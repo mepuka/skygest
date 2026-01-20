@@ -1,0 +1,22 @@
+{
+  "name": "skygest-cloudflare",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "prepare": "effect-language-service patch",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@effect/language-service": "^0.71.2",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@effect/platform": "^0.94.1",
+    "effect": "^3.19.14",
+    "effect-jetstream": "^1.0.0"
+  }
+}
