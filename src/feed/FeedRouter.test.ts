@@ -27,7 +27,12 @@ it("serves feed skeleton", async () => {
   });
   const ConfigTest = Layer.succeed(AppConfig, {
     feedDid: "did:plc:test",
-    jetstreamEndpoint: "wss://example"
+    algFeedDid: "did:plc:alg",
+    publicApi: "https://public.api.bsky.app",
+    jetstreamEndpoint: "wss://example",
+    followLimit: 5000,
+    feedLimit: 150,
+    consentThreshold: 5
   });
 
   const appLayer = Layer.mergeAll(PostsTest, ConfigTest);
