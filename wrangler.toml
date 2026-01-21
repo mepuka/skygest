@@ -3,17 +3,34 @@ main = "src/worker/feed.ts"
 compatibility_date = "2024-04-03"
 
 [vars]
-FEED_DID = "did:plc:REPLACE_ME"
+FEED_DID = "did:plc:bvwqyqjl4vxaswxbqymiofzv"
+ALG_FEED_DID = "did:plc:REPLACE_ME"
+PUBLIC_BSKY_API = "https://public.api.bsky.app"
 JETSTREAM_ENDPOINT = "wss://jetstream1.us-east.bsky.network/subscribe"
+FOLLOW_LIMIT = "5000"
+FEED_LIMIT = "150"
+CONSENT_THRESHOLD = "5"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "skygest"
 database_id = "REPLACE_ME"
 
+[[kv_namespaces]]
+binding = "FEED_CACHE"
+id = "REPLACE_ME"
+
 [[queues.producers]]
 queue = "raw-events"
 binding = "RAW_EVENTS"
+
+[[queues.producers]]
+queue = "feed-gen"
+binding = "FEED_GEN"
+
+[[queues.producers]]
+queue = "postprocess"
+binding = "POSTPROCESS"
 
 [[durable_objects.bindings]]
 name = "JETSTREAM_INGESTOR"
