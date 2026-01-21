@@ -1,6 +1,6 @@
 import { Effect, Layer } from "effect";
 import { SqlClient } from "@effect/sql";
-import { UsersRepo, type UserRow } from "../UsersRepo";
+import { UsersRepo, type AccessIncrement, type UserRow } from "../UsersRepo";
 
 type UserRowDb = Omit<UserRow, "optOut" | "deactivated"> & {
   readonly optOut: number;
@@ -69,6 +69,32 @@ export const UsersRepoD1 = {
       `.pipe(Effect.asVoid);
     };
 
-    return UsersRepo.of({ upsert, get, listActive, incrementAccess });
+    const incrementAccessMany = (increments: ReadonlyArray<AccessIncrement>) => {
+      if (increments.length === 0) {
+        return Effect.void;
+      }
+
+      const accessCases = sql.join(" ", false)(
+        increments.map((entry) => sql`WHEN ${entry.did} THEN ${entry.accessIncrement}`)
+      );
+      const consentCases = sql.join(" ", false)(
+        increments.map((entry) => sql`WHEN ${entry.did} THEN ${entry.consentIncrement}`)
+      );
+      const lastAccessCases = sql.join(" ", false)(
+        increments.map((entry) => sql`WHEN ${entry.did} THEN ${entry.lastAccessAt}`)
+      );
+      const dids = increments.map((entry) => entry.did);
+
+      return sql`
+        UPDATE users
+        SET
+          access_count = access_count + CASE did ${accessCases} ELSE 0 END,
+          consent_accesses = consent_accesses + CASE did ${consentCases} ELSE 0 END,
+          last_access_at = CASE did ${lastAccessCases} ELSE last_access_at END
+        WHERE ${sql.in("did", dids)}
+      `.pipe(Effect.asVoid);
+    };
+
+    return UsersRepo.of({ upsert, get, listActive, incrementAccess, incrementAccessMany });
   }))
 };

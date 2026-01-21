@@ -13,6 +13,13 @@ export type UserRow = {
   readonly deactivated: boolean;
 };
 
+export type AccessIncrement = {
+  readonly did: string;
+  readonly accessIncrement: number;
+  readonly consentIncrement: number;
+  readonly lastAccessAt: number;
+};
+
 export class UsersRepo extends Context.Tag("@skygest/UsersRepo")<
   UsersRepo,
   {
@@ -20,5 +27,6 @@ export class UsersRepo extends Context.Tag("@skygest/UsersRepo")<
     readonly get: (did: string) => Effect.Effect<UserRow | null, SqlError>;
     readonly listActive: () => Effect.Effect<ReadonlyArray<string>, SqlError>;
     readonly incrementAccess: (did: string, consentIncrement: number) => Effect.Effect<void, SqlError>;
+    readonly incrementAccessMany: (increments: ReadonlyArray<AccessIncrement>) => Effect.Effect<void, SqlError>;
   }
 >() {}

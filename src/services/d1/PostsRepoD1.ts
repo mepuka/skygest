@@ -1,6 +1,8 @@
-import { Effect, Layer } from "effect";
+import { Array, Effect, Layer } from "effect";
 import { SqlClient } from "@effect/sql";
 import { PostsRepo, type PaperPost } from "../PostsRepo";
+
+type PaperPostRow = PaperPost & { readonly rn: number };
 
 export const PostsRepoD1 = {
   layer: Layer.effect(PostsRepo, Effect.gen(function* () {
@@ -81,6 +83,39 @@ export const PostsRepoD1 = {
         LIMIT ${limit}
       `;
 
+    const listRecentByAuthors = (authorDids: ReadonlyArray<string>, limit: number) => {
+      const unique = Array.dedupe(authorDids);
+      if (unique.length === 0) {
+        return Effect.succeed([]);
+      }
+
+      return sql<PaperPostRow>`
+        SELECT
+          uri as uri,
+          cid as cid,
+          author_did as authorDid,
+          created_at as createdAt,
+          created_at_day as createdAtDay,
+          indexed_at as indexedAt,
+          search_text as searchText,
+          reply_root as replyRoot,
+          reply_parent as replyParent,
+          status as status,
+          row_number() over (
+            partition by author_did
+            order by created_at DESC, uri DESC
+          ) as rn
+        FROM posts
+        WHERE status != 'deleted' AND ${sql.in("author_did", unique)}
+      `.pipe(
+        Effect.map((rows) =>
+          rows
+            .filter((row) => row.rn <= limit)
+            .map(({ rn: _rn, ...post }) => post)
+        )
+      );
+    };
+
     const markDeleted = (uri: string) =>
       sql`UPDATE posts SET status = 'deleted' WHERE uri = ${uri}`.pipe(Effect.asVoid);
 
@@ -89,6 +124,13 @@ export const PostsRepoD1 = {
         ? Effect.void
         : sql`UPDATE posts SET status = 'deleted' WHERE ${sql.in("uri", uris)}`.pipe(Effect.asVoid);
 
-    return PostsRepo.of({ putMany, listRecent, listRecentByAuthor, markDeleted, markDeletedMany });
+    return PostsRepo.of({
+      putMany,
+      listRecent,
+      listRecentByAuthor,
+      listRecentByAuthors,
+      markDeleted,
+      markDeletedMany
+    });
   }))
 };

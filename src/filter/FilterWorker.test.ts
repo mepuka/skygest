@@ -11,6 +11,7 @@ it("filters paper posts", async () => {
     putMany: () => Effect.sync(() => void (inserted += 1)),
     listRecent: () => Effect.succeed([]),
     listRecentByAuthor: () => Effect.succeed([]),
+    listRecentByAuthors: () => Effect.succeed([]),
     markDeleted: () => Effect.void,
     markDeletedMany: () => Effect.sync(() => void (deleted += 1))
   });

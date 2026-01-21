@@ -15,5 +15,6 @@ export class AccessRepo extends Context.Tag("@skygest/AccessRepo")<
   AccessRepo,
   {
     readonly logAccess: (log: AccessLog) => Effect.Effect<void, SqlError>;
+    readonly logAccessMany: (logs: ReadonlyArray<AccessLog>) => Effect.Effect<void, SqlError>;
   }
 >() {}

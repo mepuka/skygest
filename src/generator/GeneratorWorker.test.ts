@@ -1,5 +1,5 @@
 import { it, expect } from "bun:test";
-import { Effect, Layer, Schema } from "effect";
+import { Duration, Effect, Layer, Request, Schema } from "effect";
 import { GeneratorWorker } from "./GeneratorWorker";
 import { FeedCache } from "../services/FeedCache";
 import { PostsRepo } from "../services/PostsRepo";
@@ -33,6 +33,21 @@ it("builds a feed and writes cache", async () => {
           status: "active"
         }
       ]),
+    listRecentByAuthors: (authorDids: ReadonlyArray<string>) =>
+      Effect.succeed(
+        authorDids.map((authorDid) => ({
+          uri: `at://${authorDid}/app.bsky.feed.post/1`,
+          cid: "cid",
+          authorDid,
+          createdAt: 100,
+          createdAtDay: "1970-01-01",
+          indexedAt: 200,
+          searchText: "arxiv",
+          replyRoot: null,
+          replyParent: null,
+          status: "active"
+        }))
+      ),
     markDeleted: () => Effect.void,
     markDeletedMany: () => Effect.void
   });
@@ -48,6 +63,11 @@ it("builds a feed and writes cache", async () => {
     feedLimit: 150,
     consentThreshold: 5
   });
+  const requestLayer = Layer.mergeAll(
+    Layer.setRequestCache(Request.makeCache({ capacity: 100, timeToLive: Duration.minutes(1) })),
+    Layer.setRequestCaching(true),
+    Layer.setRequestBatching(true)
+  );
 
   const message = Schema.decodeSync(FeedGenMessage)({
     users: ["did:plc:viewer"],
@@ -57,7 +77,7 @@ it("builds a feed and writes cache", async () => {
 
   await Effect.runPromise(
     GeneratorWorker.process(message).pipe(
-      Effect.provide(Layer.mergeAll(FeedCacheTest, PostsTest, BlueskyTest, ConfigTest))
+      Effect.provide(Layer.mergeAll(FeedCacheTest, PostsTest, BlueskyTest, ConfigTest, requestLayer))
     )
   );
 

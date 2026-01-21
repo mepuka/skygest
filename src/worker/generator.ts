@@ -1,4 +1,4 @@
-import { Effect, Layer } from "effect";
+import { Duration, Effect, Layer, Request } from "effect";
 import { GeneratorWorker } from "../generator/GeneratorWorker";
 import { CloudflareEnv, type EnvBindings } from "../platform/Env";
 import { AppConfig } from "../platform/Config";
@@ -13,13 +13,19 @@ export const queue = (batch: MessageBatch<FeedGenMessage>, env: EnvBindings, ctx
     CloudflareEnv.layer(env, { required: ["FEED_DID", "FEED_CACHE", "DB"] }),
     D1Client.layer({ db: env.DB })
   );
+  const requestLayer = Layer.mergeAll(
+    Layer.setRequestCache(Request.makeCache({ capacity: 5000, timeToLive: Duration.minutes(2) })),
+    Layer.setRequestCaching(true),
+    Layer.setRequestBatching(true)
+  );
   const configLayer = AppConfig.layer;
   const blueskyLayer = BlueskyClientLayer.pipe(Layer.provide(configLayer));
   const appLayer = Layer.mergeAll(
     configLayer,
     FeedCacheKv.layer,
     PostsRepoD1.layer,
-    blueskyLayer
+    blueskyLayer,
+    requestLayer
   );
 
   return ctx.waitUntil(

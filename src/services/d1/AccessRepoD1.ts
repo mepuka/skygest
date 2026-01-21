@@ -16,6 +16,23 @@ export const AccessRepoD1 = {
         )
       `.pipe(Effect.asVoid);
 
-    return AccessRepo.of({ logAccess });
+    const logAccessMany = (logs: ReadonlyArray<AccessLog>) =>
+      logs.length === 0
+        ? Effect.void
+        : sql`
+            INSERT INTO user_access_log (
+              id, did, access_at, recs_shown, cursor_start, cursor_end, default_from
+            ) ${sql.insert(logs.map((log) => ({
+              id: log.id,
+              did: log.did,
+              access_at: log.accessAt,
+              recs_shown: log.recsShown,
+              cursor_start: log.cursorStart,
+              cursor_end: log.cursorEnd,
+              default_from: log.defaultFrom
+            })))}
+          `.pipe(Effect.asVoid);
+
+    return AccessRepo.of({ logAccess, logAccessMany });
   }))
 };
