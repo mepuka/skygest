@@ -20,22 +20,28 @@ export interface EnvBindings {
   readonly JETSTREAM_INGESTOR: DurableObjectNamespace;
 }
 
+const defaultRequired = [
+  "FEED_DID",
+  "DB",
+  "FEED_CACHE",
+  "RAW_EVENTS",
+  "FEED_GEN",
+  "POSTPROCESS",
+  "JETSTREAM_INGESTOR"
+] as const satisfies ReadonlyArray<keyof EnvBindings>;
+
+type EnvRequirementOptions = {
+  readonly required?: ReadonlyArray<keyof EnvBindings>;
+};
+
 export class CloudflareEnv extends Context.Tag("@skygest/CloudflareEnv")<
   CloudflareEnv,
   EnvBindings
 >() {
-  static layer = (env: EnvBindings) => Layer.effect(
+  static layer = (env: EnvBindings, options?: EnvRequirementOptions) => Layer.effect(
     CloudflareEnv,
     Effect.gen(function* () {
-      const required = [
-        "FEED_DID",
-        "DB",
-        "FEED_CACHE",
-        "RAW_EVENTS",
-        "FEED_GEN",
-        "POSTPROCESS",
-        "JETSTREAM_INGESTOR"
-      ] as const satisfies ReadonlyArray<keyof EnvBindings>;
+      const required = options?.required ?? defaultRequired;
       const missing = Array.findFirst(required, (key) => env[key] == null);
 
       return yield* Option.match(missing, {

@@ -1,0 +1,15 @@
+name = "skygest-dispatch"
+main = "src/worker/dispatch.ts"
+compatibility_date = "2024-04-03"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "skygest"
+database_id = "REPLACE_ME"
+
+[[queues.producers]]
+queue = "feed-gen"
+binding = "FEED_GEN"
+
+[triggers]
+crons = ["*/20 * * * *"]

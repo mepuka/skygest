@@ -2,30 +2,22 @@ import { it, expect } from "bun:test";
 import { Effect, Layer } from "effect";
 import * as HttpApp from "@effect/platform/HttpApp";
 import { app } from "./FeedRouter";
-import { PostsRepo } from "../services/PostsRepo";
+import { FeedCache } from "../services/FeedCache";
 import { AppConfig } from "../platform/Config";
+import { AuthService } from "../auth/AuthService";
 
-it("serves feed skeleton", async () => {
-  const PostsTest = Layer.succeed(PostsRepo, {
-    putMany: () => Effect.void,
-    listRecent: () =>
-      Effect.succeed([
-        {
-          uri: "at://did:plc:1/app.bsky.feed.post/1",
-          cid: "cid",
-          authorDid: "did:plc:1",
-          createdAt: 200,
-          createdAtDay: "1970-01-01",
-          indexedAt: 210,
-          searchText: "arxiv",
-          replyRoot: null,
-          replyParent: null,
-          status: "active"
-        }
-      ]),
-    listRecentByAuthor: () => Effect.succeed([]),
-    markDeleted: () => Effect.void,
-    markDeletedMany: () => Effect.void
+it("serves feed skeleton from cache", async () => {
+  const FeedCacheTest = Layer.succeed(FeedCache, {
+    getFeed: () => Effect.succeed([
+      "at://did:plc:1/app.bsky.feed.post/1",
+      "at://did:plc:2/app.bsky.feed.post/2"
+    ]),
+    putFeed: () => Effect.void,
+    getMeta: () => Effect.succeed(null),
+    putMeta: () => Effect.void
+  });
+  const AuthTest = Layer.succeed(AuthService, {
+    decodeBearer: () => Effect.succeed("did:plc:viewer")
   });
   const ConfigTest = Layer.succeed(AppConfig, {
     feedDid: "did:plc:test",
@@ -37,17 +29,20 @@ it("serves feed skeleton", async () => {
     consentThreshold: 5
   });
 
-  const appLayer = Layer.mergeAll(PostsTest, ConfigTest);
+  const appLayer = Layer.mergeAll(FeedCacheTest, AuthTest, ConfigTest);
   const handler = HttpApp.toWebHandler(
     app.pipe(Effect.provide(appLayer))
   );
 
   const res = await handler(
-    new Request("http://localhost/xrpc/app.bsky.feed.getFeedSkeleton?limit=1")
+    new Request("http://localhost/xrpc/app.bsky.feed.getFeedSkeleton?limit=1", {
+      headers: { authorization: "bearer test" }
+    })
   );
   const body = await res.json() as { feed: Array<{ post: string }>; cursor: string };
 
   expect(res.status).toBe(200);
   expect(body.feed.length).toBe(1);
-  expect(body.cursor).toBe("200");
+  expect(body.feed[0]?.post).toBe("at://did:plc:1/app.bsky.feed.post/1");
+  expect(body.cursor).toBe("1");
 });

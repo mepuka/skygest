@@ -1,0 +1,27 @@
+name = "skygest-generator"
+main = "src/worker/generator.ts"
+compatibility_date = "2024-04-03"
+
+[vars]
+FEED_DID = "did:plc:REPLACE_ME"
+ALG_FEED_DID = "did:plc:REPLACE_ME"
+PUBLIC_BSKY_API = "https://public.api.bsky.app"
+JETSTREAM_ENDPOINT = "wss://jetstream1.us-east.bsky.network/subscribe"
+FOLLOW_LIMIT = "5000"
+FEED_LIMIT = "150"
+CONSENT_THRESHOLD = "5"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "skygest"
+database_id = "REPLACE_ME"
+
+[[kv_namespaces]]
+binding = "FEED_CACHE"
+id = "REPLACE_ME"
+
+[[queues.consumers]]
+queue = "feed-gen"
+max_batch_size = 10
+max_batch_timeout = 5
+max_retries = 5
