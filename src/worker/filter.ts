@@ -19,3 +19,5 @@ export const queue = (batch: MessageBatch<RawEventBatch>, env: EnvBindings, ctx:
       })
     )
   );
+
+export default { queue };
