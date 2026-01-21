@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260120.0",
     "@effect/language-service": "^0.71.2",
     "@types/bun": "latest"
   },
@@ -16,6 +17,9 @@
   },
   "dependencies": {
     "@effect/platform": "^0.94.1",
+    "@effect/sql": "^0.49.0",
+    "@effect/sql-d1": "^0.47.0",
+    "@effect/sql-sqlite-do": "^0.27.0",
     "effect": "^3.19.14",
     "effect-jetstream": "^1.0.0"
   }
