@@ -19,3 +19,10 @@ export class DbError extends Schema.TaggedError<DbError>()("DbError", {
 export class QueueError extends Schema.TaggedError<QueueError>()("QueueError", {
   message: Schema.String
 }) {}
+
+export class IngestorPingError extends Schema.TaggedError<IngestorPingError>()(
+  "IngestorPingError",
+  {
+    message: Schema.String
+  }
+) {}

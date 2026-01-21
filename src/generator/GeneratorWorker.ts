@@ -16,16 +16,26 @@ const buildFeed = (items: ReadonlyArray<{ uri: string }>, limit: number) =>
 export const GeneratorWorker = {
   process: (message: FeedGenMessage) =>
     Effect.gen(function* () {
-      console.log("GeneratorWorker.process called with", JSON.stringify(message));
+      yield* Effect.logInfo("GeneratorWorker.process").pipe(
+        Effect.annotateLogs({
+          batchId: message.batchId,
+          userCount: message.users.length,
+          generateAgg: message.generateAgg
+        })
+      );
       const cache = yield* FeedCache;
       const bluesky = yield* BlueskyClient;
       const cfg = yield* AppConfig;
       const resolver = RequestResolver.contextFromServices(PostsRepo)(PostsReadResolver);
 
       const processUser = Effect.fn("GeneratorWorker.processUser")(function* (user: string) {
-        console.log(`Processing user: ${user}`);
+        yield* Effect.logInfo("GeneratorWorker.processUser").pipe(
+          Effect.annotateLogs({ user })
+        );
         const follows = yield* bluesky.getFollows(user, null, cfg.followLimit);
-        console.log(`Got ${follows.dids.length} follows`);
+        yield* Effect.logInfo("GeneratorWorker.follows").pipe(
+          Effect.annotateLogs({ user, followCount: follows.dids.length })
+        );
         const followPosts = yield* Effect.forEach(
           follows.dids,
           (did) => Effect.request(
@@ -37,11 +47,18 @@ export const GeneratorWorker = {
           Effect.withRequestBatching(true),
           Effect.withRequestCaching(true)
         );
-        console.log(`Got ${Array.flatten(followPosts).length} total posts from follows`);
+        const totalPosts = Array.flatten(followPosts).length;
+        yield* Effect.logInfo("GeneratorWorker.followPosts").pipe(
+          Effect.annotateLogs({ user, postCount: totalPosts })
+        );
         const feed = buildFeed(Array.flatten(followPosts), cfg.feedLimit);
-        console.log(`Built feed with ${feed.length} items`);
+        yield* Effect.logInfo("GeneratorWorker.feedBuilt").pipe(
+          Effect.annotateLogs({ user, feedSize: feed.length })
+        );
         yield* cache.putFeed(user, feedAlgorithm, feed, feedTtlSeconds);
-        console.log(`Saved feed to cache`);
+        yield* Effect.logInfo("GeneratorWorker.feedCached").pipe(
+          Effect.annotateLogs({ user })
+        );
       });
 
       yield* Effect.forEach(message.users, processUser, { concurrency: 5, discard: true });
