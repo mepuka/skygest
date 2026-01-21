@@ -1,0 +1,14 @@
+name = "skygest-filter"
+main = "src/worker/filter.ts"
+compatibility_date = "2024-04-03"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "skygest"
+database_id = "REPLACE_ME"
+
+[[queues.consumers]]
+queue = "raw-events"
+max_batch_size = 50
+max_batch_timeout = 5
+max_retries = 5

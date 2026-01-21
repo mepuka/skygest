@@ -1,0 +1,24 @@
+name = "skygest-feed"
+main = "src/worker/feed.ts"
+compatibility_date = "2024-04-03"
+
+[vars]
+FEED_DID = "did:plc:REPLACE_ME"
+JETSTREAM_ENDPOINT = "wss://jetstream1.us-east.bsky.network/subscribe"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "skygest"
+database_id = "REPLACE_ME"
+
+[[queues.producers]]
+queue = "raw-events"
+binding = "RAW_EVENTS"
+
+[[durable_objects.bindings]]
+name = "JETSTREAM_INGESTOR"
+class_name = "JetstreamIngestorDo"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["JetstreamIngestorDo"]
