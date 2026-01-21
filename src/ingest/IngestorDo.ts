@@ -1,15 +1,17 @@
 import { DurableObject } from "cloudflare:workers";
-import { Effect, Layer } from "effect";
+import { Cause, Effect, Fiber, Layer, Option, Schedule } from "effect";
 import { SqliteClient } from "@effect/sql-sqlite-do";
 import { runIngestor } from "./JetstreamIngestor";
 import { JetstreamCursorStore } from "./JetstreamCursorStore";
 import { CloudflareEnv, type EnvBindings } from "../platform/Env";
 import { AppConfig } from "../platform/Config";
+import { makeIngestorSupervisor, type IngestorSupervisor } from "./IngestorSupervisor";
 
-const ALARM_INTERVAL_MS = 10_000; // Wake every 10 seconds to keep WebSocket alive
+const ALARM_INTERVAL_MS = 20_000;
 
 export class JetstreamIngestorDoV2 extends DurableObject<EnvBindings> {
-  private isRunning = false;
+  private supervisor: IngestorSupervisor | null = null;
+  private readonly ingestor: Effect.Effect<void>;
 
   constructor(ctx: DurableObjectState, env: EnvBindings) {
     super(ctx, env);
@@ -18,17 +20,10 @@ export class JetstreamIngestorDoV2 extends DurableObject<EnvBindings> {
         "CREATE TABLE IF NOT EXISTS jetstream_state (id TEXT PRIMARY KEY, cursor INTEGER)"
       );
     });
+    this.ingestor = this.buildIngestor();
   }
 
-  private async startIngestor(): Promise<void> {
-    if (this.isRunning) {
-      console.log("Ingestor already running, skipping");
-      return;
-    }
-
-    this.isRunning = true;
-    console.log("Starting ingestor...");
-
+  private buildIngestor(): Effect.Effect<void> {
     const baseLayer = Layer.mergeAll(
       CloudflareEnv.layer(this.env),
       SqliteClient.layer({ db: this.ctx.storage.sql })
@@ -37,42 +32,52 @@ export class JetstreamIngestorDoV2 extends DurableObject<EnvBindings> {
       AppConfig.layer,
       JetstreamCursorStore.layer
     );
+    const retryPolicy = Schedule.exponential("1 second").pipe(
+      Schedule.jittered,
+      Schedule.tapOutput((delay) =>
+        Effect.logWarning(`ingestor retrying in ${String(delay)}`)
+      )
+    );
 
-    try {
-      await Effect.runPromise(
-        runIngestor.pipe(Effect.provide(appLayer.pipe(Layer.provideMerge(baseLayer))))
+    return runIngestor.pipe(
+      Effect.provide(appLayer.pipe(Layer.provideMerge(baseLayer))),
+      Effect.tapErrorCause((cause) =>
+        Effect.logError(`ingestor failed: ${Cause.pretty(cause)}`)
+      ),
+      Effect.retry(retryPolicy)
+    );
+  }
+
+  private async ensureIngestor(): Promise<void> {
+    if (!this.supervisor) {
+      this.supervisor = await Effect.runPromise(
+        makeIngestorSupervisor(this.ingestor)
       );
-    } catch (error) {
-      console.error("Ingestor error:", error);
-    } finally {
-      this.isRunning = false;
-      console.log("Ingestor stopped");
+    }
+
+    const started = await Effect.runPromise(
+      this.supervisor.ensureRunning.pipe(Effect.tap(() => Effect.yieldNow))
+    );
+    if (Option.isSome(started)) {
+      this.ctx.waitUntil(
+        Effect.runPromise(Fiber.join(started.value))
+      );
     }
   }
 
-  override async fetch(): Promise<Response> {
-    // Schedule alarm to keep DO alive
-    const currentAlarm = await this.ctx.storage.getAlarm();
-    if (currentAlarm === null) {
-      await this.ctx.storage.setAlarm(Date.now() + ALARM_INTERVAL_MS);
-      console.log("Alarm scheduled");
-    }
+  private scheduleAlarm(): Promise<void> {
+    return this.ctx.storage.setAlarm(Date.now() + ALARM_INTERVAL_MS);
+  }
 
-    // Start ingestor in background
-    this.ctx.waitUntil(this.startIngestor());
+  override async fetch(): Promise<Response> {
+    await this.scheduleAlarm();
+    await this.ensureIngestor();
 
     return new Response("ok");
   }
 
   override async alarm(): Promise<void> {
-    console.log("Alarm fired, keeping DO alive");
-    // Reschedule alarm to keep the DO alive
-    await this.ctx.storage.setAlarm(Date.now() + ALARM_INTERVAL_MS);
-
-    // If ingestor stopped, restart it
-    if (!this.isRunning) {
-      console.log("Restarting stopped ingestor");
-      this.ctx.waitUntil(this.startIngestor());
-    }
+    await this.scheduleAlarm();
+    await this.ensureIngestor();
   }
 }
