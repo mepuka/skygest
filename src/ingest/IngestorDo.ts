@@ -11,7 +11,7 @@ const ALARM_INTERVAL_MS = 20_000;
 
 export class JetstreamIngestorDoV2 extends DurableObject<EnvBindings> {
   private supervisor: IngestorSupervisor | null = null;
-  private readonly ingestor: Effect.Effect<void>;
+  private readonly ingestor: Effect.Effect<void, unknown>;
 
   constructor(ctx: DurableObjectState, env: EnvBindings) {
     super(ctx, env);
@@ -23,7 +23,7 @@ export class JetstreamIngestorDoV2 extends DurableObject<EnvBindings> {
     this.ingestor = this.buildIngestor();
   }
 
-  private buildIngestor(): Effect.Effect<void> {
+  private buildIngestor(): Effect.Effect<void, unknown> {
     const baseLayer = Layer.mergeAll(
       CloudflareEnv.layer(this.env),
       SqliteClient.layer({ db: this.ctx.storage.sql })

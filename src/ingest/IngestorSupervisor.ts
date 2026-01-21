@@ -1,12 +1,12 @@
 import { Effect, Fiber, Option, Ref } from "effect";
 
-export type IngestorSupervisor = {
-  readonly ensureRunning: Effect.Effect<Option.Option<Fiber.RuntimeFiber<void, unknown>>>;
+export type IngestorSupervisor<E = unknown> = {
+  readonly ensureRunning: Effect.Effect<Option.Option<Fiber.RuntimeFiber<void, E>>>;
 };
 
-export const makeIngestorSupervisor = (ingestor: Effect.Effect<void>) =>
+export const makeIngestorSupervisor = <E>(ingestor: Effect.Effect<void, E>) =>
   Effect.gen(function* () {
-    const fiberRef = yield* Ref.make<Option.Option<Fiber.RuntimeFiber<void, unknown>>>(
+    const fiberRef = yield* Ref.make<Option.Option<Fiber.RuntimeFiber<void, E>>>(
       Option.none()
     );
 
