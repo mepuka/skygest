@@ -103,7 +103,9 @@ export const FeedCacheKv = {
       ttlSeconds: number
     ) =>
       encodeItems(items).pipe(
+        Effect.tap((value) => Effect.sync(() => console.log(`putFeed: key=${key(did, algorithm)}, itemCount=${items.length}, valueLen=${value.length}`))),
         Effect.flatMap((value) => putValue(key(did, algorithm), value, ttlSeconds)),
+        Effect.tap(() => Effect.sync(() => console.log(`putFeed: success`))),
         Effect.asVoid
       );
 

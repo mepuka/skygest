@@ -6,7 +6,11 @@ import { JetstreamCursorStore } from "./JetstreamCursorStore";
 import { CloudflareEnv, type EnvBindings } from "../platform/Env";
 import { AppConfig } from "../platform/Config";
 
-export class JetstreamIngestorDo extends DurableObject<EnvBindings> {
+const ALARM_INTERVAL_MS = 10_000; // Wake every 10 seconds to keep WebSocket alive
+
+export class JetstreamIngestorDoV2 extends DurableObject<EnvBindings> {
+  private isRunning = false;
+
   constructor(ctx: DurableObjectState, env: EnvBindings) {
     super(ctx, env);
     ctx.blockConcurrencyWhile(async () => {
@@ -16,7 +20,15 @@ export class JetstreamIngestorDo extends DurableObject<EnvBindings> {
     });
   }
 
-  override async fetch(): Promise<Response> {
+  private async startIngestor(): Promise<void> {
+    if (this.isRunning) {
+      console.log("Ingestor already running, skipping");
+      return;
+    }
+
+    this.isRunning = true;
+    console.log("Starting ingestor...");
+
     const baseLayer = Layer.mergeAll(
       CloudflareEnv.layer(this.env),
       SqliteClient.layer({ db: this.ctx.storage.sql })
@@ -26,12 +38,41 @@ export class JetstreamIngestorDo extends DurableObject<EnvBindings> {
       JetstreamCursorStore.layer
     );
 
-    this.ctx.waitUntil(
-      Effect.runPromise(
+    try {
+      await Effect.runPromise(
         runIngestor.pipe(Effect.provide(appLayer.pipe(Layer.provideMerge(baseLayer))))
-      )
-    );
+      );
+    } catch (error) {
+      console.error("Ingestor error:", error);
+    } finally {
+      this.isRunning = false;
+      console.log("Ingestor stopped");
+    }
+  }
+
+  override async fetch(): Promise<Response> {
+    // Schedule alarm to keep DO alive
+    const currentAlarm = await this.ctx.storage.getAlarm();
+    if (currentAlarm === null) {
+      await this.ctx.storage.setAlarm(Date.now() + ALARM_INTERVAL_MS);
+      console.log("Alarm scheduled");
+    }
+
+    // Start ingestor in background
+    this.ctx.waitUntil(this.startIngestor());
 
     return new Response("ok");
+  }
+
+  override async alarm(): Promise<void> {
+    console.log("Alarm fired, keeping DO alive");
+    // Reschedule alarm to keep the DO alive
+    await this.ctx.storage.setAlarm(Date.now() + ALARM_INTERVAL_MS);
+
+    // If ingestor stopped, restart it
+    if (!this.isRunning) {
+      console.log("Restarting stopped ingestor");
+      this.ctx.waitUntil(this.startIngestor());
+    }
   }
 }

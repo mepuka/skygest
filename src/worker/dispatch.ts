@@ -12,11 +12,18 @@ export const scheduled = (_event: ScheduledEvent, env: EnvBindings, ctx: Executi
   const appLayer = UsersRepoD1.layer;
 
   return ctx.waitUntil(
-    Effect.runPromise(
-      DispatchWorker.run().pipe(
-        Effect.provide(appLayer.pipe(Layer.provideMerge(baseLayer)))
+    Promise.all([
+      // Restart the ingestor to keep it alive
+      fetch("https://skygest-feed.kokokessy.workers.dev/internal/ingest/start", { method: "POST" })
+        .then(() => console.log("Ingestor pinged"))
+        .catch((e) => console.error("Ingestor ping failed:", e)),
+      // Run the dispatch
+      Effect.runPromise(
+        DispatchWorker.run().pipe(
+          Effect.provide(appLayer.pipe(Layer.provideMerge(baseLayer)))
+        )
       )
-    )
+    ])
   );
 };
 

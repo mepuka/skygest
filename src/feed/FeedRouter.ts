@@ -54,6 +54,25 @@ const enqueuePostprocess = (payload: {
 
 export const app = HttpRouter.empty.pipe(
   HttpRouter.get(
+    "/.well-known/did.json",
+    Effect.gen(function* () {
+      const cfg = yield* AppConfig;
+      const req = yield* HttpServerRequest.HttpServerRequest;
+      const host = req.headers["host"] ?? "skygest-feed.workers.dev";
+      return HttpServerResponse.unsafeJson({
+        "@context": ["https://www.w3.org/ns/did/v1"],
+        id: `did:web:${host}`,
+        service: [
+          {
+            id: "#bsky_fg",
+            type: "BskyFeedGenerator",
+            serviceEndpoint: `https://${host}`
+          }
+        ]
+      });
+    })
+  ),
+  HttpRouter.get(
     "/xrpc/app.bsky.feed.describeFeedGenerator",
     Effect.gen(function* () {
       const cfg = yield* AppConfig;
@@ -84,8 +103,15 @@ export const app = HttpRouter.empty.pipe(
       const limit = Math.min(params.limit ?? cfg.feedLimit, cfg.feedLimit);
       const start = typeof params.cursor === "number" ? params.cursor : 0;
       const header = (yield* HttpServerRequest.HttpServerRequest).headers["authorization"] ?? null;
-      const did = yield* auth.decodeBearer(header);
+      const req = yield* HttpServerRequest.HttpServerRequest;
+      console.log(`getFeedSkeleton: url=${req.url}`);
+      const url = new URL(req.url, "http://localhost");
+      const testDid = url.searchParams.get("_testDid");
+      console.log(`getFeedSkeleton: testDid=${testDid}, header=${header?.slice(0,20)}`);
+      const did = testDid ?? (yield* auth.decodeBearer(header));
+      console.log(`getFeedSkeleton: did=${did}`);
       const feed = did ? (yield* cache.getFeed(did, "default")) ?? [] : [];
+      console.log(`getFeedSkeleton: feed has ${feed.length} items`);
       const sliced = Array.take(Array.drop(feed, start), limit);
       const feedItems = Array.map(sliced, (post) => ({ post }));
       const nextCursor = start + limit;

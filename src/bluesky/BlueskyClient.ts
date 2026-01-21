@@ -37,6 +37,7 @@ const makeBlueskyClient = (base: string) =>
           limit: String(limit)
         }
       }).pipe(
+        Effect.tap((response) => Effect.log(`Bluesky API status: ${response.status}`)),
         Effect.flatMap(HttpClientResponse.schemaBodyJson(FollowsResponse)),
         Effect.map((body) => ({
           dids: body.follows.map((follow) => follow.did),

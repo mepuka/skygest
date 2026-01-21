@@ -71,7 +71,7 @@ export const runIngestor = Effect.gen(function* () {
     const jetstream = yield* Jetstream.Jetstream;
     yield* jetstream.stream.pipe(
       Stream.filterMapEffect(toRawEvent),
-      Stream.groupedWithin(200, Duration.seconds(2)),
+      Stream.groupedWithin(25, Duration.seconds(2)),
       Stream.mapEffect((chunk) => {
         const events = Array.from(chunk);
         const cursor = events.at(-1)?.timeUs;

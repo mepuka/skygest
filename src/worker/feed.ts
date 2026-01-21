@@ -12,18 +12,28 @@ import { UsersRepoD1 } from "../services/d1/UsersRepoD1";
 import { InteractionsRepoD1 } from "../services/d1/InteractionsRepoD1";
 import { AccessRepoD1 } from "../services/d1/AccessRepoD1";
 import { D1Client } from "@effect/sql-d1";
-import { JetstreamIngestorDo } from "../ingest/IngestorDo";
+import { JetstreamIngestorDoV2 } from "../ingest/IngestorDo";
 
-export { JetstreamIngestorDo };
+export { JetstreamIngestorDoV2 };
 
 const app = feedApp.pipe(HttpRouter.mount("/mcp", mcpApp));
 
-export const fetch = (request: Request, env: EnvBindings, _ctx: ExecutionContext) => {
+export const fetch = async (request: Request, env: EnvBindings, _ctx: ExecutionContext) => {
   const url = new URL(request.url);
   if (url.pathname === "/internal/ingest/start") {
     const id = env.JETSTREAM_INGESTOR.idFromName("main");
     const stub = env.JETSTREAM_INGESTOR.get(id);
     return stub.fetch("https://ingest/start");
+  }
+
+  if (url.pathname === "/internal/dispatch/trigger") {
+    const did = url.searchParams.get("did");
+    if (!did) {
+      return new Response("Missing did parameter", { status: 400 });
+    }
+    const message = { users: [did], batchId: Date.now(), generateAgg: false };
+    await env.FEED_GEN.send(message, { contentType: "json" });
+    return new Response(`Triggered feed generation for ${did}`);
   }
 
   const baseLayer = Layer.mergeAll(

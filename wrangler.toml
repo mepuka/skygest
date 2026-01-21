@@ -4,7 +4,7 @@ compatibility_date = "2024-04-03"
 
 [vars]
 FEED_DID = "did:plc:bvwqyqjl4vxaswxbqymiofzv"
-ALG_FEED_DID = "did:plc:REPLACE_ME"
+ALG_FEED_DID = "did:plc:bvwqyqjl4vxaswxbqymiofzv"
 PUBLIC_BSKY_API = "https://public.api.bsky.app"
 JETSTREAM_ENDPOINT = "wss://jetstream1.us-east.bsky.network/subscribe"
 FOLLOW_LIMIT = "5000"
@@ -14,11 +14,11 @@ CONSENT_THRESHOLD = "5"
 [[d1_databases]]
 binding = "DB"
 database_name = "skygest"
-database_id = "REPLACE_ME"
+database_id = "b33d6089-883e-4f62-bcfd-3b30153e51e9"
 
 [[kv_namespaces]]
 binding = "FEED_CACHE"
-id = "REPLACE_ME"
+id = "af35ca52a5934af0a64e9fcb004a2359"
 
 [[queues.producers]]
 queue = "raw-events"
@@ -34,8 +34,16 @@ binding = "POSTPROCESS"
 
 [[durable_objects.bindings]]
 name = "JETSTREAM_INGESTOR"
-class_name = "JetstreamIngestorDo"
+class_name = "JetstreamIngestorDoV2"
 
 [[migrations]]
 tag = "v1"
 new_classes = ["JetstreamIngestorDo"]
+
+[[migrations]]
+tag = "v2"
+deleted_classes = ["JetstreamIngestorDo"]
+
+[[migrations]]
+tag = "v3"
+new_sqlite_classes = ["JetstreamIngestorDoV2"]
