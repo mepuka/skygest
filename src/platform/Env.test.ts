@@ -1,6 +1,6 @@
 import { describe, it, expect } from "bun:test";
-import { Effect } from "effect";
-import { CloudflareEnv } from "./Env";
+import { Cause, Effect, Exit, Option } from "effect";
+import { CloudflareEnv, type EnvBindings } from "./Env";
 
 describe("CloudflareEnv", () => {
   it("fails when required bindings are missing", async () => {
@@ -11,17 +11,24 @@ describe("CloudflareEnv", () => {
       FEED_GEN: {} as Queue,
       POSTPROCESS: {} as Queue,
       JETSTREAM_INGESTOR: {} as DurableObjectNamespace
-    };
+    } satisfies Partial<EnvBindings>;
 
-    const program = Effect.gen(function* () {
-      yield* CloudflareEnv;
+    const exit = await Effect.runPromiseExit(
+      CloudflareEnv.pipe(
+        Effect.provide(CloudflareEnv.layer(env as EnvBindings))
+      )
+    );
+
+    const failure = Exit.match(exit, {
+      onFailure: (cause) => Cause.failureOption(cause),
+      onSuccess: () => Option.none()
     });
 
-    await expect(
-      Effect.runPromise(
-        program.pipe(Effect.provide(CloudflareEnv.layer(env)))
-      )
-    ).rejects.toThrow("Missing FEED_CACHE");
+    expect(Option.isSome(failure)).toBe(true);
+    expect(Option.getOrUndefined(failure)).toMatchObject({
+      _tag: "EnvError",
+      missing: "FEED_CACHE"
+    });
   });
 
   it("provides bindings", async () => {

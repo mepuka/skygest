@@ -1,4 +1,8 @@
-import { Array, Context, Effect, Layer, Option } from "effect";
+import { Array, Context, Effect, Layer, Option, Schema } from "effect";
+
+export class EnvError extends Schema.TaggedError<EnvError>()("EnvError", {
+  missing: Schema.String
+}) {}
 
 export interface EnvBindings {
   readonly FEED_DID: string;
@@ -22,7 +26,7 @@ export class CloudflareEnv extends Context.Tag("@skygest/CloudflareEnv")<
 >() {
   static layer = (env: EnvBindings) => Layer.effect(
     CloudflareEnv,
-    Effect.sync(() => {
+    Effect.gen(function* () {
       const required = [
         "FEED_DID",
         "DB",
@@ -34,11 +38,9 @@ export class CloudflareEnv extends Context.Tag("@skygest/CloudflareEnv")<
       ] as const satisfies ReadonlyArray<keyof EnvBindings>;
       const missing = Array.findFirst(required, (key) => env[key] == null);
 
-      return Option.match(missing, {
-        onNone: () => env,
-        onSome: (key) => {
-          throw new Error(`Missing ${key}`);
-        }
+      return yield* Option.match(missing, {
+        onNone: () => Effect.succeed(env),
+        onSome: (key) => Effect.fail(EnvError.make({ missing: String(key) }))
       });
     })
   );
