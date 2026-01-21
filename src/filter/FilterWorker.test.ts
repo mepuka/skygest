@@ -10,7 +10,8 @@ it("filters paper posts", async () => {
   const PostsTest = Layer.succeed(PostsRepo, {
     putMany: () => Effect.sync(() => void (inserted += 1)),
     listRecent: () => Effect.succeed([]),
-    markDeleted: () => Effect.sync(() => void (deleted += 1))
+    markDeleted: () => Effect.void,
+    markDeletedMany: () => Effect.sync(() => void (deleted += 1))
   });
 
   const batch: RawEventBatch = {
@@ -25,6 +26,16 @@ it("filters paper posts", async () => {
         cid: "cid",
         record: { text: "https://arxiv.org/abs/2401.00001" },
         timeUs: 1
+      },
+      {
+        kind: "commit",
+        operation: "delete",
+        collection: "app.bsky.feed.post",
+        did: "did:plc:1",
+        uri: "at://did:plc:1/app.bsky.feed.post/1",
+        cid: "cid",
+        record: undefined,
+        timeUs: 2
       }
     ]
   };
@@ -32,5 +43,5 @@ it("filters paper posts", async () => {
   await Effect.runPromise(processBatch(batch).pipe(Effect.provide(PostsTest)));
 
   expect(inserted).toBe(1);
-  expect(deleted).toBe(0);
+  expect(deleted).toBe(1);
 });
