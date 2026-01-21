@@ -5,8 +5,11 @@ import { app } from "./FeedRouter";
 import { FeedCache } from "../services/FeedCache";
 import { AppConfig } from "../platform/Config";
 import { AuthService } from "../auth/AuthService";
+import { CloudflareEnv } from "../platform/Env";
+import type { PostprocessMessage } from "../domain/types";
 
 it("serves feed skeleton from cache", async () => {
+  const sent: Array<PostprocessMessage> = [];
   const FeedCacheTest = Layer.succeed(FeedCache, {
     getFeed: () => Effect.succeed([
       "at://did:plc:1/app.bsky.feed.post/1",
@@ -28,8 +31,22 @@ it("serves feed skeleton from cache", async () => {
     feedLimit: 150,
     consentThreshold: 5
   });
+  const EnvTest = CloudflareEnv.layer({
+    FEED_DID: "did:plc:test",
+    DB: {} as D1Database,
+    FEED_CACHE: {} as KVNamespace,
+    RAW_EVENTS: {} as Queue,
+    FEED_GEN: {} as Queue,
+    POSTPROCESS: {
+      send: (body: PostprocessMessage) => {
+        sent.push(body);
+        return Promise.resolve();
+      }
+    } as Queue,
+    JETSTREAM_INGESTOR: {} as DurableObjectNamespace
+  });
 
-  const appLayer = Layer.mergeAll(FeedCacheTest, AuthTest, ConfigTest);
+  const appLayer = Layer.mergeAll(FeedCacheTest, AuthTest, ConfigTest, EnvTest);
   const handler = HttpApp.toWebHandler(
     app.pipe(Effect.provide(appLayer))
   );
@@ -45,4 +62,11 @@ it("serves feed skeleton from cache", async () => {
   expect(body.feed.length).toBe(1);
   expect(body.feed[0]?.post).toBe("at://did:plc:1/app.bsky.feed.post/1");
   expect(body.cursor).toBe("1");
+  expect(sent.length).toBe(1);
+  expect(String(sent[0]?.viewer ?? "")).toBe("did:plc:viewer");
+  expect(sent[0]?.limit).toBe(1);
+  expect(sent[0]?.cursorStart).toBe(0);
+  expect(sent[0]?.cursorEnd).toBe(1);
+  expect(sent[0]?.defaultFrom).toBe(0);
+  expect(Number.isFinite(sent[0]?.accessAt ?? NaN)).toBe(true);
 });
