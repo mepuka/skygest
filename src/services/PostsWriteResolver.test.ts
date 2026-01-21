@@ -16,6 +16,7 @@ it("batches put and delete requests", async () => {
         putCount += posts.length;
       }),
     listRecent: () => Effect.succeed([]),
+    listRecentByAuthor: () => Effect.succeed([]),
     markDeleted: () => Effect.void,
     markDeletedMany: (uris: ReadonlyArray<string>) =>
       Effect.sync(() => {

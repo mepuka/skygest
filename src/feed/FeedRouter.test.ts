@@ -23,6 +23,7 @@ it("serves feed skeleton", async () => {
           status: "active"
         }
       ]),
+    listRecentByAuthor: () => Effect.succeed([]),
     markDeleted: () => Effect.void,
     markDeletedMany: () => Effect.void
   });

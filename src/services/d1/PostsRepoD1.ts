@@ -62,6 +62,25 @@ export const PostsRepoD1 = {
             LIMIT ${limit}
           `;
 
+    const listRecentByAuthor = (authorDid: string, limit: number) =>
+      sql<PaperPost>`
+        SELECT
+          uri as uri,
+          cid as cid,
+          author_did as authorDid,
+          created_at as createdAt,
+          created_at_day as createdAtDay,
+          indexed_at as indexedAt,
+          search_text as searchText,
+          reply_root as replyRoot,
+          reply_parent as replyParent,
+          status as status
+        FROM posts
+        WHERE status != 'deleted' AND author_did = ${authorDid}
+        ORDER BY created_at DESC, uri DESC
+        LIMIT ${limit}
+      `;
+
     const markDeleted = (uri: string) =>
       sql`UPDATE posts SET status = 'deleted' WHERE uri = ${uri}`.pipe(Effect.asVoid);
 
@@ -70,6 +89,6 @@ export const PostsRepoD1 = {
         ? Effect.void
         : sql`UPDATE posts SET status = 'deleted' WHERE ${sql.in("uri", uris)}`.pipe(Effect.asVoid);
 
-    return PostsRepo.of({ putMany, listRecent, markDeleted, markDeletedMany });
+    return PostsRepo.of({ putMany, listRecent, listRecentByAuthor, markDeleted, markDeletedMany });
   }))
 };

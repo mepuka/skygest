@@ -10,6 +10,7 @@ it("filters paper posts", async () => {
   const PostsTest = Layer.succeed(PostsRepo, {
     putMany: () => Effect.sync(() => void (inserted += 1)),
     listRecent: () => Effect.succeed([]),
+    listRecentByAuthor: () => Effect.succeed([]),
     markDeleted: () => Effect.void,
     markDeletedMany: () => Effect.sync(() => void (deleted += 1))
   });
