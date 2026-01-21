@@ -15,6 +15,7 @@ it("serves feed skeleton", async () => {
           cid: "cid",
           authorDid: "did:plc:1",
           createdAt: 200,
+          createdAtDay: "1970-01-01",
           indexedAt: 210,
           searchText: "arxiv",
           replyRoot: null,

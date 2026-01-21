@@ -5,6 +5,8 @@ import { PostsRepo } from "../services/PostsRepo";
 import { DeletePost, PutPost, PostsWriteResolver } from "../services/PostsWriteResolver";
 
 const resolver = RequestResolver.contextFromServices(PostsRepo)(PostsWriteResolver);
+const toDay = (unixSeconds: number) =>
+  new Date(unixSeconds * 1000).toISOString().slice(0, 10);
 
 export const processBatch = (batch: RawEventBatch) =>
   Effect.forEach(
@@ -29,21 +31,23 @@ const toRequest = (event: RawEvent) =>
           searchText: buildSearchText(record as any)
         })),
         Option.filter((entry) => containsPaperLink(entry.searchText)),
-        Option.map((entry) =>
-          new PutPost({
+        Option.map((entry) => {
+          const createdAt = Math.floor(entry.event.timeUs / 1000);
+          return new PutPost({
             post: {
               uri: entry.event.uri,
               cid: entry.event.cid ?? "",
               authorDid: entry.event.did,
-              createdAt: Math.floor(entry.event.timeUs / 1000),
+              createdAt,
+              createdAtDay: toDay(createdAt),
               indexedAt: Date.now(),
               searchText: entry.searchText,
               replyRoot: null,
               replyParent: null,
               status: "active" as const
             }
-          })
-        )
+          });
+        })
       )
     ),
     Match.orElse(() => Option.none())

@@ -6,6 +6,7 @@ export type PaperPost = {
   readonly cid: string;
   readonly authorDid: string;
   readonly createdAt: number;
+  readonly createdAtDay: string;
   readonly indexedAt: number;
   readonly searchText: string | null;
   readonly replyRoot: string | null;
