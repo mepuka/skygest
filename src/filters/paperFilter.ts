@@ -1,4 +1,8 @@
-import { compiledPaperPatterns } from "./paperPatterns";
+import {
+  compiledPaperPatterns,
+  compiledContentPatterns,
+  pdfExclusions
+} from "./paperPatterns";
 
 export const buildSearchText = (record: Record<string, any>): string => {
   const text = String(record.text ?? "").toLowerCase();
@@ -27,5 +31,20 @@ export const buildSearchText = (record: Record<string, any>): string => {
   ].join(" ");
 };
 
-export const containsPaperLink = (searchText: string): boolean =>
-  compiledPaperPatterns.some((pattern) => pattern.test(searchText));
+const isExcludedPdf = (match: string) =>
+  Array.from(pdfExclusions).some((domain) => match.includes(domain));
+
+export const containsPaperLink = (searchText: string): boolean => {
+  const hasPaperLink = compiledPaperPatterns.some((pattern) => {
+    const match = pattern.exec(searchText);
+    if (!match) return false;
+    if (match[0].includes(".pdf") && isExcludedPdf(match[0])) return false;
+    return true;
+  });
+
+  const contentMatches = compiledContentPatterns.filter((pattern) =>
+    pattern.test(searchText)
+  ).length;
+
+  return hasPaperLink || contentMatches >= 3;
+};
