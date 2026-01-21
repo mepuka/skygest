@@ -30,3 +30,5 @@ export const fetch = (request: Request, env: EnvBindings, _ctx: ExecutionContext
     feedApp.pipe(Effect.provide(appLayer.pipe(Layer.provideMerge(baseLayer))))
   )(request);
 };
+
+export default { fetch };
