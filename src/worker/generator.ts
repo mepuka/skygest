@@ -2,6 +2,7 @@ import { Duration, Effect, Layer, Request } from "effect";
 import { GeneratorWorker } from "../generator/GeneratorWorker";
 import { CloudflareEnv, type EnvBindings } from "../platform/Env";
 import { AppConfig } from "../platform/Config";
+import { Logging } from "../platform/Logging";
 import { FeedCacheKv } from "../services/kv/FeedCacheKv";
 import { PostsRepoD1 } from "../services/d1/PostsRepoD1";
 import { layer as BlueskyClientLayer } from "../bluesky/BlueskyClient";
@@ -11,7 +12,8 @@ import type { FeedGenMessage } from "../domain/types";
 export const queue = (batch: MessageBatch<FeedGenMessage>, env: EnvBindings, ctx: ExecutionContext) => {
   const baseLayer = Layer.mergeAll(
     CloudflareEnv.layer(env, { required: ["FEED_DID", "FEED_CACHE", "DB"] }),
-    D1Client.layer({ db: env.DB })
+    D1Client.layer({ db: env.DB }),
+    Logging.layer
   );
   const requestLayer = Layer.mergeAll(
     Layer.setRequestCache(Request.makeCache({ capacity: 5000, timeToLive: Duration.minutes(2) })),

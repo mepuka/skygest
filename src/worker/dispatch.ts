@@ -1,13 +1,15 @@
 import { Effect, Layer } from "effect";
 import { DispatchWorker } from "../generator/DispatchWorker";
 import { CloudflareEnv, type EnvBindings } from "../platform/Env";
+import { Logging } from "../platform/Logging";
 import { UsersRepoD1 } from "../services/d1/UsersRepoD1";
 import { D1Client } from "@effect/sql-d1";
 
 export const scheduled = (_event: ScheduledEvent, env: EnvBindings, ctx: ExecutionContext) => {
   const baseLayer = Layer.mergeAll(
     CloudflareEnv.layer(env, { required: ["FEED_GEN", "DB"] }),
-    D1Client.layer({ db: env.DB })
+    D1Client.layer({ db: env.DB }),
+    Logging.layer
   );
   const appLayer = UsersRepoD1.layer;
 

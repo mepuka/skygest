@@ -55,6 +55,11 @@ const toRawEvent = (event: JetstreamMessage.JetstreamMessage) => {
   return Option.none();
 };
 
+export const annotateIngestorLogs = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
+  effect.pipe(
+    Effect.annotateLogs({ component: "ingest", queue: "RAW_EVENTS" })
+  );
+
 export const runIngestor = Effect.gen(function* () {
   const cfg = yield* AppConfig;
   const env = yield* CloudflareEnv;
@@ -77,6 +82,14 @@ export const runIngestor = Effect.gen(function* () {
         const cursor = events.at(-1)?.timeUs;
         const payload: RawEventBatch = { cursor, events };
         return Effect.promise(() => env.RAW_EVENTS.send(payload, { contentType: "json" })).pipe(
+          Effect.tap(() =>
+            Effect.logInfo("raw events batch sent").pipe(
+              Effect.annotateLogs({
+                batchSize: events.length,
+                cursor: cursor ?? null
+              })
+            )
+          ),
           Effect.tap(() => (cursor === undefined ? Effect.void : cursorStore.setCursor(cursor))),
           Effect.asVoid
         );
@@ -85,5 +98,9 @@ export const runIngestor = Effect.gen(function* () {
     );
   });
 
-  yield* streamEffect.pipe(Effect.provide(Jetstream.live(config)));
+  yield* streamEffect.pipe(
+    annotateIngestorLogs,
+    Effect.withSpan("jetstream.stream"),
+    Effect.provide(Jetstream.live(config))
+  );
 });

@@ -5,6 +5,7 @@ import { app as feedApp } from "../feed/FeedRouter";
 import { app as mcpApp } from "../mcp/Router";
 import { CloudflareEnv, type EnvBindings } from "../platform/Env";
 import { AppConfig } from "../platform/Config";
+import { Logging } from "../platform/Logging";
 import { FeedCacheKv } from "../services/kv/FeedCacheKv";
 import { AuthService } from "../auth/AuthService";
 import { PostsRepoD1 } from "../services/d1/PostsRepoD1";
@@ -38,7 +39,8 @@ export const fetch = async (request: Request, env: EnvBindings, _ctx: ExecutionC
 
   const baseLayer = Layer.mergeAll(
     CloudflareEnv.layer(env),
-    D1Client.layer({ db: env.DB })
+    D1Client.layer({ db: env.DB }),
+    Logging.layer
   );
   const appLayer = Layer.mergeAll(
     AppConfig.layer,

@@ -104,14 +104,23 @@ export const app = HttpRouter.empty.pipe(
       const start = typeof params.cursor === "number" ? params.cursor : 0;
       const header = (yield* HttpServerRequest.HttpServerRequest).headers["authorization"] ?? null;
       const req = yield* HttpServerRequest.HttpServerRequest;
-      console.log(`getFeedSkeleton: url=${req.url}`);
       const url = new URL(req.url, "http://localhost");
       const testDid = url.searchParams.get("_testDid");
-      console.log(`getFeedSkeleton: testDid=${testDid}, header=${header?.slice(0,20)}`);
+      yield* Effect.logInfo("getFeedSkeleton request").pipe(
+        Effect.annotateLogs({
+          url: req.url,
+          testDid: testDid ?? null,
+          headerPrefix: header ? header.slice(0, 20) : null
+        })
+      );
       const did = testDid ?? (yield* auth.decodeBearer(header));
-      console.log(`getFeedSkeleton: did=${did}`);
+      yield* Effect.logInfo("getFeedSkeleton did resolved").pipe(
+        Effect.annotateLogs({ did: did ?? null })
+      );
       const feed = did ? (yield* cache.getFeed(did, "default")) ?? [] : [];
-      console.log(`getFeedSkeleton: feed has ${feed.length} items`);
+      yield* Effect.logInfo("getFeedSkeleton feed loaded").pipe(
+        Effect.annotateLogs({ feedSize: feed.length })
+      );
       const sliced = Array.take(Array.drop(feed, start), limit);
       const feedItems = Array.map(sliced, (post) => ({ post }));
       const nextCursor = start + limit;
