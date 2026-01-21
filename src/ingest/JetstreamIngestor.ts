@@ -1,36 +1,58 @@
-import { Duration, Effect, Stream } from "effect";
+import { Duration, Effect, Option, Schema, Stream } from "effect";
 import { Jetstream, JetstreamConfig, JetstreamMessage } from "effect-jetstream";
 import { CloudflareEnv } from "../platform/Env";
 import { AppConfig } from "../platform/Config";
 import { JetstreamCursorStore } from "./JetstreamCursorStore";
-import { RawEvent, RawEventBatch } from "../domain/types";
+import { AtUri, Did, RawEvent, RawEventBatch } from "../domain/types";
 
-const toRawEvent = (event: JetstreamMessage.JetstreamMessage): RawEvent | null => {
+const toRawEvent = (event: JetstreamMessage.JetstreamMessage) => {
   if (event._tag === "CommitCreate" || event._tag === "CommitUpdate") {
-    return {
-      kind: "commit",
-      operation: event.commit.operation,
-      collection: event.commit.collection,
-      did: event.did,
-      uri: `at://${event.did}/${event.commit.collection}/${event.commit.rkey}`,
-      cid: event.commit.cid,
-      record: event.commit.record,
-      timeUs: event.time_us
-    };
+    return Option.some(
+      Effect.gen(function* () {
+        const did = yield* Schema.decodeUnknown(Did)(event.did);
+        const uri = yield* Schema.decodeUnknown(AtUri)(
+          `at://${event.did}/${event.commit.collection}/${event.commit.rkey}`
+        );
+
+        const rawEvent: RawEvent = {
+          kind: "commit",
+          operation: event.commit.operation,
+          collection: event.commit.collection,
+          did,
+          uri,
+          cid: event.commit.cid,
+          record: event.commit.record,
+          timeUs: event.time_us
+        };
+
+        return rawEvent;
+      })
+    );
   }
 
   if (event._tag === "CommitDelete") {
-    return {
-      kind: "commit",
-      operation: event.commit.operation,
-      collection: event.commit.collection,
-      did: event.did,
-      uri: `at://${event.did}/${event.commit.collection}/${event.commit.rkey}`,
-      timeUs: event.time_us
-    };
+    return Option.some(
+      Effect.gen(function* () {
+        const did = yield* Schema.decodeUnknown(Did)(event.did);
+        const uri = yield* Schema.decodeUnknown(AtUri)(
+          `at://${event.did}/${event.commit.collection}/${event.commit.rkey}`
+        );
+
+        const rawEvent: RawEvent = {
+          kind: "commit",
+          operation: event.commit.operation,
+          collection: event.commit.collection,
+          did,
+          uri,
+          timeUs: event.time_us
+        };
+
+        return rawEvent;
+      })
+    );
   }
 
-  return null;
+  return Option.none();
 };
 
 export const runIngestor = Effect.gen(function* () {
@@ -48,8 +70,7 @@ export const runIngestor = Effect.gen(function* () {
   const streamEffect = Effect.gen(function* () {
     const jetstream = yield* Jetstream.Jetstream;
     yield* jetstream.stream.pipe(
-      Stream.map(toRawEvent),
-      Stream.filter((event): event is RawEvent => event !== null),
+      Stream.filterMapEffect(toRawEvent),
       Stream.groupedWithin(200, Duration.seconds(2)),
       Stream.mapEffect((chunk) => {
         const events = Array.from(chunk);

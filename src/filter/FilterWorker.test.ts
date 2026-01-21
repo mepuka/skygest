@@ -1,5 +1,5 @@
 import { it, expect } from "bun:test";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Schema } from "effect";
 import { processBatch } from "./FilterWorker";
 import { PostsRepo } from "../services/PostsRepo";
 import { RawEventBatch } from "../domain/types";
@@ -14,7 +14,7 @@ it("filters paper posts", async () => {
     markDeletedMany: () => Effect.sync(() => void (deleted += 1))
   });
 
-  const batch: RawEventBatch = {
+  const batch = Schema.decodeSync(RawEventBatch)({
     cursor: 1,
     events: [
       {
@@ -38,7 +38,7 @@ it("filters paper posts", async () => {
         timeUs: 2
       }
     ]
-  };
+  });
 
   await Effect.runPromise(processBatch(batch).pipe(Effect.provide(PostsTest)));
 
