@@ -22,6 +22,7 @@
     "@effect/sql-d1": "^0.47.0",
     "@effect/sql-sqlite-do": "^0.27.0",
     "effect": "^3.19.14",
-    "effect-jetstream": "^1.0.0"
+    "effect-jetstream": "^1.0.0",
+    "jose": "^6.1.3"
   }
 }
