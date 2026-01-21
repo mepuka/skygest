@@ -30,14 +30,15 @@ it("serves feed skeleton", async () => {
     jetstreamEndpoint: "wss://example"
   });
 
+  const appLayer = Layer.mergeAll(PostsTest, ConfigTest);
   const handler = HttpApp.toWebHandler(
-    app.pipe(Effect.provide(PostsTest), Effect.provide(ConfigTest))
+    app.pipe(Effect.provide(appLayer))
   );
 
   const res = await handler(
     new Request("http://localhost/xrpc/app.bsky.feed.getFeedSkeleton?limit=1")
   );
-  const body = await res.json();
+  const body = await res.json() as { feed: Array<{ post: string }>; cursor: string };
 
   expect(res.status).toBe(200);
   expect(body.feed.length).toBe(1);

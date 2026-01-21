@@ -23,9 +23,7 @@ export class AppConfig extends Context.Tag("@skygest/AppConfig")<
         ["FEED_DID", env.FEED_DID],
         ["JETSTREAM_ENDPOINT", env.JETSTREAM_ENDPOINT]
       ]));
-      return yield* Config.load(ConfigSchema).pipe(
-        Effect.withConfigProvider(provider)
-      );
+      return yield* provider.load(ConfigSchema);
     })
   );
 }

@@ -1,5 +1,5 @@
 import { it, expect } from "bun:test";
-import { Effect } from "effect";
+import { Effect, Layer } from "effect";
 import { SqliteClient } from "@effect/sql-sqlite-bun";
 import { SqlClient } from "@effect/sql";
 import { JetstreamCursorStore } from "./JetstreamCursorStore";
@@ -13,11 +13,11 @@ it("stores cursor", async () => {
     return yield* store.getCursor();
   });
 
+  const baseLayer = SqliteClient.layer({ filename: ":memory:" });
+  const appLayer = JetstreamCursorStore.layer.pipe(Layer.provideMerge(baseLayer));
+
   const result = await Effect.runPromise(
-    program.pipe(
-      Effect.provide(JetstreamCursorStore.layer),
-      Effect.provide(SqliteClient.layer({ filename: ":memory:" }))
-    )
+    program.pipe(Effect.provide(appLayer))
   );
 
   expect(result).toBe(123);

@@ -1,6 +1,10 @@
-import { it, expect } from "bun:test";
-import { fetch } from "./feed";
+import { it, expect, mock } from "bun:test";
 
-it("exports fetch", () => {
-  expect(fetch).toBeDefined();
+it("exports fetch", async () => {
+  mock.module("cloudflare:workers", () => ({
+    DurableObject: class {}
+  }));
+
+  const mod = await import("./feed");
+  expect(mod.fetch).toBeDefined();
 });

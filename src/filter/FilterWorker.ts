@@ -1,12 +1,15 @@
-import { Array, Effect, Match, Option } from "effect";
+import { Array, Effect, Match, Option, RequestResolver } from "effect";
 import { RawEvent, RawEventBatch } from "../domain/types";
 import { buildSearchText, containsPaperLink } from "../filters/paperFilter";
+import { PostsRepo } from "../services/PostsRepo";
 import { DeletePost, PutPost, PostsWriteResolver } from "../services/PostsWriteResolver";
+
+const resolver = RequestResolver.contextFromServices(PostsRepo)(PostsWriteResolver);
 
 export const processBatch = (batch: RawEventBatch) =>
   Effect.forEach(
     Array.filterMap(batch.events, toRequest),
-    (req) => Effect.request(req, PostsWriteResolver),
+    (req) => Effect.request(req, resolver),
     { concurrency: "unbounded", batching: "inherit", discard: true }
   ).pipe(
     Effect.withRequestBatching(true),

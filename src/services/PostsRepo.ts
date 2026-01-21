@@ -1,4 +1,5 @@
 import { Context, Effect } from "effect";
+import type { SqlError } from "@effect/sql/SqlError";
 
 export type PaperPost = {
   readonly uri: string;
@@ -15,9 +16,9 @@ export type PaperPost = {
 export class PostsRepo extends Context.Tag("@skygest/PostsRepo")<
   PostsRepo,
   {
-    readonly putMany: (posts: ReadonlyArray<PaperPost>) => Effect.Effect<void>;
-    readonly listRecent: (cursor: number | null, limit: number) => Effect.Effect<ReadonlyArray<PaperPost>>;
-    readonly markDeleted: (uri: string) => Effect.Effect<void>;
-    readonly markDeletedMany: (uris: ReadonlyArray<string>) => Effect.Effect<void>;
+    readonly putMany: (posts: ReadonlyArray<PaperPost>) => Effect.Effect<void, SqlError>;
+    readonly listRecent: (cursor: number | null, limit: number) => Effect.Effect<ReadonlyArray<PaperPost>, SqlError>;
+    readonly markDeleted: (uri: string) => Effect.Effect<void, SqlError>;
+    readonly markDeletedMany: (uris: ReadonlyArray<string>) => Effect.Effect<void, SqlError>;
   }
 >() {}

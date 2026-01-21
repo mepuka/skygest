@@ -1,6 +1,6 @@
 import { it, expect } from "bun:test";
-import { Effect, Layer } from "effect";
-import { PostsRepo, PaperPost } from "./PostsRepo";
+import { Effect, Layer, RequestResolver } from "effect";
+import { PostsRepo, type PaperPost } from "./PostsRepo";
 import { DeletePost, PutPost, PostsWriteResolver } from "./PostsWriteResolver";
 
 it("batches put and delete requests", async () => {
@@ -54,10 +54,12 @@ it("batches put and delete requests", async () => {
     new DeletePost({ uri: "at://3" })
   ];
 
+  const resolver = RequestResolver.contextFromServices(PostsRepo)(PostsWriteResolver);
+
   await Effect.runPromise(
     Effect.forEach(
       requests,
-      (req) => Effect.request(req, PostsWriteResolver),
+      (req) => Effect.request(req, resolver),
       { concurrency: "unbounded", batching: "inherit", discard: true }
     ).pipe(
       Effect.withRequestBatching(true),

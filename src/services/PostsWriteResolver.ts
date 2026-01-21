@@ -1,15 +1,16 @@
 import { Effect, Request, RequestResolver } from "effect";
-import { PostsRepo, PaperPost } from "./PostsRepo";
+import type { SqlError } from "@effect/sql/SqlError";
+import { PostsRepo, type PaperPost } from "./PostsRepo";
 
 export class PutPost extends Request.TaggedClass("PutPost")<
   void,
-  never,
+  SqlError,
   { readonly post: PaperPost }
 > {}
 
 export class DeletePost extends Request.TaggedClass("DeletePost")<
   void,
-  never,
+  SqlError,
   { readonly uri: string }
 > {}
 

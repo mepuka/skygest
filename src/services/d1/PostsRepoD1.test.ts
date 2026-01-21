@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { Effect } from "effect";
+import { Effect, Layer } from "effect";
 import { SqliteClient } from "@effect/sql-sqlite-bun";
 import { PostsRepo } from "../PostsRepo";
 import { PostsRepoD1 } from "./PostsRepoD1";
@@ -38,11 +38,11 @@ it("lists recent posts with cursor", async () => {
     return { first, older };
   });
 
+  const baseLayer = SqliteClient.layer({ filename: ":memory:" });
+  const appLayer = PostsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
+
   const result = await Effect.runPromise(
-    program.pipe(
-      Effect.provide(PostsRepoD1.layer),
-      Effect.provide(SqliteClient.layer({ filename: ":memory:" }))
-    )
+    program.pipe(Effect.provide(appLayer))
   );
 
   expect(result.first[0]?.createdAt).toBe(200);
@@ -84,11 +84,11 @@ it("marks many posts deleted", async () => {
     return yield* repo.listRecent(null, 10);
   });
 
+  const baseLayer = SqliteClient.layer({ filename: ":memory:" });
+  const appLayer = PostsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
+
   const result = await Effect.runPromise(
-    program.pipe(
-      Effect.provide(PostsRepoD1.layer),
-      Effect.provide(SqliteClient.layer({ filename: ":memory:" }))
-    )
+    program.pipe(Effect.provide(appLayer))
   );
 
   expect(result.length).toBe(0);

@@ -1,6 +1,6 @@
 import { Effect, Layer } from "effect";
 import { SqlClient } from "@effect/sql";
-import { PostsRepo, PaperPost } from "../PostsRepo";
+import { PostsRepo, type PaperPost } from "../PostsRepo";
 
 export const PostsRepoD1 = {
   layer: Layer.effect(PostsRepo, Effect.gen(function* () {

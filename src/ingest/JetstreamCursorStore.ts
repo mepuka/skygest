@@ -1,11 +1,12 @@
 import { Context, Effect, Layer } from "effect";
 import { SqlClient } from "@effect/sql";
+import type { SqlError } from "@effect/sql/SqlError";
 
 export class JetstreamCursorStore extends Context.Tag("@skygest/JetstreamCursorStore")<
   JetstreamCursorStore,
   {
-    readonly getCursor: () => Effect.Effect<number | null>;
-    readonly setCursor: (cursor: number) => Effect.Effect<void>;
+    readonly getCursor: () => Effect.Effect<number | null, SqlError>;
+    readonly setCursor: (cursor: number) => Effect.Effect<void, SqlError>;
   }
 >() {
   static layer = Layer.effect(

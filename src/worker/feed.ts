@@ -1,7 +1,7 @@
-import { Effect } from "effect";
+import { Effect, Layer } from "effect";
 import * as HttpApp from "@effect/platform/HttpApp";
 import { app as feedApp } from "../feed/FeedRouter";
-import { CloudflareEnv, EnvBindings } from "../platform/Env";
+import { CloudflareEnv, type EnvBindings } from "../platform/Env";
 import { AppConfig } from "../platform/Config";
 import { PostsRepoD1 } from "../services/d1/PostsRepoD1";
 import { D1Client } from "@effect/sql-d1";
@@ -17,12 +17,16 @@ export const fetch = (request: Request, env: EnvBindings, _ctx: ExecutionContext
     return stub.fetch("https://ingest/start");
   }
 
+  const baseLayer = Layer.mergeAll(
+    CloudflareEnv.layer(env),
+    D1Client.layer({ db: env.DB })
+  );
+  const appLayer = Layer.mergeAll(
+    AppConfig.layer,
+    PostsRepoD1.layer
+  );
+
   return HttpApp.toWebHandler(
-    feedApp.pipe(
-      Effect.provide(CloudflareEnv.layer(env)),
-      Effect.provide(AppConfig.layer),
-      Effect.provide(PostsRepoD1.layer),
-      Effect.provide(D1Client.layer({ db: env.DB }))
-    )
+    feedApp.pipe(Effect.provide(appLayer.pipe(Layer.provideMerge(baseLayer))))
   )(request);
 };

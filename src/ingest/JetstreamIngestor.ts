@@ -55,10 +55,9 @@ export const runIngestor = Effect.gen(function* () {
         const events = Array.from(chunk);
         const cursor = events.at(-1)?.timeUs;
         const payload: RawEventBatch = { cursor, events };
-        return Effect.tryPromise({
-          try: () => env.RAW_EVENTS.send(payload, { contentType: "json" })
-        }).pipe(
-          Effect.tap(() => (cursor === undefined ? Effect.void : cursorStore.setCursor(cursor)))
+        return Effect.promise(() => env.RAW_EVENTS.send(payload, { contentType: "json" })).pipe(
+          Effect.tap(() => (cursor === undefined ? Effect.void : cursorStore.setCursor(cursor))),
+          Effect.asVoid
         );
       }),
       Stream.runDrain
@@ -66,4 +65,4 @@ export const runIngestor = Effect.gen(function* () {
   });
 
   yield* streamEffect.pipe(Effect.provide(Jetstream.live(config)));
-}).pipe(Effect.provide(JetstreamCursorStore.layer));
+});
