@@ -62,6 +62,11 @@ export const PostsRepoD1 = {
     const markDeleted = (uri: string) =>
       sql`UPDATE posts SET status = 'deleted' WHERE uri = ${uri}`.pipe(Effect.asVoid);
 
-    return PostsRepo.of({ putMany, listRecent, markDeleted });
+    const markDeletedMany = (uris: ReadonlyArray<string>) =>
+      uris.length === 0
+        ? Effect.void
+        : sql`UPDATE posts SET status = 'deleted' WHERE ${sql.in("uri", uris)}`.pipe(Effect.asVoid);
+
+    return PostsRepo.of({ putMany, listRecent, markDeleted, markDeletedMany });
   }))
 };

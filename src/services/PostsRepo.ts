@@ -18,5 +18,6 @@ export class PostsRepo extends Context.Tag("@skygest/PostsRepo")<
     readonly putMany: (posts: ReadonlyArray<PaperPost>) => Effect.Effect<void>;
     readonly listRecent: (cursor: number | null, limit: number) => Effect.Effect<ReadonlyArray<PaperPost>>;
     readonly markDeleted: (uri: string) => Effect.Effect<void>;
+    readonly markDeletedMany: (uris: ReadonlyArray<string>) => Effect.Effect<void>;
   }
 >() {}

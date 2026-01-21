@@ -48,3 +48,48 @@ it("lists recent posts with cursor", async () => {
   expect(result.first[0]?.createdAt).toBe(200);
   expect(result.older.length).toBe(1);
 });
+
+it("marks many posts deleted", async () => {
+  const program = Effect.gen(function* () {
+    yield* runMigrations;
+    const repo = yield* PostsRepo;
+    yield* repo.putMany([
+      {
+        uri: "at://did:plc:1/app.bsky.feed.post/1",
+        cid: "cid1",
+        authorDid: "did:plc:1",
+        createdAt: 200,
+        indexedAt: 250,
+        searchText: "arxiv",
+        replyRoot: null,
+        replyParent: null,
+        status: "active"
+      },
+      {
+        uri: "at://did:plc:2/app.bsky.feed.post/2",
+        cid: "cid2",
+        authorDid: "did:plc:2",
+        createdAt: 100,
+        indexedAt: 150,
+        searchText: "arxiv",
+        replyRoot: null,
+        replyParent: null,
+        status: "active"
+      }
+    ]);
+    yield* repo.markDeletedMany([
+      "at://did:plc:1/app.bsky.feed.post/1",
+      "at://did:plc:2/app.bsky.feed.post/2"
+    ]);
+    return yield* repo.listRecent(null, 10);
+  });
+
+  const result = await Effect.runPromise(
+    program.pipe(
+      Effect.provide(PostsRepoD1.layer),
+      Effect.provide(SqliteClient.layer({ filename: ":memory:" }))
+    )
+  );
+
+  expect(result.length).toBe(0);
+});
