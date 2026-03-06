@@ -1,5 +1,6 @@
 import { Duration, Effect, Option, Schema, Stream } from "effect";
 import { Jetstream, JetstreamConfig, JetstreamMessage } from "effect-jetstream";
+import { slimPostRecordFromUnknown } from "../bluesky/PostRecord";
 import { CloudflareEnv } from "../platform/Env";
 import { AppConfig } from "../platform/Config";
 import { JetstreamCursorStore } from "./JetstreamCursorStore";
@@ -21,7 +22,7 @@ const toRawEvent = (event: JetstreamMessage.JetstreamMessage) => {
           did,
           uri,
           cid: event.commit.cid,
-          record: event.commit.record,
+          record: slimPostRecordFromUnknown(event.commit.record),
           timeUs: event.time_us
         };
 
@@ -60,15 +61,38 @@ export const annotateIngestorLogs = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
     Effect.annotateLogs({ component: "ingest", queue: "RAW_EVENTS" })
   );
 
-export const runIngestor = Effect.gen(function* () {
+const loadWantedDids = (db: D1Database, shard: number) =>
+  Effect.promise(async () => {
+    const result = await db.prepare(
+      "SELECT did FROM experts WHERE active = 1 AND shard = ? ORDER BY added_at ASC, did ASC"
+    ).bind(shard).all<{ did: string }>();
+
+    return (result.results ?? []).map((row) => row.did);
+  });
+
+export const runIngestor = (shard: number) => Effect.gen(function* () {
   const cfg = yield* AppConfig;
   const env = yield* CloudflareEnv;
   const cursorStore = yield* JetstreamCursorStore;
+  const rawEvents = env.RAW_EVENTS;
+  const wantedDids = yield* loadWantedDids(env.DB, shard);
+
+  if (!rawEvents) {
+    return yield* Effect.dieMessage("RAW_EVENTS queue binding is missing");
+  }
+
+  if (wantedDids.length === 0) {
+    yield* Effect.logInfo("no active experts configured for shard").pipe(
+      Effect.annotateLogs({ shard })
+    );
+    return yield* Effect.never;
+  }
 
   const startCursor = yield* cursorStore.getCursor();
   const config = JetstreamConfig.JetstreamConfig.make({
     endpoint: cfg.jetstreamEndpoint,
     wantedCollections: ["app.bsky.feed.post"],
+    wantedDids,
     cursor: startCursor ?? undefined
   });
 
@@ -81,7 +105,7 @@ export const runIngestor = Effect.gen(function* () {
         const events = Array.from(chunk);
         const cursor = events.at(-1)?.timeUs;
         const payload: RawEventBatch = { cursor, events };
-        return Effect.promise(() => env.RAW_EVENTS.send(payload, { contentType: "json" })).pipe(
+        return Effect.promise(() => rawEvents.send(payload, { contentType: "json" })).pipe(
           Effect.tap(() =>
             Effect.logInfo("raw events batch sent").pipe(
               Effect.annotateLogs({

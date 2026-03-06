@@ -15,6 +15,7 @@
     // Bundler mode
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
 
@@ -30,5 +31,32 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  }
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts", "vitest.config.ts"],
+  "exclude": [
+    "analysis/**",
+    "src/**/*.test.ts",
+    "src/feed/**",
+    "src/generator/**",
+    "src/postprocess/**",
+    "src/filters/**",
+    "src/worker/dispatch.ts",
+    "src/worker/generator.ts",
+    "src/worker/postprocess.ts",
+    "src/services/AccessRepo.ts",
+    "src/services/AccessWriteResolver.ts",
+    "src/services/PostsReadResolver.ts",
+    "src/services/PostsRepo.ts",
+    "src/services/PostsWriteResolver.ts",
+    "src/services/UsersRepo.ts",
+    "src/services/UsersWriteResolver.ts",
+    "src/services/InteractionsRepo.ts",
+    "src/services/CandidateSessionsRepo.ts",
+    "src/services/FeedCache.ts",
+    "src/services/kv/**",
+    "src/services/d1/AccessRepoD1.ts",
+    "src/services/d1/InteractionsRepoD1.ts",
+    "src/services/d1/PostsRepoD1.ts",
+    "src/services/d1/UsersRepoD1.ts"
+  ]
 }

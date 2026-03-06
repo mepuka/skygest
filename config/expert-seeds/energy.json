@@ -1,0 +1,32 @@
+{
+  "domain": "energy",
+  "experts": [
+    {
+      "did": "did:plc:bvwqyqjl4vxaswxbqymiofzv",
+      "handle": "seed-primary.bsky.social",
+      "displayName": "Skygest Seed Primary",
+      "description": "Initial phase-one seed account for local validation.",
+      "source": "manual",
+      "sourceRef": "config/expert-seeds/energy.json",
+      "active": true
+    },
+    {
+      "did": "did:plc:skygestenergyseed0000000000001",
+      "handle": "canarymedia.com",
+      "displayName": "Canary Media",
+      "description": "Illustrative energy-news source retained for future production curation.",
+      "source": "manual",
+      "sourceRef": "config/expert-seeds/energy.json",
+      "active": false
+    },
+    {
+      "did": "did:plc:skygestenergyseed0000000000002",
+      "handle": "carbonbrief.org",
+      "displayName": "Carbon Brief",
+      "description": "Illustrative energy-news source retained for future production curation.",
+      "source": "manual",
+      "sourceRef": "config/expert-seeds/energy.json",
+      "active": false
+    }
+  ]
+}

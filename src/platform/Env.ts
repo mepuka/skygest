@@ -1,33 +1,28 @@
 import { Array, Context, Effect, Layer, Option, Schema } from "effect";
+import type { JetstreamIngestorDoV2 } from "../ingest/IngestorDo";
 
 export class EnvError extends Schema.TaggedError<EnvError>()("EnvError", {
   missing: Schema.String
 }) {}
 
 export interface EnvBindings {
-  readonly FEED_DID: string;
-  readonly ALG_FEED_DID?: string;
   readonly PUBLIC_BSKY_API?: string;
   readonly JETSTREAM_ENDPOINT?: string;
-  readonly FOLLOW_LIMIT?: string;
-  readonly FEED_LIMIT?: string;
-  readonly CONSENT_THRESHOLD?: string;
+  readonly INGEST_SHARD_COUNT?: string;
+  readonly DEFAULT_DOMAIN?: string;
+  readonly MCP_LIMIT_DEFAULT?: string;
+  readonly MCP_LIMIT_MAX?: string;
+  readonly OPERATOR_AUTH_MODE?: string;
+  readonly OPERATOR_SECRET?: string;
+  readonly ACCESS_TEAM_DOMAIN?: string;
+  readonly ACCESS_AUD?: string;
   readonly DB: D1Database;
-  readonly FEED_CACHE: KVNamespace;
-  readonly RAW_EVENTS: Queue;
-  readonly FEED_GEN: Queue;
-  readonly POSTPROCESS: Queue;
-  readonly JETSTREAM_INGESTOR: DurableObjectNamespace;
+  readonly RAW_EVENTS?: Queue;
+  readonly JETSTREAM_INGESTOR?: DurableObjectNamespace<JetstreamIngestorDoV2>;
 }
 
 const defaultRequired = [
-  "FEED_DID",
-  "DB",
-  "FEED_CACHE",
-  "RAW_EVENTS",
-  "FEED_GEN",
-  "POSTPROCESS",
-  "JETSTREAM_INGESTOR"
+  "DB"
 ] as const satisfies ReadonlyArray<keyof EnvBindings>;
 
 type EnvRequirementOptions = {

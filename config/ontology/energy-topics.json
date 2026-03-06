@@ -1,0 +1,77 @@
+[
+  {
+    "slug": "solar",
+    "label": "Solar",
+    "terms": ["solar", "solar energy", "solar power", "photovoltaic", "pv", "solar panel", "solar farm"]
+  },
+  {
+    "slug": "wind",
+    "label": "Wind",
+    "terms": ["wind", "wind energy", "wind power", "wind farm", "wind turbine", "offshore wind", "onshore wind"]
+  },
+  {
+    "slug": "nuclear",
+    "label": "Nuclear",
+    "terms": ["nuclear", "nuclear energy", "nuclear power", "small modular reactor", "smr", "fusion", "fusion energy"]
+  },
+  {
+    "slug": "natural-gas",
+    "label": "Natural Gas",
+    "terms": ["natural gas", "lng", "gas pipeline", "gas price", "methane"]
+  },
+  {
+    "slug": "energy-storage",
+    "label": "Energy Storage",
+    "terms": ["energy storage", "battery storage", "bess", "battery", "storage"]
+  },
+  {
+    "slug": "grid-and-infrastructure",
+    "label": "Grid and Infrastructure",
+    "terms": ["grid", "power grid", "electric grid", "transmission", "distribution", "interconnection", "microgrid", "der"]
+  },
+  {
+    "slug": "energy-policy",
+    "label": "Energy Policy",
+    "terms": ["energy policy", "ferc", "nerc", "ira", "inflation reduction act", "permitting", "energy regulation"]
+  },
+  {
+    "slug": "energy-markets",
+    "label": "Energy Markets",
+    "terms": ["energy market", "power market", "wholesale electricity", "capacity market", "auction", "ppa", "power purchase agreement"]
+  },
+  {
+    "slug": "hydrogen",
+    "label": "Hydrogen",
+    "terms": ["hydrogen", "green hydrogen", "blue hydrogen", "h2", "electrolyzer", "fuel cell"]
+  },
+  {
+    "slug": "carbon-capture",
+    "label": "Carbon Capture",
+    "terms": ["carbon capture", "ccs", "ccus", "dac", "direct air capture"]
+  },
+  {
+    "slug": "climate-and-emissions",
+    "label": "Climate and Emissions",
+    "terms": ["climate", "climate change", "emissions", "greenhouse gas", "ghg", "net zero", "net-zero", "decarbonization", "decarbonisation"]
+  },
+  {
+    "slug": "electrification",
+    "label": "Electrification",
+    "terms": ["electrification", "electric vehicle", "ev", "ev charging", "charging station", "heat pump", "building electrification"]
+  },
+  {
+    "slug": "data-center-demand",
+    "label": "Data Center Demand",
+    "terms": ["data center", "data centre", "ai energy", "data center power", "data center energy", "energy demand"]
+  },
+  {
+    "slug": "critical-minerals",
+    "label": "Critical Minerals",
+    "terms": ["critical minerals", "lithium", "cobalt", "rare earth", "silicon"]
+  },
+  {
+    "slug": "affordability",
+    "label": "Affordability",
+    "terms": ["affordability", "energy bills", "utility bills", "rate hike", "energy poverty"]
+  }
+]

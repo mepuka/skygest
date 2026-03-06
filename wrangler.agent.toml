@@ -1,5 +1,5 @@
-name = "skygest-bi-ingest"
-main = "src/worker/filter.ts"
+name = "skygest-bi-agent"
+main = "src/worker/feed.ts"
 compatibility_date = "2024-04-03"
 
 [observability]
@@ -21,36 +21,16 @@ binding = "DB"
 database_name = "skygest"
 database_id = "b33d6089-883e-4f62-bcfd-3b30153e51e9"
 
-[[queues.producers]]
-queue = "raw-events"
-binding = "RAW_EVENTS"
-
-[[queues.consumers]]
-queue = "raw-events"
-max_batch_size = 50
-max_batch_timeout = 5
-max_retries = 5
-dead_letter_queue = "raw-events-dlq"
-
 [[durable_objects.bindings]]
 name = "JETSTREAM_INGESTOR"
 class_name = "JetstreamIngestorDoV2"
-
-[[migrations]]
-tag = "v1"
-new_classes = ["JetstreamIngestorDo"]
-
-[[migrations]]
-tag = "v2"
-deleted_classes = ["JetstreamIngestorDo"]
-
-[[migrations]]
-tag = "v3"
-new_sqlite_classes = ["JetstreamIngestorDoV2"]
+script_name = "skygest-bi-ingest"
 
 [env.staging]
-name = "skygest-bi-ingest-staging"
+name = "skygest-bi-agent-staging"
 
+# Set with:
+# bunx wrangler secret put OPERATOR_SECRET --config wrangler.agent.toml --env staging
 [env.staging.vars]
 PUBLIC_BSKY_API = "https://public.api.bsky.app"
 JETSTREAM_ENDPOINT = "wss://jetstream1.us-east.bsky.network/subscribe"
@@ -67,17 +47,7 @@ binding = "DB"
 database_name = "skygest-staging"
 database_id = "29a612d3-67c9-429d-93af-6e976681e7c8"
 
-[[env.staging.queues.producers]]
-queue = "raw-events-staging"
-binding = "RAW_EVENTS"
-
-[[env.staging.queues.consumers]]
-queue = "raw-events-staging"
-max_batch_size = 50
-max_batch_timeout = 5
-max_retries = 5
-dead_letter_queue = "raw-events-staging-dlq"
-
 [[env.staging.durable_objects.bindings]]
 name = "JETSTREAM_INGESTOR"
 class_name = "JetstreamIngestorDoV2"
+script_name = "skygest-bi-ingest-staging"

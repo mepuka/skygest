@@ -1,9 +1,19 @@
 import { Array, Config, ConfigProvider, Context, Effect, Layer, Option } from "effect";
 import { CloudflareEnv } from "./Env";
 
-const ConfigSchema = Config.all({
-  feedDid: Config.string("FEED_DID"),
-  algFeedDid: Config.string("ALG_FEED_DID"),
+export type OperatorAuthMode = "access" | "shared-secret";
+
+const parseOperatorAuthMode = (value: string): OperatorAuthMode => {
+  if (value === "access" || value === "shared-secret") {
+    return value;
+  }
+
+  throw new Error(
+    `OPERATOR_AUTH_MODE must be "access" or "shared-secret", received: ${value}`
+  );
+};
+
+const RawConfigSchema = Config.all({
   publicApi: Config.withDefault(
     Config.string("PUBLIC_BSKY_API"),
     "https://public.api.bsky.app"
@@ -12,12 +22,24 @@ const ConfigSchema = Config.all({
     Config.string("JETSTREAM_ENDPOINT"),
     "wss://jetstream1.us-east.bsky.network/subscribe"
   ),
-  followLimit: Config.withDefault(Config.integer("FOLLOW_LIMIT"), 5000),
-  feedLimit: Config.withDefault(Config.integer("FEED_LIMIT"), 150),
-  consentThreshold: Config.withDefault(Config.integer("CONSENT_THRESHOLD"), 5)
+  ingestShardCount: Config.withDefault(Config.integer("INGEST_SHARD_COUNT"), 1),
+  defaultDomain: Config.withDefault(Config.string("DEFAULT_DOMAIN"), "energy"),
+  mcpLimitDefault: Config.withDefault(Config.integer("MCP_LIMIT_DEFAULT"), 20),
+  mcpLimitMax: Config.withDefault(Config.integer("MCP_LIMIT_MAX"), 100),
+  operatorAuthMode: Config.withDefault(Config.string("OPERATOR_AUTH_MODE"), "access"),
+  operatorSecret: Config.withDefault(Config.string("OPERATOR_SECRET"), ""),
+  accessTeamDomain: Config.withDefault(
+    Config.string("ACCESS_TEAM_DOMAIN"),
+    ""
+  ),
+  accessAud: Config.withDefault(Config.string("ACCESS_AUD"), "")
 });
 
-export type AppConfigShape = Config.Config.Success<typeof ConfigSchema>;
+type RawAppConfigShape = Config.Config.Success<typeof RawConfigSchema>;
+
+export type AppConfigShape = Omit<RawAppConfigShape, "operatorAuthMode"> & {
+  readonly operatorAuthMode: OperatorAuthMode;
+};
 
 export class AppConfig extends Context.Tag("@skygest/AppConfig")<
   AppConfig,
@@ -29,13 +51,16 @@ export class AppConfig extends Context.Tag("@skygest/AppConfig")<
       const env = yield* CloudflareEnv;
       const entries = Array.filterMap(
         [
-          ["FEED_DID", env.FEED_DID],
-          ["ALG_FEED_DID", env.ALG_FEED_DID],
           ["PUBLIC_BSKY_API", env.PUBLIC_BSKY_API],
           ["JETSTREAM_ENDPOINT", env.JETSTREAM_ENDPOINT],
-          ["FOLLOW_LIMIT", env.FOLLOW_LIMIT],
-          ["FEED_LIMIT", env.FEED_LIMIT],
-          ["CONSENT_THRESHOLD", env.CONSENT_THRESHOLD]
+          ["INGEST_SHARD_COUNT", env.INGEST_SHARD_COUNT],
+          ["DEFAULT_DOMAIN", env.DEFAULT_DOMAIN],
+          ["MCP_LIMIT_DEFAULT", env.MCP_LIMIT_DEFAULT],
+          ["MCP_LIMIT_MAX", env.MCP_LIMIT_MAX],
+          ["OPERATOR_AUTH_MODE", env.OPERATOR_AUTH_MODE],
+          ["OPERATOR_SECRET", env.OPERATOR_SECRET],
+          ["ACCESS_TEAM_DOMAIN", env.ACCESS_TEAM_DOMAIN],
+          ["ACCESS_AUD", env.ACCESS_AUD]
         ] as const,
         ([key, value]) =>
           value == null
@@ -43,7 +68,12 @@ export class AppConfig extends Context.Tag("@skygest/AppConfig")<
             : Option.some([key, String(value)] as const)
       );
       const provider = ConfigProvider.fromMap(new Map(entries));
-      return yield* provider.load(ConfigSchema);
+      const config = yield* provider.load(RawConfigSchema);
+
+      return {
+        ...config,
+        operatorAuthMode: parseOperatorAuthMode(config.operatorAuthMode)
+      } satisfies AppConfigShape;
     })
   );
 }
