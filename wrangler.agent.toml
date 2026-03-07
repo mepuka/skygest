@@ -7,7 +7,6 @@ enabled = true
 
 [vars]
 PUBLIC_BSKY_API = "https://public.api.bsky.app"
-JETSTREAM_ENDPOINT = "wss://jetstream1.us-east.bsky.network/subscribe"
 INGEST_SHARD_COUNT = "1"
 DEFAULT_DOMAIN = "energy"
 MCP_LIMIT_DEFAULT = "20"
@@ -21,11 +20,6 @@ binding = "DB"
 database_name = "skygest"
 database_id = "b33d6089-883e-4f62-bcfd-3b30153e51e9"
 
-[[durable_objects.bindings]]
-name = "JETSTREAM_INGESTOR"
-class_name = "JetstreamIngestorDoV2"
-script_name = "skygest-bi-ingest"
-
 [env.staging]
 name = "skygest-bi-agent-staging"
 
@@ -33,7 +27,6 @@ name = "skygest-bi-agent-staging"
 # bunx wrangler secret put OPERATOR_SECRET --config wrangler.agent.toml --env staging
 [env.staging.vars]
 PUBLIC_BSKY_API = "https://public.api.bsky.app"
-JETSTREAM_ENDPOINT = "wss://jetstream1.us-east.bsky.network/subscribe"
 INGEST_SHARD_COUNT = "1"
 DEFAULT_DOMAIN = "energy"
 MCP_LIMIT_DEFAULT = "20"
@@ -46,8 +39,3 @@ ACCESS_AUD = "replace-me"
 binding = "DB"
 database_name = "skygest-staging"
 database_id = "29a612d3-67c9-429d-93af-6e976681e7c8"
-
-[[env.staging.durable_objects.bindings]]
-name = "JETSTREAM_INGESTOR"
-class_name = "JetstreamIngestorDoV2"
-script_name = "skygest-bi-ingest-staging"

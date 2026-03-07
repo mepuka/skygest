@@ -11,22 +11,1047 @@
       "active": true
     },
     {
-      "did": "did:plc:skygestenergyseed0000000000001",
-      "handle": "canarymedia.com",
-      "displayName": "Canary Media",
-      "description": "Illustrative energy-news source retained for future production curation.",
-      "source": "manual",
-      "sourceRef": "config/expert-seeds/energy.json",
-      "active": false
+      "did": "did:plc:ngqdkvttdmzsbwb2mngquwip",
+      "handle": "grist.org",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
     },
     {
-      "did": "did:plc:skygestenergyseed0000000000002",
+      "did": "did:plc:7qwkxkh4lz2unhehubhbhpt5",
+      "handle": "electrek.co",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:mec75muei3zce23djcw2afqa",
+      "handle": "canarymedia.com",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:7d36kzszvmgpsyjs6nwoeqmn",
+      "handle": "cleantechnica.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:2d6kuvaoa7qi6bq5cwq4isee",
       "handle": "carbonbrief.org",
-      "displayName": "Carbon Brief",
-      "description": "Illustrative energy-news source retained for future production curation.",
-      "source": "manual",
-      "sourceRef": "config/expert-seeds/energy.json",
-      "active": false
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:3elf6xkuqhaq7jy7mlggooze",
+      "handle": "hannahdaly.ie",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:ppavi77mhpt7smqco4zeswop",
+      "handle": "iea.org",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:nmdre7r5xogxg5ruhfjeh555",
+      "handle": "worldnuclearnews.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:fjv4ly3ho3xmbpfkvtlpiey6",
+      "handle": "abbiebennett.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:bz6w6vsvdcxjuji5a64r36wu",
+      "handle": "chelseaeharvey.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:rzjuvylvbtixqhwis65moj6r",
+      "handle": "windpowermonthly.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:k26ycdzevq5xtayks6k74xp5",
+      "handle": "nathanielbullard.com",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:ozrvstykdz65npyeyltryyvm",
+      "handle": "thedriven.io",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:fe7wu5dpbwnqqe6ofwvyfulw",
+      "handle": "ucenergyinstitute.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:ihiuvtl3f5ojrypbwvpyud45",
+      "handle": "theenergymix.com",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:3ez2pmoyablhgfw6rkfmv65n",
+      "handle": "insideevs.com",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:x7txiel3rihm7ywmzopxkabr",
+      "handle": "yalee360.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:yapvitpo2txykwiua24kkcem",
+      "handle": "torsolarfred.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:7kjk27cxb7s2h3xc5s5yojor",
+      "handle": "severinborenstein.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:7rmejk2hlkw2sfowiatzoo6b",
+      "handle": "jrfhanger.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:el26bci423wwjjnhoohutwem",
+      "handle": "gasbuddyguy.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:zgvmuehzj2jlhscwgtbwf6tf",
+      "handle": "enerdata.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:4twbf7lsgwamagsbgw3xjyjb",
+      "handle": "energyvoice.com",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:gbxs4wgxc4xbb5wmurv3rskw",
+      "handle": "renewableenergy.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:cutxxs463stb442ngifjm6ke",
+      "handle": "lovering.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:6evtek7wxkbykuzos7fwdiwc",
+      "handle": "gavinjmaguire.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:zme3usssbyhtqtg2rsilkeh4",
+      "handle": "insideclimatenews.org",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:xc52wj7pj5dmo7ot5tf7gldn",
+      "handle": "rtoinsider.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:yoeonndfygr7ilq5scih6rtx",
+      "handle": "earthsciinfo.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:jcfqfvo4na6z2s4g4kuhbqia",
+      "handle": "sstapczynski.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:mpwajc42svvrwbxnuiym62vq",
+      "handle": "jessedjenkins.com",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:dw4r3ezs6vu7wkfqo2lczddn",
+      "handle": "justingerdes.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:qnf33tdgs5ac6lhvx7c5t2mn",
+      "handle": "patrickgaley.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:wttpziyf5o3q4jntiacgu7x6",
+      "handle": "cleanenergy.org",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:wfuybzxgaqfpzfn242rvexzb",
+      "handle": "drsimevans.carbonbrief.org",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:7gk35tkrkugkdcqdteviyara",
+      "handle": "heatmap.news",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:xjnxcxe2pn5lwp6z2gxapbrl",
+      "handle": "costasamaras.com",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:va37zhngej6hgxh2qjphjrrg",
+      "handle": "gruberte.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:wsq6yojxnmmbossaoskinvpm",
+      "handle": "latitudemedia.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:ieas2ifc65di56n7pqvpv6t4",
+      "handle": "brianscheid.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:4hp3xvzrhaoxf465jr3ocmyl",
+      "handle": "rebleber.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:d7pg3urgnuo573w5qalp2r2n",
+      "handle": "aleach.ca",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:rz77jmkiq477beltlqi66u5l",
+      "handle": "energyinnovation.org",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:ewkx4da6xjsw3y2agunx5wau",
+      "handle": "hanseric.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:mht47fwowze7ni44y7bdd7xc",
+      "handle": "alicemhancock.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:34ycbvwkzsakvbbutdrgwa62",
+      "handle": "mikemunsell.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:d32ypuffkm2x5iqeg6z3dder",
+      "handle": "jeffstjohn.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:66lbtw2porscqpmair6mir37",
+      "handle": "ketanjoshi.co",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:puzyhfvkombbfh3nj7a3pnjx",
+      "handle": "ethanhowl.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:52jb2b3fta6sxbkdjo35uslv",
+      "handle": "saritharai.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:l2miofuwsayrohy5z2jjbkae",
+      "handle": "liamdenning.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:z4pf3arqfd3f6iinitqyj4hr",
+      "handle": "wettengel.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:ouz6pifo2pbg5zl5fsezoft7",
+      "handle": "sammyroth.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:rgodionjwmmgp7bneq6bilcy",
+      "handle": "ckemfert.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:gcay6murutsfdwvlljntim5z",
+      "handle": "thomasmost.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:z3t6hd5ytpgri7nei757wy2p",
+      "handle": "sjcasey.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:3gczycymg3cd7u5ovmtyu7xi",
+      "handle": "climatenews.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:3l7r46ccid6absgdigpt3lam",
+      "handle": "annecronin.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:twjze4qqf6fgxz33ct52wlnl",
+      "handle": "volts.wtf",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:qqx7bauacsfwi7yufzfqio32",
+      "handle": "jael.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:yjqekodgo25hjem4isderwak",
+      "handle": "kevinleecaster.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:3v323yxa7rt7eb4wpwc5pbiw",
+      "handle": "fieseler.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:pi6p2ujo7ph2o2ztsomzazi6",
+      "handle": "geoffdembicki.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:fbvwkj56tyd2ru54rybgxpbz",
+      "handle": "cleanenergywire.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:wv5oyzuuatuizbqifq6xcdcg",
+      "handle": "robinsonmeyer.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:2sbylsj3cqwmcihdowgmff36",
+      "handle": "zhirji.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:sejfqtu7azw7zimeaqvwdl6o",
+      "handle": "greencollective.io",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:fidlfwaezwm2zmmszdfabgy2",
+      "handle": "archiehall.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:4d3itn7jlp5a5x3bavpyormu",
+      "handle": "paigeblank.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:obhblbmolbh4wd55fdmvfkvi",
+      "handle": "emilypont.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:uod7l6gktnbincngqypbi4zb",
+      "handle": "dsorennie.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:pagckadi57xqgdph4na6yges",
+      "handle": "javierblas.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:gcrjiywvef24odon553s5q2b",
+      "handle": "energylawjeff.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:lbxuuaiug3ffrohf25u422li",
+      "handle": "torystephens.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:2iv3f7svsfxfr5r53bgymkjk",
+      "handle": "janrosenow.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:ujsw4azfumuv4zqgrqjmsbz5",
+      "handle": "shedrills.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:r5ofoghdcbtjqiujqpvja4uh",
+      "handle": "hausfath.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:63ezulkb3amfzgpanfp2u5br",
+      "handle": "leohickman.carbonbrief.org",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:xvja2gss43g7luqo2mpzd4ak",
+      "handle": "rachelparkes.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:76mjn3lmhviu4adxq5efwbuf",
+      "handle": "kmkowalski.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:3ksajiny4d2ikajrnqboorws",
+      "handle": "alexckaufman.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:eege4ffdofd5lnohhwsecens",
+      "handle": "yaninequiroz.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:smcajkfn2ljo2b2h7pj6huot",
+      "handle": "drpauldorfman.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:pwtmkq3skzymldbhwlf54iqb",
+      "handle": "campbellenergy.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:efwk3ardvjvwtfeslrxxgola",
+      "handle": "dpcarrington.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:b6nazhaza26jp3eog5ue4ipt",
+      "handle": "laurenthal.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:zrl2kj7wvvjtx7eaekp5wb7f",
+      "handle": "michellema.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:u75dzingoes47w2n57qksnbq",
+      "handle": "akshatrathi.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:pw7lzadwjrlrmyr6mjnaweu2",
+      "handle": "anikanpatel.carbonbrief.org",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:ik6dntilko5d3m4nhajdxj4w",
+      "handle": "eroston.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:meebc75altsav3pgyz4b3g5o",
+      "handle": "aarnegranlund.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:twsumhodo34rfgtkwczxs3lx",
+      "handle": "danmccarthy.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:gkv76xqizdogfswf4j6jfko5",
+      "handle": "davidrvetter.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:da6c43qgaslw7mlr3n45uh7h",
+      "handle": "eciu.net",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:jvbiziwb7bwc3w2o4a37kjvc",
+      "handle": "henryjfoy.ft.com",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:ap5khfu3qzcyuqaxcoxweei2",
+      "handle": "joshgabbatiss.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:mpoxsaax7r5rs2tgeh56nqhn",
+      "handle": "michaelemann.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:6opzibs7y5revenx6aaf2t3y",
+      "handle": "catalyst-pod.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:molr3664kjz43t5gwwrac6vw",
+      "handle": "ianjames.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:giowtgl23ob5nbckkij4v3fu",
+      "handle": "thinkorswim.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:nweeqmrvdmordc23oe2th3ub",
+      "handle": "zeitlin.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:vwjokuwxkj4nj5ju2yx7mjpg",
+      "handle": "cocojournalist.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:56ah3ymaxw4tccjl5vjq6fos",
+      "handle": "hoergen.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:vo5bibvyjlwkivbvpv3tf6sj",
+      "handle": "toddwoody.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:qeocpoirsnqchwrr5lsxdnck",
+      "handle": "mariagallucci.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:2vbxpb3b5ussxlij3pu6seke",
+      "handle": "mollytaft.com",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:kl3loc27o7pkbq3fdo2rpla7",
+      "handle": "mollylempriere.carbonbrief.org",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:4tapnkvzo53z25totxh55pag",
+      "handle": "onlyanna100.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:po7bae2afotwxkb4pcxd6kon",
+      "handle": "open-circuit.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:luw7pcqimp4xchky7hdkvzvd",
+      "handle": "spignal.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:dupirzvlby7azzkrbke3qtmm",
+      "handle": "annieleymarie.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:tuwsa2264kj4hrbsuvq3xr7g",
+      "handle": "codohertynews.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:ywc22xsodf5x7d76ehfrdje2",
+      "handle": "corbinhiar.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:kejzyhhb5gnjm63t6ja4xihz",
+      "handle": "daisydunne.carbonbrief.org",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:hvnl4jfstxu7764bnsvzjxwl",
+      "handle": "desmog.com",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:am6lv4ims22ugewsrzkldtwv",
+      "handle": "ewsschoenau.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:shizlj6pv5kapue67t4docfe",
+      "handle": "jeva.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:6eh7cqwyws7wph3xj7bywthl",
+      "handle": "markgongloff.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:g2fef4qdlznd4h6lyedjqtgf",
+      "handle": "planningtransport.co.uk",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:23glch3vcy2rgopad54lz7gd",
+      "handle": "roisinmoriarty.com",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:6hzfdhu5ruogfnpe6lpxyzwh",
+      "handle": "james-bg.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:cj2xrc5qk7akjxujrtylp5x3",
+      "handle": "jeffbradynews.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:py3iflznoekuxvr7fa3yvt6k",
+      "handle": "scottpwaldman.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:hndbfplxreypuic7biapi5xj",
+      "handle": "brianreports.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:pnx2fjuannbdpy3337ggthpp",
+      "handle": "peark.es",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:rcu7ybho7gdw3x3cxp64jnue",
+      "handle": "robertferry.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:mj5h6johygkjaoo3dg5q23lm",
+      "handle": "shashj.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:j3sx4aqhunxwuznn4fk46wyv",
+      "handle": "silviomarcacci.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:lrkeec7pfqy5tok3t4k6pa3z",
+      "handle": "arunacsekhar.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:6ml4nxrk45cy23jay5hc2npp",
+      "handle": "justinmikulka.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:y67q6o4sor4zx3wejmqq3xws",
+      "handle": "karenzraick.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:5jxq665jzrekunbjdjgixupa",
+      "handle": "owenwntr.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:vl5qlk4aiztp74l3fwa2xwdq",
+      "handle": "robinpr.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:kyw6ixvyu2ntuesu4waayf5n",
+      "handle": "sondreus.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:e27glpmqieaxssmmgfav66vb",
+      "handle": "whittledaway.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:xf53ujprnmfktaxb77fztor6",
+      "handle": "electricfelix.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:tuqsg3sy75x7zeb5u66mvx3u",
+      "handle": "ilenapeng.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:eu5r4klmh4wu3s2rrbak4hnu",
+      "handle": "irishrainforest.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:lsaub3w3r6jomzwl7kt6s72h",
+      "handle": "jonakimehta.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:u3qtwr3xni67et44ip5vov2z",
+      "handle": "katharinehayhoe.com",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:tbezmmltvdtjthfeaftfoop6",
+      "handle": "kendrawrites.com",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:6zq5e2r2ywnmx2vnm3xv2uyw",
+      "handle": "nea.org.uk",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:5t3gg4aaeqrnuzgxihbmbru5",
+      "handle": "stephenjarvis.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:z5epzmu2fuh4d36poh5wnxnt",
+      "handle": "chrisbataille.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:e7rihrnrmwg7ucat4do3nkge",
+      "handle": "diw.de",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:zyxchmhojlkrbdvidbhuywol",
+      "handle": "ghoshworld.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:ysqrfdc73lac6unle6ecjvr6",
+      "handle": "kavya.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:3jab4tdz2bwnnkd34gsmz3ul",
+      "handle": "solarchesapeake.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
+    },
+    {
+      "did": "did:plc:6lpspwgxnxbrzgomcwnfos7u",
+      "handle": "swimsure.bsky.social",
+      "source": "network",
+      "sourceRef": "energy-news-store/by-posts",
+      "active": true
     }
   ]
 }

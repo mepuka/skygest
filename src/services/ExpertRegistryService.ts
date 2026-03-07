@@ -9,21 +9,20 @@ import {
   type ExpertRecord,
   ExpertNotFoundError,
   HandleResolutionError,
-  InvalidShardRequestError,
   type ListExpertsInput,
   ProfileLookupError,
-  type RefreshShardsInput,
-  type RefreshShardsResult,
   type SetExpertActiveInput,
   type SetExpertActiveResult
 } from "../domain/bi";
-import { BlueskyApiError, IngestorPingError } from "../domain/errors";
+import { BlueskyApiError } from "../domain/errors";
 import type { Did } from "../domain/types";
 import { AppConfig } from "../platform/Config";
 import { clampLimit } from "../platform/Limit";
+import { withMutationAudit } from "../platform/MutationLog";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { ExpertsRepo } from "./ExpertsRepo";
-import { IngestShardRefresher } from "./IngestShardRefresher";
+
+const MUTATION_LABEL = "expert registry mutation";
 
 const toAdminExpertResult = (expert: ExpertRecord): AdminExpertResult => ({
   did: expert.did,
@@ -35,47 +34,6 @@ const toAdminExpertResult = (expert: ExpertRecord): AdminExpertResult => ({
   source: expert.source
 });
 
-const makeAnnotations = (
-  actor: AccessIdentity,
-  annotations: Record<string, string | number | boolean | null | undefined>
-) => {
-  const result: Record<string, string | number | boolean> = {};
-
-  for (const [key, value] of Object.entries({
-    actorSubject: actor.subject,
-    actorEmail: actor.email,
-    ...annotations
-  })) {
-    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-      result[key] = value;
-    }
-  }
-
-  return result;
-};
-
-const logMutationSuccess = (
-  actor: AccessIdentity,
-  annotations: Record<string, string | number | boolean | null | undefined>
-) =>
-  Effect.logInfo("expert registry mutation").pipe(
-    Effect.annotateLogs(makeAnnotations(actor, {
-      ...annotations,
-      outcome: "success"
-    }))
-  );
-
-const logMutationFailure = (
-  actor: AccessIdentity,
-  annotations: Record<string, string | number | boolean | null | undefined>
-) =>
-  Effect.logWarning("expert registry mutation").pipe(
-    Effect.annotateLogs(makeAnnotations(actor, {
-      ...annotations,
-      outcome: "failure"
-    }))
-  );
-
 export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryService")<
   ExpertRegistryService,
   {
@@ -86,8 +44,6 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
       AdminExpertResult,
       | HandleResolutionError
       | ProfileLookupError
-      | InvalidShardRequestError
-      | IngestorPingError
       | SqlError
     >;
     readonly setExpertActive: (
@@ -96,18 +52,11 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
       input: SetExpertActiveInput
     ) => Effect.Effect<
       SetExpertActiveResult,
-      ExpertNotFoundError | InvalidShardRequestError | IngestorPingError | SqlError
+      ExpertNotFoundError | SqlError
     >;
     readonly listExperts: (
       input: ListExpertsInput
     ) => Effect.Effect<ReadonlyArray<ExpertListItem>, SqlError>;
-    readonly refreshShards: (
-      actor: AccessIdentity,
-      input: RefreshShardsInput
-    ) => Effect.Effect<
-      RefreshShardsResult,
-      InvalidShardRequestError | IngestorPingError
-    >;
   }
 >() {
   static readonly layer = Layer.effect(
@@ -116,7 +65,6 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
       const config = yield* AppConfig;
       const expertsRepo = yield* ExpertsRepo;
       const bluesky = yield* BlueskyClient;
-      const refresher = yield* IngestShardRefresher;
 
       const shardCount = Math.max(1, Math.trunc(config.ingestShardCount));
 
@@ -171,26 +119,25 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
           };
 
           yield* expertsRepo.upsert(expert);
-          yield* refresher.refreshShard(shard);
-          yield* logMutationSuccess(actor, {
-            action: "add_expert",
-            targetDid: expert.did,
-            resolvedHandle: expert.handle,
-            domain: expert.domain,
-            shard: expert.shard
-          });
 
           return toAdminExpertResult(expert);
         });
 
         return yield* program.pipe(
-          Effect.tapError(() =>
-            logMutationFailure(actor, {
-              action: "add_expert",
+          withMutationAudit({
+            label: MUTATION_LABEL,
+            actor,
+            action: "add_expert",
+            annotations: {
               didOrHandle,
               domain
+            },
+            onSuccess: (expert) => ({
+              targetDid: expert.did,
+              resolvedHandle: expert.handle,
+              shard: expert.shard
             })
-          )
+          })
         );
       });
 
@@ -206,14 +153,6 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
           }
 
           yield* expertsRepo.setActive(did, input.active);
-          yield* refresher.refreshShard(existing.shard);
-          yield* logMutationSuccess(actor, {
-            action: input.active ? "activate_expert" : "deactivate_expert",
-            targetDid: existing.did,
-            resolvedHandle: existing.handle,
-            domain: existing.domain,
-            shard: existing.shard
-          });
 
           return {
             did: existing.did,
@@ -223,12 +162,18 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
         });
 
         return yield* program.pipe(
-          Effect.tapError(() =>
-            logMutationFailure(actor, {
-              action: input.active ? "activate_expert" : "deactivate_expert",
+          withMutationAudit({
+            label: MUTATION_LABEL,
+            actor,
+            action: input.active ? "activate_expert" : "deactivate_expert",
+            annotations: {
               targetDid: did
+            },
+            onSuccess: (result) => ({
+              active: result.active,
+              shard: result.shard
             })
-          )
+          })
         );
       });
 
@@ -242,40 +187,10 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
         );
       });
 
-      const refreshShards = Effect.fn("ExpertRegistryService.refreshShards")(function* (
-        actor: AccessIdentity,
-        input: RefreshShardsInput
-      ) {
-        const program = (input.shard === undefined
-          ? refresher.refreshAllShards()
-          : refresher.refreshShard(input.shard)).pipe(
-          Effect.map((refreshedShards) => ({
-            refreshedShards
-          } satisfies RefreshShardsResult))
-        );
-
-        return yield* program.pipe(
-          Effect.tap((result) =>
-            logMutationSuccess(actor, {
-              action: "refresh_shards",
-              shard: input.shard,
-              refreshedCount: result.refreshedShards.length
-            })
-          ),
-          Effect.tapError(() =>
-            logMutationFailure(actor, {
-              action: "refresh_shards",
-              shard: input.shard
-            })
-          )
-        );
-      });
-
       return ExpertRegistryService.of({
         addExpert,
         setExpertActive,
-        listExperts,
-        refreshShards
+        listExperts
       });
     })
   );

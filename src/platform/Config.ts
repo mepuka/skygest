@@ -18,10 +18,6 @@ const RawConfigSchema = Config.all({
     Config.string("PUBLIC_BSKY_API"),
     "https://public.api.bsky.app"
   ),
-  jetstreamEndpoint: Config.withDefault(
-    Config.string("JETSTREAM_ENDPOINT"),
-    "wss://jetstream1.us-east.bsky.network/subscribe"
-  ),
   ingestShardCount: Config.withDefault(Config.integer("INGEST_SHARD_COUNT"), 1),
   defaultDomain: Config.withDefault(Config.string("DEFAULT_DOMAIN"), "energy"),
   mcpLimitDefault: Config.withDefault(Config.integer("MCP_LIMIT_DEFAULT"), 20),
@@ -52,7 +48,6 @@ export class AppConfig extends Context.Tag("@skygest/AppConfig")<
       const entries = Array.filterMap(
         [
           ["PUBLIC_BSKY_API", env.PUBLIC_BSKY_API],
-          ["JETSTREAM_ENDPOINT", env.JETSTREAM_ENDPOINT],
           ["INGEST_SHARD_COUNT", env.INGEST_SHARD_COUNT],
           ["DEFAULT_DOMAIN", env.DEFAULT_DOMAIN],
           ["MCP_LIMIT_DEFAULT", env.MCP_LIMIT_DEFAULT],

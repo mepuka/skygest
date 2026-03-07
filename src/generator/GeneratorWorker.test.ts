@@ -52,7 +52,11 @@ it("builds a feed and writes cache", async () => {
     markDeletedMany: () => Effect.void
   });
   const BlueskyTest = Layer.succeed(BlueskyClient, {
-    getFollows: () => Effect.succeed({ dids: ["did:plc:1"], cursor: null })
+    resolveDidOrHandle: () => Effect.die("unexpected resolveDidOrHandle"),
+    getProfile: () => Effect.die("unexpected getProfile"),
+    getFollows: () => Effect.succeed({ dids: ["did:plc:1"], cursor: null }),
+    resolveRepoService: () => Effect.die("unexpected resolveRepoService"),
+    listRecordsAtService: () => Effect.die("unexpected listRecordsAtService")
   });
   const ConfigTest = Layer.succeed(AppConfig, {
     feedDid: "did:plc:test",

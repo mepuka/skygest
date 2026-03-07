@@ -8,56 +8,16 @@ import type {
   BootstrapExpertsResult,
   LoadSmokeFixtureResult
 } from "../domain/bi";
-import { IngestorPingError } from "../domain/errors";
 import { processBatch } from "../filter/FilterWorker";
 import { AppConfig } from "../platform/Config";
+import { withMutationAudit } from "../platform/MutationLog";
 import { ExpertsRepo } from "./ExpertsRepo";
-import { IngestShardRefresher } from "./IngestShardRefresher";
 import { KnowledgeRepo } from "./KnowledgeRepo";
 import { OntologyCatalog } from "./OntologyCatalog";
 import { runMigrations } from "../db/migrate";
 import { makeSmokeFixtureBatch, smokeFixtureUris } from "../staging/SmokeFixture";
 
-const makeAnnotations = (
-  actor: AccessIdentity,
-  annotations: Record<string, string | number | boolean | null | undefined>
-) => {
-  const result: Record<string, string | number | boolean> = {};
-
-  for (const [key, value] of Object.entries({
-    actorSubject: actor.subject,
-    actorEmail: actor.email,
-    ...annotations
-  })) {
-    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-      result[key] = value;
-    }
-  }
-
-  return result;
-};
-
-const logMutationSuccess = (
-  actor: AccessIdentity,
-  annotations: Record<string, string | number | boolean | null | undefined>
-) =>
-  Effect.logInfo("staging ops mutation").pipe(
-    Effect.annotateLogs(makeAnnotations(actor, {
-      ...annotations,
-      outcome: "success"
-    }))
-  );
-
-const logMutationFailure = (
-  actor: AccessIdentity,
-  annotations: Record<string, string | number | boolean | null | undefined>
-) =>
-  Effect.logWarning("staging ops mutation").pipe(
-    Effect.annotateLogs(makeAnnotations(actor, {
-      ...annotations,
-      outcome: "failure"
-    }))
-  );
+const MUTATION_LABEL = "staging ops mutation";
 
 export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")<
   StagingOpsService,
@@ -67,7 +27,7 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
     ) => Effect.Effect<{ readonly ok: true }, SqlError>;
     readonly bootstrapExperts: (
       actor: AccessIdentity
-    ) => Effect.Effect<BootstrapExpertsResult, SqlError | IngestorPingError>;
+    ) => Effect.Effect<BootstrapExpertsResult, SqlError>;
     readonly loadSmokeFixture: (
       actor: AccessIdentity
     ) => Effect.Effect<LoadSmokeFixtureResult, SqlError>;
@@ -81,7 +41,6 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
       const expertsRepo = yield* ExpertsRepo;
       const knowledgeRepo = yield* KnowledgeRepo;
       const ontology = yield* OntologyCatalog;
-      const refresher = yield* IngestShardRefresher;
 
       const shardCount = Math.max(1, Math.trunc(config.ingestShardCount));
 
@@ -94,49 +53,33 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
         );
 
         return yield* program.pipe(
-          Effect.tap(() =>
-            logMutationSuccess(actor, {
-              action: "ops_migrate"
-            })
-          ),
-          Effect.tapError(() =>
-            logMutationFailure(actor, {
-              action: "ops_migrate"
-            })
-          )
+          withMutationAudit({
+            label: MUTATION_LABEL,
+            actor,
+            action: "ops_migrate"
+          })
         );
       });
 
       const bootstrapCheckedInExperts = Effect.fn(
         "StagingOpsService.bootstrapExperts"
       )(function* (actor: AccessIdentity) {
-        const program = Effect.gen(function* () {
-          const result = yield* bootstrapExperts(energySeedManifest, shardCount).pipe(
-            Effect.provideService(ExpertsRepo, expertsRepo)
-          );
-          const refreshedShards = yield* refresher.refreshAllShards();
-
-          return {
-            ...result,
-            refreshedShards
-          } satisfies BootstrapExpertsResult;
-        });
+        const program = bootstrapExperts(energySeedManifest, shardCount).pipe(
+          Effect.provideService(ExpertsRepo, expertsRepo)
+        );
 
         return yield* program.pipe(
-          Effect.tap((result) =>
-            logMutationSuccess(actor, {
-              action: "bootstrap_experts",
-              domain: result.domain,
-              count: result.count,
-              refreshedCount: result.refreshedShards.length
-            })
-          ),
-          Effect.tapError(() =>
-            logMutationFailure(actor, {
-              action: "bootstrap_experts",
+          withMutationAudit({
+            label: MUTATION_LABEL,
+            actor,
+            action: "bootstrap_experts",
+            annotations: {
               domain: energySeedManifest.domain
+            },
+            onSuccess: (result) => ({
+              count: result.count
             })
-          )
+          })
         );
       });
 
@@ -182,19 +125,16 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
         });
 
         return yield* program.pipe(
-          Effect.tap((result) =>
-            logMutationSuccess(actor, {
-              action: "load_smoke_fixture",
+          withMutationAudit({
+            label: MUTATION_LABEL,
+            actor,
+            action: "load_smoke_fixture",
+            onSuccess: (result) => ({
               posts: result.posts,
               links: result.links,
               topics: result.topics
             })
-          ),
-          Effect.tapError(() =>
-            logMutationFailure(actor, {
-              action: "load_smoke_fixture"
-            })
-          )
+          })
         );
       });
 

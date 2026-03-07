@@ -11,10 +11,8 @@
         "@effect/platform-bun": "^0.87.0",
         "@effect/sql": "^0.49.0",
         "@effect/sql-d1": "^0.47.0",
-        "@effect/sql-sqlite-do": "^0.27.0",
         "agents": "^0.0.104",
         "effect": "^3.19.14",
-        "effect-jetstream": "^1.0.3",
         "jose": "^6.1.3",
       },
       "devDependencies": {
@@ -96,8 +94,6 @@
     "@effect/sql-d1": ["@effect/sql-d1@0.47.0", "", { "dependencies": { "@cloudflare/workers-types": "^4.20250515.0" }, "peerDependencies": { "@effect/experimental": "^0.58.0", "@effect/platform": "^0.94.0", "@effect/sql": "^0.49.0", "effect": "^3.19.13" } }, "sha512-MICz8VkvcpLcHWFdRy8VzgJec6yNgKrciY0tSvpL5XF6LcJH42TB7S88bQye/L3K/hSc+LuWuTZqm6ber+4BKQ=="],
 
     "@effect/sql-sqlite-bun": ["@effect/sql-sqlite-bun@0.27.1", "", { "dependencies": { "@opentelemetry/semantic-conventions": "^1.25.1" }, "peerDependencies": { "@effect/experimental": "^0.37.1", "@effect/platform": "^0.73.1", "@effect/sql": "^0.26.1", "effect": "^3.12.4" } }, "sha512-k7Y/5G7rk42J4bO8oN3LqsGokdg255v4RRoR5GWT5DOZ7hdkGr0v9b7b3wUT1qD28nxS/Dh+GzSuj0Xro5xAUQ=="],
-
-    "@effect/sql-sqlite-do": ["@effect/sql-sqlite-do@0.27.0", "", { "peerDependencies": { "@effect/experimental": "^0.58.0", "@effect/sql": "^0.49.0", "effect": "^3.19.13" } }, "sha512-+mkNGmmSWhhoNmiJfTQrVINPgcq19BLrdoq5JdF6GoL8lS2VA+XO7IRXTD3G1Plg5hTncmsX/1Y8W1Dc/DbKNQ=="],
 
     "@effect/sql-sqlite-node": ["@effect/sql-sqlite-node@0.45.2", "", { "dependencies": { "better-sqlite3": "^11.10.0" }, "peerDependencies": { "@effect/experimental": "^0.54.6", "@effect/platform": "^0.90.6", "@effect/sql": "^0.44.2", "effect": "^3.17.12" } }, "sha512-cpyNPq03cfMQ2tRa3884JroZP1p3Nd86apT3n8UFcJ4sdWRn8gipds1X+KbROIorwl06ZrfNUxRXel0N/mJmvw=="],
 
@@ -450,8 +446,6 @@
     "ee-first": ["ee-first@1.1.1", "", {}, "sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow=="],
 
     "effect": ["effect@3.19.14", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "fast-check": "^3.23.1" } }, "sha512-3vwdq0zlvQOxXzXNKRIPKTqZNMyGCdaFUBfMPqpsyzZDre67kgC1EEHDV4EoQTovJ4w5fmJW756f86kkuz7WFA=="],
-
-    "effect-jetstream": ["effect-jetstream@1.0.3", "", { "dependencies": { "@effect/platform": "^0.94.1", "effect": "^3.19.14" }, "peerDependencies": { "typescript": "^5" } }, "sha512-GRyQnFvAPQG8mzF7g0l2GN/h82MIcC6jwo7LmdQ628+C7IqWRfPramRo667rhF5G338aHV/8cz9VNnQ7qNbamQ=="],
 
     "encodeurl": ["encodeurl@2.0.0", "", {}, "sha512-Q0n9HRi4m6JuGIV1eFlmvJB7ZEVxu93IrMyiMsGC0lrMJMWzRgx6WGquyfQgZVb31vhGgXnfmPNNXmxnOkRBrg=="],
 

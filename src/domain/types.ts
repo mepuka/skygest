@@ -12,12 +12,6 @@ export const AtUri = Schema.String.pipe(
 );
 export type AtUri = Schema.Schema.Type<typeof AtUri>;
 
-export const FeedCursor = Schema.Union(
-  Schema.Number,
-  Schema.Literal("eof")
-);
-export type FeedCursor = Schema.Schema.Type<typeof FeedCursor>;
-
 export const FeedItem = Schema.Struct({
   post: AtUri,
   reason: Schema.optional(Schema.Unknown)

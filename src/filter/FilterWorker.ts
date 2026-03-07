@@ -17,6 +17,11 @@ const makeIngestId = (
   timeUs: number
 ) => `${uri}:${operation}:${cid ?? "none"}:${timeUs}`;
 
+export type ProcessBatchSummary = {
+  readonly postsStored: number;
+  readonly postsDeleted: number;
+};
+
 export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (batch: RawEventBatch) {
   const knowledgeRepo = yield* KnowledgeRepo;
   const ontology = yield* OntologyCatalog;
@@ -85,4 +90,9 @@ export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (ba
 
   yield* knowledgeRepo.upsertPosts(upserts);
   yield* knowledgeRepo.markDeleted(deletions);
+
+  return {
+    postsStored: upserts.length,
+    postsDeleted: deletions.length
+  } satisfies ProcessBatchSummary;
 });

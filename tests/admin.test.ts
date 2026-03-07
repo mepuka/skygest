@@ -12,7 +12,6 @@ import { encodeJsonString } from "../src/platform/Json";
 import { Logging } from "../src/platform/Logging";
 import { ExpertRegistryService } from "../src/services/ExpertRegistryService";
 import { ExpertsRepo } from "../src/services/ExpertsRepo";
-import { IngestShardRefresher } from "../src/services/IngestShardRefresher";
 import { ExpertsRepoD1 } from "../src/services/d1/ExpertsRepoD1";
 import {
   makeSqliteLayer,
@@ -54,7 +53,6 @@ const makeAdminTestLayer = (options: {
   readonly filename: string;
   readonly config?: Partial<AppConfigShape>;
   readonly blueskyClient?: Layer.Layer<BlueskyClient>;
-  readonly refresher?: Layer.Layer<IngestShardRefresher>;
 }) => {
   const sqliteLayer = makeSqliteLayer(options.filename);
   const configLayer = Layer.succeed(AppConfig, testConfig(options.config));
@@ -76,19 +74,20 @@ const makeAdminTestLayer = (options: {
       Effect.succeed({
         dids: [],
         cursor: null
+      }),
+    resolveRepoService: () => Effect.succeed("https://pds.example.com"),
+    listRecordsAtService: () =>
+      Effect.succeed({
+        records: [],
+        cursor: null
       })
-  });
-  const refreshLayer = options.refresher ?? Layer.succeed(IngestShardRefresher, {
-    refreshShard: (shard: number) => Effect.succeed([shard] as const),
-    refreshAllShards: () => Effect.succeed([0])
   });
   const baseLayer = Layer.mergeAll(
     sqliteLayer,
     configLayer,
     Logging.layer,
     expertsLayer,
-    blueskyLayer,
-    refreshLayer
+    blueskyLayer
   );
 
   return Layer.mergeAll(
@@ -98,10 +97,9 @@ const makeAdminTestLayer = (options: {
 };
 
 describe("admin expert registry routes", () => {
-  it.live("adds experts by handle, upserts metadata, and refreshes the affected shard", () =>
+  it.live("adds experts by handle and upserts metadata", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
-        const refreshedShards: number[] = [];
         let displayName = "Solar Lead";
         const addedDid = decodeDid("did:plc:solar-operator");
         const layer = makeAdminTestLayer({
@@ -124,15 +122,13 @@ describe("admin expert registry routes", () => {
               Effect.succeed({
                 dids: [],
                 cursor: null
-              })
-          }),
-          refresher: Layer.succeed(IngestShardRefresher, {
-            refreshShard: (shard: number) =>
-              Effect.sync(() => {
-                refreshedShards.push(shard);
-                return [shard] as const;
               }),
-            refreshAllShards: () => Effect.succeed([])
+            resolveRepoService: () => Effect.succeed("https://pds.example.com"),
+            listRecordsAtService: () =>
+              Effect.succeed({
+                records: [],
+                cursor: null
+              })
           })
         });
 
@@ -190,27 +186,17 @@ describe("admin expert registry routes", () => {
         expect(secondBody.source).toBe("manual");
         expect(stored.count).toBe(1);
         expect(stored.expert?.displayName).toBe("Solar Lead Updated");
-        expect(refreshedShards).toEqual([shard, shard]);
       })
     )
   );
 
-  it.live("deactivates experts and refreshes the affected shard", () =>
+  it.live("deactivates experts", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
-        const refreshedShards: number[] = [];
         const shardCount = 4;
         const layer = makeAdminTestLayer({
           filename,
-          config: { ingestShardCount: shardCount },
-          refresher: Layer.succeed(IngestShardRefresher, {
-            refreshShard: (shard: number) =>
-              Effect.sync(() => {
-                refreshedShards.push(shard);
-                return [shard] as const;
-              }),
-            refreshAllShards: () => Effect.succeed([])
-          })
+          config: { ingestShardCount: shardCount }
         });
 
         await Effect.runPromise(
@@ -247,7 +233,6 @@ describe("admin expert registry routes", () => {
         expect(body.active).toBe(false);
         expect(body.shard).toBe(shard);
         expect(expert?.active).toBe(false);
-        expect(refreshedShards).toEqual([shard]);
       })
     )
   );
@@ -301,40 +286,4 @@ describe("admin expert registry routes", () => {
     )
   );
 
-  it.live("fans out explicit shard refreshes when no shard is specified", () =>
-    Effect.promise(() =>
-      withTempSqliteFile(async (filename) => {
-        const refreshedShards: number[] = [];
-        const layer = makeAdminTestLayer({
-          filename,
-          config: { ingestShardCount: 3 },
-          refresher: Layer.succeed(IngestShardRefresher, {
-            refreshShard: (shard: number) => Effect.succeed([shard] as const),
-            refreshAllShards: () =>
-              Effect.sync(() => {
-                refreshedShards.push(0, 1, 2);
-                return [0, 1, 2] as const;
-              })
-          })
-        });
-
-        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
-
-        const response = await handleAdminRequestWithLayer(
-          new Request("https://skygest.local/admin/shards/refresh", {
-            method: "POST",
-            body: encodeJsonString({})
-          }),
-          operatorIdentity,
-          layer
-        );
-        const body = await expectJsonResponse<{
-          readonly refreshedShards: ReadonlyArray<number>;
-        }>(response);
-
-        expect(body.refreshedShards).toEqual([0, 1, 2]);
-        expect(refreshedShards).toEqual([0, 1, 2]);
-      })
-    )
-  );
 });

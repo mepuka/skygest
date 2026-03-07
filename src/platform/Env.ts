@@ -1,5 +1,4 @@
 import { Array, Context, Effect, Layer, Option, Schema } from "effect";
-import type { JetstreamIngestorDoV2 } from "../ingest/IngestorDo";
 
 export class EnvError extends Schema.TaggedError<EnvError>()("EnvError", {
   missing: Schema.String
@@ -7,7 +6,6 @@ export class EnvError extends Schema.TaggedError<EnvError>()("EnvError", {
 
 export interface EnvBindings {
   readonly PUBLIC_BSKY_API?: string;
-  readonly JETSTREAM_ENDPOINT?: string;
   readonly INGEST_SHARD_COUNT?: string;
   readonly DEFAULT_DOMAIN?: string;
   readonly MCP_LIMIT_DEFAULT?: string;
@@ -17,8 +15,6 @@ export interface EnvBindings {
   readonly ACCESS_TEAM_DOMAIN?: string;
   readonly ACCESS_AUD?: string;
   readonly DB: D1Database;
-  readonly RAW_EVENTS?: Queue;
-  readonly JETSTREAM_INGESTOR?: DurableObjectNamespace<JetstreamIngestorDoV2>;
 }
 
 const defaultRequired = [

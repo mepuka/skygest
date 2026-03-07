@@ -84,6 +84,7 @@ const runStagePrepare = (options: {
     yield* Console.log(`Preparing ${options.env} staging at ${options.baseUrl}`);
     yield* client.migrate(baseUrl, secret);
     const bootstrap = yield* client.bootstrapExperts(baseUrl, secret);
+    yield* client.pollIngest(baseUrl, secret);
     const fixture = yield* client.loadSmokeFixture(baseUrl, secret);
 
     yield* Console.log(
@@ -118,11 +119,11 @@ const runStageSmoke = (options: {
       )
     );
 
-    yield* client.refreshShards(baseUrl, secret).pipe(
-      Effect.flatMap((items) =>
-        expectNonEmpty(
-          items,
-          "expected /admin/shards/refresh to return at least one shard"
+    yield* client.pollIngest(baseUrl, secret).pipe(
+      Effect.flatMap((summary) =>
+        expectCondition(
+          summary.expertsTotal > 0,
+          "expected /admin/ingest/poll to cover at least one expert"
         )
       )
     );

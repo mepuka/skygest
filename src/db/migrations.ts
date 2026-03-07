@@ -76,4 +76,30 @@ const migration1: D1Migration = {
   ]
 };
 
-export const migrations: ReadonlyArray<D1Migration> = [migration1];
+const migration2: D1Migration = {
+  id: 2,
+  name: "polling_state",
+  statements: [
+    `CREATE TABLE IF NOT EXISTS expert_sync_state (
+      did TEXT PRIMARY KEY,
+      pds_url TEXT,
+      pds_verified_at INTEGER,
+      head_uri TEXT,
+      head_rkey TEXT,
+      head_created_at INTEGER,
+      last_polled_at INTEGER,
+      last_completed_at INTEGER,
+      backfill_cursor TEXT,
+      backfill_status TEXT NOT NULL DEFAULT 'idle',
+      last_error TEXT,
+      FOREIGN KEY (did) REFERENCES experts(did)
+    )`,
+    `CREATE TABLE IF NOT EXISTS ingest_leases (
+      name TEXT PRIMARY KEY,
+      owner TEXT NOT NULL,
+      expires_at INTEGER NOT NULL
+    )`
+  ]
+};
+
+export const migrations: ReadonlyArray<D1Migration> = [migration1, migration2];

@@ -5,14 +5,11 @@ import {
   AddExpertInput,
   ExpertNotFoundError,
   type ListExpertsInput,
-  InvalidShardRequestError,
   HandleResolutionError,
   ProfileLookupError,
-  RefreshShardsInput,
   SetExpertActiveInput
 } from "../domain/bi";
 import { Did } from "../domain/types";
-import { IngestorPingError } from "../domain/errors";
 import { AppConfig } from "../platform/Config";
 import {
   decodeJsonStringEitherWith,
@@ -24,7 +21,6 @@ import { CloudflareEnv, type EnvBindings } from "../platform/Env";
 import { Logging } from "../platform/Logging";
 import { BlueskyClient, layer as BlueskyClientLayer } from "../bluesky/BlueskyClient";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
-import { IngestShardRefresher } from "../services/IngestShardRefresher";
 import { ExpertsRepoD1 } from "../services/d1/ExpertsRepoD1";
 import { KnowledgeRepoD1 } from "../services/d1/KnowledgeRepoD1";
 import { OntologyCatalog } from "../services/OntologyCatalog";
@@ -62,15 +58,6 @@ const decodeAddExpertInput = (body: string) =>
 const decodeSetExpertActiveInput = (body: string) =>
   parseDecoded(
     decodeJsonStringEitherWith(SetExpertActiveInput)(body).pipe(
-      Either.mapLeft((error) => ({
-        message: formatSchemaParseError(error)
-      }))
-    )
-  );
-
-const decodeRefreshShardsInput = (body: string) =>
-  parseDecoded(
-    decodeJsonStringEitherWith(RefreshShardsInput)(body).pipe(
       Either.mapLeft((error) => ({
         message: formatSchemaParseError(error)
       }))
@@ -137,7 +124,7 @@ const parseListExpertsInput = (url: URL): ListExpertsInput => {
 
 const makeAdminLayer = (env: EnvBindings) => {
   const baseLayer = Layer.mergeAll(
-    CloudflareEnv.layer(env, { required: ["DB", "JETSTREAM_INGESTOR"] }),
+    CloudflareEnv.layer(env, { required: ["DB"] }),
     D1Client.layer({ db: env.DB }),
     Logging.layer
   );
@@ -146,12 +133,9 @@ const makeAdminLayer = (env: EnvBindings) => {
   const expertsLayer = ExpertsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
   const knowledgeLayer = KnowledgeRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
   const blueskyLayer = BlueskyClientLayer.pipe(Layer.provideMerge(configLayer));
-  const refreshLayer = IngestShardRefresher.layer.pipe(
-    Layer.provideMerge(Layer.mergeAll(baseLayer, configLayer))
-  );
   const registryLayer = ExpertRegistryService.layer.pipe(
     Layer.provideMerge(
-      Layer.mergeAll(configLayer, expertsLayer, blueskyLayer, refreshLayer)
+      Layer.mergeAll(configLayer, expertsLayer, blueskyLayer)
     )
   );
   const stagingOpsLayer = StagingOpsService.layer.pipe(
@@ -161,7 +145,6 @@ const makeAdminLayer = (env: EnvBindings) => {
         expertsLayer,
         knowledgeLayer,
         ontologyLayer,
-        refreshLayer,
         baseLayer
       )
     )
@@ -174,7 +157,6 @@ const makeAdminLayer = (env: EnvBindings) => {
     expertsLayer,
     knowledgeLayer,
     blueskyLayer,
-    refreshLayer,
     registryLayer,
     stagingOpsLayer
   );
@@ -187,17 +169,12 @@ const respondToAdminError = (error: unknown): Response => {
 
   if (
     error instanceof HandleResolutionError ||
-    error instanceof ProfileLookupError ||
-    error instanceof IngestorPingError
+    error instanceof ProfileLookupError
   ) {
     return json({
       error: error._tag,
-      message: "message" in error ? error.message : "ingest refresh failed"
+      message: error.message
     }, 502);
-  }
-
-  if (error instanceof InvalidShardRequestError) {
-    return json({ error: error._tag, message: error.message }, 400);
   }
 
   return json({
@@ -246,16 +223,6 @@ export const handleAdminRequestWithLayer = async (
         )
       );
       return json({ items });
-    }
-
-    if (request.method === "POST" && url.pathname === "/admin/shards/refresh") {
-      const input = decodeRefreshShardsInput(await readBodyText(request));
-      const result = await runWithLayer(
-        Effect.flatMap(ExpertRegistryService, (registry) =>
-          registry.refreshShards(identity, input)
-        )
-      );
-      return json(result);
     }
 
     if (request.method === "POST" && url.pathname === "/admin/ops/migrate") {

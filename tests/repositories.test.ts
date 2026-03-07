@@ -14,7 +14,7 @@ describe("repository layers", () => {
       yield* bootstrapExperts(seedManifest, 4, 1_710_000_000_000);
 
       const experts = yield* ExpertsRepo;
-      const all = yield* experts.list(seedManifest.domain, null, 10);
+      const all = yield* experts.listActive();
       const stored = yield* experts.getByDid(sampleDid);
       const activeBeforeDisable = yield* Effect.forEach(
         [0, 1, 2, 3],

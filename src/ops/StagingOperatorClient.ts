@@ -4,6 +4,7 @@ import {
   ExpertListOutput,
   KnowledgePostsOutput
 } from "../domain/bi";
+import { PollRunSummary } from "../domain/polling";
 import {
   callTool,
   decodeCallToolResultWith,
@@ -22,15 +23,11 @@ const LoadSmokeFixtureResponse = Schema.Struct({
   topics: Schema.Number
 });
 
-const RefreshShardsResponse = Schema.Struct({
-  refreshedShards: Schema.Array(Schema.Number)
-});
-
 const decodeMigrateResponse = decodeJsonStringWith(MigrateResponse);
 const decodeBootstrapExpertsResponse = decodeJsonStringWith(BootstrapExpertsResult);
 const decodeLoadSmokeFixtureResponse = decodeJsonStringWith(LoadSmokeFixtureResponse);
+const decodePollRunSummaryResponse = decodeJsonStringWith(PollRunSummary);
 const decodeAdminExpertsJsonResponse = decodeJsonStringWith(ExpertListOutput);
-const decodeRefreshShardsJsonResponse = decodeJsonStringWith(RefreshShardsResponse);
 const decodeSearchPostsResponse = decodeCallToolResultWith(KnowledgePostsOutput);
 const decodeMcpExpertsResponse = decodeCallToolResultWith(ExpertListOutput);
 
@@ -143,7 +140,6 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
     ) => Effect.Effect<{
       readonly domain: string;
       readonly count: number;
-      readonly refreshedShards: ReadonlyArray<number>;
     }, StagingRequestError>;
     readonly loadSmokeFixture: (
       baseUrl: URL,
@@ -153,14 +149,14 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
       readonly links: number;
       readonly topics: number;
     }, StagingRequestError>;
+    readonly pollIngest: (
+      baseUrl: URL,
+      secret: string
+    ) => Effect.Effect<Schema.Schema.Type<typeof PollRunSummary>, StagingRequestError>;
     readonly listAdminExperts: (
       baseUrl: URL,
       secret: string
     ) => Effect.Effect<ReadonlyArray<{ readonly did: string; readonly domain: string }>, StagingRequestError>;
-    readonly refreshShards: (
-      baseUrl: URL,
-      secret: string
-    ) => Effect.Effect<ReadonlyArray<number>, StagingRequestError>;
     readonly listExpertsMcp: (
       baseUrl: URL,
       secret: string
@@ -210,6 +206,17 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
           }),
         decodeLoadSmokeFixtureResponse
       ),
+    pollIngest: (baseUrl, secret) =>
+      requestJson(
+        "poll-ingest",
+        () =>
+          fetch(endpointUrl(baseUrl, "/admin/ingest/poll"), {
+            method: "POST",
+            headers: operatorHeaders(secret),
+            body: encodeJsonString({})
+          }),
+        decodePollRunSummaryResponse
+      ),
     listAdminExperts: (baseUrl, secret) =>
       requestJson(
         "admin-experts",
@@ -220,17 +227,6 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
             }
           }),
         (text) => decodeAdminExpertsJsonResponse(text).items
-      ),
-    refreshShards: (baseUrl, secret) =>
-      requestJson(
-        "refresh-shards",
-        () =>
-          fetch(endpointUrl(baseUrl, "/admin/shards/refresh"), {
-            method: "POST",
-            headers: operatorHeaders(secret),
-            body: encodeJsonString({})
-          }),
-        (text) => decodeRefreshShardsJsonResponse(text).refreshedShards
       ),
     listExpertsMcp: (baseUrl, secret) =>
       callMcpTool(

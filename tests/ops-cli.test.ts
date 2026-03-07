@@ -43,8 +43,25 @@ const makeCliLayer = (options?: {
         remoteCalls.push({ action: "bootstrap", secret });
         return {
           domain: "energy",
-          count: 1,
-          refreshedShards: [0]
+          count: 1
+        } as const;
+      }),
+    pollIngest: (_baseUrl: URL, secret: string) =>
+      Effect.sync(() => {
+        remoteCalls.push({ action: "poll", secret });
+        return {
+          runId: "run-1",
+          mode: "head",
+          startedAt: 1,
+          finishedAt: 2,
+          expertsTotal: 1,
+          expertsSucceeded: 1,
+          expertsFailed: 0,
+          pagesFetched: 1,
+          postsSeen: 1,
+          postsStored: 1,
+          postsDeleted: 0,
+          failures: []
         } as const;
       }),
     loadSmokeFixture: (_baseUrl: URL, secret: string) =>
@@ -60,11 +77,6 @@ const makeCliLayer = (options?: {
       Effect.sync(() => {
         remoteCalls.push({ action: "admin-experts", secret });
         return [{ did: "did:plc:test", domain: "energy" }] as const;
-      }),
-    refreshShards: (_baseUrl: URL, secret: string) =>
-      Effect.sync(() => {
-        remoteCalls.push({ action: "refresh", secret });
-        return [0] as const;
       }),
     listExpertsMcp: (_baseUrl: URL, secret: string) =>
       Effect.sync(() => {
@@ -132,6 +144,7 @@ describe("ops CLI", () => {
       expect(remoteCalls).toEqual([
         { action: "migrate", secret: "stage-secret" },
         { action: "bootstrap", secret: "stage-secret" },
+        { action: "poll", secret: "stage-secret" },
         { action: "fixture", secret: "stage-secret" }
       ]);
     })
@@ -158,7 +171,7 @@ describe("ops CLI", () => {
       expect(remoteCalls).toEqual([
         { action: "health" },
         { action: "admin-experts", secret: "stage-secret" },
-        { action: "refresh", secret: "stage-secret" },
+        { action: "poll", secret: "stage-secret" },
         { action: "mcp-list", secret: "stage-secret" },
         { action: "mcp-search", secret: "stage-secret" }
       ]);
@@ -205,8 +218,22 @@ describe("ops CLI", () => {
           bootstrapExperts: (_baseUrl, _secret) =>
             Effect.succeed({
               domain: "energy",
-              count: 1,
-              refreshedShards: [0]
+              count: 1
+            } as const),
+          pollIngest: (_baseUrl, _secret) =>
+            Effect.succeed({
+              runId: "run-1",
+              mode: "head",
+              startedAt: 1,
+              finishedAt: 2,
+              expertsTotal: 1,
+              expertsSucceeded: 1,
+              expertsFailed: 0,
+              pagesFetched: 1,
+              postsSeen: 1,
+              postsStored: 1,
+              postsDeleted: 0,
+              failures: []
             } as const),
           loadSmokeFixture: (_baseUrl, _secret) =>
             Effect.succeed({
@@ -216,7 +243,6 @@ describe("ops CLI", () => {
             } as const),
           listAdminExperts: (_baseUrl, _secret) =>
             Effect.succeed([{ did: "did:plc:test", domain: "energy" }] as const),
-          refreshShards: (_baseUrl, _secret) => Effect.succeed([0] as const),
           listExpertsMcp: (_baseUrl, _secret) =>
             Effect.succeed([{ did: "did:plc:test", domain: "energy" }] as const),
           searchPostsMcp: (_baseUrl, _secret, _query) =>

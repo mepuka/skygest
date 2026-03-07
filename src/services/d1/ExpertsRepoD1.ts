@@ -81,6 +81,38 @@ export const ExpertsRepoD1 = {
         WHERE did = ${did}
       `.pipe(Effect.asVoid);
 
+    const setLastSyncedAt = (did: string, lastSyncedAt: number | null) =>
+      sql`
+        UPDATE experts
+        SET last_synced_at = ${lastSyncedAt}
+        WHERE did = ${did}
+      `.pipe(Effect.asVoid);
+
+    const listActive = (did?: string | null) =>
+      sql<ExpertRecordRow>`
+        SELECT
+          did as did,
+          handle as handle,
+          display_name as displayName,
+          description as description,
+          domain as domain,
+          source as source,
+          source_ref as sourceRef,
+          shard as shard,
+          active as active,
+          added_at as addedAt,
+          last_synced_at as lastSyncedAt
+        FROM experts
+        WHERE ${
+          did == null
+            ? sql`active = 1`
+            : sql`did = ${did}`
+        }
+        ORDER BY added_at ASC, did ASC
+      `.pipe(
+        Effect.map((rows) => rows.map(toExpertRecord))
+      );
+
     const listActiveByShard = (shard: number) =>
       sql<{ did: string }>`
         SELECT did as did
@@ -126,6 +158,8 @@ export const ExpertsRepoD1 = {
       upsertMany,
       getByDid,
       setActive,
+      setLastSyncedAt,
+      listActive,
       listActiveByShard,
       list
     });

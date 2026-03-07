@@ -9,6 +9,13 @@ export class ExpertsRepo extends Context.Tag("@skygest/ExpertsRepo")<
     readonly upsertMany: (experts: ReadonlyArray<ExpertRecord>) => Effect.Effect<void, SqlError>;
     readonly getByDid: (did: string) => Effect.Effect<ExpertRecord | null, SqlError>;
     readonly setActive: (did: string, active: boolean) => Effect.Effect<void, SqlError>;
+    readonly setLastSyncedAt: (
+      did: string,
+      lastSyncedAt: number | null
+    ) => Effect.Effect<void, SqlError>;
+    readonly listActive: (
+      did?: string | null
+    ) => Effect.Effect<ReadonlyArray<ExpertRecord>, SqlError>;
     readonly listActiveByShard: (shard: number) => Effect.Effect<ReadonlyArray<string>, SqlError>;
     readonly list: (
       domain: string | null,

@@ -16,7 +16,9 @@ describe("phase-one migrations", () => {
         WHERE type IN ('table', 'virtual table')
           AND name IN (
             'experts',
+            'expert_sync_state',
             'expert_sources',
+            'ingest_leases',
             'posts',
             'post_topics',
             'links',
@@ -32,14 +34,17 @@ describe("phase-one migrations", () => {
 
       expect(rows.map((row) => row.name)).toEqual([
         "expert_sources",
+        "expert_sync_state",
         "experts",
+        "ingest_leases",
         "links",
         "post_topics",
         "posts",
         "posts_fts"
       ]);
       expect(applied).toEqual([
-        { id: 1, name: "init" }
+        { id: 1, name: "init" },
+        { id: 2, name: "polling_state" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );

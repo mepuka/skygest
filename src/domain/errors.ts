@@ -20,9 +20,10 @@ export class QueueError extends Schema.TaggedError<QueueError>()("QueueError", {
   message: Schema.String
 }) {}
 
-export class IngestorPingError extends Schema.TaggedError<IngestorPingError>()(
-  "IngestorPingError",
+export class PollerBusyError extends Schema.TaggedError<PollerBusyError>()(
+  "PollerBusyError",
   {
+    lease: Schema.String,
     message: Schema.String
   }
 ) {}

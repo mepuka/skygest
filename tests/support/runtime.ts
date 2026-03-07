@@ -21,7 +21,6 @@ export const testConfig = (
   overrides: Partial<AppConfigShape> = {}
 ): AppConfigShape => ({
   publicApi: "https://public.api.bsky.app",
-  jetstreamEndpoint: "wss://jetstream1.us-east.bsky.network/subscribe",
   ingestShardCount: 1,
   defaultDomain: "energy",
   mcpLimitDefault: 20,

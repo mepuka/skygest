@@ -1,9 +1,10 @@
 import { Schema } from "effect";
 import energySeedManifestJson from "../../config/expert-seeds/energy.json";
+import { assertValidExpertSeedManifest } from "./ExpertSeeds";
 import { ExpertSeedManifest } from "../domain/bi";
 
-export const energySeedManifest = Schema.decodeUnknownSync(ExpertSeedManifest)(
-  energySeedManifestJson
+export const energySeedManifest = assertValidExpertSeedManifest(
+  Schema.decodeUnknownSync(ExpertSeedManifest)(energySeedManifestJson)
 );
 
 const firstEnergyExpert = energySeedManifest.experts[0];

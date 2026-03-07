@@ -156,11 +156,6 @@ export const SetExpertActiveInput = Schema.Struct({
 });
 export type SetExpertActiveInput = Schema.Schema.Type<typeof SetExpertActiveInput>;
 
-export const RefreshShardsInput = Schema.Struct({
-  shard: Schema.optional(Schema.Number)
-});
-export type RefreshShardsInput = Schema.Schema.Type<typeof RefreshShardsInput>;
-
 export const KnowledgePostResult = Schema.Struct({
   uri: AtUri,
   did: Did,
@@ -214,15 +209,9 @@ export const SetExpertActiveResult = Schema.Struct({
 });
 export type SetExpertActiveResult = Schema.Schema.Type<typeof SetExpertActiveResult>;
 
-export const RefreshShardsResult = Schema.Struct({
-  refreshedShards: Schema.Array(Schema.Number)
-});
-export type RefreshShardsResult = Schema.Schema.Type<typeof RefreshShardsResult>;
-
 export const BootstrapExpertsResult = Schema.Struct({
   domain: Schema.String,
-  count: Schema.Number,
-  refreshedShards: Schema.Array(Schema.Number)
+  count: Schema.Number
 });
 export type BootstrapExpertsResult = Schema.Schema.Type<typeof BootstrapExpertsResult>;
 
@@ -253,21 +242,6 @@ export class ProfileLookupError extends Schema.TaggedError<ProfileLookupError>()
   {
     didOrHandle: Schema.String,
     message: Schema.String
-  }
-) {}
-
-export class UnauthorizedScopeError extends Schema.TaggedError<UnauthorizedScopeError>()(
-  "UnauthorizedScopeError",
-  {
-    scope: Schema.String
-  }
-) {}
-
-export class InvalidShardRequestError extends Schema.TaggedError<InvalidShardRequestError>()(
-  "InvalidShardRequestError",
-  {
-    message: Schema.String,
-    shard: Schema.optional(Schema.Number)
   }
 ) {}
 

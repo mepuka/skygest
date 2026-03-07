@@ -9,7 +9,6 @@ import { AppConfig, type AppConfigShape } from "../src/platform/Config";
 import { encodeJsonString } from "../src/platform/Json";
 import { Logging } from "../src/platform/Logging";
 import { ExpertRegistryService } from "../src/services/ExpertRegistryService";
-import { IngestShardRefresher } from "../src/services/IngestShardRefresher";
 import { OntologyCatalog } from "../src/services/OntologyCatalog";
 import { StagingOpsService } from "../src/services/StagingOpsService";
 import { ExpertsRepoD1 } from "../src/services/d1/ExpertsRepoD1";
@@ -57,7 +56,6 @@ const expectJsonResponse = async <A>(
 const makeStagingAdminLayer = (options: {
   readonly filename: string;
   readonly config?: Partial<AppConfigShape>;
-  readonly refresher?: Layer.Layer<IngestShardRefresher>;
 }) => {
   const sqliteLayer = makeSqliteLayer(options.filename);
   const configLayer = Layer.succeed(AppConfig, testConfig({
@@ -85,11 +83,13 @@ const makeStagingAdminLayer = (options: {
       Effect.succeed({
         dids: [],
         cursor: null
+      }),
+    resolveRepoService: () => Effect.succeed("https://pds.example.com"),
+    listRecordsAtService: () =>
+      Effect.succeed({
+        records: [],
+        cursor: null
       })
-  });
-  const refreshLayer = options.refresher ?? Layer.succeed(IngestShardRefresher, {
-    refreshShard: (shard: number) => Effect.succeed([shard] as const),
-    refreshAllShards: () => Effect.succeed([0])
   });
   const baseLayer = Layer.mergeAll(
     sqliteLayer,
@@ -98,8 +98,7 @@ const makeStagingAdminLayer = (options: {
     ontologyLayer,
     expertsLayer,
     knowledgeLayer,
-    blueskyLayer,
-    refreshLayer
+    blueskyLayer
   );
 
   return Layer.mergeAll(
@@ -135,18 +134,9 @@ describe("staging admin ops routes", () => {
   it.live("migrates, bootstraps experts, loads the smoke fixture, and serves it through MCP", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
-        let refreshAllCalls = 0;
         const layer = makeStagingAdminLayer({
           filename,
-          config: { ingestShardCount: 2 },
-          refresher: Layer.succeed(IngestShardRefresher, {
-            refreshShard: (shard: number) => Effect.succeed([shard] as const),
-            refreshAllShards: () =>
-              Effect.sync(() => {
-                refreshAllCalls += 1;
-                return [0, 1] as const;
-              })
-          })
+          config: { ingestShardCount: 2 }
         });
 
         const migrateResponse = await handleAdminRequestWithLayer(
@@ -178,7 +168,6 @@ describe("staging admin ops routes", () => {
         const bootstrapBody = await expectJsonResponse<{
           readonly domain: string;
           readonly count: number;
-          readonly refreshedShards: ReadonlyArray<number>;
         }>(bootstrapResponse);
         const fixtureBody = await expectJsonResponse<{
           readonly posts: number;
@@ -208,11 +197,9 @@ describe("staging admin ops routes", () => {
           expect(migrateBody.ok).toBe(true);
           expect(bootstrapBody.domain).toBe("energy");
           expect(bootstrapBody.count).toBeGreaterThan(0);
-          expect(bootstrapBody.refreshedShards).toEqual([0, 1]);
           expect(fixtureBody.posts).toBe(2);
           expect(fixtureBody.links).toBe(2);
           expect(fixtureBody.topics).toBeGreaterThan(0);
-          expect(refreshAllCalls).toBe(1);
 	          expect(searchItems.items.some((item) => item.uri === smokeFixtureUris()[0])).toBe(true);
 	          expect(expertItems.items.length).toBeGreaterThan(0);
         } finally {
