@@ -13,6 +13,7 @@ import type {
   ExpandedTopicsOutput,
   ExpertListItem,
   GetTopicInput,
+  OntologyConceptSlug,
   OntologyListTopic,
   GetPostLinksInput,
   GetRecentPostsInput,
@@ -132,7 +133,9 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
               const topic = yield* ontology.getTopic(match.topicSlug);
               const fallback = ontology.topics.find((item) => item.slug === match.topicSlug);
               const topicLabel = topic?.label ?? fallback?.label ?? match.topicSlug;
-              const conceptSlugs = fallback?.conceptSlugs ?? [];
+              const conceptSlugs = topic?.kind === "canonical-topic"
+                ? topic.conceptSlugs as ReadonlyArray<OntologyConceptSlug>
+                : fallback?.conceptSlugs ?? [];
 
               return {
                 postUri: match.postUri,

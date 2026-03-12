@@ -63,6 +63,7 @@ export type ExpertPollExecutionResult = {
   readonly postsSeen: number;
   readonly postsStored: number;
   readonly postsDeleted: number;
+  readonly postsDropped: number;
   readonly processedRecords: number;
   readonly completed: boolean;
   readonly nextCursor: string | null;
@@ -315,7 +316,8 @@ export class ExpertPollExecutor extends Context.Tag("@skygest/ExpertPollExecutor
         if (records.length === 0) {
           return {
             postsStored: 0,
-            postsDeleted: 0
+            postsDeleted: 0,
+            postsDropped: 0
           } satisfies ProcessBatchSummary;
         }
 
@@ -415,6 +417,7 @@ export class ExpertPollExecutor extends Context.Tag("@skygest/ExpertPollExecutor
               postsSeen: window.fetchedRecords.length,
               postsStored: processed.postsStored,
               postsDeleted: deleted,
+              postsDropped: processed.postsDropped,
               processedRecords: window.processedRecords.length,
               completed: true,
               nextCursor: null
@@ -453,6 +456,7 @@ export class ExpertPollExecutor extends Context.Tag("@skygest/ExpertPollExecutor
               postsSeen: window.fetchedRecords.length,
               postsStored: processed.postsStored,
               postsDeleted: 0,
+              postsDropped: processed.postsDropped,
               processedRecords: window.processedRecords.length,
               completed: window.completed,
               nextCursor: window.completed ? null : window.nextCursor
@@ -485,6 +489,7 @@ export class ExpertPollExecutor extends Context.Tag("@skygest/ExpertPollExecutor
             postsSeen: window.fetchedRecords.length,
             postsStored: processed.postsStored,
             postsDeleted: deleted,
+            postsDropped: processed.postsDropped,
             processedRecords: window.processedRecords.length,
             completed: window.completed,
             nextCursor: window.completed ? null : window.nextCursor

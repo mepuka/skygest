@@ -20,16 +20,19 @@ const makeIngestId = (
 export type ProcessBatchSummary = {
   readonly postsStored: number;
   readonly postsDeleted: number;
+  readonly postsDropped: number;
 };
 
 type BatchActions = {
   readonly upserts: ReadonlyArray<KnowledgePost>;
   readonly deletions: ReadonlyArray<DeletedKnowledgePost>;
+  readonly dropped: number;
 };
 
 const emptyBatchActions = (): BatchActions => ({
   upserts: [],
-  deletions: []
+  deletions: [],
+  dropped: 0
 });
 
 export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (batch: RawEventBatch) {
@@ -95,7 +98,7 @@ export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (ba
       }).pipe(
         Effect.map((topics) =>
           topics.length === 0
-            ? state
+            ? { ...state, dropped: state.dropped + 1 }
             : {
                 ...state,
                 upserts: [
@@ -125,6 +128,7 @@ export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (ba
 
   return {
     postsStored: actions.upserts.length,
-    postsDeleted: actions.deletions.length
+    postsDeleted: actions.deletions.length,
+    postsDropped: actions.dropped
   } satisfies ProcessBatchSummary;
 });

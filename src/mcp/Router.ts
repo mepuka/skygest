@@ -5,6 +5,7 @@ import { D1Client } from "@effect/sql-d1";
 import { Effect, Layer } from "effect";
 import { CloudflareEnv, type EnvBindings } from "../platform/Env";
 import { AppConfig } from "../platform/Config";
+import { makeSharedRuntime } from "../platform/EffectRuntime";
 import { Logging } from "../platform/Logging";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { OntologyCatalog } from "../services/OntologyCatalog";
@@ -12,7 +13,7 @@ import { ExpertsRepoD1 } from "../services/d1/ExpertsRepoD1";
 import { KnowledgeRepoD1 } from "../services/d1/KnowledgeRepoD1";
 import { KnowledgeMcpHandlers, KnowledgeMcpToolkit } from "./Toolkit";
 
-const makeQueryLayer = (env: EnvBindings) => {
+export const makeQueryLayer = (env: EnvBindings) => {
   const baseLayer = Layer.mergeAll(
     CloudflareEnv.layer(env, { required: ["DB"] }),
     D1Client.layer({ db: env.DB }),
@@ -33,6 +34,8 @@ const makeQueryLayer = (env: EnvBindings) => {
     )
   );
 };
+
+const sharedMcpRuntime = makeSharedRuntime(makeQueryLayer);
 
 const makeMcpLayer = (
   queryLayer: Layer.Layer<KnowledgeQueryService, any, never>
@@ -64,5 +67,8 @@ export const handleMcpRequestWithLayer = async (
     )
   );
 
-export const handleMcpRequest = async (request: Request, env: EnvBindings): Promise<Response> =>
-  handleMcpRequestWithLayer(request, makeQueryLayer(env));
+export const handleMcpRequest = async (request: Request, env: EnvBindings): Promise<Response> => {
+  const runtime = sharedMcpRuntime.getRuntime(env);
+  const queryLayer = Layer.succeedContext(await runtime.runPromise(Effect.context()));
+  return handleMcpRequestWithLayer(request, queryLayer as Layer.Layer<KnowledgeQueryService, never, never>);
+};

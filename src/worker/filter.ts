@@ -22,11 +22,11 @@ export const fetch = async (request: Request, env: WorkflowIngestEnvBindings) =>
 export const scheduled = async (
   _controller: ScheduledController,
   env: WorkflowIngestEnvBindings,
-  _ctx: ExecutionContext
+  ctx: ExecutionContext
 ) => {
   const layer = makeWorkflowIngestLayer(env);
 
-  await withManagedRuntime(layer, (runtime) =>
+  const task = withManagedRuntime(layer, (runtime) =>
     runScopedWithRuntime(
       runtime,
       Effect.flatMap(IngestWorkflowLauncher, (launcher) =>
@@ -35,6 +35,9 @@ export const scheduled = async (
       { operation: "IngestWorker.scheduled" }
     )
   );
+
+  ctx.waitUntil(task);
+  await task;
 };
 
 export { ExpertPollCoordinatorDo, IngestRunWorkflow };
