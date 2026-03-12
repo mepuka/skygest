@@ -33,7 +33,7 @@ const DEFAULT_SEED_PATH = fileURLToPath(
 const DEFAULT_SKYGENT_DIR = resolve(import.meta.dir, "../../../skygent-bsky");
 const DEFAULT_PUBLIC_API = "https://public.api.bsky.app";
 const DEFAULT_STORE = "energy-news";
-const DEFAULT_STORE_LIMIT = 500;
+const DEFAULT_STORE_LIMIT = 1000;
 const DEFAULT_BATCH_SIZE = 25;
 
 const ScriptConfig = Config.all({
@@ -163,7 +163,8 @@ const skipHandles = new Set([
   "newsen.bsky.social", "mygridgb.bsky.social", "planetkooler.bsky.social",
   "longtail.news", "trundlelinb.bsky.social", "unaecosystems.bsky.social",
   "energysolutions.bsky.social", "epsteinweb.bsky.social", "bigearthdata.ai",
-  "counterpoint4.bsky.social"
+  "counterpoint4.bsky.social",
+  "sachlichepolitik.bsky.social"
 ]);
 
 type StoreAuthor = typeof SkygentAuthor.Type;

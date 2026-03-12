@@ -6,10 +6,6 @@ import {
   stringifyUnknown
 } from "../platform/Json";
 
-export class AuthError extends Schema.TaggedError<AuthError>()("AuthError", {
-  message: Schema.String
-}) {}
-
 export class BlueskyApiError extends Schema.TaggedError<BlueskyApiError>()(
   "BlueskyApiError",
   {
@@ -19,10 +15,6 @@ export class BlueskyApiError extends Schema.TaggedError<BlueskyApiError>()(
 ) {}
 
 export class DbError extends Schema.TaggedError<DbError>()("DbError", {
-  message: Schema.String
-}) {}
-
-export class QueueError extends Schema.TaggedError<QueueError>()("QueueError", {
   message: Schema.String
 }) {}
 
@@ -328,6 +320,30 @@ export const toIngestErrorEnvelope = (
     });
   }
 
+  if (error instanceof DbError || isTagged(error, "DbError")) {
+    return withOverrides({
+      tag: "DbError",
+      message: getStringField(error, "message") ?? "database decode or validation failure",
+      retryable: false
+    });
+  }
+
+  if (isTagged(error, "SqlError")) {
+    return withOverrides({
+      tag: "SqlError",
+      message: getStringField(error, "message") ?? "database operation failed",
+      retryable: false
+    });
+  }
+
+  if (isObject(error) && typeof (error as any)._tag === "string") {
+    return withOverrides({
+      tag: (error as any)._tag,
+      message: getStringField(error, "message") ?? stringifyUnknown(error),
+      retryable: false
+    });
+  }
+
   if (error instanceof Error) {
     return withOverrides({
       tag: error.name || "Error",
@@ -342,6 +358,28 @@ export const toIngestErrorEnvelope = (
     message: stringifyUnknown(error),
     retryable: false
   });
+};
+
+export const ingestHttpStatusForEnvelope = (envelope: IngestErrorEnvelope): number => {
+  switch (envelope.tag) {
+    case "ExpertNotFoundError":
+    case "IngestRunNotFoundError":
+      return 404;
+    case "IngestSchemaDecodeError":
+      return 400;
+    case "BlueskyApiError":
+      return 502;
+    case "IngestWorkflowLaunchError":
+      return 503;
+    case "IngestBoundaryError":
+    case "WorkflowRunCompensationError":
+    case "HistoricalRunRepairError":
+    case "DbError":
+    case "SqlError":
+      return 500;
+    default:
+      return 500;
+  }
 };
 
 export const toIngestErrorResponse = (error: unknown): IngestErrorResponse => {

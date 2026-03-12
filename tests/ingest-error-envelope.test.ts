@@ -1,8 +1,18 @@
 import { describe, expect, it } from "@effect/vitest";
 import {
+  BlueskyApiError,
+  DbError,
+  HistoricalRunRepairError,
+  IngestBoundaryError,
+  IngestRunNotFoundError,
+  IngestSchemaDecodeError,
   IngestWorkflowLaunchError,
+  StaleDispatchedIngestItemError,
+  StaleRunningIngestItemError,
+  WorkflowRunCompensationError,
   decodeStoredIngestError,
   encodeStoredIngestError,
+  ingestHttpStatusForEnvelope,
   toIngestErrorEnvelope,
   toIngestErrorResponse
 } from "../src/domain/errors";
@@ -47,5 +57,207 @@ describe("ingest error envelopes", () => {
       message: "workflow create failed",
       retryable: true
     });
+  });
+});
+
+describe("toIngestErrorEnvelope domain error classification", () => {
+  it("DbError => non-retryable", () => {
+    const envelope = toIngestErrorEnvelope(
+      DbError.make({ message: "decode failed" })
+    );
+    expect(envelope.tag).toBe("DbError");
+    expect(envelope.retryable).toBe(false);
+  });
+
+  it("SqlError (duck-typed) => non-retryable", () => {
+    const envelope = toIngestErrorEnvelope({
+      _tag: "SqlError",
+      message: "D1 execution failed"
+    });
+    expect(envelope.tag).toBe("SqlError");
+    expect(envelope.retryable).toBe(false);
+  });
+
+  it("BlueskyApiError with 429 => retryable", () => {
+    const envelope = toIngestErrorEnvelope(
+      BlueskyApiError.make({ message: "rate limited", status: 429 })
+    );
+    expect(envelope.tag).toBe("BlueskyApiError");
+    expect(envelope.retryable).toBe(true);
+    expect(envelope.status).toBe(429);
+  });
+
+  it("BlueskyApiError with 404 => non-retryable", () => {
+    const envelope = toIngestErrorEnvelope(
+      BlueskyApiError.make({ message: "not found", status: 404 })
+    );
+    expect(envelope.tag).toBe("BlueskyApiError");
+    expect(envelope.retryable).toBe(false);
+    expect(envelope.status).toBe(404);
+  });
+
+  it("BlueskyApiError without status => non-retryable", () => {
+    const envelope = toIngestErrorEnvelope(
+      BlueskyApiError.make({ message: "parse failure" })
+    );
+    expect(envelope.tag).toBe("BlueskyApiError");
+    expect(envelope.retryable).toBe(false);
+    expect(envelope.status).toBeUndefined();
+  });
+
+  it("IngestRunNotFoundError", () => {
+    const envelope = toIngestErrorEnvelope(
+      IngestRunNotFoundError.make({ runId: "run-42" })
+    );
+    expect(envelope.tag).toBe("IngestRunNotFoundError");
+    expect(envelope.retryable).toBe(false);
+    expect(envelope.runId).toBe("run-42");
+  });
+
+  it("IngestBoundaryError", () => {
+    const envelope = toIngestErrorEnvelope(
+      IngestBoundaryError.make({ message: "boundary fail", operation: "test" })
+    );
+    expect(envelope.tag).toBe("IngestBoundaryError");
+    expect(envelope.retryable).toBe(false);
+    expect(envelope.operation).toBe("test");
+  });
+
+  it("StaleDispatchedIngestItemError => retryable", () => {
+    const envelope = toIngestErrorEnvelope(
+      StaleDispatchedIngestItemError.make({
+        message: "stale",
+        did,
+        runId: "run-1",
+        operation: "test"
+      })
+    );
+    expect(envelope.tag).toBe("StaleDispatchedIngestItemError");
+    expect(envelope.retryable).toBe(true);
+    expect(envelope.did).toBe(did);
+  });
+
+  it("StaleRunningIngestItemError => non-retryable", () => {
+    const envelope = toIngestErrorEnvelope(
+      StaleRunningIngestItemError.make({
+        message: "stale running",
+        did,
+        runId: "run-1",
+        operation: "test"
+      })
+    );
+    expect(envelope.tag).toBe("StaleRunningIngestItemError");
+    expect(envelope.retryable).toBe(false);
+  });
+
+  it("WorkflowRunCompensationError", () => {
+    const envelope = toIngestErrorEnvelope(
+      WorkflowRunCompensationError.make({
+        message: "compensation fail",
+        runId: "run-1",
+        operation: "test"
+      })
+    );
+    expect(envelope.tag).toBe("WorkflowRunCompensationError");
+    expect(envelope.retryable).toBe(false);
+    expect(envelope.runId).toBe("run-1");
+  });
+
+  it("HistoricalRunRepairError", () => {
+    const envelope = toIngestErrorEnvelope(
+      HistoricalRunRepairError.make({
+        message: "repair fail",
+        runId: "run-1",
+        did,
+        operation: "test"
+      })
+    );
+    expect(envelope.tag).toBe("HistoricalRunRepairError");
+    expect(envelope.retryable).toBe(false);
+    expect(envelope.did).toBe(did);
+  });
+
+  it("EnvError duck-typed object", () => {
+    const envelope = toIngestErrorEnvelope({
+      _tag: "EnvError",
+      missing: "API_KEY"
+    });
+    expect(envelope.tag).toBe("EnvError");
+    expect(envelope.retryable).toBe(false);
+    expect(envelope.message).toContain("API_KEY");
+  });
+
+  it("unknown tagged error preserves _tag", () => {
+    const envelope = toIngestErrorEnvelope({
+      _tag: "CustomVendorError",
+      message: "something broke"
+    });
+    expect(envelope.tag).toBe("CustomVendorError");
+    expect(envelope.retryable).toBe(false);
+    expect(envelope.message).toBe("something broke");
+  });
+
+  it("plain Error", () => {
+    const envelope = toIngestErrorEnvelope(new Error("oops"));
+    expect(envelope.tag).toBe("Error");
+    expect(envelope.retryable).toBe(false);
+    expect(envelope.message).toBe("oops");
+  });
+
+  it("non-Error unknown", () => {
+    const envelope = toIngestErrorEnvelope("raw string");
+    expect(envelope.tag).toBe("UnknownError");
+    expect(envelope.retryable).toBe(false);
+    expect(envelope.message).toBe("raw string");
+  });
+
+  it("override precedence for did, runId, operation", () => {
+    const envelope = toIngestErrorEnvelope(
+      IngestBoundaryError.make({ message: "fail", operation: "original" }),
+      { did, runId: "override-run", operation: "override-op" }
+    );
+    expect(envelope.did).toBe(did);
+    expect(envelope.runId).toBe("override-run");
+    expect(envelope.operation).toBe("override-op");
+  });
+});
+
+describe("ingestHttpStatusForEnvelope", () => {
+  const envelope = (tag: string) => ({
+    tag,
+    message: "test",
+    retryable: false
+  });
+
+  it("maps ExpertNotFoundError to 404", () => {
+    expect(ingestHttpStatusForEnvelope(envelope("ExpertNotFoundError"))).toBe(404);
+  });
+
+  it("maps IngestRunNotFoundError to 404", () => {
+    expect(ingestHttpStatusForEnvelope(envelope("IngestRunNotFoundError"))).toBe(404);
+  });
+
+  it("maps IngestSchemaDecodeError to 400", () => {
+    expect(ingestHttpStatusForEnvelope(envelope("IngestSchemaDecodeError"))).toBe(400);
+  });
+
+  it("maps DbError to 500", () => {
+    expect(ingestHttpStatusForEnvelope(envelope("DbError"))).toBe(500);
+  });
+
+  it("maps BlueskyApiError to 502", () => {
+    expect(ingestHttpStatusForEnvelope(envelope("BlueskyApiError"))).toBe(502);
+  });
+
+  it("maps IngestWorkflowLaunchError to 503", () => {
+    expect(ingestHttpStatusForEnvelope(envelope("IngestWorkflowLaunchError"))).toBe(503);
+  });
+
+  it("maps SqlError to 500", () => {
+    expect(ingestHttpStatusForEnvelope(envelope("SqlError"))).toBe(500);
+  });
+
+  it("maps unknown tags to 500", () => {
+    expect(ingestHttpStatusForEnvelope(envelope("SomethingElse"))).toBe(500);
   });
 });
