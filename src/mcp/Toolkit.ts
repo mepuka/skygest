@@ -2,7 +2,15 @@ import type { SqlError } from "@effect/sql/SqlError";
 import { Tool, Toolkit } from "@effect/ai";
 import { Effect } from "effect";
 import {
+  ExplainPostTopicsInput,
+  ExplainPostTopicsOutput,
+  ExpandTopicsInput,
+  ExpandedTopicsOutput,
   ExpertListOutput,
+  GetTopicInput,
+  ListTopicsInput,
+  OntologyTopicOutput,
+  OntologyTopicsOutput,
   GetPostLinksInput,
   GetRecentPostsInput,
   KnowledgeLinksOutput,
@@ -68,11 +76,63 @@ export const ListExpertsTool = Tool.make("list_experts", {
   .annotate(Tool.Idempotent, true)
   .annotate(Tool.OpenWorld, false);
 
+export const ListTopicsTool = Tool.make("list_topics", {
+  description: "List canonical ontology topics or raw ontology concepts available to the knowledge base.",
+  parameters: ListTopicsInput.fields,
+  success: OntologyTopicsOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "List Topics")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
+
+export const GetTopicTool = Tool.make("get_topic", {
+  description: "Look up a canonical topic or ontology concept by slug.",
+  parameters: GetTopicInput.fields,
+  success: OntologyTopicOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Get Topic")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
+
+export const ExpandTopicsTool = Tool.make("expand_topics", {
+  description: "Expand ontology topics or concepts into related canonical retrieval topics.",
+  parameters: ExpandTopicsInput.fields,
+  success: ExpandedTopicsOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Expand Topics")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
+
+export const ExplainPostTopicsTool = Tool.make("explain_post_topics", {
+  description: "Explain why a stored post matched its ontology topics.",
+  parameters: ExplainPostTopicsInput.fields,
+  success: ExplainPostTopicsOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Explain Post Topics")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
+
 export const KnowledgeMcpToolkit = Toolkit.make(
   SearchPostsTool,
   GetRecentPostsTool,
   GetPostLinksTool,
-  ListExpertsTool
+  ListExpertsTool,
+  ListTopicsTool,
+  GetTopicTool,
+  ExpandTopicsTool,
+  ExplainPostTopicsTool
 );
 
 export const KnowledgeMcpHandlers = KnowledgeMcpToolkit.toLayer(
@@ -99,6 +159,24 @@ export const KnowledgeMcpHandlers = KnowledgeMcpToolkit.toLayer(
         queryService.listExperts(input).pipe(
           Effect.map((items) => ({ items })),
           Effect.mapError(toQueryError("list_experts"))
+        ),
+      list_topics: (input) =>
+        queryService.listTopics(input).pipe(
+          Effect.map((items) => ({ view: input.view ?? "facets", items })),
+          Effect.mapError(toQueryError("list_topics"))
+        ),
+      get_topic: (input) =>
+        queryService.getTopic(input).pipe(
+          Effect.map((item) => ({ item })),
+          Effect.mapError(toQueryError("get_topic"))
+        ),
+      expand_topics: (input) =>
+        queryService.expandTopics(input).pipe(
+          Effect.mapError(toQueryError("expand_topics"))
+        ),
+      explain_post_topics: (input) =>
+        queryService.explainPostTopics(input.postUri).pipe(
+          Effect.mapError(toQueryError("explain_post_topics"))
         )
     });
   })

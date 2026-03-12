@@ -7,6 +7,12 @@ export const TopicSlug = Schema.String.pipe(
 );
 export type TopicSlug = Schema.Schema.Type<typeof TopicSlug>;
 
+export const OntologyConceptSlug = Schema.String.pipe(
+  Schema.minLength(1),
+  Schema.brand("OntologyConceptSlug")
+);
+export type OntologyConceptSlug = Schema.Schema.Type<typeof OntologyConceptSlug>;
+
 export const ExpertSource = Schema.Literal("manual", "starter_pack", "list", "network");
 export type ExpertSource = Schema.Schema.Type<typeof ExpertSource>;
 
@@ -69,13 +75,72 @@ export type BlueskyProfile = Schema.Schema.Type<typeof BlueskyProfile>;
 export const OntologyTopic = Schema.Struct({
   slug: TopicSlug,
   label: Schema.String,
-  terms: Schema.Array(Schema.String)
+  description: Schema.String,
+  conceptSlugs: Schema.Array(OntologyConceptSlug),
+  rootConceptSlugs: Schema.Array(OntologyConceptSlug),
+  terms: Schema.Array(Schema.String),
+  hashtags: Schema.Array(Schema.String),
+  domains: Schema.Array(Schema.String)
 });
 export type OntologyTopic = Schema.Schema.Type<typeof OntologyTopic>;
 
+export const OntologyConcept = Schema.Struct({
+  slug: OntologyConceptSlug,
+  iri: Schema.String,
+  label: Schema.String,
+  altLabels: Schema.Array(Schema.String),
+  description: Schema.NullOr(Schema.String),
+  topConcept: Schema.Boolean,
+  broaderSlugs: Schema.Array(OntologyConceptSlug),
+  narrowerSlugs: Schema.Array(OntologyConceptSlug),
+  canonicalTopicSlug: Schema.NullOr(TopicSlug),
+  matcherTerms: Schema.Array(Schema.String)
+});
+export type OntologyConcept = Schema.Schema.Type<typeof OntologyConcept>;
+
+export const MatchSignal = Schema.Literal("term", "hashtag", "domain");
+export type MatchSignal = Schema.Schema.Type<typeof MatchSignal>;
+
+export const OntologySignalCatalog = Schema.Struct({
+  hashtags: Schema.Array(Schema.String),
+  domains: Schema.Array(Schema.String),
+  ambiguityTerms: Schema.Array(Schema.String)
+});
+export type OntologySignalCatalog = Schema.Schema.Type<typeof OntologySignalCatalog>;
+
+export const OntologyAuthorTiers = Schema.Struct({
+  energyFocused: Schema.Array(Schema.String),
+  generalOutlets: Schema.Array(Schema.String)
+});
+export type OntologyAuthorTiers = Schema.Schema.Type<typeof OntologyAuthorTiers>;
+
+export const OntologyAnomaly = Schema.Struct({
+  code: Schema.String,
+  message: Schema.String
+});
+export type OntologyAnomaly = Schema.Schema.Type<typeof OntologyAnomaly>;
+
+export const OntologySnapshot = Schema.Struct({
+  ontologyVersion: Schema.String,
+  snapshotVersion: Schema.String,
+  generatedAt: Schema.String,
+  sourceDigest: Schema.String,
+  canonicalTopics: Schema.Array(OntologyTopic),
+  concepts: Schema.Array(OntologyConcept),
+  signalCatalog: OntologySignalCatalog,
+  authorTiers: OntologyAuthorTiers,
+  anomalies: Schema.Array(OntologyAnomaly)
+});
+export type OntologySnapshot = Schema.Schema.Type<typeof OntologySnapshot>;
+
 export const MatchedTopic = Schema.Struct({
   topicSlug: TopicSlug,
-  matchedTerm: Schema.String
+  matchedTerm: Schema.String,
+  matchSignal: MatchSignal,
+  matchValue: Schema.String,
+  matchScore: Schema.Number,
+  ontologyVersion: Schema.String,
+  matcherVersion: Schema.String
 });
 export type MatchedTopic = Schema.Schema.Type<typeof MatchedTopic>;
 
@@ -137,6 +202,30 @@ export const GetPostLinksInput = Schema.Struct({
 });
 export type GetPostLinksInput = Schema.Schema.Type<typeof GetPostLinksInput>;
 
+export const SearchPostsQueryInput = Schema.Struct({
+  query: Schema.String,
+  topicSlugs: Schema.optional(Schema.Array(TopicSlug)),
+  since: Schema.optional(Schema.Number),
+  limit: Schema.optional(Schema.Number)
+});
+export type SearchPostsQueryInput = Schema.Schema.Type<typeof SearchPostsQueryInput>;
+
+export const GetRecentPostsQueryInput = Schema.Struct({
+  topicSlugs: Schema.optional(Schema.Array(TopicSlug)),
+  expertDid: Schema.optional(Did),
+  since: Schema.optional(Schema.Number),
+  limit: Schema.optional(Schema.Number)
+});
+export type GetRecentPostsQueryInput = Schema.Schema.Type<typeof GetRecentPostsQueryInput>;
+
+export const GetPostLinksQueryInput = Schema.Struct({
+  domain: Schema.optional(Schema.String),
+  topicSlugs: Schema.optional(Schema.Array(TopicSlug)),
+  since: Schema.optional(Schema.Number),
+  limit: Schema.optional(Schema.Number)
+});
+export type GetPostLinksQueryInput = Schema.Schema.Type<typeof GetPostLinksQueryInput>;
+
 export const ListExpertsInput = Schema.Struct({
   domain: Schema.optional(Schema.String),
   active: Schema.optional(Schema.Boolean),
@@ -185,6 +274,104 @@ export const KnowledgeLinksOutput = Schema.Struct({
   items: Schema.Array(KnowledgeLinkResult)
 });
 export type KnowledgeLinksOutput = Schema.Schema.Type<typeof KnowledgeLinksOutput>;
+
+export const OntologyTopicView = Schema.Literal("facets", "concepts");
+export type OntologyTopicView = Schema.Schema.Type<typeof OntologyTopicView>;
+
+export const OntologyExpandMode = Schema.Literal("exact", "descendants", "ancestors");
+export type OntologyExpandMode = Schema.Schema.Type<typeof OntologyExpandMode>;
+
+export const OntologyNodeKind = Schema.Literal("canonical-topic", "concept");
+export type OntologyNodeKind = Schema.Schema.Type<typeof OntologyNodeKind>;
+
+export const OntologyListTopic = Schema.Struct({
+  slug: Schema.String,
+  kind: OntologyNodeKind,
+  label: Schema.String,
+  description: Schema.NullOr(Schema.String),
+  canonicalTopicSlug: Schema.NullOr(TopicSlug),
+  topConcept: Schema.Boolean,
+  conceptSlugs: Schema.Array(Schema.String),
+  parentSlugs: Schema.Array(Schema.String),
+  childSlugs: Schema.Array(Schema.String),
+  terms: Schema.Array(Schema.String),
+  hashtags: Schema.Array(Schema.String),
+  domains: Schema.Array(Schema.String)
+});
+export type OntologyListTopic = Schema.Schema.Type<typeof OntologyListTopic>;
+
+export const ListTopicsInput = Schema.Struct({
+  view: Schema.optional(OntologyTopicView)
+});
+export type ListTopicsInput = Schema.Schema.Type<typeof ListTopicsInput>;
+
+export const GetTopicInput = Schema.Struct({
+  slug: Schema.String.pipe(Schema.minLength(1))
+});
+export type GetTopicInput = Schema.Schema.Type<typeof GetTopicInput>;
+
+export const ExpandTopicsInput = Schema.Struct({
+  slugs: Schema.Array(Schema.String.pipe(Schema.minLength(1))),
+  mode: Schema.optional(OntologyExpandMode)
+});
+export type ExpandTopicsInput = Schema.Schema.Type<typeof ExpandTopicsInput>;
+
+export const ExplainPostTopicsInput = Schema.Struct({
+  postUri: AtUri
+});
+export type ExplainPostTopicsInput = Schema.Schema.Type<typeof ExplainPostTopicsInput>;
+
+export const OntologyTopicsOutput = Schema.Struct({
+  view: OntologyTopicView,
+  items: Schema.Array(OntologyListTopic)
+});
+export type OntologyTopicsOutput = Schema.Schema.Type<typeof OntologyTopicsOutput>;
+
+export const OntologyTopicOutput = Schema.Struct({
+  item: Schema.NullOr(OntologyListTopic)
+});
+export type OntologyTopicOutput = Schema.Schema.Type<typeof OntologyTopicOutput>;
+
+export const ExpandedTopicsOutput = Schema.Struct({
+  mode: OntologyExpandMode,
+  inputSlugs: Schema.Array(Schema.String),
+  resolvedSlugs: Schema.Array(Schema.String),
+  canonicalTopicSlugs: Schema.Array(TopicSlug),
+  items: Schema.Array(OntologyListTopic)
+});
+export type ExpandedTopicsOutput = Schema.Schema.Type<typeof ExpandedTopicsOutput>;
+
+export const StoredTopicMatch = Schema.Struct({
+  postUri: AtUri,
+  topicSlug: TopicSlug,
+  matchedTerm: Schema.NullOr(Schema.String),
+  matchSignal: MatchSignal,
+  matchValue: Schema.NullOr(Schema.String),
+  matchScore: Schema.NullOr(Schema.Number),
+  ontologyVersion: Schema.String,
+  matcherVersion: Schema.String
+});
+export type StoredTopicMatch = Schema.Schema.Type<typeof StoredTopicMatch>;
+
+export const ExplainedPostTopic = Schema.Struct({
+  postUri: AtUri,
+  topicSlug: TopicSlug,
+  topicLabel: Schema.String,
+  conceptSlugs: Schema.Array(OntologyConceptSlug),
+  matchedTerm: Schema.NullOr(Schema.String),
+  matchSignal: MatchSignal,
+  matchValue: Schema.NullOr(Schema.String),
+  matchScore: Schema.NullOr(Schema.Number),
+  ontologyVersion: Schema.String,
+  matcherVersion: Schema.String
+});
+export type ExplainedPostTopic = Schema.Schema.Type<typeof ExplainedPostTopic>;
+
+export const ExplainPostTopicsOutput = Schema.Struct({
+  postUri: AtUri,
+  items: Schema.Array(ExplainedPostTopic)
+});
+export type ExplainPostTopicsOutput = Schema.Schema.Type<typeof ExplainPostTopicsOutput>;
 
 export const ExpertListOutput = Schema.Struct({
   items: Schema.Array(ExpertListItem)

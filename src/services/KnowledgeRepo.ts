@@ -2,12 +2,13 @@ import { Context, Effect } from "effect";
 import type { SqlError } from "@effect/sql/SqlError";
 import type {
   DeletedKnowledgePost,
-  GetPostLinksInput,
-  GetRecentPostsInput,
+  GetPostLinksQueryInput,
+  GetRecentPostsQueryInput,
   KnowledgeLinkResult,
   KnowledgePost,
   KnowledgePostResult,
-  SearchPostsInput
+  SearchPostsQueryInput,
+  StoredTopicMatch
 } from "../domain/bi";
 
 export class KnowledgeRepo extends Context.Tag("@skygest/KnowledgeRepo")<
@@ -16,13 +17,16 @@ export class KnowledgeRepo extends Context.Tag("@skygest/KnowledgeRepo")<
     readonly upsertPosts: (posts: ReadonlyArray<KnowledgePost>) => Effect.Effect<void, SqlError>;
     readonly markDeleted: (posts: ReadonlyArray<DeletedKnowledgePost>) => Effect.Effect<void, SqlError>;
     readonly searchPosts: (
-      input: SearchPostsInput
+      input: SearchPostsQueryInput
     ) => Effect.Effect<ReadonlyArray<KnowledgePostResult>, SqlError>;
     readonly getRecentPosts: (
-      input: GetRecentPostsInput
+      input: GetRecentPostsQueryInput
     ) => Effect.Effect<ReadonlyArray<KnowledgePostResult>, SqlError>;
     readonly getPostLinks: (
-      input: GetPostLinksInput
+      input: GetPostLinksQueryInput
     ) => Effect.Effect<ReadonlyArray<KnowledgeLinkResult>, SqlError>;
+    readonly getPostTopicMatches: (
+      postUri: string
+    ) => Effect.Effect<ReadonlyArray<StoredTopicMatch>, SqlError>;
   }
 >() {}

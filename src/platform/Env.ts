@@ -1,4 +1,5 @@
 import { Array, Context, Effect, Layer, Option, Schema } from "effect";
+import type { IngestRunParams } from "../domain/polling";
 
 export class EnvError extends Schema.TaggedError<EnvError>()("EnvError", {
   missing: Schema.String
@@ -14,8 +15,21 @@ export interface EnvBindings {
   readonly OPERATOR_SECRET?: string;
   readonly ACCESS_TEAM_DOMAIN?: string;
   readonly ACCESS_AUD?: string;
+  readonly INGEST_RUN_WORKFLOW?: Workflow<IngestRunParams>;
+  readonly EXPERT_POLL_COORDINATOR?: DurableObjectNamespace;
+  readonly ONTOLOGY_KV?: KVNamespace;
   readonly DB: D1Database;
 }
+
+export type WorkflowIngestEnvBindings = EnvBindings & {
+  readonly INGEST_RUN_WORKFLOW: Workflow<IngestRunParams>;
+  readonly EXPERT_POLL_COORDINATOR: DurableObjectNamespace;
+};
+
+export class WorkflowIngestEnv extends Context.Tag("@skygest/WorkflowIngestEnv")<
+  WorkflowIngestEnv,
+  WorkflowIngestEnvBindings
+>() {}
 
 const defaultRequired = [
   "DB"
@@ -42,3 +56,27 @@ export class CloudflareEnv extends Context.Tag("@skygest/CloudflareEnv")<
     })
   );
 }
+
+export const requireEnvBinding = <K extends keyof EnvBindings>(
+  env: EnvBindings,
+  key: K
+): NonNullable<EnvBindings[K]> => {
+  const value = env[key];
+
+  if (value == null) {
+    throw EnvError.make({ missing: String(key) });
+  }
+
+  return value as NonNullable<EnvBindings[K]>;
+};
+
+export const requireWorkflowIngestEnv = (
+  env: EnvBindings
+): WorkflowIngestEnvBindings => ({
+  ...env,
+  INGEST_RUN_WORKFLOW: requireEnvBinding(env, "INGEST_RUN_WORKFLOW"),
+  EXPERT_POLL_COORDINATOR: requireEnvBinding(env, "EXPERT_POLL_COORDINATOR")
+});
+
+export const makeWorkflowIngestEnvLayer = (env: WorkflowIngestEnvBindings) =>
+  Layer.succeed(WorkflowIngestEnv, env);

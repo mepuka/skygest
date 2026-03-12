@@ -168,6 +168,5 @@ export const collectMetadataTexts = (record: SlimPostRecord): ReadonlyArray<stri
   [
     record.embed?.external?.title,
     record.embed?.external?.description,
-    ...(record.tags ?? []),
     ...(record.label_values ?? [])
   ].filter((value): value is string => typeof value === "string" && value.length > 0);

@@ -1,0 +1,3383 @@
+{
+  "ontologyVersion": "0.3.0",
+  "snapshotVersion": "0.3.0-c0e0f896b6f2",
+  "generatedAt": "2026-02-27T00:00:00.000Z",
+  "sourceDigest": "c0e0f896b6f223df80ff95dd797365caba104673912841acdb1f15219b4ca26e",
+  "canonicalTopics": [
+    {
+      "slug": "solar",
+      "label": "Solar",
+      "description": "Utility-scale and distributed solar power generation.",
+      "conceptSlugs": [
+        "RooftopSolar",
+        "Solar"
+      ],
+      "rootConceptSlugs": [
+        "Solar"
+      ],
+      "terms": [
+        "distributed solar",
+        "photovoltaic",
+        "pv",
+        "PV",
+        "rooftop PV",
+        "rooftop solar",
+        "solar",
+        "solar energy",
+        "solar farm",
+        "solar panel",
+        "solar power"
+      ],
+      "hashtags": [
+        "rooftopsolar",
+        "solar",
+        "solarenergy",
+        "solarpower"
+      ],
+      "domains": [
+        "pv-magazine.com"
+      ]
+    },
+    {
+      "slug": "wind",
+      "label": "Wind",
+      "description": "Onshore wind generation and wind-power development.",
+      "conceptSlugs": [
+        "Wind"
+      ],
+      "rootConceptSlugs": [
+        "Wind"
+      ],
+      "terms": [
+        "offshore wind",
+        "onshore wind",
+        "wind",
+        "wind energy",
+        "wind farm",
+        "wind power",
+        "wind turbine"
+      ],
+      "hashtags": [
+        "onshorewind",
+        "wind",
+        "windenergy",
+        "windpower"
+      ],
+      "domains": [
+        "windpowermonthly.com"
+      ]
+    },
+    {
+      "slug": "offshore-wind",
+      "label": "Offshore Wind",
+      "description": "Offshore wind generation, leasing, and supply chains.",
+      "conceptSlugs": [
+        "OffshoreWind"
+      ],
+      "rootConceptSlugs": [
+        "OffshoreWind"
+      ],
+      "terms": [
+        "floating wind",
+        "ocean wind",
+        "offshore turbine",
+        "offshore wind",
+        "offshore wind farm"
+      ],
+      "hashtags": [
+        "offshore",
+        "offshorewind"
+      ],
+      "domains": [
+        "rechargenews.com",
+        "windpowermonthly.com"
+      ]
+    },
+    {
+      "slug": "geothermal",
+      "label": "Geothermal",
+      "description": "Geothermal power generation and geothermal heat systems.",
+      "conceptSlugs": [
+        "Geothermal"
+      ],
+      "rootConceptSlugs": [
+        "Geothermal"
+      ],
+      "terms": [
+        "geothermal",
+        "geothermal energy"
+      ],
+      "hashtags": [
+        "geothermal"
+      ],
+      "domains": [
+        "utilitydive.com"
+      ]
+    },
+    {
+      "slug": "hydro",
+      "label": "Hydro",
+      "description": "Hydropower generation and pumped hydro infrastructure.",
+      "conceptSlugs": [
+        "Hydro"
+      ],
+      "rootConceptSlugs": [
+        "Hydro"
+      ],
+      "terms": [
+        "hydro",
+        "hydroelectric",
+        "hydropower"
+      ],
+      "hashtags": [],
+      "domains": [
+        "powermag.com"
+      ]
+    },
+    {
+      "slug": "biomass",
+      "label": "Biomass",
+      "description": "Biomass and bioenergy production and policy.",
+      "conceptSlugs": [
+        "BiomassAndBioenergy"
+      ],
+      "rootConceptSlugs": [
+        "BiomassAndBioenergy"
+      ],
+      "terms": [
+        "bioenergy",
+        "biofuel",
+        "biogas",
+        "biomass",
+        "biomass and bioenergy"
+      ],
+      "hashtags": [
+        "bioenergy",
+        "biomass"
+      ],
+      "domains": []
+    },
+    {
+      "slug": "nuclear",
+      "label": "Nuclear",
+      "description": "Nuclear generation, reactors, and fusion research.",
+      "conceptSlugs": [
+        "Fusion",
+        "Nuclear",
+        "SMR"
+      ],
+      "rootConceptSlugs": [
+        "Nuclear"
+      ],
+      "terms": [
+        "atomic energy",
+        "fusion",
+        "fusion energy",
+        "nuclear",
+        "nuclear energy",
+        "nuclear fusion",
+        "nuclear power",
+        "small modular reactor",
+        "smr"
+      ],
+      "hashtags": [
+        "fusion",
+        "nuclear",
+        "nuclearenergy",
+        "nuclearpower",
+        "smr"
+      ],
+      "domains": []
+    },
+    {
+      "slug": "hydrogen",
+      "label": "Hydrogen",
+      "description": "Hydrogen production, infrastructure, and fuel-cell deployment.",
+      "conceptSlugs": [
+        "FuelCell",
+        "GreenHydrogen",
+        "Hydrogen"
+      ],
+      "rootConceptSlugs": [
+        "Hydrogen"
+      ],
+      "terms": [
+        "blue hydrogen",
+        "electrolytic hydrogen",
+        "electrolyzer",
+        "fuel cell",
+        "green H2",
+        "green hydrogen",
+        "h2",
+        "H2",
+        "hydrogen",
+        "hydrogen fuel cell",
+        "PEMFC",
+        "renewable hydrogen",
+        "SOFC"
+      ],
+      "hashtags": [
+        "greenhydrogen",
+        "hydrogen"
+      ],
+      "domains": [
+        "rechargenews.com"
+      ]
+    },
+    {
+      "slug": "natural-gas",
+      "label": "Natural Gas",
+      "description": "Natural gas production, LNG, and gas-system development.",
+      "conceptSlugs": [
+        "LNGTradeAndInfrastructure",
+        "NaturalGas"
+      ],
+      "rootConceptSlugs": [
+        "NaturalGas"
+      ],
+      "terms": [
+        "gas",
+        "gas pipeline",
+        "gas price",
+        "gas prices",
+        "liquefied natural gas trade",
+        "lng",
+        "LNG",
+        "LNG terminal",
+        "LNG trade",
+        "LNG trade and infrastructure",
+        "methane",
+        "natural gas"
+      ],
+      "hashtags": [
+        "gas",
+        "lng",
+        "methane",
+        "naturalgas"
+      ],
+      "domains": [
+        "energyintel.com",
+        "oilprice.com",
+        "platts.com"
+      ]
+    },
+    {
+      "slug": "coal",
+      "label": "Coal",
+      "description": "Coal production and coal-fired generation.",
+      "conceptSlugs": [
+        "Coal"
+      ],
+      "rootConceptSlugs": [
+        "Coal"
+      ],
+      "terms": [
+        "coal",
+        "coal power",
+        "coal-fired"
+      ],
+      "hashtags": [
+        "coal"
+      ],
+      "domains": [
+        "oilprice.com"
+      ]
+    },
+    {
+      "slug": "oil",
+      "label": "Oil",
+      "description": "Oil markets, production, and petroleum infrastructure.",
+      "conceptSlugs": [
+        "Oil"
+      ],
+      "rootConceptSlugs": [
+        "Oil"
+      ],
+      "terms": [
+        "crude",
+        "crude oil",
+        "oil",
+        "oil market",
+        "oil prices",
+        "petroleum"
+      ],
+      "hashtags": [
+        "oil",
+        "oilandgas",
+        "opec"
+      ],
+      "domains": [
+        "energyintel.com",
+        "oilprice.com",
+        "platts.com"
+      ]
+    },
+    {
+      "slug": "energy-storage",
+      "label": "Energy Storage",
+      "description": "Battery storage and long-duration storage systems.",
+      "conceptSlugs": [
+        "BatteryRecycling",
+        "EnergyStorage",
+        "LongDurationStorage",
+        "PumpedHydroStorage"
+      ],
+      "rootConceptSlugs": [
+        "EnergyStorage"
+      ],
+      "terms": [
+        "battery",
+        "battery circular economy",
+        "battery recycling",
+        "battery storage",
+        "bess",
+        "BESS",
+        "compressed air storage",
+        "energy storage",
+        "flow battery",
+        "iron-air battery",
+        "LDES",
+        "long duration energy storage",
+        "long duration storage",
+        "PHES",
+        "pumped hydro",
+        "pumped hydro storage",
+        "pumped storage",
+        "second life battery",
+        "storage"
+      ],
+      "hashtags": [
+        "battery",
+        "bess",
+        "energystorage"
+      ],
+      "domains": [
+        "powermag.com",
+        "utilitydive.com"
+      ]
+    },
+    {
+      "slug": "distributed-energy",
+      "label": "Distributed Energy",
+      "description": "DERs, demand response, microgrids, and virtual power plants.",
+      "conceptSlugs": [
+        "DemandResponse",
+        "DistributedEnergyAndFlexibility",
+        "Microgrid",
+        "VirtualPowerPlant"
+      ],
+      "rootConceptSlugs": [
+        "DistributedEnergyAndFlexibility"
+      ],
+      "terms": [
+        "aggregated DER",
+        "community microgrid",
+        "demand flexibility",
+        "demand response",
+        "DER",
+        "distributed energy",
+        "distributed energy and grid flexibility",
+        "distributed energy resources",
+        "DR",
+        "grid flexibility",
+        "islanded grid",
+        "load management",
+        "microgrid",
+        "virtual power plant",
+        "VPP"
+      ],
+      "hashtags": [
+        "der",
+        "microgrid"
+      ],
+      "domains": [
+        "utilitydive.com"
+      ]
+    },
+    {
+      "slug": "grid-and-infrastructure",
+      "label": "Grid and Infrastructure",
+      "description": "Transmission, distribution, interconnection, and grid operations.",
+      "conceptSlugs": [
+        "Distribution",
+        "GridAndInfrastructure",
+        "GridModernization",
+        "GridOperator",
+        "Interconnection",
+        "Transmission"
+      ],
+      "rootConceptSlugs": [
+        "GridAndInfrastructure"
+      ],
+      "terms": [
+        "advanced metering",
+        "der",
+        "distribution",
+        "electric grid",
+        "electricity infrastructure",
+        "grid",
+        "grid and infrastructure",
+        "grid connection",
+        "grid modernization",
+        "grid operator",
+        "grid upgrade",
+        "high-voltage lines",
+        "interconnection",
+        "interconnection queue",
+        "ISO",
+        "local grid",
+        "microgrid",
+        "power distribution",
+        "power grid",
+        "power transmission",
+        "RTO",
+        "smart grid",
+        "transmission",
+        "transmission planning"
+      ],
+      "hashtags": [
+        "electricgrid",
+        "grid",
+        "gridmodernization",
+        "interconnection",
+        "powergrid",
+        "transmission"
+      ],
+      "domains": [
+        "powermag.com",
+        "rtoinsider.com",
+        "utilitydive.com"
+      ]
+    },
+    {
+      "slug": "electrification",
+      "label": "Electrification",
+      "description": "Transport, building, and end-use electrification.",
+      "conceptSlugs": [
+        "BuildingElectrification",
+        "ElectricTransport",
+        "ElectricVehicles",
+        "Electrification",
+        "EVCharging",
+        "HeatPumps"
+      ],
+      "rootConceptSlugs": [
+        "Electrification"
+      ],
+      "terms": [
+        "BEV",
+        "building electrification",
+        "charging station",
+        "e-mobility",
+        "electric bus",
+        "electric car",
+        "electric ferry",
+        "electric transition",
+        "electric transport",
+        "electric vehicle",
+        "electric vehicles",
+        "electrification",
+        "ev",
+        "EV",
+        "EV charger",
+        "ev charging",
+        "EVSE",
+        "gas-to-electric",
+        "heat pump",
+        "heat pumps"
+      ],
+      "hashtags": [
+        "electricvehicles",
+        "electrification",
+        "ev",
+        "evcharging",
+        "evs",
+        "heatpump",
+        "heatpumps"
+      ],
+      "domains": [
+        "electrek.co",
+        "insideevs.com"
+      ]
+    },
+    {
+      "slug": "energy-efficiency",
+      "label": "Energy Efficiency",
+      "description": "Efficiency retrofits, demand reduction, and performance gains.",
+      "conceptSlugs": [
+        "BuildingsAndEfficiency",
+        "Retrofits"
+      ],
+      "rootConceptSlugs": [
+        "BuildingsAndEfficiency"
+      ],
+      "terms": [
+        "building energy",
+        "building retrofit",
+        "buildings and efficiency",
+        "efficiency gains",
+        "energy efficiency",
+        "energy retrofit",
+        "retrofit",
+        "retrofits"
+      ],
+      "hashtags": [
+        "energyefficiency"
+      ],
+      "domains": [
+        "nrel.gov"
+      ]
+    },
+    {
+      "slug": "data-center-demand",
+      "label": "Data Center Demand",
+      "description": "Electricity demand from data centers and AI workloads.",
+      "conceptSlugs": [
+        "AIAndDataCenterDemand",
+        "DataCenterDemand"
+      ],
+      "rootConceptSlugs": [
+        "AIAndDataCenterDemand",
+        "DataCenterDemand"
+      ],
+      "terms": [
+        "AI and data center energy demand",
+        "ai energy",
+        "AI energy",
+        "ai energy demand",
+        "AI energy demand",
+        "AI power demand",
+        "data center",
+        "data center demand",
+        "data center energy",
+        "data center power",
+        "data centre",
+        "energy demand"
+      ],
+      "hashtags": [],
+      "domains": []
+    },
+    {
+      "slug": "energy-policy",
+      "label": "Energy Policy",
+      "description": "Policy, regulation, permitting, and government energy strategy.",
+      "conceptSlugs": [
+        "Energiewende",
+        "EnergyPolicy",
+        "IRAPolicy",
+        "Legislation",
+        "Permitting",
+        "Regulation",
+        "Tariff"
+      ],
+      "rootConceptSlugs": [
+        "EnergyPolicy"
+      ],
+      "terms": [
+        "clean energy standard",
+        "clean energy tax credits",
+        "Energiewende",
+        "energy law",
+        "energy policy",
+        "energy regulation",
+        "energy tariffs",
+        "ferc",
+        "FERC",
+        "German energy transition",
+        "inflation reduction act",
+        "Inflation Reduction Act",
+        "Inflation Reduction Act policy",
+        "ira",
+        "IRA",
+        "legislation",
+        "nerc",
+        "NERC",
+        "permitting",
+        "permitting process",
+        "PUC",
+        "regulation",
+        "regulatory filing",
+        "siting",
+        "tariff",
+        "trade tariffs"
+      ],
+      "hashtags": [
+        "energypolicy",
+        "ferc",
+        "ira"
+      ],
+      "domains": [
+        "eia.gov",
+        "energy.gov",
+        "ferc.gov"
+      ]
+    },
+    {
+      "slug": "energy-markets",
+      "label": "Energy Markets",
+      "description": "Power, fuel, and wholesale market structure and pricing.",
+      "conceptSlugs": [
+        "Commodity",
+        "EnergyMarkets",
+        "PowerPurchaseAgreement",
+        "WholesaleMarkets"
+      ],
+      "rootConceptSlugs": [
+        "EnergyMarkets"
+      ],
+      "terms": [
+        "auction",
+        "capacity market",
+        "commodity",
+        "commodity trading",
+        "energy market",
+        "energy markets",
+        "gas prices",
+        "offtake agreement",
+        "oil futures",
+        "power market",
+        "power markets",
+        "power purchase agreement",
+        "ppa",
+        "PPA",
+        "wholesale electricity",
+        "wholesale market",
+        "wholesale markets"
+      ],
+      "hashtags": [
+        "energyfinance"
+      ],
+      "domains": [
+        "bnef.com",
+        "energyintel.com",
+        "platts.com"
+      ]
+    },
+    {
+      "slug": "energy-finance",
+      "label": "Energy Finance",
+      "description": "Project finance, M&A, public funding, and clean-tech capital.",
+      "conceptSlugs": [
+        "CorporateDeals",
+        "EnergyFinance",
+        "ProjectFinance",
+        "PublicFunding"
+      ],
+      "rootConceptSlugs": [
+        "EnergyFinance"
+      ],
+      "terms": [
+        "acquisition",
+        "corporate deals",
+        "energy finance",
+        "energy funding",
+        "energy investment",
+        "grant",
+        "M&A",
+        "merger",
+        "project finance",
+        "project funding",
+        "project investment",
+        "public funding",
+        "subsidy",
+        "tax credit",
+        "tax credit transfer"
+      ],
+      "hashtags": [
+        "cleantech",
+        "energyfinance",
+        "projectfinance"
+      ],
+      "domains": [
+        "bnef.com",
+        "latitudemedia.com"
+      ]
+    },
+    {
+      "slug": "energy-geopolitics",
+      "label": "Energy Geopolitics",
+      "description": "Energy security, sanctions, trade, and supply-chain strategy.",
+      "conceptSlugs": [
+        "EnergyGeopolitics",
+        "EnergySecurityAndResilience",
+        "SupplyChain",
+        "TradeAndSanctions"
+      ],
+      "rootConceptSlugs": [
+        "EnergyGeopolitics"
+      ],
+      "terms": [
+        "blackout prevention",
+        "energy geopolitics",
+        "energy independence",
+        "energy resilience",
+        "energy sanctions",
+        "energy security",
+        "energy security and resilience",
+        "energy supply chain",
+        "grid resilience",
+        "supply chain",
+        "trade and sanctions",
+        "trade dispute",
+        "trade sanctions"
+      ],
+      "hashtags": [
+        "energysecurity"
+      ],
+      "domains": [
+        "energyintel.com",
+        "platts.com"
+      ]
+    },
+    {
+      "slug": "critical-minerals",
+      "label": "Critical Minerals",
+      "description": "Critical-mineral extraction, processing, and market competition.",
+      "conceptSlugs": [
+        "CriticalMinerals"
+      ],
+      "rootConceptSlugs": [
+        "CriticalMinerals"
+      ],
+      "terms": [
+        "cobalt",
+        "critical minerals",
+        "lithium",
+        "rare earth",
+        "silicon"
+      ],
+      "hashtags": [
+        "criticalminerals",
+        "lithium"
+      ],
+      "domains": []
+    },
+    {
+      "slug": "climate-and-emissions",
+      "label": "Climate and Emissions",
+      "description": "Climate policy outcomes, emissions tracking, and net-zero commitments.",
+      "conceptSlugs": [
+        "ClimateAndEmissions",
+        "COPClimateConference",
+        "Decarbonization",
+        "EmissionsTracking",
+        "NetZero"
+      ],
+      "rootConceptSlugs": [
+        "ClimateAndEmissions"
+      ],
+      "terms": [
+        "carbon reduction",
+        "climate",
+        "climate and emissions",
+        "climate change",
+        "climate summit",
+        "COP",
+        "COP climate conference",
+        "COP30",
+        "decarbonisation",
+        "decarbonization",
+        "emissions",
+        "emissions reporting",
+        "emissions tracking",
+        "ghg",
+        "GHG",
+        "GHG monitoring",
+        "greenhouse gas",
+        "net zero",
+        "net zero target",
+        "net-zero",
+        "UNFCCC"
+      ],
+      "hashtags": [
+        "carbon",
+        "carbonemissions",
+        "climate",
+        "climatechange",
+        "decarbonization",
+        "emissions",
+        "netzero"
+      ],
+      "domains": [
+        "carbonbrief.org",
+        "grist.org",
+        "insideclimatenews.org"
+      ]
+    },
+    {
+      "slug": "carbon-capture",
+      "label": "Carbon Capture",
+      "description": "Carbon capture, removal, and direct-air-capture systems.",
+      "conceptSlugs": [
+        "CarbonCapture",
+        "DirectAirCapture"
+      ],
+      "rootConceptSlugs": [
+        "CarbonCapture"
+      ],
+      "terms": [
+        "carbon capture",
+        "carbon removal",
+        "ccs",
+        "CCS",
+        "ccus",
+        "CCUS",
+        "dac",
+        "DAC",
+        "direct air capture"
+      ],
+      "hashtags": [
+        "carboncapture",
+        "ccs",
+        "dac"
+      ],
+      "domains": []
+    },
+    {
+      "slug": "carbon-markets",
+      "label": "Carbon Markets",
+      "description": "Carbon-credit and emissions-trading markets.",
+      "conceptSlugs": [
+        "CarbonMarkets"
+      ],
+      "rootConceptSlugs": [
+        "CarbonMarkets"
+      ],
+      "terms": [
+        "cap-and-trade",
+        "carbon credits",
+        "carbon market",
+        "carbon markets",
+        "carbon trading",
+        "emissions trading",
+        "ets",
+        "ETS"
+      ],
+      "hashtags": [
+        "carbonmarkets"
+      ],
+      "domains": [
+        "carbonbrief.org"
+      ]
+    },
+    {
+      "slug": "environment-and-land-use",
+      "label": "Environment and Land Use",
+      "description": "Land use, environmental review, water, and pollution impacts.",
+      "conceptSlugs": [
+        "Agrivoltaics",
+        "EnvironmentAndLandUse",
+        "WasteAndPollution",
+        "WaterUse"
+      ],
+      "rootConceptSlugs": [
+        "EnvironmentAndLandUse"
+      ],
+      "terms": [
+        "agrivoltaic",
+        "agrivoltaics",
+        "cooling water",
+        "energy waste",
+        "environment and land use",
+        "environmental impact",
+        "environmental review",
+        "land use",
+        "pollution",
+        "solar farming",
+        "waste and pollution",
+        "water consumption",
+        "water use"
+      ],
+      "hashtags": [
+        "agrivoltaics"
+      ],
+      "domains": [
+        "insideclimatenews.org"
+      ]
+    },
+    {
+      "slug": "energy-justice",
+      "label": "Energy Justice",
+      "description": "Affordability, access, community energy, and just-transition concerns.",
+      "conceptSlugs": [
+        "Affordability",
+        "CommunityEnergy",
+        "EnergyAccess",
+        "EnergyJustice"
+      ],
+      "rootConceptSlugs": [
+        "EnergyJustice"
+      ],
+      "terms": [
+        "affordability",
+        "community energy",
+        "community solar",
+        "cooperative energy",
+        "energy access",
+        "energy bills",
+        "energy equity",
+        "energy justice",
+        "energy poverty",
+        "just transition",
+        "modern energy",
+        "rate hike"
+      ],
+      "hashtags": [
+        "energyaccess",
+        "energyjustice",
+        "energypoverty"
+      ],
+      "domains": []
+    },
+    {
+      "slug": "sectoral-decarbonization",
+      "label": "Sectoral Decarbonization",
+      "description": "Industrial, aviation, maritime, and cross-sector decarbonization pathways.",
+      "conceptSlugs": [
+        "AviationDecarbonization",
+        "IndustrialDecarbonization",
+        "MaritimeDecarbonization",
+        "SectoralDecarbonization"
+      ],
+      "rootConceptSlugs": [
+        "SectoralDecarbonization"
+      ],
+      "terms": [
+        "ammonia fuel",
+        "aviation decarbonization",
+        "cement decarbonization",
+        "deep decarbonization",
+        "e-fuel",
+        "green shipping",
+        "green steel",
+        "hard-to-abate sectors",
+        "industrial decarbonization",
+        "industrial heat",
+        "maritime decarbonization",
+        "maritime fuel",
+        "saf",
+        "SAF",
+        "sectoral decarbonization",
+        "sustainable aviation fuel"
+      ],
+      "hashtags": [],
+      "domains": []
+    },
+    {
+      "slug": "workforce-and-manufacturing",
+      "label": "Workforce and Manufacturing",
+      "description": "Energy jobs, industrial buildout, and manufacturing capacity.",
+      "conceptSlugs": [
+        "EnergyJobs",
+        "LaborRelations",
+        "Manufacturing",
+        "WorkforceAndManufacturing"
+      ],
+      "rootConceptSlugs": [
+        "WorkforceAndManufacturing"
+      ],
+      "terms": [
+        "clean energy jobs",
+        "domestic manufacturing",
+        "energy employment",
+        "energy jobs",
+        "energy manufacturing",
+        "energy unions",
+        "energy workforce",
+        "factory",
+        "labor relations",
+        "manufacturing",
+        "worker organizing",
+        "workforce and manufacturing"
+      ],
+      "hashtags": [],
+      "domains": []
+    },
+    {
+      "slug": "research-and-innovation",
+      "label": "Research and Innovation",
+      "description": "R&D, patents, and early-stage energy technology breakthroughs.",
+      "conceptSlugs": [
+        "EfficiencyRecords",
+        "Patent",
+        "Perovskite",
+        "ResearchAndInnovation"
+      ],
+      "rootConceptSlugs": [
+        "ResearchAndInnovation"
+      ],
+      "terms": [
+        "efficiency records",
+        "energy innovation",
+        "energy patent",
+        "energy R&D",
+        "energy research",
+        "IP",
+        "next-gen PV",
+        "patent",
+        "perovskite",
+        "perovskite solar",
+        "research and innovation",
+        "solar efficiency",
+        "tandem solar cell",
+        "technology breakthrough",
+        "technology record"
+      ],
+      "hashtags": [
+        "perovskite"
+      ],
+      "domains": [
+        "iea.org",
+        "irena.org",
+        "nrel.gov"
+      ]
+    }
+  ],
+  "concepts": [
+    {
+      "slug": "DataCenterDemand",
+      "iri": "http://example.org/ontology/energy-news#DataCenterDemand",
+      "label": "data center demand",
+      "altLabels": [
+        "AI energy demand",
+        "data center energy"
+      ],
+      "description": "A skos:Concept representing electricity demand from data centers and artificial intelligence workloads",
+      "topConcept": false,
+      "broaderSlugs": [
+        "AIAndDataCenterDemand"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "data-center-demand",
+      "matcherTerms": [
+        "ai energy demand",
+        "AI energy demand",
+        "data center demand",
+        "data center energy"
+      ]
+    },
+    {
+      "slug": "DirectAirCapture",
+      "iri": "http://example.org/ontology/energy-news#DirectAirCapture",
+      "label": "direct air capture",
+      "altLabels": [
+        "carbon removal",
+        "DAC"
+      ],
+      "description": "A skos:Concept representing technologies that capture carbon dioxide directly from ambient air",
+      "topConcept": false,
+      "broaderSlugs": [
+        "CarbonCapture"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "carbon-capture",
+      "matcherTerms": [
+        "carbon removal",
+        "dac",
+        "DAC",
+        "direct air capture"
+      ]
+    },
+    {
+      "slug": "LNGTradeAndInfrastructure",
+      "iri": "http://example.org/ontology/energy-news#LNGTradeAndInfrastructure",
+      "label": "LNG trade and infrastructure",
+      "altLabels": [
+        "liquefied natural gas trade",
+        "LNG terminal",
+        "LNG trade"
+      ],
+      "description": "A skos:Concept representing the international trade, pricing, and physical infrastructure for liquefied natural gas",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyTradeAndSupplyChains"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "natural-gas",
+      "matcherTerms": [
+        "liquefied natural gas trade",
+        "LNG terminal",
+        "LNG trade",
+        "LNG trade and infrastructure"
+      ]
+    },
+    {
+      "slug": "Affordability",
+      "iri": "http://example.org/ontology/energy-news#Affordability",
+      "label": "affordability",
+      "altLabels": [
+        "energy bills",
+        "energy poverty",
+        "rate hike"
+      ],
+      "description": "A skos:Concept representing energy affordability bills rate increases and energy poverty",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyJustice"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-justice",
+      "matcherTerms": [
+        "affordability",
+        "energy bills",
+        "energy poverty",
+        "rate hike"
+      ]
+    },
+    {
+      "slug": "Agrivoltaics",
+      "iri": "http://example.org/ontology/energy-news#Agrivoltaics",
+      "label": "agrivoltaics",
+      "altLabels": [
+        "agrivoltaic",
+        "solar farming"
+      ],
+      "description": "A skos:Concept representing co-location of solar panels and agriculture",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnvironmentAndLandUse"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "environment-and-land-use",
+      "matcherTerms": [
+        "agrivoltaic",
+        "agrivoltaics",
+        "solar farming"
+      ]
+    },
+    {
+      "slug": "AviationDecarbonization",
+      "iri": "http://example.org/ontology/energy-news#AviationDecarbonization",
+      "label": "aviation decarbonization",
+      "altLabels": [
+        "e-fuel",
+        "SAF",
+        "sustainable aviation fuel"
+      ],
+      "description": "A skos:Concept representing decarbonization of the aviation sector through sustainable fuels and electric aircraft",
+      "topConcept": false,
+      "broaderSlugs": [
+        "SectoralDecarbonization"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "sectoral-decarbonization",
+      "matcherTerms": [
+        "aviation decarbonization",
+        "e-fuel",
+        "saf",
+        "SAF",
+        "sustainable aviation fuel"
+      ]
+    },
+    {
+      "slug": "BatteryRecycling",
+      "iri": "http://example.org/ontology/energy-news#BatteryRecycling",
+      "label": "battery recycling",
+      "altLabels": [
+        "battery circular economy",
+        "second life battery"
+      ],
+      "description": "A skos:Concept representing recycling, reuse, and circular economy practices for energy storage batteries",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyStorage"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-storage",
+      "matcherTerms": [
+        "battery circular economy",
+        "battery recycling",
+        "second life battery"
+      ]
+    },
+    {
+      "slug": "BuildingElectrification",
+      "iri": "http://example.org/ontology/energy-news#BuildingElectrification",
+      "label": "building electrification",
+      "altLabels": [
+        "building electrification",
+        "gas-to-electric"
+      ],
+      "description": "A skos:Concept representing switching buildings from gas to electric systems",
+      "topConcept": false,
+      "broaderSlugs": [
+        "BuildingsAndEfficiency"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "electrification",
+      "matcherTerms": [
+        "building electrification",
+        "gas-to-electric"
+      ]
+    },
+    {
+      "slug": "COPClimateConference",
+      "iri": "http://example.org/ontology/energy-news#COPClimateConference",
+      "label": "COP climate conference",
+      "altLabels": [
+        "climate summit",
+        "COP",
+        "COP30",
+        "UNFCCC"
+      ],
+      "description": "A skos:Concept representing United Nations Climate Change Conference proceedings and outcomes",
+      "topConcept": false,
+      "broaderSlugs": [
+        "ClimateAndEmissions"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "climate-and-emissions",
+      "matcherTerms": [
+        "climate summit",
+        "COP",
+        "COP climate conference",
+        "COP30",
+        "UNFCCC"
+      ]
+    },
+    {
+      "slug": "CarbonMarkets",
+      "iri": "http://example.org/ontology/energy-news#CarbonMarkets",
+      "label": "carbon markets",
+      "altLabels": [
+        "cap-and-trade",
+        "carbon credits",
+        "carbon trading",
+        "ETS"
+      ],
+      "description": "A skos:Concept representing emissions trading systems, carbon credit markets, and cap-and-trade mechanisms",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyMarkets"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "carbon-markets",
+      "matcherTerms": [
+        "cap-and-trade",
+        "carbon credits",
+        "carbon markets",
+        "carbon trading",
+        "ets",
+        "ETS"
+      ]
+    },
+    {
+      "slug": "Coal",
+      "iri": "http://example.org/ontology/energy-news#Coal",
+      "label": "coal",
+      "altLabels": [
+        "coal power",
+        "coal-fired"
+      ],
+      "description": "A skos:Concept representing coal extraction and coal-fired power generation",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Fossil"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "coal",
+      "matcherTerms": [
+        "coal",
+        "coal power",
+        "coal-fired"
+      ]
+    },
+    {
+      "slug": "Commodity",
+      "iri": "http://example.org/ontology/energy-news#Commodity",
+      "label": "commodity",
+      "altLabels": [
+        "commodity trading",
+        "gas prices",
+        "oil futures"
+      ],
+      "description": "A skos:Concept representing oil futures gas spot prices and energy commodity trading",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyMarkets"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-markets",
+      "matcherTerms": [
+        "commodity",
+        "commodity trading",
+        "gas prices",
+        "oil futures"
+      ]
+    },
+    {
+      "slug": "CommunityEnergy",
+      "iri": "http://example.org/ontology/energy-news#CommunityEnergy",
+      "label": "community energy",
+      "altLabels": [
+        "community solar",
+        "cooperative energy"
+      ],
+      "description": "A skos:Concept representing community-owned energy projects and cooperatives",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyJustice"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-justice",
+      "matcherTerms": [
+        "community energy",
+        "community solar",
+        "cooperative energy"
+      ]
+    },
+    {
+      "slug": "CorporateDeals",
+      "iri": "http://example.org/ontology/energy-news#CorporateDeals",
+      "label": "corporate deals",
+      "altLabels": [
+        "acquisition",
+        "M&A",
+        "merger"
+      ],
+      "description": "A skos:Concept representing acquisitions mergers and corporate stakes in energy companies",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyFinance"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-finance",
+      "matcherTerms": [
+        "acquisition",
+        "corporate deals",
+        "M&A",
+        "merger"
+      ]
+    },
+    {
+      "slug": "CriticalMinerals",
+      "iri": "http://example.org/ontology/energy-news#CriticalMinerals",
+      "label": "critical minerals",
+      "altLabels": [
+        "cobalt",
+        "lithium",
+        "rare earth",
+        "silicon"
+      ],
+      "description": "A skos:Concept representing critical minerals required for energy technologies",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyGeopolitics"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "critical-minerals",
+      "matcherTerms": [
+        "cobalt",
+        "critical minerals",
+        "lithium",
+        "rare earth",
+        "silicon"
+      ]
+    },
+    {
+      "slug": "Decarbonization",
+      "iri": "http://example.org/ontology/energy-news#Decarbonization",
+      "label": "decarbonization",
+      "altLabels": [
+        "carbon reduction",
+        "decarbonisation"
+      ],
+      "description": "A skos:Concept representing strategies and progress toward reducing carbon emissions",
+      "topConcept": false,
+      "broaderSlugs": [
+        "ClimateAndEmissions"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "climate-and-emissions",
+      "matcherTerms": [
+        "carbon reduction",
+        "decarbonisation",
+        "decarbonization"
+      ]
+    },
+    {
+      "slug": "DemandResponse",
+      "iri": "http://example.org/ontology/energy-news#DemandResponse",
+      "label": "demand response",
+      "altLabels": [
+        "demand flexibility",
+        "DR",
+        "load management"
+      ],
+      "description": "A skos:Concept representing programs and technologies that adjust electricity consumption in response to grid conditions or price signals",
+      "topConcept": false,
+      "broaderSlugs": [
+        "DistributedEnergyAndFlexibility"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "distributed-energy",
+      "matcherTerms": [
+        "demand flexibility",
+        "demand response",
+        "DR",
+        "load management"
+      ]
+    },
+    {
+      "slug": "Distribution",
+      "iri": "http://example.org/ontology/energy-news#Distribution",
+      "label": "distribution",
+      "altLabels": [
+        "local grid",
+        "power distribution"
+      ],
+      "description": "A skos:Concept representing local electricity distribution networks",
+      "topConcept": false,
+      "broaderSlugs": [
+        "GridAndInfrastructure"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "grid-and-infrastructure",
+      "matcherTerms": [
+        "distribution",
+        "local grid",
+        "power distribution"
+      ]
+    },
+    {
+      "slug": "EVCharging",
+      "iri": "http://example.org/ontology/energy-news#EVCharging",
+      "label": "ev charging",
+      "altLabels": [
+        "charging station",
+        "EV charger",
+        "EVSE"
+      ],
+      "description": "A skos:Concept representing electric vehicle charging infrastructure and networks",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Electrification"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "electrification",
+      "matcherTerms": [
+        "charging station",
+        "EV charger",
+        "ev charging",
+        "EVSE"
+      ]
+    },
+    {
+      "slug": "EfficiencyRecords",
+      "iri": "http://example.org/ontology/energy-news#EfficiencyRecords",
+      "label": "efficiency records",
+      "altLabels": [
+        "solar efficiency",
+        "technology record"
+      ],
+      "description": "A skos:Concept representing technology efficiency records and breakthrough achievements",
+      "topConcept": false,
+      "broaderSlugs": [
+        "ResearchAndInnovation"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "research-and-innovation",
+      "matcherTerms": [
+        "efficiency records",
+        "solar efficiency",
+        "technology record"
+      ]
+    },
+    {
+      "slug": "ElectricTransport",
+      "iri": "http://example.org/ontology/energy-news#ElectricTransport",
+      "label": "electric transport",
+      "altLabels": [
+        "e-mobility",
+        "electric bus",
+        "electric ferry"
+      ],
+      "description": "A skos:Concept representing electrification of ships ferries buses and other transport",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Electrification"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "electrification",
+      "matcherTerms": [
+        "e-mobility",
+        "electric bus",
+        "electric ferry",
+        "electric transport"
+      ]
+    },
+    {
+      "slug": "ElectricVehicles",
+      "iri": "http://example.org/ontology/energy-news#ElectricVehicles",
+      "label": "electric vehicles",
+      "altLabels": [
+        "BEV",
+        "electric car",
+        "EV"
+      ],
+      "description": "A skos:Concept representing battery and plug-in electric vehicles",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Electrification"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "electrification",
+      "matcherTerms": [
+        "BEV",
+        "electric car",
+        "electric vehicles",
+        "ev",
+        "EV"
+      ]
+    },
+    {
+      "slug": "EmissionsTracking",
+      "iri": "http://example.org/ontology/energy-news#EmissionsTracking",
+      "label": "emissions tracking",
+      "altLabels": [
+        "emissions reporting",
+        "GHG monitoring"
+      ],
+      "description": "A skos:Concept representing monitoring and reporting of greenhouse gas emissions",
+      "topConcept": false,
+      "broaderSlugs": [
+        "ClimateAndEmissions"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "climate-and-emissions",
+      "matcherTerms": [
+        "emissions reporting",
+        "emissions tracking",
+        "GHG monitoring"
+      ]
+    },
+    {
+      "slug": "Energiewende",
+      "iri": "http://example.org/ontology/energy-news#Energiewende",
+      "label": "Energiewende",
+      "altLabels": [
+        "German energy transition"
+      ],
+      "description": "A skos:Concept representing Germany's energy transition policy framework and its global influence",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyPolicy"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-policy",
+      "matcherTerms": [
+        "Energiewende",
+        "German energy transition"
+      ]
+    },
+    {
+      "slug": "EnergyAccess",
+      "iri": "http://example.org/ontology/energy-news#EnergyAccess",
+      "label": "energy access",
+      "altLabels": [
+        "energy access",
+        "modern energy"
+      ],
+      "description": "A skos:Concept representing access to modern energy services",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyJustice"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-justice",
+      "matcherTerms": [
+        "energy access",
+        "modern energy"
+      ]
+    },
+    {
+      "slug": "EnergyJobs",
+      "iri": "http://example.org/ontology/energy-news#EnergyJobs",
+      "label": "energy jobs",
+      "altLabels": [
+        "clean energy jobs",
+        "energy employment"
+      ],
+      "description": "A skos:Concept representing employment in the energy sector",
+      "topConcept": false,
+      "broaderSlugs": [
+        "WorkforceAndManufacturing"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "workforce-and-manufacturing",
+      "matcherTerms": [
+        "clean energy jobs",
+        "energy employment",
+        "energy jobs"
+      ]
+    },
+    {
+      "slug": "EnergySecurityAndResilience",
+      "iri": "http://example.org/ontology/energy-news#EnergySecurityAndResilience",
+      "label": "energy security and resilience",
+      "altLabels": [
+        "blackout prevention",
+        "energy independence",
+        "grid resilience"
+      ],
+      "description": "A skos:Concept representing energy supply security, grid resilience against disruptions, and energy independence strategies",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyGeopolitics"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-geopolitics",
+      "matcherTerms": [
+        "blackout prevention",
+        "energy independence",
+        "energy security and resilience",
+        "grid resilience"
+      ]
+    },
+    {
+      "slug": "FuelCell",
+      "iri": "http://example.org/ontology/energy-news#FuelCell",
+      "label": "fuel cell",
+      "altLabels": [
+        "hydrogen fuel cell",
+        "PEMFC",
+        "SOFC"
+      ],
+      "description": "A skos:Concept representing electrochemical devices that convert hydrogen or other fuels into electricity",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Hydrogen"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "hydrogen",
+      "matcherTerms": [
+        "fuel cell",
+        "hydrogen fuel cell",
+        "PEMFC",
+        "SOFC"
+      ]
+    },
+    {
+      "slug": "Fusion",
+      "iri": "http://example.org/ontology/energy-news#Fusion",
+      "label": "fusion",
+      "altLabels": [
+        "fusion energy",
+        "nuclear fusion"
+      ],
+      "description": "A skos:Concept representing nuclear fusion energy research and development",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Nuclear"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "nuclear",
+      "matcherTerms": [
+        "fusion",
+        "fusion energy",
+        "nuclear fusion"
+      ]
+    },
+    {
+      "slug": "Geothermal",
+      "iri": "http://example.org/ontology/energy-news#Geothermal",
+      "label": "geothermal",
+      "altLabels": [
+        "geothermal energy"
+      ],
+      "description": "A skos:Concept representing heat energy extracted from the earth",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Renewable"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "geothermal",
+      "matcherTerms": [
+        "geothermal",
+        "geothermal energy"
+      ]
+    },
+    {
+      "slug": "GreenHydrogen",
+      "iri": "http://example.org/ontology/energy-news#GreenHydrogen",
+      "label": "green hydrogen",
+      "altLabels": [
+        "electrolytic hydrogen",
+        "green H2",
+        "renewable hydrogen"
+      ],
+      "description": "A skos:Concept representing hydrogen produced via electrolysis powered by renewable energy sources",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Hydrogen"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "hydrogen",
+      "matcherTerms": [
+        "electrolytic hydrogen",
+        "green H2",
+        "green hydrogen",
+        "renewable hydrogen"
+      ]
+    },
+    {
+      "slug": "GridModernization",
+      "iri": "http://example.org/ontology/energy-news#GridModernization",
+      "label": "grid modernization",
+      "altLabels": [
+        "advanced metering",
+        "grid upgrade",
+        "smart grid"
+      ],
+      "description": "A skos:Concept representing modernization of electrical grid infrastructure including smart grid technologies and advanced metering",
+      "topConcept": false,
+      "broaderSlugs": [
+        "GridAndInfrastructure"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "grid-and-infrastructure",
+      "matcherTerms": [
+        "advanced metering",
+        "grid modernization",
+        "grid upgrade",
+        "smart grid"
+      ]
+    },
+    {
+      "slug": "GridOperator",
+      "iri": "http://example.org/ontology/energy-news#GridOperator",
+      "label": "grid operator",
+      "altLabels": [
+        "grid operator",
+        "ISO",
+        "RTO"
+      ],
+      "description": "A skos:Concept representing independent system operators and regional transmission organizations",
+      "topConcept": false,
+      "broaderSlugs": [
+        "GridAndInfrastructure"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "grid-and-infrastructure",
+      "matcherTerms": [
+        "grid operator",
+        "ISO",
+        "RTO"
+      ]
+    },
+    {
+      "slug": "HeatPumps",
+      "iri": "http://example.org/ontology/energy-news#HeatPumps",
+      "label": "heat pumps",
+      "altLabels": [
+        "heat pump"
+      ],
+      "description": "A skos:Concept representing heat pump technology for building heating and cooling",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Electrification"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "electrification",
+      "matcherTerms": [
+        "heat pump",
+        "heat pumps"
+      ]
+    },
+    {
+      "slug": "Hydro",
+      "iri": "http://example.org/ontology/energy-news#Hydro",
+      "label": "hydro",
+      "altLabels": [
+        "hydroelectric",
+        "hydropower"
+      ],
+      "description": "A skos:Concept representing conventional and pumped-storage hydroelectric power",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Renewable"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "hydro",
+      "matcherTerms": [
+        "hydro",
+        "hydroelectric",
+        "hydropower"
+      ]
+    },
+    {
+      "slug": "IRAPolicy",
+      "iri": "http://example.org/ontology/energy-news#IRAPolicy",
+      "label": "Inflation Reduction Act policy",
+      "altLabels": [
+        "clean energy tax credits",
+        "Inflation Reduction Act",
+        "IRA"
+      ],
+      "description": "A skos:Concept representing policies, subsidies, and tax credits established by the U.S. Inflation Reduction Act",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyPolicy"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-policy",
+      "matcherTerms": [
+        "clean energy tax credits",
+        "inflation reduction act",
+        "Inflation Reduction Act",
+        "Inflation Reduction Act policy",
+        "ira",
+        "IRA"
+      ]
+    },
+    {
+      "slug": "IndustrialDecarbonization",
+      "iri": "http://example.org/ontology/energy-news#IndustrialDecarbonization",
+      "label": "industrial decarbonization",
+      "altLabels": [
+        "cement decarbonization",
+        "green steel",
+        "industrial heat"
+      ],
+      "description": "A skos:Concept representing decarbonization of heavy industry including steel, cement, and chemical manufacturing",
+      "topConcept": false,
+      "broaderSlugs": [
+        "SectoralDecarbonization"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "sectoral-decarbonization",
+      "matcherTerms": [
+        "cement decarbonization",
+        "green steel",
+        "industrial decarbonization",
+        "industrial heat"
+      ]
+    },
+    {
+      "slug": "Interconnection",
+      "iri": "http://example.org/ontology/energy-news#Interconnection",
+      "label": "interconnection",
+      "altLabels": [
+        "grid connection",
+        "interconnection queue"
+      ],
+      "description": "A skos:Concept representing generator interconnection queues and processes",
+      "topConcept": false,
+      "broaderSlugs": [
+        "GridAndInfrastructure"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "grid-and-infrastructure",
+      "matcherTerms": [
+        "grid connection",
+        "interconnection",
+        "interconnection queue"
+      ]
+    },
+    {
+      "slug": "LaborRelations",
+      "iri": "http://example.org/ontology/energy-news#LaborRelations",
+      "label": "labor relations",
+      "altLabels": [
+        "energy unions",
+        "worker organizing"
+      ],
+      "description": "A skos:Concept representing unions and worker organizing in the energy sector",
+      "topConcept": false,
+      "broaderSlugs": [
+        "WorkforceAndManufacturing"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "workforce-and-manufacturing",
+      "matcherTerms": [
+        "energy unions",
+        "labor relations",
+        "worker organizing"
+      ]
+    },
+    {
+      "slug": "Legislation",
+      "iri": "http://example.org/ontology/energy-news#Legislation",
+      "label": "legislation",
+      "altLabels": [
+        "clean energy standard",
+        "energy law"
+      ],
+      "description": "A skos:Concept representing laws and legislative acts affecting energy",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyPolicy"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-policy",
+      "matcherTerms": [
+        "clean energy standard",
+        "energy law",
+        "legislation"
+      ]
+    },
+    {
+      "slug": "LongDurationStorage",
+      "iri": "http://example.org/ontology/energy-news#LongDurationStorage",
+      "label": "long duration energy storage",
+      "altLabels": [
+        "compressed air storage",
+        "flow battery",
+        "iron-air battery",
+        "LDES"
+      ],
+      "description": "A skos:Concept representing energy storage technologies designed to discharge over periods exceeding four hours",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyStorage"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-storage",
+      "matcherTerms": [
+        "compressed air storage",
+        "flow battery",
+        "iron-air battery",
+        "LDES",
+        "long duration energy storage"
+      ]
+    },
+    {
+      "slug": "Manufacturing",
+      "iri": "http://example.org/ontology/energy-news#Manufacturing",
+      "label": "manufacturing",
+      "altLabels": [
+        "energy manufacturing",
+        "factory"
+      ],
+      "description": "A skos:Concept representing energy equipment manufacturing and factories",
+      "topConcept": false,
+      "broaderSlugs": [
+        "WorkforceAndManufacturing"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "workforce-and-manufacturing",
+      "matcherTerms": [
+        "energy manufacturing",
+        "factory",
+        "manufacturing"
+      ]
+    },
+    {
+      "slug": "MaritimeDecarbonization",
+      "iri": "http://example.org/ontology/energy-news#MaritimeDecarbonization",
+      "label": "maritime decarbonization",
+      "altLabels": [
+        "ammonia fuel",
+        "green shipping",
+        "maritime fuel"
+      ],
+      "description": "A skos:Concept representing decarbonization of maritime shipping through alternative fuels and efficiency measures",
+      "topConcept": false,
+      "broaderSlugs": [
+        "SectoralDecarbonization"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "sectoral-decarbonization",
+      "matcherTerms": [
+        "ammonia fuel",
+        "green shipping",
+        "maritime decarbonization",
+        "maritime fuel"
+      ]
+    },
+    {
+      "slug": "Microgrid",
+      "iri": "http://example.org/ontology/energy-news#Microgrid",
+      "label": "microgrid",
+      "altLabels": [
+        "community microgrid",
+        "islanded grid"
+      ],
+      "description": "A skos:Concept representing localized energy grids that can operate independently from the main grid",
+      "topConcept": false,
+      "broaderSlugs": [
+        "DistributedEnergyAndFlexibility"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "distributed-energy",
+      "matcherTerms": [
+        "community microgrid",
+        "islanded grid",
+        "microgrid"
+      ]
+    },
+    {
+      "slug": "NaturalGas",
+      "iri": "http://example.org/ontology/energy-news#NaturalGas",
+      "label": "natural gas",
+      "altLabels": [
+        "gas",
+        "LNG",
+        "natural gas"
+      ],
+      "description": "A skos:Concept representing natural gas including liquefied natural gas and pipeline gas",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Fossil"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "natural-gas",
+      "matcherTerms": [
+        "gas",
+        "lng",
+        "LNG",
+        "natural gas"
+      ]
+    },
+    {
+      "slug": "NetZero",
+      "iri": "http://example.org/ontology/energy-news#NetZero",
+      "label": "net zero",
+      "altLabels": [
+        "net zero target",
+        "net-zero"
+      ],
+      "description": "A skos:Concept representing net-zero emissions targets and commitments",
+      "topConcept": false,
+      "broaderSlugs": [
+        "ClimateAndEmissions"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "climate-and-emissions",
+      "matcherTerms": [
+        "net zero",
+        "net zero target",
+        "net-zero"
+      ]
+    },
+    {
+      "slug": "OffshoreWind",
+      "iri": "http://example.org/ontology/energy-news#OffshoreWind",
+      "label": "offshore wind",
+      "altLabels": [
+        "floating wind",
+        "ocean wind",
+        "offshore wind farm"
+      ],
+      "description": "A skos:Concept representing fixed-bottom and floating offshore wind energy generation",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Renewable"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "offshore-wind",
+      "matcherTerms": [
+        "floating wind",
+        "ocean wind",
+        "offshore wind",
+        "offshore wind farm"
+      ]
+    },
+    {
+      "slug": "Oil",
+      "iri": "http://example.org/ontology/energy-news#Oil",
+      "label": "oil",
+      "altLabels": [
+        "crude oil",
+        "petroleum"
+      ],
+      "description": "A skos:Concept representing crude oil extraction refining and petroleum products",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Fossil"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "oil",
+      "matcherTerms": [
+        "crude oil",
+        "oil",
+        "petroleum"
+      ]
+    },
+    {
+      "slug": "Patent",
+      "iri": "http://example.org/ontology/energy-news#Patent",
+      "label": "patent",
+      "altLabels": [
+        "energy patent",
+        "IP"
+      ],
+      "description": "A skos:Concept representing intellectual property and patents in energy technology",
+      "topConcept": false,
+      "broaderSlugs": [
+        "ResearchAndInnovation"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "research-and-innovation",
+      "matcherTerms": [
+        "energy patent",
+        "IP",
+        "patent"
+      ]
+    },
+    {
+      "slug": "Permitting",
+      "iri": "http://example.org/ontology/energy-news#Permitting",
+      "label": "permitting",
+      "altLabels": [
+        "permitting process",
+        "siting"
+      ],
+      "description": "A skos:Concept representing permitting and siting processes for energy projects",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyPolicy"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-policy",
+      "matcherTerms": [
+        "permitting",
+        "permitting process",
+        "siting"
+      ]
+    },
+    {
+      "slug": "Perovskite",
+      "iri": "http://example.org/ontology/energy-news#Perovskite",
+      "label": "perovskite solar",
+      "altLabels": [
+        "next-gen PV",
+        "perovskite",
+        "tandem solar cell"
+      ],
+      "description": "A skos:Concept representing perovskite and tandem solar cell research and commercialization",
+      "topConcept": false,
+      "broaderSlugs": [
+        "ResearchAndInnovation"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "research-and-innovation",
+      "matcherTerms": [
+        "next-gen PV",
+        "perovskite",
+        "perovskite solar",
+        "tandem solar cell"
+      ]
+    },
+    {
+      "slug": "PowerPurchaseAgreement",
+      "iri": "http://example.org/ontology/energy-news#PowerPurchaseAgreement",
+      "label": "power purchase agreement",
+      "altLabels": [
+        "offtake agreement",
+        "PPA"
+      ],
+      "description": "A skos:Concept representing power purchase agreements between generators and offtakers",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyMarkets"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-markets",
+      "matcherTerms": [
+        "offtake agreement",
+        "power purchase agreement",
+        "ppa",
+        "PPA"
+      ]
+    },
+    {
+      "slug": "ProjectFinance",
+      "iri": "http://example.org/ontology/energy-news#ProjectFinance",
+      "label": "project finance",
+      "altLabels": [
+        "project funding",
+        "project investment"
+      ],
+      "description": "A skos:Concept representing financing of specific energy projects",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyFinance"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-finance",
+      "matcherTerms": [
+        "project finance",
+        "project funding",
+        "project investment"
+      ]
+    },
+    {
+      "slug": "PublicFunding",
+      "iri": "http://example.org/ontology/energy-news#PublicFunding",
+      "label": "public funding",
+      "altLabels": [
+        "grant",
+        "subsidy",
+        "tax credit"
+      ],
+      "description": "A skos:Concept representing government subsidies tax credits and grants for energy",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyFinance"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-finance",
+      "matcherTerms": [
+        "grant",
+        "public funding",
+        "subsidy",
+        "tax credit"
+      ]
+    },
+    {
+      "slug": "PumpedHydroStorage",
+      "iri": "http://example.org/ontology/energy-news#PumpedHydroStorage",
+      "label": "pumped hydro storage",
+      "altLabels": [
+        "PHES",
+        "pumped hydro",
+        "pumped storage"
+      ],
+      "description": "A skos:Concept representing pumped hydroelectric energy storage systems",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyStorage"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-storage",
+      "matcherTerms": [
+        "PHES",
+        "pumped hydro",
+        "pumped hydro storage",
+        "pumped storage"
+      ]
+    },
+    {
+      "slug": "Retrofits",
+      "iri": "http://example.org/ontology/energy-news#Retrofits",
+      "label": "retrofits",
+      "altLabels": [
+        "building retrofit",
+        "energy retrofit"
+      ],
+      "description": "A skos:Concept representing energy efficiency retrofits of existing buildings",
+      "topConcept": false,
+      "broaderSlugs": [
+        "BuildingsAndEfficiency"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-efficiency",
+      "matcherTerms": [
+        "building retrofit",
+        "energy retrofit",
+        "retrofits"
+      ]
+    },
+    {
+      "slug": "RooftopSolar",
+      "iri": "http://example.org/ontology/energy-news#RooftopSolar",
+      "label": "rooftop solar",
+      "altLabels": [
+        "distributed solar",
+        "rooftop PV"
+      ],
+      "description": "A skos:Concept representing rooftop and distributed solar installations on buildings",
+      "topConcept": false,
+      "broaderSlugs": [
+        "BuildingsAndEfficiency"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "solar",
+      "matcherTerms": [
+        "distributed solar",
+        "rooftop PV",
+        "rooftop solar"
+      ]
+    },
+    {
+      "slug": "SMR",
+      "iri": "http://example.org/ontology/energy-news#SMR",
+      "label": "smr",
+      "altLabels": [
+        "small modular reactor"
+      ],
+      "description": "A skos:Concept representing small modular reactor technology designs",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Nuclear"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "nuclear",
+      "matcherTerms": [
+        "small modular reactor",
+        "smr"
+      ]
+    },
+    {
+      "slug": "Solar",
+      "iri": "http://example.org/ontology/energy-news#Solar",
+      "label": "solar",
+      "altLabels": [
+        "photovoltaic",
+        "PV",
+        "solar energy"
+      ],
+      "description": "A skos:Concept representing solar photovoltaic and concentrated solar power generation",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Renewable"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "solar",
+      "matcherTerms": [
+        "photovoltaic",
+        "pv",
+        "PV",
+        "solar",
+        "solar energy"
+      ]
+    },
+    {
+      "slug": "SupplyChain",
+      "iri": "http://example.org/ontology/energy-news#SupplyChain",
+      "label": "supply chain",
+      "altLabels": [
+        "energy supply chain"
+      ],
+      "description": "A skos:Concept representing energy equipment and fuel supply chains",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyGeopolitics"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-geopolitics",
+      "matcherTerms": [
+        "energy supply chain",
+        "supply chain"
+      ]
+    },
+    {
+      "slug": "Tariff",
+      "iri": "http://example.org/ontology/energy-news#Tariff",
+      "label": "tariff",
+      "altLabels": [
+        "energy tariffs",
+        "trade tariffs"
+      ],
+      "description": "A skos:Concept representing trade tariffs on energy equipment and materials",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyPolicy"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-policy",
+      "matcherTerms": [
+        "energy tariffs",
+        "tariff",
+        "trade tariffs"
+      ]
+    },
+    {
+      "slug": "TradeAndSanctions",
+      "iri": "http://example.org/ontology/energy-news#TradeAndSanctions",
+      "label": "trade and sanctions",
+      "altLabels": [
+        "energy sanctions",
+        "trade dispute"
+      ],
+      "description": "A skos:Concept representing energy trade disputes and sanctions regimes",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyGeopolitics"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-geopolitics",
+      "matcherTerms": [
+        "energy sanctions",
+        "trade and sanctions",
+        "trade dispute"
+      ]
+    },
+    {
+      "slug": "Transmission",
+      "iri": "http://example.org/ontology/energy-news#Transmission",
+      "label": "transmission",
+      "altLabels": [
+        "high-voltage lines",
+        "power transmission"
+      ],
+      "description": "A skos:Concept representing high-voltage transmission lines and transmission planning",
+      "topConcept": false,
+      "broaderSlugs": [
+        "GridAndInfrastructure"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "grid-and-infrastructure",
+      "matcherTerms": [
+        "high-voltage lines",
+        "power transmission",
+        "transmission"
+      ]
+    },
+    {
+      "slug": "VirtualPowerPlant",
+      "iri": "http://example.org/ontology/energy-news#VirtualPowerPlant",
+      "label": "virtual power plant",
+      "altLabels": [
+        "aggregated DER",
+        "VPP"
+      ],
+      "description": "A skos:Concept representing aggregated distributed energy resources managed as a single dispatchable unit",
+      "topConcept": false,
+      "broaderSlugs": [
+        "DistributedEnergyAndFlexibility"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "distributed-energy",
+      "matcherTerms": [
+        "aggregated DER",
+        "virtual power plant",
+        "VPP"
+      ]
+    },
+    {
+      "slug": "WasteAndPollution",
+      "iri": "http://example.org/ontology/energy-news#WasteAndPollution",
+      "label": "waste and pollution",
+      "altLabels": [
+        "energy waste",
+        "pollution"
+      ],
+      "description": "A skos:Concept representing waste disposal and pollution from energy production",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnvironmentAndLandUse"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "environment-and-land-use",
+      "matcherTerms": [
+        "energy waste",
+        "pollution",
+        "waste and pollution"
+      ]
+    },
+    {
+      "slug": "WaterUse",
+      "iri": "http://example.org/ontology/energy-news#WaterUse",
+      "label": "water use",
+      "altLabels": [
+        "cooling water",
+        "water consumption"
+      ],
+      "description": "A skos:Concept representing water consumption by energy facilities",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnvironmentAndLandUse"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "environment-and-land-use",
+      "matcherTerms": [
+        "cooling water",
+        "water consumption",
+        "water use"
+      ]
+    },
+    {
+      "slug": "WholesaleMarkets",
+      "iri": "http://example.org/ontology/energy-news#WholesaleMarkets",
+      "label": "wholesale markets",
+      "altLabels": [
+        "auction",
+        "capacity market",
+        "wholesale electricity"
+      ],
+      "description": "A skos:Concept representing wholesale electricity markets and capacity auctions",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyMarkets"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-markets",
+      "matcherTerms": [
+        "auction",
+        "capacity market",
+        "wholesale electricity",
+        "wholesale markets"
+      ]
+    },
+    {
+      "slug": "Wind",
+      "iri": "http://example.org/ontology/energy-news#Wind",
+      "label": "wind",
+      "altLabels": [
+        "wind energy",
+        "wind power"
+      ],
+      "description": "A skos:Concept representing onshore and offshore wind power generation",
+      "topConcept": false,
+      "broaderSlugs": [
+        "Renewable"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "wind",
+      "matcherTerms": [
+        "wind",
+        "wind energy",
+        "wind power"
+      ]
+    },
+    {
+      "slug": "BiomassAndBioenergy",
+      "iri": "http://example.org/ontology/energy-news#BiomassAndBioenergy",
+      "label": "biomass and bioenergy",
+      "altLabels": [
+        "bioenergy",
+        "biofuel",
+        "biogas",
+        "biomass"
+      ],
+      "description": "A skos:Concept representing energy derived from biological materials including biomass combustion, biofuels, and biogas production",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "biomass",
+      "matcherTerms": [
+        "bioenergy",
+        "biofuel",
+        "biogas",
+        "biomass",
+        "biomass and bioenergy"
+      ]
+    },
+    {
+      "slug": "Regulation",
+      "iri": "http://example.org/ontology/energy-news#Regulation",
+      "label": "regulation",
+      "altLabels": [
+        "energy regulation",
+        "FERC",
+        "NERC",
+        "PUC"
+      ],
+      "description": "A skos:Concept representing regulatory actions by energy regulatory bodies",
+      "topConcept": false,
+      "broaderSlugs": [
+        "EnergyPolicy"
+      ],
+      "narrowerSlugs": [],
+      "canonicalTopicSlug": "energy-policy",
+      "matcherTerms": [
+        "energy regulation",
+        "ferc",
+        "FERC",
+        "nerc",
+        "NERC",
+        "PUC",
+        "regulation"
+      ]
+    },
+    {
+      "slug": "CarbonCapture",
+      "iri": "http://example.org/ontology/energy-news#CarbonCapture",
+      "label": "carbon capture",
+      "altLabels": [
+        "carbon capture",
+        "CCS",
+        "CCUS"
+      ],
+      "description": "A skos:Concept representing carbon capture utilization and storage technologies",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "DirectAirCapture"
+      ],
+      "canonicalTopicSlug": "carbon-capture",
+      "matcherTerms": [
+        "carbon capture",
+        "ccs",
+        "CCS",
+        "ccus",
+        "CCUS"
+      ]
+    },
+    {
+      "slug": "AIAndDataCenterDemand",
+      "iri": "http://example.org/ontology/energy-news#AIAndDataCenterDemand",
+      "label": "AI and data center energy demand",
+      "altLabels": [
+        "AI energy",
+        "AI power demand",
+        "data center power"
+      ],
+      "description": "A skos:Concept representing electricity demand from artificial intelligence workloads, data centers, and large-scale computing infrastructure",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "DataCenterDemand"
+      ],
+      "canonicalTopicSlug": "data-center-demand",
+      "matcherTerms": [
+        "AI and data center energy demand",
+        "ai energy",
+        "AI energy",
+        "AI power demand",
+        "data center power"
+      ]
+    },
+    {
+      "slug": "EnergyTradeAndSupplyChains",
+      "iri": "http://example.org/ontology/energy-news#EnergyTradeAndSupplyChains",
+      "label": "energy trade and supply chains",
+      "altLabels": [
+        "energy logistics",
+        "energy supply chain",
+        "energy trade"
+      ],
+      "description": "A skos:Concept representing international energy commodity trade, physical infrastructure for energy transport, and supply chain logistics",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "LNGTradeAndInfrastructure"
+      ],
+      "canonicalTopicSlug": null,
+      "matcherTerms": []
+    },
+    {
+      "slug": "Hydrogen",
+      "iri": "http://example.org/ontology/energy-news#Hydrogen",
+      "label": "hydrogen",
+      "altLabels": [
+        "blue hydrogen",
+        "green hydrogen",
+        "H2"
+      ],
+      "description": "A skos:Concept representing hydrogen as an energy carrier across production methods",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "FuelCell",
+        "GreenHydrogen"
+      ],
+      "canonicalTopicSlug": "hydrogen",
+      "matcherTerms": [
+        "blue hydrogen",
+        "green hydrogen",
+        "h2",
+        "H2",
+        "hydrogen"
+      ]
+    },
+    {
+      "slug": "Nuclear",
+      "iri": "http://example.org/ontology/energy-news#Nuclear",
+      "label": "nuclear",
+      "altLabels": [
+        "atomic energy",
+        "nuclear energy",
+        "nuclear power"
+      ],
+      "description": "A skos:Concept representing energy from nuclear fission and fusion reactions",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "Fusion",
+        "SMR"
+      ],
+      "canonicalTopicSlug": "nuclear",
+      "matcherTerms": [
+        "atomic energy",
+        "nuclear",
+        "nuclear energy",
+        "nuclear power"
+      ]
+    },
+    {
+      "slug": "BuildingsAndEfficiency",
+      "iri": "http://example.org/ontology/energy-news#BuildingsAndEfficiency",
+      "label": "buildings and efficiency",
+      "altLabels": [
+        "building energy",
+        "energy efficiency"
+      ],
+      "description": "A skos:Concept representing building energy performance retrofits and distributed generation",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "BuildingElectrification",
+        "Retrofits",
+        "RooftopSolar"
+      ],
+      "canonicalTopicSlug": "energy-efficiency",
+      "matcherTerms": [
+        "building energy",
+        "buildings and efficiency",
+        "energy efficiency"
+      ]
+    },
+    {
+      "slug": "DistributedEnergyAndFlexibility",
+      "iri": "http://example.org/ontology/energy-news#DistributedEnergyAndFlexibility",
+      "label": "distributed energy and grid flexibility",
+      "altLabels": [
+        "DER",
+        "distributed energy resources",
+        "grid flexibility"
+      ],
+      "description": "A skos:Concept representing distributed energy resources, demand-side flexibility, virtual power plants, and decentralized grid management",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "DemandResponse",
+        "Microgrid",
+        "VirtualPowerPlant"
+      ],
+      "canonicalTopicSlug": "distributed-energy",
+      "matcherTerms": [
+        "DER",
+        "distributed energy and grid flexibility",
+        "distributed energy resources",
+        "grid flexibility"
+      ]
+    },
+    {
+      "slug": "EnergyFinance",
+      "iri": "http://example.org/ontology/energy-news#EnergyFinance",
+      "label": "energy finance",
+      "altLabels": [
+        "energy funding",
+        "energy investment"
+      ],
+      "description": "A skos:Concept representing investment funding and financial deals in the energy sector",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "CorporateDeals",
+        "ProjectFinance",
+        "PublicFunding"
+      ],
+      "canonicalTopicSlug": "energy-finance",
+      "matcherTerms": [
+        "energy finance",
+        "energy funding",
+        "energy investment"
+      ]
+    },
+    {
+      "slug": "EnergyJustice",
+      "iri": "http://example.org/ontology/energy-news#EnergyJustice",
+      "label": "energy justice",
+      "altLabels": [
+        "energy equity",
+        "just transition"
+      ],
+      "description": "A skos:Concept representing equity access and justice dimensions of energy systems",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "Affordability",
+        "CommunityEnergy",
+        "EnergyAccess"
+      ],
+      "canonicalTopicSlug": "energy-justice",
+      "matcherTerms": [
+        "energy equity",
+        "energy justice",
+        "just transition"
+      ]
+    },
+    {
+      "slug": "EnvironmentAndLandUse",
+      "iri": "http://example.org/ontology/energy-news#EnvironmentAndLandUse",
+      "label": "environment and land use",
+      "altLabels": [
+        "environmental impact",
+        "land use"
+      ],
+      "description": "A skos:Concept representing environmental impacts and land use of energy projects",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "Agrivoltaics",
+        "WasteAndPollution",
+        "WaterUse"
+      ],
+      "canonicalTopicSlug": "environment-and-land-use",
+      "matcherTerms": [
+        "environment and land use",
+        "environmental impact",
+        "land use"
+      ]
+    },
+    {
+      "slug": "ResearchAndInnovation",
+      "iri": "http://example.org/ontology/energy-news#ResearchAndInnovation",
+      "label": "research and innovation",
+      "altLabels": [
+        "energy innovation",
+        "energy R&D"
+      ],
+      "description": "A skos:Concept representing research development breakthroughs and patents in energy technology",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "EfficiencyRecords",
+        "Patent",
+        "Perovskite"
+      ],
+      "canonicalTopicSlug": "research-and-innovation",
+      "matcherTerms": [
+        "energy innovation",
+        "energy R&D",
+        "research and innovation"
+      ]
+    },
+    {
+      "slug": "SectoralDecarbonization",
+      "iri": "http://example.org/ontology/energy-news#SectoralDecarbonization",
+      "label": "sectoral decarbonization",
+      "altLabels": [
+        "deep decarbonization",
+        "hard-to-abate sectors"
+      ],
+      "description": "A skos:Concept representing decarbonization efforts in specific economic sectors including heavy industry, maritime transport, and aviation",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "AviationDecarbonization",
+        "IndustrialDecarbonization",
+        "MaritimeDecarbonization"
+      ],
+      "canonicalTopicSlug": "sectoral-decarbonization",
+      "matcherTerms": [
+        "deep decarbonization",
+        "hard-to-abate sectors",
+        "sectoral decarbonization"
+      ]
+    },
+    {
+      "slug": "WorkforceAndManufacturing",
+      "iri": "http://example.org/ontology/energy-news#WorkforceAndManufacturing",
+      "label": "workforce and manufacturing",
+      "altLabels": [
+        "energy manufacturing",
+        "energy workforce"
+      ],
+      "description": "A skos:Concept representing jobs labor and manufacturing in the energy sector",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "EnergyJobs",
+        "LaborRelations",
+        "Manufacturing"
+      ],
+      "canonicalTopicSlug": "workforce-and-manufacturing",
+      "matcherTerms": [
+        "energy manufacturing",
+        "energy workforce",
+        "workforce and manufacturing"
+      ]
+    },
+    {
+      "slug": "ClimateAndEmissions",
+      "iri": "http://example.org/ontology/energy-news#ClimateAndEmissions",
+      "label": "climate and emissions",
+      "altLabels": [
+        "climate",
+        "emissions",
+        "GHG"
+      ],
+      "description": "A skos:Concept representing climate change and greenhouse gas emissions in the energy context",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "COPClimateConference",
+        "Decarbonization",
+        "EmissionsTracking",
+        "NetZero"
+      ],
+      "canonicalTopicSlug": "climate-and-emissions",
+      "matcherTerms": [
+        "climate",
+        "climate and emissions",
+        "emissions",
+        "ghg",
+        "GHG"
+      ]
+    },
+    {
+      "slug": "Electrification",
+      "iri": "http://example.org/ontology/energy-news#Electrification",
+      "label": "electrification",
+      "altLabels": [
+        "electric transition",
+        "electrification"
+      ],
+      "description": "A skos:Concept representing the electrification of transport buildings and industry",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "ElectricTransport",
+        "ElectricVehicles",
+        "EVCharging",
+        "HeatPumps"
+      ],
+      "canonicalTopicSlug": "electrification",
+      "matcherTerms": [
+        "electric transition",
+        "electrification"
+      ]
+    },
+    {
+      "slug": "EnergyGeopolitics",
+      "iri": "http://example.org/ontology/energy-news#EnergyGeopolitics",
+      "label": "energy geopolitics",
+      "altLabels": [
+        "energy geopolitics",
+        "energy security"
+      ],
+      "description": "A skos:Concept representing geopolitical dimensions of energy supply trade and security",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "CriticalMinerals",
+        "EnergySecurityAndResilience",
+        "SupplyChain",
+        "TradeAndSanctions"
+      ],
+      "canonicalTopicSlug": "energy-geopolitics",
+      "matcherTerms": [
+        "energy geopolitics",
+        "energy security"
+      ]
+    },
+    {
+      "slug": "EnergyMarkets",
+      "iri": "http://example.org/ontology/energy-news#EnergyMarkets",
+      "label": "energy markets",
+      "altLabels": [
+        "energy markets",
+        "power markets"
+      ],
+      "description": "A skos:Concept representing pricing trading and wholesale electricity and commodity markets",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "CarbonMarkets",
+        "Commodity",
+        "PowerPurchaseAgreement",
+        "WholesaleMarkets"
+      ],
+      "canonicalTopicSlug": "energy-markets",
+      "matcherTerms": [
+        "energy markets",
+        "power markets"
+      ]
+    },
+    {
+      "slug": "EnergyStorage",
+      "iri": "http://example.org/ontology/energy-news#EnergyStorage",
+      "label": "energy storage",
+      "altLabels": [
+        "battery storage",
+        "BESS",
+        "storage"
+      ],
+      "description": "A skos:Concept representing battery storage and other energy storage technologies",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "BatteryRecycling",
+        "LongDurationStorage",
+        "PumpedHydroStorage"
+      ],
+      "canonicalTopicSlug": "energy-storage",
+      "matcherTerms": [
+        "battery storage",
+        "bess",
+        "BESS",
+        "energy storage",
+        "storage"
+      ]
+    },
+    {
+      "slug": "Fossil",
+      "iri": "http://example.org/ontology/energy-news#Fossil",
+      "label": "fossil",
+      "altLabels": [
+        "conventional energy",
+        "fossil fuel"
+      ],
+      "description": "A skos:Concept representing energy derived from geological carbon deposits including coal oil and natural gas",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "Coal",
+        "NaturalGas",
+        "Oil"
+      ],
+      "canonicalTopicSlug": null,
+      "matcherTerms": []
+    },
+    {
+      "slug": "Renewable",
+      "iri": "http://example.org/ontology/energy-news#Renewable",
+      "label": "renewable",
+      "altLabels": [
+        "clean energy",
+        "renewables"
+      ],
+      "description": "A skos:Concept representing energy generated from naturally replenishing sources such as solar wind and hydro",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "Geothermal",
+        "Hydro",
+        "OffshoreWind",
+        "Solar",
+        "Wind"
+      ],
+      "canonicalTopicSlug": null,
+      "matcherTerms": []
+    },
+    {
+      "slug": "EnergyPolicy",
+      "iri": "http://example.org/ontology/energy-news#EnergyPolicy",
+      "label": "energy policy",
+      "altLabels": [
+        "energy policy"
+      ],
+      "description": "A skos:Concept representing government policy affecting the energy sector",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "Energiewende",
+        "IRAPolicy",
+        "Legislation",
+        "Permitting",
+        "Regulation",
+        "Tariff"
+      ],
+      "canonicalTopicSlug": "energy-policy",
+      "matcherTerms": [
+        "energy policy"
+      ]
+    },
+    {
+      "slug": "GridAndInfrastructure",
+      "iri": "http://example.org/ontology/energy-news#GridAndInfrastructure",
+      "label": "grid and infrastructure",
+      "altLabels": [
+        "electricity infrastructure",
+        "grid",
+        "power grid"
+      ],
+      "description": "A skos:Concept representing power grid and electricity delivery infrastructure",
+      "topConcept": true,
+      "broaderSlugs": [],
+      "narrowerSlugs": [
+        "Distribution",
+        "GridModernization",
+        "GridOperator",
+        "Interconnection",
+        "Transmission"
+      ],
+      "canonicalTopicSlug": "grid-and-infrastructure",
+      "matcherTerms": [
+        "electricity infrastructure",
+        "grid",
+        "grid and infrastructure",
+        "power grid"
+      ]
+    }
+  ],
+  "signalCatalog": {
+    "hashtags": [
+      "agrivoltaics",
+      "battery",
+      "bess",
+      "bioenergy",
+      "biomass",
+      "carbon",
+      "carboncapture",
+      "carbonemissions",
+      "carbonmarkets",
+      "ccs",
+      "cleanenergy",
+      "cleanpower",
+      "cleantech",
+      "climate",
+      "climatechange",
+      "coal",
+      "communitysolar",
+      "criticalminerals",
+      "dac",
+      "decarbonization",
+      "der",
+      "electricgrid",
+      "electricity",
+      "electricvehicles",
+      "electrification",
+      "emissions",
+      "energy",
+      "energyaccess",
+      "energyefficiency",
+      "energyfinance",
+      "energyjustice",
+      "energypolicy",
+      "energypoverty",
+      "energysecurity",
+      "energystorage",
+      "energytransition",
+      "ev",
+      "evcharging",
+      "evs",
+      "ferc",
+      "fossilfuels",
+      "fusion",
+      "gas",
+      "geothermal",
+      "greenenergy",
+      "greenhydrogen",
+      "grid",
+      "gridmodernization",
+      "heatpump",
+      "heatpumps",
+      "hydrogen",
+      "interconnection",
+      "ira",
+      "lithium",
+      "lng",
+      "methane",
+      "microgrid",
+      "naturalgas",
+      "netzero",
+      "nuclear",
+      "nuclearenergy",
+      "nuclearpower",
+      "offshore",
+      "offshorewind",
+      "oil",
+      "oilandgas",
+      "onshore",
+      "onshorewind",
+      "opec",
+      "perovskite",
+      "powergrid",
+      "powerplant",
+      "projectfinance",
+      "renewables",
+      "rooftopsolar",
+      "smr",
+      "solar",
+      "solarenergy",
+      "solarpower",
+      "sustainability",
+      "transmission",
+      "uranium",
+      "wind",
+      "windenergy",
+      "windpower"
+    ],
+    "domains": [
+      "bnef.com",
+      "canary.media",
+      "canarymedia.com",
+      "carbonbrief.org",
+      "cleantechnica.com",
+      "eenews.net",
+      "eia.gov",
+      "electrek.co",
+      "energy.gov",
+      "energyintel.com",
+      "energymonitor.ai",
+      "energyvoice.com",
+      "ferc.gov",
+      "greentechmedia.com",
+      "grist.org",
+      "heatmap.news",
+      "iea.org",
+      "insideclimatenews.org",
+      "insideevs.com",
+      "irena.org",
+      "latitudemedia.com",
+      "nrel.gov",
+      "oilprice.com",
+      "platts.com",
+      "powermag.com",
+      "pv-magazine.com",
+      "rechargenews.com",
+      "renewableenergyworld.com",
+      "rtoinsider.com",
+      "thedriven.io",
+      "utilitydive.com",
+      "volts.wtf",
+      "windpowermonthly.com",
+      "woodmac.com"
+    ],
+    "ambiguityTerms": [
+      "battery",
+      "bess",
+      "coal",
+      "der",
+      "ev",
+      "ferc",
+      "gas",
+      "grid",
+      "h2",
+      "ira",
+      "lng",
+      "oil",
+      "ppa",
+      "pv",
+      "smr",
+      "storage"
+    ]
+  },
+  "authorTiers": {
+    "energyFocused": [
+      "abbiebennett.bsky.social",
+      "akshatrathi.bsky.social",
+      "aleach.ca",
+      "alicemhancock.bsky.social",
+      "altenergy.bsky.social",
+      "anikanpatel.carbonbrief.org",
+      "bigearthdata.ai",
+      "brianscheid.bsky.social",
+      "campbellenergy.bsky.social",
+      "canarymedia.com",
+      "carbonbrief.org",
+      "chelseaeharvey.bsky.social",
+      "ckemfert.bsky.social",
+      "cleanenergy.org",
+      "cleanenergywire.bsky.social",
+      "cleantechnica.bsky.social",
+      "climatenews.bsky.social",
+      "costasamaras.com",
+      "drpauldorfman.bsky.social",
+      "drsimevans.carbonbrief.org",
+      "earthsciinfo.bsky.social",
+      "electrek.co",
+      "enerdata.bsky.social",
+      "energyinnovation.org",
+      "energylawjeff.bsky.social",
+      "energyvoice.com",
+      "ethanhowl.bsky.social",
+      "euenergy.bsky.social",
+      "gasbuddyguy.bsky.social",
+      "gavinjmaguire.bsky.social",
+      "greencollective.io",
+      "grist.org",
+      "gruberte.bsky.social",
+      "hannahdaly.ie",
+      "hanseric.bsky.social",
+      "hausfath.bsky.social",
+      "heatmap.news",
+      "iea.org",
+      "insideclimatenews.org",
+      "insideevs.com",
+      "janrosenow.bsky.social",
+      "javierblas.bsky.social",
+      "jeffstjohn.bsky.social",
+      "jessedjenkins.com",
+      "jrfhanger.bsky.social",
+      "justingerdes.bsky.social",
+      "ketanjoshi.co",
+      "latitudemedia.bsky.social",
+      "leohickman.carbonbrief.org",
+      "liamdenning.bsky.social",
+      "longtail.news",
+      "lovering.bsky.social",
+      "mikemunsell.bsky.social",
+      "nathanielbullard.com",
+      "opinion.bloomberg.com",
+      "patrickgaley.bsky.social",
+      "rebleber.bsky.social",
+      "renewableenergy.bsky.social",
+      "robinsonmeyer.bsky.social",
+      "rtoinsider.bsky.social",
+      "sammyroth.bsky.social",
+      "severinborenstein.bsky.social",
+      "shedrills.bsky.social",
+      "sjcasey.bsky.social",
+      "sstapczynski.bsky.social",
+      "thedriven.io",
+      "theenergymix.com",
+      "torsolarfred.bsky.social",
+      "ucenergyinstitute.bsky.social",
+      "volts.wtf",
+      "wettengel.bsky.social",
+      "windpowermonthly.bsky.social",
+      "worldnuclearnews.bsky.social",
+      "yalee360.bsky.social"
+    ],
+    "generalOutlets": [
+      "apnews.com",
+      "arstechnica.com",
+      "axios.com",
+      "bloomberg.com",
+      "cnbc.com",
+      "economist.com",
+      "financialtimes.com",
+      "latimes.com",
+      "npr.org",
+      "nytimes.com",
+      "politico.com",
+      "reuters.com",
+      "theguardian.com",
+      "thehill.com",
+      "vox.com",
+      "washingtonpost.com",
+      "wired.com"
+    ]
+  },
+  "anomalies": [
+    {
+      "code": "duplicate_alt_label",
+      "message": "BuildingElectrification repeats its preferred label as an altLabel: \"building electrification\"."
+    },
+    {
+      "code": "duplicate_alt_label",
+      "message": "CarbonCapture repeats its preferred label as an altLabel: \"carbon capture\"."
+    },
+    {
+      "code": "duplicate_alt_label",
+      "message": "Electrification repeats its preferred label as an altLabel: \"electrification\"."
+    },
+    {
+      "code": "duplicate_alt_label",
+      "message": "EnergyAccess repeats its preferred label as an altLabel: \"energy access\"."
+    },
+    {
+      "code": "duplicate_alt_label",
+      "message": "EnergyGeopolitics repeats its preferred label as an altLabel: \"energy geopolitics\"."
+    },
+    {
+      "code": "duplicate_alt_label",
+      "message": "EnergyMarkets repeats its preferred label as an altLabel: \"energy markets\"."
+    },
+    {
+      "code": "duplicate_alt_label",
+      "message": "EnergyPolicy repeats its preferred label as an altLabel: \"energy policy\"."
+    },
+    {
+      "code": "duplicate_alt_label",
+      "message": "GridOperator repeats its preferred label as an altLabel: \"grid operator\"."
+    },
+    {
+      "code": "duplicate_alt_label",
+      "message": "NaturalGas repeats its preferred label as an altLabel: \"natural gas\"."
+    },
+    {
+      "code": "duplicate_alt_label",
+      "message": "NetZero repeats its preferred label as an altLabel: \"net-zero\"."
+    },
+    {
+      "code": "hashtag_heading_count_mismatch",
+      "message": "Heading says 82 hashtags but parsed 85."
+    },
+    {
+      "code": "term_collision",
+      "message": "Matcher term \"energy manufacturing\" appears in multiple concepts: Manufacturing, WorkforceAndManufacturing."
+    },
+    {
+      "code": "term_collision",
+      "message": "Matcher term \"green hydrogen\" appears in multiple concepts: GreenHydrogen, Hydrogen."
+    }
+  ]
+}

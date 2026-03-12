@@ -51,4 +51,19 @@ describe("ingest slice", () => {
       expect(solarPosts).toHaveLength(0);
     }).pipe(Effect.provide(makeBiLayer()))
   );
+
+  it.effect("stores match provenance that can be explained through the query service", () =>
+    Effect.gen(function* () {
+      yield* seedKnowledgeBase();
+
+      const query = yield* KnowledgeQueryService;
+      const explanation = yield* query.explainPostTopics(
+        `at://${sampleDid}/app.bsky.feed.post/post-solar` as any
+      );
+
+      expect(explanation.items.some((item) => item.topicSlug === "solar")).toBe(true);
+      expect(explanation.items.every((item) => item.matchScore !== null)).toBe(true);
+      expect(explanation.items.every((item) => item.matcherVersion.length > 0)).toBe(true);
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
 });

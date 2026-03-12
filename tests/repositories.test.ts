@@ -54,7 +54,7 @@ describe("repository layers", () => {
       `;
 
       expect(postCount?.count).toBe(2);
-      expect(topicCount?.count).toBe(5);
+      expect(topicCount?.count).toBe(6);
       expect(linkCount?.count).toBe(2);
     }).pipe(Effect.provide(makeBiLayer()))
   );

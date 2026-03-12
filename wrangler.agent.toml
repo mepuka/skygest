@@ -5,6 +5,15 @@ compatibility_date = "2024-04-03"
 [observability]
 enabled = true
 
+[[workflows]]
+name = "ingest-run"
+binding = "INGEST_RUN_WORKFLOW"
+class_name = "IngestRunWorkflow"
+
+[[durable_objects.bindings]]
+name = "EXPERT_POLL_COORDINATOR"
+class_name = "ExpertPollCoordinatorDo"
+
 [vars]
 PUBLIC_BSKY_API = "https://public.api.bsky.app"
 INGEST_SHARD_COUNT = "1"
@@ -20,8 +29,24 @@ binding = "DB"
 database_name = "skygest"
 database_id = "b33d6089-883e-4f62-bcfd-3b30153e51e9"
 
+[[kv_namespaces]]
+binding = "ONTOLOGY_KV"
+id = "replace-with-ontology-kv-id"
+
 [env.staging]
 name = "skygest-bi-agent-staging"
+
+[env.staging.observability]
+enabled = true
+
+[[env.staging.workflows]]
+name = "ingest-run"
+binding = "INGEST_RUN_WORKFLOW"
+class_name = "IngestRunWorkflow"
+
+[[env.staging.durable_objects.bindings]]
+name = "EXPERT_POLL_COORDINATOR"
+class_name = "ExpertPollCoordinatorDo"
 
 # Set with:
 # bunx wrangler secret put OPERATOR_SECRET --config wrangler.agent.toml --env staging
@@ -39,3 +64,11 @@ ACCESS_AUD = "replace-me"
 binding = "DB"
 database_name = "skygest-staging"
 database_id = "29a612d3-67c9-429d-93af-6e976681e7c8"
+
+[[env.staging.kv_namespaces]]
+binding = "ONTOLOGY_KV"
+id = "replace-with-staging-ontology-kv-id"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ExpertPollCoordinatorDo"]

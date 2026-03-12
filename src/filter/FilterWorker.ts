@@ -22,77 +22,109 @@ export type ProcessBatchSummary = {
   readonly postsDeleted: number;
 };
 
+type BatchActions = {
+  readonly upserts: ReadonlyArray<KnowledgePost>;
+  readonly deletions: ReadonlyArray<DeletedKnowledgePost>;
+};
+
+const emptyBatchActions = (): BatchActions => ({
+  upserts: [],
+  deletions: []
+});
+
 export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (batch: RawEventBatch) {
   const knowledgeRepo = yield* KnowledgeRepo;
   const ontology = yield* OntologyCatalog;
 
-  const upserts: Array<KnowledgePost> = [];
-  const deletions: Array<DeletedKnowledgePost> = [];
+  const actions = yield* Effect.reduce(
+    batch.events,
+    emptyBatchActions(),
+    (state, event) => {
+      if (event.collection !== "app.bsky.feed.post") {
+        return Effect.succeed(state);
+      }
 
-  for (const event of batch.events) {
-    if (event.collection !== "app.bsky.feed.post") {
-      continue;
-    }
+      const indexedAt = Date.now();
+      const createdAt = Math.floor(event.timeUs / 1000);
+      const ingestId = makeIngestId(event.uri, event.operation, event.cid ?? null, event.timeUs);
 
-    const indexedAt = Date.now();
-    const createdAt = Math.floor(event.timeUs / 1000);
-    const ingestId = makeIngestId(event.uri, event.operation, event.cid ?? null, event.timeUs);
+      if (event.operation === "delete") {
+        return Effect.succeed({
+          ...state,
+          deletions: [
+            ...state.deletions,
+            {
+              uri: event.uri,
+              did: event.did,
+              cid: event.cid ?? null,
+              createdAt,
+              indexedAt,
+              ingestId
+            }
+          ]
+        });
+      }
 
-    if (event.operation === "delete") {
-      deletions.push({
-        uri: event.uri,
-        did: event.did,
-        cid: event.cid ?? null,
-        createdAt,
-        indexedAt,
-        ingestId
-      });
-      continue;
-    }
+      const record = decodeSlimPostRecordEither(event.record);
+      if (Either.isLeft(record)) {
+        return Effect.logWarning("skipping undecodable bluesky post record").pipe(
+          Effect.annotateLogs({
+            uri: event.uri,
+            did: event.did,
+            operation: event.operation,
+            decodeError: formatSlimPostRecordDecodeError(record.left)
+          }),
+          Effect.as({
+            ...state
+          })
+        );
+      }
 
-    const record = decodeSlimPostRecordEither(event.record);
-    if (Either.isLeft(record)) {
-      yield* Effect.logWarning("skipping undecodable bluesky post record").pipe(
-        Effect.annotateLogs({
-          uri: event.uri,
-          did: event.did,
-          operation: event.operation,
-          decodeError: formatSlimPostRecordDecodeError(record.left)
-        }),
-        Effect.asVoid
+      const decoded = record.right;
+      const text = decoded.text?.trim() ?? "";
+      const links = extractLinkRecords(decoded, indexedAt);
+      const domains = links
+        .map((link) => link.domain)
+        .filter((domain): domain is string => domain !== null && domain.length > 0);
+
+      return ontology.match({
+        text,
+        metadataTexts: collectMetadataTexts(decoded),
+        hashtags: decoded.tags ?? [],
+        domains
+      }).pipe(
+        Effect.map((topics) =>
+          topics.length === 0
+            ? state
+            : {
+                ...state,
+                upserts: [
+                  ...state.upserts,
+                  {
+                    uri: event.uri,
+                    did: event.did,
+                    cid: event.cid ?? null,
+                    text,
+                    createdAt,
+                    indexedAt,
+                    hasLinks: links.length > 0,
+                    status: "active",
+                    ingestId,
+                    topics,
+                    links
+                  }
+                ]
+              }
+        )
       );
-      continue;
     }
+  );
 
-    const decoded = record.right;
-    const text = decoded.text?.trim() ?? "";
-    const links = extractLinkRecords(decoded, indexedAt);
-    const topics = yield* ontology.match(text, collectMetadataTexts(decoded));
-
-    if (topics.length === 0) {
-      continue;
-    }
-
-    upserts.push({
-      uri: event.uri,
-      did: event.did,
-      cid: event.cid ?? null,
-      text,
-      createdAt,
-      indexedAt,
-      hasLinks: links.length > 0,
-      status: "active",
-      ingestId,
-      topics,
-      links
-    });
-  }
-
-  yield* knowledgeRepo.upsertPosts(upserts);
-  yield* knowledgeRepo.markDeleted(deletions);
+  yield* knowledgeRepo.upsertPosts(actions.upserts);
+  yield* knowledgeRepo.markDeleted(actions.deletions);
 
   return {
-    postsStored: upserts.length,
-    postsDeleted: deletions.length
+    postsStored: actions.upserts.length,
+    postsDeleted: actions.deletions.length
   } satisfies ProcessBatchSummary;
 });
