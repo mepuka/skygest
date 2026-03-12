@@ -1,10 +1,14 @@
 import { Effect, Layer } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import type { AccessIdentity } from "../src/auth/AuthService";
-import { PollerBusyError } from "../src/domain/errors";
+import { IngestWorkflowLaunchError } from "../src/domain/errors";
+import type { IngestRunItemRecord, IngestRunRecord } from "../src/domain/polling";
+import { IngestRepairService } from "../src/ingest/IngestRepairService";
 import { handleIngestRequestWithLayer } from "../src/ingest/Router";
-import { PollCoordinator } from "../src/ingest/PollCoordinator";
+import { IngestWorkflowLauncher } from "../src/ingest/IngestWorkflowLauncher";
 import { encodeJsonString } from "../src/platform/Json";
+import { IngestRunItemsRepo } from "../src/services/IngestRunItemsRepo";
+import { IngestRunsRepo } from "../src/services/IngestRunsRepo";
 
 const operatorIdentity: AccessIdentity = {
   subject: "did:example:operator",
@@ -19,94 +23,319 @@ const operatorIdentity: AccessIdentity = {
   }
 };
 
-const sampleSummary = {
+const sampleQueued = {
   runId: "run-1",
-  mode: "head" as const,
-  startedAt: 1,
-  finishedAt: 2,
-  expertsTotal: 1,
-  expertsSucceeded: 1,
-  expertsFailed: 0,
-  pagesFetched: 1,
-  postsSeen: 1,
-  postsStored: 1,
-  postsDeleted: 0,
-  failures: []
+  workflowInstanceId: "run-1",
+  status: "queued" as const
 };
 
-describe("ingest admin routes", () => {
-  it.live("runs head polls through the coordinator", () =>
-    Effect.promise(async () => {
-      const requests: Array<unknown> = [];
-      const layer = Layer.succeed(PollCoordinator, {
-        run: (request) =>
-          Effect.sync(() => {
-            requests.push(request);
-            return sampleSummary;
-          })
-      });
+const sampleRun: IngestRunRecord = {
+  id: "run-1",
+  workflowInstanceId: "run-1",
+  kind: "head-sweep",
+  triggeredBy: "admin",
+  requestedBy: "operator@example.com",
+  status: "running",
+  phase: "dispatching",
+  startedAt: 1,
+  finishedAt: null,
+  lastProgressAt: 1,
+  totalExperts: 1,
+  expertsSucceeded: 0,
+  expertsFailed: 0,
+  pagesFetched: 0,
+  postsSeen: 0,
+  postsStored: 0,
+  postsDeleted: 0,
+  error: null
+};
 
-      const response = await handleIngestRequestWithLayer(
-        new Request("https://skygest.local/admin/ingest/poll", {
-          method: "POST",
-          body: encodeJsonString({})
+const sampleItems: ReadonlyArray<IngestRunItemRecord> = [
+  {
+    runId: "run-1",
+    did: "did:plc:expert-a" as IngestRunItemRecord["did"],
+    mode: "head",
+    status: "complete",
+    enqueuedAt: 1,
+    attemptCount: 1,
+    startedAt: 2,
+    finishedAt: 3,
+    lastProgressAt: 3,
+    pagesFetched: 1,
+    postsSeen: 2,
+    postsStored: 1,
+    postsDeleted: 0,
+    error: null
+  }
+];
+
+const makeLayer = (requests: Array<unknown> = []) =>
+  Layer.mergeAll(
+    Layer.succeed(IngestWorkflowLauncher, {
+      start: (request) =>
+        Effect.sync(() => {
+          requests.push(request);
+          return sampleQueued;
         }),
-        operatorIdentity,
-        layer
-      );
-      const body = await response.json() as typeof sampleSummary;
-
-      expect(response.status).toBe(200);
-      expect(body).toEqual(sampleSummary);
-      expect(requests).toEqual([{ mode: "head" }]);
+      startCronHeadSweep: () => Effect.void
+    }),
+    Layer.succeed(IngestRunsRepo, {
+      createQueuedIfAbsent: () => Effect.succeed(true),
+      getById: () => Effect.succeed(sampleRun),
+      listRunning: () => Effect.succeed([]),
+      markPreparing: () => Effect.void,
+      markDispatching: () => Effect.void,
+      markFinalizing: () => Effect.void,
+      markComplete: () => Effect.void,
+      markFailed: () => Effect.void
+    }),
+    Layer.succeed(IngestRunItemsRepo, {
+      createMany: () => Effect.void,
+      markDispatched: () => Effect.void,
+      markQueued: () => Effect.void,
+      markRunning: () => Effect.void,
+      markProgress: () => Effect.void,
+      markComplete: () => Effect.void,
+      markFailed: () => Effect.void,
+      listByRun: () => Effect.succeed(sampleItems),
+      countActiveByRun: () => Effect.succeed(0),
+      countIncompleteByRun: () => Effect.succeed(0),
+      listUndispatchedByRun: () => Effect.succeed([]),
+      listStaleDispatchedByRun: () => Effect.succeed([]),
+      listStaleRunningByRun: () => Effect.succeed([]),
+      summarizeByRun: () =>
+        Effect.succeed({
+          totalExperts: 1,
+          expertsSucceeded: 1,
+          expertsFailed: 0,
+          pagesFetched: 1,
+          postsSeen: 2,
+          postsStored: 1,
+          postsDeleted: 0,
+          error: null
+        })
+    }),
+    Layer.succeed(IngestRepairService, {
+      repairLiveRun: () =>
+        Effect.succeed({
+          failedItems: 0,
+          requeuedItems: 0
+        }),
+      repairHistoricalRuns: () =>
+        Effect.succeed({
+          repairedRuns: 0,
+          failedItems: 0,
+          requeuedItems: 0,
+          untouchedRuns: 0
+        })
     })
   );
 
-  it.live("returns 409 when the poller lease is held", () =>
+describe("ingest admin routes", () => {
+  it.live("starts head polls through the workflow launcher", () =>
     Effect.promise(async () => {
-      const layer = Layer.succeed(PollCoordinator, {
-        run: () =>
-          Effect.fail(
-            PollerBusyError.make({
-              lease: "expert-poller",
-              message: "already running"
-            })
-          )
-      });
-
+      const requests: Array<unknown> = [];
       const response = await handleIngestRequestWithLayer(
         new Request("https://skygest.local/admin/ingest/poll", {
           method: "POST",
           body: encodeJsonString({})
         }),
         operatorIdentity,
-        layer
+        makeLayer(requests)
       );
-      const body = await response.json() as { readonly error: string };
+      const body = await response.json() as typeof sampleQueued;
 
-      expect(response.status).toBe(409);
-      expect(body.error).toBe("PollerBusyError");
+      expect(response.status).toBe(202);
+      expect(body).toEqual(sampleQueued);
+      expect(requests).toEqual([
+        {
+          kind: "head-sweep",
+          triggeredBy: "admin",
+          requestedBy: "operator@example.com"
+        }
+      ]);
+    })
+  );
+
+  it.live("returns run status from the run repo", () =>
+    Effect.promise(async () => {
+      const response = await handleIngestRequestWithLayer(
+        new Request("https://skygest.local/admin/ingest/runs/run-1", {
+          method: "GET"
+        }),
+        operatorIdentity,
+        makeLayer()
+      );
+      const body = await response.json() as IngestRunRecord;
+
+      expect(response.status).toBe(200);
+      expect(body).toEqual(sampleRun);
+    })
+  );
+
+  it.live("returns run items from the run items repo", () =>
+    Effect.promise(async () => {
+      const response = await handleIngestRequestWithLayer(
+        new Request("https://skygest.local/admin/ingest/runs/run-1/items", {
+          method: "GET"
+        }),
+        operatorIdentity,
+        makeLayer()
+      );
+      const body = await response.json() as ReadonlyArray<IngestRunItemRecord>;
+
+      expect(response.status).toBe(200);
+      expect(body).toEqual(sampleItems);
     })
   );
 
   it.live("validates backfill inputs", () =>
     Effect.promise(async () => {
-      const layer = Layer.succeed(PollCoordinator, {
-        run: () => Effect.succeed(sampleSummary)
-      });
-
       const response = await handleIngestRequestWithLayer(
         new Request("https://skygest.local/admin/ingest/backfill", {
           method: "POST",
           body: encodeJsonString({ maxPosts: -1 })
         }),
         operatorIdentity,
-        layer
+        makeLayer()
       );
-      const body = await response.json() as { readonly error: string };
+      const body = await response.json() as {
+        readonly error: string;
+        readonly message: string;
+      };
 
       expect(response.status).toBe(400);
-      expect(body.error).toContain("NonNegativeInt");
+      expect(body.error).toBe("IngestSchemaDecodeError");
+      expect(body.message).toContain("NonNegativeInt");
+    })
+  );
+
+  it.live("maps workflow launch failures to a structured 503 response", () =>
+    Effect.promise(async () => {
+      const response = await handleIngestRequestWithLayer(
+        new Request("https://skygest.local/admin/ingest/poll", {
+          method: "POST",
+          body: encodeJsonString({})
+        }),
+        operatorIdentity,
+        Layer.mergeAll(
+          Layer.succeed(IngestWorkflowLauncher, {
+            start: () =>
+              Effect.fail(
+                IngestWorkflowLaunchError.make({
+                  message: "workflow create failed",
+                  operation: "test"
+                })
+              ),
+            startCronHeadSweep: () => Effect.void
+          }),
+          Layer.succeed(IngestRunsRepo, {
+            createQueuedIfAbsent: () => Effect.succeed(true),
+            getById: () => Effect.succeed(sampleRun),
+            listRunning: () => Effect.succeed([]),
+            markPreparing: () => Effect.void,
+            markDispatching: () => Effect.void,
+            markFinalizing: () => Effect.void,
+            markComplete: () => Effect.void,
+            markFailed: () => Effect.void
+          }),
+          Layer.succeed(IngestRunItemsRepo, {
+            createMany: () => Effect.void,
+            markDispatched: () => Effect.void,
+            markQueued: () => Effect.void,
+            markRunning: () => Effect.void,
+            markProgress: () => Effect.void,
+            markComplete: () => Effect.void,
+            markFailed: () => Effect.void,
+            listByRun: () => Effect.succeed(sampleItems),
+            countActiveByRun: () => Effect.succeed(0),
+            countIncompleteByRun: () => Effect.succeed(0),
+            listUndispatchedByRun: () => Effect.succeed([]),
+            listStaleDispatchedByRun: () => Effect.succeed([]),
+            listStaleRunningByRun: () => Effect.succeed([]),
+            summarizeByRun: () =>
+              Effect.succeed({
+                totalExperts: 1,
+                expertsSucceeded: 1,
+                expertsFailed: 0,
+                pagesFetched: 1,
+                postsSeen: 2,
+                postsStored: 1,
+                postsDeleted: 0,
+                error: null
+              })
+          }),
+          Layer.succeed(IngestRepairService, {
+            repairLiveRun: () =>
+              Effect.succeed({
+                failedItems: 0,
+                requeuedItems: 0
+              }),
+            repairHistoricalRuns: () =>
+              Effect.succeed({
+                repairedRuns: 0,
+                failedItems: 0,
+                requeuedItems: 0,
+                untouchedRuns: 0
+              })
+          })
+        )
+      );
+      const body = await response.json() as {
+        readonly error: string;
+        readonly message: string;
+        readonly retryable?: boolean;
+      };
+
+      expect(response.status).toBe(503);
+      expect(body).toEqual({
+        error: "IngestWorkflowLaunchError",
+        message: "workflow create failed",
+        retryable: true
+      });
+    })
+  );
+
+  it.live("repairs historical ingest state through the repair endpoint", () =>
+    Effect.promise(async () => {
+      const response = await handleIngestRequestWithLayer(
+        new Request("https://skygest.local/admin/ingest/repair", {
+          method: "POST",
+          body: encodeJsonString({})
+        }),
+        operatorIdentity,
+        Layer.mergeAll(
+          makeLayer(),
+          Layer.succeed(IngestRepairService, {
+            repairLiveRun: () =>
+              Effect.succeed({
+                failedItems: 0,
+                requeuedItems: 0
+              }),
+            repairHistoricalRuns: () =>
+              Effect.succeed({
+                repairedRuns: 2,
+                failedItems: 3,
+                requeuedItems: 1,
+                untouchedRuns: 4
+              })
+          })
+        )
+      );
+      const body = await response.json() as {
+        readonly repairedRuns: number;
+        readonly failedItems: number;
+        readonly requeuedItems: number;
+        readonly untouchedRuns: number;
+      };
+
+      expect(response.status).toBe(200);
+      expect(body).toEqual({
+        repairedRuns: 2,
+        failedItems: 3,
+        requeuedItems: 1,
+        untouchedRuns: 4
+      });
     })
   );
 });

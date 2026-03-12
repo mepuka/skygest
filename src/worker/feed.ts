@@ -1,8 +1,10 @@
 import { Effect } from "effect";
 import { handleAdminRequest } from "../admin/Router";
+import { ExpertPollCoordinatorDo } from "../ingest/ExpertPollCoordinatorDo";
+import { IngestRunWorkflow } from "../ingest/IngestRunWorkflow";
 import { handleIngestRequest } from "../ingest/Router";
 import { handleMcpRequest } from "../mcp/Router";
-import type { EnvBindings } from "../platform/Env";
+import type { WorkflowIngestEnvBindings } from "../platform/Env";
 import {
   authorizeOperator,
   isSharedSecretMode,
@@ -12,7 +14,7 @@ import {
   toAuthErrorResponse
 } from "./operatorAuth";
 
-export const fetch = async (request: Request, env: EnvBindings) => {
+export const fetch = async (request: Request, env: WorkflowIngestEnvBindings) => {
   const url = new URL(request.url);
 
   if (url.pathname === "/health") {
@@ -65,5 +67,7 @@ export const fetch = async (request: Request, env: EnvBindings) => {
 
   return new Response("not found", { status: 404 });
 };
+
+export { ExpertPollCoordinatorDo, IngestRunWorkflow };
 
 export default { fetch };

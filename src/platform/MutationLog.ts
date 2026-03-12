@@ -1,5 +1,6 @@
 import { Effect } from "effect";
 import type { AccessIdentity } from "../auth/AuthService";
+import { stringifyUnknown } from "./Json";
 
 type MutationLogValue = string | number | boolean | null | undefined;
 export type MutationLogAnnotations = Readonly<Record<string, MutationLogValue>>;
@@ -41,7 +42,7 @@ const toErrorAnnotations = (error: unknown): MutationLogAnnotations => {
   }
 
   if (result.errorMessage === undefined) {
-    result.errorMessage = String(error);
+    result.errorMessage = stringifyUnknown(error);
   }
 
   return result;
@@ -50,21 +51,18 @@ const toErrorAnnotations = (error: unknown): MutationLogAnnotations => {
 const makeAnnotations = (
   actor: AccessIdentity,
   annotations: MutationLogAnnotations
-) => {
-  const result: Record<string, string | number | boolean> = {};
-
-  for (const [key, value] of Object.entries({
+) =>
+  Object.entries({
     ...annotations,
     actorSubject: actor.subject ?? MISSING_ANNOTATION_VALUE,
     actorEmail: actor.email ?? MISSING_ANNOTATION_VALUE
-  })) {
+  }).reduce<Record<string, string | number | boolean>>((result, [key, value]) => {
     if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
       result[key] = value;
     }
-  }
 
-  return result;
-};
+    return result;
+  }, {});
 
 export const logMutationSuccess = (
   label: string,

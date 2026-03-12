@@ -1,10 +1,17 @@
 import { D1Client } from "@effect/sql-d1";
-import { Cause, Effect, Either, Exit, Layer, Option, Schema } from "effect";
+import { Effect, Either, Layer, Schema } from "effect";
 import type { AccessIdentity } from "../auth/AuthService";
 import { BlueskyClient, layer as BlueskyClientLayer } from "../bluesky/BlueskyClient";
 import { RepoRecordsClient } from "../bluesky/RepoRecordsClient";
 import { ExpertNotFoundError } from "../domain/bi";
-import { BlueskyApiError, PollerBusyError } from "../domain/errors";
+import {
+  BlueskyApiError,
+  IngestBoundaryError,
+  IngestRunNotFoundError,
+  IngestSchemaDecodeError,
+  IngestWorkflowLaunchError,
+  toIngestErrorResponse
+} from "../domain/errors";
 import {
   PollBackfillInput,
   PollHeadInput,
@@ -16,60 +23,39 @@ import {
   encodeJsonString,
   formatSchemaParseError
 } from "../platform/Json";
-import { CloudflareEnv, type EnvBindings } from "../platform/Env";
+import {
+  CloudflareEnv,
+  type WorkflowIngestEnvBindings,
+  makeWorkflowIngestEnvLayer
+} from "../platform/Env";
+import {
+  runScopedWithRuntime,
+  withManagedRuntime
+} from "../platform/EffectRuntime";
 import { Logging } from "../platform/Logging";
-import { ExpertPoller } from "./ExpertPoller";
-import { PollCoordinator } from "./PollCoordinator";
+import { ExpertPollExecutor } from "./ExpertPollExecutor";
+import { IngestRepairService } from "./IngestRepairService";
+import { IngestWorkflowLauncher } from "./IngestWorkflowLauncher";
+import { IngestRunItemsRepo } from "../services/IngestRunItemsRepo";
+import { IngestRunsRepo } from "../services/IngestRunsRepo";
 import { OntologyCatalog } from "../services/OntologyCatalog";
 import { ExpertSyncStateRepoD1 } from "../services/d1/ExpertSyncStateRepoD1";
 import { ExpertsRepoD1 } from "../services/d1/ExpertsRepoD1";
-import { IngestLeaseRepoD1 } from "../services/d1/IngestLeaseRepoD1";
+import { IngestRunItemsRepoD1 } from "../services/d1/IngestRunItemsRepoD1";
+import { IngestRunsRepoD1 } from "../services/d1/IngestRunsRepoD1";
 import { KnowledgeRepoD1 } from "../services/d1/KnowledgeRepoD1";
 
-class IngestRequestParseError extends Schema.TaggedError<IngestRequestParseError>()(
-  "IngestRequestParseError",
-  {
-    message: Schema.String
-  }
-) {}
-
-const makeIngestRequestParseError = (message: string) =>
-  IngestRequestParseError.make({ message });
-
-const parseDecoded = <A>(
-  decoded: Either.Either<A, { readonly message: string }>
-) => {
-  if (Either.isLeft(decoded)) {
-    throw makeIngestRequestParseError(decoded.left.message);
-  }
-
-  return decoded.right;
-};
-
-const decodePollHeadInput = (body: string) =>
-  parseDecoded(
-    decodeJsonStringEitherWith(PollHeadInput)(body).pipe(
-      Either.mapLeft((error) => ({
-        message: formatSchemaParseError(error)
-      }))
-    )
-  );
-
-const decodePollBackfillInput = (body: string) =>
-  parseDecoded(
-    decodeJsonStringEitherWith(PollBackfillInput)(body).pipe(
-      Either.mapLeft((error) => ({
-        message: formatSchemaParseError(error)
-      }))
-    )
-  );
-
-const decodePollReconcileInput = (body: string) =>
-  parseDecoded(
-    decodeJsonStringEitherWith(PollReconcileInput)(body).pipe(
-      Either.mapLeft((error) => ({
-        message: formatSchemaParseError(error)
-      }))
+const decodeJsonBody = <A, I>(
+  schema: Schema.Schema<A, I, never>,
+  body: string,
+  operation: string
+) =>
+  decodeJsonStringEitherWith(schema)(body).pipe(
+    Either.mapLeft((error) =>
+      IngestSchemaDecodeError.make({
+        message: formatSchemaParseError(error),
+        operation
+      })
     )
   );
 
@@ -93,9 +79,21 @@ const hasTag = (error: unknown, tag: string): error is { readonly _tag: string }
   "_tag" in error &&
   error._tag === tag;
 
-export const makeIngestLayer = (env: EnvBindings) => {
+const toRequestedBy = (identity: AccessIdentity) =>
+  identity.email ?? identity.subject ?? "unknown-operator";
+
+const matchRunPath = (pathname: string) =>
+  pathname.match(/^\/admin\/ingest\/runs\/([^/]+)$/u)?.[1] ?? null;
+
+const matchRunItemsPath = (pathname: string) =>
+  pathname.match(/^\/admin\/ingest\/runs\/([^/]+)\/items$/u)?.[1] ?? null;
+
+export const makeWorkflowIngestLayer = (env: WorkflowIngestEnvBindings) => {
   const baseLayer = Layer.mergeAll(
-    CloudflareEnv.layer(env, { required: ["DB"] }),
+    CloudflareEnv.layer(env, {
+      required: ["DB"]
+    }),
+    makeWorkflowIngestEnvLayer(env),
     D1Client.layer({ db: env.DB }),
     Logging.layer
   );
@@ -104,14 +102,15 @@ export const makeIngestLayer = (env: EnvBindings) => {
   const expertsLayer = ExpertsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
   const knowledgeLayer = KnowledgeRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
   const syncStateLayer = ExpertSyncStateRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
-  const leaseLayer = IngestLeaseRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
+  const runsLayer = IngestRunsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
+  const runItemsLayer = IngestRunItemsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
   const blueskyLayer = BlueskyClientLayer.pipe(Layer.provideMerge(configLayer));
   const repoRecordsLayer = RepoRecordsClient.layer.pipe(
     Layer.provideMerge(
       Layer.mergeAll(blueskyLayer, syncStateLayer)
     )
   );
-  const expertPollerLayer = ExpertPoller.layer.pipe(
+  const expertPollExecutorLayer = ExpertPollExecutor.layer.pipe(
     Layer.provideMerge(
       Layer.mergeAll(
         baseLayer,
@@ -123,9 +122,14 @@ export const makeIngestLayer = (env: EnvBindings) => {
       )
     )
   );
-  const coordinatorLayer = PollCoordinator.layer.pipe(
+  const workflowLauncherLayer = IngestWorkflowLauncher.layer.pipe(
     Layer.provideMerge(
-      Layer.mergeAll(baseLayer, expertsLayer, leaseLayer, expertPollerLayer)
+      Layer.mergeAll(baseLayer, runsLayer)
+    )
+  );
+  const ingestRepairLayer = IngestRepairService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(runsLayer, runItemsLayer)
     )
   );
 
@@ -136,124 +140,178 @@ export const makeIngestLayer = (env: EnvBindings) => {
     expertsLayer,
     knowledgeLayer,
     syncStateLayer,
-    leaseLayer,
+    runsLayer,
+    runItemsLayer,
     blueskyLayer,
     repoRecordsLayer,
-    expertPollerLayer,
-    coordinatorLayer
+    expertPollExecutorLayer,
+    workflowLauncherLayer,
+    ingestRepairLayer
   );
 };
 
-const respondToIngestError = (error: unknown): Response => {
+const statusForIngestError = (error: unknown) => {
   if (error instanceof ExpertNotFoundError || hasTag(error, "ExpertNotFoundError")) {
-    return json({ error: "ExpertNotFoundError", did: "did" in error ? error.did : undefined }, 404);
+    return 404;
   }
 
-  if (error instanceof PollerBusyError || hasTag(error, "PollerBusyError")) {
-    return json({
-      error: "PollerBusyError",
-      message: "message" in error ? error.message : "poller is already running"
-    }, 409);
+  if (error instanceof IngestRunNotFoundError || hasTag(error, "IngestRunNotFoundError")) {
+    return 404;
+  }
+
+  if (error instanceof IngestSchemaDecodeError || hasTag(error, "IngestSchemaDecodeError")) {
+    return 400;
   }
 
   if (error instanceof BlueskyApiError || hasTag(error, "BlueskyApiError")) {
-    return json({
-      error: "BlueskyApiError",
-      message: "message" in error ? error.message : "Bluesky API request failed"
-    }, 502);
+    return 502;
   }
 
-  return json({
-    error: "InternalServerError",
-    message: error instanceof Error ? error.message : String(error)
-  }, 500);
+  if (error instanceof IngestWorkflowLaunchError || hasTag(error, "IngestWorkflowLaunchError")) {
+    return 503;
+  }
+
+  if (error instanceof IngestBoundaryError || hasTag(error, "IngestBoundaryError")) {
+    return 500;
+  }
+
+  return 500;
+};
+
+const respondToIngestError = (error: unknown): Response => {
+  return json(toIngestErrorResponse(error), statusForIngestError(error));
 };
 
 export const handleIngestRequestWithLayer = async (
   request: Request,
-  _identity: AccessIdentity,
+  identity: AccessIdentity,
   layer: Layer.Layer<any, any, never>
 ): Promise<Response> => {
   const url = new URL(request.url);
-  const runWithLayer = async <A>(effect: Effect.Effect<A, unknown, any>) => {
-    const exit = await Effect.runPromiseExit(
-      Effect.scoped(
-        effect.pipe(Effect.provide(layer))
-      )
-    );
-
-    return Exit.match(exit, {
-      onSuccess: (value) => value,
-      onFailure: (cause) => {
-        const failure = Cause.failureOption(cause);
-        if (Option.isSome(failure)) {
-          throw failure.value;
-        }
-
-        throw new Error(Cause.pretty(cause));
-      }
-    });
-  };
 
   try {
-    if (request.method === "POST" && url.pathname === "/admin/ingest/poll") {
-      const input = decodePollHeadInput(await readBodyText(request));
-      const result = await runWithLayer(
-        Effect.flatMap(PollCoordinator, (coordinator) =>
-          coordinator.run(
-            input.did === undefined
-              ? { mode: "head" }
-              : { mode: "head", did: input.did }
+    return await withManagedRuntime(layer, async (runtime) => {
+      const runWithLayer = <A>(effect: Effect.Effect<A, unknown, any>) =>
+        runScopedWithRuntime(runtime, effect, {
+          operation: `IngestRouter:${request.method}:${url.pathname}`
+        });
+
+      if (request.method === "POST" && url.pathname === "/admin/ingest/poll") {
+        const decoded = decodeJsonBody(
+          PollHeadInput,
+          await readBodyText(request),
+          "IngestRouter.poll"
+        );
+        if (Either.isLeft(decoded)) {
+          return respondToIngestError(decoded.left);
+        }
+        const input = decoded.right;
+        const result = await runWithLayer(
+          Effect.flatMap(IngestWorkflowLauncher, (launcher) =>
+            launcher.start({
+              kind: "head-sweep",
+              ...(input.did === undefined ? {} : { dids: [input.did] }),
+              triggeredBy: "admin",
+              requestedBy: toRequestedBy(identity)
+            })
           )
-        )
-      );
-      return json(result);
-    }
+        );
+        return json(result, 202);
+      }
 
-    if (request.method === "POST" && url.pathname === "/admin/ingest/backfill") {
-      const input = decodePollBackfillInput(await readBodyText(request));
-      const pollRequest = {
-        mode: "backfill" as const,
-        ...(input.did === undefined ? {} : { did: input.did }),
-        ...(input.maxPosts === undefined ? {} : { maxPosts: input.maxPosts }),
-        ...(input.maxAgeDays === undefined ? {} : { maxAgeDays: input.maxAgeDays })
-      };
-      const result = await runWithLayer(
-        Effect.flatMap(PollCoordinator, (coordinator) =>
-          coordinator.run(pollRequest)
-        )
-      );
-      return json(result);
-    }
+      if (request.method === "POST" && url.pathname === "/admin/ingest/backfill") {
+        const decoded = decodeJsonBody(
+          PollBackfillInput,
+          await readBodyText(request),
+          "IngestRouter.backfill"
+        );
+        if (Either.isLeft(decoded)) {
+          return respondToIngestError(decoded.left);
+        }
+        const input = decoded.right;
+        const result = await runWithLayer(
+          Effect.flatMap(IngestWorkflowLauncher, (launcher) =>
+            launcher.start({
+              kind: "backfill",
+              ...(input.did === undefined ? {} : { dids: [input.did] }),
+              ...(input.maxPosts === undefined ? {} : { maxPosts: input.maxPosts }),
+              ...(input.maxAgeDays === undefined ? {} : { maxAgeDays: input.maxAgeDays }),
+              triggeredBy: "admin",
+              requestedBy: toRequestedBy(identity)
+            })
+          )
+        );
+        return json(result, 202);
+      }
 
-    if (request.method === "POST" && url.pathname === "/admin/ingest/reconcile") {
-      const input = decodePollReconcileInput(await readBodyText(request));
-      const pollRequest = {
-        mode: "reconcile" as const,
-        ...(input.did === undefined ? {} : { did: input.did }),
-        ...(input.depth === undefined ? {} : { depth: input.depth })
-      };
-      const result = await runWithLayer(
-        Effect.flatMap(PollCoordinator, (coordinator) =>
-          coordinator.run(pollRequest)
-        )
-      );
-      return json(result);
-    }
+      if (request.method === "POST" && url.pathname === "/admin/ingest/reconcile") {
+        const decoded = decodeJsonBody(
+          PollReconcileInput,
+          await readBodyText(request),
+          "IngestRouter.reconcile"
+        );
+        if (Either.isLeft(decoded)) {
+          return respondToIngestError(decoded.left);
+        }
+        const input = decoded.right;
+        const result = await runWithLayer(
+          Effect.flatMap(IngestWorkflowLauncher, (launcher) =>
+            launcher.start({
+              kind: "reconcile",
+              ...(input.did === undefined ? {} : { dids: [input.did] }),
+              ...(input.depth === undefined ? {} : { depth: input.depth }),
+              triggeredBy: "admin",
+              requestedBy: toRequestedBy(identity)
+            })
+          )
+        );
+        return json(result, 202);
+      }
 
-    return notFound();
+      if (request.method === "POST" && url.pathname === "/admin/ingest/repair") {
+        const summary = await runWithLayer(
+          Effect.flatMap(IngestRepairService, (repair) =>
+            repair.repairHistoricalRuns()
+          )
+        );
+        return json(summary);
+      }
+
+      const runId = matchRunPath(url.pathname);
+      if (request.method === "GET" && runId !== null) {
+        const run = await runWithLayer(
+          Effect.flatMap(IngestRunsRepo, (runs) => runs.getById(runId))
+        );
+        if (run === null) {
+          throw IngestRunNotFoundError.make({ runId });
+        }
+        return json(run);
+      }
+
+      const runItemsId = matchRunItemsPath(url.pathname);
+      if (request.method === "GET" && runItemsId !== null) {
+        const run = await runWithLayer(
+          Effect.flatMap(IngestRunsRepo, (runs) => runs.getById(runItemsId))
+        );
+        if (run === null) {
+          throw IngestRunNotFoundError.make({ runId: runItemsId });
+        }
+        const items = await runWithLayer(
+          Effect.flatMap(IngestRunItemsRepo, (repo) => repo.listByRun(runItemsId))
+        );
+        return json(items);
+      }
+
+      return notFound();
+    });
   } catch (error) {
-    if (error instanceof IngestRequestParseError) {
-      return json({ error: error.message }, 400);
-    }
-
     return respondToIngestError(error);
   }
 };
 
 export const handleIngestRequest = (
   request: Request,
-  env: EnvBindings,
+  env: WorkflowIngestEnvBindings,
   identity: AccessIdentity
 ) =>
-  handleIngestRequestWithLayer(request, identity, makeIngestLayer(env));
+  handleIngestRequestWithLayer(request, identity, makeWorkflowIngestLayer(env));

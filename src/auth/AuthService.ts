@@ -1,6 +1,7 @@
 import { Context, Effect, Layer, Schema } from "effect";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
 import { AppConfig } from "../platform/Config";
+import { stringifyUnknown } from "../platform/Json";
 
 const ACCESS_HEADER = "cf-access-jwt-assertion";
 const OPERATOR_SECRET_HEADER = "x-skygest-operator-secret";
@@ -158,7 +159,7 @@ export class AuthService extends Context.Tag("@skygest/AuthService")<
           try: () => jwtVerify(token, jwks),
           catch: (error) =>
             InvalidAccessJwtError.make({
-              message: error instanceof Error ? error.message : String(error)
+              message: stringifyUnknown(error)
             })
         });
 

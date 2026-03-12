@@ -1,9 +1,11 @@
 import { McpSchema } from "@effect/ai";
 import { Either, Effect, Schema } from "effect";
 import {
+  decodeJsonString,
   decodeJsonStringEitherWith,
   encodeJsonString,
-  formatSchemaParseError
+  formatSchemaParseError,
+  stringifyUnknown
 } from "../platform/Json";
 
 const MCP_PROTOCOL_VERSION = "2025-06-18";
@@ -136,7 +138,7 @@ const requestJsonRpc = <A, I>(
       return decodeUnknownSuccess(
         operation,
         schema,
-        text.length === 0 ? [] : JSON.parse(text)
+        text.length === 0 ? [] : decodeJsonString(text)
       );
     },
     catch: (error) =>
@@ -144,7 +146,7 @@ const requestJsonRpc = <A, I>(
         ? error
         : McpRequestError.make({
             operation,
-            message: error instanceof Error ? error.message : String(error)
+            message: stringifyUnknown(error)
           })
   });
 
@@ -184,7 +186,7 @@ const notifyJsonRpc = (
         ? error
         : McpRequestError.make({
             operation,
-            message: error instanceof Error ? error.message : String(error)
+            message: stringifyUnknown(error)
           })
   });
 

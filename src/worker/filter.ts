@@ -1,35 +1,19 @@
 import { Effect } from "effect";
-import { PollerBusyError } from "../domain/errors";
-import { handleIngestRequest, makeIngestLayer } from "../ingest/Router";
-import { PollCoordinator } from "../ingest/PollCoordinator";
-import type { EnvBindings } from "../platform/Env";
+import { makeWorkflowIngestLayer } from "../ingest/Router";
+import { ExpertPollCoordinatorDo } from "../ingest/ExpertPollCoordinatorDo";
+import { IngestRunWorkflow } from "../ingest/IngestRunWorkflow";
+import { IngestWorkflowLauncher } from "../ingest/IngestWorkflowLauncher";
+import type { WorkflowIngestEnvBindings } from "../platform/Env";
 import {
-  authorizeOperator,
-  logDeniedAdminMutation,
-  requiredAdminScopes,
-  toAuthErrorResponse
-} from "./operatorAuth";
+  runScopedWithRuntime,
+  withManagedRuntime
+} from "../platform/EffectRuntime";
 
-export const fetch = async (request: Request, env: EnvBindings) => {
+export const fetch = async (request: Request, env: WorkflowIngestEnvBindings) => {
   const url = new URL(request.url);
 
   if (url.pathname === "/health") {
     return new Response("ok");
-  }
-
-  if (url.pathname.startsWith("/admin/ingest/")) {
-    let identity;
-
-    try {
-      identity = await Effect.runPromise(
-        authorizeOperator(request, env, requiredAdminScopes(request))
-      );
-    } catch (error) {
-      await logDeniedAdminMutation(request, error);
-      return toAuthErrorResponse(error);
-    }
-
-    return handleIngestRequest(request, env, identity);
   }
 
   return new Response("not found", { status: 404 });
@@ -37,29 +21,23 @@ export const fetch = async (request: Request, env: EnvBindings) => {
 
 export const scheduled = async (
   _controller: ScheduledController,
-  env: EnvBindings,
+  env: WorkflowIngestEnvBindings,
   _ctx: ExecutionContext
 ) => {
-  const layer = makeIngestLayer(env);
+  const layer = makeWorkflowIngestLayer(env);
 
-  await Effect.runPromise(
-    Effect.scoped(
-      Effect.flatMap(PollCoordinator, (coordinator) =>
-        coordinator.run({ mode: "head" })
-      ).pipe(
-        Effect.provide(layer),
-        Effect.catchTag("PollerBusyError", (error: PollerBusyError) =>
-          Effect.logInfo("scheduled poll skipped").pipe(
-            Effect.annotateLogs({
-              lease: error.lease,
-              reason: error.message
-            })
-          )
-        )
-      )
+  await withManagedRuntime(layer, (runtime) =>
+    runScopedWithRuntime(
+      runtime,
+      Effect.flatMap(IngestWorkflowLauncher, (launcher) =>
+        launcher.startCronHeadSweep(_controller.scheduledTime)
+      ),
+      { operation: "IngestWorker.scheduled" }
     )
   );
 };
+
+export { ExpertPollCoordinatorDo, IngestRunWorkflow };
 
 export default {
   fetch,

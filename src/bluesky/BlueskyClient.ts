@@ -12,6 +12,7 @@ import {
 import { FetchHttpClient, HttpClient, HttpClientResponse } from "@effect/platform";
 import { BlueskyApiError } from "../domain/errors";
 import { AppConfig } from "../platform/Config";
+import { stringifyUnknown } from "../platform/Json";
 import type { BlueskyProfile, ResolvedDidOrHandle } from "../domain/bi";
 import {
   type ListRecordsResult as ListRecordsResultShape,
@@ -79,7 +80,7 @@ const getErrorStatus = (error: unknown): number | undefined => {
 
 const toBlueskyApiError = (error: unknown) =>
   BlueskyApiError.make({
-    message: error instanceof Error ? error.message : String(error),
+    message: stringifyUnknown(error),
     status: getErrorStatus(error)
   });
 
@@ -265,16 +266,17 @@ export const makeBlueskyClient = (base: string) =>
       );
 
     const resolveRepoService = (did: string) =>
-      requestJson(
-        `${base}/xrpc/com.atproto.identity.resolveIdentity`,
-        ResolveIdentityResponse,
-        {
-          identifier: did
-        }
+      withRateLimit(
+        "https://plc.directory",
+        http.get(`https://plc.directory/${encodeURIComponent(did)}`).pipe(
+          Effect.flatMap(HttpClientResponse.schemaBodyJson(DidDocument))
+        )
       ).pipe(
-        Effect.flatMap((body) =>
+        Effect.retry(retrySchedule),
+        Effect.mapError(toBlueskyApiError),
+        Effect.flatMap((doc) =>
           Effect.try({
-            try: () => extractPdsServiceUrl(body.didDoc),
+            try: () => extractPdsServiceUrl(doc),
             catch: toBlueskyApiError
           })
         )

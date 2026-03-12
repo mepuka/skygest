@@ -1,9 +1,11 @@
 import { BunContext } from "@effect/platform-bun";
 import { Effect, Layer } from "effect";
 import { describe, expect, it } from "@effect/vitest";
+import { energySeedDid } from "../src/bootstrap/CheckedInExpertSeeds";
 import { runOpsCli } from "../src/ops/Cli";
 import {
   MissingOperatorSecretEnvError,
+  SmokeAssertionError,
   StagingRequestError
 } from "../src/ops/Errors";
 import { OperatorSecret } from "../src/ops/OperatorSecret";
@@ -46,22 +48,47 @@ const makeCliLayer = (options?: {
           count: 1
         } as const;
       }),
-    pollIngest: (_baseUrl: URL, secret: string) =>
+    pollIngest: (_baseUrl: URL, secret: string, did?: string) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "poll", secret });
+        remoteCalls.push({ action: "poll", secret: did === undefined ? secret : `${secret}:${did}` });
         return {
           runId: "run-1",
-          mode: "head",
+          workflowInstanceId: "run-1",
+          status: "queued"
+        } as const;
+      }),
+    getIngestRun: (_baseUrl: URL, secret: string, _runId: string) =>
+      Effect.sync(() => {
+        remoteCalls.push({ action: "run-status", secret });
+        return {
+          id: "run-1",
+          workflowInstanceId: "run-1",
+          kind: "head-sweep",
+          triggeredBy: "admin",
+          requestedBy: "operator@example.com",
+          status: "complete",
+          phase: "complete",
           startedAt: 1,
           finishedAt: 2,
-          expertsTotal: 1,
+          lastProgressAt: 2,
+          totalExperts: 1,
           expertsSucceeded: 1,
           expertsFailed: 0,
           pagesFetched: 1,
           postsSeen: 1,
           postsStored: 1,
           postsDeleted: 0,
-          failures: []
+          error: null
+        } as const;
+      }),
+    repairIngest: (_baseUrl: URL, secret: string) =>
+      Effect.sync(() => {
+        remoteCalls.push({ action: "repair", secret });
+        return {
+          repairedRuns: 0,
+          failedItems: 0,
+          requeuedItems: 0,
+          untouchedRuns: 0
         } as const;
       }),
     loadSmokeFixture: (_baseUrl: URL, secret: string) =>
@@ -144,7 +171,8 @@ describe("ops CLI", () => {
       expect(remoteCalls).toEqual([
         { action: "migrate", secret: "stage-secret" },
         { action: "bootstrap", secret: "stage-secret" },
-        { action: "poll", secret: "stage-secret" },
+        { action: "poll", secret: `stage-secret:${energySeedDid}` },
+        { action: "run-status", secret: "stage-secret" },
         { action: "fixture", secret: "stage-secret" }
       ]);
     })
@@ -171,7 +199,8 @@ describe("ops CLI", () => {
       expect(remoteCalls).toEqual([
         { action: "health" },
         { action: "admin-experts", secret: "stage-secret" },
-        { action: "poll", secret: "stage-secret" },
+        { action: "poll", secret: `stage-secret:${energySeedDid}` },
+        { action: "run-status", secret: "stage-secret" },
         { action: "mcp-list", secret: "stage-secret" },
         { action: "mcp-search", secret: "stage-secret" }
       ]);
@@ -220,20 +249,39 @@ describe("ops CLI", () => {
               domain: "energy",
               count: 1
             } as const),
-          pollIngest: (_baseUrl, _secret) =>
+          pollIngest: (_baseUrl, _secret, _did) =>
             Effect.succeed({
               runId: "run-1",
-              mode: "head",
+              workflowInstanceId: "run-1",
+              status: "queued"
+            } as const),
+          getIngestRun: (_baseUrl, _secret, _runId) =>
+            Effect.succeed({
+              id: "run-1",
+              workflowInstanceId: "run-1",
+              kind: "head-sweep",
+              triggeredBy: "admin",
+              requestedBy: "operator@example.com",
+              status: "complete",
+              phase: "complete",
               startedAt: 1,
               finishedAt: 2,
-              expertsTotal: 1,
+              lastProgressAt: 2,
+              totalExperts: 1,
               expertsSucceeded: 1,
               expertsFailed: 0,
               pagesFetched: 1,
               postsSeen: 1,
               postsStored: 1,
               postsDeleted: 0,
-              failures: []
+              error: null
+            } as const),
+          repairIngest: (_baseUrl, _secret) =>
+            Effect.succeed({
+              repairedRuns: 0,
+              failedItems: 0,
+              requeuedItems: 0,
+              untouchedRuns: 0
             } as const),
           loadSmokeFixture: (_baseUrl, _secret) =>
             Effect.succeed({
@@ -272,6 +320,101 @@ describe("ops CLI", () => {
       expect(remoteFailure).toBeInstanceOf(StagingRequestError);
       if (remoteFailure instanceof StagingRequestError) {
         expect(remoteFailure.message).toContain("boom");
+      }
+    })
+  );
+
+  it.live("stringifies structured ingest failures in operator-visible CLI errors", () =>
+    Effect.promise(async () => {
+      const failingRunLayer = makeCliLayer({
+        client: Layer.succeed(StagingOperatorClient, {
+          health: () => Effect.succeed("ok"),
+          migrate: (_baseUrl, _secret) => Effect.succeed({ ok: true } as const),
+          bootstrapExperts: (_baseUrl, _secret) =>
+            Effect.succeed({
+              domain: "energy",
+              count: 1
+            } as const),
+          pollIngest: (_baseUrl, _secret, _did) =>
+            Effect.succeed({
+              runId: "run-1",
+              workflowInstanceId: "run-1",
+              status: "queued"
+            } as const),
+          getIngestRun: (_baseUrl, _secret, _runId) =>
+            Effect.succeed({
+              id: "run-1",
+              workflowInstanceId: "run-1",
+              kind: "head-sweep",
+              triggeredBy: "admin",
+              requestedBy: "operator@example.com",
+              status: "failed",
+              phase: "failed",
+              startedAt: 1,
+              finishedAt: 2,
+              lastProgressAt: 2,
+              totalExperts: 1,
+              expertsSucceeded: 0,
+              expertsFailed: 1,
+              pagesFetched: 1,
+              postsSeen: 1,
+              postsStored: 0,
+              postsDeleted: 0,
+              error: {
+                tag: "BlueskyApiError",
+                message: "upstream rate limit",
+                retryable: true,
+                status: 429,
+                did: energySeedDid,
+                runId: "run-1",
+                operation: "ExpertPollCoordinatorDo.alarm"
+              }
+            } as const),
+          repairIngest: (_baseUrl, _secret) =>
+            Effect.succeed({
+              repairedRuns: 0,
+              failedItems: 0,
+              requeuedItems: 0,
+              untouchedRuns: 0
+            } as const),
+          loadSmokeFixture: (_baseUrl, _secret) =>
+            Effect.succeed({
+              posts: 2,
+              links: 2,
+              topics: 3
+            } as const),
+          listAdminExperts: (_baseUrl, _secret) =>
+            Effect.succeed([{ did: "did:plc:test", domain: "energy" }] as const),
+          listExpertsMcp: (_baseUrl, _secret) =>
+            Effect.succeed([{ did: "did:plc:test", domain: "energy" }] as const),
+          searchPostsMcp: (_baseUrl, _secret, _query) =>
+            Effect.succeed([{
+              uri: smokeFixtureUris()[0],
+              topics: ["solar"]
+            }] as const)
+        })
+      }).layer;
+      const failure = await Effect.runPromise(
+        Effect.flip(
+          runOpsCli([
+            "bun",
+            "ops",
+            "stage",
+            "prepare",
+            "--env",
+            "staging",
+            "--base-url",
+            "https://skygest-bi-agent-staging.workers.dev"
+          ]).pipe(
+            Effect.provide(Layer.mergeAll(BunContext.layer, failingRunLayer))
+          )
+        )
+      );
+
+      expect(failure).toBeInstanceOf(SmokeAssertionError);
+      if (failure instanceof SmokeAssertionError) {
+        expect(failure.message).toContain("BlueskyApiError");
+        expect(failure.message).not.toContain("[object Object]");
       }
     })
   );

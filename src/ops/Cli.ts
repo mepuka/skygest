@@ -1,5 +1,8 @@
 import { Command, Options } from "@effect/cli";
 import { Console, Effect } from "effect";
+import { energySeedDid } from "../bootstrap/CheckedInExpertSeeds";
+import type { IngestRunRecord } from "../domain/polling";
+import { stringifyUnknown } from "../platform/Json";
 import { smokeFixtureUris, smokeSearchQuery } from "../staging/SmokeFixture";
 import {
   InvalidBaseUrlError,
@@ -40,6 +43,51 @@ const expectNonEmpty = <A>(items: ReadonlyArray<A>, message: string) =>
   items.length > 0
     ? Effect.succeed(items)
     : SmokeAssertionError.make({ message });
+
+const waitForIngestRun = Effect.fn("ops.waitForIngestRun")(function* (
+  baseUrl: URL,
+  secret: string,
+  did?: string
+) {
+  const client = yield* StagingOperatorClient;
+  const queued = yield* client.pollIngest(baseUrl, secret, did);
+  const finalState = yield* Effect.iterate(
+    {
+      attempt: 0,
+      run: null as IngestRunRecord | null
+    },
+    {
+      while: ({ attempt, run }) =>
+        attempt < 30 && (run === null || (run.status !== "complete" && run.status !== "failed")),
+      body: ({ attempt }) =>
+        client.getIngestRun(baseUrl, secret, queued.runId).pipe(
+          Effect.tap((run) =>
+            run.status === "complete" || run.status === "failed"
+              ? Effect.void
+              : Effect.sleep(1000)
+          ),
+          Effect.map((run) => ({
+            attempt: attempt + 1,
+            run
+          }))
+        )
+    }
+  );
+
+  if (finalState.run?.status === "complete") {
+    return finalState.run;
+  }
+
+  if (finalState.run?.status === "failed") {
+    return yield* SmokeAssertionError.make({
+      message: `ingest run ${finalState.run.id} failed: ${stringifyUnknown(finalState.run.error ?? "unknown error")}`
+    });
+  }
+
+  return yield* SmokeAssertionError.make({
+    message: `ingest run ${queued.runId} did not finish within the expected window`
+  });
+});
 
 const parseBaseUrl = Effect.fn("ops.parseBaseUrl")(function* (value: string) {
   return yield* Effect.try({
@@ -84,7 +132,7 @@ const runStagePrepare = (options: {
     yield* Console.log(`Preparing ${options.env} staging at ${options.baseUrl}`);
     yield* client.migrate(baseUrl, secret);
     const bootstrap = yield* client.bootstrapExperts(baseUrl, secret);
-    yield* client.pollIngest(baseUrl, secret);
+    yield* waitForIngestRun(baseUrl, secret, energySeedDid);
     const fixture = yield* client.loadSmokeFixture(baseUrl, secret);
 
     yield* Console.log(
@@ -119,10 +167,10 @@ const runStageSmoke = (options: {
       )
     );
 
-    yield* client.pollIngest(baseUrl, secret).pipe(
+    yield* waitForIngestRun(baseUrl, secret, energySeedDid).pipe(
       Effect.flatMap((summary) =>
         expectCondition(
-          summary.expertsTotal > 0,
+          summary.totalExperts > 0,
           "expected /admin/ingest/poll to cover at least one expert"
         )
       )
@@ -152,6 +200,23 @@ const runStageSmoke = (options: {
     yield* Console.log("Smoke checks passed");
   });
 
+const runStageRepair = (options: {
+  readonly env: string;
+  readonly baseUrl: string;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+
+    yield* Console.log(`Repairing ${options.env} ingest state at ${options.baseUrl}`);
+    const summary = yield* client.repairIngest(baseUrl, secret);
+
+    yield* Console.log(
+      `Repair summary: repairedRuns=${summary.repairedRuns} failedItems=${summary.failedItems} requeuedItems=${summary.requeuedItems} untouchedRuns=${summary.untouchedRuns}`
+    );
+  });
+
 const deployCommand = Command.make(
   "deploy",
   { env: envOption, worker: workerOption },
@@ -170,8 +235,14 @@ const smokeCommand = Command.make(
   runStageSmoke
 );
 
+const repairCommand = Command.make(
+  "repair",
+  { env: envOption, baseUrl: baseUrlOption },
+  runStageRepair
+);
+
 const stageCommand = Command.make("stage", {}, () => Effect.void).pipe(
-  Command.withSubcommands([prepareCommand, smokeCommand])
+  Command.withSubcommands([prepareCommand, smokeCommand, repairCommand])
 );
 
 export const opsCommand = Command.make("ops", {}, () => Effect.void).pipe(

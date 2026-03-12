@@ -2,7 +2,7 @@ import { Schema } from "effect";
 import { energySeedDid } from "../bootstrap/CheckedInExpertSeeds";
 import { RawEventBatch } from "../domain/types";
 
-export const smokeSearchQuery = "solar";
+export const smokeSearchQuery = "photovoltaic battery storage";
 
 export const smokeFixtureUris = (did = energySeedDid) =>
   [

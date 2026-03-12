@@ -5,8 +5,10 @@ import { RepoRecordsClient } from "../src/bluesky/RepoRecordsClient";
 import { BlueskyApiError } from "../src/domain/errors";
 import type {
   ExpertSyncStateRecord,
+  ListRecordsResult as ListRecordsResultShape,
   ServiceListRecordsInput
 } from "../src/domain/polling";
+import { ListRecordsResult } from "../src/domain/polling";
 import { Did } from "../src/domain/types";
 import { ExpertSyncStateRepo } from "../src/services/ExpertSyncStateRepo";
 
@@ -53,7 +55,7 @@ const makeBlueskyLayer = (options?: {
   ) => Effect.Effect<string, BlueskyApiError>;
   readonly listRecordsAtService?: (
     input: ServiceListRecordsInput
-  ) => Effect.Effect<{ readonly records: ReadonlyArray<never>; readonly cursor: null }, BlueskyApiError>;
+  ) => Effect.Effect<ListRecordsResultShape, BlueskyApiError>;
 }) =>
   Layer.succeed(BlueskyClient, {
     resolveDidOrHandle: () => Effect.die("unexpected resolveDidOrHandle"),
@@ -123,6 +125,13 @@ describe("RepoRecordsClient", () => {
       expect(syncState.store.get(repo)?.pdsVerifiedAt).toBe(0);
     })
   );
+
+  it("normalizes missing cursors from Bluesky list-record responses to null", () => {
+    const decode = Schema.decodeUnknownSync(ListRecordsResult);
+    const result = decode({ records: [] });
+
+    expect(result.cursor).toBeNull();
+  });
 
   it.effect("resolves stale hints remotely and persists the fresh service URL", () =>
     Effect.gen(function* () {

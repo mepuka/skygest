@@ -1,8 +1,18 @@
 import { Context, Effect, Layer } from "effect";
 import type { SqlError } from "@effect/sql/SqlError";
-import type { ExpertRecord, DeletedKnowledgePost, KnowledgePostResult } from "../domain/bi";
-import { BlueskyApiError } from "../domain/errors";
-import type { ExpertSyncStateRecord, PollRequest } from "../domain/polling";
+import type {
+  DeletedKnowledgePost,
+  ExpertRecord,
+  KnowledgePostResult
+} from "../domain/bi";
+import { ExpertNotFoundError } from "../domain/bi";
+import { BlueskyApiError, toIngestErrorEnvelope } from "../domain/errors";
+import type {
+  ExpertSyncStateRecord,
+  ListRecordsResult,
+  PollRequest,
+  RepoPostRecordValue
+} from "../domain/polling";
 import { RepoRecordsClient } from "../bluesky/RepoRecordsClient";
 import { processBatch, type ProcessBatchSummary } from "../filter/FilterWorker";
 import type { AtUri, RawEventBatch } from "../domain/types";
@@ -23,10 +33,14 @@ const DEEP_RECONCILE_MAX_POSTS = 1000;
 const DEEP_RECONCILE_MAX_PAGES = 10;
 const DEEP_RECONCILE_MAX_AGE_DAYS = 180;
 
+export const WORKFLOW_HEAD_MAX_PAGES = HEAD_MAX_PAGES;
+export const WORKFLOW_CHUNK_MAX_PAGES = 2;
+export const WORKFLOW_CHUNK_MAX_POSTS = 200;
+
 type PollWindowRecord = {
   readonly uri: AtUri;
   readonly cid: string;
-  readonly record: unknown;
+  readonly record: RepoPostRecordValue;
   readonly createdAt: number;
   readonly timeUs: number;
   readonly rkey: string;
@@ -40,11 +54,30 @@ type PollWindow = {
   readonly completed: boolean;
 };
 
-export type ExpertPollResult = {
+type PollWindowState = PollWindow & {
+  readonly cursor: string | null;
+};
+
+export type ExpertPollExecutionResult = {
   readonly pagesFetched: number;
   readonly postsSeen: number;
   readonly postsStored: number;
   readonly postsDeleted: number;
+  readonly processedRecords: number;
+  readonly completed: boolean;
+  readonly nextCursor: string | null;
+};
+
+export type ExpertPollResult = Omit<
+  ExpertPollExecutionResult,
+  "completed" | "nextCursor" | "processedRecords"
+>;
+
+export type ExpertPollChunkOptions = {
+  readonly initialCursor?: string | null;
+  readonly maxPages?: number;
+  readonly maxPosts?: number;
+  readonly maxAgeDays?: number;
 };
 
 const defaultSyncState = (did: ExpertRecord["did"]): ExpertSyncStateRecord => ({
@@ -68,16 +101,7 @@ const clampBackfillMaxPosts = (value: number | undefined) => {
   return Math.min(MAX_BACKFILL_POSTS, value);
 };
 
-const parseCreatedAt = (record: unknown): number | null => {
-  if (typeof record !== "object" || record === null || !("createdAt" in record)) {
-    return null;
-  }
-
-  const createdAt = record.createdAt;
-  if (typeof createdAt !== "string") {
-    return null;
-  }
-
+const parseCreatedAt = (createdAt: string): number | null => {
   const millis = Date.parse(createdAt);
   return Number.isFinite(millis) ? millis : null;
 };
@@ -87,8 +111,12 @@ const toRkey = (uri: string) => {
   return parts[parts.length - 1] ?? uri;
 };
 
-const toPollWindowRecord = (uri: AtUri, cid: string, record: unknown): PollWindowRecord | null => {
-  const createdAt = parseCreatedAt(record);
+const toPollWindowRecord = (
+  uri: AtUri,
+  cid: string,
+  record: RepoPostRecordValue
+): PollWindowRecord | null => {
+  const createdAt = parseCreatedAt(record.createdAt);
   if (createdAt === null) {
     return null;
   }
@@ -130,17 +158,35 @@ const toReconcileDelete = (
   ingestId: `reconcile:${suffix}:${post.uri}:${indexedAt}`
 });
 
-export class ExpertPoller extends Context.Tag("@skygest/ExpertPoller")<
-  ExpertPoller,
+const emptyPollWindowState = (initialCursor?: string | null): PollWindowState => ({
+  cursor: initialCursor ?? null,
+  fetchedRecords: [],
+  processedRecords: [],
+  pagesFetched: 0,
+  nextCursor: initialCursor ?? null,
+  completed: false
+});
+
+export class ExpertPollExecutor extends Context.Tag("@skygest/ExpertPollExecutor")<
+  ExpertPollExecutor,
   {
-    readonly poll: (
+    readonly runExpert: (
       expert: ExpertRecord,
-      request: PollRequest
-    ) => Effect.Effect<ExpertPollResult, BlueskyApiError | SqlError>;
+      request: PollRequest,
+      options?: ExpertPollChunkOptions
+    ) => Effect.Effect<ExpertPollExecutionResult, BlueskyApiError | SqlError>;
+    readonly runDid: (
+      did: ExpertRecord["did"],
+      request: PollRequest,
+      options?: ExpertPollChunkOptions
+    ) => Effect.Effect<
+      ExpertPollExecutionResult,
+      ExpertNotFoundError | BlueskyApiError | SqlError
+    >;
   }
 >() {
   static readonly layer = Layer.effect(
-    ExpertPoller,
+    ExpertPollExecutor,
     Effect.gen(function* () {
       const repoRecords = yield* RepoRecordsClient;
       const syncStateRepo = yield* ExpertSyncStateRepo;
@@ -148,14 +194,14 @@ export class ExpertPoller extends Context.Tag("@skygest/ExpertPoller")<
       const knowledgeRepo = yield* KnowledgeRepo;
       const ontology = yield* OntologyCatalog;
 
-      const resolveSyncState = Effect.fn("ExpertPoller.resolveSyncState")(function* (
+      const resolveSyncState = Effect.fn("ExpertPollExecutor.resolveSyncState")(function* (
         did: ExpertRecord["did"]
       ) {
         const stored = yield* syncStateRepo.getByDid(did);
         return stored ?? defaultSyncState(did);
       });
 
-      const persistState = Effect.fn("ExpertPoller.persistState")(function* (
+      const persistState = Effect.fn("ExpertPollExecutor.persistState")(function* (
         did: ExpertRecord["did"],
         update: (current: ExpertSyncStateRecord) => ExpertSyncStateRecord
       ) {
@@ -165,7 +211,7 @@ export class ExpertPoller extends Context.Tag("@skygest/ExpertPoller")<
         return nextState;
       });
 
-      const fetchWindow = Effect.fn("ExpertPoller.fetchWindow")(function* (
+      const fetchWindow = Effect.fn("ExpertPollExecutor.fetchWindow")(function* (
         expert: ExpertRecord,
         options: {
           readonly initialCursor?: string | null;
@@ -175,34 +221,19 @@ export class ExpertPoller extends Context.Tag("@skygest/ExpertPoller")<
           readonly maxAgeDays?: number;
         }
       ) {
-        let cursor = options.initialCursor ?? null;
-        let nextCursor: string | null = cursor;
-        let pagesFetched = 0;
-        let completed = false;
-        const fetchedRecords: Array<PollWindowRecord> = [];
-        const processedRecords: Array<PollWindowRecord> = [];
         const minCreatedAt = options.maxAgeDays === undefined
           ? null
           : Date.now() - options.maxAgeDays * 24 * 60 * 60 * 1000;
-
-        while (pagesFetched < options.maxPages) {
-          const page = yield* repoRecords.listRecords({
-            repo: expert.did,
-            collection: POSTS_COLLECTION,
-            cursor: cursor ?? undefined,
-            limit: HEAD_PAGE_LIMIT,
-            reverse: true
-          });
-
-          pagesFetched += 1;
-
+        const applyPage = (
+          state: PollWindowState,
+          page: ListRecordsResult
+        ) => {
           const decoded = page.records
             .map((record) => toPollWindowRecord(record.uri, record.cid, record.value))
             .filter((record): record is PollWindowRecord => record !== null);
 
-          fetchedRecords.push(...decoded);
-
           let pageRecords = decoded;
+          let completed = state.completed;
 
           if (options.stopAtUri != null) {
             const stopIndex = pageRecords.findIndex((record) => record.uri === options.stopAtUri);
@@ -221,39 +252,63 @@ export class ExpertPoller extends Context.Tag("@skygest/ExpertPoller")<
           }
 
           if (options.maxPosts !== undefined) {
-            const remaining = Math.max(0, options.maxPosts - processedRecords.length);
+            const remaining = Math.max(0, options.maxPosts - state.processedRecords.length);
             if (pageRecords.length > remaining) {
               pageRecords = pageRecords.slice(0, remaining);
               completed = true;
             }
           }
 
-          processedRecords.push(...pageRecords);
-          nextCursor = page.cursor;
-
-          if (
-            completed ||
+          const processedRecords = [
+            ...state.processedRecords,
+            ...pageRecords
+          ];
+          const exhausted =
             page.cursor === null ||
             decoded.length === 0 ||
-            (options.maxPosts !== undefined && processedRecords.length >= options.maxPosts)
-          ) {
-            completed = completed || page.cursor === null || decoded.length === 0;
-            break;
-          }
+            (options.maxPosts !== undefined && processedRecords.length >= options.maxPosts);
 
-          cursor = page.cursor;
-        }
+          return {
+            cursor: page.cursor,
+            fetchedRecords: [
+              ...state.fetchedRecords,
+              ...decoded
+            ],
+            processedRecords,
+            pagesFetched: state.pagesFetched + 1,
+            nextCursor: page.cursor,
+            completed: completed || exhausted
+          } satisfies PollWindowState;
+        };
+
+        const finalState = yield* Effect.iterate(
+          emptyPollWindowState(options.initialCursor),
+          {
+            while: (state) =>
+              state.pagesFetched < options.maxPages &&
+              !state.completed,
+            body: (state) =>
+              repoRecords.listRecords({
+                repo: expert.did,
+                collection: POSTS_COLLECTION,
+                cursor: state.cursor ?? undefined,
+                limit: HEAD_PAGE_LIMIT
+              }).pipe(
+                Effect.map((page) => applyPage(state, page))
+              )
+          }
+        );
 
         return {
-          fetchedRecords,
-          processedRecords,
-          pagesFetched,
-          nextCursor,
-          completed
+          fetchedRecords: finalState.fetchedRecords,
+          processedRecords: finalState.processedRecords,
+          pagesFetched: finalState.pagesFetched,
+          nextCursor: finalState.nextCursor,
+          completed: finalState.completed
         } satisfies PollWindow;
       });
 
-      const processRecords = Effect.fn("ExpertPoller.processRecords")(function* (
+      const processRecords = Effect.fn("ExpertPollExecutor.processRecords")(function* (
         expert: ExpertRecord,
         records: ReadonlyArray<PollWindowRecord>
       ) {
@@ -270,7 +325,7 @@ export class ExpertPoller extends Context.Tag("@skygest/ExpertPoller")<
         );
       });
 
-      const reconcileDeletes = Effect.fn("ExpertPoller.reconcileDeletes")(function* (
+      const reconcileDeletes = Effect.fn("ExpertPollExecutor.reconcileDeletes")(function* (
         expert: ExpertRecord,
         records: ReadonlyArray<PollWindowRecord>,
         suffix: string
@@ -302,29 +357,37 @@ export class ExpertPoller extends Context.Tag("@skygest/ExpertPoller")<
         return deletions.length;
       });
 
-      const persistFailure = Effect.fn("ExpertPoller.persistFailure")(function* (
+      const persistFailure = Effect.fn("ExpertPollExecutor.persistFailure")(function* (
         did: ExpertRecord["did"],
         request: PollRequest,
         error: unknown
       ) {
+        const operation = request.mode === "reconcile"
+          ? `ExpertPollExecutor.${request.mode}:${request.depth}`
+          : `ExpertPollExecutor.${request.mode}`;
         yield* persistState(did, (current) => ({
           ...current,
           lastPolledAt: Date.now(),
           backfillStatus: request.mode === "backfill" ? "failed" : current.backfillStatus,
-          lastError: error instanceof Error ? error.message : String(error)
+          lastError: toIngestErrorEnvelope(error, {
+            did,
+            operation
+          })
         }));
       });
 
-      const poll = Effect.fn("ExpertPoller.poll")(function* (
+      const runExpert = Effect.fn("ExpertPollExecutor.runExpert")(function* (
         expert: ExpertRecord,
-        request: PollRequest
+        request: PollRequest,
+        options?: ExpertPollChunkOptions
       ) {
         const state = yield* resolveSyncState(expert.did);
+
         return yield* Effect.gen(function* () {
           if (request.mode === "head") {
             const window = yield* fetchWindow(expert, {
               stopAtUri: state.headUri,
-              maxPages: HEAD_MAX_PAGES
+              maxPages: options?.maxPages ?? HEAD_MAX_PAGES
             });
             const processed = yield* processRecords(expert, window.processedRecords);
             const deleted = yield* reconcileDeletes(expert, window.fetchedRecords, "recent");
@@ -338,7 +401,11 @@ export class ExpertPoller extends Context.Tag("@skygest/ExpertPoller")<
               headCreatedAt: newest?.createdAt ?? current.headCreatedAt,
               lastPolledAt: finishedAt,
               lastCompletedAt: finishedAt,
-              backfillCursor: current.backfillCursor ?? window.nextCursor,
+              // Only seed backfill from a head sweep when we consumed whole pages.
+              // If the stored head stopped us mid-page, a page-level cursor would
+              // skip the older tail of that page on a later backfill.
+              backfillCursor: current.backfillCursor ??
+                (current.headUri === null ? window.nextCursor : null),
               lastError: null
             }));
             yield* expertsRepo.setLastSyncedAt(expert.did, finishedAt);
@@ -347,25 +414,36 @@ export class ExpertPoller extends Context.Tag("@skygest/ExpertPoller")<
               pagesFetched: window.pagesFetched,
               postsSeen: window.fetchedRecords.length,
               postsStored: processed.postsStored,
-              postsDeleted: deleted
-            } satisfies ExpertPollResult;
+              postsDeleted: deleted,
+              processedRecords: window.processedRecords.length,
+              completed: true,
+              nextCursor: null
+            } satisfies ExpertPollExecutionResult;
           }
 
           if (request.mode === "backfill") {
+            yield* persistState(expert.did, (current) => ({
+              ...current,
+              backfillStatus: "running",
+              lastError: null
+            }));
+
+            const maxPosts = options?.maxPosts ?? clampBackfillMaxPosts(request.maxPosts);
             const window = yield* fetchWindow(expert, {
-              initialCursor: state.backfillCursor,
-              maxPages: Math.ceil(clampBackfillMaxPosts(request.maxPosts) / HEAD_PAGE_LIMIT) + 1,
-              maxPosts: clampBackfillMaxPosts(request.maxPosts),
-              maxAgeDays: request.maxAgeDays ?? DEFAULT_BACKFILL_MAX_AGE_DAYS
+              initialCursor: options?.initialCursor ?? state.backfillCursor,
+              maxPages: options?.maxPages ?? Math.ceil(maxPosts / HEAD_PAGE_LIMIT) + 1,
+              maxPosts,
+              maxAgeDays: options?.maxAgeDays ?? request.maxAgeDays ?? DEFAULT_BACKFILL_MAX_AGE_DAYS
             });
             const processed = yield* processRecords(expert, window.processedRecords);
             const finishedAt = Date.now();
+
             yield* persistState(expert.did, (current) => ({
               ...current,
               lastPolledAt: finishedAt,
               lastCompletedAt: finishedAt,
               backfillCursor: window.completed ? null : window.nextCursor,
-              backfillStatus: window.completed ? "complete" : "idle",
+              backfillStatus: window.completed ? "complete" : "running",
               lastError: null
             }));
             yield* expertsRepo.setLastSyncedAt(expert.did, finishedAt);
@@ -374,15 +452,19 @@ export class ExpertPoller extends Context.Tag("@skygest/ExpertPoller")<
               pagesFetched: window.pagesFetched,
               postsSeen: window.fetchedRecords.length,
               postsStored: processed.postsStored,
-              postsDeleted: 0
-            } satisfies ExpertPollResult;
+              postsDeleted: 0,
+              processedRecords: window.processedRecords.length,
+              completed: window.completed,
+              nextCursor: window.completed ? null : window.nextCursor
+            } satisfies ExpertPollExecutionResult;
           }
 
           const isDeep = request.depth === "deep";
           const window = yield* fetchWindow(expert, {
-            maxPages: isDeep ? DEEP_RECONCILE_MAX_PAGES : RECENT_RECONCILE_MAX_PAGES,
-            maxPosts: isDeep ? DEEP_RECONCILE_MAX_POSTS : RECENT_RECONCILE_MAX_POSTS,
-            maxAgeDays: isDeep ? DEEP_RECONCILE_MAX_AGE_DAYS : DEFAULT_BACKFILL_MAX_AGE_DAYS
+            initialCursor: options?.initialCursor ?? null,
+            maxPages: options?.maxPages ?? (isDeep ? DEEP_RECONCILE_MAX_PAGES : RECENT_RECONCILE_MAX_PAGES),
+            maxPosts: options?.maxPosts ?? (isDeep ? DEEP_RECONCILE_MAX_POSTS : RECENT_RECONCILE_MAX_POSTS),
+            maxAgeDays: options?.maxAgeDays ?? (isDeep ? DEEP_RECONCILE_MAX_AGE_DAYS : DEFAULT_BACKFILL_MAX_AGE_DAYS)
           });
           const processed = yield* processRecords(expert, window.processedRecords);
           const deleted = yield* reconcileDeletes(
@@ -402,8 +484,11 @@ export class ExpertPoller extends Context.Tag("@skygest/ExpertPoller")<
             pagesFetched: window.pagesFetched,
             postsSeen: window.fetchedRecords.length,
             postsStored: processed.postsStored,
-            postsDeleted: deleted
-          } satisfies ExpertPollResult;
+            postsDeleted: deleted,
+            processedRecords: window.processedRecords.length,
+            completed: window.completed,
+            nextCursor: window.completed ? null : window.nextCursor
+          } satisfies ExpertPollExecutionResult;
         }).pipe(
           Effect.catchAll((error) =>
             persistFailure(expert.did, request, error).pipe(
@@ -415,8 +500,22 @@ export class ExpertPoller extends Context.Tag("@skygest/ExpertPoller")<
         );
       });
 
-      return ExpertPoller.of({
-        poll
+      const runDid = Effect.fn("ExpertPollExecutor.runDid")(function* (
+        did: ExpertRecord["did"],
+        request: PollRequest,
+        options?: ExpertPollChunkOptions
+      ) {
+        const expert = yield* expertsRepo.getByDid(did);
+        if (expert === null) {
+          return yield* ExpertNotFoundError.make({ did });
+        }
+
+        return yield* runExpert(expert, request, options);
+      });
+
+      return ExpertPollExecutor.of({
+        runExpert,
+        runDid
       });
     })
   );

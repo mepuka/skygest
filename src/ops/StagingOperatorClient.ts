@@ -4,13 +4,21 @@ import {
   ExpertListOutput,
   KnowledgePostsOutput
 } from "../domain/bi";
-import { PollRunSummary } from "../domain/polling";
+import {
+  IngestQueuedResponse,
+  IngestRepairSummary,
+  IngestRunRecord
+} from "../domain/polling";
 import {
   callTool,
   decodeCallToolResultWith,
   type McpCallToolResult
 } from "../mcp/Client";
-import { decodeJsonStringWith, encodeJsonString } from "../platform/Json";
+import {
+  decodeJsonStringWith,
+  encodeJsonString,
+  stringifyUnknown
+} from "../platform/Json";
 import { StagingRequestError } from "./Errors";
 
 const MigrateResponse = Schema.Struct({
@@ -26,7 +34,9 @@ const LoadSmokeFixtureResponse = Schema.Struct({
 const decodeMigrateResponse = decodeJsonStringWith(MigrateResponse);
 const decodeBootstrapExpertsResponse = decodeJsonStringWith(BootstrapExpertsResult);
 const decodeLoadSmokeFixtureResponse = decodeJsonStringWith(LoadSmokeFixtureResponse);
-const decodePollRunSummaryResponse = decodeJsonStringWith(PollRunSummary);
+const decodeIngestQueuedResponse = decodeJsonStringWith(IngestQueuedResponse);
+const decodeIngestRepairSummary = decodeJsonStringWith(IngestRepairSummary);
+const decodeIngestRunResponse = decodeJsonStringWith(IngestRunRecord);
 const decodeAdminExpertsJsonResponse = decodeJsonStringWith(ExpertListOutput);
 const decodeSearchPostsResponse = decodeCallToolResultWith(KnowledgePostsOutput);
 const decodeMcpExpertsResponse = decodeCallToolResultWith(ExpertListOutput);
@@ -38,6 +48,9 @@ const operatorHeaders = (secret: string) => ({
 
 const endpointUrl = (baseUrl: URL, pathname: string) =>
   new URL(pathname, baseUrl);
+
+const optionalDidBody = (did?: string) =>
+  encodeJsonString(did === undefined ? {} : { did });
 
 const requestJson = <A>(
   operation: string,
@@ -64,7 +77,7 @@ const requestJson = <A>(
         ? error
         : StagingRequestError.make({
           operation,
-          message: error instanceof Error ? error.message : String(error)
+          message: stringifyUnknown(error)
         })
   });
 
@@ -93,7 +106,7 @@ const callMcpTool = <A>(
     Effect.mapError((error) =>
       StagingRequestError.make({
         operation,
-        message: error instanceof Error ? error.message : String(error)
+        message: stringifyUnknown(error)
       })
     )
   );
@@ -122,7 +135,7 @@ const requestText = (
         ? error
         : StagingRequestError.make({
           operation,
-          message: error instanceof Error ? error.message : String(error)
+          message: stringifyUnknown(error)
         })
   });
 
@@ -151,8 +164,18 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
     }, StagingRequestError>;
     readonly pollIngest: (
       baseUrl: URL,
+      secret: string,
+      did?: string
+    ) => Effect.Effect<Schema.Schema.Type<typeof IngestQueuedResponse>, StagingRequestError>;
+    readonly getIngestRun: (
+      baseUrl: URL,
+      secret: string,
+      runId: string
+    ) => Effect.Effect<Schema.Schema.Type<typeof IngestRunRecord>, StagingRequestError>;
+    readonly repairIngest: (
+      baseUrl: URL,
       secret: string
-    ) => Effect.Effect<Schema.Schema.Type<typeof PollRunSummary>, StagingRequestError>;
+    ) => Effect.Effect<Schema.Schema.Type<typeof IngestRepairSummary>, StagingRequestError>;
     readonly listAdminExperts: (
       baseUrl: URL,
       secret: string
@@ -206,16 +229,38 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
           }),
         decodeLoadSmokeFixtureResponse
       ),
-    pollIngest: (baseUrl, secret) =>
+    pollIngest: (baseUrl, secret, did) =>
       requestJson(
         "poll-ingest",
         () =>
           fetch(endpointUrl(baseUrl, "/admin/ingest/poll"), {
             method: "POST",
             headers: operatorHeaders(secret),
+            body: optionalDidBody(did)
+          }),
+        decodeIngestQueuedResponse
+      ),
+    getIngestRun: (baseUrl, secret, runId) =>
+      requestJson(
+        "get-ingest-run",
+        () =>
+          fetch(endpointUrl(baseUrl, `/admin/ingest/runs/${runId}`), {
+            headers: {
+              "x-skygest-operator-secret": secret
+            }
+          }),
+        decodeIngestRunResponse
+      ),
+    repairIngest: (baseUrl, secret) =>
+      requestJson(
+        "repair-ingest",
+        () =>
+          fetch(endpointUrl(baseUrl, "/admin/ingest/repair"), {
+            method: "POST",
+            headers: operatorHeaders(secret),
             body: encodeJsonString({})
           }),
-        decodePollRunSummaryResponse
+        decodeIngestRepairSummary
       ),
     listAdminExperts: (baseUrl, secret) =>
       requestJson(

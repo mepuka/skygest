@@ -1,5 +1,6 @@
 import { Command, CommandExecutor } from "@effect/platform";
 import { Context, Effect, Layer } from "effect";
+import { stringifyUnknown } from "../platform/Json";
 import { WranglerDeployError } from "./Errors";
 
 export class WranglerCli extends Context.Tag("@skygest/WranglerCli")<
@@ -38,7 +39,7 @@ export class WranglerCli extends Context.Tag("@skygest/WranglerCli")<
           Effect.mapError((error) =>
             WranglerDeployError.make({
               command: commandText,
-              message: error instanceof Error ? error.message : String(error)
+              message: stringifyUnknown(error)
             })
           )
         );

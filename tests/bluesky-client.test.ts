@@ -204,4 +204,43 @@ describe("BlueskyClient", () => {
       expect(yield* Ref.get(attempts)).toBe(3);
     })
   );
+
+  it.effect("fails at the client boundary for invalid repo record payloads", () =>
+    Effect.gen(function* () {
+      const layer = makeHttpLayer((request) =>
+        Effect.succeed(
+          jsonResponse(request, {
+            records: [
+              {
+                uri: "at://did:plc:expert-a/app.bsky.feed.post/abc123",
+                cid: "cid-1",
+                value: {
+                  text: "missing createdAt"
+                }
+              }
+            ],
+            cursor: null
+          })
+        )
+      );
+
+      const error = yield* Effect.gen(function* () {
+        const client = yield* makeBlueskyClient("https://public.api.bsky.app");
+        return yield* client.listRecordsAtService({
+          serviceUrl: "https://pds-a.example.com",
+          repo,
+          collection: "app.bsky.feed.post",
+          limit: 1,
+          reverse: true
+        });
+      }).pipe(
+        Effect.provide(layer),
+        Effect.flip
+      );
+
+      expect(error._tag).toBe("BlueskyApiError");
+      expect(error.message).toContain("createdAt");
+      expect(error.status).toBeUndefined();
+    })
+  );
 });
