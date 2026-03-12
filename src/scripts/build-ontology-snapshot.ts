@@ -1,5 +1,4 @@
 import { resolve } from "node:path";
-import legacyTopics from "../../config/ontology/energy-topics.json";
 import { buildOntologySnapshot, encodeOntologySnapshot } from "../ontology/buildSnapshot";
 
 const repoRoot = resolve(import.meta.dir, "../..");
@@ -23,7 +22,6 @@ const readRequired = async (path: string) => {
 const snapshot = buildOntologySnapshot({
   ttl: await readRequired(resolve(ontologyRoot, "release/energy-news-reference-individuals.ttl")),
   derivedStoreFilter: await readRequired(resolve(ontologyRoot, "docs/derived-store-filter.md")),
-  legacyTopics,
   owlJson: await readRequired(resolve(ontologyRoot, "release/energy-news.json"))
 });
 

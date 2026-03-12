@@ -1,8 +1,8 @@
 {
   "ontologyVersion": "0.3.0",
-  "snapshotVersion": "0.3.0-c0e0f896b6f2",
+  "snapshotVersion": "0.3.0-7b3ce31da96e",
   "generatedAt": "2026-02-27T00:00:00.000Z",
-  "sourceDigest": "c0e0f896b6f223df80ff95dd797365caba104673912841acdb1f15219b4ca26e",
+  "sourceDigest": "7b3ce31da96ea71435af8a206af8244ff65ab2e25bb7d97ec29ecfcfb434d8cf",
   "canonicalTopics": [
     {
       "slug": "solar",

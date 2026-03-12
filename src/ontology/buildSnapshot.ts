@@ -1,11 +1,6 @@
 import { createHash } from "node:crypto";
 import { canonicalTopics, conceptToCanonicalTopicSlug, legacyTopicCompatibility, matcherSignalExclusionConceptSlugs, ambiguityTerms, type CanonicalTopicSlug } from "./canonical";
-
-type LegacyTopicInput = {
-  readonly slug: string;
-  readonly label: string;
-  readonly terms: ReadonlyArray<string>;
-};
+import { compactWhitespace, normalizeWord, normalizeHashtag, normalizeDomain } from "./normalize";
 
 type ParsedConcept = {
   readonly slug: string;
@@ -21,7 +16,6 @@ type ParsedConcept = {
 type BuildOntologySnapshotInput = {
   readonly ttl: string;
   readonly derivedStoreFilter: string;
-  readonly legacyTopics: ReadonlyArray<LegacyTopicInput>;
   readonly owlJson?: string;
 };
 
@@ -68,21 +62,6 @@ type OntologySnapshotData = {
   };
   readonly anomalies: ReadonlyArray<OntologyAnomaly>;
 };
-
-const compactWhitespace = (value: string) =>
-  value.replace(/\s+/g, " ").trim();
-
-const normalizeForMatch = (value: string) =>
-  compactWhitespace(value)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-
-const normalizeHashtag = (value: string) =>
-  value.trim().toLowerCase().replace(/^#+/u, "");
-
-const normalizeDomain = (value: string) =>
-  value.trim().toLowerCase().replace(/^www\./u, "");
 
 const parseQuotedValues = (input: string) =>
   Array.from(input.matchAll(/"([^"]+)"/g), (match) => compactWhitespace(match[1] ?? ""));
@@ -215,7 +194,6 @@ const makeSourceDigest = (input: BuildOntologySnapshotInput) =>
   createHash("sha256")
     .update(input.ttl)
     .update(input.derivedStoreFilter)
-    .update(JSON.stringify(input.legacyTopics))
     .update(input.owlJson ?? "")
     .digest("hex");
 
@@ -249,9 +227,6 @@ const buildMatcherTermsForConcept = (
     ? sortStrings([concept.label, ...concept.altLabels])
     : [];
 
-const legacyTermsBySlug = (legacyTopics: ReadonlyArray<LegacyTopicInput>) =>
-  new Map(legacyTopics.map((topic) => [topic.slug, sortStrings(topic.terms)] as const));
-
 export const buildOntologySnapshot = (
   input: BuildOntologySnapshotInput
 ): OntologySnapshotData => {
@@ -278,7 +253,6 @@ export const buildOntologySnapshot = (
     });
   }
 
-  const legacyTerms = legacyTermsBySlug(input.legacyTopics);
   const conceptMap = new Map(concepts.map((concept) => [concept.slug, concept] as const));
   const globalHashtagSet = new Set(globalHashtags);
   const globalDomainSet = new Set(globalDomains);
@@ -288,9 +262,9 @@ export const buildOntologySnapshot = (
     const useMatcherSignals = !matcherSignalExclusionConceptSlugs.has(concept.slug);
     const matcherTerms = buildMatcherTermsForConcept(concept, useMatcherSignals);
 
-    const normalizedLabel = normalizeForMatch(concept.label);
+    const normalizedLabel = normalizeWord(concept.label);
     for (const altLabel of concept.altLabels) {
-      if (normalizeForMatch(altLabel) === normalizedLabel) {
+      if (normalizeWord(altLabel) === normalizedLabel) {
         anomalies.push({
           code: "duplicate_alt_label",
           message: `${concept.slug} repeats its preferred label as an altLabel: "${altLabel}".`
@@ -299,9 +273,9 @@ export const buildOntologySnapshot = (
     }
 
     for (const term of matcherTerms) {
-      const owners = duplicateMatcherTerms.get(normalizeForMatch(term)) ?? new Set<string>();
+      const owners = duplicateMatcherTerms.get(normalizeWord(term)) ?? new Set<string>();
       owners.add(concept.slug);
-      duplicateMatcherTerms.set(normalizeForMatch(term), owners);
+      duplicateMatcherTerms.set(normalizeWord(term), owners);
     }
 
     return {
@@ -340,7 +314,6 @@ export const buildOntologySnapshot = (
     const mergedTerms = sortStrings([
       ...conceptTerms,
       ...termOverrides,
-      ...(legacyTerms.get(definition.slug) ?? []),
       ...((legacyTopicCompatibility as Record<string, ReadonlyArray<string> | undefined>)[definition.slug] ?? [])
     ]);
 
@@ -394,8 +367,8 @@ export const buildOntologySnapshot = (
       .filter((topic) => topic.conceptSlugs.includes(concept.slug) && !matcherSignalExclusionConceptSlugs.has(concept.slug))
       .flatMap((topic) => topic.terms)
       .filter((term) =>
-        normalizeForMatch(term) === normalizeForMatch(concept.label) ||
-        concept.altLabels.some((altLabel) => normalizeForMatch(term) === normalizeForMatch(altLabel))
+        normalizeWord(term) === normalizeWord(concept.label) ||
+        concept.altLabels.some((altLabel) => normalizeWord(term) === normalizeWord(altLabel))
       );
 
     return {

@@ -29,6 +29,7 @@ import {
   makeWorkflowIngestEnvLayer
 } from "../platform/Env";
 import {
+  makeSharedRuntime,
   runScopedWithRuntime,
   withManagedRuntime
 } from "../platform/EffectRuntime";
@@ -136,7 +137,6 @@ export const makeWorkflowIngestLayer = (env: WorkflowIngestEnvBindings) => {
   return Layer.mergeAll(
     baseLayer,
     configLayer,
-    ontologyLayer,
     expertsLayer,
     knowledgeLayer,
     syncStateLayer,
@@ -149,6 +149,8 @@ export const makeWorkflowIngestLayer = (env: WorkflowIngestEnvBindings) => {
     ingestRepairLayer
   );
 };
+
+const sharedIngestRuntime = makeSharedRuntime(makeWorkflowIngestLayer);
 
 const statusForIngestError = (error: unknown) => {
   if (error instanceof ExpertNotFoundError || hasTag(error, "ExpertNotFoundError")) {
@@ -309,9 +311,128 @@ export const handleIngestRequestWithLayer = async (
   }
 };
 
-export const handleIngestRequest = (
+export const handleIngestRequest = async (
   request: Request,
   env: WorkflowIngestEnvBindings,
   identity: AccessIdentity
-) =>
-  handleIngestRequestWithLayer(request, identity, makeWorkflowIngestLayer(env));
+) => {
+  const url = new URL(request.url);
+  const runtime = sharedIngestRuntime.getRuntime(env);
+
+  try {
+    const runWithRuntime = <A>(effect: Effect.Effect<A, unknown, any>) =>
+      runScopedWithRuntime(runtime, effect, {
+        operation: `IngestRouter:${request.method}:${url.pathname}`
+      });
+
+    if (request.method === "POST" && url.pathname === "/admin/ingest/poll") {
+      const decoded = decodeJsonBody(
+        PollHeadInput,
+        await readBodyText(request),
+        "IngestRouter.poll"
+      );
+      if (Either.isLeft(decoded)) {
+        return respondToIngestError(decoded.left);
+      }
+      const input = decoded.right;
+      const result = await runWithRuntime(
+        Effect.flatMap(IngestWorkflowLauncher, (launcher) =>
+          launcher.start({
+            kind: "head-sweep",
+            ...(input.did === undefined ? {} : { dids: [input.did] }),
+            triggeredBy: "admin",
+            requestedBy: toRequestedBy(identity)
+          })
+        )
+      );
+      return json(result, 202);
+    }
+
+    if (request.method === "POST" && url.pathname === "/admin/ingest/backfill") {
+      const decoded = decodeJsonBody(
+        PollBackfillInput,
+        await readBodyText(request),
+        "IngestRouter.backfill"
+      );
+      if (Either.isLeft(decoded)) {
+        return respondToIngestError(decoded.left);
+      }
+      const input = decoded.right;
+      const result = await runWithRuntime(
+        Effect.flatMap(IngestWorkflowLauncher, (launcher) =>
+          launcher.start({
+            kind: "backfill",
+            ...(input.did === undefined ? {} : { dids: [input.did] }),
+            ...(input.maxPosts === undefined ? {} : { maxPosts: input.maxPosts }),
+            ...(input.maxAgeDays === undefined ? {} : { maxAgeDays: input.maxAgeDays }),
+            triggeredBy: "admin",
+            requestedBy: toRequestedBy(identity)
+          })
+        )
+      );
+      return json(result, 202);
+    }
+
+    if (request.method === "POST" && url.pathname === "/admin/ingest/reconcile") {
+      const decoded = decodeJsonBody(
+        PollReconcileInput,
+        await readBodyText(request),
+        "IngestRouter.reconcile"
+      );
+      if (Either.isLeft(decoded)) {
+        return respondToIngestError(decoded.left);
+      }
+      const input = decoded.right;
+      const result = await runWithRuntime(
+        Effect.flatMap(IngestWorkflowLauncher, (launcher) =>
+          launcher.start({
+            kind: "reconcile",
+            ...(input.did === undefined ? {} : { dids: [input.did] }),
+            ...(input.depth === undefined ? {} : { depth: input.depth }),
+            triggeredBy: "admin",
+            requestedBy: toRequestedBy(identity)
+          })
+        )
+      );
+      return json(result, 202);
+    }
+
+    if (request.method === "POST" && url.pathname === "/admin/ingest/repair") {
+      const summary = await runWithRuntime(
+        Effect.flatMap(IngestRepairService, (repair) =>
+          repair.repairHistoricalRuns()
+        )
+      );
+      return json(summary);
+    }
+
+    const runId = matchRunPath(url.pathname);
+    if (request.method === "GET" && runId !== null) {
+      const run = await runWithRuntime(
+        Effect.flatMap(IngestRunsRepo, (runs) => runs.getById(runId))
+      );
+      if (run === null) {
+        throw IngestRunNotFoundError.make({ runId });
+      }
+      return json(run);
+    }
+
+    const runItemsId = matchRunItemsPath(url.pathname);
+    if (request.method === "GET" && runItemsId !== null) {
+      const run = await runWithRuntime(
+        Effect.flatMap(IngestRunsRepo, (runs) => runs.getById(runItemsId))
+      );
+      if (run === null) {
+        throw IngestRunNotFoundError.make({ runId: runItemsId });
+      }
+      const items = await runWithRuntime(
+        Effect.flatMap(IngestRunItemsRepo, (repo) => repo.listByRun(runItemsId))
+      );
+      return json(items);
+    }
+
+    return notFound();
+  } catch (error) {
+    return respondToIngestError(error);
+  }
+};

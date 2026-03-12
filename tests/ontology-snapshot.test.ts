@@ -2,22 +2,20 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import legacyTopics from "../config/ontology/energy-topics.json";
 import { buildOntologySnapshot } from "../src/ontology/buildSnapshot";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const ontologyRoot = resolve(here, "../../ontology_skill/ontologies/energy-news");
+const fixtureRoot = resolve(here, "fixtures/ontology");
 
 const readSource = (relativePath: string) =>
-  readFileSync(resolve(ontologyRoot, relativePath), "utf8");
+  readFileSync(resolve(fixtureRoot, relativePath), "utf8");
 
 describe("ontology snapshot builder", () => {
   it("builds a deterministic curated canonical snapshot from the release artifacts", () => {
     const input = {
-      ttl: readSource("release/energy-news-reference-individuals.ttl"),
-      derivedStoreFilter: readSource("docs/derived-store-filter.md"),
-      legacyTopics,
-      owlJson: readSource("release/energy-news.json")
+      ttl: readSource("energy-news-reference-individuals.ttl"),
+      derivedStoreFilter: readSource("derived-store-filter.md"),
+      owlJson: readSource("energy-news.json")
     };
 
     const first = buildOntologySnapshot(input);

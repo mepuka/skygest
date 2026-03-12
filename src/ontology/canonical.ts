@@ -38,7 +38,6 @@ export type CanonicalTopicDefinition = {
   readonly label: string;
   readonly description: string;
   readonly rootConceptSlugs: ReadonlyArray<string>;
-  readonly matcherConceptSlugs?: ReadonlyArray<string>;
   readonly termOverrides?: ReadonlyArray<string>;
   readonly hashtags?: ReadonlyArray<string>;
   readonly domains?: ReadonlyArray<string>;
@@ -171,8 +170,7 @@ export const canonicalTopics = [
     label: "Solar",
     description: "Utility-scale and distributed solar power generation.",
     rootConceptSlugs: ["Solar"],
-    matcherConceptSlugs: ["Solar", "RooftopSolar"],
-    termOverrides: ["photovoltaic", "pv", "solar energy", "solar farm", "solar panel"],
+    termOverrides: ["photovoltaic", "pv", "solar energy", "solar farm", "solar panel", "solar power"],
     hashtags: ["solar", "solarenergy", "solarpower", "rooftopsolar"],
     domains: ["pv-magazine.com"]
   },
@@ -225,7 +223,6 @@ export const canonicalTopics = [
     label: "Nuclear",
     description: "Nuclear generation, reactors, and fusion research.",
     rootConceptSlugs: ["Nuclear"],
-    matcherConceptSlugs: ["Nuclear", "Fusion", "SMR"],
     termOverrides: ["nuclear power", "nuclear energy", "small modular reactor"],
     hashtags: ["nuclear", "smr", "fusion", "nuclearenergy", "nuclearpower"],
     domains: []
@@ -235,7 +232,6 @@ export const canonicalTopics = [
     label: "Hydrogen",
     description: "Hydrogen production, infrastructure, and fuel-cell deployment.",
     rootConceptSlugs: ["Hydrogen"],
-    matcherConceptSlugs: ["Hydrogen", "FuelCell", "GreenHydrogen"],
     termOverrides: ["hydrogen", "green hydrogen", "electrolyzer"],
     hashtags: ["hydrogen", "greenhydrogen"],
     domains: ["rechargenews.com"]
@@ -245,7 +241,6 @@ export const canonicalTopics = [
     label: "Natural Gas",
     description: "Natural gas production, LNG, and gas-system development.",
     rootConceptSlugs: ["NaturalGas"],
-    matcherConceptSlugs: ["NaturalGas", "LNGTradeAndInfrastructure"],
     termOverrides: ["natural gas", "gas pipeline", "gas prices", "lng", "methane"],
     hashtags: ["naturalgas", "lng", "gas", "methane"],
     domains: ["oilprice.com", "platts.com", "energyintel.com"]
@@ -273,7 +268,6 @@ export const canonicalTopics = [
     label: "Energy Storage",
     description: "Battery storage and long-duration storage systems.",
     rootConceptSlugs: ["EnergyStorage"],
-    matcherConceptSlugs: ["EnergyStorage", "BatteryRecycling", "LongDurationStorage", "PumpedHydroStorage"],
     termOverrides: ["battery storage", "bess", "long duration storage", "battery recycling", "pumped hydro"],
     hashtags: ["energystorage", "bess", "battery"],
     domains: ["utilitydive.com", "powermag.com"]
@@ -283,7 +277,6 @@ export const canonicalTopics = [
     label: "Distributed Energy",
     description: "DERs, demand response, microgrids, and virtual power plants.",
     rootConceptSlugs: ["DistributedEnergyAndFlexibility"],
-    matcherConceptSlugs: ["DistributedEnergyAndFlexibility", "DemandResponse", "Microgrid", "VirtualPowerPlant"],
     termOverrides: ["distributed energy", "demand response", "demand flexibility", "virtual power plant"],
     hashtags: ["microgrid", "der"],
     domains: ["utilitydive.com"]
@@ -293,7 +286,6 @@ export const canonicalTopics = [
     label: "Grid and Infrastructure",
     description: "Transmission, distribution, interconnection, and grid operations.",
     rootConceptSlugs: ["GridAndInfrastructure"],
-    matcherConceptSlugs: ["GridAndInfrastructure", "Distribution", "GridModernization", "GridOperator", "Interconnection", "Transmission"],
     termOverrides: ["power grid", "electric grid", "grid modernization", "transmission planning"],
     hashtags: ["gridmodernization", "powergrid", "electricgrid", "grid", "interconnection", "transmission"],
     domains: ["rtoinsider.com", "utilitydive.com", "powermag.com"]
@@ -303,7 +295,6 @@ export const canonicalTopics = [
     label: "Electrification",
     description: "Transport, building, and end-use electrification.",
     rootConceptSlugs: ["Electrification"],
-    matcherConceptSlugs: ["Electrification", "ElectricTransport", "ElectricVehicles", "EVCharging", "HeatPumps", "BuildingElectrification"],
     termOverrides: ["electric vehicle", "ev charging", "heat pump", "building electrification"],
     hashtags: ["ev", "evs", "electricvehicles", "heatpump", "heatpumps", "electrification", "evcharging"],
     domains: ["insideevs.com", "electrek.co"]
@@ -313,7 +304,6 @@ export const canonicalTopics = [
     label: "Energy Efficiency",
     description: "Efficiency retrofits, demand reduction, and performance gains.",
     rootConceptSlugs: ["BuildingsAndEfficiency"],
-    matcherConceptSlugs: ["BuildingsAndEfficiency", "Retrofits", "EfficiencyRecords"],
     termOverrides: ["energy efficiency", "retrofit", "retrofits", "efficiency gains"],
     hashtags: ["energyefficiency"],
     domains: ["nrel.gov"]
@@ -323,7 +313,6 @@ export const canonicalTopics = [
     label: "Data Center Demand",
     description: "Electricity demand from data centers and AI workloads.",
     rootConceptSlugs: ["AIAndDataCenterDemand", "DataCenterDemand"],
-    matcherConceptSlugs: ["AIAndDataCenterDemand", "DataCenterDemand"],
     termOverrides: ["data center", "data centre", "ai energy demand", "data center energy", "data center power"],
     hashtags: [],
     domains: []
@@ -333,7 +322,6 @@ export const canonicalTopics = [
     label: "Energy Policy",
     description: "Policy, regulation, permitting, and government energy strategy.",
     rootConceptSlugs: ["EnergyPolicy"],
-    matcherConceptSlugs: ["EnergyPolicy", "Energiewende", "IRAPolicy", "Legislation", "Permitting", "Regulation", "Tariff"],
     termOverrides: ["energy policy", "inflation reduction act", "regulatory filing"],
     hashtags: ["energypolicy", "ira", "ferc"],
     domains: ["ferc.gov", "energy.gov", "eia.gov"]
@@ -343,7 +331,6 @@ export const canonicalTopics = [
     label: "Energy Markets",
     description: "Power, fuel, and wholesale market structure and pricing.",
     rootConceptSlugs: ["EnergyMarkets"],
-    matcherConceptSlugs: ["EnergyMarkets", "Commodity", "PowerPurchaseAgreement", "WholesaleMarkets"],
     termOverrides: ["energy market", "power market", "wholesale market", "power purchase agreement", "ppa"],
     hashtags: ["energyfinance"],
     domains: ["platts.com", "bnef.com", "energyintel.com"]
@@ -353,7 +340,6 @@ export const canonicalTopics = [
     label: "Energy Finance",
     description: "Project finance, M&A, public funding, and clean-tech capital.",
     rootConceptSlugs: ["EnergyFinance"],
-    matcherConceptSlugs: ["EnergyFinance", "CorporateDeals", "ProjectFinance", "PublicFunding"],
     termOverrides: ["project finance", "tax credit transfer", "public funding"],
     hashtags: ["projectfinance", "energyfinance", "cleantech"],
     domains: ["bnef.com", "latitudemedia.com"]
@@ -363,7 +349,6 @@ export const canonicalTopics = [
     label: "Energy Geopolitics",
     description: "Energy security, sanctions, trade, and supply-chain strategy.",
     rootConceptSlugs: ["EnergyGeopolitics"],
-    matcherConceptSlugs: ["EnergyGeopolitics", "EnergySecurityAndResilience", "SupplyChain", "TradeAndSanctions"],
     termOverrides: ["energy security", "energy resilience", "trade sanctions", "supply chain"],
     hashtags: ["energysecurity"],
     domains: ["energyintel.com", "platts.com"]
@@ -382,7 +367,6 @@ export const canonicalTopics = [
     label: "Climate and Emissions",
     description: "Climate policy outcomes, emissions tracking, and net-zero commitments.",
     rootConceptSlugs: ["ClimateAndEmissions"],
-    matcherConceptSlugs: ["ClimateAndEmissions", "COPClimateConference", "Decarbonization", "EmissionsTracking", "NetZero"],
     termOverrides: ["climate change", "greenhouse gas", "ghg", "net zero", "net-zero", "emissions tracking"],
     hashtags: ["netzero", "decarbonization", "climatechange", "carbonemissions", "climate", "emissions", "carbon"],
     domains: ["carbonbrief.org", "insideclimatenews.org", "grist.org"]
@@ -392,7 +376,6 @@ export const canonicalTopics = [
     label: "Carbon Capture",
     description: "Carbon capture, removal, and direct-air-capture systems.",
     rootConceptSlugs: ["CarbonCapture"],
-    matcherConceptSlugs: ["CarbonCapture", "DirectAirCapture"],
     termOverrides: ["carbon capture", "ccs", "ccus", "direct air capture", "dac", "carbon removal"],
     hashtags: ["carboncapture", "ccs", "dac"],
     domains: []
@@ -411,7 +394,6 @@ export const canonicalTopics = [
     label: "Environment and Land Use",
     description: "Land use, environmental review, water, and pollution impacts.",
     rootConceptSlugs: ["EnvironmentAndLandUse"],
-    matcherConceptSlugs: ["EnvironmentAndLandUse", "Agrivoltaics", "WasteAndPollution", "WaterUse"],
     termOverrides: ["environmental review", "land use", "water use", "waste and pollution"],
     hashtags: ["agrivoltaics"],
     domains: ["insideclimatenews.org"]
@@ -421,7 +403,6 @@ export const canonicalTopics = [
     label: "Energy Justice",
     description: "Affordability, access, community energy, and just-transition concerns.",
     rootConceptSlugs: ["EnergyJustice"],
-    matcherConceptSlugs: ["EnergyJustice", "Affordability", "CommunityEnergy", "EnergyAccess"],
     termOverrides: ["energy justice", "energy access", "community energy", "energy poverty", "energy bills", "rate hike"],
     hashtags: ["energyaccess", "energyjustice", "energypoverty"],
     domains: []
@@ -431,7 +412,6 @@ export const canonicalTopics = [
     label: "Sectoral Decarbonization",
     description: "Industrial, aviation, maritime, and cross-sector decarbonization pathways.",
     rootConceptSlugs: ["SectoralDecarbonization"],
-    matcherConceptSlugs: ["SectoralDecarbonization", "AviationDecarbonization", "IndustrialDecarbonization", "MaritimeDecarbonization"],
     termOverrides: ["sectoral decarbonization", "industrial decarbonization", "maritime decarbonization", "aviation decarbonization", "sustainable aviation fuel", "saf"],
     hashtags: [],
     domains: []
@@ -441,7 +421,6 @@ export const canonicalTopics = [
     label: "Workforce and Manufacturing",
     description: "Energy jobs, industrial buildout, and manufacturing capacity.",
     rootConceptSlugs: ["WorkforceAndManufacturing"],
-    matcherConceptSlugs: ["WorkforceAndManufacturing", "EnergyJobs", "LaborRelations", "Manufacturing"],
     termOverrides: ["energy jobs", "manufacturing", "labor relations", "domestic manufacturing"],
     hashtags: [],
     domains: []
@@ -451,7 +430,6 @@ export const canonicalTopics = [
     label: "Research and Innovation",
     description: "R&D, patents, and early-stage energy technology breakthroughs.",
     rootConceptSlugs: ["ResearchAndInnovation"],
-    matcherConceptSlugs: ["ResearchAndInnovation", "EfficiencyRecords", "Patent", "Perovskite"],
     termOverrides: ["research and innovation", "patent", "perovskite", "energy research", "technology breakthrough"],
     hashtags: ["perovskite"],
     domains: ["nrel.gov", "iea.org", "irena.org"]

@@ -1,6 +1,6 @@
 name = "skygest-bi-agent"
 main = "src/worker/feed.ts"
-compatibility_date = "2024-04-03"
+compatibility_date = "2025-01-01"
 
 [observability]
 enabled = true
@@ -31,7 +31,7 @@ database_id = "b33d6089-883e-4f62-bcfd-3b30153e51e9"
 
 [[kv_namespaces]]
 binding = "ONTOLOGY_KV"
-id = "replace-with-ontology-kv-id"
+id = "f9888501c4ad473db8ff49ecf069f9ed"
 
 [env.staging]
 name = "skygest-bi-agent-staging"
@@ -67,7 +67,7 @@ database_id = "29a612d3-67c9-429d-93af-6e976681e7c8"
 
 [[env.staging.kv_namespaces]]
 binding = "ONTOLOGY_KV"
-id = "replace-with-staging-ontology-kv-id"
+id = "f9888501c4ad473db8ff49ecf069f9ed"
 
 [[migrations]]
 tag = "v1"
