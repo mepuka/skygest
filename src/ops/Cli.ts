@@ -9,6 +9,7 @@ import {
   SmokeAssertionError
 } from "./Errors";
 import { OperatorSecret } from "./OperatorSecret";
+import { runSearchSmokeChecks } from "./SearchSmokeRunner";
 import { StagingOperatorClient } from "./StagingOperatorClient";
 import { WranglerCli } from "./WranglerCli";
 
@@ -241,8 +242,18 @@ const repairCommand = Command.make(
   runStageRepair
 );
 
+const smokeSearchCommand = Command.make(
+  "smoke-search",
+  { env: envOption, baseUrl: baseUrlOption },
+  (options) =>
+    Effect.gen(function* () {
+      const baseUrl = yield* parseBaseUrl(options.baseUrl);
+      yield* runSearchSmokeChecks(baseUrl);
+    })
+);
+
 const stageCommand = Command.make("stage", {}, () => Effect.void).pipe(
-  Command.withSubcommands([prepareCommand, smokeCommand, repairCommand])
+  Command.withSubcommands([prepareCommand, smokeCommand, smokeSearchCommand, repairCommand])
 );
 
 export const opsCommand = Command.make("ops", {}, () => Effect.void).pipe(
