@@ -126,7 +126,7 @@ describe("IngestRunItemsRepoD1", () => {
       const itemsRepo = yield* IngestRunItemsRepo;
       const failedError: IngestErrorEnvelope = {
         tag: "BlueskyApiError",
-        message: "rate limited",
+        message: "Bluesky API request failed",
         retryable: true,
         status: 429,
         did: asDid("did:plc:expert-2"),
