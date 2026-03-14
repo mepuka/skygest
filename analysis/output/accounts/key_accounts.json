@@ -1,0 +1,92 @@
+{
+  "top_bots": [
+    {
+      "handle": "astroarxiv.bsky.social",
+      "posts": 791,
+      "category": "Astronomy arXiv papers"
+    },
+    {
+      "handle": "cslg-bot.bsky.social",
+      "posts": 742,
+      "category": "CS Language/Learning arXiv"
+    },
+    {
+      "handle": "arxiv-cs-cv.bsky.social",
+      "posts": 564,
+      "category": "Computer Vision arXiv"
+    },
+    {
+      "handle": "biorxivpreprint.bsky.social",
+      "posts": 1486,
+      "category": "bioRxiv preprints"
+    },
+    {
+      "handle": "arxiv-cs-ai.bsky.social",
+      "posts": 123,
+      "category": "AI/ML arXiv papers"
+    },
+    {
+      "handle": "arxiv-cs-cl.bsky.social",
+      "posts": 394,
+      "category": "Computational Linguistics arXiv"
+    },
+    {
+      "handle": "biorxiv-neursci.bsky.social",
+      "posts": 279,
+      "category": "Neuroscience bioRxiv"
+    }
+  ],
+  "aggregators": [
+    {
+      "handle": "ai-firehose.column.social",
+      "pagerank": 0.000561,
+      "type": "AI paper aggregator"
+    },
+    {
+      "handle": "science.org",
+      "pagerank": 0.000936,
+      "type": "Science journal"
+    },
+    {
+      "handle": "bigearthdata.ai",
+      "pagerank": 0.00095,
+      "type": "Earth/climate data science"
+    },
+    {
+      "handle": "aai.org",
+      "pagerank": 0.000728,
+      "type": "Association for AI"
+    }
+  ],
+  "bot_community_size": 144,
+  "notable_humans": [
+    {
+      "handle": "labwaggoner.bsky.social",
+      "note": "Lab account, high engagement"
+    },
+    {
+      "handle": "tedunderwood.com",
+      "note": "Digital humanities researcher"
+    },
+    {
+      "handle": "carolynbertozzi.bsky.social",
+      "note": "Nobel laureate chemist"
+    },
+    {
+      "handle": "justinwolfers.bsky.social",
+      "note": "Economist"
+    },
+    {
+      "handle": "isabellamweber.bsky.social",
+      "note": "Economist"
+    },
+    {
+      "handle": "morgridgeinstitute.bsky.social",
+      "note": "Research institute"
+    },
+    {
+      "handle": "drugmonkey.bsky.social",
+      "note": "Science blogger"
+    }
+  ]
+}

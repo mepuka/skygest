@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="318" viewBox="0 0 680 318" style="background: transparent;">
+<text x="12" y="20" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" text-anchor="start">#</text>
+<text x="36" y="20" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" text-anchor="start">Paper</text>
+<text x="300" y="20" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" text-anchor="start">Source</text>
+<text x="410" y="20" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" text-anchor="end">Likes</text>
+<text x="470" y="20" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" text-anchor="end">Reposts</text>
+<text x="522" y="20" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" text-anchor="end">Replies</text>
+<text x="574" y="20" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" text-anchor="end">Quotes</text>
+<text x="622" y="20" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" text-anchor="end">Total</text>
+<text x="628" y="20" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6b7280" text-anchor="start">By</text>
+<line x1="8" x2="672" y1="28" y2="28" stroke="#6b7280" stroke-opacity="0.3"/>
+
+<text x="12" y="52" font-family="system-ui, sans-serif" font-size="11" fill="#6b7280" text-anchor="start">1</text>
+<text x="36" y="52" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="start">Swapping old immune cells in the brai…</text>
+<text x="300" y="52" font-family="system-ui, sans-serif" font-size="10" fill="#6b7280" text-anchor="start">nature</text>
+<text x="410" y="52" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">657</text>
+<text x="470" y="52" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">175</text>
+<text x="522" y="52" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">13</text>
+<text x="574" y="52" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">8</text>
+<text x="622" y="52" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">853</text>
+<text x="628" y="52" font-family="system-ui, sans-serif" font-size="10" fill="#4a7fa5" text-anchor="start">labwaggoner</text>
+<rect x="8" y="62" width="664" height="28" rx="3" fill="#f5f4f1"/>
+<text x="12" y="80" font-family="system-ui, sans-serif" font-size="11" fill="#6b7280" text-anchor="start">2</text>
+<text x="36" y="80" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="start">Tiny robots swim through blood, deliv…</text>
+<text x="300" y="80" font-family="system-ui, sans-serif" font-size="10" fill="#6b7280" text-anchor="start">nature</text>
+<text x="410" y="80" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">244</text>
+<text x="470" y="80" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">45</text>
+<text x="522" y="80" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">35</text>
+<text x="574" y="80" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">11</text>
+<text x="622" y="80" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">335</text>
+<text x="628" y="80" font-family="system-ui, sans-serif" font-size="10" fill="#4a7fa5" text-anchor="start">labwaggoner</text>
+
+<text x="12" y="108" font-family="system-ui, sans-serif" font-size="11" fill="#6b7280" text-anchor="start">3</text>
+<text x="36" y="108" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="start">Sensitization of tumours to immunothe…</text>
+<text x="300" y="108" font-family="system-ui, sans-serif" font-size="10" fill="#6b7280" text-anchor="start">nature</text>
+<text x="410" y="108" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">248</text>
+<text x="470" y="108" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">82</text>
+<text x="522" y="108" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">3</text>
+<text x="574" y="108" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">1</text>
+<text x="622" y="108" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">334</text>
+<text x="628" y="108" font-family="system-ui, sans-serif" font-size="10" fill="#4a7fa5" text-anchor="start">erictopol</text>
+<rect x="8" y="118" width="664" height="28" rx="3" fill="#f5f4f1"/>
+<text x="12" y="136" font-family="system-ui, sans-serif" font-size="11" fill="#6b7280" text-anchor="start">4</text>
+<text x="36" y="136" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="start">mRNA 3′UTRs chaperone intrinsically d…</text>
+<text x="300" y="136" font-family="system-ui, sans-serif" font-size="10" fill="#6b7280" text-anchor="start">biorxiv</text>
+<text x="410" y="136" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">158</text>
+<text x="470" y="136" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">66</text>
+<text x="522" y="136" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">4</text>
+<text x="574" y="136" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">5</text>
+<text x="622" y="136" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">233</text>
+<text x="628" y="136" font-family="system-ui, sans-serif" font-size="10" fill="#4a7fa5" text-anchor="start">christinemayr</text>
+
+<text x="12" y="164" font-family="system-ui, sans-serif" font-size="11" fill="#6b7280" text-anchor="start">5</text>
+<text x="36" y="164" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="start">In Nature Human Behaviour, Peter Glei…</text>
+<text x="300" y="164" font-family="system-ui, sans-serif" font-size="10" fill="#6b7280" text-anchor="start">nature</text>
+<text x="410" y="164" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">134</text>
+<text x="470" y="164" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">53</text>
+<text x="522" y="164" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">3</text>
+<text x="574" y="164" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">0</text>
+<text x="622" y="164" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">190</text>
+<text x="628" y="164" font-family="system-ui, sans-serif" font-size="10" fill="#4a7fa5" text-anchor="start">natureportfolio.nature.com</text>
+<rect x="8" y="174" width="664" height="28" rx="3" fill="#f5f4f1"/>
+<text x="12" y="192" font-family="system-ui, sans-serif" font-size="11" fill="#6b7280" text-anchor="start">6</text>
+<text x="36" y="192" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="start">Single antivenom protects against 17…</text>
+<text x="300" y="192" font-family="system-ui, sans-serif" font-size="10" fill="#6b7280" text-anchor="start">nature</text>
+<text x="410" y="192" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">142</text>
+<text x="470" y="192" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">24</text>
+<text x="522" y="192" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">1</text>
+<text x="574" y="192" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">2</text>
+<text x="622" y="192" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">169</text>
+<text x="628" y="192" font-family="system-ui, sans-serif" font-size="10" fill="#4a7fa5" text-anchor="start">labwaggoner</text>
+
+<text x="12" y="220" font-family="system-ui, sans-serif" font-size="11" fill="#6b7280" text-anchor="start">7</text>
+<text x="36" y="220" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="start">A new jump forward in cancer immunoth…</text>
+<text x="300" y="220" font-family="system-ui, sans-serif" font-size="10" fill="#6b7280" text-anchor="start">nature</text>
+<text x="410" y="220" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">116</text>
+<text x="470" y="220" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">30</text>
+<text x="522" y="220" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">1</text>
+<text x="574" y="220" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">1</text>
+<text x="622" y="220" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">148</text>
+<text x="628" y="220" font-family="system-ui, sans-serif" font-size="10" fill="#4a7fa5" text-anchor="start">erictopol</text>
+<rect x="8" y="230" width="664" height="28" rx="3" fill="#f5f4f1"/>
+<text x="12" y="248" font-family="system-ui, sans-serif" font-size="11" fill="#6b7280" text-anchor="start">8</text>
+<text x="36" y="248" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="start">Ten species comprise half of the bact…</text>
+<text x="300" y="248" font-family="system-ui, sans-serif" font-size="10" fill="#6b7280" text-anchor="start">biorxiv</text>
+<text x="410" y="248" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">57</text>
+<text x="470" y="248" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">40</text>
+<text x="522" y="248" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">4</text>
+<text x="574" y="248" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">12</text>
+<text x="622" y="248" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">113</text>
+<text x="628" y="248" font-family="system-ui, sans-serif" font-size="10" fill="#4a7fa5" text-anchor="start">biorxiv-microbiol</text>
+
+<text x="12" y="276" font-family="system-ui, sans-serif" font-size="11" fill="#6b7280" text-anchor="start">9</text>
+<text x="36" y="276" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="start">We mapped the whole human fallopian t…</text>
+<text x="300" y="276" font-family="system-ui, sans-serif" font-size="10" fill="#6b7280" text-anchor="start">biorxiv</text>
+<text x="410" y="276" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">94</text>
+<text x="470" y="276" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">25</text>
+<text x="522" y="276" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">7</text>
+<text x="574" y="276" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">1</text>
+<text x="622" y="276" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">127</text>
+<text x="628" y="276" font-family="system-ui, sans-serif" font-size="10" fill="#4a7fa5" text-anchor="start">deniswirtz</text>
+<rect x="8" y="286" width="664" height="28" rx="3" fill="#f5f4f1"/>
+<text x="12" y="304" font-family="system-ui, sans-serif" font-size="11" fill="#6b7280" text-anchor="start">10</text>
+<text x="36" y="304" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="start">Discovering Glycosylation-Dependent P…</text>
+<text x="300" y="304" font-family="system-ui, sans-serif" font-size="10" fill="#6b7280" text-anchor="start">biorxiv</text>
+<text x="410" y="304" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">90</text>
+<text x="470" y="304" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">26</text>
+<text x="522" y="304" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">1</text>
+<text x="574" y="304" font-family="system-ui, sans-serif" font-size="11" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">3</text>
+<text x="622" y="304" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#3d4852" text-anchor="end" font-variant="tabular-nums">120</text>
+<text x="628" y="304" font-family="system-ui, sans-serif" font-size="10" fill="#4a7fa5" text-anchor="start">carolynbertozzi</text>
+</svg>

@@ -1,0 +1,12 @@
+{
+  "posts": 48434,
+  "authors": 14381,
+  "urls": 105390,
+  "preprint_pct": 61.1,
+  "arxiv_pct": 52.9,
+  "network_nodes": 637,
+  "network_edges": 800,
+  "communities": 43,
+  "top_source": "arxiv",
+  "top_keyword": "arxiv"
+}

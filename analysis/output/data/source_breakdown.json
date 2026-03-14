@@ -1,0 +1,165 @@
+{
+  "sources": [
+    {
+      "name": "arxiv",
+      "count": 55724,
+      "category": "Preprint"
+    },
+    {
+      "name": "other",
+      "count": 20374,
+      "category": "Other"
+    },
+    {
+      "name": "biorxiv",
+      "count": 7135,
+      "category": "Preprint"
+    },
+    {
+      "name": "doi",
+      "count": 5874,
+      "category": "DOI (unclassified)"
+    },
+    {
+      "name": "nature",
+      "count": 3911,
+      "category": "High-Impact Journal"
+    },
+    {
+      "name": "pubmed",
+      "count": 2761,
+      "category": "PubMed"
+    },
+    {
+      "name": "elsevier",
+      "count": 1451,
+      "category": "Publisher"
+    },
+    {
+      "name": "wiley",
+      "count": 1269,
+      "category": "Publisher"
+    },
+    {
+      "name": "springer",
+      "count": 941,
+      "category": "Publisher"
+    },
+    {
+      "name": "medrxiv",
+      "count": 887,
+      "category": "Preprint"
+    },
+    {
+      "name": "taylor_francis",
+      "count": 645,
+      "category": "Publisher"
+    },
+    {
+      "name": "oxford",
+      "count": 635,
+      "category": "Publisher"
+    },
+    {
+      "name": "science",
+      "count": 612,
+      "category": "High-Impact Journal"
+    },
+    {
+      "name": "sage",
+      "count": 439,
+      "category": "Publisher"
+    },
+    {
+      "name": "researchgate",
+      "count": 350,
+      "category": "Preprint"
+    },
+    {
+      "name": "bmj",
+      "count": 317,
+      "category": "High-Impact Journal"
+    },
+    {
+      "name": "ssrn",
+      "count": 317,
+      "category": "Preprint"
+    },
+    {
+      "name": "jama",
+      "count": 296,
+      "category": "High-Impact Journal"
+    },
+    {
+      "name": "cambridge",
+      "count": 285,
+      "category": "Publisher"
+    },
+    {
+      "name": "lancet",
+      "count": 274,
+      "category": "High-Impact Journal"
+    },
+    {
+      "name": "pnas",
+      "count": 244,
+      "category": "High-Impact Journal"
+    },
+    {
+      "name": "plos",
+      "count": 237,
+      "category": "Publisher"
+    },
+    {
+      "name": "acs",
+      "count": 235,
+      "category": "Publisher"
+    },
+    {
+      "name": "github",
+      "count": 114,
+      "category": "Code/Data"
+    },
+    {
+      "name": "cell",
+      "count": 32,
+      "category": "High-Impact Journal"
+    },
+    {
+      "name": "huggingface",
+      "count": 31,
+      "category": "Code/Data"
+    }
+  ],
+  "categories": [
+    {
+      "name": "Preprint",
+      "count": 64413
+    },
+    {
+      "name": "Other",
+      "count": 20374
+    },
+    {
+      "name": "Publisher",
+      "count": 6137
+    },
+    {
+      "name": "DOI (unclassified)",
+      "count": 5874
+    },
+    {
+      "name": "High-Impact Journal",
+      "count": 5686
+    },
+    {
+      "name": "PubMed",
+      "count": 2761
+    },
+    {
+      "name": "Code/Data",
+      "count": 145
+    }
+  ],
+  "total_urls": 105390
+}

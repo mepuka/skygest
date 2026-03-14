@@ -1,0 +1,110 @@
+{
+  "generated": "2026-02-04",
+  "summary": {
+    "total_paper_posts_scanned": 231680,
+    "scientist_posts_scanned": 74186,
+    "date_range": "2024-09-16 to 2026-02-03"
+  },
+  "top_paper_sharers_by_engagement": [
+    {"handle": "justinwolfers.bsky.social", "posts": 2161, "engagement": 2571969, "type": "Economist"},
+    {"handle": "standupforscience.bsky.social", "posts": 2491, "engagement": 435164, "type": "Science Advocacy"},
+    {"handle": "altnih4science.bsky.social", "posts": 4101, "engagement": 393994, "type": "NIH News"},
+    {"handle": "peterhotezmdphd.bsky.social", "posts": 1412, "engagement": 391950, "type": "Vaccine Scientist"},
+    {"handle": "erictopol.bsky.social", "posts": 500, "engagement": 200000, "type": "Physician-Scientist"}
+  ],
+  "notable_engaged_papers": {
+    "arxiv": [
+      {
+        "title": "Scaling Synthetic Data Creation with 1,000,000,000 Personas",
+        "url": "https://arxiv.org/abs/2406.20094",
+        "shared_by": "tedunderwood.com",
+        "context": "AI2 used persona-driven data synthesis for LLM training"
+      },
+      {
+        "title": "HalluCitation Matters: Impact of Hallucinated References",
+        "url": "https://arxiv.org/abs/2601.18724",
+        "shared_by": "arxiv-cs-cl.bsky.social",
+        "context": "300 hallucinated papers found in ACL conferences"
+      },
+      {
+        "title": "Recursive Language Models (100M token context)",
+        "url": "https://arxiv.org/abs/2512.24601",
+        "shared_by": "ai-firehose.column.social",
+        "context": "RLMs process up to 100 million tokens"
+      },
+      {
+        "title": "AI-exposed jobs deteriorated before ChatGPT",
+        "url": "arxiv",
+        "shared_by": "arxivecongnbot.bsky.social",
+        "context": "Economics paper on AI job impact"
+      },
+      {
+        "title": "LLMs can effectively convince people to believe conspiracies",
+        "url": "arxiv",
+        "shared_by": "arxivecongnbot.bsky.social",
+        "context": "AI misinformation research"
+      }
+    ],
+    "biorxiv": [
+      {
+        "title": "mRNA 3'UTRs chaperone intrinsically disordered regions",
+        "url": "https://www.biorxiv.org/content/10.1101/2025.07.02.662873v1",
+        "shared_by": "christinemayr.bsky.social",
+        "context": "Novel mechanism for protein folding via mRNA"
+      },
+      {
+        "title": "Ten species comprise half of the bacteriology literature",
+        "url": "https://www.biorxiv.org/content/10.1101/2025.01.04.631297v1",
+        "shared_by": "biorxiv-microbiol.bsky.social",
+        "context": "Most bacteria remain unstudied"
+      },
+      {
+        "title": "SimpleFold: Folding Proteins is Simpler than You Think",
+        "url": "arxiv",
+        "shared_by": "aixbiobot.bsky.social",
+        "context": "Simplified protein folding with flow-matching"
+      }
+    ],
+    "nature": [
+      {
+        "title": "Swapping old immune cells in the brain with fresh ones",
+        "url": "http://nature.com/articles/d41586-025-03008-5",
+        "shared_by": "labwaggoner.bsky.social",
+        "context": "Microglia replacement for Alzheimer's"
+      },
+      {
+        "title": "Single antivenom protects against 17 different snakebites",
+        "url": "https://www.nature.com/articles/d41586-025-03541-3",
+        "shared_by": "labwaggoner.bsky.social",
+        "context": "Nanobody from alpaca/llama"
+      },
+      {
+        "title": "Tiny robots swim through blood, deliver drugs — and then dissolve",
+        "url": "nature.com",
+        "shared_by": "labwaggoner.bsky.social",
+        "context": "Drug delivery nanobots"
+      },
+      {
+        "title": "Naked mole rats live for decades — genetic tweaks reveal insights",
+        "url": "https://go.nature.com/46QLrWQ",
+        "shared_by": "nature.com",
+        "context": "Longevity research"
+      }
+    ]
+  },
+  "key_accounts_for_paper_sharing": [
+    {"handle": "labwaggoner.bsky.social", "note": "High engagement science curation"},
+    {"handle": "erictopol.bsky.social", "note": "Medical/biotech papers"},
+    {"handle": "carolynbertozzi.bskyverified.social", "note": "Nobel laureate, chemistry"},
+    {"handle": "tedunderwood.com", "note": "Digital humanities, AI"},
+    {"handle": "ai-firehose.column.social", "note": "AI paper aggregator bot"}
+  ],
+  "observations": [
+    "Political/news content dominates engagement in both stores",
+    "Academic papers get less raw engagement but form tight communities",
+    "Bot accounts (arxiv-*, biorxiv-*) are prolific but low-engagement",
+    "Human scientists with large followings bridge academic and general audiences",
+    "AI/ML papers get significantly more engagement than other fields",
+    "Health/medicine papers spike during relevant news cycles"
+  ]
+}

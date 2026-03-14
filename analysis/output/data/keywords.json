@@ -1,0 +1,146 @@
+[
+  {
+    "keyword": "arxiv",
+    "count": 57741
+  },
+  {
+    "keyword": "doi",
+    "count": 18732
+  },
+  {
+    "keyword": "paper",
+    "count": 3351
+  },
+  {
+    "keyword": "ai",
+    "count": 3168
+  },
+  {
+    "keyword": "study",
+    "count": 2523
+  },
+  {
+    "keyword": "research",
+    "count": 2211
+  },
+  {
+    "keyword": "data",
+    "count": 2031
+  },
+  {
+    "keyword": "journal",
+    "count": 1731
+  },
+  {
+    "keyword": "analysis",
+    "count": 1605
+  },
+  {
+    "keyword": "model",
+    "count": 1476
+  },
+  {
+    "keyword": "health",
+    "count": 1301
+  },
+  {
+    "keyword": "published",
+    "count": 1243
+  },
+  {
+    "keyword": "climate",
+    "count": 633
+  },
+  {
+    "keyword": "protein",
+    "count": 561
+  },
+  {
+    "keyword": "neural",
+    "count": 503
+  },
+  {
+    "keyword": "llm",
+    "count": 485
+  },
+  {
+    "keyword": "preprint",
+    "count": 363
+  },
+  {
+    "keyword": "medical",
+    "count": 346
+  },
+  {
+    "keyword": "machine learning",
+    "count": 325
+  },
+  {
+    "keyword": "deep learning",
+    "count": 312
+  },
+  {
+    "keyword": "chemistry",
+    "count": 283
+  },
+  {
+    "keyword": "vision",
+    "count": 242
+  },
+  {
+    "keyword": "physics",
+    "count": 240
+  },
+  {
+    "keyword": "biology",
+    "count": 172
+  },
+  {
+    "keyword": "economics",
+    "count": 158
+  },
+  {
+    "keyword": "transformer",
+    "count": 148
+  },
+  {
+    "keyword": "psychology",
+    "count": 125
+  },
+  {
+    "keyword": "math",
+    "count": 125
+  },
+  {
+    "keyword": "peer review",
+    "count": 124
+  },
+  {
+    "keyword": "genomics",
+    "count": 118
+  },
+  {
+    "keyword": "neuroscience",
+    "count": 102
+  },
+  {
+    "keyword": "statistics",
+    "count": 94
+  },
+  {
+    "keyword": "cv",
+    "count": 49
+  },
+  {
+    "keyword": "gpt",
+    "count": 32
+  },
+  {
+    "keyword": "nlp",
+    "count": 24
+  },
+  {
+    "keyword": "bert",
+    "count": 8
+  }
+]

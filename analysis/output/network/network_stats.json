@@ -1,0 +1,61 @@
+{
+  "network": {
+    "nodes": 637,
+    "edges": 800,
+    "edge_types": {
+      "repost": 406,
+      "quote": 28,
+      "reply": 1,
+      "mention": 365
+    }
+  },
+  "communities": {
+    "total": 43,
+    "largest": 1616,
+    "with_multiple_members": 18
+  },
+  "pagerank": {
+    "top_10": [
+      [
+        "dolcevida1.bsky.social",
+        0.008392
+      ],
+      [
+        "atrupar.com",
+        0.006655
+      ],
+      [
+        "meidastouch.com",
+        0.004906
+      ],
+      [
+        "labwaggoner.bsky.social",
+        0.004259
+      ],
+      [
+        "acyn.bsky.social",
+        0.003911
+      ],
+      [
+        "statuscoupnews.bsky.social",
+        0.00251
+      ],
+      [
+        "did:plc:xjgsaiyut2ybl7id44e363rm",
+        0.0024
+      ],
+      [
+        "noturtlesoup17.bsky.social",
+        0.001915
+      ],
+      [
+        "ronfilipkowski.bsky.social",
+        0.001715
+      ],
+      [
+        "whstancil.bsky.social",
+        0.001685
+      ]
+    ]
+  }
+}

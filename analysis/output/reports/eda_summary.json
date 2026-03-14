@@ -1,0 +1,386 @@
+{
+  "generated": "2026-02-04T07:32:23.815105",
+  "dataset": {
+    "total_posts": 48434,
+    "unique_authors": 14381,
+    "posts_per_author": 3.37,
+    "total_urls": 105390,
+    "time_range": {
+      "start": "2026-01-21T08:00:00",
+      "end": "2026-02-02T08:00:00",
+      "hours_covered": 269
+    }
+  },
+  "sources": {
+    "categories": [
+      {
+        "name": "Preprint",
+        "count": 64413
+      },
+      {
+        "name": "Other",
+        "count": 20374
+      },
+      {
+        "name": "Publisher",
+        "count": 6137
+      },
+      {
+        "name": "DOI (unclassified)",
+        "count": 5874
+      },
+      {
+        "name": "High-Impact Journal",
+        "count": 5686
+      },
+      {
+        "name": "PubMed",
+        "count": 2761
+      },
+      {
+        "name": "Code/Data",
+        "count": 145
+      }
+    ],
+    "top_10": [
+      {
+        "name": "arxiv",
+        "count": 55724,
+        "category": "Preprint"
+      },
+      {
+        "name": "other",
+        "count": 20374,
+        "category": "Other"
+      },
+      {
+        "name": "biorxiv",
+        "count": 7135,
+        "category": "Preprint"
+      },
+      {
+        "name": "doi",
+        "count": 5874,
+        "category": "DOI (unclassified)"
+      },
+      {
+        "name": "nature",
+        "count": 3911,
+        "category": "High-Impact Journal"
+      },
+      {
+        "name": "pubmed",
+        "count": 2761,
+        "category": "PubMed"
+      },
+      {
+        "name": "elsevier",
+        "count": 1451,
+        "category": "Publisher"
+      },
+      {
+        "name": "wiley",
+        "count": 1269,
+        "category": "Publisher"
+      },
+      {
+        "name": "springer",
+        "count": 941,
+        "category": "Publisher"
+      },
+      {
+        "name": "medrxiv",
+        "count": 887,
+        "category": "Preprint"
+      }
+    ],
+    "preprint_percentage": 61.1
+  },
+  "keywords": {
+    "top_20": [
+      {
+        "keyword": "arxiv",
+        "count": 57741
+      },
+      {
+        "keyword": "doi",
+        "count": 18732
+      },
+      {
+        "keyword": "paper",
+        "count": 3351
+      },
+      {
+        "keyword": "ai",
+        "count": 3168
+      },
+      {
+        "keyword": "study",
+        "count": 2523
+      },
+      {
+        "keyword": "research",
+        "count": 2211
+      },
+      {
+        "keyword": "data",
+        "count": 2031
+      },
+      {
+        "keyword": "journal",
+        "count": 1731
+      },
+      {
+        "keyword": "analysis",
+        "count": 1605
+      },
+      {
+        "keyword": "model",
+        "count": 1476
+      },
+      {
+        "keyword": "health",
+        "count": 1301
+      },
+      {
+        "keyword": "published",
+        "count": 1243
+      },
+      {
+        "keyword": "climate",
+        "count": 633
+      },
+      {
+        "keyword": "protein",
+        "count": 561
+      },
+      {
+        "keyword": "neural",
+        "count": 503
+      },
+      {
+        "keyword": "llm",
+        "count": 485
+      },
+      {
+        "keyword": "preprint",
+        "count": 363
+      },
+      {
+        "keyword": "medical",
+        "count": 346
+      },
+      {
+        "keyword": "machine learning",
+        "count": 325
+      },
+      {
+        "keyword": "deep learning",
+        "count": 312
+      }
+    ],
+    "ai_ml_count": 5005,
+    "academic_count": 87895
+  },
+  "network": {
+    "nodes": 637,
+    "edges": 800,
+    "density_percent": 0.3949,
+    "average_degree": 2.51,
+    "edge_types": {
+      "repost": 406,
+      "quote": 28,
+      "reply": 1,
+      "mention": 365
+    },
+    "communities": {
+      "total": 43,
+      "largest": 1616,
+      "with_multiple_members": 18
+    }
+  },
+  "top_accounts": {
+    "by_pagerank": [
+      {
+        "rank": 1,
+        "handle": "dolcevida1.bsky.social",
+        "score": 0.008392118979670314
+      },
+      {
+        "rank": 2,
+        "handle": "atrupar.com",
+        "score": 0.006655455714088778
+      },
+      {
+        "rank": 3,
+        "handle": "meidastouch.com",
+        "score": 0.004906226853077173
+      },
+      {
+        "rank": 4,
+        "handle": "labwaggoner.bsky.social",
+        "score": 0.004258770963373048
+      },
+      {
+        "rank": 5,
+        "handle": "acyn.bsky.social",
+        "score": 0.003910720557224993
+      },
+      {
+        "rank": 6,
+        "handle": "statuscoupnews.bsky.social",
+        "score": 0.002510148055674323
+      },
+      {
+        "rank": 7,
+        "handle": "did:plc:xjgsaiyut2ybl7id44e363rm",
+        "score": 0.002400361765209698
+      },
+      {
+        "rank": 8,
+        "handle": "noturtlesoup17.bsky.social",
+        "score": 0.0019146044747744356
+      },
+      {
+        "rank": 9,
+        "handle": "ronfilipkowski.bsky.social",
+        "score": 0.0017148199459349868
+      },
+      {
+        "rank": 10,
+        "handle": "whstancil.bsky.social",
+        "score": 0.0016847276929149644
+      },
+      {
+        "rank": 11,
+        "handle": "lincolnproject.us",
+        "score": 0.0016822293373023052
+      },
+      {
+        "rank": 12,
+        "handle": "combatcavscout.bsky.social",
+        "score": 0.0016810201557340048
+      },
+      {
+        "rank": 13,
+        "handle": "did:plc:zhcfq6acrvb6ermtjt644w2n",
+        "score": 0.0016810201557340048
+      },
+      {
+        "rank": 14,
+        "handle": "politicalnash.bsky.social",
+        "score": 0.0016565628987420494
+      },
+      {
+        "rank": 15,
+        "handle": "thetnholler.bsky.social",
+        "score": 0.0016283980463976202
+      },
+      {
+        "rank": 16,
+        "handle": "did:plc:kkjomzfxvdwfsma2hgp3lnf5",
+        "score": 0.00139072889742675
+      },
+      {
+        "rank": 17,
+        "handle": "did:plc:pefar6seyjfqkfvxy32mbuli",
+        "score": 0.001349745142995739
+      },
+      {
+        "rank": 18,
+        "handle": "aflcio.org",
+        "score": 0.001309308990458182
+      },
+      {
+        "rank": 19,
+        "handle": "apnews.com",
+        "score": 0.0012992897142455472
+      },
+      {
+        "rank": 20,
+        "handle": "joncooper-us.bsky.social",
+        "score": 0.001274128652871575
+      }
+    ],
+    "paper_bots": [
+      {
+        "handle": "astroarxiv.bsky.social",
+        "posts": 791,
+        "category": "Astronomy arXiv papers"
+      },
+      {
+        "handle": "cslg-bot.bsky.social",
+        "posts": 742,
+        "category": "CS Language/Learning arXiv"
+      },
+      {
+        "handle": "arxiv-cs-cv.bsky.social",
+        "posts": 564,
+        "category": "Computer Vision arXiv"
+      },
+      {
+        "handle": "biorxivpreprint.bsky.social",
+        "posts": 1486,
+        "category": "bioRxiv preprints"
+      },
+      {
+        "handle": "arxiv-cs-ai.bsky.social",
+        "posts": 123,
+        "category": "AI/ML arXiv papers"
+      },
+      {
+        "handle": "arxiv-cs-cl.bsky.social",
+        "posts": 394,
+        "category": "Computational Linguistics arXiv"
+      },
+      {
+        "handle": "biorxiv-neursci.bsky.social",
+        "posts": 279,
+        "category": "Neuroscience bioRxiv"
+      }
+    ],
+    "aggregators": [
+      {
+        "handle": "ai-firehose.column.social",
+        "pagerank": 0.000561,
+        "type": "AI paper aggregator"
+      },
+      {
+        "handle": "science.org",
+        "pagerank": 0.000936,
+        "type": "Science journal"
+      },
+      {
+        "handle": "bigearthdata.ai",
+        "pagerank": 0.00095,
+        "type": "Earth/climate data science"
+      },
+      {
+        "handle": "aai.org",
+        "pagerank": 0.000728,
+        "type": "Association for AI"
+      }
+    ],
+    "bot_community_size": 144
+  },
+  "data_quality": {
+    "temporal_gaps": false,
+    "source_diversity": "moderate",
+    "arxiv_concentration": 52.9,
+    "network_coverage": "good"
+  },
+  "recommendations": {
+    "visualizations": [
+      "Force-directed network graph (d3_network.json)",
+      "Source treemap/sunburst (source_breakdown.json)",
+      "Time series area chart (posts_over_time.json)",
+      "Author bubble chart (centrality.json)"
+    ],
+    "analyses": [
+      "Bot vs human classification",
+      "Topic modeling on post content",
+      "Temporal pattern analysis",
+      "Cross-community influence mapping"
+    ]
+  }
+}

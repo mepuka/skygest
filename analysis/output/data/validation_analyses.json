@@ -1,0 +1,289 @@
+{
+  "multiple_testing": {
+    "n_tests": 4,
+    "tests": [
+      "hour_of_day",
+      "day_of_week",
+      "weekday_vs_weekend",
+      "zipf_law_fit"
+    ],
+    "original_p_values": [
+      0.001365,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "benjamini_hochberg": {
+      "adjusted_p_values": [
+        0.001365,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rejected_at_0.05": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "method": "Benjamini-Hochberg FDR control"
+    },
+    "bonferroni": {
+      "adjusted_p_values": [
+        0.00546,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rejected_at_0.05": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "adjusted_alpha": 0.0125,
+      "method": "Bonferroni family-wise error rate control"
+    },
+    "conclusion": "All tests remain significant after both corrections due to very small original p-values"
+  },
+  "community_comparison": {
+    "greedy_modularity": {
+      "n_communities": 45,
+      "modularity": 0.5331,
+      "sizes": [
+        415,
+        111,
+        9,
+        9,
+        8,
+        5,
+        5,
+        4,
+        4,
+        4
+      ]
+    },
+    "label_propagation": {
+      "n_communities": 46,
+      "modularity": 0.5053,
+      "sizes": [
+        428,
+        50,
+        42,
+        19,
+        9,
+        7,
+        6,
+        5,
+        4,
+        4
+      ]
+    },
+    "louvain": {
+      "n_communities": 50,
+      "modularity": 0.5345,
+      "sizes": [
+        405,
+        111,
+        9,
+        9,
+        8,
+        5,
+        5,
+        4,
+        4,
+        4
+      ]
+    },
+    "stability_analysis": {
+      "algorithm": "greedy_modularity",
+      "n_runs": 5,
+      "community_counts": [
+        45,
+        45,
+        45,
+        45,
+        45
+      ],
+      "is_stable": true,
+      "note": "Greedy modularity is deterministic, producing identical results"
+    },
+    "comparison": {
+      "modularity_range": [
+        0.5053,
+        0.5345
+      ],
+      "community_count_range": [
+        45,
+        50
+      ],
+      "interpretation": "Algorithms agree on general community structure despite different counts"
+    }
+  },
+  "bootstrap_ci": {
+    "method": "Edge resampling bootstrap",
+    "n_iterations": 100,
+    "top_10_nodes": {
+      "did:plc:3gm3wqojlafxmt4scfiw47xm": {
+        "label": "labwaggoner.bsky.social",
+        "original_pagerank": 0.006011,
+        "pagerank_95ci": [
+          0.002466,
+          0.006512
+        ],
+        "rank_95ci": [
+          1,
+          25
+        ],
+        "rank_stability": "unstable"
+      },
+      "did:plc:pb4pq7uiczisildujyhpkmo6": {
+        "label": "eessas-bot.bsky.social",
+        "original_pagerank": 0.00501,
+        "pagerank_95ci": [
+          0.0015,
+          0.005591
+        ],
+        "rank_95ci": [
+          1,
+          282
+        ],
+        "rank_stability": "unstable"
+      },
+      "did:plc:6kndbdnawzpis5y33gpacfop": {
+        "label": "cscl-bot.bsky.social",
+        "original_pagerank": 0.004095,
+        "pagerank_95ci": [
+          0.00155,
+          0.004818
+        ],
+        "rank_95ci": [
+          1,
+          110
+        ],
+        "rank_stability": "unstable"
+      },
+      "did:plc:4llrhdclvdlmmynkwsmg5tdc": {
+        "label": "atrupar.com",
+        "original_pagerank": 0.003912,
+        "pagerank_95ci": [
+          0.001469,
+          0.004006
+        ],
+        "rank_95ci": [
+          1,
+          573
+        ],
+        "rank_stability": "unstable"
+      },
+      "did:plc:vqgovau5gkirnk3ss5qwjdmz": {
+        "label": "science.org",
+        "original_pagerank": 0.00372,
+        "pagerank_95ci": [
+          0.001467,
+          0.00381
+        ],
+        "rank_95ci": [
+          1,
+          456
+        ],
+        "rank_stability": "unstable"
+      },
+      "did:plc:o7xt7svg2xtjbb4e2xqahqqc": {
+        "label": "spavel.bsky.social",
+        "original_pagerank": 0.002875,
+        "pagerank_95ci": [
+          0.001465,
+          0.00326
+        ],
+        "rank_95ci": [
+          2,
+          434
+        ],
+        "rank_stability": "unstable"
+      },
+      "did:plc:7b5ffheuztsnusuo6cqyrj2t": {
+        "label": "isabellamweber.bsky.social",
+        "original_pagerank": 0.002875,
+        "pagerank_95ci": [
+          0.001465,
+          0.00326
+        ],
+        "rank_95ci": [
+          3,
+          505
+        ],
+        "rank_stability": "unstable"
+      },
+      "did:plc:lzsgqcftmzykp34ierpkc3mz": {
+        "label": "",
+        "original_pagerank": 0.002816,
+        "pagerank_95ci": [
+          0.001462,
+          0.003039
+        ],
+        "rank_95ci": [
+          3,
+          560
+        ],
+        "rank_stability": "unstable"
+      },
+      "did:plc:dm26mwrhpansywrkiikhwb46": {
+        "label": "johnnybarbu.bsky.social",
+        "original_pagerank": 0.002816,
+        "pagerank_95ci": [
+          0.001464,
+          0.00317
+        ],
+        "rank_95ci": [
+          3,
+          637
+        ],
+        "rank_stability": "unstable"
+      },
+      "did:plc:l7bhfs6qsxnflryx6ovxzegn": {
+        "label": "drlaurahaynes.bsky.social",
+        "original_pagerank": 0.002688,
+        "pagerank_95ci": [
+          0.001469,
+          0.00276
+        ],
+        "rank_95ci": [
+          5,
+          497
+        ],
+        "rank_stability": "unstable"
+      }
+    }
+  },
+  "null_model": {
+    "observed": {
+      "clustering": 0.0983,
+      "assortativity": -0.5811,
+      "transitivity": 0.0064
+    },
+    "null_model": "Configuration model (preserves degree sequence)",
+    "n_null_graphs": 50,
+    "comparison": {
+      "clustering": {
+        "observed": 0.0983,
+        "null_mean": 0.0314,
+        "null_std": 0.0058,
+        "z_score": 11.59,
+        "interpretation": "Higher than random"
+      },
+      "assortativity": {
+        "observed": -0.5811,
+        "null_mean": -0.2607,
+        "null_std": 0.0085,
+        "z_score": -37.91
+      },
+      "transitivity": {
+        "observed": 0.0064,
+        "null_mean": 0.0074,
+        "null_std": 0.0011,
+        "z_score": -1.01
+      }
+    }
+  }
+}

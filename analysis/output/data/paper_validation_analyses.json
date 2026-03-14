@@ -1,0 +1,225 @@
+{
+  "generated": "2026-02-04T22:13:36.915999",
+  "purpose": "Address peer review methodological concerns",
+  "selection_bias": {
+    "sample_characteristics": {
+      "total_posts": 300,
+      "min_engagement": 4,
+      "max_engagement": 853,
+      "median_engagement": 19.0,
+      "mean_engagement": 28.65
+    },
+    "acknowledged_limitations": [
+      "Sample consists of TOP 100 posts by engagement per source",
+      "This systematically excludes the long tail of low-engagement posts",
+      "Findings describe HIGH-ENGAGEMENT posts only, not general posting patterns",
+      "Cannot make inferences about typical paper-sharing behavior",
+      "Results are DESCRIPTIVE of viral/high-impact posts, not inferential"
+    ],
+    "valid_inferences": [
+      "What characterizes highly-engaged academic posts",
+      "Relative comparison within the high-engagement tier",
+      "Which topics/sources reach the engagement threshold",
+      "Differences between human and bot sharers among top posts"
+    ],
+    "invalid_inferences": [
+      "Overall engagement distribution of academic posts",
+      "Typical bot vs human engagement patterns",
+      "General conclusions about the academic Bluesky community",
+      "Power law claims require full population data"
+    ]
+  },
+  "weight_sensitivity": {
+    "weight_schemes_tested": [
+      "original",
+      "equal",
+      "likes_heavy",
+      "interaction_heavy",
+      "amplification_heavy",
+      "reversed"
+    ],
+    "correlation_matrix": {
+      "schemes": [
+        "original",
+        "equal",
+        "likes_heavy",
+        "interaction_heavy",
+        "amplification_heavy",
+        "reversed"
+      ],
+      "correlations": [
+        [
+          1.0,
+          0.9797023403085372,
+          0.9444170191183426,
+          0.974421832005464,
+          0.9602685867588306,
+          0.9507796297197977
+        ],
+        [
+          0.9797023403085372,
+          1.0,
+          0.986853165466008,
+          0.9187539962911456,
+          0.933691904217568,
+          0.9922709567002939
+        ],
+        [
+          0.9444170191183426,
+          0.986853165466008,
+          1.0,
+          0.8677738320789168,
+          0.8900380861170013,
+          0.9961976065616366
+        ],
+        [
+          0.974421832005464,
+          0.9187539962911456,
+          0.8677738320789168,
+          1.0,
+          0.960977264833104,
+          0.8740017191671854
+        ],
+        [
+          0.9602685867588306,
+          0.933691904217568,
+          0.8900380861170013,
+          0.960977264833104,
+          1.0,
+          0.9036046066882328
+        ],
+        [
+          0.9507796297197977,
+          0.9922709567002939,
+          0.9961976065616366,
+          0.8740017191671854,
+          0.9036046066882328,
+          1.0
+        ]
+      ]
+    },
+    "top10_overlaps": {
+      "equal": 10,
+      "likes_heavy": 9,
+      "interaction_heavy": 9,
+      "amplification_heavy": 10,
+      "reversed": 9
+    },
+    "robust_papers": 8,
+    "interpretation": "Rankings show high stability across weight schemes. 8 papers appear in top-10 regardless of weighting."
+  },
+  "classification": {
+    "categories": {
+      "human": {
+        "count": 15,
+        "sample": [
+          "tedunderwood.com",
+          "condmatstatmech-bt.bsky.social",
+          "christinemayr.bsky.social",
+          "deniswirtz.bsky.social",
+          "carolynbertozzi.bskyverified.social",
+          "lennarthilbert.bsky.social",
+          "labwaggoner.bsky.social",
+          "cryoempapers.bsky.social",
+          "erictopol.bsky.social",
+          "nathanec.bsky.social"
+        ]
+      },
+      "bot": {
+        "count": 30,
+        "sample": [
+          "paperposterbot.bsky.social",
+          "arxivecongnbot.bsky.social",
+          "aixbiobot.bsky.social",
+          "eesssp-bot.bsky.social",
+          "mathna-bot.bsky.social",
+          "eesssy-bot.bsky.social",
+          "econth-bot.bsky.social",
+          "csse-bot.bsky.social",
+          "cscv-bot.bsky.social",
+          "cscr-bot.bsky.social"
+        ]
+      },
+      "aggregator": {
+        "count": 10,
+        "sample": [
+          "ai-firehose.column.social",
+          "arxiv-cs-cl.bsky.social",
+          "astroarxiv.bsky.social",
+          "biorxiv-microbiol.bsky.social",
+          "biorxiv-bioinfo.bsky.social",
+          "biorxiv-neursci.bsky.social",
+          "natureportfolio.nature.com",
+          "nature.com",
+          "natbiotech.nature.com",
+          "natmicrobiol.nature.com"
+        ]
+      }
+    },
+    "edge_cases": {
+      "high_volume_humans": 2,
+      "sample": [
+        "cryoempapers.bsky.social",
+        "labwaggoner.bsky.social"
+      ]
+    },
+    "confidence_note": "Classification is heuristic-based (string matching on 'bot' in username). Human verification recommended for edge cases. Results should be interpreted as 'likely human' vs 'likely automated' rather than definitive labels."
+  },
+  "improved_statistics": {
+    "tests": [
+      {
+        "name": "Bot vs Human Engagement",
+        "test": "Mann-Whitney U",
+        "statistic": 7732.5,
+        "p_value": 9.40657458316702e-25,
+        "p_value_formatted": "p < 0.0001",
+        "effect_size_r": -0.895,
+        "cles": 0.948,
+        "n_human": 120,
+        "n_bot": 68,
+        "human_median": 22.0,
+        "bot_median": 5.0,
+        "interpretation": "Within this TOP-ENGAGED sample, human-shared posts have higher median engagement (22 vs 5). Effect size r = -0.895 (large). Note: This compares already-successful posts, not general posting patterns.",
+        "caution": "This does NOT mean human posts generally get more engagement. Both groups were sampled from top-100 by engagement, so conclusions only apply to posts that already achieved high visibility."
+      },
+      {
+        "name": "Source Engagement Differences",
+        "test": "Kruskal-Wallis H",
+        "statistic": 156.6,
+        "p_value": 9.877167918803658e-35,
+        "p_value_formatted": "p < 0.0001",
+        "effect_size_epsilon_sq": 0.521,
+        "n_groups": 3,
+        "interpretation": "Engagement differs significantly across sources (H = 156.60, p < 0.0001). \u03b5\u00b2 = 0.521 (large effect)."
+      }
+    ],
+    "multiple_testing": {
+      "n_tests": 2,
+      "bonferroni_alpha": 0.025,
+      "all_significant_after_bonferroni": true,
+      "benjamini_hochberg_results": [
+        {
+          "test": "Source Engagement Differences",
+          "significant": true
+        },
+        {
+          "test": "Bot vs Human Engagement",
+          "significant": true
+        }
+      ]
+    }
+  },
+  "power_law_note": {
+    "original_claim": "Engagement follows power law (Zipf) distribution",
+    "methodology_used": "Log-log linear regression R\u00b2 threshold",
+    "why_invalid": [
+      "Proper power law testing requires Clauset et al. (2009) methodology",
+      "Log-log R\u00b2 can be high for many non-power-law distributions",
+      "Sample is truncated (top-100 only), obscuring true tail behavior",
+      "Need KS test against fitted power law, comparison to alternatives",
+      "Full population data required for valid inference"
+    ],
+    "revised_statement": "The engagement distribution within this high-engagement sample shows high variance and right skew (skewness = 9.82), consistent with the heavy-tailed distributions commonly observed in social media. However, formal power law testing is not appropriate for this truncated sample.",
+    "recommendation": "For proper power law analysis, collect full engagement distribution data and apply methods from: Clauset, A., Shalizi, C. R., & Newman, M. E. J. (2009). Power-law distributions in empirical data. SIAM Review, 51(4), 661-703."
+  }
+}

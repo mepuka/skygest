@@ -1,0 +1,13 @@
+[project]
+name = "skygest-analysis"
+version = "0.1.0"
+description = "Analyze Skygest Bluesky feed data"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=2.0",
+    "polars>=1.0",
+]
+
+[project.scripts]
+analyze = "analyze:main"
