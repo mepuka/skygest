@@ -1,4 +1,5 @@
 import { Effect, Layer } from "effect";
+import { SqlError } from "@effect/sql/SqlError";
 import { describe, expect, it } from "@effect/vitest";
 import { vi } from "vitest";
 import type { IngestErrorEnvelope } from "../src/domain/errors";
@@ -9,6 +10,7 @@ import type { WorkflowIngestEnvBindings } from "../src/platform/Env";
 import { ExpertsRepo } from "../src/services/ExpertsRepo";
 import { IngestRunItemsRepo } from "../src/services/IngestRunItemsRepo";
 import { IngestRunsRepo } from "../src/services/IngestRunsRepo";
+import { KnowledgeRepo } from "../src/services/KnowledgeRepo";
 
 let currentLayer: Layer.Layer<any, any, never>;
 
@@ -244,10 +246,24 @@ describe("IngestRunWorkflow", () => {
             )
         });
 
+      const knowledgeLayer = Layer.succeed(KnowledgeRepo, {
+        upsertPosts: () => Effect.void,
+        markDeleted: () => Effect.void,
+        searchPosts: () => Effect.succeed([]),
+        searchPostsPage: () => Effect.succeed([]),
+        getRecentPosts: () => Effect.succeed([]),
+        getRecentPostsPage: () => Effect.succeed([]),
+        getPostLinks: () => Effect.succeed([]),
+        getPostLinksPage: () => Effect.succeed([]),
+        getPostTopicMatches: () => Effect.succeed([]),
+        optimizeFts: () => Effect.void
+      });
+
       currentLayer = Layer.mergeAll(
         expertsLayer,
         runsLayer,
         runItemsLayer,
+        knowledgeLayer,
         IngestRepairService.layer.pipe(
           Layer.provideMerge(Layer.mergeAll(runsLayer, runItemsLayer))
         )
@@ -328,6 +344,124 @@ describe("IngestRunWorkflow", () => {
       expect(toRunRecord().expertsSucceeded).toBe(7);
       expect(toRunRecord().pagesFetched).toBe(7);
       expect(toRunRecord().postsStored).toBe(7);
+    })
+  );
+
+  it.live("keeps run complete when optimizeFts fails after finalization", () =>
+    Effect.promise(async () => {
+      const { IngestRunWorkflow } = await import("../src/ingest/IngestRunWorkflow");
+
+      const runState = {
+        status: "queued" as IngestRunRecord["status"],
+        phase: "queued" as IngestRunRecord["phase"],
+        finishedAt: null as number | null,
+        lastProgressAt: 1,
+        totalExperts: 0,
+        expertsSucceeded: 0,
+        expertsFailed: 0,
+        pagesFetched: 0,
+        postsSeen: 0,
+        postsStored: 0,
+        postsDeleted: 0,
+        error: null as IngestErrorEnvelope | null
+      };
+      const toRunRecord = (): IngestRunRecord => ({
+        id: "run-1",
+        workflowInstanceId: "run-1",
+        kind: "head-sweep",
+        triggeredBy: "admin",
+        requestedBy: "operator@example.com",
+        startedAt: 1,
+        ...runState
+      });
+      const items = new Map<Did, ReturnType<typeof makeMutableItem>>();
+
+      const expertsLayer = Layer.succeed(ExpertsRepo, {
+        upsert: () => Effect.void,
+        upsertMany: () => Effect.void,
+        getByDid: (did: string) => Effect.succeed(makeExpert(asDid(did))),
+        setActive: () => Effect.void,
+        setLastSyncedAt: () => Effect.void,
+        listActive: () => Effect.succeed([makeExpert(asDid("did:plc:expert-1"))]),
+        listActiveByShard: () => Effect.succeed([]),
+        list: () => Effect.succeed([])
+      });
+      const runsLayer = Layer.succeed(IngestRunsRepo, {
+        createQueuedIfAbsent: () => Effect.succeed(true),
+        getById: () => Effect.succeed(toRunRecord()),
+        listRunning: () => Effect.succeed([]),
+        markPreparing: (input) =>
+          Effect.sync(() => { runState.status = "running"; runState.phase = "preparing"; runState.lastProgressAt = input.lastProgressAt; }),
+        markDispatching: (input) =>
+          Effect.sync(() => { runState.status = "running"; runState.phase = "dispatching"; runState.lastProgressAt = input.lastProgressAt; runState.totalExperts = input.totalExperts; }),
+        markFinalizing: (input) =>
+          Effect.sync(() => { runState.status = "running"; runState.phase = "finalizing"; runState.lastProgressAt = input.lastProgressAt; }),
+        markComplete: (input) =>
+          Effect.sync(() => { runState.status = "complete"; runState.phase = "complete"; runState.finishedAt = input.finishedAt; }),
+        markFailed: (input) =>
+          Effect.sync(() => { runState.status = "failed"; runState.phase = "failed"; runState.finishedAt = input.finishedAt; runState.error = input.error; })
+      });
+      const runItemsLayer = Layer.succeed(IngestRunItemsRepo, {
+        createMany: (created) =>
+          Effect.sync(() => { for (const item of created) items.set(item.did, makeMutableItem(item.runId, item.did, item.mode)); }),
+        markDispatched: ({ did, enqueuedAt, lastProgressAt }) =>
+          Effect.sync(() => { const item = items.get(did)!; item.enqueuedAt = enqueuedAt; item.lastProgressAt = lastProgressAt; item.status = "complete"; item.startedAt = enqueuedAt; item.finishedAt = enqueuedAt; item.postsStored = 1; item.pagesFetched = 1; }),
+        markQueued: () => Effect.void,
+        markRunning: () => Effect.void,
+        markProgress: () => Effect.void,
+        markComplete: () => Effect.void,
+        markFailed: () => Effect.void,
+        listByRun: () => Effect.succeed([...items.values()] as ReadonlyArray<IngestRunItemRecord>),
+        countActiveByRun: () => Effect.succeed(0),
+        countIncompleteByRun: () => Effect.succeed(0),
+        listUndispatchedByRun: (_runId, limit) =>
+          Effect.succeed([...items.values()].filter((item) => item.status === "queued").slice(0, limit) as ReadonlyArray<IngestRunItemRecord>),
+        listStaleDispatchedByRun: () => Effect.succeed([]),
+        listStaleRunningByRun: () => Effect.succeed([]),
+        summarizeByRun: () =>
+          Effect.succeed({ totalExperts: 1, expertsSucceeded: 1, expertsFailed: 0, pagesFetched: 1, postsSeen: 0, postsStored: 1, postsDeleted: 0, error: null })
+      });
+      // optimizeFts fails — the run should still stay "complete"
+      const knowledgeLayer = Layer.succeed(KnowledgeRepo, {
+        upsertPosts: () => Effect.void,
+        markDeleted: () => Effect.void,
+        searchPosts: () => Effect.succeed([]),
+        searchPostsPage: () => Effect.succeed([]),
+        getRecentPosts: () => Effect.succeed([]),
+        getRecentPostsPage: () => Effect.succeed([]),
+        getPostLinks: () => Effect.succeed([]),
+        getPostLinksPage: () => Effect.succeed([]),
+        getPostTopicMatches: () => Effect.succeed([]),
+        optimizeFts: () => Effect.fail(new SqlError({ cause: "test", message: "optimize failed" }))
+      });
+
+      currentLayer = Layer.mergeAll(
+        expertsLayer, runsLayer, runItemsLayer, knowledgeLayer,
+        IngestRepairService.layer.pipe(Layer.provideMerge(Layer.mergeAll(runsLayer, runItemsLayer)))
+      );
+
+      const namespace = {
+        idFromName: (name: string) => ({ name }),
+        get: (_id: { readonly name: string }) => ({
+          enqueueHead: async (input: { readonly did: Did }) => {
+            const item = items.get(input.did)!;
+            item.status = "complete"; item.startedAt = 1; item.finishedAt = 2; item.postsStored = 1; item.pagesFetched = 1;
+          }
+        })
+      };
+      const env = { EXPERT_POLL_COORDINATOR: namespace } as unknown as WorkflowIngestEnvBindings;
+      const ctx = {} as ExecutionContext;
+      const workflow = new IngestRunWorkflow(ctx, env);
+      const step = { do: async (_name: string, fn: () => Promise<any>) => fn(), sleep: async () => {} };
+
+      await (workflow as any).run(
+        { instanceId: "run-1", payload: { kind: "head-sweep", triggeredBy: "admin", requestedBy: "operator@example.com" } },
+        step
+      );
+
+      // The critical assertion: optimizeFts failed but the run stayed complete
+      expect(toRunRecord().status).toBe("complete");
+      expect(toRunRecord().error).toBeNull();
     })
   );
 

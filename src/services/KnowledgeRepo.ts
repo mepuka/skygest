@@ -3,7 +3,8 @@ import type { SqlError } from "@effect/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type {
   GetPostLinksPageQueryInput,
-  GetRecentPostsPageQueryInput
+  GetRecentPostsPageQueryInput,
+  SearchPostsPageQueryInput
 } from "../domain/api";
 import type {
   DeletedKnowledgePost,
@@ -39,5 +40,9 @@ export class KnowledgeRepo extends Context.Tag("@skygest/KnowledgeRepo")<
     readonly getPostTopicMatches: (
       postUri: string
     ) => Effect.Effect<ReadonlyArray<StoredTopicMatch>, SqlError | DbError>;
+    readonly searchPostsPage: (
+      input: SearchPostsPageQueryInput
+    ) => Effect.Effect<ReadonlyArray<KnowledgePostResult & { readonly rank: number }>, SqlError | DbError>;
+    readonly optimizeFts: () => Effect.Effect<void, SqlError | DbError>;
   }
 >() {}

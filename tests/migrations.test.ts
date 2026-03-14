@@ -50,7 +50,9 @@ describe("phase-one migrations", () => {
         { id: 3, name: "ingest_runs" },
         { id: 4, name: "drop_ingest_leases" },
         { id: 5, name: "ingest_recovery_state" },
-        { id: 6, name: "post_topic_match_provenance" }
+        { id: 6, name: "post_topic_match_provenance" },
+        { id: 7, name: "fts_porter_stemming" },
+        { id: 8, name: "fts_external_content" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );

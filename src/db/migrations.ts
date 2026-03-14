@@ -218,11 +218,44 @@ const migration6: D1Migration = {
   ]
 };
 
+const migration7: D1Migration = {
+  id: 7,
+  name: "fts_porter_stemming",
+  statements: [
+    `DROP TABLE IF EXISTS posts_fts`,
+    `CREATE VIRTUAL TABLE posts_fts USING fts5(
+      uri UNINDEXED,
+      text,
+      tokenize='porter unicode61'
+    )`,
+    `INSERT INTO posts_fts (uri, text)
+      SELECT uri, text FROM posts WHERE status = 'active'`
+  ]
+};
+
+const migration8: D1Migration = {
+  id: 8,
+  name: "fts_external_content",
+  statements: [
+    `DROP TABLE IF EXISTS posts_fts`,
+    `CREATE VIRTUAL TABLE posts_fts USING fts5(
+      text,
+      content='posts',
+      content_rowid='rowid',
+      tokenize='porter unicode61'
+    )`,
+    `INSERT INTO posts_fts (rowid, text)
+      SELECT rowid, text FROM posts WHERE status = 'active'`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
   migration3,
   migration4,
   migration5,
-  migration6
+  migration6,
+  migration7,
+  migration8
 ];

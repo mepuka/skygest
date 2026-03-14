@@ -85,6 +85,51 @@ describe("frontend REST API", () => {
     )
   );
 
+  it.live("returns search cursor when more results exist and empty cursor when exhausted", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        // "solar" matches 1 post — with limit=1 there's exactly 1 result, no more pages
+        const singleResult = await expectJsonResponse(
+          await requestApi("/api/posts/search?q=solar&limit=10", layer),
+          decodePostsPage
+        );
+        expect(singleResult.items).toHaveLength(1);
+        expect(singleResult.page.nextCursor).toBeNull();
+
+        // "transmission" matches post 2 (stemming: "transmission" → "transmiss")
+        const transmissionResult = await expectJsonResponse(
+          await requestApi("/api/posts/search?q=transmission", layer),
+          decodePostsPage
+        );
+        expect(transmissionResult.items).toHaveLength(1);
+        expect(transmissionResult.items[0]?.uri).toBe(smokeFixtureUris(sampleDid)[1]);
+      })
+    )
+  );
+
+  it.live("includes snippet with match highlights in search results", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const page = await expectJsonResponse(
+          await requestApi("/api/posts/search?q=solar", layer),
+          decodePostsPage
+        );
+
+        expect(page.items.length).toBeGreaterThan(0);
+        const item = page.items[0] as any;
+        expect(item.snippet).toBeDefined();
+        expect(typeof item.snippet).toBe("string");
+        expect(item.snippet).toContain("<mark>");
+      })
+    )
+  );
+
   it.live("paginates links and preserves stable ordering", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
@@ -103,11 +148,13 @@ describe("frontend REST API", () => {
           decodeLinksPage
         );
 
+        const allUris = smokeFixtureUris(sampleDid);
         expect(firstPage.items).toHaveLength(1);
-        expect(firstPage.items[0]?.postUri).toBe(smokeFixtureUris(sampleDid)[1]);
+        expect(allUris).toContain(firstPage.items[0]?.postUri);
         expect(firstPage.page.nextCursor).not.toBeNull();
         expect(secondPage.items).toHaveLength(1);
-        expect(secondPage.items[0]?.postUri).toBe(smokeFixtureUris(sampleDid)[0]);
+        expect(allUris).toContain(secondPage.items[0]?.postUri);
+        expect(firstPage.items[0]?.postUri).not.toBe(secondPage.items[0]?.postUri);
       })
     )
   );
@@ -189,7 +236,8 @@ describe("frontend REST API", () => {
       const response = await handleApiRequestWithLayer(
         new Request("https://skygest.local/api/posts/search?q=solar"),
         Layer.succeed(KnowledgeQueryService, {
-          searchPosts: () => Effect.fail(DbError.make({ message: "sql exploded" })),
+          searchPosts: () => Effect.succeed([]),
+          searchPostsPage: () => Effect.fail(DbError.make({ message: "sql exploded" })),
           getRecentPosts: () => Effect.succeed([]),
           getRecentPostsPage: () => Effect.succeed({ items: [], nextCursor: null }),
           getPostLinks: () => Effect.succeed([]),

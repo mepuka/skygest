@@ -145,7 +145,9 @@ const makeHarness = (options: {
         ),
       getPostLinks: () => Effect.succeed([]),
       getPostLinksPage: () => Effect.succeed([]),
-      getPostTopicMatches: () => Effect.succeed([])
+      getPostTopicMatches: () => Effect.succeed([]),
+      searchPostsPage: () => Effect.succeed([]),
+      optimizeFts: () => Effect.void
     }),
     Layer.succeed(OntologyCatalog, {
       snapshot: ontologySnapshotJson as any,

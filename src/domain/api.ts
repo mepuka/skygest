@@ -254,17 +254,6 @@ const DecodedId = Schema.compose(
   Schema.String.pipe(Schema.minLength(1))
 );
 
-export const SearchPostsApiInput = Schema.Struct({
-  q: Schema.String.pipe(Schema.minLength(1)),
-  topic: OptionalString,
-  since: OptionalNumberFromString,
-  until: OptionalNumberFromString,
-  limit: OptionalNumberFromString
-});
-export type SearchPostsApiInput = Schema.Schema.Type<typeof SearchPostsApiInput>;
-
-export const SearchPostsUrlParams = SearchPostsApiInput;
-export type SearchPostsUrlParams = Schema.Schema.Type<typeof SearchPostsUrlParams>;
 
 export const ChronologicalCursor = Schema.Struct({
   createdAt: Schema.Number,
@@ -298,6 +287,58 @@ export const encodeLinkPageCursor = (cursor: LinkPageCursor | null) =>
   cursor === null
     ? null
     : Schema.encodeSync(LinkPageCursorString)(cursor);
+
+export const SearchPostsCursor = Schema.Struct({
+  rank: Schema.Number,
+  createdAt: Schema.Number,
+  uri: AtUri
+});
+export type SearchPostsCursor = Schema.Schema.Type<typeof SearchPostsCursor>;
+
+const SearchPostsCursorString = Schema.compose(
+  StringFromBase64Url,
+  Schema.parseJson(SearchPostsCursor)
+);
+
+export const encodeSearchPostsCursor = (cursor: SearchPostsCursor | null) =>
+  cursor === null
+    ? null
+    : Schema.encodeSync(SearchPostsCursorString)(cursor);
+
+export const SearchPostsUrlParams = Schema.Struct({
+  q: Schema.String.pipe(Schema.minLength(1)),
+  topic: OptionalString,
+  since: OptionalNumberFromString,
+  until: OptionalNumberFromString,
+  limit: OptionalNumberFromString,
+  cursor: Schema.optional(SearchPostsCursorString)
+});
+export type SearchPostsUrlParams = Schema.Schema.Type<typeof SearchPostsUrlParams>;
+
+export const SearchPostsPageInput = Schema.Struct({
+  query: Schema.String,
+  topic: Schema.optional(Schema.String),
+  since: Schema.optional(Schema.Number),
+  until: Schema.optional(Schema.Number),
+  limit: Schema.optional(Schema.Number),
+  cursor: Schema.optional(SearchPostsCursor)
+});
+export type SearchPostsPageInput = Schema.Schema.Type<typeof SearchPostsPageInput>;
+
+export const SearchPostsPageQueryInput = Schema.Struct({
+  query: Schema.String,
+  topicSlugs: Schema.optional(Schema.Array(TopicSlug)),
+  since: Schema.optional(Schema.Number),
+  until: Schema.optional(Schema.Number),
+  limit: Schema.optional(Schema.Number),
+  cursor: Schema.optional(SearchPostsCursor)
+});
+export type SearchPostsPageQueryInput = Schema.Schema.Type<typeof SearchPostsPageQueryInput>;
+
+export type SearchPostsPageResult = {
+  readonly items: ReadonlyArray<Schema.Schema.Type<typeof KnowledgePostResult>>;
+  readonly nextCursor: SearchPostsCursor | null;
+};
 
 export const GetRecentPostsPageInput = Schema.Struct({
   topic: Schema.optional(Schema.String),
@@ -502,13 +543,3 @@ export type AdminResponseSchemas = typeof AdminResponseSchemas;
 export type IngestRequestSchemas = typeof IngestRequestSchemas;
 export type IngestResponseSchemas = typeof IngestResponseSchemas;
 
-export type PublicReadInputs = {
-  readonly searchPosts: SearchPostsApiInput;
-  readonly recentPosts: GetRecentPostsPageInput;
-  readonly expertPosts: Omit<GetRecentPostsPageInput, "expertDid">;
-  readonly links: GetPostLinksPageInput;
-  readonly listExperts: ListExpertsInput;
-  readonly listTopics: ListTopicsInput;
-  readonly expandTopics: ExpandTopicsInput;
-  readonly getTopic: GetTopicInput;
-};

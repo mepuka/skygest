@@ -274,7 +274,8 @@ export const KnowledgePostResult = Schema.Struct({
   handle: Schema.NullOr(Schema.String),
   text: Schema.String,
   createdAt: Schema.Number,
-  topics: Schema.Array(Schema.String)
+  topics: Schema.Array(Schema.String),
+  snippet: Schema.optional(Schema.NullOr(Schema.String))
 });
 export type KnowledgePostResult = Schema.Schema.Type<typeof KnowledgePostResult>;
 

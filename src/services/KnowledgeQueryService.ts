@@ -5,7 +5,9 @@ import type {
   GetPostLinksPageInput,
   GetRecentPostsPageInput,
   PostLinksPageResult,
-  RecentPostsPageResult
+  RecentPostsPageResult,
+  SearchPostsPageInput,
+  SearchPostsPageResult
 } from "../domain/api";
 import { AppConfig } from "../platform/Config";
 import { clampLimit } from "../platform/Limit";
@@ -37,6 +39,9 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
     readonly searchPosts: (
       input: SearchPostsInput
     ) => Effect.Effect<ReadonlyArray<KnowledgePostResult>, SqlError | DbError>;
+    readonly searchPostsPage: (
+      input: SearchPostsPageInput
+    ) => Effect.Effect<SearchPostsPageResult, SqlError | DbError>;
     readonly getRecentPosts: (
       input: GetRecentPostsInput
     ) => Effect.Effect<ReadonlyArray<KnowledgePostResult>, SqlError | DbError>;
@@ -94,6 +99,31 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
           limit: clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax),
           ...(topicSlugs === undefined ? {} : { topicSlugs })
         });
+      });
+
+      const searchPostsPage = Effect.fn("KnowledgeQueryService.searchPostsPage")(function* (
+        input: SearchPostsPageInput
+      ) {
+        const topicSlugs = yield* resolveTopicSlugs(input.topic);
+        const limit = clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax);
+        const rows = yield* knowledgeRepo.searchPostsPage({
+          query: input.query,
+          limit: limit + 1,
+          ...(input.cursor === undefined ? {} : { cursor: input.cursor }),
+          ...(input.since === undefined ? {} : { since: input.since }),
+          ...(input.until === undefined ? {} : { until: input.until }),
+          ...(topicSlugs === undefined ? {} : { topicSlugs })
+        });
+        const hasMore = rows.length > limit;
+        const pageRows = hasMore ? rows.slice(0, limit) : rows;
+        const lastItem = pageRows[pageRows.length - 1];
+        const nextCursor = hasMore && lastItem !== undefined
+          ? { rank: lastItem.rank, createdAt: lastItem.createdAt, uri: lastItem.uri }
+          : null;
+
+        const items = pageRows.map(({ rank: _rank, ...rest }) => rest);
+
+        return { items, nextCursor } satisfies SearchPostsPageResult;
       });
 
       const getRecentPosts = Effect.fn("KnowledgeQueryService.getRecentPosts")(function* (input: GetRecentPostsInput) {
@@ -236,6 +266,7 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
 
       return KnowledgeQueryService.of({
         searchPosts,
+        searchPostsPage,
         getRecentPosts,
         getRecentPostsPage,
         getPostLinks,

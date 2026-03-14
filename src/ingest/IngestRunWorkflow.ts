@@ -19,6 +19,7 @@ import {
 import { ExpertsRepo } from "../services/ExpertsRepo";
 import { IngestRunsRepo } from "../services/IngestRunsRepo";
 import { IngestRunItemsRepo } from "../services/IngestRunItemsRepo";
+import { KnowledgeRepo } from "../services/KnowledgeRepo";
 import type {
   IngestRunParams,
   PollMode
@@ -405,6 +406,22 @@ export class IngestRunWorkflow extends WorkflowEntrypoint<
           status: finalized?.status ?? "unknown"
         });
         return finalized;
+      });
+
+      await step.do("optimize fts index", async () => {
+        await this.runEffect(
+          Effect.gen(function* () {
+            const repo = yield* KnowledgeRepo;
+            yield* repo.optimizeFts().pipe(
+              Effect.catchAll((error) =>
+                Effect.logWarning("FTS optimize failed (non-fatal)").pipe(
+                  Effect.annotateLogs({ error: String(error) })
+                )
+              )
+            );
+          }),
+          "IngestRunWorkflow.optimizeFts"
+        );
       });
     } catch (error) {
       await step.do("compensate run failure", async () => {

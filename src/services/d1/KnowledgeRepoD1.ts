@@ -5,7 +5,12 @@ import { SqlClient } from "@effect/sql";
 import { SqlError } from "@effect/sql/SqlError";
 import type {
   GetPostLinksPageQueryInput,
-  GetRecentPostsPageQueryInput
+  GetRecentPostsPageQueryInput,
+  SearchPostsCursor,
+  SearchPostsPageQueryInput
+} from "../../domain/api";
+import {
+  SearchPostsPageQueryInput as SearchPostsPageQueryInputSchema
 } from "../../domain/api";
 import { KnowledgeRepo } from "../KnowledgeRepo";
 import type {
@@ -33,6 +38,7 @@ import {
   StoredTopicMatch as StoredTopicMatchSchema
 } from "../../domain/bi";
 import { stringifyUnknown } from "../../platform/Json";
+import { sanitizeFtsQuery } from "../../query/sanitizeFts";
 import { decodeWithDbError } from "./schemaDecode";
 
 const isDefined = <A>(value: A | null): value is A => value !== null;
@@ -54,6 +60,32 @@ const PostRowsSchema = Schema.Array(PostRowSchema);
 const LinkRowsSchema = Schema.Array(KnowledgeLinkResultSchema);
 const StoredTopicMatchRowsSchema = Schema.Array(StoredTopicMatchSchema);
 type PostRow = Schema.Schema.Type<typeof PostRowSchema>;
+
+const SearchPostRowSchema = Schema.Struct({
+  uri: Schema.String,
+  did: Schema.String,
+  handle: Schema.NullOr(Schema.String),
+  text: Schema.String,
+  createdAt: Schema.Number,
+  topicsCsv: Schema.NullOr(Schema.String),
+  snippet: Schema.NullOr(Schema.String),
+  rank: Schema.Number
+});
+const SearchPostRowsSchema = Schema.Array(SearchPostRowSchema);
+type SearchPostRow = Schema.Schema.Type<typeof SearchPostRowSchema>;
+
+const toSearchPostResult = (row: SearchPostRow): KnowledgePostResult & { readonly rank: number } => ({
+  uri: row.uri as KnowledgePostResult["uri"],
+  did: row.did as KnowledgePostResult["did"],
+  handle: row.handle,
+  text: row.text,
+  createdAt: row.createdAt,
+  topics: row.topicsCsv === null || row.topicsCsv.length === 0
+    ? []
+    : row.topicsCsv.split(",").filter((t) => t.length > 0),
+  snippet: row.snippet,
+  rank: row.rank
+});
 
 const makeBatchError = (cause: unknown, message: string) =>
   new SqlError({
@@ -85,6 +117,18 @@ const topicFilterExists = (
       topicSlugs.map((topicSlug) => sql`filter_pt.topic_slug = ${topicSlug}`)
     )})
 )`;
+
+const searchCursorCondition = (
+  sql: SqlClient.SqlClient,
+  cursor: SearchPostsCursor | undefined
+) =>
+  cursor === undefined
+    ? null
+    : sql`(
+        posts_fts.rank > ${cursor.rank}
+        OR (posts_fts.rank = ${cursor.rank} AND p.created_at < ${cursor.createdAt})
+        OR (posts_fts.rank = ${cursor.rank} AND p.created_at = ${cursor.createdAt} AND p.uri > ${cursor.uri})
+      )`;
 
 const recentPostCursorCondition = (
   sql: SqlClient.SqlClient,
@@ -250,6 +294,12 @@ const makeUpsertStatements = (
   );
 
   return [
+    // 1. Delete old FTS entry BEFORE upsert (reads old text from posts)
+    db.prepare(`
+      INSERT INTO posts_fts(posts_fts, rowid, text)
+      SELECT 'delete', rowid, text FROM posts WHERE uri = ?
+    `).bind(post.uri),
+    // 2. Upsert the post row (changes text in posts table)
     db.prepare(`
       INSERT INTO posts (
         uri, did, cid, text, created_at, indexed_at,
@@ -275,15 +325,16 @@ const makeUpsertStatements = (
       post.status,
       post.ingestId
     ),
+    // 3. Delete/insert topics and links
     db.prepare("DELETE FROM post_topics WHERE post_uri = ?").bind(post.uri),
     db.prepare("DELETE FROM links WHERE post_uri = ?").bind(post.uri),
-    db.prepare("DELETE FROM posts_fts WHERE uri = ?").bind(post.uri),
     ...(topicInsert === null ? [] : [topicInsert]),
     ...(linksInsert === null ? [] : [linksInsert]),
+    // 4. Insert new FTS entry AFTER upsert (reads new text from posts)
     db.prepare(`
-      INSERT INTO posts_fts (uri, text)
-      VALUES (?, ?)
-    `).bind(post.uri, post.text)
+      INSERT INTO posts_fts(rowid, text)
+      SELECT rowid, text FROM posts WHERE uri = ?
+    `).bind(post.uri)
   ];
 };
 
@@ -291,6 +342,12 @@ const makeDeleteStatements = (
   db: D1Database,
   post: DeletedKnowledgePost
 ): ReadonlyArray<D1PreparedStatement> => [
+  // Delete old FTS entry BEFORE upsert — no FTS re-insert needed since
+  // deleted posts (empty text, status='deleted') should not be searchable.
+  db.prepare(`
+    INSERT INTO posts_fts(posts_fts, rowid, text)
+    SELECT 'delete', rowid, text FROM posts WHERE uri = ?
+  `).bind(post.uri),
   db.prepare(`
     INSERT INTO posts (
       uri, did, cid, text, created_at, indexed_at,
@@ -314,8 +371,7 @@ const makeDeleteStatements = (
     post.ingestId
   ),
   db.prepare("DELETE FROM post_topics WHERE post_uri = ?").bind(post.uri),
-  db.prepare("DELETE FROM links WHERE post_uri = ?").bind(post.uri),
-  db.prepare("DELETE FROM posts_fts WHERE uri = ?").bind(post.uri)
+  db.prepare("DELETE FROM links WHERE post_uri = ?").bind(post.uri)
 ];
 
 export const KnowledgeRepoD1 = {
@@ -355,6 +411,12 @@ export const KnowledgeRepoD1 = {
 
       yield* sql.withTransaction(
         Effect.gen(function* () {
+          // Delete old FTS entry BEFORE upsert (reads old text)
+          yield* sql`
+            INSERT INTO posts_fts(posts_fts, rowid, text)
+            SELECT 'delete', rowid, text FROM posts WHERE uri = ${validated.uri}
+          `.pipe(Effect.asVoid);
+
           yield* sql`
               INSERT INTO posts (
                 uri, did, cid, text, created_at, indexed_at,
@@ -383,14 +445,15 @@ export const KnowledgeRepoD1 = {
 
           yield* sql`DELETE FROM post_topics WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
           yield* sql`DELETE FROM links WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
-          yield* sql`DELETE FROM posts_fts WHERE uri = ${validated.uri}`.pipe(Effect.asVoid);
 
           yield* insertTopics(sql, validated);
           yield* insertLinks(sql, validated);
+
+          // Insert new FTS entry AFTER upsert (reads new text)
           yield* sql`
-              INSERT INTO posts_fts (uri, text)
-              VALUES (${validated.uri}, ${validated.text})
-            `.pipe(Effect.asVoid);
+            INSERT INTO posts_fts(rowid, text)
+            SELECT rowid, text FROM posts WHERE uri = ${validated.uri}
+          `.pipe(Effect.asVoid);
         })
       );
     });
@@ -421,8 +484,14 @@ export const KnowledgeRepoD1 = {
         return;
       }
 
+      // No FTS re-insert needed — deleted posts should not be searchable.
       yield* sql.withTransaction(
         Effect.gen(function* () {
+          yield* sql`
+            INSERT INTO posts_fts(posts_fts, rowid, text)
+            SELECT 'delete', rowid, text FROM posts WHERE uri = ${validated.uri}
+          `.pipe(Effect.asVoid);
+
           yield* sql`
               INSERT INTO posts (
                 uri, did, cid, text, created_at, indexed_at,
@@ -448,7 +517,6 @@ export const KnowledgeRepoD1 = {
 
           yield* sql`DELETE FROM post_topics WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
           yield* sql`DELETE FROM links WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
-          yield* sql`DELETE FROM posts_fts WHERE uri = ${validated.uri}`.pipe(Effect.asVoid);
         })
       );
     });
@@ -466,7 +534,7 @@ export const KnowledgeRepoD1 = {
         "Invalid search posts input"
       ).pipe(
         Effect.flatMap((validated) => {
-          const trimmed = validated.query.trim();
+          const trimmed = sanitizeFtsQuery(validated.query);
           if (trimmed.length === 0 || validated.topicSlugs?.length === 0) {
             return Effect.succeed([]);
           }
@@ -482,25 +550,26 @@ export const KnowledgeRepoD1 = {
 
           return sql<any>`
             SELECT
-              p.uri as uri,
-              p.did as did,
-              e.handle as handle,
-              p.text as text,
-              p.created_at as createdAt,
+              search.uri as uri,
+              search.did as did,
+              search.handle as handle,
+              search.text as text,
+              search.createdAt as createdAt,
               group_concat(DISTINCT pt.topic_slug) as topicsCsv
             FROM (
               SELECT
-                uri,
-                rank as rank
+                p.uri, p.did, e.handle, p.text,
+                p.created_at as createdAt,
+                posts_fts.rank as rank
               FROM posts_fts
+              JOIN posts p ON p.rowid = posts_fts.rowid
+              JOIN experts e ON e.did = p.did
               WHERE posts_fts MATCH ${trimmed}
+                AND ${sql.join(" AND ", false)(postConditions)}
             ) search
-            JOIN posts p ON p.uri = search.uri
-            JOIN experts e ON e.did = p.did
-            LEFT JOIN post_topics pt ON pt.post_uri = p.uri
-            WHERE ${sql.join(" AND ", false)(postConditions)}
-            GROUP BY p.uri, p.did, e.handle, p.text, p.created_at, search.rank
-            ORDER BY search.rank, p.created_at DESC, p.uri ASC
+            LEFT JOIN post_topics pt ON pt.post_uri = search.uri
+            GROUP BY search.uri, search.did, search.handle, search.text, search.createdAt, search.rank
+            ORDER BY search.rank, search.createdAt DESC, search.uri ASC
             LIMIT ${validated.limit ?? 20}
           `.pipe(
             Effect.flatMap((rows) =>
@@ -522,6 +591,67 @@ export const KnowledgeRepoD1 = {
         })
       );
     };
+
+    const searchPostsPage = (input: SearchPostsPageQueryInput) =>
+      decodeWithDbError(
+        SearchPostsPageQueryInputSchema,
+        input,
+        "Invalid search posts page input"
+      ).pipe(
+        Effect.flatMap((validated) => {
+          const trimmed = sanitizeFtsQuery(validated.query);
+          if (trimmed.length === 0 || validated.topicSlugs?.length === 0) {
+            return Effect.succeed([]);
+          }
+
+          const conditions = [
+            sql`p.status = 'active'`,
+            validated.since === undefined ? null : sql`p.created_at >= ${validated.since}`,
+            validated.until === undefined ? null : sql`p.created_at <= ${validated.until}`,
+            searchCursorCondition(sql, validated.cursor),
+            validated.topicSlugs === undefined
+              ? null
+              : topicFilterExists(sql, validated.topicSlugs)
+          ].filter(isDefined);
+
+          return sql<any>`
+            SELECT
+              search.uri as uri,
+              search.did as did,
+              search.handle as handle,
+              search.text as text,
+              search.createdAt as createdAt,
+              group_concat(DISTINCT pt.topic_slug) as topicsCsv,
+              search.snippet as snippet,
+              search.rank as rank
+            FROM (
+              SELECT
+                p.uri, p.did, e.handle, p.text,
+                p.created_at as createdAt,
+                snippet(posts_fts, 0, '<mark>', '</mark>', '...', 30) as snippet,
+                posts_fts.rank as rank
+              FROM posts_fts
+              JOIN posts p ON p.rowid = posts_fts.rowid
+              JOIN experts e ON e.did = p.did
+              WHERE posts_fts MATCH ${trimmed}
+                AND ${sql.join(" AND ", false)(conditions)}
+            ) search
+            LEFT JOIN post_topics pt ON pt.post_uri = search.uri
+            GROUP BY search.uri, search.did, search.handle, search.text, search.createdAt, search.snippet, search.rank
+            ORDER BY search.rank, search.createdAt DESC, search.uri ASC
+            LIMIT ${validated.limit ?? 20}
+          `.pipe(
+            Effect.flatMap((rows) =>
+              decodeWithDbError(
+                SearchPostRowsSchema,
+                rows,
+                "Failed to decode search post page rows"
+              )
+            ),
+            Effect.map((rows) => rows.map(toSearchPostResult))
+          );
+        })
+      );
 
     const executeRecentPostsQuery = (
       validated: GetRecentPostsQueryInput | GetRecentPostsPageQueryInput
@@ -677,15 +807,21 @@ export const KnowledgeRepoD1 = {
         )
       );
 
+    const optimizeFts = Effect.fn("KnowledgeRepo.optimizeFts")(function* () {
+      yield* sql`INSERT INTO posts_fts(posts_fts) VALUES ('optimize')`.pipe(Effect.asVoid);
+    });
+
     return KnowledgeRepo.of({
       upsertPosts,
       markDeleted,
       searchPosts,
+      searchPostsPage,
       getRecentPosts,
       getRecentPostsPage,
       getPostLinks,
       getPostLinksPage,
-      getPostTopicMatches
+      getPostTopicMatches,
+      optimizeFts
     });
   }))
 };

@@ -10,6 +10,7 @@ import {
   type ChronologicalCursor,
   encodeChronologicalCursor,
   encodeLinkPageCursor,
+  encodeSearchPostsCursor,
   ForbiddenError,
   InternalServerError,
   type KnowledgeLinksPageOutput,
@@ -19,6 +20,7 @@ import {
   NotFoundError,
   PublicReadRequestSchemas,
   PublicReadResponseSchemas,
+  type SearchPostsPageResult,
   ServiceUnavailableError,
   UnauthorizedError,
   UpstreamFailureError
@@ -152,15 +154,19 @@ const PublicReadHandlers = Layer.mergeAll(
     handlers
       .handle("search", ({ urlParams }) =>
         withReadErrors("/api/posts/search", Effect.flatMap(KnowledgeQueryService, (query) =>
-          query.searchPosts({
+          query.searchPostsPage({
             query: urlParams.q,
             topic: urlParams.topic,
             since: urlParams.since,
             until: urlParams.until,
-            limit: urlParams.limit
+            limit: urlParams.limit,
+            cursor: urlParams.cursor
           })
         )).pipe(
-          Effect.map((items) => toPostsPage(items, null))
+          Effect.map((page: SearchPostsPageResult) => ({
+            items: Array.from(page.items),
+            page: { nextCursor: encodeSearchPostsCursor(page.nextCursor) }
+          } satisfies KnowledgePostsPageOutput))
         )
       )
       .handle("recent", ({ urlParams }) =>
