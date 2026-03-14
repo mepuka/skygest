@@ -9,7 +9,7 @@
 
 The filter uses a two-tier approach:
 
-1. **Energy-focused authors pass-through** (74 handles) — all posts from dedicated
+1. **Energy-focused authors pass-through** (99 handles) — all posts from dedicated
    energy/climate publications and energy journalists are included without additional
    signal filtering. These authors' editorial mandate is energy coverage.
 
@@ -22,7 +22,7 @@ The filter uses a two-tier approach:
 
 | Source Category | Original | Filtered | Keep Rate |
 |-----------------|----------|----------|-----------|
-| Energy-focused (74 handles) | 26,603 | 26,603 | 100% |
+| Energy-focused (99 handles) | 26,603 | 26,603 | 100% |
 | General outlets (17 handles) | 64,770 | 3,742 | 5.8% |
 | Feed-sourced other (6,319 handles) | 13,621 | 4,301 | 31.6% |
 | **Total** | **104,994** | **34,646** | **33.0%** |
@@ -49,38 +49,55 @@ The filter uses a two-tier approach:
 | thehill.com | 62 | 10 | 16.1% |
 | financialtimes.com | 27 | 3 | 11.1% |
 
-## Energy-Focused Author Handles (74)
+## Energy-Focused Author Handles (99)
 
 These authors pass through with no additional filtering:
 
 ```
 abbiebennett.bsky.social, akshatrathi.bsky.social, aleach.ca,
-alicemhancock.bsky.social, altenergy.bsky.social,
-anikanpatel.carbonbrief.org, bigearthdata.ai, brianscheid.bsky.social,
+alexckaufman.bsky.social, alicemhancock.bsky.social,
+altenergy.bsky.social, anikanpatel.carbonbrief.org,
+aripeskoe.bsky.social, bigearthdata.ai, brianscheid.bsky.social,
 campbellenergy.bsky.social, canarymedia.com, carbonbrief.org,
-chelseaeharvey.bsky.social, ckemfert.bsky.social, cleanenergy.org,
-cleanenergywire.bsky.social, cleantechnica.bsky.social,
-climatenews.bsky.social, costasamaras.com, drpauldorfman.bsky.social,
-drsimevans.carbonbrief.org, earthsciinfo.bsky.social, electrek.co,
-enerdata.bsky.social, energyinnovation.org, energylawjeff.bsky.social,
-energyvoice.com, ethanhowl.bsky.social, euenergy.bsky.social,
-gasbuddyguy.bsky.social, gavinjmaguire.bsky.social, greencollective.io,
-grist.org, gruberte.bsky.social, hannahdaly.ie, hanseric.bsky.social,
-hausfath.bsky.social, heatmap.news, iea.org, insideclimatenews.org,
-insideevs.com, janrosenow.bsky.social, javierblas.bsky.social,
-jeffstjohn.bsky.social, jessedjenkins.com, jrfhanger.bsky.social,
-justingerdes.bsky.social, ketanjoshi.co, latitudemedia.bsky.social,
-leohickman.carbonbrief.org, liamdenning.bsky.social, longtail.news,
-lovering.bsky.social, mikemunsell.bsky.social, nathanielbullard.com,
-opinion.bloomberg.com, patrickgaley.bsky.social, rebleber.bsky.social,
+chelseaeharvey.bsky.social, ckemfert.bsky.social,
+clairehao.bsky.social, cleanenergy.org,
+cleanenergywire.bsky.social, cleanpowerdave.bsky.social,
+cleantechnica.bsky.social, climatenews.bsky.social,
+costasamaras.com, danmccarthy.bsky.social,
+drpauldorfman.bsky.social, drsimevans.carbonbrief.org,
+earthsciinfo.bsky.social, electronecon.bsky.social, electrek.co,
+emilypont.bsky.social, enerdata.bsky.social,
+energyinnovation.org, energylawjeff.bsky.social,
+energyvoice.com, eroston.bsky.social, ethanhowl.bsky.social,
+euenergy.bsky.social, fieseler.bsky.social,
+gasbuddyguy.bsky.social, gavinjmaguire.bsky.social,
+geoffdembicki.bsky.social, greencollective.io, grist.org,
+gruberte.bsky.social, hannahdaly.ie, hanseric.bsky.social,
+hausfath.bsky.social, heatmap.news, iea.org,
+insideclimatenews.org, insideevs.com, jackconness.bsky.social,
+jael.bsky.social, janrosenow.bsky.social,
+javierblas.bsky.social, jeffstjohn.bsky.social,
+jendlouhy.bsky.social, jessedjenkins.com,
+jlappen1.bsky.social, jrfhanger.bsky.social,
+justingerdes.bsky.social, ketanjoshi.co,
+kevinjkircher.com, kmkowalski.bsky.social,
+latitudemedia.bsky.social, leohickman.carbonbrief.org,
+liamdenning.bsky.social, longtail.news, lovering.bsky.social,
+mariagallucci.bsky.social, michellema.bsky.social,
+mikemunsell.bsky.social, mollytaft.com,
+nathanielbullard.com, opinion.bloomberg.com,
+patrickgaley.bsky.social, rebleber.bsky.social,
 renewableenergy.bsky.social, robinsonmeyer.bsky.social,
-rtoinsider.bsky.social, sammyroth.bsky.social,
+rtoinsider.bsky.social, sammyroth.bsky.social, sevier.io,
 severinborenstein.bsky.social, shedrills.bsky.social,
-sjcasey.bsky.social, sstapczynski.bsky.social, thedriven.io,
-theenergymix.com, torsolarfred.bsky.social,
-ucenergyinstitute.bsky.social, volts.wtf, wettengel.bsky.social,
-windpowermonthly.bsky.social, worldnuclearnews.bsky.social,
-yalee360.bsky.social
+sjcasey.bsky.social, solarchase.bsky.social,
+sstapczynski.bsky.social, thedriven.io, theenergymix.com,
+thinkorswim.bsky.social, tnorris.bsky.social,
+toddwoody.bsky.social, torsolarfred.bsky.social,
+ucenergyinstitute.bsky.social, volts.wtf,
+wettengel.bsky.social, windpowermonthly.bsky.social,
+worldnuclearnews.bsky.social, yalee360.bsky.social,
+zeitlin.bsky.social
 ```
 
 ## Energy Signal Components

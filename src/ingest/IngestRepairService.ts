@@ -1,5 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import type { SqlError } from "@effect/sql/SqlError";
+import type { DbError } from "../domain/errors";
 import {
   HistoricalRunRepairError,
   StaleDispatchedIngestItemError,
@@ -66,10 +67,10 @@ export class IngestRepairService extends Context.Tag("@skygest/IngestRepairServi
     readonly repairLiveRun: (
       runId: string,
       now?: number
-    ) => Effect.Effect<IngestRunRecoverySummary, SqlError>;
+    ) => Effect.Effect<IngestRunRecoverySummary, SqlError | DbError>;
     readonly repairHistoricalRuns: (
       now?: number
-    ) => Effect.Effect<IngestRepairSummary, SqlError>;
+    ) => Effect.Effect<IngestRepairSummary, SqlError | DbError>;
   }
 >() {
   static readonly layer = Layer.effect(

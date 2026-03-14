@@ -1,5 +1,12 @@
 import { Context, Effect, Layer } from "effect";
 import type { SqlError } from "@effect/sql/SqlError";
+import type { DbError } from "../domain/errors";
+import type {
+  GetPostLinksPageInput,
+  GetRecentPostsPageInput,
+  PostLinksPageResult,
+  RecentPostsPageResult
+} from "../domain/api";
 import { AppConfig } from "../platform/Config";
 import { clampLimit } from "../platform/Limit";
 import { ExpertsRepo } from "./ExpertsRepo";
@@ -29,16 +36,22 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
   {
     readonly searchPosts: (
       input: SearchPostsInput
-    ) => Effect.Effect<ReadonlyArray<KnowledgePostResult>, SqlError>;
+    ) => Effect.Effect<ReadonlyArray<KnowledgePostResult>, SqlError | DbError>;
     readonly getRecentPosts: (
       input: GetRecentPostsInput
-    ) => Effect.Effect<ReadonlyArray<KnowledgePostResult>, SqlError>;
+    ) => Effect.Effect<ReadonlyArray<KnowledgePostResult>, SqlError | DbError>;
+    readonly getRecentPostsPage: (
+      input: GetRecentPostsPageInput
+    ) => Effect.Effect<RecentPostsPageResult, SqlError | DbError>;
     readonly getPostLinks: (
       input: GetPostLinksInput
-    ) => Effect.Effect<ReadonlyArray<KnowledgeLinkResult>, SqlError>;
+    ) => Effect.Effect<ReadonlyArray<KnowledgeLinkResult>, SqlError | DbError>;
+    readonly getPostLinksPage: (
+      input: GetPostLinksPageInput
+    ) => Effect.Effect<PostLinksPageResult, SqlError | DbError>;
     readonly listExperts: (
       input: ListExpertsInput
-    ) => Effect.Effect<ReadonlyArray<ExpertListItem>, SqlError>;
+    ) => Effect.Effect<ReadonlyArray<ExpertListItem>, SqlError | DbError>;
     readonly listTopics: (
       input: ListTopicsInput
     ) => Effect.Effect<ReadonlyArray<OntologyListTopic>>;
@@ -50,7 +63,7 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
     ) => Effect.Effect<ExpandedTopicsOutput>;
     readonly explainPostTopics: (
       postUri: ExplainPostTopicsInput["postUri"]
-    ) => Effect.Effect<ExplainPostTopicsOutput, SqlError>;
+    ) => Effect.Effect<ExplainPostTopicsOutput, SqlError | DbError>;
   }
 >() {
   static readonly layer = Layer.effect(
@@ -77,6 +90,7 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
         return yield* knowledgeRepo.searchPosts({
           query: input.query,
           since: input.since,
+          until: input.until,
           limit: clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax),
           ...(topicSlugs === undefined ? {} : { topicSlugs })
         });
@@ -87,9 +101,39 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
         return yield* knowledgeRepo.getRecentPosts({
           expertDid: input.expertDid,
           since: input.since,
+          until: input.until,
+          cursor: input.cursor,
           limit: clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax),
           ...(topicSlugs === undefined ? {} : { topicSlugs })
         });
+      });
+
+      const getRecentPostsPage = Effect.fn("KnowledgeQueryService.getRecentPostsPage")(function* (
+        input: GetRecentPostsPageInput
+      ) {
+        const topicSlugs = yield* resolveTopicSlugs(input.topic);
+        const limit = clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax);
+        const rows = yield* knowledgeRepo.getRecentPostsPage({
+          expertDid: input.expertDid,
+          since: input.since,
+          until: input.until,
+          limit: limit + 1,
+          ...(input.cursor === undefined ? {} : { cursor: input.cursor }),
+          ...(topicSlugs === undefined ? {} : { topicSlugs })
+        });
+        const hasMore = rows.length > limit;
+        const items = hasMore ? rows.slice(0, limit) : rows;
+        const lastItem = items[items.length - 1];
+
+        return {
+          items,
+          nextCursor: hasMore && lastItem !== undefined
+            ? {
+                createdAt: lastItem.createdAt,
+                uri: lastItem.uri
+              }
+            : null
+        } satisfies RecentPostsPageResult;
       });
 
       const getPostLinks = Effect.fn("KnowledgeQueryService.getPostLinks")(function* (input: GetPostLinksInput) {
@@ -97,9 +141,40 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
         return yield* knowledgeRepo.getPostLinks({
           domain: input.domain,
           since: input.since,
+          until: input.until,
+          cursor: input.cursor,
           limit: clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax),
           ...(topicSlugs === undefined ? {} : { topicSlugs })
         });
+      });
+
+      const getPostLinksPage = Effect.fn("KnowledgeQueryService.getPostLinksPage")(function* (
+        input: GetPostLinksPageInput
+      ) {
+        const topicSlugs = yield* resolveTopicSlugs(input.topic);
+        const limit = clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax);
+        const rows = yield* knowledgeRepo.getPostLinksPage({
+          domain: input.domain,
+          since: input.since,
+          until: input.until,
+          limit: limit + 1,
+          ...(input.cursor === undefined ? {} : { cursor: input.cursor }),
+          ...(topicSlugs === undefined ? {} : { topicSlugs })
+        });
+        const hasMore = rows.length > limit;
+        const items = hasMore ? rows.slice(0, limit) : rows;
+        const lastItem = items[items.length - 1];
+
+        return {
+          items,
+          nextCursor: hasMore && lastItem !== undefined
+            ? {
+                createdAt: lastItem.createdAt,
+                postUri: lastItem.postUri,
+                url: lastItem.url
+              }
+            : null
+        } satisfies PostLinksPageResult;
       });
 
       const listExperts = Effect.fn("KnowledgeQueryService.listExperts")(function* (input: ListExpertsInput) {
@@ -162,7 +237,9 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
       return KnowledgeQueryService.of({
         searchPosts,
         getRecentPosts,
+        getRecentPostsPage,
         getPostLinks,
+        getPostLinksPage,
         listExperts,
         listTopics,
         getTopic,

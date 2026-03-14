@@ -182,22 +182,40 @@ export const SearchPostsInput = Schema.Struct({
   query: Schema.String,
   topic: Schema.optional(Schema.String),
   since: Schema.optional(Schema.Number),
+  until: Schema.optional(Schema.Number),
   limit: Schema.optional(Schema.Number)
 });
 export type SearchPostsInput = Schema.Schema.Type<typeof SearchPostsInput>;
+
+export const KnowledgePostCursor = Schema.Struct({
+  createdAt: Schema.Number,
+  uri: AtUri
+});
+export type KnowledgePostCursor = Schema.Schema.Type<typeof KnowledgePostCursor>;
 
 export const GetRecentPostsInput = Schema.Struct({
   topic: Schema.optional(Schema.String),
   expertDid: Schema.optional(Did),
   since: Schema.optional(Schema.Number),
+  until: Schema.optional(Schema.Number),
+  cursor: Schema.optional(KnowledgePostCursor),
   limit: Schema.optional(Schema.Number)
 });
 export type GetRecentPostsInput = Schema.Schema.Type<typeof GetRecentPostsInput>;
+
+export const KnowledgeLinkCursor = Schema.Struct({
+  createdAt: Schema.Number,
+  postUri: AtUri,
+  url: Schema.String
+});
+export type KnowledgeLinkCursor = Schema.Schema.Type<typeof KnowledgeLinkCursor>;
 
 export const GetPostLinksInput = Schema.Struct({
   domain: Schema.optional(Schema.String),
   topic: Schema.optional(Schema.String),
   since: Schema.optional(Schema.Number),
+  until: Schema.optional(Schema.Number),
+  cursor: Schema.optional(KnowledgeLinkCursor),
   limit: Schema.optional(Schema.Number)
 });
 export type GetPostLinksInput = Schema.Schema.Type<typeof GetPostLinksInput>;
@@ -206,6 +224,7 @@ export const SearchPostsQueryInput = Schema.Struct({
   query: Schema.String,
   topicSlugs: Schema.optional(Schema.Array(TopicSlug)),
   since: Schema.optional(Schema.Number),
+  until: Schema.optional(Schema.Number),
   limit: Schema.optional(Schema.Number)
 });
 export type SearchPostsQueryInput = Schema.Schema.Type<typeof SearchPostsQueryInput>;
@@ -214,6 +233,8 @@ export const GetRecentPostsQueryInput = Schema.Struct({
   topicSlugs: Schema.optional(Schema.Array(TopicSlug)),
   expertDid: Schema.optional(Did),
   since: Schema.optional(Schema.Number),
+  until: Schema.optional(Schema.Number),
+  cursor: Schema.optional(KnowledgePostCursor),
   limit: Schema.optional(Schema.Number)
 });
 export type GetRecentPostsQueryInput = Schema.Schema.Type<typeof GetRecentPostsQueryInput>;
@@ -222,6 +243,8 @@ export const GetPostLinksQueryInput = Schema.Struct({
   domain: Schema.optional(Schema.String),
   topicSlugs: Schema.optional(Schema.Array(TopicSlug)),
   since: Schema.optional(Schema.Number),
+  until: Schema.optional(Schema.Number),
+  cursor: Schema.optional(KnowledgeLinkCursor),
   limit: Schema.optional(Schema.Number)
 });
 export type GetPostLinksQueryInput = Schema.Schema.Type<typeof GetPostLinksQueryInput>;

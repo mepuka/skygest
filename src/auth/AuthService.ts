@@ -89,7 +89,10 @@ const toScopes = (payload: JWTPayload): ReadonlyArray<string> => {
 };
 
 const operatorScopes: ReadonlyArray<string> = [
+  "mcp:read",
+  "experts:read",
   "experts:write",
+  "ops:read",
   "ops:refresh"
 ];
 

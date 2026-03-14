@@ -134,7 +134,17 @@ const makeHarness = (options: {
             )
             .slice(0, limit ?? Number.POSITIVE_INFINITY)
         ),
+      getRecentPostsPage: ({ expertDid, since, limit }) =>
+        Effect.succeed(
+          (options.recentPosts ?? [])
+            .filter((post) =>
+              (expertDid === undefined || post.did === expertDid) &&
+              (since === undefined || post.createdAt >= since)
+            )
+            .slice(0, limit ?? Number.POSITIVE_INFINITY)
+        ),
       getPostLinks: () => Effect.succeed([]),
+      getPostLinksPage: () => Effect.succeed([]),
       getPostTopicMatches: () => Effect.succeed([])
     }),
     Layer.succeed(OntologyCatalog, {

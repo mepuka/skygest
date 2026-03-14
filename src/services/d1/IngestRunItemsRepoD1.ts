@@ -1,6 +1,7 @@
 import { Effect, Layer, Schema } from "effect";
 import { SqlClient } from "@effect/sql";
 import type { SqlError } from "@effect/sql/SqlError";
+import type { DbError } from "../../domain/errors";
 import {
   decodeStoredIngestError,
   encodeStoredIngestError
@@ -26,7 +27,7 @@ import {
   type UpdateIngestRunItemCounts
 } from "../../domain/polling";
 import { IngestRunItemsRepo } from "../IngestRunItemsRepo";
-import { decodeWithSqlError } from "./schemaDecode";
+import { decodeWithDbError } from "./schemaDecode";
 
 const D1_MAX_BOUND_PARAMETERS = 100;
 const INSERT_VALUE_COLUMN_COUNT = 13;
@@ -89,7 +90,7 @@ export const IngestRunItemsRepoD1 = {
     const sql = yield* SqlClient.SqlClient;
 
     const createMany = (items: ReadonlyArray<CreateIngestRunItem>) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         Schema.Array(CreateIngestRunItemSchema),
         items,
         "Invalid create ingest run items input"
@@ -125,7 +126,7 @@ export const IngestRunItemsRepoD1 = {
       );
 
     const markDispatched = (input: MarkIngestRunItemDispatched) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         MarkIngestRunItemDispatchedSchema,
         input,
         "Invalid mark ingest run item dispatched input"
@@ -145,7 +146,7 @@ export const IngestRunItemsRepoD1 = {
       );
 
     const markQueued = (input: MarkIngestRunItemQueued) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         MarkIngestRunItemQueuedSchema,
         input,
         "Invalid mark ingest run item queued input"
@@ -167,7 +168,7 @@ export const IngestRunItemsRepoD1 = {
       );
 
     const markRunning = (input: MarkIngestRunItemRunning) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         MarkIngestRunItemRunningSchema,
         input,
         "Invalid mark ingest run item running input"
@@ -220,7 +221,7 @@ export const IngestRunItemsRepoD1 = {
       `.pipe(Effect.asVoid);
 
     const markProgress = (input: UpdateIngestRunItemCounts) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         UpdateIngestRunItemCountsSchema,
         input,
         "Invalid mark ingest run item progress input"
@@ -229,7 +230,7 @@ export const IngestRunItemsRepoD1 = {
       );
 
     const markComplete = (input: CompleteIngestRunItem) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         CompleteIngestRunItemSchema,
         input,
         "Invalid mark ingest run item complete input"
@@ -238,7 +239,7 @@ export const IngestRunItemsRepoD1 = {
       );
 
     const markFailed = (input: FailIngestRunItem) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         FailIngestRunItemSchema,
         input,
         "Invalid mark ingest run item failed input"
@@ -268,7 +269,7 @@ export const IngestRunItemsRepoD1 = {
         ORDER BY did ASC, mode ASC
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             RawIngestRunItemRowsSchema,
             rows,
             `Failed to decode ingest run items for ${runId}`
@@ -281,7 +282,7 @@ export const IngestRunItemsRepoD1 = {
           }))
         ),
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             IngestRunItemRowsSchema,
             rows,
             `Failed to normalize ingest run items for ${runId}`
@@ -297,7 +298,7 @@ export const IngestRunItemsRepoD1 = {
           AND status IN ('dispatched', 'running')
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             CountRowsSchema,
             rows,
             `Failed to decode active ingest run item count for ${runId}`
@@ -330,7 +331,7 @@ export const IngestRunItemsRepoD1 = {
         LIMIT ${limit}
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             RawIngestRunItemRowsSchema,
             rows,
             `Failed to decode undispatched ingest run items for ${runId}`
@@ -343,7 +344,7 @@ export const IngestRunItemsRepoD1 = {
           }))
         ),
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             IngestRunItemRowsSchema,
             rows,
             `Failed to normalize undispatched ingest run items for ${runId}`
@@ -375,7 +376,7 @@ export const IngestRunItemsRepoD1 = {
         ORDER BY did ASC, mode ASC
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             RawIngestRunItemRowsSchema,
             rows,
             `Failed to decode stale dispatched ingest run items for ${runId}`
@@ -388,7 +389,7 @@ export const IngestRunItemsRepoD1 = {
           }))
         ),
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             IngestRunItemRowsSchema,
             rows,
             `Failed to normalize stale dispatched ingest run items for ${runId}`
@@ -420,7 +421,7 @@ export const IngestRunItemsRepoD1 = {
         ORDER BY did ASC, mode ASC
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             RawIngestRunItemRowsSchema,
             rows,
             `Failed to decode stale running ingest run items for ${runId}`
@@ -433,7 +434,7 @@ export const IngestRunItemsRepoD1 = {
           }))
         ),
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             IngestRunItemRowsSchema,
             rows,
             `Failed to normalize stale running ingest run items for ${runId}`
@@ -449,7 +450,7 @@ export const IngestRunItemsRepoD1 = {
           AND status NOT IN ('complete', 'failed')
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             CountRowsSchema,
             rows,
             `Failed to decode incomplete ingest run item count for ${runId}`
@@ -458,7 +459,7 @@ export const IngestRunItemsRepoD1 = {
         Effect.map((rows) => rows[0]?.count ?? 0)
       );
 
-    const summarizeByRun = (runId: string): Effect.Effect<IngestRunItemSummary, SqlError> =>
+    const summarizeByRun = (runId: string): Effect.Effect<IngestRunItemSummary, SqlError | DbError> =>
       Effect.all({
         summary: sql<any>`
           SELECT
@@ -473,7 +474,7 @@ export const IngestRunItemsRepoD1 = {
           WHERE run_id = ${runId}
         `.pipe(
           Effect.flatMap((rows) =>
-            decodeWithSqlError(
+            decodeWithDbError(
               RawIngestRunItemSummaryRowsSchema,
               rows,
               `Failed to decode ingest run item summary for ${runId}`
@@ -499,7 +500,7 @@ export const IngestRunItemsRepoD1 = {
           LIMIT 1
         `.pipe(
           Effect.flatMap((rows) =>
-            decodeWithSqlError(
+            decodeWithDbError(
               ErrorRowsSchema,
               rows,
               `Failed to decode ingest run item failure for ${runId}`
@@ -509,7 +510,7 @@ export const IngestRunItemsRepoD1 = {
         )
       }).pipe(
         Effect.flatMap(({ summary, error }) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             IngestRunItemSummarySchema,
             {
               ...summary,

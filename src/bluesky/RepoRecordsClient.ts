@@ -1,5 +1,6 @@
 import { Cache, Clock, Context, Duration, Effect, Either, Layer } from "effect";
 import type { SqlError } from "@effect/sql/SqlError";
+import type { DbError } from "../domain/errors";
 import { BlueskyClient } from "./BlueskyClient";
 import { BlueskyApiError } from "../domain/errors";
 import type {
@@ -48,7 +49,7 @@ export class RepoRecordsClient extends Context.Tag("@skygest/RepoRecordsClient")
   {
     readonly listRecords: (
       input: RepoListRecordsInput
-    ) => Effect.Effect<ListRecordsResult, BlueskyApiError | SqlError>;
+    ) => Effect.Effect<ListRecordsResult, BlueskyApiError | SqlError | DbError>;
     readonly invalidateRepo: (repo: Did) => Effect.Effect<void>;
   }
 >() {

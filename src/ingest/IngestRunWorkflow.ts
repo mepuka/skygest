@@ -194,35 +194,35 @@ export class IngestRunWorkflow extends WorkflowEntrypoint<
           yield* Effect.forEach(
             undispatched,
             (item) =>
-              items.markDispatched({
-                runId,
-                did: item.did,
-                mode: item.mode,
-                enqueuedAt,
-                lastProgressAt: enqueuedAt
+              Effect.promise(async () => {
+                const stub = coordinatorStub(item.did);
+                if (params.kind === "head-sweep") {
+                  await stub.enqueueHead({
+                    did: item.did,
+                    runId
+                  });
+                } else if (params.kind === "backfill") {
+                  await stub.enqueueBackfill({
+                    did: item.did,
+                    runId,
+                    ...(params.maxPosts === undefined ? {} : { maxPosts: params.maxPosts }),
+                    ...(params.maxAgeDays === undefined ? {} : { maxAgeDays: params.maxAgeDays })
+                  });
+                } else {
+                  await stub.enqueueReconcile({
+                    did: item.did,
+                    runId,
+                    ...(params.depth === undefined ? {} : { depth: params.depth })
+                  });
+                }
               }).pipe(
                 Effect.zipRight(
-                  Effect.promise(async () => {
-                    const stub = coordinatorStub(item.did);
-                    if (params.kind === "head-sweep") {
-                      await stub.enqueueHead({
-                        did: item.did,
-                        runId
-                      });
-                    } else if (params.kind === "backfill") {
-                      await stub.enqueueBackfill({
-                        did: item.did,
-                        runId,
-                        ...(params.maxPosts === undefined ? {} : { maxPosts: params.maxPosts }),
-                        ...(params.maxAgeDays === undefined ? {} : { maxAgeDays: params.maxAgeDays })
-                      });
-                    } else {
-                      await stub.enqueueReconcile({
-                        did: item.did,
-                        runId,
-                        ...(params.depth === undefined ? {} : { depth: params.depth })
-                      });
-                    }
+                  items.markDispatched({
+                    runId,
+                    did: item.did,
+                    mode: item.mode,
+                    enqueuedAt,
+                    lastProgressAt: enqueuedAt
                   })
                 )
               ),

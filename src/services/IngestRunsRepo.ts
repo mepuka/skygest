@@ -1,5 +1,6 @@
 import { Context, Effect } from "effect";
 import type { SqlError } from "@effect/sql/SqlError";
+import type { DbError } from "../domain/errors";
 import type {
   CompleteIngestRun,
   CreateQueuedIngestRun,
@@ -15,25 +16,25 @@ export class IngestRunsRepo extends Context.Tag("@skygest/IngestRunsRepo")<
   {
     readonly createQueuedIfAbsent: (
       input: CreateQueuedIngestRun
-    ) => Effect.Effect<boolean, SqlError>;
+    ) => Effect.Effect<boolean, SqlError | DbError>;
     readonly getById: (
       id: string
-    ) => Effect.Effect<IngestRunRecord | null, SqlError>;
-    readonly listRunning: () => Effect.Effect<ReadonlyArray<IngestRunRecord>, SqlError>;
+    ) => Effect.Effect<IngestRunRecord | null, SqlError | DbError>;
+    readonly listRunning: () => Effect.Effect<ReadonlyArray<IngestRunRecord>, SqlError | DbError>;
     readonly markPreparing: (
       input: MarkIngestRunPreparing
-    ) => Effect.Effect<void, SqlError>;
+    ) => Effect.Effect<void, SqlError | DbError>;
     readonly markDispatching: (
       input: MarkIngestRunDispatching
-    ) => Effect.Effect<void, SqlError>;
+    ) => Effect.Effect<void, SqlError | DbError>;
     readonly markFinalizing: (
       input: MarkIngestRunFinalizing
-    ) => Effect.Effect<void, SqlError>;
+    ) => Effect.Effect<void, SqlError | DbError>;
     readonly markComplete: (
       input: CompleteIngestRun
-    ) => Effect.Effect<void, SqlError>;
+    ) => Effect.Effect<void, SqlError | DbError>;
     readonly markFailed: (
       input: FailIngestRun
-    ) => Effect.Effect<void, SqlError>;
+    ) => Effect.Effect<void, SqlError | DbError>;
   }
 >() {}

@@ -3,6 +3,10 @@ import { D1Client } from "@effect/sql-d1";
 import { Effect, Layer, Option, Schema } from "effect";
 import { SqlClient } from "@effect/sql";
 import { SqlError } from "@effect/sql/SqlError";
+import type {
+  GetPostLinksPageQueryInput,
+  GetRecentPostsPageQueryInput
+} from "../../domain/api";
 import { KnowledgeRepo } from "../KnowledgeRepo";
 import type {
   DeletedKnowledgePost,
@@ -15,6 +19,10 @@ import type {
   StoredTopicMatch
 } from "../../domain/bi";
 import {
+  GetPostLinksPageQueryInput as GetPostLinksPageQueryInputSchema,
+  GetRecentPostsPageQueryInput as GetRecentPostsPageQueryInputSchema
+} from "../../domain/api";
+import {
   DeletedKnowledgePost as DeletedKnowledgePostSchema,
   GetPostLinksQueryInput as GetPostLinksQueryInputSchema,
   GetRecentPostsQueryInput as GetRecentPostsQueryInputSchema,
@@ -25,10 +33,9 @@ import {
   StoredTopicMatch as StoredTopicMatchSchema
 } from "../../domain/bi";
 import { stringifyUnknown } from "../../platform/Json";
-import { decodeWithSqlError } from "./schemaDecode";
+import { decodeWithDbError } from "./schemaDecode";
 
 const isDefined = <A>(value: A | null): value is A => value !== null;
-const D1_BATCH_STATEMENT_CHUNK_SIZE = 50;
 
 const toCauseMessage = (cause: unknown) =>
   cause instanceof Error
@@ -54,18 +61,7 @@ const makeBatchError = (cause: unknown, message: string) =>
     message: `${message}: ${toCauseMessage(cause)}`
   });
 
-const chunkStatements = (
-  statements: ReadonlyArray<D1PreparedStatement>,
-  size: number
-) => {
-  const chunks: Array<ReadonlyArray<D1PreparedStatement>> = [];
-
-  for (let index = 0; index < statements.length; index += size) {
-    chunks.push(statements.slice(index, index + size));
-  }
-
-  return chunks;
-};
+type D1BatchBindValue = string | number | null;
 
 const toPostResult = (row: PostRow) => ({
   uri: row.uri,
@@ -89,6 +85,34 @@ const topicFilterExists = (
       topicSlugs.map((topicSlug) => sql`filter_pt.topic_slug = ${topicSlug}`)
     )})
 )`;
+
+const recentPostCursorCondition = (
+  sql: SqlClient.SqlClient,
+  cursor: GetRecentPostsPageQueryInput["cursor"]
+) =>
+  cursor === undefined
+    ? null
+    : sql`(
+        p.created_at < ${cursor.createdAt}
+        OR (p.created_at = ${cursor.createdAt} AND p.uri > ${cursor.uri})
+      )`;
+
+const linkCursorCondition = (
+  sql: SqlClient.SqlClient,
+  cursor: GetPostLinksPageQueryInput["cursor"]
+) =>
+  cursor === undefined
+    ? null
+    : sql`(
+        l.extracted_at < ${cursor.createdAt}
+        OR (
+          l.extracted_at = ${cursor.createdAt}
+          AND (
+            l.post_uri > ${cursor.postUri}
+            OR (l.post_uri = ${cursor.postUri} AND l.url > ${cursor.url})
+          )
+        )
+      )`;
 
 const insertTopics = (sql: SqlClient.SqlClient, post: KnowledgePost) =>
   Effect.forEach(
@@ -138,6 +162,26 @@ const insertLinks = (sql: SqlClient.SqlClient, post: KnowledgePost) =>
     { discard: true }
   );
 
+const makeBulkInsertStatement = (
+  db: D1Database,
+  table: string,
+  columns: ReadonlyArray<string>,
+  rows: ReadonlyArray<ReadonlyArray<D1BatchBindValue>>
+): D1PreparedStatement | null => {
+  if (rows.length === 0) {
+    return null;
+  }
+
+  const placeholders = rows
+    .map((row) => `(${row.map(() => "?").join(", ")})`)
+    .join(", ");
+  const values = rows.flatMap((row) => [...row]);
+
+  return db.prepare(
+    `INSERT OR IGNORE INTO ${table} (${columns.join(", ")}) VALUES ${placeholders}`
+  ).bind(...values);
+};
+
 const runAtomicBatch = (
   db: D1Database,
   statements: ReadonlyArray<D1PreparedStatement>,
@@ -145,29 +189,67 @@ const runAtomicBatch = (
 ) =>
   statements.length === 0
     ? Effect.void
-    : Effect.forEach(
-        chunkStatements(statements, D1_BATCH_STATEMENT_CHUNK_SIZE),
-        (chunk, index) =>
-          Effect.tryPromise({
-            try: async () => {
-              await db.batch(Array.from(chunk));
-            },
-            catch: (cause) =>
-              makeBatchError(
-                cause,
-                `Failed to execute D1 batch chunk ${index + 1} of ${
-                  Math.ceil(statements.length / D1_BATCH_STATEMENT_CHUNK_SIZE)
-                } for ${operation}`
-              )
-          }),
-        { discard: true }
-      ).pipe(Effect.asVoid);
+    : Effect.tryPromise({
+        try: async () => {
+          await db.batch(Array.from(statements));
+        },
+        catch: (cause) =>
+          makeBatchError(
+            cause,
+            `Failed to execute D1 batch for ${operation}`
+          )
+      }).pipe(Effect.asVoid);
 
 const makeUpsertStatements = (
   db: D1Database,
   post: KnowledgePost
 ): ReadonlyArray<D1PreparedStatement> => {
-  const statements: Array<D1PreparedStatement> = [
+  const topicInsert = makeBulkInsertStatement(
+    db,
+    "post_topics",
+    [
+      "post_uri",
+      "topic_slug",
+      "matched_term",
+      "match_signal",
+      "match_value",
+      "match_score",
+      "ontology_version",
+      "matcher_version"
+    ],
+    post.topics.map((topic) => [
+      post.uri,
+      topic.topicSlug,
+      topic.matchedTerm,
+      topic.matchSignal,
+      topic.matchValue,
+      topic.matchScore,
+      topic.ontologyVersion,
+      topic.matcherVersion
+    ])
+  );
+  const linksInsert = makeBulkInsertStatement(
+    db,
+    "links",
+    [
+      "post_uri",
+      "url",
+      "title",
+      "description",
+      "domain",
+      "extracted_at"
+    ],
+    post.links.map((link) => [
+      post.uri,
+      link.url,
+      link.title,
+      link.description,
+      link.domain,
+      link.extractedAt
+    ])
+  );
+
+  return [
     db.prepare(`
       INSERT INTO posts (
         uri, did, cid, text, created_at, indexed_at,
@@ -195,61 +277,14 @@ const makeUpsertStatements = (
     ),
     db.prepare("DELETE FROM post_topics WHERE post_uri = ?").bind(post.uri),
     db.prepare("DELETE FROM links WHERE post_uri = ?").bind(post.uri),
-    db.prepare("DELETE FROM posts_fts WHERE uri = ?").bind(post.uri)
-  ];
-
-  for (const topic of post.topics) {
-    statements.push(
-      db.prepare(`
-        INSERT OR IGNORE INTO post_topics (
-          post_uri,
-          topic_slug,
-          matched_term,
-          match_signal,
-          match_value,
-          match_score,
-          ontology_version,
-          matcher_version
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `).bind(
-        post.uri,
-        topic.topicSlug,
-        topic.matchedTerm,
-        topic.matchSignal,
-        topic.matchValue,
-        topic.matchScore,
-        topic.ontologyVersion,
-        topic.matcherVersion
-      )
-    );
-  }
-
-  for (const link of post.links) {
-    statements.push(
-      db.prepare(`
-        INSERT OR IGNORE INTO links (
-          post_uri, url, title, description, domain, extracted_at
-        ) VALUES (?, ?, ?, ?, ?, ?)
-      `).bind(
-        post.uri,
-        link.url,
-        link.title,
-        link.description,
-        link.domain,
-        link.extractedAt
-      )
-    );
-  }
-
-  statements.push(
+    db.prepare("DELETE FROM posts_fts WHERE uri = ?").bind(post.uri),
+    ...(topicInsert === null ? [] : [topicInsert]),
+    ...(linksInsert === null ? [] : [linksInsert]),
     db.prepare(`
       INSERT INTO posts_fts (uri, text)
       VALUES (?, ?)
     `).bind(post.uri, post.text)
-  );
-
-  return statements;
+  ];
 };
 
 const makeDeleteStatements = (
@@ -293,7 +328,7 @@ export const KnowledgeRepoD1 = {
     });
 
     const upsertOne = Effect.fn("KnowledgeRepo.upsertOne")(function* (post: KnowledgePost) {
-      const validated = yield* decodeWithSqlError(
+      const validated = yield* decodeWithDbError(
         KnowledgePostSchema,
         post,
         `Invalid knowledge post input for ${post.uri}`
@@ -318,46 +353,50 @@ export const KnowledgeRepoD1 = {
         return;
       }
 
-      yield* sql`
-          INSERT INTO posts (
-            uri, did, cid, text, created_at, indexed_at,
-            has_links, status, ingest_id
-          ) VALUES (
-            ${validated.uri},
-            ${validated.did},
-            ${validated.cid},
-            ${validated.text},
-            ${validated.createdAt},
-            ${validated.indexedAt},
-            ${validated.hasLinks ? 1 : 0},
-            ${validated.status},
-            ${validated.ingestId}
-          )
-          ON CONFLICT(uri) DO UPDATE SET
-            did = excluded.did,
-            cid = excluded.cid,
-            text = excluded.text,
-            created_at = excluded.created_at,
-            indexed_at = excluded.indexed_at,
-            has_links = excluded.has_links,
-            status = excluded.status,
-            ingest_id = excluded.ingest_id
-        `.pipe(Effect.asVoid);
+      yield* sql.withTransaction(
+        Effect.gen(function* () {
+          yield* sql`
+              INSERT INTO posts (
+                uri, did, cid, text, created_at, indexed_at,
+                has_links, status, ingest_id
+              ) VALUES (
+                ${validated.uri},
+                ${validated.did},
+                ${validated.cid},
+                ${validated.text},
+                ${validated.createdAt},
+                ${validated.indexedAt},
+                ${validated.hasLinks ? 1 : 0},
+                ${validated.status},
+                ${validated.ingestId}
+              )
+              ON CONFLICT(uri) DO UPDATE SET
+                did = excluded.did,
+                cid = excluded.cid,
+                text = excluded.text,
+                created_at = excluded.created_at,
+                indexed_at = excluded.indexed_at,
+                has_links = excluded.has_links,
+                status = excluded.status,
+                ingest_id = excluded.ingest_id
+            `.pipe(Effect.asVoid);
 
-      yield* sql`DELETE FROM post_topics WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
-      yield* sql`DELETE FROM links WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
-      yield* sql`DELETE FROM posts_fts WHERE uri = ${validated.uri}`.pipe(Effect.asVoid);
+          yield* sql`DELETE FROM post_topics WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
+          yield* sql`DELETE FROM links WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
+          yield* sql`DELETE FROM posts_fts WHERE uri = ${validated.uri}`.pipe(Effect.asVoid);
 
-      yield* insertTopics(sql, validated);
-      yield* insertLinks(sql, validated);
-      yield* sql`
-          INSERT INTO posts_fts (uri, text)
-          VALUES (${validated.uri}, ${validated.text})
-        `.pipe(Effect.asVoid);
+          yield* insertTopics(sql, validated);
+          yield* insertLinks(sql, validated);
+          yield* sql`
+              INSERT INTO posts_fts (uri, text)
+              VALUES (${validated.uri}, ${validated.text})
+            `.pipe(Effect.asVoid);
+        })
+      );
     });
 
     const markDeletedOne = Effect.fn("KnowledgeRepo.markDeletedOne")(function* (post: DeletedKnowledgePost) {
-      const validated = yield* decodeWithSqlError(
+      const validated = yield* decodeWithDbError(
         DeletedKnowledgePostSchema,
         post,
         `Invalid deleted knowledge post input for ${post.uri}`
@@ -382,32 +421,36 @@ export const KnowledgeRepoD1 = {
         return;
       }
 
-      yield* sql`
-          INSERT INTO posts (
-            uri, did, cid, text, created_at, indexed_at,
-            has_links, status, ingest_id
-          ) VALUES (
-            ${validated.uri},
-            ${validated.did},
-            ${validated.cid},
-            '',
-            ${validated.createdAt},
-            ${validated.indexedAt},
-            0,
-            'deleted',
-            ${validated.ingestId}
-          )
-          ON CONFLICT(uri) DO UPDATE SET
-            did = excluded.did,
-            cid = excluded.cid,
-            indexed_at = excluded.indexed_at,
-            status = excluded.status,
-            ingest_id = excluded.ingest_id
-        `.pipe(Effect.asVoid);
+      yield* sql.withTransaction(
+        Effect.gen(function* () {
+          yield* sql`
+              INSERT INTO posts (
+                uri, did, cid, text, created_at, indexed_at,
+                has_links, status, ingest_id
+              ) VALUES (
+                ${validated.uri},
+                ${validated.did},
+                ${validated.cid},
+                '',
+                ${validated.createdAt},
+                ${validated.indexedAt},
+                0,
+                'deleted',
+                ${validated.ingestId}
+              )
+              ON CONFLICT(uri) DO UPDATE SET
+                did = excluded.did,
+                cid = excluded.cid,
+                indexed_at = excluded.indexed_at,
+                status = excluded.status,
+                ingest_id = excluded.ingest_id
+            `.pipe(Effect.asVoid);
 
-      yield* sql`DELETE FROM post_topics WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
-      yield* sql`DELETE FROM links WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
-      yield* sql`DELETE FROM posts_fts WHERE uri = ${validated.uri}`.pipe(Effect.asVoid);
+          yield* sql`DELETE FROM post_topics WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
+          yield* sql`DELETE FROM links WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
+          yield* sql`DELETE FROM posts_fts WHERE uri = ${validated.uri}`.pipe(Effect.asVoid);
+        })
+      );
     });
 
     const upsertPosts = (posts: ReadonlyArray<KnowledgePost>) =>
@@ -417,7 +460,7 @@ export const KnowledgeRepoD1 = {
       Effect.forEach(posts, markDeletedOne, { discard: true });
 
     const searchPosts = (input: SearchPostsQueryInput) => {
-      return decodeWithSqlError(
+      return decodeWithDbError(
         SearchPostsQueryInputSchema,
         input,
         "Invalid search posts input"
@@ -431,6 +474,7 @@ export const KnowledgeRepoD1 = {
           const postConditions = [
             sql`p.status = 'active'`,
             validated.since === undefined ? null : sql`p.created_at >= ${validated.since}`,
+            validated.until === undefined ? null : sql`p.created_at <= ${validated.until}`,
             validated.topicSlugs === undefined
               ? null
               : topicFilterExists(sql, validated.topicSlugs)
@@ -460,7 +504,7 @@ export const KnowledgeRepoD1 = {
             LIMIT ${validated.limit ?? 20}
           `.pipe(
             Effect.flatMap((rows) =>
-              decodeWithSqlError(
+              decodeWithDbError(
                 PostRowsSchema,
                 rows,
                 "Failed to decode search post rows"
@@ -468,7 +512,7 @@ export const KnowledgeRepoD1 = {
             ),
             Effect.map((rows) => rows.map(toPostResult)),
             Effect.flatMap((rows) =>
-              decodeWithSqlError(
+              decodeWithDbError(
                 Schema.Array(KnowledgePostResultSchema),
                 rows,
                 "Failed to normalize search post rows"
@@ -479,107 +523,135 @@ export const KnowledgeRepoD1 = {
       );
     };
 
-    const getRecentPosts = (input: GetRecentPostsQueryInput) => {
-      return decodeWithSqlError(
+    const executeRecentPostsQuery = (
+      validated: GetRecentPostsQueryInput | GetRecentPostsPageQueryInput
+    ) => {
+      if (validated.topicSlugs?.length === 0) {
+        return Effect.succeed([]);
+      }
+
+      const conditions = [
+        sql`p.status = 'active'`,
+        validated.since === undefined ? null : sql`p.created_at >= ${validated.since}`,
+        validated.until === undefined ? null : sql`p.created_at <= ${validated.until}`,
+        validated.expertDid === undefined ? null : sql`p.did = ${validated.expertDid}`,
+        recentPostCursorCondition(sql, validated.cursor),
+        validated.topicSlugs === undefined
+          ? null
+          : topicFilterExists(sql, validated.topicSlugs)
+      ].filter(isDefined);
+
+      return sql<any>`
+        SELECT
+          p.uri as uri,
+          p.did as did,
+          e.handle as handle,
+          p.text as text,
+          p.created_at as createdAt,
+          group_concat(DISTINCT pt.topic_slug) as topicsCsv
+        FROM posts p
+        JOIN experts e ON e.did = p.did
+        LEFT JOIN post_topics pt ON pt.post_uri = p.uri
+        WHERE ${sql.join(" AND ", false)(conditions)}
+        GROUP BY p.uri, p.did, e.handle, p.text, p.created_at
+        ORDER BY p.created_at DESC, p.uri ASC
+        LIMIT ${validated.limit ?? 20}
+      `.pipe(
+        Effect.flatMap((rows) =>
+          decodeWithDbError(
+            PostRowsSchema,
+            rows,
+            "Failed to decode recent post rows"
+          )
+        ),
+        Effect.map((rows) => rows.map(toPostResult)),
+        Effect.flatMap((rows) =>
+          decodeWithDbError(
+            Schema.Array(KnowledgePostResultSchema),
+            rows,
+            "Failed to normalize recent post rows"
+          )
+        )
+      );
+    };
+
+    const getRecentPosts = (input: GetRecentPostsQueryInput) =>
+      decodeWithDbError(
         GetRecentPostsQueryInputSchema,
         input,
         "Invalid get recent posts input"
       ).pipe(
-        Effect.flatMap((validated) => {
-          if (validated.topicSlugs?.length === 0) {
-            return Effect.succeed([]);
-          }
+        Effect.flatMap(executeRecentPostsQuery)
+      );
 
-          const conditions = [
-            sql`p.status = 'active'`,
-            validated.since === undefined ? null : sql`p.created_at >= ${validated.since}`,
-            validated.expertDid === undefined ? null : sql`p.did = ${validated.expertDid}`,
-            validated.topicSlugs === undefined
-              ? null
-              : topicFilterExists(sql, validated.topicSlugs)
-          ].filter(isDefined);
+    const getRecentPostsPage = (input: GetRecentPostsPageQueryInput) =>
+      decodeWithDbError(
+        GetRecentPostsPageQueryInputSchema,
+        input,
+        "Invalid get recent posts page input"
+      ).pipe(
+        Effect.flatMap(executeRecentPostsQuery)
+      );
 
-          return sql<any>`
-            SELECT
-              p.uri as uri,
-              p.did as did,
-              e.handle as handle,
-              p.text as text,
-              p.created_at as createdAt,
-              group_concat(DISTINCT pt.topic_slug) as topicsCsv
-            FROM posts p
-            JOIN experts e ON e.did = p.did
-            LEFT JOIN post_topics pt ON pt.post_uri = p.uri
-            WHERE ${sql.join(" AND ", false)(conditions)}
-            GROUP BY p.uri, p.did, e.handle, p.text, p.created_at
-            ORDER BY p.created_at DESC, p.uri ASC
-            LIMIT ${validated.limit ?? 20}
-          `.pipe(
-            Effect.flatMap((rows) =>
-              decodeWithSqlError(
-                PostRowsSchema,
-                rows,
-                "Failed to decode recent post rows"
-              )
-            ),
-            Effect.map((rows) => rows.map(toPostResult)),
-            Effect.flatMap((rows) =>
-              decodeWithSqlError(
-                Schema.Array(KnowledgePostResultSchema),
-                rows,
-                "Failed to normalize recent post rows"
-              )
-            )
-          );
-        })
+    const executePostLinksQuery = (
+      validated: GetPostLinksQueryInput | GetPostLinksPageQueryInput
+    ) => {
+      if (validated.topicSlugs?.length === 0) {
+        return Effect.succeed([]);
+      }
+
+      const conditions = [
+        sql`p.status = 'active'`,
+        validated.since === undefined ? null : sql`l.extracted_at >= ${validated.since}`,
+        validated.until === undefined ? null : sql`l.extracted_at <= ${validated.until}`,
+        validated.domain === undefined ? null : sql`l.domain = ${validated.domain}`,
+        linkCursorCondition(sql, validated.cursor),
+        validated.topicSlugs === undefined
+          ? null
+          : topicFilterExists(sql, validated.topicSlugs)
+      ].filter(isDefined);
+
+      return sql<any>`
+        SELECT
+          l.post_uri as postUri,
+          l.url as url,
+          l.domain as domain,
+          l.title as title,
+          l.description as description,
+          l.extracted_at as createdAt
+        FROM links l
+        JOIN posts p ON p.uri = l.post_uri
+        WHERE ${sql.join(" AND ", false)(conditions)}
+        ORDER BY l.extracted_at DESC, l.post_uri ASC, l.url ASC
+        LIMIT ${validated.limit ?? 20}
+      `.pipe(
+        Effect.flatMap((rows) =>
+          decodeWithDbError(
+            LinkRowsSchema,
+            rows,
+            "Failed to decode post link rows"
+          )
+        )
       );
     };
 
-    const getPostLinks = (input: GetPostLinksQueryInput) => {
-      return decodeWithSqlError(
+    const getPostLinks = (input: GetPostLinksQueryInput) =>
+      decodeWithDbError(
         GetPostLinksQueryInputSchema,
         input,
         "Invalid get post links input"
       ).pipe(
-        Effect.flatMap((validated) => {
-          if (validated.topicSlugs?.length === 0) {
-            return Effect.succeed([]);
-          }
-
-          const conditions = [
-            sql`p.status = 'active'`,
-            validated.since === undefined ? null : sql`p.created_at >= ${validated.since}`,
-            validated.domain === undefined ? null : sql`l.domain = ${validated.domain}`,
-            validated.topicSlugs === undefined
-              ? null
-              : topicFilterExists(sql, validated.topicSlugs)
-          ].filter(isDefined);
-
-          return sql<any>`
-            SELECT
-              l.post_uri as postUri,
-              l.url as url,
-              l.domain as domain,
-              l.title as title,
-              l.description as description,
-              l.extracted_at as createdAt
-            FROM links l
-            JOIN posts p ON p.uri = l.post_uri
-            WHERE ${sql.join(" AND ", false)(conditions)}
-            ORDER BY l.extracted_at DESC, l.post_uri ASC
-            LIMIT ${validated.limit ?? 20}
-          `.pipe(
-            Effect.flatMap((rows) =>
-              decodeWithSqlError(
-                LinkRowsSchema,
-                rows,
-                "Failed to decode post link rows"
-              )
-            )
-          );
-        })
+        Effect.flatMap(executePostLinksQuery)
       );
-    };
+
+    const getPostLinksPage = (input: GetPostLinksPageQueryInput) =>
+      decodeWithDbError(
+        GetPostLinksPageQueryInputSchema,
+        input,
+        "Invalid get post links page input"
+      ).pipe(
+        Effect.flatMap(executePostLinksQuery)
+      );
 
     const getPostTopicMatches = (postUri: string) =>
       sql<any>`
@@ -597,7 +669,7 @@ export const KnowledgeRepoD1 = {
         ORDER BY topic_slug ASC
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             StoredTopicMatchRowsSchema,
             rows,
             "Failed to decode stored topic matches"
@@ -610,7 +682,9 @@ export const KnowledgeRepoD1 = {
       markDeleted,
       searchPosts,
       getRecentPosts,
+      getRecentPostsPage,
       getPostLinks,
+      getPostLinksPage,
       getPostTopicMatches
     });
   }))

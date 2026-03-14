@@ -9,7 +9,7 @@ import {
   decodeStoredIngestError,
   encodeStoredIngestError
 } from "../../domain/errors";
-import { decodeWithSqlError } from "./schemaDecode";
+import { decodeWithDbError } from "./schemaDecode";
 
 const RawExpertSyncStateRowSchema = Schema.Struct({
   did: Schema.String,
@@ -49,7 +49,7 @@ export const ExpertSyncStateRepoD1 = {
         LIMIT 1
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             RawExpertSyncStateRowsSchema,
             rows,
             `Failed to decode expert sync state row for ${did}`
@@ -62,7 +62,7 @@ export const ExpertSyncStateRepoD1 = {
           }))
         ),
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             Schema.Array(ExpertSyncStateRecordSchema),
             rows,
             `Failed to normalize expert sync state row for ${did}`
@@ -72,7 +72,7 @@ export const ExpertSyncStateRepoD1 = {
       );
 
     const upsert = (state: ExpertSyncStateRecord) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         ExpertSyncStateRecordSchema,
         state,
         "Invalid expert sync state upsert input"

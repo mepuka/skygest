@@ -7,7 +7,7 @@ import {
   type ExpertListItem,
   type ExpertRecord
 } from "../../domain/bi";
-import { decodeWithSqlError } from "./schemaDecode";
+import { decodeWithDbError } from "./schemaDecode";
 
 const ActiveFlag = Schema.Union(Schema.Literal(0), Schema.Literal(1));
 const ExpertListRowSchema = Schema.Struct({
@@ -55,7 +55,7 @@ export const ExpertsRepoD1 = {
     const sql = yield* SqlClient.SqlClient;
 
     const upsertOne = (expert: ExpertRecord) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         ExpertRecordSchema,
         expert,
         "Invalid expert upsert input"
@@ -116,7 +116,7 @@ export const ExpertsRepoD1 = {
         LIMIT 1
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             ExpertRecordRowsSchema,
             rows,
             `Failed to decode expert row for ${did}`
@@ -124,7 +124,7 @@ export const ExpertsRepoD1 = {
         ),
         Effect.map((rows) => rows.map(toExpertRecord)),
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             Schema.Array(ExpertRecordSchema),
             rows,
             `Failed to normalize expert row for ${did}`
@@ -173,7 +173,7 @@ export const ExpertsRepoD1 = {
         ORDER BY added_at ASC, did ASC
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             ExpertRecordRowsSchema,
             rows,
             did == null
@@ -183,7 +183,7 @@ export const ExpertsRepoD1 = {
         ),
         Effect.map((rows) => rows.map(toExpertRecord)),
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             Schema.Array(ExpertRecordSchema),
             rows,
             did == null
@@ -201,7 +201,7 @@ export const ExpertsRepoD1 = {
         ORDER BY added_at ASC, did ASC
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             ExpertDidRowsSchema,
             rows,
             `Failed to decode active expert dids for shard ${shard}`
@@ -234,7 +234,7 @@ export const ExpertsRepoD1 = {
         LIMIT ${limit}
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             ExpertListRowsSchema,
             rows,
             "Failed to decode expert list rows"
@@ -242,7 +242,7 @@ export const ExpertsRepoD1 = {
         ),
         Effect.map((rows) => rows.map(toExpertListItem)),
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             Schema.Array(ExpertListItemSchema),
             rows,
             "Failed to normalize expert list rows"

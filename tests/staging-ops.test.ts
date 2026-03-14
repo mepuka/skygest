@@ -125,8 +125,16 @@ describe("staging admin ops routes", () => {
           operatorIdentity,
           layer
         );
+        const body = await expectJsonResponse<{
+          readonly error: string;
+          readonly message: string;
+        }>(response, 404);
 
         expect(response.status).toBe(404);
+        expect(body).toEqual({
+          error: "NotFound",
+          message: "not found"
+        });
       })
     )
   );

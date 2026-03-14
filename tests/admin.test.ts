@@ -26,11 +26,11 @@ const operatorIdentity: AccessIdentity = {
   email: "operator@example.com",
   issuer: "https://access.example.com",
   audience: ["skygest-mcp"],
-  scopes: ["experts:write", "ops:refresh"],
+  scopes: ["experts:read", "experts:write", "ops:read", "ops:refresh"],
   payload: {
     sub: "did:example:operator",
     email: "operator@example.com",
-    scope: "experts:write ops:refresh"
+    scope: "experts:read experts:write ops:read ops:refresh"
   }
 };
 
@@ -137,6 +137,9 @@ describe("admin expert registry routes", () => {
         const firstResponse = await handleAdminRequestWithLayer(
           new Request("https://skygest.local/admin/experts", {
             method: "POST",
+            headers: {
+              "content-type": "application/json"
+            },
             body: encodeJsonString({ didOrHandle: "solar.example.com" })
           }),
           operatorIdentity,
@@ -148,6 +151,9 @@ describe("admin expert registry routes", () => {
         const secondResponse = await handleAdminRequestWithLayer(
           new Request("https://skygest.local/admin/experts", {
             method: "POST",
+            headers: {
+              "content-type": "application/json"
+            },
             body: encodeJsonString({ didOrHandle: "solar.example.com" })
           }),
           operatorIdentity,
@@ -211,6 +217,9 @@ describe("admin expert registry routes", () => {
             `https://skygest.local/admin/experts/${encodeURIComponent(sampleDid)}/activate`,
             {
               method: "POST",
+              headers: {
+                "content-type": "application/json"
+              },
               body: encodeJsonString({ active: false })
             }
           ),
@@ -280,8 +289,12 @@ describe("admin expert registry routes", () => {
           layer
         );
 
-        const body = await expectJsonResponse<{ readonly error: string }>(response, 400);
-        expect(body.error).toContain("active must be");
+        const body = await expectJsonResponse<{
+          readonly error: string;
+          readonly message: string;
+        }>(response, 400);
+        expect(body.error).toBe("BadRequest");
+        expect(body.message).toContain("active");
       })
     )
   );

@@ -1,5 +1,6 @@
 import { Context, Effect, Either, Layer, Schema } from "effect";
 import type { SqlError } from "@effect/sql/SqlError";
+import type { DbError } from "../domain/errors";
 import {
   IngestRunParams,
   type IngestQueuedResponse
@@ -49,13 +50,13 @@ export class IngestWorkflowLauncher extends Context.Tag("@skygest/IngestWorkflow
       params: IngestRunParams
     ) => Effect.Effect<
       IngestQueuedResponse,
-      SqlError | IngestSchemaDecodeError | IngestWorkflowLaunchError
+      SqlError | DbError | IngestSchemaDecodeError | IngestWorkflowLaunchError
     >;
     readonly startCronHeadSweep: (
       scheduledTime: number
     ) => Effect.Effect<
       void,
-      SqlError | IngestSchemaDecodeError | IngestWorkflowLaunchError
+      SqlError | DbError | IngestSchemaDecodeError | IngestWorkflowLaunchError
     >;
   }
 >() {

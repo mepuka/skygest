@@ -11,6 +11,7 @@ import {
 } from "../src/auth/AuthService";
 import { AppConfig } from "../src/platform/Config";
 import { encodeJsonString } from "../src/platform/Json";
+import { authorizeOperator } from "../src/worker/operatorAuth";
 import { testConfig } from "./support/runtime";
 
 const issuer = "https://access.example.com";
@@ -176,7 +177,7 @@ describe("Cloudflare Access auth", () => {
       }));
       const scopedIdentity = yield* auth.requireOperatorScopes(new Headers({
         "x-skygest-operator-secret": "stage-secret"
-      }), ["experts:write", "ops:refresh"]);
+      }), ["mcp:read", "experts:read", "experts:write", "ops:read", "ops:refresh"]);
       const missing = yield* Effect.exit(
         Effect.flip(auth.requireOperator(new Headers()))
       );
@@ -187,7 +188,10 @@ describe("Cloudflare Access auth", () => {
       );
 
       expect(identity.subject).toBe("staging-shared-secret-operator");
+      expect(identity.scopes).toContain("mcp:read");
+      expect(identity.scopes).toContain("experts:read");
       expect(scopedIdentity.scopes).toContain("experts:write");
+      expect(scopedIdentity.scopes).toContain("ops:read");
       expect(Exit.isSuccess(missing)).toBe(true);
       expect(Exit.isSuccess(invalid)).toBe(true);
 
@@ -202,6 +206,45 @@ describe("Cloudflare Access auth", () => {
       operatorAuthMode: "shared-secret",
       operatorSecret: "stage-secret"
     })))
+  );
+
+  it.live("reuses the cached auth runtime for repeated worker requests", () =>
+    Effect.promise(async () => {
+      const { publicKey, privateKey } = await generateKeyPair("RS256");
+      const publicJwk = await exportJWK(publicKey);
+      publicJwk.kid = "test-key";
+
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(encodeJsonString({ keys: [publicJwk] }), {
+          headers: { "content-type": "application/json" }
+        })
+      );
+
+      try {
+        const token = await issueToken(publicJwk, privateKey, {
+          scope: "mcp:read"
+        });
+        const env = {
+          DB: {} as D1Database,
+          OPERATOR_AUTH_MODE: "access",
+          ACCESS_TEAM_DOMAIN: issuer,
+          ACCESS_AUD: audience
+        };
+        const request = new Request("https://skygest.local/mcp", {
+          method: "POST",
+          headers: {
+            "cf-access-jwt-assertion": token
+          }
+        });
+
+        await authorizeOperator(request, env, ["mcp:read"]);
+        await authorizeOperator(request, env, ["mcp:read"]);
+
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+      } finally {
+        fetchSpy.mockRestore();
+      }
+    })
   );
 });
 

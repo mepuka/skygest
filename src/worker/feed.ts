@@ -1,5 +1,5 @@
-import { Effect } from "effect";
 import { handleAdminRequest } from "../admin/Router";
+import { handleApiRequest } from "../api/Router";
 import { ExpertPollCoordinatorDo } from "../ingest/ExpertPollCoordinatorDo";
 import { IngestRunWorkflow } from "../ingest/IngestRunWorkflow";
 import { handleIngestRequest } from "../ingest/Router";
@@ -9,8 +9,9 @@ import {
   authorizeOperator,
   isSharedSecretMode,
   isStagingOpsPath,
-  logDeniedAdminMutation,
-  requiredAdminScopes,
+  logDeniedOperatorRequest,
+  notFoundJsonResponse,
+  requiredOperatorScopes,
   toAuthErrorResponse
 } from "./operatorAuth";
 
@@ -21,10 +22,15 @@ export const fetch = async (request: Request, env: WorkflowIngestEnvBindings) =>
     return new Response("ok");
   }
 
+  if (url.pathname.startsWith("/api/")) {
+    return handleApiRequest(request, env);
+  }
+
   if (url.pathname === "/mcp") {
     try {
-      await Effect.runPromise(authorizeOperator(request, env));
+      await authorizeOperator(request, env, requiredOperatorScopes(request));
     } catch (error) {
+      await logDeniedOperatorRequest(request, error);
       return toAuthErrorResponse(error);
     }
 
@@ -35,11 +41,13 @@ export const fetch = async (request: Request, env: WorkflowIngestEnvBindings) =>
     let identity;
 
     try {
-      identity = await Effect.runPromise(
-        authorizeOperator(request, env, requiredAdminScopes(request))
+      identity = await authorizeOperator(
+        request,
+        env,
+        requiredOperatorScopes(request)
       );
     } catch (error) {
-      await logDeniedAdminMutation(request, error);
+      await logDeniedOperatorRequest(request, error);
       return toAuthErrorResponse(error);
     }
 
@@ -48,17 +56,19 @@ export const fetch = async (request: Request, env: WorkflowIngestEnvBindings) =>
 
   if (url.pathname.startsWith("/admin")) {
     if (isStagingOpsPath(url.pathname) && !isSharedSecretMode(env)) {
-      return new Response("not found", { status: 404 });
+      return notFoundJsonResponse();
     }
 
     let identity;
 
     try {
-      identity = await Effect.runPromise(
-        authorizeOperator(request, env, requiredAdminScopes(request))
+      identity = await authorizeOperator(
+        request,
+        env,
+        requiredOperatorScopes(request)
       );
     } catch (error) {
-      await logDeniedAdminMutation(request, error);
+      await logDeniedOperatorRequest(request, error);
       return toAuthErrorResponse(error);
     }
 

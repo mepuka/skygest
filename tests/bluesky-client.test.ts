@@ -148,7 +148,7 @@ describe("BlueskyClient", () => {
     })
   );
 
-  it.effect("retries on transient failures under TestClock", () =>
+  it.effect("retries on transient HTTP failures under TestClock", () =>
     Effect.gen(function* () {
       const attempts = yield* Ref.make(0);
       const started = yield* Deferred.make<void>();
@@ -167,10 +167,12 @@ describe("BlueskyClient", () => {
           ),
           Effect.flatMap((attempt) =>
             attempt < 3
-              ? Effect.fail({
-                  status: 503,
-                  message: `attempt ${String(attempt)}`
-                } as any)
+              ? Effect.succeed(
+                  HttpClientResponse.fromWeb(
+                    request,
+                    new Response("service unavailable", { status: 503 })
+                  )
+                )
               : Effect.succeed(jsonResponse(request, {
                   did: "did:plc:expert-a",
                   handle: "seed.example.com",
@@ -202,6 +204,34 @@ describe("BlueskyClient", () => {
 
       expect(profile.did).toBe("did:plc:expert-a");
       expect(yield* Ref.get(attempts)).toBe(3);
+    })
+  );
+
+  it.effect("preserves HTTP status from non-2xx responses", () =>
+    Effect.gen(function* () {
+      const layer = makeHttpLayer((request) =>
+        Effect.succeed(
+          HttpClientResponse.fromWeb(
+            request,
+            new Response(JSON.stringify({ error: "not found" }), {
+              status: 404,
+              headers: { "content-type": "application/json" }
+            })
+          )
+        )
+      );
+
+      const error = yield* Effect.gen(function* () {
+        const client = yield* makeBlueskyClient("https://public.api.bsky.app");
+        return yield* client.getProfile("did:plc:nonexistent");
+      }).pipe(
+        Effect.provide(layer),
+        Effect.withRandomFixed([0]),
+        Effect.flip
+      );
+
+      expect(error._tag).toBe("BlueskyApiError");
+      expect(error.status).toBe(404);
     })
   );
 

@@ -24,7 +24,7 @@ describe("ontology snapshot builder", () => {
     expect(first).toEqual(second);
     expect(first.concepts).toHaveLength(92);
     expect(first.canonicalTopics).toHaveLength(30);
-    expect(first.authorTiers.energyFocused).toHaveLength(74);
+    expect(first.authorTiers.energyFocused).toHaveLength(99);
     expect(first.authorTiers.generalOutlets).toHaveLength(17);
     expect(first.signalCatalog.hashtags).toHaveLength(85);
     expect(first.signalCatalog.domains).toHaveLength(34);

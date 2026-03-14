@@ -15,11 +15,11 @@ const operatorIdentity: AccessIdentity = {
   email: "operator@example.com",
   issuer: "https://access.example.com",
   audience: ["skygest-mcp"],
-  scopes: ["ops:refresh"],
+  scopes: ["ops:read", "ops:refresh"],
   payload: {
     sub: "did:example:operator",
     email: "operator@example.com",
-    scope: "ops:refresh"
+    scope: "ops:read ops:refresh"
   }
 };
 
@@ -138,6 +138,9 @@ describe("ingest admin routes", () => {
       const response = await handleIngestRequestWithLayer(
         new Request("https://skygest.local/admin/ingest/poll", {
           method: "POST",
+          headers: {
+            "content-type": "application/json"
+          },
           body: encodeJsonString({})
         }),
         operatorIdentity,
@@ -182,10 +185,12 @@ describe("ingest admin routes", () => {
         operatorIdentity,
         makeLayer()
       );
-      const body = await response.json() as ReadonlyArray<IngestRunItemRecord>;
+      const body = await response.json() as {
+        readonly items: ReadonlyArray<IngestRunItemRecord>;
+      };
 
       expect(response.status).toBe(200);
-      expect(body).toEqual(sampleItems);
+      expect(body.items).toEqual(sampleItems);
     })
   );
 
@@ -194,6 +199,9 @@ describe("ingest admin routes", () => {
       const response = await handleIngestRequestWithLayer(
         new Request("https://skygest.local/admin/ingest/backfill", {
           method: "POST",
+          headers: {
+            "content-type": "application/json"
+          },
           body: encodeJsonString({ maxPosts: -1 })
         }),
         operatorIdentity,
@@ -205,7 +213,7 @@ describe("ingest admin routes", () => {
       };
 
       expect(response.status).toBe(400);
-      expect(body.error).toBe("IngestSchemaDecodeError");
+      expect(body.error).toBe("BadRequest");
       expect(body.message).toContain("NonNegativeInt");
     })
   );
@@ -215,6 +223,9 @@ describe("ingest admin routes", () => {
       const response = await handleIngestRequestWithLayer(
         new Request("https://skygest.local/admin/ingest/poll", {
           method: "POST",
+          headers: {
+            "content-type": "application/json"
+          },
           body: encodeJsonString({})
         }),
         operatorIdentity,
@@ -289,8 +300,8 @@ describe("ingest admin routes", () => {
 
       expect(response.status).toBe(503);
       expect(body).toEqual({
-        error: "IngestWorkflowLaunchError",
-        message: "workflow create failed",
+        error: "ServiceUnavailable",
+        message: "failed to launch ingest workflow",
         retryable: true
       });
     })

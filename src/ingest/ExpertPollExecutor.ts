@@ -1,5 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import type { SqlError } from "@effect/sql/SqlError";
+import type { DbError } from "../domain/errors";
 import type {
   DeletedKnowledgePost,
   ExpertRecord,
@@ -175,14 +176,14 @@ export class ExpertPollExecutor extends Context.Tag("@skygest/ExpertPollExecutor
       expert: ExpertRecord,
       request: PollRequest,
       options?: ExpertPollChunkOptions
-    ) => Effect.Effect<ExpertPollExecutionResult, BlueskyApiError | SqlError>;
+    ) => Effect.Effect<ExpertPollExecutionResult, BlueskyApiError | SqlError | DbError>;
     readonly runDid: (
       did: ExpertRecord["did"],
       request: PollRequest,
       options?: ExpertPollChunkOptions
     ) => Effect.Effect<
       ExpertPollExecutionResult,
-      ExpertNotFoundError | BlueskyApiError | SqlError
+      ExpertNotFoundError | BlueskyApiError | SqlError | DbError
     >;
   }
 >() {
@@ -498,7 +499,7 @@ export class ExpertPollExecutor extends Context.Tag("@skygest/ExpertPollExecutor
           Effect.catchAll((error) =>
             persistFailure(expert.did, request, error).pipe(
               Effect.zipRight(
-                Effect.failSync(() => error as BlueskyApiError | SqlError)
+                Effect.failSync(() => error as BlueskyApiError | SqlError | DbError)
               )
             )
           )

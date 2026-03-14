@@ -85,14 +85,17 @@ const toBlueskyApiError = (error: unknown) =>
   });
 
 export const isRetryableBlueskyError = (error: unknown) => {
-  const status = getErrorStatus(error);
-
-  if (typeof status === "number") {
-    return status === 429 || (status >= 500 && status < 600);
+  if (typeof error !== "object" || error === null) {
+    return false;
   }
 
-  if (typeof error === "object" && error !== null && "code" in error) {
-    return error.code === "ECONNRESET" || error.code === "ETIMEDOUT";
+  if ("_tag" in error && error._tag === "RequestError" && "reason" in error) {
+    return error.reason === "Transport";
+  }
+
+  const status = getErrorStatus(error);
+  if (typeof status === "number") {
+    return status === 429 || (status >= 500 && status < 600);
   }
 
   return false;
@@ -208,6 +211,7 @@ export const makeBlueskyClient = (base: string) =>
       withRateLimit(
         url,
         http.get(url, { urlParams }).pipe(
+          Effect.flatMap(HttpClientResponse.filterStatusOk),
           Effect.flatMap(HttpClientResponse.schemaBodyJson(schema))
         )
       ).pipe(
@@ -269,6 +273,7 @@ export const makeBlueskyClient = (base: string) =>
       withRateLimit(
         "https://plc.directory",
         http.get(`https://plc.directory/${encodeURIComponent(did)}`).pipe(
+          Effect.flatMap(HttpClientResponse.filterStatusOk),
           Effect.flatMap(HttpClientResponse.schemaBodyJson(DidDocument))
         )
       ).pipe(

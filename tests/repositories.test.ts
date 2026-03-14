@@ -58,4 +58,40 @@ describe("repository layers", () => {
       expect(linkCount?.count).toBe(2);
     }).pipe(Effect.provide(makeBiLayer()))
   );
+
+  it.effect("rolls back post writes when a later link insert fails", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      yield* bootstrapExperts(seedManifest, 1, 1_710_000_000_000);
+
+      const sql = yield* SqlClient.SqlClient;
+      yield* sql`
+        CREATE TRIGGER fail_links_insert
+        BEFORE INSERT ON links
+        BEGIN
+          SELECT RAISE(FAIL, 'forced links failure');
+        END
+      `.pipe(Effect.asVoid);
+
+      yield* Effect.exit(processBatch(makeSampleBatch()));
+
+      const [postCount] = yield* sql<{ count: number }>`
+        SELECT COUNT(*) as count FROM posts
+      `;
+      const [topicCount] = yield* sql<{ count: number }>`
+        SELECT COUNT(*) as count FROM post_topics
+      `;
+      const [linkCount] = yield* sql<{ count: number }>`
+        SELECT COUNT(*) as count FROM links
+      `;
+      const [ftsCount] = yield* sql<{ count: number }>`
+        SELECT COUNT(*) as count FROM posts_fts
+      `;
+
+      expect(postCount?.count).toBe(0);
+      expect(topicCount?.count).toBe(0);
+      expect(linkCount?.count).toBe(0);
+      expect(ftsCount?.count).toBe(0);
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
 });

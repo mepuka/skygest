@@ -1,373 +1,189 @@
-import { Effect, Either, Layer, Schema } from "effect";
-import { D1Client } from "@effect/sql-d1";
+import * as HttpApi from "@effect/platform/HttpApi";
+import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder";
+import * as HttpApiEndpoint from "@effect/platform/HttpApiEndpoint";
+import * as HttpApiGroup from "@effect/platform/HttpApiGroup";
+import { Effect, Layer } from "effect";
 import type { AccessIdentity } from "../auth/AuthService";
 import {
-  AddExpertInput,
-  ExpertNotFoundError,
-  type ListExpertsInput,
-  HandleResolutionError,
-  ProfileLookupError,
-  SetExpertActiveInput
-} from "../domain/bi";
-import { Did } from "../domain/types";
-import { AppConfig } from "../platform/Config";
-import {
-  decodeJsonStringEitherWith,
-  decodeUnknownEitherWith,
-  encodeJsonString,
-  formatSchemaParseError,
-  stringifyUnknown
-} from "../platform/Json";
-import { CloudflareEnv, type EnvBindings } from "../platform/Env";
-import {
-  makeSharedRuntime,
-  runScopedWithRuntime,
-  withManagedRuntime
-} from "../platform/EffectRuntime";
-import { Logging } from "../platform/Logging";
-import { BlueskyClient, layer as BlueskyClientLayer } from "../bluesky/BlueskyClient";
+  AdminRequestSchemas,
+  AdminResponseSchemas,
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  InternalServerError,
+  notFoundError,
+  NotFoundError,
+  ServiceUnavailableError,
+  UnauthorizedError,
+  UpstreamFailureError
+} from "../domain/api";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
-import { ExpertsRepoD1 } from "../services/d1/ExpertsRepoD1";
-import { KnowledgeRepoD1 } from "../services/d1/KnowledgeRepoD1";
-import { OntologyCatalog } from "../services/OntologyCatalog";
 import { StagingOpsService } from "../services/StagingOpsService";
+import { AppConfig } from "../platform/Config";
+import { OperatorIdentity, operatorIdentityContext } from "../http/Identity";
+import { handleWithApiLayer, makeCachedApiHandler } from "../http/ApiSupport";
+import { getStringField, isTaggedError, toUpstreamFailure, withHttpErrorMapping } from "../http/ErrorMapping";
+import { makeAdminWorkerLayer } from "../edge/Layer";
+import type { EnvBindings } from "../platform/Env";
 
-class AdminRequestParseError extends Schema.TaggedError<AdminRequestParseError>()(
-  "AdminRequestParseError",
-  {
-    message: Schema.String
-  }
-) {}
+const AdminApi = HttpApi.make("admin")
+  .add(
+    HttpApiGroup.make("experts")
+      .add(
+        HttpApiEndpoint.get("list", "/admin/experts")
+          .setUrlParams(AdminRequestSchemas.listExperts)
+          .addSuccess(AdminResponseSchemas.listExperts)
+      )
+      .add(
+        HttpApiEndpoint.post("add", "/admin/experts")
+          .setPayload(AdminRequestSchemas.addExpert)
+          .addSuccess(AdminResponseSchemas.addExpert)
+      )
+      .add(
+        HttpApiEndpoint.post("setActive", "/admin/experts/:did/activate")
+          .setPath(AdminRequestSchemas.expertPath)
+          .setPayload(AdminRequestSchemas.setExpertActive)
+          .addSuccess(AdminResponseSchemas.setExpertActive)
+      )
+  )
+  .add(
+    HttpApiGroup.make("stagingOps")
+      .add(
+        HttpApiEndpoint.post("migrate", "/admin/ops/migrate")
+          .addSuccess(AdminResponseSchemas.migrate)
+      )
+      .add(
+        HttpApiEndpoint.post("bootstrapExperts", "/admin/ops/bootstrap-experts")
+          .addSuccess(AdminResponseSchemas.bootstrapExperts)
+      )
+      .add(
+        HttpApiEndpoint.post("loadSmokeFixture", "/admin/ops/load-smoke-fixture")
+          .addSuccess(AdminResponseSchemas.loadSmokeFixture)
+      )
+  )
+  .addError(BadRequestError)
+  .addError(UnauthorizedError)
+  .addError(ForbiddenError)
+  .addError(ConflictError)
+  .addError(NotFoundError)
+  .addError(UpstreamFailureError)
+  .addError(ServiceUnavailableError)
+  .addError(InternalServerError);
 
-const makeAdminRequestParseError = (message: string) =>
-  AdminRequestParseError.make({ message });
+const withAdminErrors = <A, R>(
+  route: string,
+  effect: Effect.Effect<A, unknown, R>
+) =>
+  withHttpErrorMapping(effect, {
+    route,
+    classify: (error) => {
+      if (isTaggedError(error, "ExpertNotFoundError")) {
+        const did = getStringField(error, "did");
+        return notFoundError(
+          did === undefined ? "expert not found" : `expert not found: ${did}`
+        );
+      }
 
-const parseDecoded = <A>(
-  decoded: Either.Either<A, { readonly message: string }>
-) => {
-  if (Either.isLeft(decoded)) {
-    throw makeAdminRequestParseError(decoded.left.message);
-  }
-
-  return decoded.right;
-};
-
-const decodeAddExpertInput = (body: string) =>
-  parseDecoded(
-    decodeJsonStringEitherWith(AddExpertInput)(body).pipe(
-      Either.mapLeft((error) => ({
-        message: formatSchemaParseError(error)
-      }))
-    )
-  );
-
-const decodeSetExpertActiveInput = (body: string) =>
-  parseDecoded(
-    decodeJsonStringEitherWith(SetExpertActiveInput)(body).pipe(
-      Either.mapLeft((error) => ({
-        message: formatSchemaParseError(error)
-      }))
-    )
-  );
-
-const decodeDid = (value: unknown) =>
-  parseDecoded(
-    decodeUnknownEitherWith(Did)(value).pipe(
-      Either.mapLeft((error) => ({
-        message: formatSchemaParseError(error)
-      }))
-    )
-  );
-
-const json = (body: unknown, status = 200) =>
-  new Response(encodeJsonString(body), {
-    status,
-    headers: {
-      "content-type": "application/json"
+      return toUpstreamFailure()(error);
     }
   });
 
-const badRequest = (message: string) =>
-  json({ error: message }, 400);
+const ensureStagingOpsEnabled = Effect.gen(function* () {
+  const config = yield* AppConfig;
 
-const notFound = () =>
-  new Response("not found", { status: 404 });
+  if (config.operatorAuthMode !== "shared-secret") {
+    return yield* Effect.fail(notFoundError("not found"));
+  }
+});
 
-const readBodyText = (request: Request, emptyFallback = "{}") =>
-  request.text().then((text) => text.trim().length === 0 ? emptyFallback : text);
-
-const isStagingOpsPath = (pathname: string) =>
-  pathname.startsWith("/admin/ops/");
-
-const parseListExpertsInput = (url: URL): ListExpertsInput => {
-  const activeParam = url.searchParams.get("active");
-  const limitParam = url.searchParams.get("limit");
-  const active = activeParam === null
-    ? undefined
-    : activeParam === "true"
-      ? true
-      : activeParam === "false"
-        ? false
-        : (() => {
-          throw makeAdminRequestParseError("active must be 'true' or 'false'");
-        })();
-  const limit = limitParam === null
-    ? undefined
-    : (() => {
-      const parsed = Number(limitParam);
-      if (!Number.isFinite(parsed)) {
-        throw makeAdminRequestParseError("limit must be a number");
-      }
-      return parsed;
-    })();
-
-  return {
-    domain: url.searchParams.get("domain") ?? undefined,
-    active,
-    limit
-  };
-};
-
-const makeAdminLayer = (env: EnvBindings) => {
-  const baseLayer = Layer.mergeAll(
-    CloudflareEnv.layer(env, { required: ["DB"] }),
-    D1Client.layer({ db: env.DB }),
-    Logging.layer
-  );
-  const configLayer = AppConfig.layer.pipe(Layer.provideMerge(baseLayer));
-  const ontologyLayer = OntologyCatalog.layer;
-  const expertsLayer = ExpertsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
-  const knowledgeLayer = KnowledgeRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
-  const blueskyLayer = BlueskyClientLayer.pipe(Layer.provideMerge(configLayer));
-  const registryLayer = ExpertRegistryService.layer.pipe(
-    Layer.provideMerge(
-      Layer.mergeAll(configLayer, expertsLayer, blueskyLayer)
-    )
-  );
-  const stagingOpsLayer = StagingOpsService.layer.pipe(
-    Layer.provideMerge(
-      Layer.mergeAll(
-        configLayer,
-        expertsLayer,
-        knowledgeLayer,
-        ontologyLayer,
-        baseLayer
+const AdminHandlers = Layer.mergeAll(
+  HttpApiBuilder.group(AdminApi, "experts", (handlers) =>
+    handlers
+      .handle("list", ({ urlParams }) =>
+        withAdminErrors("/admin/experts", Effect.flatMap(ExpertRegistryService, (registry) =>
+          registry.listExperts(urlParams)
+        )).pipe(
+          Effect.map((items) => ({ items }))
+        )
       )
-    )
-  );
+      .handle("add", ({ payload }) =>
+        withAdminErrors("/admin/experts", Effect.gen(function* () {
+          const actor = yield* OperatorIdentity;
+          const registry = yield* ExpertRegistryService;
+          return yield* registry.addExpert(actor, payload);
+        }))
+      )
+      .handle("setActive", ({ path, payload }) =>
+        withAdminErrors("/admin/experts/:did/activate", Effect.gen(function* () {
+          const actor = yield* OperatorIdentity;
+          const registry = yield* ExpertRegistryService;
+          return yield* registry.setExpertActive(actor, path.did, payload);
+        }))
+      )
+  ),
+  HttpApiBuilder.group(AdminApi, "stagingOps", (handlers) =>
+    handlers
+      .handle("migrate", () =>
+        withAdminErrors("/admin/ops/migrate", Effect.gen(function* () {
+          yield* ensureStagingOpsEnabled;
+          const actor = yield* OperatorIdentity;
+          const ops = yield* StagingOpsService;
+          return yield* ops.migrate(actor);
+        }))
+      )
+      .handle("bootstrapExperts", () =>
+        withAdminErrors("/admin/ops/bootstrap-experts", Effect.gen(function* () {
+          yield* ensureStagingOpsEnabled;
+          const actor = yield* OperatorIdentity;
+          const ops = yield* StagingOpsService;
+          return yield* ops.bootstrapExperts(actor);
+        }))
+      )
+      .handle("loadSmokeFixture", () =>
+        withAdminErrors("/admin/ops/load-smoke-fixture", Effect.gen(function* () {
+          yield* ensureStagingOpsEnabled;
+          const actor = yield* OperatorIdentity;
+          const ops = yield* StagingOpsService;
+          return yield* ops.loadSmokeFixture(actor);
+        }))
+      )
+  )
+);
 
-  return Layer.mergeAll(
-    baseLayer,
-    configLayer,
-    ontologyLayer,
-    expertsLayer,
-    knowledgeLayer,
-    blueskyLayer,
-    registryLayer,
-    stagingOpsLayer
-  );
-};
+const makeAdminApiLayer = (serviceLayer: Layer.Layer<any, any, never>) =>
+  (() => {
+    const handlersLayer = AdminHandlers.pipe(
+      Layer.provideMerge(serviceLayer)
+    );
 
-const sharedAdminRuntime = makeSharedRuntime(makeAdminLayer);
+    return HttpApiBuilder.api(AdminApi).pipe(
+      Layer.provideMerge(handlersLayer)
+    );
+  })();
 
-const respondToAdminError = (error: unknown): Response => {
-  if (error instanceof ExpertNotFoundError) {
-    return json({ error: error._tag, did: error.did }, 404);
-  }
+const handleCachedAdminRequest = makeCachedApiHandler(
+  (env: EnvBindings) =>
+    makeAdminApiLayer(makeAdminWorkerLayer(env))
+);
 
-  if (
-    error instanceof HandleResolutionError ||
-    error instanceof ProfileLookupError
-  ) {
-    return json({
-      error: error._tag,
-      message: error.message
-    }, 502);
-  }
-
-  return json({
-    error: "InternalServerError",
-    message: stringifyUnknown(error)
-  }, 500);
-};
-
-export const handleAdminRequestWithLayer = async (
+export const handleAdminRequestWithLayer = (
   request: Request,
   identity: AccessIdentity,
   layer: Layer.Layer<any, any, never>
-): Promise<Response> => {
-  const url = new URL(request.url);
+) =>
+  handleWithApiLayer(
+    request,
+    makeAdminApiLayer(layer),
+    operatorIdentityContext(identity)
+  );
 
-  try {
-    return await withManagedRuntime(layer, async (runtime) => {
-      const runWithLayer = <A>(effect: Effect.Effect<A, unknown, any>) =>
-        runScopedWithRuntime(
-          runtime,
-          effect,
-          { operation: `AdminRouter:${request.method}:${url.pathname}` }
-        );
-
-      const stagingOpsEnabled = await runWithLayer(
-        Effect.map(AppConfig, (config) => config.operatorAuthMode === "shared-secret")
-      );
-
-      if (isStagingOpsPath(url.pathname) && !stagingOpsEnabled) {
-        return notFound();
-      }
-
-      if (request.method === "POST" && url.pathname === "/admin/experts") {
-        const input = decodeAddExpertInput(await readBodyText(request));
-        const result = await runWithLayer(
-          Effect.flatMap(ExpertRegistryService, (registry) =>
-            registry.addExpert(identity, input)
-          )
-        );
-        return json(result);
-      }
-
-      if (request.method === "GET" && url.pathname === "/admin/experts") {
-        const input = parseListExpertsInput(url);
-        const items = await runWithLayer(
-          Effect.flatMap(ExpertRegistryService, (registry) =>
-            registry.listExperts(input)
-          )
-        );
-        return json({ items });
-      }
-
-      if (request.method === "POST" && url.pathname === "/admin/ops/migrate") {
-        await readBodyText(request);
-        const result = await runWithLayer(
-          Effect.flatMap(StagingOpsService, (ops) => ops.migrate(identity))
-        );
-        return json(result);
-      }
-
-      if (request.method === "POST" && url.pathname === "/admin/ops/bootstrap-experts") {
-        await readBodyText(request);
-        const result = await runWithLayer(
-          Effect.flatMap(StagingOpsService, (ops) => ops.bootstrapExperts(identity))
-        );
-        return json(result);
-      }
-
-      if (request.method === "POST" && url.pathname === "/admin/ops/load-smoke-fixture") {
-        await readBodyText(request);
-        const result = await runWithLayer(
-          Effect.flatMap(StagingOpsService, (ops) => ops.loadSmokeFixture(identity))
-        );
-        return json(result);
-      }
-
-      const activateMatch = url.pathname.match(/^\/admin\/experts\/([^/]+)\/activate$/u);
-      if (request.method === "POST" && activateMatch?.[1]) {
-        const did = decodeDid(decodeURIComponent(activateMatch[1]));
-        const input = decodeSetExpertActiveInput(await readBodyText(request));
-        const result = await runWithLayer(
-          Effect.flatMap(ExpertRegistryService, (registry) =>
-            registry.setExpertActive(identity, did, input)
-          )
-        );
-        return json(result);
-      }
-
-      return notFound();
-    });
-  } catch (error) {
-    if (error instanceof AdminRequestParseError) {
-      return badRequest(error.message);
-    }
-
-    return respondToAdminError(error);
-  }
-};
-
-export const handleAdminRequest = async (
+export const handleAdminRequest = (
   request: Request,
   env: EnvBindings,
   identity: AccessIdentity
-) => {
-  const url = new URL(request.url);
-  const runtime = sharedAdminRuntime.getRuntime(env);
-
-  try {
-    const runWithRuntime = <A>(effect: Effect.Effect<A, unknown, any>) =>
-      runScopedWithRuntime(
-        runtime,
-        effect,
-        { operation: `AdminRouter:${request.method}:${url.pathname}` }
-      );
-
-    const stagingOpsEnabled = await runWithRuntime(
-      Effect.map(AppConfig, (config) => config.operatorAuthMode === "shared-secret")
-    );
-
-    if (isStagingOpsPath(url.pathname) && !stagingOpsEnabled) {
-      return notFound();
-    }
-
-    if (request.method === "POST" && url.pathname === "/admin/experts") {
-      const input = decodeAddExpertInput(await readBodyText(request));
-      const result = await runWithRuntime(
-        Effect.flatMap(ExpertRegistryService, (registry) =>
-          registry.addExpert(identity, input)
-        )
-      );
-      return json(result);
-    }
-
-    if (request.method === "GET" && url.pathname === "/admin/experts") {
-      const input = parseListExpertsInput(url);
-      const items = await runWithRuntime(
-        Effect.flatMap(ExpertRegistryService, (registry) =>
-          registry.listExperts(input)
-        )
-      );
-      return json({ items });
-    }
-
-    if (request.method === "POST" && url.pathname === "/admin/ops/migrate") {
-      await readBodyText(request);
-      const result = await runWithRuntime(
-        Effect.flatMap(StagingOpsService, (ops) => ops.migrate(identity))
-      );
-      return json(result);
-    }
-
-    if (request.method === "POST" && url.pathname === "/admin/ops/bootstrap-experts") {
-      await readBodyText(request);
-      const result = await runWithRuntime(
-        Effect.flatMap(StagingOpsService, (ops) => ops.bootstrapExperts(identity))
-      );
-      return json(result);
-    }
-
-    if (request.method === "POST" && url.pathname === "/admin/ops/load-smoke-fixture") {
-      await readBodyText(request);
-      const result = await runWithRuntime(
-        Effect.flatMap(StagingOpsService, (ops) => ops.loadSmokeFixture(identity))
-      );
-      return json(result);
-    }
-
-    const activateMatch = url.pathname.match(/^\/admin\/experts\/([^/]+)\/activate$/u);
-    if (request.method === "POST" && activateMatch?.[1]) {
-      const did = decodeDid(decodeURIComponent(activateMatch[1]));
-      const input = decodeSetExpertActiveInput(await readBodyText(request));
-      const result = await runWithRuntime(
-        Effect.flatMap(ExpertRegistryService, (registry) =>
-          registry.setExpertActive(identity, did, input)
-        )
-      );
-      return json(result);
-    }
-
-    return notFound();
-  } catch (error) {
-    if (error instanceof AdminRequestParseError) {
-      return badRequest(error.message);
-    }
-
-    return respondToAdminError(error);
-  }
-};
+) =>
+  handleCachedAdminRequest(
+    request,
+    env,
+    operatorIdentityContext(identity)
+  );

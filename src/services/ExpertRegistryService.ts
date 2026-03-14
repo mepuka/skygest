@@ -1,5 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import type { SqlError } from "@effect/sql/SqlError";
+import type { DbError } from "../domain/errors";
 import type { AccessIdentity } from "../auth/AuthService";
 import { computeShard } from "../bootstrap/ExpertSeeds";
 import {
@@ -45,6 +46,7 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
       | HandleResolutionError
       | ProfileLookupError
       | SqlError
+      | DbError
     >;
     readonly setExpertActive: (
       actor: AccessIdentity,
@@ -52,11 +54,11 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
       input: SetExpertActiveInput
     ) => Effect.Effect<
       SetExpertActiveResult,
-      ExpertNotFoundError | SqlError
+      ExpertNotFoundError | SqlError | DbError
     >;
     readonly listExperts: (
       input: ListExpertsInput
-    ) => Effect.Effect<ReadonlyArray<ExpertListItem>, SqlError>;
+    ) => Effect.Effect<ReadonlyArray<ExpertListItem>, SqlError | DbError>;
   }
 >() {
   static readonly layer = Layer.effect(

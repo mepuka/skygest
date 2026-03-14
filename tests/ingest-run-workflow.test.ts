@@ -166,6 +166,13 @@ describe("IngestRunWorkflow", () => {
               const item = items.get(did)!;
               item.enqueuedAt = enqueuedAt;
               item.lastProgressAt = lastProgressAt;
+
+              if (item.status === "complete") {
+                item.startedAt ??= enqueuedAt;
+                item.finishedAt ??= enqueuedAt;
+                return;
+              }
+
               item.status = "dispatched";
             }),
           markQueued: ({ did, lastProgressAt }) =>
@@ -467,6 +474,175 @@ describe("IngestRunWorkflow", () => {
       expect(toRunRecord().phase).toBe("failed");
       expect(toRunRecord().error?.tag).toBe("WorkflowRunCompensationError");
       expect(toRunRecord().totalExperts).toBe(0);
+    })
+  );
+
+  it.live("leaves items queued when coordinator enqueue fails", () =>
+    Effect.promise(async () => {
+      const { IngestRunWorkflow } = await import("../src/ingest/IngestRunWorkflow");
+
+      const runState = {
+        status: "queued" as IngestRunRecord["status"],
+        phase: "queued" as IngestRunRecord["phase"],
+        finishedAt: null as number | null,
+        lastProgressAt: 1,
+        totalExperts: 0,
+        expertsSucceeded: 0,
+        expertsFailed: 0,
+        pagesFetched: 0,
+        postsSeen: 0,
+        postsStored: 0,
+        postsDeleted: 0,
+        error: null as IngestErrorEnvelope | null
+      };
+      const toRunRecord = (): IngestRunRecord => ({
+        id: "run-1",
+        workflowInstanceId: "run-1",
+        kind: "head-sweep",
+        triggeredBy: "admin",
+        requestedBy: "operator@example.com",
+        startedAt: 1,
+        ...runState
+      });
+      const did = asDid("did:plc:expert-1");
+      const items = new Map([[did, makeMutableItem("run-1", did, "head")]]);
+
+      const runsLayer = Layer.succeed(IngestRunsRepo, {
+        createQueuedIfAbsent: () => Effect.succeed(true),
+        getById: () => Effect.succeed(toRunRecord()),
+        listRunning: () => Effect.succeed([]),
+        markPreparing: (input) =>
+          Effect.sync(() => {
+            runState.status = "running";
+            runState.phase = "preparing";
+            runState.lastProgressAt = input.lastProgressAt;
+          }),
+        markDispatching: (input) =>
+          Effect.sync(() => {
+            runState.status = "running";
+            runState.phase = "dispatching";
+            runState.lastProgressAt = input.lastProgressAt;
+            runState.totalExperts = input.totalExperts;
+          }),
+        markFinalizing: () => Effect.void,
+        markComplete: () => Effect.void,
+        markFailed: (input) =>
+          Effect.sync(() => {
+            runState.status = "failed";
+            runState.phase = "failed";
+            runState.finishedAt = input.finishedAt;
+            runState.lastProgressAt = input.finishedAt;
+            runState.error = input.error;
+          })
+      });
+      const runItemsLayer = Layer.succeed(IngestRunItemsRepo, {
+        createMany: () => Effect.void,
+        markDispatched: ({ did: itemDid, enqueuedAt, lastProgressAt }) =>
+          Effect.sync(() => {
+            const item = items.get(itemDid)!;
+            item.status = "dispatched";
+            item.enqueuedAt = enqueuedAt;
+            item.lastProgressAt = lastProgressAt;
+          }),
+        markQueued: () => Effect.void,
+        markRunning: () => Effect.void,
+        markProgress: () => Effect.void,
+        markComplete: () => Effect.void,
+        markFailed: () => Effect.void,
+        listByRun: () => Effect.succeed([...items.values()] as ReadonlyArray<IngestRunItemRecord>),
+        countActiveByRun: () => Effect.succeed(0),
+        countIncompleteByRun: () => Effect.succeed(1),
+        listUndispatchedByRun: () =>
+          Effect.succeed([...items.values()] as ReadonlyArray<IngestRunItemRecord>),
+        listStaleDispatchedByRun: () => Effect.succeed([]),
+        listStaleRunningByRun: () => Effect.succeed([]),
+        summarizeByRun: () =>
+          Effect.succeed({
+            totalExperts: 1,
+            expertsSucceeded: 0,
+            expertsFailed: 0,
+            pagesFetched: 0,
+            postsSeen: 0,
+            postsStored: 0,
+            postsDeleted: 0,
+            error: null
+          })
+      });
+
+      currentLayer = Layer.mergeAll(
+        Layer.succeed(ExpertsRepo, {
+          upsert: () => Effect.void,
+          upsertMany: () => Effect.void,
+          getByDid: (value: string) => Effect.succeed(makeExpert(asDid(value))),
+          setActive: () => Effect.void,
+          setLastSyncedAt: () => Effect.void,
+          listActive: () => Effect.succeed([makeExpert(did)]),
+          listActiveByShard: () => Effect.succeed([]),
+          list: () => Effect.succeed([])
+        }),
+        runsLayer,
+        runItemsLayer,
+        IngestRepairService.layer.pipe(
+          Layer.provideMerge(Layer.mergeAll(runsLayer, runItemsLayer))
+        )
+      );
+
+      const namespace = {
+        idFromName: (name: string) => ({ name }),
+        get: () => ({
+          enqueueHead: async () => {
+            throw new Error("enqueue failed");
+          },
+          enqueueBackfill: async () => ({ accepted: true }),
+          enqueueReconcile: async () => ({ accepted: true })
+        })
+      } as unknown as DurableObjectNamespace;
+
+      const workflow = new IngestRunWorkflow(
+        ({
+          waitUntil: () => {},
+          passThroughOnException: () => {},
+          props: {}
+        } as unknown) as ExecutionContext,
+        {
+          DB: {} as D1Database,
+          INGEST_RUN_WORKFLOW: {} as WorkflowIngestEnvBindings["INGEST_RUN_WORKFLOW"],
+          EXPERT_POLL_COORDINATOR: namespace
+        }
+      );
+
+      const step = {
+        do: async <A>(
+          _name: string,
+          ...args: [(() => Promise<A>) | object, (() => Promise<A>)?]
+        ) => {
+          const fn = typeof args[0] === "function" ? args[0] : args[1]!;
+          return await fn();
+        },
+        sleep: async () => {},
+        sleepUntil: async () => {},
+        waitForEvent: async () => {
+          throw new Error("not used");
+        }
+      } as any;
+
+      await expect(workflow.run(
+        {
+          instanceId: "run-1",
+          payload: {
+            kind: "head-sweep",
+            triggeredBy: "admin",
+            requestedBy: "operator@example.com"
+          },
+          timestamp: new Date()
+        },
+        step
+      )).rejects.toThrow();
+
+      expect(items.get(did)?.status).toBe("queued");
+      expect(items.get(did)?.enqueuedAt).toBeNull();
+      expect(toRunRecord().status).toBe("failed");
+      expect(toRunRecord().error?.tag).toBe("WorkflowRunCompensationError");
     })
   );
 });

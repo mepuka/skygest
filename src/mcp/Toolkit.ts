@@ -1,4 +1,5 @@
 import type { SqlError } from "@effect/sql/SqlError";
+import type { DbError } from "../domain/errors";
 import { Tool, Toolkit } from "@effect/ai";
 import { Effect } from "effect";
 import {
@@ -21,7 +22,7 @@ import {
 } from "../domain/bi";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 
-const toQueryError = (tool: string) => (error: SqlError) =>
+const toQueryError = (tool: string) => (error: SqlError | DbError) =>
   McpToolQueryError.make({
     tool,
     message: error.message,

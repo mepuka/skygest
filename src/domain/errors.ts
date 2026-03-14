@@ -2,8 +2,7 @@ import { Either, Schema } from "effect";
 import { Did } from "./types";
 import {
   decodeJsonStringEitherWith,
-  encodeJsonStringWith,
-  stringifyUnknown
+  encodeJsonStringWith
 } from "../platform/Json";
 
 export class BlueskyApiError extends Schema.TaggedError<BlueskyApiError>()(
@@ -144,10 +143,77 @@ export const legacyIngestErrorEnvelope = (message: string): IngestErrorEnvelope 
   retryable: false
 });
 
+export const sanitizeIngestErrorEnvelope = (
+  envelope: IngestErrorEnvelope
+): IngestErrorEnvelope => {
+  switch (envelope.tag) {
+    case "BlueskyApiError":
+      return {
+        ...envelope,
+        message: "Bluesky API request failed"
+      };
+    case "IngestRunNotFoundError":
+    case "ExpertNotFoundError":
+    case "LegacyError":
+      return envelope;
+    case "IngestSchemaDecodeError":
+      return {
+        ...envelope,
+        message: "invalid ingest input"
+      };
+    case "IngestWorkflowLaunchError":
+      return {
+        ...envelope,
+        message: "failed to launch ingest workflow"
+      };
+    case "IngestBoundaryError":
+      return {
+        ...envelope,
+        message: "unexpected ingest boundary failure"
+      };
+    case "WorkflowRunCompensationError":
+      return {
+        ...envelope,
+        message: "workflow failed before run state could converge"
+      };
+    case "StaleDispatchedIngestItemError":
+      return {
+        ...envelope,
+        message: "stale dispatched ingest item was requeued"
+      };
+    case "StaleRunningIngestItemError":
+      return {
+        ...envelope,
+        message: "stale running ingest item was failed"
+      };
+    case "HistoricalRunRepairError":
+      return {
+        ...envelope,
+        message: "historical run required repair"
+      };
+    case "EnvError":
+      return {
+        ...envelope,
+        message: "missing worker binding"
+      };
+    case "DbError":
+    case "SqlError":
+      return {
+        ...envelope,
+        message: "database operation failed"
+      };
+    default:
+      return {
+        ...envelope,
+        message: "internal ingest failure"
+      };
+  }
+};
+
 export const encodeStoredIngestError = (error: IngestErrorEnvelope | null) =>
   error === null
     ? null
-    : encodeEnvelope(error);
+    : encodeEnvelope(sanitizeIngestErrorEnvelope(error));
 
 export const decodeStoredIngestError = (value: string | null) => {
   if (value === null) {
@@ -156,10 +222,10 @@ export const decodeStoredIngestError = (value: string | null) => {
 
   const decoded = decodeEnvelopeJson(value);
   if (Either.isRight(decoded)) {
-    return decoded.right;
+    return sanitizeIngestErrorEnvelope(decoded.right);
   }
 
-  return legacyIngestErrorEnvelope(value);
+  return legacyIngestErrorEnvelope("legacy ingest failure");
 };
 
 export const toIngestErrorEnvelope = (
@@ -171,10 +237,12 @@ export const toIngestErrorEnvelope = (
   } = {}
 ): IngestErrorEnvelope => {
   const withOverrides = (envelope: IngestErrorEnvelope): IngestErrorEnvelope => ({
-    ...envelope,
-    ...(overrides.did === undefined ? {} : { did: overrides.did as Did }),
-    ...(overrides.runId === undefined ? {} : { runId: overrides.runId }),
-    ...(overrides.operation === undefined ? {} : { operation: overrides.operation })
+    ...sanitizeIngestErrorEnvelope({
+      ...envelope,
+      ...(overrides.did === undefined ? {} : { did: overrides.did as Did }),
+      ...(overrides.runId === undefined ? {} : { runId: overrides.runId }),
+      ...(overrides.operation === undefined ? {} : { operation: overrides.operation })
+    })
   });
 
   const asEnvelope = decodeEnvelope(error);
@@ -339,7 +407,7 @@ export const toIngestErrorEnvelope = (
   if (isObject(error) && typeof (error as any)._tag === "string") {
     return withOverrides({
       tag: (error as any)._tag,
-      message: getStringField(error, "message") ?? stringifyUnknown(error),
+      message: getStringField(error, "message") ?? "internal ingest failure",
       retryable: false
     });
   }
@@ -347,7 +415,7 @@ export const toIngestErrorEnvelope = (
   if (error instanceof Error) {
     return withOverrides({
       tag: error.name || "Error",
-      message: error.message,
+      message: "internal ingest failure",
       retryable: false,
       ...(getNumberField(error, "status") === undefined ? {} : { status: getNumberField(error, "status")! })
     });
@@ -355,7 +423,7 @@ export const toIngestErrorEnvelope = (
 
   return withOverrides({
     tag: "UnknownError",
-    message: stringifyUnknown(error),
+    message: "internal ingest failure",
     retryable: false
   });
 };

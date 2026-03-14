@@ -1,5 +1,6 @@
 import { SqlClient } from "@effect/sql";
 import type { SqlError } from "@effect/sql/SqlError";
+import type { DbError } from "../domain/errors";
 import { Context, Effect, Layer } from "effect";
 import type { AccessIdentity } from "../auth/AuthService";
 import { energySeedDid, energySeedManifest } from "../bootstrap/CheckedInExpertSeeds";
@@ -27,10 +28,10 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
     ) => Effect.Effect<{ readonly ok: true }, SqlError>;
     readonly bootstrapExperts: (
       actor: AccessIdentity
-    ) => Effect.Effect<BootstrapExpertsResult, SqlError>;
+    ) => Effect.Effect<BootstrapExpertsResult, SqlError | DbError>;
     readonly loadSmokeFixture: (
       actor: AccessIdentity
-    ) => Effect.Effect<LoadSmokeFixtureResult, SqlError>;
+    ) => Effect.Effect<LoadSmokeFixtureResult, SqlError | DbError>;
   }
 >() {
   static readonly layer = Layer.effect(

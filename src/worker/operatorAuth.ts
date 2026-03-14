@@ -1,5 +1,6 @@
-import { Effect, Layer } from "effect";
+import { Effect } from "effect";
 import {
+  type AccessIdentity,
   AuthService,
   ForbiddenAccessJwtError,
   InvalidAccessJwtError,
@@ -8,36 +9,151 @@ import {
   MissingAccessJwtError,
   MissingOperatorSecretError
 } from "../auth/AuthService";
-import { AppConfig } from "../platform/Config";
-import { CloudflareEnv, type EnvBindings } from "../platform/Env";
+import {
+  forbiddenError,
+  internalServerError,
+  notFoundError,
+  unauthorizedError
+} from "../domain/api";
+import { makeAuthLayer } from "../edge/Layer";
+import { encodeJsonString } from "../platform/Json";
+import { type EnvBindings } from "../platform/Env";
 import { Logging } from "../platform/Logging";
+import { makeSharedRuntime } from "../platform/EffectRuntime";
 
-const authLayer = (env: EnvBindings) =>
-  (() => {
-    const baseLayer = Layer.mergeAll(
-      CloudflareEnv.layer(env),
-      Logging.layer
-    );
-    const configLayer = AppConfig.layer.pipe(Layer.provideMerge(baseLayer));
+const sharedAuthRuntime = makeSharedRuntime(makeAuthLayer);
 
-    return AuthService.layer.pipe(
-      Layer.provideMerge(Layer.mergeAll(baseLayer, configLayer))
-    );
-  })();
+type OperatorRequestPolicy = {
+  readonly action: string | null;
+  readonly scopes: ReadonlyArray<string>;
+};
+
+const isExpertActivatePath = (pathname: string) =>
+  /^\/admin\/experts\/[^/]+\/activate$/u.test(pathname);
+
+const isIngestRunItemsPath = (pathname: string) =>
+  /^\/admin\/ingest\/runs\/[^/]+\/items$/u.test(pathname);
+
+const isIngestRunPath = (pathname: string) =>
+  /^\/admin\/ingest\/runs\/[^/]+$/u.test(pathname);
+
+const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
+  const { pathname } = new URL(request.url);
+
+  if (pathname === "/mcp") {
+    return {
+      action: "mcp_read",
+      scopes: ["mcp:read"]
+    };
+  }
+
+  if (request.method === "GET" && pathname === "/admin/experts") {
+    return {
+      action: "list_experts",
+      scopes: ["experts:read"]
+    };
+  }
+
+  if (request.method === "POST" && pathname === "/admin/experts") {
+    return {
+      action: "add_expert",
+      scopes: ["experts:write"]
+    };
+  }
+
+  if (request.method === "POST" && isExpertActivatePath(pathname)) {
+    return {
+      action: "set_expert_active",
+      scopes: ["experts:write"]
+    };
+  }
+
+  if (request.method === "GET" && isIngestRunItemsPath(pathname)) {
+    return {
+      action: "list_ingest_run_items",
+      scopes: ["ops:read"]
+    };
+  }
+
+  if (request.method === "GET" && isIngestRunPath(pathname)) {
+    return {
+      action: "get_ingest_run",
+      scopes: ["ops:read"]
+    };
+  }
+
+  if (request.method === "POST" && pathname === "/admin/ingest/poll") {
+    return {
+      action: "poll_ingest",
+      scopes: ["ops:refresh"]
+    };
+  }
+
+  if (request.method === "POST" && pathname === "/admin/ingest/backfill") {
+    return {
+      action: "backfill_ingest",
+      scopes: ["ops:refresh"]
+    };
+  }
+
+  if (request.method === "POST" && pathname === "/admin/ingest/reconcile") {
+    return {
+      action: "reconcile_ingest",
+      scopes: ["ops:refresh"]
+    };
+  }
+
+  if (request.method === "POST" && pathname === "/admin/ingest/repair") {
+    return {
+      action: "repair_ingest",
+      scopes: ["ops:refresh"]
+    };
+  }
+
+  if (request.method === "POST" && pathname === "/admin/ops/migrate") {
+    return {
+      action: "ops_migrate",
+      scopes: ["ops:refresh"]
+    };
+  }
+
+  if (request.method === "POST" && pathname === "/admin/ops/bootstrap-experts") {
+    return {
+      action: "bootstrap_experts",
+      scopes: ["ops:refresh"]
+    };
+  }
+
+  if (request.method === "POST" && pathname === "/admin/ops/load-smoke-fixture") {
+    return {
+      action: "load_smoke_fixture",
+      scopes: ["ops:refresh"]
+    };
+  }
+
+  return {
+    action: null,
+    scopes: []
+  };
+};
 
 export const authorizeOperator = (
   request: Request,
   env: EnvBindings,
   requiredScopes: ReadonlyArray<string> = []
-) =>
-  Effect.gen(function* () {
-    const auth = yield* AuthService;
-    return yield* (
-      requiredScopes.length === 0
-        ? auth.requireOperator(request.headers)
-        : auth.requireOperatorScopes(request.headers, requiredScopes)
-    );
-  }).pipe(Effect.provide(authLayer(env)));
+): Promise<AccessIdentity> =>
+  sharedAuthRuntime.runScoped(
+    env,
+    Effect.gen(function* () {
+      const auth = yield* AuthService;
+      return yield* (
+        requiredScopes.length === 0
+          ? auth.requireOperator(request.headers)
+          : auth.requireOperatorScopes(request.headers, requiredScopes)
+      );
+    }),
+    { operation: "authorizeOperator" }
+  );
 
 export const toAuthErrorResponse = (error: unknown) => {
   if (
@@ -46,64 +162,57 @@ export const toAuthErrorResponse = (error: unknown) => {
     error instanceof MissingOperatorSecretError ||
     error instanceof InvalidOperatorSecretError
   ) {
-    return new Response("unauthorized", { status: 401 });
+    return new Response(
+      encodeJsonString(unauthorizedError("unauthorized")),
+      {
+        status: 401,
+        headers: {
+          "content-type": "application/json"
+        }
+      }
+    );
   }
 
   if (error instanceof ForbiddenAccessJwtError) {
-    return new Response("forbidden", { status: 403 });
+    return new Response(
+      encodeJsonString(forbiddenError("forbidden")),
+      {
+        status: 403,
+        headers: {
+          "content-type": "application/json"
+        }
+      }
+    );
   }
 
   if (error instanceof InvalidAuthConfigError) {
-    return new Response("invalid auth config", { status: 500 });
+    return new Response(
+      encodeJsonString(internalServerError("invalid auth config")),
+      {
+        status: 500,
+        headers: {
+          "content-type": "application/json"
+        }
+      }
+    );
   }
 
-  return new Response("internal error", { status: 500 });
+  return new Response(
+    encodeJsonString(internalServerError("internal error")),
+    {
+      status: 500,
+      headers: {
+        "content-type": "application/json"
+      }
+    }
+  );
 };
 
-const adminMutationAction = (request: Request): string | null => {
-  const url = new URL(request.url);
-
-  if (request.method !== "POST") {
-    return null;
-  }
-
-  if (url.pathname === "/admin/experts") {
-    return "add_expert";
-  }
-
-  if (/^\/admin\/experts\/[^/]+\/activate$/u.test(url.pathname)) {
-    return "set_expert_active";
-  }
-
-  if (url.pathname === "/admin/ingest/poll") {
-    return "poll_ingest";
-  }
-
-  if (url.pathname === "/admin/ingest/backfill") {
-    return "backfill_ingest";
-  }
-
-  if (url.pathname === "/admin/ingest/reconcile") {
-    return "reconcile_ingest";
-  }
-
-  if (url.pathname === "/admin/ops/migrate") {
-    return "ops_migrate";
-  }
-
-  if (url.pathname === "/admin/ops/bootstrap-experts") {
-    return "bootstrap_experts";
-  }
-
-  if (url.pathname === "/admin/ops/load-smoke-fixture") {
-    return "load_smoke_fixture";
-  }
-
-  return null;
-};
-
-export const logDeniedAdminMutation = async (request: Request, error: unknown) => {
-  const action = adminMutationAction(request);
+export const logDeniedOperatorRequest = async (
+  request: Request,
+  error: unknown
+) => {
+  const { action } = operatorRequestPolicy(request);
   if (action === null) {
     return;
   }
@@ -114,14 +223,14 @@ export const logDeniedAdminMutation = async (request: Request, error: unknown) =
       ? error.message
       : error instanceof InvalidOperatorSecretError
         ? "invalid operator secret"
-      : error instanceof InvalidAuthConfigError
-        ? `missing ${error.missing}`
-        : error instanceof MissingOperatorSecretError
-          ? "missing operator secret"
-          : "missing or invalid access token";
+        : error instanceof InvalidAuthConfigError
+          ? `missing ${error.missing}`
+          : error instanceof MissingOperatorSecretError
+            ? "missing operator secret"
+            : "missing or invalid access token";
 
   await Effect.runPromise(
-    Effect.logWarning("operator mutation denied").pipe(
+    Effect.logWarning("operator request denied").pipe(
       Effect.annotateLogs({
         action,
         outcome: "failure",
@@ -132,27 +241,24 @@ export const logDeniedAdminMutation = async (request: Request, error: unknown) =
   );
 };
 
-export const requiredAdminScopes = (request: Request): ReadonlyArray<string> => {
-  const url = new URL(request.url);
+export const operatorRequestAction = (request: Request) =>
+  operatorRequestPolicy(request).action;
 
-  if (request.method === "POST" && url.pathname === "/admin/experts") {
-    return ["experts:write"];
-  }
+export const requiredOperatorScopes = (
+  request: Request
+): ReadonlyArray<string> =>
+  operatorRequestPolicy(request).scopes;
 
-  if (request.method === "POST" && /^\/admin\/experts\/[^/]+\/activate$/u.test(url.pathname)) {
-    return ["experts:write"];
-  }
-
-  if (request.method === "POST" && url.pathname.startsWith("/admin/ingest/")) {
-    return ["ops:refresh"];
-  }
-
-  if (request.method === "POST" && url.pathname.startsWith("/admin/ops/")) {
-    return ["ops:refresh"];
-  }
-
-  return [];
-};
+export const notFoundJsonResponse = () =>
+  new Response(
+    encodeJsonString(notFoundError("not found")),
+    {
+      status: 404,
+      headers: {
+        "content-type": "application/json"
+      }
+    }
+  );
 
 export const isSharedSecretMode = (env: EnvBindings) =>
   env.OPERATOR_AUTH_MODE === "shared-secret";

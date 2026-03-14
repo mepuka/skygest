@@ -1,5 +1,5 @@
-import { SqlError } from "@effect/sql/SqlError";
 import { Effect, Schema } from "effect";
+import { DbError } from "../../domain/errors";
 import { formatSchemaParseError, stringifyUnknown } from "../../platform/Json";
 
 const toDecodeMessage = (cause: unknown) => {
@@ -14,7 +14,7 @@ const toDecodeMessage = (cause: unknown) => {
   }
 };
 
-export const decodeWithSqlError = <A, I>(
+export const decodeWithDbError = <A, I>(
   schema: Schema.Schema<A, I, never>,
   input: unknown,
   message: string
@@ -22,8 +22,7 @@ export const decodeWithSqlError = <A, I>(
   Effect.try({
     try: () => Schema.decodeUnknownSync(schema)(input),
     catch: (cause) =>
-      new SqlError({
-        cause,
+      DbError.make({
         message: `${message}: ${toDecodeMessage(cause)}`
       })
   });

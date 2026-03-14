@@ -39,7 +39,7 @@ describe("ingest error envelopes", () => {
   it("normalizes legacy plain-text failures without a migration", () => {
     expect(decodeStoredIngestError("legacy failure text")).toEqual({
       tag: "LegacyError",
-      message: "legacy failure text",
+      message: "legacy ingest failure",
       retryable: false
     });
   });
@@ -54,7 +54,7 @@ describe("ingest error envelopes", () => {
 
     expect(response).toEqual({
       error: "IngestWorkflowLaunchError",
-      message: "workflow create failed",
+      message: "failed to launch ingest workflow",
       retryable: true
     });
   });
@@ -67,6 +67,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
     );
     expect(envelope.tag).toBe("DbError");
     expect(envelope.retryable).toBe(false);
+    expect(envelope.message).toBe("database operation failed");
   });
 
   it("SqlError (duck-typed) => non-retryable", () => {
@@ -76,6 +77,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
     });
     expect(envelope.tag).toBe("SqlError");
     expect(envelope.retryable).toBe(false);
+    expect(envelope.message).toBe("database operation failed");
   });
 
   it("BlueskyApiError with 429 => retryable", () => {
@@ -85,6 +87,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
     expect(envelope.tag).toBe("BlueskyApiError");
     expect(envelope.retryable).toBe(true);
     expect(envelope.status).toBe(429);
+    expect(envelope.message).toBe("Bluesky API request failed");
   });
 
   it("BlueskyApiError with 404 => non-retryable", () => {
@@ -94,6 +97,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
     expect(envelope.tag).toBe("BlueskyApiError");
     expect(envelope.retryable).toBe(false);
     expect(envelope.status).toBe(404);
+    expect(envelope.message).toBe("Bluesky API request failed");
   });
 
   it("BlueskyApiError without status => non-retryable", () => {
@@ -103,6 +107,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
     expect(envelope.tag).toBe("BlueskyApiError");
     expect(envelope.retryable).toBe(false);
     expect(envelope.status).toBeUndefined();
+    expect(envelope.message).toBe("Bluesky API request failed");
   });
 
   it("IngestRunNotFoundError", () => {
@@ -121,6 +126,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
     expect(envelope.tag).toBe("IngestBoundaryError");
     expect(envelope.retryable).toBe(false);
     expect(envelope.operation).toBe("test");
+    expect(envelope.message).toBe("unexpected ingest boundary failure");
   });
 
   it("StaleDispatchedIngestItemError => retryable", () => {
@@ -175,6 +181,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
     expect(envelope.tag).toBe("HistoricalRunRepairError");
     expect(envelope.retryable).toBe(false);
     expect(envelope.did).toBe(did);
+    expect(envelope.message).toBe("historical run required repair");
   });
 
   it("EnvError duck-typed object", () => {
@@ -184,7 +191,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
     });
     expect(envelope.tag).toBe("EnvError");
     expect(envelope.retryable).toBe(false);
-    expect(envelope.message).toContain("API_KEY");
+    expect(envelope.message).toBe("missing worker binding");
   });
 
   it("unknown tagged error preserves _tag", () => {
@@ -194,21 +201,21 @@ describe("toIngestErrorEnvelope domain error classification", () => {
     });
     expect(envelope.tag).toBe("CustomVendorError");
     expect(envelope.retryable).toBe(false);
-    expect(envelope.message).toBe("something broke");
+    expect(envelope.message).toBe("internal ingest failure");
   });
 
   it("plain Error", () => {
     const envelope = toIngestErrorEnvelope(new Error("oops"));
     expect(envelope.tag).toBe("Error");
     expect(envelope.retryable).toBe(false);
-    expect(envelope.message).toBe("oops");
+    expect(envelope.message).toBe("internal ingest failure");
   });
 
   it("non-Error unknown", () => {
     const envelope = toIngestErrorEnvelope("raw string");
     expect(envelope.tag).toBe("UnknownError");
     expect(envelope.retryable).toBe(false);
-    expect(envelope.message).toBe("raw string");
+    expect(envelope.message).toBe("internal ingest failure");
   });
 
   it("override precedence for did, runId, operation", () => {

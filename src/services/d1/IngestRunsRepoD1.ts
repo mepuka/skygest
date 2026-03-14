@@ -20,7 +20,7 @@ import {
   type MarkIngestRunPreparing
 } from "../../domain/polling";
 import { IngestRunsRepo } from "../IngestRunsRepo";
-import { decodeWithSqlError } from "./schemaDecode";
+import { decodeWithDbError } from "./schemaDecode";
 
 const RawIngestRunRowSchema = Schema.Struct({
   id: Schema.String,
@@ -75,7 +75,7 @@ export const IngestRunsRepoD1 = {
         LIMIT 1
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             RawIngestRunRowsSchema,
             rows,
             `Failed to decode ingest run row for ${id}`
@@ -88,7 +88,7 @@ export const IngestRunsRepoD1 = {
           }))
         ),
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             IngestRunRowsSchema,
             rows,
             `Failed to normalize ingest run row for ${id}`
@@ -123,7 +123,7 @@ export const IngestRunsRepoD1 = {
         ORDER BY started_at ASC, id ASC
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             RawIngestRunRowsSchema,
             rows,
             "Failed to decode running ingest runs"
@@ -136,7 +136,7 @@ export const IngestRunsRepoD1 = {
           }))
         ),
         Effect.flatMap((rows) =>
-          decodeWithSqlError(
+          decodeWithDbError(
             IngestRunRowsSchema,
             rows,
             "Failed to normalize running ingest runs"
@@ -145,7 +145,7 @@ export const IngestRunsRepoD1 = {
       );
 
     const createQueuedIfAbsent = (input: CreateQueuedIngestRun) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         CreateQueuedIngestRunSchema,
         input,
         "Invalid create queued ingest run input"
@@ -199,7 +199,7 @@ export const IngestRunsRepoD1 = {
       );
 
     const markPreparing = (input: MarkIngestRunPreparing) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         MarkIngestRunPreparingSchema,
         input,
         "Invalid mark ingest run preparing input"
@@ -218,7 +218,7 @@ export const IngestRunsRepoD1 = {
       );
 
     const markDispatching = (input: MarkIngestRunDispatching) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         MarkIngestRunDispatchingSchema,
         input,
         "Invalid mark ingest run dispatching input"
@@ -236,7 +236,7 @@ export const IngestRunsRepoD1 = {
       );
 
     const markFinalizing = (input: MarkIngestRunFinalizing) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         MarkIngestRunFinalizingSchema,
         input,
         "Invalid mark ingest run finalizing input"
@@ -278,7 +278,7 @@ export const IngestRunsRepoD1 = {
       `.pipe(Effect.asVoid);
 
     const markComplete = (input: CompleteIngestRun) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         CompleteIngestRunSchema,
         input,
         "Invalid complete ingest run input"
@@ -287,7 +287,7 @@ export const IngestRunsRepoD1 = {
       );
 
     const markFailed = (input: FailIngestRun) =>
-      decodeWithSqlError(
+      decodeWithDbError(
         FailIngestRunSchema,
         input,
         "Invalid failed ingest run input"
