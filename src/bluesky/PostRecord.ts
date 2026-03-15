@@ -1,5 +1,6 @@
 import { Array as Arr, Either, Option, ParseResult, Schema } from "effect";
 import type { LinkRecord } from "../domain/bi";
+import { normalizeDomain } from "../domain/normalize";
 import type { Did } from "../domain/types";
 import { extractBlobCid, feedThumbnailUrl } from "./BskyCdn";
 
@@ -144,6 +145,11 @@ const hostnameFor = (value: string): string | null => {
   }
 };
 
+const normalizedHostnameFor = (value: string): string | null => {
+  const hostname = hostnameFor(value);
+  return hostname ? normalizeDomain(hostname) : null;
+};
+
 export const extractLinkRecords = (
   record: SlimPostRecord,
   did: Did,
@@ -172,7 +178,7 @@ export const extractLinkRecords = (
       title: isExternalEmbed ? record.embed!.external!.title ?? null : null,
       description: isExternalEmbed ? record.embed!.external!.description ?? null : null,
       imageUrl: isExternalEmbed ? thumbnailUrl : null,
-      domain: hostnameFor(url),
+      domain: normalizedHostnameFor(url),
       extractedAt
     };
   });

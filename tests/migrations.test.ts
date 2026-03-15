@@ -23,7 +23,8 @@ describe("phase-one migrations", () => {
             'posts',
             'post_topics',
             'links',
-            'posts_fts'
+            'posts_fts',
+            'publications'
           )
         ORDER BY name ASC
       `;
@@ -42,7 +43,8 @@ describe("phase-one migrations", () => {
         "links",
         "post_topics",
         "posts",
-        "posts_fts"
+        "posts_fts",
+        "publications"
       ]);
       expect(applied).toEqual([
         { id: 1, name: "init" },
@@ -53,7 +55,8 @@ describe("phase-one migrations", () => {
         { id: 6, name: "post_topic_match_provenance" },
         { id: 7, name: "fts_porter_stemming" },
         { id: 8, name: "fts_external_content" },
-        { id: 9, name: "expert_avatar_and_link_images" }
+        { id: 9, name: "expert_avatar_and_link_images" },
+        { id: 10, name: "publications_and_expert_tiers" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );

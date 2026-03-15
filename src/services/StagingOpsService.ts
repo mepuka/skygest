@@ -4,11 +4,13 @@ import type { DbError } from "../domain/errors";
 import { Context, Effect, Layer } from "effect";
 import type { AccessIdentity } from "../auth/AuthService";
 import { energySeedDid, energySeedManifest } from "../bootstrap/CheckedInExpertSeeds";
+import { publicationsSeedManifest } from "../bootstrap/CheckedInPublications";
 import { bootstrapExperts } from "../bootstrap/ExpertSeeds";
 import type {
   BootstrapExpertsResult,
   LoadSmokeFixtureResult,
-  RefreshProfilesResult
+  RefreshProfilesResult,
+  SeedPublicationsResult
 } from "../domain/bi";
 import { processBatch } from "../filter/FilterWorker";
 import { AppConfig } from "../platform/Config";
@@ -17,6 +19,7 @@ import { ExpertsRepo } from "./ExpertsRepo";
 import { ExpertRegistryService } from "./ExpertRegistryService";
 import { KnowledgeRepo } from "./KnowledgeRepo";
 import { OntologyCatalog } from "./OntologyCatalog";
+import { PublicationsRepo } from "./PublicationsRepo";
 import { runMigrations } from "../db/migrate";
 import { makeSmokeFixtureBatch, smokeFixtureUris } from "../staging/SmokeFixture";
 
@@ -37,6 +40,9 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
     readonly refreshProfiles: (
       actor: AccessIdentity
     ) => Effect.Effect<RefreshProfilesResult, SqlError | DbError>;
+    readonly seedPublications: (
+      actor: AccessIdentity
+    ) => Effect.Effect<SeedPublicationsResult, SqlError | DbError>;
   }
 >() {
   static readonly layer = Layer.effect(
@@ -48,6 +54,7 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
       const registry = yield* ExpertRegistryService;
       const knowledgeRepo = yield* KnowledgeRepo;
       const ontology = yield* OntologyCatalog;
+      const publicationsRepo = yield* PublicationsRepo;
 
       const shardCount = Math.max(1, Math.trunc(config.ingestShardCount));
 
@@ -191,11 +198,30 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
         );
       });
 
+      const seedPublications = Effect.fn("StagingOpsService.seedPublications")(function* (
+        actor: AccessIdentity
+      ) {
+        const manifest = publicationsSeedManifest;
+        const result = yield* publicationsRepo.seedCurated(manifest, Date.now());
+        return yield* Effect.succeed(result).pipe(
+          withMutationAudit({
+            label: MUTATION_LABEL,
+            actor,
+            action: "seed_publications",
+            onSuccess: (r) => ({
+              seeded: r.seeded,
+              snapshotVersion: r.snapshotVersion
+            })
+          })
+        );
+      });
+
       return StagingOpsService.of({
         migrate,
         bootstrapExperts: bootstrapCheckedInExperts,
         loadSmokeFixture,
-        refreshProfiles
+        refreshProfiles,
+        seedPublications
       });
     })
   );

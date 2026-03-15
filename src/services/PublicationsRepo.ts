@@ -1,0 +1,26 @@
+import { Context, Effect } from "effect";
+import type { SqlError } from "@effect/sql/SqlError";
+import type { DbError } from "../domain/errors";
+import type {
+  PublicationListItem,
+  ListPublicationsInput,
+  PublicationSeedManifest,
+  SeedPublicationsResult
+} from "../domain/bi";
+
+export class PublicationsRepo extends Context.Tag("@skygest/PublicationsRepo")<
+  PublicationsRepo,
+  {
+    readonly seedCurated: (
+      manifest: PublicationSeedManifest,
+      observedAt: number
+    ) => Effect.Effect<SeedPublicationsResult, SqlError | DbError>;
+    readonly list: (
+      input: ListPublicationsInput
+    ) => Effect.Effect<ReadonlyArray<PublicationListItem>, SqlError | DbError>;
+    readonly ensureDomains: (
+      hostnames: ReadonlyArray<string>,
+      observedAt: number
+    ) => Effect.Effect<void, SqlError | DbError>;
+  }
+>() {}

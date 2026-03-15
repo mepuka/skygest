@@ -32,6 +32,11 @@ import type {
   ListExpertsInput,
   SearchPostsInput
 } from "../domain/bi";
+import type {
+  ListPublicationsInput,
+  PublicationListItem
+} from "../domain/bi";
+import { PublicationsRepo } from "./PublicationsRepo";
 
 export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryService")<
   KnowledgeQueryService,
@@ -69,6 +74,9 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
     readonly explainPostTopics: (
       postUri: ExplainPostTopicsInput["postUri"]
     ) => Effect.Effect<ExplainPostTopicsOutput, SqlError | DbError>;
+    readonly listPublications: (
+      input: ListPublicationsInput
+    ) => Effect.Effect<ReadonlyArray<PublicationListItem>, SqlError | DbError>;
   }
 >() {
   static readonly layer = Layer.effect(
@@ -78,6 +86,7 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
       const expertsRepo = yield* ExpertsRepo;
       const knowledgeRepo = yield* KnowledgeRepo;
       const ontology = yield* OntologyCatalog;
+      const publicationsRepo = yield* PublicationsRepo;
 
       const resolveTopicSlugs = Effect.fn("KnowledgeQueryService.resolveTopicSlugs")(function* (
         topic: string | undefined
@@ -264,6 +273,14 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
         } satisfies ExplainPostTopicsOutput;
       });
 
+      const listPublications = Effect.fn("KnowledgeQueryService.listPublications")(function* (input: ListPublicationsInput) {
+        return yield* publicationsRepo.list({
+          tier: input.tier,
+          source: input.source,
+          limit: clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax)
+        });
+      });
+
       return KnowledgeQueryService.of({
         searchPosts,
         searchPostsPage,
@@ -275,7 +292,8 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
         listTopics,
         getTopic,
         expandTopics,
-        explainPostTopics
+        explainPostTopics,
+        listPublications
       });
     })
   );

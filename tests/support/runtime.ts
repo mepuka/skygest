@@ -15,6 +15,7 @@ import { OntologyCatalog } from "../../src/services/OntologyCatalog";
 import { KnowledgeQueryService } from "../../src/services/KnowledgeQueryService";
 import { ExpertsRepoD1 } from "../../src/services/d1/ExpertsRepoD1";
 import { KnowledgeRepoD1 } from "../../src/services/d1/KnowledgeRepoD1";
+import { PublicationsRepoD1 } from "../../src/services/d1/PublicationsRepoD1";
 import { makeSmokeFixtureBatch } from "../../src/staging/SmokeFixture";
 
 export const testConfig = (
@@ -47,12 +48,14 @@ export const makeBiLayer = (options?: {
   const expertsLayer = ExpertsRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
   const knowledgeLayer = KnowledgeRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
 
+  const publicationsLayer = PublicationsRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
   const baseLayer = Layer.mergeAll(
     sqliteLayer,
     configLayer,
     OntologyCatalog.layer,
     expertsLayer,
-    knowledgeLayer
+    knowledgeLayer,
+    publicationsLayer
   );
 
   return Layer.mergeAll(

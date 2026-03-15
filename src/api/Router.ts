@@ -1,29 +1,17 @@
-import * as HttpApi from "@effect/platform/HttpApi";
 import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder";
-import * as HttpApiEndpoint from "@effect/platform/HttpApiEndpoint";
-import * as HttpApiGroup from "@effect/platform/HttpApiGroup";
 import { Effect, Layer } from "effect";
 import { makeQueryLayer } from "../edge/Layer";
 import type { KnowledgeLinkResult, KnowledgePostResult } from "../domain/bi";
 import {
-  BadRequestError,
   type ChronologicalCursor,
   encodeChronologicalCursor,
   encodeLinkPageCursor,
   encodeSearchPostsCursor,
-  ForbiddenError,
-  InternalServerError,
   type KnowledgeLinksPageOutput,
   type KnowledgePostsPageOutput,
   type LinkPageCursor,
   notFoundError,
-  NotFoundError,
-  PublicReadRequestSchemas,
-  PublicReadResponseSchemas,
-  type SearchPostsPageResult,
-  ServiceUnavailableError,
-  UnauthorizedError,
-  UpstreamFailureError
+  type SearchPostsPageResult
 } from "../domain/api";
 import type {
   BadRequestError as BadRequestErrorShape,
@@ -38,75 +26,7 @@ import type { EnvBindings } from "../platform/Env";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { handleWithApiLayer, makeCachedApiHandler } from "../http/ApiSupport";
 import { withHttpErrorMapping } from "../http/ErrorMapping";
-
-const PublicReadApi = HttpApi.make("public-read")
-  .add(
-    HttpApiGroup.make("posts")
-      .add(
-        HttpApiEndpoint.get("search", "/posts/search")
-          .setUrlParams(PublicReadRequestSchemas.searchPosts)
-          .addSuccess(PublicReadResponseSchemas.postsPage)
-      )
-      .add(
-        HttpApiEndpoint.get("recent", "/posts/recent")
-          .setUrlParams(PublicReadRequestSchemas.recentPosts)
-          .addSuccess(PublicReadResponseSchemas.postsPage)
-      )
-      .add(
-        HttpApiEndpoint.get("explainTopics", "/posts/:uri/topics")
-          .setPath(PublicReadRequestSchemas.postUriPath)
-          .addSuccess(PublicReadResponseSchemas.explainedTopics)
-      )
-  )
-  .add(
-    HttpApiGroup.make("links")
-      .add(
-        HttpApiEndpoint.get("list", "/links")
-          .setUrlParams(PublicReadRequestSchemas.links)
-          .addSuccess(PublicReadResponseSchemas.linksPage)
-      )
-  )
-  .add(
-    HttpApiGroup.make("experts")
-      .add(
-        HttpApiEndpoint.get("list", "/experts")
-          .setUrlParams(PublicReadRequestSchemas.experts)
-          .addSuccess(PublicReadResponseSchemas.experts)
-      )
-      .add(
-        HttpApiEndpoint.get("posts", "/experts/:did/posts")
-          .setPath(PublicReadRequestSchemas.expertPath)
-          .setUrlParams(PublicReadRequestSchemas.expertPosts)
-          .addSuccess(PublicReadResponseSchemas.postsPage)
-      )
-  )
-  .add(
-    HttpApiGroup.make("topics")
-      .add(
-        HttpApiEndpoint.get("list", "/topics")
-          .setUrlParams(PublicReadRequestSchemas.topics)
-          .addSuccess(PublicReadResponseSchemas.topics)
-      )
-      .add(
-        HttpApiEndpoint.get("get", "/topics/:slug")
-          .setPath(PublicReadRequestSchemas.topicPath)
-          .addSuccess(PublicReadResponseSchemas.topic)
-      )
-      .add(
-        HttpApiEndpoint.get("expand", "/topics/:slug/expand")
-          .setPath(PublicReadRequestSchemas.topicPath)
-          .setUrlParams(PublicReadRequestSchemas.expandTopic)
-          .addSuccess(PublicReadResponseSchemas.expandedTopics)
-      )
-  )
-  .prefix("/api")
-  .addError(BadRequestError)
-  .addError(UnauthorizedError)
-  .addError(ForbiddenError)
-  .addError(NotFoundError)
-  .addError(UpstreamFailureError)
-  .addError(ServiceUnavailableError)
-  .addError(InternalServerError);
+import { PublicReadApi } from "./PublicReadApi";
 
 const withReadErrors = <A, R>(
   route: string,
@@ -214,6 +134,15 @@ const PublicReadHandlers = Layer.mergeAll(
           Effect.map((page) => toPostsPage(page.items, page.nextCursor))
         )
       )
+  ),
+  HttpApiBuilder.group(PublicReadApi, "publications", (handlers) =>
+    handlers.handle("list", ({ urlParams }) =>
+      withReadErrors("/api/publications", Effect.flatMap(KnowledgeQueryService, (query) =>
+        query.listPublications(urlParams)
+      )).pipe(
+        Effect.map((items) => ({ items }))
+      )
+    )
   ),
   HttpApiBuilder.group(PublicReadApi, "topics", (handlers) =>
     handlers

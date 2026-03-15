@@ -23,6 +23,7 @@ import { ExpertsRepoD1 } from "../services/d1/ExpertsRepoD1";
 import { IngestRunItemsRepoD1 } from "../services/d1/IngestRunItemsRepoD1";
 import { IngestRunsRepoD1 } from "../services/d1/IngestRunsRepoD1";
 import { KnowledgeRepoD1 } from "../services/d1/KnowledgeRepoD1";
+import { PublicationsRepoD1 } from "../services/d1/PublicationsRepoD1";
 
 const makeBaseLayer = (env: EnvBindings) =>
   Layer.mergeAll(
@@ -37,10 +38,12 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const ontologyLayer = OntologyCatalog.layer;
   const expertsLayer = ExpertsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
   const knowledgeLayer = KnowledgeRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
+  const publicationsLayer = PublicationsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
   const queryRepositoriesLayer = Layer.mergeAll(
     ontologyLayer,
     expertsLayer,
-    knowledgeLayer
+    knowledgeLayer,
+    publicationsLayer
   );
   const queryLayer = Layer.mergeAll(
     queryRepositoriesLayer,
@@ -57,7 +60,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   );
   const registryLayer = ExpertRegistryService.layer.pipe(
     Layer.provideMerge(
-      Layer.mergeAll(configLayer, expertsLayer, blueskyLayer)
+      Layer.mergeAll(configLayer, expertsLayer, blueskyLayer, ontologyLayer)
     )
   );
   const stagingOpsLayer = StagingOpsService.layer.pipe(
@@ -67,7 +70,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         ontologyLayer,
         expertsLayer,
         knowledgeLayer,
-        registryLayer
+        registryLayer,
+        publicationsLayer
       )
     )
   );
@@ -77,6 +81,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     ontologyLayer,
     expertsLayer,
     knowledgeLayer,
+    publicationsLayer,
     queryLayer,
     blueskyLayer,
     authLayer,
@@ -90,6 +95,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     ontologyLayer,
     expertsLayer,
     knowledgeLayer,
+    publicationsLayer,
     queryLayer,
     blueskyLayer,
     authLayer,

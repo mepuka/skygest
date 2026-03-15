@@ -2,6 +2,11 @@ name = "skygest-bi-agent"
 main = "src/worker/feed.ts"
 compatibility_date = "2025-01-01"
 
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "/admin/*", "/mcp", "/health"]
+
 [observability]
 enabled = true
 
@@ -35,6 +40,11 @@ id = "f9888501c4ad473db8ff49ecf069f9ed"
 
 [env.staging]
 name = "skygest-bi-agent-staging"
+
+[env.staging.assets]
+directory = "./dist"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "/admin/*", "/mcp", "/health"]
 
 [env.staging.observability]
 enabled = true

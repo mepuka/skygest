@@ -110,6 +110,23 @@ const makeCliLayer = (options?: {
         remoteCalls.push({ action: "mcp-list", secret });
         return [{ did: "did:plc:test", domain: "energy" }] as const;
       }),
+    seedPublications: (_baseUrl: URL, secret: string) =>
+      Effect.sync(() => {
+        remoteCalls.push({ action: "seed-publications", secret });
+        return {
+          seeded: 15,
+          snapshotVersion: "0.3.0-test"
+        } as const;
+      }),
+    listPublications: (_baseUrl: URL, secret: string) =>
+      Effect.sync(() => {
+        remoteCalls.push({ action: "list-publications", secret });
+        return Array.from({ length: 34 }, (_, i) => ({
+          hostname: `pub${i}.com`,
+          tier: "energy-focused" as const,
+          postCount: 100 - i
+        }));
+      }),
     searchPostsMcp: (_baseUrl: URL, secret: string) =>
       Effect.sync(() => {
         remoteCalls.push({ action: "mcp-search", secret });
@@ -203,7 +220,8 @@ describe("ops CLI", () => {
         { action: "poll", secret: `stage-secret:${energySeedDid}` },
         { action: "run-status", secret: "stage-secret" },
         { action: "mcp-list", secret: "stage-secret" },
-        { action: "mcp-search", secret: "stage-secret" }
+        { action: "mcp-search", secret: "stage-secret" },
+        { action: "list-publications", secret: "stage-secret" }
       ]);
     })
   );
@@ -294,6 +312,13 @@ describe("ops CLI", () => {
             Effect.succeed([{ did: "did:plc:test", domain: "energy" }] as const),
           listExpertsMcp: (_baseUrl, _secret) =>
             Effect.succeed([{ did: "did:plc:test", domain: "energy" }] as const),
+          seedPublications: (_baseUrl, _secret) =>
+            Effect.succeed({
+              seeded: 15,
+              snapshotVersion: "0.3.0-test"
+            } as const),
+          listPublications: (_baseUrl, _secret) =>
+            Effect.succeed([{ hostname: "utilitydive.com", tier: "energy-focused", postCount: 100 }] as const),
           searchPostsMcp: (_baseUrl, _secret, _query) =>
             Effect.succeed([{
               uri: smokeFixtureUris()[0],
@@ -389,6 +414,13 @@ describe("ops CLI", () => {
             Effect.succeed([{ did: "did:plc:test", domain: "energy" }] as const),
           listExpertsMcp: (_baseUrl, _secret) =>
             Effect.succeed([{ did: "did:plc:test", domain: "energy" }] as const),
+          seedPublications: (_baseUrl, _secret) =>
+            Effect.succeed({
+              seeded: 15,
+              snapshotVersion: "0.3.0-test"
+            } as const),
+          listPublications: (_baseUrl, _secret) =>
+            Effect.succeed([{ hostname: "utilitydive.com", tier: "energy-focused", postCount: 100 }] as const),
           searchPostsMcp: (_baseUrl, _secret, _query) =>
             Effect.succeed([{
               uri: smokeFixtureUris()[0],

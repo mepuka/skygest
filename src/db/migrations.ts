@@ -258,6 +258,23 @@ const migration9: D1Migration = {
   ]
 };
 
+const migration10: D1Migration = {
+  id: 10,
+  name: "publications_and_expert_tiers",
+  statements: [
+    `ALTER TABLE experts ADD COLUMN tier TEXT NOT NULL DEFAULT 'independent'`,
+    `CREATE TABLE IF NOT EXISTS publications (
+      hostname    TEXT PRIMARY KEY,
+      tier        TEXT NOT NULL,
+      source      TEXT NOT NULL,
+      first_seen_at INTEGER NOT NULL,
+      last_seen_at  INTEGER NOT NULL
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_publications_tier_last_seen_at
+      ON publications(tier, last_seen_at DESC)`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -267,5 +284,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration6,
   migration7,
   migration8,
-  migration9
+  migration9,
+  migration10
 ];

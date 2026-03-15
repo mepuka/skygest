@@ -4,7 +4,9 @@ import {
   ExpertListOutput,
   KnowledgePostsOutput,
   LoadSmokeFixtureResult,
-  RefreshProfilesResult
+  PublicationListOutput,
+  RefreshProfilesResult,
+  SeedPublicationsResult
 } from "../domain/bi";
 import {
   IngestQueuedResponse,
@@ -31,9 +33,11 @@ const decodeMigrateResponse = decodeJsonStringWith(MigrateResponse);
 const decodeBootstrapExpertsResponse = decodeJsonStringWith(BootstrapExpertsResult);
 const decodeLoadSmokeFixtureResponse = decodeJsonStringWith(LoadSmokeFixtureResult);
 const decodeRefreshProfilesResponse = decodeJsonStringWith(RefreshProfilesResult);
+const decodeSeedPublicationsResponse = decodeJsonStringWith(SeedPublicationsResult);
 const decodeIngestQueuedResponse = decodeJsonStringWith(IngestQueuedResponse);
 const decodeIngestRepairSummary = decodeJsonStringWith(IngestRepairSummary);
 const decodeIngestRunResponse = decodeJsonStringWith(IngestRunRecord);
+const decodePublicationsResponse = decodeJsonStringWith(PublicationListOutput);
 const decodeAdminExpertsJsonResponse = decodeJsonStringWith(ExpertListOutput);
 const decodeSearchPostsResponse = decodeCallToolResultWith(KnowledgePostsOutput);
 const decodeMcpExpertsResponse = decodeCallToolResultWith(ExpertListOutput);
@@ -188,6 +192,17 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
       baseUrl: URL,
       secret: string
     ) => Effect.Effect<ReadonlyArray<{ readonly did: string; readonly domain: string }>, StagingRequestError>;
+    readonly seedPublications: (
+      baseUrl: URL,
+      secret: string
+    ) => Effect.Effect<{
+      readonly seeded: number;
+      readonly snapshotVersion: string;
+    }, StagingRequestError>;
+    readonly listPublications: (
+      baseUrl: URL,
+      secret: string
+    ) => Effect.Effect<ReadonlyArray<{ readonly hostname: string; readonly tier: string; readonly postCount: number }>, StagingRequestError>;
     readonly searchPostsMcp: (
       baseUrl: URL,
       secret: string,
@@ -277,6 +292,17 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
           }),
         decodeIngestRepairSummary
       ),
+    seedPublications: (baseUrl, secret) =>
+      requestJson(
+        "seed-publications",
+        () =>
+          fetch(endpointUrl(baseUrl, "/admin/ops/seed-publications"), {
+            method: "POST",
+            headers: operatorHeaders(secret),
+            body: encodeJsonString({})
+          }),
+        decodeSeedPublicationsResponse
+      ),
     listAdminExperts: (baseUrl, secret) =>
       requestJson(
         "admin-experts",
@@ -298,6 +324,15 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
           arguments: { domain: "energy" }
         },
         (text) => decodeMcpExpertsResponse(text).items
+      ),
+    listPublications: (baseUrl, secret) =>
+      requestJson(
+        "list-publications",
+        () =>
+          fetch(endpointUrl(baseUrl, "/api/publications?limit=100"), {
+            headers: { "x-skygest-operator-secret": secret }
+          }),
+        (text) => decodePublicationsResponse(text).items
       ),
     searchPostsMcp: (baseUrl, secret, query) =>
       callMcpTool(

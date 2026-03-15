@@ -12,11 +12,16 @@ import {
   KnowledgeLinkResult,
   KnowledgePostResult,
   ListExpertsInput,
+  ListPublicationsInput,
   ListTopicsInput,
   LoadSmokeFixtureResult,
   OntologyListTopic,
   OntologyTopicsOutput,
+  PublicationListOutput,
+  PublicationSource,
+  PublicationTier,
   RefreshProfilesResult,
+  SeedPublicationsResult,
   SetExpertActiveInput,
   SetExpertActiveResult,
   TopicSlug
@@ -484,12 +489,20 @@ export type PostLinksPageResult = {
   readonly nextCursor: LinkPageCursor | null;
 };
 
+export const ListPublicationsUrlParams = Schema.Struct({
+  tier: Schema.optional(PublicationTier),
+  source: Schema.optional(PublicationSource),
+  limit: OptionalNumberFromString
+});
+export type ListPublicationsUrlParams = Schema.Schema.Type<typeof ListPublicationsUrlParams>;
+
 export const PublicReadRequestSchemas = {
   searchPosts: SearchPostsUrlParams,
   recentPosts: GetRecentPostsPageUrlParams,
   expertPosts: GetExpertPostsPageUrlParams,
   links: GetPostLinksPageUrlParams,
   experts: ListExpertsUrlParams,
+  publications: ListPublicationsUrlParams,
   topics: ListTopicsUrlParams,
   expandTopic: ExpandTopicUrlParams,
   expertPath: ExpertDidPathParams,
@@ -501,6 +514,7 @@ export const PublicReadResponseSchemas = {
   postsPage: KnowledgePostsPageOutput,
   linksPage: KnowledgeLinksPageOutput,
   experts: ExpertListOutput,
+  publications: PublicationListOutput,
   topics: OntologyTopicsOutput,
   topic: PublicTopicOutput,
   expandedTopics: ExpandedTopicsOutput,
@@ -521,7 +535,8 @@ export const AdminResponseSchemas = {
   migrate: Schema.Struct({ ok: Schema.Literal(true) }),
   bootstrapExperts: BootstrapExpertsResult,
   loadSmokeFixture: LoadSmokeFixtureResult,
-  refreshProfiles: RefreshProfilesResult
+  refreshProfiles: RefreshProfilesResult,
+  seedPublications: SeedPublicationsResult
 } as const;
 
 export const IngestRequestSchemas = {

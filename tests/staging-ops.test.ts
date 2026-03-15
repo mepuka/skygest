@@ -14,6 +14,7 @@ import { OntologyCatalog } from "../src/services/OntologyCatalog";
 import { StagingOpsService } from "../src/services/StagingOpsService";
 import { ExpertsRepoD1 } from "../src/services/d1/ExpertsRepoD1";
 import { KnowledgeRepoD1 } from "../src/services/d1/KnowledgeRepoD1";
+import { PublicationsRepoD1 } from "../src/services/d1/PublicationsRepoD1";
 import { smokeFixtureUris } from "../src/staging/SmokeFixture";
 import {
   createMcpClient,
@@ -93,6 +94,7 @@ const makeStagingAdminLayer = (options: {
         cursor: null
       })
   });
+  const publicationsLayer = PublicationsRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
   const baseLayer = Layer.mergeAll(
     sqliteLayer,
     configLayer,
@@ -100,6 +102,7 @@ const makeStagingAdminLayer = (options: {
     ontologyLayer,
     expertsLayer,
     knowledgeLayer,
+    publicationsLayer,
     blueskyLayer
   );
 

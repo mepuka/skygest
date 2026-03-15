@@ -138,6 +138,13 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
     };
   }
 
+  if (request.method === "POST" && pathname === "/admin/ops/seed-publications") {
+    return {
+      action: "seed_publications",
+      scopes: ["ops:refresh"]
+    };
+  }
+
   return {
     action: null,
     scopes: []

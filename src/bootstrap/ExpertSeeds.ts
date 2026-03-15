@@ -1,6 +1,8 @@
 import { Effect } from "effect";
-import type { ExpertRecord, ExpertSeed, ExpertSeedManifest } from "../domain/bi";
+import type { ExpertRecord, ExpertSeed, ExpertSeedManifest, OntologyAuthorTiers } from "../domain/bi";
+import { resolveExpertTier } from "../ontology/expertTier";
 import { ExpertsRepo } from "../services/ExpertsRepo";
+import { OntologyCatalog } from "../services/OntologyCatalog";
 
 const isDefined = <A>(value: A | null): value is A => value !== null;
 
@@ -117,7 +119,8 @@ export const computeShard = (did: string, shardCount: number) => {
 export const materializeExperts = (
   manifest: ExpertSeedManifest,
   shardCount: number,
-  addedAt: number
+  addedAt: number,
+  authorTiers?: OntologyAuthorTiers
 ): ReadonlyArray<ExpertRecord> =>
   assertValidExpertSeedManifest(manifest).experts.map((expert) => ({
     did: expert.did,
@@ -130,6 +133,9 @@ export const materializeExperts = (
     sourceRef: expert.sourceRef ?? null,
     shard: computeShard(expert.did, shardCount),
     active: expert.active,
+    tier: authorTiers
+      ? resolveExpertTier(expert.handle ?? null, authorTiers)
+      : "independent" as const,
     addedAt,
     lastSyncedAt: null
   }));
@@ -140,7 +146,11 @@ export const bootstrapExperts = Effect.fn("bootstrapExperts")(function* (
   addedAt = Date.now()
 ) {
   const expertsRepo = yield* ExpertsRepo;
-  const experts = materializeExperts(manifest, shardCount, addedAt);
+  const ontology = yield* Effect.serviceOption(OntologyCatalog);
+  const authorTiers = ontology._tag === "Some"
+    ? ontology.value.snapshot.authorTiers
+    : undefined;
+  const experts = materializeExperts(manifest, shardCount, addedAt, authorTiers);
   yield* expertsRepo.upsertMany(experts);
 
   return {
