@@ -22,9 +22,10 @@ export class EditorialRepo extends Context.Tag("@skygest/EditorialRepo")<
       postUri: string
     ) => Effect.Effect<boolean, SqlError | DbError>;
 
-    /** List active picks, optionally filtered by min score / time window. */
+    /** List active, non-expired picks. `now` filters out picks past expires_at. */
     readonly listPicks: (
-      input: ListEditorialPicksInput
+      input: ListEditorialPicksInput,
+      now: number
     ) => Effect.Effect<ReadonlyArray<EditorialPickRecord>, SqlError | DbError>;
 
     /**
@@ -33,11 +34,13 @@ export class EditorialRepo extends Context.Tag("@skygest/EditorialRepo")<
      * executeRecentPostsQuery in KnowledgeRepoD1) and a separate LEFT JOIN
      * on post_topics for aggregating ALL topic slugs into topicsCsv.
      * topicSlugs is pre-resolved by the service layer via ontology expansion.
+     * `now` filters out picks past expires_at at query time.
      */
     readonly getCuratedFeed: (
       input: GetCuratedFeedInput & {
         readonly topicSlugs?: ReadonlyArray<TopicSlug>;
-      }
+      },
+      now: number
     ) => Effect.Effect<ReadonlyArray<CuratedPostResult>, SqlError | DbError>;
 
     /** Check if an active post exists by URI. */

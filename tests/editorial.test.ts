@@ -215,7 +215,7 @@ describe("EditorialRepoD1", () => {
       expect(second).toBe(false);
 
       // Verify the update took effect
-      const picks = yield* repo.listPicks({ limit: 10 });
+      const picks = yield* repo.listPicks({ limit: 10 }, Date.now());
       const pick = picks.find((p) => p.postUri === solarUri);
       expect(pick?.score).toBe(90);
       expect(pick?.reason).toBe("Updated reason");
@@ -232,7 +232,7 @@ describe("EditorialRepoD1", () => {
       expect(retracted).toBe(true);
 
       // Retracted pick should not appear in active listings
-      const picks = yield* repo.listPicks({ limit: 10 });
+      const picks = yield* repo.listPicks({ limit: 10 }, Date.now());
       expect(picks.find((p) => p.postUri === solarUri)).toBeUndefined();
     }).pipe(Effect.provide(makeEditorialLayer()))
   );
@@ -275,7 +275,7 @@ describe("EditorialRepoD1", () => {
         } as any)
       );
 
-      const feed = yield* repo.getCuratedFeed({ limit: 10 });
+      const feed = yield* repo.getCuratedFeed({ limit: 10 }, Date.now());
 
       expect(feed).toHaveLength(2);
       // Ordered by score DESC — solar (85) first, wind (70) second
@@ -311,7 +311,7 @@ describe("EditorialRepoD1", () => {
       const feed = yield* repo.getCuratedFeed({
         limit: 10,
         topicSlugs: ["solar" as TopicSlug]
-      });
+      }, Date.now());
 
       expect(feed).toHaveLength(1);
       expect(feed[0]!.uri).toBe(solarUri);
@@ -333,7 +333,7 @@ describe("EditorialRepoD1", () => {
       const feed = yield* repo.getCuratedFeed({
         limit: 10,
         topicSlugs: [] as unknown as ReadonlyArray<TopicSlug>
-      });
+      }, Date.now());
 
       expect(feed).toHaveLength(0);
     }).pipe(Effect.provide(makeEditorialLayer()))
@@ -368,7 +368,7 @@ describe("EditorialRepoD1", () => {
       expect(expired).toBe(1);
 
       // Only the wind pick should remain active
-      const picks = yield* repo.listPicks({ limit: 10 });
+      const picks = yield* repo.listPicks({ limit: 10 }, Date.now());
       expect(picks).toHaveLength(1);
       expect(picks[0]!.postUri).toBe(windUri);
     }).pipe(Effect.provide(makeEditorialLayer()))
@@ -384,11 +384,11 @@ describe("EditorialRepoD1", () => {
         makePick({ postUri: windUri, score: 40 as any, reason: "Low score" } as any)
       );
 
-      const high = yield* repo.listPicks({ minScore: 80 as any, limit: 10 });
+      const high = yield* repo.listPicks({ minScore: 80 as any, limit: 10 }, Date.now());
       expect(high).toHaveLength(1);
       expect(high[0]!.postUri).toBe(solarUri);
 
-      const all = yield* repo.listPicks({ limit: 10 });
+      const all = yield* repo.listPicks({ limit: 10 }, Date.now());
       expect(all).toHaveLength(2);
     }).pipe(Effect.provide(makeEditorialLayer()))
   );
@@ -849,7 +849,7 @@ describe("EditorialService", () => {
 
             // Verify the pick was created with an expiry
             const repo = yield* EditorialRepo;
-            const picks = yield* repo.listPicks({ limit: 10 });
+            const picks = yield* repo.listPicks({ limit: 10 }, Date.now());
             const pick = picks.find((p) => p.postUri === solarUri);
             expect(pick).toBeDefined();
             expect(pick!.expiresAt).not.toBeNull();

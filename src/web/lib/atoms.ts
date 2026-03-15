@@ -58,12 +58,24 @@ export const feedAtom = SkygestApi.runtime.atom((get) => {
       urlParams: topic !== undefined ? { topic, limit: 30 } : { limit: 30 }
     });
     if (curated.items.length > 0) {
-      return { mode: "curated" as const, items: curated.items };
+      // Curated picks may reference older posts — fetch links without the
+      // recent-window constraint that linksAtom uses, so previews render
+      // regardless of post age.
+      const linksResult = yield* client.links.list({
+        urlParams: topic !== undefined ? { topic, limit: 100 } : { limit: 100 }
+      });
+      const linksMap = new Map<string, (typeof linksResult.items)[number]>();
+      for (const link of linksResult.items) {
+        if (!linksMap.has(link.postUri)) {
+          linksMap.set(link.postUri, link);
+        }
+      }
+      return { mode: "curated" as const, items: curated.items, linksMap };
     }
     const chronological = yield* client.posts.recent({
       urlParams: topic !== undefined ? { topic, limit: 30 } : { limit: 30 }
     });
-    return { mode: "chronological" as const, items: chronological.items };
+    return { mode: "chronological" as const, items: chronological.items, linksMap: null };
   });
 });
 

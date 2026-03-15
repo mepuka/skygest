@@ -84,10 +84,11 @@ export class EditorialService extends Context.Tag("@skygest/EditorialService")<
 
     const listPicks = Effect.fn("EditorialService.listPicks")(
       function* (input: ListEditorialPicksInput) {
+        const now = yield* Clock.currentTimeMillis;
         const records = yield* repo.listPicks({
           ...input,
           limit: clampEditorialLimit(input.limit)
-        });
+        }, now);
         return records.map((r) => ({
           postUri: r.postUri,
           score: r.score,
@@ -101,12 +102,13 @@ export class EditorialService extends Context.Tag("@skygest/EditorialService")<
 
     const getCuratedFeed = Effect.fn("EditorialService.getCuratedFeed")(
       function* (input: GetCuratedFeedInput) {
+        const now = yield* Clock.currentTimeMillis;
         const topicSlugs = yield* ontology.resolveCanonicalTopicSlugs(input.topic);
         return yield* repo.getCuratedFeed({
           ...input,
           limit: clampEditorialLimit(input.limit),
           ...(topicSlugs === undefined ? {} : { topicSlugs })
-        });
+        }, now);
       }
     );
 

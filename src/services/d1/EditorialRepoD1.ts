@@ -138,7 +138,7 @@ export const EditorialRepoD1 = {
     // ---------------------------------------------------------------------------
     // listPicks
     // ---------------------------------------------------------------------------
-    const listPicks = (input: ListEditorialPicksInput) =>
+    const listPicks = (input: ListEditorialPicksInput, now: number) =>
       decodeWithDbError(
         ListEditorialPicksInputSchema,
         input,
@@ -147,6 +147,7 @@ export const EditorialRepoD1 = {
         Effect.flatMap((validated) => {
           const conditions = [
             sql`status = 'active'`,
+            sql`(expires_at IS NULL OR expires_at > ${now})`,
             validated.minScore === undefined ? null : sql`score >= ${validated.minScore}`,
             validated.since === undefined ? null : sql`picked_at >= ${validated.since}`
           ].filter(isDefined);
@@ -206,7 +207,8 @@ export const EditorialRepoD1 = {
     const getCuratedFeed = (
       input: GetCuratedFeedInput & {
         readonly topicSlugs?: ReadonlyArray<TopicSlug>;
-      }
+      },
+      now: number
     ) =>
       decodeWithDbError(
         GetCuratedFeedInputSchema,
@@ -223,6 +225,7 @@ export const EditorialRepoD1 = {
           const conditions = [
             sql`ep.status = 'active'`,
             sql`p.status = 'active'`,
+            sql`(ep.expires_at IS NULL OR ep.expires_at > ${now})`,
             validated.minScore === undefined ? null : sql`ep.score >= ${validated.minScore}`,
             validated.since === undefined ? null : sql`ep.picked_at >= ${validated.since}`,
             topicSlugs === undefined

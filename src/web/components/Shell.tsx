@@ -83,8 +83,11 @@ export function Shell() {
                   Something went wrong.
                 </div>
               ))
-              .onSuccess((feed) =>
-                feed.items.length === 0 ? (
+              .onSuccess((feed) => {
+                // Curated mode bundles its own links map (covers older posts);
+                // chronological mode uses the standard linksAtom.
+                const feedLinks = feed.linksMap ?? linksMap;
+                return feed.items.length === 0 ? (
                   <div className="p-8 text-center text-mid text-sm">
                     No posts yet.
                   </div>
@@ -100,7 +103,7 @@ export function Shell() {
                       <PostCard
                         key={post.uri}
                         post={post}
-                        link={linksMap.get(post.uri) ?? null}
+                        link={feedLinks.get(post.uri) ?? null}
                         publicationIndex={pubIndex}
                         topicLabel={selectedTopicLabel}
                         topicEntries={resolveTopicEntries(post.topics)}
@@ -108,7 +111,8 @@ export function Shell() {
                       />
                     ))}
                   </div>
-                )
+                );
+              }
               )
               .render()}
           </div>
