@@ -6,3 +6,5 @@ export interface TopicEntry {
   readonly slug: string;
   readonly label: string;
 }
+
+export type { EditorialPickCategory } from "../../domain/editorial.ts";

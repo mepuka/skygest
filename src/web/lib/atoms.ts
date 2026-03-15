@@ -50,6 +50,23 @@ export const linksAtom = SkygestApi.runtime.atom((get) => {
   });
 });
 
+export const feedAtom = SkygestApi.runtime.atom((get) => {
+  const topic = get(selectedTopicAtom) ?? undefined;
+  return Effect.gen(function* () {
+    const client = yield* SkygestApi;
+    const curated = yield* client.posts.curated({
+      urlParams: topic !== undefined ? { topic, limit: 30 } : { limit: 30 }
+    });
+    if (curated.items.length > 0) {
+      return { mode: "curated" as const, items: curated.items };
+    }
+    const chronological = yield* client.posts.recent({
+      urlParams: topic !== undefined ? { topic, limit: 30 } : { limit: 30 }
+    });
+    return { mode: "chronological" as const, items: chronological.items };
+  });
+});
+
 /** Resolve topic slugs to label entries for OntologyBreadcrumb */
 export const topicLookupAtom = Atom.make((get) => {
   const items = Result.getOrElse(get(topicsAtom), () => [] as readonly never[]);

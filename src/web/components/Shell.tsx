@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from "react";
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
 import { Result } from "@effect-atom/atom";
-import { postsAtom, topicsAtom, linksAtom, publicationsAtom, selectedTopicAtom, topicLookupAtom } from "../lib/atoms.ts";
+import { feedAtom, topicsAtom, linksAtom, publicationsAtom, selectedTopicAtom, topicLookupAtom } from "../lib/atoms.ts";
 import type { TopicEntry } from "../lib/types.ts";
 import { PostCard } from "./PostCard.tsx";
 import { TopicFilterBar } from "./TopicFilterBar.tsx";
@@ -11,7 +11,7 @@ const EMPTY_LINKS = new Map<string, never>();
 const EMPTY_PUBS = new Map<string, never>();
 
 export function Shell() {
-  const postsResult = useAtomValue(postsAtom);
+  const feedResult = useAtomValue(feedAtom);
   const topicsResult = useAtomValue(topicsAtom);
   const linksResult = useAtomValue(linksAtom);
   const pubsResult = useAtomValue(publicationsAtom);
@@ -66,15 +66,8 @@ export function Shell() {
             />
           )}
 
-          <div className="flex items-center px-4 py-2 gap-2">
-            <span className="font-ui text-[10px] font-semibold tracking-[0.1em] uppercase text-ghost">
-              Recent
-            </span>
-            <div className="grow h-px bg-border" />
-          </div>
-
           <div aria-live="polite">
-            {Result.builder(postsResult)
+            {Result.builder(feedResult)
               .onInitialOrWaiting(() => (
                 <div className="p-8 text-center text-mid text-sm">
                   Loading…
@@ -90,14 +83,20 @@ export function Shell() {
                   Something went wrong.
                 </div>
               ))
-              .onSuccess((posts) =>
-                posts.length === 0 ? (
+              .onSuccess((feed) =>
+                feed.items.length === 0 ? (
                   <div className="p-8 text-center text-mid text-sm">
                     No posts yet.
                   </div>
                 ) : (
                   <div>
-                    {posts.map((post) => (
+                    <div className="flex items-center px-4 py-2 gap-2">
+                      <span className="font-ui text-[10px] font-semibold tracking-[0.1em] uppercase text-ghost">
+                        {feed.mode === "curated" ? "Curated" : "Recent"}
+                      </span>
+                      <div className="grow h-px bg-border" />
+                    </div>
+                    {feed.items.map((post) => (
                       <PostCard
                         key={post.uri}
                         post={post}
@@ -105,6 +104,7 @@ export function Shell() {
                         publicationIndex={pubIndex}
                         topicLabel={selectedTopicLabel}
                         topicEntries={resolveTopicEntries(post.topics)}
+                        editorialCategory={"editorialCategory" in post ? post.editorialCategory : undefined}
                       />
                     ))}
                   </div>
