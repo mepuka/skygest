@@ -18,6 +18,7 @@ import {
   UpstreamFailureError
 } from "../domain/api";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
+import { EditorialService } from "../services/EditorialService";
 import { StagingOpsService } from "../services/StagingOpsService";
 import { AppConfig } from "../platform/Config";
 import { OperatorIdentity, operatorIdentityContext } from "../http/Identity";
@@ -67,6 +68,24 @@ const AdminApi = HttpApi.make("admin")
       .add(
         HttpApiEndpoint.post("seedPublications", "/admin/ops/seed-publications")
           .addSuccess(AdminResponseSchemas.seedPublications)
+      )
+  )
+  .add(
+    HttpApiGroup.make("editorial")
+      .add(
+        HttpApiEndpoint.post("submitPick", "/admin/editorial/pick")
+          .setPayload(AdminRequestSchemas.submitEditorialPick)
+          .addSuccess(AdminResponseSchemas.submitEditorialPick)
+      )
+      .add(
+        HttpApiEndpoint.post("retractPick", "/admin/editorial/retract")
+          .setPayload(AdminRequestSchemas.retractEditorialPick)
+          .addSuccess(AdminResponseSchemas.retractEditorialPick)
+      )
+      .add(
+        HttpApiEndpoint.get("listPicks", "/admin/editorial/picks")
+          .setUrlParams(AdminRequestSchemas.listEditorialPicks)
+          .addSuccess(AdminResponseSchemas.listEditorialPicks)
       )
   )
   .addError(BadRequestError)
@@ -176,6 +195,32 @@ const AdminHandlers = Layer.mergeAll(
           const actor = yield* OperatorIdentity;
           const ops = yield* StagingOpsService;
           return yield* ops.seedPublications(actor);
+        }))
+      )
+  ),
+  HttpApiBuilder.group(AdminApi, "editorial", (handlers) =>
+    handlers
+      .handle("submitPick", ({ payload }) =>
+        withAdminErrors("/admin/editorial/pick", Effect.gen(function* () {
+          const actor = yield* OperatorIdentity;
+          const editorial = yield* EditorialService;
+          return yield* editorial.submitPick(
+            payload,
+            actor.email ?? actor.subject ?? "operator"
+          );
+        }))
+      )
+      .handle("retractPick", ({ payload }) =>
+        withAdminErrors("/admin/editorial/retract", Effect.gen(function* () {
+          const editorial = yield* EditorialService;
+          return yield* editorial.retractPick(payload.postUri);
+        }))
+      )
+      .handle("listPicks", ({ urlParams }) =>
+        withAdminErrors("/admin/editorial/picks", Effect.gen(function* () {
+          const editorial = yield* EditorialService;
+          const items = yield* editorial.listPicks(urlParams);
+          return { items };
         }))
       )
   )
