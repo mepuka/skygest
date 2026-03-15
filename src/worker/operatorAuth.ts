@@ -131,6 +131,13 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
     };
   }
 
+  if (request.method === "POST" && pathname === "/admin/ops/refresh-profiles") {
+    return {
+      action: "refresh_profiles",
+      scopes: ["ops:refresh"]
+    };
+  }
+
   return {
     action: null,
     scopes: []

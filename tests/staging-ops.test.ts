@@ -3,6 +3,7 @@ import { describe, expect, it } from "@effect/vitest";
 import { handleAdminRequestWithLayer } from "../src/admin/Router";
 import type { AccessIdentity } from "../src/auth/AuthService";
 import { BlueskyClient } from "../src/bluesky/BlueskyClient";
+import { parseAvatarUrl } from "../src/bluesky/BskyCdn";
 import { ExpertListOutput, KnowledgePostsOutput } from "../src/domain/bi";
 import { decodeCallToolResultWith } from "../src/mcp/Client";
 import { AppConfig, type AppConfigShape } from "../src/platform/Config";
@@ -77,7 +78,8 @@ const makeStagingAdminLayer = (options: {
         did: didOrHandle.startsWith("did:") ? sampleDid : sampleDid,
         handle: didOrHandle.startsWith("did:") ? "seed.example.com" : didOrHandle,
         displayName: "Seed Expert",
-        description: "Seeded profile"
+        description: "Seeded profile",
+        avatar: parseAvatarUrl("https://cdn.bsky.app/img/avatar/plain/did:plc:test/cid@jpeg")
       }),
     getFollows: () =>
       Effect.succeed({
@@ -101,10 +103,13 @@ const makeStagingAdminLayer = (options: {
     blueskyLayer
   );
 
+  const registryLayer = ExpertRegistryService.layer.pipe(Layer.provideMerge(baseLayer));
+  const stagingDeps = Layer.mergeAll(baseLayer, registryLayer);
+
   return Layer.mergeAll(
     baseLayer,
-    ExpertRegistryService.layer.pipe(Layer.provideMerge(baseLayer)),
-    StagingOpsService.layer.pipe(Layer.provideMerge(baseLayer))
+    registryLayer,
+    StagingOpsService.layer.pipe(Layer.provideMerge(stagingDeps))
   );
 };
 

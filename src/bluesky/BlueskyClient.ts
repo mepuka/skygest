@@ -14,6 +14,7 @@ import { BlueskyApiError } from "../domain/errors";
 import { AppConfig } from "../platform/Config";
 import { stringifyUnknown } from "../platform/Json";
 import type { BlueskyProfile, ResolvedDidOrHandle } from "../domain/bi";
+import { parseAvatarUrl } from "./BskyCdn";
 import {
   type ListRecordsResult as ListRecordsResultShape,
   type ServiceListRecordsInput,
@@ -43,7 +44,8 @@ export const ProfileResponse = Schema.Struct({
   did: Did,
   handle: Schema.optional(Schema.String),
   displayName: Schema.optional(Schema.String),
-  description: Schema.optional(Schema.String)
+  description: Schema.optional(Schema.String),
+  avatar: Schema.optional(Schema.String)
 });
 
 const RepoServiceEntry = Schema.Struct({
@@ -231,7 +233,8 @@ export const makeBlueskyClient = (base: string) =>
           did: body.did,
           handle: body.handle ?? null,
           displayName: body.displayName ?? null,
-          description: body.description ?? null
+          description: body.description ?? null,
+          avatar: body.avatar ? parseAvatarUrl(body.avatar) : null
         }))
       );
 

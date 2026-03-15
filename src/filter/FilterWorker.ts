@@ -85,7 +85,7 @@ export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (ba
 
       const decoded = record.right;
       const text = decoded.text?.trim() ?? "";
-      const links = extractLinkRecords(decoded, indexedAt);
+      const links = extractLinkRecords(decoded, event.did, indexedAt);
       const domains = links
         .map((link) => link.domain)
         .filter((domain): domain is string => domain !== null && domain.length > 0);

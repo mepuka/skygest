@@ -37,6 +37,7 @@ const makeExpert = (did: Did) => ({
   handle: `${did}.test`,
   displayName: did,
   description: null,
+  avatar: null,
   domain: "energy",
   source: "manual" as const,
   sourceRef: null,

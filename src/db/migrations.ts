@@ -249,6 +249,15 @@ const migration8: D1Migration = {
   ]
 };
 
+const migration9: D1Migration = {
+  id: 9,
+  name: "expert_avatar_and_link_images",
+  statements: [
+    `ALTER TABLE experts ADD COLUMN avatar TEXT`,
+    `ALTER TABLE links ADD COLUMN image_url TEXT`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -257,5 +266,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration5,
   migration6,
   migration7,
-  migration8
+  migration8,
+  migration9
 ];

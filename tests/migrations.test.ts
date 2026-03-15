@@ -52,7 +52,8 @@ describe("phase-one migrations", () => {
         { id: 5, name: "ingest_recovery_state" },
         { id: 6, name: "post_topic_match_provenance" },
         { id: 7, name: "fts_porter_stemming" },
-        { id: 8, name: "fts_external_content" }
+        { id: 8, name: "fts_external_content" },
+        { id: 9, name: "expert_avatar_and_link_images" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );

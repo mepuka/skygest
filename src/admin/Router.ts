@@ -60,6 +60,10 @@ const AdminApi = HttpApi.make("admin")
         HttpApiEndpoint.post("loadSmokeFixture", "/admin/ops/load-smoke-fixture")
           .addSuccess(AdminResponseSchemas.loadSmokeFixture)
       )
+      .add(
+        HttpApiEndpoint.post("refreshProfiles", "/admin/ops/refresh-profiles")
+          .addSuccess(AdminResponseSchemas.refreshProfiles)
+      )
   )
   .addError(BadRequestError)
   .addError(UnauthorizedError)
@@ -145,6 +149,14 @@ const AdminHandlers = Layer.mergeAll(
           const actor = yield* OperatorIdentity;
           const ops = yield* StagingOpsService;
           return yield* ops.loadSmokeFixture(actor);
+        }))
+      )
+      .handle("refreshProfiles", () =>
+        withAdminErrors("/admin/ops/refresh-profiles", Effect.gen(function* () {
+          yield* ensureStagingOpsEnabled;
+          const actor = yield* OperatorIdentity;
+          const ops = yield* StagingOpsService;
+          return yield* ops.refreshProfiles(actor);
         }))
       )
   )

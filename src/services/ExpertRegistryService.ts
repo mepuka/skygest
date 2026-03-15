@@ -29,6 +29,7 @@ const toAdminExpertResult = (expert: ExpertRecord): AdminExpertResult => ({
   did: expert.did,
   handle: expert.handle,
   displayName: expert.displayName,
+  avatar: expert.avatar,
   domain: expert.domain,
   shard: expert.shard,
   active: expert.active,
@@ -59,6 +60,9 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
     readonly listExperts: (
       input: ListExpertsInput
     ) => Effect.Effect<ReadonlyArray<ExpertListItem>, SqlError | DbError>;
+    readonly refreshExpertProfile: (
+      did: Did
+    ) => Effect.Effect<ExpertRecord, ProfileLookupError | SqlError | DbError>;
   }
 >() {
   static readonly layer = Layer.effect(
@@ -85,6 +89,59 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
             message: error.message
           });
 
+      const syncProfileBackedExpert = (options: {
+        readonly profile: ExpertRecord["did"] extends infer D ? { readonly did: D; readonly handle: ExpertRecord["handle"]; readonly displayName: ExpertRecord["displayName"]; readonly description: ExpertRecord["description"]; readonly avatar: ExpertRecord["avatar"] } : never;
+        readonly domain: string;
+        readonly source: ExpertRecord["source"];
+        readonly sourceRef: ExpertRecord["sourceRef"];
+        readonly active: boolean;
+        readonly preserveMetadata: boolean;
+      }) =>
+        Effect.gen(function* () {
+          const { profile } = options;
+          const existing = yield* expertsRepo.getByDid(profile.did);
+          const shard = existing?.shard ?? computeShard(profile.did, shardCount);
+          const expert: ExpertRecord = {
+            did: profile.did,
+            handle: profile.handle,
+            displayName: profile.displayName,
+            description: profile.description,
+            avatar: profile.avatar,
+            domain: options.preserveMetadata && existing ? existing.domain : options.domain,
+            source: options.preserveMetadata && existing ? existing.source : options.source,
+            sourceRef: options.preserveMetadata && existing ? existing.sourceRef : options.sourceRef,
+            shard,
+            active: options.preserveMetadata && existing ? existing.active : options.active,
+            addedAt: existing?.addedAt ?? Date.now(),
+            lastSyncedAt: Date.now()
+          };
+
+          yield* expertsRepo.upsert(expert);
+
+          return expert;
+        });
+
+      const refreshExpertProfile = Effect.fn("ExpertRegistryService.refreshExpertProfile")(function* (
+        did: Did
+      ) {
+        const profile = yield* bluesky.getProfile(did).pipe(
+          Effect.mapError((error) =>
+            ProfileLookupError.make({
+              didOrHandle: did,
+              message: error.message
+            })
+          )
+        );
+        return yield* syncProfileBackedExpert({
+          profile,
+          domain: config.defaultDomain,
+          source: "manual",
+          sourceRef: null,
+          active: true,
+          preserveMetadata: true
+        });
+      });
+
       const addExpert = Effect.fn("ExpertRegistryService.addExpert")(function* (
         actor: AccessIdentity,
         input: AddExpertInput
@@ -104,23 +161,14 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
           const profile = yield* bluesky.getProfile(resolved.did).pipe(
             Effect.mapError((error) => mapBlueskyError(error, didOrHandle, "profile"))
           );
-          const existing = yield* expertsRepo.getByDid(profile.did);
-          const shard = computeShard(profile.did, shardCount);
-          const expert: ExpertRecord = {
-            did: profile.did,
-            handle: profile.handle,
-            displayName: profile.displayName,
-            description: profile.description,
+          const expert = yield* syncProfileBackedExpert({
+            profile,
             domain,
             source: "manual",
             sourceRef: null,
-            shard,
             active,
-            addedAt: existing?.addedAt ?? Date.now(),
-            lastSyncedAt: existing?.lastSyncedAt ?? null
-          };
-
-          yield* expertsRepo.upsert(expert);
+            preserveMetadata: false
+          });
 
           return toAdminExpertResult(expert);
         });
@@ -192,7 +240,8 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
       return ExpertRegistryService.of({
         addExpert,
         setExpertActive,
-        listExperts
+        listExperts,
+        refreshExpertProfile
       });
     })
   );

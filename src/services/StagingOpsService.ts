@@ -7,12 +7,14 @@ import { energySeedDid, energySeedManifest } from "../bootstrap/CheckedInExpertS
 import { bootstrapExperts } from "../bootstrap/ExpertSeeds";
 import type {
   BootstrapExpertsResult,
-  LoadSmokeFixtureResult
+  LoadSmokeFixtureResult,
+  RefreshProfilesResult
 } from "../domain/bi";
 import { processBatch } from "../filter/FilterWorker";
 import { AppConfig } from "../platform/Config";
 import { withMutationAudit } from "../platform/MutationLog";
 import { ExpertsRepo } from "./ExpertsRepo";
+import { ExpertRegistryService } from "./ExpertRegistryService";
 import { KnowledgeRepo } from "./KnowledgeRepo";
 import { OntologyCatalog } from "./OntologyCatalog";
 import { runMigrations } from "../db/migrate";
@@ -32,6 +34,9 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
     readonly loadSmokeFixture: (
       actor: AccessIdentity
     ) => Effect.Effect<LoadSmokeFixtureResult, SqlError | DbError>;
+    readonly refreshProfiles: (
+      actor: AccessIdentity
+    ) => Effect.Effect<RefreshProfilesResult, SqlError | DbError>;
   }
 >() {
   static readonly layer = Layer.effect(
@@ -40,6 +45,7 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
       const config = yield* AppConfig;
       const sql = yield* SqlClient.SqlClient;
       const expertsRepo = yield* ExpertsRepo;
+      const registry = yield* ExpertRegistryService;
       const knowledgeRepo = yield* KnowledgeRepo;
       const ontology = yield* OntologyCatalog;
 
@@ -139,10 +145,57 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
         );
       });
 
+      const refreshProfiles = Effect.fn("StagingOpsService.refreshProfiles")(function* (
+        actor: AccessIdentity
+      ) {
+        const program = Effect.gen(function* () {
+          const activeExperts = yield* expertsRepo.listActive();
+          let updated = 0;
+          let failed = 0;
+
+          yield* Effect.forEach(
+            activeExperts,
+            (expert) =>
+              registry.refreshExpertProfile(expert.did).pipe(
+                Effect.tap(() =>
+                  Effect.sync(() => { updated++; })
+                ),
+                Effect.catchAll((error) =>
+                  Effect.logWarning("failed to refresh expert profile").pipe(
+                    Effect.annotateLogs({
+                      did: expert.did,
+                      error: String(error)
+                    }),
+                    Effect.tap(() =>
+                      Effect.sync(() => { failed++; })
+                    )
+                  )
+                )
+              ),
+            { concurrency: 3 }
+          );
+
+          return { updated, failed } satisfies RefreshProfilesResult;
+        });
+
+        return yield* program.pipe(
+          withMutationAudit({
+            label: MUTATION_LABEL,
+            actor,
+            action: "refresh_profiles",
+            onSuccess: (result) => ({
+              updated: result.updated,
+              failed: result.failed
+            })
+          })
+        );
+      });
+
       return StagingOpsService.of({
         migrate,
         bootstrapExperts: bootstrapCheckedInExperts,
-        loadSmokeFixture
+        loadSmokeFixture,
+        refreshProfiles
       });
     })
   );

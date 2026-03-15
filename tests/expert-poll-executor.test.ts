@@ -25,6 +25,7 @@ const makeExpert = (did: Did): ExpertRecord => ({
   handle: "expert.test",
   displayName: "Expert",
   description: null,
+  avatar: null,
   domain: "energy",
   source: "manual",
   sourceRef: null,
@@ -293,6 +294,7 @@ describe("ExpertPollExecutor", () => {
             uri: missingUri,
             did,
             handle: null,
+            avatar: null,
             text: "solar stale",
             createdAt: Date.UTC(2026, 2, 8, 8, 30, 0),
             topics: ["solar"]

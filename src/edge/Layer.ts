@@ -66,7 +66,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         configLayer,
         ontologyLayer,
         expertsLayer,
-        knowledgeLayer
+        knowledgeLayer,
+        registryLayer
       )
     )
   );

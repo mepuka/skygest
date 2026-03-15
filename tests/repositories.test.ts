@@ -1,8 +1,9 @@
 import { SqlClient } from "@effect/sql";
-import { Effect } from "effect";
+import { Effect, Schema } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { bootstrapExperts } from "../src/bootstrap/ExpertSeeds";
 import { runMigrations } from "../src/db/migrate";
+import { RankedKnowledgePostResult } from "../src/domain/bi";
 import { processBatch } from "../src/filter/FilterWorker";
 import { ExpertsRepo } from "../src/services/ExpertsRepo";
 import { KnowledgeRepo } from "../src/services/KnowledgeRepo";
@@ -121,6 +122,50 @@ describe("repository layers", () => {
       // so test with the exact stored term to verify FTS5 works at all
       const stored = yield* repo.searchPosts({ query: "transmission", limit: 10 });
       expect(stored.length).toBeGreaterThan(0);
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
+  it.effect("expert avatar round-trips through ExpertsRepo", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      yield* bootstrapExperts(seedManifest, 1, 1_710_000_000_000);
+
+      const experts = yield* ExpertsRepo;
+      const stored = yield* experts.getByDid(sampleDid);
+
+      // Bootstrapped experts have null avatars
+      expect(stored?.avatar).toBeNull();
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
+  it.effect("link imageUrl round-trips through KnowledgeRepo", () =>
+    Effect.gen(function* () {
+      yield* seedKnowledgeBase();
+      const repo = yield* KnowledgeRepo;
+
+      const links = yield* repo.getPostLinks({ limit: 10 });
+      expect(links.length).toBeGreaterThan(0);
+
+      // The solar fixture post has a thumb blob ref, so imageUrl should be non-null
+      const solarLink = links.find((l) => l.url === "https://example.com/solar-storage");
+      expect(solarLink).toBeDefined();
+      expect(solarLink!.imageUrl).not.toBeNull();
+      expect(solarLink!.imageUrl).toContain("cdn.bsky.app");
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
+  it.effect("searchPostsPage returns rows that normalize through RankedKnowledgePostResult", () =>
+    Effect.gen(function* () {
+      yield* seedKnowledgeBase();
+      const repo = yield* KnowledgeRepo;
+
+      const rows = yield* repo.searchPostsPage({ query: "solar", limit: 10 });
+      expect(rows.length).toBeGreaterThan(0);
+
+      // Should already be normalized through the schema — verify by re-decoding
+      const decoded = Schema.decodeUnknownSync(Schema.Array(RankedKnowledgePostResult))(rows);
+      expect(decoded.length).toBe(rows.length);
+      expect(typeof decoded[0]?.rank).toBe("number");
     }).pipe(Effect.provide(makeBiLayer()))
   );
 });

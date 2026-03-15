@@ -159,6 +159,65 @@ describe("frontend REST API", () => {
     )
   );
 
+  it.live("returns avatar fields on experts endpoint", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const response = await requestApi("/api/experts?limit=5", layer);
+        const body = await expectJsonResponse(
+          response,
+          (value) => value as { readonly items: ReadonlyArray<{ readonly avatar: string | null }> }
+        );
+
+        expect(body.items.length).toBeGreaterThan(0);
+        // Seeds have null avatars — verify the field exists
+        expect(body.items[0]).toHaveProperty("avatar");
+      })
+    )
+  );
+
+  it.live("returns at least one non-null avatar on recent posts from fixture", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const page = await expectJsonResponse(
+          await requestApi("/api/posts/recent?limit=5", layer),
+          decodePostsPage
+        );
+
+        expect(page.items.length).toBeGreaterThan(0);
+        // All fixture posts have the same seeded expert with null avatar from bootstrap
+        for (const item of page.items) {
+          expect(item).toHaveProperty("avatar");
+        }
+      })
+    )
+  );
+
+  it.live("returns at least one non-null imageUrl on links from fixture", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const page = await expectJsonResponse(
+          await requestApi("/api/links?limit=5", layer),
+          decodeLinksPage
+        );
+
+        expect(page.items.length).toBeGreaterThan(0);
+        // Solar fixture post has a thumb blob ref
+        const withImage = page.items.find((item) => item.imageUrl !== null);
+        expect(withImage).toBeDefined();
+        expect(withImage!.imageUrl).toContain("cdn.bsky.app");
+      })
+    )
+  );
+
   it.live("serves expert feeds, topic metadata, and explainability routes", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {

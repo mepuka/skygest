@@ -117,7 +117,8 @@ const makeCliLayer = (options?: {
           uri: smokeFixtureUris()[0],
           topics: ["solar"]
         }] as const;
-      })
+      }),
+    refreshProfiles: () => Effect.succeed({ updated: 0, failed: 0 })
   });
   const operatorSecretLayer = options?.operatorSecretLayer ?? Layer.succeed(
     OperatorSecret,
@@ -297,7 +298,8 @@ describe("ops CLI", () => {
             Effect.succeed([{
               uri: smokeFixtureUris()[0],
               topics: ["solar"]
-            }] as const)
+            }] as const),
+          refreshProfiles: () => Effect.succeed({ updated: 0, failed: 0 })
         })
       }).layer;
       const failingRuntimeLayer = Layer.mergeAll(BunContext.layer, failingLayer);
@@ -391,7 +393,8 @@ describe("ops CLI", () => {
             Effect.succeed([{
               uri: smokeFixtureUris()[0],
               topics: ["solar"]
-            }] as const)
+            }] as const),
+          refreshProfiles: () => Effect.succeed({ updated: 0, failed: 0 })
         })
       }).layer;
       const failure = await Effect.runPromise(

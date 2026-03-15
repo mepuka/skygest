@@ -2,7 +2,9 @@ import { Context, Effect, Layer, Schema } from "effect";
 import {
   BootstrapExpertsResult,
   ExpertListOutput,
-  KnowledgePostsOutput
+  KnowledgePostsOutput,
+  LoadSmokeFixtureResult,
+  RefreshProfilesResult
 } from "../domain/bi";
 import {
   IngestQueuedResponse,
@@ -25,15 +27,10 @@ const MigrateResponse = Schema.Struct({
   ok: Schema.Literal(true)
 });
 
-const LoadSmokeFixtureResponse = Schema.Struct({
-  posts: Schema.Number,
-  links: Schema.Number,
-  topics: Schema.Number
-});
-
 const decodeMigrateResponse = decodeJsonStringWith(MigrateResponse);
 const decodeBootstrapExpertsResponse = decodeJsonStringWith(BootstrapExpertsResult);
-const decodeLoadSmokeFixtureResponse = decodeJsonStringWith(LoadSmokeFixtureResponse);
+const decodeLoadSmokeFixtureResponse = decodeJsonStringWith(LoadSmokeFixtureResult);
+const decodeRefreshProfilesResponse = decodeJsonStringWith(RefreshProfilesResult);
 const decodeIngestQueuedResponse = decodeJsonStringWith(IngestQueuedResponse);
 const decodeIngestRepairSummary = decodeJsonStringWith(IngestRepairSummary);
 const decodeIngestRunResponse = decodeJsonStringWith(IngestRunRecord);
@@ -162,6 +159,13 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
       readonly links: number;
       readonly topics: number;
     }, StagingRequestError>;
+    readonly refreshProfiles: (
+      baseUrl: URL,
+      secret: string
+    ) => Effect.Effect<{
+      readonly updated: number;
+      readonly failed: number;
+    }, StagingRequestError>;
     readonly pollIngest: (
       baseUrl: URL,
       secret: string,
@@ -228,6 +232,17 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
             body: encodeJsonString({})
           }),
         decodeLoadSmokeFixtureResponse
+      ),
+    refreshProfiles: (baseUrl, secret) =>
+      requestJson(
+        "refresh-profiles",
+        () =>
+          fetch(endpointUrl(baseUrl, "/admin/ops/refresh-profiles"), {
+            method: "POST",
+            headers: operatorHeaders(secret),
+            body: encodeJsonString({})
+          }),
+        decodeRefreshProfilesResponse
       ),
     pollIngest: (baseUrl, secret, did) =>
       requestJson(

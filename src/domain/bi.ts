@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { AtUri, Did } from "./types";
+import { AtUri, Did, HttpsUrl } from "./types";
 
 export const TopicSlug = Schema.String.pipe(
   Schema.minLength(1),
@@ -38,6 +38,7 @@ export const ExpertRecord = Schema.Struct({
   handle: Schema.NullOr(Schema.String),
   displayName: Schema.NullOr(Schema.String),
   description: Schema.NullOr(Schema.String),
+  avatar: Schema.NullOr(HttpsUrl),
   domain: Schema.String,
   source: ExpertSource,
   sourceRef: Schema.NullOr(Schema.String),
@@ -52,6 +53,7 @@ export const ExpertListItem = Schema.Struct({
   did: Did,
   handle: Schema.NullOr(Schema.String),
   displayName: Schema.NullOr(Schema.String),
+  avatar: Schema.NullOr(HttpsUrl),
   domain: Schema.String,
   source: ExpertSource,
   active: Schema.Boolean
@@ -68,7 +70,8 @@ export const BlueskyProfile = Schema.Struct({
   did: Did,
   handle: Schema.NullOr(Schema.String),
   displayName: Schema.NullOr(Schema.String),
-  description: Schema.NullOr(Schema.String)
+  description: Schema.NullOr(Schema.String),
+  avatar: Schema.NullOr(HttpsUrl)
 });
 export type BlueskyProfile = Schema.Schema.Type<typeof BlueskyProfile>;
 
@@ -148,6 +151,7 @@ export const LinkRecord = Schema.Struct({
   url: Schema.String,
   title: Schema.NullOr(Schema.String),
   description: Schema.NullOr(Schema.String),
+  imageUrl: Schema.NullOr(HttpsUrl),
   domain: Schema.NullOr(Schema.String),
   extractedAt: Schema.Number
 });
@@ -272,6 +276,7 @@ export const KnowledgePostResult = Schema.Struct({
   uri: AtUri,
   did: Did,
   handle: Schema.NullOr(Schema.String),
+  avatar: Schema.NullOr(HttpsUrl),
   text: Schema.String,
   createdAt: Schema.Number,
   topics: Schema.Array(Schema.String),
@@ -285,6 +290,7 @@ export const KnowledgeLinkResult = Schema.Struct({
   domain: Schema.NullOr(Schema.String),
   title: Schema.NullOr(Schema.String),
   description: Schema.NullOr(Schema.String),
+  imageUrl: Schema.NullOr(HttpsUrl),
   createdAt: Schema.Number
 });
 export type KnowledgeLinkResult = Schema.Schema.Type<typeof KnowledgeLinkResult>;
@@ -406,6 +412,7 @@ export const AdminExpertResult = Schema.Struct({
   did: Did,
   handle: Schema.NullOr(Schema.String),
   displayName: Schema.NullOr(Schema.String),
+  avatar: Schema.NullOr(HttpsUrl),
   domain: Schema.String,
   shard: Schema.Number,
   active: Schema.Boolean,
@@ -432,6 +439,20 @@ export const LoadSmokeFixtureResult = Schema.Struct({
   topics: Schema.Number
 });
 export type LoadSmokeFixtureResult = Schema.Schema.Type<typeof LoadSmokeFixtureResult>;
+
+export const RefreshProfilesResult = Schema.Struct({
+  updated: Schema.Number,
+  failed: Schema.Number
+});
+export type RefreshProfilesResult = Schema.Schema.Type<typeof RefreshProfilesResult>;
+
+export const RankedKnowledgePostResult = Schema.extend(
+  KnowledgePostResult,
+  Schema.Struct({
+    rank: Schema.Number
+  })
+);
+export type RankedKnowledgePostResult = Schema.Schema.Type<typeof RankedKnowledgePostResult>;
 
 export class ExpertNotFoundError extends Schema.TaggedError<ExpertNotFoundError>()(
   "ExpertNotFoundError",

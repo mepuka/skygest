@@ -201,6 +201,23 @@ const runStageSmoke = (options: {
     yield* Console.log("Smoke checks passed");
   });
 
+const runStageRefreshProfiles = (options: {
+  readonly env: string;
+  readonly baseUrl: string;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+
+    yield* Console.log(`Refreshing expert profiles at ${options.baseUrl}`);
+    const result = yield* client.refreshProfiles(baseUrl, secret);
+
+    yield* Console.log(
+      `Refreshed profiles: updated=${String(result.updated)} failed=${String(result.failed)}`
+    );
+  });
+
 const runStageRepair = (options: {
   readonly env: string;
   readonly baseUrl: string;
@@ -236,6 +253,12 @@ const smokeCommand = Command.make(
   runStageSmoke
 );
 
+const refreshProfilesCommand = Command.make(
+  "refresh-profiles",
+  { env: envOption, baseUrl: baseUrlOption },
+  runStageRefreshProfiles
+);
+
 const repairCommand = Command.make(
   "repair",
   { env: envOption, baseUrl: baseUrlOption },
@@ -253,7 +276,7 @@ const smokeSearchCommand = Command.make(
 );
 
 const stageCommand = Command.make("stage", {}, () => Effect.void).pipe(
-  Command.withSubcommands([prepareCommand, smokeCommand, smokeSearchCommand, repairCommand])
+  Command.withSubcommands([prepareCommand, smokeCommand, smokeSearchCommand, refreshProfilesCommand, repairCommand])
 );
 
 export const opsCommand = Command.make("ops", {}, () => Effect.void).pipe(

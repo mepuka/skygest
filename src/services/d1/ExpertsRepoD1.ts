@@ -14,6 +14,7 @@ const ExpertListRowSchema = Schema.Struct({
   did: Schema.String,
   handle: Schema.NullOr(Schema.String),
   displayName: Schema.NullOr(Schema.String),
+  avatar: Schema.NullOr(Schema.String),
   domain: Schema.String,
   source: Schema.String,
   active: ActiveFlag
@@ -23,6 +24,7 @@ const ExpertRecordRowSchema = Schema.Struct({
   handle: Schema.NullOr(Schema.String),
   displayName: Schema.NullOr(Schema.String),
   description: Schema.NullOr(Schema.String),
+  avatar: Schema.NullOr(Schema.String),
   domain: Schema.String,
   source: Schema.String,
   sourceRef: Schema.NullOr(Schema.String),
@@ -63,13 +65,14 @@ export const ExpertsRepoD1 = {
         Effect.flatMap((validated) =>
           sql`
             INSERT INTO experts (
-              did, handle, display_name, description, domain,
+              did, handle, display_name, description, avatar, domain,
               source, source_ref, shard, active, added_at, last_synced_at
             ) VALUES (
               ${validated.did},
               ${validated.handle},
               ${validated.displayName},
               ${validated.description},
+              ${validated.avatar},
               ${validated.domain},
               ${validated.source},
               ${validated.sourceRef},
@@ -82,6 +85,7 @@ export const ExpertsRepoD1 = {
               handle = excluded.handle,
               display_name = excluded.display_name,
               description = excluded.description,
+              avatar = excluded.avatar,
               domain = excluded.domain,
               source = excluded.source,
               source_ref = excluded.source_ref,
@@ -104,6 +108,7 @@ export const ExpertsRepoD1 = {
           handle as handle,
           display_name as displayName,
           description as description,
+          avatar as avatar,
           domain as domain,
           source as source,
           source_ref as sourceRef,
@@ -157,6 +162,7 @@ export const ExpertsRepoD1 = {
           handle as handle,
           display_name as displayName,
           description as description,
+          avatar as avatar,
           domain as domain,
           source as source,
           source_ref as sourceRef,
@@ -225,6 +231,7 @@ export const ExpertsRepoD1 = {
           did as did,
           handle as handle,
           display_name as displayName,
+          avatar as avatar,
           domain as domain,
           source as source,
           active as active

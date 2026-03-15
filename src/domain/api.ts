@@ -16,6 +16,7 @@ import {
   LoadSmokeFixtureResult,
   OntologyListTopic,
   OntologyTopicsOutput,
+  RefreshProfilesResult,
   SetExpertActiveInput,
   SetExpertActiveResult,
   TopicSlug
@@ -519,7 +520,8 @@ export const AdminResponseSchemas = {
   setExpertActive: SetExpertActiveResult,
   migrate: Schema.Struct({ ok: Schema.Literal(true) }),
   bootstrapExperts: BootstrapExpertsResult,
-  loadSmokeFixture: LoadSmokeFixtureResult
+  loadSmokeFixture: LoadSmokeFixtureResult,
+  refreshProfiles: RefreshProfilesResult
 } as const;
 
 export const IngestRequestSchemas = {

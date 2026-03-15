@@ -31,9 +31,10 @@ import {
   DeletedKnowledgePost as DeletedKnowledgePostSchema,
   GetPostLinksQueryInput as GetPostLinksQueryInputSchema,
   GetRecentPostsQueryInput as GetRecentPostsQueryInputSchema,
-  KnowledgeLinkResult as KnowledgeLinkResultSchema,
   KnowledgePost as KnowledgePostSchema,
   KnowledgePostResult as KnowledgePostResultSchema,
+  RankedKnowledgePostResult as RankedKnowledgePostResultSchema,
+  KnowledgeLinkResult as KnowledgeLinkResultSchema,
   SearchPostsQueryInput as SearchPostsQueryInputSchema,
   StoredTopicMatch as StoredTopicMatchSchema
 } from "../../domain/bi";
@@ -52,12 +53,23 @@ const PostRowSchema = Schema.Struct({
   uri: Schema.String,
   did: Schema.String,
   handle: Schema.NullOr(Schema.String),
+  avatar: Schema.NullOr(Schema.String),
   text: Schema.String,
   createdAt: Schema.Number,
   topicsCsv: Schema.NullOr(Schema.String)
 });
 const PostRowsSchema = Schema.Array(PostRowSchema);
-const LinkRowsSchema = Schema.Array(KnowledgeLinkResultSchema);
+
+const LinkRowSchema = Schema.Struct({
+  postUri: Schema.String,
+  url: Schema.String,
+  domain: Schema.NullOr(Schema.String),
+  title: Schema.NullOr(Schema.String),
+  description: Schema.NullOr(Schema.String),
+  imageUrl: Schema.NullOr(Schema.String),
+  createdAt: Schema.Number
+});
+const LinkRowsSchema = Schema.Array(LinkRowSchema);
 const StoredTopicMatchRowsSchema = Schema.Array(StoredTopicMatchSchema);
 type PostRow = Schema.Schema.Type<typeof PostRowSchema>;
 
@@ -65,6 +77,7 @@ const SearchPostRowSchema = Schema.Struct({
   uri: Schema.String,
   did: Schema.String,
   handle: Schema.NullOr(Schema.String),
+  avatar: Schema.NullOr(Schema.String),
   text: Schema.String,
   createdAt: Schema.Number,
   topicsCsv: Schema.NullOr(Schema.String),
@@ -74,10 +87,11 @@ const SearchPostRowSchema = Schema.Struct({
 const SearchPostRowsSchema = Schema.Array(SearchPostRowSchema);
 type SearchPostRow = Schema.Schema.Type<typeof SearchPostRowSchema>;
 
-const toSearchPostResult = (row: SearchPostRow): KnowledgePostResult & { readonly rank: number } => ({
-  uri: row.uri as KnowledgePostResult["uri"],
-  did: row.did as KnowledgePostResult["did"],
+const toSearchPostResult = (row: SearchPostRow) => ({
+  uri: row.uri,
+  did: row.did,
   handle: row.handle,
+  avatar: row.avatar,
   text: row.text,
   createdAt: row.createdAt,
   topics: row.topicsCsv === null || row.topicsCsv.length === 0
@@ -99,6 +113,7 @@ const toPostResult = (row: PostRow) => ({
   uri: row.uri,
   did: row.did,
   handle: row.handle,
+  avatar: row.avatar,
   text: row.text,
   createdAt: row.createdAt,
   topics: row.topicsCsv === null || row.topicsCsv.length === 0
@@ -193,12 +208,13 @@ const insertLinks = (sql: SqlClient.SqlClient, post: KnowledgePost) =>
     (link) =>
       sql`
         INSERT OR IGNORE INTO links (
-          post_uri, url, title, description, domain, extracted_at
+          post_uri, url, title, description, image_url, domain, extracted_at
         ) VALUES (
           ${post.uri},
           ${link.url},
           ${link.title},
           ${link.description},
+          ${link.imageUrl},
           ${link.domain},
           ${link.extractedAt}
         )
@@ -280,6 +296,7 @@ const makeUpsertStatements = (
       "url",
       "title",
       "description",
+      "image_url",
       "domain",
       "extracted_at"
     ],
@@ -288,6 +305,7 @@ const makeUpsertStatements = (
       link.url,
       link.title,
       link.description,
+      link.imageUrl,
       link.domain,
       link.extractedAt
     ])
@@ -553,12 +571,13 @@ export const KnowledgeRepoD1 = {
               search.uri as uri,
               search.did as did,
               search.handle as handle,
+              search.avatar as avatar,
               search.text as text,
               search.createdAt as createdAt,
               group_concat(DISTINCT pt.topic_slug) as topicsCsv
             FROM (
               SELECT
-                p.uri, p.did, e.handle, p.text,
+                p.uri, p.did, e.handle, e.avatar, p.text,
                 p.created_at as createdAt,
                 posts_fts.rank as rank
               FROM posts_fts
@@ -568,7 +587,7 @@ export const KnowledgeRepoD1 = {
                 AND ${sql.join(" AND ", false)(postConditions)}
             ) search
             LEFT JOIN post_topics pt ON pt.post_uri = search.uri
-            GROUP BY search.uri, search.did, search.handle, search.text, search.createdAt, search.rank
+            GROUP BY search.uri, search.did, search.handle, search.avatar, search.text, search.createdAt, search.rank
             ORDER BY search.rank, search.createdAt DESC, search.uri ASC
             LIMIT ${validated.limit ?? 20}
           `.pipe(
@@ -619,6 +638,7 @@ export const KnowledgeRepoD1 = {
               search.uri as uri,
               search.did as did,
               search.handle as handle,
+              search.avatar as avatar,
               search.text as text,
               search.createdAt as createdAt,
               group_concat(DISTINCT pt.topic_slug) as topicsCsv,
@@ -626,7 +646,7 @@ export const KnowledgeRepoD1 = {
               search.rank as rank
             FROM (
               SELECT
-                p.uri, p.did, e.handle, p.text,
+                p.uri, p.did, e.handle, e.avatar, p.text,
                 p.created_at as createdAt,
                 snippet(posts_fts, 0, '<mark>', '</mark>', '...', 30) as snippet,
                 posts_fts.rank as rank
@@ -637,7 +657,7 @@ export const KnowledgeRepoD1 = {
                 AND ${sql.join(" AND ", false)(conditions)}
             ) search
             LEFT JOIN post_topics pt ON pt.post_uri = search.uri
-            GROUP BY search.uri, search.did, search.handle, search.text, search.createdAt, search.snippet, search.rank
+            GROUP BY search.uri, search.did, search.handle, search.avatar, search.text, search.createdAt, search.snippet, search.rank
             ORDER BY search.rank, search.createdAt DESC, search.uri ASC
             LIMIT ${validated.limit ?? 20}
           `.pipe(
@@ -648,7 +668,14 @@ export const KnowledgeRepoD1 = {
                 "Failed to decode search post page rows"
               )
             ),
-            Effect.map((rows) => rows.map(toSearchPostResult))
+            Effect.map((rows) => rows.map(toSearchPostResult)),
+            Effect.flatMap((rows) =>
+              decodeWithDbError(
+                Schema.Array(RankedKnowledgePostResultSchema),
+                rows,
+                "Failed to normalize search post page rows"
+              )
+            )
           );
         })
       );
@@ -676,6 +703,7 @@ export const KnowledgeRepoD1 = {
           p.uri as uri,
           p.did as did,
           e.handle as handle,
+          e.avatar as avatar,
           p.text as text,
           p.created_at as createdAt,
           group_concat(DISTINCT pt.topic_slug) as topicsCsv
@@ -683,7 +711,7 @@ export const KnowledgeRepoD1 = {
         JOIN experts e ON e.did = p.did
         LEFT JOIN post_topics pt ON pt.post_uri = p.uri
         WHERE ${sql.join(" AND ", false)(conditions)}
-        GROUP BY p.uri, p.did, e.handle, p.text, p.created_at
+        GROUP BY p.uri, p.did, e.handle, e.avatar, p.text, p.created_at
         ORDER BY p.created_at DESC, p.uri ASC
         LIMIT ${validated.limit ?? 20}
       `.pipe(
@@ -748,6 +776,7 @@ export const KnowledgeRepoD1 = {
           l.domain as domain,
           l.title as title,
           l.description as description,
+          l.image_url as imageUrl,
           l.extracted_at as createdAt
         FROM links l
         JOIN posts p ON p.uri = l.post_uri
@@ -760,6 +789,13 @@ export const KnowledgeRepoD1 = {
             LinkRowsSchema,
             rows,
             "Failed to decode post link rows"
+          )
+        ),
+        Effect.flatMap((rows) =>
+          decodeWithDbError(
+            Schema.Array(KnowledgeLinkResultSchema),
+            rows,
+            "Failed to normalize post link rows"
           )
         )
       );

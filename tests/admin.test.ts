@@ -6,6 +6,7 @@ import type { AccessIdentity } from "../src/auth/AuthService";
 import { bootstrapExperts, computeShard } from "../src/bootstrap/ExpertSeeds";
 import { runMigrations } from "../src/db/migrate";
 import { BlueskyClient } from "../src/bluesky/BlueskyClient";
+import { parseAvatarUrl } from "../src/bluesky/BskyCdn";
 import { Did } from "../src/domain/types";
 import { AppConfig, type AppConfigShape } from "../src/platform/Config";
 import { encodeJsonString } from "../src/platform/Json";
@@ -68,7 +69,8 @@ const makeAdminTestLayer = (options: {
         did: didOrHandle.startsWith("did:") ? decodeDid(didOrHandle) : sampleDid,
         handle: didOrHandle.startsWith("did:") ? "seed.example.com" : didOrHandle,
         displayName: "Seed Expert",
-        description: "Seeded profile"
+        description: "Seeded profile",
+        avatar: parseAvatarUrl("https://cdn.bsky.app/img/avatar/plain/did:plc:test/cid@jpeg")
       }),
     getFollows: () =>
       Effect.succeed({
@@ -116,7 +118,8 @@ describe("admin expert registry routes", () => {
                 did: addedDid,
                 handle: "solar.example.com",
                 displayName,
-                description: "Solar sector operator"
+                description: "Solar sector operator",
+                avatar: parseAvatarUrl("https://cdn.bsky.app/img/avatar/plain/did:plc:solar-operator/cid@jpeg")
               }),
             getFollows: () =>
               Effect.succeed({

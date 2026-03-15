@@ -1,5 +1,19 @@
 import { Schema } from "effect";
 
+const isHttpsUrl = (value: string) => {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
+export const HttpsUrl = Schema.String.pipe(
+  Schema.filter(isHttpsUrl),
+  Schema.brand("HttpsUrl")
+);
+export type HttpsUrl = Schema.Schema.Type<typeof HttpsUrl>;
+
 export const Did = Schema.String.pipe(
   Schema.pattern(/^did:/),
   Schema.brand("Did")

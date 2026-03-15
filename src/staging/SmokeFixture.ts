@@ -30,7 +30,13 @@ export const makeSmokeFixtureBatch = (did = energySeedDid) =>
             external: {
               uri: "https://example.com/solar-storage",
               title: "Solar storage buildout",
-              description: "Battery storage and transmission upgrades"
+              description: "Battery storage and transmission upgrades",
+              thumb: {
+                $type: "blob",
+                ref: { $link: "bafkrei-smoke-solar-thumb" },
+                mimeType: "image/jpeg",
+                size: 54321
+              }
             }
           }
         },

@@ -124,6 +124,7 @@ export const materializeExperts = (
     handle: expert.handle ?? null,
     displayName: expert.displayName ?? null,
     description: expert.description ?? null,
+    avatar: null,
     domain: manifest.domain,
     source: expert.source,
     sourceRef: expert.sourceRef ?? null,

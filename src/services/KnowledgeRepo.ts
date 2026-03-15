@@ -13,6 +13,7 @@ import type {
   KnowledgeLinkResult,
   KnowledgePost,
   KnowledgePostResult,
+  RankedKnowledgePostResult,
   SearchPostsQueryInput,
   StoredTopicMatch
 } from "../domain/bi";
@@ -42,7 +43,7 @@ export class KnowledgeRepo extends Context.Tag("@skygest/KnowledgeRepo")<
     ) => Effect.Effect<ReadonlyArray<StoredTopicMatch>, SqlError | DbError>;
     readonly searchPostsPage: (
       input: SearchPostsPageQueryInput
-    ) => Effect.Effect<ReadonlyArray<KnowledgePostResult & { readonly rank: number }>, SqlError | DbError>;
+    ) => Effect.Effect<ReadonlyArray<RankedKnowledgePostResult>, SqlError | DbError>;
     readonly optimizeFts: () => Effect.Effect<void, SqlError | DbError>;
   }
 >() {}

@@ -1,5 +1,7 @@
 import { Array as Arr, Either, Option, ParseResult, Schema } from "effect";
 import type { LinkRecord } from "../domain/bi";
+import type { Did } from "../domain/types";
+import { extractBlobCid, feedThumbnailUrl } from "./BskyCdn";
 
 const LinkFeature = Schema.Struct({
   $type: Schema.Literal("app.bsky.richtext.facet#link"),
@@ -16,7 +18,8 @@ const Facet = Schema.Struct({
 const ExternalEmbed = Schema.Struct({
   uri: Schema.String,
   title: Schema.String,
-  description: Schema.String
+  description: Schema.String,
+  thumb: Schema.optional(Schema.Unknown)
 });
 
 const RecordEmbed = Schema.Struct({
@@ -52,7 +55,8 @@ export type BlueskyPostRecord = Schema.Schema.Type<typeof BlueskyPostRecord>;
 const EmbeddedExternal = Schema.Struct({
   uri: Schema.optional(Schema.String),
   title: Schema.optional(Schema.String),
-  description: Schema.optional(Schema.String)
+  description: Schema.optional(Schema.String),
+  thumb: Schema.optional(Schema.Unknown)
 });
 
 const EmbeddedRecord = Schema.Struct({
@@ -142,6 +146,7 @@ const hostnameFor = (value: string): string | null => {
 
 export const extractLinkRecords = (
   record: SlimPostRecord,
+  did: Did,
   extractedAt: number
 ): ReadonlyArray<LinkRecord> => {
   const urls = new Set<string>();
@@ -155,13 +160,22 @@ export const extractLinkRecords = (
     urls.add(externalUri);
   }
 
-  return Array.from(urls).map((url) => ({
-    url,
-    title: record.embed?.external?.uri === url ? record.embed.external.title ?? null : null,
-    description: record.embed?.external?.uri === url ? record.embed.external.description ?? null : null,
-    domain: hostnameFor(url),
-    extractedAt
-  }));
+  const thumbCid = record.embed?.external?.thumb
+    ? extractBlobCid(record.embed.external.thumb)
+    : null;
+  const thumbnailUrl = thumbCid !== null ? feedThumbnailUrl(did, thumbCid) : null;
+
+  return Array.from(urls).map((url) => {
+    const isExternalEmbed = record.embed?.external?.uri === url;
+    return {
+      url,
+      title: isExternalEmbed ? record.embed!.external!.title ?? null : null,
+      description: isExternalEmbed ? record.embed!.external!.description ?? null : null,
+      imageUrl: isExternalEmbed ? thumbnailUrl : null,
+      domain: hostnameFor(url),
+      extractedAt
+    };
+  });
 };
 
 export const collectMetadataTexts = (record: SlimPostRecord): ReadonlyArray<string> =>
