@@ -31,6 +31,11 @@ export const PublicReadApi = HttpApi.make("public-read")
           .setPath(PublicReadRequestSchemas.postUriPath)
           .addSuccess(PublicReadResponseSchemas.explainedTopics)
       )
+      .add(
+        HttpApiEndpoint.get("curated", "/posts/curated")
+          .setUrlParams(PublicReadRequestSchemas.curatedFeed)
+          .addSuccess(PublicReadResponseSchemas.curatedPostsPage)
+      )
   )
   .add(
     HttpApiGroup.make("links")

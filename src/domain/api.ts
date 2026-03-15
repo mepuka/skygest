@@ -41,7 +41,8 @@ import {
   RemoveEditorialPickInput,
   SubmitEditorialPickOutput,
   RemoveEditorialPickOutput,
-  EditorialPicksOutput
+  EditorialPicksOutput,
+  CuratedPostResult
 } from "./editorial";
 import { AtUri, Did } from "./types";
 
@@ -515,6 +516,20 @@ export const ListEditorialPicksUrlParams = Schema.Struct({
 });
 export type ListEditorialPicksUrlParams = Schema.Schema.Type<typeof ListEditorialPicksUrlParams>;
 
+export const GetCuratedFeedUrlParams = Schema.Struct({
+  topic: OptionalString,
+  minScore: OptionalEditorialScoreFromString,
+  since: OptionalNumberFromString,
+  limit: OptionalNumberFromString
+});
+export type GetCuratedFeedUrlParams = Schema.Schema.Type<typeof GetCuratedFeedUrlParams>;
+
+export const CuratedPostsPageOutput = Schema.Struct({
+  items: Schema.Array(CuratedPostResult),
+  page: ApiPage
+});
+export type CuratedPostsPageOutput = Schema.Schema.Type<typeof CuratedPostsPageOutput>;
+
 export const PublicReadRequestSchemas = {
   searchPosts: SearchPostsUrlParams,
   recentPosts: GetRecentPostsPageUrlParams,
@@ -526,7 +541,8 @@ export const PublicReadRequestSchemas = {
   expandTopic: ExpandTopicUrlParams,
   expertPath: ExpertDidPathParams,
   topicPath: TopicPathParams,
-  postUriPath: PostUriPathParams
+  postUriPath: PostUriPathParams,
+  curatedFeed: GetCuratedFeedUrlParams
 } as const;
 
 export const PublicReadResponseSchemas = {
@@ -537,7 +553,8 @@ export const PublicReadResponseSchemas = {
   topics: OntologyTopicsOutput,
   topic: PublicTopicOutput,
   expandedTopics: ExpandedTopicsOutput,
-  explainedTopics: ExplainPostTopicsOutput
+  explainedTopics: ExplainPostTopicsOutput,
+  curatedPostsPage: CuratedPostsPageOutput
 } as const;
 
 export const AdminRequestSchemas = {

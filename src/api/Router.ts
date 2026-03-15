@@ -24,6 +24,7 @@ import type {
 } from "../domain/api";
 import type { EnvBindings } from "../platform/Env";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
+import { EditorialService } from "../services/EditorialService";
 import { handleWithApiLayer, makeCachedApiHandler } from "../http/ApiSupport";
 import { withHttpErrorMapping } from "../http/ErrorMapping";
 import { PublicReadApi } from "./PublicReadApi";
@@ -100,6 +101,21 @@ const PublicReadHandlers = Layer.mergeAll(
         withReadErrors("/api/posts/:uri/topics", Effect.flatMap(KnowledgeQueryService, (query) =>
           query.explainPostTopics(path.uri)
         ))
+      )
+      .handle("curated", ({ urlParams }) =>
+        withReadErrors("/api/posts/curated", Effect.flatMap(EditorialService, (editorial) =>
+          editorial.getCuratedFeed({
+            topic: urlParams.topic,
+            minScore: urlParams.minScore,
+            since: urlParams.since,
+            limit: urlParams.limit
+          })
+        )).pipe(
+          Effect.map((items) => ({
+            items: Array.from(items),
+            page: { nextCursor: null }
+          }))
+        )
       )
   ),
   HttpApiBuilder.group(PublicReadApi, "links", (handlers) =>
