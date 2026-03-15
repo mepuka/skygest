@@ -15,6 +15,7 @@ describe("phase-one migrations", () => {
         FROM sqlite_master
         WHERE type IN ('table', 'virtual table')
           AND name IN (
+            'editorial_picks',
             'experts',
             'expert_sync_state',
             'expert_sources',
@@ -35,6 +36,7 @@ describe("phase-one migrations", () => {
       `;
 
       expect(rows.map((row) => row.name)).toEqual([
+        "editorial_picks",
         "expert_sources",
         "expert_sync_state",
         "experts",
@@ -56,7 +58,8 @@ describe("phase-one migrations", () => {
         { id: 7, name: "fts_porter_stemming" },
         { id: 8, name: "fts_external_content" },
         { id: 9, name: "expert_avatar_and_link_images" },
-        { id: 10, name: "publications_and_expert_tiers" }
+        { id: 10, name: "publications_and_expert_tiers" },
+        { id: 11, name: "editorial_picks" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );

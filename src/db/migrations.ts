@@ -275,6 +275,29 @@ const migration10: D1Migration = {
   ]
 };
 
+const migration11: D1Migration = {
+  id: 11,
+  name: "editorial_picks",
+  statements: [
+    `CREATE TABLE IF NOT EXISTS editorial_picks (
+      post_uri    TEXT PRIMARY KEY,
+      score       REAL NOT NULL,
+      reason      TEXT NOT NULL,
+      category    TEXT,
+      curator     TEXT NOT NULL,
+      status      TEXT NOT NULL DEFAULT 'active',
+      picked_at   INTEGER NOT NULL,
+      expires_at  INTEGER,
+      FOREIGN KEY (post_uri) REFERENCES posts(uri)
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_editorial_picks_active_score
+      ON editorial_picks(status, score DESC, picked_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_editorial_picks_expires
+      ON editorial_picks(expires_at)
+      WHERE expires_at IS NOT NULL AND status = 'active'`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -285,5 +308,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration7,
   migration8,
   migration9,
-  migration10
+  migration10,
+  migration11
 ];
