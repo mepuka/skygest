@@ -29,6 +29,8 @@ export const normalizeText = (value: string) =>
 export const normalizeHashtag = (value: string) =>
   value.trim().toLowerCase().replace(/^#+/u, "");
 
-/** Strip leading `www.` and lowercase. */
-export const normalizeDomain = (value: string) =>
-  value.trim().toLowerCase().replace(/^www\./u, "");
+/**
+ * Re-export the shared normalizeDomain so existing ontology imports
+ * continue to work without changes.
+ */
+export { normalizeDomain } from "../domain/normalize";

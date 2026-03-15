@@ -24,6 +24,25 @@ type OntologyAnomaly = {
   readonly message: string;
 };
 
+/** Seed tiers only — "unknown" is a runtime-discovered tier, not a build-time tier */
+type PublicationSeedTier = "energy-focused" | "general-outlet";
+
+type PublicationSeed = {
+  readonly hostname: string;
+  readonly tier: PublicationSeedTier;
+};
+
+type PublicationSeedManifest = {
+  readonly ontologyVersion: string;
+  readonly snapshotVersion: string;
+  readonly publications: ReadonlyArray<PublicationSeed>;
+};
+
+type OntologyArtifacts = {
+  readonly snapshot: OntologySnapshotData;
+  readonly publicationsSeed: PublicationSeedManifest;
+};
+
 type OntologySnapshotData = {
   readonly ontologyVersion: string;
   readonly snapshotVersion: string;
@@ -226,6 +245,70 @@ const buildMatcherTermsForConcept = (
   useMatcherSignals
     ? sortStrings([concept.label, ...concept.altLabels])
     : [];
+
+/**
+ * Parse general outlet domains from the General Outlet Breakdown table.
+ * The Author column contains domain-style identifiers (e.g. "bloomberg.com").
+ * Reuses the same table-parsing logic as parseGeneralOutletAuthors.
+ */
+const parseGeneralOutletDomains = (input: string) => {
+  const section = input.match(/### General Outlet Breakdown\s+([\s\S]*?)## Energy-Focused Author Handles/u)?.[1];
+
+  if (section === undefined) {
+    throw new Error("Unable to find General Outlet Breakdown section");
+  }
+
+  return sortStrings(
+    section
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => /^\|/.test(line) && !line.includes("Author") && !line.includes("---"))
+      .map((line) => normalizeDomain(line.split("|")[1] ?? ""))
+  );
+};
+
+const buildPublicationSeed = (
+  derivedStoreFilter: string,
+  ontologyVersion: string,
+  snapshotVersion: string
+): PublicationSeedManifest => {
+  const energyFocusedDomains = parseDomains(derivedStoreFilter);
+  const generalOutletDomains = parseGeneralOutletDomains(derivedStoreFilter);
+
+  const energyFocusedSet = new Set(energyFocusedDomains);
+
+  const publications: Array<PublicationSeed> = energyFocusedDomains.map((hostname) => ({
+    hostname,
+    tier: "energy-focused" as const
+  }));
+
+  for (const hostname of generalOutletDomains) {
+    if (!energyFocusedSet.has(hostname)) {
+      publications.push({ hostname, tier: "general-outlet" as const });
+    }
+  }
+
+  publications.sort((a, b) => a.hostname.localeCompare(b.hostname));
+
+  return {
+    ontologyVersion,
+    snapshotVersion,
+    publications
+  };
+};
+
+export const buildOntologyArtifacts = (
+  input: BuildOntologySnapshotInput
+): OntologyArtifacts => {
+  const snapshot = buildOntologySnapshot(input);
+  const publicationsSeed = buildPublicationSeed(
+    input.derivedStoreFilter,
+    snapshot.ontologyVersion,
+    snapshot.snapshotVersion
+  );
+
+  return { snapshot, publicationsSeed };
+};
 
 export const buildOntologySnapshot = (
   input: BuildOntologySnapshotInput
@@ -438,3 +521,6 @@ export const buildOntologySnapshot = (
 
 export const encodeOntologySnapshot = (snapshot: OntologySnapshotData) =>
   `${JSON.stringify(snapshot, null, 2)}\n`;
+
+export const encodePublicationsSeed = (manifest: PublicationSeedManifest) =>
+  `${JSON.stringify(manifest, null, 2)}\n`;

@@ -1,13 +1,17 @@
 import { resolve } from "node:path";
-import { buildOntologySnapshot, encodeOntologySnapshot } from "../ontology/buildSnapshot";
+import { buildOntologyArtifacts, encodeOntologySnapshot, encodePublicationsSeed } from "../ontology/buildSnapshot";
 
 const repoRoot = resolve(import.meta.dir, "../..");
 const ontologyRoot = process.argv[2] === undefined
   ? resolve(repoRoot, "../ontology_skill/ontologies/energy-news")
   : resolve(repoRoot, process.argv[2]);
-const outputPath = process.argv[3] === undefined
+const snapshotOutputPath = process.argv[3] === undefined
   ? resolve(repoRoot, "config/ontology/energy-snapshot.json")
   : resolve(repoRoot, process.argv[3]);
+const publicationsSeedOutputPath = resolve(
+  snapshotOutputPath,
+  "../publications-seed.json"
+);
 
 const readRequired = async (path: string) => {
   const file = Bun.file(path);
@@ -19,17 +23,20 @@ const readRequired = async (path: string) => {
   return file.text();
 };
 
-const snapshot = buildOntologySnapshot({
+const { snapshot, publicationsSeed } = buildOntologyArtifacts({
   ttl: await readRequired(resolve(ontologyRoot, "release/energy-news-reference-individuals.ttl")),
   derivedStoreFilter: await readRequired(resolve(ontologyRoot, "docs/derived-store-filter.md")),
   owlJson: await readRequired(resolve(ontologyRoot, "release/energy-news.json"))
 });
 
-await Bun.write(outputPath, encodeOntologySnapshot(snapshot));
+await Bun.write(snapshotOutputPath, encodeOntologySnapshot(snapshot));
+await Bun.write(publicationsSeedOutputPath, encodePublicationsSeed(publicationsSeed));
 
-console.log(`Wrote ontology snapshot to ${outputPath}`);
+console.log(`Wrote ontology snapshot to ${snapshotOutputPath}`);
+console.log(`Wrote publications seed to ${publicationsSeedOutputPath}`);
 console.log(`ontologyVersion=${snapshot.ontologyVersion}`);
 console.log(`snapshotVersion=${snapshot.snapshotVersion}`);
 console.log(`canonicalTopics=${snapshot.canonicalTopics.length}`);
 console.log(`concepts=${snapshot.concepts.length}`);
+console.log(`publications=${publicationsSeed.publications.length}`);
 console.log(`anomalies=${snapshot.anomalies.length}`);

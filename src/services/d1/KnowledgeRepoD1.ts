@@ -39,6 +39,7 @@ import {
   StoredTopicMatch as StoredTopicMatchSchema
 } from "../../domain/bi";
 import { stringifyUnknown } from "../../platform/Json";
+import { normalizeDomain } from "../../domain/normalize";
 import { sanitizeFtsQuery } from "../../query/sanitizeFts";
 import { decodeWithDbError } from "./schemaDecode";
 
@@ -54,6 +55,7 @@ const PostRowSchema = Schema.Struct({
   did: Schema.String,
   handle: Schema.NullOr(Schema.String),
   avatar: Schema.NullOr(Schema.String),
+  tier: Schema.optionalWith(Schema.String, { default: () => "independent" }),
   text: Schema.String,
   createdAt: Schema.Number,
   topicsCsv: Schema.NullOr(Schema.String)
@@ -78,6 +80,7 @@ const SearchPostRowSchema = Schema.Struct({
   did: Schema.String,
   handle: Schema.NullOr(Schema.String),
   avatar: Schema.NullOr(Schema.String),
+  tier: Schema.optionalWith(Schema.String, { default: () => "independent" }),
   text: Schema.String,
   createdAt: Schema.Number,
   topicsCsv: Schema.NullOr(Schema.String),
@@ -92,6 +95,7 @@ const toSearchPostResult = (row: SearchPostRow) => ({
   did: row.did,
   handle: row.handle,
   avatar: row.avatar,
+  tier: row.tier,
   text: row.text,
   createdAt: row.createdAt,
   topics: row.topicsCsv === null || row.topicsCsv.length === 0
@@ -114,6 +118,7 @@ const toPostResult = (row: PostRow) => ({
   did: row.did,
   handle: row.handle,
   avatar: row.avatar,
+  tier: row.tier,
   text: row.text,
   createdAt: row.createdAt,
   topics: row.topicsCsv === null || row.topicsCsv.length === 0
@@ -221,6 +226,39 @@ const insertLinks = (sql: SqlClient.SqlClient, post: KnowledgePost) =>
       `.pipe(Effect.asVoid),
     { discard: true }
   );
+
+const insertDiscoveredPublications = (sql: SqlClient.SqlClient, post: KnowledgePost) => {
+  const uniqueDomains = [
+    ...new Set(
+      post.links
+        .map((link) => link.domain)
+        .filter((d): d is string => d !== null && d !== undefined && d.length > 0)
+        .map(normalizeDomain)
+        .filter((d) => d.length > 0)
+    )
+  ];
+
+  if (uniqueDomains.length === 0) {
+    return Effect.void;
+  }
+
+  return Effect.forEach(
+    uniqueDomains,
+    (hostname) =>
+      sql`
+        INSERT OR IGNORE INTO publications (
+          hostname, tier, source, first_seen_at, last_seen_at
+        ) VALUES (
+          ${hostname},
+          'unknown',
+          'discovered',
+          ${post.indexedAt},
+          ${post.indexedAt}
+        )
+      `.pipe(Effect.asVoid),
+    { discard: true }
+  );
+};
 
 const makeBulkInsertStatement = (
   db: D1Database,
@@ -348,6 +386,24 @@ const makeUpsertStatements = (
     db.prepare("DELETE FROM links WHERE post_uri = ?").bind(post.uri),
     ...(topicInsert === null ? [] : [topicInsert]),
     ...(linksInsert === null ? [] : [linksInsert]),
+    ...(() => {
+      const uniqueDomains = [
+        ...new Set(
+          post.links
+            .map((link) => link.domain)
+            .filter((d): d is string => d !== null && d !== undefined && d.length > 0)
+            .map(normalizeDomain)
+            .filter((d) => d.length > 0)
+        )
+      ];
+      const publicationsInsert = makeBulkInsertStatement(
+        db,
+        "publications",
+        ["hostname", "tier", "source", "first_seen_at", "last_seen_at"],
+        uniqueDomains.map((domain) => [domain, "unknown", "discovered", post.indexedAt, post.indexedAt])
+      );
+      return publicationsInsert === null ? [] : [publicationsInsert];
+    })(),
     // 4. Insert new FTS entry AFTER upsert (reads new text from posts)
     db.prepare(`
       INSERT INTO posts_fts(rowid, text)
@@ -466,6 +522,7 @@ export const KnowledgeRepoD1 = {
 
           yield* insertTopics(sql, validated);
           yield* insertLinks(sql, validated);
+          yield* insertDiscoveredPublications(sql, validated);
 
           // Insert new FTS entry AFTER upsert (reads new text)
           yield* sql`
@@ -572,12 +629,13 @@ export const KnowledgeRepoD1 = {
               search.did as did,
               search.handle as handle,
               search.avatar as avatar,
+              search.tier as tier,
               search.text as text,
               search.createdAt as createdAt,
               group_concat(DISTINCT pt.topic_slug) as topicsCsv
             FROM (
               SELECT
-                p.uri, p.did, e.handle, e.avatar, p.text,
+                p.uri, p.did, e.handle, e.avatar, COALESCE(e.tier, 'independent') as tier, p.text,
                 p.created_at as createdAt,
                 posts_fts.rank as rank
               FROM posts_fts
@@ -587,7 +645,7 @@ export const KnowledgeRepoD1 = {
                 AND ${sql.join(" AND ", false)(postConditions)}
             ) search
             LEFT JOIN post_topics pt ON pt.post_uri = search.uri
-            GROUP BY search.uri, search.did, search.handle, search.avatar, search.text, search.createdAt, search.rank
+            GROUP BY search.uri, search.did, search.handle, search.avatar, search.tier, search.text, search.createdAt, search.rank
             ORDER BY search.rank, search.createdAt DESC, search.uri ASC
             LIMIT ${validated.limit ?? 20}
           `.pipe(
@@ -639,6 +697,7 @@ export const KnowledgeRepoD1 = {
               search.did as did,
               search.handle as handle,
               search.avatar as avatar,
+              search.tier as tier,
               search.text as text,
               search.createdAt as createdAt,
               group_concat(DISTINCT pt.topic_slug) as topicsCsv,
@@ -646,7 +705,7 @@ export const KnowledgeRepoD1 = {
               search.rank as rank
             FROM (
               SELECT
-                p.uri, p.did, e.handle, e.avatar, p.text,
+                p.uri, p.did, e.handle, e.avatar, COALESCE(e.tier, 'independent') as tier, p.text,
                 p.created_at as createdAt,
                 snippet(posts_fts, 0, '<mark>', '</mark>', '...', 30) as snippet,
                 posts_fts.rank as rank
@@ -657,7 +716,7 @@ export const KnowledgeRepoD1 = {
                 AND ${sql.join(" AND ", false)(conditions)}
             ) search
             LEFT JOIN post_topics pt ON pt.post_uri = search.uri
-            GROUP BY search.uri, search.did, search.handle, search.avatar, search.text, search.createdAt, search.snippet, search.rank
+            GROUP BY search.uri, search.did, search.handle, search.avatar, search.tier, search.text, search.createdAt, search.snippet, search.rank
             ORDER BY search.rank, search.createdAt DESC, search.uri ASC
             LIMIT ${validated.limit ?? 20}
           `.pipe(
@@ -704,6 +763,7 @@ export const KnowledgeRepoD1 = {
           p.did as did,
           e.handle as handle,
           e.avatar as avatar,
+          COALESCE(e.tier, 'independent') as tier,
           p.text as text,
           p.created_at as createdAt,
           group_concat(DISTINCT pt.topic_slug) as topicsCsv
@@ -711,7 +771,7 @@ export const KnowledgeRepoD1 = {
         JOIN experts e ON e.did = p.did
         LEFT JOIN post_topics pt ON pt.post_uri = p.uri
         WHERE ${sql.join(" AND ", false)(conditions)}
-        GROUP BY p.uri, p.did, e.handle, e.avatar, p.text, p.created_at
+        GROUP BY p.uri, p.did, e.handle, e.avatar, e.tier, p.text, p.created_at
         ORDER BY p.created_at DESC, p.uri ASC
         LIMIT ${validated.limit ?? 20}
       `.pipe(

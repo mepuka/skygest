@@ -17,11 +17,13 @@ import {
 } from "../domain/bi";
 import { BlueskyApiError } from "../domain/errors";
 import type { Did } from "../domain/types";
+import { resolveExpertTier } from "../ontology/expertTier";
 import { AppConfig } from "../platform/Config";
 import { clampLimit } from "../platform/Limit";
 import { withMutationAudit } from "../platform/MutationLog";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { ExpertsRepo } from "./ExpertsRepo";
+import { OntologyCatalog } from "./OntologyCatalog";
 
 const MUTATION_LABEL = "expert registry mutation";
 
@@ -33,7 +35,8 @@ const toAdminExpertResult = (expert: ExpertRecord): AdminExpertResult => ({
   domain: expert.domain,
   shard: expert.shard,
   active: expert.active,
-  source: expert.source
+  source: expert.source,
+  tier: expert.tier
 });
 
 export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryService")<
@@ -71,6 +74,7 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
       const config = yield* AppConfig;
       const expertsRepo = yield* ExpertsRepo;
       const bluesky = yield* BlueskyClient;
+      const ontology = yield* OntologyCatalog;
 
       const shardCount = Math.max(1, Math.trunc(config.ingestShardCount));
 
@@ -101,6 +105,7 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
           const { profile } = options;
           const existing = yield* expertsRepo.getByDid(profile.did);
           const shard = existing?.shard ?? computeShard(profile.did, shardCount);
+          const tier = resolveExpertTier(profile.handle, ontology.snapshot.authorTiers);
           const expert: ExpertRecord = {
             did: profile.did,
             handle: profile.handle,
@@ -112,6 +117,7 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
             sourceRef: options.preserveMetadata && existing ? existing.sourceRef : options.sourceRef,
             shard,
             active: options.preserveMetadata && existing ? existing.active : options.active,
+            tier,
             addedAt: existing?.addedAt ?? Date.now(),
             lastSyncedAt: Date.now()
           };

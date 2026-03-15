@@ -13,6 +13,7 @@ import { encodeJsonString } from "../src/platform/Json";
 import { Logging } from "../src/platform/Logging";
 import { ExpertRegistryService } from "../src/services/ExpertRegistryService";
 import { ExpertsRepo } from "../src/services/ExpertsRepo";
+import { OntologyCatalog } from "../src/services/OntologyCatalog";
 import { ExpertsRepoD1 } from "../src/services/d1/ExpertsRepoD1";
 import {
   makeSqliteLayer,
@@ -89,7 +90,8 @@ const makeAdminTestLayer = (options: {
     configLayer,
     Logging.layer,
     expertsLayer,
-    blueskyLayer
+    blueskyLayer,
+    OntologyCatalog.layer
   );
 
   return Layer.mergeAll(

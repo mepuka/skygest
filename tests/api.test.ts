@@ -312,7 +312,8 @@ describe("frontend REST API", () => {
               canonicalTopicSlugs: [],
               items: []
             }),
-          explainPostTopics: (postUri) => Effect.succeed({ postUri, items: [] })
+          explainPostTopics: (postUri) => Effect.succeed({ postUri, items: [] }),
+          listPublications: () => Effect.succeed([])
         })
       );
       const body = await expectJsonResponse(

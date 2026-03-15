@@ -121,6 +121,23 @@ const deploySelection = (env: string, worker: DeployWorker) =>
     );
   });
 
+const runSeedPublications = (options: {
+  readonly env: string;
+  readonly baseUrl: string;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+
+    yield* Console.log(`Seeding publications for ${options.env} at ${options.baseUrl}`);
+    const result = yield* client.seedPublications(baseUrl, secret);
+
+    yield* Console.log(
+      `Seeded ${result.seeded} publications (snapshot ${result.snapshotVersion})`
+    );
+  });
+
 const runStagePrepare = (options: {
   readonly env: string;
   readonly baseUrl: string;
@@ -275,8 +292,14 @@ const smokeSearchCommand = Command.make(
     })
 );
 
+const seedPublicationsCommand = Command.make(
+  "seed-publications",
+  { env: envOption, baseUrl: baseUrlOption },
+  runSeedPublications
+);
+
 const stageCommand = Command.make("stage", {}, () => Effect.void).pipe(
-  Command.withSubcommands([prepareCommand, smokeCommand, smokeSearchCommand, refreshProfilesCommand, repairCommand])
+  Command.withSubcommands([prepareCommand, smokeCommand, smokeSearchCommand, refreshProfilesCommand, repairCommand, seedPublicationsCommand])
 );
 
 export const opsCommand = Command.make("ops", {}, () => Effect.void).pipe(

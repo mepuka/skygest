@@ -16,6 +16,9 @@ export type OntologyConceptSlug = Schema.Schema.Type<typeof OntologyConceptSlug>
 export const ExpertSource = Schema.Literal("manual", "starter_pack", "list", "network");
 export type ExpertSource = Schema.Schema.Type<typeof ExpertSource>;
 
+export const ExpertTier = Schema.Literal("energy-focused", "general-outlet", "independent");
+export type ExpertTier = Schema.Schema.Type<typeof ExpertTier>;
+
 export const ExpertSeed = Schema.Struct({
   did: Did,
   handle: Schema.optional(Schema.String),
@@ -44,6 +47,7 @@ export const ExpertRecord = Schema.Struct({
   sourceRef: Schema.NullOr(Schema.String),
   shard: Schema.Number,
   active: Schema.Boolean,
+  tier: Schema.optionalWith(ExpertTier, { default: () => "independent" as const }),
   addedAt: Schema.Number,
   lastSyncedAt: Schema.NullOr(Schema.Number)
 });
@@ -56,7 +60,8 @@ export const ExpertListItem = Schema.Struct({
   avatar: Schema.NullOr(HttpsUrl),
   domain: Schema.String,
   source: ExpertSource,
-  active: Schema.Boolean
+  active: Schema.Boolean,
+  tier: Schema.optionalWith(ExpertTier, { default: () => "independent" as const })
 });
 export type ExpertListItem = Schema.Schema.Type<typeof ExpertListItem>;
 
@@ -280,7 +285,8 @@ export const KnowledgePostResult = Schema.Struct({
   text: Schema.String,
   createdAt: Schema.Number,
   topics: Schema.Array(Schema.String),
-  snippet: Schema.optional(Schema.NullOr(Schema.String))
+  snippet: Schema.optional(Schema.NullOr(Schema.String)),
+  tier: Schema.optionalWith(ExpertTier, { default: () => "independent" as const })
 });
 export type KnowledgePostResult = Schema.Schema.Type<typeof KnowledgePostResult>;
 
@@ -416,7 +422,8 @@ export const AdminExpertResult = Schema.Struct({
   domain: Schema.String,
   shard: Schema.Number,
   active: Schema.Boolean,
-  source: ExpertSource
+  source: ExpertSource,
+  tier: Schema.optionalWith(ExpertTier, { default: () => "independent" as const })
 });
 export type AdminExpertResult = Schema.Schema.Type<typeof AdminExpertResult>;
 
@@ -485,3 +492,62 @@ export class McpToolQueryError extends Schema.TaggedError<McpToolQueryError>()(
     error: Schema.Defect
   }
 ) {}
+
+// ---------------------------------------------------------------------------
+// Publications & Expert Tiers (Phase A — Foundation)
+// ---------------------------------------------------------------------------
+
+export const PublicationTier = Schema.Literal("energy-focused", "general-outlet", "unknown");
+export type PublicationTier = Schema.Schema.Type<typeof PublicationTier>;
+
+export const PublicationSource = Schema.Literal("seed", "discovered");
+export type PublicationSource = Schema.Schema.Type<typeof PublicationSource>;
+
+export const PublicationSeed = Schema.Struct({
+  hostname: Schema.String,
+  tier: PublicationTier
+});
+export type PublicationSeed = Schema.Schema.Type<typeof PublicationSeed>;
+
+export const PublicationSeedManifest = Schema.Struct({
+  ontologyVersion: Schema.String,
+  snapshotVersion: Schema.String,
+  publications: Schema.Array(PublicationSeed)
+});
+export type PublicationSeedManifest = Schema.Schema.Type<typeof PublicationSeedManifest>;
+
+export const PublicationRecord = Schema.Struct({
+  hostname: Schema.String,
+  tier: PublicationTier,
+  source: PublicationSource,
+  firstSeenAt: Schema.Number,
+  lastSeenAt: Schema.Number
+});
+export type PublicationRecord = Schema.Schema.Type<typeof PublicationRecord>;
+
+export const PublicationListItem = Schema.Struct({
+  hostname: Schema.String,
+  tier: PublicationTier,
+  source: PublicationSource,
+  postCount: Schema.Number,
+  latestPostAt: Schema.NullOr(Schema.Number)
+});
+export type PublicationListItem = Schema.Schema.Type<typeof PublicationListItem>;
+
+export const ListPublicationsInput = Schema.Struct({
+  tier: Schema.optional(PublicationTier),
+  source: Schema.optional(PublicationSource),
+  limit: Schema.optional(Schema.Number)
+});
+export type ListPublicationsInput = Schema.Schema.Type<typeof ListPublicationsInput>;
+
+export const PublicationListOutput = Schema.Struct({
+  items: Schema.Array(PublicationListItem)
+});
+export type PublicationListOutput = Schema.Schema.Type<typeof PublicationListOutput>;
+
+export const SeedPublicationsResult = Schema.Struct({
+  seeded: Schema.Number,
+  snapshotVersion: Schema.String
+});
+export type SeedPublicationsResult = Schema.Schema.Type<typeof SeedPublicationsResult>;

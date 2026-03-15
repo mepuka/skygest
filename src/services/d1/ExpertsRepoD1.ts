@@ -5,7 +5,8 @@ import {
   ExpertListItem as ExpertListItemSchema,
   ExpertRecord as ExpertRecordSchema,
   type ExpertListItem,
-  type ExpertRecord
+  type ExpertRecord,
+  type ExpertTier
 } from "../../domain/bi";
 import { decodeWithDbError } from "./schemaDecode";
 
@@ -17,7 +18,8 @@ const ExpertListRowSchema = Schema.Struct({
   avatar: Schema.NullOr(Schema.String),
   domain: Schema.String,
   source: Schema.String,
-  active: ActiveFlag
+  active: ActiveFlag,
+  tier: Schema.optionalWith(Schema.NullOr(Schema.String), { default: () => null })
 });
 const ExpertRecordRowSchema = Schema.Struct({
   did: Schema.String,
@@ -30,6 +32,7 @@ const ExpertRecordRowSchema = Schema.Struct({
   sourceRef: Schema.NullOr(Schema.String),
   shard: Schema.Number,
   active: ActiveFlag,
+  tier: Schema.optionalWith(Schema.NullOr(Schema.String), { default: () => null }),
   addedAt: Schema.Number,
   lastSyncedAt: Schema.NullOr(Schema.Number)
 });
@@ -45,11 +48,13 @@ type ExpertListRow = Schema.Schema.Type<typeof ExpertListRowSchema>;
 
 const toExpertRecord = (row: ExpertRecordRow) => ({
   ...row,
-  active: row.active === 1
+  active: row.active === 1,
+  tier: (row.tier ?? "independent") as ExpertTier
 });
 const toExpertListItem = (row: ExpertListRow) => ({
   ...row,
-  active: row.active === 1
+  active: row.active === 1,
+  tier: (row.tier ?? "independent") as ExpertTier
 });
 
 export const ExpertsRepoD1 = {
@@ -66,7 +71,7 @@ export const ExpertsRepoD1 = {
           sql`
             INSERT INTO experts (
               did, handle, display_name, description, avatar, domain,
-              source, source_ref, shard, active, added_at, last_synced_at
+              source, source_ref, shard, active, tier, added_at, last_synced_at
             ) VALUES (
               ${validated.did},
               ${validated.handle},
@@ -78,6 +83,7 @@ export const ExpertsRepoD1 = {
               ${validated.sourceRef},
               ${validated.shard},
               ${validated.active ? 1 : 0},
+              ${validated.tier},
               ${validated.addedAt},
               ${validated.lastSyncedAt}
             )
@@ -91,6 +97,7 @@ export const ExpertsRepoD1 = {
               source_ref = excluded.source_ref,
               shard = excluded.shard,
               active = excluded.active,
+              tier = excluded.tier,
               last_synced_at = excluded.last_synced_at
           `.pipe(Effect.asVoid)
         )
@@ -114,6 +121,7 @@ export const ExpertsRepoD1 = {
           source_ref as sourceRef,
           shard as shard,
           active as active,
+          COALESCE(tier, 'independent') as tier,
           added_at as addedAt,
           last_synced_at as lastSyncedAt
         FROM experts
@@ -168,6 +176,7 @@ export const ExpertsRepoD1 = {
           source_ref as sourceRef,
           shard as shard,
           active as active,
+          COALESCE(tier, 'independent') as tier,
           added_at as addedAt,
           last_synced_at as lastSyncedAt
         FROM experts
@@ -234,7 +243,8 @@ export const ExpertsRepoD1 = {
           avatar as avatar,
           domain as domain,
           source as source,
-          active as active
+          active as active,
+          COALESCE(tier, 'independent') as tier
         FROM experts
         WHERE ${whereClause}
         ORDER BY added_at DESC, did ASC

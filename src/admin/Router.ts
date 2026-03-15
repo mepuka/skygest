@@ -64,6 +64,10 @@ const AdminApi = HttpApi.make("admin")
         HttpApiEndpoint.post("refreshProfiles", "/admin/ops/refresh-profiles")
           .addSuccess(AdminResponseSchemas.refreshProfiles)
       )
+      .add(
+        HttpApiEndpoint.post("seedPublications", "/admin/ops/seed-publications")
+          .addSuccess(AdminResponseSchemas.seedPublications)
+      )
   )
   .addError(BadRequestError)
   .addError(UnauthorizedError)
@@ -157,6 +161,14 @@ const AdminHandlers = Layer.mergeAll(
           const actor = yield* OperatorIdentity;
           const ops = yield* StagingOpsService;
           return yield* ops.refreshProfiles(actor);
+        }))
+      )
+      .handle("seedPublications", () =>
+        withAdminErrors("/admin/ops/seed-publications", Effect.gen(function* () {
+          yield* ensureStagingOpsEnabled;
+          const actor = yield* OperatorIdentity;
+          const ops = yield* StagingOpsService;
+          return yield* ops.seedPublications(actor);
         }))
       )
   )

@@ -1,0 +1,210 @@
+{
+  "ontologyVersion": "0.3.0",
+  "snapshotVersion": "0.3.0-1f1f1b1426bb",
+  "publications": [
+    {
+      "hostname": "apnews.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "arstechnica.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "axios.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "bloomberg.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "bnef.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "canary.media",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "canarymedia.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "carbonbrief.org",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "cleantechnica.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "cnbc.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "economist.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "eenews.net",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "eia.gov",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "electrek.co",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "energy.gov",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "energyintel.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "energymonitor.ai",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "energyvoice.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "ferc.gov",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "financialtimes.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "greentechmedia.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "grist.org",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "heatmap.news",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "iea.org",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "insideclimatenews.org",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "insideevs.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "irena.org",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "latimes.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "latitudemedia.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "npr.org",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "nrel.gov",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "nytimes.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "oilprice.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "platts.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "politico.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "powermag.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "pv-magazine.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "rechargenews.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "renewableenergyworld.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "reuters.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "rtoinsider.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "thedriven.io",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "theguardian.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "thehill.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "utilitydive.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "volts.wtf",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "vox.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "washingtonpost.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "windpowermonthly.com",
+      "tier": "energy-focused"
+    },
+    {
+      "hostname": "wired.com",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "woodmac.com",
+      "tier": "energy-focused"
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import {
   LoadSmokeFixtureResult,
   RefreshProfilesResult
 } from "../domain/bi";
+import { SeedPublicationsResult } from "../domain/bi";
 import {
   IngestQueuedResponse,
   IngestRepairSummary,
@@ -31,6 +32,7 @@ const decodeMigrateResponse = decodeJsonStringWith(MigrateResponse);
 const decodeBootstrapExpertsResponse = decodeJsonStringWith(BootstrapExpertsResult);
 const decodeLoadSmokeFixtureResponse = decodeJsonStringWith(LoadSmokeFixtureResult);
 const decodeRefreshProfilesResponse = decodeJsonStringWith(RefreshProfilesResult);
+const decodeSeedPublicationsResponse = decodeJsonStringWith(SeedPublicationsResult);
 const decodeIngestQueuedResponse = decodeJsonStringWith(IngestQueuedResponse);
 const decodeIngestRepairSummary = decodeJsonStringWith(IngestRepairSummary);
 const decodeIngestRunResponse = decodeJsonStringWith(IngestRunRecord);
@@ -188,6 +190,13 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
       baseUrl: URL,
       secret: string
     ) => Effect.Effect<ReadonlyArray<{ readonly did: string; readonly domain: string }>, StagingRequestError>;
+    readonly seedPublications: (
+      baseUrl: URL,
+      secret: string
+    ) => Effect.Effect<{
+      readonly seeded: number;
+      readonly snapshotVersion: string;
+    }, StagingRequestError>;
     readonly searchPostsMcp: (
       baseUrl: URL,
       secret: string,
@@ -276,6 +285,17 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
             body: encodeJsonString({})
           }),
         decodeIngestRepairSummary
+      ),
+    seedPublications: (baseUrl, secret) =>
+      requestJson(
+        "seed-publications",
+        () =>
+          fetch(endpointUrl(baseUrl, "/admin/ops/seed-publications"), {
+            method: "POST",
+            headers: operatorHeaders(secret),
+            body: encodeJsonString({})
+          }),
+        decodeSeedPublicationsResponse
       ),
     listAdminExperts: (baseUrl, secret) =>
       requestJson(
