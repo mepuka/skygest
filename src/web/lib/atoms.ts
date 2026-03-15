@@ -1,6 +1,8 @@
-import { Atom } from "@effect-atom/atom";
+import { Atom, Result } from "@effect-atom/atom";
 import { Effect } from "effect";
 import { SkygestApi } from "./client.ts";
+import { buildPublicationIndex } from "./publications.ts";
+import type { TopicEntry } from "./types.ts";
 
 export const selectedTopicAtom = Atom.make<string | null>(null).pipe(
   Atom.keepAlive
@@ -13,6 +15,13 @@ export const topicsAtom = SkygestApi.query("topics", "list", {
   Atom.keepAlive
 );
 
+export const publicationsAtom = SkygestApi.query("publications", "list", {
+  urlParams: {}
+}).pipe(
+  Atom.mapResult((res) => buildPublicationIndex(res.items)),
+  Atom.keepAlive
+);
+
 export const postsAtom = SkygestApi.runtime.atom((get) => {
   const topic = get(selectedTopicAtom) ?? undefined;
   return Effect.gen(function* () {
@@ -22,4 +31,31 @@ export const postsAtom = SkygestApi.runtime.atom((get) => {
     });
     return result.items;
   });
+});
+
+export const linksAtom = SkygestApi.runtime.atom((get) => {
+  const topic = get(selectedTopicAtom) ?? undefined;
+  return Effect.gen(function* () {
+    const client = yield* SkygestApi;
+    const result = yield* client.links.list({
+      urlParams: topic !== undefined ? { topic, limit: 100 } : { limit: 100 }
+    });
+    const byPostUri = new Map<string, (typeof result.items)[number]>();
+    for (const link of result.items) {
+      if (!byPostUri.has(link.postUri)) {
+        byPostUri.set(link.postUri, link);
+      }
+    }
+    return byPostUri;
+  });
+});
+
+/** Resolve topic slugs to label entries for OntologyBreadcrumb */
+export const topicLookupAtom = Atom.make((get) => {
+  const items = Result.getOrElse(get(topicsAtom), () => [] as readonly never[]);
+  const map = new Map<string, TopicEntry>();
+  for (const t of items) {
+    map.set(t.slug, { slug: t.slug, label: t.label });
+  }
+  return map;
 });
