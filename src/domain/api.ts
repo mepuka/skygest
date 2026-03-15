@@ -35,6 +35,14 @@ import {
   PollHeadInput,
   PollReconcileInput
 } from "./polling";
+import {
+  EditorialScore,
+  SubmitEditorialPickInput,
+  RemoveEditorialPickInput,
+  SubmitEditorialPickOutput,
+  RemoveEditorialPickOutput,
+  EditorialPicksOutput
+} from "./editorial";
 import { AtUri, Did } from "./types";
 
 const withStatus = <A, I, R>(
@@ -496,6 +504,17 @@ export const ListPublicationsUrlParams = Schema.Struct({
 });
 export type ListPublicationsUrlParams = Schema.Schema.Type<typeof ListPublicationsUrlParams>;
 
+const OptionalEditorialScoreFromString = Schema.optional(
+  Schema.compose(Schema.NumberFromString, EditorialScore)
+);
+
+export const ListEditorialPicksUrlParams = Schema.Struct({
+  minScore: OptionalEditorialScoreFromString,
+  since: OptionalNumberFromString,
+  limit: OptionalNumberFromString
+});
+export type ListEditorialPicksUrlParams = Schema.Schema.Type<typeof ListEditorialPicksUrlParams>;
+
 export const PublicReadRequestSchemas = {
   searchPosts: SearchPostsUrlParams,
   recentPosts: GetRecentPostsPageUrlParams,
@@ -525,7 +544,10 @@ export const AdminRequestSchemas = {
   addExpert: AddExpertInput,
   listExperts: ListExpertsUrlParams,
   setExpertActive: SetExpertActiveInput,
-  expertPath: ExpertDidPathParams
+  expertPath: ExpertDidPathParams,
+  submitEditorialPick: SubmitEditorialPickInput,
+  retractEditorialPick: RemoveEditorialPickInput,
+  listEditorialPicks: ListEditorialPicksUrlParams
 } as const;
 
 export const AdminResponseSchemas = {
@@ -536,7 +558,10 @@ export const AdminResponseSchemas = {
   bootstrapExperts: BootstrapExpertsResult,
   loadSmokeFixture: LoadSmokeFixtureResult,
   refreshProfiles: RefreshProfilesResult,
-  seedPublications: SeedPublicationsResult
+  seedPublications: SeedPublicationsResult,
+  submitEditorialPick: SubmitEditorialPickOutput,
+  retractEditorialPick: RemoveEditorialPickOutput,
+  listEditorialPicks: EditorialPicksOutput
 } as const;
 
 export const IngestRequestSchemas = {

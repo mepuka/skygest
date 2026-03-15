@@ -145,6 +145,16 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
     };
   }
 
+  if (request.method === "POST" && pathname === "/admin/editorial/pick") {
+    return { action: "submit_editorial_pick", scopes: ["editorial:write"] };
+  }
+  if (request.method === "POST" && pathname === "/admin/editorial/retract") {
+    return { action: "retract_editorial_pick", scopes: ["editorial:write"] };
+  }
+  if (request.method === "GET" && pathname === "/admin/editorial/picks") {
+    return { action: "list_editorial_picks", scopes: ["editorial:read"] };
+  }
+
   return {
     action: null,
     scopes: []

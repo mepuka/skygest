@@ -93,7 +93,9 @@ const operatorScopes: ReadonlyArray<string> = [
   "experts:read",
   "experts:write",
   "ops:read",
-  "ops:refresh"
+  "ops:refresh",
+  "editorial:read",
+  "editorial:write"
 ];
 
 export class AuthService extends Context.Tag("@skygest/AuthService")<
