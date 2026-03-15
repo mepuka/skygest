@@ -19,6 +19,8 @@ import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { OntologyCatalog } from "../services/OntologyCatalog";
 import { StagingOpsService } from "../services/StagingOpsService";
 import { ExpertSyncStateRepoD1 } from "../services/d1/ExpertSyncStateRepoD1";
+import { EditorialService } from "../services/EditorialService";
+import { EditorialRepoD1 } from "../services/d1/EditorialRepoD1";
 import { ExpertsRepoD1 } from "../services/d1/ExpertsRepoD1";
 import { IngestRunItemsRepoD1 } from "../services/d1/IngestRunItemsRepoD1";
 import { IngestRunsRepoD1 } from "../services/d1/IngestRunsRepoD1";
@@ -39,18 +41,24 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const expertsLayer = ExpertsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
   const knowledgeLayer = KnowledgeRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
   const publicationsLayer = PublicationsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
+  const editorialRepoLayer = EditorialRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
   const queryRepositoriesLayer = Layer.mergeAll(
     ontologyLayer,
     expertsLayer,
     knowledgeLayer,
-    publicationsLayer
+    publicationsLayer,
+    editorialRepoLayer
+  );
+  const editorialServiceLayer = EditorialService.layer.pipe(
+    Layer.provideMerge(Layer.mergeAll(editorialRepoLayer, configLayer, ontologyLayer))
   );
   const queryLayer = Layer.mergeAll(
     queryRepositoriesLayer,
     configLayer,
     KnowledgeQueryService.layer.pipe(
       Layer.provideMerge(Layer.mergeAll(queryRepositoriesLayer, configLayer))
-    )
+    ),
+    editorialServiceLayer
   );
   const blueskyLayer = BlueskyClientLayer.pipe(
     Layer.provideMerge(configLayer)
@@ -86,7 +94,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     blueskyLayer,
     authLayer,
     registryLayer,
-    stagingOpsLayer
+    stagingOpsLayer,
+    editorialServiceLayer
   );
 
   return {

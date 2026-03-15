@@ -11,8 +11,10 @@ import { processBatch } from "../../src/filter/FilterWorker";
 import { callTool, listTools, type McpToolCall } from "../../src/mcp/Client";
 import { handleMcpRequestWithLayer } from "../../src/mcp/Router";
 import { AppConfig, type AppConfigShape } from "../../src/platform/Config";
+import { EditorialService } from "../../src/services/EditorialService";
 import { OntologyCatalog } from "../../src/services/OntologyCatalog";
 import { KnowledgeQueryService } from "../../src/services/KnowledgeQueryService";
+import { EditorialRepoD1 } from "../../src/services/d1/EditorialRepoD1";
 import { ExpertsRepoD1 } from "../../src/services/d1/ExpertsRepoD1";
 import { KnowledgeRepoD1 } from "../../src/services/d1/KnowledgeRepoD1";
 import { PublicationsRepoD1 } from "../../src/services/d1/PublicationsRepoD1";
@@ -50,18 +52,26 @@ export const makeBiLayer = (options?: {
   const knowledgeLayer = KnowledgeRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
 
   const publicationsLayer = PublicationsRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
+  const editorialRepoLayer = EditorialRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
+  const ontologyLayer = OntologyCatalog.layer;
   const baseLayer = Layer.mergeAll(
     sqliteLayer,
     configLayer,
-    OntologyCatalog.layer,
+    ontologyLayer,
     expertsLayer,
     knowledgeLayer,
-    publicationsLayer
+    publicationsLayer,
+    editorialRepoLayer
+  );
+
+  const editorialServiceLayer = EditorialService.layer.pipe(
+    Layer.provideMerge(Layer.mergeAll(editorialRepoLayer, configLayer, ontologyLayer))
   );
 
   return Layer.mergeAll(
     baseLayer,
-    KnowledgeQueryService.layer.pipe(Layer.provideMerge(baseLayer))
+    KnowledgeQueryService.layer.pipe(Layer.provideMerge(baseLayer)),
+    editorialServiceLayer
   );
 };
 
