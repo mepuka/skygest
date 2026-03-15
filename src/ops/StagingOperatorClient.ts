@@ -4,9 +4,10 @@ import {
   ExpertListOutput,
   KnowledgePostsOutput,
   LoadSmokeFixtureResult,
-  RefreshProfilesResult
+  PublicationListOutput,
+  RefreshProfilesResult,
+  SeedPublicationsResult
 } from "../domain/bi";
-import { SeedPublicationsResult } from "../domain/bi";
 import {
   IngestQueuedResponse,
   IngestRepairSummary,
@@ -36,6 +37,7 @@ const decodeSeedPublicationsResponse = decodeJsonStringWith(SeedPublicationsResu
 const decodeIngestQueuedResponse = decodeJsonStringWith(IngestQueuedResponse);
 const decodeIngestRepairSummary = decodeJsonStringWith(IngestRepairSummary);
 const decodeIngestRunResponse = decodeJsonStringWith(IngestRunRecord);
+const decodePublicationsResponse = decodeJsonStringWith(PublicationListOutput);
 const decodeAdminExpertsJsonResponse = decodeJsonStringWith(ExpertListOutput);
 const decodeSearchPostsResponse = decodeCallToolResultWith(KnowledgePostsOutput);
 const decodeMcpExpertsResponse = decodeCallToolResultWith(ExpertListOutput);
@@ -197,6 +199,10 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
       readonly seeded: number;
       readonly snapshotVersion: string;
     }, StagingRequestError>;
+    readonly listPublications: (
+      baseUrl: URL,
+      secret: string
+    ) => Effect.Effect<ReadonlyArray<{ readonly hostname: string; readonly tier: string; readonly postCount: number }>, StagingRequestError>;
     readonly searchPostsMcp: (
       baseUrl: URL,
       secret: string,
@@ -318,6 +324,15 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
           arguments: { domain: "energy" }
         },
         (text) => decodeMcpExpertsResponse(text).items
+      ),
+    listPublications: (baseUrl, secret) =>
+      requestJson(
+        "list-publications",
+        () =>
+          fetch(endpointUrl(baseUrl, "/api/publications?limit=100"), {
+            headers: { "x-skygest-operator-secret": secret }
+          }),
+        (text) => decodePublicationsResponse(text).items
       ),
     searchPostsMcp: (baseUrl, secret, query) =>
       callMcpTool(

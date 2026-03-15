@@ -215,6 +215,18 @@ const runStageSmoke = (options: {
       "expected MCP search_posts to return the deterministic smoke fixture hit"
     );
 
+    const publications = yield* client.listPublications(baseUrl, secret);
+    yield* expectNonEmpty(
+      publications,
+      "expected /api/publications to return at least one publication"
+    );
+
+    const energyPubs = publications.filter((p) => p.tier === "energy-focused");
+    yield* expectCondition(
+      energyPubs.length >= 30,
+      `expected at least 30 energy-focused publications, got ${energyPubs.length}`
+    );
+
     yield* Console.log("Smoke checks passed");
   });
 
