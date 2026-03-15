@@ -3,11 +3,12 @@ import * as HttpLayerRouter from "@effect/platform/HttpLayerRouter";
 import { Layer } from "effect";
 import { makeQueryLayer } from "../edge/Layer";
 import type { EnvBindings } from "../platform/Env";
+import { EditorialService } from "../services/EditorialService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { KnowledgeMcpHandlers, KnowledgeMcpToolkit } from "./Toolkit";
 
 const makeMcpLayer = (
-  queryLayer: Layer.Layer<KnowledgeQueryService, any, never>
+  queryLayer: Layer.Layer<KnowledgeQueryService | EditorialService, any, never>
 ): Layer.Layer<HttpLayerRouter.HttpRouter, any, never> =>
   McpServer.toolkit(KnowledgeMcpToolkit).pipe(
     Layer.provideMerge(
@@ -24,7 +25,7 @@ const makeMcpLayer = (
 
 export const handleMcpRequestWithLayer = async (
   request: Request,
-  layer: Layer.Layer<KnowledgeQueryService, any, never>
+  layer: Layer.Layer<KnowledgeQueryService | EditorialService, any, never>
 ): Promise<Response> => {
   const webHandler = HttpLayerRouter.toWebHandler(makeMcpLayer(layer));
 
@@ -36,7 +37,7 @@ export const handleMcpRequestWithLayer = async (
 };
 
 const makeCachedMcpHandler = <Env extends object>(
-  buildLayer: (env: Env) => Layer.Layer<KnowledgeQueryService, any, never>
+  buildLayer: (env: Env) => Layer.Layer<KnowledgeQueryService | EditorialService, any, never>
 ) => {
   let cached: {
     readonly env: Env;

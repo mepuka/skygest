@@ -20,6 +20,11 @@ import {
   McpToolQueryError,
   SearchPostsInput
 } from "../domain/bi";
+import {
+  ListEditorialPicksInput,
+  EditorialPicksOutput
+} from "../domain/editorial";
+import { EditorialService } from "../services/EditorialService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 
 const toQueryError = (tool: string) => (error: SqlError | DbError) =>
@@ -125,6 +130,18 @@ export const ExplainPostTopicsTool = Tool.make("explain_post_topics", {
   .annotate(Tool.Idempotent, true)
   .annotate(Tool.OpenWorld, false);
 
+export const ListEditorialPicksTool = Tool.make("list_editorial_picks", {
+  description: "List current editorial picks for the curated feed, optionally filtered by minimum score.",
+  parameters: ListEditorialPicksInput.fields,
+  success: EditorialPicksOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "List Editorial Picks")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
+
 export const KnowledgeMcpToolkit = Toolkit.make(
   SearchPostsTool,
   GetRecentPostsTool,
@@ -133,12 +150,14 @@ export const KnowledgeMcpToolkit = Toolkit.make(
   ListTopicsTool,
   GetTopicTool,
   ExpandTopicsTool,
-  ExplainPostTopicsTool
+  ExplainPostTopicsTool,
+  ListEditorialPicksTool
 );
 
 export const KnowledgeMcpHandlers = KnowledgeMcpToolkit.toLayer(
   Effect.gen(function* () {
     const queryService = yield* KnowledgeQueryService;
+    const editorialService = yield* EditorialService;
 
     return KnowledgeMcpToolkit.of({
       search_posts: (input) =>
@@ -178,6 +197,11 @@ export const KnowledgeMcpHandlers = KnowledgeMcpToolkit.toLayer(
       explain_post_topics: (input) =>
         queryService.explainPostTopics(input.postUri).pipe(
           Effect.mapError(toQueryError("explain_post_topics"))
+        ),
+      list_editorial_picks: (input) =>
+        editorialService.listPicks(input).pipe(
+          Effect.map((items) => ({ items })),
+          Effect.mapError(toQueryError("list_editorial_picks"))
         )
     });
   })

@@ -30,6 +30,7 @@ describe("read-only MCP server", () => {
             "get_post_links",
             "get_recent_posts",
             "get_topic",
+            "list_editorial_picks",
             "list_experts",
             "list_topics",
             "search_posts"
