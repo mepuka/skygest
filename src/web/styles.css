@@ -1,0 +1,25 @@
+@import "tailwindcss";
+@source "./**/*.tsx";
+
+@theme {
+  /* Typography */
+  --font-brand: "Instrument Serif", serif;
+  --font-body: "Newsreader", serif;
+  --font-ui: "Inter", system-ui, sans-serif;
+
+  /* Colors — from design tokens */
+  --color-accent: #C45D2C;
+  --color-surface: #FFFFFF;
+  --color-recessed: #FAFAF8;
+  --color-primary: #2A2A26;
+  --color-heading: #1A1A1A;
+  --color-secondary: #6B6B63;
+  --color-ghost: #B0B0A6;
+  --color-mid: #9A9A90;
+  --color-whisper: #C4C4BB;
+  --color-border: #EEEEE9;
+  --color-border-hover: #E8E8E4;
+
+  /* Accent tints */
+  --color-accent-tint: rgba(196, 93, 44, 0.06);
+}
