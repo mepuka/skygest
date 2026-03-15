@@ -42,6 +42,7 @@ import { stringifyUnknown } from "../../platform/Json";
 import { normalizeDomain } from "../../domain/normalize";
 import { sanitizeFtsQuery } from "../../query/sanitizeFts";
 import { decodeWithDbError } from "./schemaDecode";
+import { topicFilterExists } from "./queryFragments";
 
 const isDefined = <A>(value: A | null): value is A => value !== null;
 
@@ -125,18 +126,6 @@ const toPostResult = (row: PostRow) => ({
     ? []
     : row.topicsCsv.split(",").filter((topic) => topic.length > 0)
 });
-
-const topicFilterExists = (
-  sql: SqlClient.SqlClient,
-  topicSlugs: ReadonlyArray<string>
-) => sql`EXISTS (
-  SELECT 1
-  FROM post_topics filter_pt
-  WHERE filter_pt.post_uri = p.uri
-    AND (${sql.join(" OR ", false)(
-      topicSlugs.map((topicSlug) => sql`filter_pt.topic_slug = ${topicSlug}`)
-    )})
-)`;
 
 const searchCursorCondition = (
   sql: SqlClient.SqlClient,
