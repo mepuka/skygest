@@ -236,6 +236,9 @@ export class OntologyCatalog extends Context.Tag("@skygest/OntologyCatalog")<
       slugs: ReadonlyArray<string>,
       mode: OntologyExpandMode
     ) => Effect.Effect<ExpandedTopicsOutputType>;
+    readonly resolveCanonicalTopicSlugs: (
+      topic: string | undefined
+    ) => Effect.Effect<ReadonlyArray<TopicSlug> | undefined>;
   }
 >() {
   static readonly layer = Layer.effect(
@@ -306,7 +309,13 @@ export class OntologyCatalog extends Context.Tag("@skygest/OntologyCatalog")<
         match,
         listTopics,
         getTopic,
-        expandTopics
+        expandTopics,
+        resolveCanonicalTopicSlugs: (topic) => {
+          if (topic === undefined) return Effect.succeed(undefined as ReadonlyArray<TopicSlug> | undefined);
+          return expandTopics([topic], "descendants").pipe(
+            Effect.map((r) => r.canonicalTopicSlugs)
+          );
+        }
       });
     })
   );

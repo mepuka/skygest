@@ -165,7 +165,8 @@ const makeHarness = (options: {
           resolvedSlugs: [],
           canonicalTopicSlugs: [],
           items: []
-        })
+        }),
+      resolveCanonicalTopicSlugs: () => Effect.succeed(undefined)
     })
   );
 

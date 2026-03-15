@@ -92,6 +92,13 @@ const withAdminErrors = <A, R>(
         );
       }
 
+      if (isTaggedError(error, "EditorialPostNotFoundError")) {
+        const postUri = getStringField(error, "postUri");
+        return notFoundError(
+          postUri === undefined ? "post not found" : `post not found: ${postUri}`
+        );
+      }
+
       return toUpstreamFailure()(error);
     }
   });

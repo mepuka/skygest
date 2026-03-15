@@ -88,19 +88,8 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
       const ontology = yield* OntologyCatalog;
       const publicationsRepo = yield* PublicationsRepo;
 
-      const resolveTopicSlugs = Effect.fn("KnowledgeQueryService.resolveTopicSlugs")(function* (
-        topic: string | undefined
-      ) {
-        if (topic === undefined) {
-          return undefined;
-        }
-
-        const expanded = yield* ontology.expandTopics([topic], "descendants");
-        return expanded.canonicalTopicSlugs;
-      });
-
       const searchPosts = Effect.fn("KnowledgeQueryService.searchPosts")(function* (input: SearchPostsInput) {
-        const topicSlugs = yield* resolveTopicSlugs(input.topic);
+        const topicSlugs = yield* ontology.resolveCanonicalTopicSlugs(input.topic);
         return yield* knowledgeRepo.searchPosts({
           query: input.query,
           since: input.since,
@@ -113,7 +102,7 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
       const searchPostsPage = Effect.fn("KnowledgeQueryService.searchPostsPage")(function* (
         input: SearchPostsPageInput
       ) {
-        const topicSlugs = yield* resolveTopicSlugs(input.topic);
+        const topicSlugs = yield* ontology.resolveCanonicalTopicSlugs(input.topic);
         const limit = clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax);
         const rows = yield* knowledgeRepo.searchPostsPage({
           query: input.query,
@@ -136,7 +125,7 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
       });
 
       const getRecentPosts = Effect.fn("KnowledgeQueryService.getRecentPosts")(function* (input: GetRecentPostsInput) {
-        const topicSlugs = yield* resolveTopicSlugs(input.topic);
+        const topicSlugs = yield* ontology.resolveCanonicalTopicSlugs(input.topic);
         return yield* knowledgeRepo.getRecentPosts({
           expertDid: input.expertDid,
           since: input.since,
@@ -150,7 +139,7 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
       const getRecentPostsPage = Effect.fn("KnowledgeQueryService.getRecentPostsPage")(function* (
         input: GetRecentPostsPageInput
       ) {
-        const topicSlugs = yield* resolveTopicSlugs(input.topic);
+        const topicSlugs = yield* ontology.resolveCanonicalTopicSlugs(input.topic);
         const limit = clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax);
         const rows = yield* knowledgeRepo.getRecentPostsPage({
           expertDid: input.expertDid,
@@ -176,7 +165,7 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
       });
 
       const getPostLinks = Effect.fn("KnowledgeQueryService.getPostLinks")(function* (input: GetPostLinksInput) {
-        const topicSlugs = yield* resolveTopicSlugs(input.topic);
+        const topicSlugs = yield* ontology.resolveCanonicalTopicSlugs(input.topic);
         return yield* knowledgeRepo.getPostLinks({
           domain: input.domain,
           since: input.since,
@@ -190,7 +179,7 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
       const getPostLinksPage = Effect.fn("KnowledgeQueryService.getPostLinksPage")(function* (
         input: GetPostLinksPageInput
       ) {
-        const topicSlugs = yield* resolveTopicSlugs(input.topic);
+        const topicSlugs = yield* ontology.resolveCanonicalTopicSlugs(input.topic);
         const limit = clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax);
         const rows = yield* knowledgeRepo.getPostLinksPage({
           domain: input.domain,

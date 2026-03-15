@@ -30,6 +30,7 @@ export const testConfig = (
   operatorSecret: "",
   accessTeamDomain: "https://access.example.com",
   accessAud: "skygest-mcp",
+  editorialDefaultExpiryHours: 24,
   ...overrides
 });
 

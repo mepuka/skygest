@@ -15,6 +15,7 @@ export interface EnvBindings {
   readonly OPERATOR_SECRET?: string;
   readonly ACCESS_TEAM_DOMAIN?: string;
   readonly ACCESS_AUD?: string;
+  readonly EDITORIAL_DEFAULT_EXPIRY_HOURS?: string;
   readonly INGEST_RUN_WORKFLOW?: Workflow<IngestRunParams>;
   readonly EXPERT_POLL_COORDINATOR?: DurableObjectNamespace;
   readonly ONTOLOGY_KV?: KVNamespace;
