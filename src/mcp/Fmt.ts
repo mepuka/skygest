@@ -29,9 +29,10 @@ import type { EditorialPickOutput } from "../domain/editorial.ts";
 
 type SDoc = Doc.Doc<never>;
 
-/** Render a Doc to a plain string with pretty layout at 90-col width. */
+/** Render a Doc to a plain string. Uses compact layout to avoid
+ *  stack overflow on large result sets (pretty layout is recursive). */
 const render = (doc: SDoc): string =>
-  Doc.render(doc, { style: "pretty", options: { lineWidth: 90 } });
+  Doc.render(doc, { style: "compact" });
 
 /** Collapse all whitespace (newlines, tabs, runs of spaces) to single spaces and trim. */
 const collapse = (s: string): string => s.replace(/\s+/g, " ").trim();
@@ -95,7 +96,7 @@ export const formatPosts = (items: ReadonlyArray<KnowledgePostResult>): string =
     ]);
 
     const bodyText = truncate(collapse(p.snippet ?? p.text), 200);
-    const body = Doc.indent(Doc.reflow(bodyText), 5);
+    const body = Doc.text(`     ${bodyText}`);
 
     const uriLine = Doc.text(`     URI: ${p.uri}`);
 
@@ -342,7 +343,7 @@ export const formatEditorialPicks = (items: ReadonlyArray<EditorialPickOutput>):
       Doc.text(formatTimestamp(p.pickedAt))
     ]);
 
-    const reason = Doc.indent(Doc.reflow(truncate(collapse(p.reason), 150)), 5);
+    const reason = Doc.text(`     ${truncate(collapse(p.reason), 150)}`);
     const uri = Doc.text(`     URI: ${p.postUri}`);
 
     return Doc.vsep([header, reason, uri]);
