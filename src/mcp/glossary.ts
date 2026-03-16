@@ -16,6 +16,8 @@ export const GLOSSARY_CONTENT = `# Skygest Knowledge Base — Domain Glossary
 
 **Editorial Pick** — A post selected for the curated feed, annotated with score (0-100), reason, and optional category. The MCP tool returns only active, non-expired picks; status and expiry are managed internally.
 
+**Thread** — A conversation on Bluesky: a chain of reply posts. The \`get_post_thread\` tool fetches ancestors (parent posts), the focus post, and replies with engagement counts (likes, reposts, reply counts). Thread data comes from the live Bluesky API, not the local knowledge store. The \`createdAt\` field is an ISO timestamp from the post record (authored time).
+
 ## Enums
 
 **ExpertTier** — "energy-focused" (dedicated energy journalists/analysts), "general-outlet" (mainstream media), "independent" (default; individual commentators).
@@ -53,5 +55,8 @@ Tool responses include a \`_display\` field with a compact text summary using ad
 - \`[T1]\`, \`[T2]\` — Topics (with slug)
 - \`[M1]\`, \`[M2]\` — Topic match explanations
 - \`[K1]\`, \`[K2]\` — Editorial picks (with postUri)
+- \`[A1]\`, \`[A2]\` — Thread ancestors (oldest first)
+- \`[F]\` — Thread focus post
+- \`[R1]\`, \`[R2]\` — Thread replies
 
 Use \`_display\` for reading results at a glance. Reference items by their identifier from the structured \`items\` array for follow-up tool calls (e.g., \`items[n].uri\` for posts, \`items[n].did\` for experts).`;
