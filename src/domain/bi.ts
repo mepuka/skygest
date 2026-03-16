@@ -551,3 +551,48 @@ export const SeedPublicationsResult = Schema.Struct({
   snapshotVersion: Schema.String
 });
 export type SeedPublicationsResult = Schema.Schema.Type<typeof SeedPublicationsResult>;
+
+// --- Thread expansion ---
+
+export const GetPostThreadInput = Schema.Struct({
+  postUri: AtUri.annotations({
+    description: "AT Protocol URI of the post to get thread context for"
+  }),
+  depth: Schema.optional(
+    Schema.Number.pipe(Schema.int(), Schema.between(0, 10)).annotations({
+      description: "Reply depth levels to include (0-10, default 3)"
+    })
+  ),
+  parentHeight: Schema.optional(
+    Schema.Number.pipe(Schema.int(), Schema.between(0, 10)).annotations({
+      description: "Parent context levels to include (0-10, default 3)"
+    })
+  )
+});
+export type GetPostThreadInput = Schema.Schema.Type<typeof GetPostThreadInput>;
+
+export const ThreadPostPosition = Schema.Literal("ancestor", "focus", "reply");
+export type ThreadPostPosition = Schema.Schema.Type<typeof ThreadPostPosition>;
+
+export const ThreadPostResult = Schema.Struct({
+  uri: AtUri,
+  did: Did,
+  handle: Schema.NullOr(Schema.String),
+  displayName: Schema.NullOr(Schema.String),
+  text: Schema.String,
+  createdAt: Schema.String,
+  replyCount: Schema.NullOr(Schema.Number),
+  repostCount: Schema.NullOr(Schema.Number),
+  likeCount: Schema.NullOr(Schema.Number),
+  quoteCount: Schema.NullOr(Schema.Number),
+  position: ThreadPostPosition
+});
+export type ThreadPostResult = Schema.Schema.Type<typeof ThreadPostResult>;
+
+export const PostThreadOutput = Schema.Struct({
+  focusUri: AtUri,
+  ancestors: Schema.Array(ThreadPostResult),
+  focus: ThreadPostResult,
+  replies: Schema.Array(ThreadPostResult)
+});
+export type PostThreadOutput = Schema.Schema.Type<typeof PostThreadOutput>;
