@@ -19,6 +19,10 @@ class_name = "IngestRunWorkflow"
 name = "EXPERT_POLL_COORDINATOR"
 class_name = "ExpertPollCoordinatorDo"
 
+[[services]]
+binding = "INGEST_SERVICE"
+service = "skygest-bi-ingest"
+
 [vars]
 PUBLIC_BSKY_API = "https://public.api.bsky.app"
 INGEST_SHARD_COUNT = "1"
@@ -57,6 +61,10 @@ class_name = "IngestRunWorkflow"
 [[env.staging.durable_objects.bindings]]
 name = "EXPERT_POLL_COORDINATOR"
 class_name = "ExpertPollCoordinatorDo"
+
+[[env.staging.services]]
+binding = "INGEST_SERVICE"
+service = "skygest-bi-ingest-staging"
 
 # Set with:
 # bunx wrangler secret put OPERATOR_SECRET --config wrangler.agent.toml --env staging

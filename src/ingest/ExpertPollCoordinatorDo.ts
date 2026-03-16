@@ -465,3 +465,8 @@ export class ExpertPollCoordinatorDo extends DurableObject<WorkflowIngestEnvBind
     }
   }
 }
+
+/** Transfer-destination class for worker isolation migration.
+ *  Shares the same implementation; the separate class name avoids
+ *  transferring into the ingest worker's existing ExpertPollCoordinatorDo. */
+export class ExpertPollCoordinatorDoIsolated extends ExpertPollCoordinatorDo {}

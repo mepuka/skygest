@@ -93,3 +93,11 @@ deleted_classes = ["JetstreamIngestorDoV2"]
 [[migrations]]
 tag = "v5"
 new_sqlite_classes = ["ExpertPollCoordinatorDo"]
+
+# Phase C: production DO transfer migration will be added here
+# [[migrations]]
+# tag = "v6"
+# [[migrations.transferred_classes]]
+# from = "ExpertPollCoordinatorDo"
+# from_script = "skygest-bi-agent"
+# to = "ExpertPollCoordinatorDoIsolated"

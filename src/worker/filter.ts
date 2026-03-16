@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { handleIngestRequest, makeWorkflowIngestLayer } from "../ingest/Router";
-import { ExpertPollCoordinatorDo } from "../ingest/ExpertPollCoordinatorDo";
+import { ExpertPollCoordinatorDo, ExpertPollCoordinatorDoIsolated } from "../ingest/ExpertPollCoordinatorDo";
 import { IngestRunWorkflow } from "../ingest/IngestRunWorkflow";
 import { IngestWorkflowLauncher } from "../ingest/IngestWorkflowLauncher";
 import type { WorkflowIngestEnvBindings } from "../platform/Env";
@@ -57,7 +57,7 @@ export const scheduled = async (
   await task;
 };
 
-export { ExpertPollCoordinatorDo, IngestRunWorkflow };
+export { ExpertPollCoordinatorDo, ExpertPollCoordinatorDoIsolated, IngestRunWorkflow };
 
 export default {
   fetch,
