@@ -7,6 +7,7 @@ import { EditorialService } from "../services/EditorialService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { GLOSSARY_CONTENT } from "./glossary";
 import { PromptsLayer } from "./prompts";
+import { toolkitWithDisplayText } from "./registerToolkitWithDisplayText.ts";
 import { KnowledgeMcpHandlers, KnowledgeMcpToolkit } from "./Toolkit";
 
 const GlossaryResource = McpServer.resource({
@@ -21,7 +22,7 @@ const GlossaryResource = McpServer.resource({
 const makeMcpLayer = (
   queryLayer: Layer.Layer<KnowledgeQueryService | EditorialService, any, never>
 ): Layer.Layer<HttpLayerRouter.HttpRouter, any, never> =>
-  McpServer.toolkit(KnowledgeMcpToolkit).pipe(
+  toolkitWithDisplayText(KnowledgeMcpToolkit).pipe(
     Layer.provideMerge(
       KnowledgeMcpHandlers.pipe(Layer.provideMerge(queryLayer))
     ),
