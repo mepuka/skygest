@@ -42,9 +42,9 @@ export const RemoveEditorialPickInput = Schema.Struct({
 export type RemoveEditorialPickInput = Schema.Schema.Type<typeof RemoveEditorialPickInput>;
 
 export const ListEditorialPicksInput = Schema.Struct({
-  minScore: Schema.optional(EditorialScore),
-  since: Schema.optional(Schema.Number),
-  limit: Schema.optional(Schema.Number)
+  minScore: Schema.optional(EditorialScore.annotations({ description: "Minimum editorial score (0-100) to include" })),
+  since: Schema.optional(Schema.Number.annotations({ description: "Filter picks created after this Unix epoch timestamp (milliseconds)" })),
+  limit: Schema.optional(Schema.Number.annotations({ description: "Maximum number of results to return" }))
 });
 export type ListEditorialPicksInput = Schema.Schema.Type<typeof ListEditorialPicksInput>;
 

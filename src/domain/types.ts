@@ -17,13 +17,13 @@ export type HttpsUrl = Schema.Schema.Type<typeof HttpsUrl>;
 export const Did = Schema.String.pipe(
   Schema.pattern(/^did:/),
   Schema.brand("Did")
-);
+).annotations({ description: "Decentralized Identifier, e.g. did:plc:abc123" });
 export type Did = Schema.Schema.Type<typeof Did>;
 
 export const AtUri = Schema.String.pipe(
   Schema.pattern(/^at:\/\//),
   Schema.brand("AtUri")
-);
+).annotations({ description: "AT Protocol URI, e.g. at://did:plc:abc/app.bsky.feed.post/rkey" });
 export type AtUri = Schema.Schema.Type<typeof AtUri>;
 
 export const FeedItem = Schema.Struct({

@@ -188,11 +188,11 @@ export const DeletedKnowledgePost = Schema.Struct({
 export type DeletedKnowledgePost = Schema.Schema.Type<typeof DeletedKnowledgePost>;
 
 export const SearchPostsInput = Schema.Struct({
-  query: Schema.String,
-  topic: Schema.optional(Schema.String),
-  since: Schema.optional(Schema.Number),
-  until: Schema.optional(Schema.Number),
-  limit: Schema.optional(Schema.Number)
+  query: Schema.String.annotations({ description: "Full-text search query" }),
+  topic: Schema.optional(Schema.String.annotations({ description: "Topic slug to filter by, e.g. 'solar' or 'hydrogen'" })),
+  since: Schema.optional(Schema.Number.annotations({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
+  until: Schema.optional(Schema.Number.annotations({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
+  limit: Schema.optional(Schema.Number.annotations({ description: "Maximum number of results to return" }))
 });
 export type SearchPostsInput = Schema.Schema.Type<typeof SearchPostsInput>;
 
@@ -203,12 +203,12 @@ export const KnowledgePostCursor = Schema.Struct({
 export type KnowledgePostCursor = Schema.Schema.Type<typeof KnowledgePostCursor>;
 
 export const GetRecentPostsInput = Schema.Struct({
-  topic: Schema.optional(Schema.String),
+  topic: Schema.optional(Schema.String.annotations({ description: "Topic slug to filter by, e.g. 'solar' or 'hydrogen'" })),
   expertDid: Schema.optional(Did),
-  since: Schema.optional(Schema.Number),
-  until: Schema.optional(Schema.Number),
+  since: Schema.optional(Schema.Number.annotations({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
+  until: Schema.optional(Schema.Number.annotations({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
   cursor: Schema.optional(KnowledgePostCursor),
-  limit: Schema.optional(Schema.Number)
+  limit: Schema.optional(Schema.Number.annotations({ description: "Maximum number of results to return" }))
 });
 export type GetRecentPostsInput = Schema.Schema.Type<typeof GetRecentPostsInput>;
 
@@ -220,12 +220,12 @@ export const KnowledgeLinkCursor = Schema.Struct({
 export type KnowledgeLinkCursor = Schema.Schema.Type<typeof KnowledgeLinkCursor>;
 
 export const GetPostLinksInput = Schema.Struct({
-  domain: Schema.optional(Schema.String),
-  topic: Schema.optional(Schema.String),
-  since: Schema.optional(Schema.Number),
-  until: Schema.optional(Schema.Number),
+  domain: Schema.optional(Schema.String.annotations({ description: "Link hostname to filter by, e.g. 'reuters.com'" })),
+  topic: Schema.optional(Schema.String.annotations({ description: "Topic slug to filter by, e.g. 'solar' or 'hydrogen'" })),
+  since: Schema.optional(Schema.Number.annotations({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
+  until: Schema.optional(Schema.Number.annotations({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
   cursor: Schema.optional(KnowledgeLinkCursor),
-  limit: Schema.optional(Schema.Number)
+  limit: Schema.optional(Schema.Number.annotations({ description: "Maximum number of results to return" }))
 });
 export type GetPostLinksInput = Schema.Schema.Type<typeof GetPostLinksInput>;
 
@@ -259,9 +259,9 @@ export const GetPostLinksQueryInput = Schema.Struct({
 export type GetPostLinksQueryInput = Schema.Schema.Type<typeof GetPostLinksQueryInput>;
 
 export const ListExpertsInput = Schema.Struct({
-  domain: Schema.optional(Schema.String),
-  active: Schema.optional(Schema.Boolean),
-  limit: Schema.optional(Schema.Number)
+  domain: Schema.optional(Schema.String.annotations({ description: "Knowledge domain, e.g. 'energy'" })),
+  active: Schema.optional(Schema.Boolean.annotations({ description: "Filter by active status" })),
+  limit: Schema.optional(Schema.Number.annotations({ description: "Maximum number of results to return" }))
 });
 export type ListExpertsInput = Schema.Schema.Type<typeof ListExpertsInput>;
 
@@ -337,23 +337,23 @@ export const OntologyListTopic = Schema.Struct({
 export type OntologyListTopic = Schema.Schema.Type<typeof OntologyListTopic>;
 
 export const ListTopicsInput = Schema.Struct({
-  view: Schema.optional(OntologyTopicView)
+  view: Schema.optional(OntologyTopicView.annotations({ description: "Topic view: 'facets' for high-level categories, 'concepts' for fine-grained ontology nodes" }))
 });
 export type ListTopicsInput = Schema.Schema.Type<typeof ListTopicsInput>;
 
 export const GetTopicInput = Schema.Struct({
-  slug: Schema.String.pipe(Schema.minLength(1))
+  slug: Schema.String.pipe(Schema.minLength(1)).annotations({ description: "Topic slug to look up" })
 });
 export type GetTopicInput = Schema.Schema.Type<typeof GetTopicInput>;
 
 export const ExpandTopicsInput = Schema.Struct({
-  slugs: Schema.Array(Schema.String.pipe(Schema.minLength(1))),
-  mode: Schema.optional(OntologyExpandMode)
+  slugs: Schema.Array(Schema.String.pipe(Schema.minLength(1))).annotations({ description: "Topic slugs to expand" }),
+  mode: Schema.optional(OntologyExpandMode.annotations({ description: "Expansion mode: 'exact' for direct matches, 'descendants' for narrower sub-topics, 'ancestors' for broader parent topics" }))
 });
 export type ExpandTopicsInput = Schema.Schema.Type<typeof ExpandTopicsInput>;
 
 export const ExplainPostTopicsInput = Schema.Struct({
-  postUri: AtUri
+  postUri: AtUri.annotations({ description: "AT Protocol URI of the post to explain topic matches for" })
 });
 export type ExplainPostTopicsInput = Schema.Schema.Type<typeof ExplainPostTopicsInput>;
 

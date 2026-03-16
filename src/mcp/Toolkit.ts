@@ -35,7 +35,7 @@ const toQueryError = (tool: string) => (error: SqlError | DbError) =>
   });
 
 export const SearchPostsTool = Tool.make("search_posts", {
-  description: "Search stored expert posts using full-text search and optional topic/time filters.",
+  description: "Search expert posts by keyword using full-text search. Supports topic and time range filters. Use this for keyword-based discovery; use get_recent_posts for chronological browsing.",
   parameters: SearchPostsInput.fields,
   success: KnowledgePostsOutput,
   failure: McpToolQueryError
@@ -47,7 +47,7 @@ export const SearchPostsTool = Tool.make("search_posts", {
   .annotate(Tool.OpenWorld, false);
 
 export const GetRecentPostsTool = Tool.make("get_recent_posts", {
-  description: "Get recent posts for the configured knowledge base with optional topic or expert filtering.",
+  description: "Browse posts in reverse chronological order. Filter by topic slug or expert DID. Use this for chronological browsing; use search_posts for keyword matching.",
   parameters: GetRecentPostsInput.fields,
   success: KnowledgePostsOutput,
   failure: McpToolQueryError
@@ -59,7 +59,7 @@ export const GetRecentPostsTool = Tool.make("get_recent_posts", {
   .annotate(Tool.OpenWorld, false);
 
 export const GetPostLinksTool = Tool.make("get_post_links", {
-  description: "List links extracted from stored posts, optionally filtered by link domain or topic.",
+  description: "List URLs shared in expert posts. Filter by link hostname (e.g. 'reuters.com') or topic. Returns title, description, and image metadata for each link.",
   parameters: GetPostLinksInput.fields,
   success: KnowledgeLinksOutput,
   failure: McpToolQueryError
@@ -71,7 +71,7 @@ export const GetPostLinksTool = Tool.make("get_post_links", {
   .annotate(Tool.OpenWorld, false);
 
 export const ListExpertsTool = Tool.make("list_experts", {
-  description: "List experts tracked by the knowledge base.",
+  description: "List domain experts tracked by the knowledge base. Filter by knowledge domain (e.g. 'energy') or active status.",
   parameters: ListExpertsInput.fields,
   success: ExpertListOutput,
   failure: McpToolQueryError
@@ -83,7 +83,7 @@ export const ListExpertsTool = Tool.make("list_experts", {
   .annotate(Tool.OpenWorld, false);
 
 export const ListTopicsTool = Tool.make("list_topics", {
-  description: "List canonical ontology topics or raw ontology concepts available to the knowledge base.",
+  description: "List topics used to classify posts. Use view='facets' for high-level categories (e.g. Solar, Hydrogen, Wind) or view='concepts' for fine-grained ontology nodes.",
   parameters: ListTopicsInput.fields,
   success: OntologyTopicsOutput,
   failure: McpToolQueryError
@@ -95,7 +95,7 @@ export const ListTopicsTool = Tool.make("list_topics", {
   .annotate(Tool.OpenWorld, false);
 
 export const GetTopicTool = Tool.make("get_topic", {
-  description: "Look up a canonical topic or ontology concept by slug.",
+  description: "Look up a single topic by its slug. Returns the topic's label, description, related concepts, and matching terms.",
   parameters: GetTopicInput.fields,
   success: OntologyTopicOutput,
   failure: McpToolQueryError
@@ -107,7 +107,7 @@ export const GetTopicTool = Tool.make("get_topic", {
   .annotate(Tool.OpenWorld, false);
 
 export const ExpandTopicsTool = Tool.make("expand_topics", {
-  description: "Expand ontology topics or concepts into related canonical retrieval topics.",
+  description: "Given topic slugs, find related topics. Use mode='descendants' to get narrower sub-topics, mode='ancestors' to get broader parent topics. Useful for broadening or narrowing a search scope.",
   parameters: ExpandTopicsInput.fields,
   success: ExpandedTopicsOutput,
   failure: McpToolQueryError
@@ -119,7 +119,7 @@ export const ExpandTopicsTool = Tool.make("expand_topics", {
   .annotate(Tool.OpenWorld, false);
 
 export const ExplainPostTopicsTool = Tool.make("explain_post_topics", {
-  description: "Explain why a stored post matched its ontology topics.",
+  description: "Explain why a post was classified under its topics. Shows the matched term, signal type (keyword, hashtag, or domain), and match score for each topic assignment.",
   parameters: ExplainPostTopicsInput.fields,
   success: ExplainPostTopicsOutput,
   failure: McpToolQueryError
@@ -131,7 +131,7 @@ export const ExplainPostTopicsTool = Tool.make("explain_post_topics", {
   .annotate(Tool.OpenWorld, false);
 
 export const ListEditorialPicksTool = Tool.make("list_editorial_picks", {
-  description: "List current editorial picks for the curated feed, optionally filtered by minimum score.",
+  description: "List posts that have been editorially selected for the curated feed. Filter by minimum score (0-100). Returns the post URI, score, reason, category, and curator for each pick.",
   parameters: ListEditorialPicksInput.fields,
   success: EditorialPicksOutput,
   failure: McpToolQueryError
