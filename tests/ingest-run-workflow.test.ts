@@ -43,6 +43,7 @@ const makeExpert = (did: Did) => ({
   sourceRef: null,
   shard: 0,
   active: true,
+  tier: "independent" as const,
   addedAt: 1,
   lastSyncedAt: null
 });

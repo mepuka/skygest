@@ -52,9 +52,7 @@ export class EditorialService extends Context.Tag("@skygest/EditorialService")<
       function* (input: SubmitEditorialPickInput, curator: string) {
         const exists = yield* repo.postExists(input.postUri);
         if (!exists) {
-          return yield* Effect.fail(
-            EditorialPostNotFoundError.make({ postUri: input.postUri })
-          );
+          return yield* EditorialPostNotFoundError.make({ postUri: input.postUri });
         }
         const now = yield* Clock.currentTimeMillis;
         const defaultExpiryHours = Math.max(1, config.editorialDefaultExpiryHours);

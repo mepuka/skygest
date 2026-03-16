@@ -311,7 +311,7 @@ export class OntologyCatalog extends Context.Tag("@skygest/OntologyCatalog")<
         getTopic,
         expandTopics,
         resolveCanonicalTopicSlugs: (topic) => {
-          if (topic === undefined) return Effect.succeed(undefined as ReadonlyArray<TopicSlug> | undefined);
+          if (topic === undefined) return Effect.void as unknown as Effect.Effect<ReadonlyArray<TopicSlug> | undefined>;
           return expandTopics([topic], "descendants").pipe(
             Effect.map((r) => r.canonicalTopicSlugs)
           );

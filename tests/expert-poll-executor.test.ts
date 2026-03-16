@@ -166,7 +166,7 @@ const makeHarness = (options: {
           canonicalTopicSlugs: [],
           items: []
         }),
-      resolveCanonicalTopicSlugs: () => Effect.succeed(undefined)
+      resolveCanonicalTopicSlugs: () => Effect.void as any
     })
   );
 
@@ -299,7 +299,8 @@ describe("ExpertPollExecutor", () => {
             avatar: null,
             text: "solar stale",
             createdAt: Date.UTC(2026, 2, 8, 8, 30, 0),
-            topics: ["solar"]
+            topics: ["solar"],
+            tier: "independent" as const
           }
         ]
       });

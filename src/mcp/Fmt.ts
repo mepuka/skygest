@@ -54,6 +54,27 @@ const formatTimestamp = (epochMs: number): string => {
 };
 
 /**
+ * Format a relative time string like "3h ago", "2d ago", "5mo ago".
+ * Uses the provided `now` to keep output deterministic in tests.
+ */
+const relativeTime = (isoDate: string, now: Date): string => {
+  const then = new Date(isoDate);
+  const diffMs = now.getTime() - then.getTime();
+  if (diffMs < 0) return "just now";
+  const mins = Math.floor(diffMs / 60_000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}mo ago`;
+  const years = Math.floor(months / 12);
+  return `${years}y ago`;
+};
+
+/**
  * Build a human label for an expert / person.
  * Prefer `displayName (@handle)`, fallback to `@handle`, fallback to DID prefix.
  */
@@ -327,8 +348,72 @@ export const formatExplainedPostTopics = (result: ExplainPostTopicsOutput): stri
  *      URI: at://...
  * ```
  */
+/** Thread post shape expected by formatPostThread */
+interface ThreadDisplayPost {
+  handle: string | null;
+  did: string;
+  text: string;
+  createdAt: string;
+  likeCount: number | null;
+  repostCount: number | null;
+  replyCount: number | null;
+  quoteCount: number | null;
+  uri: string;
+  depth: number;
+  parentUri: string | null;
+  embedType: string | null;
+  embedContent?: unknown | null;
+}
+
+/** Render embed content as display lines with appropriate emoji prefixes. */
+const formatEmbedLines = (embedType: string | null, embedContent: unknown | null, indent: string): string[] => {
+  if (!embedType || !embedContent || typeof embedContent !== "object") return [];
+  const ec = embedContent as Record<string, any>;
+  const lines: string[] = [];
+
+  if (embedType === "img" && Array.isArray(ec.images)) {
+    for (const img of ec.images.slice(0, 4)) {
+      const alt = img.alt ? ` (alt: ${truncate(collapse(img.alt), 80)})` : "";
+      lines.push(`${indent}\uD83D\uDCF7 ${img.fullsize}${alt}`);
+    }
+  } else if (embedType === "link" && ec.uri) {
+    const title = ec.title ? ` \u2014 ${truncate(collapse(ec.title), 60)}` : "";
+    lines.push(`${indent}\uD83D\uDD17 ${ec.uri}${title}`);
+  } else if (embedType === "video") {
+    const thumb = ec.thumbnail ? ` (thumb: ${ec.thumbnail})` : "";
+    const alt = ec.alt ? ` (alt: ${truncate(collapse(ec.alt), 80)})` : "";
+    lines.push(`${indent}\uD83C\uDFAC ${ec.playlist ?? "video"}${thumb}${alt}`);
+  } else if (embedType === "quote" && ec.uri) {
+    const author = ec.author ? `@${ec.author}` : "unknown";
+    const text = ec.text ? ` \u00B7 ${truncate(collapse(ec.text), 80)}` : "";
+    lines.push(`${indent}\uD83D\uDCAC ${author}${text} (${ec.uri})`);
+  } else if (embedType === "media") {
+    if (ec.record) {
+      const author = ec.record.author ? `@${ec.record.author}` : "unknown";
+      const text = ec.record.text ? ` \u00B7 ${truncate(collapse(ec.record.text), 60)}` : "";
+      lines.push(`${indent}\uD83D\uDCAC ${author}${text} (${ec.record.uri ?? ""})`);
+    }
+    if (ec.media && typeof ec.media === "object") {
+      const mediaEc = ec.media as Record<string, any>;
+      if (Array.isArray(mediaEc.images)) {
+        lines.push(...formatEmbedLines("img", mediaEc, indent));
+      } else if (mediaEc.uri) {
+        lines.push(...formatEmbedLines("link", mediaEc, indent));
+      } else if (mediaEc.playlist) {
+        lines.push(...formatEmbedLines("video", mediaEc, indent));
+      }
+    }
+  }
+
+  return lines;
+};
+
 /**
  * Format a post thread (ancestors, focus, replies) for MCP display.
+ *
+ * Ancestors: compact single-line with URI inlined.
+ * Focus: expanded with full text.
+ * Replies: depth-indented (2 spaces per depth level), engagement-sorted.
  *
  * Uses plain string concatenation (not Doc) to avoid stack overflow
  * on large thread trees.
@@ -336,56 +421,65 @@ export const formatExplainedPostTopics = (result: ExplainPostTopicsOutput): stri
 export const formatPostThread = (
   result: {
     focusUri: string;
-    ancestors: ReadonlyArray<{ handle: string | null; did: string; text: string; createdAt: string; likeCount: number | null; repostCount: number | null; replyCount: number | null; uri: string }>;
-    focus: { handle: string | null; did: string; text: string; createdAt: string; likeCount: number | null; repostCount: number | null; replyCount: number | null; uri: string };
-    replies: ReadonlyArray<{ handle: string | null; did: string; text: string; createdAt: string; likeCount: number | null; repostCount: number | null; replyCount: number | null; uri: string }>;
+    ancestors: ReadonlyArray<ThreadDisplayPost>;
+    focus: ThreadDisplayPost;
+    replies: ReadonlyArray<ThreadDisplayPost>;
   }
 ): string => {
   const lines: string[] = [];
-  lines.push(`Thread for ${result.focusUri}`);
+  const now = new Date();
+  const retrieved = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}`;
+  lines.push(`Thread for ${result.focusUri} (retrieved ${retrieved})`);
 
+  const engagementStr = (p: ThreadDisplayPost): string => {
+    const parts = [
+      `\u2661${p.likeCount ?? 0}`,
+      `\u21BB${p.repostCount ?? 0}`,
+      `\uD83D\uDCAC${p.replyCount ?? 0}`,
+      `\u275D${p.quoteCount ?? 0}`
+    ];
+    return parts.join(" ");
+  };
+
+  const embedTag = (p: ThreadDisplayPost): string =>
+    p.embedType ? ` [${p.embedType}]` : "";
+
+  // --- Ancestors: compact single-line ---
   if (result.ancestors.length > 0) {
     lines.push("");
     lines.push("--- Ancestors ---");
     for (const [i, a] of result.ancestors.entries()) {
       const handle = a.handle ? `@${a.handle}` : a.did;
-      const engagement = [
-        `\u2661${a.likeCount ?? 0}`,
-        `\u21BB${a.repostCount ?? 0}`,
-        `\uD83D\uDCAC${a.replyCount ?? 0}`
-      ].join(" ");
-      lines.push(`[A${i + 1}] ${handle} \u00B7 ${a.createdAt.slice(0, 10)} \u00B7 ${engagement}`);
-      lines.push(`     ${truncate(collapse(a.text), 150)}`);
-      lines.push(`     URI: ${a.uri}`);
+      const text = truncate(collapse(a.text), 100);
+      const dateStr = `${a.createdAt.slice(0, 10)} (${relativeTime(a.createdAt, now)})`;
+      lines.push(`[A${i + 1}] ${handle} \u00B7 ${dateStr} \u00B7 ${engagementStr(a)}${embedTag(a)} \u00B7 ${text} (${a.uri})`);
     }
   }
 
+  // --- Focus: expanded ---
   lines.push("");
   lines.push("--- Focus ---");
   const f = result.focus;
   const fHandle = f.handle ? `@${f.handle}` : f.did;
-  const fEngagement = [
-    `\u2661${f.likeCount ?? 0}`,
-    `\u21BB${f.repostCount ?? 0}`,
-    `\uD83D\uDCAC${f.replyCount ?? 0}`
-  ].join(" ");
-  lines.push(`[F] ${fHandle} \u00B7 ${f.createdAt.slice(0, 10)} \u00B7 ${fEngagement}`);
+  const fDateStr = `${f.createdAt.slice(0, 10)} (${relativeTime(f.createdAt, now)})`;
+  lines.push(`[F] ${fHandle} \u00B7 ${fDateStr} \u00B7 ${engagementStr(f)}${embedTag(f)}`);
   lines.push(`    ${truncate(collapse(f.text), 200)}`);
+  lines.push(...formatEmbedLines(f.embedType, f.embedContent, "    "));
   lines.push(`    URI: ${f.uri}`);
 
+  // --- Replies: depth-indented ---
   if (result.replies.length > 0) {
     lines.push("");
     lines.push(`--- Replies (${result.replies.length}) ---`);
     for (const [i, r] of result.replies.entries()) {
       const handle = r.handle ? `@${r.handle}` : r.did;
-      const engagement = [
-        `\u2661${r.likeCount ?? 0}`,
-        `\u21BB${r.repostCount ?? 0}`,
-        `\uD83D\uDCAC${r.replyCount ?? 0}`
-      ].join(" ");
-      lines.push(`[R${i + 1}] ${handle} \u00B7 ${r.createdAt.slice(0, 10)} \u00B7 ${engagement}`);
-      lines.push(`     ${truncate(collapse(r.text), 150)}`);
-      lines.push(`     URI: ${r.uri}`);
+      // 2 spaces indent per depth level (depth 1 = 0 indent, depth 2 = 2 spaces, etc.)
+      const indent = "  ".repeat(Math.max(0, r.depth - 1));
+      const text = truncate(collapse(r.text), 150);
+      const rDateStr = `${r.createdAt.slice(0, 10)} (${relativeTime(r.createdAt, now)})`;
+      lines.push(`${indent}[R${i + 1}] ${handle} \u00B7 ${rDateStr} \u00B7 ${engagementStr(r)}${embedTag(r)}`);
+      lines.push(`${indent}     ${text}`);
+      lines.push(...formatEmbedLines(r.embedType, r.embedContent, `${indent}     `));
     }
   }
 

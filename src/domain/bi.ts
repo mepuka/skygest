@@ -574,6 +574,9 @@ export type GetPostThreadInput = Schema.Schema.Type<typeof GetPostThreadInput>;
 export const ThreadPostPosition = Schema.Literal("ancestor", "focus", "reply");
 export type ThreadPostPosition = Schema.Schema.Type<typeof ThreadPostPosition>;
 
+export const ThreadEmbedType = Schema.Literal("link", "img", "quote", "media", "video");
+export type ThreadEmbedType = Schema.Schema.Type<typeof ThreadEmbedType>;
+
 export const ThreadPostResult = Schema.Struct({
   uri: AtUri,
   did: Did,
@@ -585,7 +588,11 @@ export const ThreadPostResult = Schema.Struct({
   repostCount: Schema.NullOr(Schema.Number),
   likeCount: Schema.NullOr(Schema.Number),
   quoteCount: Schema.NullOr(Schema.Number),
-  position: ThreadPostPosition
+  position: ThreadPostPosition,
+  depth: Schema.Number,
+  parentUri: Schema.NullOr(AtUri),
+  embedType: Schema.NullOr(ThreadEmbedType),
+  embedContent: Schema.NullOr(Schema.Unknown)
 });
 export type ThreadPostResult = Schema.Schema.Type<typeof ThreadPostResult>;
 

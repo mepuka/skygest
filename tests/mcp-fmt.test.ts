@@ -588,7 +588,12 @@ describe("formatPostThread", () => {
     likeCount: number | null;
     repostCount: number | null;
     replyCount: number | null;
+    quoteCount: number | null;
     uri: string;
+    depth: number;
+    parentUri: string | null;
+    embedType: string | null;
+    embedContent: unknown | null;
   }> = {}) => ({
     handle: "alice.bsky.social",
     did: "did:plc:abc",
@@ -597,7 +602,12 @@ describe("formatPostThread", () => {
     likeCount: 5,
     repostCount: 2,
     replyCount: 1,
+    quoteCount: 0,
     uri: "at://did:plc:abc/app.bsky.feed.post/1",
+    depth: 0,
+    parentUri: null,
+    embedType: null,
+    embedContent: null,
     ...overrides
   });
 
@@ -609,7 +619,7 @@ describe("formatPostThread", () => {
       replies: []
     });
 
-    expect(out).toContain("Thread for at://did:plc:abc/app.bsky.feed.post/1");
+    expect(out).toContain("Thread for at://did:plc:abc/app.bsky.feed.post/1 (retrieved ");
     expect(out).toContain("--- Focus ---");
     expect(out).toContain("[F]");
     expect(out).toContain("@alice.bsky.social");
@@ -624,8 +634,8 @@ describe("formatPostThread", () => {
     const out = formatPostThread({
       focusUri: "at://did:plc:abc/app.bsky.feed.post/3",
       ancestors: [
-        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/1", text: "First ancestor", handle: "bob.bsky.social" }),
-        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/2", text: "Second ancestor" })
+        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/1", text: "First ancestor", handle: "bob.bsky.social", depth: -2 }),
+        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/2", text: "Second ancestor", depth: -1 })
       ],
       focus: makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/3" }),
       replies: []
@@ -645,8 +655,8 @@ describe("formatPostThread", () => {
       ancestors: [],
       focus: makePost(),
       replies: [
-        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/r1", text: "Reply one" }),
-        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/r2", text: "Reply two" })
+        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/r1", text: "Reply one", depth: 1 }),
+        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/r2", text: "Reply two", depth: 1 })
       ]
     });
 
@@ -655,6 +665,9 @@ describe("formatPostThread", () => {
     expect(out).toContain("Reply one");
     expect(out).toContain("[R2]");
     expect(out).toContain("Reply two");
+    // Replies should include dates for chronological grounding
+    const r1Line = out.split("\n").find(l => l.includes("[R1]"))!;
+    expect(r1Line).toContain("2024-03-09");
   });
 
   it("uses DID when handle is null", () => {
@@ -692,5 +705,190 @@ describe("formatPostThread", () => {
 
     // Should show 0 for null counts
     expect(out).toContain("0");
+  });
+
+  // --- New density tests ---
+
+  it("shows quote count with ❝ symbol", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/1",
+      ancestors: [],
+      focus: makePost({ quoteCount: 3 }),
+      replies: []
+    });
+
+    expect(out).toContain("\u275D3");
+  });
+
+  it("shows embed type tag for focus", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/1",
+      ancestors: [],
+      focus: makePost({ embedType: "link" }),
+      replies: []
+    });
+
+    expect(out).toContain("[link]");
+  });
+
+  it("shows embed type tag for replies", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/1",
+      ancestors: [],
+      focus: makePost(),
+      replies: [
+        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/r1", embedType: "img", depth: 1 })
+      ]
+    });
+
+    expect(out).toContain("[img]");
+  });
+
+  it("indents replies by depth", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/1",
+      ancestors: [],
+      focus: makePost(),
+      replies: [
+        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/r1", text: "Top reply", depth: 1 }),
+        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/r2", text: "Nested reply", depth: 2 }),
+        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/r3", text: "Deep reply", depth: 3 })
+      ]
+    });
+
+    const lines = out.split("\n");
+    // depth 1 = no indent, depth 2 = 2 spaces, depth 3 = 4 spaces
+    const r1Line = lines.find(l => l.includes("[R1]"))!;
+    const r2Line = lines.find(l => l.includes("[R2]"))!;
+    const r3Line = lines.find(l => l.includes("[R3]"))!;
+
+    expect(r1Line).toMatch(/^\[R1\]/);      // no leading spaces
+    expect(r2Line).toMatch(/^  \[R2\]/);     // 2 leading spaces
+    expect(r3Line).toMatch(/^    \[R3\]/);   // 4 leading spaces
+  });
+
+  it("renders image embed content with 📷 prefix and fullsize URL", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/1",
+      ancestors: [],
+      focus: makePost({
+        embedType: "img",
+        embedContent: {
+          images: [
+            { thumb: "https://cdn.bsky.app/thumb/1", fullsize: "https://cdn.bsky.app/full/1", alt: "Solar capacity chart" },
+            { thumb: "https://cdn.bsky.app/thumb/2", fullsize: "https://cdn.bsky.app/full/2", alt: null }
+          ]
+        }
+      }),
+      replies: []
+    });
+
+    expect(out).toContain("\uD83D\uDCF7 https://cdn.bsky.app/full/1 (alt: Solar capacity chart)");
+    expect(out).toContain("\uD83D\uDCF7 https://cdn.bsky.app/full/2");
+  });
+
+  it("renders link embed content with 🔗 prefix and title", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/1",
+      ancestors: [],
+      focus: makePost({
+        embedType: "link",
+        embedContent: {
+          uri: "https://reuters.com/article/solar",
+          title: "Solar capacity hits record",
+          description: "Global solar installations...",
+          thumb: null
+        }
+      }),
+      replies: []
+    });
+
+    expect(out).toContain("\uD83D\uDD17 https://reuters.com/article/solar \u2014 Solar capacity hits record");
+  });
+
+  it("renders video embed content with 🎬 prefix", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/1",
+      ancestors: [],
+      focus: makePost({
+        embedType: "video",
+        embedContent: {
+          playlist: "https://video.bsky.app/watch/did:plc:abc/playlist.m3u8",
+          thumbnail: "https://video.bsky.app/thumb.jpg",
+          alt: "Wind turbine installation timelapse"
+        }
+      }),
+      replies: []
+    });
+
+    expect(out).toContain("\uD83C\uDFAC https://video.bsky.app/watch/did:plc:abc/playlist.m3u8");
+    expect(out).toContain("(thumb: https://video.bsky.app/thumb.jpg)");
+  });
+
+  it("renders quote embed content with 💬 prefix", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/1",
+      ancestors: [],
+      focus: makePost({
+        embedType: "quote",
+        embedContent: {
+          uri: "at://did:plc:xyz/app.bsky.feed.post/99",
+          text: "Original post about grid storage",
+          author: "expert.bsky.social"
+        }
+      }),
+      replies: []
+    });
+
+    expect(out).toContain("\uD83D\uDCAC @expert.bsky.social");
+    expect(out).toContain("Original post about grid storage");
+    expect(out).toContain("(at://did:plc:xyz/app.bsky.feed.post/99)");
+  });
+
+  it("renders embed content on replies with correct indentation", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/1",
+      ancestors: [],
+      focus: makePost(),
+      replies: [
+        makePost({
+          uri: "at://did:plc:abc/app.bsky.feed.post/r1",
+          depth: 2,
+          embedType: "img",
+          embedContent: {
+            images: [{ thumb: "https://cdn.bsky.app/thumb/1", fullsize: "https://cdn.bsky.app/full/1", alt: "Chart" }]
+          }
+        })
+      ]
+    });
+
+    const imgLine = out.split("\n").find(l => l.includes("\uD83D\uDCF7"))!;
+    // depth 2 reply = 2 spaces indent + 5 spaces content indent
+    expect(imgLine).toMatch(/^  {6}\uD83D\uDCF7/);
+  });
+
+  it("renders compact ancestor format with URI inlined", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/2",
+      ancestors: [
+        makePost({
+          uri: "at://did:plc:abc/app.bsky.feed.post/1",
+          text: "Ancestor text",
+          handle: "bob.bsky.social",
+          depth: -1
+        })
+      ],
+      focus: makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/2" }),
+      replies: []
+    });
+
+    // Ancestor should be single-line with URI inlined (not on separate line)
+    const lines = out.split("\n");
+    const a1Line = lines.find(l => l.includes("[A1]"))!;
+    expect(a1Line).toContain("(at://did:plc:abc/app.bsky.feed.post/1)");
+    expect(a1Line).toContain("Ancestor text");
+    // No separate URI line for ancestors
+    const ancestorSection = out.split("--- Focus ---")[0]!;
+    expect(ancestorSection).not.toContain("     URI:");
   });
 });

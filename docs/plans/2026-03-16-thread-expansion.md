@@ -23,10 +23,12 @@
 | `OpenWorld` annotation | true | This tool calls an external API (Bluesky), unlike other tools which query local D1 |
 | Service dependency | `BlueskyClient` directly in MCP handler | Thread data comes from live Bluesky API, not `KnowledgeQueryService` |
 | MCP layer wiring | Add `BlueskyClient` to `makeQueryLayer` (or merge separately into MCP layer) | `makeQueryLayer` currently lacks `blueskyLayer`; MCP handler needs it for `yield* BlueskyClient` |
-| Timestamp source | Extract `createdAt` from `post.record.createdAt` (authored time), not `post.indexedAt` | `indexedAt` is AppView index time; `createdAt` is when the author wrote the post — matches rest of codebase |
+| Timestamp source | Extract `createdAt` from `post.record.createdAt` (authored time), not `post.indexedAt` | `indexedAt` is AppView index time; `createdAt` is when the author wrote the post |
+| `createdAt` format | Keep thread `createdAt` as ISO string from the Bluesky record | The live thread API already returns ISO timestamps; the formatter can slice `YYYY-MM-DD` directly. This differs from D1-backed outputs and should be called out explicitly in the schema docs |
 | Depth bounds | Enforce `Schema.between(0, 10)` in input schema, not just `Math.min` | Prevents negative values passing through |
 | `getPosts` | Deferred to follow-up — not needed for thread expansion | Repeated query params need manual URL construction; unnecessary scope for this plan |
 | Test strategy | Mocked `BlueskyClient` for unit tests; opt-in live smoke test with real public URI | Fixture URIs are synthetic local values, not real public posts |
+| Error mapping | Add MCP error helper that accepts `BlueskyApiError` and passes through `McpToolQueryError` | The existing `toQueryError` helper is typed for SQL / DB errors only; thread expansion needs Bluesky API failures wrapped without double-wrapping local tool errors |
 | Result schema | New `PostThreadOutput` with `ancestors`, `focus`, `replies` arrays | Flat structure for easy LLM consumption; each post has a `position` field |
 
 ---
@@ -153,7 +155,7 @@ return BlueskyClient.of({
 **Commit:**
 ```bash
 git add src/bluesky/BlueskyClient.ts
-git commit -m "feat(thread): add getPostThread + getPosts to BlueskyClient"
+git commit -m "feat(thread): add getPostThread to BlueskyClient"
 ```
 
 ---
@@ -308,6 +310,8 @@ export const PostThreadOutput = Schema.Struct({
 export type PostThreadOutput = Schema.Schema.Type<typeof PostThreadOutput>;
 ```
 
+**`createdAt` convention:** Keep `ThreadPostResult.createdAt` as the authored ISO timestamp from the Bluesky record. This tool is a live API pass-through surface, so using the upstream string timestamp is acceptable even though D1-backed MCP outputs use epoch millis.
+
 ### 4.2 MCP wrapper in `OutputSchemas.ts`
 
 ```typescript
@@ -422,10 +426,29 @@ Add to `KnowledgeMcpToolkit = Toolkit.make(...)`.
 ```typescript
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { flattenThread } from "../bluesky/ThreadFlatten.ts";
+import { BlueskyApiError } from "../domain/errors";
 import { formatPostThread } from "./Fmt.ts";
 
 // In KnowledgeMcpHandlers Effect.gen:
 const bskyClient = yield* BlueskyClient;
+
+const isMcpToolQueryError = (error: unknown): error is McpToolQueryError =>
+  typeof error === "object" &&
+  error !== null &&
+  "_tag" in error &&
+  error._tag === "McpToolQueryError";
+
+const toMcpToolError = (tool: string) =>
+  (
+    error: SqlError | DbError | BlueskyApiError | McpToolQueryError
+  ) =>
+    isMcpToolQueryError(error)
+      ? error
+      : McpToolQueryError.make({
+          tool,
+          message: error.message,
+          error
+        });
 
 // Handler:
 get_post_thread: (input) =>
@@ -451,7 +474,7 @@ get_post_thread: (input) =>
           handle: post.author.handle ?? null,
           displayName: post.author.displayName ?? null,
           text,
-          createdAt: post.indexedAt,
+          createdAt: extractCreatedAt(post.record, post.indexedAt),
           replyCount: post.replyCount ?? null,
           repostCount: post.repostCount ?? null,
           likeCount: post.likeCount ?? null,
@@ -470,7 +493,7 @@ get_post_thread: (input) =>
 
       return Effect.succeed(result);
     }),
-    Effect.mapError(toQueryError("get_post_thread"))
+    Effect.mapError(toMcpToolError("get_post_thread"))
   ),
 ```
 
@@ -482,8 +505,12 @@ get_post_thread: (input) =>
 - Option A: Widen `makeQueryLayer` to include `blueskyLayer` (simplest — BlueskyClient is stateless and cheap)
 - Option B: Merge `blueskyLayer` separately into `makeMcpLayer` composition in `Router.ts`
 
-Option A is preferred — add `blueskyLayer` to `queryLayer` in `buildSharedWorkerParts`:
+Option A is preferred — move `blueskyLayer` above `queryLayer`, then add it to `queryLayer` in `buildSharedWorkerParts`:
 ```typescript
+const blueskyLayer = BlueskyClientLayer.pipe(
+  Layer.provideMerge(configLayer)
+);
+
 const queryLayer = Layer.mergeAll(
   queryRepositoriesLayer,
   configLayer,
@@ -571,9 +598,10 @@ describe("thread expansion (mocked)", () => {
 
 ```typescript
 const LIVE_POST_URI = process.env.THREAD_TEST_URI;
+const liveIt = LIVE_POST_URI ? it.live : it.skip;
 
-describe.skipIf(!LIVE_POST_URI)("thread expansion (live)", () => {
-  it.live("fetches real thread from Bluesky public API", () =>
+describe("thread expansion (live)", () => {
+  liveIt("fetches real thread from Bluesky public API", () =>
     // Call getPostThread with the real URI
     // Verify non-empty response with engagement counts
   );
