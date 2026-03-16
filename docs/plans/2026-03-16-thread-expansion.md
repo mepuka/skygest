@@ -4,7 +4,7 @@
 
 **Goal:** Add a `get_post_thread` MCP tool that fetches full thread context (ancestors + focus + replies) with engagement metrics from the live Bluesky API, enabling agents to follow discussions and evaluate post quality.
 
-**Architecture:** Extend the existing `BlueskyClient` Effect service with `getPostThread` and `getPosts` methods using the same `requestJson` pattern (rate limiting, retries, schema decode). Define lightweight Effect schemas for the Bluesky `PostView` and `ThreadViewPost` response types. Add a thread flattening utility that walks the recursive parent/replies tree into a linear structure. Wire as an MCP tool with `_display` formatter showing ancestors → focus → replies with engagement counts.
+**Architecture:** Extend the existing `BlueskyClient` Effect service with a `getPostThread` method using the same `requestJson` pattern (rate limiting, retries, schema decode). Define lightweight Effect schemas for the Bluesky `PostView` and `ThreadViewPost` response types. Add a thread flattening utility that walks the recursive parent/replies tree into a linear structure. Wire as an MCP tool with `_display` formatter showing ancestors → focus → replies with engagement counts. `getPosts` (batch fetch) deferred to follow-up.
 
 **Tech Stack:** Effect.ts, `@effect/platform` HttpClient, Bluesky public API at `public.api.bsky.app` (unauthenticated), `@effect/printer` for display formatting
 
@@ -22,6 +22,11 @@
 | Thread flattening | Iterative walk (not recursive) | Avoids stack overflow on deep threads; matches the `@effect/printer` fix pattern |
 | `OpenWorld` annotation | true | This tool calls an external API (Bluesky), unlike other tools which query local D1 |
 | Service dependency | `BlueskyClient` directly in MCP handler | Thread data comes from live Bluesky API, not `KnowledgeQueryService` |
+| MCP layer wiring | Add `BlueskyClient` to `makeQueryLayer` (or merge separately into MCP layer) | `makeQueryLayer` currently lacks `blueskyLayer`; MCP handler needs it for `yield* BlueskyClient` |
+| Timestamp source | Extract `createdAt` from `post.record.createdAt` (authored time), not `post.indexedAt` | `indexedAt` is AppView index time; `createdAt` is when the author wrote the post — matches rest of codebase |
+| Depth bounds | Enforce `Schema.between(0, 10)` in input schema, not just `Math.min` | Prevents negative values passing through |
+| `getPosts` | Deferred to follow-up — not needed for thread expansion | Repeated query params need manual URL construction; unnecessary scope for this plan |
+| Test strategy | Mocked `BlueskyClient` for unit tests; opt-in live smoke test with real public URI | Fixture URIs are synthetic local values, not real public posts |
 | Result schema | New `PostThreadOutput` with `ancestors`, `focus`, `replies` arrays | Flat structure for easy LLM consumption; each post has a `position` field |
 
 ---
@@ -81,12 +86,6 @@ export const GetPostThreadResponse = Schema.Struct({
 });
 export type GetPostThreadResponse = Schema.Schema.Type<typeof GetPostThreadResponse>;
 
-// --- Batch posts response ---
-
-export const GetPostsResponse = Schema.Struct({
-  posts: Schema.Array(ThreadPostView)
-});
-export type GetPostsResponse = Schema.Schema.Type<typeof GetPostsResponse>;
 ```
 
 **Why `Schema.Unknown` for parent/replies:** Effect Schema doesn't support recursive types easily. We decode the top-level response, then walk the tree manually using `Schema.decodeUnknownSync(ThreadViewPostNode)` at each level during flattening.
@@ -101,27 +100,25 @@ git commit -m "feat(thread): add Effect schemas for Bluesky thread API response 
 
 ---
 
-## Task 2: Add getPostThread + getPosts to BlueskyClient
+## Task 2: Add getPostThread to BlueskyClient
 
 **Files:**
 - Modify: `src/bluesky/BlueskyClient.ts`
 
+**Note:** `getPosts` (batch fetch) is deferred to a follow-up. It requires repeated query params (`?uris=at://...&uris=at://...`) which `requestJson`'s `urlParams: Record<string, string>` doesn't support. Not needed for thread expansion.
+
 ### 2.1 Extend the service interface
 
-Add two new methods to the `BlueskyClient` `Context.Tag` type:
+Add one new method to the `BlueskyClient` `Context.Tag` type:
 
 ```typescript
 readonly getPostThread: (
   uri: string,
   opts?: { depth?: number; parentHeight?: number }
 ) => Effect.Effect<GetPostThreadResponse, BlueskyApiError>;
-
-readonly getPosts: (
-  uris: ReadonlyArray<string>
-) => Effect.Effect<GetPostsResponse, BlueskyApiError>;
 ```
 
-Import `GetPostThreadResponse` and `GetPostsResponse` from `./ThreadTypes.ts`.
+Import `GetPostThreadResponse` from `./ThreadTypes.ts`.
 
 ### 2.2 Implement in `makeBlueskyClient`
 
@@ -136,25 +133,6 @@ const getPostThread = (uri: string, opts?: { depth?: number; parentHeight?: numb
       parentHeight: String(opts?.parentHeight ?? 80)
     }
   );
-
-const getPosts = (uris: ReadonlyArray<string>) =>
-  requestJson(
-    `${base}/xrpc/app.bsky.feed.getPosts`,
-    GetPostsResponse,
-    Object.fromEntries(uris.map((uri, i) => [`uris`, uri]))
-  );
-```
-
-**Note on `getPosts` params:** The Bluesky API expects repeated `uris` query params (`?uris=at://...&uris=at://...`). The `@effect/platform` `HttpClient.get` `urlParams` may not support repeated keys. If not, construct the URL manually:
-
-```typescript
-const getPosts = (uris: ReadonlyArray<string>) => {
-  const params = uris.map(uri => `uris=${encodeURIComponent(uri)}`).join("&");
-  return requestJson(
-    `${base}/xrpc/app.bsky.feed.getPosts?${params}`,
-    GetPostsResponse
-  );
-};
 ```
 
 ### 2.3 Add to `.of({...})` return
@@ -166,8 +144,7 @@ return BlueskyClient.of({
   getFollows,
   resolveRepoService,
   listRecordsAtService,
-  getPostThread,
-  getPosts
+  getPostThread
 });
 ```
 
@@ -291,12 +268,16 @@ export const GetPostThreadInput = Schema.Struct({
   postUri: AtUri.annotations({
     description: "AT Protocol URI of the post to get thread context for"
   }),
-  depth: Schema.optional(Schema.Number.annotations({
-    description: "Reply depth levels to include (0-10, default 3)"
-  })),
-  parentHeight: Schema.optional(Schema.Number.annotations({
-    description: "Parent context levels to include (0-10, default 3)"
-  }))
+  depth: Schema.optional(
+    Schema.Number.pipe(Schema.int(), Schema.between(0, 10)).annotations({
+      description: "Reply depth levels to include (0-10, default 3)"
+    })
+  ),
+  parentHeight: Schema.optional(
+    Schema.Number.pipe(Schema.int(), Schema.between(0, 10)).annotations({
+      description: "Parent context levels to include (0-10, default 3)"
+    })
+  )
 });
 export type GetPostThreadInput = Schema.Schema.Type<typeof GetPostThreadInput>;
 
@@ -493,15 +474,36 @@ get_post_thread: (input) =>
   ),
 ```
 
-### 6.3 Router type widening
+### 6.3 Layer wiring — add BlueskyClient to MCP service layer
 
-`makeMcpLayer` in `Router.ts` needs `BlueskyClient` in the service layer. Since the agent worker's `makeAdminWorkerLayer` already includes `BlueskyClient` (via `ExpertRegistryService` dependency), this should work without additional layer changes.
+**Critical:** `makeMcpLayer` in `Router.ts` is built from `makeQueryLayer`, which does NOT include `blueskyLayer`. The MCP handler needs `BlueskyClient` for `yield* BlueskyClient`. Two changes required:
 
-Verify by checking that `makeQueryLayer` or `makeAdminWorkerLayer` provides `BlueskyClient`.
+**Production (`src/edge/Layer.ts`):** Add `blueskyLayer` to the layer passed to the MCP handler. Either:
+- Option A: Widen `makeQueryLayer` to include `blueskyLayer` (simplest — BlueskyClient is stateless and cheap)
+- Option B: Merge `blueskyLayer` separately into `makeMcpLayer` composition in `Router.ts`
 
-### 6.4 Text extraction helper
+Option A is preferred — add `blueskyLayer` to `queryLayer` in `buildSharedWorkerParts`:
+```typescript
+const queryLayer = Layer.mergeAll(
+  queryRepositoriesLayer,
+  configLayer,
+  blueskyLayer,  // <-- ADD for thread expansion
+  KnowledgeQueryService.layer.pipe(...),
+  editorialServiceLayer
+);
+```
 
-The Bluesky `PostView.record` is `Schema.Unknown`. We need a helper to extract text:
+**Test (`tests/support/runtime.ts`):** `makeBiLayer` also needs `BlueskyClient`. Add a mock or the real layer:
+```typescript
+const blueskyLayer = BlueskyClientLayer.pipe(Layer.provideMerge(configLayer));
+```
+Or provide a mock `BlueskyClient` that returns test data for thread tests.
+
+**Router type widening:** `makeMcpLayer` parameter type changes from `Layer.Layer<KnowledgeQueryService | EditorialService, ...>` to `Layer.Layer<KnowledgeQueryService | EditorialService | BlueskyClient, ...>`. Also widen `handleMcpRequestWithLayer` and `makeCachedMcpHandler` (same pattern as the editorial layer widening).
+
+### 6.4 Record extraction helpers
+
+The Bluesky `PostView.record` is `Schema.Unknown`. We need helpers to extract text and authored timestamp:
 
 ```typescript
 const extractText = (record: unknown): string => {
@@ -510,6 +512,22 @@ const extractText = (record: unknown): string => {
   }
   return "";
 };
+
+/** Extract the authored createdAt from the post record.
+ *  IMPORTANT: Use record.createdAt (author's timestamp), NOT post.indexedAt
+ *  (AppView index time). This matches the rest of the codebase where
+ *  createdAt means when the author wrote the post. */
+const extractCreatedAt = (record: unknown, fallbackIndexedAt: string): string => {
+  if (typeof record === "object" && record !== null && "createdAt" in record) {
+    return typeof record.createdAt === "string" ? record.createdAt : fallbackIndexedAt;
+  }
+  return fallbackIndexedAt;
+};
+```
+
+Then in `toResult`:
+```typescript
+createdAt: extractCreatedAt(post.record, post.indexedAt),
 ```
 
 ### 6.5 Update tool list test
@@ -532,22 +550,37 @@ git commit -m "feat(thread): add get_post_thread MCP tool with live Bluesky API 
 - Modify: `tests/mcp.test.ts` — add integration test
 - Modify: `src/mcp/glossary.ts` — document the new tool
 
-### 7.1 Integration test
+### 7.1 Tests — mocked unit test + opt-in live smoke
 
-Note: This test calls the LIVE Bluesky API. Mark it appropriately:
+**Unit test (always runs):** Mock `BlueskyClient.getPostThread` to return a canned thread response. Verify the full pipeline: flattening → domain mapping → `_display` rendering.
 
 ```typescript
-describe("thread expansion", () => {
-  it.live("get_post_thread returns thread with engagement data", () =>
-    // Use a known public post URI (e.g., from the seeded fixture data)
-    // Call the tool via MCP client
-    // Verify response has focus post with engagement counts
-    // Verify _display contains [F] and engagement symbols
+describe("thread expansion (mocked)", () => {
+  it.live("get_post_thread returns flattened thread with _display", () =>
+    // 1. Build a mock BlueskyClient that returns a fake ThreadViewPost
+    // 2. Provide the mock into the MCP test layer
+    // 3. Call the tool via MCP client
+    // 4. Verify: ancestors array, focus post, replies array
+    // 5. Verify: _display contains [A1], [F], [R1], engagement symbols
+    // 6. Verify: createdAt comes from record.createdAt, not indexedAt
   );
 });
 ```
 
-**Caveat:** Live API tests may be flaky. Consider a unit test path using mocked `BlueskyClient` instead.
+**Live smoke test (opt-in, skipped in CI):** Use a real public post URI. Gate behind an env var:
+
+```typescript
+const LIVE_POST_URI = process.env.THREAD_TEST_URI;
+
+describe.skipIf(!LIVE_POST_URI)("thread expansion (live)", () => {
+  it.live("fetches real thread from Bluesky public API", () =>
+    // Call getPostThread with the real URI
+    // Verify non-empty response with engagement counts
+  );
+});
+```
+
+**Do NOT use seeded fixture URIs** — those are synthetic local values (e.g., `at://did:plc:bvwqyqjl4vxaswxbqymiofzv/app.bsky.feed.post/post-solar`) that don't exist on the public Bluesky network.
 
 ### 7.2 Glossary update
 
