@@ -21,6 +21,7 @@ import {
   ListRecordsResult,
 } from "../domain/polling";
 import { AtUri, Did } from "../domain/types";
+import { GetPostThreadResponse } from "./ThreadTypes";
 
 const FollowsResponse = Schema.Struct({
   cursor: Schema.optional(Schema.String),
@@ -153,6 +154,10 @@ export class BlueskyClient extends Context.Tag("@skygest/BlueskyClient")<
     readonly listRecordsAtService: (
       input: ServiceListRecordsInput
     ) => Effect.Effect<ListRecordsResultShape, BlueskyApiError>;
+    readonly getPostThread: (
+      uri: string,
+      opts?: { depth?: number; parentHeight?: number }
+    ) => Effect.Effect<GetPostThreadResponse, BlueskyApiError>;
   }
 >() {}
 
@@ -303,12 +308,24 @@ export const makeBlueskyClient = (base: string) =>
         }
       );
 
+    const getPostThread = (uri: string, opts?: { depth?: number; parentHeight?: number }) =>
+      requestJson(
+        `${base}/xrpc/app.bsky.feed.getPostThread`,
+        GetPostThreadResponse,
+        {
+          uri,
+          depth: String(opts?.depth ?? 6),
+          parentHeight: String(opts?.parentHeight ?? 80)
+        }
+      );
+
     return BlueskyClient.of({
       resolveDidOrHandle,
       getProfile,
       getFollows,
       resolveRepoService,
-      listRecordsAtService
+      listRecordsAtService,
+      getPostThread
     });
   });
 

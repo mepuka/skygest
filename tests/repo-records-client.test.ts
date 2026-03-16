@@ -62,7 +62,8 @@ const makeBlueskyLayer = (options?: {
     getProfile: () => Effect.die("unexpected getProfile"),
     getFollows: () => Effect.die("unexpected getFollows"),
     resolveRepoService: options?.resolveRepoService ?? (() => Effect.die("unexpected resolveRepoService")),
-    listRecordsAtService: options?.listRecordsAtService ?? (() => Effect.die("unexpected listRecordsAtService"))
+    listRecordsAtService: options?.listRecordsAtService ?? (() => Effect.die("unexpected listRecordsAtService")),
+    getPostThread: () => Effect.die("unexpected getPostThread")
   });
 
 const makeRepoRecordsLayer = (

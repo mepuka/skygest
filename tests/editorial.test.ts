@@ -65,7 +65,8 @@ const mockBlueskyClient = Layer.succeed(BlueskyClient, {
     Effect.succeed({
       records: [],
       cursor: null
-    })
+    }),
+  getPostThread: () => Effect.succeed({ thread: {} })
 });
 
 const makeAdminEditorialLayer = (options: {
