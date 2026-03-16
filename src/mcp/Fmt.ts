@@ -327,6 +327,71 @@ export const formatExplainedPostTopics = (result: ExplainPostTopicsOutput): stri
  *      URI: at://...
  * ```
  */
+/**
+ * Format a post thread (ancestors, focus, replies) for MCP display.
+ *
+ * Uses plain string concatenation (not Doc) to avoid stack overflow
+ * on large thread trees.
+ */
+export const formatPostThread = (
+  result: {
+    focusUri: string;
+    ancestors: ReadonlyArray<{ handle: string | null; did: string; text: string; createdAt: string; likeCount: number | null; repostCount: number | null; replyCount: number | null; uri: string }>;
+    focus: { handle: string | null; did: string; text: string; createdAt: string; likeCount: number | null; repostCount: number | null; replyCount: number | null; uri: string };
+    replies: ReadonlyArray<{ handle: string | null; did: string; text: string; createdAt: string; likeCount: number | null; repostCount: number | null; replyCount: number | null; uri: string }>;
+  }
+): string => {
+  const lines: string[] = [];
+  lines.push(`Thread for ${result.focusUri}`);
+
+  if (result.ancestors.length > 0) {
+    lines.push("");
+    lines.push("--- Ancestors ---");
+    for (const [i, a] of result.ancestors.entries()) {
+      const handle = a.handle ? `@${a.handle}` : a.did;
+      const engagement = [
+        `\u2661${a.likeCount ?? 0}`,
+        `\u21BB${a.repostCount ?? 0}`,
+        `\uD83D\uDCAC${a.replyCount ?? 0}`
+      ].join(" ");
+      lines.push(`[A${i + 1}] ${handle} \u00B7 ${a.createdAt.slice(0, 10)} \u00B7 ${engagement}`);
+      lines.push(`     ${truncate(collapse(a.text), 150)}`);
+      lines.push(`     URI: ${a.uri}`);
+    }
+  }
+
+  lines.push("");
+  lines.push("--- Focus ---");
+  const f = result.focus;
+  const fHandle = f.handle ? `@${f.handle}` : f.did;
+  const fEngagement = [
+    `\u2661${f.likeCount ?? 0}`,
+    `\u21BB${f.repostCount ?? 0}`,
+    `\uD83D\uDCAC${f.replyCount ?? 0}`
+  ].join(" ");
+  lines.push(`[F] ${fHandle} \u00B7 ${f.createdAt.slice(0, 10)} \u00B7 ${fEngagement}`);
+  lines.push(`    ${truncate(collapse(f.text), 200)}`);
+  lines.push(`    URI: ${f.uri}`);
+
+  if (result.replies.length > 0) {
+    lines.push("");
+    lines.push(`--- Replies (${result.replies.length}) ---`);
+    for (const [i, r] of result.replies.entries()) {
+      const handle = r.handle ? `@${r.handle}` : r.did;
+      const engagement = [
+        `\u2661${r.likeCount ?? 0}`,
+        `\u21BB${r.repostCount ?? 0}`,
+        `\uD83D\uDCAC${r.replyCount ?? 0}`
+      ].join(" ");
+      lines.push(`[R${i + 1}] ${handle} \u00B7 ${r.createdAt.slice(0, 10)} \u00B7 ${engagement}`);
+      lines.push(`     ${truncate(collapse(r.text), 150)}`);
+      lines.push(`     URI: ${r.uri}`);
+    }
+  }
+
+  return lines.join("\n");
+};
+
 export const formatEditorialPicks = (items: ReadonlyArray<EditorialPickOutput>): string => {
   if (items.length === 0) return "No editorial picks found.";
 

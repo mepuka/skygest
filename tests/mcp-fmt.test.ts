@@ -7,7 +7,8 @@ import {
   formatTopic,
   formatExpandedTopics,
   formatExplainedPostTopics,
-  formatEditorialPicks
+  formatEditorialPicks,
+  formatPostThread
 } from "../src/mcp/Fmt";
 
 // ---------------------------------------------------------------------------
@@ -572,5 +573,124 @@ describe("formatEditorialPicks", () => {
 
     expect(out).toContain("[K1]");
     expect(out).toContain("[K2]");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// formatPostThread
+// ---------------------------------------------------------------------------
+describe("formatPostThread", () => {
+  const makePost = (overrides: Partial<{
+    handle: string | null;
+    did: string;
+    text: string;
+    createdAt: string;
+    likeCount: number | null;
+    repostCount: number | null;
+    replyCount: number | null;
+    uri: string;
+  }> = {}) => ({
+    handle: "alice.bsky.social",
+    did: "did:plc:abc",
+    text: "Hello world",
+    createdAt: "2024-03-09T16:00:00.000Z",
+    likeCount: 5,
+    repostCount: 2,
+    replyCount: 1,
+    uri: "at://did:plc:abc/app.bsky.feed.post/1",
+    ...overrides
+  });
+
+  it("renders focus-only thread with header and [F] tag", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/1",
+      ancestors: [],
+      focus: makePost(),
+      replies: []
+    });
+
+    expect(out).toContain("Thread for at://did:plc:abc/app.bsky.feed.post/1");
+    expect(out).toContain("--- Focus ---");
+    expect(out).toContain("[F]");
+    expect(out).toContain("@alice.bsky.social");
+    expect(out).toContain("2024-03-09");
+    expect(out).toContain("Hello world");
+    expect(out).toContain("URI: at://did:plc:abc/app.bsky.feed.post/1");
+    expect(out).not.toContain("--- Ancestors ---");
+    expect(out).not.toContain("--- Replies");
+  });
+
+  it("renders ancestors with [A1], [A2] tags", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/3",
+      ancestors: [
+        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/1", text: "First ancestor", handle: "bob.bsky.social" }),
+        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/2", text: "Second ancestor" })
+      ],
+      focus: makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/3" }),
+      replies: []
+    });
+
+    expect(out).toContain("--- Ancestors ---");
+    expect(out).toContain("[A1]");
+    expect(out).toContain("@bob.bsky.social");
+    expect(out).toContain("First ancestor");
+    expect(out).toContain("[A2]");
+    expect(out).toContain("Second ancestor");
+  });
+
+  it("renders replies with [R1], [R2] tags and count", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/1",
+      ancestors: [],
+      focus: makePost(),
+      replies: [
+        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/r1", text: "Reply one" }),
+        makePost({ uri: "at://did:plc:abc/app.bsky.feed.post/r2", text: "Reply two" })
+      ]
+    });
+
+    expect(out).toContain("--- Replies (2) ---");
+    expect(out).toContain("[R1]");
+    expect(out).toContain("Reply one");
+    expect(out).toContain("[R2]");
+    expect(out).toContain("Reply two");
+  });
+
+  it("uses DID when handle is null", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/1",
+      ancestors: [],
+      focus: makePost({ handle: null }),
+      replies: []
+    });
+
+    expect(out).toContain("did:plc:abc");
+    expect(out).not.toContain("@");
+  });
+
+  it("shows engagement metrics", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/1",
+      ancestors: [],
+      focus: makePost({ likeCount: 42, repostCount: 7, replyCount: 3 }),
+      replies: []
+    });
+
+    expect(out).toContain("42");
+    expect(out).toContain("7");
+    expect(out).toContain("3");
+  });
+
+  it("handles null engagement counts gracefully", () => {
+    const out = formatPostThread({
+      focusUri: "at://did:plc:abc/app.bsky.feed.post/1",
+      ancestors: [],
+      focus: makePost({ likeCount: null, repostCount: null, replyCount: null }),
+      replies: []
+    });
+
+    // Should show 0 for null counts
+    expect(out).toContain("0");
   });
 });
