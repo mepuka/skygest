@@ -1,0 +1,45 @@
+/**
+ * MCP-specific success wrappers.
+ *
+ * These extend the shared domain output schemas with a required `_display`
+ * field.  Domain schemas in `bi.ts` / `editorial.ts` stay unchanged — `_display`
+ * is an MCP transport concern only.
+ */
+
+import { Schema } from "effect";
+import {
+  KnowledgePostsOutput,
+  KnowledgeLinksOutput,
+  ExpertListOutput,
+  OntologyTopicsOutput,
+  OntologyTopicOutput,
+  ExpandedTopicsOutput,
+  ExplainPostTopicsOutput
+} from "../domain/bi.ts";
+import { EditorialPicksOutput } from "../domain/editorial.ts";
+
+const DisplayField = Schema.Struct({ _display: Schema.String });
+
+export const KnowledgePostsMcpOutput = Schema.extend(KnowledgePostsOutput, DisplayField);
+export type KnowledgePostsMcpOutput = Schema.Schema.Type<typeof KnowledgePostsMcpOutput>;
+
+export const KnowledgeLinksMcpOutput = Schema.extend(KnowledgeLinksOutput, DisplayField);
+export type KnowledgeLinksMcpOutput = Schema.Schema.Type<typeof KnowledgeLinksMcpOutput>;
+
+export const ExpertListMcpOutput = Schema.extend(ExpertListOutput, DisplayField);
+export type ExpertListMcpOutput = Schema.Schema.Type<typeof ExpertListMcpOutput>;
+
+export const OntologyTopicsMcpOutput = Schema.extend(OntologyTopicsOutput, DisplayField);
+export type OntologyTopicsMcpOutput = Schema.Schema.Type<typeof OntologyTopicsMcpOutput>;
+
+export const OntologyTopicMcpOutput = Schema.extend(OntologyTopicOutput, DisplayField);
+export type OntologyTopicMcpOutput = Schema.Schema.Type<typeof OntologyTopicMcpOutput>;
+
+export const ExpandedTopicsMcpOutput = Schema.extend(ExpandedTopicsOutput, DisplayField);
+export type ExpandedTopicsMcpOutput = Schema.Schema.Type<typeof ExpandedTopicsMcpOutput>;
+
+export const ExplainPostTopicsMcpOutput = Schema.extend(ExplainPostTopicsOutput, DisplayField);
+export type ExplainPostTopicsMcpOutput = Schema.Schema.Type<typeof ExplainPostTopicsMcpOutput>;
+
+export const EditorialPicksMcpOutput = Schema.extend(EditorialPicksOutput, DisplayField);
+export type EditorialPicksMcpOutput = Schema.Schema.Type<typeof EditorialPicksMcpOutput>;
