@@ -1,6 +1,7 @@
 import { McpServer } from "@effect/ai";
 import * as HttpLayerRouter from "@effect/platform/HttpLayerRouter";
 import { Effect, Layer } from "effect";
+import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { makeQueryLayer } from "../edge/Layer";
 import type { EnvBindings } from "../platform/Env";
 import { EditorialService } from "../services/EditorialService";
@@ -20,7 +21,7 @@ const GlossaryResource = McpServer.resource({
 });
 
 const makeMcpLayer = (
-  queryLayer: Layer.Layer<KnowledgeQueryService | EditorialService, any, never>
+  queryLayer: Layer.Layer<KnowledgeQueryService | EditorialService | BlueskyClient, any, never>
 ): Layer.Layer<HttpLayerRouter.HttpRouter, any, never> =>
   toolkitWithDisplayText(KnowledgeMcpToolkit).pipe(
     Layer.provideMerge(
@@ -39,7 +40,7 @@ const makeMcpLayer = (
 
 export const handleMcpRequestWithLayer = async (
   request: Request,
-  layer: Layer.Layer<KnowledgeQueryService | EditorialService, any, never>
+  layer: Layer.Layer<KnowledgeQueryService | EditorialService | BlueskyClient, any, never>
 ): Promise<Response> => {
   const webHandler = HttpLayerRouter.toWebHandler(makeMcpLayer(layer));
 
@@ -51,7 +52,7 @@ export const handleMcpRequestWithLayer = async (
 };
 
 const makeCachedMcpHandler = <Env extends object>(
-  buildLayer: (env: Env) => Layer.Layer<KnowledgeQueryService | EditorialService, any, never>
+  buildLayer: (env: Env) => Layer.Layer<KnowledgeQueryService | EditorialService | BlueskyClient, any, never>
 ) => {
   let cached: {
     readonly env: Env;

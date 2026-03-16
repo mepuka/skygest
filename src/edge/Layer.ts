@@ -52,16 +52,17 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const editorialServiceLayer = EditorialService.layer.pipe(
     Layer.provideMerge(Layer.mergeAll(editorialRepoLayer, configLayer, ontologyLayer))
   );
+  const blueskyLayer = BlueskyClientLayer.pipe(
+    Layer.provideMerge(configLayer)
+  );
   const queryLayer = Layer.mergeAll(
     queryRepositoriesLayer,
     configLayer,
+    blueskyLayer,
     KnowledgeQueryService.layer.pipe(
       Layer.provideMerge(Layer.mergeAll(queryRepositoriesLayer, configLayer))
     ),
     editorialServiceLayer
-  );
-  const blueskyLayer = BlueskyClientLayer.pipe(
-    Layer.provideMerge(configLayer)
   );
   const authLayer = AuthService.layer.pipe(
     Layer.provideMerge(Layer.mergeAll(baseLayer, configLayer))

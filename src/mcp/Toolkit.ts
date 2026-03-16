@@ -9,6 +9,7 @@ import {
   ListTopicsInput,
   GetPostLinksInput,
   GetRecentPostsInput,
+  GetPostThreadInput,
   ListExpertsInput,
   McpToolQueryError,
   SearchPostsInput
@@ -22,7 +23,8 @@ import {
   OntologyTopicMcpOutput,
   ExpandedTopicsMcpOutput,
   ExplainPostTopicsMcpOutput,
-  EditorialPicksMcpOutput
+  EditorialPicksMcpOutput,
+  PostThreadMcpOutput
 } from "./OutputSchemas.ts";
 import {
   formatPosts,
@@ -32,10 +34,13 @@ import {
   formatTopic,
   formatExpandedTopics,
   formatExplainedPostTopics,
-  formatEditorialPicks
+  formatEditorialPicks,
+  formatPostThread
 } from "./Fmt.ts";
 import { EditorialService } from "../services/EditorialService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
+import { BlueskyClient } from "../bluesky/BlueskyClient";
+import { flattenThread } from "../bluesky/ThreadFlatten.ts";
 
 // ---------------------------------------------------------------------------
 // MCP-specific input schemas — strip cursor fields that LLMs cannot construct
@@ -172,6 +177,18 @@ export const ListEditorialPicksTool = Tool.make("list_editorial_picks", {
   .annotate(Tool.Idempotent, true)
   .annotate(Tool.OpenWorld, false);
 
+export const GetPostThreadTool = Tool.make("get_post_thread", {
+  description: "Get the thread context for a Bluesky post. Returns ancestor posts (conversation history), the focus post, and replies. Includes engagement metrics (likes, reposts, reply counts). Calls the live Bluesky API.",
+  parameters: GetPostThreadInput.fields,
+  success: PostThreadMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Get Post Thread")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, true);
+
 export const KnowledgeMcpToolkit = Toolkit.make(
   SearchPostsTool,
   GetRecentPostsTool,
@@ -181,13 +198,29 @@ export const KnowledgeMcpToolkit = Toolkit.make(
   GetTopicTool,
   ExpandTopicsTool,
   ExplainPostTopicsTool,
-  ListEditorialPicksTool
+  ListEditorialPicksTool,
+  GetPostThreadTool
 );
+
+const extractText = (record: unknown): string => {
+  if (typeof record === "object" && record !== null && "text" in record) {
+    return typeof record.text === "string" ? record.text : "";
+  }
+  return "";
+};
+
+const extractCreatedAt = (record: unknown, fallbackIndexedAt: string): string => {
+  if (typeof record === "object" && record !== null && "createdAt" in record) {
+    return typeof record.createdAt === "string" ? record.createdAt : fallbackIndexedAt;
+  }
+  return fallbackIndexedAt;
+};
 
 export const KnowledgeMcpHandlers = KnowledgeMcpToolkit.toLayer(
   Effect.gen(function* () {
     const queryService = yield* KnowledgeQueryService;
     const editorialService = yield* EditorialService;
+    const bskyClient = yield* BlueskyClient;
 
     return KnowledgeMcpToolkit.of({
       search_posts: (input) =>
@@ -262,6 +295,57 @@ export const KnowledgeMcpHandlers = KnowledgeMcpToolkit.toLayer(
             _display: formatEditorialPicks(items)
           })),
           Effect.mapError(toQueryError("list_editorial_picks"))
+        ),
+      get_post_thread: (input) =>
+        bskyClient.getPostThread(input.postUri, {
+          depth: input.depth ?? 3,
+          parentHeight: input.parentHeight ?? 3
+        }).pipe(
+          Effect.flatMap((response) => {
+            const flat = flattenThread(response.thread);
+            if (!flat) {
+              return Effect.fail(McpToolQueryError.make({
+                tool: "get_post_thread",
+                message: "Post not found or thread unavailable",
+                error: new Error("thread decode failed")
+              }));
+            }
+
+            const toResult = (post: any, position: "ancestor" | "focus" | "reply") => ({
+              uri: post.uri as string,
+              did: post.author.did as string,
+              handle: (post.author.handle ?? null) as string | null,
+              displayName: (post.author.displayName ?? null) as string | null,
+              text: extractText(post.record),
+              createdAt: extractCreatedAt(post.record, post.indexedAt),
+              replyCount: (post.replyCount ?? null) as number | null,
+              repostCount: (post.repostCount ?? null) as number | null,
+              likeCount: (post.likeCount ?? null) as number | null,
+              quoteCount: (post.quoteCount ?? null) as number | null,
+              position
+            });
+
+            const result = {
+              focusUri: flat.focus.uri as string,
+              ancestors: flat.ancestors.map(p => toResult(p, "ancestor")),
+              focus: toResult(flat.focus, "focus"),
+              replies: flat.replies.map(p => toResult(p, "reply"))
+            };
+
+            return Effect.succeed({
+              ...result,
+              _display: formatPostThread(result)
+            } as unknown as PostThreadMcpOutput);
+          }),
+          Effect.mapError((error) =>
+            "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
+              ? error as McpToolQueryError
+              : McpToolQueryError.make({
+                  tool: "get_post_thread",
+                  message: error instanceof Error ? error.message : String(error),
+                  error
+                })
+          )
         )
     });
   })

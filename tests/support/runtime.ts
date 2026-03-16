@@ -5,6 +5,7 @@ import { SqliteClient } from "@effect/sql-sqlite-node";
 import { Effect, Layer, Schema } from "effect";
 import { energySeedDid, energySeedManifest } from "../../src/bootstrap/CheckedInExpertSeeds";
 import { bootstrapExperts } from "../../src/bootstrap/ExpertSeeds";
+import { layer as BlueskyClientLayer } from "../../src/bluesky/BlueskyClient";
 import { runMigrations } from "../../src/db/migrate";
 import { RawEventBatch } from "../../src/domain/types";
 import { processBatch } from "../../src/filter/FilterWorker";
@@ -68,10 +69,15 @@ export const makeBiLayer = (options?: {
     Layer.provideMerge(Layer.mergeAll(editorialRepoLayer, configLayer, ontologyLayer))
   );
 
+  const blueskyLayer = BlueskyClientLayer.pipe(
+    Layer.provideMerge(Layer.mergeAll(sqliteLayer, configLayer))
+  );
+
   return Layer.mergeAll(
     baseLayer,
     KnowledgeQueryService.layer.pipe(Layer.provideMerge(baseLayer)),
-    editorialServiceLayer
+    editorialServiceLayer,
+    blueskyLayer
   );
 };
 
