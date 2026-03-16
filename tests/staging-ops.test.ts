@@ -4,8 +4,8 @@ import { handleAdminRequestWithLayer } from "../src/admin/Router";
 import type { AccessIdentity } from "../src/auth/AuthService";
 import { BlueskyClient } from "../src/bluesky/BlueskyClient";
 import { parseAvatarUrl } from "../src/bluesky/BskyCdn";
-import { ExpertListOutput, KnowledgePostsOutput } from "../src/domain/bi";
 import { decodeCallToolResultWith } from "../src/mcp/Client";
+import { KnowledgePostsMcpOutput, ExpertListMcpOutput } from "../src/mcp/OutputSchemas";
 import { AppConfig, type AppConfigShape } from "../src/platform/Config";
 import { encodeJsonString } from "../src/platform/Json";
 import { Logging } from "../src/platform/Logging";
@@ -25,8 +25,8 @@ import {
   withTempSqliteFile
 } from "./support/runtime";
 
-const decodeSearchResponse = decodeCallToolResultWith(KnowledgePostsOutput);
-const decodeExpertsResponse = decodeCallToolResultWith(ExpertListOutput);
+const decodeSearchResponse = decodeCallToolResultWith(KnowledgePostsMcpOutput);
+const decodeExpertsResponse = decodeCallToolResultWith(ExpertListMcpOutput);
 
 const operatorIdentity: AccessIdentity = {
   subject: "staging-shared-secret-operator",

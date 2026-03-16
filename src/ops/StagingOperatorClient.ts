@@ -2,7 +2,6 @@ import { Context, Effect, Layer, Schema } from "effect";
 import {
   BootstrapExpertsResult,
   ExpertListOutput,
-  KnowledgePostsOutput,
   LoadSmokeFixtureResult,
   PublicationListOutput,
   RefreshProfilesResult,
@@ -18,6 +17,10 @@ import {
   decodeCallToolResultWith,
   type McpCallToolResult
 } from "../mcp/Client";
+import {
+  KnowledgePostsMcpOutput,
+  ExpertListMcpOutput
+} from "../mcp/OutputSchemas";
 import {
   decodeJsonStringWith,
   encodeJsonString,
@@ -39,8 +42,8 @@ const decodeIngestRepairSummary = decodeJsonStringWith(IngestRepairSummary);
 const decodeIngestRunResponse = decodeJsonStringWith(IngestRunRecord);
 const decodePublicationsResponse = decodeJsonStringWith(PublicationListOutput);
 const decodeAdminExpertsJsonResponse = decodeJsonStringWith(ExpertListOutput);
-const decodeSearchPostsResponse = decodeCallToolResultWith(KnowledgePostsOutput);
-const decodeMcpExpertsResponse = decodeCallToolResultWith(ExpertListOutput);
+const decodeSearchPostsResponse = decodeCallToolResultWith(KnowledgePostsMcpOutput);
+const decodeMcpExpertsResponse = decodeCallToolResultWith(ExpertListMcpOutput);
 
 const operatorHeaders = (secret: string) => ({
   "content-type": "application/json",

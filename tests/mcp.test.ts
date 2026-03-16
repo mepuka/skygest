@@ -1,9 +1,13 @@
 import { Effect } from "effect";
 import { SqlClient } from "@effect/sql";
 import { describe, expect, it } from "@effect/vitest";
-import { ExpertListOutput, KnowledgePostsOutput, OntologyTopicsOutput } from "../src/domain/bi";
-import { EditorialPicksOutput } from "../src/domain/editorial";
 import { decodeCallToolResultWith } from "../src/mcp/Client";
+import {
+  KnowledgePostsMcpOutput,
+  ExpertListMcpOutput,
+  OntologyTopicsMcpOutput,
+  EditorialPicksMcpOutput
+} from "../src/mcp/OutputSchemas";
 import { smokeFixtureUris } from "../src/staging/SmokeFixture";
 import {
   createMcpClient,
@@ -13,10 +17,10 @@ import {
   withTempSqliteFile
 } from "./support/runtime";
 
-const decodeSearchResponse = decodeCallToolResultWith(KnowledgePostsOutput);
-const decodeExpertsResponse = decodeCallToolResultWith(ExpertListOutput);
-const decodeTopicsResponse = decodeCallToolResultWith(OntologyTopicsOutput);
-const decodeEditorialPicksResponse = decodeCallToolResultWith(EditorialPicksOutput);
+const decodeSearchResponse = decodeCallToolResultWith(KnowledgePostsMcpOutput);
+const decodeExpertsResponse = decodeCallToolResultWith(ExpertListMcpOutput);
+const decodeTopicsResponse = decodeCallToolResultWith(OntologyTopicsMcpOutput);
+const decodeEditorialPicksResponse = decodeCallToolResultWith(EditorialPicksMcpOutput);
 
 describe("read-only MCP server", () => {
   it.live("serves the phase-one tools and returns structured search data", () =>
@@ -62,6 +66,107 @@ describe("read-only MCP server", () => {
           expect(expertItems.length).toBeGreaterThan(0);
           expect(expertItems[0]?.domain).toBe("energy");
           expect(topicItems.some((item) => item.slug === "solar")).toBe(true);
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+});
+
+describe("MCP display formatting", () => {
+  it.live("tool responses include _display in structuredContent and as text payload", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const seedLayer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(makeBiLayer({ filename }));
+
+        try {
+          const result = await client.callTool({
+            name: "search_posts",
+            arguments: { query: "solar" }
+          });
+
+          // structuredContent should include _display as a string
+          const sc = result.structuredContent as Record<string, unknown>;
+          expect(sc).toBeDefined();
+          expect(typeof sc._display).toBe("string");
+          expect((sc._display as string).length).toBeGreaterThan(0);
+
+          // text content should be the display string, NOT raw JSON
+          const textContent = result.content.find(
+            (c): c is { type: "text"; text: string } => c.type === "text"
+          );
+          expect(textContent).toBeDefined();
+          expect(textContent!.text).not.toMatch(/^\s*\{/);
+          expect(textContent!.text).toContain("[P");
+
+          // MCP wrapper schema decode should succeed (includes _display)
+          const decoded = decodeSearchResponse(result);
+          expect(decoded.items).toHaveLength(1);
+          expect(decoded._display).toBe(textContent!.text);
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("experts tool response has display text with [E prefix", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const seedLayer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(makeBiLayer({ filename }));
+
+        try {
+          const result = await client.callTool({
+            name: "list_experts",
+            arguments: { domain: "energy" }
+          });
+
+          const textContent = result.content.find(
+            (c): c is { type: "text"; text: string } => c.type === "text"
+          );
+          expect(textContent).toBeDefined();
+          expect(textContent!.text).toContain("[E");
+
+          const decoded = decodeExpertsResponse(result);
+          expect(decoded.items.length).toBeGreaterThan(0);
+          expect(typeof decoded._display).toBe("string");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("topics tool response has display text with [T prefix", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const seedLayer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(makeBiLayer({ filename }));
+
+        try {
+          const result = await client.callTool({
+            name: "list_topics",
+            arguments: { view: "facets" }
+          });
+
+          const textContent = result.content.find(
+            (c): c is { type: "text"; text: string } => c.type === "text"
+          );
+          expect(textContent).toBeDefined();
+          expect(textContent!.text).toContain("[T");
+
+          const decoded = decodeTopicsResponse(result);
+          expect(decoded.items.length).toBeGreaterThan(0);
+          expect(typeof decoded._display).toBe("string");
         } finally {
           await close();
         }
