@@ -116,7 +116,8 @@ export class ExpertPollCoordinatorDo extends DurableObject<WorkflowIngestEnvBind
       const currentAlarm = await this.ctx.storage.getAlarm();
 
       if (currentAlarm === null) {
-        await this.ctx.storage.setAlarm(Date.now());
+        // 2-second gap between chunk alarms to reduce D1 write burst pressure
+        await this.ctx.storage.setAlarm(Date.now() + 2000);
       }
     }
   }

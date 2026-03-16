@@ -585,11 +585,70 @@ export const KnowledgeRepoD1 = {
       );
     });
 
-    const upsertPosts = (posts: ReadonlyArray<KnowledgePost>) =>
-      Effect.forEach(posts, upsertOne, { discard: true });
+    const upsertPosts = (posts: ReadonlyArray<KnowledgePost>) => {
+      if (rawDb === null || posts.length === 0) {
+        return Effect.forEach(posts, upsertOne, { discard: true });
+      }
 
-    const markDeleted = (posts: ReadonlyArray<DeletedKnowledgePost>) =>
-      Effect.forEach(posts, markDeletedOne, { discard: true });
+      // D1 batch path: validate + idempotency-check all posts, then combine
+      // the write statements into a single db.batch() call (or chunked at 100).
+      return Effect.gen(function* () {
+        const allStatements: D1PreparedStatement[] = [];
+
+        for (const post of posts) {
+          const validated = yield* decodeWithDbError(
+            KnowledgePostSchema,
+            post,
+            `Invalid knowledge post input for ${post.uri}`
+          );
+
+          const existing = yield* sql<{ ingestId: string | null }>`
+            SELECT ingest_id as ingestId
+            FROM posts
+            WHERE uri = ${validated.uri}
+          `;
+
+          if (existing[0]?.ingestId === validated.ingestId) {
+            continue;
+          }
+
+          allStatements.push(...makeUpsertStatements(rawDb, validated));
+        }
+
+        // D1 batch limit is 100 statements; chunk if needed
+        const BATCH_LIMIT = 100;
+        for (let i = 0; i < allStatements.length; i += BATCH_LIMIT) {
+          const chunk = allStatements.slice(i, i + BATCH_LIMIT);
+          yield* runAtomicBatch(rawDb, chunk, `KnowledgeRepo.upsertPosts(chunk ${Math.floor(i / BATCH_LIMIT) + 1})`);
+        }
+      });
+    };
+
+    const markDeleted = (posts: ReadonlyArray<DeletedKnowledgePost>) => {
+      if (rawDb === null || posts.length === 0) {
+        return Effect.forEach(posts, markDeletedOne, { discard: true });
+      }
+
+      // D1 batch path: combine all delete statements into one batch
+      return Effect.gen(function* () {
+        const allStatements: D1PreparedStatement[] = [];
+
+        for (const post of posts) {
+          const validated = yield* decodeWithDbError(
+            DeletedKnowledgePostSchema,
+            post,
+            `Invalid deleted post input for ${post.uri}`
+          );
+          allStatements.push(...makeDeleteStatements(rawDb, validated));
+        }
+
+        const BATCH_LIMIT = 100;
+        for (let i = 0; i < allStatements.length; i += BATCH_LIMIT) {
+          const chunk = allStatements.slice(i, i + BATCH_LIMIT);
+          yield* runAtomicBatch(rawDb, chunk, `KnowledgeRepo.markDeleted(chunk ${Math.floor(i / BATCH_LIMIT) + 1})`);
+        }
+      });
+    };
 
     const searchPosts = (input: SearchPostsQueryInput) => {
       return decodeWithDbError(

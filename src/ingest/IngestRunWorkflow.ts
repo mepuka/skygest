@@ -34,7 +34,7 @@ import { IngestRepairService } from "./IngestRepairService";
 import { makeWorkflowIngestLayer } from "./Router";
 import { formatSchemaParseError, stringifyUnknown } from "../platform/Json";
 
-const WORKFLOW_FANOUT = 5;
+const WORKFLOW_FANOUT = 3;
 const WORKFLOW_POLL_INTERVAL_MS = 15_000;
 
 type ExpertPollCoordinatorStub = DurableObjectStub & {
