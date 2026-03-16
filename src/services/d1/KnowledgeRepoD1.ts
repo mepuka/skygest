@@ -1,6 +1,6 @@
 import type { D1Database, D1PreparedStatement } from "@cloudflare/workers-types";
 import { D1Client } from "@effect/sql-d1";
-import { Effect, Layer, Option, Schema } from "effect";
+import { Array as A, Effect, Layer, Option, Schema } from "effect";
 import { SqlClient } from "@effect/sql";
 import { SqlError } from "@effect/sql/SqlError";
 import type {
@@ -585,6 +585,8 @@ export const KnowledgeRepoD1 = {
       );
     });
 
+    const BATCH_LIMIT = 100;
+
     const upsertPosts = (posts: ReadonlyArray<KnowledgePost>) => {
       if (rawDb === null || posts.length === 0) {
         return Effect.forEach(posts, upsertOne, { discard: true });
@@ -593,34 +595,37 @@ export const KnowledgeRepoD1 = {
       // D1 batch path: validate + idempotency-check all posts, then combine
       // the write statements into a single db.batch() call (or chunked at 100).
       return Effect.gen(function* () {
-        const allStatements: D1PreparedStatement[] = [];
+        // 1. Validate + idempotency check → collect statements per post
+        const statementSets = yield* Effect.forEach(posts, (post) =>
+          Effect.gen(function* () {
+            const validated = yield* decodeWithDbError(
+              KnowledgePostSchema,
+              post,
+              `Invalid knowledge post input for ${post.uri}`
+            );
 
-        for (const post of posts) {
-          const validated = yield* decodeWithDbError(
-            KnowledgePostSchema,
-            post,
-            `Invalid knowledge post input for ${post.uri}`
-          );
+            const existing = yield* sql<{ ingestId: string | null }>`
+              SELECT ingest_id as ingestId
+              FROM posts
+              WHERE uri = ${validated.uri}
+            `;
 
-          const existing = yield* sql<{ ingestId: string | null }>`
-            SELECT ingest_id as ingestId
-            FROM posts
-            WHERE uri = ${validated.uri}
-          `;
+            if (existing[0]?.ingestId === validated.ingestId) {
+              return [] as ReadonlyArray<D1PreparedStatement>;
+            }
 
-          if (existing[0]?.ingestId === validated.ingestId) {
-            continue;
-          }
+            return makeUpsertStatements(rawDb, validated);
+          }),
+          { concurrency: 1 }
+        );
 
-          allStatements.push(...makeUpsertStatements(rawDb, validated));
-        }
-
-        // D1 batch limit is 100 statements; chunk if needed
-        const BATCH_LIMIT = 100;
-        for (let i = 0; i < allStatements.length; i += BATCH_LIMIT) {
-          const chunk = allStatements.slice(i, i + BATCH_LIMIT);
-          yield* runAtomicBatch(rawDb, chunk, `KnowledgeRepo.upsertPosts(chunk ${Math.floor(i / BATCH_LIMIT) + 1})`);
-        }
+        // 2. Flatten + chunk + batch
+        const allStatements = A.flatten(statementSets);
+        const chunks = A.chunksOf(allStatements, BATCH_LIMIT);
+        yield* Effect.forEach(chunks, (chunk, i) =>
+          runAtomicBatch(rawDb, chunk, `KnowledgeRepo.upsertPosts(chunk ${i + 1})`),
+          { discard: true }
+        );
       });
     };
 
@@ -629,24 +634,28 @@ export const KnowledgeRepoD1 = {
         return Effect.forEach(posts, markDeletedOne, { discard: true });
       }
 
-      // D1 batch path: combine all delete statements into one batch
+      // D1 batch path: validate all posts, then combine delete statements into chunked batches
       return Effect.gen(function* () {
-        const allStatements: D1PreparedStatement[] = [];
+        // 1. Validate → collect statements per post
+        const statementSets = yield* Effect.forEach(posts, (post) =>
+          Effect.map(
+            decodeWithDbError(
+              DeletedKnowledgePostSchema,
+              post,
+              `Invalid deleted post input for ${post.uri}`
+            ),
+            (validated) => makeDeleteStatements(rawDb, validated)
+          ),
+          { concurrency: 1 }
+        );
 
-        for (const post of posts) {
-          const validated = yield* decodeWithDbError(
-            DeletedKnowledgePostSchema,
-            post,
-            `Invalid deleted post input for ${post.uri}`
-          );
-          allStatements.push(...makeDeleteStatements(rawDb, validated));
-        }
-
-        const BATCH_LIMIT = 100;
-        for (let i = 0; i < allStatements.length; i += BATCH_LIMIT) {
-          const chunk = allStatements.slice(i, i + BATCH_LIMIT);
-          yield* runAtomicBatch(rawDb, chunk, `KnowledgeRepo.markDeleted(chunk ${Math.floor(i / BATCH_LIMIT) + 1})`);
-        }
+        // 2. Flatten + chunk + batch
+        const allStatements = A.flatten(statementSets);
+        const chunks = A.chunksOf(allStatements, BATCH_LIMIT);
+        yield* Effect.forEach(chunks, (chunk, i) =>
+          runAtomicBatch(rawDb, chunk, `KnowledgeRepo.markDeleted(chunk ${i + 1})`),
+          { discard: true }
+        );
       });
     };
 
