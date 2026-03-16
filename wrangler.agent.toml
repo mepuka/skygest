@@ -10,15 +10,6 @@ run_worker_first = ["/api/*", "/admin/*", "/mcp", "/health"]
 [observability]
 enabled = true
 
-[[workflows]]
-name = "ingest-run"
-binding = "INGEST_RUN_WORKFLOW"
-class_name = "IngestRunWorkflow"
-
-[[durable_objects.bindings]]
-name = "EXPERT_POLL_COORDINATOR"
-class_name = "ExpertPollCoordinatorDo"
-
 [[services]]
 binding = "INGEST_SERVICE"
 service = "skygest-bi-ingest"
@@ -53,15 +44,6 @@ run_worker_first = ["/api/*", "/admin/*", "/mcp", "/health"]
 [env.staging.observability]
 enabled = true
 
-[[env.staging.workflows]]
-name = "ingest-run"
-binding = "INGEST_RUN_WORKFLOW"
-class_name = "IngestRunWorkflow"
-
-[[env.staging.durable_objects.bindings]]
-name = "EXPERT_POLL_COORDINATOR"
-class_name = "ExpertPollCoordinatorDo"
-
 [[env.staging.services]]
 binding = "INGEST_SERVICE"
 service = "skygest-bi-ingest-staging"
@@ -90,3 +72,7 @@ id = "f9888501c4ad473db8ff49ecf069f9ed"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["ExpertPollCoordinatorDo"]
+
+[[migrations]]
+tag = "v2"
+deleted_classes = ["ExpertPollCoordinatorDo"]
