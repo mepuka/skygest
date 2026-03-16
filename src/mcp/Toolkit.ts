@@ -125,7 +125,7 @@ export const ListTopicsTool = Tool.make("list_topics", {
   .annotate(Tool.OpenWorld, false);
 
 export const GetTopicTool = Tool.make("get_topic", {
-  description: "Look up a single topic by its slug. Returns the topic's label, description, related concepts, and matching terms.",
+  description: "Look up a single topic by its slug. Returns label, kind, description, concept slugs, parent/child relationships, matching terms, hashtags, and signal domains.",
   parameters: GetTopicInput.fields,
   success: OntologyTopicMcpOutput,
   failure: McpToolQueryError
@@ -137,7 +137,7 @@ export const GetTopicTool = Tool.make("get_topic", {
   .annotate(Tool.OpenWorld, false);
 
 export const ExpandTopicsTool = Tool.make("expand_topics", {
-  description: "Given topic slugs, find related topics. Use mode='descendants' to get narrower sub-topics, mode='ancestors' to get broader parent topics. Useful for broadening or narrowing a search scope.",
+  description: "Given topic slugs, find related topics. mode='exact' (default) for direct matches, mode='descendants' for narrower sub-topics, mode='ancestors' for broader parent topics.",
   parameters: ExpandTopicsInput.fields,
   success: ExpandedTopicsMcpOutput,
   failure: McpToolQueryError
@@ -149,7 +149,7 @@ export const ExpandTopicsTool = Tool.make("expand_topics", {
   .annotate(Tool.OpenWorld, false);
 
 export const ExplainPostTopicsTool = Tool.make("explain_post_topics", {
-  description: "Explain why a post was classified under its topics. Shows the matched term, signal type (keyword, hashtag, or domain), and match score for each topic assignment.",
+  description: "Explain why a post was classified under its topics. Shows the matched term, signal type (term, hashtag, or domain), and match score for each topic assignment.",
   parameters: ExplainPostTopicsInput.fields,
   success: ExplainPostTopicsMcpOutput,
   failure: McpToolQueryError
@@ -161,7 +161,7 @@ export const ExplainPostTopicsTool = Tool.make("explain_post_topics", {
   .annotate(Tool.OpenWorld, false);
 
 export const ListEditorialPicksTool = Tool.make("list_editorial_picks", {
-  description: "List posts that have been editorially selected for the curated feed. Filter by minimum score (0-100). Returns the post URI, score, reason, category, and curator for each pick.",
+  description: "List posts that have been editorially selected for the curated feed. Filter by minimum score (0-100) or pick date. Returns the post URI, score, reason, category, curator, and pick timestamp for each pick.",
   parameters: ListEditorialPicksInput.fields,
   success: EditorialPicksMcpOutput,
   failure: McpToolQueryError

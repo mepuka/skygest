@@ -12,9 +12,9 @@ export const GLOSSARY_CONTENT = `# Skygest Knowledge Base — Domain Glossary
 
 **Concept (Ontology Concept)** — Fine-grained node in the SKOS-style ontology hierarchy. ~92 concepts (e.g., "Perovskite", "SMR", "HeatPumps", "EVCharging"). Have broader/narrower relationships and map to at most one canonical topic.
 
-**Publication** — A news domain tracked by hostname (e.g., "utilitydive.com", "heatmap.news"). Has a tier and source.
+**Publication** — A news domain tracked by hostname (e.g., "utilitydive.com", "heatmap.news"). Has a tier and source classification.
 
-**Editorial Pick** — A post selected for the curated feed, annotated with score (0-100), reason, and category. Status: active, expired, or retracted.
+**Editorial Pick** — A post selected for the curated feed, annotated with score (0-100), reason, and optional category. The MCP tool returns only active, non-expired picks; status and expiry are managed internally.
 
 ## Enums
 
@@ -22,7 +22,11 @@ export const GLOSSARY_CONTENT = `# Skygest Knowledge Base — Domain Glossary
 
 **MatchSignal** — How a post matched a topic: "term" (keyword in text), "hashtag" (tag on post), "domain" (hostname of embedded link).
 
-**EditorialPickCategory** — "breaking" (time-sensitive), "analysis" (deep dives), "discussion" (debate), "data" (statistics), "opinion" (commentary).
+**EditorialPickCategory** — "breaking" (time-sensitive), "analysis" (deep dives), "discussion" (debate), "data" (statistics), "opinion" (commentary). Category may be null.
+
+**PublicationTier** — "energy-focused" (dedicated energy outlets), "general-outlet" (mainstream media), "unknown" (discovered but unclassified).
+
+**PublicationSource** — "seed" (from ontology manifest), "discovered" (observed in ingested links).
 
 **OntologyTopicView** — "facets" returns ~30 canonical topics; "concepts" returns all ~92 ontology nodes.
 
@@ -38,4 +42,16 @@ export const GLOSSARY_CONTENT = `# Skygest Knowledge Base — Domain Glossary
 
 ## Data Flow
 
-Experts post on Bluesky → ingest pipeline fetches posts → ontology matcher classifies by topic (term/hashtag/domain signals) → matched posts stored → curators submit editorial picks with scores → curated feed serves top picks by score, filterable by topic.`;
+Experts post on Bluesky → ingest pipeline fetches posts → ontology matcher classifies by topic (term/hashtag/domain signals) → matched posts stored with extracted link metadata (title, description, image, hostname) → curators submit editorial picks with scores → curated feed serves top picks by score, filterable by topic.
+
+## Display Convention
+
+Tool responses include a \`_display\` field with a compact text summary using addressable IDs:
+- \`[P1]\`, \`[P2]\` — Posts (with URI on a separate line for follow-up)
+- \`[L1]\`, \`[L2]\` — Links (with URL and postUri)
+- \`[E1]\`, \`[E2]\` — Experts (with DID)
+- \`[T1]\`, \`[T2]\` — Topics (with slug)
+- \`[M1]\`, \`[M2]\` — Topic match explanations
+- \`[K1]\`, \`[K2]\` — Editorial picks (with postUri)
+
+Use \`_display\` for reading results at a glance. Reference items by their identifier from the structured \`items\` array for follow-up tool calls (e.g., \`items[n].uri\` for posts, \`items[n].did\` for experts).`;

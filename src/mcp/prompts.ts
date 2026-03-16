@@ -23,7 +23,7 @@ WORKFLOW:
 2. GATHER — Call get_recent_posts(topic: "${topic}", since: <now minus ${h}h in epoch ms>, limit: 20). Note each post's uri, text, handle, tier, and topics. "energy-focused" tier experts carry higher baseline credibility.
 3. CHECK LINKS — Call get_post_links(topic: "${topic}", since: <same>) for article metadata. Posts sharing original reporting from known energy publications are stronger candidates.
 4. DEDUPLICATE — Call list_editorial_picks(since: <24h ago>) to see existing picks. Do not re-pick duplicates.
-5. EVALUATE each post on: informational value, source quality (expert tier + publication tier), topical fit, and original insight.
+5. EVALUATE each post on: informational value, source quality (expert tier + link domain reputation from step 3), topical fit, and original insight.
 6. OUTPUT for each recommended pick: postUri, score (0-100: 80+=must-read, 60-79=strong, 40-59=notable), reason (1-2 sentences), category (breaking/analysis/discussion/data/opinion).
 
 Submit picks via POST /admin/editorial/pick with the operator secret header.`
@@ -73,7 +73,7 @@ WORKFLOW:
 2. POSTS — Call get_recent_posts(expertDid: <did>, limit: 20). Note posting frequency, topic distribution, and content style (original analysis vs. link-sharing).
 3. LINKS — From posts with links, note hostnames. Do they share primary sources (government reports, trade press) or aggregation?
 4. TOPICS — For their top 2-3 topics, call get_topic(slug: <slug>). Call explain_post_topics(postUri: <uri>) on 2-3 posts to verify classification accuracy.
-5. CROSS-REF — Call search_posts(query: <handle>, limit: 5) to find mentions by other experts.
+5. CROSS-REF — Call search_posts(query: <handle>, limit: 5) to find posts mentioning this expert (best-effort — searches post text, may miss mentions using display names).
 6. REPORT — Profile (handle, tier, source), posting cadence, topical focus, source quality, classifier accuracy, tier adjustment recommendation.`
     );
   }
