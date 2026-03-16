@@ -185,10 +185,6 @@ const buildWorkflowWorkerParts = (env: WorkflowIngestEnvBindings) => {
     workflowLauncherLayer,
     ingestRepairLayer
   );
-  const agentLayer = Layer.mergeAll(
-    shared.adminLayer,
-    ingestLayer
-  );
 
   return {
     ...shared,
@@ -200,8 +196,7 @@ const buildWorkflowWorkerParts = (env: WorkflowIngestEnvBindings) => {
     expertPollExecutorLayer,
     workflowLauncherLayer,
     ingestRepairLayer,
-    ingestLayer,
-    agentLayer
+    ingestLayer
   };
 };
 
@@ -234,6 +229,3 @@ export const makeAdminWorkerLayer = (env: EnvBindings) =>
 
 export const makeIngestWorkerLayer = (env: WorkflowIngestEnvBindings) =>
   getWorkflowWorkerParts(env).ingestLayer;
-
-export const makeAgentWorkerLayer = (env: WorkflowIngestEnvBindings) =>
-  getWorkflowWorkerParts(env).agentLayer;

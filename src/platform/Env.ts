@@ -22,6 +22,10 @@ export interface EnvBindings {
   readonly DB: D1Database;
 }
 
+export interface AgentWorkerEnvBindings extends EnvBindings {
+  readonly INGEST_SERVICE: Fetcher;
+}
+
 export type WorkflowIngestEnvBindings = EnvBindings & {
   readonly INGEST_RUN_WORKFLOW: Workflow<IngestRunParams>;
   readonly EXPERT_POLL_COORDINATOR: DurableObjectNamespace;
