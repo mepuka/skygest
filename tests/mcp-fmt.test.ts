@@ -43,6 +43,8 @@ describe("formatPosts", () => {
     expect(out).toContain("2024-03-09");
     expect(out).toContain("Solar capacity");
     expect(out).toContain("Topics: solar, energy-storage");
+    // Follow-up identifier: URI must be present for tool chaining
+    expect(out).toContain("URI: at://did:plc:abc/app.bsky.feed.post/1");
   });
 
   it("assigns sequential IDs [P1], [P2], [P3]", () => {
@@ -146,6 +148,9 @@ describe("formatLinks", () => {
     expect(out).toContain("reuters.com");
     expect(out).toContain("Solar capacity hits record");
     expect(out).toContain("2024-03-09");
+    // Follow-up identifiers: URL and postUri must be present for tool chaining
+    expect(out).toContain("URL: https://reuters.com/article/solar");
+    expect(out).toContain("Post: at://did:plc:abc/app.bsky.feed.post/1");
   });
 
   it("shows (untitled) when title is null", () => {
@@ -207,6 +212,8 @@ describe("formatExperts", () => {
     expect(out).toContain("Alice (@alice.bsky.social)");
     expect(out).toContain("energy-focused");
     expect(out).toContain("energy");
+    // Follow-up identifier: DID must always be present for tool chaining
+    expect(out).toContain("DID: did:plc:abc");
   });
 
   it("falls back to DID prefix when handle is null", () => {

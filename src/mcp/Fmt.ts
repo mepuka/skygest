@@ -94,15 +94,17 @@ export const formatPosts = (items: ReadonlyArray<KnowledgePostResult>): string =
       Doc.text(formatTimestamp(p.createdAt))
     ]);
 
-    const bodyText = collapse(p.snippet ?? p.text);
-    const body = Doc.text(`     ${truncate(bodyText, 110)}`);
+    const bodyText = truncate(collapse(p.snippet ?? p.text), 200);
+    const body = Doc.indent(Doc.reflow(bodyText), 5);
+
+    const uriLine = Doc.text(`     URI: ${p.uri}`);
 
     const topicLine =
       p.topics.length > 0
         ? Doc.text(`     Topics: ${p.topics.join(", ")}`)
         : Doc.empty;
 
-    const parts: SDoc[] = [header, body];
+    const parts: SDoc[] = [header, body, uriLine];
     if (p.topics.length > 0) parts.push(topicLine);
     return Doc.vsep(parts);
   });
@@ -124,7 +126,7 @@ export const formatLinks = (items: ReadonlyArray<KnowledgeLinkResult>): string =
     const tag = `[L${i + 1}]`;
     const domain = l.domain ?? "unknown";
     const title = l.title ? truncate(collapse(l.title), 60) : "(untitled)";
-    return Doc.hsep([
+    const header = Doc.hsep([
       Doc.text(tag),
       Doc.text(domain),
       Doc.text("\u2014"),
@@ -132,6 +134,9 @@ export const formatLinks = (items: ReadonlyArray<KnowledgeLinkResult>): string =
       Doc.text("\u00B7"),
       Doc.text(formatTimestamp(l.createdAt))
     ]);
+    const urlLine = Doc.text(`     URL: ${l.url}`);
+    const postLine = Doc.text(`     Post: ${l.postUri}`);
+    return Doc.vsep([header, urlLine, postLine]);
   });
 
   return render(Doc.vsep(rows));
@@ -150,7 +155,7 @@ export const formatExperts = (items: ReadonlyArray<ExpertListItem>): string => {
   const rows: SDoc[] = items.map((e, i) => {
     const tag = `[E${i + 1}]`;
     const label = personLabel(e.handle, e.displayName, e.did);
-    return Doc.hsep([
+    const header = Doc.hsep([
       Doc.text(tag),
       Doc.text(label),
       Doc.text("\u00B7"),
@@ -158,6 +163,8 @@ export const formatExperts = (items: ReadonlyArray<ExpertListItem>): string => {
       Doc.text("\u00B7"),
       Doc.text(e.domain)
     ]);
+    const didLine = Doc.text(`     DID: ${e.did}`);
+    return Doc.vsep([header, didLine]);
   });
 
   return render(Doc.vsep(rows));
@@ -335,7 +342,7 @@ export const formatEditorialPicks = (items: ReadonlyArray<EditorialPickOutput>):
       Doc.text(formatTimestamp(p.pickedAt))
     ]);
 
-    const reason = Doc.text(`     ${truncate(collapse(p.reason), 110)}`);
+    const reason = Doc.indent(Doc.reflow(truncate(collapse(p.reason), 150)), 5);
     const uri = Doc.text(`     URI: ${p.postUri}`);
 
     return Doc.vsep([header, reason, uri]);
