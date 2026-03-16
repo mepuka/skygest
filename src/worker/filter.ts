@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { makeWorkflowIngestLayer } from "../ingest/Router";
+import { handleIngestRequest, makeWorkflowIngestLayer } from "../ingest/Router";
 import { ExpertPollCoordinatorDo } from "../ingest/ExpertPollCoordinatorDo";
 import { IngestRunWorkflow } from "../ingest/IngestRunWorkflow";
 import { IngestWorkflowLauncher } from "../ingest/IngestWorkflowLauncher";
@@ -8,12 +8,29 @@ import {
   runScopedWithRuntime,
   withManagedRuntime
 } from "../platform/EffectRuntime";
+import {
+  authorizeOperator,
+  logDeniedOperatorRequest,
+  requiredOperatorScopes,
+  toAuthErrorResponse
+} from "./operatorAuth";
 
 export const fetch = async (request: Request, env: WorkflowIngestEnvBindings) => {
   const url = new URL(request.url);
 
   if (url.pathname === "/health") {
     return new Response("ok");
+  }
+
+  if (url.pathname.startsWith("/admin/ingest/")) {
+    let identity;
+    try {
+      identity = await authorizeOperator(request, env, requiredOperatorScopes(request));
+    } catch (error) {
+      await logDeniedOperatorRequest(request, error);
+      return toAuthErrorResponse(error);
+    }
+    return handleIngestRequest(request, env, identity);
   }
 
   return new Response("not found", { status: 404 });

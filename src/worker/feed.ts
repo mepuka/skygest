@@ -1,10 +1,7 @@
 import { handleAdminRequest } from "../admin/Router";
 import { handleApiRequest } from "../api/Router";
-import { ExpertPollCoordinatorDo } from "../ingest/ExpertPollCoordinatorDo";
-import { IngestRunWorkflow } from "../ingest/IngestRunWorkflow";
-import { handleIngestRequest } from "../ingest/Router";
 import { handleMcpRequest } from "../mcp/Router";
-import type { WorkflowIngestEnvBindings } from "../platform/Env";
+import type { AgentWorkerEnvBindings } from "../platform/Env";
 import {
   authorizeOperator,
   isSharedSecretMode,
@@ -15,7 +12,7 @@ import {
   toAuthErrorResponse
 } from "./operatorAuth";
 
-export const fetch = async (request: Request, env: WorkflowIngestEnvBindings) => {
+export const fetch = async (request: Request, env: AgentWorkerEnvBindings) => {
   const url = new URL(request.url);
 
   if (url.pathname === "/health") {
@@ -38,20 +35,13 @@ export const fetch = async (request: Request, env: WorkflowIngestEnvBindings) =>
   }
 
   if (url.pathname.startsWith("/admin/ingest/")) {
-    let identity;
-
     try {
-      identity = await authorizeOperator(
-        request,
-        env,
-        requiredOperatorScopes(request)
-      );
+      await authorizeOperator(request, env, requiredOperatorScopes(request));
     } catch (error) {
       await logDeniedOperatorRequest(request, error);
       return toAuthErrorResponse(error);
     }
-
-    return handleIngestRequest(request, env, identity);
+    return env.INGEST_SERVICE.fetch(request);
   }
 
   if (url.pathname.startsWith("/admin")) {
@@ -77,7 +67,5 @@ export const fetch = async (request: Request, env: WorkflowIngestEnvBindings) =>
 
   return new Response("not found", { status: 404 });
 };
-
-export { ExpertPollCoordinatorDo, IngestRunWorkflow };
 
 export default { fetch };
