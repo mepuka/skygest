@@ -1,11 +1,22 @@
 import { McpServer } from "@effect/ai";
 import * as HttpLayerRouter from "@effect/platform/HttpLayerRouter";
-import { Layer } from "effect";
+import { Effect, Layer } from "effect";
 import { makeQueryLayer } from "../edge/Layer";
 import type { EnvBindings } from "../platform/Env";
 import { EditorialService } from "../services/EditorialService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
+import { GLOSSARY_CONTENT } from "./glossary";
+import { PromptsLayer } from "./prompts";
 import { KnowledgeMcpHandlers, KnowledgeMcpToolkit } from "./Toolkit";
+
+const GlossaryResource = McpServer.resource({
+  uri: "skygest://glossary",
+  name: "Domain Glossary",
+  description:
+    "Definitions of key terms, entities, and enums used across all tools",
+  mimeType: "text/markdown",
+  content: Effect.succeed(GLOSSARY_CONTENT)
+});
 
 const makeMcpLayer = (
   queryLayer: Layer.Layer<KnowledgeQueryService | EditorialService, any, never>
@@ -14,6 +25,8 @@ const makeMcpLayer = (
     Layer.provideMerge(
       KnowledgeMcpHandlers.pipe(Layer.provideMerge(queryLayer))
     ),
+    Layer.provideMerge(GlossaryResource),
+    Layer.provideMerge(PromptsLayer),
     Layer.provideMerge(
       McpServer.layerHttpRouter({
         name: "skygest-bi-mcp",

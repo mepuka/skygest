@@ -1,7 +1,7 @@
 import type { SqlError } from "@effect/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import { Tool, Toolkit } from "@effect/ai";
-import { Effect } from "effect";
+import { Effect, Schema } from "effect";
 import {
   ExplainPostTopicsInput,
   ExplainPostTopicsOutput,
@@ -27,6 +27,26 @@ import {
 import { EditorialService } from "../services/EditorialService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 
+// ---------------------------------------------------------------------------
+// MCP-specific input schemas — strip cursor fields that LLMs cannot construct
+// ---------------------------------------------------------------------------
+
+const GetRecentPostsMcpInput = Schema.Struct({
+  topic: GetRecentPostsInput.fields.topic,
+  expertDid: GetRecentPostsInput.fields.expertDid,
+  since: GetRecentPostsInput.fields.since,
+  until: GetRecentPostsInput.fields.until,
+  limit: GetRecentPostsInput.fields.limit
+});
+
+const GetPostLinksMcpInput = Schema.Struct({
+  domain: GetPostLinksInput.fields.domain,
+  topic: GetPostLinksInput.fields.topic,
+  since: GetPostLinksInput.fields.since,
+  until: GetPostLinksInput.fields.until,
+  limit: GetPostLinksInput.fields.limit
+});
+
 const toQueryError = (tool: string) => (error: SqlError | DbError) =>
   McpToolQueryError.make({
     tool,
@@ -48,7 +68,7 @@ export const SearchPostsTool = Tool.make("search_posts", {
 
 export const GetRecentPostsTool = Tool.make("get_recent_posts", {
   description: "Browse posts in reverse chronological order. Filter by topic slug or expert DID. Use this for chronological browsing; use search_posts for keyword matching.",
-  parameters: GetRecentPostsInput.fields,
+  parameters: GetRecentPostsMcpInput.fields,
   success: KnowledgePostsOutput,
   failure: McpToolQueryError
 })
@@ -60,7 +80,7 @@ export const GetRecentPostsTool = Tool.make("get_recent_posts", {
 
 export const GetPostLinksTool = Tool.make("get_post_links", {
   description: "List URLs shared in expert posts. Filter by link hostname (e.g. 'reuters.com') or topic. Returns title, description, and image metadata for each link.",
-  parameters: GetPostLinksInput.fields,
+  parameters: GetPostLinksMcpInput.fields,
   success: KnowledgeLinksOutput,
   failure: McpToolQueryError
 })
