@@ -10,7 +10,8 @@ import {
   ListPublicationsInput as ListPublicationsInputSchema,
   PublicationSeedManifest as PublicationSeedManifestSchema,
   SeedPublicationsResult as SeedPublicationsResultSchema,
-  PublicationListItem as PublicationListItemSchema
+  PublicationListItem as PublicationListItemSchema,
+  PublicationRecord as PublicationRecordSchema
 } from "../../domain/bi";
 import { decodeWithDbError } from "./schemaDecode";
 
@@ -155,10 +156,60 @@ export const PublicationsRepoD1 = {
       );
     };
 
+    const PublicationRecordRowSchema = Schema.Struct({
+      hostname: Schema.String,
+      tier: Schema.String,
+      source: Schema.String,
+      firstSeenAt: Schema.Number,
+      lastSeenAt: Schema.Number
+    });
+    const PublicationRecordRowsSchema = Schema.Array(PublicationRecordRowSchema);
+
+    const getByHostnames = (hostnames: ReadonlyArray<string>) => {
+      if (hostnames.length === 0) return Effect.succeed([] as any[]);
+
+      const chunks: string[][] = [];
+      for (let i = 0; i < hostnames.length; i += 50) {
+        chunks.push(hostnames.slice(i, i + 50) as string[]);
+      }
+
+      return Effect.forEach(chunks, (chunk) => {
+        const placeholders = chunk.map((h) => sql`${h}`);
+        return sql<any>`
+          SELECT
+            hostname as hostname,
+            tier as tier,
+            source as source,
+            first_seen_at as firstSeenAt,
+            last_seen_at as lastSeenAt
+          FROM publications
+          WHERE hostname IN (${sql.join(", ", false)(placeholders)})
+        `.pipe(
+          Effect.flatMap((rows) =>
+            decodeWithDbError(
+              PublicationRecordRowsSchema,
+              rows,
+              "Failed to decode publication rows for batch lookup"
+            )
+          ),
+          Effect.flatMap((rows) =>
+            decodeWithDbError(
+              Schema.Array(PublicationRecordSchema),
+              rows,
+              "Failed to normalize publication rows for batch lookup"
+            )
+          )
+        );
+      }).pipe(
+        Effect.map((chunks) => chunks.flat())
+      );
+    };
+
     return PublicationsRepo.of({
       seedCurated,
       list,
-      ensureDomains
+      ensureDomains,
+      getByHostnames
     });
   }))
 };

@@ -3,6 +3,7 @@ import type { SqlError } from "@effect/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type {
   PublicationListItem,
+  PublicationRecord,
   ListPublicationsInput,
   PublicationSeedManifest,
   SeedPublicationsResult
@@ -22,5 +23,9 @@ export class PublicationsRepo extends Context.Tag("@skygest/PublicationsRepo")<
       hostnames: ReadonlyArray<string>,
       observedAt: number
     ) => Effect.Effect<void, SqlError | DbError>;
+
+    readonly getByHostnames: (
+      hostnames: ReadonlyArray<string>
+    ) => Effect.Effect<ReadonlyArray<PublicationRecord>, SqlError | DbError>;
   }
 >() {}

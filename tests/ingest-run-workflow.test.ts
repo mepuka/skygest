@@ -109,7 +109,8 @@ describe("IngestRunWorkflow", () => {
               )
             ),
           listActiveByShard: () => Effect.succeed([]),
-          list: () => Effect.succeed([])
+          list: () => Effect.succeed([]),
+          getByDids: () => Effect.succeed([])
         });
       const runsLayer = Layer.succeed(IngestRunsRepo, {
           createQueuedIfAbsent: () => Effect.succeed(true),
@@ -399,7 +400,8 @@ describe("IngestRunWorkflow", () => {
         setLastSyncedAt: () => Effect.void,
         listActive: () => Effect.succeed([makeExpert(asDid("did:plc:expert-1"))]),
         listActiveByShard: () => Effect.succeed([]),
-        list: () => Effect.succeed([])
+        list: () => Effect.succeed([]),
+        getByDids: () => Effect.succeed([])
       });
       const runsLayer = Layer.succeed(IngestRunsRepo, {
         createQueuedIfAbsent: () => Effect.succeed(true),
@@ -571,7 +573,8 @@ describe("IngestRunWorkflow", () => {
           setLastSyncedAt: () => Effect.void,
           listActive: () => Effect.succeed([makeExpert(asDid("did:plc:expert-1"))]),
           listActiveByShard: () => Effect.succeed([]),
-          list: () => Effect.succeed([])
+          list: () => Effect.succeed([]),
+          getByDids: () => Effect.succeed([])
         }),
         runsLayer,
         runItemsLayer,
@@ -730,7 +733,8 @@ describe("IngestRunWorkflow", () => {
           setLastSyncedAt: () => Effect.void,
           listActive: () => Effect.succeed([makeExpert(did)]),
           listActiveByShard: () => Effect.succeed([]),
-          list: () => Effect.succeed([])
+          list: () => Effect.succeed([]),
+          getByDids: () => Effect.succeed([])
         }),
         runsLayer,
         runItemsLayer,

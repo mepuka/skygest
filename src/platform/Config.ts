@@ -29,7 +29,8 @@ const RawConfigSchema = Config.all({
     ""
   ),
   accessAud: Config.withDefault(Config.string("ACCESS_AUD"), ""),
-  editorialDefaultExpiryHours: Config.withDefault(Config.integer("EDITORIAL_DEFAULT_EXPIRY_HOURS"), 24)
+  editorialDefaultExpiryHours: Config.withDefault(Config.integer("EDITORIAL_DEFAULT_EXPIRY_HOURS"), 24),
+  curationMinSignalScore: Config.withDefault(Config.integer("CURATION_MIN_SIGNAL_SCORE"), 30)
 });
 
 type RawAppConfigShape = Config.Config.Success<typeof RawConfigSchema>;
@@ -57,7 +58,8 @@ export class AppConfig extends Context.Tag("@skygest/AppConfig")<
           ["OPERATOR_SECRET", env.OPERATOR_SECRET],
           ["ACCESS_TEAM_DOMAIN", env.ACCESS_TEAM_DOMAIN],
           ["ACCESS_AUD", env.ACCESS_AUD],
-          ["EDITORIAL_DEFAULT_EXPIRY_HOURS", env.EDITORIAL_DEFAULT_EXPIRY_HOURS]
+          ["EDITORIAL_DEFAULT_EXPIRY_HOURS", env.EDITORIAL_DEFAULT_EXPIRY_HOURS],
+          ["CURATION_MIN_SIGNAL_SCORE", env.CURATION_MIN_SIGNAL_SCORE]
         ] as const,
         ([key, value]) =>
           value == null

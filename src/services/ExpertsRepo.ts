@@ -23,5 +23,9 @@ export class ExpertsRepo extends Context.Tag("@skygest/ExpertsRepo")<
       active: boolean | null,
       limit: number
     ) => Effect.Effect<ReadonlyArray<ExpertListItem>, SqlError | DbError>;
+
+    readonly getByDids: (
+      dids: ReadonlyArray<string>
+    ) => Effect.Effect<ReadonlyArray<ExpertRecord>, SqlError | DbError>;
   }
 >() {}

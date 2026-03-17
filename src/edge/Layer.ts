@@ -16,6 +16,8 @@ import {
 import { Logging } from "../platform/Logging";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { CandidatePayloadService } from "../services/CandidatePayloadService";
+import { CurationService } from "../services/CurationService";
+import { CurationRepoD1 } from "../services/d1/CurationRepoD1";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { OntologyCatalog } from "../services/OntologyCatalog";
 import { StagingOpsService } from "../services/StagingOpsService";
@@ -50,6 +52,9 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const candidatePayloadServiceLayer = CandidatePayloadService.layer.pipe(
     Layer.provideMerge(candidatePayloadRepoLayer)
   );
+  const curationRepoLayer = CurationRepoD1.layer.pipe(
+    Layer.provideMerge(baseLayer)
+  );
   const queryRepositoriesLayer = Layer.mergeAll(
     ontologyLayer,
     expertsLayer,
@@ -64,6 +69,18 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const blueskyLayer = BlueskyClientLayer.pipe(
     Layer.provideMerge(configLayer)
   );
+  const curationServiceLayer = CurationService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        curationRepoLayer,
+        expertsLayer,
+        publicationsLayer,
+        candidatePayloadServiceLayer,
+        blueskyLayer,
+        configLayer
+      )
+    )
+  );
   const queryLayer = Layer.mergeAll(
     queryRepositoriesLayer,
     configLayer,
@@ -71,7 +88,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     KnowledgeQueryService.layer.pipe(
       Layer.provideMerge(Layer.mergeAll(queryRepositoriesLayer, configLayer))
     ),
-    editorialServiceLayer
+    editorialServiceLayer,
+    curationServiceLayer
   );
   const authLayer = AuthService.layer.pipe(
     Layer.provideMerge(Layer.mergeAll(baseLayer, configLayer))
@@ -89,7 +107,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         expertsLayer,
         knowledgeLayer,
         registryLayer,
-        publicationsLayer
+        publicationsLayer,
+        curationServiceLayer
       )
     )
   );
@@ -106,7 +125,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     registryLayer,
     stagingOpsLayer,
     editorialServiceLayer,
-    candidatePayloadServiceLayer
+    candidatePayloadServiceLayer,
+    curationServiceLayer
   );
 
   return {
@@ -118,6 +138,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     publicationsLayer,
     candidatePayloadRepoLayer,
     candidatePayloadServiceLayer,
+    curationRepoLayer,
+    curationServiceLayer,
     queryLayer,
     blueskyLayer,
     authLayer,
@@ -166,6 +188,7 @@ const buildWorkflowWorkerParts = (env: WorkflowIngestEnvBindings) => {
         shared.ontologyLayer,
         shared.expertsLayer,
         shared.knowledgeLayer,
+        shared.curationServiceLayer,
         repoRecordsLayer,
         syncStateLayer
       )

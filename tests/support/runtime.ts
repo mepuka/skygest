@@ -16,7 +16,9 @@ import { AppConfig, type AppConfigShape } from "../../src/platform/Config";
 import { EditorialService } from "../../src/services/EditorialService";
 import { OntologyCatalog } from "../../src/services/OntologyCatalog";
 import { KnowledgeQueryService } from "../../src/services/KnowledgeQueryService";
+import { CurationService } from "../../src/services/CurationService";
 import { CandidatePayloadRepoD1 } from "../../src/services/d1/CandidatePayloadRepoD1";
+import { CurationRepoD1 } from "../../src/services/d1/CurationRepoD1";
 import { EditorialRepoD1 } from "../../src/services/d1/EditorialRepoD1";
 import { ExpertsRepoD1 } from "../../src/services/d1/ExpertsRepoD1";
 import { KnowledgeRepoD1 } from "../../src/services/d1/KnowledgeRepoD1";
@@ -36,6 +38,7 @@ export const testConfig = (
   accessTeamDomain: "https://access.example.com",
   accessAud: "skygest-mcp",
   editorialDefaultExpiryHours: 24,
+  curationMinSignalScore: 30,
   ...overrides
 });
 
@@ -58,6 +61,9 @@ export const makeBiLayer = (options?: {
   const candidatePayloadRepoLayer = CandidatePayloadRepoD1.layer.pipe(
     Layer.provideMerge(sqliteLayer)
   );
+  const curationRepoLayer = CurationRepoD1.layer.pipe(
+    Layer.provideMerge(sqliteLayer)
+  );
   const editorialRepoLayer = EditorialRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
   const ontologyLayer = OntologyCatalog.layer;
   const baseLayer = Layer.mergeAll(
@@ -68,6 +74,7 @@ export const makeBiLayer = (options?: {
     knowledgeLayer,
     publicationsLayer,
     candidatePayloadRepoLayer,
+    curationRepoLayer,
     editorialRepoLayer
   );
 
@@ -83,11 +90,25 @@ export const makeBiLayer = (options?: {
     Layer.provideMerge(candidatePayloadRepoLayer)
   );
 
+  const curationServiceLayer = CurationService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        curationRepoLayer,
+        expertsLayer,
+        publicationsLayer,
+        candidatePayloadServiceLayer,
+        blueskyLayer,
+        configLayer
+      )
+    )
+  );
+
   return Layer.mergeAll(
     baseLayer,
     KnowledgeQueryService.layer.pipe(Layer.provideMerge(baseLayer)),
     editorialServiceLayer,
     candidatePayloadServiceLayer,
+    curationServiceLayer,
     blueskyLayer
   );
 };
