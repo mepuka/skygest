@@ -3,6 +3,7 @@ import type { SqlError } from "@effect/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type {
   CandidatePayloadRecord,
+  CandidatePayloadNotPickedError,
   SaveCandidateEnrichmentInput
 } from "../domain/candidatePayload";
 
@@ -30,6 +31,6 @@ export class CandidatePayloadRepo extends Context.Tag("@skygest/CandidatePayload
       input: SaveCandidateEnrichmentInput,
       updatedAt: number,
       enrichedAt: number
-    ) => Effect.Effect<boolean, SqlError | DbError>;
+    ) => Effect.Effect<boolean, SqlError | DbError | CandidatePayloadNotPickedError>;
   }
 >() {}
