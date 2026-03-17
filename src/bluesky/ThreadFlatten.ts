@@ -5,6 +5,7 @@ export interface FlattenedPost {
   readonly post: ThreadPostView;
   readonly depth: number;
   readonly parentUri: string | null;
+  readonly dfsIndex: number;
 }
 
 export interface FlattenedThread {
@@ -38,7 +39,7 @@ export const flattenThread = (threadData: unknown): FlattenedThread | null => {
   const root = tryDecodeNodeFull(threadData);
   if (!root) return null;
 
-  const focus: FlattenedPost = { post: root.post, depth: 0, parentUri: null };
+  const focus: FlattenedPost = { post: root.post, depth: 0, parentUri: null, dfsIndex: 0 };
   const seen = new Set<string>([focus.post.uri]);
 
   // Walk parent chain upward (iterative, not recursive)
@@ -48,7 +49,7 @@ export const flattenThread = (threadData: unknown): FlattenedThread | null => {
     const parentNode = tryDecodeNodeFull(currentParent);
     if (!parentNode || seen.has(parentNode.post.uri)) break;
     seen.add(parentNode.post.uri);
-    ancestors.unshift({ post: parentNode.post, depth: 0, parentUri: null }); // depth set below
+    ancestors.unshift({ post: parentNode.post, depth: 0, parentUri: null, dfsIndex: 0 }); // depth set below
     currentParent = parentNode.parent;
   }
 
@@ -56,12 +57,12 @@ export const flattenThread = (threadData: unknown): FlattenedThread | null => {
   for (let i = 0; i < ancestors.length; i++) {
     const depth = -(ancestors.length - i);
     const parentUri = i === 0 ? null : ancestors[i - 1]!.post.uri;
-    ancestors[i] = { post: ancestors[i]!.post, depth, parentUri };
+    ancestors[i] = { post: ancestors[i]!.post, depth, parentUri, dfsIndex: 0 };
   }
 
   // Set focus parentUri to last ancestor if present
   const focusParentUri = ancestors.length > 0 ? ancestors[ancestors.length - 1]!.post.uri : null;
-  const focusPost: FlattenedPost = { post: root.post, depth: 0, parentUri: focusParentUri };
+  const focusPost: FlattenedPost = { post: root.post, depth: 0, parentUri: focusParentUri, dfsIndex: 0 };
 
   // Walk replies via DFS with engagement sorting
   const replies: FlattenedPost[] = [];
@@ -85,12 +86,13 @@ export const flattenThread = (threadData: unknown): FlattenedThread | null => {
     stack.push({ raw: rootReplies[i]!.raw, depth: 1, parentUri: focusPost.post.uri });
   }
 
+  let replyDfsIndex = 0;
   while (stack.length > 0) {
     const { raw, depth, parentUri } = stack.pop()!;
     const replyNode = tryDecodeNodeFull(raw);
     if (!replyNode || seen.has(replyNode.post.uri)) continue;
     seen.add(replyNode.post.uri);
-    replies.push({ post: replyNode.post, depth, parentUri });
+    replies.push({ post: replyNode.post, depth, parentUri, dfsIndex: replyDfsIndex++ });
 
     // Decode, sort, and push children in reverse
     if (replyNode.replies && replyNode.replies.length > 0) {

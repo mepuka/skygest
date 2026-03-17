@@ -159,6 +159,42 @@ describe("flattenThread", () => {
     expect(result.replies[2]!.post.uri).toBe("child-low");
   });
 
+  it("assigns sequential dfsIndex to replies", () => {
+    const deep = makeNode("deep", "Deep reply");
+    const mid = makeNode("mid", "Mid reply", { replies: [deep] });
+    const top = makeNode("top", "Top reply", { replies: [mid] });
+    const focus = makeNode("focus", "Focus", { replies: [top] });
+    const result = flattenThread(focus)!;
+
+    expect(result.replies[0]!.dfsIndex).toBe(0);  // top
+    expect(result.replies[1]!.dfsIndex).toBe(1);  // mid
+    expect(result.replies[2]!.dfsIndex).toBe(2);  // deep
+  });
+
+  it("assigns dfsIndex across engagement-sorted siblings", () => {
+    const low = makeNode("low", "Low", { likeCount: 1 });
+    const high = makeNode("high", "High", { likeCount: 50 });
+    const focus = makeNode("focus", "Focus", { replies: [low, high] });
+    const result = flattenThread(focus)!;
+
+    // high sorted first (engagement), gets dfsIndex 0
+    expect(result.replies[0]!.post.uri).toBe("high");
+    expect(result.replies[0]!.dfsIndex).toBe(0);
+    expect(result.replies[1]!.post.uri).toBe("low");
+    expect(result.replies[1]!.dfsIndex).toBe(1);
+  });
+
+  it("assigns dfsIndex 0 to ancestors and focus", () => {
+    const gp = makeNode("gp", "Grandparent");
+    const parent = makeNode("parent", "Parent", { parent: gp });
+    const focus = makeNode("focus", "Focus", { parent });
+    const result = flattenThread(focus)!;
+
+    expect(result.ancestors[0]!.dfsIndex).toBe(0);
+    expect(result.ancestors[1]!.dfsIndex).toBe(0);
+    expect(result.focus.dfsIndex).toBe(0);
+  });
+
   it("preserves embed data on posts", () => {
     const reply = makeNode("reply", "Reply with link", {
       embed: { $type: "app.bsky.embed.external#view" }
