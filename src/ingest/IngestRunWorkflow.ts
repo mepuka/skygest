@@ -34,7 +34,9 @@ import { IngestRepairService } from "./IngestRepairService";
 import { makeWorkflowIngestLayer } from "./Router";
 import { formatSchemaParseError, stringifyUnknown } from "../platform/Json";
 
-const WORKFLOW_FANOUT = 3;
+const WORKFLOW_FANOUT_HEAD = 10;
+const WORKFLOW_FANOUT_BACKFILL = 3;
+const WORKFLOW_FANOUT_RECONCILE = 5;
 const WORKFLOW_POLL_INTERVAL_MS = 15_000;
 
 type ExpertPollCoordinatorStub = DurableObjectStub & {
@@ -47,6 +49,17 @@ const dedupe = <A>(values: ReadonlyArray<A>) => [...new Set(values)];
 
 const modeForKind = (kind: IngestRunParams["kind"]): PollMode =>
   kind === "head-sweep" ? "head" : kind;
+
+const fanoutForKind = (kind: IngestRunParams["kind"]): number => {
+  switch (modeForKind(kind)) {
+    case "head":
+      return WORKFLOW_FANOUT_HEAD;
+    case "backfill":
+      return WORKFLOW_FANOUT_BACKFILL;
+    case "reconcile":
+      return WORKFLOW_FANOUT_RECONCILE;
+  }
+};
 
 const decodeIngestRunParams = (input: unknown) =>
   (() => {
@@ -184,10 +197,12 @@ export class IngestRunWorkflow extends WorkflowEntrypoint<
     return await this.runEffect(
       Effect.gen(function* () {
         const items = yield* IngestRunItemsRepo;
+        const runs = yield* IngestRunsRepo;
         const repair = yield* IngestRepairService;
         const recovered = yield* repair.repairLiveRun(runId);
         const active = yield* items.countActiveByRun(runId);
-        const available = Math.max(0, WORKFLOW_FANOUT - active);
+        const fanout = fanoutForKind(params.kind);
+        const available = Math.max(0, fanout - active);
         if (available > 0) {
           const undispatched = yield* items.listUndispatchedByRun(runId, available);
           const enqueuedAt = Date.now();
@@ -232,6 +247,15 @@ export class IngestRunWorkflow extends WorkflowEntrypoint<
         }
 
         const incomplete = yield* items.countIncompleteByRun(runId);
+
+        // Periodic progress rollup — persists counters every dispatch cycle
+        const summary = yield* items.summarizeByRun(runId);
+        const { error: _error, ...counters } = summary;
+        yield* runs.updateProgress({
+          id: runId,
+          lastProgressAt: Date.now(),
+          ...counters
+        });
 
         return {
           terminal: incomplete === 0,

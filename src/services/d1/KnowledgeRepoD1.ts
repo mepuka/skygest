@@ -585,41 +585,58 @@ export const KnowledgeRepoD1 = {
       );
     });
 
-    const BATCH_LIMIT = 100;
+    const BATCH_LIMIT = 500;
+    const IDEMPOTENCY_CHUNK_SIZE = 80;
 
     const upsertPosts = (posts: ReadonlyArray<KnowledgePost>) => {
       if (rawDb === null || posts.length === 0) {
         return Effect.forEach(posts, upsertOne, { discard: true });
       }
 
-      // D1 batch path: validate + idempotency-check all posts, then combine
-      // the write statements into a single db.batch() call (or chunked at 100).
+      // D1 batch path: validate all posts, batch idempotency-check via
+      // chunked IN queries, then combine write statements into db.batch().
       return Effect.gen(function* () {
-        // 1. Validate + idempotency check → collect statements per post
-        const statementSets = yield* Effect.forEach(posts, (post) =>
-          Effect.gen(function* () {
-            const validated = yield* decodeWithDbError(
-              KnowledgePostSchema,
-              post,
-              `Invalid knowledge post input for ${post.uri}`
-            );
-
-            const existing = yield* sql<{ ingestId: string | null }>`
-              SELECT ingest_id as ingestId
-              FROM posts
-              WHERE uri = ${validated.uri}
-            `;
-
-            if (existing[0]?.ingestId === validated.ingestId) {
-              return [] as ReadonlyArray<D1PreparedStatement>;
-            }
-
-            return makeUpsertStatements(rawDb, validated);
-          }),
+        // 1. Validate all posts up-front
+        const validatedPosts = yield* Effect.forEach(posts, (post) =>
+          decodeWithDbError(
+            KnowledgePostSchema,
+            post,
+            `Invalid knowledge post input for ${post.uri}`
+          ),
           { concurrency: 1 }
         );
 
-        // 2. Flatten + chunk + batch
+        // 2. Batch idempotency check — chunked IN queries (≤80 params each)
+        const existingIngestIds = new Map<string, string | null>();
+        const uriChunks = A.chunksOf(validatedPosts, IDEMPOTENCY_CHUNK_SIZE);
+        yield* Effect.forEach(uriChunks, (chunk) =>
+          Effect.gen(function* () {
+            const uris = chunk.map((p) => p.uri);
+            const placeholders = uris.map(() => "?").join(", ");
+            const rows = yield* Effect.tryPromise({
+              try: () =>
+                rawDb.prepare(
+                  `SELECT uri, ingest_id as ingestId FROM posts WHERE uri IN (${placeholders})`
+                ).bind(...uris).all<{ uri: string; ingestId: string | null }>(),
+              catch: (cause) =>
+                makeBatchError(cause, "Failed to batch-check idempotency")
+            });
+            for (const row of rows.results) {
+              existingIngestIds.set(row.uri, row.ingestId);
+            }
+          }),
+          { discard: true }
+        );
+
+        // 3. Collect upsert statements only for posts that need updating
+        const statementSets = validatedPosts.map((validated) => {
+          if (existingIngestIds.get(validated.uri) === validated.ingestId) {
+            return [] as ReadonlyArray<D1PreparedStatement>;
+          }
+          return makeUpsertStatements(rawDb, validated);
+        });
+
+        // 4. Flatten + chunk + batch
         const allStatements = A.flatten(statementSets);
         const chunks = A.chunksOf(allStatements, BATCH_LIMIT);
         yield* Effect.forEach(chunks, (chunk, i) =>

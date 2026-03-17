@@ -66,7 +66,7 @@ const makeMutableItem = (runId: string, did: Did, mode: IngestRunItemRecord["mod
 });
 
 describe("IngestRunWorkflow", () => {
-  it.live("dispatches head runs in a 5-wide window and finalizes the run", () =>
+  it.live("dispatches head runs in a 10-wide window and finalizes the run", () =>
     Effect.promise(async () => {
       const { IngestRunWorkflow } = await import("../src/ingest/IngestRunWorkflow");
 
