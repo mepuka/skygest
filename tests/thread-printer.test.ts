@@ -1,3 +1,4 @@
+import { Schema } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import {
   filterReplies,
@@ -5,6 +6,7 @@ import {
   type PrinterConfig,
   type ThreadDocument
 } from "../src/bluesky/ThreadPrinter";
+import { GetThreadDocumentInput, ThreadDocumentOutput } from "../src/domain/bi";
 import type { FlattenedPost, FlattenedThread } from "../src/bluesky/ThreadFlatten";
 
 /** Helper: build a minimal FlattenedPost for filter testing */
@@ -245,5 +247,40 @@ describe("printThread", () => {
     expect(r1Line!.match(/^\s*/)?.[0].length).toBe(0);
     // depth-2 reply should be indented (2 spaces)
     expect(r1_1Line!.match(/^\s*/)?.[0].length).toBeGreaterThan(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Schema decode tests
+// ---------------------------------------------------------------------------
+
+describe("ThreadDocument schemas", () => {
+  it("decodes valid GetThreadDocumentInput", () => {
+    const input = Schema.decodeUnknownSync(GetThreadDocumentInput)({
+      postUri: "at://did:plc:abc/app.bsky.feed.post/123",
+      depth: 3,
+      topN: 5,
+      minLikes: 2
+    });
+    expect(input.postUri).toBe("at://did:plc:abc/app.bsky.feed.post/123");
+    expect(input.topN).toBe(5);
+  });
+
+  it("rejects topN out of range", () => {
+    expect(() => Schema.decodeUnknownSync(GetThreadDocumentInput)({
+      postUri: "at://did:plc:abc/app.bsky.feed.post/123",
+      topN: 100
+    })).toThrow();
+  });
+
+  it("decodes valid ThreadDocumentOutput", () => {
+    const output = Schema.decodeUnknownSync(ThreadDocumentOutput)({
+      title: "Test thread",
+      postCount: 5,
+      replyCount: 3,
+      totalReplies: 10,
+      body: "document body"
+    });
+    expect(output.title).toBe("Test thread");
   });
 });

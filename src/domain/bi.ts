@@ -603,3 +603,46 @@ export const PostThreadOutput = Schema.Struct({
   replies: Schema.Array(ThreadPostResult)
 });
 export type PostThreadOutput = Schema.Schema.Type<typeof PostThreadOutput>;
+
+// --- Thread document (printer) ---
+
+export const GetThreadDocumentInput = Schema.Struct({
+  postUri: AtUri.annotations({
+    description: "AT Protocol URI of the post to render as a document"
+  }),
+  depth: Schema.optional(
+    Schema.Number.pipe(Schema.int(), Schema.between(0, 10)).annotations({
+      description: "Reply depth levels to fetch from Bluesky API (0-10, default 3)"
+    })
+  ),
+  parentHeight: Schema.optional(
+    Schema.Number.pipe(Schema.int(), Schema.between(0, 10)).annotations({
+      description: "Parent context levels to fetch (0-10, default 3)"
+    })
+  ),
+  maxDepth: Schema.optional(
+    Schema.Number.pipe(Schema.int(), Schema.between(1, 10)).annotations({
+      description: "Max reply nesting depth to include in document (1-10)"
+    })
+  ),
+  minLikes: Schema.optional(
+    Schema.Number.pipe(Schema.int(), Schema.greaterThanOrEqualTo(0)).annotations({
+      description: "Minimum likes for a reply to be included"
+    })
+  ),
+  topN: Schema.optional(
+    Schema.Number.pipe(Schema.int(), Schema.between(1, 50)).annotations({
+      description: "Keep only the N highest-engagement replies (1-50)"
+    })
+  )
+});
+export type GetThreadDocumentInput = Schema.Schema.Type<typeof GetThreadDocumentInput>;
+
+export const ThreadDocumentOutput = Schema.Struct({
+  title: Schema.String,
+  postCount: Schema.Number,
+  replyCount: Schema.Number,
+  totalReplies: Schema.Number,
+  body: Schema.String
+});
+export type ThreadDocumentOutput = Schema.Schema.Type<typeof ThreadDocumentOutput>;

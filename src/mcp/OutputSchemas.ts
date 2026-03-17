@@ -15,7 +15,8 @@ import {
   OntologyTopicOutput,
   ExpandedTopicsOutput,
   ExplainPostTopicsOutput,
-  PostThreadOutput
+  PostThreadOutput,
+  ThreadDocumentOutput
 } from "../domain/bi.ts";
 import { EditorialPicksOutput } from "../domain/editorial.ts";
 
@@ -47,3 +48,6 @@ export type EditorialPicksMcpOutput = Schema.Schema.Type<typeof EditorialPicksMc
 
 export const PostThreadMcpOutput = Schema.extend(PostThreadOutput, DisplayField);
 export type PostThreadMcpOutput = Schema.Schema.Type<typeof PostThreadMcpOutput>;
+
+export const ThreadDocumentMcpOutput = ThreadDocumentOutput;
+export type ThreadDocumentMcpOutput = Schema.Schema.Type<typeof ThreadDocumentMcpOutput>;
