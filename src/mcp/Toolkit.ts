@@ -36,8 +36,7 @@ import {
   formatTopic,
   formatExpandedTopics,
   formatExplainedPostTopics,
-  formatEditorialPicks,
-  formatPostThread
+  formatEditorialPicks
 } from "./Fmt.ts";
 import { EditorialService } from "../services/EditorialService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
@@ -431,7 +430,7 @@ export const KnowledgeMcpHandlers = KnowledgeMcpToolkit.toLayer(
 
             return Effect.succeed({
               ...result,
-              _display: formatPostThread(result)
+              _display: printThread(flat, {}).body
             } as unknown as PostThreadMcpOutput);
           }),
           Effect.mapError((error) =>
