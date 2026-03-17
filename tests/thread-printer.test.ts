@@ -1,9 +1,11 @@
 import { describe, expect, it } from "@effect/vitest";
 import {
   filterReplies,
-  type PrinterConfig
+  printThread,
+  type PrinterConfig,
+  type ThreadDocument
 } from "../src/bluesky/ThreadPrinter";
-import type { FlattenedPost } from "../src/bluesky/ThreadFlatten";
+import type { FlattenedPost, FlattenedThread } from "../src/bluesky/ThreadFlatten";
 
 /** Helper: build a minimal FlattenedPost for filter testing */
 const makeReply = (uri: string, opts: {
@@ -94,5 +96,130 @@ describe("filterReplies", () => {
     // top-1 = r1 (50 likes, depth 1, parentUri: focus)
     // r1's parent is focus — should NOT be added to reply list
     expect(filtered.map(r => r.post.uri)).toEqual(["r1"]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// printThread tests
+// ---------------------------------------------------------------------------
+
+/** Helper: build a minimal FlattenedPost suitable as a focus or ancestor */
+const makeFocus = (uri: string, handle: string, text: string, opts?: {
+  likeCount?: number;
+  repostCount?: number;
+  replyCount?: number;
+  embed?: any;
+}): FlattenedPost => ({
+  post: {
+    uri,
+    cid: `cid-${uri}`,
+    author: { did: `did:plc:${uri}`, handle, displayName: handle },
+    record: { text, createdAt: "2026-03-15T00:00:00Z", $type: "app.bsky.feed.post" },
+    indexedAt: "2026-03-15T00:01:00Z",
+    likeCount: opts?.likeCount ?? 0,
+    repostCount: opts?.repostCount ?? 0,
+    replyCount: opts?.replyCount ?? 0,
+    ...(opts?.embed ? { embed: opts.embed } : {})
+  } as any,
+  depth: 0,
+  parentUri: null,
+  dfsIndex: 0
+});
+
+describe("printThread", () => {
+  it("renders a focus-only thread", () => {
+    const focus = makeFocus("f1", "alice.bsky.social", "Hello world");
+    const thread: FlattenedThread = { ancestors: [], focus, replies: [] };
+    const doc = printThread(thread);
+
+    expect(doc.postCount).toBe(1);
+    expect(doc.replyCount).toBe(0);
+    expect(doc.body).toContain("@alice.bsky.social");
+    expect(doc.body).toContain("[1/1]");
+    expect(doc.body).toContain("Hello world");
+  });
+
+  it("renders ancestors and focus as numbered posts", () => {
+    const ancestor = makeFocus("a1", "alice.bsky.social", "Thread start");
+    const focus = makeFocus("f1", "alice.bsky.social", "Thread continuation");
+    // Ancestors have negative depth
+    const ancestorPost: FlattenedPost = { ...ancestor, depth: -1, parentUri: null };
+    const thread: FlattenedThread = { ancestors: [ancestorPost], focus, replies: [] };
+    const doc = printThread(thread);
+
+    expect(doc.postCount).toBe(2);
+    expect(doc.body).toContain("[1/2]");
+    expect(doc.body).toContain("[2/2]");
+  });
+
+  it("renders filtered replies with engagement", () => {
+    const focus = makeFocus("f1", "alice.bsky.social", "Main post");
+    const reply1 = makeReply("r1", { depth: 1, dfsIndex: 0, likeCount: 42, parentUri: "f1" });
+    // Give reply1 a handle for display
+    (reply1.post.author as any).handle = "bob.bsky.social";
+    const reply2 = makeReply("r2", { depth: 1, dfsIndex: 1, likeCount: 5, parentUri: "f1" });
+    (reply2.post.author as any).handle = "carol.bsky.social";
+
+    const thread: FlattenedThread = { ancestors: [], focus, replies: [reply1, reply2] };
+    const doc = printThread(thread, { topN: 1 });
+
+    expect(doc.replyCount).toBe(1);
+    expect(doc.totalReplies).toBe(2);
+    expect(doc.body).toContain("filtered from 2");
+    expect(doc.body).toContain("♡42");
+  });
+
+  it("renders discussion header without filter note when unfiltered", () => {
+    const focus = makeFocus("f1", "alice.bsky.social", "Main post");
+    const reply1 = makeReply("r1", { depth: 1, dfsIndex: 0, likeCount: 10, parentUri: "f1" });
+    (reply1.post.author as any).handle = "bob.bsky.social";
+
+    const thread: FlattenedThread = { ancestors: [], focus, replies: [reply1] };
+    const doc = printThread(thread);
+
+    expect(doc.body).toContain("Discussion (1 replies)");
+    expect(doc.body).not.toContain("filtered from");
+  });
+
+  it("renders image embeds", () => {
+    const focus = makeFocus("f1", "alice.bsky.social", "Check this chart", {
+      embed: {
+        $type: "app.bsky.embed.images#view",
+        images: [
+          { thumb: "https://img.example.com/thumb.jpg", fullsize: "https://img.example.com/full.jpg", alt: "Energy production chart" }
+        ]
+      }
+    });
+    const thread: FlattenedThread = { ancestors: [], focus, replies: [] };
+    const doc = printThread(thread);
+
+    expect(doc.body).toContain("\u{1F4CA}");
+    expect(doc.body).toContain("Energy production chart");
+  });
+
+  it("renders link embeds", () => {
+    const focus = makeFocus("f1", "alice.bsky.social", "Read this article", {
+      embed: {
+        $type: "app.bsky.embed.external#view",
+        external: {
+          uri: "https://example.com/article",
+          title: "Important Energy Report"
+        }
+      }
+    });
+    const thread: FlattenedThread = { ancestors: [], focus, replies: [] };
+    const doc = printThread(thread);
+
+    expect(doc.body).toContain("\u{1F517}");
+    expect(doc.body).toContain("Important Energy Report");
+  });
+
+  it("returns a title with handle and date", () => {
+    const focus = makeFocus("f1", "alice.bsky.social", "Some interesting post about energy policy");
+    const thread: FlattenedThread = { ancestors: [], focus, replies: [] };
+    const doc = printThread(thread);
+
+    expect(doc.title).toContain("@alice.bsky.social");
+    expect(doc.title).toContain("2026-03-15");
   });
 });
