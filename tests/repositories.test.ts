@@ -3,7 +3,7 @@ import { Effect, Schema } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { bootstrapExperts } from "../src/bootstrap/ExpertSeeds";
 import { runMigrations } from "../src/db/migrate";
-import { RankedKnowledgePostResult } from "../src/domain/bi";
+import { KnowledgePost, RankedKnowledgePostResult } from "../src/domain/bi";
 import { processBatch } from "../src/filter/FilterWorker";
 import { ExpertsRepo } from "../src/services/ExpertsRepo";
 import { KnowledgeRepo } from "../src/services/KnowledgeRepo";
@@ -166,6 +166,67 @@ describe("repository layers", () => {
       const decoded = yield* Schema.decodeUnknown(Schema.Array(RankedKnowledgePostResult))(rows);
       expect(decoded.length).toBe(rows.length);
       expect(typeof decoded[0]?.rank).toBe("number");
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
+  it.effect("upsertPosts handles >80 posts with mixed existing/new ingestIds", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      yield* bootstrapExperts(seedManifest, 1, 1_710_000_000_000);
+
+      const repo = yield* KnowledgeRepo;
+      const sql = yield* SqlClient.SqlClient;
+      const now = 1_710_000_000_000;
+
+      // Generate 100 posts to exceed the 80-param idempotency chunk size
+      // ingest_id is UNIQUE per row, so each post needs its own ingestId
+      const makePost = (i: number, runPrefix: string): KnowledgePost => ({
+        uri: `at://${sampleDid}/app.bsky.feed.post/batch-${i}` as any,
+        did: sampleDid,
+        cid: `cid-batch-${i}`,
+        text: `Post number ${i} about solar energy`,
+        createdAt: now + i * 1000,
+        indexedAt: now + i * 1000,
+        hasLinks: false,
+        status: "active",
+        ingestId: `${runPrefix}-${i}`,
+        topics: [],
+        links: []
+      });
+
+      // First pass: insert 100 posts with ingestIds "run-1-0" through "run-1-99"
+      const firstBatch = Array.from({ length: 100 }, (_, i) => makePost(i, "run-1"));
+      yield* repo.upsertPosts(firstBatch);
+
+      const [countAfterFirst] = yield* sql<{ count: number }>`SELECT COUNT(*) as count FROM posts`;
+      expect(countAfterFirst?.count).toBe(100);
+
+      // Second pass: same 100 URIs with same ingestIds — all should be skipped (idempotent)
+      yield* repo.upsertPosts(firstBatch);
+      const [countAfterIdempotent] = yield* sql<{ count: number }>`SELECT COUNT(*) as count FROM posts`;
+      expect(countAfterIdempotent?.count).toBe(100);
+
+      // Third pass: 50 existing URIs with new ingestIds + 50 new URIs
+      const mixedBatch = [
+        ...Array.from({ length: 50 }, (_, i) => makePost(i, "run-2")),     // existing URIs, new ingestId → upsert
+        ...Array.from({ length: 50 }, (_, i) => makePost(100 + i, "run-2")) // new URIs → insert
+      ];
+      yield* repo.upsertPosts(mixedBatch);
+
+      const [countAfterMixed] = yield* sql<{ count: number }>`SELECT COUNT(*) as count FROM posts`;
+      expect(countAfterMixed?.count).toBe(150); // 100 original + 50 new
+
+      // Verify the updated posts have new ingestId
+      const [updatedSample] = yield* sql<{ ingestId: string }>`
+        SELECT ingest_id as ingestId FROM posts WHERE uri = ${`at://${sampleDid}/app.bsky.feed.post/batch-0`}
+      `;
+      expect(updatedSample?.ingestId).toBe("run-2-0");
+
+      // Verify untouched posts kept old ingestId
+      const [untouchedSample] = yield* sql<{ ingestId: string }>`
+        SELECT ingest_id as ingestId FROM posts WHERE uri = ${`at://${sampleDid}/app.bsky.feed.post/batch-50`}
+      `;
+      expect(untouchedSample?.ingestId).toBe("run-1-50");
     }).pipe(Effect.provide(makeBiLayer()))
   );
 });

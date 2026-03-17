@@ -104,7 +104,7 @@ describe("IngestRunWorkflow", () => {
           setLastSyncedAt: () => Effect.void,
           listActive: () =>
             Effect.succeed(
-              Array.from({ length: 7 }, (_, index) =>
+              Array.from({ length: 12 }, (_, index) =>
                 makeExpert(asDid(`did:plc:expert-${index + 1}`))
               )
             ),
@@ -344,19 +344,21 @@ describe("IngestRunWorkflow", () => {
         step
       );
 
-      expect(enqueueOrder).toHaveLength(7);
-      expect(enqueueOrder.slice(0, 5)).toEqual([
-        asDid("did:plc:expert-1"),
-        asDid("did:plc:expert-2"),
-        asDid("did:plc:expert-3"),
-        asDid("did:plc:expert-4"),
-        asDid("did:plc:expert-5")
+      expect(enqueueOrder).toHaveLength(12);
+      // First 10 dispatched in the first cycle (FANOUT_HEAD = 10)
+      expect(enqueueOrder.slice(0, 10)).toEqual(
+        Array.from({ length: 10 }, (_, i) => asDid(`did:plc:expert-${i + 1}`))
+      );
+      // Remaining 2 dispatched in the second cycle
+      expect(enqueueOrder.slice(10)).toEqual([
+        asDid("did:plc:expert-11"),
+        asDid("did:plc:expert-12")
       ]);
       expect(toRunRecord().status).toBe("complete");
-      expect(toRunRecord().totalExperts).toBe(7);
-      expect(toRunRecord().expertsSucceeded).toBe(7);
-      expect(toRunRecord().pagesFetched).toBe(7);
-      expect(toRunRecord().postsStored).toBe(7);
+      expect(toRunRecord().totalExperts).toBe(12);
+      expect(toRunRecord().expertsSucceeded).toBe(12);
+      expect(toRunRecord().pagesFetched).toBe(12);
+      expect(toRunRecord().postsStored).toBe(12);
     })
   );
 

@@ -248,14 +248,22 @@ export class IngestRunWorkflow extends WorkflowEntrypoint<
 
         const incomplete = yield* items.countIncompleteByRun(runId);
 
-        // Periodic progress rollup — persists counters every dispatch cycle
-        const summary = yield* items.summarizeByRun(runId);
-        const { error: _error, ...counters } = summary;
-        yield* runs.updateProgress({
-          id: runId,
-          lastProgressAt: Date.now(),
-          ...counters
-        });
+        // Periodic progress rollup — best-effort, never aborts the workflow
+        yield* Effect.gen(function* () {
+          const summary = yield* items.summarizeByRun(runId);
+          const { error: _error, ...counters } = summary;
+          yield* runs.updateProgress({
+            id: runId,
+            lastProgressAt: Date.now(),
+            ...counters
+          });
+        }).pipe(
+          Effect.catchAll((cause) =>
+            Effect.logWarning("progress rollup failed, continuing").pipe(
+              Effect.annotateLogs({ runId, error: String(cause) })
+            )
+          )
+        );
 
         return {
           terminal: incomplete === 0,
