@@ -10,6 +10,7 @@ import {
   GetPostLinksInput,
   GetRecentPostsInput,
   GetPostThreadInput,
+  GetThreadDocumentInput,
   ListExpertsInput,
   McpToolQueryError,
   SearchPostsInput
@@ -24,7 +25,8 @@ import {
   ExpandedTopicsMcpOutput,
   ExplainPostTopicsMcpOutput,
   EditorialPicksMcpOutput,
-  PostThreadMcpOutput
+  PostThreadMcpOutput,
+  ThreadDocumentMcpOutput
 } from "./OutputSchemas.ts";
 import {
   formatPosts,
@@ -41,6 +43,7 @@ import { EditorialService } from "../services/EditorialService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { flattenThread } from "../bluesky/ThreadFlatten.ts";
+import { printThread } from "../bluesky/ThreadPrinter.ts";
 
 // ---------------------------------------------------------------------------
 // MCP-specific input schemas — strip cursor fields that LLMs cannot construct
@@ -189,6 +192,18 @@ export const GetPostThreadTool = Tool.make("get_post_thread", {
   .annotate(Tool.Idempotent, true)
   .annotate(Tool.OpenWorld, true);
 
+export const GetThreadDocumentTool = Tool.make("get_thread_document", {
+  description: "Render a Bluesky thread as a readable document. Returns the thread author's posts as a narrative with numbered sections, plus filtered expert discussion. Use this to read and understand threads — prefer over get_post_thread for analysis. Supports filtering replies by engagement (minLikes), depth (maxDepth), and top-N.",
+  parameters: GetThreadDocumentInput.fields,
+  success: ThreadDocumentMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Get Thread Document")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, true);
+
 export const KnowledgeMcpToolkit = Toolkit.make(
   SearchPostsTool,
   GetRecentPostsTool,
@@ -199,7 +214,8 @@ export const KnowledgeMcpToolkit = Toolkit.make(
   ExpandTopicsTool,
   ExplainPostTopicsTool,
   ListEditorialPicksTool,
-  GetPostThreadTool
+  GetPostThreadTool,
+  GetThreadDocumentTool
 );
 
 const extractText = (record: unknown): string => {
@@ -423,6 +439,39 @@ export const KnowledgeMcpHandlers = KnowledgeMcpToolkit.toLayer(
               ? error as McpToolQueryError
               : McpToolQueryError.make({
                   tool: "get_post_thread",
+                  message: error instanceof Error ? error.message : String(error),
+                  error
+                })
+          )
+        ),
+      get_thread_document: (input) =>
+        bskyClient.getPostThread(input.postUri, {
+          depth: input.depth ?? 3,
+          parentHeight: input.parentHeight ?? 3
+        }).pipe(
+          Effect.flatMap((response) => {
+            const flat = flattenThread(response.thread);
+            if (!flat) {
+              return Effect.fail(McpToolQueryError.make({
+                tool: "get_thread_document",
+                message: "Post not found or thread unavailable",
+                error: new Error("thread decode failed")
+              }));
+            }
+
+            const doc = printThread(flat, {
+              maxDepth: input.maxDepth,
+              minLikes: input.minLikes,
+              topN: input.topN
+            });
+
+            return Effect.succeed(doc);
+          }),
+          Effect.mapError((error) =>
+            "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
+              ? error as McpToolQueryError
+              : McpToolQueryError.make({
+                  tool: "get_thread_document",
                   message: error instanceof Error ? error.message : String(error),
                   error
                 })
