@@ -177,7 +177,7 @@ describe("printThread", () => {
     const thread: FlattenedThread = { ancestors: [], focus, replies: [reply1] };
     const doc = printThread(thread);
 
-    expect(doc.body).toContain("Discussion (1 replies)");
+    expect(doc.body).toContain("Discussion (1 reply)");
     expect(doc.body).not.toContain("filtered from");
   });
 
@@ -221,5 +221,29 @@ describe("printThread", () => {
 
     expect(doc.title).toContain("@alice.bsky.social");
     expect(doc.title).toContain("2026-03-15");
+  });
+
+  it("indents nested replies by depth", () => {
+    const thread: FlattenedThread = {
+      ancestors: [],
+      focus: makeFocus("focus-1", "alice.bsky.social", "Main post"),
+      replies: [
+        makeReply("r1", { depth: 1, dfsIndex: 0, likeCount: 10, parentUri: "focus-1" }),
+        makeReply("r1-1", { depth: 2, dfsIndex: 1, likeCount: 5, parentUri: "r1" })
+      ]
+    };
+    const doc = printThread(thread);
+    const lines = doc.body.split("\n");
+
+    // Find lines containing the reply handles
+    const r1Line = lines.find(l => l.includes("did:plc:r1") && !l.includes("r1-1"));
+    const r1_1Line = lines.find(l => l.includes("did:plc:r1-1"));
+
+    expect(r1Line).toBeDefined();
+    expect(r1_1Line).toBeDefined();
+    // depth-1 reply should not be indented
+    expect(r1Line!.match(/^\s*/)?.[0].length).toBe(0);
+    // depth-2 reply should be indented (2 spaces)
+    expect(r1_1Line!.match(/^\s*/)?.[0].length).toBeGreaterThan(0);
   });
 });

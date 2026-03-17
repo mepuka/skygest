@@ -243,7 +243,7 @@ const renderReplyPost = (post: FlattenedPost): SDoc => {
   const body = Doc.nest(Doc.text(extractText(post.post.record)), 2);
   const inner = Doc.vsep([header, body]);
   const indentLevel = Math.max(0, (post.depth - 1)) * 2;
-  return indentLevel > 0 ? Doc.nest(inner, indentLevel) : inner;
+  return indentLevel > 0 ? Doc.indent(inner, indentLevel) : inner;
 };
 
 // ---------------------------------------------------------------------------
@@ -276,8 +276,8 @@ const renderDocument = (
   // Reply section
   if (filtered.length > 0) {
     const filterNote = filtered.length < totalReplies
-      ? `--- Expert Discussion (${filtered.length} replies, filtered from ${totalReplies}) ---`
-      : `--- Discussion (${filtered.length} replies) ---`;
+      ? `--- Expert Discussion (${filtered.length} ${filtered.length === 1 ? "reply" : "replies"}, filtered from ${totalReplies}) ---`
+      : `--- Discussion (${filtered.length} ${filtered.length === 1 ? "reply" : "replies"}) ---`;
     parts.push(Doc.text(filterNote));
 
     const replyDocs = filtered.map(renderReplyPost);
@@ -315,6 +315,6 @@ export const printThread = (
     postCount: thread.ancestors.length + 1,
     replyCount: filtered.length,
     totalReplies: total,
-    body: Doc.render(doc, { style: "compact" })
+    body: Doc.render(doc, { style: "pretty", options: { lineWidth: 200 } })
   };
 };
