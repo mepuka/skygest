@@ -37,6 +37,9 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
+      - name: Build web assets
+        run: bun run build:web:prod
+
       - name: Deploy to staging
         run: bunx wrangler deploy --config wrangler.agent.toml --env staging
         env:
