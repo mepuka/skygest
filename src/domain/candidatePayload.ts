@@ -1,5 +1,6 @@
 import { Schema } from "effect";
 import { ThreadEmbedType } from "./bi";
+import { EmbedPayload } from "./embed";
 import { AtUri } from "./types";
 
 export const CandidatePayloadStage = Schema.Literal("candidate", "picked");
@@ -22,7 +23,7 @@ export const CandidatePayloadRecord = Schema.Struct({
   postUri: AtUri,
   captureStage: CandidatePayloadStage,
   embedType: Schema.NullOr(ThreadEmbedType),
-  embedPayload: Schema.NullOr(Schema.Unknown),
+  embedPayload: Schema.NullOr(EmbedPayload),
   enrichments: Schema.Array(CandidatePayloadEnrichmentRecord),
   capturedAt: Schema.Number,
   updatedAt: Schema.Number,
@@ -34,7 +35,7 @@ export const SaveCandidatePayloadInput = Schema.Struct({
   postUri: AtUri,
   captureStage: CandidatePayloadStage,
   embedType: Schema.NullOr(ThreadEmbedType),
-  embedPayload: Schema.NullOr(Schema.Unknown)
+  embedPayload: Schema.NullOr(EmbedPayload)
 });
 export type SaveCandidatePayloadInput = Schema.Schema.Type<typeof SaveCandidatePayloadInput>;
 

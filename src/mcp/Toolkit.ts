@@ -46,6 +46,7 @@ import { EditorialService } from "../services/EditorialService";
 import { CurationService } from "../services/CurationService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
+import { extractEmbedKind, buildTypedEmbed } from "../bluesky/EmbedExtract";
 import { flattenThread } from "../bluesky/ThreadFlatten.ts";
 import { printThread } from "../bluesky/ThreadPrinter.ts";
 
@@ -364,80 +365,6 @@ export const KnowledgeMcpHandlers = KnowledgeMcpToolkit.toLayer(
               }));
             }
 
-            const mapEmbedType = (embed: { $type?: string } | undefined): string | null => {
-              if (!embed?.$type) return null;
-              const t = embed.$type;
-              if (t.includes("record") && t.includes("Media")) return "media";
-              if (t.includes("record")) return "quote";
-              if (t.includes("external")) return "link";
-              if (t.includes("images")) return "img";
-              if (t.includes("video")) return "video";
-              return null;
-            };
-
-            const extractRecordText = (value: unknown): string | null => {
-              if (typeof value === "object" && value !== null && "text" in value) {
-                return typeof (value as any).text === "string" ? (value as any).text : null;
-              }
-              return null;
-            };
-
-            const buildEmbedContent = (embed: any): unknown | null => {
-              if (!embed?.$type) return null;
-              const t = embed.$type as string;
-
-              if (t.includes("images") && embed.images) {
-                return {
-                  images: (embed.images as any[]).map((img: any) => ({
-                    thumb: img.thumb,
-                    fullsize: img.fullsize,
-                    alt: img.alt ?? null
-                  }))
-                };
-              }
-
-              if (t.includes("external") && embed.external) {
-                return {
-                  uri: embed.external.uri,
-                  title: embed.external.title ?? null,
-                  description: embed.external.description ?? null,
-                  thumb: embed.external.thumb ?? null
-                };
-              }
-
-              if (t.includes("video")) {
-                return {
-                  playlist: embed.playlist ?? null,
-                  thumbnail: embed.thumbnail ?? null,
-                  alt: embed.alt ?? null
-                };
-              }
-
-              if (t.includes("record") && t.includes("Media")) {
-                const record = embed.record?.record ?? embed.record;
-                const mediaEmbed = embed.media;
-                return {
-                  record: record ? {
-                    uri: record.uri ?? null,
-                    text: extractRecordText(record.value),
-                    author: record.author?.handle ?? record.author?.did ?? null
-                  } : null,
-                  media: mediaEmbed ? buildEmbedContent({ ...mediaEmbed, $type: mediaEmbed.$type ?? "unknown" }) : null
-                };
-              }
-
-              if (t.includes("record") && embed.record) {
-                const rec = embed.record;
-                return {
-                  uri: rec.uri ?? null,
-                  text: extractRecordText(rec.value),
-                  author: rec.author?.handle ?? rec.author?.did ?? null
-                };
-              }
-
-              return null;
-            };
-
             const toResult = (
               fp: { post: any; depth: number; parentUri: string | null },
               position: "ancestor" | "focus" | "reply"
@@ -455,8 +382,8 @@ export const KnowledgeMcpHandlers = KnowledgeMcpToolkit.toLayer(
               position,
               depth: fp.depth,
               parentUri: (fp.parentUri ?? null) as string | null,
-              embedType: mapEmbedType(fp.post.embed),
-              embedContent: buildEmbedContent(fp.post.embed)
+              embedType: extractEmbedKind(fp.post.embed),
+              embedContent: buildTypedEmbed(fp.post.embed)
             });
 
             const result = {
