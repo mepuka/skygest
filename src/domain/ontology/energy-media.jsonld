@@ -1,0 +1,1979 @@
+[
+  {
+    "@id": "_:n8a6250db15234adab47a871347e215a1b5",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#AllDisjointClasses"
+    ],
+    "http://www.w3.org/2002/07/owl#members": [
+      {
+        "@list": [
+          {
+            "@id": "http://example.org/ontology/energy-media#EnergyDataProvider"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#EnergyDataset"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#provider_entsoe",
+    "@type": [
+      "http://example.org/ontology/energy-media#EnergyDataProvider"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "ENTSO-E"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "European Network of Transmission System Operators for Electricity, providing pan-European grid data."
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#thumbnailUrl",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "http://www.w3.org/2002/07/owl#FunctionalProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#MediaAttachment"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "thumbnail url"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#anyURI"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "The CDN URL of the media attachment's thumbnail"
+      }
+    ]
+  },
+  {
+    "@id": "_:n8a6250db15234adab47a871347e215a1b14",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#AllDisjointClasses"
+    ],
+    "http://www.w3.org/2002/07/owl#members": [
+      {
+        "@list": [
+          {
+            "@id": "http://example.org/ontology/energy-media#ChartAxis"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#ChartSeries"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#EnergyDataset",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "energy dataset"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "_:n8a6250db15234adab47a871347e215a1b1"
+      },
+      {
+        "@id": "http://purl.obolibrary.org/obo/BFO_0000031"
+      },
+      {
+        "@id": "https://schema.org/Dataset"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "A specific dataset published by an EnergyDataProvider"
+      }
+    ]
+  },
+  {
+    "@id": "_:n8a6250db15234adab47a871347e215a1b1",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Restriction"
+    ],
+    "http://www.w3.org/2002/07/owl#onProperty": [
+      {
+        "@id": "http://example.org/ontology/energy-media#providedBy"
+      }
+    ],
+    "http://www.w3.org/2002/07/owl#someValuesFrom": [
+      {
+        "@id": "http://example.org/ontology/energy-media#EnergyDataProvider"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#seriesUnit",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "http://www.w3.org/2002/07/owl#FunctionalProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartSeries"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "series unit"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "The unit of measurement for a data series"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#PieChart",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Pie Chart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#altLabel": [
+      {
+        "@language": "en",
+        "@value": "donut chart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Circular chart divided into proportional segments"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#AltTextProvenanceScheme",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#ConceptScheme"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Alt Text Provenance Scheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Classifies the origin of a media attachment's descriptive text."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#hasTopConcept": [
+      {
+        "@id": "http://example.org/ontology/energy-media#AltTextAbsent"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media#AltTextOriginal"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media#AltTextSynthetic"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#axisLabel",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "http://www.w3.org/2002/07/owl#FunctionalProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartAxis"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "axis label"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "The displayed label text of a chart axis"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#hasSourceLine",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#ObjectProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#Chart"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "has source line"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartSourceLine"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Relates a Chart to its source attribution line"
+      }
+    ]
+  },
+  {
+    "@id": "http://www.w3.org/ns/prov#wasAttributedTo",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#ObjectProperty"
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#VideoAttachment",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "video attachment"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#MediaAttachment"
+      },
+      {
+        "@id": "http://purl.obolibrary.org/obo/BFO_0000031"
+      },
+      {
+        "@id": "https://schema.org/VideoObject"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "A MediaAttachment that is a video recording or animation"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#StackedBarChart",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Stacked Bar Chart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#broader": [
+      {
+        "@id": "http://example.org/ontology/energy-media#BarChart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Bar chart with segments showing component breakdown"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#Heatmap",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Heatmap"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#altLabel": [
+      {
+        "@language": "en",
+        "@value": "heat map"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Matrix of values encoded as colors to show patterns"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#MediaAttachment",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "media attachment"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "http://purl.obolibrary.org/obo/BFO_0000031"
+      },
+      {
+        "@id": "https://schema.org/MediaObject"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "A digital resource attached to or embedded in a Post"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#ChartTypeScheme",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#ConceptScheme"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Chart Type Scheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "A SKOS concept scheme classifying chart/visualization structural forms. Informed by VISO ontology but lightweight. Each individual is typed as skos:Concept within this scheme."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#hasTopConcept": [
+      {
+        "@id": "http://example.org/ontology/energy-media#BarChart"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media#CandlestickChart"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media#ChoroplethMap"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media#DataTable"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media#DualAxisChart"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media#Heatmap"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media#LineChart"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media#PieChart"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media#PointMap"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media#SankeyDiagram"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media#ScatterPlot"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media#Treemap"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#Treemap",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Treemap"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Nested rectangles showing hierarchical data proportions"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#provider_eia",
+    "@type": [
+      "http://example.org/ontology/energy-media#EnergyDataProvider"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "EIA"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "The U.S. Energy Information Administration, providing comprehensive energy statistics and analysis."
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media/chart-types",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Ontology"
+    ],
+    "http://purl.org/dc/terms/created": [
+      {
+        "@value": "2026-03-17"
+      }
+    ],
+    "http://purl.org/dc/terms/creator": [
+      {
+        "@value": "ontology-architect skill"
+      }
+    ],
+    "http://purl.org/dc/terms/description": [
+      {
+        "@language": "en",
+        "@value": "SKOS concept scheme classifying chart and visualization structural forms for the Energy Media Ontology."
+      }
+    ],
+    "http://purl.org/dc/terms/license": [
+      {
+        "@id": "https://spdx.org/licenses/MIT"
+      }
+    ],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@value": "2026-03-17"
+      }
+    ],
+    "http://purl.org/dc/terms/title": [
+      {
+        "@language": "en",
+        "@value": "Energy Media Ontology — Chart Type Scheme"
+      }
+    ],
+    "http://www.w3.org/2002/07/owl#versionIRI": [
+      {
+        "@id": "http://example.org/ontology/energy-media/chart-types/0.1.0"
+      }
+    ],
+    "http://www.w3.org/2002/07/owl#versionInfo": [
+      {
+        "@value": "0.1.0"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#DualAxisChart",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Dual Axis Chart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#altLabel": [
+      {
+        "@language": "en",
+        "@value": "combo chart"
+      },
+      {
+        "@language": "en",
+        "@value": "mixed chart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Chart combining two chart types sharing one axis (e.g., bars + line)"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#AltTextOriginal",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Original"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Alt text provided by the post author"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#AltTextProvenanceScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#AltTextProvenanceScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#AltTextAbsent",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Absent"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "No alt text exists for this media attachment"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#AltTextProvenanceScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#AltTextProvenanceScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#legendLabel",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "http://www.w3.org/2002/07/owl#FunctionalProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartSeries"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "legend label"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "The text label for a data series as shown in the chart legend"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#providedBy",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#FunctionalProperty",
+      "http://www.w3.org/2002/07/owl#ObjectProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#EnergyDataset"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "provided by"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://example.org/ontology/energy-media#EnergyDataProvider"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Relates an EnergyDataset to its EnergyDataProvider"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#AreaChart",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Area Chart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#altLabel": [
+      {
+        "@language": "en",
+        "@value": "filled line chart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#broader": [
+      {
+        "@id": "http://example.org/ontology/energy-media#LineChart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Line chart with the area below filled to emphasize volume"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#axisUnit",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "http://www.w3.org/2002/07/owl#FunctionalProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartAxis"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "axis unit"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "The unit of measurement on a chart axis (MW, TWh, $/MWh, %)"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#DocumentExcerpt",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "document excerpt"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#MediaAttachment"
+      },
+      {
+        "@id": "http://purl.obolibrary.org/obo/BFO_0000031"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "A MediaAttachment that is an extracted portion of a document, article, or report"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#hasXAxis",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#FunctionalProperty",
+      "http://www.w3.org/2002/07/owl#ObjectProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#Chart"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "has x axis"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartAxis"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Relates a Chart to its horizontal axis"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#keyFinding",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#DatatypeProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#Chart"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "key finding"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "The most salient data point or trend highlighted by a chart"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#provider_gridstatus",
+    "@type": [
+      "http://example.org/ontology/energy-media#EnergyDataProvider"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "GridStatus"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "An energy data aggregator providing real-time and historical grid data for North American ISOs/RTOs."
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#BarChart",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Bar Chart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#altLabel": [
+      {
+        "@language": "en",
+        "@value": "bar graph"
+      },
+      {
+        "@language": "en",
+        "@value": "column chart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Rectangular bars representing values across categories"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#ScatterPlot",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Scatter Plot"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#altLabel": [
+      {
+        "@language": "en",
+        "@value": "dot plot"
+      },
+      {
+        "@language": "en",
+        "@value": "scatter chart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Individual data points plotted on two quantitative axes"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#sourceText",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "http://www.w3.org/2002/07/owl#FunctionalProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartSourceLine"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "source text"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "The raw text of a chart's source attribution line as it appears on the chart"
+      }
+    ]
+  },
+  {
+    "@id": "_:n8a6250db15234adab47a871347e215a1b8",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#AllDisjointClasses"
+    ],
+    "http://www.w3.org/2002/07/owl#members": [
+      {
+        "@list": [
+          {
+            "@id": "http://example.org/ontology/energy-media#Chart"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#DocumentExcerpt"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#Photo"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#Infographic"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#VideoAttachment"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#Chart",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "chart"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "_:n8a6250db15234adab47a871347e215a1b2"
+      },
+      {
+        "@id": "_:n8a6250db15234adab47a871347e215a1b3"
+      },
+      {
+        "@id": "_:n8a6250db15234adab47a871347e215a1b4"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media#MediaAttachment"
+      },
+      {
+        "@id": "http://purl.obolibrary.org/obo/BFO_0000031"
+      },
+      {
+        "@id": "https://schema.org/ImageObject"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "A MediaAttachment that is a data visualization depicting quantitative information"
+      }
+    ]
+  },
+  {
+    "@id": "_:n8a6250db15234adab47a871347e215a1b2",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Restriction"
+    ],
+    "http://www.w3.org/2002/07/owl#onProperty": [
+      {
+        "@id": "http://example.org/ontology/energy-media#chartType"
+      }
+    ],
+    "http://www.w3.org/2002/07/owl#someValuesFrom": [
+      {
+        "@id": "http://www.w3.org/2004/02/skos/core#Concept"
+      }
+    ]
+  },
+  {
+    "@id": "_:n8a6250db15234adab47a871347e215a1b3",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Restriction"
+    ],
+    "http://www.w3.org/2002/07/owl#onProperty": [
+      {
+        "@id": "http://example.org/ontology/energy-media#hasXAxis"
+      }
+    ],
+    "http://www.w3.org/2002/07/owl#someValuesFrom": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartAxis"
+      }
+    ]
+  },
+  {
+    "@id": "_:n8a6250db15234adab47a871347e215a1b4",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Restriction"
+    ],
+    "http://www.w3.org/2002/07/owl#onProperty": [
+      {
+        "@id": "http://example.org/ontology/energy-media#hasYAxis"
+      }
+    ],
+    "http://www.w3.org/2002/07/owl#someValuesFrom": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartAxis"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#hasYAxis",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#FunctionalProperty",
+      "http://www.w3.org/2002/07/owl#ObjectProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#Chart"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "has y axis"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartAxis"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Relates a Chart to its vertical axis"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#LineChart",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Line Chart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#altLabel": [
+      {
+        "@language": "en",
+        "@value": "time series"
+      },
+      {
+        "@language": "en",
+        "@value": "trend line"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Connected data points showing trends over a continuous axis"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ]
+  },
+  {
+    "@id": "_:n0c17d65629d248b182c6a83468171413b8",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#AllDifferent"
+    ],
+    "http://www.w3.org/2002/07/owl#distinctMembers": [
+      {
+        "@list": [
+          {
+            "@id": "http://example.org/ontology/energy-media#AltTextOriginal"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#AltTextSynthetic"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#AltTextAbsent"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#EnergyDataProvider",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "energy data provider"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "http://purl.obolibrary.org/obo/BFO_0000030"
+      },
+      {
+        "@id": "https://schema.org/Organization"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "An organization that publishes energy data accessible via API or download"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#Infographic",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "infographic"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#MediaAttachment"
+      },
+      {
+        "@id": "http://purl.obolibrary.org/obo/BFO_0000031"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "A MediaAttachment that is a designed visual composition combining data, text, and graphics"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#Photo",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "photo"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#MediaAttachment"
+      },
+      {
+        "@id": "http://purl.obolibrary.org/obo/BFO_0000031"
+      },
+      {
+        "@id": "https://schema.org/ImageObject"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "A MediaAttachment that is a photographic image of a real-world scene"
+      }
+    ]
+  },
+  {
+    "@id": "http://purl.org/dc/terms/source",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#ObjectProperty"
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#provider_bchydro",
+    "@type": [
+      "http://example.org/ontology/energy-media#EnergyDataProvider"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "BC Hydro"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "British Columbia's primary electric utility, providing generation and transmission data."
+      }
+    ]
+  },
+  {
+    "@id": "http://purl.org/dc/terms/spatial",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#ObjectProperty"
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#PointMap",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Point Map"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#altLabel": [
+      {
+        "@language": "en",
+        "@value": "dot map"
+      },
+      {
+        "@language": "en",
+        "@value": "location map"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Geographic map with data points plotted at coordinates"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ]
+  },
+  {
+    "@id": "_:n2d2bcc0c08104b9da8ab07f269df014db1",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#AllDifferent"
+    ],
+    "http://www.w3.org/2002/07/owl#distinctMembers": [
+      {
+        "@list": [
+          {
+            "@id": "http://example.org/ontology/energy-media#BarChart"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#StackedBarChart"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#LineChart"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#AreaChart"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#ScatterPlot"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#Heatmap"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#PieChart"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#SankeyDiagram"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#Treemap"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#CandlestickChart"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#ChoroplethMap"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#PointMap"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#DataTable"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#DualAxisChart"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#hasSeries",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#ObjectProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#Chart"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "has series"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartSeries"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Relates a Chart to a plotted data series"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#CandlestickChart",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Candlestick Chart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#altLabel": [
+      {
+        "@language": "en",
+        "@value": "OHLC chart"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Chart showing open, high, low, close values for financial/commodity data"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://www.w3.org/ns/prov#wasDerivedFrom",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#ObjectProperty"
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#AltTextSynthetic",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Synthetic"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Alt text generated by a vision model (e.g., Gemini 2.5 Flash)"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#AltTextProvenanceScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#AltTextProvenanceScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#SankeyDiagram",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Sankey Diagram"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#altLabel": [
+      {
+        "@language": "en",
+        "@value": "alluvial diagram"
+      },
+      {
+        "@language": "en",
+        "@value": "flow diagram"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Weighted flow diagram showing magnitude of flows between nodes"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media/providers",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Ontology"
+    ],
+    "http://purl.org/dc/terms/created": [
+      {
+        "@value": "2026-03-17"
+      }
+    ],
+    "http://purl.org/dc/terms/creator": [
+      {
+        "@value": "ontology-architect skill"
+      }
+    ],
+    "http://purl.org/dc/terms/description": [
+      {
+        "@language": "en",
+        "@value": "SKOS concept scheme for alt text provenance and EnergyDataProvider individuals for the Energy Media Ontology."
+      }
+    ],
+    "http://purl.org/dc/terms/license": [
+      {
+        "@id": "https://spdx.org/licenses/MIT"
+      }
+    ],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@value": "2026-03-17"
+      }
+    ],
+    "http://purl.org/dc/terms/title": [
+      {
+        "@language": "en",
+        "@value": "Energy Media Ontology — Providers & Alt Text Provenance"
+      }
+    ],
+    "http://www.w3.org/2002/07/owl#versionIRI": [
+      {
+        "@id": "http://example.org/ontology/energy-media/providers/0.1.0"
+      }
+    ],
+    "http://www.w3.org/2002/07/owl#versionInfo": [
+      {
+        "@value": "0.1.0"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#altText",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "http://www.w3.org/2002/07/owl#FunctionalProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#MediaAttachment"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "alt text"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "The descriptive text for a media attachment"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#ChoroplethMap",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Choropleth Map"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#altLabel": [
+      {
+        "@language": "en",
+        "@value": "shaded map"
+      },
+      {
+        "@language": "en",
+        "@value": "thematic map"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Geographic map with regions shaded by data values"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#mediaUrl",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "http://www.w3.org/2002/07/owl#FunctionalProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#MediaAttachment"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "media url"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#anyURI"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "The CDN URL of the media attachment's full-resolution file"
+      }
+    ]
+  },
+  {
+    "@id": "http://purl.org/dc/terms/temporal",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#ObjectProperty"
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#DataTable",
+    "@type": [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "Data Table"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#altLabel": [
+      {
+        "@language": "en",
+        "@value": "spreadsheet view"
+      },
+      {
+        "@language": "en",
+        "@value": "table"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Structured tabular presentation of data in rows and columns"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#inScheme": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#topConceptOf": [
+      {
+        "@id": "http://example.org/ontology/energy-media#ChartTypeScheme"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#ChartAxis",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "chart axis"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "http://purl.obolibrary.org/obo/BFO_0000031"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "A dimensional axis of a chart with label, unit, and scale"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#provider_aeso",
+    "@type": [
+      "http://example.org/ontology/energy-media#EnergyDataProvider"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "AESO"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Alberta Electric System Operator, managing the Alberta electricity market."
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#ChartSeries",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "chart series"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "http://purl.obolibrary.org/obo/BFO_0000031"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "A named data series plotted within a chart"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Ontology"
+    ],
+    "http://purl.org/dc/terms/created": [
+      {
+        "@value": "2026-03-17"
+      }
+    ],
+    "http://purl.org/dc/terms/creator": [
+      {
+        "@value": "ontology-architect skill"
+      }
+    ],
+    "http://purl.org/dc/terms/description": [
+      {
+        "@language": "en",
+        "@value": "A lightweight OWL 2 DL ontology modeling media attachments, chart semantics, and energy data provenance for social media posts in the energy domain."
+      }
+    ],
+    "http://purl.org/dc/terms/license": [
+      {
+        "@id": "https://spdx.org/licenses/MIT"
+      }
+    ],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@value": "2026-03-17"
+      }
+    ],
+    "http://purl.org/dc/terms/title": [
+      {
+        "@language": "en",
+        "@value": "Energy Media Ontology"
+      }
+    ],
+    "http://www.w3.org/2002/07/owl#imports": [
+      {
+        "@id": "http://example.org/ontology/energy-media/chart-types"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-media/providers"
+      },
+      {
+        "@id": "http://example.org/ontology/energy-news"
+      }
+    ],
+    "http://www.w3.org/2002/07/owl#versionIRI": [
+      {
+        "@id": "http://example.org/ontology/energy-media/0.1.0"
+      }
+    ],
+    "http://www.w3.org/2002/07/owl#versionInfo": [
+      {
+        "@value": "0.1.0"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#ChartSourceLine",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Class"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "chart source line"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "http://purl.obolibrary.org/obo/BFO_0000031"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "The source attribution text appearing on a chart, typically at the bottom"
+      }
+    ]
+  },
+  {
+    "@id": "_:n0c17d65629d248b182c6a83468171413b1",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#AllDifferent"
+    ],
+    "http://www.w3.org/2002/07/owl#distinctMembers": [
+      {
+        "@list": [
+          {
+            "@id": "http://example.org/ontology/energy-media#provider_gridstatus"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#provider_eia"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#provider_aeso"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#provider_ieso"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#provider_bchydro"
+          },
+          {
+            "@id": "http://example.org/ontology/energy-media#provider_entsoe"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#chartType",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#FunctionalProperty",
+      "http://www.w3.org/2002/07/owl#ObjectProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#Chart"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "chart type"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2004/02/skos/core#Concept"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Relates a Chart to its ChartType classification"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#hasMediaAttachment",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#ObjectProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-news#Post"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "has media attachment"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://example.org/ontology/energy-media#MediaAttachment"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Relates a Post to its attached media"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#provider_ieso",
+    "@type": [
+      "http://example.org/ontology/energy-media#EnergyDataProvider"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "IESO"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "Independent Electricity System Operator, managing Ontario's electricity market."
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/ontology/energy-media#altTextProvenance",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#FunctionalProperty",
+      "http://www.w3.org/2002/07/owl#ObjectProperty"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "http://example.org/ontology/energy-media#MediaAttachment"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "en",
+        "@value": "alt text provenance"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2004/02/skos/core#Concept"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en",
+        "@value": "The provenance classification of a media attachment's alt text"
+      }
+    ]
+  }
+]

@@ -1,0 +1,239 @@
+{
+  "classes": {
+    "DocumentExcerpt": {
+      "label": "document excerpt",
+      "definition": "A MediaAttachment that is an extracted portion of a document, article, or report",
+      "parent": "MediaAttachment"
+    },
+    "Infographic": {
+      "label": "infographic",
+      "definition": "A MediaAttachment that is a designed visual composition combining data, text, and graphics",
+      "parent": "MediaAttachment"
+    },
+    "Photo": {
+      "label": "photo",
+      "definition": "A MediaAttachment that is a photographic image of a real-world scene",
+      "parent": "MediaAttachment"
+    },
+    "VideoAttachment": {
+      "label": "video attachment",
+      "definition": "A MediaAttachment that is a video recording or animation",
+      "parent": "MediaAttachment"
+    },
+    "ChartSourceLine": {
+      "label": "chart source line",
+      "definition": "The source attribution text appearing on a chart, typically at the bottom",
+      "parent": null
+    },
+    "EnergyDataset": {
+      "label": "energy dataset",
+      "definition": "A specific dataset published by an EnergyDataProvider",
+      "parent": null
+    },
+    "EnergyDataProvider": {
+      "label": "energy data provider",
+      "definition": "An organization that publishes energy data accessible via API or download",
+      "parent": null
+    },
+    "ChartSeries": {
+      "label": "chart series",
+      "definition": "A named data series plotted within a chart",
+      "parent": null
+    },
+    "Chart": {
+      "label": "chart",
+      "definition": "A MediaAttachment that is a data visualization depicting quantitative information",
+      "parent": "MediaAttachment"
+    },
+    "ChartAxis": {
+      "label": "chart axis",
+      "definition": "A dimensional axis of a chart with label, unit, and scale",
+      "parent": null
+    },
+    "MediaAttachment": {
+      "label": "media attachment",
+      "definition": "A digital resource attached to or embedded in a Post",
+      "parent": null
+    }
+  },
+  "objectProperties": {
+    "altTextProvenance": {
+      "domain": "MediaAttachment",
+      "range": "Concept",
+      "functional": true
+    },
+    "hasMediaAttachment": {
+      "domain": "Post",
+      "range": "MediaAttachment",
+      "functional": false
+    },
+    "hasSeries": {
+      "domain": "Chart",
+      "range": "ChartSeries",
+      "functional": false
+    },
+    "hasSourceLine": {
+      "domain": "Chart",
+      "range": "ChartSourceLine",
+      "functional": false
+    },
+    "chartType": {
+      "domain": "Chart",
+      "range": "Concept",
+      "functional": true
+    },
+    "hasXAxis": {
+      "domain": "Chart",
+      "range": "ChartAxis",
+      "functional": true
+    },
+    "hasYAxis": {
+      "domain": "Chart",
+      "range": "ChartAxis",
+      "functional": true
+    },
+    "providedBy": {
+      "domain": "EnergyDataset",
+      "range": "EnergyDataProvider",
+      "functional": true
+    }
+  },
+  "dataProperties": {
+    "altText": {
+      "domain": "MediaAttachment",
+      "range": "string",
+      "functional": true
+    },
+    "axisLabel": {
+      "domain": "ChartAxis",
+      "range": "string",
+      "functional": true
+    },
+    "axisUnit": {
+      "domain": "ChartAxis",
+      "range": "string",
+      "functional": true
+    },
+    "keyFinding": {
+      "domain": "Chart",
+      "range": "string",
+      "functional": false
+    },
+    "legendLabel": {
+      "domain": "ChartSeries",
+      "range": "string",
+      "functional": true
+    },
+    "mediaUrl": {
+      "domain": "MediaAttachment",
+      "range": "anyURI",
+      "functional": true
+    },
+    "seriesUnit": {
+      "domain": "ChartSeries",
+      "range": "string",
+      "functional": true
+    },
+    "sourceText": {
+      "domain": "ChartSourceLine",
+      "range": "string",
+      "functional": true
+    },
+    "thumbnailUrl": {
+      "domain": "MediaAttachment",
+      "range": "anyURI",
+      "functional": true
+    }
+  },
+  "conceptSchemes": {
+    "ChartTypeScheme": [
+      {
+        "name": "AreaChart",
+        "label": "AreaChart",
+        "broader": "LineChart"
+      },
+      {
+        "name": "BarChart",
+        "label": "BarChart",
+        "broader": null
+      },
+      {
+        "name": "CandlestickChart",
+        "label": "CandlestickChart",
+        "broader": null
+      },
+      {
+        "name": "ChoroplethMap",
+        "label": "ChoroplethMap",
+        "broader": null
+      },
+      {
+        "name": "DataTable",
+        "label": "DataTable",
+        "broader": null
+      },
+      {
+        "name": "DualAxisChart",
+        "label": "DualAxisChart",
+        "broader": null
+      },
+      {
+        "name": "Heatmap",
+        "label": "Heatmap",
+        "broader": null
+      },
+      {
+        "name": "LineChart",
+        "label": "LineChart",
+        "broader": null
+      },
+      {
+        "name": "PieChart",
+        "label": "PieChart",
+        "broader": null
+      },
+      {
+        "name": "PointMap",
+        "label": "PointMap",
+        "broader": null
+      },
+      {
+        "name": "SankeyDiagram",
+        "label": "SankeyDiagram",
+        "broader": null
+      },
+      {
+        "name": "ScatterPlot",
+        "label": "ScatterPlot",
+        "broader": null
+      },
+      {
+        "name": "StackedBarChart",
+        "label": "StackedBarChart",
+        "broader": "BarChart"
+      },
+      {
+        "name": "Treemap",
+        "label": "Treemap",
+        "broader": null
+      }
+    ],
+    "AltTextProvenanceScheme": [
+      {
+        "name": "AltTextAbsent",
+        "label": "AltTextAbsent",
+        "broader": null
+      },
+      {
+        "name": "AltTextOriginal",
+        "label": "AltTextOriginal",
+        "broader": null
+      },
+      {
+        "name": "AltTextSynthetic",
+        "label": "AltTextSynthetic",
+        "broader": null
+      }
+    ]
+  }
+}
