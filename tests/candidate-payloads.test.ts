@@ -1,6 +1,9 @@
 import { SqlClient } from "@effect/sql";
 import { Effect, Layer, TestClock } from "effect";
 import { describe, expect, it } from "@effect/vitest";
+import {
+  CandidatePayloadNotPickedError
+} from "../src/domain/candidatePayload";
 import { runMigrations } from "../src/db/migrate";
 import { CandidatePayloadService } from "../src/services/CandidatePayloadService";
 import { CandidatePayloadRepo } from "../src/services/CandidatePayloadRepo";
@@ -24,8 +27,8 @@ const makeLayer = () => {
   return Layer.mergeAll(baseLayer, repoLayer, serviceLayer);
 };
 
-describe("post_payloads migration", () => {
-  it.live("creates the post_payloads table with post_uri as PK", () =>
+describe("payload storage migrations", () => {
+  it.live("creates post_payloads and post_enrichments with the expected primary keys", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const sqliteLayer = makeSqliteLayer(filename);
@@ -37,14 +40,29 @@ describe("post_payloads migration", () => {
         await Effect.runPromise(
           Effect.gen(function* () {
             const sql = yield* SqlClient.SqlClient;
-            const tables = yield* sql`
+
+            const payloadTables = yield* sql`
               SELECT name FROM sqlite_master
               WHERE type='table' AND name='post_payloads'
             `;
-            expect(tables).toHaveLength(1);
-            const info = yield* sql`PRAGMA table_info(post_payloads)`;
-            const pkCol = (info as any[]).find((c: any) => c.pk === 1);
-            expect(pkCol?.name).toBe("post_uri");
+            expect(payloadTables).toHaveLength(1);
+
+            const payloadInfo = yield* sql`PRAGMA table_info(post_payloads)`;
+            const payloadPk = (payloadInfo as any[]).find((column: any) => column.pk === 1);
+            expect(payloadPk?.name).toBe("post_uri");
+
+            const enrichmentTables = yield* sql`
+              SELECT name FROM sqlite_master
+              WHERE type='table' AND name='post_enrichments'
+            `;
+            expect(enrichmentTables).toHaveLength(1);
+
+            const enrichmentInfo = yield* sql`PRAGMA table_info(post_enrichments)`;
+            const enrichmentPk = (enrichmentInfo as any[])
+              .filter((column: any) => column.pk > 0)
+              .sort((left: any, right: any) => left.pk - right.pk)
+              .map((column: any) => column.name);
+            expect(enrichmentPk).toEqual(["post_uri", "enrichment_type"]);
           }).pipe(Effect.provide(sqliteLayer))
         );
       })
@@ -71,7 +89,7 @@ describe("CandidatePayloadRepoD1", () => {
             }
           ]
         },
-        enrichmentPayload: null,
+        enrichments: [],
         capturedAt: 1_710_000_100_000,
         updatedAt: 1_710_000_100_000,
         enrichedAt: null
@@ -91,10 +109,11 @@ describe("CandidatePayloadRepoD1", () => {
           }
         ]
       });
+      expect(stored?.enrichments).toEqual([]);
     }).pipe(Effect.provide(makeLayer()))
   );
 
-  it.effect("upsertCapture preserves picked stage and existing enrichment on refresh", () =>
+  it.effect("saveEnrichment accumulates different enrichment types and rewrites one type idempotently", () =>
     Effect.gen(function* () {
       yield* seedKnowledgeBase();
       const repo = yield* CandidatePayloadRepo;
@@ -106,7 +125,76 @@ describe("CandidatePayloadRepoD1", () => {
         embedPayload: {
           images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null }]
         },
-        enrichmentPayload: null,
+        enrichments: [],
+        capturedAt: 10,
+        updatedAt: 10,
+        enrichedAt: null
+      });
+      yield* repo.markPicked(solarUri, 20);
+
+      yield* repo.saveEnrichment(
+        {
+          postUri: solarUri,
+          enrichmentType: "source-attribution",
+          enrichmentPayload: { sources: ["gridstatus"] }
+        },
+        30,
+        30
+      );
+
+      yield* repo.saveEnrichment(
+        {
+          postUri: solarUri,
+          enrichmentType: "vision",
+          enrichmentPayload: { summary: "Chart shows rising prices" }
+        },
+        40,
+        40
+      );
+
+      yield* repo.saveEnrichment(
+        {
+          postUri: solarUri,
+          enrichmentType: "vision",
+          enrichmentPayload: { summary: "Chart shows prices rising quickly" }
+        },
+        50,
+        50
+      );
+
+      const stored = yield* repo.getByPostUri(solarUri);
+      expect(stored?.enrichments).toEqual([
+        {
+          enrichmentType: "source-attribution",
+          enrichmentPayload: { sources: ["gridstatus"] },
+          updatedAt: 30,
+          enrichedAt: 30
+        },
+        {
+          enrichmentType: "vision",
+          enrichmentPayload: { summary: "Chart shows prices rising quickly" },
+          updatedAt: 50,
+          enrichedAt: 50
+        }
+      ]);
+      expect(stored?.updatedAt).toBe(50);
+      expect(stored?.enrichedAt).toBe(50);
+    }).pipe(Effect.provide(makeLayer()))
+  );
+
+  it.effect("upsertCapture preserves picked stage and existing enrichments on refresh", () =>
+    Effect.gen(function* () {
+      yield* seedKnowledgeBase();
+      const repo = yield* CandidatePayloadRepo;
+
+      yield* repo.upsertCapture({
+        postUri: solarUri,
+        captureStage: "candidate",
+        embedType: "img",
+        embedPayload: {
+          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null }]
+        },
+        enrichments: [],
         capturedAt: 10,
         updatedAt: 10,
         enrichedAt: null
@@ -115,6 +203,7 @@ describe("CandidatePayloadRepoD1", () => {
       yield* repo.saveEnrichment(
         {
           postUri: solarUri,
+          enrichmentType: "vision",
           enrichmentPayload: { summary: "Synthetic alt text" }
         },
         30,
@@ -128,7 +217,7 @@ describe("CandidatePayloadRepoD1", () => {
         embedPayload: {
           images: [{ thumb: "thumb-b", fullsize: "full-b", alt: "Updated alt" }]
         },
-        enrichmentPayload: null,
+        enrichments: [],
         capturedAt: 40,
         updatedAt: 40,
         enrichedAt: null
@@ -141,7 +230,14 @@ describe("CandidatePayloadRepoD1", () => {
       expect(stored?.embedPayload).toEqual({
         images: [{ thumb: "thumb-b", fullsize: "full-b", alt: "Updated alt" }]
       });
-      expect(stored?.enrichmentPayload).toEqual({ summary: "Synthetic alt text" });
+      expect(stored?.enrichments).toEqual([
+        {
+          enrichmentType: "vision",
+          enrichmentPayload: { summary: "Synthetic alt text" },
+          updatedAt: 30,
+          enrichedAt: 30
+        }
+      ]);
       expect(stored?.capturedAt).toBe(10);
       expect(stored?.updatedAt).toBe(40);
       expect(stored?.enrichedAt).toBe(30);
@@ -156,6 +252,7 @@ describe("CandidatePayloadRepoD1", () => {
       const stored = yield* repo.saveEnrichment(
         {
           postUri: solarUri,
+          enrichmentType: "vision",
           enrichmentPayload: { summary: "No row yet" }
         },
         50,
@@ -165,10 +262,77 @@ describe("CandidatePayloadRepoD1", () => {
       expect(stored).toBe(false);
     }).pipe(Effect.provide(makeLayer()))
   );
+
+  it.effect("saveEnrichment fails when the payload has not been picked", () =>
+    Effect.gen(function* () {
+      yield* seedKnowledgeBase();
+      const repo = yield* CandidatePayloadRepo;
+
+      yield* repo.upsertCapture({
+        postUri: solarUri,
+        captureStage: "candidate",
+        embedType: "img",
+        embedPayload: {
+          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null }]
+        },
+        enrichments: [],
+        capturedAt: 10,
+        updatedAt: 10,
+        enrichedAt: null
+      });
+
+      const error = yield* repo.saveEnrichment(
+        {
+          postUri: solarUri,
+          enrichmentType: "vision",
+          enrichmentPayload: { summary: "Too early" }
+        },
+        20,
+        20
+      ).pipe(Effect.flip);
+
+      expect(error).toBeInstanceOf(CandidatePayloadNotPickedError);
+      if (error instanceof CandidatePayloadNotPickedError) {
+        expect(error.captureStage).toBe("candidate");
+      }
+    }).pipe(Effect.provide(makeLayer()))
+  );
 });
 
 describe("CandidatePayloadService", () => {
-  it.effect("captures candidate payloads, marks picks, and stores enrichment with service-managed timestamps", () =>
+  it.effect("fails enrichment writes before the payload is picked", () =>
+    Effect.gen(function* () {
+      yield* seedKnowledgeBase();
+      const service = yield* CandidatePayloadService;
+
+      yield* service.capturePayload({
+        postUri: solarUri,
+        captureStage: "candidate",
+        embedType: "link",
+        embedPayload: {
+          uri: "https://example.com/report",
+          title: "Grid report",
+          description: "Useful context",
+          thumb: null
+        }
+      });
+
+      const error = yield* service.saveEnrichment({
+        postUri: solarUri,
+        enrichmentType: "vision",
+        enrichmentPayload: {
+          visionSummary: "Chart shows rising prices"
+        }
+      }).pipe(Effect.flip);
+
+      expect(error).toBeInstanceOf(CandidatePayloadNotPickedError);
+      if (error instanceof CandidatePayloadNotPickedError) {
+        expect(error.captureStage).toBe("candidate");
+      }
+    }).pipe(Effect.provide(makeLayer()))
+  );
+
+  it.effect("captures candidate payloads, marks picks, and stores typed enrichments with service-managed timestamps", () =>
     Effect.gen(function* () {
       yield* seedKnowledgeBase();
       const service = yield* CandidatePayloadService;
@@ -193,26 +357,50 @@ describe("CandidatePayloadService", () => {
 
       yield* TestClock.adjust(1);
 
-      const enriched = yield* service.saveEnrichment({
+      const sourceEnriched = yield* service.saveEnrichment({
         postUri: solarUri,
+        enrichmentType: "source-attribution",
         enrichmentPayload: {
-          sourceAttribution: ["gridstatus"],
+          sources: ["gridstatus"]
+        }
+      });
+      expect(sourceEnriched).toBe(true);
+
+      yield* TestClock.adjust(1);
+
+      const visionEnriched = yield* service.saveEnrichment({
+        postUri: solarUri,
+        enrichmentType: "vision",
+        enrichmentPayload: {
           visionSummary: "Chart shows rising prices"
         }
       });
-      expect(enriched).toBe(true);
+      expect(visionEnriched).toBe(true);
 
       const stored = yield* service.getPayload(solarUri);
       expect(stored?.captureStage).toBe("picked");
       expect(stored?.embedType).toBe("link");
-      expect(stored?.enrichmentPayload).toEqual({
-        sourceAttribution: ["gridstatus"],
-        visionSummary: "Chart shows rising prices"
-      });
+      expect(stored?.enrichments).toEqual([
+        {
+          enrichmentType: "source-attribution",
+          enrichmentPayload: {
+            sources: ["gridstatus"]
+          },
+          updatedAt: 2,
+          enrichedAt: 2
+        },
+        {
+          enrichmentType: "vision",
+          enrichmentPayload: {
+            visionSummary: "Chart shows rising prices"
+          },
+          updatedAt: 3,
+          enrichedAt: 3
+        }
+      ]);
       expect(stored?.capturedAt).toBe(0);
-      expect(stored?.updatedAt).toBeGreaterThanOrEqual(stored?.capturedAt ?? 0);
-      expect(stored?.updatedAt).toBe(2);
-      expect(stored?.enrichedAt).toBe(2);
+      expect(stored?.updatedAt).toBe(3);
+      expect(stored?.enrichedAt).toBe(3);
     }).pipe(Effect.provide(makeLayer()))
   );
 });

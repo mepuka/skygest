@@ -2,6 +2,7 @@ import { Clock, Context, Effect, Layer } from "effect";
 import type { SqlError } from "@effect/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type {
+  CandidatePayloadNotPickedError,
   CandidatePayloadRecord,
   SaveCandidateEnrichmentInput,
   SaveCandidatePayloadInput
@@ -22,7 +23,7 @@ export class CandidatePayloadService extends Context.Tag("@skygest/CandidatePayl
 
     readonly saveEnrichment: (
       input: SaveCandidateEnrichmentInput
-    ) => Effect.Effect<boolean, SqlError | DbError>;
+    ) => Effect.Effect<boolean, SqlError | DbError | CandidatePayloadNotPickedError>;
 
     readonly getPayload: (
       postUri: AtUri
@@ -41,7 +42,7 @@ export class CandidatePayloadService extends Context.Tag("@skygest/CandidatePayl
         captureStage: input.captureStage,
         embedType: input.embedType,
         embedPayload: input.embedPayload,
-        enrichmentPayload: null,
+        enrichments: [],
         capturedAt: now,
         updatedAt: now,
         enrichedAt: null

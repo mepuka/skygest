@@ -16,13 +16,13 @@ KV remains appropriate for ephemeral session/cache state, but not for the durabl
 
 ## Storage Shape
 
-Use one row per post in `post_payloads`:
+Use one row per post in `post_payloads`, with per-enrichment child rows in `post_enrichments`:
 
 - `post_uri` as the primary key
 - `capture_stage` as `candidate | picked`
 - `embed_type` as the normalized embed discriminator
 - `embed_payload_json` for lightweight embed metadata only
-- `enrichment_payload_json` for later vision/source/grounding results
+- `post_enrichments(post_uri, enrichment_type)` for later vision/source/grounding results
 - `captured_at`, `updated_at`, `enriched_at` for lifecycle tracking
 
 No binary media is stored. Bluesky CDN URLs remain the media source of truth.
@@ -31,7 +31,7 @@ No binary media is stored. Bluesky CDN URLs remain the media source of truth.
 
 - candidate scoring captures the lightweight payload once a post enters the candidate set
 - pick flow promotes an existing payload row from `candidate` to `picked`
-- enrichment writes JSON back onto the same row later
+- enrichment writes upsert one child row per enrichment type later
 - operator/feed surfaces read the payload by `post_uri`
 
 ## Candidate Write Trigger

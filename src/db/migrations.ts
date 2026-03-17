@@ -341,6 +341,22 @@ const migration13: D1Migration = {
   ]
 };
 
+const migration14: D1Migration = {
+  id: 14,
+  name: "post_enrichments",
+  statements: [
+    `CREATE TABLE IF NOT EXISTS post_enrichments (
+      post_uri                 TEXT NOT NULL,
+      enrichment_type          TEXT NOT NULL,
+      enrichment_payload_json  TEXT NOT NULL,
+      updated_at               INTEGER NOT NULL,
+      enriched_at              INTEGER NOT NULL,
+      PRIMARY KEY (post_uri, enrichment_type),
+      FOREIGN KEY (post_uri) REFERENCES post_payloads(post_uri)
+    )`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -354,5 +370,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration10,
   migration11,
   migration12,
-  migration13
+  migration13,
+  migration14
 ];

@@ -23,6 +23,7 @@ describe("phase-one migrations", () => {
             'ingest_runs',
             'posts',
             'post_curation',
+            'post_enrichments',
             'post_payloads',
             'post_topics',
             'links',
@@ -46,6 +47,7 @@ describe("phase-one migrations", () => {
         "ingest_runs",
         "links",
         "post_curation",
+        "post_enrichments",
         "post_payloads",
         "post_topics",
         "posts",
@@ -65,7 +67,8 @@ describe("phase-one migrations", () => {
         { id: 10, name: "publications_and_expert_tiers" },
         { id: 11, name: "editorial_picks" },
         { id: 12, name: "post_payloads" },
-        { id: 13, name: "post_curation" }
+        { id: 13, name: "post_curation" },
+        { id: 14, name: "post_enrichments" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );
