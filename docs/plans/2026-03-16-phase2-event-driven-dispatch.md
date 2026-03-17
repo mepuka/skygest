@@ -1,119 +1,61 @@
-# Phase 2: Hybrid Event-Driven Dispatch
+# Phase 2: Reduced Poll Interval
 
 ## Goal
 
-Replace the fixed 15-second sleep between dispatch cycles with a wake hint from DOs, so the workflow reacts instantly when experts complete while preserving the existing repair/poll fallback for liveness.
+Cut the idle time between dispatch cycles from 15s to 5s, reducing head sweep wall-clock time by ~3x with zero complexity risk.
 
 ## Baseline (after Phase 1)
 
 - Head sweep: ~35 min for 793 experts (fanout=10, 15s poll cadence)
-- The 15s sleep is the dominant idle time — most DOs complete in 2-5s but the workflow doesn't notice until the next poll
-- Progress rollup works, repair loop works, all on the existing sleep-poll path
+- The 15s sleep is the dominant remaining idle time — most DOs complete in 2-5s
+- Progress rollup works, repair loop works
+
+## Why Not waitForEvent
+
+The original Phase 2 design proposed `step.waitForEvent` with DO-emitted wake events. Code review identified a critical step budget issue:
+
+- 793 DOs each emit one completion event
+- Cloudflare buffers events until `waitForEvent` is reached
+- Each `waitForEvent` call drains one buffered event and returns instantly
+- This causes rapid-fire dispatch iterations, each consuming a workflow step
+- With 793 events: potentially 793 dispatch steps instead of ~80, blowing the 1,024 step limit
+
+Additional issues: under-scoped DO test coverage, missing multi-runId emit for coalesced tasks, weak rollout observability. The complexity-to-benefit ratio doesn't justify the risk.
+
+`step.sleep` is free (doesn't count toward the step limit). Reducing the interval from 15s to 5s captures most of the benefit with none of the step budget, event buffering, or DO-workflow coupling concerns.
 
 ## Design
 
-### Event Schema
+### Single Change
 
-Add to `src/domain/polling.ts`:
-
-```typescript
-export class IngestWorkflowWakeEvent extends Schema.TaggedClass<IngestWorkflowWakeEvent>()(
-  "IngestWorkflowWakeEvent",
-  {
-    runId: Schema.String,
-    did: Did,
-    terminal: Schema.Literal("complete", "failed")
-  }
-) {}
-```
-
-- `_tag: "IngestWorkflowWakeEvent"` gives safe decode on the workflow side
-- `terminal` covers both success and failure — the workflow cares that a slot opened, not why
-- Lives in `polling.ts` alongside the other ingest lifecycle types, not a new module
-
-### DO Signal — Best-Effort sendEvent
-
-In `ExpertPollCoordinatorDo.ts`, after the terminal item transition is fully committed:
+**File:** `src/ingest/IngestRunWorkflow.ts`
 
 ```typescript
-// After: markComplete/markFailed + recordCoordinatorCompletion + saveState + setAlarmIfPending
-try {
-  const payload = IngestWorkflowWakeEvent.make({ runId, did, terminal: "complete" });
-  const instance = await this.env.INGEST_RUN_WORKFLOW.get(runId);
-  await instance.sendEvent({ type: "ingest-item-terminal", payload });
-} catch {
-  // Advisory only — workflow's timeout fallback handles missed events
-}
+// Before:
+const WORKFLOW_POLL_INTERVAL_MS = 15_000;
+
+// After:
+const WORKFLOW_POLL_INTERVAL_MS = 5_000;
 ```
 
-Rules:
-- **After terminal commit, not before.** The durable state write must succeed before the event fires.
-- **try/catch, never fail the DO.** If sendEvent throws, the DO's work is already committed.
-- **Emit per runId.** If a DO processes tasks for multiple runs in one alarm cycle, emit once per distinct runId that reached a terminal transition.
-- **console.warn inside catch** for observability, but no Effect error channel.
-- The DO does not import the schema for encoding — uses `IngestWorkflowWakeEvent.make()` for type safety, sends the plain object as the sendEvent payload.
+That's it. No new schemas, no DO changes, no event system.
 
-Cloudflare confirms Workflow bindings are accessible from DOs: the DO already has `this.env.INGEST_RUN_WORKFLOW` via `WorkflowIngestEnvBindings`.
+### Math
 
-### Workflow Side — Hybrid waitForEvent + Timeout
+With fanout=10, 793 experts, 5s sleep:
+- ~80 dispatch cycles × 5s = ~400s = ~7 min of sleep overhead
+- Plus DO processing time (~2-5s per expert, overlapped via fanout)
+- Expected total: ~12-15 min
 
-In `dispatchUntilTerminal`, replace `step.sleep` with `step.waitForEvent`:
-
-```typescript
-// Replace:
-await step.sleep(`wait-${iteration}`, WORKFLOW_POLL_INTERVAL_MS);
-
-// With:
-try {
-  await step.waitForEvent(`wake-${iteration}`, {
-    type: "ingest-item-terminal",
-    timeout: "15s"
-  });
-} catch {
-  // Timeout — fall through to existing dispatch + repair path
-}
-```
-
-The loop structure stays identical:
-1. `step.do(`dispatch-${iteration}`)` — dispatchAvailable() does repair + dispatch + progress rollup
-2. If not terminal, `step.waitForEvent` with 15s timeout
-3. Whether woken by event or timeout, loops back to step 1
-
-Key properties:
-- **Same 15s timeout as current sleep.** No regression in worst-case detection. When events arrive, it's instant. When missed, same cadence as before.
-- **Repair loop runs every iteration** regardless of how the workflow woke. `dispatchAvailable()` still calls `repairLiveRun()` and `countIncompleteByRun()`.
-- **Workflow does not inspect event payload** for dispatch decisions. The event is purely a wake hint. Dispatch logic queries D1 for the actual state.
-- **Step budget:** At fanout=10 with 793 experts, ~80 iterations × 2 steps (dispatch + waitForEvent) = ~160 steps. Well under 1,024.
-- **Step naming is deterministic:** `wake-${iteration}` satisfies the Workflows non-deterministic step name gotcha.
-
-## Files
-
-| File | Change |
-|------|--------|
-| `src/domain/polling.ts` | Add `IngestWorkflowWakeEvent` tagged class |
-| `src/ingest/ExpertPollCoordinatorDo.ts` | After terminal commit, best-effort `sendEvent` per runId |
-| `src/ingest/IngestRunWorkflow.ts` | Replace `step.sleep` with `step.waitForEvent` + 15s timeout catch |
-| `tests/ingest-run-workflow.test.ts` | Update mock step, add event/timeout path tests |
+Step budget: ~80 iterations × 1 step (dispatch) = ~80 steps. `step.sleep` is free. Well under 1,024.
 
 ### What Does NOT Change
 
 - `dispatchAvailable()` — untouched
-- Enqueue input schemas — `runId` already present
-- Error taxonomy — sendEvent failures are caught, not domain errors
-- Repair loop — runs every iteration
-- Progress rollup — runs every iteration
-
-## Testing
-
-- **Workflow happy path:** Mock `step.waitForEvent` to resolve immediately. Verify workflow dispatches without delay when events arrive.
-- **Workflow timeout path:** Mock `step.waitForEvent` to throw (simulating timeout). Verify workflow still completes via poll fallback — identical behavior to Phase 1.
-- **DO signal test:** Verify `sendEvent` is called after terminal commit. Verify a `sendEvent` failure does not affect item completion status.
-
-## Expected Impact
-
-- Typical dispatch cadence drops from fixed 15s to ~2-5s (DO completion time + event latency)
-- With fanout=10, head sweeps should complete in ~10-15 min (down from ~35 min)
-- Worst case (all events missed): identical to Phase 1 (~35 min)
+- Repair loop — runs every 5s instead of every 15s (more responsive)
+- Progress rollup — updates every 5s instead of every 15s (more granular)
+- DO code — no changes
+- Error handling — no changes
 
 ## Verification
 
@@ -121,5 +63,15 @@ Key properties:
 2. `bun run test` — all pass
 3. Deploy staging, trigger head sweep
 4. Compare wall-clock time against Phase 1 baseline (~35 min)
-5. Monitor for sendEvent failures in DO logs
-6. Verify repair loop still catches stalled items when events are missed
+5. Verify repair still catches stalled items
+6. Monitor D1 query load — progress rollup now runs 3x more frequently
+
+## Future: Event-Driven Dispatch (Phase 2b)
+
+If sub-10-min head sweeps are needed, revisit DO→Workflow signaling with coalesced events rather than per-item events. Possible approaches:
+
+- **Coalesce at a queue layer** (Phase 3): queue consumer emits one event per drained batch, not per item
+- **Workflow self-wake**: dispatch step sends an event to itself when it detects completed items, instead of DOs sending events
+- **Reduced fanout with instant wake**: lower fanout so fewer events are buffered, staying under the step budget
+
+These require the queue infrastructure from Phase 3 to be in place first, which provides a natural coalescing point.

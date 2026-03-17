@@ -37,7 +37,7 @@ import { formatSchemaParseError, stringifyUnknown } from "../platform/Json";
 const WORKFLOW_FANOUT_HEAD = 10;
 const WORKFLOW_FANOUT_BACKFILL = 3;
 const WORKFLOW_FANOUT_RECONCILE = 5;
-const WORKFLOW_POLL_INTERVAL_MS = 15_000;
+const WORKFLOW_POLL_INTERVAL_MS = 5_000;
 
 type ExpertPollCoordinatorStub = DurableObjectStub & {
   enqueueHead(input: EnqueueHeadCoordinatorInput): Promise<unknown>;
