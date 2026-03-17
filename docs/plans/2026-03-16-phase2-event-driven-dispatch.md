@@ -57,6 +57,19 @@ Step budget: ~80 iterations × 1 step (dispatch) = ~80 steps. `step.sleep` is fr
 - DO code — no changes
 - Error handling — no changes
 
+## Cron Overlap Risk
+
+Production cron fires every 15 minutes (`*/15 * * * *` in wrangler.toml). Each slot gets a unique ID via `toCronSlotId(scheduledTime)` — e.g., `head-sweep:2026-03-16T22:15`. The launcher's `createQueuedIfAbsent` only dedupes within the same slot, not across slots. If a run takes longer than 15 minutes, the next cron slot fires a second concurrent run.
+
+This is pre-existing behavior, not introduced by Phase 2. But Phase 2 makes it more visible because the target runtime (~12-15 min) is close to the 15-minute boundary. At the upper end, overlapping runs would stack D1 polling load.
+
+**Mitigation options (not in scope for Phase 2):**
+- Widen cron interval to 20 or 30 minutes
+- Add a `listRunning` guard in `startCronHeadSweep` that skips launch if another head sweep is already running
+- Accept overlap as harmless (duplicate polls are idempotent; DOs dedup work via task coalescing)
+
+For now, staging runs are admin-triggered, not cron. Monitor production after deploy.
+
 ## Verification
 
 1. `bunx tsc --noEmit` — clean
@@ -65,6 +78,7 @@ Step budget: ~80 iterations × 1 step (dispatch) = ~80 steps. `step.sleep` is fr
 4. Compare wall-clock time against Phase 1 baseline (~35 min)
 5. Verify repair still catches stalled items
 6. Monitor D1 query load — progress rollup now runs 3x more frequently
+7. Check for cron overlap: if a staging run exceeds 15 min, verify a second concurrent run does not cause errors or data corruption
 
 ## Future: Event-Driven Dispatch (Phase 2b)
 
