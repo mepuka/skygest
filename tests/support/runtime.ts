@@ -7,6 +7,7 @@ import { energySeedDid, energySeedManifest } from "../../src/bootstrap/CheckedIn
 import { bootstrapExperts } from "../../src/bootstrap/ExpertSeeds";
 import { layer as BlueskyClientLayer } from "../../src/bluesky/BlueskyClient";
 import { runMigrations } from "../../src/db/migrate";
+import { CandidatePayloadService } from "../../src/services/CandidatePayloadService";
 import { RawEventBatch } from "../../src/domain/types";
 import { processBatch } from "../../src/filter/FilterWorker";
 import { callTool, listTools, type McpToolCall } from "../../src/mcp/Client";
@@ -15,6 +16,7 @@ import { AppConfig, type AppConfigShape } from "../../src/platform/Config";
 import { EditorialService } from "../../src/services/EditorialService";
 import { OntologyCatalog } from "../../src/services/OntologyCatalog";
 import { KnowledgeQueryService } from "../../src/services/KnowledgeQueryService";
+import { CandidatePayloadRepoD1 } from "../../src/services/d1/CandidatePayloadRepoD1";
 import { EditorialRepoD1 } from "../../src/services/d1/EditorialRepoD1";
 import { ExpertsRepoD1 } from "../../src/services/d1/ExpertsRepoD1";
 import { KnowledgeRepoD1 } from "../../src/services/d1/KnowledgeRepoD1";
@@ -53,6 +55,9 @@ export const makeBiLayer = (options?: {
   const knowledgeLayer = KnowledgeRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
 
   const publicationsLayer = PublicationsRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
+  const candidatePayloadRepoLayer = CandidatePayloadRepoD1.layer.pipe(
+    Layer.provideMerge(sqliteLayer)
+  );
   const editorialRepoLayer = EditorialRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
   const ontologyLayer = OntologyCatalog.layer;
   const baseLayer = Layer.mergeAll(
@@ -62,6 +67,7 @@ export const makeBiLayer = (options?: {
     expertsLayer,
     knowledgeLayer,
     publicationsLayer,
+    candidatePayloadRepoLayer,
     editorialRepoLayer
   );
 
@@ -73,10 +79,15 @@ export const makeBiLayer = (options?: {
     Layer.provideMerge(Layer.mergeAll(sqliteLayer, configLayer))
   );
 
+  const candidatePayloadServiceLayer = CandidatePayloadService.layer.pipe(
+    Layer.provideMerge(candidatePayloadRepoLayer)
+  );
+
   return Layer.mergeAll(
     baseLayer,
     KnowledgeQueryService.layer.pipe(Layer.provideMerge(baseLayer)),
     editorialServiceLayer,
+    candidatePayloadServiceLayer,
     blueskyLayer
   );
 };
