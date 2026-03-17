@@ -2,7 +2,7 @@
 
 ## Context
 
-**Product:** Skygest — AI-managed energy news intelligence
+**Product:** Skygest — operator-first energy news intelligence
 **Target segments:** Energy analysts (utilities, consultancies, government), energy journalists/newsletter writers, energy experts seeking amplification
 **Current alternatives:** Manual Bluesky/Twitter scrolling, private expert lists, editorial newsletters (Bloomberg Green, Carbon Brief), nothing (missing the discourse entirely)
 **Product model:** Media product (intelligent newsreader), not a dev tool

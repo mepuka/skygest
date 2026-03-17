@@ -80,15 +80,26 @@ All three are pipeline/workflow problems that map to Cloudflare's event-driven i
 
 ## Implementation Order
 
-1. **Thread-as-document** — reshape existing MCP response (days)
-2. **Vision pipeline** — Cloudflare Workflow for chart analysis + alt text + source attribution (1-2 weeks)
-3. **Data source registry** — GridStatus integration as first external API (1-2 weeks)
-4. **Signal metadata** — computed thread-level scores using 7 ranking signals (1 week)
-5. **Temporal linking** — cross-thread topic linking over time (later)
-6. **Claim extraction** — quantitative claim tagging (later)
+Already in place:
+
+- thread/document-aware MCP responses
+- embed-content surfacing for live media analysis
+- manual editorial picks and curated-feed infrastructure
+
+Execution order for the Expert News Feed milestone:
+
+1. **Unified runtime schema target** — finish ontology convergence for `energy-news` + `energy-media` (`SKY-19`, `SKY-24`)
+2. **Candidate scoring + pick workflow** — deterministic candidate set and operator pick action (`SKY-20`)
+3. **Candidate payload storage** — lightweight persistence for candidate/picked posts only; no binary media (`SKY-23`)
+4. **Pick-driven enrichment primitives** — workflow state, retries, provenance, idempotent execution (`SKY-21`)
+5. **Vision enrichment** — chart analysis, alt-text gap filling, source attribution for picked posts (`SKY-16`)
+6. **Provider registry** — normalized source catalog and attribution matching (`SKY-17`)
+7. **Live grounding adapters** — GridStatus first, then additional external data providers (`SKY-10`)
+8. **Temporal linking and claim extraction** — later
 
 ## Related
 
 - `docs/plans/2026-03-17-jobs-to-be-done.md`
 - `docs/plans/2026-03-17-positioning-statement.md`
+- `docs/plans/2026-03-17-expert-news-feed-execution-plan.md`
 - `docs/canonical-threads.md`
