@@ -1,147 +1,229 @@
 {
+  "_note": "Generated from energy-news ontology (enews namespace). Media domain merged.",
+  "_namespace": "http://example.org/ontology/energy-news#",
   "classes": {
-    "DocumentExcerpt": {
-      "label": "document excerpt",
-      "definition": "A MediaAttachment that is an extracted portion of a document, article, or report",
-      "parent": "MediaAttachment"
-    },
-    "Infographic": {
-      "label": "infographic",
-      "definition": "A MediaAttachment that is a designed visual composition combining data, text, and graphics",
-      "parent": "MediaAttachment"
-    },
-    "Photo": {
-      "label": "photo",
-      "definition": "A MediaAttachment that is a photographic image of a real-world scene",
-      "parent": "MediaAttachment"
-    },
-    "VideoAttachment": {
-      "label": "video attachment",
-      "definition": "A MediaAttachment that is a video recording or animation",
-      "parent": "MediaAttachment"
-    },
-    "ChartSourceLine": {
-      "label": "chart source line",
-      "definition": "The source attribution text appearing on a chart, typically at the bottom",
-      "parent": null
-    },
-    "EnergyDataset": {
-      "label": "energy dataset",
-      "definition": "A specific dataset published by an EnergyDataProvider",
-      "parent": null
-    },
-    "EnergyDataProvider": {
-      "label": "energy data provider",
-      "definition": "An organization that publishes energy data accessible via API or download",
-      "parent": null
-    },
-    "ChartSeries": {
-      "label": "chart series",
-      "definition": "A named data series plotted within a chart",
-      "parent": null
+    "MediaAttachment": {
+      "label": "media attachment",
+      "definition": "A digital resource attached to or embedded in a Post",
+      "parents": [
+        "http://purl.obolibrary.org/obo/BFO_0000031"
+      ]
     },
     "Chart": {
       "label": "chart",
       "definition": "A MediaAttachment that is a data visualization depicting quantitative information",
-      "parent": "MediaAttachment"
+      "parents": [
+        "enews:MediaAttachment",
+        "http://purl.obolibrary.org/obo/BFO_0000031",
+        "schema:ImageObject"
+      ]
+    },
+    "DocumentExcerpt": {
+      "label": "document excerpt",
+      "definition": "A MediaAttachment that is an extracted portion of a document, article, or report",
+      "parents": [
+        "enews:MediaAttachment",
+        "http://purl.obolibrary.org/obo/BFO_0000031"
+      ]
+    },
+    "Photo": {
+      "label": "photo",
+      "definition": "A MediaAttachment that is a photographic image of a real-world scene",
+      "parents": [
+        "enews:MediaAttachment",
+        "http://purl.obolibrary.org/obo/BFO_0000031",
+        "schema:ImageObject"
+      ]
+    },
+    "Infographic": {
+      "label": "infographic",
+      "definition": "A MediaAttachment that is a designed visual composition combining data, text, and graphics",
+      "parents": [
+        "enews:MediaAttachment",
+        "http://purl.obolibrary.org/obo/BFO_0000031"
+      ]
+    },
+    "VideoAttachment": {
+      "label": "video attachment",
+      "definition": "A MediaAttachment that is a video recording or animation",
+      "parents": [
+        "enews:MediaAttachment",
+        "http://purl.obolibrary.org/obo/BFO_0000031",
+        "schema:VideoObject"
+      ]
     },
     "ChartAxis": {
       "label": "chart axis",
-      "definition": "A dimensional axis of a chart with label, unit, and scale",
-      "parent": null
+      "definition": "A dimensional axis of a chart with label, unit, and optional scale",
+      "parents": [
+        "http://purl.obolibrary.org/obo/BFO_0000031"
+      ]
     },
-    "MediaAttachment": {
-      "label": "media attachment",
-      "definition": "A digital resource attached to or embedded in a Post",
-      "parent": null
+    "ChartSeries": {
+      "label": "chart series",
+      "definition": "A named data series plotted within a chart",
+      "parents": [
+        "http://purl.obolibrary.org/obo/BFO_0000031"
+      ]
+    },
+    "ChartSourceLine": {
+      "label": "chart source line",
+      "definition": "The source attribution text appearing on a chart, typically at the bottom",
+      "parents": [
+        "http://purl.obolibrary.org/obo/BFO_0000031"
+      ]
+    },
+    "TemporalCoverage": {
+      "label": "temporal coverage",
+      "definition": "A time period that a chart or visualization covers, with start and end dates",
+      "parents": [
+        "http://purl.obolibrary.org/obo/BFO_0000008"
+      ]
+    },
+    "EnergyDataProvider": {
+      "label": "energy data provider",
+      "definition": "An organization that publishes energy data accessible via API or download",
+      "parents": [
+        "http://purl.obolibrary.org/obo/BFO_0000030",
+        "schema:Organization"
+      ]
+    },
+    "EnergyDataset": {
+      "label": "energy dataset",
+      "definition": "A specific dataset published by an EnergyDataProvider",
+      "parents": [
+        "http://purl.obolibrary.org/obo/BFO_0000031",
+        "schema:Dataset"
+      ]
     }
   },
   "objectProperties": {
-    "altTextProvenance": {
-      "domain": "MediaAttachment",
-      "range": "Concept",
-      "functional": true
-    },
-    "hasMediaAttachment": {
-      "domain": "Post",
-      "range": "MediaAttachment",
-      "functional": false
-    },
-    "hasSeries": {
-      "domain": "Chart",
-      "range": "ChartSeries",
-      "functional": false
-    },
-    "hasSourceLine": {
-      "domain": "Chart",
-      "range": "ChartSourceLine",
-      "functional": false
-    },
     "chartType": {
-      "domain": "Chart",
-      "range": "Concept",
-      "functional": true
+      "domain": "enews:Chart",
+      "range": "skos:Concept",
+      "functional": false
     },
     "hasXAxis": {
-      "domain": "Chart",
-      "range": "ChartAxis",
+      "domain": "enews:Chart",
+      "range": "enews:ChartAxis",
       "functional": true
     },
     "hasYAxis": {
-      "domain": "Chart",
-      "range": "ChartAxis",
+      "domain": "enews:Chart",
+      "range": "enews:ChartAxis",
+      "functional": false
+    },
+    "hasSeries": {
+      "domain": "enews:Chart",
+      "range": "enews:ChartSeries",
+      "functional": false
+    },
+    "hasSourceLine": {
+      "domain": "enews:Chart",
+      "range": "enews:ChartSourceLine",
+      "functional": false
+    },
+    "altTextProvenance": {
+      "domain": "enews:MediaAttachment",
+      "range": "skos:Concept",
       "functional": true
     },
     "providedBy": {
-      "domain": "EnergyDataset",
-      "range": "EnergyDataProvider",
+      "domain": "enews:EnergyDataset",
+      "range": "enews:EnergyDataProvider",
       "functional": true
+    },
+    "containsChart": {
+      "domain": "enews:DocumentExcerpt",
+      "range": "enews:Chart",
+      "functional": false
+    },
+    "hasTemporalCoverage": {
+      "domain": "enews:Chart",
+      "range": "enews:TemporalCoverage",
+      "functional": true
+    },
+    "_external": {
+      "prov:wasAttributedTo": {
+        "domain": null,
+        "range": null,
+        "functional": false,
+        "note": "Image source \u2192 author"
+      },
+      "prov:wasDerivedFrom": {
+        "domain": null,
+        "range": null,
+        "functional": false,
+        "note": "Data source \u2192 dataset"
+      },
+      "dcterms:source": {
+        "domain": null,
+        "range": null,
+        "functional": false,
+        "note": "Content source \u2192 article/report"
+      },
+      "dcterms:spatial": {
+        "domain": null,
+        "range": null,
+        "functional": false,
+        "note": "Geographic coverage"
+      }
     }
   },
   "dataProperties": {
     "altText": {
-      "domain": "MediaAttachment",
-      "range": "string",
-      "functional": true
-    },
-    "axisLabel": {
-      "domain": "ChartAxis",
-      "range": "string",
-      "functional": true
-    },
-    "axisUnit": {
-      "domain": "ChartAxis",
-      "range": "string",
-      "functional": true
-    },
-    "keyFinding": {
-      "domain": "Chart",
-      "range": "string",
-      "functional": false
-    },
-    "legendLabel": {
-      "domain": "ChartSeries",
+      "domain": "enews:MediaAttachment",
       "range": "string",
       "functional": true
     },
     "mediaUrl": {
-      "domain": "MediaAttachment",
+      "domain": "enews:MediaAttachment",
       "range": "anyURI",
       "functional": true
     },
+    "thumbnailUrl": {
+      "domain": "enews:MediaAttachment",
+      "range": "anyURI",
+      "functional": true
+    },
+    "axisLabel": {
+      "domain": "enews:ChartAxis",
+      "range": "string",
+      "functional": true
+    },
+    "axisUnit": {
+      "domain": "enews:ChartAxis",
+      "range": "string",
+      "functional": true
+    },
     "seriesUnit": {
-      "domain": "ChartSeries",
+      "domain": "enews:ChartSeries",
+      "range": "string",
+      "functional": true
+    },
+    "legendLabel": {
+      "domain": "enews:ChartSeries",
       "range": "string",
       "functional": true
     },
     "sourceText": {
-      "domain": "ChartSourceLine",
+      "domain": "enews:ChartSourceLine",
       "range": "string",
       "functional": true
     },
-    "thumbnailUrl": {
-      "domain": "MediaAttachment",
-      "range": "anyURI",
+    "keyFinding": {
+      "domain": "enews:Chart",
+      "range": "string",
+      "functional": false
+    },
+    "startDate": {
+      "domain": "enews:TemporalCoverage",
+      "range": "date",
+      "functional": true
+    },
+    "endDate": {
+      "domain": "enews:TemporalCoverage",
+      "range": "date",
       "functional": true
     }
   },
@@ -149,89 +231,106 @@
     "ChartTypeScheme": [
       {
         "name": "AreaChart",
-        "label": "AreaChart",
+        "label": "Area Chart",
+        "definition": "Line chart with the area below filled to emphasize volume",
         "broader": "LineChart"
       },
       {
         "name": "BarChart",
-        "label": "BarChart",
+        "label": "Bar Chart",
+        "definition": "Rectangular bars representing values across categories",
         "broader": null
       },
       {
         "name": "CandlestickChart",
-        "label": "CandlestickChart",
+        "label": "Candlestick Chart",
+        "definition": "Chart showing open, high, low, close values for financial/commodity data",
         "broader": null
       },
       {
         "name": "ChoroplethMap",
-        "label": "ChoroplethMap",
+        "label": "Choropleth Map",
+        "definition": "Geographic map with regions shaded by data values",
         "broader": null
       },
       {
         "name": "DataTable",
-        "label": "DataTable",
+        "label": "Data Table",
+        "definition": "Structured tabular presentation of data in rows and columns",
         "broader": null
       },
       {
         "name": "DualAxisChart",
-        "label": "DualAxisChart",
+        "label": "Dual Axis Chart",
+        "definition": "Chart combining two chart types sharing one axis (e.g., bars + line)",
         "broader": null
       },
       {
         "name": "Heatmap",
         "label": "Heatmap",
+        "definition": "Matrix of values encoded as colors to show patterns",
         "broader": null
       },
       {
         "name": "LineChart",
-        "label": "LineChart",
+        "label": "Line Chart",
+        "definition": "Connected data points showing trends over a continuous axis",
         "broader": null
       },
       {
         "name": "PieChart",
-        "label": "PieChart",
+        "label": "Pie Chart",
+        "definition": "Circular chart divided into proportional segments",
         "broader": null
       },
       {
         "name": "PointMap",
-        "label": "PointMap",
+        "label": "Point Map",
+        "definition": "Geographic map with data points plotted at coordinates",
         "broader": null
       },
       {
         "name": "SankeyDiagram",
-        "label": "SankeyDiagram",
+        "label": "Sankey Diagram",
+        "definition": "Weighted flow diagram showing magnitude of flows between nodes",
         "broader": null
       },
       {
         "name": "ScatterPlot",
-        "label": "ScatterPlot",
+        "label": "Scatter Plot",
+        "definition": "Individual data points plotted on two quantitative axes",
         "broader": null
       },
       {
         "name": "StackedBarChart",
-        "label": "StackedBarChart",
+        "label": "Stacked Bar Chart",
+        "definition": "Bar chart with segments showing component breakdown",
         "broader": "BarChart"
       },
       {
         "name": "Treemap",
         "label": "Treemap",
+        "definition": "Nested rectangles showing hierarchical data proportions",
         "broader": null
       }
     ],
     "AltTextProvenanceScheme": [
       {
         "name": "AltTextAbsent",
-        "label": "AltTextAbsent",
+        "label": "Absent",
+        "definition": "No alt text exists for this media attachment",
         "broader": null
       },
       {
         "name": "AltTextOriginal",
-        "label": "AltTextOriginal",
+        "label": "Original",
+        "definition": "Alt text provided by the post author",
         "broader": null
       },
       {
         "name": "AltTextSynthetic",
-        "label": "AltTextSynthetic",
+        "label": "Synthetic",
+        "definition": "Alt text generated by a vision model (e.g., Gemini 2.5 Flash)",
         "broader": null
       }
     ]
