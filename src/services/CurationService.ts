@@ -19,6 +19,7 @@ import { ExpertsRepo } from "./ExpertsRepo";
 import { PublicationsRepo } from "./PublicationsRepo";
 import { CandidatePayloadService } from "./CandidatePayloadService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
+import { extractEmbedKind, buildTypedEmbed } from "../bluesky/EmbedExtract";
 import { flattenThread } from "../bluesky/ThreadFlatten";
 import {
   evaluateSignal,
@@ -195,20 +196,9 @@ export class CurationService extends Context.Tag("@skygest/CurationService")<
           });
         }
 
-        // Extract embed type and payload from the focus post
-        const mapEmbedType = (embed: { $type?: string } | undefined): string | null => {
-          if (!embed?.$type) return null;
-          const t = embed.$type;
-          if (t.includes("record") && t.includes("Media")) return "media";
-          if (t.includes("record")) return "quote";
-          if (t.includes("external")) return "link";
-          if (t.includes("images")) return "img";
-          if (t.includes("video")) return "video";
-          return null;
-        };
-
-        const embedType = focusPost.embed ? mapEmbedType(focusPost.embed as any) : null;
-        const embedPayload = focusPost.embed ?? null;
+        // Extract typed embed from the focus post
+        const embedType = extractEmbedKind(focusPost.embed as any);
+        const embedPayload = buildTypedEmbed(focusPost.embed);
 
         // Write payload FIRST — if this fails, status stays flagged and retry works.
         // Writing status last ensures the idempotency guard (early return on "curated")

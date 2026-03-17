@@ -1,5 +1,6 @@
 import { Schema } from "effect";
 import { AtUri, Did, HttpsUrl } from "./types";
+import { EmbedPayload } from "./embed";
 
 export const TopicSlug = Schema.String.pipe(
   Schema.minLength(1),
@@ -592,7 +593,7 @@ export const ThreadPostResult = Schema.Struct({
   depth: Schema.Number,
   parentUri: Schema.NullOr(AtUri),
   embedType: Schema.NullOr(ThreadEmbedType),
-  embedContent: Schema.NullOr(Schema.Unknown)
+  embedContent: Schema.NullOr(EmbedPayload)
 });
 export type ThreadPostResult = Schema.Schema.Type<typeof ThreadPostResult>;
 

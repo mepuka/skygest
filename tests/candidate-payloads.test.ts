@@ -81,6 +81,7 @@ describe("CandidatePayloadRepoD1", () => {
         captureStage: "candidate",
         embedType: "img",
         embedPayload: {
+          kind: "img",
           images: [
             {
               thumb: "https://cdn.bsky.app/thumb-1.jpg",
@@ -101,6 +102,7 @@ describe("CandidatePayloadRepoD1", () => {
       expect(stored?.captureStage).toBe("candidate");
       expect(stored?.embedType).toBe("img");
       expect(stored?.embedPayload).toEqual({
+        kind: "img",
         images: [
           {
             thumb: "https://cdn.bsky.app/thumb-1.jpg",
@@ -123,6 +125,7 @@ describe("CandidatePayloadRepoD1", () => {
         captureStage: "candidate",
         embedType: "img",
         embedPayload: {
+          kind: "img",
           images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null }]
         },
         enrichments: [],
@@ -192,6 +195,7 @@ describe("CandidatePayloadRepoD1", () => {
         captureStage: "candidate",
         embedType: "img",
         embedPayload: {
+          kind: "img",
           images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null }]
         },
         enrichments: [],
@@ -215,6 +219,7 @@ describe("CandidatePayloadRepoD1", () => {
         captureStage: "candidate",
         embedType: "img",
         embedPayload: {
+          kind: "img",
           images: [{ thumb: "thumb-b", fullsize: "full-b", alt: "Updated alt" }]
         },
         enrichments: [],
@@ -228,6 +233,7 @@ describe("CandidatePayloadRepoD1", () => {
       const stored = yield* repo.getByPostUri(solarUri);
       expect(stored?.captureStage).toBe("picked");
       expect(stored?.embedPayload).toEqual({
+        kind: "img",
         images: [{ thumb: "thumb-b", fullsize: "full-b", alt: "Updated alt" }]
       });
       expect(stored?.enrichments).toEqual([
@@ -273,6 +279,7 @@ describe("CandidatePayloadRepoD1", () => {
         captureStage: "candidate",
         embedType: "img",
         embedPayload: {
+          kind: "img",
           images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null }]
         },
         enrichments: [],
@@ -310,6 +317,7 @@ describe("CandidatePayloadService", () => {
         captureStage: "candidate",
         embedType: "link",
         embedPayload: {
+          kind: "link",
           uri: "https://example.com/report",
           title: "Grid report",
           description: "Useful context",
@@ -342,6 +350,7 @@ describe("CandidatePayloadService", () => {
         captureStage: "candidate",
         embedType: "link",
         embedPayload: {
+          kind: "link",
           uri: "https://example.com/report",
           title: "Grid report",
           description: "Useful context",
