@@ -17,6 +17,7 @@ import { AppConfig } from "../platform/Config";
 import { withMutationAudit } from "../platform/MutationLog";
 import { ExpertsRepo } from "./ExpertsRepo";
 import { ExpertRegistryService } from "./ExpertRegistryService";
+import { CurationService } from "./CurationService";
 import { KnowledgeRepo } from "./KnowledgeRepo";
 import { OntologyCatalog } from "./OntologyCatalog";
 import { PublicationsRepo } from "./PublicationsRepo";
@@ -55,6 +56,7 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
       const knowledgeRepo = yield* KnowledgeRepo;
       const ontology = yield* OntologyCatalog;
       const publicationsRepo = yield* PublicationsRepo;
+      const curationService = yield* CurationService;
 
       const shardCount = Math.max(1, Math.trunc(config.ingestShardCount));
 
@@ -108,7 +110,8 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
         const program = Effect.gen(function* () {
           yield* processBatch(makeSmokeFixtureBatch(fixtureDid)).pipe(
             Effect.provideService(KnowledgeRepo, knowledgeRepo),
-            Effect.provideService(OntologyCatalog, ontology)
+            Effect.provideService(OntologyCatalog, ontology),
+            Effect.provideService(CurationService, curationService)
           );
 
           const rows = yield* sql<LoadSmokeFixtureResult>`

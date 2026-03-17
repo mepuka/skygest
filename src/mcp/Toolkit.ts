@@ -16,6 +16,7 @@ import {
   SearchPostsInput
 } from "../domain/bi";
 import { ListEditorialPicksInput } from "../domain/editorial";
+import { ListCurationCandidatesInput, CuratePostInput } from "../domain/curation";
 import {
   KnowledgePostsMcpOutput,
   KnowledgeLinksMcpOutput,
@@ -26,7 +27,9 @@ import {
   ExplainPostTopicsMcpOutput,
   EditorialPicksMcpOutput,
   PostThreadMcpOutput,
-  ThreadDocumentMcpOutput
+  ThreadDocumentMcpOutput,
+  CurationCandidatesMcpOutput,
+  CuratePostMcpOutput
 } from "./OutputSchemas.ts";
 import {
   formatPosts,
@@ -36,9 +39,11 @@ import {
   formatTopic,
   formatExpandedTopics,
   formatExplainedPostTopics,
-  formatEditorialPicks
+  formatEditorialPicks,
+  formatCurationCandidates
 } from "./Fmt.ts";
 import { EditorialService } from "../services/EditorialService";
+import { CurationService } from "../services/CurationService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { flattenThread } from "../bluesky/ThreadFlatten.ts";
@@ -203,6 +208,35 @@ export const GetThreadDocumentTool = Tool.make("get_thread_document", {
   .annotate(Tool.Idempotent, true)
   .annotate(Tool.OpenWorld, true);
 
+export const ListCurationCandidatesTool = Tool.make("list_curation_candidates", {
+  description: "List posts flagged by curation predicates for editorial review. Shows signal score, matched predicates, and post details. Use to find high-signal posts that may warrant enrichment.",
+  parameters: ListCurationCandidatesInput.fields,
+  success: CurationCandidatesMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "List Curation Candidates")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
+
+export const CuratePostTool = Tool.make("curate_post", {
+  description: "Curate or reject a post. Curating fetches live embed data from Bluesky, captures the payload, and marks it for enrichment. Rejecting dismisses the post. Idempotent — re-curating an already-curated post is a no-op.",
+  parameters: CuratePostInput.fields,
+  success: CuratePostMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Curate Post")
+  .annotate(Tool.Readonly, false)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, true);
+
+// NOTE: CuratePostTool is defined but intentionally excluded from the shared
+// MCP toolkit. The /mcp route is gated by mcp:read scope only — exposing a
+// write tool here would bypass auth. curate_post will be added back once the
+// MCP route supports write-scope gating (or it moves to the admin surface).
+
 export const KnowledgeMcpToolkit = Toolkit.make(
   SearchPostsTool,
   GetRecentPostsTool,
@@ -214,7 +248,8 @@ export const KnowledgeMcpToolkit = Toolkit.make(
   ExplainPostTopicsTool,
   ListEditorialPicksTool,
   GetPostThreadTool,
-  GetThreadDocumentTool
+  GetThreadDocumentTool,
+  ListCurationCandidatesTool
 );
 
 const extractText = (record: unknown): string => {
@@ -235,7 +270,10 @@ export const KnowledgeMcpHandlers = KnowledgeMcpToolkit.toLayer(
   Effect.gen(function* () {
     const queryService = yield* KnowledgeQueryService;
     const editorialService = yield* EditorialService;
+    const curationService = yield* CurationService;
     const bskyClient = yield* BlueskyClient;
+    // curationService is used for list_curation_candidates (read-only).
+    // curate_post handler removed — see note above KnowledgeMcpToolkit.
 
     return KnowledgeMcpToolkit.of({
       search_posts: (input) =>
@@ -475,6 +513,14 @@ export const KnowledgeMcpHandlers = KnowledgeMcpToolkit.toLayer(
                   error
                 })
           )
+        ),
+      list_curation_candidates: (input) =>
+        curationService.listCandidates(input).pipe(
+          Effect.map((items) => ({
+            items,
+            _display: formatCurationCandidates(items)
+          })),
+          Effect.mapError(toQueryError("list_curation_candidates"))
         )
     });
   })

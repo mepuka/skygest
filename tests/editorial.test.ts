@@ -26,6 +26,10 @@ import { ExpertsRepoD1 } from "../src/services/d1/ExpertsRepoD1";
 import { KnowledgeRepoD1 } from "../src/services/d1/KnowledgeRepoD1";
 import { PublicationsRepoD1 } from "../src/services/d1/PublicationsRepoD1";
 import { OntologyCatalog } from "../src/services/OntologyCatalog";
+import { CurationService } from "../src/services/CurationService";
+import { CandidatePayloadService } from "../src/services/CandidatePayloadService";
+import { CandidatePayloadRepoD1 } from "../src/services/d1/CandidatePayloadRepoD1";
+import { CurationRepoD1 } from "../src/services/d1/CurationRepoD1";
 import { StagingOpsService } from "../src/services/StagingOpsService";
 import { CuratedPostsPageOutput } from "../src/domain/api";
 import { encodeJsonString } from "../src/platform/Json";
@@ -80,6 +84,25 @@ const makeAdminEditorialLayer = (options: {
   const knowledgeLayer = KnowledgeRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
   const publicationsLayer = PublicationsRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
   const editorialRepoLayer = EditorialRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
+  const candidatePayloadRepoLayer = CandidatePayloadRepoD1.layer.pipe(
+    Layer.provideMerge(sqliteLayer)
+  );
+  const candidatePayloadServiceLayer = CandidatePayloadService.layer.pipe(
+    Layer.provideMerge(candidatePayloadRepoLayer)
+  );
+  const curationRepoLayer = CurationRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
+  const curationServiceLayer = CurationService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        curationRepoLayer,
+        expertsLayer,
+        publicationsLayer,
+        candidatePayloadServiceLayer,
+        mockBlueskyClient,
+        configLayer
+      )
+    )
+  );
 
   const editorialServiceLayer = EditorialService.layer.pipe(
     Layer.provideMerge(Layer.mergeAll(editorialRepoLayer, configLayer, ontologyLayer))
@@ -99,7 +122,8 @@ const makeAdminEditorialLayer = (options: {
         expertsLayer,
         knowledgeLayer,
         registryLayer,
-        publicationsLayer
+        publicationsLayer,
+        curationServiceLayer
       )
     )
   );
@@ -114,6 +138,10 @@ const makeAdminEditorialLayer = (options: {
     publicationsLayer,
     editorialRepoLayer,
     editorialServiceLayer,
+    candidatePayloadRepoLayer,
+    candidatePayloadServiceLayer,
+    curationRepoLayer,
+    curationServiceLayer,
     mockBlueskyClient,
     registryLayer,
     stagingOpsLayer

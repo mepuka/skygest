@@ -22,6 +22,7 @@ import type {
   ExplainPostTopicsOutput
 } from "../domain/bi.ts";
 import type { EditorialPickOutput } from "../domain/editorial.ts";
+import type { CurationCandidateOutput } from "../domain/curation.ts";
 
 // ---------------------------------------------------------------------------
 // Internal helpers (not exported)
@@ -506,6 +507,56 @@ export const formatEditorialPicks = (items: ReadonlyArray<EditorialPickOutput>):
     const uri = Doc.text(`     URI: ${p.postUri}`);
 
     return Doc.vsep([header, reason, uri]);
+  });
+
+  return render(Doc.vsep(rows));
+};
+
+/**
+ * Format curation candidates for MCP display.
+ *
+ * ```
+ * [C1] @handle · energy-focused · 2025-03-15 · score:65
+ *      Post text truncated...
+ *      Predicates: expert-tier-1, has-links, multi-topic
+ *      URI: at://...
+ * ```
+ */
+export const formatCurationCandidates = (items: ReadonlyArray<CurationCandidateOutput>): string => {
+  if (items.length === 0) return "No curation candidates found.";
+
+  const rows: SDoc[] = items.map((p, i) => {
+    const tag = `[C${i + 1}]`;
+    const handle = p.handle ? `@${p.handle}` : p.did;
+    const header = Doc.hsep([
+      Doc.text(tag),
+      Doc.text(handle),
+      Doc.text("\u00B7"),
+      Doc.text(p.tier),
+      Doc.text("\u00B7"),
+      Doc.text(formatTimestamp(p.createdAt)),
+      Doc.text("\u00B7"),
+      Doc.text(`score:${p.signalScore}`)
+    ]);
+
+    const bodyText = truncate(collapse(p.text), 200);
+    const body = Doc.text(`     ${bodyText}`);
+
+    const predicatesLine = p.predicatesApplied.length > 0
+      ? Doc.text(`     Predicates: ${p.predicatesApplied.join(", ")}`)
+      : Doc.empty;
+
+    const uriLine = Doc.text(`     URI: ${p.uri}`);
+
+    const topicLine = p.topics.length > 0
+      ? Doc.text(`     Topics: ${p.topics.join(", ")}`)
+      : Doc.empty;
+
+    const parts: SDoc[] = [header, body];
+    if (p.predicatesApplied.length > 0) parts.push(predicatesLine);
+    parts.push(uriLine);
+    if (p.topics.length > 0) parts.push(topicLine);
+    return Doc.vsep(parts);
   });
 
   return render(Doc.vsep(rows));

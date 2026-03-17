@@ -321,6 +321,26 @@ const migration12: D1Migration = {
   ]
 };
 
+const migration13: D1Migration = {
+  id: 13,
+  name: "post_curation",
+  statements: [
+    `CREATE TABLE IF NOT EXISTS post_curation (
+      post_uri         TEXT PRIMARY KEY,
+      status           TEXT NOT NULL DEFAULT 'flagged',
+      signal_score     REAL NOT NULL,
+      predicates_applied TEXT NOT NULL,
+      flagged_at       INTEGER NOT NULL,
+      curated_at       INTEGER,
+      curated_by       TEXT,
+      review_note      TEXT,
+      FOREIGN KEY (post_uri) REFERENCES posts(uri)
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_post_curation_status_score
+      ON post_curation(status, signal_score DESC, flagged_at DESC)`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -333,5 +353,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration9,
   migration10,
   migration11,
-  migration12
+  migration12,
+  migration13
 ];

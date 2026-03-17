@@ -16,6 +16,7 @@ import type {
 } from "../domain/polling";
 import { RepoRecordsClient } from "../bluesky/RepoRecordsClient";
 import { processBatch, type ProcessBatchSummary } from "../filter/FilterWorker";
+import { CurationService } from "../services/CurationService";
 import type { AtUri, RawEventBatch } from "../domain/types";
 import { ExpertSyncStateRepo } from "../services/ExpertSyncStateRepo";
 import { ExpertsRepo } from "../services/ExpertsRepo";
@@ -195,6 +196,7 @@ export class ExpertPollExecutor extends Context.Tag("@skygest/ExpertPollExecutor
       const expertsRepo = yield* ExpertsRepo;
       const knowledgeRepo = yield* KnowledgeRepo;
       const ontology = yield* OntologyCatalog;
+      const curationService = yield* CurationService;
 
       const resolveSyncState = Effect.fn("ExpertPollExecutor.resolveSyncState")(function* (
         did: ExpertRecord["did"]
@@ -324,7 +326,8 @@ export class ExpertPollExecutor extends Context.Tag("@skygest/ExpertPollExecutor
 
         return yield* processBatch(toRawBatch(expert, records)).pipe(
           Effect.provideService(KnowledgeRepo, knowledgeRepo),
-          Effect.provideService(OntologyCatalog, ontology)
+          Effect.provideService(OntologyCatalog, ontology),
+          Effect.provideService(CurationService, curationService)
         );
       });
 

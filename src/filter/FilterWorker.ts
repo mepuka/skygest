@@ -8,6 +8,7 @@ import {
 import type { RawEventBatch } from "../domain/types";
 import type { DeletedKnowledgePost, KnowledgePost } from "../domain/bi";
 import { KnowledgeRepo } from "../services/KnowledgeRepo";
+import { CurationService } from "../services/CurationService";
 import { OntologyCatalog } from "../services/OntologyCatalog";
 
 const makeIngestId = (
@@ -125,6 +126,17 @@ export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (ba
 
   yield* knowledgeRepo.upsertPosts(actions.upserts);
   yield* knowledgeRepo.markDeleted(actions.deletions);
+
+  // Curation: flag high-signal posts (error-tolerant — never fails ingest)
+  const curationService = yield* CurationService;
+  yield* curationService.flagBatch(actions.upserts).pipe(
+    Effect.tapError((e) =>
+      Effect.logWarning("curation flagging failed, continuing").pipe(
+        Effect.annotateLogs({ error: String(e) })
+      )
+    ),
+    Effect.catchAll(() => Effect.succeed(0))
+  );
 
   return {
     postsStored: actions.upserts.length,

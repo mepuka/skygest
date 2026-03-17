@@ -268,6 +268,56 @@ export const ExpertsRepoD1 = {
       );
     };
 
+    const getByDids = (dids: ReadonlyArray<string>) => {
+      if (dids.length === 0) return Effect.succeed([] as ReadonlyArray<ExpertRecord>);
+
+      // Chunk into groups of 50 to avoid SQLite variable limits
+      const chunks: string[][] = [];
+      for (let i = 0; i < dids.length; i += 50) {
+        chunks.push(dids.slice(i, i + 50) as string[]);
+      }
+
+      return Effect.forEach(chunks, (chunk) => {
+        const placeholders = chunk.map((did) => sql`${did}`);
+        return sql<any>`
+          SELECT
+            did as did,
+            handle as handle,
+            display_name as displayName,
+            description as description,
+            avatar as avatar,
+            domain as domain,
+            source as source,
+            source_ref as sourceRef,
+            shard as shard,
+            active as active,
+            COALESCE(tier, 'independent') as tier,
+            added_at as addedAt,
+            last_synced_at as lastSyncedAt
+          FROM experts
+          WHERE did IN (${sql.join(", ", false)(placeholders)})
+        `.pipe(
+          Effect.flatMap((rows) =>
+            decodeWithDbError(
+              ExpertRecordRowsSchema,
+              rows,
+              "Failed to decode expert rows for batch lookup"
+            )
+          ),
+          Effect.map((rows) => rows.map(toExpertRecord)),
+          Effect.flatMap((rows) =>
+            decodeWithDbError(
+              Schema.Array(ExpertRecordSchema),
+              rows,
+              "Failed to normalize expert rows for batch lookup"
+            )
+          )
+        );
+      }).pipe(
+        Effect.map((chunks) => chunks.flat())
+      );
+    };
+
     return ExpertsRepo.of({
       upsert,
       upsertMany,
@@ -276,7 +326,8 @@ export const ExpertsRepoD1 = {
       setLastSyncedAt,
       listActive,
       listActiveByShard,
-      list
+      list,
+      getByDids
     });
   }))
 };

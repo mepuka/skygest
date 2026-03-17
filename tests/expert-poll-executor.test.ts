@@ -14,6 +14,7 @@ import { RepoRecordsClient } from "../src/bluesky/RepoRecordsClient";
 import { ExpertPollExecutor } from "../src/ingest/ExpertPollExecutor";
 import { ExpertSyncStateRepo } from "../src/services/ExpertSyncStateRepo";
 import { ExpertsRepo } from "../src/services/ExpertsRepo";
+import { CurationService } from "../src/services/CurationService";
 import { KnowledgeRepo } from "../src/services/KnowledgeRepo";
 import { OntologyCatalog } from "../src/services/OntologyCatalog";
 
@@ -115,7 +116,8 @@ const makeHarness = (options: {
         }),
       listActive: () => Effect.succeed([expert]),
       listActiveByShard: () => Effect.succeed([]),
-      list: () => Effect.succeed([])
+      list: () => Effect.succeed([]),
+      getByDids: () => Effect.succeed([])
     }),
     Layer.succeed(KnowledgeRepo, {
       upsertPosts: (posts) =>
@@ -167,6 +169,11 @@ const makeHarness = (options: {
           items: []
         }),
       resolveCanonicalTopicSlugs: () => Effect.void as any
+    }),
+    Layer.succeed(CurationService, {
+      flagBatch: () => Effect.succeed(0),
+      listCandidates: () => Effect.succeed([]),
+      curatePost: () => Effect.succeed(null as any)
     })
   );
 

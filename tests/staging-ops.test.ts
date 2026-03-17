@@ -10,8 +10,12 @@ import { AppConfig, type AppConfigShape } from "../src/platform/Config";
 import { encodeJsonString } from "../src/platform/Json";
 import { Logging } from "../src/platform/Logging";
 import { ExpertRegistryService } from "../src/services/ExpertRegistryService";
+import { CurationService } from "../src/services/CurationService";
+import { CandidatePayloadService } from "../src/services/CandidatePayloadService";
 import { OntologyCatalog } from "../src/services/OntologyCatalog";
 import { StagingOpsService } from "../src/services/StagingOpsService";
+import { CandidatePayloadRepoD1 } from "../src/services/d1/CandidatePayloadRepoD1";
+import { CurationRepoD1 } from "../src/services/d1/CurationRepoD1";
 import { ExpertsRepoD1 } from "../src/services/d1/ExpertsRepoD1";
 import { KnowledgeRepoD1 } from "../src/services/d1/KnowledgeRepoD1";
 import { PublicationsRepoD1 } from "../src/services/d1/PublicationsRepoD1";
@@ -96,6 +100,25 @@ const makeStagingAdminLayer = (options: {
     getPostThread: () => Effect.succeed({ thread: {} })
   });
   const publicationsLayer = PublicationsRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
+  const candidatePayloadRepoLayer = CandidatePayloadRepoD1.layer.pipe(
+    Layer.provideMerge(sqliteLayer)
+  );
+  const candidatePayloadServiceLayer = CandidatePayloadService.layer.pipe(
+    Layer.provideMerge(candidatePayloadRepoLayer)
+  );
+  const curationRepoLayer = CurationRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
+  const curationServiceLayer = CurationService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        curationRepoLayer,
+        expertsLayer,
+        publicationsLayer,
+        candidatePayloadServiceLayer,
+        blueskyLayer,
+        configLayer
+      )
+    )
+  );
   const baseLayer = Layer.mergeAll(
     sqliteLayer,
     configLayer,
@@ -104,7 +127,11 @@ const makeStagingAdminLayer = (options: {
     expertsLayer,
     knowledgeLayer,
     publicationsLayer,
-    blueskyLayer
+    blueskyLayer,
+    candidatePayloadRepoLayer,
+    candidatePayloadServiceLayer,
+    curationRepoLayer,
+    curationServiceLayer
   );
 
   const registryLayer = ExpertRegistryService.layer.pipe(Layer.provideMerge(baseLayer));
