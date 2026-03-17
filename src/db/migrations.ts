@@ -298,6 +298,29 @@ const migration11: D1Migration = {
   ]
 };
 
+const migration12: D1Migration = {
+  id: 12,
+  name: "post_payloads",
+  statements: [
+    `CREATE TABLE IF NOT EXISTS post_payloads (
+      post_uri                 TEXT PRIMARY KEY,
+      capture_stage            TEXT NOT NULL CHECK (capture_stage IN ('candidate', 'picked')),
+      embed_type               TEXT CHECK (embed_type IN ('link', 'img', 'quote', 'media', 'video')),
+      embed_payload_json       TEXT,
+      enrichment_payload_json  TEXT,
+      captured_at              INTEGER NOT NULL,
+      updated_at               INTEGER NOT NULL,
+      enriched_at              INTEGER,
+      FOREIGN KEY (post_uri) REFERENCES posts(uri)
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_post_payloads_stage_updated
+      ON post_payloads(capture_stage, updated_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_post_payloads_enriched
+      ON post_payloads(enriched_at DESC)
+      WHERE enriched_at IS NOT NULL`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -309,5 +332,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration8,
   migration9,
   migration10,
-  migration11
+  migration11,
+  migration12
 ];

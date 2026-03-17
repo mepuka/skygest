@@ -15,9 +15,11 @@ import {
 } from "../platform/Env";
 import { Logging } from "../platform/Logging";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
+import { CandidatePayloadService } from "../services/CandidatePayloadService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { OntologyCatalog } from "../services/OntologyCatalog";
 import { StagingOpsService } from "../services/StagingOpsService";
+import { CandidatePayloadRepoD1 } from "../services/d1/CandidatePayloadRepoD1";
 import { ExpertSyncStateRepoD1 } from "../services/d1/ExpertSyncStateRepoD1";
 import { EditorialService } from "../services/EditorialService";
 import { EditorialRepoD1 } from "../services/d1/EditorialRepoD1";
@@ -42,12 +44,19 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const knowledgeLayer = KnowledgeRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
   const publicationsLayer = PublicationsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
   const editorialRepoLayer = EditorialRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
+  const candidatePayloadRepoLayer = CandidatePayloadRepoD1.layer.pipe(
+    Layer.provideMerge(baseLayer)
+  );
+  const candidatePayloadServiceLayer = CandidatePayloadService.layer.pipe(
+    Layer.provideMerge(candidatePayloadRepoLayer)
+  );
   const queryRepositoriesLayer = Layer.mergeAll(
     ontologyLayer,
     expertsLayer,
     knowledgeLayer,
     publicationsLayer,
-    editorialRepoLayer
+    editorialRepoLayer,
+    candidatePayloadRepoLayer
   );
   const editorialServiceLayer = EditorialService.layer.pipe(
     Layer.provideMerge(Layer.mergeAll(editorialRepoLayer, configLayer, ontologyLayer))
@@ -96,7 +105,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     authLayer,
     registryLayer,
     stagingOpsLayer,
-    editorialServiceLayer
+    editorialServiceLayer,
+    candidatePayloadServiceLayer
   );
 
   return {
@@ -106,6 +116,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     expertsLayer,
     knowledgeLayer,
     publicationsLayer,
+    candidatePayloadRepoLayer,
+    candidatePayloadServiceLayer,
     queryLayer,
     blueskyLayer,
     authLayer,
