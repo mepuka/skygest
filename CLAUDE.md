@@ -7,7 +7,7 @@ alwaysApply: false
 Default to using Bun instead of Node.js.
 
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`
-- Use `bun test` instead of `jest` or `vitest`
+- Use `bun run test` instead of `jest` or `vitest` (this project uses vitest via @effect/vitest)
 - Use `bun build <file.html|file.ts|file.css>` instead of `webpack` or `esbuild`
 - Use `bun install` instead of `npm install` or `yarn install` or `pnpm install`
 - Use `bun run <script>` instead of `npm run <script>` or `yarn run <script>` or `pnpm run <script>`
@@ -26,13 +26,15 @@ Default to using Bun instead of Node.js.
 
 ## Testing
 
-Use `bun test` to run tests.
+Use `bun run test` to run tests (vitest via @effect/vitest).
 
 ```ts#index.test.ts
-import { test, expect } from "bun:test";
+import { describe, expect, it } from "@effect/vitest";
 
-test("hello world", () => {
-  expect(1).toBe(1);
+describe("example", () => {
+  it("works", () => {
+    expect(1).toBe(1);
+  });
 });
 ```
 
@@ -109,6 +111,13 @@ bun --hot ./index.ts
 ```
 
 For more information, read the Bun API docs in `node_modules/bun-types/docs/**.mdx`.
+
+## Development Workflow
+
+- **Branching:** Trunk-based. Feature branches named `sky-<issue>/<description>` (e.g., `sky-15/thread-printer`).
+- **PRs:** Always PR to `main`, squash merge. Reference Linear issue ID (`SKY-XX`) in branch name or PR body.
+- **CI:** GitHub Actions runs `bunx tsc --noEmit` + `bun run test` on all PRs. Staging auto-deploys on merge to main.
+- **Linear:** Project key is `SKY`. GitHub integration auto-links via issue ID in branch names/PR descriptions.
 
 <!-- effect-solutions:start -->
 ## Effect Best Practices
