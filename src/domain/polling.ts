@@ -201,6 +201,13 @@ export const MarkIngestRunFinalizing = Schema.Struct({
 });
 export type MarkIngestRunFinalizing = Schema.Schema.Type<typeof MarkIngestRunFinalizing>;
 
+export const UpdateIngestRunProgress = Schema.Struct({
+  id: Schema.String,
+  lastProgressAt: EpochMillis,
+  ...IngestRunSummaryCounterFields
+});
+export type UpdateIngestRunProgress = Schema.Schema.Type<typeof UpdateIngestRunProgress>;
+
 export const CompleteIngestRun = Schema.Struct({
   id: Schema.String,
   finishedAt: EpochMillis,

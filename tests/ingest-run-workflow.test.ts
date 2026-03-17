@@ -135,6 +135,17 @@ describe("IngestRunWorkflow", () => {
               runState.phase = "finalizing";
               runState.lastProgressAt = input.lastProgressAt;
             }),
+          updateProgress: (input) =>
+            Effect.sync(() => {
+              runState.lastProgressAt = input.lastProgressAt;
+              runState.totalExperts = input.totalExperts;
+              runState.expertsSucceeded = input.expertsSucceeded;
+              runState.expertsFailed = input.expertsFailed;
+              runState.pagesFetched = input.pagesFetched;
+              runState.postsSeen = input.postsSeen;
+              runState.postsStored = input.postsStored;
+              runState.postsDeleted = input.postsDeleted;
+            }),
           markComplete: (input) =>
             Effect.sync(() => {
               runState.status = "complete";
@@ -398,6 +409,7 @@ describe("IngestRunWorkflow", () => {
           Effect.sync(() => { runState.status = "running"; runState.phase = "dispatching"; runState.lastProgressAt = input.lastProgressAt; runState.totalExperts = input.totalExperts; }),
         markFinalizing: (input) =>
           Effect.sync(() => { runState.status = "running"; runState.phase = "finalizing"; runState.lastProgressAt = input.lastProgressAt; }),
+        updateProgress: () => Effect.void,
         markComplete: (input) =>
           Effect.sync(() => { runState.status = "complete"; runState.phase = "complete"; runState.finishedAt = input.finishedAt; }),
         markFailed: (input) =>
@@ -507,6 +519,7 @@ describe("IngestRunWorkflow", () => {
           }),
         markDispatching: () => Effect.void,
         markFinalizing: () => Effect.void,
+        updateProgress: () => Effect.void,
         markComplete: () => Effect.void,
         markFailed: (input) =>
           Effect.sync(() => {
@@ -661,6 +674,7 @@ describe("IngestRunWorkflow", () => {
             runState.totalExperts = input.totalExperts;
           }),
         markFinalizing: () => Effect.void,
+        updateProgress: () => Effect.void,
         markComplete: () => Effect.void,
         markFailed: (input) =>
           Effect.sync(() => {

@@ -86,6 +86,7 @@ const makeLayer = (requests: Array<unknown> = []) =>
       markPreparing: () => Effect.void,
       markDispatching: () => Effect.void,
       markFinalizing: () => Effect.void,
+      updateProgress: () => Effect.void,
       markComplete: () => Effect.void,
       markFailed: () => Effect.void
     }),
@@ -247,6 +248,7 @@ describe("ingest admin routes", () => {
             markPreparing: () => Effect.void,
             markDispatching: () => Effect.void,
             markFinalizing: () => Effect.void,
+            updateProgress: () => Effect.void,
             markComplete: () => Effect.void,
             markFailed: () => Effect.void
           }),

@@ -8,7 +8,8 @@ import type {
   IngestRunRecord,
   MarkIngestRunDispatching,
   MarkIngestRunFinalizing,
-  MarkIngestRunPreparing
+  MarkIngestRunPreparing,
+  UpdateIngestRunProgress
 } from "../domain/polling";
 
 export class IngestRunsRepo extends Context.Tag("@skygest/IngestRunsRepo")<
@@ -29,6 +30,9 @@ export class IngestRunsRepo extends Context.Tag("@skygest/IngestRunsRepo")<
     ) => Effect.Effect<void, SqlError | DbError>;
     readonly markFinalizing: (
       input: MarkIngestRunFinalizing
+    ) => Effect.Effect<void, SqlError | DbError>;
+    readonly updateProgress: (
+      input: UpdateIngestRunProgress
     ) => Effect.Effect<void, SqlError | DbError>;
     readonly markComplete: (
       input: CompleteIngestRun

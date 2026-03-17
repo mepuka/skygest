@@ -12,12 +12,14 @@ import {
   MarkIngestRunDispatching as MarkIngestRunDispatchingSchema,
   MarkIngestRunFinalizing as MarkIngestRunFinalizingSchema,
   MarkIngestRunPreparing as MarkIngestRunPreparingSchema,
+  UpdateIngestRunProgress as UpdateIngestRunProgressSchema,
   type CompleteIngestRun,
   type CreateQueuedIngestRun,
   type FailIngestRun,
   type MarkIngestRunDispatching,
   type MarkIngestRunFinalizing,
-  type MarkIngestRunPreparing
+  type MarkIngestRunPreparing,
+  type UpdateIngestRunProgress
 } from "../../domain/polling";
 import { IngestRunsRepo } from "../IngestRunsRepo";
 import { decodeWithDbError } from "./schemaDecode";
@@ -252,6 +254,28 @@ export const IngestRunsRepoD1 = {
         )
       );
 
+    const updateProgress = (input: UpdateIngestRunProgress) =>
+      decodeWithDbError(
+        UpdateIngestRunProgressSchema,
+        input,
+        "Invalid update ingest run progress input"
+      ).pipe(
+        Effect.flatMap((validated) =>
+          sql`
+            UPDATE ingest_runs
+            SET total_experts = ${validated.totalExperts},
+                experts_succeeded = ${validated.expertsSucceeded},
+                experts_failed = ${validated.expertsFailed},
+                pages_fetched = ${validated.pagesFetched},
+                posts_seen = ${validated.postsSeen},
+                posts_stored = ${validated.postsStored},
+                posts_deleted = ${validated.postsDeleted},
+                last_progress_at = ${validated.lastProgressAt}
+            WHERE id = ${validated.id}
+          `.pipe(Effect.asVoid)
+        )
+      );
+
     const applyTerminalUpdate = (
       status: "complete" | "failed",
       input: CompleteIngestRun | FailIngestRun
@@ -302,6 +326,7 @@ export const IngestRunsRepoD1 = {
       markPreparing,
       markDispatching,
       markFinalizing,
+      updateProgress,
       markComplete,
       markFailed
     });

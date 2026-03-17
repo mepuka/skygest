@@ -48,6 +48,7 @@ describe("IngestWorkflowLauncher", () => {
               markPreparing: () => Effect.void,
               markDispatching: () => Effect.void,
               markFinalizing: () => Effect.void,
+              updateProgress: () => Effect.void,
               markComplete: () => Effect.void,
               markFailed: () => Effect.void
             })
@@ -115,6 +116,7 @@ describe("IngestWorkflowLauncher", () => {
               markPreparing: () => Effect.void,
               markDispatching: () => Effect.void,
               markFinalizing: () => Effect.void,
+              updateProgress: () => Effect.void,
               markComplete: () => Effect.void,
               markFailed: () => Effect.void
             })
