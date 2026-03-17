@@ -1,4 +1,5 @@
 name = "skygest-bi-ingest"
+account_id = "af578620f2ff4eae2042c031be82f7e7"
 main = "src/worker/filter.ts"
 compatibility_date = "2025-01-01"
 
