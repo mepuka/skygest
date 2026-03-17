@@ -55,16 +55,18 @@ describe("filterReplies", () => {
   it("takes top-N by engagement, preserves DFS order", () => {
     const { filtered } = filterReplies(replies, { topN: 2 });
     // Top 2 by likes: r1 (50), r2-1 (30)
-    // Re-sorted by dfsIndex: r1 (0), r2-1 (2)
-    expect(filtered.map(r => r.post.uri)).toEqual(["r1", "r2-1"]);
+    // Closure restores r2 (parent of r2-1)
+    // Re-sorted by dfsIndex: r1 (0), r2 (1), r2-1 (2)
+    expect(filtered.map(r => r.post.uri)).toEqual(["r1", "r2", "r2-1"]);
   });
 
-  it("applies filters in order: depth → engagement → topN", () => {
+  it("applies filters in order: depth → engagement → topN → closure", () => {
     // maxDepth 2 removes r2-1-1 (depth 3)
     // minLikes 10 removes r3 (2 likes)
-    // topN 2 keeps r1 (50) and r2-1 (30) from [r1, r2, r2-1]
+    // topN 2 keeps r1 (50) and r2-1 (30)
+    // closure restores r2 (parent of r2-1, was not in topN)
     const { filtered } = filterReplies(replies, { maxDepth: 2, minLikes: 10, topN: 2 });
-    expect(filtered.map(r => r.post.uri)).toEqual(["r1", "r2-1"]);
+    expect(filtered.map(r => r.post.uri)).toEqual(["r1", "r2", "r2-1"]);
   });
 
   it("ensures structural closure — restores missing parent chain", () => {
@@ -76,6 +78,15 @@ describe("filterReplies", () => {
     expect(uris).toContain("r2-1");
     expect(uris).toContain("r2");  // restored by closure
     expect(uris.indexOf("r2")).toBeLessThan(uris.indexOf("r2-1"));  // DFS order preserved
+  });
+
+  it("closure after topN restores parents removed by topN", () => {
+    const { filtered } = filterReplies(replies, { topN: 2 });
+    const uris = filtered.map(r => r.post.uri);
+    expect(uris).toContain("r1");
+    expect(uris).toContain("r2-1");
+    expect(uris).toContain("r2");  // restored by closure
+    expect(uris.indexOf("r2")).toBeLessThan(uris.indexOf("r2-1"));
   });
 
   it("closure does not restore replies at depth 0 (focus boundary)", () => {

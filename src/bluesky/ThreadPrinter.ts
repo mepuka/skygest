@@ -114,8 +114,8 @@ const buildFilterPipeline = (
   flow(
     capDepth(config.maxDepth),
     requireEngagement(config.minLikes),
-    ensureClosure(allReplies),
-    takeTopN(config.topN)
+    takeTopN(config.topN),
+    ensureClosure(allReplies)
   );
 
 // ---------------------------------------------------------------------------
