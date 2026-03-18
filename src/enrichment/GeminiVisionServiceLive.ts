@@ -12,7 +12,6 @@
 
 import { GoogleGenAI, createUserContent, createPartFromUri } from "@google/genai";
 import { Config, Effect, Layer, Schema } from "effect";
-import type { VisionEnrichment } from "../domain/enrichment";
 import { VisionEnrichment as VisionEnrichmentSchema } from "../domain/enrichment";
 import { GeminiApiError, GeminiParseError } from "../domain/errors";
 import {
@@ -31,6 +30,7 @@ const DEFAULT_MODEL = "gemini-2.5-flash";
 // JSON Schemas for Gemini structured output
 // ---------------------------------------------------------------------------
 
+// These enum values must match the Schema.Literal members in src/domain/media.ts
 const MEDIA_TYPE_ENUM = [
   "chart",
   "document-excerpt",
@@ -39,6 +39,7 @@ const MEDIA_TYPE_ENUM = [
   "video"
 ] as const;
 
+// These enum values must match the Schema.Literal members in src/domain/media.ts
 const CHART_TYPE_ENUM = [
   "area-chart",
   "bar-chart",
@@ -56,6 +57,7 @@ const CHART_TYPE_ENUM = [
   "treemap"
 ] as const;
 
+// These enum values must match the Schema.Literal members in src/domain/media.ts
 const ALT_TEXT_PROVENANCE_ENUM = ["original", "synthetic", "absent"] as const;
 
 /**
@@ -296,7 +298,10 @@ export const GeminiVisionServiceLive = Layer.effect(
             new GeminiApiError({
               message: cause instanceof Error
                 ? cause.message
-                : "Gemini Files API upload failed"
+                : "Gemini Files API upload failed",
+              status: cause instanceof Error && "status" in cause
+                ? (cause as Record<string, unknown>).status as number
+                : undefined
             })
         });
 
@@ -333,7 +338,10 @@ export const GeminiVisionServiceLive = Layer.effect(
             new GeminiApiError({
               message: cause instanceof Error
                 ? cause.message
-                : "Gemini generateContent failed during classification"
+                : "Gemini generateContent failed during classification",
+              status: cause instanceof Error && "status" in cause
+                ? (cause as Record<string, unknown>).status as number
+                : undefined
             })
         });
 
@@ -391,7 +399,10 @@ export const GeminiVisionServiceLive = Layer.effect(
             new GeminiApiError({
               message: cause instanceof Error
                 ? cause.message
-                : "Gemini generateContent failed during extraction"
+                : "Gemini generateContent failed during extraction",
+              status: cause instanceof Error && "status" in cause
+                ? (cause as Record<string, unknown>).status as number
+                : undefined
             })
         });
 
@@ -430,7 +441,7 @@ export const GeminiVisionServiceLive = Layer.effect(
           )
         );
 
-        return enrichment as VisionEnrichment;
+        return enrichment;
       }
     );
 
