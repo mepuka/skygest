@@ -29,6 +29,7 @@ MCP_LIMIT_MAX = "100"
 OPERATOR_AUTH_MODE = "access"
 ACCESS_TEAM_DOMAIN = "example.cloudflareaccess.com"
 ACCESS_AUD = "replace-me"
+GEMINI_VISION_MODEL = "gemini-2.5-flash"
 
 [[d1_databases]]
 binding = "DB"
@@ -71,6 +72,7 @@ MCP_LIMIT_MAX = "100"
 OPERATOR_AUTH_MODE = "shared-secret"
 ACCESS_TEAM_DOMAIN = "example.cloudflareaccess.com"
 ACCESS_AUD = "replace-me"
+GEMINI_VISION_MODEL = "gemini-2.5-flash"
 
 [[env.staging.d1_databases]]
 binding = "DB"

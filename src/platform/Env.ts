@@ -18,6 +18,8 @@ export interface EnvBindings {
   readonly ACCESS_AUD?: string;
   readonly EDITORIAL_DEFAULT_EXPIRY_HOURS?: string;
   readonly CURATION_MIN_SIGNAL_SCORE?: string;
+  readonly GOOGLE_API_KEY?: string;
+  readonly GEMINI_VISION_MODEL?: string;
   readonly INGEST_RUN_WORKFLOW?: Workflow<IngestRunParams>;
   readonly ENRICHMENT_RUN_WORKFLOW?: Workflow<EnrichmentRunParams>;
   readonly EXPERT_POLL_COORDINATOR?: DurableObjectNamespace;
