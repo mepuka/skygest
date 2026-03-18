@@ -34,12 +34,11 @@ import {
   ImageClassification,
   type UploadedFile
 } from "./GeminiVisionService";
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const DEFAULT_MODEL = "gemini-2.5-flash";
+import {
+  VISION_CLASSIFICATION_PROMPT,
+  VISION_EXTRACTION_PROMPT,
+  VISION_PROMPT_VERSION
+} from "./prompts";
 
 // ---------------------------------------------------------------------------
 // Gemini extraction output schema (subset of VisionEnrichment without runtime fields)
@@ -87,37 +86,6 @@ const CLASSIFICATION_JSON_SCHEMA = makeJsonSchema(ImageClassification.ast);
 const EXTRACTION_JSON_SCHEMA = makeJsonSchema(GeminiExtractionOutput.ast);
 
 // ---------------------------------------------------------------------------
-// Prompts
-// ---------------------------------------------------------------------------
-
-const CLASSIFICATION_PROMPT = `You are an expert energy-sector image analyst. Classify this image.
-
-Determine:
-1. **mediaType**: What kind of media is this? (chart, document-excerpt, photo, infographic, or video)
-2. **chartTypes**: If it contains charts, which specific chart types are present? Use exact values from the enum. Return an empty array if not a chart.
-3. **hasDataPoints**: Does this image contain extractable quantitative data points (numbers, percentages, values on axes)?
-
-Focus on energy, electricity, climate, and commodity domains. Be precise with chart type identification — a chart with filled areas is an area-chart, vertical bars are bar-chart, etc.`;
-
-const EXTRACTION_PROMPT = `You are an expert energy-sector data analyst performing structured chart/image analysis. Follow the Charts-of-Thought process:
-
-**Step 1 — Extract**: Identify all visible text, labels, axes, legends, data series, source attributions, and title.
-
-**Step 2 — Sort**: Organize the extracted information into the structured fields: title, axes (with units), series (with legend labels), source lines, temporal coverage, and chart types.
-
-**Step 3 — Verify**: Cross-check that extracted series match the legend, axis labels match the data, and temporal coverage spans the full range shown.
-
-**Step 4 — Analyze**: Write 1-5 key findings as concise energy-domain statements. Focus on trends, comparisons, and notable data points.
-
-Additional instructions:
-- altText: Write a concise, accessible description suitable for screen readers. Describe what the chart shows, not just its type.
-- altTextProvenance: Always set to "synthetic" since you are generating this.
-- sourceLines: Extract verbatim source/attribution text (e.g., "Source: EIA", "Data: AESO").
-- temporalCoverage: Use ISO 8601 partial dates (e.g., "2020", "2024-Q3", "2024-01").
-- keyFindings: Energy-domain insights, not generic observations. Be specific about values and trends.
-- For non-chart images (photos, documents), still provide altText and mediaType. Set chart-specific fields to null/empty as appropriate.`;
-
-// ---------------------------------------------------------------------------
 // Layer
 // ---------------------------------------------------------------------------
 
@@ -125,8 +93,10 @@ export const GeminiVisionServiceLive = Layer.effect(
   GeminiVisionService,
   Effect.gen(function* () {
     const apiKey = yield* Config.string("GOOGLE_API_KEY");
+    const model = yield* Config.string("GEMINI_VISION_MODEL").pipe(
+      Config.withDefault("gemini-2.5-flash")
+    );
     const ai = new GoogleGenAI({ apiKey });
-    const model = DEFAULT_MODEL;
 
     // -----------------------------------------------------------------------
     // uploadImage
@@ -173,7 +143,7 @@ export const GeminiVisionServiceLive = Layer.effect(
               model,
               contents: createUserContent([
                 createPartFromUri(imageUri, mimeType),
-                CLASSIFICATION_PROMPT
+                VISION_CLASSIFICATION_PROMPT
               ]),
               config: {
                 responseMimeType: "application/json",
@@ -225,7 +195,7 @@ export const GeminiVisionServiceLive = Layer.effect(
               model,
               contents: createUserContent([
                 createPartFromUri(imageUri, mimeType),
-                EXTRACTION_PROMPT
+                VISION_EXTRACTION_PROMPT
               ]),
               config: {
                 responseMimeType: "application/json",
