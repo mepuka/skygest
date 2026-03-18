@@ -8,7 +8,7 @@ interface TopicTagProps {
 export function TopicTag({ label, active, size = "default", onClick }: TopicTagProps) {
   const isSmall = size === "small";
 
-  const base = "font-ui rounded-[2px] transition-colors cursor-pointer select-none tracking-[0.02em] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent";
+  const base = "shrink-0 whitespace-nowrap font-ui rounded-[2px] transition-colors cursor-pointer select-none tracking-[0.02em] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent";
   const sizeClass = isSmall
     ? "text-[10px] leading-[14px] px-1.5 py-0.5"
     : "text-[11px] leading-[14px] px-2 py-0.5";
