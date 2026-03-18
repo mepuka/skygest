@@ -162,6 +162,47 @@ const deploySelection = (env: string, worker: DeployWorker) =>
     );
   });
 
+const runStageStats = (options: {
+  readonly env: string;
+  readonly baseUrl: string;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+
+    yield* Console.log(`Fetching stats for ${options.env} at ${options.baseUrl}`);
+    const stats = yield* client.getStats(baseUrl, secret);
+
+    yield* Console.log("");
+    yield* Console.log("Experts");
+    yield* Console.log(`  total: ${String(stats.experts.total)}  active: ${String(stats.experts.active)}`);
+
+    yield* Console.log("");
+    yield* Console.log("Posts");
+    yield* Console.log(`  total: ${String(stats.posts.total)}  last 24h: ${String(stats.posts.inLast24h)}  with links: ${String(stats.posts.withLinks)}`);
+
+    yield* Console.log("");
+    yield* Console.log("Curation");
+    yield* Console.log(`  flagged: ${String(stats.curation.flagged)}  curated: ${String(stats.curation.curated)}  rejected: ${String(stats.curation.rejected)}`);
+
+    yield* Console.log("");
+    yield* Console.log("Enrichment Runs");
+    yield* Console.log(`  queued: ${String(stats.enrichment.queued)}  running: ${String(stats.enrichment.running)}  complete: ${String(stats.enrichment.complete)}  failed: ${String(stats.enrichment.failed)}  needs-review: ${String(stats.enrichment.needsReview)}`);
+
+    if (stats.lastIngest !== null) {
+      yield* Console.log("");
+      yield* Console.log("Last Ingest");
+      yield* Console.log(`  run: ${stats.lastIngest.runId}`);
+      yield* Console.log(`  kind: ${stats.lastIngest.kind}  status: ${stats.lastIngest.status}`);
+      yield* Console.log(`  posts seen: ${String(stats.lastIngest.postsSeen)}  stored: ${String(stats.lastIngest.postsStored)}`);
+      yield* Console.log(`  started: ${new Date(stats.lastIngest.startedAt).toISOString()}`);
+      if (stats.lastIngest.finishedAt !== null) {
+        yield* Console.log(`  finished: ${new Date(stats.lastIngest.finishedAt).toISOString()}`);
+      }
+    }
+  });
+
 const runSeedPublications = (options: {
   readonly env: string;
   readonly baseUrl: string;
@@ -455,6 +496,12 @@ const deployCommand = Command.make(
   ({ env, worker }) => deploySelection(env, worker as DeployWorker)
 );
 
+const statsCommand = Command.make(
+  "stats",
+  { env: envOption, baseUrl: baseUrlOption },
+  runStageStats
+);
+
 const prepareCommand = Command.make(
   "prepare",
   { env: envOption, baseUrl: baseUrlOption },
@@ -538,6 +585,7 @@ const seedPublicationsCommand = Command.make(
 
 const stageCommand = Command.make("stage", {}, () => Effect.void).pipe(
   Command.withSubcommands([
+    statsCommand,
     prepareCommand,
     smokeCommand,
     smokeSearchCommand,

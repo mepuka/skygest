@@ -2,6 +2,7 @@ import * as HttpApi from "@effect/platform/HttpApi";
 import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder";
 import * as HttpApiEndpoint from "@effect/platform/HttpApiEndpoint";
 import * as HttpApiGroup from "@effect/platform/HttpApiGroup";
+import { SqlClient } from "@effect/sql";
 import { Effect, Layer } from "effect";
 import type { AccessIdentity } from "../auth/AuthService";
 import {
@@ -68,6 +69,10 @@ const AdminApi = HttpApi.make("admin")
       .add(
         HttpApiEndpoint.post("seedPublications", "/admin/ops/seed-publications")
           .addSuccess(AdminResponseSchemas.seedPublications)
+      )
+      .add(
+        HttpApiEndpoint.get("stats", "/admin/ops/stats")
+          .addSuccess(AdminResponseSchemas.stats)
       )
   )
   .add(
@@ -195,6 +200,68 @@ const AdminHandlers = Layer.mergeAll(
           const actor = yield* OperatorIdentity;
           const ops = yield* StagingOpsService;
           return yield* ops.seedPublications(actor);
+        }))
+      )
+      .handle("stats", () =>
+        withAdminErrors("/admin/ops/stats", Effect.gen(function* () {
+          yield* ensureStagingOpsEnabled;
+          const sql = yield* SqlClient.SqlClient;
+          const now = Date.now();
+          const oneDayAgo = now - 86_400_000;
+
+          const [experts, posts, curation, enrichment, lastIngest] = yield* Effect.all([
+            sql<{ total: number; active: number }>`
+              SELECT COUNT(*) as total, SUM(CASE WHEN active = 1 THEN 1 ELSE 0 END) as active FROM experts
+            `.pipe(Effect.map((rows) => ({
+              total: Number(rows[0]?.total ?? 0),
+              active: Number(rows[0]?.active ?? 0)
+            }))),
+            sql<{ total: number; in_last_24h: number; with_links: number }>`
+              SELECT COUNT(*) as total, SUM(CASE WHEN created_at > ${oneDayAgo} THEN 1 ELSE 0 END) as in_last_24h, SUM(CASE WHEN has_links = 1 THEN 1 ELSE 0 END) as with_links FROM posts WHERE status = 'active'
+            `.pipe(Effect.map((rows) => ({
+              total: Number(rows[0]?.total ?? 0),
+              inLast24h: Number(rows[0]?.in_last_24h ?? 0),
+              withLinks: Number(rows[0]?.with_links ?? 0)
+            }))),
+            sql<{ flagged: number; curated: number; rejected: number }>`
+              SELECT SUM(CASE WHEN status = 'flagged' THEN 1 ELSE 0 END) as flagged, SUM(CASE WHEN status = 'curated' THEN 1 ELSE 0 END) as curated, SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected FROM post_curation
+            `.pipe(Effect.map((rows) => ({
+              flagged: Number(rows[0]?.flagged ?? 0),
+              curated: Number(rows[0]?.curated ?? 0),
+              rejected: Number(rows[0]?.rejected ?? 0)
+            }))),
+            sql<{ queued: number; running: number; complete: number; failed: number; needs_review: number }>`
+              SELECT SUM(CASE WHEN status = 'queued' THEN 1 ELSE 0 END) as queued, SUM(CASE WHEN status = 'running' THEN 1 ELSE 0 END) as running, SUM(CASE WHEN status = 'complete' THEN 1 ELSE 0 END) as complete, SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed, SUM(CASE WHEN status = 'needs-review' THEN 1 ELSE 0 END) as needs_review FROM post_enrichment_runs
+            `.pipe(Effect.map((rows) => ({
+              queued: Number(rows[0]?.queued ?? 0),
+              running: Number(rows[0]?.running ?? 0),
+              complete: Number(rows[0]?.complete ?? 0),
+              failed: Number(rows[0]?.failed ?? 0),
+              needsReview: Number(rows[0]?.needs_review ?? 0)
+            }))),
+            sql<{ id: string; kind: string; status: string; started_at: number; finished_at: number | null; posts_seen: number; posts_stored: number }>`
+              SELECT id, kind, status, started_at, finished_at, posts_seen, posts_stored FROM ingest_runs ORDER BY started_at DESC LIMIT 1
+            `.pipe(Effect.map((rows) =>
+              rows.length === 0 ? null : {
+                runId: String(rows[0]!.id),
+                kind: String(rows[0]!.kind),
+                status: String(rows[0]!.status),
+                startedAt: Number(rows[0]!.started_at),
+                finishedAt: rows[0]!.finished_at === null ? null : Number(rows[0]!.finished_at),
+                postsSeen: Number(rows[0]!.posts_seen),
+                postsStored: Number(rows[0]!.posts_stored)
+              }
+            ))
+          ], { concurrency: "unbounded" });
+
+          return {
+            timestamp: now,
+            experts,
+            posts,
+            curation,
+            enrichment,
+            lastIngest
+          };
         }))
       )
   ),
