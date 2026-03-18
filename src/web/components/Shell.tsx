@@ -70,7 +70,7 @@ export function Shell() {
           <div className="mx-auto max-w-[1080px] flex gap-10 max-lg:flex-col max-lg:gap-0">
 
             {/* Main Column — magazine layer */}
-            <div className="w-[680px] shrink-0 max-lg:w-full" aria-live="polite">
+            <div className="w-[680px] shrink-0 max-lg:w-full">
               {Result.builder(feedResult)
                 .onInitialOrWaiting(() => (
                   <div className="py-8 text-center text-mid text-sm">

@@ -34,7 +34,7 @@ export function DataCollapseBar({
       <Collapsible.Trigger
         className={`rounded-[--radius-data-card] px-3 py-2 ${
           open
-            ? "bg-[#E8E5E0] rounded-b-none"
+            ? "bg-data-collapse-active rounded-b-none"
             : "bg-data-collapse"
         }`}
       >

@@ -25,7 +25,7 @@ export function Tip({
         <RadixTooltip.Content
           side={side}
           sideOffset={4}
-          className="rounded-[3px] bg-heading px-2 py-1 font-ui text-[10px] text-surface animate-in fade-in-0 zoom-in-95"
+          className="rounded-[3px] bg-heading px-2 py-1 font-ui text-[10px] text-surface"
         >
           {content}
           <RadixTooltip.Arrow className="fill-heading" />

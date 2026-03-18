@@ -42,6 +42,7 @@
   --color-data-border: #D8DDE3;
   --color-data-external: #2D7D46;
   --color-data-collapse: #F0EDE8;
+  --color-data-collapse-active: #E8E5E0;
 
   /* Spacing */
   --radius-data-card: 4px;

@@ -5,11 +5,14 @@
  * with favicon, title, domain, and description.
  */
 
+import type { ExpertTier } from "../lib/types.ts";
+import { TierDot } from "./TierDot.tsx";
+
 interface SourceCardProps {
   readonly title: string;
   readonly domain: string;
   readonly description?: string | null;
-  readonly tier?: "energy-focused" | "general-outlet" | null;
+  readonly tier?: ExpertTier | null;
 }
 
 export function SourceCard({ title, domain, description, tier }: SourceCardProps) {
@@ -29,11 +32,7 @@ export function SourceCard({ title, domain, description, tier }: SourceCardProps
             <span className="font-data-mono text-[10px] text-data-secondary">
               {domain}
             </span>
-            {tier && (
-              <span className={`size-1 rounded-full shrink-0 ${
-                tier === "energy-focused" ? "bg-accent" : "bg-secondary"
-              }`} />
-            )}
+            {tier && <TierDot tier={tier} />}
           </div>
         </div>
       </div>

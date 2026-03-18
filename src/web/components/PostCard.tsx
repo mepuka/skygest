@@ -1,5 +1,5 @@
 import type { KnowledgePostResult, KnowledgeLinkResult, PublicationListItem } from "../lib/api.ts";
-import type { ExpertTier, TopicEntry } from "../lib/types.ts";
+import type { EditorialPickCategory, ExpertTier, TopicEntry } from "../lib/types.ts";
 import { AttributionRow } from "./AttributionRow.tsx";
 import { EditorialBadge } from "./EditorialBadge.tsx";
 import { LinkPreview } from "./LinkPreview.tsx";
@@ -13,7 +13,7 @@ interface PostCardProps {
   readonly topicLabel?: string | null | undefined;
   readonly topicEntries?: readonly TopicEntry[] | undefined;
   readonly borderColor?: string | null | undefined;
-  readonly editorialCategory?: string | null | undefined;
+  readonly editorialCategory?: EditorialPickCategory | null | undefined;
   readonly active?: boolean | undefined;
   readonly onHover?: ((uri: string | null) => void) | undefined;
 }
@@ -54,7 +54,7 @@ export function PostCard({
       />
 
       {editorialCategory && (
-        <EditorialBadge category={editorialCategory as any} />
+        <EditorialBadge category={editorialCategory} />
       )}
 
       <p className="font-body text-[16px] leading-[25px] text-primary">

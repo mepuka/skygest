@@ -40,7 +40,7 @@ function ChartThumbnail({
           loading="lazy"
           className="w-full h-full object-cover"
         />
-        <span className="absolute top-1 left-1 rounded-sm px-1 py-px bg-data-text font-data-mono text-[9px] font-semibold text-surface leading-3">
+        <span className="absolute top-1 left-1 rounded-sm px-1 py-px bg-data-text font-data-mono text-[9px] font-medium text-surface leading-3">
           {index + 1}
         </span>
       </div>

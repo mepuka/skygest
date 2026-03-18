@@ -5,6 +5,9 @@
  * finding text, axis info, and source with tier dot.
  */
 
+import type { ExpertTier } from "../lib/types.ts";
+import { TierDot } from "./TierDot.tsx";
+
 interface FindingCardProps {
   readonly chartIndex: number;
   readonly chartType: string;
@@ -12,7 +15,7 @@ interface FindingCardProps {
   readonly finding: string;
   readonly axisLabel?: string | null;
   readonly sourceDomain?: string | null;
-  readonly sourceTier?: "energy-focused" | "general-outlet" | null;
+  readonly sourceTier?: ExpertTier | null;
 }
 
 export function FindingCard({
@@ -27,7 +30,7 @@ export function FindingCard({
   return (
     <div className="flex flex-col gap-2 bg-surface border border-data-border border-l-[3px] border-l-accent rounded-r-[--radius-data-card] p-3.5">
       <div className="flex items-center gap-1.5">
-        <span className="font-data-mono text-[10px] font-semibold text-surface bg-data-text rounded-sm px-1.5 py-px">
+        <span className="font-data-mono text-[10px] font-medium text-surface bg-data-text rounded-sm px-1.5 py-px">
           {chartIndex}
         </span>
         <span className="font-data-mono text-[10px] text-data-text bg-data-surface rounded-[3px] px-1.5 py-0.5">
@@ -56,11 +59,7 @@ export function FindingCard({
           <span className="font-data-mono text-[10px] text-data-text">
             {sourceDomain}
           </span>
-          {sourceTier && (
-            <span className={`size-1 rounded-full shrink-0 ${
-              sourceTier === "energy-focused" ? "bg-accent" : "bg-secondary"
-            }`} />
-          )}
+          {sourceTier && <TierDot tier={sourceTier} />}
         </div>
       )}
     </div>
