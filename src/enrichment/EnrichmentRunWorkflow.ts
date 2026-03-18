@@ -5,6 +5,10 @@ import {
 } from "cloudflare:workers";
 import { Effect, Either, ManagedRuntime, Schema } from "effect";
 import {
+  describeEnrichmentPlanStopReason,
+  type EnrichmentExecutionPlan
+} from "../domain/enrichmentPlan";
+import {
   EnrichmentRunParams,
   type EnrichmentRunParams as EnrichmentRunParamsValue
 } from "../domain/enrichmentRun";
@@ -18,6 +22,11 @@ import type { WorkflowEnrichmentEnvBindings } from "../platform/Env";
 import { EnrichmentRunsRepo } from "../services/EnrichmentRunsRepo";
 import { formatSchemaParseError } from "../platform/Json";
 import { makeWorkflowEnrichmentLayer } from "./Layer";
+import { EnrichmentPlanner } from "./EnrichmentPlanner";
+import {
+  defaultStopReasonForEnrichmentType,
+  isSkippedEnrichmentPlan
+} from "./EnrichmentPredicates";
 
 const decodeEnrichmentRunParams = (input: unknown) =>
   (() => {
@@ -52,6 +61,40 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
       effect as Effect.Effect<A, E, never>,
       { operation }
     );
+
+  private reviewErrorFromPlan(
+    runId: string,
+    plan: EnrichmentExecutionPlan
+  ) {
+    return isSkippedEnrichmentPlan(plan)
+      ? (() => {
+          const reason =
+            plan.stopReason ??
+            defaultStopReasonForEnrichmentType(plan.enrichmentType);
+          return toEnrichmentErrorEnvelope(
+            {
+              _tag: "EnrichmentPlanningStopped",
+              message: `planner stopped: ${describeEnrichmentPlanStopReason(
+                reason
+              )}`
+            },
+            {
+              runId,
+              operation: "EnrichmentRunWorkflow.run"
+            }
+          );
+        })()
+      : toEnrichmentErrorEnvelope(
+          {
+            _tag: "EnrichmentExecutionDeferred",
+            message: "enrichment execution lane not implemented yet"
+          },
+          {
+            runId,
+            operation: "EnrichmentRunWorkflow.run"
+          }
+        );
+  }
 
   override async run(
     event: WorkflowEvent<EnrichmentRunParamsValue>,
@@ -108,19 +151,26 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
         )
       );
 
+      const plan = await step.do("assemble enrichment plan", async () =>
+        this.runEffect(
+          Effect.flatMap(EnrichmentPlanner, (planner) =>
+            planner.plan({
+              postUri: run.postUri,
+              enrichmentType: run.enrichmentType,
+              schemaVersion: run.schemaVersion
+            })
+          ),
+          "EnrichmentRunWorkflow.plan"
+        )
+      );
+
       await step.do("mark needs review", async () =>
         this.runEffect(
           Effect.flatMap(EnrichmentRunsRepo, (runs) =>
             runs.markNeedsReview({
               id: run.id,
               lastProgressAt: Date.now(),
-              error: toEnrichmentErrorEnvelope({
-                _tag: "EnrichmentExecutionDeferred",
-                message: "enrichment execution lane not implemented yet"
-              }, {
-                runId,
-                operation: "EnrichmentRunWorkflow.run"
-              })
+              error: this.reviewErrorFromPlan(runId, plan)
             })
           ),
           "EnrichmentRunWorkflow.markNeedsReview"
