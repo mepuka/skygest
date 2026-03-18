@@ -11,6 +11,11 @@ name = "ingest-run"
 binding = "INGEST_RUN_WORKFLOW"
 class_name = "IngestRunWorkflow"
 
+[[workflows]]
+name = "enrichment-run"
+binding = "ENRICHMENT_RUN_WORKFLOW"
+class_name = "EnrichmentRunWorkflow"
+
 [[durable_objects.bindings]]
 name = "EXPERT_POLL_COORDINATOR"
 class_name = "ExpertPollCoordinatorDo"
@@ -47,6 +52,11 @@ enabled = true
 name = "ingest-run"
 binding = "INGEST_RUN_WORKFLOW"
 class_name = "IngestRunWorkflow"
+
+[[env.staging.workflows]]
+name = "enrichment-run"
+binding = "ENRICHMENT_RUN_WORKFLOW"
+class_name = "EnrichmentRunWorkflow"
 
 [[env.staging.durable_objects.bindings]]
 name = "EXPERT_POLL_COORDINATOR"

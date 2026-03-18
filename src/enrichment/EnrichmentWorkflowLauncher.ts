@@ -1,0 +1,117 @@
+import { Context, Effect, Either, Layer, Schema } from "effect";
+import type { SqlError } from "@effect/sql/SqlError";
+import type { DbError } from "../domain/errors";
+import {
+  EnrichmentRunParams,
+  type EnrichmentQueuedResponse
+} from "../domain/enrichmentRun";
+import {
+  EnrichmentSchemaDecodeError,
+  EnrichmentWorkflowLaunchError,
+  toEnrichmentErrorEnvelope
+} from "../domain/errors";
+import { WorkflowEnrichmentEnv } from "../platform/Env";
+import { formatSchemaParseError, stringifyUnknown } from "../platform/Json";
+import { EnrichmentRunsRepo } from "../services/EnrichmentRunsRepo";
+
+const decodeEnrichmentRunParams = (input: unknown, operation: string) =>
+  (() => {
+    const decoded = Schema.decodeUnknownEither(EnrichmentRunParams)(input);
+    return Either.isRight(decoded)
+      ? Effect.succeed(decoded.right)
+      : Effect.fail(
+          EnrichmentSchemaDecodeError.make({
+            message: formatSchemaParseError(decoded.left),
+            operation
+          })
+        );
+  })();
+
+const launchWorkflow = <A>(operation: string, thunk: () => Promise<A>) =>
+  Effect.tryPromise({
+    try: thunk,
+    catch: (cause) =>
+      EnrichmentWorkflowLaunchError.make({
+        message: stringifyUnknown(cause),
+        operation
+      })
+  });
+
+export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/EnrichmentWorkflowLauncher")<
+  EnrichmentWorkflowLauncher,
+  {
+    readonly start: (
+      params: EnrichmentRunParams
+    ) => Effect.Effect<
+      EnrichmentQueuedResponse,
+      SqlError | DbError | EnrichmentSchemaDecodeError | EnrichmentWorkflowLaunchError
+    >;
+  }
+>() {
+  static readonly layer = Layer.effect(
+    EnrichmentWorkflowLauncher,
+    Effect.gen(function* () {
+      const env = yield* WorkflowEnrichmentEnv;
+      const runs = yield* EnrichmentRunsRepo;
+      const workflow = env.ENRICHMENT_RUN_WORKFLOW;
+
+      const start = Effect.fn("EnrichmentWorkflowLauncher.start")(function* (
+        params: EnrichmentRunParams
+      ) {
+        const operation = "EnrichmentWorkflowLauncher.start";
+        const validatedParams = yield* decodeEnrichmentRunParams(params, operation);
+        const runId = crypto.randomUUID();
+        const startedAt = Date.now();
+
+        const inserted = yield* runs.createQueuedIfAbsent({
+          id: runId,
+          workflowInstanceId: runId,
+          postUri: validatedParams.postUri,
+          enrichmentType: validatedParams.enrichmentType,
+          schemaVersion: validatedParams.schemaVersion,
+          triggeredBy: validatedParams.triggeredBy,
+          requestedBy: validatedParams.requestedBy ?? null,
+          modelLane: null,
+          promptVersion: null,
+          inputFingerprint: null,
+          startedAt
+        });
+
+        if (!inserted) {
+          return yield* EnrichmentWorkflowLaunchError.make({
+            message: `enrichment run already exists for ${validatedParams.postUri}`,
+            operation
+          });
+        }
+
+        yield* launchWorkflow(operation, () =>
+          workflow.create({
+            id: runId,
+            params: validatedParams
+          })
+        ).pipe(
+          Effect.catchAll((error) =>
+            runs.markFailed({
+              id: runId,
+              finishedAt: Date.now(),
+              error: toEnrichmentErrorEnvelope(error, {
+                runId,
+                operation
+              })
+            }).pipe(Effect.zipRight(Effect.fail(error)))
+          )
+        );
+
+        return {
+          runId,
+          workflowInstanceId: runId,
+          status: "queued"
+        } satisfies EnrichmentQueuedResponse;
+      });
+
+      return EnrichmentWorkflowLauncher.of({
+        start
+      });
+    })
+  );
+}

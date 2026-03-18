@@ -24,6 +24,13 @@ export class IngestRunNotFoundError extends Schema.TaggedError<IngestRunNotFound
   }
 ) {}
 
+export class EnrichmentRunNotFoundError extends Schema.TaggedError<EnrichmentRunNotFoundError>()(
+  "EnrichmentRunNotFoundError",
+  {
+    runId: Schema.String
+  }
+) {}
+
 export class IngestSchemaDecodeError extends Schema.TaggedError<IngestSchemaDecodeError>()(
   "IngestSchemaDecodeError",
   {
@@ -34,6 +41,22 @@ export class IngestSchemaDecodeError extends Schema.TaggedError<IngestSchemaDeco
 
 export class IngestWorkflowLaunchError extends Schema.TaggedError<IngestWorkflowLaunchError>()(
   "IngestWorkflowLaunchError",
+  {
+    message: Schema.String,
+    operation: Schema.String
+  }
+) {}
+
+export class EnrichmentSchemaDecodeError extends Schema.TaggedError<EnrichmentSchemaDecodeError>()(
+  "EnrichmentSchemaDecodeError",
+  {
+    message: Schema.String,
+    operation: Schema.optional(Schema.String)
+  }
+) {}
+
+export class EnrichmentWorkflowLaunchError extends Schema.TaggedError<EnrichmentWorkflowLaunchError>()(
+  "EnrichmentWorkflowLaunchError",
   {
     message: Schema.String,
     operation: Schema.String
@@ -108,9 +131,24 @@ export const IngestErrorResponse = Schema.Struct({
 });
 export type IngestErrorResponse = Schema.Schema.Type<typeof IngestErrorResponse>;
 
+export const EnrichmentErrorEnvelope = Schema.Struct({
+  tag: Schema.String.pipe(Schema.minLength(1)),
+  message: Schema.String,
+  retryable: Schema.Boolean,
+  status: Schema.optional(Schema.Number),
+  runId: Schema.optional(Schema.String),
+  operation: Schema.optional(Schema.String)
+});
+export type EnrichmentErrorEnvelope = Schema.Schema.Type<
+  typeof EnrichmentErrorEnvelope
+>;
+
 const decodeEnvelope = Schema.decodeUnknownEither(IngestErrorEnvelope);
 const encodeEnvelope = encodeJsonStringWith(IngestErrorEnvelope);
 const decodeEnvelopeJson = decodeJsonStringEitherWith(IngestErrorEnvelope);
+const decodeEnrichmentEnvelope = Schema.decodeUnknownEither(EnrichmentErrorEnvelope);
+const encodeEnrichmentEnvelope = encodeJsonStringWith(EnrichmentErrorEnvelope);
+const decodeEnrichmentEnvelopeJson = decodeJsonStringEitherWith(EnrichmentErrorEnvelope);
 
 const isTagged = (
   error: unknown,
@@ -138,6 +176,14 @@ const isRetryableStatus = (status: number | undefined) =>
   status === 429 || (status !== undefined && status >= 500 && status < 600);
 
 export const legacyIngestErrorEnvelope = (message: string): IngestErrorEnvelope => ({
+  tag: "LegacyError",
+  message,
+  retryable: false
+});
+
+export const legacyEnrichmentErrorEnvelope = (
+  message: string
+): EnrichmentErrorEnvelope => ({
   tag: "LegacyError",
   message,
   retryable: false
@@ -226,6 +272,26 @@ export const decodeStoredIngestError = (value: string | null) => {
   }
 
   return legacyIngestErrorEnvelope("legacy ingest failure");
+};
+
+export const encodeStoredEnrichmentError = (
+  error: EnrichmentErrorEnvelope | null
+) =>
+  error === null
+    ? null
+    : encodeEnrichmentEnvelope(error);
+
+export const decodeStoredEnrichmentError = (value: string | null) => {
+  if (value === null) {
+    return null;
+  }
+
+  const decoded = decodeEnrichmentEnvelopeJson(value);
+  if (Either.isRight(decoded)) {
+    return decoded.right;
+  }
+
+  return legacyEnrichmentErrorEnvelope("legacy enrichment failure");
 };
 
 export const toIngestErrorEnvelope = (
@@ -448,6 +514,113 @@ export const ingestHttpStatusForEnvelope = (envelope: IngestErrorEnvelope): numb
     default:
       return 500;
   }
+};
+
+export const toEnrichmentErrorEnvelope = (
+  error: unknown,
+  overrides: {
+    readonly runId?: string;
+    readonly operation?: string;
+  } = {}
+): EnrichmentErrorEnvelope => {
+  const withOverrides = (
+    envelope: EnrichmentErrorEnvelope
+  ): EnrichmentErrorEnvelope => ({
+    ...envelope,
+    ...(overrides.runId === undefined ? {} : { runId: overrides.runId }),
+    ...(overrides.operation === undefined
+      ? {}
+      : { operation: overrides.operation })
+  });
+
+  const asEnvelope = decodeEnrichmentEnvelope(error);
+  if (Either.isRight(asEnvelope)) {
+    return withOverrides(asEnvelope.right);
+  }
+
+  if (
+    error instanceof EnrichmentRunNotFoundError ||
+    isTagged(error, "EnrichmentRunNotFoundError")
+  ) {
+    const runId = getStringField(error, "runId") ?? overrides.runId;
+    return withOverrides({
+      tag: "EnrichmentRunNotFoundError",
+      message:
+        runId === undefined
+          ? "enrichment run not found"
+          : `enrichment run not found: ${runId}`,
+      retryable: false,
+      ...(runId === undefined ? {} : { runId })
+    });
+  }
+
+  if (
+    error instanceof EnrichmentSchemaDecodeError ||
+    isTagged(error, "EnrichmentSchemaDecodeError")
+  ) {
+    const operation = getStringField(error, "operation") ?? overrides.operation;
+    return withOverrides({
+      tag: "EnrichmentSchemaDecodeError",
+      message: getStringField(error, "message") ?? "invalid enrichment input",
+      retryable: false,
+      ...(operation === undefined ? {} : { operation })
+    });
+  }
+
+  if (
+    error instanceof EnrichmentWorkflowLaunchError ||
+    isTagged(error, "EnrichmentWorkflowLaunchError")
+  ) {
+    const operation = getStringField(error, "operation") ?? overrides.operation;
+    return withOverrides({
+      tag: "EnrichmentWorkflowLaunchError",
+      message:
+        getStringField(error, "message") ?? "failed to launch enrichment workflow",
+      retryable: true,
+      ...(operation === undefined ? {} : { operation })
+    });
+  }
+
+  if (error instanceof DbError || isTagged(error, "DbError")) {
+    return withOverrides({
+      tag: "DbError",
+      message: getStringField(error, "message") ?? "database decode or validation failure",
+      retryable: false
+    });
+  }
+
+  if (isTagged(error, "SqlError")) {
+    return withOverrides({
+      tag: "SqlError",
+      message: getStringField(error, "message") ?? "database operation failed",
+      retryable: false
+    });
+  }
+
+  if (isObject(error) && typeof (error as any)._tag === "string") {
+    return withOverrides({
+      tag: (error as any)._tag,
+      message: getStringField(error, "message") ?? "internal enrichment failure",
+      retryable: false
+    });
+  }
+
+  if (error instanceof Error) {
+    return withOverrides({
+      tag: error.name || "Error",
+      message: "internal enrichment failure",
+      retryable: false,
+      ...(getNumberField(error, "status") === undefined
+        ? {}
+        : { status: getNumberField(error, "status")! })
+    });
+  }
+
+  return withOverrides({
+    tag: "UnknownError",
+    message: "internal enrichment failure",
+    retryable: false
+  });
 };
 
 export const toIngestErrorResponse = (error: unknown): IngestErrorResponse => {
