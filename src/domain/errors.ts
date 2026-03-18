@@ -175,6 +175,16 @@ export class GeminiParseError extends Schema.TaggedError<GeminiParseError>()(
   }
 ) {}
 
+export class EnrichmentAssetFetchError extends Schema.TaggedError<EnrichmentAssetFetchError>()(
+  "EnrichmentAssetFetchError",
+  {
+    assetKey: Schema.String,
+    message: Schema.String,
+    status: Schema.optional(Schema.Number),
+    operation: Schema.String
+  }
+) {}
+
 export const IngestErrorEnvelope = Schema.Struct({
   tag: Schema.String.pipe(Schema.minLength(1)),
   message: Schema.String,
@@ -742,6 +752,39 @@ export const toEnrichmentErrorEnvelope = (
         getStringField(error, "message") ?? "historical enrichment run required repair",
       retryable: false,
       ...(runId === undefined ? {} : { runId }),
+      ...(operation === undefined ? {} : { operation })
+    });
+  }
+
+  if (error instanceof GeminiApiError || isTagged(error, "GeminiApiError")) {
+    const status = getNumberField(error, "status");
+    return withOverrides({
+      tag: "GeminiApiError",
+      message: getStringField(error, "message") ?? "Gemini API request failed",
+      retryable: isRetryableStatus(status),
+      ...(status === undefined ? {} : { status })
+    });
+  }
+
+  if (error instanceof GeminiParseError || isTagged(error, "GeminiParseError")) {
+    return withOverrides({
+      tag: "GeminiParseError",
+      message: getStringField(error, "message") ?? "Gemini response could not be parsed",
+      retryable: false
+    });
+  }
+
+  if (
+    error instanceof EnrichmentAssetFetchError ||
+    isTagged(error, "EnrichmentAssetFetchError")
+  ) {
+    const status = getNumberField(error, "status");
+    const operation = getStringField(error, "operation") ?? overrides.operation;
+    return withOverrides({
+      tag: "EnrichmentAssetFetchError",
+      message: getStringField(error, "message") ?? "failed to fetch enrichment asset",
+      retryable: isRetryableStatus(status),
+      ...(status === undefined ? {} : { status }),
       ...(operation === undefined ? {} : { operation })
     });
   }

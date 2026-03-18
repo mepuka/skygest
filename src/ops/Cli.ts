@@ -29,6 +29,11 @@ const enrichmentStatuses = [
   "failed",
   "needs-review"
 ] as const;
+const enrichmentKinds = [
+  "vision",
+  "source-attribution",
+  "grounding"
+] as const;
 
 const envOption = Options.text("env").pipe(
   Options.withDescription("Wrangler environment name"),
@@ -56,6 +61,19 @@ const enrichmentLimitOption = Options.integer("limit").pipe(
 
 const runIdOption = Options.text("run-id").pipe(
   Options.withDescription("Run id")
+);
+
+const postUriOption = Options.text("post-uri").pipe(
+  Options.withDescription("Post URI")
+);
+
+const enrichmentTypeOption = Options.choice("enrichment-type", enrichmentKinds).pipe(
+  Options.withDescription("Enrichment lane to run")
+);
+
+const schemaVersionOption = Options.text("schema-version").pipe(
+  Options.withDescription("Schema version"),
+  Options.withDefault("v1")
 );
 
 const expectCondition = (condition: boolean, message: string) =>
@@ -408,6 +426,29 @@ const runStageEnrichmentRepair = (options: {
     );
   });
 
+const runStageEnrichmentStart = (options: {
+  readonly env: string;
+  readonly baseUrl: string;
+  readonly postUri: string;
+  readonly enrichmentType: typeof enrichmentKinds[number];
+  readonly schemaVersion: string;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+
+    const queued = yield* client.startEnrichment(baseUrl, secret, {
+      postUri: options.postUri,
+      enrichmentType: options.enrichmentType,
+      schemaVersion: options.schemaVersion
+    });
+
+    yield* Console.log(
+      `Queued ${options.enrichmentType} enrichment for ${options.postUri} as run ${queued.runId}`
+    );
+  });
+
 const deployCommand = Command.make(
   "deploy",
   { env: envOption, worker: workerOption },
@@ -447,6 +488,18 @@ const enrichmentRunsCommand = Command.make(
     limit: enrichmentLimitOption
   },
   runStageEnrichmentRuns
+);
+
+const enrichmentStartCommand = Command.make(
+  "enrichment-start",
+  {
+    env: envOption,
+    baseUrl: baseUrlOption,
+    postUri: postUriOption,
+    enrichmentType: enrichmentTypeOption,
+    schemaVersion: schemaVersionOption
+  },
+  runStageEnrichmentStart
 );
 
 const enrichmentRunCommand = Command.make(
@@ -491,6 +544,7 @@ const stageCommand = Command.make("stage", {}, () => Effect.void).pipe(
     refreshProfilesCommand,
     repairCommand,
     enrichmentRunsCommand,
+    enrichmentStartCommand,
     enrichmentRunCommand,
     enrichmentRetryCommand,
     enrichmentRepairCommand,

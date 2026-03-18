@@ -34,6 +34,7 @@ import { OperatorIdentity, operatorIdentityContext } from "../http/Identity";
 import type { WorkflowEnrichmentEnvBindings } from "../platform/Env";
 import { EnrichmentRunsRepo } from "../services/EnrichmentRunsRepo";
 import { EnrichmentRepairService } from "./EnrichmentRepairService";
+import { EnrichmentWorkflowLauncher } from "./EnrichmentWorkflowLauncher";
 
 const DEFAULT_RUN_LIST_LIMIT = 20;
 const MAX_RUN_LIST_LIMIT = 100;
@@ -41,9 +42,17 @@ const MAX_RUN_LIST_LIMIT = 100;
 const clampListLimit = (value: number | undefined) =>
   Math.max(1, Math.min(value ?? DEFAULT_RUN_LIST_LIMIT, MAX_RUN_LIST_LIMIT));
 
+const toRequestedBy = (identity: AccessIdentity) =>
+  identity.email ?? identity.subject ?? "unknown-operator";
+
 const EnrichmentApi = HttpApi.make("enrichment")
   .add(
     HttpApiGroup.make("commands")
+      .add(
+        HttpApiEndpoint.post("start", "/admin/enrichment/start")
+          .setPayload(EnrichmentRequestSchemas.start)
+          .addSuccess(EnrichmentResponseSchemas.queued, { status: 202 })
+      )
       .add(
         HttpApiEndpoint.post("repair", "/admin/enrichment/repair")
           .addSuccess(EnrichmentResponseSchemas.repair)
@@ -124,6 +133,22 @@ const withEnrichmentErrors = <A, R>(
 const EnrichmentHandlers = Layer.mergeAll(
   HttpApiBuilder.group(EnrichmentApi, "commands", (handlers) =>
     handlers
+      .handle("start", ({ payload }) =>
+        withEnrichmentErrors(
+          "/admin/enrichment/start",
+          Effect.gen(function* () {
+            const actor = yield* OperatorIdentity;
+            const launcher = yield* EnrichmentWorkflowLauncher;
+            return yield* launcher.start({
+              postUri: payload.postUri,
+              enrichmentType: payload.enrichmentType,
+              schemaVersion: payload.schemaVersion ?? "v1",
+              triggeredBy: "admin",
+              requestedBy: toRequestedBy(actor)
+            });
+          })
+        )
+      )
       .handle("repair", () =>
         withEnrichmentErrors(
           "/admin/enrichment/repair",

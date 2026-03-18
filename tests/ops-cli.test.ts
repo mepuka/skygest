@@ -112,6 +112,18 @@ const makeCliLayer = (options?: {
           untouchedRuns: 0
         } as const;
       }),
+    startEnrichment: (_baseUrl: URL, secret: string, input) =>
+      Effect.sync(() => {
+        remoteCalls.push({
+          action: `enrichment-start:${input.enrichmentType}:${input.postUri}`,
+          secret
+        });
+        return {
+          runId: "enrich-start-1",
+          workflowInstanceId: "enrich-start-1",
+          status: "queued"
+        } as const;
+      }),
     listEnrichmentRuns: (_baseUrl: URL, secret: string, _options) =>
       Effect.sync(() => {
         remoteCalls.push({ action: "enrichment-runs", secret });
@@ -276,10 +288,29 @@ describe("ops CLI", () => {
     })
   );
 
-  it.live("runs enrichment inspection and retry commands through the staging client", () =>
+  it.live("runs enrichment start, inspection, and retry commands through the staging client", () =>
     Effect.promise(async () => {
       const { layer, remoteCalls } = makeCliLayer();
       const runtimeLayer = Layer.mergeAll(BunContext.layer, layer);
+
+      await Effect.runPromise(
+        runOpsCli([
+          "bun",
+          "ops",
+          "stage",
+          "enrichment-start",
+          "--env",
+          "staging",
+          "--base-url",
+          "https://skygest-bi-agent-staging.workers.dev",
+          "--post-uri",
+          "at://did:plc:test/app.bsky.feed.post/post-1",
+          "--enrichment-type",
+          "vision",
+          "--schema-version",
+          "v1"
+        ]).pipe(Effect.provide(runtimeLayer))
+      );
 
       await Effect.runPromise(
         runOpsCli([
@@ -314,6 +345,10 @@ describe("ops CLI", () => {
       );
 
       expect(remoteCalls).toEqual([
+        {
+          action: "enrichment-start:vision:at://did:plc:test/app.bsky.feed.post/post-1",
+          secret: "stage-secret"
+        },
         { action: "enrichment-runs", secret: "stage-secret" },
         { action: "enrichment-retry", secret: "stage-secret" }
       ]);
@@ -395,6 +430,12 @@ describe("ops CLI", () => {
               failedItems: 0,
               requeuedItems: 0,
               untouchedRuns: 0
+            } as const),
+          startEnrichment: (_baseUrl, _secret, _input) =>
+            Effect.succeed({
+              runId: "enrich-start-1",
+              workflowInstanceId: "enrich-start-1",
+              status: "queued"
             } as const),
           listEnrichmentRuns: (_baseUrl, _secret, _options) => Effect.succeed([] as const),
           getEnrichmentRun: (_baseUrl, _secret, _runId) =>
@@ -513,6 +554,12 @@ describe("ops CLI", () => {
               failedItems: 0,
               requeuedItems: 0,
               untouchedRuns: 0
+            } as const),
+          startEnrichment: (_baseUrl, _secret, _input) =>
+            Effect.succeed({
+              runId: "enrich-start-1",
+              workflowInstanceId: "enrich-start-1",
+              status: "queued"
             } as const),
           listEnrichmentRuns: (_baseUrl, _secret, _options) => Effect.succeed([] as const),
           getEnrichmentRun: (_baseUrl, _secret, _runId) =>

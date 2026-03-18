@@ -6,19 +6,23 @@ import {
 import { Effect, Either, ManagedRuntime, Schema } from "effect";
 import {
   describeEnrichmentPlanStopReason,
-  type EnrichmentExecutionPlan
+  type EnrichmentExecutionPlan,
+  isVisionExecutionPlan,
+  type VisionExecutionPlan as VisionExecutionPlanValue
 } from "../domain/enrichmentPlan";
 import {
   EnrichmentRunParams,
   type EnrichmentRunParams as EnrichmentRunParamsValue
 } from "../domain/enrichmentRun";
 import {
+  EnrichmentPayloadMissingError,
   EnrichmentRunNotFoundError,
   EnrichmentSchemaDecodeError,
   toEnrichmentErrorEnvelope
 } from "../domain/errors";
 import { makeManagedRuntime, runScopedWithRuntime } from "../platform/EffectRuntime";
 import type { WorkflowEnrichmentEnvBindings } from "../platform/Env";
+import { CandidatePayloadRepo } from "../services/CandidatePayloadRepo";
 import { EnrichmentRunsRepo } from "../services/EnrichmentRunsRepo";
 import { formatSchemaParseError } from "../platform/Json";
 import { makeWorkflowEnrichmentLayer } from "./Layer";
@@ -27,6 +31,7 @@ import {
   defaultStopReasonForEnrichmentType,
   isSkippedEnrichmentPlan
 } from "./EnrichmentPredicates";
+import { VisionEnrichmentExecutor } from "./VisionEnrichmentExecutor";
 
 const decodeEnrichmentRunParams = (input: unknown) =>
   (() => {
@@ -62,7 +67,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
       { operation }
     );
 
-  private reviewErrorFromPlan(
+  private needsReviewErrorFromPlan(
     runId: string,
     plan: EnrichmentExecutionPlan
   ) {
@@ -85,15 +90,15 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
           );
         })()
       : toEnrichmentErrorEnvelope(
-          {
-            _tag: "EnrichmentExecutionDeferred",
-            message: "enrichment execution lane not implemented yet"
-          },
-          {
-            runId,
-            operation: "EnrichmentRunWorkflow.run"
-          }
-        );
+        {
+          _tag: "EnrichmentExecutionDeferred",
+          message: "enrichment execution lane not implemented yet"
+        },
+        {
+          runId,
+          operation: "EnrichmentRunWorkflow.run"
+        }
+      );
   }
 
   override async run(
@@ -164,22 +169,105 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
         )
       );
 
-      await step.do("mark needs review", async () =>
+      if (!isVisionExecutionPlan(plan)) {
+        await step.do("mark needs review", async () =>
+          this.runEffect(
+            Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+              runs.markNeedsReview({
+                id: run.id,
+                lastProgressAt: Date.now(),
+                error: this.needsReviewErrorFromPlan(runId, plan)
+              })
+            ),
+            "EnrichmentRunWorkflow.markNeedsReview"
+          )
+        );
+
+        return {
+          runId,
+          status: "needs-review"
+        } as const;
+      }
+
+      await step.do("mark executing", async () =>
         this.runEffect(
           Effect.flatMap(EnrichmentRunsRepo, (runs) =>
-            runs.markNeedsReview({
+            runs.markPhase({
               id: run.id,
-              lastProgressAt: Date.now(),
-              error: this.reviewErrorFromPlan(runId, plan)
+              phase: "executing",
+              lastProgressAt: Date.now()
             })
           ),
-          "EnrichmentRunWorkflow.markNeedsReview"
+          "EnrichmentRunWorkflow.markExecuting"
+        )
+      );
+
+      const vision = await step.do("execute vision enrichment", async () =>
+        this.runEffect(
+          Effect.flatMap(VisionEnrichmentExecutor, (executor) =>
+            executor.execute(plan as VisionExecutionPlanValue)
+          ),
+          "EnrichmentRunWorkflow.executeVision"
+        )
+      );
+
+      await step.do("mark persisting", async () =>
+        this.runEffect(
+          Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+            runs.markPhase({
+              id: run.id,
+              phase: "persisting",
+              lastProgressAt: Date.now()
+            })
+          ),
+          "EnrichmentRunWorkflow.markPersisting"
+        )
+      );
+
+      const resultWrittenAt = Date.now();
+      await step.do("persist vision enrichment", async () =>
+        this.runEffect(
+          Effect.flatMap(CandidatePayloadRepo, (payloads) =>
+            payloads.saveEnrichment(
+              {
+                postUri: plan.postUri,
+                enrichmentType: "vision",
+                enrichmentPayload: vision
+              },
+              resultWrittenAt,
+              resultWrittenAt
+            )
+          ).pipe(
+            Effect.flatMap((saved) =>
+              saved
+                ? Effect.void
+                : Effect.fail(
+                    EnrichmentPayloadMissingError.make({
+                      postUri: plan.postUri
+                    })
+                  )
+            )
+          ),
+          "EnrichmentRunWorkflow.persistVision"
+        )
+      );
+
+      await step.do("mark complete", async () =>
+        this.runEffect(
+          Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+            runs.markComplete({
+              id: run.id,
+              finishedAt: Date.now(),
+              resultWrittenAt
+            })
+          ),
+          "EnrichmentRunWorkflow.markComplete"
         )
       );
 
       return {
         runId,
-        status: "needs-review"
+        status: "complete"
       } as const;
     } catch (error) {
       await this.runEffect(

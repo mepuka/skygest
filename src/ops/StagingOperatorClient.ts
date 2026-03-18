@@ -19,6 +19,7 @@ import {
   EnrichmentRunStatus,
   EnrichmentRunsOutput
 } from "../domain/enrichmentRun";
+import { EnrichmentKind } from "../domain/enrichment";
 import {
   callTool,
   decodeCallToolResultWith,
@@ -214,6 +215,15 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
       baseUrl: URL,
       secret: string
     ) => Effect.Effect<Schema.Schema.Type<typeof IngestRepairSummary>, StagingRequestError>;
+    readonly startEnrichment: (
+      baseUrl: URL,
+      secret: string,
+      input: {
+        readonly postUri: string;
+        readonly enrichmentType: Schema.Schema.Type<typeof EnrichmentKind>;
+        readonly schemaVersion?: string;
+      }
+    ) => Effect.Effect<Schema.Schema.Type<typeof EnrichmentQueuedResponse>, StagingRequestError>;
     readonly listEnrichmentRuns: (
       baseUrl: URL,
       secret: string,
@@ -343,6 +353,23 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
             body: encodeJsonString({})
           }),
         decodeIngestRepairSummary
+      ),
+    startEnrichment: (baseUrl, secret, input) =>
+      requestJson(
+        "start-enrichment",
+        () =>
+          fetch(endpointUrl(baseUrl, "/admin/enrichment/start"), {
+            method: "POST",
+            headers: operatorHeaders(secret),
+            body: encodeJsonString({
+              postUri: input.postUri,
+              enrichmentType: input.enrichmentType,
+              ...(input.schemaVersion === undefined
+                ? {}
+                : { schemaVersion: input.schemaVersion })
+            })
+          }),
+        decodeEnrichmentQueuedResponse
       ),
     listEnrichmentRuns: (baseUrl, secret, options) =>
       requestJson(

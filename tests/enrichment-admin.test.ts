@@ -9,6 +9,7 @@ import type {
 } from "../src/domain/enrichmentRun";
 import { handleEnrichmentRequestWithLayer } from "../src/enrichment/Router";
 import { EnrichmentRepairService } from "../src/enrichment/EnrichmentRepairService";
+import { EnrichmentWorkflowLauncher } from "../src/enrichment/EnrichmentWorkflowLauncher";
 import { encodeJsonString } from "../src/platform/Json";
 import { EnrichmentRunsRepo } from "../src/services/EnrichmentRunsRepo";
 
@@ -62,6 +63,19 @@ const makeLayer = (state?: {
   readonly repair?: () => Effect.Effect<EnrichmentRepairSummary, never>;
 }) =>
   Layer.mergeAll(
+    Layer.succeed(EnrichmentWorkflowLauncher, {
+      start: (input) =>
+        Effect.sync(() => {
+          const runId = typeof input.postUri === "string"
+            ? `${input.enrichmentType}-queued`
+            : "enrichment-queued";
+          return {
+            runId,
+            workflowInstanceId: runId,
+            status: "queued" as const
+          };
+        })
+    }),
     Layer.succeed(EnrichmentRunsRepo, {
       createQueuedIfAbsent: () => Effect.succeed(true),
       getById: (runId: string) =>
@@ -90,6 +104,34 @@ const makeLayer = (state?: {
   );
 
 describe("enrichment admin routes", () => {
+  it.live("starts an enrichment run through the launcher", () =>
+    Effect.promise(async () => {
+      const response = await handleEnrichmentRequestWithLayer(
+        new Request("https://skygest.local/admin/enrichment/start", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json"
+          },
+          body: encodeJsonString({
+            postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
+            enrichmentType: "vision",
+            schemaVersion: "v1"
+          })
+        }),
+        operatorIdentity,
+        makeLayer()
+      );
+      const body = await response.json() as EnrichmentQueuedResponse;
+
+      expect(response.status).toBe(202);
+      expect(body).toEqual({
+        runId: "vision-queued",
+        workflowInstanceId: "vision-queued",
+        status: "queued"
+      });
+    })
+  );
+
   it.live("lists recent enrichment runs through the run repo", () =>
     Effect.promise(async () => {
       const calls: Array<unknown> = [];
