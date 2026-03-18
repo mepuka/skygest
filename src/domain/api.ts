@@ -17,6 +17,7 @@ import {
   LoadSmokeFixtureResult,
   OntologyListTopic,
   OntologyTopicsOutput,
+  PostThreadOutput,
   PublicationListOutput,
   PublicationSource,
   PublicationTier,
@@ -392,6 +393,16 @@ export const GetExpertPostsPageUrlParams = Schema.Struct({
 });
 export type GetExpertPostsPageUrlParams = Schema.Schema.Type<typeof GetExpertPostsPageUrlParams>;
 
+const OptionalThreadTraversalDepthFromString = Schema.optional(
+  Schema.NumberFromString.pipe(Schema.int(), Schema.between(0, 10))
+);
+
+export const GetThreadUrlParams = Schema.Struct({
+  depth: OptionalThreadTraversalDepthFromString,
+  parentHeight: OptionalThreadTraversalDepthFromString
+});
+export type GetThreadUrlParams = Schema.Schema.Type<typeof GetThreadUrlParams>;
+
 export const GetRecentPostsPageQueryInput = Schema.Struct({
   topicSlugs: Schema.optional(Schema.Array(TopicSlug)),
   expertDid: Schema.optional(Did),
@@ -576,6 +587,7 @@ export const PublicReadRequestSchemas = {
   expertPath: ExpertDidPathParams,
   topicPath: TopicPathParams,
   postUriPath: PostUriPathParams,
+  thread: GetThreadUrlParams,
   curatedFeed: GetCuratedFeedUrlParams
 } as const;
 
@@ -588,6 +600,7 @@ export const PublicReadResponseSchemas = {
   topic: PublicTopicOutput,
   expandedTopics: ExpandedTopicsOutput,
   explainedTopics: ExplainPostTopicsOutput,
+  thread: PostThreadOutput,
   curatedPostsPage: CuratedPostsPageOutput
 } as const;
 

@@ -14,7 +14,7 @@ import type { EmbedKind, EmbedPayload } from "../domain/embed";
 // ---------------------------------------------------------------------------
 
 export const extractEmbedKind = (
-  embed: { $type?: string } | undefined | null
+  embed: { $type?: string | undefined } | undefined | null
 ): EmbedKind | null => {
   if (!embed?.$type) return null;
   const t = embed.$type;
