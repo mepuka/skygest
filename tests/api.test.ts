@@ -2,11 +2,12 @@ import { Effect, Layer, Schema } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { handleApiRequestWithLayer } from "../src/api/Router";
 import { BlueskyClient } from "../src/bluesky/BlueskyClient";
+import { PostThreadOutput } from "../src/domain/bi";
 import {
   KnowledgeLinksPageOutput,
   KnowledgePostsPageOutput
 } from "../src/domain/api";
-import type { ThreadPostView } from "../src/bluesky/ThreadTypes";
+import type { GetPostThreadResponse, ThreadPostView } from "../src/bluesky/ThreadTypes";
 import { BlueskyApiError, DbError } from "../src/domain/errors";
 import { KnowledgeQueryService } from "../src/services/KnowledgeQueryService";
 import { smokeFixtureUris } from "../src/staging/SmokeFixture";
@@ -19,6 +20,7 @@ import {
 
 const decodePostsPage = Schema.decodeUnknownSync(KnowledgePostsPageOutput);
 const decodeLinksPage = Schema.decodeUnknownSync(KnowledgeLinksPageOutput);
+const decodePostThread = Schema.decodeUnknownSync(PostThreadOutput);
 
 const expectJsonResponse = async <A>(
   response: Response,
@@ -67,17 +69,58 @@ const makeThreadPostView = (
   indexedAt: "2026-03-18T12:00:00.000Z"
 });
 
-const makeBlueskyLayer = (
-  getPosts: (uris: ReadonlyArray<string>) => Effect.Effect<ReadonlyArray<ThreadPostView>, BlueskyApiError>
-) =>
+const makeThreadNode = (
+  uri: string,
+  opts?: {
+    readonly parent?: unknown;
+    readonly replies?: ReadonlyArray<unknown>;
+    readonly embed?: ThreadPostView["embed"];
+    readonly likeCount?: number;
+    readonly replyCount?: number;
+  }
+) => ({
+  $type: "app.bsky.feed.defs#threadViewPost",
+  post: {
+    uri,
+    cid: `cid-${uri}`,
+    author: {
+      did: sampleDid,
+      handle: "seed.example.com",
+      displayName: "Seed Example"
+    },
+    record: {
+      text: `Thread ${uri}`,
+      createdAt: "2026-03-18T12:00:00.000Z",
+      $type: "app.bsky.feed.post"
+    },
+    ...(opts?.embed === undefined ? {} : { embed: opts.embed }),
+    replyCount: opts?.replyCount ?? 0,
+    repostCount: 1,
+    likeCount: opts?.likeCount ?? 2,
+    quoteCount: 0,
+    indexedAt: "2026-03-18T12:05:00.000Z"
+  },
+  ...(opts?.parent === undefined ? {} : { parent: opts.parent }),
+  ...(opts?.replies === undefined ? {} : { replies: Array.from(opts.replies) })
+});
+
+const makeBlueskyLayer = (overrides: {
+  readonly getPosts?: (
+    uris: ReadonlyArray<string>
+  ) => Effect.Effect<ReadonlyArray<ThreadPostView>, BlueskyApiError>;
+  readonly getPostThread?: (
+    uri: string,
+    opts?: { depth?: number; parentHeight?: number }
+  ) => Effect.Effect<GetPostThreadResponse, BlueskyApiError>;
+} = {}) =>
   Layer.succeed(BlueskyClient, {
     resolveDidOrHandle: () => Effect.die("unexpected resolveDidOrHandle"),
     getProfile: () => Effect.die("unexpected getProfile"),
     getFollows: () => Effect.die("unexpected getFollows"),
     resolveRepoService: () => Effect.die("unexpected resolveRepoService"),
     listRecordsAtService: () => Effect.die("unexpected listRecordsAtService"),
-    getPostThread: () => Effect.die("unexpected getPostThread"),
-    getPosts
+    getPostThread: overrides.getPostThread ?? (() => Effect.die("unexpected getPostThread")),
+    getPosts: overrides.getPosts ?? (() => Effect.die("unexpected getPosts"))
   });
 
 describe("frontend REST API", () => {
@@ -292,6 +335,207 @@ describe("frontend REST API", () => {
     )
   );
 
+  it.live("serves public thread results with MCP-parity defaults and thread metadata", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const focusUri = smokeFixtureUris(sampleDid)[0];
+        const ancestorUri = `at://${sampleDid}/app.bsky.feed.post/ancestor`;
+        const replyUri = `at://${sampleDid}/app.bsky.feed.post/reply`;
+        const nestedReplyUri = `at://${sampleDid}/app.bsky.feed.post/reply-nested`;
+        const seenCalls: Array<{ uri: string; opts?: { depth?: number; parentHeight?: number } }> = [];
+        const nestedReply = makeThreadNode(nestedReplyUri, {
+          likeCount: 3,
+          embed: {
+            $type: "app.bsky.embed.external#view",
+            external: {
+              uri: "https://example.com/reply",
+              title: "Reply Link",
+              description: "Nested reply link",
+              thumb: "https://example.com/thumb.jpg"
+            }
+          }
+        });
+        const reply = makeThreadNode(replyUri, {
+          likeCount: 8,
+          replies: [nestedReply]
+        });
+        const ancestor = makeThreadNode(ancestorUri);
+        const focus = makeThreadNode(focusUri, {
+          parent: ancestor,
+          replies: [reply],
+          embed: {
+            $type: "app.bsky.embed.images#view",
+            images: [
+              {
+                thumb: "https://cdn.bsky.app/img/feed_thumbnail/plain/did/image@jpeg",
+                fullsize: "https://cdn.bsky.app/img/feed_fullsize/plain/did/image@jpeg",
+                alt: "Focus image"
+              }
+            ]
+          }
+        });
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeBlueskyLayer({
+            getPostThread: (uri, opts) => {
+              seenCalls.push(opts === undefined ? { uri } : { uri, opts });
+              return Effect.succeed({ thread: focus });
+            }
+          })
+        });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const thread = await expectJsonResponse(
+          await requestApi(`/api/posts/${encodeURIComponent(focusUri)}/thread`, layer),
+          decodePostThread
+        );
+
+        expect(seenCalls).toEqual([
+          {
+            uri: focusUri,
+            opts: {
+              depth: 3,
+              parentHeight: 3
+            }
+          }
+        ]);
+        expect(thread.focusUri).toBe(focusUri);
+        expect(thread.ancestors).toHaveLength(1);
+        expect(thread.ancestors[0]?.uri).toBe(ancestorUri);
+        expect(thread.ancestors[0]?.position).toBe("ancestor");
+        expect(thread.ancestors[0]?.depth).toBe(-1);
+        expect(thread.focus.uri).toBe(focusUri);
+        expect(thread.focus.position).toBe("focus");
+        expect(thread.focus.parentUri).toBe(ancestorUri);
+        expect(thread.focus.embedType).toBe("img");
+        expect(thread.focus.embedContent?.kind).toBe("img");
+        expect(thread.replies).toHaveLength(2);
+        expect(thread.replies[0]?.uri).toBe(replyUri);
+        expect(thread.replies[0]?.position).toBe("reply");
+        expect(thread.replies[0]?.depth).toBe(1);
+        expect(thread.replies[0]?.parentUri).toBe(focusUri);
+        expect(thread.replies[1]?.uri).toBe(nestedReplyUri);
+        expect(thread.replies[1]?.depth).toBe(2);
+        expect(thread.replies[1]?.parentUri).toBe(replyUri);
+        expect(thread.replies[1]?.embedType).toBe("link");
+        expect(thread.replies[1]?.embedContent?.kind).toBe("link");
+      })
+    )
+  );
+
+  it.live("returns 400 for invalid thread query params", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const focusUri = smokeFixtureUris(sampleDid)[0];
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const badDepth = await expectJsonResponse(
+          await requestApi(`/api/posts/${encodeURIComponent(focusUri)}/thread?depth=abc`, layer),
+          (value) => value as { readonly error: string; readonly message: string },
+          400
+        );
+        const badParentHeight = await expectJsonResponse(
+          await requestApi(`/api/posts/${encodeURIComponent(focusUri)}/thread?parentHeight=11`, layer),
+          (value) => value as { readonly error: string; readonly message: string },
+          400
+        );
+
+        expect(badDepth.error).toBe("BadRequest");
+        expect(badDepth.message).toContain("depth");
+        expect(badParentHeight.error).toBe("BadRequest");
+        expect(badParentHeight.message).toContain("parentHeight");
+      })
+    )
+  );
+
+  it.live("returns 404 when thread data cannot be flattened", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const focusUri = smokeFixtureUris(sampleDid)[0];
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeBlueskyLayer({
+            getPostThread: () => Effect.succeed({ thread: {} })
+          })
+        });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const body = await expectJsonResponse(
+          await requestApi(`/api/posts/${encodeURIComponent(focusUri)}/thread`, layer),
+          (value) => value as { readonly error: string; readonly message: string },
+          404
+        );
+
+        expect(body).toEqual({
+          error: "NotFound",
+          message: "post thread not found"
+        });
+      })
+    )
+  );
+
+  it.live("maps Bluesky 404 thread failures to 404", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const focusUri = smokeFixtureUris(sampleDid)[0];
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeBlueskyLayer({
+            getPostThread: () =>
+              Effect.fail(BlueskyApiError.make({
+                message: "not found",
+                status: 404
+              }))
+          })
+        });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const body = await expectJsonResponse(
+          await requestApi(`/api/posts/${encodeURIComponent(focusUri)}/thread`, layer),
+          (value) => value as { readonly error: string; readonly message: string },
+          404
+        );
+
+        expect(body).toEqual({
+          error: "NotFound",
+          message: "post thread not found"
+        });
+      })
+    )
+  );
+
+  it.live("maps non-404 Bluesky thread failures to upstream failure", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const focusUri = smokeFixtureUris(sampleDid)[0];
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeBlueskyLayer({
+            getPostThread: () =>
+              Effect.fail(BlueskyApiError.make({
+                message: "temporary outage",
+                status: 503
+              }))
+          })
+        });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const body = await expectJsonResponse(
+          await requestApi(`/api/posts/${encodeURIComponent(focusUri)}/thread`, layer),
+          (value) => value as { readonly error: string; readonly message: string; readonly retryable?: boolean },
+          502
+        );
+
+        expect(body).toEqual({
+          error: "UpstreamFailure",
+          message: "failed to fetch post thread",
+          retryable: true
+        });
+      })
+    )
+  );
+
   it.live("hydrates recent, search, and expert feeds with reply and embed metadata", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
@@ -302,14 +546,15 @@ describe("frontend REST API", () => {
         ]);
         const layer = makeBiLayer({
           filename,
-          blueskyClient: makeBlueskyLayer((uris) =>
-            Effect.succeed(
-              uris.flatMap((uri) => {
-                const post = hydratedPosts.get(uri);
-                return post === undefined ? [] : [post];
-              })
-            )
-          )
+          blueskyClient: makeBlueskyLayer({
+            getPosts: (uris) =>
+              Effect.succeed(
+                uris.flatMap((uri) => {
+                  const post = hydratedPosts.get(uri);
+                  return post === undefined ? [] : [post];
+                })
+              )
+          })
         });
         await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
 
@@ -346,12 +591,13 @@ describe("frontend REST API", () => {
       withTempSqliteFile(async (filename) => {
         const layer = makeBiLayer({
           filename,
-          blueskyClient: makeBlueskyLayer(() =>
-            Effect.fail(BlueskyApiError.make({
-              message: "temporary outage",
-              status: 503
-            }))
-          )
+          blueskyClient: makeBlueskyLayer({
+            getPosts: () =>
+              Effect.fail(BlueskyApiError.make({
+                message: "temporary outage",
+                status: 503
+              }))
+          })
         });
         await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
 

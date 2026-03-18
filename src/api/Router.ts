@@ -1,7 +1,13 @@
 import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder";
 import { Effect, Layer } from "effect";
 import { makeQueryLayer } from "../edge/Layer";
-import type { KnowledgeLinkResult, KnowledgePostResult } from "../domain/bi";
+import type {
+  KnowledgeLinkResult,
+  KnowledgePostResult,
+  PostThreadOutput as PostThreadOutputShape,
+  ThreadPostPosition as ThreadPostPositionShape,
+  ThreadPostResult as ThreadPostResultShape
+} from "../domain/bi";
 import {
   type ChronologicalCursor,
   encodeChronologicalCursor,
@@ -22,12 +28,20 @@ import type {
   UnauthorizedError as UnauthorizedErrorShape,
   UpstreamFailureError as UpstreamFailureErrorShape
 } from "../domain/api";
+import { BlueskyClient } from "../bluesky/BlueskyClient";
+import { buildTypedEmbed, extractEmbedKind } from "../bluesky/EmbedExtract";
+import type { FlattenedPost } from "../bluesky/ThreadFlatten";
+import { flattenThread } from "../bluesky/ThreadFlatten";
 import type { EnvBindings } from "../platform/Env";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { EditorialService } from "../services/EditorialService";
 import { PostHydrationService } from "../services/PostHydrationService";
 import { handleWithApiLayer, makeCachedApiHandler } from "../http/ApiSupport";
-import { withHttpErrorMapping } from "../http/ErrorMapping";
+import {
+  isTaggedError,
+  toUpstreamFailure,
+  withHttpErrorMapping
+} from "../http/ErrorMapping";
 import { PublicReadApi } from "./PublicReadApi";
 
 const withReadErrors = <A, R>(
@@ -37,6 +51,39 @@ const withReadErrors = <A, R>(
   withHttpErrorMapping(effect, {
     route,
     internalMessage: "internal error"
+  }) as Effect.Effect<
+    A,
+    | BadRequestErrorShape
+    | UnauthorizedErrorShape
+    | ForbiddenErrorShape
+    | NotFoundErrorShape
+    | UpstreamFailureErrorShape
+    | ServiceUnavailableErrorShape
+    | InternalServerErrorShape,
+    R
+  >;
+
+const withThreadReadErrors = <A, R>(
+  route: string,
+  effect: Effect.Effect<A, unknown, R>
+) =>
+  withHttpErrorMapping(effect, {
+    route,
+    internalMessage: "internal error",
+    classify: (error) => {
+      if (isTaggedError(error, "BlueskyApiError")) {
+        const status =
+          "status" in error && typeof error.status === "number"
+            ? error.status
+            : undefined;
+
+        if (status === 404) {
+          return notFoundError("post thread not found");
+        }
+      }
+
+      return toUpstreamFailure("failed to fetch post thread")(error);
+    }
   }) as Effect.Effect<
     A,
     | BadRequestErrorShape
@@ -75,6 +122,43 @@ const hydratePosts = <A extends KnowledgePostResult>(items: ReadonlyArray<A>) =>
   Effect.flatMap(PostHydrationService, (hydration) =>
     hydration.hydratePosts(items)
   );
+
+const extractText = (record: unknown): string => {
+  if (typeof record === "object" && record !== null && "text" in record) {
+    return typeof record.text === "string" ? record.text : "";
+  }
+
+  return "";
+};
+
+const extractCreatedAt = (record: unknown, fallbackIndexedAt: string): string => {
+  if (typeof record === "object" && record !== null && "createdAt" in record) {
+    return typeof record.createdAt === "string" ? record.createdAt : fallbackIndexedAt;
+  }
+
+  return fallbackIndexedAt;
+};
+
+const toThreadPostResult = (
+  flatPost: FlattenedPost,
+  position: ThreadPostPositionShape
+): ThreadPostResultShape => ({
+  uri: flatPost.post.uri as ThreadPostResultShape["uri"],
+  did: flatPost.post.author.did as ThreadPostResultShape["did"],
+  handle: (flatPost.post.author.handle ?? null) as ThreadPostResultShape["handle"],
+  displayName: (flatPost.post.author.displayName ?? null) as ThreadPostResultShape["displayName"],
+  text: extractText(flatPost.post.record),
+  createdAt: extractCreatedAt(flatPost.post.record, flatPost.post.indexedAt),
+  replyCount: (flatPost.post.replyCount ?? null) as ThreadPostResultShape["replyCount"],
+  repostCount: (flatPost.post.repostCount ?? null) as ThreadPostResultShape["repostCount"],
+  likeCount: (flatPost.post.likeCount ?? null) as ThreadPostResultShape["likeCount"],
+  quoteCount: (flatPost.post.quoteCount ?? null) as ThreadPostResultShape["quoteCount"],
+  position,
+  depth: flatPost.depth,
+  parentUri: (flatPost.parentUri ?? null) as ThreadPostResultShape["parentUri"],
+  embedType: extractEmbedKind(flatPost.post.embed) as ThreadPostResultShape["embedType"],
+  embedContent: buildTypedEmbed(flatPost.post.embed) as ThreadPostResultShape["embedContent"]
+});
 
 const PublicReadHandlers = Layer.mergeAll(
   HttpApiBuilder.group(PublicReadApi, "posts", (handlers) =>
@@ -115,6 +199,32 @@ const PublicReadHandlers = Layer.mergeAll(
         withReadErrors("/api/posts/:uri/topics", Effect.flatMap(KnowledgeQueryService, (query) =>
           query.explainPostTopics(path.uri)
         ))
+      )
+      .handle("thread", ({ path, urlParams }) =>
+        withThreadReadErrors(
+          "/api/posts/:uri/thread",
+          Effect.flatMap(BlueskyClient, (bluesky) =>
+            bluesky.getPostThread(path.uri, {
+              depth: urlParams.depth ?? 3,
+              parentHeight: urlParams.parentHeight ?? 3
+            })
+          ).pipe(
+            Effect.flatMap((response) => {
+              const flat = flattenThread(response.thread);
+
+              if (flat === null) {
+                return Effect.fail(notFoundError("post thread not found"));
+              }
+
+              return Effect.succeed({
+                focusUri: flat.focus.post.uri as PostThreadOutputShape["focusUri"],
+                ancestors: flat.ancestors.map((post) => toThreadPostResult(post, "ancestor")),
+                focus: toThreadPostResult(flat.focus, "focus"),
+                replies: flat.replies.map((post) => toThreadPostResult(post, "reply"))
+              } satisfies PostThreadOutputShape);
+            })
+          )
+        )
       )
       .handle("curated", ({ urlParams }) =>
         withReadErrors("/api/posts/curated", Effect.flatMap(EditorialService, (editorial) =>
