@@ -591,6 +591,50 @@ export const PublicReadResponseSchemas = {
   curatedPostsPage: CuratedPostsPageOutput
 } as const;
 
+export const StagingStatsExperts = Schema.Struct({
+  total: Schema.NonNegativeInt,
+  active: Schema.NonNegativeInt
+});
+
+export const StagingStatsPosts = Schema.Struct({
+  total: Schema.NonNegativeInt,
+  inLast24h: Schema.NonNegativeInt,
+  withLinks: Schema.NonNegativeInt
+});
+
+export const StagingStatsCuration = Schema.Struct({
+  flagged: Schema.NonNegativeInt,
+  curated: Schema.NonNegativeInt,
+  rejected: Schema.NonNegativeInt
+});
+
+export const StagingStatsEnrichment = Schema.Struct({
+  queued: Schema.NonNegativeInt,
+  running: Schema.NonNegativeInt,
+  complete: Schema.NonNegativeInt,
+  failed: Schema.NonNegativeInt,
+  needsReview: Schema.NonNegativeInt
+});
+
+export const StagingStatsLastIngest = Schema.Struct({
+  runId: Schema.String,
+  kind: Schema.String,
+  status: Schema.String,
+  startedAt: Schema.NonNegativeInt,
+  finishedAt: Schema.NullOr(Schema.NonNegativeInt),
+  postsSeen: Schema.NonNegativeInt,
+  postsStored: Schema.NonNegativeInt
+});
+
+export const StagingStats = Schema.Struct({
+  timestamp: Schema.NonNegativeInt,
+  experts: StagingStatsExperts,
+  posts: StagingStatsPosts,
+  curation: StagingStatsCuration,
+  enrichment: StagingStatsEnrichment,
+  lastIngest: Schema.NullOr(StagingStatsLastIngest)
+});
+
 export const AdminRequestSchemas = {
   addExpert: AddExpertInput,
   listExperts: ListExpertsUrlParams,
@@ -612,7 +656,8 @@ export const AdminResponseSchemas = {
   seedPublications: SeedPublicationsResult,
   submitEditorialPick: SubmitEditorialPickOutput,
   retractEditorialPick: RemoveEditorialPickOutput,
-  listEditorialPicks: EditorialPicksOutput
+  listEditorialPicks: EditorialPicksOutput,
+  stats: StagingStats
 } as const;
 
 export const IngestRequestSchemas = {
