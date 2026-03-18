@@ -9,6 +9,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.web.json",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json",
+    "dev": "bun --hot scripts/dev.ts",
     "build:web": "bun build src/web/app.tsx --outdir dist --target browser && bunx @tailwindcss/cli -i src/web/styles.css -o dist/styles.css && cp src/web/index.html dist/index.html",
     "build:web:prod": "bun build src/web/app.tsx --outdir dist --target browser --minify && bunx @tailwindcss/cli -i src/web/styles.css -o dist/styles.css --minify && cp src/web/index.html dist/index.html",
     "bootstrap:experts": "bun run src/scripts/bootstrap-experts.ts",
