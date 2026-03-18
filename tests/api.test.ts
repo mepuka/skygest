@@ -1,11 +1,13 @@
 import { Effect, Layer, Schema } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { handleApiRequestWithLayer } from "../src/api/Router";
+import { BlueskyClient } from "../src/bluesky/BlueskyClient";
 import {
   KnowledgeLinksPageOutput,
   KnowledgePostsPageOutput
 } from "../src/domain/api";
-import { DbError } from "../src/domain/errors";
+import type { ThreadPostView } from "../src/bluesky/ThreadTypes";
+import { BlueskyApiError, DbError } from "../src/domain/errors";
 import { KnowledgeQueryService } from "../src/services/KnowledgeQueryService";
 import { smokeFixtureUris } from "../src/staging/SmokeFixture";
 import {
@@ -37,6 +39,46 @@ const requestApi = (path: string, layer: ReturnType<typeof makeBiLayer>) =>
     new Request(`https://skygest.local${path}`),
     layer
   );
+
+const makeThreadPostView = (
+  uri: string,
+  replyCount: number
+): ThreadPostView => ({
+  uri,
+  cid: `cid-${replyCount}`,
+  author: {
+    did: sampleDid,
+    handle: "seed.example.com"
+  },
+  record: {
+    text: `Hydrated ${uri}`
+  },
+  embed: {
+    $type: "app.bsky.embed.images#view",
+    images: [
+      {
+        thumb: `https://cdn.bsky.app/img/feed_thumbnail/plain/${sampleDid}/${replyCount}@jpeg`,
+        fullsize: `https://cdn.bsky.app/img/feed_fullsize/plain/${sampleDid}/${replyCount}@jpeg`,
+        alt: `Image ${replyCount}`
+      }
+    ]
+  },
+  replyCount,
+  indexedAt: "2026-03-18T12:00:00.000Z"
+});
+
+const makeBlueskyLayer = (
+  getPosts: (uris: ReadonlyArray<string>) => Effect.Effect<ReadonlyArray<ThreadPostView>, BlueskyApiError>
+) =>
+  Layer.succeed(BlueskyClient, {
+    resolveDidOrHandle: () => Effect.die("unexpected resolveDidOrHandle"),
+    getProfile: () => Effect.die("unexpected getProfile"),
+    getFollows: () => Effect.die("unexpected getFollows"),
+    resolveRepoService: () => Effect.die("unexpected resolveRepoService"),
+    listRecordsAtService: () => Effect.die("unexpected listRecordsAtService"),
+    getPostThread: () => Effect.die("unexpected getPostThread"),
+    getPosts
+  });
 
 describe("frontend REST API", () => {
   it.live("paginates recent posts with cursors", () =>
@@ -246,6 +288,81 @@ describe("frontend REST API", () => {
         expect(topicResponse.item.slug).toBe("solar");
         expect(expandResponse.canonicalTopicSlugs).toContain("solar");
         expect(explainResponse.items.some((item) => item.topicSlug === "solar")).toBe(true);
+      })
+    )
+  );
+
+  it.live("hydrates recent, search, and expert feeds with reply and embed metadata", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const [solarUri, latestUri] = smokeFixtureUris(sampleDid);
+        const hydratedPosts = new Map<string, ThreadPostView>([
+          [solarUri, makeThreadPostView(solarUri, 3)],
+          [latestUri, makeThreadPostView(latestUri, 7)]
+        ]);
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeBlueskyLayer((uris) =>
+            Effect.succeed(
+              uris.flatMap((uri) => {
+                const post = hydratedPosts.get(uri);
+                return post === undefined ? [] : [post];
+              })
+            )
+          )
+        });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const recent = await expectJsonResponse(
+          await requestApi("/api/posts/recent?limit=1", layer),
+          decodePostsPage
+        );
+        const search = await expectJsonResponse(
+          await requestApi("/api/posts/search?q=solar", layer),
+          decodePostsPage
+        );
+        const expertFeed = await expectJsonResponse(
+          await requestApi(`/api/experts/${encodeURIComponent(sampleDid)}/posts?limit=1`, layer),
+          decodePostsPage
+        );
+
+        expect(recent.items[0]?.replyCount).toBe(7);
+        expect(recent.items[0]?.embedType).toBe("img");
+        expect(recent.items[0]?.embedContent?.kind).toBe("img");
+
+        expect(search.items[0]?.replyCount).toBe(3);
+        expect(search.items[0]?.embedType).toBe("img");
+        expect(search.items[0]?.embedContent?.kind).toBe("img");
+
+        expect(expertFeed.items[0]?.replyCount).toBe(7);
+        expect(expertFeed.items[0]?.embedType).toBe("img");
+        expect(expertFeed.items[0]?.embedContent?.kind).toBe("img");
+      })
+    )
+  );
+
+  it.live("falls back to null hydration metadata when Bluesky lookup fails", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeBlueskyLayer(() =>
+            Effect.fail(BlueskyApiError.make({
+              message: "temporary outage",
+              status: 503
+            }))
+          )
+        });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const page = await expectJsonResponse(
+          await requestApi("/api/posts/recent?limit=1", layer),
+          decodePostsPage
+        );
+
+        expect(page.items[0]?.replyCount).toBeNull();
+        expect(page.items[0]?.embedType).toBeNull();
+        expect(page.items[0]?.embedContent).toBeNull();
       })
     )
   );

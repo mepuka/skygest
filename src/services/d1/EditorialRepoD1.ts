@@ -13,7 +13,7 @@ import {
   ListEditorialPicksInput as ListEditorialPicksInputSchema,
   GetCuratedFeedInput as GetCuratedFeedInputSchema
 } from "../../domain/editorial";
-import type { TopicSlug } from "../../domain/bi";
+import { emptyKnowledgePostHydration, type TopicSlug } from "../../domain/bi";
 import { decodeWithDbError } from "./schemaDecode";
 import { topicFilterExists } from "./queryFragments";
 
@@ -62,6 +62,7 @@ const toCuratedPostResult = (row: CuratedPostRow) => ({
   topics: row.topicsCsv === null || row.topicsCsv.length === 0
     ? []
     : row.topicsCsv.split(",").filter((t) => t.length > 0),
+  ...emptyKnowledgePostHydration(),
   editorialScore: row.editorialScore,
   editorialReason: row.editorialReason,
   editorialCategory: row.editorialCategory

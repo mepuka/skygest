@@ -273,4 +273,79 @@ describe("BlueskyClient", () => {
       expect(error.status).toBeUndefined();
     })
   );
+
+  it.effect("requests repeated uris and decodes hydrated posts", () =>
+    Effect.gen(function* () {
+      const seenUris = yield* Ref.make<ReadonlyArray<string>>([]);
+      const layer = makeHttpLayer((request, url) =>
+        Effect.gen(function* () {
+          yield* Ref.set(seenUris, url.searchParams.getAll("uris"));
+
+          return jsonResponse(request, {
+            posts: [
+              {
+                uri: "at://did:plc:expert-a/app.bsky.feed.post/post-1",
+                cid: "cid-1",
+                author: {
+                  did: "did:plc:expert-a",
+                  handle: "expert-a.bsky.social"
+                },
+                record: {
+                  text: "Hydrated post"
+                },
+                replyCount: 7,
+                indexedAt: "2026-03-18T12:00:00.000Z"
+              }
+            ]
+          });
+        })
+      );
+
+      const posts = yield* Effect.gen(function* () {
+        const client = yield* makeBlueskyClient("https://public.api.bsky.app");
+        return yield* client.getPosts([
+          "at://did:plc:expert-a/app.bsky.feed.post/post-1",
+          "at://did:plc:expert-b/app.bsky.feed.post/post-2"
+        ]);
+      }).pipe(Effect.provide(layer));
+
+      expect(yield* Ref.get(seenUris)).toEqual([
+        "at://did:plc:expert-a/app.bsky.feed.post/post-1",
+        "at://did:plc:expert-b/app.bsky.feed.post/post-2"
+      ]);
+      expect(posts).toHaveLength(1);
+      expect(posts[0]?.uri).toBe("at://did:plc:expert-a/app.bsky.feed.post/post-1");
+      expect(posts[0]?.replyCount).toBe(7);
+      expect(posts[0]?.author.handle).toBe("expert-a.bsky.social");
+    })
+  );
+
+  it.effect("preserves HTTP status from getPosts non-2xx responses", () =>
+    Effect.gen(function* () {
+      const layer = makeHttpLayer((request) =>
+        Effect.succeed(
+          HttpClientResponse.fromWeb(
+            request,
+            new Response(JSON.stringify({ error: "not found" }), {
+              status: 404,
+              headers: { "content-type": "application/json" }
+            })
+          )
+        )
+      );
+
+      const error = yield* Effect.gen(function* () {
+        const client = yield* makeBlueskyClient("https://public.api.bsky.app");
+        return yield* client.getPosts([
+          "at://did:plc:expert-a/app.bsky.feed.post/missing"
+        ]);
+      }).pipe(
+        Effect.provide(layer),
+        Effect.flip
+      );
+
+      expect(error._tag).toBe("BlueskyApiError");
+      expect(error.status).toBe(404);
+    })
+  );
 });

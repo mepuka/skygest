@@ -104,3 +104,8 @@ export const GetPostThreadResponse = Schema.Struct({
   thread: Schema.Unknown
 });
 export type GetPostThreadResponse = Schema.Schema.Type<typeof GetPostThreadResponse>;
+
+export const GetPostsResponse = Schema.Struct({
+  posts: Schema.Array(ThreadPostView)
+});
+export type GetPostsResponse = Schema.Schema.Type<typeof GetPostsResponse>;

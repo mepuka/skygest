@@ -25,6 +25,7 @@ import type {
 import type { EnvBindings } from "../platform/Env";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { EditorialService } from "../services/EditorialService";
+import { PostHydrationService } from "../services/PostHydrationService";
 import { handleWithApiLayer, makeCachedApiHandler } from "../http/ApiSupport";
 import { withHttpErrorMapping } from "../http/ErrorMapping";
 import { PublicReadApi } from "./PublicReadApi";
@@ -70,6 +71,11 @@ const toLinksPage = (
     }
   });
 
+const hydratePosts = <A extends KnowledgePostResult>(items: ReadonlyArray<A>) =>
+  Effect.flatMap(PostHydrationService, (hydration) =>
+    hydration.hydratePosts(items)
+  );
+
 const PublicReadHandlers = Layer.mergeAll(
   HttpApiBuilder.group(PublicReadApi, "posts", (handlers) =>
     handlers
@@ -84,17 +90,25 @@ const PublicReadHandlers = Layer.mergeAll(
             cursor: urlParams.cursor
           })
         )).pipe(
-          Effect.map((page: SearchPostsPageResult) => ({
-            items: Array.from(page.items),
-            page: { nextCursor: encodeSearchPostsCursor(page.nextCursor) }
-          } satisfies KnowledgePostsPageOutput))
+          Effect.flatMap((page: SearchPostsPageResult) =>
+            hydratePosts(page.items).pipe(
+              Effect.map((items) => ({
+                items: Array.from(items),
+                page: { nextCursor: encodeSearchPostsCursor(page.nextCursor) }
+              } satisfies KnowledgePostsPageOutput))
+            )
+          )
         )
       )
       .handle("recent", ({ urlParams }) =>
         withReadErrors("/api/posts/recent", Effect.flatMap(KnowledgeQueryService, (query) =>
           query.getRecentPostsPage(urlParams)
         )).pipe(
-          Effect.map((page) => toPostsPage(page.items, page.nextCursor))
+          Effect.flatMap((page) =>
+            hydratePosts(page.items).pipe(
+              Effect.map((items) => toPostsPage(items, page.nextCursor))
+            )
+          )
         )
       )
       .handle("explainTopics", ({ path }) =>
@@ -111,10 +125,14 @@ const PublicReadHandlers = Layer.mergeAll(
             limit: urlParams.limit
           })
         )).pipe(
-          Effect.map((items) => ({
-            items: Array.from(items),
-            page: { nextCursor: null }
-          }))
+          Effect.flatMap((items) =>
+            hydratePosts(items).pipe(
+              Effect.map((hydratedItems) => ({
+                items: Array.from(hydratedItems),
+                page: { nextCursor: null }
+              }))
+            )
+          )
         )
       )
   ),
@@ -147,7 +165,11 @@ const PublicReadHandlers = Layer.mergeAll(
             cursor: urlParams.cursor
           })
         )).pipe(
-          Effect.map((page) => toPostsPage(page.items, page.nextCursor))
+          Effect.flatMap((page) =>
+            hydratePosts(page.items).pipe(
+              Effect.map((items) => toPostsPage(items, page.nextCursor))
+            )
+          )
         )
       )
   ),

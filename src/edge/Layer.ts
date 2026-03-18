@@ -17,6 +17,7 @@ import { Logging } from "../platform/Logging";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { CandidatePayloadService } from "../services/CandidatePayloadService";
 import { CurationService } from "../services/CurationService";
+import { PostHydrationService } from "../services/PostHydrationService";
 import { CurationRepoD1 } from "../services/d1/CurationRepoD1";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { OntologyCatalog } from "../services/OntologyCatalog";
@@ -69,6 +70,9 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const blueskyLayer = BlueskyClientLayer.pipe(
     Layer.provideMerge(configLayer)
   );
+  const postHydrationLayer = PostHydrationService.layer.pipe(
+    Layer.provideMerge(blueskyLayer)
+  );
   const curationServiceLayer = CurationService.layer.pipe(
     Layer.provideMerge(
       Layer.mergeAll(
@@ -85,6 +89,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     queryRepositoriesLayer,
     configLayer,
     blueskyLayer,
+    postHydrationLayer,
     KnowledgeQueryService.layer.pipe(
       Layer.provideMerge(Layer.mergeAll(queryRepositoriesLayer, configLayer))
     ),

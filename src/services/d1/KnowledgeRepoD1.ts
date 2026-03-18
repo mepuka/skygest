@@ -29,6 +29,7 @@ import {
 } from "../../domain/api";
 import {
   DeletedKnowledgePost as DeletedKnowledgePostSchema,
+  emptyKnowledgePostHydration,
   GetPostLinksQueryInput as GetPostLinksQueryInputSchema,
   GetRecentPostsQueryInput as GetRecentPostsQueryInputSchema,
   KnowledgePost as KnowledgePostSchema,
@@ -103,6 +104,7 @@ const toSearchPostResult = (row: SearchPostRow) => ({
     ? []
     : row.topicsCsv.split(",").filter((t) => t.length > 0),
   snippet: row.snippet,
+  ...emptyKnowledgePostHydration(),
   rank: row.rank
 });
 
@@ -124,7 +126,8 @@ const toPostResult = (row: PostRow) => ({
   createdAt: row.createdAt,
   topics: row.topicsCsv === null || row.topicsCsv.length === 0
     ? []
-    : row.topicsCsv.split(",").filter((topic) => topic.length > 0)
+    : row.topicsCsv.split(",").filter((topic) => topic.length > 0),
+  ...emptyKnowledgePostHydration()
 });
 
 const searchCursorCondition = (

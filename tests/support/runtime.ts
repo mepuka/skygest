@@ -5,7 +5,7 @@ import { SqliteClient } from "@effect/sql-sqlite-node";
 import { Effect, Layer, Schema } from "effect";
 import { energySeedDid, energySeedManifest } from "../../src/bootstrap/CheckedInExpertSeeds";
 import { bootstrapExperts } from "../../src/bootstrap/ExpertSeeds";
-import { layer as BlueskyClientLayer } from "../../src/bluesky/BlueskyClient";
+import { BlueskyClient, layer as BlueskyClientLayer } from "../../src/bluesky/BlueskyClient";
 import { runMigrations } from "../../src/db/migrate";
 import { CandidatePayloadService } from "../../src/services/CandidatePayloadService";
 import { RawEventBatch } from "../../src/domain/types";
@@ -15,6 +15,7 @@ import { handleMcpRequestWithLayer } from "../../src/mcp/Router";
 import { AppConfig, type AppConfigShape } from "../../src/platform/Config";
 import { EditorialService } from "../../src/services/EditorialService";
 import { OntologyCatalog } from "../../src/services/OntologyCatalog";
+import { PostHydrationService } from "../../src/services/PostHydrationService";
 import { KnowledgeQueryService } from "../../src/services/KnowledgeQueryService";
 import { CurationService } from "../../src/services/CurationService";
 import { CandidatePayloadRepoD1 } from "../../src/services/d1/CandidatePayloadRepoD1";
@@ -51,6 +52,7 @@ export const makeSqliteLayer = (filename = ":memory:") =>
 export const makeBiLayer = (options?: {
   readonly filename?: string;
   readonly config?: Partial<AppConfigShape>;
+  readonly blueskyClient?: Layer.Layer<BlueskyClient>;
 }) => {
   const sqliteLayer = makeSqliteLayer(options?.filename);
   const configLayer = Layer.succeed(AppConfig, testConfig(options?.config));
@@ -82,8 +84,11 @@ export const makeBiLayer = (options?: {
     Layer.provideMerge(Layer.mergeAll(editorialRepoLayer, configLayer, ontologyLayer))
   );
 
-  const blueskyLayer = BlueskyClientLayer.pipe(
+  const blueskyLayer = options?.blueskyClient ?? BlueskyClientLayer.pipe(
     Layer.provideMerge(Layer.mergeAll(sqliteLayer, configLayer))
+  );
+  const postHydrationLayer = PostHydrationService.layer.pipe(
+    Layer.provideMerge(blueskyLayer)
   );
 
   const candidatePayloadServiceLayer = CandidatePayloadService.layer.pipe(
@@ -105,6 +110,7 @@ export const makeBiLayer = (options?: {
 
   return Layer.mergeAll(
     baseLayer,
+    postHydrationLayer,
     KnowledgeQueryService.layer.pipe(Layer.provideMerge(baseLayer)),
     editorialServiceLayer,
     candidatePayloadServiceLayer,

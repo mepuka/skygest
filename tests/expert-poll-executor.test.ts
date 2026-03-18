@@ -8,6 +8,7 @@ import type {
   KnowledgePostResult,
   MatchedTopic
 } from "../src/domain/bi";
+import { emptyKnowledgePostHydration as makeEmptyKnowledgePostHydration } from "../src/domain/bi";
 import type { ExpertSyncStateRecord, ListRecordsResult, PollRequest } from "../src/domain/polling";
 import type { AtUri, Did } from "../src/domain/types";
 import { RepoRecordsClient } from "../src/bluesky/RepoRecordsClient";
@@ -35,6 +36,17 @@ const makeExpert = (did: Did): ExpertRecord => ({
   tier: "independent" as const,
   addedAt: 1,
   lastSyncedAt: null
+});
+
+const makeRecentPostResult = (
+  overrides: Partial<KnowledgePostResult> & Pick<KnowledgePostResult, "uri" | "did" | "text" | "createdAt">
+): KnowledgePostResult => ({
+  handle: null,
+  avatar: null,
+  topics: [],
+  tier: "independent",
+  ...makeEmptyKnowledgePostHydration(),
+  ...overrides
 });
 
 const makeRecordPage = (
@@ -299,16 +311,13 @@ describe("ExpertPollExecutor", () => {
           "cursor-2": makeRecordPage(did, ["remote-2", "remote-1"], "cursor-3", Date.UTC(2026, 2, 8, 8, 0, 0))
         },
         recentPosts: [
-          {
+          makeRecentPostResult({
             uri: missingUri,
             did,
-            handle: null,
-            avatar: null,
             text: "solar stale",
             createdAt: Date.UTC(2026, 2, 8, 8, 30, 0),
-            topics: ["solar"],
-            tier: "independent" as const
-          }
+            topics: ["solar"]
+          })
         ]
       });
 
