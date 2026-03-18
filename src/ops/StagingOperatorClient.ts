@@ -1,5 +1,11 @@
 import { Context, Effect, Layer, Schema } from "effect";
 import {
+  FetchHttpClient,
+  HttpBody,
+  HttpClient,
+  HttpClientResponse
+} from "@effect/platform";
+import {
   BootstrapExpertsResult,
   ExpertListOutput,
   LoadSmokeFixtureResult,
@@ -30,90 +36,15 @@ import {
   KnowledgePostsMcpOutput,
   ExpertListMcpOutput
 } from "../mcp/OutputSchemas";
-import {
-  decodeJsonStringWith,
-  encodeJsonString,
-  stringifyUnknown
-} from "../platform/Json";
+import { stringifyUnknown } from "../platform/Json";
 import { StagingRequestError } from "./Errors";
 
 const MigrateResponse = Schema.Struct({
   ok: Schema.Literal(true)
 });
 
-const decodeMigrateResponse = decodeJsonStringWith(MigrateResponse);
-const decodeBootstrapExpertsResponse = decodeJsonStringWith(BootstrapExpertsResult);
-const decodeLoadSmokeFixtureResponse = decodeJsonStringWith(LoadSmokeFixtureResult);
-const decodeRefreshProfilesResponse = decodeJsonStringWith(RefreshProfilesResult);
-const decodeSeedPublicationsResponse = decodeJsonStringWith(SeedPublicationsResult);
-const decodeIngestQueuedResponse = decodeJsonStringWith(IngestQueuedResponse);
-const decodeIngestRepairSummary = decodeJsonStringWith(IngestRepairSummary);
-const decodeIngestRunResponse = decodeJsonStringWith(IngestRunRecord);
-const decodeEnrichmentQueuedResponse = decodeJsonStringWith(EnrichmentQueuedResponse);
-const decodeEnrichmentRepairSummary = decodeJsonStringWith(EnrichmentRepairSummary);
-const decodeEnrichmentRunResponse = decodeJsonStringWith(EnrichmentRunRecord);
-const decodeEnrichmentRunsResponse = decodeJsonStringWith(EnrichmentRunsOutput);
-const decodePublicationsResponse = decodeJsonStringWith(PublicationListOutput);
-const decodeAdminExpertsJsonResponse = decodeJsonStringWith(ExpertListOutput);
-const decodeStagingStatsResponse = decodeJsonStringWith(StagingStats);
 const decodeSearchPostsResponse = decodeCallToolResultWith(KnowledgePostsMcpOutput);
 const decodeMcpExpertsResponse = decodeCallToolResultWith(ExpertListMcpOutput);
-
-const operatorHeaders = (secret: string) => ({
-  "content-type": "application/json",
-  "x-skygest-operator-secret": secret
-});
-
-const endpointUrl = (baseUrl: URL, pathname: string) =>
-  new URL(pathname, baseUrl);
-
-const endpointUrlWithQuery = (
-  baseUrl: URL,
-  pathname: string,
-  query: Record<string, string | undefined>
-) => {
-  const url = endpointUrl(baseUrl, pathname);
-
-  for (const [key, value] of Object.entries(query)) {
-    if (value !== undefined) {
-      url.searchParams.set(key, value);
-    }
-  }
-
-  return url;
-};
-
-const optionalDidBody = (did?: string) =>
-  encodeJsonString(did === undefined ? {} : { did });
-
-const requestJson = <A>(
-  operation: string,
-  request: () => Promise<Response>,
-  decode: (text: string) => A
-) =>
-  Effect.tryPromise({
-    try: async () => {
-      const response = await request();
-      const text = await response.text();
-
-      if (!response.ok) {
-        throw StagingRequestError.make({
-          operation,
-          status: response.status,
-          message: text || response.statusText
-        });
-      }
-
-      return decode(text.length === 0 ? "{}" : text);
-    },
-    catch: (error) =>
-      error instanceof StagingRequestError
-        ? error
-        : StagingRequestError.make({
-          operation,
-          message: stringifyUnknown(error)
-        })
-  });
 
 const callMcpTool = <A>(
   baseUrl: URL,
@@ -144,34 +75,6 @@ const callMcpTool = <A>(
       })
     )
   );
-
-const requestText = (
-  operation: string,
-  request: () => Promise<Response>
-) =>
-  Effect.tryPromise({
-    try: async () => {
-      const response = await request();
-      const text = await response.text();
-
-      if (!response.ok) {
-        throw StagingRequestError.make({
-          operation,
-          status: response.status,
-          message: text || response.statusText
-        });
-      }
-
-      return text;
-    },
-    catch: (error) =>
-      error instanceof StagingRequestError
-        ? error
-        : StagingRequestError.make({
-          operation,
-          message: stringifyUnknown(error)
-        })
-  });
 
 export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperatorClient")<
   StagingOperatorClient,
@@ -278,216 +181,294 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
     ) => Effect.Effect<ReadonlyArray<{ readonly uri: string; readonly topics: ReadonlyArray<string> }>, StagingRequestError>;
   }
 >() {
-  static readonly live = Layer.succeed(StagingOperatorClient, {
-    health: (baseUrl) =>
-      requestText("health", () =>
-        fetch(endpointUrl(baseUrl, "/health"))
-      ),
-    migrate: (baseUrl, secret) =>
-      requestJson(
-        "migrate",
-        () =>
-          fetch(endpointUrl(baseUrl, "/admin/ops/migrate"), {
-            method: "POST",
-            headers: operatorHeaders(secret),
-            body: encodeJsonString({})
-          }),
-        decodeMigrateResponse
-      ),
-    bootstrapExperts: (baseUrl, secret) =>
-      requestJson(
-        "bootstrap-experts",
-        () =>
-          fetch(endpointUrl(baseUrl, "/admin/ops/bootstrap-experts"), {
-            method: "POST",
-            headers: operatorHeaders(secret),
-            body: encodeJsonString({})
-          }),
-        decodeBootstrapExpertsResponse
-      ),
-    loadSmokeFixture: (baseUrl, secret) =>
-      requestJson(
-        "load-smoke-fixture",
-        () =>
-          fetch(endpointUrl(baseUrl, "/admin/ops/load-smoke-fixture"), {
-            method: "POST",
-            headers: operatorHeaders(secret),
-            body: encodeJsonString({})
-          }),
-        decodeLoadSmokeFixtureResponse
-      ),
-    refreshProfiles: (baseUrl, secret) =>
-      requestJson(
-        "refresh-profiles",
-        () =>
-          fetch(endpointUrl(baseUrl, "/admin/ops/refresh-profiles"), {
-            method: "POST",
-            headers: operatorHeaders(secret),
-            body: encodeJsonString({})
-          }),
-        decodeRefreshProfilesResponse
-      ),
-    pollIngest: (baseUrl, secret, did) =>
-      requestJson(
-        "poll-ingest",
-        () =>
-          fetch(endpointUrl(baseUrl, "/admin/ingest/poll"), {
-            method: "POST",
-            headers: operatorHeaders(secret),
-            body: optionalDidBody(did)
-          }),
-        decodeIngestQueuedResponse
-      ),
-    getIngestRun: (baseUrl, secret, runId) =>
-      requestJson(
-        "get-ingest-run",
-        () =>
-          fetch(endpointUrl(baseUrl, `/admin/ingest/runs/${runId}`), {
+  static readonly live = Layer.effect(
+    StagingOperatorClient,
+    Effect.gen(function* () {
+      const http = yield* HttpClient.HttpClient;
+
+      return StagingOperatorClient.of({
+        health: (baseUrl) =>
+          http.get(new URL("/health", baseUrl)).pipe(
+            Effect.flatMap((response) => response.text),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "health",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        migrate: (baseUrl, secret) =>
+          http.post(new URL("/admin/ops/migrate", baseUrl), {
             headers: {
+              "content-type": "application/json",
               "x-skygest-operator-secret": secret
-            }
-          }),
-        decodeIngestRunResponse
-      ),
-    repairIngest: (baseUrl, secret) =>
-      requestJson(
-        "repair-ingest",
-        () =>
-          fetch(endpointUrl(baseUrl, "/admin/ingest/repair"), {
-            method: "POST",
-            headers: operatorHeaders(secret),
-            body: encodeJsonString({})
-          }),
-        decodeIngestRepairSummary
-      ),
-    startEnrichment: (baseUrl, secret, input) =>
-      requestJson(
-        "start-enrichment",
-        () =>
-          fetch(endpointUrl(baseUrl, "/admin/enrichment/start"), {
-            method: "POST",
-            headers: operatorHeaders(secret),
-            body: encodeJsonString({
+            },
+            body: HttpBody.unsafeJson({})
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(MigrateResponse)),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "migrate",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        bootstrapExperts: (baseUrl, secret) =>
+          http.post(new URL("/admin/ops/bootstrap-experts", baseUrl), {
+            headers: {
+              "content-type": "application/json",
+              "x-skygest-operator-secret": secret
+            },
+            body: HttpBody.unsafeJson({})
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(BootstrapExpertsResult)),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "bootstrap-experts",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        loadSmokeFixture: (baseUrl, secret) =>
+          http.post(new URL("/admin/ops/load-smoke-fixture", baseUrl), {
+            headers: {
+              "content-type": "application/json",
+              "x-skygest-operator-secret": secret
+            },
+            body: HttpBody.unsafeJson({})
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(LoadSmokeFixtureResult)),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "load-smoke-fixture",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        refreshProfiles: (baseUrl, secret) =>
+          http.post(new URL("/admin/ops/refresh-profiles", baseUrl), {
+            headers: {
+              "content-type": "application/json",
+              "x-skygest-operator-secret": secret
+            },
+            body: HttpBody.unsafeJson({})
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(RefreshProfilesResult)),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "refresh-profiles",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        pollIngest: (baseUrl, secret, did) =>
+          http.post(new URL("/admin/ingest/poll", baseUrl), {
+            headers: {
+              "content-type": "application/json",
+              "x-skygest-operator-secret": secret
+            },
+            body: HttpBody.unsafeJson(did === undefined ? {} : { did })
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(IngestQueuedResponse)),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "poll-ingest",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        getIngestRun: (baseUrl, secret, runId) =>
+          http.get(new URL(`/admin/ingest/runs/${runId}`, baseUrl), {
+            headers: { "x-skygest-operator-secret": secret }
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(IngestRunRecord)),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "get-ingest-run",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        repairIngest: (baseUrl, secret) =>
+          http.post(new URL("/admin/ingest/repair", baseUrl), {
+            headers: {
+              "content-type": "application/json",
+              "x-skygest-operator-secret": secret
+            },
+            body: HttpBody.unsafeJson({})
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(IngestRepairSummary)),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "repair-ingest",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        startEnrichment: (baseUrl, secret, input) =>
+          http.post(new URL("/admin/enrichment/start", baseUrl), {
+            headers: {
+              "content-type": "application/json",
+              "x-skygest-operator-secret": secret
+            },
+            body: HttpBody.unsafeJson({
               postUri: input.postUri,
               enrichmentType: input.enrichmentType,
               ...(input.schemaVersion === undefined
                 ? {}
                 : { schemaVersion: input.schemaVersion })
             })
-          }),
-        decodeEnrichmentQueuedResponse
-      ),
-    listEnrichmentRuns: (baseUrl, secret, options) =>
-      requestJson(
-        "list-enrichment-runs",
-        () =>
-          fetch(
-            endpointUrlWithQuery(baseUrl, "/admin/enrichment/runs", {
-              status: options?.status,
-              limit: options?.limit === undefined ? undefined : String(options.limit)
-            }),
-            {
-              headers: {
-                "x-skygest-operator-secret": secret
-              }
-            }
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(EnrichmentQueuedResponse)),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "start-enrichment",
+                message: stringifyUnknown(error)
+              })
+            )
           ),
-        (text) => decodeEnrichmentRunsResponse(text).items
-      ),
-    getEnrichmentRun: (baseUrl, secret, runId) =>
-      requestJson(
-        "get-enrichment-run",
-        () =>
-          fetch(endpointUrl(baseUrl, `/admin/enrichment/runs/${runId}`), {
-            headers: {
-              "x-skygest-operator-secret": secret
-            }
-          }),
-        decodeEnrichmentRunResponse
-      ),
-    retryEnrichment: (baseUrl, secret, runId) =>
-      requestJson(
-        "retry-enrichment",
-        () =>
-          fetch(endpointUrl(baseUrl, `/admin/enrichment/runs/${runId}/retry`), {
-            method: "POST",
-            headers: operatorHeaders(secret),
-            body: encodeJsonString({})
-          }),
-        decodeEnrichmentQueuedResponse
-      ),
-    repairEnrichment: (baseUrl, secret) =>
-      requestJson(
-        "repair-enrichment",
-        () =>
-          fetch(endpointUrl(baseUrl, "/admin/enrichment/repair"), {
-            method: "POST",
-            headers: operatorHeaders(secret),
-            body: encodeJsonString({})
-          }),
-        decodeEnrichmentRepairSummary
-      ),
-    seedPublications: (baseUrl, secret) =>
-      requestJson(
-        "seed-publications",
-        () =>
-          fetch(endpointUrl(baseUrl, "/admin/ops/seed-publications"), {
-            method: "POST",
-            headers: operatorHeaders(secret),
-            body: encodeJsonString({})
-          }),
-        decodeSeedPublicationsResponse
-      ),
-    listAdminExperts: (baseUrl, secret) =>
-      requestJson(
-        "admin-experts",
-        () =>
-          fetch(endpointUrl(baseUrl, "/admin/experts"), {
-            headers: {
-              "x-skygest-operator-secret": secret
-            }
-          }),
-        (text) => decodeAdminExpertsJsonResponse(text).items
-      ),
-    listExpertsMcp: (baseUrl, secret) =>
-      callMcpTool(
-        baseUrl,
-        secret,
-        "mcp:list_experts",
-        {
-          name: "list_experts",
-          arguments: { domain: "energy" }
-        },
-        (text) => decodeMcpExpertsResponse(text).items
-      ),
-    getStats: (baseUrl, secret) =>
-      requestJson(
-        "get-stats",
-        () =>
-          fetch(endpointUrl(baseUrl, "/admin/ops/stats"), {
+        listEnrichmentRuns: (baseUrl, secret, options) => {
+          const url = new URL("/admin/enrichment/runs", baseUrl);
+          if (options?.status !== undefined) {
+            url.searchParams.set("status", options.status);
+          }
+          if (options?.limit !== undefined) {
+            url.searchParams.set("limit", String(options.limit));
+          }
+          return http.get(url, {
             headers: { "x-skygest-operator-secret": secret }
-          }),
-        decodeStagingStatsResponse
-      ),
-    listPublications: (baseUrl, secret) =>
-      requestJson(
-        "list-publications",
-        () =>
-          fetch(endpointUrl(baseUrl, "/api/publications?limit=100"), {
-            headers: { "x-skygest-operator-secret": secret }
-          }),
-        (text) => decodePublicationsResponse(text).items
-      ),
-    searchPostsMcp: (baseUrl, secret, query) =>
-      callMcpTool(
-        baseUrl,
-        secret,
-        "mcp:search_posts",
-        {
-          name: "search_posts",
-          arguments: { query }
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(EnrichmentRunsOutput)),
+            Effect.map((output) => output.items),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "list-enrichment-runs",
+                message: stringifyUnknown(error)
+              })
+            )
+          );
         },
-        (text) => decodeSearchPostsResponse(text).items
-      )
-  });
+        getEnrichmentRun: (baseUrl, secret, runId) =>
+          http.get(new URL(`/admin/enrichment/runs/${runId}`, baseUrl), {
+            headers: { "x-skygest-operator-secret": secret }
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(EnrichmentRunRecord)),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "get-enrichment-run",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        retryEnrichment: (baseUrl, secret, runId) =>
+          http.post(new URL(`/admin/enrichment/runs/${runId}/retry`, baseUrl), {
+            headers: {
+              "content-type": "application/json",
+              "x-skygest-operator-secret": secret
+            },
+            body: HttpBody.unsafeJson({})
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(EnrichmentQueuedResponse)),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "retry-enrichment",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        repairEnrichment: (baseUrl, secret) =>
+          http.post(new URL("/admin/enrichment/repair", baseUrl), {
+            headers: {
+              "content-type": "application/json",
+              "x-skygest-operator-secret": secret
+            },
+            body: HttpBody.unsafeJson({})
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(EnrichmentRepairSummary)),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "repair-enrichment",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        seedPublications: (baseUrl, secret) =>
+          http.post(new URL("/admin/ops/seed-publications", baseUrl), {
+            headers: {
+              "content-type": "application/json",
+              "x-skygest-operator-secret": secret
+            },
+            body: HttpBody.unsafeJson({})
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(SeedPublicationsResult)),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "seed-publications",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        listAdminExperts: (baseUrl, secret) =>
+          http.get(new URL("/admin/experts", baseUrl), {
+            headers: { "x-skygest-operator-secret": secret }
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(ExpertListOutput)),
+            Effect.map((output) => output.items),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "admin-experts",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        listExpertsMcp: (baseUrl, secret) =>
+          callMcpTool(
+            baseUrl,
+            secret,
+            "mcp:list_experts",
+            {
+              name: "list_experts",
+              arguments: { domain: "energy" }
+            },
+            (text) => decodeMcpExpertsResponse(text).items
+          ),
+        getStats: (baseUrl, secret) =>
+          http.get(new URL("/admin/ops/stats", baseUrl), {
+            headers: { "x-skygest-operator-secret": secret }
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(StagingStats)),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "get-stats",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        listPublications: (baseUrl, secret) =>
+          http.get(new URL("/api/publications?limit=100", baseUrl), {
+            headers: { "x-skygest-operator-secret": secret }
+          }).pipe(
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(PublicationListOutput)),
+            Effect.map((output) => output.items),
+            Effect.mapError((error) =>
+              StagingRequestError.make({
+                operation: "list-publications",
+                message: stringifyUnknown(error)
+              })
+            )
+          ),
+        searchPostsMcp: (baseUrl, secret, query) =>
+          callMcpTool(
+            baseUrl,
+            secret,
+            "mcp:search_posts",
+            {
+              name: "search_posts",
+              arguments: { query }
+            },
+            (text) => decodeSearchPostsResponse(text).items
+          )
+      });
+    })
+  ).pipe(Layer.provide(FetchHttpClient.layer));
 }
