@@ -69,6 +69,13 @@ describe("operator request policies", () => {
     ).toEqual(["ops:refresh"]);
     expect(
       requiredOperatorScopes(
+        new Request("https://skygest.local/admin/enrichment/start", {
+          method: "POST"
+        })
+      )
+    ).toEqual(["ops:refresh"]);
+    expect(
+      requiredOperatorScopes(
         new Request("https://skygest.local/admin/enrichment/runs/run-1/retry", {
           method: "POST"
         })
@@ -108,6 +115,13 @@ describe("operator request policies", () => {
         })
       )
     ).toBe("repair_ingest");
+    expect(
+      operatorRequestAction(
+        new Request("https://skygest.local/admin/enrichment/start", {
+          method: "POST"
+        })
+      )
+    ).toBe("start_enrichment");
     expect(
       operatorRequestAction(
         new Request("https://skygest.local/admin/enrichment/runs/run-1/retry", {

@@ -130,6 +130,13 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
     };
   }
 
+  if (request.method === "POST" && pathname === "/admin/enrichment/start") {
+    return {
+      action: "start_enrichment",
+      scopes: ["ops:refresh"]
+    };
+  }
+
   if (request.method === "POST" && isEnrichmentRunRetryPath(pathname)) {
     return {
       action: "retry_enrichment",
