@@ -11,6 +11,7 @@ import {
   type CandidatePayloadRecord,
   type SaveCandidateEnrichmentInput
 } from "../../domain/candidatePayload";
+import { isPickedCandidatePayloadStage } from "../../domain/CandidatePayloadPredicates";
 import { CandidatePayloadRepo } from "../CandidatePayloadRepo";
 import {
   decodeJsonColumnWithDbError,
@@ -245,7 +246,7 @@ export const CandidatePayloadRepoD1 = {
                 return Effect.succeed(false);
               }
 
-              if (row.captureStage !== "picked") {
+              if (!isPickedCandidatePayloadStage(row.captureStage)) {
                 return Effect.fail(
                   CandidatePayloadNotPickedError.make({
                     postUri: validated.postUri,

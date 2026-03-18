@@ -3,11 +3,13 @@ import { describe, expect, it } from "@effect/vitest";
 import { vi } from "vitest";
 import type { WorkflowStep } from "cloudflare:workers";
 import type { EnrichmentErrorEnvelope } from "../src/domain/errors";
+import type { EnrichmentExecutionPlan } from "../src/domain/enrichmentPlan";
 import type {
   EnrichmentRunParams,
   EnrichmentRunRecord
 } from "../src/domain/enrichmentRun";
 import type { AtUri } from "../src/domain/types";
+import { EnrichmentPlanner } from "../src/enrichment/EnrichmentPlanner";
 import type { WorkflowEnrichmentEnvBindings } from "../src/platform/Env";
 import { EnrichmentRunsRepo } from "../src/services/EnrichmentRunsRepo";
 
@@ -69,6 +71,51 @@ const makeStep = () =>
     do: async (_name: string, thunk: () => Promise<unknown>) => await thunk()
   }) as unknown as WorkflowStep;
 
+const makePlan = (
+  overrides: Partial<EnrichmentExecutionPlan> = {}
+): EnrichmentExecutionPlan => ({
+  postUri: asAtUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+  enrichmentType: "vision",
+  schemaVersion: "v1",
+  decision: "execute",
+  captureStage: "picked",
+  post: {
+    postUri: asAtUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+    did: "did:plc:test" as any,
+    text: "Stored post text",
+    createdAt: 1,
+    threadCoverage: "focus-only"
+  },
+  embedType: "img",
+  embedPayload: {
+    kind: "img",
+    images: [
+      {
+        thumb: "https://cdn.bsky.app/thumb-1.jpg",
+        fullsize: "https://cdn.bsky.app/full-1.jpg",
+        alt: null
+      }
+    ]
+  },
+  links: [],
+  topicMatches: [],
+  quote: null,
+  linkCards: [],
+  assets: [
+    {
+      assetKey: "embed:0:https://cdn.bsky.app/full-1.jpg",
+      assetType: "image",
+      source: "embed",
+      index: 0,
+      thumb: "https://cdn.bsky.app/thumb-1.jpg",
+      fullsize: "https://cdn.bsky.app/full-1.jpg",
+      alt: null
+    }
+  ],
+  existingEnrichments: [],
+  ...overrides
+});
+
 describe("EnrichmentRunWorkflow", () => {
   it.live("marks a launched run as needs review until execution steps are implemented", () =>
     Effect.promise(async () => {
@@ -79,6 +126,7 @@ describe("EnrichmentRunWorkflow", () => {
       const phases: Array<EnrichmentRunRecord["phase"]> = [];
       const reviewMarks: Array<unknown> = [];
       const failures: Array<unknown> = [];
+      const plannerCalls: Array<unknown> = [];
       const runState = {
         status: "queued" as EnrichmentRunRecord["status"],
         phase: "queued" as EnrichmentRunRecord["phase"],
@@ -119,7 +167,17 @@ describe("EnrichmentRunWorkflow", () => {
             runState.lastProgressAt = input.lastProgressAt;
             runState.error = input.error;
           })
-      });
+      }).pipe(
+        Layer.provideMerge(
+          Layer.succeed(EnrichmentPlanner, {
+            plan: (input) =>
+              Effect.sync(() => {
+                plannerCalls.push(input);
+                return makePlan();
+              })
+          })
+        )
+      );
 
       const workflow = new EnrichmentRunWorkflow(
         {} as ExecutionContext,
@@ -144,6 +202,13 @@ describe("EnrichmentRunWorkflow", () => {
         status: "needs-review"
       });
       expect(phases).toEqual(["assembling", "planning"]);
+      expect(plannerCalls).toEqual([
+        {
+          postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
+          enrichmentType: "vision",
+          schemaVersion: "v1"
+        }
+      ]);
       expect(reviewMarks).toHaveLength(1);
       expect(reviewMarks[0]).toEqual(
         expect.objectContaining({
@@ -184,7 +249,13 @@ describe("EnrichmentRunWorkflow", () => {
             failures.push(input);
           }),
         markNeedsReview: () => Effect.void
-      });
+      }).pipe(
+        Layer.provideMerge(
+          Layer.succeed(EnrichmentPlanner, {
+            plan: () => Effect.succeed(makePlan())
+          })
+        )
+      );
 
       const workflow = new EnrichmentRunWorkflow(
         {} as ExecutionContext,
@@ -216,6 +287,84 @@ describe("EnrichmentRunWorkflow", () => {
             tag: "EnrichmentSchemaDecodeError",
             retryable: false,
             runId: "run-1"
+          })
+        })
+      );
+    })
+  );
+
+  it.live("records a planning stop reason when the planner decides the lane should not run", () =>
+    Effect.promise(async () => {
+      const { EnrichmentRunWorkflow } = await import(
+        "../src/enrichment/EnrichmentRunWorkflow"
+      );
+
+      const reviewMarks: Array<unknown> = [];
+
+      currentLayer = Layer.succeed(EnrichmentRunsRepo, {
+        createQueuedIfAbsent: () => Effect.succeed(true),
+        getById: () => Effect.succeed(makeRunRecord()),
+        listRunning: () => Effect.succeed([]),
+        markPhase: () => Effect.void,
+        markComplete: () => Effect.void,
+        markFailed: () => Effect.void,
+        markNeedsReview: (input) =>
+          Effect.sync(() => {
+            reviewMarks.push(input);
+          })
+      }).pipe(
+        Layer.provideMerge(
+          Layer.succeed(EnrichmentPlanner, {
+            plan: () =>
+              Effect.succeed(
+                makePlan({
+                  decision: "skip",
+                  stopReason: "no-visual-assets",
+                  assets: [],
+                  embedType: "link",
+                  embedPayload: {
+                    kind: "link",
+                    uri: "https://example.com/report",
+                    title: "Grid report",
+                    description: null,
+                    thumb: null
+                  }
+                })
+              )
+          })
+        )
+      );
+
+      const workflow = new EnrichmentRunWorkflow(
+        {} as ExecutionContext,
+        makeEnv()
+      );
+
+      const result = await workflow.run(
+        {
+          instanceId: "run-1",
+          payload: {
+            postUri: asAtUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+            enrichmentType: "vision",
+            schemaVersion: "v1",
+            triggeredBy: "admin",
+            requestedBy: "operator@example.com"
+          } satisfies EnrichmentRunParams
+        } as any,
+        makeStep()
+      );
+
+      expect(result).toEqual({
+        runId: "run-1",
+        status: "needs-review"
+      });
+      expect(reviewMarks).toHaveLength(1);
+      expect(reviewMarks[0]).toEqual(
+        expect.objectContaining({
+          error: expect.objectContaining({
+            tag: "EnrichmentPlanningStopped",
+            message: "planner stopped: the stored post has no visual assets to analyze",
+            retryable: false
           })
         })
       );

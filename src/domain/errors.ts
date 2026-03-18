@@ -1,5 +1,6 @@
 import { Either, Schema } from "effect";
-import { Did } from "./types";
+import { CandidatePayloadStage } from "./candidatePayload";
+import { AtUri, Did } from "./types";
 import {
   decodeJsonStringEitherWith,
   encodeJsonStringWith
@@ -28,6 +29,28 @@ export class EnrichmentRunNotFoundError extends Schema.TaggedError<EnrichmentRun
   "EnrichmentRunNotFoundError",
   {
     runId: Schema.String
+  }
+) {}
+
+export class EnrichmentPayloadMissingError extends Schema.TaggedError<EnrichmentPayloadMissingError>()(
+  "EnrichmentPayloadMissingError",
+  {
+    postUri: AtUri
+  }
+) {}
+
+export class EnrichmentPostContextMissingError extends Schema.TaggedError<EnrichmentPostContextMissingError>()(
+  "EnrichmentPostContextMissingError",
+  {
+    postUri: AtUri
+  }
+) {}
+
+export class EnrichmentPayloadNotPickedError extends Schema.TaggedError<EnrichmentPayloadNotPickedError>()(
+  "EnrichmentPayloadNotPickedError",
+  {
+    postUri: AtUri,
+    captureStage: CandidatePayloadStage
   }
 ) {}
 
@@ -551,6 +574,55 @@ export const toEnrichmentErrorEnvelope = (
           : `enrichment run not found: ${runId}`,
       retryable: false,
       ...(runId === undefined ? {} : { runId })
+    });
+  }
+
+  if (
+    error instanceof EnrichmentPayloadMissingError ||
+    isTagged(error, "EnrichmentPayloadMissingError")
+  ) {
+    const postUri = getStringField(error, "postUri");
+    return withOverrides({
+      tag: "EnrichmentPayloadMissingError",
+      message:
+        postUri === undefined
+          ? "picked payload not found"
+          : `picked payload not found: ${postUri}`,
+      retryable: false
+    });
+  }
+
+  if (
+    error instanceof EnrichmentPostContextMissingError ||
+    isTagged(error, "EnrichmentPostContextMissingError")
+  ) {
+    const postUri = getStringField(error, "postUri");
+    return withOverrides({
+      tag: "EnrichmentPostContextMissingError",
+      message:
+        postUri === undefined
+          ? "stored post context not found"
+          : `stored post context not found: ${postUri}`,
+      retryable: false
+    });
+  }
+
+  if (
+    error instanceof EnrichmentPayloadNotPickedError ||
+    isTagged(error, "EnrichmentPayloadNotPickedError") ||
+    isTagged(error, "CandidatePayloadNotPickedError")
+  ) {
+    const postUri = getStringField(error, "postUri");
+    const captureStage = getStringField(error, "captureStage");
+    return withOverrides({
+      tag: "EnrichmentPayloadNotPickedError",
+      message:
+        postUri === undefined
+          ? "payload is not yet picked"
+          : captureStage === undefined
+            ? `payload is not yet picked: ${postUri}`
+            : `payload is not yet picked: ${postUri} (${captureStage})`,
+      retryable: false
     });
   }
 
