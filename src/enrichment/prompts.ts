@@ -36,7 +36,6 @@ export const VISION_EXTRACTION_PROMPT = `You are an expert energy-sector data an
 
 Additional instructions:
 - altText: Write a concise, accessible description suitable for screen readers. Describe what the chart shows, not just its type.
-- altTextProvenance: Always set to "synthetic" since you are generating this.
 - sourceLines: Extract verbatim source/attribution text (e.g., "Source: EIA", "Data: AESO").
 - temporalCoverage: Use ISO 8601 partial dates (e.g., "2020", "2024-Q3", "2024-01").
 - keyFindings: Energy-domain insights, not generic observations. Be specific about values and trends.

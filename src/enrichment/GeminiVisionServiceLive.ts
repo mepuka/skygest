@@ -21,7 +21,6 @@ import { VisionEnrichment as VisionEnrichmentSchema } from "../domain/enrichment
 import {
   MediaType,
   ChartType,
-  AltTextProvenance,
   ChartAxis,
   ChartSeries,
   ChartSourceLine,
@@ -48,7 +47,6 @@ const GeminiExtractionOutput = Schema.Struct({
   mediaType: MediaType,
   chartTypes: Schema.Array(ChartType),
   altText: Schema.NullOr(Schema.String),
-  altTextProvenance: AltTextProvenance,
   title: Schema.NullOr(Schema.String),
   xAxis: Schema.NullOr(ChartAxis),
   yAxis: Schema.NullOr(ChartAxis),
@@ -235,6 +233,7 @@ export const GeminiVisionServiceLive = Layer.effect(
         const enrichment = yield* Schema.decodeUnknown(VisionEnrichmentSchema)({
           ...geminiResult,
           kind: "vision" as const,
+          altTextProvenance: "synthetic" as const,
           modelId: model,
           processedAt: Date.now()
         }).pipe(
