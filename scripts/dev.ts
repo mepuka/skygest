@@ -1,12 +1,16 @@
 /**
  * Local development server with HMR.
  *
- * Uses Bun's native HTML imports for bundling + hot reload.
+ * Uses Bun's native HTML imports — Bun automatically bundles
+ * the .tsx and .css referenced in index.html.
  * Proxies /api/* to staging.
  *
  * Usage:
  *   bun --hot scripts/dev.ts
  */
+
+// Bun HTML import — triggers automatic bundling of referenced .tsx/.css
+import homepage from "../src/web/index.html";
 
 const STAGING_BASE = process.env.SKYGEST_STAGING_BASE_URL
   ?? "https://skygest-bi-agent-staging.kokokessy.workers.dev";
@@ -14,7 +18,7 @@ const STAGING_BASE = process.env.SKYGEST_STAGING_BASE_URL
 const server = Bun.serve({
   port: 3000,
   routes: {
-    "/": () => new Response(Bun.file("src/web/index.html")),
+    "/": homepage,
   },
   async fetch(req) {
     const url = new URL(req.url);
@@ -41,7 +45,6 @@ const server = Bun.serve({
       }
     }
 
-    // Bun handles static assets (JS, CSS, images) automatically
     return new Response("Not found", { status: 404 });
   },
   development: {
@@ -52,4 +55,3 @@ const server = Bun.serve({
 
 console.log(`Dev server: http://localhost:${server.port}`);
 console.log(`Proxying /api/* → ${STAGING_BASE}`);
-console.log(`HMR enabled`);
