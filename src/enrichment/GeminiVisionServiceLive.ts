@@ -8,12 +8,27 @@
  *
  * Uses structured output (responseMimeType + responseJsonSchema) to get
  * typed JSON responses directly from Gemini.
+ *
+ * JSON schemas for Gemini structured output are derived from Effect schemas
+ * via JsonSchema.fromAST(), keeping enum values in sync with domain types.
  */
 
 import { GoogleGenAI, createUserContent, createPartFromUri } from "@google/genai";
 import { Config, Effect, Layer, Schema } from "effect";
+import * as JsonSchema from "effect/JSONSchema";
+import * as AST from "effect/SchemaAST";
 import { VisionEnrichment as VisionEnrichmentSchema } from "../domain/enrichment";
+import {
+  MediaType,
+  ChartType,
+  AltTextProvenance,
+  ChartAxis,
+  ChartSeries,
+  ChartSourceLine,
+  TemporalCoverage
+} from "../domain/media";
 import { GeminiApiError, GeminiParseError } from "../domain/errors";
+import { formatSchemaParseError } from "../platform/Json";
 import {
   GeminiVisionService,
   ImageClassification,
@@ -27,218 +42,49 @@ import {
 const DEFAULT_MODEL = "gemini-2.5-flash";
 
 // ---------------------------------------------------------------------------
-// JSON Schemas for Gemini structured output
+// Gemini extraction output schema (subset of VisionEnrichment without runtime fields)
 // ---------------------------------------------------------------------------
 
-// These enum values must match the Schema.Literal members in src/domain/media.ts
-const MEDIA_TYPE_ENUM = [
-  "chart",
-  "document-excerpt",
-  "photo",
-  "infographic",
-  "video"
-] as const;
+const GeminiExtractionOutput = Schema.Struct({
+  mediaType: MediaType,
+  chartTypes: Schema.Array(ChartType),
+  altText: Schema.NullOr(Schema.String),
+  altTextProvenance: AltTextProvenance,
+  title: Schema.NullOr(Schema.String),
+  xAxis: Schema.NullOr(ChartAxis),
+  yAxis: Schema.NullOr(ChartAxis),
+  series: Schema.Array(ChartSeries),
+  sourceLines: Schema.Array(ChartSourceLine),
+  temporalCoverage: Schema.NullOr(TemporalCoverage),
+  keyFindings: Schema.Array(Schema.String)
+});
 
-// These enum values must match the Schema.Literal members in src/domain/media.ts
-const CHART_TYPE_ENUM = [
-  "area-chart",
-  "bar-chart",
-  "candlestick-chart",
-  "choropleth-map",
-  "data-table",
-  "dual-axis-chart",
-  "heatmap",
-  "line-chart",
-  "pie-chart",
-  "point-map",
-  "sankey-diagram",
-  "scatter-plot",
-  "stacked-bar-chart",
-  "treemap"
-] as const;
+// ---------------------------------------------------------------------------
+// JSON Schemas for Gemini structured output (derived from Effect schemas)
+// ---------------------------------------------------------------------------
 
-// These enum values must match the Schema.Literal members in src/domain/media.ts
-const ALT_TEXT_PROVENANCE_ENUM = ["original", "synthetic", "absent"] as const;
-
-/**
- * Lightweight classification schema — used by classifyImage.
- */
-const CLASSIFICATION_JSON_SCHEMA = {
-  type: "object",
-  properties: {
-    mediaType: {
-      type: "string",
-      enum: [...MEDIA_TYPE_ENUM],
-      description: "The primary media type of the image content."
-    },
-    chartTypes: {
-      type: "array",
-      items: {
-        type: "string",
-        enum: [...CHART_TYPE_ENUM]
-      },
-      description:
-        "Chart types present in the image. Empty array if not a chart."
-    },
-    hasDataPoints: {
-      type: "boolean",
-      description:
-        "True if the image contains extractable quantitative data points."
-    }
-  },
-  required: ["mediaType", "chartTypes", "hasDataPoints"]
-} as const;
-
-/**
- * Full extraction schema — used by extractChartData.
- * Matches the VisionEnrichment domain shape.
- */
-const EXTRACTION_JSON_SCHEMA = {
-  type: "object",
-  properties: {
-    mediaType: {
-      type: "string",
-      enum: [...MEDIA_TYPE_ENUM],
-      description: "The primary media type of the image."
-    },
-    chartTypes: {
-      type: "array",
-      items: {
-        type: "string",
-        enum: [...CHART_TYPE_ENUM]
-      },
-      description: "All chart types present in the image."
-    },
-    altText: {
-      type: "string",
-      nullable: true,
-      description:
-        "A concise, accessible alt-text description of the image. Null only if the image is completely uninterpretable."
-    },
-    altTextProvenance: {
-      type: "string",
-      enum: [...ALT_TEXT_PROVENANCE_ENUM],
-      description:
-        "Set to 'synthetic' since this alt text is AI-generated."
-    },
-    title: {
-      type: "string",
-      nullable: true,
-      description:
-        "The chart or image title as it appears in the image. Null if none visible."
-    },
-    xAxis: {
+const makeJsonSchema = (ast: AST.AST): JsonSchema.JsonSchema7 => {
+  const props = AST.getPropertySignatures(ast);
+  if (props.length === 0) {
+    return {
       type: "object",
-      nullable: true,
-      properties: {
-        label: {
-          type: "string",
-          nullable: true,
-          description: "X-axis label text."
-        },
-        unit: {
-          type: "string",
-          nullable: true,
-          description: "X-axis unit (e.g. 'years', 'months', 'MW')."
-        }
-      },
-      required: ["label", "unit"],
-      description: "X-axis metadata. Null if no x-axis is present."
-    },
-    yAxis: {
-      type: "object",
-      nullable: true,
-      properties: {
-        label: {
-          type: "string",
-          nullable: true,
-          description: "Y-axis label text."
-        },
-        unit: {
-          type: "string",
-          nullable: true,
-          description: "Y-axis unit (e.g. 'GWh', 'USD/MWh', '%')."
-        }
-      },
-      required: ["label", "unit"],
-      description: "Y-axis metadata. Null if no y-axis is present."
-    },
-    series: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          legendLabel: {
-            type: "string",
-            description: "The label for this data series as shown in the legend."
-          },
-          unit: {
-            type: "string",
-            nullable: true,
-            description: "Unit for this series if different from the axis unit."
-          }
-        },
-        required: ["legendLabel", "unit"]
-      },
-      description: "Data series visible in the chart. Empty array if none."
-    },
-    sourceLines: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          sourceText: {
-            type: "string",
-            description:
-              "Verbatim source/attribution text from the image (e.g. 'Source: EIA')."
-          }
-        },
-        required: ["sourceText"]
-      },
-      description:
-        "Source attribution lines visible in the image. Empty array if none."
-    },
-    temporalCoverage: {
-      type: "object",
-      nullable: true,
-      properties: {
-        startDate: {
-          type: "string",
-          nullable: true,
-          description: "Start date of the data (ISO 8601 or partial, e.g. '2020' or '2020-01')."
-        },
-        endDate: {
-          type: "string",
-          nullable: true,
-          description: "End date of the data (ISO 8601 or partial, e.g. '2024' or '2024-12')."
-        }
-      },
-      required: ["startDate", "endDate"],
-      description: "Temporal range of the data shown. Null if not time-series data."
-    },
-    keyFindings: {
-      type: "array",
-      items: {
-        type: "string"
-      },
-      description:
-        "1-5 key findings or takeaways from the image, written as concise energy-domain statements."
-    }
-  },
-  required: [
-    "mediaType",
-    "chartTypes",
-    "altText",
-    "altTextProvenance",
-    "title",
-    "xAxis",
-    "yAxis",
-    "series",
-    "sourceLines",
-    "temporalCoverage",
-    "keyFindings"
-  ]
-} as const;
+      properties: {},
+      required: [],
+      additionalProperties: false
+    };
+  }
+  const $defs = {};
+  const schema = JsonSchema.fromAST(ast, {
+    definitions: $defs,
+    topLevelReferenceStrategy: "skip"
+  });
+  if (Object.keys($defs).length === 0) return schema;
+  (schema as any).$defs = $defs;
+  return schema;
+};
+
+const CLASSIFICATION_JSON_SCHEMA = makeJsonSchema(ImageClassification.ast);
+const EXTRACTION_JSON_SCHEMA = makeJsonSchema(GeminiExtractionOutput.ast);
 
 // ---------------------------------------------------------------------------
 // Prompts
@@ -352,21 +198,12 @@ export const GeminiVisionServiceLive = Layer.effect(
           });
         }
 
-        const parsed = yield* Effect.try({
-          try: () => JSON.parse(rawText) as unknown,
-          catch: () =>
-            new GeminiParseError({
-              message: "Failed to parse classification JSON",
-              rawOutput: rawText
-            })
-        });
-
-        const classification = yield* Schema.decodeUnknown(ImageClassification)(
-          parsed
-        ).pipe(
+        const classification = yield* Schema.decodeUnknown(
+          Schema.parseJson(ImageClassification)
+        )(rawText).pipe(
           Effect.mapError((error) =>
             new GeminiParseError({
-              message: `Classification schema validation failed: ${error.message}`,
+              message: `Classification parse/validation failed: ${formatSchemaParseError(error)}`,
               rawOutput: rawText
             })
           )
@@ -413,29 +250,27 @@ export const GeminiVisionServiceLive = Layer.effect(
           });
         }
 
-        const parsed = yield* Effect.try({
-          try: () => JSON.parse(rawText) as unknown,
-          catch: () =>
+        const geminiResult = yield* Schema.decodeUnknown(
+          Schema.parseJson(GeminiExtractionOutput)
+        )(rawText).pipe(
+          Effect.mapError((error) =>
             new GeminiParseError({
-              message: "Failed to parse extraction JSON",
+              message: `Extraction parse/validation failed: ${formatSchemaParseError(error)}`,
               rawOutput: rawText
             })
-        });
+          )
+        );
 
         // Merge Gemini output with runtime fields to form VisionEnrichment
-        const enrichmentInput = {
-          ...(parsed as Record<string, unknown>),
+        const enrichment = yield* Schema.decodeUnknown(VisionEnrichmentSchema)({
+          ...geminiResult,
           kind: "vision" as const,
           modelId: model,
           processedAt: Date.now()
-        };
-
-        const enrichment = yield* Schema.decodeUnknown(VisionEnrichmentSchema)(
-          enrichmentInput
-        ).pipe(
+        }).pipe(
           Effect.mapError((error) =>
             new GeminiParseError({
-              message: `Extraction schema validation failed: ${error.message}`,
+              message: `VisionEnrichment validation failed: ${formatSchemaParseError(error)}`,
               rawOutput: rawText
             })
           )
