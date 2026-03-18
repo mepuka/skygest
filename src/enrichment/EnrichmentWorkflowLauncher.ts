@@ -13,6 +13,7 @@ import {
 import { WorkflowEnrichmentEnv } from "../platform/Env";
 import { formatSchemaParseError, stringifyUnknown } from "../platform/Json";
 import { EnrichmentRunsRepo } from "../services/EnrichmentRunsRepo";
+import { VISION_PROMPT_VERSION } from "./prompts";
 
 const decodeEnrichmentRunParams = (input: unknown, operation: string) =>
   (() => {
@@ -62,6 +63,12 @@ export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/Enrichment
         const validatedParams = yield* decodeEnrichmentRunParams(params, operation);
         const runId = crypto.randomUUID();
         const startedAt = Date.now();
+        const modelLane = validatedParams.enrichmentType === "vision"
+          ? env.GEMINI_VISION_MODEL ?? "gemini-2.5-flash"
+          : null;
+        const promptVersion = validatedParams.enrichmentType === "vision"
+          ? VISION_PROMPT_VERSION
+          : null;
 
         const inserted = yield* runs.createQueuedIfAbsent({
           id: runId,
@@ -71,8 +78,8 @@ export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/Enrichment
           schemaVersion: validatedParams.schemaVersion,
           triggeredBy: validatedParams.triggeredBy,
           requestedBy: validatedParams.requestedBy ?? null,
-          modelLane: null,
-          promptVersion: null,
+          modelLane,
+          promptVersion,
           inputFingerprint: null,
           startedAt
         });

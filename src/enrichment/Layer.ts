@@ -12,6 +12,7 @@ import { EnrichmentPlanner } from "./EnrichmentPlanner";
 import { EnrichmentRepairService } from "./EnrichmentRepairService";
 import { EnrichmentWorkflowLauncher } from "./EnrichmentWorkflowLauncher";
 import { GeminiVisionServiceLive } from "./GeminiVisionServiceLive";
+import { VisionEnrichmentExecutor } from "./VisionEnrichmentExecutor";
 
 export const makeWorkflowEnrichmentLayer = (
   env: WorkflowEnrichmentEnvBindings
@@ -56,8 +57,11 @@ export const makeWorkflowEnrichmentLayer = (
       Layer.mergeAll(workflowEnvLayer, runsLayer)
     )
   );
-  const visionLayer = GeminiVisionServiceLive.pipe(
+  const visionServiceLayer = GeminiVisionServiceLive.pipe(
     Layer.provideMerge(baseLayer)
+  );
+  const visionExecutorLayer = VisionEnrichmentExecutor.layer.pipe(
+    Layer.provideMerge(visionServiceLayer)
   );
 
   return Layer.mergeAll(
@@ -68,6 +72,7 @@ export const makeWorkflowEnrichmentLayer = (
     plannerLayer,
     launcherLayer,
     repairLayer,
-    visionLayer
+    visionServiceLayer,
+    visionExecutorLayer
   );
 };

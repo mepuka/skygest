@@ -42,6 +42,7 @@ import {
   EnrichmentRunStatus,
   EnrichmentRunsOutput
 } from "./enrichmentRun";
+import { EnrichmentKind } from "./enrichment";
 import {
   EditorialScore,
   SubmitEditorialPickInput,
@@ -552,6 +553,17 @@ export type ListEnrichmentRunsUrlParams = Schema.Schema.Type<
   typeof ListEnrichmentRunsUrlParams
 >;
 
+export const StartEnrichmentInput = Schema.Struct({
+  postUri: AtUri,
+  enrichmentType: EnrichmentKind,
+  schemaVersion: Schema.optional(
+    Schema.String.pipe(Schema.minLength(1))
+  )
+});
+export type StartEnrichmentInput = Schema.Schema.Type<
+  typeof StartEnrichmentInput
+>;
+
 export const PublicReadRequestSchemas = {
   searchPosts: SearchPostsUrlParams,
   recentPosts: GetRecentPostsPageUrlParams,
@@ -618,6 +630,7 @@ export const IngestResponseSchemas = {
 } as const;
 
 export const EnrichmentRequestSchemas = {
+  start: StartEnrichmentInput,
   runPath: EnrichmentRunPathParams,
   runs: ListEnrichmentRunsUrlParams
 } as const;

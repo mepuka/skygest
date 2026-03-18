@@ -369,7 +369,7 @@ describe("GeminiVisionService", () => {
 
   describe("extractChartData", () => {
     it.effect(
-      "returns VisionEnrichment with runtime fields for valid response",
+      "returns VisionAssetAnalysis with runtime fields for valid response",
       () =>
         Effect.gen(function* () {
           mockGenerateContent.mockReset();
@@ -385,7 +385,6 @@ describe("GeminiVisionService", () => {
           );
 
           // Runtime fields injected by the service
-          expect(result.kind).toBe("vision");
           expect(result.modelId).toBe("test-model");
           expect(result.processedAt).toBeGreaterThanOrEqual(before);
           expect(result.processedAt).toBeLessThanOrEqual(Date.now());
@@ -548,7 +547,6 @@ describe("GeminiVisionService", () => {
             "image/jpeg"
           );
 
-          expect(result.kind).toBe("vision");
           expect(result.modelId).toBe("test-model");
           expect(result.mediaType).toBe("photo");
           expect(result.altText).toBeNull();

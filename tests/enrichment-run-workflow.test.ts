@@ -3,6 +3,7 @@ import { describe, expect, it } from "@effect/vitest";
 import { vi } from "vitest";
 import type { WorkflowStep } from "cloudflare:workers";
 import type { EnrichmentErrorEnvelope } from "../src/domain/errors";
+import type { VisionEnrichment } from "../src/domain/enrichment";
 import type { EnrichmentExecutionPlan } from "../src/domain/enrichmentPlan";
 import type {
   EnrichmentRunParams,
@@ -10,7 +11,9 @@ import type {
 } from "../src/domain/enrichmentRun";
 import type { AtUri } from "../src/domain/types";
 import { EnrichmentPlanner } from "../src/enrichment/EnrichmentPlanner";
+import { VisionEnrichmentExecutor } from "../src/enrichment/VisionEnrichmentExecutor";
 import type { WorkflowEnrichmentEnvBindings } from "../src/platform/Env";
+import { CandidatePayloadRepo } from "../src/services/CandidatePayloadRepo";
 import { EnrichmentRunsRepo } from "../src/services/EnrichmentRunsRepo";
 
 let currentLayer: Layer.Layer<any, any, never>;
@@ -116,17 +119,66 @@ const makePlan = (
   ...overrides
 });
 
+const makeVisionEnrichment = (): VisionEnrichment => ({
+  kind: "vision",
+  summary: {
+    text: "Bar chart of Alberta pool prices by month.",
+    mediaTypes: ["chart"],
+    chartTypes: ["bar-chart"],
+    titles: ["Alberta pool prices"],
+    keyFindings: [
+      {
+        text: "Prices rose through the summer",
+        assetKeys: ["embed:0:https://cdn.bsky.app/full-1.jpg"]
+      }
+    ]
+  },
+  assets: [
+    {
+      assetKey: "embed:0:https://cdn.bsky.app/full-1.jpg",
+      assetType: "image",
+      source: "embed",
+      index: 0,
+      originalAltText: null,
+      analysis: {
+        mediaType: "chart",
+        chartTypes: ["bar-chart"],
+        altText: "Bar chart of Alberta pool prices by month.",
+        altTextProvenance: "synthetic",
+        xAxis: { label: "Month", unit: null },
+        yAxis: { label: "Price", unit: "$/MWh" },
+        series: [{ legendLabel: "Pool price", unit: "$/MWh" }],
+        sourceLines: [{ sourceText: "Source: AESO" }],
+        temporalCoverage: {
+          startDate: "2024-01",
+          endDate: "2024-12"
+        },
+        keyFindings: ["Prices rose through the summer"],
+        title: "Alberta pool prices",
+        modelId: "gemini-2.5-flash",
+        processedAt: 10
+      }
+    }
+  ],
+  modelId: "gemini-2.5-flash",
+  promptVersion: "v1.0.0",
+  processedAt: 10
+});
+
 describe("EnrichmentRunWorkflow", () => {
-  it.live("marks a launched run as needs review until execution steps are implemented", () =>
+  it.live("completes a vision run and persists the enrichment payload", () =>
     Effect.promise(async () => {
       const { EnrichmentRunWorkflow } = await import(
         "../src/enrichment/EnrichmentRunWorkflow"
       );
 
       const phases: Array<EnrichmentRunRecord["phase"]> = [];
+      const completions: Array<unknown> = [];
+      const persisted: Array<unknown> = [];
       const reviewMarks: Array<unknown> = [];
       const failures: Array<unknown> = [];
       const plannerCalls: Array<unknown> = [];
+      const executorCalls: Array<unknown> = [];
       const runState = {
         status: "queued" as EnrichmentRunRecord["status"],
         phase: "queued" as EnrichmentRunRecord["phase"],
@@ -154,7 +206,14 @@ describe("EnrichmentRunWorkflow", () => {
             }
           }),
         resetForRetry: () => Effect.succeed(false),
-        markComplete: () => Effect.void,
+        markComplete: (input) =>
+          Effect.sync(() => {
+            completions.push(input);
+            runState.status = "complete";
+            runState.phase = "complete";
+            runState.finishedAt = input.finishedAt;
+            runState.lastProgressAt = input.finishedAt;
+          }),
         markFailed: (input) =>
           Effect.sync(() => {
             failures.push(input);
@@ -173,13 +232,32 @@ describe("EnrichmentRunWorkflow", () => {
           })
       }).pipe(
         Layer.provideMerge(
-          Layer.succeed(EnrichmentPlanner, {
-            plan: (input) =>
-              Effect.sync(() => {
-                plannerCalls.push(input);
-                return makePlan();
-              })
-          })
+          Layer.mergeAll(
+            Layer.succeed(EnrichmentPlanner, {
+              plan: (input) =>
+                Effect.sync(() => {
+                  plannerCalls.push(input);
+                  return makePlan();
+                })
+            }),
+            Layer.succeed(VisionEnrichmentExecutor, {
+              execute: (input) =>
+                Effect.sync(() => {
+                  executorCalls.push(input);
+                  return makeVisionEnrichment();
+                })
+            }),
+            Layer.succeed(CandidatePayloadRepo, {
+              upsertCapture: () => Effect.succeed(false),
+              getByPostUri: () => Effect.succeed(null),
+              markPicked: () => Effect.succeed(false),
+              saveEnrichment: (input) =>
+                Effect.sync(() => {
+                  persisted.push(input);
+                  return true;
+                })
+            })
+          )
         )
       );
 
@@ -203,9 +281,9 @@ describe("EnrichmentRunWorkflow", () => {
 
       expect(result).toEqual({
         runId: "run-1",
-        status: "needs-review"
+        status: "complete"
       });
-      expect(phases).toEqual(["assembling", "planning"]);
+      expect(phases).toEqual(["assembling", "planning", "executing", "persisting"]);
       expect(plannerCalls).toEqual([
         {
           postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
@@ -213,19 +291,16 @@ describe("EnrichmentRunWorkflow", () => {
           schemaVersion: "v1"
         }
       ]);
-      expect(reviewMarks).toHaveLength(1);
-      expect(reviewMarks[0]).toEqual(
-        expect.objectContaining({
-          id: "run-1",
-          error: expect.objectContaining({
-            tag: "EnrichmentExecutionDeferred",
-            message: "enrichment execution lane not implemented yet",
-            retryable: false,
-            runId: "run-1",
-            operation: "EnrichmentRunWorkflow.run"
-          })
-        })
-      );
+      expect(executorCalls).toEqual([makePlan()]);
+      expect(persisted).toEqual([
+        {
+          postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
+          enrichmentType: "vision",
+          enrichmentPayload: makeVisionEnrichment()
+        }
+      ]);
+      expect(completions).toHaveLength(1);
+      expect(reviewMarks).toEqual([]);
       expect(failures).toEqual([]);
     })
   );

@@ -30,12 +30,14 @@ export const EnrichmentKind = Schema.Literal(
 );
 export type EnrichmentKind = Schema.Schema.Type<typeof EnrichmentKind>;
 
+const VisionAssetType = Schema.Literal("image", "video");
+const VisionAssetSource = Schema.Literal("embed", "media");
+
 // ---------------------------------------------------------------------------
 // Vision enrichment (SKY-16: chart analysis + alt text)
 // ---------------------------------------------------------------------------
 
-export const VisionEnrichment = Schema.Struct({
-  kind: Schema.Literal("vision"),
+export const VisionAssetAnalysis = Schema.Struct({
   mediaType: MediaType,
   chartTypes: Schema.Array(ChartType),
   altText: Schema.NullOr(Schema.String),
@@ -48,6 +50,45 @@ export const VisionEnrichment = Schema.Struct({
   keyFindings: Schema.Array(Schema.String),
   title: Schema.NullOr(Schema.String),
   modelId: Schema.String,
+  processedAt: Schema.Number
+});
+export type VisionAssetAnalysis = Schema.Schema.Type<typeof VisionAssetAnalysis>;
+
+export const VisionSynthesisFinding = Schema.Struct({
+  text: Schema.String.pipe(Schema.minLength(1)),
+  assetKeys: Schema.Array(Schema.String.pipe(Schema.minLength(1)))
+});
+export type VisionSynthesisFinding = Schema.Schema.Type<
+  typeof VisionSynthesisFinding
+>;
+
+export const VisionPostSummary = Schema.Struct({
+  text: Schema.String.pipe(Schema.minLength(1)),
+  mediaTypes: Schema.Array(MediaType),
+  chartTypes: Schema.Array(ChartType),
+  titles: Schema.Array(Schema.String.pipe(Schema.minLength(1))),
+  keyFindings: Schema.Array(VisionSynthesisFinding)
+});
+export type VisionPostSummary = Schema.Schema.Type<typeof VisionPostSummary>;
+
+export const VisionAssetEnrichment = Schema.Struct({
+  assetKey: Schema.String.pipe(Schema.minLength(1)),
+  assetType: VisionAssetType,
+  source: VisionAssetSource,
+  index: Schema.NonNegativeInt,
+  originalAltText: Schema.NullOr(Schema.String),
+  analysis: VisionAssetAnalysis
+});
+export type VisionAssetEnrichment = Schema.Schema.Type<
+  typeof VisionAssetEnrichment
+>;
+
+export const VisionEnrichment = Schema.Struct({
+  kind: Schema.Literal("vision"),
+  summary: VisionPostSummary,
+  assets: Schema.Array(VisionAssetEnrichment),
+  modelId: Schema.String,
+  promptVersion: Schema.String.pipe(Schema.minLength(1)),
   processedAt: Schema.Number
 });
 export type VisionEnrichment = Schema.Schema.Type<typeof VisionEnrichment>;

@@ -123,6 +123,18 @@ export type EnrichmentExecutionPlan = Schema.Schema.Type<
   typeof EnrichmentExecutionPlan
 >;
 
+export const isVisionExecutionPlan = (
+  plan: EnrichmentExecutionPlan
+): plan is EnrichmentExecutionPlan & {
+  readonly enrichmentType: "vision";
+  readonly decision: "execute";
+} => plan.enrichmentType === "vision" && plan.decision === "execute";
+
+export const VisionExecutionPlan = EnrichmentExecutionPlan.pipe(
+  Schema.filter(isVisionExecutionPlan)
+);
+export type VisionExecutionPlan = Schema.Schema.Type<typeof VisionExecutionPlan>;
+
 export const describeEnrichmentPlanStopReason = (
   reason: EnrichmentPlannerStopReason
 ) => {

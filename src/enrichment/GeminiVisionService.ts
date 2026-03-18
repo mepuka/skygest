@@ -10,7 +10,7 @@
  */
 
 import { Context, Effect, Schema } from "effect";
-import type { VisionEnrichment } from "../domain/enrichment";
+import type { VisionAssetAnalysis } from "../domain/enrichment";
 import { MediaType, ChartType } from "../domain/media";
 import type { GeminiApiError, GeminiParseError } from "../domain/errors";
 
@@ -55,6 +55,6 @@ export class GeminiVisionService extends Context.Tag("@skygest/GeminiVisionServi
     readonly extractChartData: (
       imageUri: string,
       mimeType: string
-    ) => Effect.Effect<VisionEnrichment, GeminiApiError | GeminiParseError>;
+    ) => Effect.Effect<VisionAssetAnalysis, GeminiApiError | GeminiParseError>;
   }
 >() {}

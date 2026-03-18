@@ -4,7 +4,7 @@
  *
  * Two-pass pattern:
  * 1. classifyImage — lightweight classification with small JSON schema
- * 2. extractChartData — full VisionEnrichment extraction with detailed schema
+ * 2. extractChartData — full asset analysis extraction with detailed schema
  *
  * Uses structured output (responseMimeType + responseJsonSchema) to get
  * typed JSON responses directly from Gemini.
@@ -17,7 +17,7 @@ import { GoogleGenAI, createUserContent, createPartFromUri } from "@google/genai
 import { Config, Effect, Layer, Schema } from "effect";
 import * as JsonSchema from "effect/JSONSchema";
 import * as AST from "effect/SchemaAST";
-import { VisionEnrichment as VisionEnrichmentSchema } from "../domain/enrichment";
+import { VisionAssetAnalysis as VisionAssetAnalysisSchema } from "../domain/enrichment";
 import {
   MediaType,
   ChartType,
@@ -35,12 +35,11 @@ import {
 } from "./GeminiVisionService";
 import {
   VISION_CLASSIFICATION_PROMPT,
-  VISION_EXTRACTION_PROMPT,
-  VISION_PROMPT_VERSION
+  VISION_EXTRACTION_PROMPT
 } from "./prompts";
 
 // ---------------------------------------------------------------------------
-// Gemini extraction output schema (subset of VisionEnrichment without runtime fields)
+// Gemini extraction output schema (same fields as VisionAssetAnalysis minus runtime metadata)
 // ---------------------------------------------------------------------------
 
 const GeminiExtractionOutput = Schema.Struct({
@@ -229,17 +228,15 @@ export const GeminiVisionServiceLive = Layer.effect(
           )
         );
 
-        // Merge Gemini output with runtime fields to form VisionEnrichment
-        const enrichment = yield* Schema.decodeUnknown(VisionEnrichmentSchema)({
+        const enrichment = yield* Schema.decodeUnknown(VisionAssetAnalysisSchema)({
           ...geminiResult,
-          kind: "vision" as const,
           altTextProvenance: "synthetic" as const,
           modelId: model,
           processedAt: Date.now()
         }).pipe(
           Effect.mapError((error) =>
             new GeminiParseError({
-              message: `VisionEnrichment validation failed: ${formatSchemaParseError(error)}`,
+              message: `Vision asset analysis validation failed: ${formatSchemaParseError(error)}`,
               rawOutput: rawText
             })
           )
