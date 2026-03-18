@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import { EnrichmentRunWorkflow } from "../enrichment/EnrichmentRunWorkflow";
 import { handleIngestRequest, makeWorkflowIngestLayer } from "../ingest/Router";
 import { ExpertPollCoordinatorDo, ExpertPollCoordinatorDoIsolated } from "../ingest/ExpertPollCoordinatorDo";
 import { IngestRunWorkflow } from "../ingest/IngestRunWorkflow";
@@ -57,7 +58,12 @@ export const scheduled = async (
   await task;
 };
 
-export { ExpertPollCoordinatorDo, ExpertPollCoordinatorDoIsolated, IngestRunWorkflow };
+export {
+  EnrichmentRunWorkflow,
+  ExpertPollCoordinatorDo,
+  ExpertPollCoordinatorDoIsolated,
+  IngestRunWorkflow
+};
 
 export default {
   fetch,

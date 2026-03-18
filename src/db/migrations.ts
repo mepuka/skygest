@@ -357,6 +357,44 @@ const migration14: D1Migration = {
   ]
 };
 
+const migration15: D1Migration = {
+  id: 15,
+  name: "post_enrichment_runs",
+  statements: [
+    `CREATE TABLE IF NOT EXISTS post_enrichment_runs (
+      id                  TEXT PRIMARY KEY,
+      workflow_instance_id TEXT NOT NULL,
+      post_uri            TEXT NOT NULL,
+      enrichment_type     TEXT NOT NULL CHECK (enrichment_type IN ('vision', 'source-attribution', 'grounding')),
+      schema_version      TEXT NOT NULL,
+      triggered_by        TEXT NOT NULL CHECK (triggered_by IN ('pick', 'admin', 'repair')),
+      requested_by        TEXT,
+      status              TEXT NOT NULL CHECK (status IN ('queued', 'running', 'complete', 'failed', 'needs-review')),
+      phase               TEXT NOT NULL CHECK (phase IN ('queued', 'assembling', 'planning', 'executing', 'validating', 'persisting', 'complete', 'failed', 'needs-review')),
+      attempt_count       INTEGER NOT NULL DEFAULT 0,
+      model_lane          TEXT,
+      prompt_version      TEXT,
+      input_fingerprint   TEXT,
+      started_at          INTEGER NOT NULL,
+      finished_at         INTEGER,
+      last_progress_at    INTEGER,
+      result_written_at   INTEGER,
+      error               TEXT,
+      FOREIGN KEY (post_uri) REFERENCES post_payloads(post_uri)
+    )`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_post_enrichment_runs_workflow_instance_id
+      ON post_enrichment_runs(workflow_instance_id)`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_post_enrichment_runs_logical_key
+      ON post_enrichment_runs(post_uri, enrichment_type, schema_version)`,
+    `CREATE INDEX IF NOT EXISTS idx_post_enrichment_runs_status_started_at
+      ON post_enrichment_runs(status, started_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_post_enrichment_runs_phase_last_progress_at
+      ON post_enrichment_runs(phase, last_progress_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_post_enrichment_runs_post_type_started_at
+      ON post_enrichment_runs(post_uri, enrichment_type, started_at DESC)`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -371,5 +409,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration11,
   migration12,
   migration13,
-  migration14
+  migration14,
+  migration15
 ];
