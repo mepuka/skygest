@@ -1,6 +1,7 @@
 import { Command, Options } from "@effect/cli";
 import { Console, Effect } from "effect";
 import { energySeedDid } from "../bootstrap/CheckedInExpertSeeds";
+import type { EnrichmentRunRecord } from "../domain/enrichmentRun";
 import type { IngestRunRecord } from "../domain/polling";
 import { stringifyUnknown } from "../platform/Json";
 import { smokeFixtureUris, smokeSearchQuery } from "../staging/SmokeFixture";
@@ -20,6 +21,14 @@ const deployWorkers = [
 ] as const;
 
 type DeployWorker = typeof deployWorkers[number];
+const enrichmentStatuses = [
+  "all",
+  "queued",
+  "running",
+  "complete",
+  "failed",
+  "needs-review"
+] as const;
 
 const envOption = Options.text("env").pipe(
   Options.withDescription("Wrangler environment name"),
@@ -33,6 +42,20 @@ const workerOption = Options.choice("worker", deployWorkers).pipe(
 
 const baseUrlOption = Options.text("base-url").pipe(
   Options.withDescription("Base workers.dev URL for the staging agent worker")
+);
+
+const enrichmentStatusOption = Options.choice("status", enrichmentStatuses).pipe(
+  Options.withDescription("Filter enrichment runs by status"),
+  Options.withDefault("all")
+);
+
+const enrichmentLimitOption = Options.integer("limit").pipe(
+  Options.withDescription("Maximum enrichment runs to show"),
+  Options.withDefault(20)
+);
+
+const runIdOption = Options.text("run-id").pipe(
+  Options.withDescription("Run id")
 );
 
 const expectCondition = (condition: boolean, message: string) =>
@@ -264,6 +287,127 @@ const runStageRepair = (options: {
     );
   });
 
+const formatMaybeTimestamp = (value: number | null) =>
+  value === null ? "none" : String(value);
+
+const formatEnrichmentRunLine = (run: EnrichmentRunRecord) =>
+  [
+    run.id,
+    `type=${run.enrichmentType}`,
+    `status=${run.status}`,
+    `phase=${run.phase}`,
+    `attempts=${String(run.attemptCount)}`,
+    `lastProgress=${formatMaybeTimestamp(run.lastProgressAt)}`
+  ].join(" ");
+
+const formatMaybeText = (value: string | null | undefined) =>
+  value ?? "none";
+
+const formatEnrichmentRunDetail = (run: EnrichmentRunRecord) => [
+  `runId=${run.id}`,
+  `workflowInstanceId=${run.workflowInstanceId}`,
+  `postUri=${run.postUri}`,
+  `type=${run.enrichmentType}`,
+  `schemaVersion=${run.schemaVersion}`,
+  `triggeredBy=${run.triggeredBy}`,
+  `requestedBy=${formatMaybeText(run.requestedBy)}`,
+  `status=${run.status}`,
+  `phase=${run.phase}`,
+  `attempts=${String(run.attemptCount)}`,
+  `modelLane=${formatMaybeText(run.modelLane)}`,
+  `promptVersion=${formatMaybeText(run.promptVersion)}`,
+  `inputFingerprint=${formatMaybeText(run.inputFingerprint)}`,
+  `startedAt=${String(run.startedAt)}`,
+  `finishedAt=${formatMaybeTimestamp(run.finishedAt)}`,
+  `lastProgressAt=${formatMaybeTimestamp(run.lastProgressAt)}`,
+  `resultWrittenAt=${formatMaybeTimestamp(run.resultWrittenAt)}`,
+  `error=${run.error === null ? "none" : stringifyUnknown(run.error)}`
+];
+
+const runStageEnrichmentRuns = (options: {
+  readonly env: string;
+  readonly baseUrl: string;
+  readonly status: typeof enrichmentStatuses[number];
+  readonly limit: number;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+
+    yield* Console.log(
+      `Listing enrichment runs for ${options.env} at ${options.baseUrl}`
+    );
+    const runs = yield* client.listEnrichmentRuns(baseUrl, secret, {
+      ...(options.status === "all" ? {} : { status: options.status }),
+      limit: options.limit
+    });
+
+    if (runs.length === 0) {
+      yield* Console.log("No enrichment runs found");
+      return;
+    }
+
+    yield* Effect.forEach(
+      runs,
+      (run) => Console.log(formatEnrichmentRunLine(run)),
+      { discard: true }
+    );
+  });
+
+const runStageEnrichmentRun = (options: {
+  readonly env: string;
+  readonly baseUrl: string;
+  readonly runId: string;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+
+    yield* Console.log(
+      `Loading enrichment run ${options.runId} from ${options.baseUrl}`
+    );
+    const run = yield* client.getEnrichmentRun(baseUrl, secret, options.runId);
+
+    yield* Effect.forEach(
+      formatEnrichmentRunDetail(run),
+      (line) => Console.log(line),
+      { discard: true }
+    );
+  });
+
+const runStageEnrichmentRetry = (options: {
+  readonly env: string;
+  readonly baseUrl: string;
+  readonly runId: string;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+
+    const queued = yield* client.retryEnrichment(baseUrl, secret, options.runId);
+    yield* Console.log(
+      `Retried enrichment run ${queued.runId}; workflow status is ${queued.status}`
+    );
+  });
+
+const runStageEnrichmentRepair = (options: {
+  readonly env: string;
+  readonly baseUrl: string;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+
+    const summary = yield* client.repairEnrichment(baseUrl, secret);
+    yield* Console.log(
+      `Enrichment repair summary: repairedRuns=${summary.repairedRuns} staleQueuedRuns=${summary.staleQueuedRuns} staleRunningRuns=${summary.staleRunningRuns} untouchedRuns=${summary.untouchedRuns}`
+    );
+  });
+
 const deployCommand = Command.make(
   "deploy",
   { env: envOption, worker: workerOption },
@@ -294,6 +438,35 @@ const repairCommand = Command.make(
   runStageRepair
 );
 
+const enrichmentRunsCommand = Command.make(
+  "enrichment-runs",
+  {
+    env: envOption,
+    baseUrl: baseUrlOption,
+    status: enrichmentStatusOption,
+    limit: enrichmentLimitOption
+  },
+  runStageEnrichmentRuns
+);
+
+const enrichmentRunCommand = Command.make(
+  "enrichment-run",
+  { env: envOption, baseUrl: baseUrlOption, runId: runIdOption },
+  runStageEnrichmentRun
+);
+
+const enrichmentRetryCommand = Command.make(
+  "enrichment-retry",
+  { env: envOption, baseUrl: baseUrlOption, runId: runIdOption },
+  runStageEnrichmentRetry
+);
+
+const enrichmentRepairCommand = Command.make(
+  "enrichment-repair",
+  { env: envOption, baseUrl: baseUrlOption },
+  runStageEnrichmentRepair
+);
+
 const smokeSearchCommand = Command.make(
   "smoke-search",
   { env: envOption, baseUrl: baseUrlOption },
@@ -311,7 +484,18 @@ const seedPublicationsCommand = Command.make(
 );
 
 const stageCommand = Command.make("stage", {}, () => Effect.void).pipe(
-  Command.withSubcommands([prepareCommand, smokeCommand, smokeSearchCommand, refreshProfilesCommand, repairCommand, seedPublicationsCommand])
+  Command.withSubcommands([
+    prepareCommand,
+    smokeCommand,
+    smokeSearchCommand,
+    refreshProfilesCommand,
+    repairCommand,
+    enrichmentRunsCommand,
+    enrichmentRunCommand,
+    enrichmentRetryCommand,
+    enrichmentRepairCommand,
+    seedPublicationsCommand
+  ])
 );
 
 export const opsCommand = Command.make("ops", {}, () => Effect.void).pipe(

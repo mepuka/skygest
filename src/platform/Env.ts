@@ -40,6 +40,10 @@ export type WorkflowEnrichmentEnvBindings = EnvBindings & {
   readonly ENRICHMENT_RUN_WORKFLOW: Workflow<EnrichmentRunParams>;
 };
 
+export type WorkflowFilterEnvBindings =
+  & WorkflowIngestEnvBindings
+  & WorkflowEnrichmentEnvBindings;
+
 export class WorkflowIngestEnv extends Context.Tag("@skygest/WorkflowIngestEnv")<
   WorkflowIngestEnv,
   WorkflowIngestEnvBindings

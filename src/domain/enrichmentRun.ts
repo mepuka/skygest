@@ -4,6 +4,7 @@ import { EnrichmentKind } from "./enrichment";
 import { AtUri } from "./types";
 
 const EpochMillis = Schema.NonNegativeInt;
+const Counter = Schema.NonNegativeInt;
 
 export const EnrichmentTrigger = Schema.Literal("pick", "admin", "repair");
 export type EnrichmentTrigger = Schema.Schema.Type<typeof EnrichmentTrigger>;
@@ -130,4 +131,45 @@ export const EnrichmentQueuedResponse = Schema.Struct({
 });
 export type EnrichmentQueuedResponse = Schema.Schema.Type<
   typeof EnrichmentQueuedResponse
+>;
+
+export const EnrichmentRunListOptions = Schema.Struct({
+  status: Schema.optional(EnrichmentRunStatus),
+  limit: Schema.Int.pipe(Schema.between(1, 100))
+});
+export type EnrichmentRunListOptions = Schema.Schema.Type<
+  typeof EnrichmentRunListOptions
+>;
+
+export const ListStaleEnrichmentRuns = Schema.Struct({
+  queuedBefore: EpochMillis,
+  runningBefore: EpochMillis
+});
+export type ListStaleEnrichmentRuns = Schema.Schema.Type<
+  typeof ListStaleEnrichmentRuns
+>;
+
+export const ResetEnrichmentRunForRetry = Schema.Struct({
+  id: Schema.String,
+  queuedAt: EpochMillis
+});
+export type ResetEnrichmentRunForRetry = Schema.Schema.Type<
+  typeof ResetEnrichmentRunForRetry
+>;
+
+export const EnrichmentRunsOutput = Schema.Struct({
+  items: Schema.Array(EnrichmentRunRecord)
+});
+export type EnrichmentRunsOutput = Schema.Schema.Type<
+  typeof EnrichmentRunsOutput
+>;
+
+export const EnrichmentRepairSummary = Schema.Struct({
+  repairedRuns: Counter,
+  staleQueuedRuns: Counter,
+  staleRunningRuns: Counter,
+  untouchedRuns: Counter
+});
+export type EnrichmentRepairSummary = Schema.Schema.Type<
+  typeof EnrichmentRepairSummary
 >;

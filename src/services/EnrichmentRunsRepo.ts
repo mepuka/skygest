@@ -5,9 +5,12 @@ import type {
   CompleteEnrichmentRun,
   CreateQueuedEnrichmentRun,
   EnrichmentRunRecord,
+  EnrichmentRunListOptions,
   FailEnrichmentRun,
+  ListStaleEnrichmentRuns,
   MarkEnrichmentRunNeedsReview,
-  MarkEnrichmentRunPhase
+  MarkEnrichmentRunPhase,
+  ResetEnrichmentRunForRetry
 } from "../domain/enrichmentRun";
 
 export class EnrichmentRunsRepo extends Context.Tag("@skygest/EnrichmentRunsRepo")<
@@ -20,6 +23,13 @@ export class EnrichmentRunsRepo extends Context.Tag("@skygest/EnrichmentRunsRepo
       id: string
     ) => Effect.Effect<EnrichmentRunRecord | null, SqlError | DbError>;
     readonly listRunning: () => Effect.Effect<ReadonlyArray<EnrichmentRunRecord>, SqlError | DbError>;
+    readonly listRecent: (
+      input: EnrichmentRunListOptions
+    ) => Effect.Effect<ReadonlyArray<EnrichmentRunRecord>, SqlError | DbError>;
+    readonly listActive: () => Effect.Effect<ReadonlyArray<EnrichmentRunRecord>, SqlError | DbError>;
+    readonly listStaleActive: (
+      input: ListStaleEnrichmentRuns
+    ) => Effect.Effect<ReadonlyArray<EnrichmentRunRecord>, SqlError | DbError>;
     readonly markPhase: (
       input: MarkEnrichmentRunPhase
     ) => Effect.Effect<void, SqlError | DbError>;
@@ -32,5 +42,8 @@ export class EnrichmentRunsRepo extends Context.Tag("@skygest/EnrichmentRunsRepo
     readonly markNeedsReview: (
       input: MarkEnrichmentRunNeedsReview
     ) => Effect.Effect<void, SqlError | DbError>;
+    readonly resetForRetry: (
+      input: ResetEnrichmentRunForRetry
+    ) => Effect.Effect<boolean, SqlError | DbError>;
   }
 >() {}

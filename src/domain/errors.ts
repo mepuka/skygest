@@ -86,6 +86,32 @@ export class EnrichmentWorkflowLaunchError extends Schema.TaggedError<Enrichment
   }
 ) {}
 
+export class EnrichmentWorkflowControlError extends Schema.TaggedError<EnrichmentWorkflowControlError>()(
+  "EnrichmentWorkflowControlError",
+  {
+    message: Schema.String,
+    runId: Schema.String,
+    operation: Schema.String
+  }
+) {}
+
+export class EnrichmentRetryNotAllowedError extends Schema.TaggedError<EnrichmentRetryNotAllowedError>()(
+  "EnrichmentRetryNotAllowedError",
+  {
+    runId: Schema.String,
+    status: Schema.String
+  }
+) {}
+
+export class HistoricalEnrichmentRepairError extends Schema.TaggedError<HistoricalEnrichmentRepairError>()(
+  "HistoricalEnrichmentRepairError",
+  {
+    message: Schema.String,
+    runId: Schema.String,
+    operation: Schema.String
+  }
+) {}
+
 export class IngestBoundaryError extends Schema.TaggedError<IngestBoundaryError>()(
   "IngestBoundaryError",
   {
@@ -665,6 +691,57 @@ export const toEnrichmentErrorEnvelope = (
       message:
         getStringField(error, "message") ?? "failed to launch enrichment workflow",
       retryable: true,
+      ...(operation === undefined ? {} : { operation })
+    });
+  }
+
+  if (
+    error instanceof EnrichmentWorkflowControlError ||
+    isTagged(error, "EnrichmentWorkflowControlError")
+  ) {
+    const runId = getStringField(error, "runId") ?? overrides.runId;
+    const operation = getStringField(error, "operation") ?? overrides.operation;
+    return withOverrides({
+      tag: "EnrichmentWorkflowControlError",
+      message:
+        getStringField(error, "message") ?? "failed to control enrichment workflow",
+      retryable: true,
+      ...(runId === undefined ? {} : { runId }),
+      ...(operation === undefined ? {} : { operation })
+    });
+  }
+
+  if (
+    error instanceof EnrichmentRetryNotAllowedError ||
+    isTagged(error, "EnrichmentRetryNotAllowedError")
+  ) {
+    const runId = getStringField(error, "runId") ?? overrides.runId;
+    const status = getStringField(error, "status");
+    return withOverrides({
+      tag: "EnrichmentRetryNotAllowedError",
+      message:
+        runId === undefined
+          ? "enrichment retry not allowed"
+          : status === undefined
+            ? `enrichment retry not allowed: ${runId}`
+            : `enrichment retry not allowed: ${runId} (${status})`,
+      retryable: false,
+      ...(runId === undefined ? {} : { runId })
+    });
+  }
+
+  if (
+    error instanceof HistoricalEnrichmentRepairError ||
+    isTagged(error, "HistoricalEnrichmentRepairError")
+  ) {
+    const runId = getStringField(error, "runId") ?? overrides.runId;
+    const operation = getStringField(error, "operation") ?? overrides.operation;
+    return withOverrides({
+      tag: "HistoricalEnrichmentRepairError",
+      message:
+        getStringField(error, "message") ?? "historical enrichment run required repair",
+      retryable: false,
+      ...(runId === undefined ? {} : { runId }),
       ...(operation === undefined ? {} : { operation })
     });
   }

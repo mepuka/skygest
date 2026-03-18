@@ -30,6 +30,20 @@ describe("operator request policies", () => {
         })
       )
     ).toEqual(["ops:read"]);
+    expect(
+      requiredOperatorScopes(
+        new Request("https://skygest.local/admin/enrichment/runs", {
+          method: "GET"
+        })
+      )
+    ).toEqual(["ops:read"]);
+    expect(
+      requiredOperatorScopes(
+        new Request("https://skygest.local/admin/enrichment/runs/run-1", {
+          method: "GET"
+        })
+      )
+    ).toEqual(["ops:read"]);
   });
 
   it("assigns write scopes to expert, ingest, and staging mutations", () => {
@@ -49,6 +63,20 @@ describe("operator request policies", () => {
     expect(
       requiredOperatorScopes(
         new Request("https://skygest.local/admin/ingest/repair", {
+          method: "POST"
+        })
+      )
+    ).toEqual(["ops:refresh"]);
+    expect(
+      requiredOperatorScopes(
+        new Request("https://skygest.local/admin/enrichment/runs/run-1/retry", {
+          method: "POST"
+        })
+      )
+    ).toEqual(["ops:refresh"]);
+    expect(
+      requiredOperatorScopes(
+        new Request("https://skygest.local/admin/enrichment/repair", {
           method: "POST"
         })
       )
@@ -80,5 +108,19 @@ describe("operator request policies", () => {
         })
       )
     ).toBe("repair_ingest");
+    expect(
+      operatorRequestAction(
+        new Request("https://skygest.local/admin/enrichment/runs/run-1/retry", {
+          method: "POST"
+        })
+      )
+    ).toBe("retry_enrichment");
+    expect(
+      operatorRequestAction(
+        new Request("https://skygest.local/admin/enrichment/repair", {
+          method: "POST"
+        })
+      )
+    ).toBe("repair_enrichment");
   });
 });

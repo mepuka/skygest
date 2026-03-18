@@ -1,10 +1,11 @@
 import { Effect } from "effect";
+import { handleEnrichmentRequest } from "../enrichment/Router";
 import { EnrichmentRunWorkflow } from "../enrichment/EnrichmentRunWorkflow";
 import { handleIngestRequest, makeWorkflowIngestLayer } from "../ingest/Router";
 import { ExpertPollCoordinatorDo, ExpertPollCoordinatorDoIsolated } from "../ingest/ExpertPollCoordinatorDo";
 import { IngestRunWorkflow } from "../ingest/IngestRunWorkflow";
 import { IngestWorkflowLauncher } from "../ingest/IngestWorkflowLauncher";
-import type { WorkflowIngestEnvBindings } from "../platform/Env";
+import type { WorkflowFilterEnvBindings } from "../platform/Env";
 import {
   runScopedWithRuntime,
   withManagedRuntime
@@ -16,7 +17,7 @@ import {
   toAuthErrorResponse
 } from "./operatorAuth";
 
-export const fetch = async (request: Request, env: WorkflowIngestEnvBindings) => {
+export const fetch = async (request: Request, env: WorkflowFilterEnvBindings) => {
   const url = new URL(request.url);
 
   if (url.pathname === "/health") {
@@ -34,12 +35,23 @@ export const fetch = async (request: Request, env: WorkflowIngestEnvBindings) =>
     return handleIngestRequest(request, env, identity);
   }
 
+  if (url.pathname.startsWith("/admin/enrichment/")) {
+    let identity;
+    try {
+      identity = await authorizeOperator(request, env, requiredOperatorScopes(request));
+    } catch (error) {
+      await logDeniedOperatorRequest(request, error);
+      return toAuthErrorResponse(error);
+    }
+    return handleEnrichmentRequest(request, env, identity);
+  }
+
   return new Response("not found", { status: 404 });
 };
 
 export const scheduled = async (
   _controller: ScheduledController,
-  env: WorkflowIngestEnvBindings,
+  env: WorkflowFilterEnvBindings,
   ctx: ExecutionContext
 ) => {
   const layer = makeWorkflowIngestLayer(env);

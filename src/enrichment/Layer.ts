@@ -9,6 +9,8 @@ import { Logging } from "../platform/Logging";
 import { CandidatePayloadRepoD1 } from "../services/d1/CandidatePayloadRepoD1";
 import { EnrichmentRunsRepoD1 } from "../services/d1/EnrichmentRunsRepoD1";
 import { EnrichmentPlanner } from "./EnrichmentPlanner";
+import { EnrichmentRepairService } from "./EnrichmentRepairService";
+import { EnrichmentWorkflowLauncher } from "./EnrichmentWorkflowLauncher";
 import { GeminiVisionServiceLive } from "./GeminiVisionServiceLive";
 
 export const makeWorkflowEnrichmentLayer = (
@@ -44,6 +46,16 @@ export const makeWorkflowEnrichmentLayer = (
       Layer.mergeAll(baseLayer, payloadsLayer)
     )
   );
+  const launcherLayer = EnrichmentWorkflowLauncher.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(baseLayer, workflowEnvLayer, runsLayer)
+    )
+  );
+  const repairLayer = EnrichmentRepairService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(workflowEnvLayer, runsLayer)
+    )
+  );
   const visionLayer = GeminiVisionServiceLive.pipe(
     Layer.provideMerge(baseLayer)
   );
@@ -54,6 +66,8 @@ export const makeWorkflowEnrichmentLayer = (
     payloadsLayer,
     runsLayer,
     plannerLayer,
+    launcherLayer,
+    repairLayer,
     visionLayer
   );
 };
