@@ -31,6 +31,16 @@ export function Shell() {
     [selectedTopic, topicLookup]
   );
 
+  const feedThreadCount = useMemo(
+    () => Result.getOrElse(feedResult, () => ({ items: [] })).items.length,
+    [feedResult]
+  );
+
+  const feedExpertCount = useMemo(() => {
+    const items = Result.getOrElse(feedResult, () => ({ items: [] })).items;
+    return new Set(items.map((p: { did: string }) => p.did)).size;
+  }, [feedResult]);
+
   const resolveTopicEntries = useCallback(
     (slugs: readonly string[]): readonly TopicEntry[] =>
       slugs
@@ -45,7 +55,7 @@ export function Shell() {
         {/* ---- Header ---- */}
         <header className="px-20 pt-6 max-lg:px-5 max-lg:pt-4">
           <div className="mx-auto max-w-[1080px] flex items-baseline justify-between pb-5">
-            <h1 className="font-brand text-[28px] leading-none text-heading">
+            <h1 className="font-brand text-[28px] leading-[34px] text-heading">
               Skygest
             </h1>
             <div className="size-7 rounded-full bg-border shrink-0" />
@@ -60,6 +70,8 @@ export function Shell() {
                 topics={topics}
                 selectedSlug={selectedTopic}
                 onSelect={setSelectedTopic}
+                threadCount={feedThreadCount}
+                expertCount={feedExpertCount}
               />
             )}
           </div>
