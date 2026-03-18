@@ -43,10 +43,9 @@ const TestConfig = Layer.setConfigProvider(
 /** Full test layer: live service backed by our mocked SDK + test config. */
 const TestLayer = GeminiVisionServiceLive.pipe(Layer.provide(TestConfig));
 
-/** Run an effect that requires GeminiVisionService through our test layer. */
-const runWith = <A, E>(
-  effect: Effect.Effect<A, E, GeminiVisionService>
-): Effect.Effect<A, E> => effect.pipe(Effect.provide(TestLayer));
+/** Provide GeminiVisionService + Config to an effect. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const runWith = (effect: Effect.Effect<any, any, any>) => Effect.provide(effect, TestLayer);
 
 /** Valid classification JSON that matches ImageClassification schema. */
 const validClassificationJson = JSON.stringify({
@@ -60,7 +59,6 @@ const validExtractionJson = JSON.stringify({
   mediaType: "chart",
   chartTypes: ["bar-chart", "line-chart"],
   altText: "Alberta electricity prices from 2020 to 2024",
-  altTextProvenance: "synthetic",
   title: "Alberta Pool Price",
   xAxis: { label: "Year", unit: null },
   yAxis: { label: "Price", unit: "$/MWh" },
@@ -496,13 +494,13 @@ describe("GeminiVisionService", () => {
       () =>
         Effect.gen(function* () {
           mockGenerateContent.mockReset();
-          // Valid JSON but missing required fields like altTextProvenance
+          // Valid JSON but missing required fields like title, xAxis, yAxis, etc.
           mockGenerateContent.mockResolvedValueOnce({
             text: JSON.stringify({
               mediaType: "chart",
               chartTypes: ["bar-chart"],
               altText: "some alt text"
-              // missing altTextProvenance, title, xAxis, yAxis, series, etc.
+              // missing title, xAxis, yAxis, series, sourceLines, etc.
             })
           });
 
@@ -534,7 +532,6 @@ describe("GeminiVisionService", () => {
               mediaType: "photo",
               chartTypes: [],
               altText: null,
-              altTextProvenance: "absent",
               title: null,
               xAxis: null,
               yAxis: null,
