@@ -36,6 +36,13 @@ import {
   PollReconcileInput
 } from "./polling";
 import {
+  EnrichmentQueuedResponse,
+  EnrichmentRepairSummary,
+  EnrichmentRunRecord,
+  EnrichmentRunStatus,
+  EnrichmentRunsOutput
+} from "./enrichmentRun";
+import {
   EditorialScore,
   SubmitEditorialPickInput,
   RemoveEditorialPickInput,
@@ -530,6 +537,21 @@ export const CuratedPostsPageOutput = Schema.Struct({
 });
 export type CuratedPostsPageOutput = Schema.Schema.Type<typeof CuratedPostsPageOutput>;
 
+export const EnrichmentRunPathParams = Schema.Struct({
+  id: DecodedId
+});
+export type EnrichmentRunPathParams = Schema.Schema.Type<
+  typeof EnrichmentRunPathParams
+>;
+
+export const ListEnrichmentRunsUrlParams = Schema.Struct({
+  status: Schema.optional(EnrichmentRunStatus),
+  limit: OptionalNumberFromString
+});
+export type ListEnrichmentRunsUrlParams = Schema.Schema.Type<
+  typeof ListEnrichmentRunsUrlParams
+>;
+
 export const PublicReadRequestSchemas = {
   searchPosts: SearchPostsUrlParams,
   recentPosts: GetRecentPostsPageUrlParams,
@@ -595,10 +617,23 @@ export const IngestResponseSchemas = {
   repair: IngestRepairSummary
 } as const;
 
+export const EnrichmentRequestSchemas = {
+  runPath: EnrichmentRunPathParams,
+  runs: ListEnrichmentRunsUrlParams
+} as const;
+
+export const EnrichmentResponseSchemas = {
+  queued: EnrichmentQueuedResponse,
+  run: EnrichmentRunRecord,
+  runs: EnrichmentRunsOutput,
+  repair: EnrichmentRepairSummary
+} as const;
+
 export type PublicReadResponseSchemas = typeof PublicReadResponseSchemas;
 export type PublicReadRequestSchemas = typeof PublicReadRequestSchemas;
 export type AdminRequestSchemas = typeof AdminRequestSchemas;
 export type AdminResponseSchemas = typeof AdminResponseSchemas;
 export type IngestRequestSchemas = typeof IngestRequestSchemas;
 export type IngestResponseSchemas = typeof IngestResponseSchemas;
-
+export type EnrichmentRequestSchemas = typeof EnrichmentRequestSchemas;
+export type EnrichmentResponseSchemas = typeof EnrichmentResponseSchemas;

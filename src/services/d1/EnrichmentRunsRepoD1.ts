@@ -8,14 +8,20 @@ import {
   CompleteEnrichmentRun as CompleteEnrichmentRunSchema,
   CreateQueuedEnrichmentRun as CreateQueuedEnrichmentRunSchema,
   EnrichmentRunRecord as EnrichmentRunRecordSchema,
+  EnrichmentRunListOptions as EnrichmentRunListOptionsSchema,
   FailEnrichmentRun as FailEnrichmentRunSchema,
+  ListStaleEnrichmentRuns as ListStaleEnrichmentRunsSchema,
   MarkEnrichmentRunNeedsReview as MarkEnrichmentRunNeedsReviewSchema,
   MarkEnrichmentRunPhase as MarkEnrichmentRunPhaseSchema,
+  ResetEnrichmentRunForRetry as ResetEnrichmentRunForRetrySchema,
   type CompleteEnrichmentRun,
   type CreateQueuedEnrichmentRun,
+  type EnrichmentRunListOptions,
   type FailEnrichmentRun,
+  type ListStaleEnrichmentRuns,
   type MarkEnrichmentRunNeedsReview,
-  type MarkEnrichmentRunPhase
+  type MarkEnrichmentRunPhase,
+  type ResetEnrichmentRunForRetry
 } from "../../domain/enrichmentRun";
 import { EnrichmentRunsRepo } from "../EnrichmentRunsRepo";
 import { decodeWithDbError } from "./schemaDecode";
@@ -117,6 +123,70 @@ export const EnrichmentRunsRepoD1 = {
         )
       );
 
+    const listRecent = (input: EnrichmentRunListOptions) =>
+      decodeWithDbError(
+        EnrichmentRunListOptionsSchema,
+        input,
+        "Invalid list enrichment runs input"
+      ).pipe(
+        Effect.flatMap((validated) =>
+          validated.status === undefined
+            ? sql<any>`
+                SELECT ${selectColumns}
+                FROM post_enrichment_runs
+                ORDER BY started_at DESC, id DESC
+                LIMIT ${validated.limit}
+              `
+            : sql<any>`
+                SELECT ${selectColumns}
+                FROM post_enrichment_runs
+                WHERE status = ${validated.status}
+                ORDER BY started_at DESC, id DESC
+                LIMIT ${validated.limit}
+              `
+        ),
+        Effect.flatMap((rows) =>
+          decodeRows(rows, "Failed to decode recent enrichment runs")
+        )
+      );
+
+    const listActive = () =>
+      sql<any>`
+        SELECT ${selectColumns}
+        FROM post_enrichment_runs
+        WHERE status IN ('queued', 'running')
+        ORDER BY started_at ASC, id ASC
+      `.pipe(
+        Effect.flatMap((rows) =>
+          decodeRows(rows, "Failed to decode active enrichment runs")
+        )
+      );
+
+    const listStaleActive = (input: ListStaleEnrichmentRuns) =>
+      decodeWithDbError(
+        ListStaleEnrichmentRunsSchema,
+        input,
+        "Invalid stale enrichment run query"
+      ).pipe(
+        Effect.flatMap((validated) =>
+          sql<any>`
+            SELECT ${selectColumns}
+            FROM post_enrichment_runs
+            WHERE (
+              status = 'queued'
+              AND COALESCE(last_progress_at, started_at, 9223372036854775807) <= ${validated.queuedBefore}
+            ) OR (
+              status = 'running'
+              AND COALESCE(last_progress_at, started_at, 9223372036854775807) <= ${validated.runningBefore}
+            )
+            ORDER BY started_at ASC, id ASC
+          `
+        ),
+        Effect.flatMap((rows) =>
+          decodeRows(rows, "Failed to decode stale enrichment runs")
+        )
+      );
+
     const createQueuedIfAbsent = (input: CreateQueuedEnrichmentRun) =>
       decodeWithDbError(
         CreateQueuedEnrichmentRunSchema,
@@ -183,7 +253,7 @@ export const EnrichmentRunsRepoD1 = {
             SET status = 'running',
                 phase = ${validated.phase},
                 attempt_count = CASE
-                  WHEN status = 'queued' AND phase = 'queued' THEN 1
+                  WHEN status = 'queued' AND phase = 'queued' THEN attempt_count + 1
                   ELSE attempt_count
                 END,
                 last_progress_at = ${validated.lastProgressAt},
@@ -213,6 +283,7 @@ export const EnrichmentRunsRepoD1 = {
                 result_written_at = ${validated.resultWrittenAt},
                 error = NULL
             WHERE id = ${validated.id}
+              AND status = 'running'
           `.pipe(Effect.asVoid)
         )
       );
@@ -232,6 +303,7 @@ export const EnrichmentRunsRepoD1 = {
                 last_progress_at = ${validated.finishedAt},
                 error = ${encodeStoredEnrichmentError(validated.error)}
             WHERE id = ${validated.id}
+              AND status IN ('queued', 'running')
           `.pipe(Effect.asVoid)
         )
       );
@@ -251,7 +323,33 @@ export const EnrichmentRunsRepoD1 = {
                 last_progress_at = ${validated.lastProgressAt},
                 error = ${encodeStoredEnrichmentError(validated.error)}
             WHERE id = ${validated.id}
+              AND status = 'running'
           `.pipe(Effect.asVoid)
+        )
+      );
+
+    const resetForRetry = (input: ResetEnrichmentRunForRetry) =>
+      decodeWithDbError(
+        ResetEnrichmentRunForRetrySchema,
+        input,
+        "Invalid enrichment retry reset input"
+      ).pipe(
+        Effect.flatMap((validated) =>
+          sql<any>`
+            UPDATE post_enrichment_runs
+            SET status = 'queued',
+                phase = 'queued',
+                started_at = ${validated.queuedAt},
+                finished_at = NULL,
+                last_progress_at = ${validated.queuedAt},
+                result_written_at = NULL,
+                error = NULL
+            WHERE id = ${validated.id}
+              AND status IN ('failed', 'needs-review')
+            RETURNING id
+          `.pipe(
+            Effect.map((rows) => rows.length > 0)
+          )
         )
       );
 
@@ -259,10 +357,14 @@ export const EnrichmentRunsRepoD1 = {
       createQueuedIfAbsent,
       getById,
       listRunning,
+      listRecent,
+      listActive,
+      listStaleActive,
       markPhase,
       markComplete,
       markFailed,
-      markNeedsReview
+      markNeedsReview,
+      resetForRetry
     });
   }))
 };

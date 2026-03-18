@@ -37,6 +37,12 @@ const isIngestRunItemsPath = (pathname: string) =>
 const isIngestRunPath = (pathname: string) =>
   /^\/admin\/ingest\/runs\/[^/]+$/u.test(pathname);
 
+const isEnrichmentRunRetryPath = (pathname: string) =>
+  /^\/admin\/enrichment\/runs\/[^/]+\/retry$/u.test(pathname);
+
+const isEnrichmentRunPath = (pathname: string) =>
+  /^\/admin\/enrichment\/runs\/[^/]+$/u.test(pathname);
+
 const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
   const { pathname } = new URL(request.url);
 
@@ -82,6 +88,20 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
     };
   }
 
+  if (request.method === "GET" && pathname === "/admin/enrichment/runs") {
+    return {
+      action: "list_enrichment_runs",
+      scopes: ["ops:read"]
+    };
+  }
+
+  if (request.method === "GET" && isEnrichmentRunPath(pathname)) {
+    return {
+      action: "get_enrichment_run",
+      scopes: ["ops:read"]
+    };
+  }
+
   if (request.method === "POST" && pathname === "/admin/ingest/poll") {
     return {
       action: "poll_ingest",
@@ -106,6 +126,20 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
   if (request.method === "POST" && pathname === "/admin/ingest/repair") {
     return {
       action: "repair_ingest",
+      scopes: ["ops:refresh"]
+    };
+  }
+
+  if (request.method === "POST" && isEnrichmentRunRetryPath(pathname)) {
+    return {
+      action: "retry_enrichment",
+      scopes: ["ops:refresh"]
+    };
+  }
+
+  if (request.method === "POST" && pathname === "/admin/enrichment/repair") {
+    return {
+      action: "repair_enrichment",
       scopes: ["ops:refresh"]
     };
   }

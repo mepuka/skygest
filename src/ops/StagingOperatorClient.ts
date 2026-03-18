@@ -13,6 +13,13 @@ import {
   IngestRunRecord
 } from "../domain/polling";
 import {
+  EnrichmentQueuedResponse,
+  EnrichmentRepairSummary,
+  EnrichmentRunRecord,
+  EnrichmentRunStatus,
+  EnrichmentRunsOutput
+} from "../domain/enrichmentRun";
+import {
   callTool,
   decodeCallToolResultWith,
   type McpCallToolResult
@@ -40,6 +47,10 @@ const decodeSeedPublicationsResponse = decodeJsonStringWith(SeedPublicationsResu
 const decodeIngestQueuedResponse = decodeJsonStringWith(IngestQueuedResponse);
 const decodeIngestRepairSummary = decodeJsonStringWith(IngestRepairSummary);
 const decodeIngestRunResponse = decodeJsonStringWith(IngestRunRecord);
+const decodeEnrichmentQueuedResponse = decodeJsonStringWith(EnrichmentQueuedResponse);
+const decodeEnrichmentRepairSummary = decodeJsonStringWith(EnrichmentRepairSummary);
+const decodeEnrichmentRunResponse = decodeJsonStringWith(EnrichmentRunRecord);
+const decodeEnrichmentRunsResponse = decodeJsonStringWith(EnrichmentRunsOutput);
 const decodePublicationsResponse = decodeJsonStringWith(PublicationListOutput);
 const decodeAdminExpertsJsonResponse = decodeJsonStringWith(ExpertListOutput);
 const decodeSearchPostsResponse = decodeCallToolResultWith(KnowledgePostsMcpOutput);
@@ -52,6 +63,22 @@ const operatorHeaders = (secret: string) => ({
 
 const endpointUrl = (baseUrl: URL, pathname: string) =>
   new URL(pathname, baseUrl);
+
+const endpointUrlWithQuery = (
+  baseUrl: URL,
+  pathname: string,
+  query: Record<string, string | undefined>
+) => {
+  const url = endpointUrl(baseUrl, pathname);
+
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined) {
+      url.searchParams.set(key, value);
+    }
+  }
+
+  return url;
+};
 
 const optionalDidBody = (did?: string) =>
   encodeJsonString(did === undefined ? {} : { did });
@@ -187,6 +214,28 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
       baseUrl: URL,
       secret: string
     ) => Effect.Effect<Schema.Schema.Type<typeof IngestRepairSummary>, StagingRequestError>;
+    readonly listEnrichmentRuns: (
+      baseUrl: URL,
+      secret: string,
+      options?: {
+        readonly status?: Schema.Schema.Type<typeof EnrichmentRunStatus>;
+        readonly limit?: number;
+      }
+    ) => Effect.Effect<ReadonlyArray<Schema.Schema.Type<typeof EnrichmentRunRecord>>, StagingRequestError>;
+    readonly getEnrichmentRun: (
+      baseUrl: URL,
+      secret: string,
+      runId: string
+    ) => Effect.Effect<Schema.Schema.Type<typeof EnrichmentRunRecord>, StagingRequestError>;
+    readonly retryEnrichment: (
+      baseUrl: URL,
+      secret: string,
+      runId: string
+    ) => Effect.Effect<Schema.Schema.Type<typeof EnrichmentQueuedResponse>, StagingRequestError>;
+    readonly repairEnrichment: (
+      baseUrl: URL,
+      secret: string
+    ) => Effect.Effect<Schema.Schema.Type<typeof EnrichmentRepairSummary>, StagingRequestError>;
     readonly listAdminExperts: (
       baseUrl: URL,
       secret: string
@@ -294,6 +343,56 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
             body: encodeJsonString({})
           }),
         decodeIngestRepairSummary
+      ),
+    listEnrichmentRuns: (baseUrl, secret, options) =>
+      requestJson(
+        "list-enrichment-runs",
+        () =>
+          fetch(
+            endpointUrlWithQuery(baseUrl, "/admin/enrichment/runs", {
+              status: options?.status,
+              limit: options?.limit === undefined ? undefined : String(options.limit)
+            }),
+            {
+              headers: {
+                "x-skygest-operator-secret": secret
+              }
+            }
+          ),
+        (text) => decodeEnrichmentRunsResponse(text).items
+      ),
+    getEnrichmentRun: (baseUrl, secret, runId) =>
+      requestJson(
+        "get-enrichment-run",
+        () =>
+          fetch(endpointUrl(baseUrl, `/admin/enrichment/runs/${runId}`), {
+            headers: {
+              "x-skygest-operator-secret": secret
+            }
+          }),
+        decodeEnrichmentRunResponse
+      ),
+    retryEnrichment: (baseUrl, secret, runId) =>
+      requestJson(
+        "retry-enrichment",
+        () =>
+          fetch(endpointUrl(baseUrl, `/admin/enrichment/runs/${runId}/retry`), {
+            method: "POST",
+            headers: operatorHeaders(secret),
+            body: encodeJsonString({})
+          }),
+        decodeEnrichmentQueuedResponse
+      ),
+    repairEnrichment: (baseUrl, secret) =>
+      requestJson(
+        "repair-enrichment",
+        () =>
+          fetch(endpointUrl(baseUrl, "/admin/enrichment/repair"), {
+            method: "POST",
+            headers: operatorHeaders(secret),
+            body: encodeJsonString({})
+          }),
+        decodeEnrichmentRepairSummary
       ),
     seedPublications: (baseUrl, secret) =>
       requestJson(

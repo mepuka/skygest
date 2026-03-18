@@ -13,6 +13,27 @@ import { StagingOperatorClient } from "../src/ops/StagingOperatorClient";
 import { WranglerCli } from "../src/ops/WranglerCli";
 import { smokeFixtureUris } from "../src/staging/SmokeFixture";
 
+const makeSampleEnrichmentRun = () => ({
+  id: "enrich-run-1",
+  workflowInstanceId: "enrich-run-1",
+  postUri: "at://did:plc:test/app.bsky.feed.post/post-1" as any,
+  enrichmentType: "vision" as const,
+  schemaVersion: "v1",
+  triggeredBy: "admin" as const,
+  requestedBy: "operator@example.com",
+  status: "failed" as const,
+  phase: "failed" as const,
+  attemptCount: 1,
+  modelLane: null,
+  promptVersion: null,
+  inputFingerprint: null,
+  startedAt: 1,
+  finishedAt: 2,
+  lastProgressAt: 2,
+  resultWrittenAt: null,
+  error: null
+});
+
 const makeCliLayer = (options?: {
   readonly deploy?: (configFile: string, env: string) => Effect.Effect<void, never>;
   readonly client?: Layer.Layer<StagingOperatorClient>;
@@ -88,6 +109,35 @@ const makeCliLayer = (options?: {
           repairedRuns: 0,
           failedItems: 0,
           requeuedItems: 0,
+          untouchedRuns: 0
+        } as const;
+      }),
+    listEnrichmentRuns: (_baseUrl: URL, secret: string, _options) =>
+      Effect.sync(() => {
+        remoteCalls.push({ action: "enrichment-runs", secret });
+        return [makeSampleEnrichmentRun()] as const;
+      }),
+    getEnrichmentRun: (_baseUrl: URL, secret: string, _runId: string) =>
+      Effect.sync(() => {
+        remoteCalls.push({ action: "enrichment-run", secret });
+        return makeSampleEnrichmentRun();
+      }),
+    retryEnrichment: (_baseUrl: URL, secret: string, _runId: string) =>
+      Effect.sync(() => {
+        remoteCalls.push({ action: "enrichment-retry", secret });
+        return {
+          runId: "enrich-run-1",
+          workflowInstanceId: "enrich-run-1",
+          status: "queued"
+        } as const;
+      }),
+    repairEnrichment: (_baseUrl: URL, secret: string) =>
+      Effect.sync(() => {
+        remoteCalls.push({ action: "enrichment-repair", secret });
+        return {
+          repairedRuns: 1,
+          staleQueuedRuns: 1,
+          staleRunningRuns: 0,
           untouchedRuns: 0
         } as const;
       }),
@@ -226,6 +276,50 @@ describe("ops CLI", () => {
     })
   );
 
+  it.live("runs enrichment inspection and retry commands through the staging client", () =>
+    Effect.promise(async () => {
+      const { layer, remoteCalls } = makeCliLayer();
+      const runtimeLayer = Layer.mergeAll(BunContext.layer, layer);
+
+      await Effect.runPromise(
+        runOpsCli([
+          "bun",
+          "ops",
+          "stage",
+          "enrichment-runs",
+          "--env",
+          "staging",
+          "--base-url",
+          "https://skygest-bi-agent-staging.workers.dev",
+          "--status",
+          "failed",
+          "--limit",
+          "5"
+        ]).pipe(Effect.provide(runtimeLayer))
+      );
+
+      await Effect.runPromise(
+        runOpsCli([
+          "bun",
+          "ops",
+          "stage",
+          "enrichment-retry",
+          "--env",
+          "staging",
+          "--base-url",
+          "https://skygest-bi-agent-staging.workers.dev",
+          "--run-id",
+          "enrich-run-1"
+        ]).pipe(Effect.provide(runtimeLayer))
+      );
+
+      expect(remoteCalls).toEqual([
+        { action: "enrichment-runs", secret: "stage-secret" },
+        { action: "enrichment-retry", secret: "stage-secret" }
+      ]);
+    })
+  );
+
   it.live("fails clearly when the operator secret is missing or a remote call fails", () =>
     Effect.promise(async () => {
       const missingSecretLayer = Layer.mergeAll(
@@ -300,6 +394,22 @@ describe("ops CLI", () => {
               repairedRuns: 0,
               failedItems: 0,
               requeuedItems: 0,
+              untouchedRuns: 0
+            } as const),
+          listEnrichmentRuns: (_baseUrl, _secret, _options) => Effect.succeed([] as const),
+          getEnrichmentRun: (_baseUrl, _secret, _runId) =>
+            Effect.succeed(makeSampleEnrichmentRun()),
+          retryEnrichment: (_baseUrl, _secret, _runId) =>
+            Effect.succeed({
+              runId: "enrich-run-1",
+              workflowInstanceId: "enrich-run-1",
+              status: "queued"
+            } as const),
+          repairEnrichment: (_baseUrl, _secret) =>
+            Effect.succeed({
+              repairedRuns: 0,
+              staleQueuedRuns: 0,
+              staleRunningRuns: 0,
               untouchedRuns: 0
             } as const),
           loadSmokeFixture: (_baseUrl, _secret) =>
@@ -402,6 +512,22 @@ describe("ops CLI", () => {
               repairedRuns: 0,
               failedItems: 0,
               requeuedItems: 0,
+              untouchedRuns: 0
+            } as const),
+          listEnrichmentRuns: (_baseUrl, _secret, _options) => Effect.succeed([] as const),
+          getEnrichmentRun: (_baseUrl, _secret, _runId) =>
+            Effect.succeed(makeSampleEnrichmentRun()),
+          retryEnrichment: (_baseUrl, _secret, _runId) =>
+            Effect.succeed({
+              runId: "enrich-run-1",
+              workflowInstanceId: "enrich-run-1",
+              status: "queued"
+            } as const),
+          repairEnrichment: (_baseUrl, _secret) =>
+            Effect.succeed({
+              repairedRuns: 0,
+              staleQueuedRuns: 0,
+              staleRunningRuns: 0,
               untouchedRuns: 0
             } as const),
           loadSmokeFixture: (_baseUrl, _secret) =>
