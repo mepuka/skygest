@@ -133,6 +133,22 @@ export class HistoricalRunRepairError extends Schema.TaggedError<HistoricalRunRe
   }
 ) {}
 
+export class GeminiApiError extends Schema.TaggedError<GeminiApiError>()(
+  "GeminiApiError",
+  {
+    message: Schema.String,
+    status: Schema.optional(Schema.Number)
+  }
+) {}
+
+export class GeminiParseError extends Schema.TaggedError<GeminiParseError>()(
+  "GeminiParseError",
+  {
+    message: Schema.String,
+    rawOutput: Schema.optional(Schema.String)
+  }
+) {}
+
 export const IngestErrorEnvelope = Schema.Struct({
   tag: Schema.String.pipe(Schema.minLength(1)),
   message: Schema.String,
