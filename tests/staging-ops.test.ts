@@ -97,7 +97,8 @@ const makeStagingAdminLayer = (options: {
         records: [],
         cursor: null
       }),
-    getPostThread: () => Effect.succeed({ thread: {} })
+    getPostThread: () => Effect.succeed({ thread: {} }),
+    getPosts: () => Effect.succeed([])
   });
   const publicationsLayer = PublicationsRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
   const candidatePayloadRepoLayer = CandidatePayloadRepoD1.layer.pipe(

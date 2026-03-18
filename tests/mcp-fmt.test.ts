@@ -10,11 +10,22 @@ import {
   formatEditorialPicks,
   formatPostThread
 } from "../src/mcp/Fmt";
+import { emptyKnowledgePostHydration, type KnowledgePostResult } from "../src/domain/bi";
 
 // ---------------------------------------------------------------------------
 // Deterministic timestamp: 1710000000000 = 2024-03-09T16:00:00Z
 // ---------------------------------------------------------------------------
 const EPOCH = 1710000000000;
+
+const makePost = (
+  overrides: Partial<KnowledgePostResult> & Pick<
+    KnowledgePostResult,
+    "uri" | "did" | "handle" | "avatar" | "text" | "createdAt" | "topics" | "tier"
+  >
+): KnowledgePostResult => ({
+  ...emptyKnowledgePostHydration(),
+  ...overrides
+});
 
 // ---------------------------------------------------------------------------
 // formatPosts
@@ -26,7 +37,7 @@ describe("formatPosts", () => {
 
   it("renders a single post with [P1], handle, tier, date, text, and topics", () => {
     const out = formatPosts([
-      {
+      makePost({
         uri: "at://did:plc:abc/app.bsky.feed.post/1" as any,
         did: "did:plc:abc" as any,
         handle: "alice.bsky.social",
@@ -35,7 +46,7 @@ describe("formatPosts", () => {
         createdAt: EPOCH,
         topics: ["solar", "energy-storage"],
         tier: "energy-focused" as const
-      }
+      })
     ]);
 
     expect(out).toContain("[P1]");
@@ -50,6 +61,7 @@ describe("formatPosts", () => {
 
   it("assigns sequential IDs [P1], [P2], [P3]", () => {
     const posts = Array.from({ length: 3 }, (_, i) => ({
+      ...emptyKnowledgePostHydration(),
       uri: `at://did:plc:abc/app.bsky.feed.post/${i}` as any,
       did: "did:plc:abc" as any,
       handle: "alice.bsky.social",
@@ -68,7 +80,7 @@ describe("formatPosts", () => {
 
   it("prefers snippet over text when present", () => {
     const out = formatPosts([
-      {
+      makePost({
         uri: "at://did:plc:abc/app.bsky.feed.post/1" as any,
         did: "did:plc:abc" as any,
         handle: "h.bsky.social",
@@ -78,7 +90,7 @@ describe("formatPosts", () => {
         createdAt: EPOCH,
         topics: [],
         tier: "independent" as const
-      }
+      })
     ]);
 
     expect(out).toContain("This is the snippet that should appear.");
@@ -87,7 +99,7 @@ describe("formatPosts", () => {
 
   it("uses DID when handle is null", () => {
     const out = formatPosts([
-      {
+      makePost({
         uri: "at://did:plc:abc/app.bsky.feed.post/1" as any,
         did: "did:plc:abc" as any,
         handle: null,
@@ -96,7 +108,7 @@ describe("formatPosts", () => {
         createdAt: EPOCH,
         topics: [],
         tier: "independent" as const
-      }
+      })
     ]);
 
     expect(out).toContain("did:plc:abc");
@@ -105,7 +117,7 @@ describe("formatPosts", () => {
 
   it("produces ASCII-only output (no fancy unicode beyond design chars)", () => {
     const out = formatPosts([
-      {
+      makePost({
         uri: "at://did:plc:abc/app.bsky.feed.post/1" as any,
         did: "did:plc:abc" as any,
         handle: "alice.bsky.social",
@@ -114,7 +126,7 @@ describe("formatPosts", () => {
         createdAt: EPOCH,
         topics: ["solar"],
         tier: "energy-focused" as const
-      }
+      })
     ]);
 
     // Only allowed non-ASCII: middle-dot (U+00B7) and ellipsis (U+2026)

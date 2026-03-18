@@ -5,12 +5,7 @@ import { CloudflareEnv, type EnvBindings } from "./Env";
 describe("CloudflareEnv", () => {
   it("fails when required bindings are missing", async () => {
     const env = {
-      FEED_DID: "did:plc:test",
-      DB: {} as D1Database,
-      RAW_EVENTS: {} as Queue,
-      FEED_GEN: {} as Queue,
-      POSTPROCESS: {} as Queue,
-      JETSTREAM_INGESTOR: {} as DurableObjectNamespace
+      PUBLIC_BSKY_API: "https://public.api.bsky.app"
     } satisfies Partial<EnvBindings>;
 
     const exit = await Effect.runPromiseExit(
@@ -27,31 +22,25 @@ describe("CloudflareEnv", () => {
     expect(Option.isSome(failure)).toBe(true);
     expect(Option.getOrUndefined(failure)).toMatchObject({
       _tag: "EnvError",
-      missing: "FEED_CACHE"
+      missing: "DB"
     });
   });
 
   it("provides bindings", async () => {
     const env = {
-      FEED_DID: "did:plc:test",
       DB: {} as D1Database,
-      FEED_CACHE: {} as KVNamespace,
-      RAW_EVENTS: {} as Queue,
-      FEED_GEN: {} as Queue,
-      POSTPROCESS: {} as Queue,
-      JETSTREAM_ENDPOINT: "wss://example",
-      JETSTREAM_INGESTOR: {} as DurableObjectNamespace
+      PUBLIC_BSKY_API: "https://public.api.bsky.app"
     };
 
     const program = Effect.gen(function* () {
       const bindings = yield* CloudflareEnv;
-      return bindings.FEED_DID;
+      return bindings.PUBLIC_BSKY_API;
     });
 
     const result = await Effect.runPromise(
       program.pipe(Effect.provide(CloudflareEnv.layer(env)))
     );
 
-    expect(result).toBe("did:plc:test");
+    expect(result).toBe("https://public.api.bsky.app");
   });
 });

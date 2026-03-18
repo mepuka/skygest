@@ -6,15 +6,17 @@ import { CloudflareEnv, type EnvBindings } from "./Env";
 describe("AppConfig", () => {
   it("loads config from provider", async () => {
     const env = {
-      FEED_DID: "did:plc:test",
-      ALG_FEED_DID: "did:plc:alg",
-      FOLLOW_LIMIT: "5000",
       DB: {} as D1Database,
-      FEED_CACHE: {} as KVNamespace,
-      RAW_EVENTS: {} as Queue,
-      FEED_GEN: {} as Queue,
-      POSTPROCESS: {} as Queue,
-      JETSTREAM_INGESTOR: {} as DurableObjectNamespace
+      PUBLIC_BSKY_API: "https://example.public.api",
+      DEFAULT_DOMAIN: "grid",
+      MCP_LIMIT_DEFAULT: "15",
+      MCP_LIMIT_MAX: "75",
+      OPERATOR_AUTH_MODE: "shared-secret",
+      OPERATOR_SECRET: "top-secret",
+      ACCESS_TEAM_DOMAIN: "https://access.example.com",
+      ACCESS_AUD: "skygest-api",
+      EDITORIAL_DEFAULT_EXPIRY_HOURS: "48",
+      CURATION_MIN_SIGNAL_SCORE: "55"
     } satisfies EnvBindings;
 
     const program = AppConfig.pipe(
@@ -24,9 +26,16 @@ describe("AppConfig", () => {
     const result = await Effect.runPromise(program);
 
     expect(result).toMatchObject({
-      feedDid: "did:plc:test",
-      algFeedDid: "did:plc:alg",
-      followLimit: 5000
+      publicApi: "https://example.public.api",
+      defaultDomain: "grid",
+      mcpLimitDefault: 15,
+      mcpLimitMax: 75,
+      operatorAuthMode: "shared-secret",
+      operatorSecret: "top-secret",
+      accessTeamDomain: "https://access.example.com",
+      accessAud: "skygest-api",
+      editorialDefaultExpiryHours: 48,
+      curationMinSignalScore: 55
     });
   });
 });

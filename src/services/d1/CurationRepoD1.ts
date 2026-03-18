@@ -6,6 +6,7 @@ import {
   CurationRecord as CurationRecordSchema,
   CurationCandidateOutput as CurationCandidateOutputSchema
 } from "../../domain/curation";
+import { emptyKnowledgePostHydration } from "../../domain/bi";
 import { decodeWithDbError } from "./schemaDecode";
 import { topicFilterExists } from "./queryFragments";
 
@@ -61,6 +62,7 @@ const toCandidateOutput = (row: CandidateRow) => ({
   topics: row.topicsCsv === null || row.topicsCsv.length === 0
     ? []
     : row.topicsCsv.split(",").filter((t) => t.length > 0),
+  ...emptyKnowledgePostHydration(),
   signalScore: row.signalScore,
   curationStatus: row.curationStatus,
   predicatesApplied: JSON.parse(row.predicatesApplied) as string[],

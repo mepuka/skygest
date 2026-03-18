@@ -39,7 +39,6 @@ it("schedules alarm and starts ingestor", async () => {
     FEED_DID: "did:plc:test",
     ALG_FEED_DID: "did:plc:alg",
     DB: {} as D1Database,
-    FEED_CACHE: {} as KVNamespace,
     RAW_EVENTS: {} as Queue,
     FEED_GEN: {} as Queue,
     POSTPROCESS: {} as Queue,

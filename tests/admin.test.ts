@@ -84,7 +84,8 @@ const makeAdminTestLayer = (options: {
         records: [],
         cursor: null
       }),
-    getPostThread: () => Effect.succeed({ thread: {} })
+    getPostThread: () => Effect.succeed({ thread: {} }),
+    getPosts: () => Effect.succeed([])
   });
   const baseLayer = Layer.mergeAll(
     sqliteLayer,
@@ -135,7 +136,8 @@ describe("admin expert registry routes", () => {
                 records: [],
                 cursor: null
               }),
-            getPostThread: () => Effect.succeed({ thread: {} })
+            getPostThread: () => Effect.succeed({ thread: {} }),
+            getPosts: () => Effect.succeed([])
           })
         });
 

@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { AtUri, Did, HttpsUrl } from "./types";
-import { EmbedPayload } from "./embed";
+import { EmbedKind, EmbedPayload } from "./embed";
 
 export const TopicSlug = Schema.String.pipe(
   Schema.minLength(1),
@@ -278,7 +278,23 @@ export const SetExpertActiveInput = Schema.Struct({
 });
 export type SetExpertActiveInput = Schema.Schema.Type<typeof SetExpertActiveInput>;
 
-export const KnowledgePostResult = Schema.Struct({
+export const ThreadEmbedType = EmbedKind;
+export type ThreadEmbedType = Schema.Schema.Type<typeof ThreadEmbedType>;
+
+export const KnowledgePostHydration = Schema.Struct({
+  replyCount: Schema.NullOr(Schema.Number),
+  embedType: Schema.NullOr(ThreadEmbedType),
+  embedContent: Schema.NullOr(EmbedPayload)
+});
+export type KnowledgePostHydration = Schema.Schema.Type<typeof KnowledgePostHydration>;
+
+export const emptyKnowledgePostHydration = (): KnowledgePostHydration => ({
+  replyCount: null,
+  embedType: null,
+  embedContent: null
+});
+
+export const KnowledgePostResult = Schema.extend(Schema.Struct({
   uri: AtUri,
   did: Did,
   handle: Schema.NullOr(Schema.String),
@@ -288,7 +304,7 @@ export const KnowledgePostResult = Schema.Struct({
   topics: Schema.Array(Schema.String),
   snippet: Schema.optional(Schema.NullOr(Schema.String)),
   tier: Schema.optionalWith(ExpertTier, { default: () => "independent" as const })
-});
+}), KnowledgePostHydration);
 export type KnowledgePostResult = Schema.Schema.Type<typeof KnowledgePostResult>;
 
 export const KnowledgeLinkResult = Schema.Struct({
@@ -574,9 +590,6 @@ export type GetPostThreadInput = Schema.Schema.Type<typeof GetPostThreadInput>;
 
 export const ThreadPostPosition = Schema.Literal("ancestor", "focus", "reply");
 export type ThreadPostPosition = Schema.Schema.Type<typeof ThreadPostPosition>;
-
-export const ThreadEmbedType = Schema.Literal("link", "img", "quote", "media", "video");
-export type ThreadEmbedType = Schema.Schema.Type<typeof ThreadEmbedType>;
 
 export const ThreadPostResult = Schema.Struct({
   uri: AtUri,

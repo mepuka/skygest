@@ -18,6 +18,7 @@ import { handleApiRequestWithLayer } from "../src/api/Router";
 import type { AccessIdentity } from "../src/auth/AuthService";
 import { BlueskyClient } from "../src/bluesky/BlueskyClient";
 import { parseAvatarUrl } from "../src/bluesky/BskyCdn";
+import type { ThreadPostView } from "../src/bluesky/ThreadTypes";
 import { Did } from "../src/domain/types";
 import { AppConfig, type AppConfigShape } from "../src/platform/Config";
 import { Logging } from "../src/platform/Logging";
@@ -70,8 +71,72 @@ const mockBlueskyClient = Layer.succeed(BlueskyClient, {
       records: [],
       cursor: null
     }),
-  getPostThread: () => Effect.succeed({ thread: {} })
+  getPostThread: () => Effect.succeed({ thread: {} }),
+  getPosts: () => Effect.succeed([])
 });
+
+const makeThreadPostView = (uri: string, replyCount: number): ThreadPostView => ({
+  uri,
+  cid: `cid-${replyCount}`,
+  author: {
+    did: sampleDid,
+    handle: "seed.example.com"
+  },
+  record: {
+    text: `Hydrated ${uri}`
+  },
+  embed: {
+    $type: "app.bsky.embed.images#view",
+    images: [
+      {
+        thumb: `https://cdn.bsky.app/img/feed_thumbnail/plain/${sampleDid}/${replyCount}@jpeg`,
+        fullsize: `https://cdn.bsky.app/img/feed_fullsize/plain/${sampleDid}/${replyCount}@jpeg`,
+        alt: `Image ${replyCount}`
+      }
+    ]
+  },
+  replyCount,
+  indexedAt: "2026-03-18T12:00:00.000Z"
+});
+
+const makeHydratingBlueskyLayer = (posts: ReadonlyArray<ThreadPostView>) => {
+  const postsByUri = new Map(posts.map((post) => [post.uri, post] as const));
+
+  return Layer.succeed(BlueskyClient, {
+    resolveDidOrHandle: (input: string) =>
+      Effect.succeed({
+        did: sampleDid,
+        handle: input
+      }),
+    getProfile: (didOrHandle: string) =>
+      Effect.succeed({
+        did: didOrHandle.startsWith("did:") ? decodeDid(didOrHandle) : sampleDid,
+        handle: didOrHandle.startsWith("did:") ? "seed.example.com" : didOrHandle,
+        displayName: "Seed Expert",
+        description: "Seeded profile",
+        avatar: parseAvatarUrl("https://cdn.bsky.app/img/avatar/plain/did:plc:test/cid@jpeg")
+      }),
+    getFollows: () =>
+      Effect.succeed({
+        dids: [],
+        cursor: null
+      }),
+    resolveRepoService: () => Effect.succeed("https://pds.example.com"),
+    listRecordsAtService: () =>
+      Effect.succeed({
+        records: [],
+        cursor: null
+      }),
+    getPostThread: () => Effect.succeed({ thread: {} }),
+    getPosts: (uris: ReadonlyArray<string>) =>
+      Effect.succeed(
+        uris.flatMap((uri) => {
+          const post = postsByUri.get(uri);
+          return post === undefined ? [] : [post];
+        })
+      )
+  });
+};
 
 const makeAdminEditorialLayer = (options: {
   readonly filename: string;
@@ -779,6 +844,46 @@ describe("curated feed public API", () => {
         expect(body.items[1]!.uri).toBe(windUri);
         expect(body.items[1]!.editorialScore).toBe(70);
         expect(body.page.nextCursor).toBeNull();
+      })
+    )
+  );
+
+  it.live("GET /api/posts/curated hydrates reply and embed metadata", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeHydratingBlueskyLayer([
+            makeThreadPostView(solarUri, 9),
+            makeThreadPostView(windUri, 4)
+          ])
+        });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            yield* sql`
+              INSERT INTO editorial_picks (post_uri, score, reason, category, curator, status, picked_at, expires_at)
+              VALUES (${solarUri}, 90, 'Great solar post', 'analysis', 'curator', 'active', ${Date.now()}, NULL)
+            `;
+            yield* sql`
+              INSERT INTO editorial_picks (post_uri, score, reason, category, curator, status, picked_at, expires_at)
+              VALUES (${windUri}, 70, 'Wind analysis', 'discussion', 'curator', 'active', ${Date.now()}, NULL)
+            `;
+          }).pipe(Effect.provide(layer))
+        );
+
+        const response = await requestApi("/api/posts/curated", layer);
+        const text = await response.text();
+        expect(response.status).toBe(200);
+
+        const body = decodeCuratedPostsPage(JSON.parse(text));
+        expect(body.items[0]!.replyCount).toBe(9);
+        expect(body.items[0]!.embedType).toBe("img");
+        expect(body.items[0]!.embedContent?.kind).toBe("img");
+        expect(body.items[1]!.replyCount).toBe(4);
+        expect(body.items[1]!.embedType).toBe("img");
       })
     )
   );
