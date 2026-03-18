@@ -197,6 +197,18 @@ const makeCliLayer = (options?: {
           topics: ["solar"]
         }] as const;
       }),
+    getStats: (_baseUrl: URL, secret: string) =>
+      Effect.sync(() => {
+        remoteCalls.push({ action: "get-stats", secret });
+        return {
+          timestamp: Date.now(),
+          experts: { total: 5, active: 3 },
+          posts: { total: 100, inLast24h: 10, withLinks: 50 },
+          curation: { flagged: 2, curated: 1, rejected: 0 },
+          enrichment: { queued: 0, running: 0, complete: 5, failed: 1, needsReview: 0 },
+          lastIngest: null
+        } as const;
+      }),
     refreshProfiles: () => Effect.succeed({ updated: 0, failed: 0 })
   });
   const operatorSecretLayer = options?.operatorSecretLayer ?? Layer.succeed(
@@ -475,6 +487,15 @@ describe("ops CLI", () => {
               uri: smokeFixtureUris()[0],
               topics: ["solar"]
             }] as const),
+          getStats: () =>
+            Effect.succeed({
+              timestamp: Date.now(),
+              experts: { total: 5, active: 3 },
+              posts: { total: 100, inLast24h: 10, withLinks: 50 },
+              curation: { flagged: 2, curated: 1, rejected: 0 },
+              enrichment: { queued: 0, running: 0, complete: 5, failed: 1, needsReview: 0 },
+              lastIngest: null
+            } as const),
           refreshProfiles: () => Effect.succeed({ updated: 0, failed: 0 })
         })
       }).layer;
@@ -599,6 +620,15 @@ describe("ops CLI", () => {
               uri: smokeFixtureUris()[0],
               topics: ["solar"]
             }] as const),
+          getStats: () =>
+            Effect.succeed({
+              timestamp: Date.now(),
+              experts: { total: 5, active: 3 },
+              posts: { total: 100, inLast24h: 10, withLinks: 50 },
+              curation: { flagged: 2, curated: 1, rejected: 0 },
+              enrichment: { queued: 0, running: 0, complete: 5, failed: 1, needsReview: 0 },
+              lastIngest: null
+            } as const),
           refreshProfiles: () => Effect.succeed({ updated: 0, failed: 0 })
         })
       }).layer;

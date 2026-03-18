@@ -7,6 +7,7 @@ import {
   RefreshProfilesResult,
   SeedPublicationsResult
 } from "../domain/bi";
+import { StagingStats } from "../domain/api";
 import {
   IngestQueuedResponse,
   IngestRepairSummary,
@@ -54,6 +55,7 @@ const decodeEnrichmentRunResponse = decodeJsonStringWith(EnrichmentRunRecord);
 const decodeEnrichmentRunsResponse = decodeJsonStringWith(EnrichmentRunsOutput);
 const decodePublicationsResponse = decodeJsonStringWith(PublicationListOutput);
 const decodeAdminExpertsJsonResponse = decodeJsonStringWith(ExpertListOutput);
+const decodeStagingStatsResponse = decodeJsonStringWith(StagingStats);
 const decodeSearchPostsResponse = decodeCallToolResultWith(KnowledgePostsMcpOutput);
 const decodeMcpExpertsResponse = decodeCallToolResultWith(ExpertListMcpOutput);
 
@@ -265,6 +267,10 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
       baseUrl: URL,
       secret: string
     ) => Effect.Effect<ReadonlyArray<{ readonly hostname: string; readonly tier: string; readonly postCount: number }>, StagingRequestError>;
+    readonly getStats: (
+      baseUrl: URL,
+      secret: string
+    ) => Effect.Effect<Schema.Schema.Type<typeof StagingStats>, StagingRequestError>;
     readonly searchPostsMcp: (
       baseUrl: URL,
       secret: string,
@@ -453,6 +459,15 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
           arguments: { domain: "energy" }
         },
         (text) => decodeMcpExpertsResponse(text).items
+      ),
+    getStats: (baseUrl, secret) =>
+      requestJson(
+        "get-stats",
+        () =>
+          fetch(endpointUrl(baseUrl, "/admin/ops/stats"), {
+            headers: { "x-skygest-operator-secret": secret }
+          }),
+        decodeStagingStatsResponse
       ),
     listPublications: (baseUrl, secret) =>
       requestJson(
