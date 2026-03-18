@@ -1,5 +1,5 @@
 import type { KnowledgePostResult, KnowledgeLinkResult, PublicationListItem } from "../lib/api.ts";
-import type { ExpertTier, TopicEntry } from "../lib/types.ts";
+import type { EditorialPickCategory, ExpertTier, TopicEntry } from "../lib/types.ts";
 import { AttributionRow } from "./AttributionRow.tsx";
 import { EditorialBadge } from "./EditorialBadge.tsx";
 import { LinkPreview } from "./LinkPreview.tsx";
@@ -13,7 +13,9 @@ interface PostCardProps {
   readonly topicLabel?: string | null | undefined;
   readonly topicEntries?: readonly TopicEntry[] | undefined;
   readonly borderColor?: string | null | undefined;
-  readonly editorialCategory?: string | null | undefined;
+  readonly editorialCategory?: EditorialPickCategory | null | undefined;
+  readonly active?: boolean | undefined;
+  readonly onHover?: ((uri: string | null) => void) | undefined;
 }
 
 export function PostCard({
@@ -23,7 +25,9 @@ export function PostCard({
   topicLabel,
   topicEntries,
   borderColor,
-  editorialCategory
+  editorialCategory,
+  active,
+  onHover
 }: PostCardProps) {
   const pub = link?.domain && publicationIndex
     ? resolvePublication(link.domain, publicationIndex)
@@ -31,44 +35,46 @@ export function PostCard({
 
   return (
     <article
-      className="flex pt-[10px] pb-[14px] pl-2 border-b border-border"
+      className={`flex flex-col pt-[14px] pb-[14px] gap-2 border-b border-border transition-colors ${
+        active ? "bg-surface" : ""
+      }`}
       style={borderColor ? { borderLeft: `2px solid ${borderColor}` } : undefined}
       aria-label={`Post by ${post.handle ?? "unknown"}`}
+      onMouseEnter={() => onHover?.(post.uri)}
+      onMouseLeave={() => onHover?.(null)}
     >
-      <div className="flex flex-col grow pr-1 gap-[6px] min-w-0">
-        <AttributionRow
-          handle={post.handle}
-          did={post.did}
-          avatar={post.avatar}
-          tier={post.tier as ExpertTier}
-          createdAt={post.createdAt}
-          uri={post.uri}
-          topicLabel={topicLabel}
+      <AttributionRow
+        handle={post.handle}
+        did={post.did}
+        avatar={post.avatar}
+        tier={post.tier as ExpertTier}
+        createdAt={post.createdAt}
+        uri={post.uri}
+        topicLabel={topicLabel}
+      />
+
+      {editorialCategory && (
+        <EditorialBadge category={editorialCategory} />
+      )}
+
+      <p className="font-body text-[16px] leading-[25px] text-primary">
+        {post.text}
+      </p>
+
+      {link && (
+        <LinkPreview
+          url={link.url}
+          domain={link.domain}
+          title={link.title}
+          description={link.description}
+          imageUrl={link.imageUrl}
+          tier={pub?.tier}
         />
+      )}
 
-        {editorialCategory && (
-          <EditorialBadge category={editorialCategory as any} />
-        )}
-
-        <p className="font-body text-[16px] leading-[25px] text-primary">
-          {post.text}
-        </p>
-
-        {link && (
-          <LinkPreview
-            url={link.url}
-            domain={link.domain}
-            title={link.title}
-            description={link.description}
-            imageUrl={link.imageUrl}
-            tier={pub?.tier}
-          />
-        )}
-
-        {topicEntries && topicEntries.length > 0 && (
-          <OntologyBreadcrumb topics={topicEntries} />
-        )}
-      </div>
+      {topicEntries && topicEntries.length > 0 && (
+        <OntologyBreadcrumb topics={topicEntries} />
+      )}
     </article>
   );
 }
