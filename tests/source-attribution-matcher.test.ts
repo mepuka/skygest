@@ -1,21 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, Layer } from "effect";
-import { vi } from "vitest";
-
-vi.mock("../src/domain/enrichmentPlan", async () => {
-  const { Schema } = await import("effect");
-
-  return {
-    EnrichmentPlannedLinkCardContext: Schema.Struct({
-      source: Schema.Literal("embed", "media"),
-      uri: Schema.String,
-      title: Schema.NullOr(Schema.String),
-      description: Schema.NullOr(Schema.String),
-      thumb: Schema.NullOr(Schema.String)
-    })
-  };
-});
-
 import { SourceAttributionMatcher } from "../src/source/SourceAttributionMatcher";
 import type {
   SourceAttributionMatcherInput,

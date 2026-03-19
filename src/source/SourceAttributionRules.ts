@@ -399,10 +399,10 @@ export const matchSourceAttribution = (
   const baseCandidates = sortCandidates(
     Array.from(HashMap.values(index)).map((bucket) => ({
       providerId: bucket.entityId,
-      providerLabel:
-        Option.getOrThrowWith(lookup.findById(bucket.entityId), () =>
-          new Error(`missing provider for ${bucket.entityId}`)
-        ).providerLabel,
+      providerLabel: Option.getOrElse(
+        Option.map(lookup.findById(bucket.entityId), (entry) => entry.providerLabel),
+        () => bucket.entityId
+      ),
       sourceFamily: null,
       bestRank: bucket.bestRank,
       evidence: Array.from(bucket.evidence, (item) => item.signal)
@@ -427,14 +427,15 @@ export const matchSourceAttribution = (
         socialProvenance
       };
     case "Matched": {
-      const providerEntry = Option.getOrThrowWith(
-        lookup.findById(resolution.winner.entityId),
-        () => new Error(`missing provider for ${resolution.winner.entityId}`)
+      const providerEntry = Option.getOrUndefined(
+        lookup.findById(resolution.winner.entityId)
       );
-      const sourceFamily = matchCanonicalSourceFamily(providerEntry, input);
+      const sourceFamily = providerEntry !== undefined
+        ? matchCanonicalSourceFamily(providerEntry, input)
+        : null;
       const provider: ProviderReference = {
-        providerId: providerEntry.providerId,
-        providerLabel: providerEntry.providerLabel,
+        providerId: resolution.winner.entityId,
+        providerLabel: providerEntry?.providerLabel ?? resolution.winner.entityId,
         sourceFamily
       };
 

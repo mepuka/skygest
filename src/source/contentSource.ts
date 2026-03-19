@@ -16,10 +16,11 @@
  *   3. Otherwise, leave contentSource = null.
  */
 
+import { Option } from "effect";
 import type { ContentSourceReference } from "../domain/source";
 import type { EnrichmentPlannedLinkCardContext } from "../domain/enrichmentPlan";
 import type { LinkRecord } from "../domain/bi";
-import { normalizeDomain } from "../domain/normalize";
+import { parseNormalizedDomain } from "./normalize";
 
 // ---------------------------------------------------------------------------
 // Input type
@@ -44,17 +45,8 @@ export interface ContentSourceInput {
 // Domain helper
 // ---------------------------------------------------------------------------
 
-/**
- * Parse and normalize the hostname from a URL string.
- * Returns null if the URL is invalid.
- */
-const parseDomain = (url: string): string | null => {
-  try {
-    return normalizeDomain(new URL(url).hostname);
-  } catch {
-    return null;
-  }
-};
+const parseDomain = (url: string): string | null =>
+  Option.getOrNull(parseNormalizedDomain(url));
 
 // ---------------------------------------------------------------------------
 // Public API

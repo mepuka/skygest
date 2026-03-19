@@ -1,4 +1,4 @@
-import { Chunk, HashMap, Order } from "effect";
+import { Chunk, HashMap, Option, Order } from "effect";
 
 export type RankedSignal = {
   readonly signal: string;
@@ -42,17 +42,18 @@ export const collectEvidence = <EntityId, Signal extends RankedSignal>(
     (index) => {
       for (const item of items) {
         const existing = HashMap.get(index, item.entityId);
-        const nextBucket = existing._tag === "Some"
-          ? {
-              entityId: existing.value.entityId,
-              bestRank: Math.min(existing.value.bestRank, item.signal.rank),
-              evidence: Chunk.append(existing.value.evidence, item)
-            }
-          : {
-              entityId: item.entityId,
-              bestRank: item.signal.rank,
-              evidence: Chunk.of(item)
-            };
+        const nextBucket = Option.match(existing, {
+          onNone: () => ({
+            entityId: item.entityId,
+            bestRank: item.signal.rank,
+            evidence: Chunk.of(item)
+          }),
+          onSome: (bucket) => ({
+            entityId: bucket.entityId,
+            bestRank: Math.min(bucket.bestRank, item.signal.rank),
+            evidence: Chunk.append(bucket.evidence, item)
+          })
+        });
 
         HashMap.set(index, item.entityId, nextBucket);
       }
