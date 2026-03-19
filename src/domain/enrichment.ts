@@ -8,7 +8,7 @@
  */
 
 import { Schema } from "effect";
-import { Did } from "./types";
+import { AtUri, Did } from "./types";
 import {
   MediaType,
   ChartType,
@@ -151,3 +151,47 @@ export const EnrichmentOutput = Schema.Union(
   GroundingEnrichment
 );
 export type EnrichmentOutput = Schema.Schema.Type<typeof EnrichmentOutput>;
+
+export const VisionPostEnrichmentResult = Schema.Struct({
+  kind: Schema.Literal("vision"),
+  payload: VisionEnrichment,
+  enrichedAt: Schema.Number
+});
+export type VisionPostEnrichmentResult = Schema.Schema.Type<
+  typeof VisionPostEnrichmentResult
+>;
+
+export const SourceAttributionPostEnrichmentResult = Schema.Struct({
+  kind: Schema.Literal("source-attribution"),
+  payload: SourceAttributionEnrichment,
+  enrichedAt: Schema.Number
+});
+export type SourceAttributionPostEnrichmentResult = Schema.Schema.Type<
+  typeof SourceAttributionPostEnrichmentResult
+>;
+
+export const GroundingPostEnrichmentResult = Schema.Struct({
+  kind: Schema.Literal("grounding"),
+  payload: GroundingEnrichment,
+  enrichedAt: Schema.Number
+});
+export type GroundingPostEnrichmentResult = Schema.Schema.Type<
+  typeof GroundingPostEnrichmentResult
+>;
+
+export const PostEnrichmentResult = Schema.Union(
+  VisionPostEnrichmentResult,
+  SourceAttributionPostEnrichmentResult,
+  GroundingPostEnrichmentResult
+);
+export type PostEnrichmentResult = Schema.Schema.Type<
+  typeof PostEnrichmentResult
+>;
+
+export const PostEnrichmentsOutput = Schema.Struct({
+  postUri: AtUri,
+  enrichments: Schema.Array(PostEnrichmentResult)
+});
+export type PostEnrichmentsOutput = Schema.Schema.Type<
+  typeof PostEnrichmentsOutput
+>;

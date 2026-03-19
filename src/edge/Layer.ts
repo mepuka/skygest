@@ -90,6 +90,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     configLayer,
     blueskyLayer,
     postHydrationLayer,
+    candidatePayloadServiceLayer,
     KnowledgeQueryService.layer.pipe(
       Layer.provideMerge(Layer.mergeAll(queryRepositoriesLayer, configLayer))
     ),
