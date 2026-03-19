@@ -3,12 +3,15 @@ import { describe, expect, it } from "@effect/vitest";
 import { handleApiRequestWithLayer } from "../src/api/Router";
 import { BlueskyClient } from "../src/bluesky/BlueskyClient";
 import { PostThreadOutput } from "../src/domain/bi";
+import { PostEnrichmentsOutput } from "../src/domain/enrichment";
 import {
   KnowledgeLinksPageOutput,
   KnowledgePostsPageOutput
 } from "../src/domain/api";
 import type { GetPostThreadResponse, ThreadPostView } from "../src/bluesky/ThreadTypes";
 import { BlueskyApiError, DbError } from "../src/domain/errors";
+import type { AtUri } from "../src/domain/types";
+import { CandidatePayloadService } from "../src/services/CandidatePayloadService";
 import { KnowledgeQueryService } from "../src/services/KnowledgeQueryService";
 import { smokeFixtureUris } from "../src/staging/SmokeFixture";
 import {
@@ -21,6 +24,7 @@ import {
 const decodePostsPage = Schema.decodeUnknownSync(KnowledgePostsPageOutput);
 const decodeLinksPage = Schema.decodeUnknownSync(KnowledgeLinksPageOutput);
 const decodePostThread = Schema.decodeUnknownSync(PostThreadOutput);
+const decodePostEnrichments = Schema.decodeUnknownSync(PostEnrichmentsOutput);
 
 const expectJsonResponse = async <A>(
   response: Response,
@@ -122,6 +126,98 @@ const makeBlueskyLayer = (overrides: {
     getPostThread: overrides.getPostThread ?? (() => Effect.die("unexpected getPostThread")),
     getPosts: overrides.getPosts ?? (() => Effect.die("unexpected getPosts"))
   });
+
+const makeVisionEnrichmentPayload = () => ({
+  kind: "vision" as const,
+  summary: {
+    text: "Bar chart of ERCOT load by month.",
+    mediaTypes: ["chart"] as const,
+    chartTypes: ["bar-chart"] as const,
+    titles: ["ERCOT load"],
+    keyFindings: [
+      {
+        text: "Load rises through summer.",
+        assetKeys: ["embed:0:https://cdn.bsky.app/full-1.jpg"]
+      }
+    ]
+  },
+  assets: [
+    {
+      assetKey: "embed:0:https://cdn.bsky.app/full-1.jpg",
+      assetType: "image" as const,
+      source: "embed" as const,
+      index: 0,
+      originalAltText: null,
+      analysis: {
+        mediaType: "chart" as const,
+        chartTypes: ["bar-chart"] as const,
+        altText: "Bar chart of ERCOT load by month.",
+        altTextProvenance: "synthetic" as const,
+        xAxis: { label: "Month", unit: null },
+        yAxis: { label: "Load", unit: "GW" },
+        series: [{ legendLabel: "Load", unit: "GW" }],
+        sourceLines: [{ sourceText: "Source: ERCOT" }],
+        temporalCoverage: {
+          startDate: "2024-01",
+          endDate: "2024-12"
+        },
+        keyFindings: ["Load rises through summer."],
+        title: "ERCOT load",
+        modelId: "gemini-2.5-flash",
+        processedAt: 10
+      }
+    }
+  ],
+  modelId: "gemini-2.5-flash",
+  promptVersion: "v1.0.0",
+  processedAt: 10
+});
+
+const makeSourceAttributionEnrichmentPayload = () => ({
+  kind: "source-attribution" as const,
+  imageSource: {
+    did: sampleDid,
+    handle: "seed.example.com"
+  },
+  contentSource: {
+    url: "https://example.com/grid-report",
+    title: "Grid report",
+    publication: "Example"
+  },
+  dataSource: {
+    providerId: "ercot",
+    providerLabel: "ERCOT",
+    datasetLabel: "Load"
+  },
+  processedAt: 20
+});
+
+const asAtUri = (value: string) => value as AtUri;
+
+const createPickedPayload = (
+  postUri: AtUri,
+  layer: ReturnType<typeof makeBiLayer>
+) =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      const payloads = yield* CandidatePayloadService;
+
+      yield* payloads.capturePayload({
+        postUri,
+        captureStage: "candidate",
+        embedType: "link",
+        embedPayload: {
+          kind: "link",
+          uri: "https://example.com/report",
+          title: "Grid report",
+          description: "Useful context",
+          thumb: null
+        }
+      });
+
+      yield* payloads.markPicked(postUri);
+    }).pipe(Effect.provide(layer))
+  );
 
 describe("frontend REST API", () => {
   it.live("paginates recent posts with cursors", () =>
@@ -532,6 +628,183 @@ describe("frontend REST API", () => {
           message: "failed to fetch post thread",
           retryable: true
         });
+      })
+    )
+  );
+
+  it.live("serves stored post enrichments with typed payloads", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const focusUri = asAtUri(smokeFixtureUris(sampleDid)[0]);
+        const layer = makeBiLayer({ filename });
+        const visionPayload = makeVisionEnrichmentPayload();
+        const sourcePayload = makeSourceAttributionEnrichmentPayload();
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await createPickedPayload(focusUri, layer);
+
+        const stored = await Effect.runPromise(
+          Effect.gen(function* () {
+            const payloads = yield* CandidatePayloadService;
+
+            yield* payloads.saveEnrichment({
+              postUri: focusUri,
+              enrichmentType: "vision",
+              enrichmentPayload: visionPayload
+            });
+            yield* payloads.saveEnrichment({
+              postUri: focusUri,
+              enrichmentType: "source-attribution",
+              enrichmentPayload: sourcePayload
+            });
+
+            return yield* payloads.getPayload(focusUri);
+          }).pipe(Effect.provide(layer))
+        );
+
+        const sourceStored = stored?.enrichments.find(
+          (enrichment) => enrichment.enrichmentType === "source-attribution"
+        );
+        const visionStored = stored?.enrichments.find(
+          (enrichment) => enrichment.enrichmentType === "vision"
+        );
+
+        expect(sourceStored).toBeDefined();
+        expect(visionStored).toBeDefined();
+
+        const body = await expectJsonResponse(
+          await requestApi(`/api/posts/${encodeURIComponent(focusUri)}/enrichments`, layer),
+          decodePostEnrichments
+        );
+
+        expect(body).toEqual({
+          postUri: focusUri,
+          enrichments: [
+            {
+              kind: "source-attribution",
+              payload: sourcePayload,
+              enrichedAt: sourceStored!.enrichedAt
+            },
+            {
+              kind: "vision",
+              payload: visionPayload,
+              enrichedAt: visionStored!.enrichedAt
+            }
+          ]
+        });
+      })
+    )
+  );
+
+  it.live("returns empty enrichments when no payload record exists", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const focusUri = asAtUri(smokeFixtureUris(sampleDid)[0]);
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const body = await expectJsonResponse(
+          await requestApi(`/api/posts/${encodeURIComponent(focusUri)}/enrichments`, layer),
+          decodePostEnrichments
+        );
+
+        expect(body).toEqual({
+          postUri: focusUri,
+          enrichments: []
+        });
+      })
+    )
+  );
+
+  it.live("returns empty enrichments when a payload record exists without enrichments", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const focusUri = asAtUri(smokeFixtureUris(sampleDid)[0]);
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await createPickedPayload(focusUri, layer);
+
+        const body = await expectJsonResponse(
+          await requestApi(`/api/posts/${encodeURIComponent(focusUri)}/enrichments`, layer),
+          decodePostEnrichments
+        );
+
+        expect(body).toEqual({
+          postUri: focusUri,
+          enrichments: []
+        });
+      })
+    )
+  );
+
+  it.live("filters legacy or invalid enrichment payloads from the public response", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const focusUri = asAtUri(smokeFixtureUris(sampleDid)[0]);
+        const layer = makeBiLayer({ filename });
+        const sourcePayload = makeSourceAttributionEnrichmentPayload();
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await createPickedPayload(focusUri, layer);
+
+        const stored = await Effect.runPromise(
+          Effect.gen(function* () {
+            const payloads = yield* CandidatePayloadService;
+
+            yield* payloads.saveEnrichment({
+              postUri: focusUri,
+              enrichmentType: "vision",
+              enrichmentPayload: {
+                summary: "legacy shape that should be ignored"
+              }
+            });
+            yield* payloads.saveEnrichment({
+              postUri: focusUri,
+              enrichmentType: "source-attribution",
+              enrichmentPayload: sourcePayload
+            });
+
+            return yield* payloads.getPayload(focusUri);
+          }).pipe(Effect.provide(layer))
+        );
+
+        const sourceStored = stored?.enrichments.find(
+          (enrichment) => enrichment.enrichmentType === "source-attribution"
+        );
+
+        expect(sourceStored).toBeDefined();
+
+        const body = await expectJsonResponse(
+          await requestApi(`/api/posts/${encodeURIComponent(focusUri)}/enrichments`, layer),
+          decodePostEnrichments
+        );
+
+        expect(body).toEqual({
+          postUri: focusUri,
+          enrichments: [
+            {
+              kind: "source-attribution",
+              payload: sourcePayload,
+              enrichedAt: sourceStored!.enrichedAt
+            }
+          ]
+        });
+      })
+    )
+  );
+
+  it.live("returns 400 for malformed enrichment post URIs", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const body = await expectJsonResponse(
+          await requestApi("/api/posts/not-a-uri/enrichments", layer),
+          (value) => value as { readonly error: string; readonly message: string },
+          400
+        );
+
+        expect(body.error).toBe("BadRequest");
+        expect(body.message).toContain("uri");
       })
     )
   );

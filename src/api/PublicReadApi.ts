@@ -38,6 +38,11 @@ export const PublicReadApi = HttpApi.make("public-read")
           .addSuccess(PublicReadResponseSchemas.thread)
       )
       .add(
+        HttpApiEndpoint.get("enrichments", "/posts/:uri/enrichments")
+          .setPath(PublicReadRequestSchemas.postUriPath)
+          .addSuccess(PublicReadResponseSchemas.enrichments)
+      )
+      .add(
         HttpApiEndpoint.get("curated", "/posts/curated")
           .setUrlParams(PublicReadRequestSchemas.curatedFeed)
           .addSuccess(PublicReadResponseSchemas.curatedPostsPage)

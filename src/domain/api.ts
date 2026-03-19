@@ -43,7 +43,7 @@ import {
   EnrichmentRunStatus,
   EnrichmentRunsOutput
 } from "./enrichmentRun";
-import { EnrichmentKind } from "./enrichment";
+import { EnrichmentKind, PostEnrichmentsOutput } from "./enrichment";
 import {
   EditorialScore,
   SubmitEditorialPickInput,
@@ -601,6 +601,7 @@ export const PublicReadResponseSchemas = {
   expandedTopics: ExpandedTopicsOutput,
   explainedTopics: ExplainPostTopicsOutput,
   thread: PostThreadOutput,
+  enrichments: PostEnrichmentsOutput,
   curatedPostsPage: CuratedPostsPageOutput
 } as const;
 
