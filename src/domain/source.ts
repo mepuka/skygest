@@ -49,3 +49,44 @@ export const ProviderRegistryManifest = Schema.Struct({
 export type ProviderRegistryManifest = Schema.Schema.Type<
   typeof ProviderRegistryManifest
 >;
+
+// ---------------------------------------------------------------------------
+// Match evidence contract (SKY-45)
+// ---------------------------------------------------------------------------
+
+export const MatchSignalType = Schema.Literal(
+  "source-line-alias",
+  "source-line-domain",
+  "chart-title-alias",
+  "link-domain",
+  "embed-link-domain",
+  "visible-url-domain",
+  "post-text-mention"
+);
+export type MatchSignalType = Schema.Schema.Type<typeof MatchSignalType>;
+
+export const MatchEvidence = Schema.Struct({
+  signal: MatchSignalType,
+  raw: Schema.Record({ key: Schema.String, value: Schema.String })
+});
+export type MatchEvidence = Schema.Schema.Type<typeof MatchEvidence>;
+
+export const ProviderMatch = Schema.Struct({
+  providerId: ProviderId,
+  providerLabel: Schema.String,
+  sourceFamily: Schema.NullOr(Schema.String),
+  signals: Schema.Array(MatchEvidence)
+});
+export type ProviderMatch = Schema.Schema.Type<typeof ProviderMatch>;
+
+export const MatchResolution = Schema.Literal("matched", "ambiguous", "none");
+export type MatchResolution = Schema.Schema.Type<typeof MatchResolution>;
+
+export const MatchResult = Schema.Struct({
+  providerMatches: Schema.Array(ProviderMatch),
+  selectedProvider: Schema.NullOr(ProviderReference),
+  resolution: MatchResolution,
+  contentSource: Schema.NullOr(ContentSourceReference),
+  socialProvenance: Schema.NullOr(SocialProvenance)
+});
+export type MatchResult = Schema.Schema.Type<typeof MatchResult>;
