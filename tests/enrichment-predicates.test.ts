@@ -156,9 +156,9 @@ describe("EnrichmentPredicates", () => {
             {
               output: {
                 kind: "source-attribution",
-                imageSource: null,
+                provider: null,
                 contentSource: null,
-                dataSource: null,
+                socialProvenance: null,
                 processedAt: 1
               },
               updatedAt: 1,

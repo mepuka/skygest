@@ -165,13 +165,14 @@ describe("EnrichmentPlanner", () => {
         enrichmentType: "source-attribution",
         enrichmentPayload: {
           kind: "source-attribution",
-          imageSource: null,
+          provider: null,
           contentSource: {
             url: "https://example.com/solar-storage",
             title: "Solar storage buildout",
+            domain: "example.com",
             publication: "Example"
           },
-          dataSource: null,
+          socialProvenance: null,
           processedAt: 123
         }
       });

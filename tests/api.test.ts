@@ -175,19 +175,20 @@ const makeVisionEnrichmentPayload = () => ({
 
 const makeSourceAttributionEnrichmentPayload = () => ({
   kind: "source-attribution" as const,
-  imageSource: {
-    did: sampleDid,
-    handle: "seed.example.com"
+  provider: {
+    providerId: "ercot",
+    providerLabel: "ERCOT",
+    sourceFamily: "Load"
   },
   contentSource: {
     url: "https://example.com/grid-report",
     title: "Grid report",
+    domain: "example.com",
     publication: "Example"
   },
-  dataSource: {
-    providerId: "ercot",
-    providerLabel: "ERCOT",
-    datasetLabel: "Load"
+  socialProvenance: {
+    did: sampleDid,
+    handle: "seed.example.com"
   },
   processedAt: 20
 });

@@ -8,7 +8,7 @@
  */
 
 import { Schema } from "effect";
-import { AtUri, Did } from "./types";
+import { AtUri } from "./types";
 import {
   MediaType,
   ChartType,
@@ -18,6 +18,11 @@ import {
   ChartSourceLine,
   TemporalCoverage
 } from "./media";
+import {
+  ContentSourceReference,
+  ProviderReference,
+  SocialProvenance
+} from "./source";
 
 // ---------------------------------------------------------------------------
 // Enrichment kind discriminator
@@ -94,31 +99,14 @@ export const VisionEnrichment = Schema.Struct({
 export type VisionEnrichment = Schema.Schema.Type<typeof VisionEnrichment>;
 
 // ---------------------------------------------------------------------------
-// Source attribution enrichment (SKY-17: data source registry)
+// Source attribution enrichment (SKY-17: provider/content normalization)
 // ---------------------------------------------------------------------------
-
-export const ImageSource = Schema.Struct({
-  did: Did,
-  handle: Schema.NullOr(Schema.String)
-});
-
-export const ContentSource = Schema.Struct({
-  url: Schema.String,
-  title: Schema.NullOr(Schema.String),
-  publication: Schema.NullOr(Schema.String)
-});
-
-export const DataSource = Schema.Struct({
-  providerId: Schema.NullOr(Schema.String),
-  providerLabel: Schema.NullOr(Schema.String),
-  datasetLabel: Schema.NullOr(Schema.String)
-});
 
 export const SourceAttributionEnrichment = Schema.Struct({
   kind: Schema.Literal("source-attribution"),
-  imageSource: Schema.NullOr(ImageSource),
-  contentSource: Schema.NullOr(ContentSource),
-  dataSource: Schema.NullOr(DataSource),
+  provider: Schema.NullOr(ProviderReference),
+  contentSource: Schema.NullOr(ContentSourceReference),
+  socialProvenance: Schema.NullOr(SocialProvenance),
   processedAt: Schema.Number
 });
 export type SourceAttributionEnrichment = Schema.Schema.Type<typeof SourceAttributionEnrichment>;
