@@ -4,12 +4,14 @@ import {
   MatchSignalType,
   MatchEvidence,
   ProviderMatch,
+  MatchResolution,
   MatchResult
 } from "../src/domain/source";
 
 describe("evidence contract types", () => {
-  it("MatchSignalType accepts all 7 signal types", () => {
-    const signals: Schema.Schema.Type<typeof MatchSignalType>[] = [
+  it("MatchSignalType decodes all 7 signal types and rejects invalid", () => {
+    const decode = Schema.decodeUnknownSync(MatchSignalType);
+    const signals = [
       "source-line-alias",
       "source-line-domain",
       "chart-title-alias",
@@ -18,7 +20,10 @@ describe("evidence contract types", () => {
       "visible-url-domain",
       "post-text-mention"
     ];
-    expect(signals).toHaveLength(7);
+    for (const s of signals) {
+      expect(decode(s)).toBe(s);
+    }
+    expect(() => decode("invalid-signal")).toThrow();
   });
 
   it("MatchResult resolution discriminates matched/ambiguous/none", () => {
