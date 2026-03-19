@@ -67,11 +67,12 @@ export const isWholeWordMatch = (text: string, alias: string): boolean => {
 /**
  * Matches either a full URL (https?://...) or a bare domain (eia.gov).
  *
- * Captures the hostname portion (group 1). The TLD requirement (two or
- * more labels separated by dots) prevents false positives on plain words.
+ * Captures the hostname portion (group 1). The final label must be at
+ * least 2 characters to avoid false positives on abbreviations like
+ * "U.S.", "a.m.", "i.e.", "e.g." that appear in energy-domain writing.
  */
 const DOMAIN_PATTERN =
-  /(?:https?:\/\/)?([a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+)(?:\/[^\s]*)?/iu;
+  /(?:https?:\/\/)?([a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,})(?:\/[^\s]*)?/iu;
 
 /**
  * Extract a domain from free text.

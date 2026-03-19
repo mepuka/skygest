@@ -208,5 +208,12 @@ describe("normalization utilities", () => {
         extractDomainFromText("Check out gridstatus.io for live data")
       ).toBe("gridstatus.io");
     });
+
+    it("rejects common abbreviations (U.S., a.m., i.e., e.g.)", () => {
+      expect(extractDomainFromText("at 10 a.m. ET")).toBeNull();
+      expect(extractDomainFromText("U.S. Energy Information Administration")).toBeNull();
+      expect(extractDomainFromText("i.e. this is a test")).toBeNull();
+      expect(extractDomainFromText("e.g. solar panels")).toBeNull();
+    });
   });
 });
