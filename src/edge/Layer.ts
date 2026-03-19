@@ -31,6 +31,7 @@ import { IngestRunItemsRepoD1 } from "../services/d1/IngestRunItemsRepoD1";
 import { IngestRunsRepoD1 } from "../services/d1/IngestRunsRepoD1";
 import { KnowledgeRepoD1 } from "../services/d1/KnowledgeRepoD1";
 import { PublicationsRepoD1 } from "../services/d1/PublicationsRepoD1";
+import { ProviderRegistry } from "../services/ProviderRegistry";
 
 const makeBaseLayer = (env: EnvBindings) =>
   Layer.mergeAll(
@@ -43,6 +44,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const baseLayer = makeBaseLayer(env);
   const configLayer = AppConfig.layer.pipe(Layer.provideMerge(baseLayer));
   const ontologyLayer = OntologyCatalog.layer;
+  const providerRegistryLayer = ProviderRegistry.layer;
   const expertsLayer = ExpertsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
   const knowledgeLayer = KnowledgeRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
   const publicationsLayer = PublicationsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
@@ -88,6 +90,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const queryLayer = Layer.mergeAll(
     queryRepositoriesLayer,
     configLayer,
+    providerRegistryLayer,
     blueskyLayer,
     postHydrationLayer,
     candidatePayloadServiceLayer,
@@ -110,6 +113,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
       Layer.mergeAll(
         configLayer,
         ontologyLayer,
+        providerRegistryLayer,
         expertsLayer,
         knowledgeLayer,
         registryLayer,
@@ -122,6 +126,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     baseLayer,
     configLayer,
     ontologyLayer,
+    providerRegistryLayer,
     expertsLayer,
     knowledgeLayer,
     publicationsLayer,
@@ -139,6 +144,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     baseLayer,
     configLayer,
     ontologyLayer,
+    providerRegistryLayer,
     expertsLayer,
     knowledgeLayer,
     publicationsLayer,

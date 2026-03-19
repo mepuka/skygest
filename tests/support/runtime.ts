@@ -24,6 +24,7 @@ import { EditorialRepoD1 } from "../../src/services/d1/EditorialRepoD1";
 import { ExpertsRepoD1 } from "../../src/services/d1/ExpertsRepoD1";
 import { KnowledgeRepoD1 } from "../../src/services/d1/KnowledgeRepoD1";
 import { PublicationsRepoD1 } from "../../src/services/d1/PublicationsRepoD1";
+import { ProviderRegistry } from "../../src/services/ProviderRegistry";
 import { makeSmokeFixtureBatch } from "../../src/staging/SmokeFixture";
 
 export const testConfig = (
@@ -68,10 +69,12 @@ export const makeBiLayer = (options?: {
   );
   const editorialRepoLayer = EditorialRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
   const ontologyLayer = OntologyCatalog.layer;
+  const providerRegistryLayer = ProviderRegistry.layer;
   const baseLayer = Layer.mergeAll(
     sqliteLayer,
     configLayer,
     ontologyLayer,
+    providerRegistryLayer,
     expertsLayer,
     knowledgeLayer,
     publicationsLayer,
@@ -101,6 +104,7 @@ export const makeBiLayer = (options?: {
         curationRepoLayer,
         expertsLayer,
         publicationsLayer,
+        providerRegistryLayer,
         candidatePayloadServiceLayer,
         blueskyLayer,
         configLayer
