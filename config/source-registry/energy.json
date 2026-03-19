@@ -1,0 +1,197 @@
+{
+  "domain": "energy",
+  "version": "2026-03-18",
+  "providers": [
+    {
+      "providerId": "aeso",
+      "providerLabel": "AESO",
+      "aliases": ["Alberta Electric System Operator"],
+      "domains": ["aeso.ca"],
+      "sourceFamilies": [
+        "Annual Market Statistics",
+        "Long-Term Adequacy Metrics",
+        "Current Supply and Demand"
+      ]
+    },
+    {
+      "providerId": "bc-hydro",
+      "providerLabel": "BC Hydro",
+      "aliases": ["British Columbia Hydro and Power Authority"],
+      "domains": ["bchydro.com"],
+      "sourceFamilies": [
+        "Balancing Authority Load Data",
+        "Area Control Error Annual Reports",
+        "Integrated Resource Plan"
+      ]
+    },
+    {
+      "providerId": "caiso",
+      "providerLabel": "California ISO",
+      "aliases": [
+        "CAISO",
+        "California Independent System Operator",
+        "California Independent System Operator Corporation"
+      ],
+      "domains": ["caiso.com", "oasis.caiso.com"],
+      "sourceFamilies": [
+        "Daily Renewable Report",
+        "Curtailed and non-operational generators",
+        "Monthly Renewables Performance Report"
+      ]
+    },
+    {
+      "providerId": "eia",
+      "providerLabel": "EIA",
+      "aliases": [
+        "U.S. Energy Information Administration",
+        "US Energy Information Administration",
+        "Energy Information Administration"
+      ],
+      "domains": ["eia.gov"],
+      "sourceFamilies": [
+        "Short-Term Energy Outlook",
+        "Electric Power Monthly",
+        "Natural Gas Monthly",
+        "Weekly Natural Gas Storage Report"
+      ]
+    },
+    {
+      "providerId": "entso-e",
+      "providerLabel": "ENTSO-E",
+      "aliases": [
+        "European Network of Transmission System Operators for Electricity",
+        "ENTSOE"
+      ],
+      "domains": ["entsoe.eu", "webportal.tp.entsoe.eu"],
+      "sourceFamilies": [
+        "Transparency Platform",
+        "European Resource Adequacy Assessment",
+        "Annual Report"
+      ]
+    },
+    {
+      "providerId": "ercot",
+      "providerLabel": "ERCOT",
+      "aliases": ["Electric Reliability Council of Texas"],
+      "domains": ["ercot.com"],
+      "sourceFamilies": [
+        "Monthly Outlook for Resource Adequacy (MORA)",
+        "Capacity, Demand, and Reserves (CDR) Report",
+        "Hourly Load Data Archives"
+      ]
+    },
+    {
+      "providerId": "ferc",
+      "providerLabel": "FERC",
+      "aliases": [
+        "Federal Energy Regulatory Commission"
+      ],
+      "domains": ["ferc.gov"],
+      "sourceFamilies": [
+        "State of the Markets Report",
+        "Winter Energy Market and Reliability Assessment",
+        "Summer Energy Market and Electric Reliability Assessment",
+        "Energy Primer"
+      ]
+    },
+    {
+      "providerId": "iea",
+      "providerLabel": "IEA",
+      "aliases": [
+        "International Energy Agency"
+      ],
+      "domains": ["iea.org"],
+      "sourceFamilies": [
+        "World Energy Outlook",
+        "Electricity",
+        "Renewables",
+        "Global Energy Review"
+      ]
+    },
+    {
+      "providerId": "ieso",
+      "providerLabel": "IESO",
+      "aliases": ["Independent Electricity System Operator"],
+      "domains": ["ieso.ca"],
+      "sourceFamilies": [
+        "Annual Planning Outlook",
+        "Reliability Outlook",
+        "Resource Adequacy Update",
+        "Power Data"
+      ]
+    },
+    {
+      "providerId": "iso-new-england",
+      "providerLabel": "ISO New England",
+      "aliases": ["ISO-NE", "ISONE"],
+      "domains": ["iso-ne.com"],
+      "sourceFamilies": [
+        "Dispatch Fuel Mix Report",
+        "Annual Markets Report",
+        "Quarterly Markets Report",
+        "Regional Electricity Outlook"
+      ]
+    },
+    {
+      "providerId": "miso",
+      "providerLabel": "MISO",
+      "aliases": ["Midcontinent Independent System Operator"],
+      "domains": ["misoenergy.org"],
+      "sourceFamilies": [
+        "Market Reports",
+        "Resource Adequacy",
+        "Planning Resource Auction",
+        "Regional Resource Assessment"
+      ]
+    },
+    {
+      "providerId": "nrel",
+      "providerLabel": "NREL",
+      "aliases": [
+        "National Renewable Energy Laboratory"
+      ],
+      "domains": ["nrel.gov", "atb.nrel.gov", "scenarioviewer.nrel.gov"],
+      "sourceFamilies": [
+        "Annual Technology Baseline",
+        "Standard Scenarios",
+        "Cambium",
+        "Scenario Viewer"
+      ]
+    },
+    {
+      "providerId": "nyiso",
+      "providerLabel": "NYISO",
+      "aliases": ["New York ISO", "New York Independent System Operator"],
+      "domains": ["nyiso.com"],
+      "sourceFamilies": [
+        "Load & Capacity Data Report (Gold Book)",
+        "Short-Term Assessment of Reliability (STAR)",
+        "Reliability Needs Assessment (RNA)",
+        "Comprehensive Reliability Plan (CRP)"
+      ]
+    },
+    {
+      "providerId": "pjm",
+      "providerLabel": "PJM",
+      "aliases": ["PJM Interconnection", "PJM Interconnection, L.L.C."],
+      "domains": ["pjm.com", "services.pjm.com"],
+      "sourceFamilies": [
+        "Load Forecast Report",
+        "Annual Markets Report",
+        "Annual Report"
+      ]
+    },
+    {
+      "providerId": "spp",
+      "providerLabel": "Southwest Power Pool",
+      "aliases": ["SPP"],
+      "domains": ["spp.org"],
+      "sourceFamilies": [
+        "Annual State of the Market Report",
+        "Quarterly State of the Market Report",
+        "Resource Adequacy Report",
+        "Annual Resource Real-time Availability"
+      ]
+    }
+  ]
+}
