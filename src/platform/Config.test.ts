@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Redacted } from "effect";
 import { AppConfig } from "./Config";
 import { CloudflareEnv, type EnvBindings } from "./Env";
 
@@ -31,11 +31,11 @@ describe("AppConfig", () => {
       mcpLimitDefault: 15,
       mcpLimitMax: 75,
       operatorAuthMode: "shared-secret",
-      operatorSecret: "top-secret",
       accessTeamDomain: "https://access.example.com",
       accessAud: "skygest-api",
       editorialDefaultExpiryHours: 48,
       curationMinSignalScore: 55
     });
+    expect(Redacted.value(result.operatorSecret)).toBe("top-secret");
   });
 });

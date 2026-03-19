@@ -1,6 +1,7 @@
 import { Command, Options } from "@effect/cli";
-import { Console, Effect } from "effect";
+import { Console, Effect, Option, Redacted } from "effect";
 import { energySeedDid } from "../bootstrap/CheckedInExpertSeeds";
+import type { CurationAction } from "../domain/curation";
 import { defaultSchemaVersionForEnrichmentKind } from "../domain/enrichment";
 import type { EnrichmentRunRecord } from "../domain/enrichmentRun";
 import type { IngestRunRecord } from "../domain/polling";
@@ -35,6 +36,10 @@ const enrichmentKinds = [
   "source-attribution",
   "grounding"
 ] as const;
+const curationActions = [
+  "curate",
+  "reject"
+] as const;
 
 const envOption = Options.text("env").pipe(
   Options.withDescription("Wrangler environment name"),
@@ -68,6 +73,16 @@ const postUriOption = Options.text("post-uri").pipe(
   Options.withDescription("Post URI")
 );
 
+const curationActionOption = Options.choice("action", curationActions).pipe(
+  Options.withDescription("Curation action"),
+  Options.withDefault("curate")
+);
+
+const noteOption = Options.text("note").pipe(
+  Options.withDescription("Optional review note"),
+  Options.optional
+);
+
 const enrichmentTypeOption = Options.choice("enrichment-type", enrichmentKinds).pipe(
   Options.withDescription("Enrichment lane to run")
 );
@@ -89,7 +104,7 @@ const expectNonEmpty = <A>(items: ReadonlyArray<A>, message: string) =>
 
 const waitForIngestRun = Effect.fn("ops.waitForIngestRun")(function* (
   baseUrl: URL,
-  secret: string,
+  secret: Redacted.Redacted<string>,
   did?: string
 ) {
   const client = yield* StagingOperatorClient;
@@ -238,6 +253,31 @@ const runStagePrepare = (options: {
 
     yield* Console.log(
       `Prepared ${bootstrap.count} experts and ${fixture.posts} smoke posts`
+    );
+  });
+
+const runStageCurate = (options: {
+  readonly env: string;
+  readonly baseUrl: string;
+  readonly postUri: string;
+  readonly action: CurationAction;
+  readonly note: Option.Option<string>;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+    const note = Option.getOrUndefined(options.note);
+
+    yield* Console.log(`Curating ${options.postUri} on ${options.env} at ${options.baseUrl}`);
+    const result = yield* client.curatePost(baseUrl, secret, {
+      postUri: options.postUri,
+      action: options.action,
+      ...(note === undefined ? {} : { note })
+    });
+
+    yield* Console.log(
+      `Post ${result.postUri}: ${String(result.previousStatus ?? "none")} -> ${result.newStatus}`
     );
   });
 
@@ -512,6 +552,18 @@ const prepareCommand = Command.make(
   runStagePrepare
 );
 
+const curateCommand = Command.make(
+  "curate",
+  {
+    env: envOption,
+    baseUrl: baseUrlOption,
+    postUri: postUriOption,
+    action: curationActionOption,
+    note: noteOption
+  },
+  runStageCurate
+);
+
 const smokeCommand = Command.make(
   "smoke",
   { env: envOption, baseUrl: baseUrlOption },
@@ -591,6 +643,7 @@ const stageCommand = Command.make("stage", {}, () => Effect.void).pipe(
   Command.withSubcommands([
     statsCommand,
     prepareCommand,
+    curateCommand,
     smokeCommand,
     smokeSearchCommand,
     refreshProfilesCommand,

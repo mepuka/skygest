@@ -53,6 +53,10 @@ import {
   EditorialPicksOutput,
   CuratedPostResult
 } from "./editorial";
+import {
+  CuratePostInput,
+  CuratePostOutput
+} from "./curation";
 import { AtUri, Did } from "./types";
 
 const withStatus = <A, I, R>(
@@ -654,6 +658,7 @@ export const AdminRequestSchemas = {
   listExperts: ListExpertsUrlParams,
   setExpertActive: SetExpertActiveInput,
   expertPath: ExpertDidPathParams,
+  curatePost: CuratePostInput,
   submitEditorialPick: SubmitEditorialPickInput,
   retractEditorialPick: RemoveEditorialPickInput,
   listEditorialPicks: ListEditorialPicksUrlParams
@@ -663,6 +668,7 @@ export const AdminResponseSchemas = {
   addExpert: AdminExpertResult,
   listExperts: ExpertListOutput,
   setExpertActive: SetExpertActiveResult,
+  curatePost: CuratePostOutput,
   migrate: Schema.Struct({ ok: Schema.Literal(true) }),
   bootstrapExperts: BootstrapExpertsResult,
   loadSmokeFixture: LoadSmokeFixtureResult,

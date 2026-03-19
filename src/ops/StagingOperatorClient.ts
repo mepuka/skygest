@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Schema } from "effect";
+import { Context, Effect, Layer, Redacted, Schema } from "effect";
 import {
   FetchHttpClient,
   HttpBody,
@@ -13,6 +13,7 @@ import {
   RefreshProfilesResult,
   SeedPublicationsResult
 } from "../domain/bi";
+import { CuratePostInput, CuratePostOutput } from "../domain/curation";
 import { StagingStats } from "../domain/api";
 import {
   IngestQueuedResponse,
@@ -82,10 +83,13 @@ const textRequest = (
 
 const decodeSearchPostsResponse = decodeCallToolResultWith(KnowledgePostsMcpOutput);
 const decodeMcpExpertsResponse = decodeCallToolResultWith(ExpertListMcpOutput);
+const secretHeader = (secret: Redacted.Redacted<string>) => ({
+  "x-skygest-operator-secret": Redacted.value(secret)
+});
 
 const callMcpTool = <A>(
   baseUrl: URL,
-  secret: string,
+  secret: Redacted.Redacted<string>,
   operation: string,
   input: {
     readonly name: string;
@@ -96,9 +100,7 @@ const callMcpTool = <A>(
   callTool(
     {
       baseUrl,
-      headers: {
-        "x-skygest-operator-secret": secret
-      },
+      headers: secretHeader(secret),
       clientName: "skygest-staging-ops",
       clientVersion: "0.1.0"
     },
@@ -119,18 +121,18 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
     readonly health: (baseUrl: URL) => Effect.Effect<string, StagingRequestError>;
     readonly migrate: (
       baseUrl: URL,
-      secret: string
+      secret: Redacted.Redacted<string>
     ) => Effect.Effect<{ readonly ok: true }, StagingRequestError>;
     readonly bootstrapExperts: (
       baseUrl: URL,
-      secret: string
+      secret: Redacted.Redacted<string>
     ) => Effect.Effect<{
       readonly domain: string;
       readonly count: number;
     }, StagingRequestError>;
     readonly loadSmokeFixture: (
       baseUrl: URL,
-      secret: string
+      secret: Redacted.Redacted<string>
     ) => Effect.Effect<{
       readonly posts: number;
       readonly links: number;
@@ -138,28 +140,33 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
     }, StagingRequestError>;
     readonly refreshProfiles: (
       baseUrl: URL,
-      secret: string
+      secret: Redacted.Redacted<string>
     ) => Effect.Effect<{
       readonly updated: number;
       readonly failed: number;
     }, StagingRequestError>;
+    readonly curatePost: (
+      baseUrl: URL,
+      secret: Redacted.Redacted<string>,
+      input: Schema.Schema.Encoded<typeof CuratePostInput>
+    ) => Effect.Effect<Schema.Schema.Type<typeof CuratePostOutput>, StagingRequestError>;
     readonly pollIngest: (
       baseUrl: URL,
-      secret: string,
+      secret: Redacted.Redacted<string>,
       did?: string
     ) => Effect.Effect<Schema.Schema.Type<typeof IngestQueuedResponse>, StagingRequestError>;
     readonly getIngestRun: (
       baseUrl: URL,
-      secret: string,
+      secret: Redacted.Redacted<string>,
       runId: string
     ) => Effect.Effect<Schema.Schema.Type<typeof IngestRunRecord>, StagingRequestError>;
     readonly repairIngest: (
       baseUrl: URL,
-      secret: string
+      secret: Redacted.Redacted<string>
     ) => Effect.Effect<Schema.Schema.Type<typeof IngestRepairSummary>, StagingRequestError>;
     readonly startEnrichment: (
       baseUrl: URL,
-      secret: string,
+      secret: Redacted.Redacted<string>,
       input: {
         readonly postUri: string;
         readonly enrichmentType: Schema.Schema.Type<typeof EnrichmentKind>;
@@ -168,7 +175,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
     ) => Effect.Effect<Schema.Schema.Type<typeof EnrichmentQueuedResponse>, StagingRequestError>;
     readonly listEnrichmentRuns: (
       baseUrl: URL,
-      secret: string,
+      secret: Redacted.Redacted<string>,
       options?: {
         readonly status?: Schema.Schema.Type<typeof EnrichmentRunStatus>;
         readonly limit?: number;
@@ -176,44 +183,44 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
     ) => Effect.Effect<ReadonlyArray<Schema.Schema.Type<typeof EnrichmentRunRecord>>, StagingRequestError>;
     readonly getEnrichmentRun: (
       baseUrl: URL,
-      secret: string,
+      secret: Redacted.Redacted<string>,
       runId: string
     ) => Effect.Effect<Schema.Schema.Type<typeof EnrichmentRunRecord>, StagingRequestError>;
     readonly retryEnrichment: (
       baseUrl: URL,
-      secret: string,
+      secret: Redacted.Redacted<string>,
       runId: string
     ) => Effect.Effect<Schema.Schema.Type<typeof EnrichmentQueuedResponse>, StagingRequestError>;
     readonly repairEnrichment: (
       baseUrl: URL,
-      secret: string
+      secret: Redacted.Redacted<string>
     ) => Effect.Effect<Schema.Schema.Type<typeof EnrichmentRepairSummary>, StagingRequestError>;
     readonly listAdminExperts: (
       baseUrl: URL,
-      secret: string
+      secret: Redacted.Redacted<string>
     ) => Effect.Effect<ReadonlyArray<{ readonly did: string; readonly domain: string }>, StagingRequestError>;
     readonly listExpertsMcp: (
       baseUrl: URL,
-      secret: string
+      secret: Redacted.Redacted<string>
     ) => Effect.Effect<ReadonlyArray<{ readonly did: string; readonly domain: string }>, StagingRequestError>;
     readonly seedPublications: (
       baseUrl: URL,
-      secret: string
+      secret: Redacted.Redacted<string>
     ) => Effect.Effect<{
       readonly seeded: number;
       readonly snapshotVersion: string;
     }, StagingRequestError>;
     readonly listPublications: (
       baseUrl: URL,
-      secret: string
+      secret: Redacted.Redacted<string>
     ) => Effect.Effect<ReadonlyArray<{ readonly hostname: string; readonly tier: string; readonly postCount: number }>, StagingRequestError>;
     readonly getStats: (
       baseUrl: URL,
-      secret: string
+      secret: Redacted.Redacted<string>
     ) => Effect.Effect<Schema.Schema.Type<typeof StagingStats>, StagingRequestError>;
     readonly searchPostsMcp: (
       baseUrl: URL,
-      secret: string,
+      secret: Redacted.Redacted<string>,
       query: string
     ) => Effect.Effect<ReadonlyArray<{ readonly uri: string; readonly topics: ReadonlyArray<string> }>, StagingRequestError>;
   }
@@ -229,7 +236,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
         migrate: (baseUrl, secret) =>
           jsonRequest(
             http.post(new URL("/admin/ops/migrate", baseUrl), {
-              headers: { "content-type": "application/json", "x-skygest-operator-secret": secret },
+              headers: { "content-type": "application/json", ...secretHeader(secret) },
               body: HttpBody.unsafeJson({})
             }),
             MigrateResponse,
@@ -238,7 +245,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
         bootstrapExperts: (baseUrl, secret) =>
           jsonRequest(
             http.post(new URL("/admin/ops/bootstrap-experts", baseUrl), {
-              headers: { "content-type": "application/json", "x-skygest-operator-secret": secret },
+              headers: { "content-type": "application/json", ...secretHeader(secret) },
               body: HttpBody.unsafeJson({})
             }),
             BootstrapExpertsResult,
@@ -247,7 +254,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
         loadSmokeFixture: (baseUrl, secret) =>
           jsonRequest(
             http.post(new URL("/admin/ops/load-smoke-fixture", baseUrl), {
-              headers: { "content-type": "application/json", "x-skygest-operator-secret": secret },
+              headers: { "content-type": "application/json", ...secretHeader(secret) },
               body: HttpBody.unsafeJson({})
             }),
             LoadSmokeFixtureResult,
@@ -256,16 +263,25 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
         refreshProfiles: (baseUrl, secret) =>
           jsonRequest(
             http.post(new URL("/admin/ops/refresh-profiles", baseUrl), {
-              headers: { "content-type": "application/json", "x-skygest-operator-secret": secret },
+              headers: { "content-type": "application/json", ...secretHeader(secret) },
               body: HttpBody.unsafeJson({})
             }),
             RefreshProfilesResult,
             "refresh-profiles"
           ),
+        curatePost: (baseUrl, secret, input) =>
+          jsonRequest(
+            http.post(new URL("/admin/curation/curate", baseUrl), {
+              headers: { "content-type": "application/json", ...secretHeader(secret) },
+              body: HttpBody.unsafeJson(input)
+            }),
+            CuratePostOutput,
+            "curate-post"
+          ),
         pollIngest: (baseUrl, secret, did) =>
           jsonRequest(
             http.post(new URL("/admin/ingest/poll", baseUrl), {
-              headers: { "content-type": "application/json", "x-skygest-operator-secret": secret },
+              headers: { "content-type": "application/json", ...secretHeader(secret) },
               body: HttpBody.unsafeJson(did === undefined ? {} : { did })
             }),
             IngestQueuedResponse,
@@ -274,7 +290,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
         getIngestRun: (baseUrl, secret, runId) =>
           jsonRequest(
             http.get(new URL(`/admin/ingest/runs/${runId}`, baseUrl), {
-              headers: { "x-skygest-operator-secret": secret }
+              headers: secretHeader(secret)
             }),
             IngestRunRecord,
             "get-ingest-run"
@@ -282,7 +298,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
         repairIngest: (baseUrl, secret) =>
           jsonRequest(
             http.post(new URL("/admin/ingest/repair", baseUrl), {
-              headers: { "content-type": "application/json", "x-skygest-operator-secret": secret },
+              headers: { "content-type": "application/json", ...secretHeader(secret) },
               body: HttpBody.unsafeJson({})
             }),
             IngestRepairSummary,
@@ -291,7 +307,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
         startEnrichment: (baseUrl, secret, input) =>
           jsonRequest(
             http.post(new URL("/admin/enrichment/start", baseUrl), {
-              headers: { "content-type": "application/json", "x-skygest-operator-secret": secret },
+              headers: { "content-type": "application/json", ...secretHeader(secret) },
               body: HttpBody.unsafeJson({
                 postUri: input.postUri,
                 enrichmentType: input.enrichmentType,
@@ -312,7 +328,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
             url.searchParams.set("limit", String(options.limit));
           }
           return jsonRequest(
-            http.get(url, { headers: { "x-skygest-operator-secret": secret } }),
+            http.get(url, { headers: secretHeader(secret) }),
             EnrichmentRunsOutput,
             "list-enrichment-runs"
           ).pipe(Effect.map((output) => output.items));
@@ -320,7 +336,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
         getEnrichmentRun: (baseUrl, secret, runId) =>
           jsonRequest(
             http.get(new URL(`/admin/enrichment/runs/${runId}`, baseUrl), {
-              headers: { "x-skygest-operator-secret": secret }
+              headers: secretHeader(secret)
             }),
             EnrichmentRunRecord,
             "get-enrichment-run"
@@ -328,7 +344,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
         retryEnrichment: (baseUrl, secret, runId) =>
           jsonRequest(
             http.post(new URL(`/admin/enrichment/runs/${runId}/retry`, baseUrl), {
-              headers: { "content-type": "application/json", "x-skygest-operator-secret": secret },
+              headers: { "content-type": "application/json", ...secretHeader(secret) },
               body: HttpBody.unsafeJson({})
             }),
             EnrichmentQueuedResponse,
@@ -337,7 +353,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
         repairEnrichment: (baseUrl, secret) =>
           jsonRequest(
             http.post(new URL("/admin/enrichment/repair", baseUrl), {
-              headers: { "content-type": "application/json", "x-skygest-operator-secret": secret },
+              headers: { "content-type": "application/json", ...secretHeader(secret) },
               body: HttpBody.unsafeJson({})
             }),
             EnrichmentRepairSummary,
@@ -346,7 +362,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
         seedPublications: (baseUrl, secret) =>
           jsonRequest(
             http.post(new URL("/admin/ops/seed-publications", baseUrl), {
-              headers: { "content-type": "application/json", "x-skygest-operator-secret": secret },
+              headers: { "content-type": "application/json", ...secretHeader(secret) },
               body: HttpBody.unsafeJson({})
             }),
             SeedPublicationsResult,
@@ -355,7 +371,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
         listAdminExperts: (baseUrl, secret) =>
           jsonRequest(
             http.get(new URL("/admin/experts", baseUrl), {
-              headers: { "x-skygest-operator-secret": secret }
+              headers: secretHeader(secret)
             }),
             ExpertListOutput,
             "admin-experts"
@@ -374,7 +390,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
         getStats: (baseUrl, secret) =>
           jsonRequest(
             http.get(new URL("/admin/ops/stats", baseUrl), {
-              headers: { "x-skygest-operator-secret": secret }
+              headers: secretHeader(secret)
             }),
             StagingStats,
             "get-stats"
@@ -382,7 +398,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
         listPublications: (baseUrl, secret) =>
           jsonRequest(
             http.get(new URL("/api/publications?limit=100", baseUrl), {
-              headers: { "x-skygest-operator-secret": secret }
+              headers: secretHeader(secret)
             }),
             PublicationListOutput,
             "list-publications"

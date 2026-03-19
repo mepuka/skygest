@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Schema } from "effect";
+import { Context, Effect, Layer, Redacted, Schema } from "effect";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
 import { AppConfig } from "../platform/Config";
 import { stringifyUnknown } from "../platform/Json";
@@ -92,6 +92,7 @@ const operatorScopes: ReadonlyArray<string> = [
   "mcp:read",
   "experts:read",
   "experts:write",
+  "curation:write",
   "ops:read",
   "ops:refresh",
   "editorial:read",
@@ -206,7 +207,9 @@ export class AuthService extends Context.Tag("@skygest/AuthService")<
       const requireSharedSecret = Effect.fn("AuthService.requireSharedSecret")(function* (
         headers: Headers
       ) {
-        if (config.operatorSecret.length === 0) {
+        const configuredOperatorSecret = Redacted.value(config.operatorSecret);
+
+        if (configuredOperatorSecret.length === 0) {
           return yield* InvalidAuthConfigError.make({ missing: "OPERATOR_SECRET" });
         }
 
@@ -215,7 +218,7 @@ export class AuthService extends Context.Tag("@skygest/AuthService")<
           return yield* MissingOperatorSecretError.make({});
         }
 
-        if (operatorSecret !== config.operatorSecret) {
+        if (operatorSecret !== configuredOperatorSecret) {
           return yield* InvalidOperatorSecretError.make({});
         }
 

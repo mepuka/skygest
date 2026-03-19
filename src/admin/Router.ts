@@ -18,6 +18,7 @@ import {
   UnauthorizedError,
   UpstreamFailureError
 } from "../domain/api";
+import { CurationService } from "../services/CurationService";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { EditorialService } from "../services/EditorialService";
 import { StagingOpsService } from "../services/StagingOpsService";
@@ -76,6 +77,14 @@ const AdminApi = HttpApi.make("admin")
       )
   )
   .add(
+    HttpApiGroup.make("curation")
+      .add(
+        HttpApiEndpoint.post("curate", "/admin/curation/curate")
+          .setPayload(AdminRequestSchemas.curatePost)
+          .addSuccess(AdminResponseSchemas.curatePost)
+      )
+  )
+  .add(
     HttpApiGroup.make("editorial")
       .add(
         HttpApiEndpoint.post("submitPick", "/admin/editorial/pick")
@@ -121,6 +130,17 @@ const withAdminErrors = <A, R>(
         return notFoundError(
           postUri === undefined ? "post not found" : `post not found: ${postUri}`
         );
+      }
+
+      if (isTaggedError(error, "CurationPostNotFoundError")) {
+        const postUri = getStringField(error, "postUri");
+        return notFoundError(
+          postUri === undefined ? "post not found" : `post not found: ${postUri}`
+        );
+      }
+
+      if (route === "/admin/curation/curate") {
+        return toUpstreamFailure("failed to curate post")(error);
       }
 
       return toUpstreamFailure()(error);
@@ -264,6 +284,18 @@ const AdminHandlers = Layer.mergeAll(
           };
         }))
       )
+  ),
+  HttpApiBuilder.group(AdminApi, "curation", (handlers) =>
+    handlers.handle("curate", ({ payload }) =>
+      withAdminErrors("/admin/curation/curate", Effect.gen(function* () {
+        const actor = yield* OperatorIdentity;
+        const curation = yield* CurationService;
+        return yield* curation.curatePost(
+          payload,
+          actor.email ?? actor.subject ?? "operator"
+        );
+      }))
+    )
   ),
   HttpApiBuilder.group(AdminApi, "editorial", (handlers) =>
     handlers
