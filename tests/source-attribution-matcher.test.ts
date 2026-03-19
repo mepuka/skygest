@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Schema } from "effect";
+import { Effect, Layer, Schema } from "effect";
 import {
   MatchSignalType,
   MatchEvidence,
@@ -13,6 +13,8 @@ import {
   extractDomainFromText
 } from "../src/source/normalize";
 import { choosePrimaryContentSource } from "../src/source/contentSource";
+import { SourceAttributionMatcher } from "../src/source/SourceAttributionMatcher";
+import { ProviderRegistry } from "../src/services/ProviderRegistry";
 
 describe("evidence contract types", () => {
   it("MatchSignalType decodes all 7 signal types and rejects invalid", () => {
@@ -390,4 +392,234 @@ describe("content source assembly", () => {
     expect(result?.url).toBe("not-a-valid-url");
     expect(result?.domain).toBeNull();
   });
+});
+
+// ---------------------------------------------------------------------------
+// SourceAttributionMatcher service tests
+// ---------------------------------------------------------------------------
+
+const TestLayer = Layer.merge(
+  ProviderRegistry.layer,
+  Layer.provideMerge(SourceAttributionMatcher.live, ProviderRegistry.layer)
+);
+
+describe("SourceAttributionMatcher", () => {
+  it.effect("matches provider from link domain", () =>
+    Effect.gen(function* () {
+      const matcher = yield* SourceAttributionMatcher;
+      const result = yield* matcher.match({
+        post: { did: "did:plc:test", text: "Check this out" },
+        links: [
+          {
+            url: "https://ercot.com/gridinfo",
+            domain: "ercot.com",
+            title: null,
+            description: null,
+            imageUrl: null,
+            extractedAt: 0
+          }
+        ],
+        linkCards: [],
+        vision: null
+      });
+      expect(result.resolution).toBe("matched");
+      expect(result.selectedProvider?.providerId).toBe("ercot");
+      expect(result.providerMatches[0]?.signals[0]?.signal).toBe("link-domain");
+    }).pipe(Effect.provide(TestLayer))
+  );
+
+  it.effect("matches provider from post text mention", () =>
+    Effect.gen(function* () {
+      const matcher = yield* SourceAttributionMatcher;
+      const result = yield* matcher.match({
+        post: { did: "did:plc:test", text: "ERCOT demand is near peak today" },
+        links: [],
+        linkCards: [],
+        vision: null
+      });
+      expect(result.resolution).toBe("matched");
+      expect(result.selectedProvider?.providerId).toBe("ercot");
+      expect(result.providerMatches[0]?.signals[0]?.signal).toBe(
+        "post-text-mention"
+      );
+    }).pipe(Effect.provide(TestLayer))
+  );
+
+  it.effect("returns ambiguous when multiple providers match at same rank", () =>
+    Effect.gen(function* () {
+      const matcher = yield* SourceAttributionMatcher;
+      const result = yield* matcher.match({
+        post: {
+          did: "did:plc:test",
+          text: "Comparing ERCOT and CAISO load data"
+        },
+        links: [],
+        linkCards: [],
+        vision: null
+      });
+      expect(result.resolution).toBe("ambiguous");
+      expect(result.selectedProvider).toBeNull();
+      expect(result.providerMatches.length).toBeGreaterThanOrEqual(2);
+    }).pipe(Effect.provide(TestLayer))
+  );
+
+  it.effect("returns none when no signals match", () =>
+    Effect.gen(function* () {
+      const matcher = yield* SourceAttributionMatcher;
+      const result = yield* matcher.match({
+        post: { did: "did:plc:test", text: "Beautiful sunset today" },
+        links: [],
+        linkCards: [],
+        vision: null
+      });
+      expect(result.resolution).toBe("none");
+      expect(result.selectedProvider).toBeNull();
+      expect(result.providerMatches).toHaveLength(0);
+    }).pipe(Effect.provide(TestLayer))
+  );
+
+  it.effect("assembles socialProvenance from post DID", () =>
+    Effect.gen(function* () {
+      const matcher = yield* SourceAttributionMatcher;
+      const result = yield* matcher.match({
+        post: { did: "did:plc:abc123", text: "test" },
+        links: [],
+        linkCards: [],
+        vision: null
+      });
+      expect(result.socialProvenance?.did).toBe("did:plc:abc123");
+    }).pipe(Effect.provide(TestLayer))
+  );
+
+  it.effect("socialProvenance includes handle when provided", () =>
+    Effect.gen(function* () {
+      const matcher = yield* SourceAttributionMatcher;
+      const result = yield* matcher.match({
+        post: {
+          did: "did:plc:abc123",
+          text: "test",
+          handle: "expert.bsky.social"
+        },
+        links: [],
+        linkCards: [],
+        vision: null
+      });
+      expect(result.socialProvenance?.did).toBe("did:plc:abc123");
+      expect(result.socialProvenance?.handle).toBe("expert.bsky.social");
+    }).pipe(Effect.provide(TestLayer))
+  );
+
+  it.effect("link-domain outranks post-text-mention", () =>
+    Effect.gen(function* () {
+      const matcher = yield* SourceAttributionMatcher;
+      const result = yield* matcher.match({
+        post: { did: "did:plc:test", text: "CAISO data looks interesting" },
+        links: [
+          {
+            url: "https://ercot.com/data",
+            domain: "ercot.com",
+            title: null,
+            description: null,
+            imageUrl: null,
+            extractedAt: 0
+          }
+        ],
+        linkCards: [],
+        vision: null
+      });
+      // ERCOT has link-domain (rank 4), CAISO has post-text-mention (rank 7)
+      // ERCOT wins because it has the stronger signal
+      expect(result.resolution).toBe("matched");
+      expect(result.selectedProvider?.providerId).toBe("ercot");
+    }).pipe(Effect.provide(TestLayer))
+  );
+
+  it.effect("assembles contentSource from link card", () =>
+    Effect.gen(function* () {
+      const matcher = yield* SourceAttributionMatcher;
+      const result = yield* matcher.match({
+        post: { did: "did:plc:test", text: "ERCOT report" },
+        links: [],
+        linkCards: [
+          {
+            source: "embed" as const,
+            uri: "https://gridstatus.io/live/ercot",
+            title: "ERCOT Dashboard",
+            description: null,
+            thumb: null
+          }
+        ],
+        vision: null
+      });
+      expect(result.contentSource?.domain).toBe("gridstatus.io");
+      expect(result.selectedProvider?.providerId).toBe("ercot");
+    }).pipe(Effect.provide(TestLayer))
+  );
+
+  it.effect("embed-link-domain matches provider", () =>
+    Effect.gen(function* () {
+      const matcher = yield* SourceAttributionMatcher;
+      const result = yield* matcher.match({
+        post: { did: "did:plc:test", text: "Check this report" },
+        links: [],
+        linkCards: [
+          {
+            source: "embed" as const,
+            uri: "https://www.eia.gov/petroleum/supply/monthly/",
+            title: "EIA Monthly",
+            description: null,
+            thumb: null
+          }
+        ],
+        vision: null
+      });
+      expect(result.resolution).toBe("matched");
+      expect(result.selectedProvider?.providerId).toBe("eia");
+      expect(result.providerMatches[0]?.signals[0]?.signal).toBe(
+        "embed-link-domain"
+      );
+    }).pipe(Effect.provide(TestLayer))
+  );
+
+  it.effect("non-provider domain does not match (gridstatus.io)", () =>
+    Effect.gen(function* () {
+      const matcher = yield* SourceAttributionMatcher;
+      const result = yield* matcher.match({
+        post: { did: "did:plc:test", text: "Nice dashboard" },
+        links: [
+          {
+            url: "https://gridstatus.io/live",
+            domain: "gridstatus.io",
+            title: null,
+            description: null,
+            imageUrl: null,
+            extractedAt: 0
+          }
+        ],
+        linkCards: [],
+        vision: null
+      });
+      // gridstatus.io is NOT in provider registry
+      expect(result.selectedProvider).toBeNull();
+      // But contentSource should still be populated
+      expect(result.contentSource?.domain).toBe("gridstatus.io");
+    }).pipe(Effect.provide(TestLayer))
+  );
+
+  it.effect("long alias match works (full organization name)", () =>
+    Effect.gen(function* () {
+      const matcher = yield* SourceAttributionMatcher;
+      const result = yield* matcher.match({
+        post: {
+          did: "did:plc:test",
+          text: "The Electric Reliability Council of Texas reported record demand"
+        },
+        links: [],
+        linkCards: [],
+        vision: null
+      });
+      expect(result.resolution).toBe("matched");
+      expect(result.selectedProvider?.providerId).toBe("ercot");
+    }).pipe(Effect.provide(TestLayer))
+  );
 });
