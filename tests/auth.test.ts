@@ -1,5 +1,5 @@
 import { generateKeyPair, exportJWK, SignJWT, type JWK } from "jose";
-import { Effect, Exit, Layer } from "effect";
+import { Effect, Exit, Layer, Redacted } from "effect";
 import { describe, expect, it, vi } from "@effect/vitest";
 import {
   AuthService,
@@ -204,7 +204,7 @@ describe("Cloudflare Access auth", () => {
       }
     }).pipe(Effect.provide(makeAuthLayer({
       operatorAuthMode: "shared-secret",
-      operatorSecret: "stage-secret"
+      operatorSecret: Redacted.make("stage-secret")
     })))
   );
 

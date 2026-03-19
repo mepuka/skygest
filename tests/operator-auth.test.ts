@@ -62,6 +62,13 @@ describe("operator request policies", () => {
     ).toEqual(["experts:write"]);
     expect(
       requiredOperatorScopes(
+        new Request("https://skygest.local/admin/curation/curate", {
+          method: "POST"
+        })
+      )
+    ).toEqual(["curation:write"]);
+    expect(
+      requiredOperatorScopes(
         new Request("https://skygest.local/admin/ingest/repair", {
           method: "POST"
         })
@@ -108,6 +115,13 @@ describe("operator request policies", () => {
         new Request("https://skygest.local/admin/experts", { method: "GET" })
       )
     ).toBe("list_experts");
+    expect(
+      operatorRequestAction(
+        new Request("https://skygest.local/admin/curation/curate", {
+          method: "POST"
+        })
+      )
+    ).toBe("curate_post");
     expect(
       operatorRequestAction(
         new Request("https://skygest.local/admin/ingest/repair", {

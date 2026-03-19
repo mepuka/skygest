@@ -67,6 +67,13 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
     };
   }
 
+  if (request.method === "POST" && pathname === "/admin/curation/curate") {
+    return {
+      action: "curate_post",
+      scopes: ["curation:write"]
+    };
+  }
+
   if (request.method === "POST" && isExpertActivatePath(pathname)) {
     return {
       action: "set_expert_active",

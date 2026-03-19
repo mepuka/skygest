@@ -1,18 +1,24 @@
-import { Context, Effect, Layer } from "effect";
+import { Config, Context, Effect, Layer, Redacted } from "effect";
 import { MissingOperatorSecretEnvError } from "./Errors";
 
 export class OperatorSecret extends Context.Tag("@skygest/OperatorSecret")<
   OperatorSecret,
   {
-    readonly value: string;
+    readonly value: Redacted.Redacted<string>;
   }
 >() {
   static readonly live = Layer.effect(
     OperatorSecret,
     Effect.gen(function* () {
-      const value = process.env.SKYGEST_OPERATOR_SECRET?.trim();
+      const value = yield* Config.redacted("SKYGEST_OPERATOR_SECRET").pipe(
+        Effect.mapError(() =>
+          MissingOperatorSecretEnvError.make({
+            envVar: "SKYGEST_OPERATOR_SECRET"
+          })
+        )
+      );
 
-      if (!value) {
+      if (Redacted.value(value).trim().length === 0) {
         return yield* MissingOperatorSecretEnvError.make({
           envVar: "SKYGEST_OPERATOR_SECRET"
         });

@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { rmSync } from "node:fs";
 import { join } from "node:path";
 import { SqliteClient } from "@effect/sql-sqlite-node";
-import { Effect, Layer, Schema } from "effect";
+import { Effect, Layer, Redacted, Schema } from "effect";
 import { energySeedDid, energySeedManifest } from "../../src/bootstrap/CheckedInExpertSeeds";
 import { bootstrapExperts } from "../../src/bootstrap/ExpertSeeds";
 import { BlueskyClient, layer as BlueskyClientLayer } from "../../src/bluesky/BlueskyClient";
@@ -36,7 +36,7 @@ export const testConfig = (
   mcpLimitDefault: 20,
   mcpLimitMax: 100,
   operatorAuthMode: "access",
-  operatorSecret: "",
+  operatorSecret: Redacted.make(""),
   accessTeamDomain: "https://access.example.com",
   accessAud: "skygest-mcp",
   editorialDefaultExpiryHours: 24,

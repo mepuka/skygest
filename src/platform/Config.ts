@@ -1,4 +1,4 @@
-import { Array, Config, ConfigProvider, Context, Effect, Layer, Option } from "effect";
+import { Array, Config, ConfigProvider, Context, Effect, Layer, Option, Redacted } from "effect";
 import { CloudflareEnv } from "./Env";
 
 export type OperatorAuthMode = "access" | "shared-secret";
@@ -23,7 +23,10 @@ const RawConfigSchema = Config.all({
   mcpLimitDefault: Config.withDefault(Config.integer("MCP_LIMIT_DEFAULT"), 20),
   mcpLimitMax: Config.withDefault(Config.integer("MCP_LIMIT_MAX"), 100),
   operatorAuthMode: Config.withDefault(Config.string("OPERATOR_AUTH_MODE"), "access"),
-  operatorSecret: Config.withDefault(Config.string("OPERATOR_SECRET"), ""),
+  operatorSecret: Config.withDefault(
+    Config.redacted("OPERATOR_SECRET"),
+    Redacted.make("")
+  ),
   accessTeamDomain: Config.withDefault(
     Config.string("ACCESS_TEAM_DOMAIN"),
     ""

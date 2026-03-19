@@ -1,6 +1,6 @@
 import { BunContext } from "@effect/platform-bun";
 import { FetchHttpClient } from "@effect/platform";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Redacted } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { energySeedDid } from "../src/bootstrap/CheckedInExpertSeeds";
 import { runOpsCli } from "../src/ops/Cli";
@@ -42,6 +42,7 @@ const makeCliLayer = (options?: {
 }) => {
   const deployCalls: Array<{ readonly configFile: string; readonly env: string }> = [];
   const remoteCalls: Array<{ readonly action: string; readonly secret?: string }> = [];
+  const reveal = (secret: Redacted.Redacted<string>) => Redacted.value(secret);
 
   const wranglerLayer = Layer.succeed(WranglerCli, {
     deploy: (configFile: string, env: string) =>
@@ -57,31 +58,32 @@ const makeCliLayer = (options?: {
         remoteCalls.push({ action: "health" });
         return "ok";
       }),
-    migrate: (_baseUrl: URL, secret: string) =>
+    migrate: (_baseUrl: URL, secret: Redacted.Redacted<string>) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "migrate", secret });
+        remoteCalls.push({ action: "migrate", secret: reveal(secret) });
         return { ok: true } as const;
       }),
-    bootstrapExperts: (_baseUrl: URL, secret: string) =>
+    bootstrapExperts: (_baseUrl: URL, secret: Redacted.Redacted<string>) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "bootstrap", secret });
+        remoteCalls.push({ action: "bootstrap", secret: reveal(secret) });
         return {
           domain: "energy",
           count: 1
         } as const;
       }),
-    pollIngest: (_baseUrl: URL, secret: string, did?: string) =>
+    pollIngest: (_baseUrl: URL, secret: Redacted.Redacted<string>, did?: string) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "poll", secret: did === undefined ? secret : `${secret}:${did}` });
+        const revealed = reveal(secret);
+        remoteCalls.push({ action: "poll", secret: did === undefined ? revealed : `${revealed}:${did}` });
         return {
           runId: "run-1",
           workflowInstanceId: "run-1",
           status: "queued"
         } as const;
       }),
-    getIngestRun: (_baseUrl: URL, secret: string, _runId: string) =>
+    getIngestRun: (_baseUrl: URL, secret: Redacted.Redacted<string>, _runId: string) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "run-status", secret });
+        remoteCalls.push({ action: "run-status", secret: reveal(secret) });
         return {
           id: "run-1",
           workflowInstanceId: "run-1",
@@ -103,9 +105,9 @@ const makeCliLayer = (options?: {
           error: null
         } as const;
       }),
-    repairIngest: (_baseUrl: URL, secret: string) =>
+    repairIngest: (_baseUrl: URL, secret: Redacted.Redacted<string>) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "repair", secret });
+        remoteCalls.push({ action: "repair", secret: reveal(secret) });
         return {
           repairedRuns: 0,
           failedItems: 0,
@@ -113,11 +115,11 @@ const makeCliLayer = (options?: {
           untouchedRuns: 0
         } as const;
       }),
-    startEnrichment: (_baseUrl: URL, secret: string, input) =>
+    startEnrichment: (_baseUrl: URL, secret: Redacted.Redacted<string>, input) =>
       Effect.sync(() => {
         remoteCalls.push({
           action: `enrichment-start:${input.enrichmentType}:${input.postUri}`,
-          secret
+          secret: reveal(secret)
         });
         return {
           runId: "enrich-start-1",
@@ -125,28 +127,28 @@ const makeCliLayer = (options?: {
           status: "queued"
         } as const;
       }),
-    listEnrichmentRuns: (_baseUrl: URL, secret: string, _options) =>
+    listEnrichmentRuns: (_baseUrl: URL, secret: Redacted.Redacted<string>, _options) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "enrichment-runs", secret });
+        remoteCalls.push({ action: "enrichment-runs", secret: reveal(secret) });
         return [makeSampleEnrichmentRun()] as const;
       }),
-    getEnrichmentRun: (_baseUrl: URL, secret: string, _runId: string) =>
+    getEnrichmentRun: (_baseUrl: URL, secret: Redacted.Redacted<string>, _runId: string) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "enrichment-run", secret });
+        remoteCalls.push({ action: "enrichment-run", secret: reveal(secret) });
         return makeSampleEnrichmentRun();
       }),
-    retryEnrichment: (_baseUrl: URL, secret: string, _runId: string) =>
+    retryEnrichment: (_baseUrl: URL, secret: Redacted.Redacted<string>, _runId: string) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "enrichment-retry", secret });
+        remoteCalls.push({ action: "enrichment-retry", secret: reveal(secret) });
         return {
           runId: "enrich-run-1",
           workflowInstanceId: "enrich-run-1",
           status: "queued"
         } as const;
       }),
-    repairEnrichment: (_baseUrl: URL, secret: string) =>
+    repairEnrichment: (_baseUrl: URL, secret: Redacted.Redacted<string>) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "enrichment-repair", secret });
+        remoteCalls.push({ action: "enrichment-repair", secret: reveal(secret) });
         return {
           repairedRuns: 1,
           staleQueuedRuns: 1,
@@ -154,53 +156,66 @@ const makeCliLayer = (options?: {
           untouchedRuns: 0
         } as const;
       }),
-    loadSmokeFixture: (_baseUrl: URL, secret: string) =>
+    loadSmokeFixture: (_baseUrl: URL, secret: Redacted.Redacted<string>) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "fixture", secret });
+        remoteCalls.push({ action: "fixture", secret: reveal(secret) });
         return {
           posts: 2,
           links: 2,
           topics: 3
         } as const;
       }),
-    listAdminExperts: (_baseUrl: URL, secret: string) =>
+    curatePost: (_baseUrl: URL, secret: Redacted.Redacted<string>, input) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "admin-experts", secret });
+        remoteCalls.push({
+          action: `curate:${input.action}:${input.postUri}${input.note === undefined ? "" : `:${input.note}`}`,
+          secret: reveal(secret)
+        });
+        return {
+          postUri: input.postUri as any,
+          action: input.action,
+          previousStatus: null,
+          newStatus: input.action === "reject" ? "rejected" as const : "curated" as const
+        };
+      }),
+    listAdminExperts: (_baseUrl: URL, secret: Redacted.Redacted<string>) =>
+      Effect.sync(() => {
+        remoteCalls.push({ action: "admin-experts", secret: reveal(secret) });
         return [{ did: "did:plc:test", domain: "energy" }] as const;
       }),
-    listExpertsMcp: (_baseUrl: URL, secret: string) =>
+    listExpertsMcp: (_baseUrl: URL, secret: Redacted.Redacted<string>) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "mcp-list", secret });
+        remoteCalls.push({ action: "mcp-list", secret: reveal(secret) });
         return [{ did: "did:plc:test", domain: "energy" }] as const;
       }),
-    seedPublications: (_baseUrl: URL, secret: string) =>
+    seedPublications: (_baseUrl: URL, secret: Redacted.Redacted<string>) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "seed-publications", secret });
+        remoteCalls.push({ action: "seed-publications", secret: reveal(secret) });
         return {
           seeded: 15,
           snapshotVersion: "0.3.0-test"
         } as const;
       }),
-    listPublications: (_baseUrl: URL, secret: string) =>
+    listPublications: (_baseUrl: URL, secret: Redacted.Redacted<string>) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "list-publications", secret });
+        remoteCalls.push({ action: "list-publications", secret: reveal(secret) });
         return Array.from({ length: 34 }, (_, i) => ({
           hostname: `pub${i}.com`,
           tier: "energy-focused" as const,
           postCount: 100 - i
         }));
       }),
-    searchPostsMcp: (_baseUrl: URL, secret: string) =>
+    searchPostsMcp: (_baseUrl: URL, secret: Redacted.Redacted<string>) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "mcp-search", secret });
+        remoteCalls.push({ action: "mcp-search", secret: reveal(secret) });
         return [{
           uri: smokeFixtureUris()[0],
           topics: ["solar"]
         }] as const;
       }),
-    getStats: (_baseUrl: URL, secret: string) =>
+    getStats: (_baseUrl: URL, secret: Redacted.Redacted<string>) =>
       Effect.sync(() => {
-        remoteCalls.push({ action: "get-stats", secret });
+        remoteCalls.push({ action: "get-stats", secret: reveal(secret) });
         return {
           timestamp: Date.now(),
           experts: { total: 5, active: 3 },
@@ -214,7 +229,7 @@ const makeCliLayer = (options?: {
   });
   const operatorSecretLayer = options?.operatorSecretLayer ?? Layer.succeed(
     OperatorSecret,
-    OperatorSecret.of({ value: "stage-secret" })
+    OperatorSecret.of({ value: Redacted.make("stage-secret") })
   );
 
   return {
@@ -267,6 +282,58 @@ describe("ops CLI", () => {
         { action: "poll", secret: `stage-secret:${energySeedDid}` },
         { action: "run-status", secret: "stage-secret" },
         { action: "fixture", secret: "stage-secret" }
+      ]);
+    })
+  );
+
+  it.live("runs stage curate with default and explicit actions", () =>
+    Effect.promise(async () => {
+      const { layer, remoteCalls } = makeCliLayer();
+      const runtimeLayer = Layer.mergeAll(BunContext.layer, layer);
+
+      await Effect.runPromise(
+        runOpsCli([
+          "bun",
+          "ops",
+          "stage",
+          "curate",
+          "--env",
+          "staging",
+          "--base-url",
+          "https://skygest-bi-agent-staging.workers.dev",
+          "--post-uri",
+          "at://did:plc:test/app.bsky.feed.post/post-1"
+        ]).pipe(Effect.provide(runtimeLayer))
+      );
+
+      await Effect.runPromise(
+        runOpsCli([
+          "bun",
+          "ops",
+          "stage",
+          "curate",
+          "--env",
+          "staging",
+          "--base-url",
+          "https://skygest-bi-agent-staging.workers.dev",
+          "--post-uri",
+          "at://did:plc:test/app.bsky.feed.post/post-2",
+          "--action",
+          "reject",
+          "--note",
+          "duplicate"
+        ]).pipe(Effect.provide(runtimeLayer))
+      );
+
+      expect(remoteCalls).toEqual([
+        {
+          action: "curate:curate:at://did:plc:test/app.bsky.feed.post/post-1",
+          secret: "stage-secret"
+        },
+        {
+          action: "curate:reject:at://did:plc:test/app.bsky.feed.post/post-2:duplicate",
+          secret: "stage-secret"
+        }
       ]);
     })
   );
@@ -472,6 +539,13 @@ describe("ops CLI", () => {
               links: 2,
               topics: 3
             } as const),
+          curatePost: (_baseUrl, _secret, input) =>
+            Effect.succeed({
+              postUri: input.postUri as any,
+              action: input.action,
+              previousStatus: null,
+              newStatus: input.action === "reject" ? "rejected" as const : "curated" as const
+            }),
           listAdminExperts: (_baseUrl, _secret) =>
             Effect.succeed([{ did: "did:plc:test", domain: "energy" }] as const),
           listExpertsMcp: (_baseUrl, _secret) =>
@@ -605,6 +679,13 @@ describe("ops CLI", () => {
               links: 2,
               topics: 3
             } as const),
+          curatePost: (_baseUrl, _secret, input) =>
+            Effect.succeed({
+              postUri: input.postUri as any,
+              action: input.action,
+              previousStatus: null,
+              newStatus: input.action === "reject" ? "rejected" as const : "curated" as const
+            }),
           listAdminExperts: (_baseUrl, _secret) =>
             Effect.succeed([{ did: "did:plc:test", domain: "energy" }] as const),
           listExpertsMcp: (_baseUrl, _secret) =>
