@@ -95,22 +95,3 @@ export const ChartDescription = Schema.Struct({
   keyFindings: Schema.Array(Schema.String)
 });
 export type ChartDescription = Schema.Schema.Type<typeof ChartDescription>;
-
-// ---------------------------------------------------------------------------
-// Source/provider references (from ontology individuals)
-// ---------------------------------------------------------------------------
-
-export const ProviderReference = Schema.Struct({
-  providerId: Schema.String,
-  providerLabel: Schema.String,
-  datasetLabel: Schema.NullOr(Schema.String)
-});
-export type ProviderReference = Schema.Schema.Type<typeof ProviderReference>;
-
-export const SourceReference = Schema.Struct({
-  url: Schema.String,
-  title: Schema.NullOr(Schema.String),
-  domain: Schema.NullOr(Schema.String),
-  publication: Schema.NullOr(Schema.String)
-});
-export type SourceReference = Schema.Schema.Type<typeof SourceReference>;
