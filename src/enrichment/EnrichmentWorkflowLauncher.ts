@@ -47,6 +47,12 @@ export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/Enrichment
       EnrichmentQueuedResponse,
       SqlError | DbError | EnrichmentSchemaDecodeError | EnrichmentWorkflowLaunchError
     >;
+    readonly startIfAbsent: (
+      params: EnrichmentRunParams
+    ) => Effect.Effect<
+      boolean,
+      SqlError | DbError | EnrichmentSchemaDecodeError | EnrichmentWorkflowLaunchError
+    >;
   }
 >() {
   static readonly layer = Layer.effect(
@@ -56,7 +62,7 @@ export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/Enrichment
       const runs = yield* EnrichmentRunsRepo;
       const workflow = env.ENRICHMENT_RUN_WORKFLOW;
 
-      const start = Effect.fn("EnrichmentWorkflowLauncher.start")(function* (
+      const queueRun = Effect.fn("EnrichmentWorkflowLauncher.queueRun")(function* (
         params: EnrichmentRunParams
       ) {
         const operation = "EnrichmentWorkflowLauncher.start";
@@ -85,10 +91,7 @@ export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/Enrichment
         });
 
         if (!inserted) {
-          return yield* EnrichmentWorkflowLaunchError.make({
-            message: `enrichment run already exists for ${validatedParams.postUri}`,
-            operation
-          });
+          return null;
         }
 
         yield* launchWorkflow(operation, () =>
@@ -116,8 +119,31 @@ export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/Enrichment
         } satisfies EnrichmentQueuedResponse;
       });
 
+      const startIfAbsent = Effect.fn(
+        "EnrichmentWorkflowLauncher.startIfAbsent"
+      )(function* (params: EnrichmentRunParams) {
+        const queued = yield* queueRun(params);
+        return queued !== null;
+      });
+
+      const start = Effect.fn("EnrichmentWorkflowLauncher.start")(function* (
+        params: EnrichmentRunParams
+      ) {
+        const queued = yield* queueRun(params);
+
+        if (queued === null) {
+          return yield* EnrichmentWorkflowLaunchError.make({
+            message: `enrichment run already exists for ${params.postUri}`,
+            operation: "EnrichmentWorkflowLauncher.start"
+          });
+        }
+
+        return queued;
+      });
+
       return EnrichmentWorkflowLauncher.of({
-        start
+        start,
+        startIfAbsent
       });
     })
   );

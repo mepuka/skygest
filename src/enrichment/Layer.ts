@@ -8,10 +8,13 @@ import {
 import { Logging } from "../platform/Logging";
 import { CandidatePayloadRepoD1 } from "../services/d1/CandidatePayloadRepoD1";
 import { EnrichmentRunsRepoD1 } from "../services/d1/EnrichmentRunsRepoD1";
+import { ProviderRegistry } from "../services/ProviderRegistry";
 import { EnrichmentPlanner } from "./EnrichmentPlanner";
 import { EnrichmentRepairService } from "./EnrichmentRepairService";
+import { SourceAttributionExecutor } from "./SourceAttributionExecutor";
 import { EnrichmentWorkflowLauncher } from "./EnrichmentWorkflowLauncher";
 import { GeminiVisionServiceLive } from "./GeminiVisionServiceLive";
+import { SourceAttributionMatcher } from "../source/SourceAttributionMatcher";
 import { VisionEnrichmentExecutor } from "./VisionEnrichmentExecutor";
 
 export const makeWorkflowEnrichmentLayer = (
@@ -57,11 +60,18 @@ export const makeWorkflowEnrichmentLayer = (
       Layer.mergeAll(workflowEnvLayer, runsLayer)
     )
   );
+  const providerRegistryLayer = ProviderRegistry.layer;
   const visionServiceLayer = GeminiVisionServiceLive.pipe(
     Layer.provideMerge(baseLayer)
   );
   const visionExecutorLayer = VisionEnrichmentExecutor.layer.pipe(
     Layer.provideMerge(visionServiceLayer)
+  );
+  const sourceMatcherLayer = SourceAttributionMatcher.layer.pipe(
+    Layer.provideMerge(providerRegistryLayer)
+  );
+  const sourceExecutorLayer = SourceAttributionExecutor.layer.pipe(
+    Layer.provideMerge(sourceMatcherLayer)
   );
 
   return Layer.mergeAll(
@@ -72,7 +82,10 @@ export const makeWorkflowEnrichmentLayer = (
     plannerLayer,
     launcherLayer,
     repairLayer,
+    providerRegistryLayer,
     visionServiceLayer,
-    visionExecutorLayer
+    visionExecutorLayer,
+    sourceMatcherLayer,
+    sourceExecutorLayer
   );
 };

@@ -16,7 +16,10 @@ import {
   EnrichmentExecutionPlan,
   EnrichmentPlannerInput
 } from "../domain/enrichmentPlan";
-import { EnrichmentOutput } from "../domain/enrichment";
+import {
+  EnrichmentOutput,
+  type VisionEnrichment
+} from "../domain/enrichment";
 import type { EmbedPayload, LinkEmbed } from "../domain/embed";
 import type { AtUri } from "../domain/types";
 import { CandidatePayloadRepo } from "../services/CandidatePayloadRepo";
@@ -29,6 +32,7 @@ import {
 const PlannerPostRowSchema = Schema.Struct({
   postUri: Schema.String,
   did: Schema.String,
+  handle: Schema.NullOr(Schema.String),
   text: Schema.String,
   createdAt: Schema.NonNegativeInt,
   status: Schema.String
@@ -185,6 +189,29 @@ const decodeExistingEnrichments = (payload: CandidatePayloadRecord) =>
       : [];
   });
 
+const selectVisionEnrichment = (
+  enrichments: ReadonlyArray<{
+    readonly output: Schema.Schema.Type<typeof EnrichmentOutput>;
+    readonly enrichedAt: number;
+  }>
+): VisionEnrichment | null => {
+  let selected: VisionEnrichment | null = null;
+  let selectedEnrichedAt = Number.NEGATIVE_INFINITY;
+
+  for (const enrichment of enrichments) {
+    if (enrichment.output.kind !== "vision") {
+      continue;
+    }
+
+    if (enrichment.enrichedAt >= selectedEnrichedAt) {
+      selected = enrichment.output;
+      selectedEnrichedAt = enrichment.enrichedAt;
+    }
+  }
+
+  return selected;
+};
+
 export class EnrichmentPlanner extends Context.Tag("@skygest/EnrichmentPlanner")<
   EnrichmentPlanner,
   {
@@ -231,6 +258,12 @@ export class EnrichmentPlanner extends Context.Tag("@skygest/EnrichmentPlanner")
             SELECT
               uri as postUri,
               did as did,
+              (
+                SELECT handle
+                FROM experts
+                WHERE experts.did = posts.did
+                LIMIT 1
+              ) as handle,
               text as text,
               created_at as createdAt,
               status as status
@@ -300,6 +333,7 @@ export class EnrichmentPlanner extends Context.Tag("@skygest/EnrichmentPlanner")
             post: {
               postUri: row.postUri as AtUri,
               did: row.did,
+              handle: row.handle,
               text: row.text,
               createdAt: row.createdAt,
               threadCoverage: "focus-only" as const
@@ -324,13 +358,15 @@ export class EnrichmentPlanner extends Context.Tag("@skygest/EnrichmentPlanner")
         const quote = extractQuoteContext(payload.embedPayload);
         const linkCards = extractLinkCards(payload.embedPayload);
         const existingEnrichments = decodeExistingEnrichments(payload);
+        const vision = selectVisionEnrichment(existingEnrichments);
         const planningContext: EnrichmentPlanningContext = {
           enrichmentType: validated.enrichmentType,
           assets,
           links: postContext.links,
           quote,
           linkCards,
-          existingEnrichments
+          existingEnrichments,
+          vision
         };
         const outcome = evaluateEnrichmentPlanningDecision(planningContext);
 
@@ -353,7 +389,8 @@ export class EnrichmentPlanner extends Context.Tag("@skygest/EnrichmentPlanner")
             quote,
             linkCards,
             assets,
-            existingEnrichments
+            existingEnrichments,
+            vision
           },
           `Failed to normalize enrichment execution plan for ${validated.postUri}`
         );

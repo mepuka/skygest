@@ -8,7 +8,7 @@
  * See docs/plans/2026-03-19-sky-46-source-attribution-matching-design.md
  * § Normalization Rules for the authoritative specification.
  */
-
+import { Option } from "effect";
 import { normalizeDomain } from "../domain/normalize";
 
 // ---------------------------------------------------------------------------
@@ -88,4 +88,24 @@ export const extractDomainFromText = (text: string): string | null => {
   const match = DOMAIN_PATTERN.exec(text);
   if (!match?.[1]) return null;
   return normalizeDomain(match[1]);
+};
+
+export const parseHostname = Option.liftThrowable(
+  (url: string) => new URL(url).hostname
+);
+
+export const parseNormalizedDomain = (
+  url: string
+): Option.Option<string> => Option.map(parseHostname(url), normalizeDomain);
+
+export const startsWithWholeAlias = (text: string, alias: string): boolean => {
+  const normalizedText = text.trim().toLowerCase();
+  const normalizedAlias = alias.trim().toLowerCase();
+
+  if (normalizedAlias.length < 3 || !normalizedText.startsWith(normalizedAlias)) {
+    return false;
+  }
+
+  const nextChar = normalizedText[normalizedAlias.length];
+  return nextChar === undefined || /[\s,;:()/-]/u.test(nextChar);
 };

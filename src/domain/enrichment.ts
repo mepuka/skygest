@@ -23,6 +23,12 @@ import {
   ProviderReference,
   SocialProvenance
 } from "./source";
+import {
+  SourceAttributionProviderCandidate,
+  SourceAttributionResolution,
+  VisionOrganizationMention,
+  VisionSourceLineAttribution
+} from "./sourceMatching";
 
 // ---------------------------------------------------------------------------
 // Enrichment kind discriminator
@@ -35,6 +41,18 @@ export const EnrichmentKind = Schema.Literal(
 );
 export type EnrichmentKind = Schema.Schema.Type<typeof EnrichmentKind>;
 
+export const defaultSchemaVersionForEnrichmentKind = (
+  kind: EnrichmentKind
+) => {
+  switch (kind) {
+    case "vision":
+    case "source-attribution":
+      return "v2";
+    case "grounding":
+      return "v1";
+  }
+};
+
 const VisionAssetType = Schema.Literal("image", "video");
 const VisionAssetSource = Schema.Literal("embed", "media");
 
@@ -42,7 +60,25 @@ const VisionAssetSource = Schema.Literal("embed", "media");
 // Vision enrichment (SKY-16: chart analysis + alt text)
 // ---------------------------------------------------------------------------
 
-export const VisionAssetAnalysis = Schema.Struct({
+const VisionAssetAnalysisV2 = Schema.Struct({
+  mediaType: MediaType,
+  chartTypes: Schema.Array(ChartType),
+  altText: Schema.NullOr(Schema.String),
+  altTextProvenance: AltTextProvenance,
+  xAxis: Schema.NullOr(ChartAxis),
+  yAxis: Schema.NullOr(ChartAxis),
+  series: Schema.Array(ChartSeries),
+  sourceLines: Schema.Array(VisionSourceLineAttribution),
+  temporalCoverage: Schema.NullOr(TemporalCoverage),
+  keyFindings: Schema.Array(Schema.String),
+  visibleUrls: Schema.Array(Schema.String),
+  organizationMentions: Schema.Array(VisionOrganizationMention),
+  logoText: Schema.Array(Schema.String),
+  title: Schema.NullOr(Schema.String),
+  modelId: Schema.String,
+  processedAt: Schema.Number
+});
+const LegacyVisionAssetAnalysis = Schema.Struct({
   mediaType: MediaType,
   chartTypes: Schema.Array(ChartType),
   altText: Schema.NullOr(Schema.String),
@@ -57,6 +93,46 @@ export const VisionAssetAnalysis = Schema.Struct({
   modelId: Schema.String,
   processedAt: Schema.Number
 });
+const LegacyVisionAssetAnalysisNormalized = Schema.transform(
+  LegacyVisionAssetAnalysis,
+  VisionAssetAnalysisV2,
+  {
+    strict: true,
+    decode: (legacy) =>
+      ({
+        ...legacy,
+        sourceLines: legacy.sourceLines.map((sourceLine) => ({
+          sourceText: sourceLine.sourceText,
+          datasetName: null
+        })),
+        visibleUrls: [],
+        organizationMentions: [],
+        logoText: []
+      }),
+    encode: (value) =>
+      ({
+        mediaType: value.mediaType,
+        chartTypes: value.chartTypes,
+        altText: value.altText,
+        altTextProvenance: value.altTextProvenance,
+        xAxis: value.xAxis,
+        yAxis: value.yAxis,
+        series: value.series,
+        sourceLines: value.sourceLines.map((sourceLine) => ({
+          sourceText: sourceLine.sourceText
+        })),
+        temporalCoverage: value.temporalCoverage,
+        keyFindings: value.keyFindings,
+        title: value.title,
+        modelId: value.modelId,
+        processedAt: value.processedAt
+      })
+  }
+);
+export const VisionAssetAnalysis = Schema.Union(
+  VisionAssetAnalysisV2,
+  LegacyVisionAssetAnalysisNormalized
+);
 export type VisionAssetAnalysis = Schema.Schema.Type<typeof VisionAssetAnalysis>;
 
 export const VisionSynthesisFinding = Schema.Struct({
@@ -102,14 +178,64 @@ export type VisionEnrichment = Schema.Schema.Type<typeof VisionEnrichment>;
 // Source attribution enrichment (SKY-17: provider/content normalization)
 // ---------------------------------------------------------------------------
 
-export const SourceAttributionEnrichment = Schema.Struct({
+const SourceAttributionEnrichmentV2 = Schema.Struct({
+  kind: Schema.Literal("source-attribution"),
+  provider: Schema.NullOr(ProviderReference),
+  resolution: SourceAttributionResolution,
+  providerCandidates: Schema.Array(SourceAttributionProviderCandidate),
+  contentSource: Schema.NullOr(ContentSourceReference),
+  socialProvenance: Schema.NullOr(SocialProvenance),
+  processedAt: Schema.Number
+});
+const LegacySourceAttributionEnrichment = Schema.Struct({
   kind: Schema.Literal("source-attribution"),
   provider: Schema.NullOr(ProviderReference),
   contentSource: Schema.NullOr(ContentSourceReference),
   socialProvenance: Schema.NullOr(SocialProvenance),
   processedAt: Schema.Number
 });
-export type SourceAttributionEnrichment = Schema.Schema.Type<typeof SourceAttributionEnrichment>;
+const LegacySourceAttributionEnrichmentNormalized = Schema.transform(
+  LegacySourceAttributionEnrichment,
+  SourceAttributionEnrichmentV2,
+  {
+    strict: true,
+    decode: (
+      legacy
+    ): Schema.Schema.Type<typeof SourceAttributionEnrichmentV2> => {
+      const resolution = legacy.provider === null
+        ? "unmatched"
+        : "matched";
+
+      return {
+        ...legacy,
+        resolution,
+        providerCandidates: []
+      };
+    },
+    encode: (
+      value
+    ): Schema.Schema.Type<typeof LegacySourceAttributionEnrichment> => ({
+        kind: value.kind,
+        provider:
+          value.provider as Schema.Schema.Type<
+            typeof LegacySourceAttributionEnrichment
+          >["provider"],
+        contentSource: value.contentSource,
+        socialProvenance:
+          value.socialProvenance as Schema.Schema.Type<
+            typeof LegacySourceAttributionEnrichment
+          >["socialProvenance"],
+        processedAt: value.processedAt
+      })
+  }
+);
+export const SourceAttributionEnrichment = Schema.Union(
+  SourceAttributionEnrichmentV2,
+  LegacySourceAttributionEnrichmentNormalized
+);
+export type SourceAttributionEnrichment = Schema.Schema.Type<
+  typeof SourceAttributionEnrichment
+>;
 
 // ---------------------------------------------------------------------------
 // Grounding enrichment (future: claim verification)

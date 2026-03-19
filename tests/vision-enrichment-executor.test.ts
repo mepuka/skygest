@@ -17,6 +17,7 @@ const makePlan = (): VisionExecutionPlan => ({
   post: {
     postUri: asAtUri("at://did:plc:test/app.bsky.feed.post/post-1"),
     did: "did:plc:test" as any,
+    handle: null,
     text: "Stored post text",
     createdAt: 1,
     threadCoverage: "focus-only"
@@ -47,7 +48,8 @@ const makePlan = (): VisionExecutionPlan => ({
       alt: "Original alt"
     }
   ],
-  existingEnrichments: []
+  existingEnrichments: [],
+  vision: null
 });
 
 describe("VisionEnrichmentExecutor", () => {
@@ -103,12 +105,15 @@ describe("VisionEnrichmentExecutor", () => {
                         xAxis: { label: "Month", unit: null },
                         yAxis: { label: "Price", unit: "$/MWh" },
                         series: [{ legendLabel: "Pool price", unit: "$/MWh" }],
-                        sourceLines: [{ sourceText: "Source: AESO" }],
+                        sourceLines: [{ sourceText: "Source: AESO", datasetName: null }],
                         temporalCoverage: {
                           startDate: "2024-01",
                           endDate: "2024-12"
                         },
                         keyFindings: ["Prices rose through the summer"],
+                        visibleUrls: [],
+                        organizationMentions: [],
+                        logoText: [],
                         title: "Alberta pool prices",
                         modelId: "test-model",
                         processedAt: 100
@@ -121,7 +126,9 @@ describe("VisionEnrichmentExecutor", () => {
                         xAxis: { label: "Year", unit: null },
                         yAxis: { label: "MW", unit: "MW" },
                         series: [{ legendLabel: "Storage", unit: "MW" }],
-                        sourceLines: [{ sourceText: "Source: GridStatus" }],
+                        sourceLines: [
+                          { sourceText: "Source: GridStatus", datasetName: null }
+                        ],
                         temporalCoverage: {
                           startDate: "2021",
                           endDate: "2025"
@@ -130,6 +137,9 @@ describe("VisionEnrichmentExecutor", () => {
                           "Prices rose through the summer",
                           "Battery storage additions accelerated"
                         ],
+                        visibleUrls: [],
+                        organizationMentions: [],
+                        logoText: [],
                         title: "Battery storage additions",
                         modelId: "test-model",
                         processedAt: 200
@@ -165,7 +175,7 @@ describe("VisionEnrichmentExecutor", () => {
           ])
         );
         expect(result.modelId).toBe("test-model");
-        expect(result.promptVersion).toBe("v1.0.0");
+        expect(result.promptVersion).toBe("v2.0.0");
         expect(result.processedAt).toBe(200);
       } finally {
         globalThis.fetch = originalFetch;

@@ -23,11 +23,14 @@ import {
   ChartType,
   ChartAxis,
   ChartSeries,
-  ChartSourceLine,
   TemporalCoverage
 } from "../domain/media";
 import { GeminiApiError, GeminiParseError } from "../domain/errors";
 import { formatSchemaParseError } from "../platform/Json";
+import {
+  VisionOrganizationMention,
+  VisionSourceLineAttribution
+} from "../domain/sourceMatching";
 import {
   GeminiVisionService,
   ImageClassification,
@@ -50,9 +53,12 @@ const GeminiExtractionOutput = Schema.Struct({
   xAxis: Schema.NullOr(ChartAxis),
   yAxis: Schema.NullOr(ChartAxis),
   series: Schema.Array(ChartSeries),
-  sourceLines: Schema.Array(ChartSourceLine),
+  sourceLines: Schema.Array(VisionSourceLineAttribution),
   temporalCoverage: Schema.NullOr(TemporalCoverage),
-  keyFindings: Schema.Array(Schema.String)
+  keyFindings: Schema.Array(Schema.String),
+  visibleUrls: Schema.Array(Schema.String),
+  organizationMentions: Schema.Array(VisionOrganizationMention),
+  logoText: Schema.Array(Schema.String)
 });
 
 // ---------------------------------------------------------------------------

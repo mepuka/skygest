@@ -185,6 +185,15 @@ export class EnrichmentAssetFetchError extends Schema.TaggedError<EnrichmentAsse
   }
 ) {}
 
+export class EnrichmentDependencyPendingError extends Schema.TaggedError<EnrichmentDependencyPendingError>()(
+  "EnrichmentDependencyPendingError",
+  {
+    dependency: Schema.String,
+    postUri: Schema.optional(AtUri),
+    operation: Schema.optional(Schema.String)
+  }
+) {}
+
 export const IngestErrorEnvelope = Schema.Struct({
   tag: Schema.String.pipe(Schema.minLength(1)),
   message: Schema.String,
@@ -785,6 +794,24 @@ export const toEnrichmentErrorEnvelope = (
       message: getStringField(error, "message") ?? "failed to fetch enrichment asset",
       retryable: isRetryableStatus(status),
       ...(status === undefined ? {} : { status }),
+      ...(operation === undefined ? {} : { operation })
+    });
+  }
+
+  if (
+    error instanceof EnrichmentDependencyPendingError ||
+    isTagged(error, "EnrichmentDependencyPendingError")
+  ) {
+    const dependency = getStringField(error, "dependency") ?? "dependency";
+    const postUri = getStringField(error, "postUri");
+    const operation = getStringField(error, "operation") ?? overrides.operation;
+    return withOverrides({
+      tag: "EnrichmentDependencyPendingError",
+      message:
+        postUri === undefined
+          ? `${dependency} enrichment is not ready yet`
+          : `${dependency} enrichment is not ready yet for ${postUri}`,
+      retryable: true,
       ...(operation === undefined ? {} : { operation })
     });
   }

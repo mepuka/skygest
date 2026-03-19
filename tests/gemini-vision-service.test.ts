@@ -63,9 +63,12 @@ const validExtractionJson = JSON.stringify({
   xAxis: { label: "Year", unit: null },
   yAxis: { label: "Price", unit: "$/MWh" },
   series: [{ legendLabel: "Pool Price", unit: "$/MWh" }],
-  sourceLines: [{ sourceText: "Source: AESO" }],
+  sourceLines: [{ sourceText: "Source: AESO", datasetName: null }],
   temporalCoverage: { startDate: "2020", endDate: "2024" },
-  keyFindings: ["Prices peaked in 2022", "Steady decline through 2023"]
+  keyFindings: ["Prices peaked in 2022", "Steady decline through 2023"],
+  visibleUrls: [],
+  organizationMentions: [],
+  logoText: []
 });
 
 // ---------------------------------------------------------------------------
@@ -403,8 +406,11 @@ describe("GeminiVisionService", () => {
             { legendLabel: "Pool Price", unit: "$/MWh" }
           ]);
           expect(result.sourceLines).toEqual([
-            { sourceText: "Source: AESO" }
+            { sourceText: "Source: AESO", datasetName: null }
           ]);
+          expect(result.visibleUrls).toEqual([]);
+          expect(result.organizationMentions).toEqual([]);
+          expect(result.logoText).toEqual([]);
           expect(result.temporalCoverage).toEqual({
             startDate: "2020",
             endDate: "2024"
@@ -537,7 +543,10 @@ describe("GeminiVisionService", () => {
               series: [],
               sourceLines: [],
               temporalCoverage: null,
-              keyFindings: []
+              keyFindings: [],
+              visibleUrls: [],
+              organizationMentions: [],
+              logoText: []
             })
           });
 

@@ -5,9 +5,15 @@ import {
 } from "cloudflare:workers";
 import { Effect, Either, ManagedRuntime, Schema } from "effect";
 import {
+  defaultSchemaVersionForEnrichmentKind,
+  type EnrichmentOutput
+} from "../domain/enrichment";
+import {
   describeEnrichmentPlanStopReason,
   type EnrichmentExecutionPlan,
+  isSourceAttributionExecutionPlan,
   isVisionExecutionPlan,
+  type SourceAttributionExecutionPlan as SourceAttributionExecutionPlanValue,
   type VisionExecutionPlan as VisionExecutionPlanValue
 } from "../domain/enrichmentPlan";
 import {
@@ -15,6 +21,7 @@ import {
   type EnrichmentRunParams as EnrichmentRunParamsValue
 } from "../domain/enrichmentRun";
 import {
+  EnrichmentDependencyPendingError,
   EnrichmentPayloadMissingError,
   EnrichmentRunNotFoundError,
   EnrichmentSchemaDecodeError,
@@ -31,6 +38,8 @@ import {
   defaultStopReasonForEnrichmentType,
   isSkippedEnrichmentPlan
 } from "./EnrichmentPredicates";
+import { EnrichmentWorkflowLauncher } from "./EnrichmentWorkflowLauncher";
+import { SourceAttributionExecutor } from "./SourceAttributionExecutor";
 import { VisionEnrichmentExecutor } from "./VisionEnrichmentExecutor";
 
 const decodeEnrichmentRunParams = (input: unknown) =>
@@ -90,15 +99,43 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
           );
         })()
       : toEnrichmentErrorEnvelope(
+          {
+            _tag: "EnrichmentExecutionDeferred",
+            message: "enrichment execution lane not implemented yet"
+          },
+          {
+            runId,
+            operation: "EnrichmentRunWorkflow.run"
+          }
+        );
+  }
+
+  private persistEnrichment(
+    plan: EnrichmentExecutionPlan,
+    enrichment: EnrichmentOutput,
+    resultWrittenAt: number
+  ) {
+    return Effect.flatMap(CandidatePayloadRepo, (payloads) =>
+      payloads.saveEnrichment(
         {
-          _tag: "EnrichmentExecutionDeferred",
-          message: "enrichment execution lane not implemented yet"
+          postUri: plan.postUri,
+          enrichmentType: plan.enrichmentType,
+          enrichmentPayload: enrichment
         },
-        {
-          runId,
-          operation: "EnrichmentRunWorkflow.run"
-        }
-      );
+        resultWrittenAt,
+        resultWrittenAt
+      )
+    ).pipe(
+      Effect.flatMap((saved) =>
+        saved
+          ? Effect.void
+          : Effect.fail(
+              EnrichmentPayloadMissingError.make({
+                postUri: plan.postUri
+              })
+            )
+      )
+    );
   }
 
   override async run(
@@ -169,7 +206,22 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
         )
       );
 
-      if (!isVisionExecutionPlan(plan)) {
+      if (
+        isSkippedEnrichmentPlan(plan) &&
+        plan.enrichmentType === "source-attribution" &&
+        plan.stopReason === "awaiting-vision"
+      ) {
+        await this.runEffect(
+          EnrichmentDependencyPendingError.make({
+            dependency: "vision",
+            postUri: plan.postUri,
+            operation: "EnrichmentRunWorkflow.run"
+          }),
+          "EnrichmentRunWorkflow.awaitingVision"
+        );
+      }
+
+      if (!isVisionExecutionPlan(plan) && !isSourceAttributionExecutionPlan(plan)) {
         await step.do("mark needs review", async () =>
           this.runEffect(
             Effect.flatMap(EnrichmentRunsRepo, (runs) =>
@@ -202,14 +254,23 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
         )
       );
 
-      const vision = await step.do("execute vision enrichment", async () =>
-        this.runEffect(
-          Effect.flatMap(VisionEnrichmentExecutor, (executor) =>
-            executor.execute(plan as VisionExecutionPlanValue)
-          ),
-          "EnrichmentRunWorkflow.executeVision"
-        )
-      );
+      const enrichment = isVisionExecutionPlan(plan)
+        ? await step.do("execute vision enrichment", async () =>
+            this.runEffect(
+              Effect.flatMap(VisionEnrichmentExecutor, (executor) =>
+                executor.execute(plan as VisionExecutionPlanValue)
+              ),
+              "EnrichmentRunWorkflow.executeVision"
+            )
+          )
+        : await step.do("execute source attribution", async () =>
+            this.runEffect(
+              Effect.flatMap(SourceAttributionExecutor, (executor) =>
+                executor.execute(plan as SourceAttributionExecutionPlanValue)
+              ),
+              "EnrichmentRunWorkflow.executeSourceAttribution"
+            )
+          );
 
       await step.do("mark persisting", async () =>
         this.runEffect(
@@ -225,32 +286,31 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
       );
 
       const resultWrittenAt = Date.now();
-      await step.do("persist vision enrichment", async () =>
+      await step.do(`persist ${plan.enrichmentType} enrichment`, async () =>
         this.runEffect(
-          Effect.flatMap(CandidatePayloadRepo, (payloads) =>
-            payloads.saveEnrichment(
-              {
-                postUri: plan.postUri,
-                enrichmentType: "vision",
-                enrichmentPayload: vision
-              },
-              resultWrittenAt,
-              resultWrittenAt
-            )
-          ).pipe(
-            Effect.flatMap((saved) =>
-              saved
-                ? Effect.void
-                : Effect.fail(
-                    EnrichmentPayloadMissingError.make({
-                      postUri: plan.postUri
-                    })
-                  )
-            )
-          ),
-          "EnrichmentRunWorkflow.persistVision"
+          this.persistEnrichment(plan, enrichment, resultWrittenAt),
+          "EnrichmentRunWorkflow.persistEnrichment"
         )
       );
+
+      if (isVisionExecutionPlan(plan)) {
+        await step.do("queue source attribution", async () =>
+          this.runEffect(
+            Effect.flatMap(EnrichmentWorkflowLauncher, (launcher) =>
+              launcher.startIfAbsent({
+                postUri: plan.postUri,
+                enrichmentType: "source-attribution",
+                schemaVersion: defaultSchemaVersionForEnrichmentKind(
+                  "source-attribution"
+                ),
+                triggeredBy: run.triggeredBy,
+                requestedBy: run.requestedBy
+              })
+            ),
+            "EnrichmentRunWorkflow.queueSourceAttribution"
+          )
+        );
+      }
 
       await step.do("mark complete", async () =>
         this.runEffect(

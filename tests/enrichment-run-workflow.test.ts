@@ -11,6 +11,7 @@ import type {
 } from "../src/domain/enrichmentRun";
 import type { AtUri } from "../src/domain/types";
 import { EnrichmentPlanner } from "../src/enrichment/EnrichmentPlanner";
+import { EnrichmentWorkflowLauncher } from "../src/enrichment/EnrichmentWorkflowLauncher";
 import { VisionEnrichmentExecutor } from "../src/enrichment/VisionEnrichmentExecutor";
 import type { WorkflowEnrichmentEnvBindings } from "../src/platform/Env";
 import { CandidatePayloadRepo } from "../src/services/CandidatePayloadRepo";
@@ -85,6 +86,7 @@ const makePlan = (
   post: {
     postUri: asAtUri("at://did:plc:test/app.bsky.feed.post/post-1"),
     did: "did:plc:test" as any,
+    handle: null,
     text: "Stored post text",
     createdAt: 1,
     threadCoverage: "focus-only"
@@ -116,6 +118,7 @@ const makePlan = (
     }
   ],
   existingEnrichments: [],
+  vision: null,
   ...overrides
 });
 
@@ -148,12 +151,15 @@ const makeVisionEnrichment = (): VisionEnrichment => ({
         xAxis: { label: "Month", unit: null },
         yAxis: { label: "Price", unit: "$/MWh" },
         series: [{ legendLabel: "Pool price", unit: "$/MWh" }],
-        sourceLines: [{ sourceText: "Source: AESO" }],
+        sourceLines: [{ sourceText: "Source: AESO", datasetName: null }],
         temporalCoverage: {
           startDate: "2024-01",
           endDate: "2024-12"
         },
         keyFindings: ["Prices rose through the summer"],
+        visibleUrls: [],
+        organizationMentions: [],
+        logoText: [],
         title: "Alberta pool prices",
         modelId: "gemini-2.5-flash",
         processedAt: 10
@@ -161,7 +167,7 @@ const makeVisionEnrichment = (): VisionEnrichment => ({
     }
   ],
   modelId: "gemini-2.5-flash",
-  promptVersion: "v1.0.0",
+  promptVersion: "v2.0.0",
   processedAt: 10
 });
 
@@ -246,6 +252,15 @@ describe("EnrichmentRunWorkflow", () => {
                   executorCalls.push(input);
                   return makeVisionEnrichment();
                 })
+            }),
+            Layer.succeed(EnrichmentWorkflowLauncher, {
+              start: () =>
+                Effect.succeed({
+                  runId: "source-attribution-queued",
+                  workflowInstanceId: "source-attribution-queued",
+                  status: "queued" as const
+                }),
+              startIfAbsent: () => Effect.succeed(true)
             }),
             Layer.succeed(CandidatePayloadRepo, {
               upsertCapture: () => Effect.succeed(false),

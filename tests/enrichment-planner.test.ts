@@ -183,6 +183,60 @@ describe("EnrichmentPlanner", () => {
           summary: "legacy shape that should be ignored"
         }
       });
+      yield* payloads.saveEnrichment({
+        postUri: solarUri,
+        enrichmentType: "vision",
+        enrichmentPayload: {
+          kind: "vision",
+          summary: {
+            text: "Chart summary",
+            mediaTypes: ["chart"],
+            chartTypes: ["bar-chart"],
+            titles: ["Balancing authority data"],
+            keyFindings: [
+              {
+                text: "Source identified in chart footer",
+                assetKeys: ["media:0:https://cdn.bsky.app/full-media.jpg"]
+              }
+            ]
+          },
+          assets: [
+            {
+              assetKey: "media:0:https://cdn.bsky.app/full-media.jpg",
+              assetType: "image",
+              source: "media",
+              index: 0,
+              originalAltText: "Chart screenshot",
+              analysis: {
+                mediaType: "chart",
+                chartTypes: ["bar-chart"],
+                altText: "Chart screenshot",
+                altTextProvenance: "synthetic",
+                xAxis: null,
+                yAxis: null,
+                series: [],
+                sourceLines: [
+                  {
+                    sourceText: "Source: Example",
+                    datasetName: null
+                  }
+                ],
+                temporalCoverage: null,
+                keyFindings: ["Source identified in chart footer"],
+                visibleUrls: [],
+                organizationMentions: [],
+                logoText: [],
+                title: "Balancing authority data",
+                modelId: "gemini-2.5-flash",
+                processedAt: 200
+              }
+            }
+          ],
+          modelId: "gemini-2.5-flash",
+          promptVersion: "v2.0.0",
+          processedAt: 200
+        }
+      });
 
       const plan = yield* planner.plan({
         postUri: solarUri,
@@ -197,9 +251,14 @@ describe("EnrichmentPlanner", () => {
         text: "Quoted context about balancing authority data",
         author: "quoted.author"
       });
+      expect(plan.vision?.kind).toBe("vision");
       expect(plan.assets).toHaveLength(1);
-      expect(plan.existingEnrichments).toHaveLength(1);
-      expect(plan.existingEnrichments[0]?.output.kind).toBe("source-attribution");
+      expect(plan.existingEnrichments).toHaveLength(2);
+      expect(
+        plan.existingEnrichments.some(
+          (enrichment) => enrichment.output.kind === "source-attribution"
+        )
+      ).toBe(true);
     }).pipe(Effect.provide(makeLayer()))
   );
 

@@ -1,4 +1,5 @@
 import { Predicate } from "effect";
+import type { VisionEnrichment } from "../domain/enrichment";
 import type {
   EnrichmentPlannerInput,
   EnrichmentPlannerStopReason,
@@ -17,6 +18,7 @@ export interface EnrichmentPlanningContext {
   readonly quote: EnrichmentPlannedQuoteContext | null;
   readonly linkCards: ReadonlyArray<EnrichmentPlannedLinkCardContext>;
   readonly existingEnrichments: ReadonlyArray<EnrichmentPlannedExistingEnrichment>;
+  readonly vision: VisionEnrichment | null;
 }
 
 export type EnrichmentPlanningDecision =
@@ -79,6 +81,12 @@ export const hasExistingEnrichments: Predicate.Predicate<
   EnrichmentPlanningContext
 > = Predicate.mapInput(isNonEmpty, (context) => context.existingEnrichments);
 
+export const hasDecodedVision: Predicate.Predicate<EnrichmentPlanningContext> =
+  Predicate.mapInput(
+    (vision: VisionEnrichment | null) => vision !== null,
+    (context) => context.vision
+  );
+
 export const hasDurableQuoteContext: Predicate.Predicate<
   EnrichmentPlanningContext
 > = (context) => context.quote !== null && hasQuoteSignal(context.quote);
@@ -104,18 +112,26 @@ export const canExecuteEnrichmentPlan: Predicate.Predicate<
   EnrichmentPlanningContext
 > = Predicate.some([
   Predicate.and(plansVision, hasVisualAssets),
-  Predicate.and(plansSourceAttribution, hasSourceSignals),
+  Predicate.and(
+    plansSourceAttribution,
+    Predicate.or(Predicate.not(hasVisualAssets), hasDecodedVision)
+  ),
   Predicate.and(plansGrounding, hasGroundingSignals)
 ]);
 
 export const defaultStopReasonForEnrichmentType = (
-  enrichmentType: EnrichmentType
+  enrichmentType: EnrichmentType,
+  context?: EnrichmentPlanningContext
 ): EnrichmentPlannerStopReason => {
   switch (enrichmentType) {
     case "vision":
       return "no-visual-assets";
     case "source-attribution":
-      return "no-source-signals";
+      return context !== undefined &&
+        hasVisualAssets(context) &&
+        !hasDecodedVision(context)
+        ? "awaiting-vision"
+        : "no-source-signals";
     case "grounding":
       return "no-grounding-signals";
   }
@@ -128,7 +144,10 @@ export const evaluateEnrichmentPlanningDecision = (
     ? { decision: "execute" }
     : {
         decision: "skip",
-        stopReason: defaultStopReasonForEnrichmentType(context.enrichmentType)
+        stopReason: defaultStopReasonForEnrichmentType(
+          context.enrichmentType,
+          context
+        )
       };
 
 export const isSkippedEnrichmentPlan: Predicate.Predicate<

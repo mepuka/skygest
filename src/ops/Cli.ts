@@ -1,6 +1,7 @@
 import { Command, Options } from "@effect/cli";
 import { Console, Effect } from "effect";
 import { energySeedDid } from "../bootstrap/CheckedInExpertSeeds";
+import { defaultSchemaVersionForEnrichmentKind } from "../domain/enrichment";
 import type { EnrichmentRunRecord } from "../domain/enrichmentRun";
 import type { IngestRunRecord } from "../domain/polling";
 import { stringifyUnknown } from "../platform/Json";
@@ -73,7 +74,7 @@ const enrichmentTypeOption = Options.choice("enrichment-type", enrichmentKinds).
 
 const schemaVersionOption = Options.text("schema-version").pipe(
   Options.withDescription("Schema version"),
-  Options.withDefault("v1")
+  Options.withDefault("auto")
 );
 
 const expectCondition = (condition: boolean, message: string) =>
@@ -482,7 +483,10 @@ const runStageEnrichmentStart = (options: {
     const queued = yield* client.startEnrichment(baseUrl, secret, {
       postUri: options.postUri,
       enrichmentType: options.enrichmentType,
-      schemaVersion: options.schemaVersion
+      schemaVersion:
+        options.schemaVersion === "auto"
+          ? defaultSchemaVersionForEnrichmentKind(options.enrichmentType)
+          : options.schemaVersion
     });
 
     yield* Console.log(
