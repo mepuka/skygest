@@ -1,4 +1,4 @@
-import { Clock, Context, Effect, Layer } from "effect";
+import { Clock, Context, Effect, Layer, Option } from "effect";
 import type { SqlError } from "@effect/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import { BlueskyApiError } from "../domain/errors";
@@ -12,6 +12,11 @@ import type {
 } from "../domain/curation";
 import { CurationPostNotFoundError } from "../domain/curation";
 import type { KnowledgePost } from "../domain/bi";
+import {
+  defaultSchemaVersionForEnrichmentKind,
+  type EnrichmentKind
+} from "../domain/enrichment";
+import type { EmbedPayload } from "../domain/embed";
 import { AppConfig } from "../platform/Config";
 import { clampLimit } from "../platform/Limit";
 import { CurationRepo } from "./CurationRepo";
@@ -27,6 +32,7 @@ import {
   defaultPredicates
 } from "../curation/CurationPredicates";
 import type { PostContext } from "../curation/CurationPredicates";
+import { EnrichmentWorkflowLauncher } from "../enrichment/EnrichmentWorkflowLauncher";
 
 export class CurationService extends Context.Tag("@skygest/CurationService")<
   CurationService,
@@ -53,8 +59,46 @@ export class CurationService extends Context.Tag("@skygest/CurationService")<
     const bskyClient = yield* BlueskyClient;
     const config = yield* AppConfig;
 
-    const clampCurationLimit = (limit: number | undefined) =>
-      clampLimit(limit, config.mcpLimitDefault, config.mcpLimitMax);
+const clampCurationLimit = (limit: number | undefined) =>
+  clampLimit(limit, config.mcpLimitDefault, config.mcpLimitMax);
+
+    const hasVisualAssets = (embedPayload: EmbedPayload | null): boolean => {
+      if (embedPayload === null) {
+        return false;
+      }
+
+      switch (embedPayload.kind) {
+        case "img":
+        case "video":
+          return true;
+        case "media":
+          return embedPayload.media !== null && hasVisualAssets(embedPayload.media);
+        default:
+          return false;
+      }
+    };
+
+    const queuePickedEnrichment = Effect.fn(
+      "CurationService.queuePickedEnrichment"
+    )(function* (postUri: AtUri, embedPayload: EmbedPayload | null, curator: string) {
+      const maybeLauncher = yield* Effect.serviceOption(EnrichmentWorkflowLauncher);
+
+      if (Option.isNone(maybeLauncher)) {
+        return false;
+      }
+
+      const enrichmentType: EnrichmentKind = hasVisualAssets(embedPayload)
+        ? "vision"
+        : "source-attribution";
+
+      return yield* maybeLauncher.value.startIfAbsent({
+        postUri,
+        enrichmentType,
+        schemaVersion: defaultSchemaVersionForEnrichmentKind(enrichmentType),
+        triggeredBy: "pick",
+        requestedBy: curator
+      });
+    });
 
     // ---------------------------------------------------------------------------
     // flagBatch — batch-evaluate predicates, bulk-upsert flags into post_curation
@@ -218,6 +262,14 @@ export class CurationService extends Context.Tag("@skygest/CurationService")<
           curator,
           input.note ?? null,
           now
+        );
+
+        yield* queuePickedEnrichment(
+          input.postUri as AtUri,
+          embedPayload,
+          curator
+        ).pipe(
+          Effect.catchAll(() => Effect.succeed(false))
         );
 
         return {

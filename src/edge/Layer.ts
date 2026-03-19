@@ -10,7 +10,9 @@ import { AppConfig } from "../platform/Config";
 import {
   CloudflareEnv,
   type EnvBindings,
+  makeWorkflowEnrichmentEnvLayer,
   makeWorkflowIngestEnvLayer,
+  requireWorkflowEnrichmentEnv,
   type WorkflowIngestEnvBindings
 } from "../platform/Env";
 import { Logging } from "../platform/Logging";
@@ -23,6 +25,7 @@ import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { OntologyCatalog } from "../services/OntologyCatalog";
 import { StagingOpsService } from "../services/StagingOpsService";
 import { CandidatePayloadRepoD1 } from "../services/d1/CandidatePayloadRepoD1";
+import { EnrichmentRunsRepoD1 } from "../services/d1/EnrichmentRunsRepoD1";
 import { ExpertSyncStateRepoD1 } from "../services/d1/ExpertSyncStateRepoD1";
 import { EditorialService } from "../services/EditorialService";
 import { EditorialRepoD1 } from "../services/d1/EditorialRepoD1";
@@ -32,6 +35,7 @@ import { IngestRunsRepoD1 } from "../services/d1/IngestRunsRepoD1";
 import { KnowledgeRepoD1 } from "../services/d1/KnowledgeRepoD1";
 import { PublicationsRepoD1 } from "../services/d1/PublicationsRepoD1";
 import { ProviderRegistry } from "../services/ProviderRegistry";
+import { EnrichmentWorkflowLauncher } from "../enrichment/EnrichmentWorkflowLauncher";
 
 const makeBaseLayer = (env: EnvBindings) =>
   Layer.mergeAll(
@@ -55,6 +59,24 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const candidatePayloadServiceLayer = CandidatePayloadService.layer.pipe(
     Layer.provideMerge(candidatePayloadRepoLayer)
   );
+  const enrichmentRunsLayer = env.ENRICHMENT_RUN_WORKFLOW == null
+    ? null
+    : EnrichmentRunsRepoD1.layer.pipe(Layer.provideMerge(baseLayer));
+  const enrichmentWorkflowEnvLayer = env.ENRICHMENT_RUN_WORKFLOW == null
+    ? null
+    : makeWorkflowEnrichmentEnvLayer(requireWorkflowEnrichmentEnv(env));
+  const enrichmentLauncherLayer =
+    enrichmentRunsLayer === null || enrichmentWorkflowEnvLayer === null
+      ? null
+      : EnrichmentWorkflowLauncher.layer.pipe(
+          Layer.provideMerge(
+            Layer.mergeAll(
+              baseLayer,
+              enrichmentWorkflowEnvLayer,
+              enrichmentRunsLayer
+            )
+          )
+        );
   const curationRepoLayer = CurationRepoD1.layer.pipe(
     Layer.provideMerge(baseLayer)
   );
@@ -77,14 +99,24 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   );
   const curationServiceLayer = CurationService.layer.pipe(
     Layer.provideMerge(
-      Layer.mergeAll(
-        curationRepoLayer,
-        expertsLayer,
-        publicationsLayer,
-        candidatePayloadServiceLayer,
-        blueskyLayer,
-        configLayer
-      )
+      enrichmentLauncherLayer === null
+        ? Layer.mergeAll(
+            curationRepoLayer,
+            expertsLayer,
+            publicationsLayer,
+            candidatePayloadServiceLayer,
+            blueskyLayer,
+            configLayer
+          )
+        : Layer.mergeAll(
+            curationRepoLayer,
+            expertsLayer,
+            publicationsLayer,
+            candidatePayloadServiceLayer,
+            blueskyLayer,
+            configLayer,
+            enrichmentLauncherLayer
+          )
     )
   );
   const queryLayer = Layer.mergeAll(
@@ -122,23 +154,42 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
       )
     )
   );
-  const adminLayer = Layer.mergeAll(
-    baseLayer,
-    configLayer,
-    ontologyLayer,
-    providerRegistryLayer,
-    expertsLayer,
-    knowledgeLayer,
-    publicationsLayer,
-    queryLayer,
-    blueskyLayer,
-    authLayer,
-    registryLayer,
-    stagingOpsLayer,
-    editorialServiceLayer,
-    candidatePayloadServiceLayer,
-    curationServiceLayer
-  );
+  const adminLayer = enrichmentLauncherLayer === null
+    ? Layer.mergeAll(
+        baseLayer,
+        configLayer,
+        ontologyLayer,
+        providerRegistryLayer,
+        expertsLayer,
+        knowledgeLayer,
+        publicationsLayer,
+        queryLayer,
+        blueskyLayer,
+        authLayer,
+        registryLayer,
+        stagingOpsLayer,
+        editorialServiceLayer,
+        candidatePayloadServiceLayer,
+        curationServiceLayer
+      )
+    : Layer.mergeAll(
+        baseLayer,
+        configLayer,
+        ontologyLayer,
+        providerRegistryLayer,
+        expertsLayer,
+        knowledgeLayer,
+        publicationsLayer,
+        queryLayer,
+        blueskyLayer,
+        authLayer,
+        registryLayer,
+        stagingOpsLayer,
+        editorialServiceLayer,
+        candidatePayloadServiceLayer,
+        curationServiceLayer,
+        enrichmentLauncherLayer
+      );
 
   return {
     baseLayer,

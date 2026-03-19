@@ -23,6 +23,7 @@ const makeContext = (
   quote: null,
   linkCards: [],
   existingEnrichments: [],
+  vision: null,
   ...overrides
 });
 
@@ -157,6 +158,8 @@ describe("EnrichmentPredicates", () => {
               output: {
                 kind: "source-attribution",
                 provider: null,
+                resolution: "unmatched",
+                providerCandidates: [],
                 contentSource: null,
                 socialProvenance: null,
                 processedAt: 1

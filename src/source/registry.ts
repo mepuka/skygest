@@ -1,3 +1,4 @@
+import { Chunk, Option } from "effect";
 import type {
   ProviderRegistryEntry,
   ProviderRegistryManifest
@@ -22,6 +23,27 @@ export type PreparedProviderRegistry = {
     string,
     ReadonlyArray<ProviderRegistryEntry>
   >;
+  readonly aliasEntries: ReadonlyArray<{
+    readonly aliasKey: string;
+    readonly aliasText: string;
+    readonly provider: ProviderRegistryEntry;
+  }>;
+};
+
+export type ProviderLookup = {
+  readonly manifest: ProviderRegistryManifest;
+  readonly providers: Chunk.Chunk<ProviderRegistryEntry>;
+  readonly aliasEntries: Chunk.Chunk<{
+    readonly aliasKey: string;
+    readonly aliasText: string;
+    readonly provider: ProviderRegistryEntry;
+  }>;
+  readonly findById: (providerId: string) => Option.Option<ProviderRegistryEntry>;
+  readonly findByAlias: (alias: string) => Option.Option<ProviderRegistryEntry>;
+  readonly findByDomain: (domain: string) => Option.Option<ProviderRegistryEntry>;
+  readonly findBySourceFamily: (
+    sourceFamily: string
+  ) => Chunk.Chunk<ProviderRegistryEntry>;
 };
 
 export const assertValidProviderRegistryManifest = (
@@ -140,12 +162,23 @@ export const prepareProviderRegistry = (
     string,
     ReadonlyArray<ProviderRegistryEntry>
   >();
+  const aliasEntries: Array<{
+    readonly aliasKey: string;
+    readonly aliasText: string;
+    readonly provider: ProviderRegistryEntry;
+  }> = [];
 
   for (const provider of validManifest.providers) {
     providerById.set(normalizeProviderIdKey(provider.providerId), provider);
 
     for (const alias of [provider.providerLabel, ...provider.aliases]) {
-      providerByAlias.set(normalizeProviderLookupKey(alias), provider);
+      const aliasKey = normalizeProviderLookupKey(alias);
+      providerByAlias.set(aliasKey, provider);
+      aliasEntries.push({
+        aliasKey,
+        aliasText: alias,
+        provider
+      });
     }
 
     for (const domain of provider.domains) {
@@ -165,6 +198,38 @@ export const prepareProviderRegistry = (
     providerById,
     providerByAlias,
     providerByDomain,
-    providersBySourceFamily
+    providersBySourceFamily,
+    aliasEntries: aliasEntries.sort((left, right) => {
+      const byLength = right.aliasKey.length - left.aliasKey.length;
+      if (byLength !== 0) {
+        return byLength;
+      }
+
+      return left.provider.providerId.localeCompare(right.provider.providerId);
+    })
   };
 };
+
+export const toProviderLookup = (
+  prepared: PreparedProviderRegistry
+): ProviderLookup => ({
+  manifest: prepared.manifest,
+  providers: Chunk.fromIterable(prepared.providers),
+  aliasEntries: Chunk.fromIterable(prepared.aliasEntries),
+  findById: (providerId: string) =>
+    Option.fromNullable(
+      prepared.providerById.get(normalizeProviderIdKey(providerId))
+    ),
+  findByAlias: (alias: string) =>
+    Option.fromNullable(
+      prepared.providerByAlias.get(normalizeProviderLookupKey(alias))
+    ),
+  findByDomain: (domain: string) =>
+    Option.fromNullable(prepared.providerByDomain.get(normalizeDomain(domain))),
+  findBySourceFamily: (sourceFamily: string) =>
+    Chunk.fromIterable(
+      prepared.providersBySourceFamily.get(
+        normalizeSourceFamilyKey(sourceFamily)
+      ) ?? []
+    )
+});

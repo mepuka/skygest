@@ -156,12 +156,15 @@ const makeVisionEnrichmentPayload = () => ({
         xAxis: { label: "Month", unit: null },
         yAxis: { label: "Load", unit: "GW" },
         series: [{ legendLabel: "Load", unit: "GW" }],
-        sourceLines: [{ sourceText: "Source: ERCOT" }],
+        sourceLines: [{ sourceText: "Source: ERCOT", datasetName: null }],
         temporalCoverage: {
           startDate: "2024-01",
           endDate: "2024-12"
         },
         keyFindings: ["Load rises through summer."],
+        visibleUrls: [],
+        organizationMentions: [],
+        logoText: [],
         title: "ERCOT load",
         modelId: "gemini-2.5-flash",
         processedAt: 10
@@ -169,7 +172,7 @@ const makeVisionEnrichmentPayload = () => ({
     }
   ],
   modelId: "gemini-2.5-flash",
-  promptVersion: "v1.0.0",
+  promptVersion: "v2.0.0",
   processedAt: 10
 });
 
@@ -186,6 +189,8 @@ const makeSourceAttributionEnrichmentPayload = () => ({
     domain: "example.com",
     publication: "Example"
   },
+  resolution: "matched" as const,
+  providerCandidates: [],
   socialProvenance: {
     did: sampleDid,
     handle: "seed.example.com"

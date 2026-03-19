@@ -23,6 +23,7 @@ import {
   EnrichmentRetryNotAllowedError,
   EnrichmentRunNotFoundError
 } from "../domain/errors";
+import { defaultSchemaVersionForEnrichmentKind } from "../domain/enrichment";
 import { makeWorkflowEnrichmentLayer } from "../enrichment/Layer";
 import { handleWithApiLayer, makeCachedApiHandler } from "../http/ApiSupport";
 import {
@@ -142,7 +143,9 @@ const EnrichmentHandlers = Layer.mergeAll(
             return yield* launcher.start({
               postUri: payload.postUri,
               enrichmentType: payload.enrichmentType,
-              schemaVersion: payload.schemaVersion ?? "v1",
+              schemaVersion:
+                payload.schemaVersion ??
+                defaultSchemaVersionForEnrichmentKind(payload.enrichmentType),
               triggeredBy: "admin",
               requestedBy: toRequestedBy(actor)
             });

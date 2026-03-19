@@ -36,13 +36,16 @@ export const VISION_EXTRACTION_PROMPT = `You are an expert energy-sector data an
 
 Additional instructions:
 - altText: Write a concise, accessible description suitable for screen readers. Describe what the chart shows, not just its type.
-- sourceLines: Extract verbatim source/attribution text (e.g., "Source: EIA", "Data: AESO").
+- sourceLines: Extract verbatim source/attribution text (e.g., "Source: EIA", "Data: AESO"). If a source line also names a dataset or report family, capture that as datasetName. Otherwise set datasetName to null.
 - temporalCoverage: Use ISO 8601 partial dates (e.g., "2020", "2024-Q3", "2024-01").
 - keyFindings: Energy-domain insights, not generic observations. Be specific about values and trends.
+- visibleUrls: Extract visible URLs or bare domains printed inside the image, especially in footers or watermarks.
+- organizationMentions: Extract organization names visibly present in the image and label where they appear (title, subtitle, footer, watermark, or body).
+- logoText: Extract short organization or platform text that appears as a logo or watermark.
 - For non-chart images (photos, documents), still provide altText and mediaType. Set chart-specific fields to null/empty as appropriate.`;
 
 /**
  * Prompt version identifier — bump when prompt text changes materially.
  * Stored alongside enrichment results for audit and quality tracking.
  */
-export const VISION_PROMPT_VERSION = "v1.0.0";
+export const VISION_PROMPT_VERSION = "v2.0.0";

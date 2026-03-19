@@ -74,7 +74,8 @@ const makeLayer = (state?: {
             workflowInstanceId: runId,
             status: "queued" as const
           };
-        })
+        }),
+      startIfAbsent: () => Effect.succeed(true)
     }),
     Layer.succeed(EnrichmentRunsRepo, {
       createQueuedIfAbsent: () => Effect.succeed(true),

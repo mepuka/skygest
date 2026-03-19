@@ -1,4 +1,4 @@
-import { Effect, Schema } from "effect";
+import { Effect, Option, Schema } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import {
   energyProviderRegistry,
@@ -95,37 +95,41 @@ describe("provider registry", () => {
     Effect.gen(function* () {
       const registry = yield* ProviderRegistry;
 
-      const ercot = yield* registry.getProvider("ercot");
-      const ercotByAlias = yield* registry.findByAlias(
-        "Electric Reliability Council of Texas"
+      const ercot = Option.getOrNull(registry.lookup.findById("ercot"));
+      const ercotByAlias = Option.getOrNull(
+        registry.lookup.findByAlias("Electric Reliability Council of Texas")
       );
-      const eiaByDomain = yield* registry.findByDomain("www.eia.gov");
-      const entsoeByAlias = yield* registry.findByAlias("ENTSO-E");
-      const entsoeBySourceFamily = yield* registry.findBySourceFamily(
-        " transparency platform "
+      const eiaByDomain = Option.getOrNull(
+        registry.lookup.findByDomain("www.eia.gov")
       );
-      const aeso = yield* registry.getProvider("aeso");
-      const bcHydro = yield* registry.getProvider("bc-hydro");
-      const caiso = yield* registry.getProvider("caiso");
-      const resourceAdequacyProviders = yield* registry.findBySourceFamily(
-        "Resource Adequacy"
+      const entsoeByAlias = Option.getOrNull(registry.lookup.findByAlias("ENTSO-E"));
+      const entsoeBySourceFamily = Array.from(
+        registry.lookup.findBySourceFamily(" transparency platform ")
       );
-      const dailyRenewableReportProviders = yield* registry.findBySourceFamily(
-        "daily renewable report"
+      const aeso = Option.getOrNull(registry.lookup.findById("aeso"));
+      const bcHydro = Option.getOrNull(registry.lookup.findById("bc-hydro"));
+      const caiso = Option.getOrNull(registry.lookup.findById("caiso"));
+      const resourceAdequacyProviders = Array.from(
+        registry.lookup.findBySourceFamily("Resource Adequacy")
       );
-      const planningOutlookProviders = yield* registry.findBySourceFamily(
-        "annual planning outlook"
+      const dailyRenewableReportProviders = Array.from(
+        registry.lookup.findBySourceFamily("daily renewable report")
       );
-      const eia = yield* registry.getProvider("eia");
-      const ferc = yield* registry.getProvider("ferc");
-      const iea = yield* registry.getProvider("iea");
-      const nrel = yield* registry.getProvider("nrel");
-      const pjm = yield* registry.getProvider("pjm");
-      const nrelByDomain = yield* registry.findByDomain("scenarioviewer.nrel.gov");
-      const fercByAlias = yield* registry.findByAlias(
-        "federal energy regulatory commission"
+      const planningOutlookProviders = Array.from(
+        registry.lookup.findBySourceFamily("annual planning outlook")
       );
-      const sppByAlias = yield* registry.findByAlias("spp");
+      const eia = Option.getOrNull(registry.lookup.findById("eia"));
+      const ferc = Option.getOrNull(registry.lookup.findById("ferc"));
+      const iea = Option.getOrNull(registry.lookup.findById("iea"));
+      const nrel = Option.getOrNull(registry.lookup.findById("nrel"));
+      const pjm = Option.getOrNull(registry.lookup.findById("pjm"));
+      const nrelByDomain = Option.getOrNull(
+        registry.lookup.findByDomain("scenarioviewer.nrel.gov")
+      );
+      const fercByAlias = Option.getOrNull(
+        registry.lookup.findByAlias("federal energy regulatory commission")
+      );
+      const sppByAlias = Option.getOrNull(registry.lookup.findByAlias("spp"));
 
       expect(ercot?.providerLabel).toBe("ERCOT");
       expect(ercotByAlias?.providerId).toBe("ercot");

@@ -1,7 +1,11 @@
 import { Schema } from "effect";
 import { LinkRecord, StoredTopicMatch, ThreadEmbedType } from "./bi";
 import { EmbedPayload, QuoteRef } from "./embed";
-import { EnrichmentKind, EnrichmentOutput } from "./enrichment";
+import {
+  EnrichmentKind,
+  EnrichmentOutput,
+  VisionEnrichment
+} from "./enrichment";
 import { AtUri, Did } from "./types";
 
 export const EnrichmentPlannerDecision = Schema.Literal("execute", "skip");
@@ -12,7 +16,8 @@ export type EnrichmentPlannerDecision = Schema.Schema.Type<
 export const EnrichmentPlannerStopReason = Schema.Literal(
   "no-visual-assets",
   "no-source-signals",
-  "no-grounding-signals"
+  "no-grounding-signals",
+  "awaiting-vision"
 );
 export type EnrichmentPlannerStopReason = Schema.Schema.Type<
   typeof EnrichmentPlannerStopReason
@@ -30,6 +35,7 @@ export type EnrichmentPlannerInput = Schema.Schema.Type<
 export const EnrichmentPlannedPostContext = Schema.Struct({
   postUri: AtUri,
   did: Did,
+  handle: Schema.NullOr(Schema.String),
   text: Schema.String,
   createdAt: Schema.NonNegativeInt,
   threadCoverage: Schema.Literal("focus-only")
@@ -117,7 +123,8 @@ export const EnrichmentExecutionPlan = Schema.Struct({
   quote: Schema.NullOr(EnrichmentPlannedQuoteContext),
   linkCards: Schema.Array(EnrichmentPlannedLinkCardContext),
   assets: Schema.Array(EnrichmentPlannedAsset),
-  existingEnrichments: Schema.Array(EnrichmentPlannedExistingEnrichment)
+  existingEnrichments: Schema.Array(EnrichmentPlannedExistingEnrichment),
+  vision: Schema.NullOr(VisionEnrichment)
 });
 export type EnrichmentExecutionPlan = Schema.Schema.Type<
   typeof EnrichmentExecutionPlan
@@ -135,6 +142,23 @@ export const VisionExecutionPlan = EnrichmentExecutionPlan.pipe(
 );
 export type VisionExecutionPlan = Schema.Schema.Type<typeof VisionExecutionPlan>;
 
+export const isSourceAttributionExecutionPlan = (
+  plan: EnrichmentExecutionPlan
+): plan is EnrichmentExecutionPlan & {
+  readonly enrichmentType: "source-attribution";
+  readonly decision: "execute";
+} =>
+  plan.enrichmentType === "source-attribution" &&
+  plan.decision === "execute" &&
+  (plan.assets.length === 0 || plan.vision !== null);
+
+export const SourceAttributionExecutionPlan = EnrichmentExecutionPlan.pipe(
+  Schema.filter(isSourceAttributionExecutionPlan)
+);
+export type SourceAttributionExecutionPlan = Schema.Schema.Type<
+  typeof SourceAttributionExecutionPlan
+>;
+
 export const describeEnrichmentPlanStopReason = (
   reason: EnrichmentPlannerStopReason
 ) => {
@@ -145,5 +169,7 @@ export const describeEnrichmentPlanStopReason = (
       return "the stored post has no durable source signals to attribute";
     case "no-grounding-signals":
       return "the stored post does not have enough durable grounding signals";
+    case "awaiting-vision":
+      return "the stored post has visual assets and source attribution is waiting on vision enrichment";
   }
 };
