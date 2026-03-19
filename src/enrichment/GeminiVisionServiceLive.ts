@@ -14,7 +14,7 @@
  */
 
 import { GoogleGenAI, createUserContent, createPartFromUri } from "@google/genai";
-import { Config, Effect, Layer, Schema } from "effect";
+import { Clock, Config, Effect, Layer, Schema } from "effect";
 import * as JsonSchema from "effect/JSONSchema";
 import * as AST from "effect/SchemaAST";
 import { VisionAssetAnalysis as VisionAssetAnalysisSchema } from "../domain/enrichment";
@@ -62,6 +62,18 @@ const GeminiExtractionOutput = Schema.Struct({
 });
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const extractErrorStatus = (cause: unknown): number | undefined => {
+  if (cause instanceof Error && "status" in cause) {
+    const status = (cause as Record<string, unknown>).status;
+    return typeof status === "number" ? status : undefined;
+  }
+  return undefined;
+};
+
+// ---------------------------------------------------------------------------
 // JSON Schemas for Gemini structured output (derived from Effect schemas)
 // ---------------------------------------------------------------------------
 
@@ -75,14 +87,13 @@ const makeJsonSchema = (ast: AST.AST): JsonSchema.JsonSchema7 => {
       additionalProperties: false
     };
   }
-  const $defs = {};
+  const $defs: Record<string, JsonSchema.JsonSchema7> = {};
   const schema = JsonSchema.fromAST(ast, {
     definitions: $defs,
     topLevelReferenceStrategy: "skip"
   });
   if (Object.keys($defs).length === 0) return schema;
-  (schema as any).$defs = $defs;
-  return schema;
+  return { ...schema, $defs } as unknown as JsonSchema.JsonSchema7;
 };
 
 const CLASSIFICATION_JSON_SCHEMA = makeJsonSchema(ImageClassification.ast);
@@ -118,9 +129,7 @@ export const GeminiVisionServiceLive = Layer.effect(
               message: cause instanceof Error
                 ? cause.message
                 : "Gemini Files API upload failed",
-              status: cause instanceof Error && "status" in cause
-                ? (cause as Record<string, unknown>).status as number
-                : undefined
+              status: extractErrorStatus(cause)
             })
         });
 
@@ -158,9 +167,7 @@ export const GeminiVisionServiceLive = Layer.effect(
               message: cause instanceof Error
                 ? cause.message
                 : "Gemini generateContent failed during classification",
-              status: cause instanceof Error && "status" in cause
-                ? (cause as Record<string, unknown>).status as number
-                : undefined
+              status: extractErrorStatus(cause)
             })
         });
 
@@ -210,9 +217,7 @@ export const GeminiVisionServiceLive = Layer.effect(
               message: cause instanceof Error
                 ? cause.message
                 : "Gemini generateContent failed during extraction",
-              status: cause instanceof Error && "status" in cause
-                ? (cause as Record<string, unknown>).status as number
-                : undefined
+              status: extractErrorStatus(cause)
             })
         });
 
@@ -234,11 +239,12 @@ export const GeminiVisionServiceLive = Layer.effect(
           )
         );
 
+        const now = yield* Clock.currentTimeMillis;
         const enrichment = yield* Schema.decodeUnknown(VisionAssetAnalysisSchema)({
           ...geminiResult,
           altTextProvenance: "synthetic" as const,
           modelId: model,
-          processedAt: Date.now()
+          processedAt: now
         }).pipe(
           Effect.mapError((error) =>
             new GeminiParseError({

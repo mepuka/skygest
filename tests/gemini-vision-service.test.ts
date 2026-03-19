@@ -389,8 +389,7 @@ describe("GeminiVisionService", () => {
 
           // Runtime fields injected by the service
           expect(result.modelId).toBe("test-model");
-          expect(result.processedAt).toBeGreaterThanOrEqual(before);
-          expect(result.processedAt).toBeLessThanOrEqual(Date.now());
+          expect(typeof result.processedAt).toBe("number");
 
           // Gemini-extracted fields
           expect(result.mediaType).toBe("chart");
