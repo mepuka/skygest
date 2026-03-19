@@ -12,6 +12,7 @@ import {
   isWholeWordMatch,
   extractDomainFromText
 } from "../src/source/normalize";
+import { choosePrimaryContentSource } from "../src/source/contentSource";
 
 describe("evidence contract types", () => {
   it("MatchSignalType decodes all 7 signal types and rejects invalid", () => {
@@ -215,5 +216,178 @@ describe("normalization utilities", () => {
       expect(extractDomainFromText("i.e. this is a test")).toBeNull();
       expect(extractDomainFromText("e.g. solar panels")).toBeNull();
     });
+  });
+});
+
+describe("content source assembly", () => {
+  it("prefers embed link card URL (rule 1)", () => {
+    const result = choosePrimaryContentSource({
+      linkCards: [
+        {
+          source: "embed" as const,
+          uri: "https://utilitydive.com/story/123",
+          title: "Article",
+          description: null,
+          thumb: null
+        }
+      ],
+      links: [
+        {
+          url: "https://other.com/page",
+          domain: "other.com",
+          title: null,
+          description: null,
+          imageUrl: null,
+          extractedAt: 0
+        }
+      ]
+    });
+    expect(result).not.toBeNull();
+    expect(result?.url).toBe("https://utilitydive.com/story/123");
+    expect(result?.domain).toBe("utilitydive.com");
+    expect(result?.title).toBe("Article");
+    expect(result?.publication).toBeNull();
+  });
+
+  it("strips www from embed link card domain", () => {
+    const result = choosePrimaryContentSource({
+      linkCards: [
+        {
+          source: "embed" as const,
+          uri: "https://www.eia.gov/petroleum/report",
+          title: "EIA Report",
+          description: null,
+          thumb: null
+        }
+      ],
+      links: []
+    });
+    expect(result?.domain).toBe("eia.gov");
+  });
+
+  it("falls back to single unique link (rule 2)", () => {
+    const result = choosePrimaryContentSource({
+      linkCards: [],
+      links: [
+        {
+          url: "https://eia.gov/report",
+          domain: "eia.gov",
+          title: "Report",
+          description: null,
+          imageUrl: null,
+          extractedAt: 0
+        }
+      ]
+    });
+    expect(result).not.toBeNull();
+    expect(result?.url).toBe("https://eia.gov/report");
+    expect(result?.domain).toBe("eia.gov");
+    expect(result?.title).toBe("Report");
+  });
+
+  it("deduplicates links by URL for rule 2", () => {
+    const result = choosePrimaryContentSource({
+      linkCards: [],
+      links: [
+        {
+          url: "https://eia.gov/report",
+          domain: "eia.gov",
+          title: "Report",
+          description: null,
+          imageUrl: null,
+          extractedAt: 0
+        },
+        {
+          url: "https://eia.gov/report",
+          domain: "eia.gov",
+          title: "Report (dup)",
+          description: null,
+          imageUrl: null,
+          extractedAt: 1
+        }
+      ]
+    });
+    expect(result).not.toBeNull();
+    expect(result?.url).toBe("https://eia.gov/report");
+  });
+
+  it("returns null for multiple unrelated links (rule 3)", () => {
+    const result = choosePrimaryContentSource({
+      linkCards: [],
+      links: [
+        {
+          url: "https://a.com/page1",
+          domain: "a.com",
+          title: null,
+          description: null,
+          imageUrl: null,
+          extractedAt: 0
+        },
+        {
+          url: "https://b.com/page2",
+          domain: "b.com",
+          title: null,
+          description: null,
+          imageUrl: null,
+          extractedAt: 0
+        }
+      ]
+    });
+    expect(result).toBeNull();
+  });
+
+  it("returns null when no links exist", () => {
+    const result = choosePrimaryContentSource({ linkCards: [], links: [] });
+    expect(result).toBeNull();
+  });
+
+  it("uses link domain field when available, falls back to parsing URL", () => {
+    const withDomain = choosePrimaryContentSource({
+      linkCards: [],
+      links: [
+        {
+          url: "https://www.ercot.com/data",
+          domain: "ercot.com",
+          title: null,
+          description: null,
+          imageUrl: null,
+          extractedAt: 0
+        }
+      ]
+    });
+    expect(withDomain?.domain).toBe("ercot.com");
+
+    const withoutDomain = choosePrimaryContentSource({
+      linkCards: [],
+      links: [
+        {
+          url: "https://www.ercot.com/data",
+          domain: null,
+          title: null,
+          description: null,
+          imageUrl: null,
+          extractedAt: 0
+        }
+      ]
+    });
+    expect(withoutDomain?.domain).toBe("ercot.com");
+  });
+
+  it("handles invalid URL in link card gracefully", () => {
+    const result = choosePrimaryContentSource({
+      linkCards: [
+        {
+          source: "embed" as const,
+          uri: "not-a-valid-url",
+          title: "Bad Link",
+          description: null,
+          thumb: null
+        }
+      ],
+      links: []
+    });
+    expect(result).not.toBeNull();
+    expect(result?.url).toBe("not-a-valid-url");
+    expect(result?.domain).toBeNull();
   });
 });
