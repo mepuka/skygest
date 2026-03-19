@@ -1,4 +1,5 @@
 import { BunContext } from "@effect/platform-bun";
+import { FetchHttpClient } from "@effect/platform";
 import { Effect, Layer } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { energySeedDid } from "../src/bootstrap/CheckedInExpertSeeds";
@@ -654,6 +655,26 @@ describe("ops CLI", () => {
         expect(failure.message).toContain("BlueskyApiError");
         expect(failure.message).not.toContain("[object Object]");
       }
+    })
+  );
+
+  it.effect("StagingOperatorClient.live rejects non-2xx health responses with status", () =>
+    Effect.gen(function* () {
+      const fakeFetchLayer = Layer.succeed(
+        FetchHttpClient.Fetch,
+        ((_url: string | URL | Request, _init?: RequestInit) =>
+          Promise.resolve(
+            new Response("internal server error", { status: 500 })
+          )) as typeof globalThis.fetch
+      );
+      const httpLayer = FetchHttpClient.layer.pipe(Layer.provide(fakeFetchLayer));
+      const clientLayer = StagingOperatorClient.live.pipe(Layer.provide(httpLayer));
+      const client = yield* StagingOperatorClient.pipe(Effect.provide(clientLayer));
+      const error = yield* client.health(new URL("https://broken.test")).pipe(Effect.flip);
+
+      expect(error._tag).toBe("StagingRequestError");
+      expect(error.operation).toBe("health");
+      expect(error.status).toBe(500);
     })
   );
 });
