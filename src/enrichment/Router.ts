@@ -24,6 +24,7 @@ import {
   EnrichmentRunNotFoundError
 } from "../domain/errors";
 import { defaultSchemaVersionForEnrichmentKind } from "../domain/enrichment";
+import type { AtUri } from "../domain/types";
 import { makeWorkflowEnrichmentLayer } from "../enrichment/Layer";
 import { EnrichmentPlanner } from "./EnrichmentPlanner";
 import { isSkippedEnrichmentPlan } from "./EnrichmentPredicates";
@@ -49,7 +50,7 @@ const toRequestedBy = (identity: AccessIdentity) =>
   identity.email ?? identity.subject ?? "unknown-operator";
 
 const ensureEnrichmentStartAllowed = (input: {
-  readonly postUri: string;
+  readonly postUri: AtUri;
   readonly enrichmentType: "vision" | "source-attribution" | "grounding";
   readonly schemaVersion: string;
 }) =>
