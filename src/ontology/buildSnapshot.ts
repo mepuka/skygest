@@ -17,6 +17,7 @@ type BuildOntologySnapshotInput = {
   readonly ttl: string;
   readonly derivedStoreFilter: string;
   readonly owlJson?: string;
+  readonly aboxTtl?: string;
 };
 
 type OntologyAnomaly = {
@@ -24,8 +25,8 @@ type OntologyAnomaly = {
   readonly message: string;
 };
 
-/** Seed tiers only — "unknown" is a runtime-discovered tier, not a build-time tier */
-type PublicationSeedTier = "energy-focused" | "general-outlet";
+/** Seed tiers — "unknown" covers ABox-derived hostnames not in the curated list */
+type PublicationSeedTier = "energy-focused" | "general-outlet" | "unknown";
 
 type PublicationSeed = {
   readonly hostname: string;
@@ -214,6 +215,7 @@ const makeSourceDigest = (input: BuildOntologySnapshotInput) =>
     .update(input.ttl)
     .update(input.derivedStoreFilter)
     .update(input.owlJson ?? "")
+    .update(input.aboxTtl ?? "")
     .digest("hex");
 
 const validateMappingCoverage = (concepts: ReadonlyArray<ParsedConcept>) => {
@@ -267,28 +269,76 @@ const parseGeneralOutletDomains = (input: string) => {
   );
 };
 
+const parseAboxPublicationDomains = (aboxTtl: string): ReadonlyArray<string> =>
+  sortStrings(
+    Array.from(
+      aboxTtl.matchAll(/enews:siteDomain\s+"([^"]+)"/g),
+      (match) => normalizeDomain(match[1] ?? "")
+    ).filter((hostname) => hostname.length > 0)
+  );
+
+const INFRASTRUCTURE_SUFFIX_DENYLIST = [
+  "hubspotusercontent-na1.net",
+  "hubspotusercontent-eu1.net",
+  "cloudfront.net",
+  "amazonaws.com",
+  "azureedge.net"
+] as const;
+
+const isLikelyPublicationHostname = (hostname: string): boolean =>
+  !INFRASTRUCTURE_SUFFIX_DENYLIST.some(
+    (suffix) => hostname === suffix || hostname.endsWith(`.${suffix}`)
+  );
+
 const buildPublicationSeed = (
   derivedStoreFilter: string,
   ontologyVersion: string,
-  snapshotVersion: string
+  snapshotVersion: string,
+  aboxTtl?: string
 ): PublicationSeedManifest => {
   const energyFocusedDomains = parseDomains(derivedStoreFilter);
   const generalOutletDomains = parseGeneralOutletDomains(derivedStoreFilter);
 
-  const energyFocusedSet = new Set(energyFocusedDomains);
+  const tierByHostname = new Map<string, PublicationSeedTier>();
 
-  const publications: Array<PublicationSeed> = energyFocusedDomains.map((hostname) => ({
-    hostname,
-    tier: "energy-focused" as const
-  }));
+  for (const hostname of energyFocusedDomains) {
+    tierByHostname.set(hostname, "energy-focused");
+  }
 
   for (const hostname of generalOutletDomains) {
-    if (!energyFocusedSet.has(hostname)) {
-      publications.push({ hostname, tier: "general-outlet" as const });
+    if (!tierByHostname.has(hostname)) {
+      tierByHostname.set(hostname, "general-outlet");
     }
   }
 
-  publications.sort((a, b) => a.hostname.localeCompare(b.hostname));
+  const curatedTotal = tierByHostname.size;
+
+  const aboxDomains = aboxTtl === undefined
+    ? []
+    : parseAboxPublicationDomains(aboxTtl);
+
+  let acceptedAbox = 0;
+  let rejectedAbox = 0;
+
+  for (const hostname of aboxDomains) {
+    if (!tierByHostname.has(hostname) && isLikelyPublicationHostname(hostname)) {
+      tierByHostname.set(hostname, "unknown");
+      acceptedAbox++;
+    } else if (!tierByHostname.has(hostname)) {
+      rejectedAbox++;
+    }
+  }
+
+  const publications = Array.from(tierByHostname.entries(), ([hostname, tier]) => ({
+    hostname,
+    tier
+  })).sort((a, b) => a.hostname.localeCompare(b.hostname));
+
+  console.log(`[publications-seed] curated total: ${curatedTotal}`);
+  console.log(`[publications-seed] raw ABox total: ${aboxDomains.length}`);
+  console.log(`[publications-seed] accepted ABox additions: ${acceptedAbox}`);
+  console.log(`[publications-seed] rejected ABox additions: ${rejectedAbox}`);
+  console.log(`[publications-seed] final seed total: ${publications.length}`);
 
   return {
     ontologyVersion,
@@ -304,7 +354,8 @@ export const buildOntologyArtifacts = (
   const publicationsSeed = buildPublicationSeed(
     input.derivedStoreFilter,
     snapshot.ontologyVersion,
-    snapshot.snapshotVersion
+    snapshot.snapshotVersion,
+    input.aboxTtl
   );
 
   return { snapshot, publicationsSeed };
