@@ -7,6 +7,7 @@ import type {
   EnrichmentRepairSummary,
   EnrichmentRunRecord
 } from "../src/domain/enrichmentRun";
+import { EnrichmentPlanner } from "../src/enrichment/EnrichmentPlanner";
 import { handleEnrichmentRequestWithLayer } from "../src/enrichment/Router";
 import { EnrichmentRepairService } from "../src/enrichment/EnrichmentRepairService";
 import { EnrichmentWorkflowLauncher } from "../src/enrichment/EnrichmentWorkflowLauncher";
@@ -61,6 +62,7 @@ const makeLayer = (state?: {
     runId: string
   ) => Effect.Effect<EnrichmentQueuedResponse, EnrichmentRetryNotAllowedError>;
   readonly repair?: () => Effect.Effect<EnrichmentRepairSummary, never>;
+  readonly plan?: (input: unknown) => unknown;
 }) =>
   Layer.mergeAll(
     Layer.succeed(EnrichmentWorkflowLauncher, {
@@ -101,6 +103,17 @@ const makeLayer = (state?: {
         }),
       repairHistoricalRuns: (_now?: number) =>
         state?.repair?.() ?? Effect.succeed(sampleRepairSummary)
+    }),
+    Layer.succeed(EnrichmentPlanner, {
+      plan: (input) =>
+        Effect.sync(() =>
+          (state?.plan?.(input) as any) ?? ({
+            enrichmentType:
+              (input as { readonly enrichmentType?: string }).enrichmentType ??
+              "vision",
+            decision: "execute"
+          })
+        )
     })
   );
 
@@ -129,6 +142,45 @@ describe("enrichment admin routes", () => {
         runId: "vision-queued",
         workflowInstanceId: "vision-queued",
         status: "queued"
+      });
+    })
+  );
+
+  it.live("rejects source attribution starts while vision enrichment is still required", () =>
+    Effect.promise(async () => {
+      const response = await handleEnrichmentRequestWithLayer(
+        new Request("https://skygest.local/admin/enrichment/start", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json"
+          },
+          body: encodeJsonString({
+            postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
+            enrichmentType: "source-attribution",
+            schemaVersion: "v2"
+          })
+        }),
+        operatorIdentity,
+        makeLayer({
+          plan: () => ({
+            enrichmentType: "source-attribution",
+            decision: "skip",
+            stopReason: "awaiting-vision"
+          })
+        })
+      );
+      const body = await response.json() as {
+        readonly error: string;
+        readonly message: string;
+        readonly retryable?: boolean;
+      };
+
+      expect(response.status).toBe(409);
+      expect(body).toEqual({
+        error: "Conflict",
+        message:
+          "vision enrichment must complete before source attribution can start for at://did:plc:test/app.bsky.feed.post/post-1",
+        retryable: true
       });
     })
   );
