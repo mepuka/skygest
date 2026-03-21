@@ -25,6 +25,8 @@ import {
 } from "../domain/errors";
 import { defaultSchemaVersionForEnrichmentKind } from "../domain/enrichment";
 import { makeWorkflowEnrichmentLayer } from "../enrichment/Layer";
+import { EnrichmentPlanner } from "./EnrichmentPlanner";
+import { isSkippedEnrichmentPlan } from "./EnrichmentPredicates";
 import { handleWithApiLayer, makeCachedApiHandler } from "../http/ApiSupport";
 import {
   getStringField,
@@ -45,6 +47,30 @@ const clampListLimit = (value: number | undefined) =>
 
 const toRequestedBy = (identity: AccessIdentity) =>
   identity.email ?? identity.subject ?? "unknown-operator";
+
+const ensureEnrichmentStartAllowed = (input: {
+  readonly postUri: string;
+  readonly enrichmentType: "vision" | "source-attribution" | "grounding";
+  readonly schemaVersion: string;
+}) =>
+  input.enrichmentType !== "source-attribution"
+    ? Effect.void
+    : Effect.gen(function* () {
+        const planner = yield* EnrichmentPlanner;
+        const plan = yield* planner.plan(input);
+
+        if (
+          isSkippedEnrichmentPlan(plan) &&
+          plan.stopReason === "awaiting-vision"
+        ) {
+          return yield* Effect.fail(
+            conflictError(
+              `vision enrichment must complete before source attribution can start for ${input.postUri}`,
+              true
+            )
+          );
+        }
+      });
 
 const EnrichmentApi = HttpApi.make("enrichment")
   .add(
@@ -140,12 +166,20 @@ const EnrichmentHandlers = Layer.mergeAll(
           Effect.gen(function* () {
             const actor = yield* OperatorIdentity;
             const launcher = yield* EnrichmentWorkflowLauncher;
+            const schemaVersion =
+              payload.schemaVersion ??
+              defaultSchemaVersionForEnrichmentKind(payload.enrichmentType);
+
+            yield* ensureEnrichmentStartAllowed({
+              postUri: payload.postUri,
+              enrichmentType: payload.enrichmentType,
+              schemaVersion
+            });
+
             return yield* launcher.start({
               postUri: payload.postUri,
               enrichmentType: payload.enrichmentType,
-              schemaVersion:
-                payload.schemaVersion ??
-                defaultSchemaVersionForEnrichmentKind(payload.enrichmentType),
+              schemaVersion,
               triggeredBy: "admin",
               requestedBy: toRequestedBy(actor)
             });
