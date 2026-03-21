@@ -1,54 +1,1110 @@
 {
   "ontologyVersion": "0.3.0",
-  "snapshotVersion": "0.3.0-1f1f1b1426bb",
+  "snapshotVersion": "0.3.0-a2a1fa2ffc56",
   "publications": [
+    {
+      "hostname": "10news.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "11alive.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "13newsnow.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "1819news.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "19thnews.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "29news.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "2daystream.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "3sat.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "404media.co",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "8newsnow.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "9to5google.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "a2gov.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "aap.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "abc.net.au",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "abc11.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "abc15.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "abc7.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "abc7news.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "abcnews.go.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "abcnews4.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "about.bnef.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "abudhabimagazine.ae",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "aceee.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "afdc.energy.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "africa.businessinsider.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "aijourn.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ajc.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "al.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "alabamareflector.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "alaskapublic.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "aljazeera.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "altanalyses.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "altenergymag.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "alternative-fuels-observatory.ec.europa.eu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "amazon.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "americanbar.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "americanprogress.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "amp.knowyourmeme.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "amusementtoday.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ans.org",
+      "tier": "unknown"
+    },
     {
       "hostname": "apnews.com",
       "tier": "general-outlet"
+    },
+    {
+      "hostname": "app.galabid.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "app.halcyon.io",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "app.publicnewsservice.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "apple.news",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "apply.interfolio.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "appvoices.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "aps.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "arctictoday.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "argusmedia.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "arktimes.com",
+      "tier": "unknown"
     },
     {
       "hostname": "arstechnica.com",
       "tier": "general-outlet"
     },
     {
+      "hostname": "arxiv.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "as.ft.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ascelibrary.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "asia.nikkei.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "asianewstoday.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "astoriabookshop.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "atg.wa.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "atlanticcouncil.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "audacy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "augustachronicle.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "aus.social",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "autoevolution.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "autovista24.autovistagroup.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "autoviva.in",
+      "tier": "unknown"
+    },
+    {
       "hostname": "axios.com",
       "tier": "general-outlet"
+    },
+    {
+      "hostname": "azcentral.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "bakerinstitute.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "batteryrecyclersofamerica.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "batterytechonline.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "bbc.co.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "bbc.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "benrhodes1.substack.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "berkeley.us13.list-manage.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "berkeleyside.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "bestmag.co.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "beyondfossilfuels.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "bharatcharge.blogspot.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "bigpivots.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "billmckibben.substack.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "biogenicmethane.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "biz.chosun.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "blog.google",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "blog.yesenergy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "bloomberg.avature.net",
+      "tier": "unknown"
     },
     {
       "hostname": "bloomberg.com",
       "tier": "general-outlet"
     },
     {
+      "hostname": "bmwk.de",
+      "tier": "unknown"
+    },
+    {
       "hostname": "bnef.com",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "bnnbloomberg.ca",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "bntmedia.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "boem.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "bpr.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "brandnewbundestag.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "brattle.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "breakingnews.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "bridgemi.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "briefly.co",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "britannica.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "brookings.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "bruegel.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "brusselstimes.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "bsky.app",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "budget.senate.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "buff.ly",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "buildingconnections.eu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "buildingdecarb.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "bundestag.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "businesscraft.se",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "businessdesk.co.nz",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "businessgreen.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "businesspost.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "businesswire.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "buttermilkbysam.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "buzzleaktv.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "buzzsprout.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "byd.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "bylinetimes.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "byteseu.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "c-span.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ca.movies.yahoo.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "caiso.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "calendar.boell.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "calmatters.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "campaigncc.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "camus.energy",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "canada.ca",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "canadadrives.ca",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "canadaland.com",
+      "tier": "unknown"
     },
     {
       "hostname": "canary.media",
       "tier": "energy-focused"
     },
     {
+      "hostname": "canarylivedc.eventbrite.com",
+      "tier": "unknown"
+    },
+    {
       "hostname": "canarymedia.com",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "cantorinewyork.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "capitalbnews.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "capreform.eu",
+      "tier": "unknown"
     },
     {
       "hostname": "carbonbrief.org",
       "tier": "energy-focused"
     },
     {
+      "hostname": "cardealermagazine.co.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "carnewschina.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "carolinaforward.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "carrier.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cbc.ca",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cbsloc.al",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cbsnews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ceees.nd.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ceenergynews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cell.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cen.acs.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cesa.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cfainstitute.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cfpublic.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "chapelboro.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "chasebound.itch.io",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cheer.xsbrt.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "chemistryworld.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "chieftain.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "chinadaily.com.cn",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "circularenergystorage-online.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "circularenergystorage.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "citizen-times.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "citizenportal.ai",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "citybiz.co",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cleanairalliance.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cleanenergy.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cleanenergycanada.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cleanenergygrid.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cleanenergywire.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cleaningup.live",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cleanpower.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cleanpowercalifornia.org",
+      "tier": "unknown"
+    },
+    {
       "hostname": "cleantechnica.com",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "cleveland.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "climateandcommunity.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "climatecentral.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "climatechangenews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "climatecoloredgoggles.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "climatecouncil.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "climateintegrity.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "climateinthecourts.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "climateone.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "climaterealitybayarea.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "climatesolutions.berkeley.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "climatetechatlas.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "climatetechmap.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "climateweeknyc.org",
+      "tier": "unknown"
     },
     {
       "hostname": "cnbc.com",
       "tier": "general-outlet"
     },
     {
+      "hostname": "cnbcafrica.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cnn.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "coastalreview.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "coindesk.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "coinworldstory.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "coldeye.earth",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "colorado.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "coloradonewsline.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "coloradopolitics.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "columbian.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "computeforecast.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "conference.sej.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "consilium.europa.eu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "constructamiracle.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "construction-physics.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "continuations.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "contrarian.substack.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "corkfilmfest.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "corkkinsalegreenway.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "corporateknights.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "councilonstrategicrisks.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "covidtests.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cowboystatedaily.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "coxautoinc.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cozzyenergysolutions.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cpj.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cpr.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cpuc.ca.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "criticalthreats.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "csis.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cspdailynews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ctmirror.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ctvnews.ca",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "cville.online",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "d.repec.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "dailycal.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "dailyheadlinez.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "dailymemphian.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "dallasnews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "danish-presidency.consilium.europa.eu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "data.sbfnetwork.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "datacenterdynamics.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "datacentremagazine.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "dceff.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "deeppressanalysis.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "defense.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "dentons.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "denverpost.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "desmog.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "desmoinesregister.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "detroitnews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "deutschlandfunk.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "dialogue.earth",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "diddukewin.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "digitaltrends.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "dir.lat",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "discovery.ucl.ac.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "distilled.earth",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "diw.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "docs.google.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "documentcloud.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "documents.dps.ny.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "documents.house.mo.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "doi.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "donate.grist.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "doomsdayscenario.co",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "dotearth.blogs.nytimes.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "douglewin.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "downtoearth.org.in",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "drilled.media",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "drive.google.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "dropbox.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "dserver.bundestag.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "duke-energy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "e360.yale.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "e3g.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "earthjustice.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "eastbaytimes.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "eavor.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ec.europa.eu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "echolive.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "eciu.net",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ecogeneration.com.au",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ecoinventos.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "econ.trib.al",
+      "tier": "unknown"
+    },
+    {
       "hostname": "economist.com",
       "tier": "general-outlet"
     },
     {
+      "hostname": "edie.net",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "edition.cnn.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "eea.europa.eu",
+      "tier": "unknown"
+    },
+    {
       "hostname": "eenews.net",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "efiling.energy.ca.gov",
+      "tier": "unknown"
     },
     {
       "hostname": "eia.gov",
@@ -59,44 +1115,800 @@
       "tier": "energy-focused"
     },
     {
+      "hostname": "electricchoice.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "electricschoolbusinitiative.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "electrificationcoalition.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "elements.lbl.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "elibrary.ferc.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "elpais.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "emagazine.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ember-energy.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "emec.org.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "emp.lbl.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "en.ecoaction.org.ua",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "en.m.wikipedia.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "en.wikipedia.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "endsreport.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "enerdata.net",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energi.se",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energopolis.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energy-storage.news",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energy.canarymedia.com",
+      "tier": "unknown"
+    },
+    {
       "hostname": "energy.gov",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "energy.stanford.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energyandpolicy.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energyathaas.wordpress.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energychangemakers.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energychoice.ohio.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energycommerce.house.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energydigital.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energyforgrowth.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energyglobal.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energyinafrica.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energyinnovation.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energyinnovation.zoom.us",
+      "tier": "unknown"
     },
     {
       "hostname": "energyintel.com",
       "tier": "energy-focused"
     },
     {
+      "hostname": "energymixweekender.substack.com",
+      "tier": "unknown"
+    },
+    {
       "hostname": "energymonitor.ai",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "energynews.biz",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energynewsbulletin.net",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energypolicy.columbia.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "energysense.uillinois.edu",
+      "tier": "unknown"
     },
     {
       "hostname": "energyvoice.com",
       "tier": "energy-focused"
     },
     {
+      "hostname": "energywatch.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "engineering.cmu.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "engineeringnews.co.za",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "english.news.cn",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "eni.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "enr.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "enterprise-sharing.ft.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "environmentenergyleader.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "environmentjournal.online",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "envirotech-online.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "envirotechgeo.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "envnewsbits.info",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "epa.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "epmg.netlify.app",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "equinor.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "espn.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "eualive.net",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "euromaidanpress.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "euronews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "europesays.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "evcandi.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "event.newschool.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "eventbrite.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "evinfo.net",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "evshift.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "evsmarts.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "exponentialview.co",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "exxonknews.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "facebook.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "faculty.haas.berkeley.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "fallows.substack.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "farmersjournal.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "fastcompany.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "fasterplease.substack.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "fayobserver.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "federalregister.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "federalreserve.gov",
+      "tier": "unknown"
+    },
+    {
       "hostname": "ferc.gov",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "fieldnotes.co",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "fieldnotes.substack.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "finance.yahoo.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "financenewsaggregator.com",
+      "tier": "unknown"
     },
     {
       "hostname": "financialtimes.com",
       "tier": "general-outlet"
     },
     {
+      "hostname": "findsuperdeals.shop",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "fintechguide24.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "firmapower.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "fiscalcouncil.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "floodlightnews.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "floridaphoenix.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "floridarealtors.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "flowcharts.llnl.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "focus.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "footprintproject.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "forbes.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "foreignaffairs.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "fortune.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "forum.canarymedia.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "fox5sandiego.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "fox5vegas.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "foxbusiness.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "fr.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "france24.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "freederia.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "fresnobee.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "friendsoftheearth.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ft.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "fuelcellsworks.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "gasbuddy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "gaspriceguy.substack.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "gasprices.aaa.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "gcaptain.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "generation180.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "geomar.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "giftarticle.ft.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "gipl.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "globalelectricity.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "globalnews.ca",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "globalvoices.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "globalwitness.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "go.bsky.app",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "go.grist.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "goodreads.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "google.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "gothamist.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "gov.ca.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "gov.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "govconintelligence.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "governing.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "governor.ny.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "governorsoffice.colorado.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "gpb.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "greatlakesnow.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "greencarcongress.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "greencars.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "greencollective.io",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "greenh2world.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "greenmajority.ca",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "greenparty.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "greenrevolutionpowerpark.com",
+      "tier": "unknown"
+    },
+    {
       "hostname": "greentechmedia.com",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "gridlab.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "gridstatus.io",
+      "tier": "unknown"
     },
     {
       "hostname": "grist.org",
       "tier": "energy-focused"
     },
     {
+      "hostname": "ground.news",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "groundswell.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "h2-view.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "haaretz.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "haas.berkeley.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "halcyon.eco",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "halcyon.io",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "hannahdaly.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "hartenergy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "harvardbusiness.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "hayestownshipmi.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "hclf.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "heated.world",
+      "tier": "unknown"
+    },
+    {
       "hostname": "heatmap.news",
       "tier": "energy-focused"
     },
     {
+      "hostname": "heatpumped.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "help.aol.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "help.senate.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "heraldextra.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "hilltimes.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "holesinthewallcollective.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "home.treasury.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "hoodline.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "horche.demkontinuum.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "houstonchronicle.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "hs.fi",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "hsr.ca.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "hubs.la",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "huffingtonpost.co.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "hydrogenfuelnews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "hydrostor.ca",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "iae.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "iamrenew.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ibtimes.co.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ideas.repec.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "idnfinancials.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "iea.blob.core.windows.net",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "iea.li",
+      "tier": "unknown"
+    },
+    {
       "hostname": "iea.org",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "ieefa.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "iet.polymtl.ca",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ifa.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ifn.se",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ig.ft.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "iiasa.ac.at",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "in4u.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "inc.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "incat.com.au",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "independent.co.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "independent.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "indianmasterminds.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "indivisiblesf.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "industriouslabs.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "influencemap.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "info.heatmap.news",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "info.yesenergy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "inn.org",
+      "tier": "unknown"
     },
     {
       "hostname": "insideclimatenews.org",
@@ -107,8 +1919,196 @@
       "tier": "energy-focused"
     },
     {
+      "hostname": "insomniachedge.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "instagram.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "interactive.carbonbrief.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "interestingengineering.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "intertekcea.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "investor.pgecorp.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "investors.duke-energy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "invt.io",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "iopscience.iop.org",
+      "tier": "unknown"
+    },
+    {
       "hostname": "irena.org",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "irishexaminer.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "irishtimes.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ise.fraunhofer.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "isonewswire.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "isr.nyas.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "issues.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "iwf.org.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "j.mp",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "jacobin.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "jameswebbdiscovery.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "job-boards.greenhouse.io",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "jobs.gusto.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "journalist.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "journals.plos.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "journals.sagepub.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "jrnl.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "kathari.news",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "kaufmanmusiccenter.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "kcrw.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "kcur.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "kennys.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "kentuckylantern.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "killarneytoday.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "kilowatt.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "kitsapsun.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "kleinmanenergy.upenn.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "klimakompass.podigee.io",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "klimareporter.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "knoxnews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "kommersant.ru",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "kpbs.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "kqed.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "kruzeconsulting.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ktvu.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "kyivindependent.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "lailluminator.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "laist.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "latestnewsx.com",
+      "tier": "unknown"
     },
     {
       "hostname": "latimes.com",
@@ -119,56 +2119,1500 @@
       "tier": "energy-focused"
     },
     {
+      "hostname": "leachandrew.github.io",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "legal-planet.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "lemonde.fr",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "lesechos.fr",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "libertyenergy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "lifespherenews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "lightnews.app",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "link.podtrac.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "link.springer.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "linkedin.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "linkly.link",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "lithub.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "lnkd.in",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "lombardi.group",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "loom.ly",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "lu.ma",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "luma.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "m.independent.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "m.youtube.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "macfound.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mailchi.mp",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mainemorningstar.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "manufacturingdive.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "marinij.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "maritime-executive.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "marketscreener.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "marketwatch.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "marylandmatters.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "maryrobinsoncentre.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mastodon.scot",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mastodon.social",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mastodon.xyz",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "matthey.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mchediak.bsky.social",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mckinsey.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mcubedecon.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mdr.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mecco.colorado.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "media.mit.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "media.tenor.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "medium.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mekongeye.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mercomindia.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mercurynews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "metrorewind.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "minnpost.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mirror.co.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mobilize.us",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mondoweiss.net",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mongabay.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "montelnews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "motherjones.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "motor1.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mountainstatespotlight.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "msn.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mstdn.social",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "my.corehr.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "my.uplift.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "myfoxzone.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "mynewsla.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "n-tv.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "n.pr",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "n24usa.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "naija247news.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "naijaonpoint.com.ng",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "natesilver.net",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nathanielbullard.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nation.cymru",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nationalobserver.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nationalreview.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "naturalgasintel.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nature.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "navonarecords.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nbcbayarea.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nbclosangeles.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nbcnews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nber.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nca2023.globalchange.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ncnewsline.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ncsl.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ndr.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ndtvprofit.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "neefusa.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "neimagazine.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nettavisen.no",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "new.abb.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "newbedfordlight.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "newhampshirebulletin.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "newrepublic.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "news.berkeley.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "news.dealershipguy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "news.duke-energy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "news.fundsforngos.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "news.inn.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "news.mit.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "news.mongabay.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "news.stanford.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "news.wickedproblems.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "newsbeep.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "newscientist.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "newsobserver.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "newstalk.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "newstatesman.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "newstecnicas.info.ve",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "newsweek.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "newyorker.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nhc.noaa.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "niemanlab.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nikkei.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nj.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "njoag.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "njspotlightnews.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "noaa.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "noahpinion.blog",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nordot.app",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "northdakotamonitor.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "notus.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "novaramedia.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nplusonemag.com",
+      "tier": "unknown"
+    },
+    {
       "hostname": "npr.org",
       "tier": "general-outlet"
+    },
+    {
+      "hostname": "nps.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nrdc.org",
+      "tier": "unknown"
     },
     {
       "hostname": "nrel.gov",
       "tier": "energy-focused"
     },
     {
+      "hostname": "nrg.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nrk.no",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nuclearinnovationalliance.applicantpro.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nuclearinnovationalliance.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nuclearinnovationbootcamp.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nucnet.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nworbmot.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nwzonline.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nyserda.ny.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "nysfocus.com",
+      "tier": "unknown"
+    },
+    {
       "hostname": "nytimes.com",
       "tier": "general-outlet"
+    },
+    {
+      "hostname": "nzherald.co.nz",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "oaarchive.arctic-council.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "oag.ca.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "oakridger.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "observer.co.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "offshore-energy.biz",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "offshorewind.biz",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ohiocapitaljournal.com",
+      "tier": "unknown"
     },
     {
       "hostname": "oilprice.com",
       "tier": "energy-focused"
     },
     {
+      "hostname": "oireachtas.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "okenergytoday.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "omny.fm",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "on.e2.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "onemileatatime.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "oneusefulthing.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ongoingnow.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "onlineathens.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "onlinelibrary.wiley.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "opb.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "open.spotify.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "open.substack.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "opendatascience.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "openrijk.nl",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "opensecrets.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "openstreetmap.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "opis.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ore.ucc.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "origin.iea.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "originenergy.com.au",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "orsted.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ourworldindata.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "overshootconference.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ox.ac.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "palomapress.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "paulkrugman.substack.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pbp.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pbs.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pditechnologies.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "peer.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "peopleandnature.wordpress.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pgjonline.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "philanthropy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "phys.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pilotonline.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pipelineonline.ca",
+      "tier": "unknown"
+    },
+    {
       "hostname": "platts.com",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "pnas.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pnnl.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pod.link",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "podcasts.apple.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "poetryfoundation.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "policy.friendsoftheearth.uk",
+      "tier": "unknown"
     },
     {
       "hostname": "politico.com",
       "tier": "general-outlet"
     },
     {
+      "hostname": "politico.eu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "politik.watson.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "popularmechanics.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "portcitydaily.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "postandcourier.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "power-technology.com",
+      "tier": "unknown"
+    },
+    {
       "hostname": "powermag.com",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "powerpolicy.net",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "powersystems.technology",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "praxisnation.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pressombudsman.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pressreader.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "prices.gasbuddy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "prnewswire.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "projectfinance.law",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "prokon.energy",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "promarket.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "propublica.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "prospect.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "providencejournal.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "public.tableau.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "publicnewsservice.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "publicpolicy.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "publicpower.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "publishernewsletters.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pubs.geoscienceworld.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pulse.ly",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pv-magazine-australia.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pv-magazine-india.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pv-magazine-usa.com",
+      "tier": "unknown"
     },
     {
       "hostname": "pv-magazine.com",
       "tier": "energy-focused"
     },
     {
+      "hostname": "pv-magazine.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "pv-tech.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "quittingcarbonmedia.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "qz.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "radioeins.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "radiokerry.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "raleighnc.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "rangetherapy.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "raponline.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "readtpa.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "realcleardefense.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "realclearenergy.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "rebrand.ly",
+      "tier": "unknown"
+    },
+    {
       "hostname": "rechargenews.com",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "recommon.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "reddit.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "redoxblox.com",
+      "tier": "unknown"
     },
     {
       "hostname": "renewableenergyworld.com",
       "tier": "energy-focused"
     },
     {
+      "hostname": "reneweconomy.com.au",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "repeatproject.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "researchsquare.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "resilientenergyeconomies.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "resources.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "retaildive.com",
+      "tier": "unknown"
+    },
+    {
       "hostname": "reuters.com",
       "tier": "general-outlet"
+    },
+    {
+      "hostname": "reviewjournal.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ria.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "richbycoin.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "rigg-access.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "rmi.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "rnz.co.nz",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "rogerpielkejr.substack.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "rondo.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "roofingcontractor.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "rozeepk.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "rte.ie",
+      "tier": "unknown"
     },
     {
       "hostname": "rtoinsider.com",
       "tier": "energy-focused"
     },
     {
+      "hostname": "sacbee.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sandiegouniontribune.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "saportareport.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "saurenergy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "scdailygazette.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "scholar.google.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "science.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sciencedirect.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sciencemediacentre.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "scientificamerican.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "scmp.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "scoop.co.nz",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sd11.senate.ca.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "seai.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sealawards.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "seapop.no",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "seattletimes.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sec.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "seenews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "seia.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sej.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "selc.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "semafor.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sepapower.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sfchronicle.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sfexaminer.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sfgate.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sfstandard.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sg.finance.yahoo.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "share.google",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "share.upscrolled.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sharpst.co.in",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "shippingandoceans.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "shorturl.at",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sierraclub.ca",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sierraclub.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sites.nd.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "skylight.nyc",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "slate.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sltrib.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "smartcitiesdive.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "solarbuildermag.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "solarpowerworldonline.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "solarquarter.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "solsystems.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "somo.nl",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sosvclimatetech.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "soundcloud.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "southcarolinapublicradio.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "southerncompany.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "southerncompany.mediaroom.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "southernrenewable.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "spacenews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "spectrum.ieee.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "spglobal.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "spiegel.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "starnewsonline.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "starw1.ncuc.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "state.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "stateline.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "stateofgreen.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "statesman.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "statnews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "statsandresearch.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "stbaldricks.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "stern.nyu.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "steveahlquist.substack.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "stillwaterassociates.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "stlpr.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "stockupdatesnow.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "stormlake.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "straitstimes.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "stuff.co.nz",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sub.grist.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "subscribe.carbonbrief.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "subscribepage.io",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "subscriber.politicopro.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "substack.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sunrisestate.in",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "supremecourt.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sustainabilitybynumbers.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sustainabilitynetwork.ca",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sustainabilityonline.net",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sustainable-bus.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sverigesradio.se",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "swenergy.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "swr.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "sydsvenskan.se",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "t-online.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "table.media",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "tae.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "tagesschau.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "taiwannews.com.tw",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "talkingpointsmemo.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "tampabay.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "tandfonline.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "taxlawcenter.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "taz.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "tceq.texas.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "techcrunch.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "technologyreview.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "techxplore.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ted.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "theadvocate.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "theatlantic.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thebadgerproject.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thebanner.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thebreakthrough.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thebulletin.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thebulwark.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thebusinessdesk.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thecanadianpressnews.ca",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thecanary.co",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "theconversation.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thecooldown.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thedailybeast.com",
+      "tier": "unknown"
+    },
+    {
       "hostname": "thedriven.io",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "theenergymix.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "theglobeandmail.com",
+      "tier": "unknown"
     },
     {
       "hostname": "theguardian.com",
@@ -179,8 +3623,272 @@
       "tier": "general-outlet"
     },
     {
+      "hostname": "theicct.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "theins.press",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thejournal.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "themessenger.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thenakedscientists.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thenarwhal.ca",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thenational.scot",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thenews.com.pk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thenewsnow.co.in",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thenorthernecho.co.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "theolympian.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "theonion.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thepowerline.substack.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "theraisinahills.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "therealpreneur.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "theregister.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "theregreview.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thermalprocessing.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thescottishfarmer.co.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thestandardnewspaper.online",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thestatesman.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thetimes.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thetransportpolitic.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "theverge.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thewarhorse.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thewoolley.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thinkgeoenergy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "third-news.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "thirdway.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "threads.net",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "timesfreepress.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "todayheadline.co",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "toledoblade.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "tracyalloway.bsky.social",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "transportenvironment.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "trefis.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "trustfnd.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ts2.tech",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "tva.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "twp.ai",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "uaetodaynews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "uapdrop.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "uazmi.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ucc.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "uh.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "uk.pinterest.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "ukerc.ac.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "unaeco-lithium-ion-battery.blogspot.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "uncg.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "undercodenews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "understandingwar.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "unearthed.greenpeace.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "unep.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "urbangreencouncil.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "us02web.zoom.us",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "us06web.zoom.us",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "usatoday.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "usinenouvelle.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "utahnewsdispatch.com",
+      "tier": "unknown"
+    },
+    {
       "hostname": "utilitydive.com",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "uu.se",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "v.redd.it",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "vccafe.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "vermontpublic.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "viory.video",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "virginiamercury.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "vittlesmagazine.com",
+      "tier": "unknown"
     },
     {
       "hostname": "volts.wtf",
@@ -191,20 +3899,256 @@
       "tier": "general-outlet"
     },
     {
+      "hostname": "voxdotcom.visitlink.me",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wabe.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "walker.co.uk",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "washingtonexaminer.com",
+      "tier": "unknown"
+    },
+    {
       "hostname": "washingtonpost.com",
       "tier": "general-outlet"
+    },
+    {
+      "hostname": "waterfordwhispersnews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wattever.com.au",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "waz.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wbhm.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wbur.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wcjb.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "web.archive.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "web.stanford.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "westorlandonews.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wfae.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wgme.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "whas11.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "whitehouse.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "whitehousehistory.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "whnt.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "whyy.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wilayah.com.my",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wildlifecrime.ie",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wind-watch.org",
+      "tier": "unknown"
     },
     {
       "hostname": "windpowermonthly.com",
       "tier": "energy-focused"
     },
     {
+      "hostname": "windtech-international.com",
+      "tier": "unknown"
+    },
+    {
       "hostname": "wired.com",
       "tier": "general-outlet"
     },
     {
+      "hostname": "wisconsinwatch.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "with-great-power.simplecast.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wjcl.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wlos.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wmo.int",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wndu.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wnegradio.com",
+      "tier": "unknown"
+    },
+    {
       "hostname": "woodmac.com",
       "tier": "energy-focused"
+    },
+    {
+      "hostname": "world-nuclear-news.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "worldscientific.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wp.me",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wpr.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wral.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wrdw.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wsj.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wskg.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wtkr.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wusfnews.wusf.usf.edu",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wvxu.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "wwd.ca.gov",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "www1.wdr.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "www3.nhk.or.jp",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "x.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "yahoo.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "yaleclimateconnections.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "yesenergy.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "yesenergy.zoom.us",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "yicaiglobal.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "youtu.be",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "youtube.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "zacks.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "zawya.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "zeit.de",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "zenodo.org",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "zoox.com",
+      "tier": "unknown"
+    },
+    {
+      "hostname": "zurl.co",
+      "tier": "unknown"
     }
   ]
 }

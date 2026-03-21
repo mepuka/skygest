@@ -23,10 +23,25 @@ const readRequired = async (path: string) => {
   return file.text();
 };
 
+const readOptional = async (path: string) => {
+  const file = Bun.file(path);
+  return (await file.exists()) ? file.text() : undefined;
+};
+
+const aboxPath = resolve(ontologyRoot, "data/abox-snapshot.ttl");
+const aboxTtl = await readOptional(aboxPath);
+
+if (aboxTtl !== undefined) {
+  console.log(`Found ABox snapshot: ${aboxPath}`);
+} else {
+  console.log(`No ABox snapshot found at ${aboxPath} — skipping ABox enrichment`);
+}
+
 const { snapshot, publicationsSeed } = buildOntologyArtifacts({
   ttl: await readRequired(resolve(ontologyRoot, "release/energy-news-reference-individuals.ttl")),
   derivedStoreFilter: await readRequired(resolve(ontologyRoot, "docs/derived-store-filter.md")),
-  owlJson: await readRequired(resolve(ontologyRoot, "release/energy-news.json"))
+  owlJson: await readRequired(resolve(ontologyRoot, "release/energy-news.json")),
+  ...(aboxTtl !== undefined ? { aboxTtl } : {})
 });
 
 await Bun.write(snapshotOutputPath, encodeOntologySnapshot(snapshot));

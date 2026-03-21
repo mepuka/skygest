@@ -1,0 +1,15 @@
+{
+  "version": "2026-03-21",
+  "entries": [
+    { "shortDomain": "reut.rs", "resolvedDomain": "reuters.com" },
+    { "shortDomain": "nyti.ms", "resolvedDomain": "nytimes.com" },
+    { "shortDomain": "wapo.st", "resolvedDomain": "washingtonpost.com" },
+    { "shortDomain": "cnb.cx", "resolvedDomain": "cnbc.com" },
+    { "shortDomain": "wrd.cm", "resolvedDomain": "wired.com" },
+    { "shortDomain": "on.ft.com", "resolvedDomain": "financialtimes.com" },
+    { "shortDomain": "econ.st", "resolvedDomain": "economist.com" },
+    { "shortDomain": "bloom.bg", "resolvedDomain": "bloomberg.com" },
+    { "shortDomain": "politi.co", "resolvedDomain": "politico.com" },
+    { "shortDomain": "hill.cm", "resolvedDomain": "thehill.com" }
+  ]
+}

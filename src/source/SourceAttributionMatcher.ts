@@ -7,6 +7,15 @@ import {
 import { formatSchemaParseError } from "../platform/Json";
 import { ProviderRegistry } from "../services/ProviderRegistry";
 import { matchSourceAttribution } from "./SourceAttributionRules";
+import { publicationsSeedManifest } from "../bootstrap/CheckedInPublications";
+import { brandShortenerMap } from "./brandShorteners";
+import { buildPublicationIndex } from "./publicationResolver";
+import type { PublicationContext } from "./contentSource";
+
+const publicationContext: PublicationContext = {
+  publicationIndex: buildPublicationIndex(publicationsSeedManifest.publications),
+  brandShortenerMap
+};
 
 const decodeMatcherInput = (input: unknown) =>
   Schema.decodeUnknown(SourceAttributionMatcherInput)(input).pipe(
@@ -34,7 +43,7 @@ export class SourceAttributionMatcher extends Context.Tag(
         input: Schema.Schema.Encoded<typeof SourceAttributionMatcherInput>
       ) {
         const decoded = yield* decodeMatcherInput(input);
-        return matchSourceAttribution(decoded, registry.lookup);
+        return matchSourceAttribution(decoded, registry.lookup, publicationContext);
       });
 
       return SourceAttributionMatcher.of({ match });
