@@ -1,6 +1,7 @@
 import { ConfigProvider, Effect, Exit, Layer } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { vi } from "vitest";
+import { encodeJsonString } from "../src/platform/Json.ts";
 
 // ---------------------------------------------------------------------------
 // Mock @google/genai — must be before the dynamic import
@@ -48,14 +49,14 @@ const TestLayer = GeminiVisionServiceLive.pipe(Layer.provide(TestConfig));
 const runWith = (effect: Effect.Effect<any, any, any>) => Effect.provide(effect, TestLayer);
 
 /** Valid classification JSON that matches ImageClassification schema. */
-const validClassificationJson = JSON.stringify({
+const validClassificationJson = encodeJsonString({
   mediaType: "chart",
   chartTypes: ["bar-chart"],
   hasDataPoints: true
 });
 
 /** Valid extraction JSON that matches GeminiExtractionOutput schema. */
-const validExtractionJson = JSON.stringify({
+const validExtractionJson = encodeJsonString({
   mediaType: "chart",
   chartTypes: ["bar-chart", "line-chart"],
   altText: "Alberta electricity prices from 2020 to 2024",
@@ -244,7 +245,7 @@ describe("GeminiVisionService", () => {
           mockGenerateContent.mockReset();
           // Missing hasDataPoints field
           mockGenerateContent.mockResolvedValueOnce({
-            text: JSON.stringify({ mediaType: "chart" })
+            text: encodeJsonString({ mediaType: "chart" })
           });
 
           const svc = yield* GeminiVisionService;
@@ -343,7 +344,7 @@ describe("GeminiVisionService", () => {
         Effect.gen(function* () {
           mockGenerateContent.mockReset();
           mockGenerateContent.mockResolvedValueOnce({
-            text: JSON.stringify({
+            text: encodeJsonString({
               mediaType: "invalid-type",
               chartTypes: [],
               hasDataPoints: false
@@ -500,7 +501,7 @@ describe("GeminiVisionService", () => {
           mockGenerateContent.mockReset();
           // Valid JSON but missing required fields like title, xAxis, yAxis, etc.
           mockGenerateContent.mockResolvedValueOnce({
-            text: JSON.stringify({
+            text: encodeJsonString({
               mediaType: "chart",
               chartTypes: ["bar-chart"],
               altText: "some alt text"
@@ -532,7 +533,7 @@ describe("GeminiVisionService", () => {
         Effect.gen(function* () {
           mockGenerateContent.mockReset();
           mockGenerateContent.mockResolvedValueOnce({
-            text: JSON.stringify({
+            text: encodeJsonString({
               mediaType: "photo",
               chartTypes: [],
               altText: null,

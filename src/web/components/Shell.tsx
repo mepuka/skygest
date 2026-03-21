@@ -1,45 +1,21 @@
-import { useMemo, useCallback, useState } from "react";
-import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
+import { useCallback, useState } from "react";
+import { useAtomValue } from "@effect-atom/atom-react";
 import { Result } from "@effect-atom/atom";
-import { feedAtom, topicsAtom, linksAtom, publicationsAtom, selectedTopicAtom, topicLookupAtom } from "../lib/atoms.ts";
+import { feedAtom, publicationsAtom, topicLookupAtom } from "../lib/atoms.ts";
 import type { TopicEntry } from "../lib/types.ts";
 import { PostCard } from "./PostCard.tsx";
-import { TopicFilterBar } from "./TopicFilterBar.tsx";
 import { TooltipProvider } from "../primitives/index.ts";
 
-const EMPTY_TOPICS: readonly never[] = [];
-const EMPTY_LINKS = new Map<string, never>();
 const EMPTY_PUBS = new Map<string, never>();
 
 export function Shell() {
   const feedResult = useAtomValue(feedAtom);
-  const topicsResult = useAtomValue(topicsAtom);
-  const linksResult = useAtomValue(linksAtom);
   const pubsResult = useAtomValue(publicationsAtom);
-  const selectedTopic = useAtomValue(selectedTopicAtom);
-  const setSelectedTopic = useAtomSet(selectedTopicAtom);
   const topicLookup = useAtomValue(topicLookupAtom);
 
   const [activePostUri, setActivePostUri] = useState<string | null>(null);
 
-  const topics = Result.getOrElse(topicsResult, () => EMPTY_TOPICS);
-  const linksMap = Result.getOrElse(linksResult, () => EMPTY_LINKS);
   const pubIndex = Result.getOrElse(pubsResult, () => EMPTY_PUBS);
-
-  const selectedTopicLabel = useMemo(
-    () => selectedTopic ? topicLookup.get(selectedTopic)?.label ?? null : null,
-    [selectedTopic, topicLookup]
-  );
-
-  const feedThreadCount = useMemo(
-    () => Result.getOrElse(feedResult, () => ({ items: [] })).items.length,
-    [feedResult]
-  );
-
-  const feedExpertCount = useMemo(() => {
-    const items = Result.getOrElse(feedResult, () => ({ items: [] })).items;
-    return new Set(items.map((p: { did: string }) => p.did)).size;
-  }, [feedResult]);
 
   const resolveTopicEntries = useCallback(
     (slugs: readonly string[]): readonly TopicEntry[] =>
@@ -61,21 +37,6 @@ export function Shell() {
             <div className="size-7 rounded-full bg-border shrink-0" />
           </div>
         </header>
-
-        {/* ---- Topic Filter Bar ---- */}
-        <div className="px-20 pb-4 border-b border-border max-lg:px-5">
-          <div className="mx-auto max-w-[1080px]">
-            {topics.length > 0 && (
-              <TopicFilterBar
-                topics={topics}
-                selectedSlug={selectedTopic}
-                onSelect={setSelectedTopic}
-                threadCount={feedThreadCount}
-                expertCount={feedExpertCount}
-              />
-            )}
-          </div>
-        </div>
 
         {/* ---- Feed Content: two-column on desktop ---- */}
         <main className="px-20 pt-6 max-lg:px-5">
@@ -100,10 +61,10 @@ export function Shell() {
                   </div>
                 ))
                 .onSuccess((feed) => {
-                  const feedLinks = feed.linksMap ?? linksMap;
+                  const feedLinks = feed.linksMap;
                   return feed.items.length === 0 ? (
                     <div className="py-8 text-center text-mid text-sm">
-                      No posts yet.
+                      No curated picks yet.
                     </div>
                   ) : (
                     <>
@@ -113,7 +74,7 @@ export function Shell() {
                           post={post}
                           link={feedLinks.get(post.uri) ?? null}
                           publicationIndex={pubIndex}
-                          topicLabel={selectedTopicLabel}
+                          topicLabel={null}
                           topicEntries={resolveTopicEntries(post.topics)}
                           editorialCategory={"editorialCategory" in post ? post.editorialCategory : undefined}
                           active={activePostUri === post.uri}

@@ -4,10 +4,6 @@ import { SkygestApi } from "./client.ts";
 import { buildPublicationIndex } from "./publications.ts";
 import type { TopicEntry } from "./types.ts";
 
-export const selectedTopicAtom = Atom.make<string | null>(null).pipe(
-  Atom.keepAlive
-);
-
 export const topicsAtom = SkygestApi.query("topics", "list", {
   urlParams: {}
 }).pipe(
@@ -22,23 +18,21 @@ export const publicationsAtom = SkygestApi.query("publications", "list", {
   Atom.keepAlive
 );
 
-export const postsAtom = SkygestApi.runtime.atom((get) => {
-  const topic = get(selectedTopicAtom) ?? undefined;
-  return Effect.gen(function* () {
+export const postsAtom = SkygestApi.runtime.atom(() =>
+  Effect.gen(function* () {
     const client = yield* SkygestApi;
     const result = yield* client.posts.recent({
-      urlParams: topic !== undefined ? { topic, limit: 30 } : { limit: 30 }
+      urlParams: { limit: 30 }
     });
     return result.items;
-  });
-});
+  })
+);
 
-export const linksAtom = SkygestApi.runtime.atom((get) => {
-  const topic = get(selectedTopicAtom) ?? undefined;
-  return Effect.gen(function* () {
+export const linksAtom = SkygestApi.runtime.atom(() =>
+  Effect.gen(function* () {
     const client = yield* SkygestApi;
     const result = yield* client.links.list({
-      urlParams: topic !== undefined ? { topic, limit: 100 } : { limit: 100 }
+      urlParams: { limit: 100 }
     });
     const byPostUri = new Map<string, (typeof result.items)[number]>();
     for (const link of result.items) {
@@ -47,37 +41,30 @@ export const linksAtom = SkygestApi.runtime.atom((get) => {
       }
     }
     return byPostUri;
-  });
-});
+  })
+);
 
-export const feedAtom = SkygestApi.runtime.atom((get) => {
-  const topic = get(selectedTopicAtom) ?? undefined;
-  return Effect.gen(function* () {
+export const feedAtom = SkygestApi.runtime.atom(() =>
+  Effect.gen(function* () {
     const client = yield* SkygestApi;
     const curated = yield* client.posts.curated({
-      urlParams: topic !== undefined ? { topic, limit: 30 } : { limit: 30 }
+      urlParams: { limit: 30 }
     });
-    if (curated.items.length > 0) {
-      // Curated picks may reference older posts — fetch links without the
-      // recent-window constraint that linksAtom uses, so previews render
-      // regardless of post age.
-      const linksResult = yield* client.links.list({
-        urlParams: topic !== undefined ? { topic, limit: 100 } : { limit: 100 }
-      });
-      const linksMap = new Map<string, (typeof linksResult.items)[number]>();
-      for (const link of linksResult.items) {
-        if (!linksMap.has(link.postUri)) {
-          linksMap.set(link.postUri, link);
-        }
+    // Curated picks may reference older posts — fetch links without the
+    // recent-window constraint that linksAtom uses, so previews render
+    // regardless of post age.
+    const linksResult = yield* client.links.list({
+      urlParams: { limit: 100 }
+    });
+    const linksMap = new Map<string, (typeof linksResult.items)[number]>();
+    for (const link of linksResult.items) {
+      if (!linksMap.has(link.postUri)) {
+        linksMap.set(link.postUri, link);
       }
-      return { mode: "curated" as const, items: curated.items, linksMap };
     }
-    const chronological = yield* client.posts.recent({
-      urlParams: topic !== undefined ? { topic, limit: 30 } : { limit: 30 }
-    });
-    return { mode: "chronological" as const, items: chronological.items, linksMap: null };
-  });
-});
+    return { items: curated.items, linksMap };
+  })
+);
 
 /** Resolve topic slugs to label entries for OntologyBreadcrumb */
 export const topicLookupAtom = Atom.make((get) => {
