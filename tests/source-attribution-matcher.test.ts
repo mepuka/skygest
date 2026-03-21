@@ -206,6 +206,64 @@ describe("SourceAttributionMatcher", () => {
     })
   );
 
+  it.effect("populates contentSource.publication for a known publication even when resolution is unmatched", () =>
+    Effect.gen(function* () {
+      const result = yield* runMatch({
+        post: {
+          did: "did:plc:test" as any,
+          handle: null,
+          text: "Interesting read on Carbon Brief"
+        },
+        links: [
+          {
+            url: "https://www.carbonbrief.org/analysis/some-article",
+            domain: "carbonbrief.org",
+            title: "Carbon Brief Analysis",
+            description: null,
+            imageUrl: null,
+            extractedAt: 0
+          }
+        ],
+        linkCards: [],
+        vision: null
+      });
+
+      expect(result.resolution).toBe("unmatched");
+      expect(result.provider).toBeNull();
+      expect(result.contentSource).not.toBeNull();
+      expect(result.contentSource!.domain).toBe("carbonbrief.org");
+      expect(result.contentSource!.publication).toBe("carbonbrief.org");
+    })
+  );
+
+  it.effect("resolves brand shortener to publication label via matcher", () =>
+    Effect.gen(function* () {
+      const result = yield* runMatch({
+        post: {
+          did: "did:plc:test" as any,
+          handle: null,
+          text: "Reuters report on energy"
+        },
+        links: [
+          {
+            url: "https://reut.rs/4abc123",
+            domain: "reut.rs",
+            title: null,
+            description: null,
+            imageUrl: null,
+            extractedAt: 0
+          }
+        ],
+        linkCards: [],
+        vision: null
+      });
+
+      expect(result.resolution).toBe("unmatched");
+      expect(result.contentSource).not.toBeNull();
+      expect(result.contentSource!.publication).toBe("Reuters");
+    })
+  );
+
   it.effect("fails with a schema decode error when post.handle uses the old missing-field shape", () =>
     Effect.gen(function* () {
       const matcher = yield* SourceAttributionMatcher;

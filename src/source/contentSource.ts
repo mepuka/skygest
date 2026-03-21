@@ -19,8 +19,18 @@
 import { Option } from "effect";
 import type { ContentSourceReference } from "../domain/source";
 import type { EnrichmentPlannedLinkCardContext } from "../domain/enrichmentPlan";
-import type { LinkRecord } from "../domain/bi";
+import type { LinkRecord, PublicationSeed } from "../domain/bi";
 import { parseNormalizedDomain } from "./normalize";
+import { resolvePublicationEntry, publicationDisplayLabel } from "./publicationResolver";
+
+// ---------------------------------------------------------------------------
+// Publication context (optional, enables publication resolution)
+// ---------------------------------------------------------------------------
+
+export interface PublicationContext {
+  readonly publicationIndex: ReadonlyMap<string, PublicationSeed>;
+  readonly brandShortenerMap: ReadonlyMap<string, string>;
+}
 
 // ---------------------------------------------------------------------------
 // Input type
@@ -59,16 +69,28 @@ const parseDomain = (url: string): string | null =>
  * `ContentSourceReference` or null.
  */
 export const choosePrimaryContentSource = (
-  input: ContentSourceInput
+  input: ContentSourceInput,
+  publicationContext?: PublicationContext
 ): ContentSourceReference | null => {
   // Rule 1: prefer explicit embed link card
   if (input.linkCards.length > 0) {
     const card = input.linkCards[0]!;
+    const domain = parseDomain(card.uri);
+    const publication = publicationContext === undefined
+      ? null
+      : (() => {
+          const entry = resolvePublicationEntry(
+            domain,
+            publicationContext.publicationIndex,
+            publicationContext.brandShortenerMap
+          );
+          return entry === null ? null : publicationDisplayLabel(entry.hostname);
+        })();
     return {
       url: card.uri,
       title: card.title ?? null,
-      domain: parseDomain(card.uri),
-      publication: null
+      domain,
+      publication
     };
   }
 
@@ -76,11 +98,22 @@ export const choosePrimaryContentSource = (
   const uniqueUrls = new Set(input.links.map((l) => l.url));
   if (uniqueUrls.size === 1) {
     const link = input.links[0]!;
+    const domain = link.domain ?? parseDomain(link.url);
+    const publication = publicationContext === undefined
+      ? null
+      : (() => {
+          const entry = resolvePublicationEntry(
+            domain,
+            publicationContext.publicationIndex,
+            publicationContext.brandShortenerMap
+          );
+          return entry === null ? null : publicationDisplayLabel(entry.hostname);
+        })();
     return {
       url: link.url,
       title: link.title ?? null,
-      domain: link.domain ?? parseDomain(link.url),
-      publication: null
+      domain,
+      publication
     };
   }
 

@@ -14,7 +14,7 @@ import type {
   SourceAttributionProviderCandidate
 } from "../domain/sourceMatching";
 import type { ProviderLookup } from "./registry";
-import { choosePrimaryContentSource } from "./contentSource";
+import { choosePrimaryContentSource, type PublicationContext } from "./contentSource";
 import {
   extractDomainFromText,
   isWholeWordMatch,
@@ -386,12 +386,16 @@ const setCandidateSourceFamily = (
 
 export const matchSourceAttribution = (
   input: SourceAttributionMatcherInput,
-  lookup: ProviderLookup
+  lookup: ProviderLookup,
+  publicationContext?: PublicationContext
 ): SourceAttributionMatchResult => {
-  const contentSource = choosePrimaryContentSource({
-    linkCards: input.linkCards,
-    links: input.links
-  });
+  const contentSource = choosePrimaryContentSource(
+    {
+      linkCards: input.linkCards,
+      links: input.links
+    },
+    publicationContext
+  );
   const socialProvenance = makeSocialProvenance(input);
   const evidence = collectProviderEvidence(input, lookup);
   const index = collectEvidence(evidence);
