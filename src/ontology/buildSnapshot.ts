@@ -276,18 +276,109 @@ const parseAboxPublicationDomains = (aboxTtl: string): ReadonlyArray<string> =>
     ).filter((hostname) => hostname.length > 0)
   );
 
+/** Exact hostnames that are clearly not publications */
+const HOSTNAME_DENYLIST = new Set([
+  "amazon.com",
+  "apple.com",
+  "apple.news",
+  "google.com",
+  "facebook.com",
+  "twitter.com",
+  "x.com",
+  "youtube.com",
+  "linkedin.com",
+  "instagram.com",
+  "reddit.com",
+  "tiktok.com",
+  "github.com",
+  "medium.com",
+  "substack.com",
+  "wordpress.com",
+  "docs.google.com",
+  "drive.google.com",
+  "scholar.google.com",
+  "blog.google",
+  "share.google",
+  "dropbox.com",
+  "eventbrite.com",
+  "bsky.app",
+  "go.bsky.app",
+  "podcasts.apple.com"
+]);
+
+/** Suffixes for infrastructure, CDN, and hosting platforms */
 const INFRASTRUCTURE_SUFFIX_DENYLIST = [
   "hubspotusercontent-na1.net",
   "hubspotusercontent-eu1.net",
   "cloudfront.net",
   "amazonaws.com",
-  "azureedge.net"
+  "s3.amazonaws.com",
+  "azureedge.net",
+  "googleapis.com",
+  "googleusercontent.com",
+  "gstatic.com",
+  "firebaseapp.com",
+  "herokuapp.com",
+  "netlify.app",
+  "vercel.app",
+  "pages.dev",
+  "workers.dev",
+  "r2.dev",
+  "github.io",
+  "itch.io",
+  "podigee.io",
+  "greenhouse.io",
+  "subscribepage.io"
 ] as const;
 
-const isLikelyPublicationHostname = (hostname: string): boolean =>
-  !INFRASTRUCTURE_SUFFIX_DENYLIST.some(
+/** Platform-hosting suffixes — subdomains of these are user content, not publications */
+const PLATFORM_HOSTING_SUFFIXES = [
+  "substack.com",
+  "wordpress.com",
+  "medium.com",
+  "eventbrite.com",
+  "galabid.com",
+  "interfolio.com",
+  "google.com",
+  "apple.com",
+  "youtube.com"
+] as const;
+
+/** Suspicious subdomain prefixes that indicate app/service portals, not publications */
+const SUSPICIOUS_SUBDOMAIN_PREFIXES = [
+  "app.",
+  "apply.",
+  "forms.",
+  "docs.",
+  "share.",
+  "m.",
+  "api.",
+  "cdn.",
+  "mail.",
+  "job-boards."
+] as const;
+
+const isLikelyPublicationHostname = (hostname: string): boolean => {
+  // (a) Exact hostname denylist
+  if (HOSTNAME_DENYLIST.has(hostname)) return false;
+
+  // (b) Infrastructure suffix denylist
+  if (INFRASTRUCTURE_SUFFIX_DENYLIST.some(
     (suffix) => hostname === suffix || hostname.endsWith(`.${suffix}`)
-  );
+  )) return false;
+
+  // (c) Platform-hosting subdomains (e.g. billmckibben.substack.com)
+  if (PLATFORM_HOSTING_SUFFIXES.some(
+    (suffix) => hostname.endsWith(`.${suffix}`) && hostname !== suffix
+  )) return false;
+
+  // (d) Suspicious subdomain prefixes (e.g. app.galabid.com, forms.gle)
+  if (SUSPICIOUS_SUBDOMAIN_PREFIXES.some(
+    (prefix) => hostname.startsWith(prefix)
+  )) return false;
+
+  return true;
+};
 
 const buildPublicationSeed = (
   derivedStoreFilter: string,

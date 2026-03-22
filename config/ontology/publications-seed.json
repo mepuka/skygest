@@ -1,6 +1,6 @@
 {
   "ontologyVersion": "0.3.0",
-  "snapshotVersion": "0.3.0-a2a1fa2ffc56",
+  "snapshotVersion": "0.3.0-7b3ce31da96e",
   "publications": [
     {
       "hostname": "10news.com",
@@ -139,10 +139,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "amazon.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "americanbar.org",
       "tier": "unknown"
     },
@@ -165,26 +161,6 @@
     {
       "hostname": "apnews.com",
       "tier": "general-outlet"
-    },
-    {
-      "hostname": "app.galabid.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "app.halcyon.io",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "app.publicnewsservice.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "apple.news",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "apply.interfolio.com",
-      "tier": "unknown"
     },
     {
       "hostname": "appvoices.org",
@@ -295,10 +271,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "benrhodes1.substack.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "berkeley.us13.list-manage.com",
       "tier": "unknown"
     },
@@ -323,19 +295,11 @@
       "tier": "unknown"
     },
     {
-      "hostname": "billmckibben.substack.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "biogenicmethane.org",
       "tier": "unknown"
     },
     {
       "hostname": "biz.chosun.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "blog.google",
       "tier": "unknown"
     },
     {
@@ -408,10 +372,6 @@
     },
     {
       "hostname": "brusselstimes.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "bsky.app",
       "tier": "unknown"
     },
     {
@@ -523,10 +483,6 @@
       "tier": "energy-focused"
     },
     {
-      "hostname": "canarylivedc.eventbrite.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "canarymedia.com",
       "tier": "energy-focused"
     },
@@ -604,10 +560,6 @@
     },
     {
       "hostname": "chapelboro.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "chasebound.itch.io",
       "tier": "unknown"
     },
     {
@@ -807,10 +759,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "contrarian.substack.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "corkfilmfest.org",
       "tier": "unknown"
     },
@@ -979,10 +927,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "docs.google.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "documentcloud.org",
       "tier": "unknown"
     },
@@ -1020,14 +964,6 @@
     },
     {
       "hostname": "drilled.media",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "drive.google.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "dropbox.com",
       "tier": "unknown"
     },
     {
@@ -1203,10 +1139,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "energyathaas.wordpress.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "energychangemakers.com",
       "tier": "unknown"
     },
@@ -1245,10 +1177,6 @@
     {
       "hostname": "energyintel.com",
       "tier": "energy-focused"
-    },
-    {
-      "hostname": "energymixweekender.substack.com",
-      "tier": "unknown"
     },
     {
       "hostname": "energymonitor.ai",
@@ -1327,10 +1255,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "epmg.netlify.app",
-      "tier": "unknown"
-    },
-    {
       "hostname": "equinor.com",
       "tier": "unknown"
     },
@@ -1363,10 +1287,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "eventbrite.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "evinfo.net",
       "tier": "unknown"
     },
@@ -1387,15 +1307,7 @@
       "tier": "unknown"
     },
     {
-      "hostname": "facebook.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "faculty.haas.berkeley.edu",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "fallows.substack.com",
       "tier": "unknown"
     },
     {
@@ -1404,10 +1316,6 @@
     },
     {
       "hostname": "fastcompany.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "fasterplease.substack.com",
       "tier": "unknown"
     },
     {
@@ -1428,10 +1336,6 @@
     },
     {
       "hostname": "fieldnotes.co",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "fieldnotes.substack.com",
       "tier": "unknown"
     },
     {
@@ -1547,10 +1451,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "gaspriceguy.substack.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "gasprices.aaa.com",
       "tier": "unknown"
     },
@@ -1591,19 +1491,11 @@
       "tier": "unknown"
     },
     {
-      "hostname": "go.bsky.app",
-      "tier": "unknown"
-    },
-    {
       "hostname": "go.grist.org",
       "tier": "unknown"
     },
     {
       "hostname": "goodreads.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "google.com",
       "tier": "unknown"
     },
     {
@@ -1923,10 +1815,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "instagram.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "interactive.carbonbrief.org",
       "tier": "unknown"
     },
@@ -1999,10 +1887,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "job-boards.greenhouse.io",
-      "tier": "unknown"
-    },
-    {
       "hostname": "jobs.gusto.com",
       "tier": "unknown"
     },
@@ -2063,10 +1947,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "klimakompass.podigee.io",
-      "tier": "unknown"
-    },
-    {
       "hostname": "klimareporter.de",
       "tier": "unknown"
     },
@@ -2119,10 +1999,6 @@
       "tier": "energy-focused"
     },
     {
-      "hostname": "leachandrew.github.io",
-      "tier": "unknown"
-    },
-    {
       "hostname": "legal-planet.org",
       "tier": "unknown"
     },
@@ -2155,10 +2031,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "linkedin.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "linkly.link",
       "tier": "unknown"
     },
@@ -2184,14 +2056,6 @@
     },
     {
       "hostname": "luma.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "m.independent.ie",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "m.youtube.com",
       "tier": "unknown"
     },
     {
@@ -2276,10 +2140,6 @@
     },
     {
       "hostname": "media.tenor.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "medium.com",
       "tier": "unknown"
     },
     {
@@ -2735,10 +2595,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "open.substack.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "opendatascience.com",
       "tier": "unknown"
     },
@@ -2791,10 +2647,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "paulkrugman.substack.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "pbp.ie",
       "tier": "unknown"
     },
@@ -2808,10 +2660,6 @@
     },
     {
       "hostname": "peer.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "peopleandnature.wordpress.com",
       "tier": "unknown"
     },
     {
@@ -2848,10 +2696,6 @@
     },
     {
       "hostname": "pod.link",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "podcasts.apple.com",
       "tier": "unknown"
     },
     {
@@ -3051,10 +2895,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "reddit.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "redoxblox.com",
       "tier": "unknown"
     },
@@ -3115,10 +2955,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "rogerpielkejr.substack.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "rondo.com",
       "tier": "unknown"
     },
@@ -3156,10 +2992,6 @@
     },
     {
       "hostname": "scdailygazette.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "scholar.google.com",
       "tier": "unknown"
     },
     {
@@ -3252,14 +3084,6 @@
     },
     {
       "hostname": "sg.finance.yahoo.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "share.google",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "share.upscrolled.com",
       "tier": "unknown"
     },
     {
@@ -3403,10 +3227,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "steveahlquist.substack.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "stillwaterassociates.com",
       "tier": "unknown"
     },
@@ -3439,15 +3259,7 @@
       "tier": "unknown"
     },
     {
-      "hostname": "subscribepage.io",
-      "tier": "unknown"
-    },
-    {
       "hostname": "subscriber.politicopro.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "substack.com",
       "tier": "unknown"
     },
     {
@@ -3668,10 +3480,6 @@
     },
     {
       "hostname": "theonion.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "thepowerline.substack.com",
       "tier": "unknown"
     },
     {
@@ -4095,10 +3903,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "x.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "yahoo.com",
       "tier": "unknown"
     },
@@ -4120,10 +3924,6 @@
     },
     {
       "hostname": "youtu.be",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "youtube.com",
       "tier": "unknown"
     },
     {
