@@ -215,7 +215,6 @@ const makeSourceDigest = (input: BuildOntologySnapshotInput) =>
     .update(input.ttl)
     .update(input.derivedStoreFilter)
     .update(input.owlJson ?? "")
-    .update(input.aboxTtl ?? "")
     .digest("hex");
 
 const validateMappingCoverage = (concepts: ReadonlyArray<ParsedConcept>) => {
