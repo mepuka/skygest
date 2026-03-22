@@ -1,28 +1,21 @@
 import type { PublicationListItem } from "../lib/api.ts";
-
-function extractRootDomain(domain: string): string {
-  const parts = domain.toLowerCase().split(".");
-  if (parts.length <= 2) return domain.toLowerCase();
-  return parts.slice(-2).join(".");
-}
+import { brandShortenerMap } from "../../source/brandShorteners";
+import {
+  buildPublicationIndex as buildSharedIndex,
+  resolvePublicationEntry
+} from "../../source/publicationResolver";
 
 export function buildPublicationIndex(
   items: readonly PublicationListItem[]
 ): ReadonlyMap<string, PublicationListItem> {
-  const map = new Map<string, PublicationListItem>();
-  for (const item of items) {
-    map.set(item.hostname.toLowerCase(), item);
-  }
-  return map;
+  return buildSharedIndex(items);
 }
 
 export function resolvePublication(
   domain: string | null,
   index: ReadonlyMap<string, PublicationListItem>
 ): PublicationListItem | null {
-  if (!domain) return null;
-  const root = extractRootDomain(domain);
-  return index.get(root) ?? index.get(domain.toLowerCase()) ?? null;
+  return resolvePublicationEntry(domain, index, brandShortenerMap);
 }
 
 export function formatDomainLabel(domain: string): string {

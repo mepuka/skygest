@@ -49,3 +49,17 @@ export const ProviderRegistryManifest = Schema.Struct({
 export type ProviderRegistryManifest = Schema.Schema.Type<
   typeof ProviderRegistryManifest
 >;
+
+export const BrandShortenerEntry = Schema.Struct({
+  shortDomain: Schema.String.pipe(Schema.minLength(1)),
+  resolvedDomain: Schema.String.pipe(Schema.minLength(1))
+});
+export type BrandShortenerEntry = Schema.Schema.Type<typeof BrandShortenerEntry>;
+
+export const BrandShortenerManifest = Schema.Struct({
+  version: Schema.String.pipe(Schema.minLength(1)),
+  entries: Schema.Array(BrandShortenerEntry)
+});
+export type BrandShortenerManifest = Schema.Schema.Type<
+  typeof BrandShortenerManifest
+>;
