@@ -4,8 +4,37 @@ export type PublicationLike = {
   readonly hostname: string;
 };
 
-export const publicationDisplayLabel = (hostname: string): string => {
-  switch (hostname) {
+const HIDDEN_PUBLICATION_LABEL_HOSTNAMES = new Set([
+  "archive.is",
+  "arxiv.org",
+  "bit.ly",
+  "buff.ly",
+  "documentcloud.org",
+  "doi.org",
+  "en.wikipedia.org",
+  "goo.gl",
+  "link.springer.com",
+  "lnkd.in",
+  "msn.com",
+  "open.spotify.com",
+  "ow.ly",
+  "sciencedirect.com",
+  "soundcloud.com",
+  "t.me",
+  "tinyurl.com",
+  "web.archive.org",
+  "wp.me",
+  "yahoo.com"
+]);
+
+export const publicationDisplayLabel = (hostname: string): string | null => {
+  const normalized = normalizeDomain(hostname);
+
+  if (HIDDEN_PUBLICATION_LABEL_HOSTNAMES.has(normalized)) {
+    return null;
+  }
+
+  switch (normalized) {
     case "reuters.com":
       return "Reuters";
     case "financialtimes.com":
@@ -15,7 +44,7 @@ export const publicationDisplayLabel = (hostname: string): string => {
     case "washingtonpost.com":
       return "The Washington Post";
     default:
-      return hostname;
+      return normalized;
   }
 };
 
@@ -35,6 +64,13 @@ export const buildPublicationIndex = <A extends PublicationLike>(
   return map;
 };
 
+const publicationLookupCandidates = (domain: string): ReadonlyArray<string> => {
+  const normalized = normalizeDomain(domain);
+  const parts = normalized.split(".");
+
+  return parts.map((_, index) => parts.slice(index).join("."));
+};
+
 export const resolvePublicationEntry = <A extends PublicationLike>(
   domain: string | null,
   index: ReadonlyMap<string, A>,
@@ -45,9 +81,10 @@ export const resolvePublicationEntry = <A extends PublicationLike>(
   const normalized = normalizeDomain(domain);
   const expanded = brandShortenerMap.get(normalized) ?? normalized;
 
-  const exact = index.get(expanded);
-  if (exact !== undefined) return exact;
+  for (const candidate of publicationLookupCandidates(expanded)) {
+    const match = index.get(candidate);
+    if (match !== undefined) return match;
+  }
 
-  const root = extractRootDomain(expanded);
-  return index.get(root) ?? null;
+  return null;
 };

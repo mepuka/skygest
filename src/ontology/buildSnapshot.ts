@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { canonicalTopics, conceptToCanonicalTopicSlug, legacyTopicCompatibility, matcherSignalExclusionConceptSlugs, ambiguityTerms, type CanonicalTopicSlug } from "./canonical";
 import { compactWhitespace, normalizeWord, normalizeHashtag, normalizeDomain } from "./normalize";
+import publicationCuratedSupplementJson from "../../config/ontology/publication-curated-supplement.json";
 
 type ParsedConcept = {
   readonly slug: string;
@@ -82,6 +83,49 @@ type OntologySnapshotData = {
   };
   readonly anomalies: ReadonlyArray<OntologyAnomaly>;
 };
+
+const publicationTierStrength: Record<PublicationSeedTier, number> = {
+  unknown: 0,
+  "general-outlet": 1,
+  "energy-focused": 2
+};
+
+const parseCuratedPublicationSupplement = (
+  input: unknown
+): ReadonlyArray<PublicationSeed> => {
+  if (!Array.isArray(input)) {
+    throw new Error("config/ontology/publication-curated-supplement.json must be an array");
+  }
+
+  const entries = new Map<string, PublicationSeed>();
+
+  for (const rawEntry of input) {
+    if (typeof rawEntry !== "object" || rawEntry === null) {
+      throw new Error("Curated publication supplement entries must be objects");
+    }
+
+    const hostname = normalizeDomain(String((rawEntry as { hostname?: unknown }).hostname ?? ""));
+    const tier = (rawEntry as { tier?: unknown }).tier;
+
+    if (hostname.length === 0) {
+      throw new Error("Curated publication supplement entries must include a hostname");
+    }
+
+    if (tier !== "energy-focused" && tier !== "general-outlet" && tier !== "unknown") {
+      throw new Error(`Invalid publication tier for curated supplement hostname: ${hostname}`);
+    }
+
+    entries.set(hostname, { hostname, tier });
+  }
+
+  return Array.from(entries.values()).sort((left, right) =>
+    left.hostname.localeCompare(right.hostname)
+  );
+};
+
+const curatedPublicationSupplement = parseCuratedPublicationSupplement(
+  publicationCuratedSupplementJson
+);
 
 const parseQuotedValues = (input: string) =>
   Array.from(input.matchAll(/"([^"]+)"/g), (match) => compactWhitespace(match[1] ?? ""));
@@ -278,6 +322,7 @@ const parseAboxPublicationDomains = (aboxTtl: string): ReadonlyArray<string> =>
 
 /** Exact hostnames that are clearly not publications */
 const HOSTNAME_DENYLIST = new Set([
+  "archive.is",
   "amazon.com",
   "apple.com",
   "apple.news",
@@ -303,7 +348,20 @@ const HOSTNAME_DENYLIST = new Set([
   "eventbrite.com",
   "bsky.app",
   "go.bsky.app",
-  "podcasts.apple.com"
+  "podcasts.apple.com",
+  "bit.ly",
+  "buff.ly",
+  "documentcloud.org",
+  "doi.org",
+  "en.wikipedia.org",
+  "goo.gl",
+  "lnkd.in",
+  "open.spotify.com",
+  "ow.ly",
+  "t.me",
+  "tinyurl.com",
+  "web.archive.org",
+  "wp.me"
 ]);
 
 /** Suffixes for infrastructure, CDN, and hosting platforms */
@@ -326,15 +384,18 @@ const INFRASTRUCTURE_SUFFIX_DENYLIST = [
   "r2.dev",
   "github.io",
   "itch.io",
+  "list-manage.com",
   "podigee.io",
   "greenhouse.io",
-  "subscribepage.io"
+  "subscribepage.io",
+  "avature.net"
 ] as const;
 
 /** Platform-hosting suffixes — subdomains of these are user content, not publications */
 const PLATFORM_HOSTING_SUFFIXES = [
   "substack.com",
   "wordpress.com",
+  "blogspot.com",
   "medium.com",
   "eventbrite.com",
   "galabid.com",
@@ -346,10 +407,16 @@ const PLATFORM_HOSTING_SUFFIXES = [
 
 /** Suspicious subdomain prefixes that indicate app/service portals, not publications */
 const SUSPICIOUS_SUBDOMAIN_PREFIXES = [
+  "about.",
+  "amp.",
   "app.",
   "apply.",
+  "calendar.",
+  "conference.",
   "forms.",
   "docs.",
+  "event.",
+  "events.",
   "share.",
   "m.",
   "api.",
@@ -358,26 +425,44 @@ const SUSPICIOUS_SUBDOMAIN_PREFIXES = [
   "job-boards."
 ] as const;
 
-const isLikelyPublicationHostname = (hostname: string): boolean => {
-  // (a) Exact hostname denylist
-  if (HOSTNAME_DENYLIST.has(hostname)) return false;
+type PublicationHostnameRejectionReason =
+  | "exact-denylist"
+  | "government-or-academic"
+  | "infrastructure-suffix"
+  | "platform-hosting"
+  | "suspicious-prefix";
 
-  // (b) Infrastructure suffix denylist
+const isGovernmentOrAcademicHostname = (hostname: string): boolean =>
+  hostname === "gov.uk" ||
+  hostname.endsWith(".gov") ||
+  hostname.includes(".gov.") ||
+  hostname.endsWith(".gov.uk") ||
+  hostname.includes(".gov.uk.") ||
+  hostname.endsWith(".edu") ||
+  hostname.includes(".edu.") ||
+  hostname.endsWith(".ac.uk") ||
+  hostname.includes(".ac.uk.");
+
+const publicationHostnameRejectionReason = (
+  hostname: string
+): PublicationHostnameRejectionReason | null => {
+  if (HOSTNAME_DENYLIST.has(hostname)) return "exact-denylist";
+
+  if (isGovernmentOrAcademicHostname(hostname)) return "government-or-academic";
+
   if (INFRASTRUCTURE_SUFFIX_DENYLIST.some(
     (suffix) => hostname === suffix || hostname.endsWith(`.${suffix}`)
-  )) return false;
+  )) return "infrastructure-suffix";
 
-  // (c) Platform-hosting subdomains (e.g. billmckibben.substack.com)
   if (PLATFORM_HOSTING_SUFFIXES.some(
     (suffix) => hostname.endsWith(`.${suffix}`) && hostname !== suffix
-  )) return false;
+  )) return "platform-hosting";
 
-  // (d) Suspicious subdomain prefixes (e.g. app.galabid.com, forms.gle)
   if (SUSPICIOUS_SUBDOMAIN_PREFIXES.some(
     (prefix) => hostname.startsWith(prefix)
-  )) return false;
+  )) return "suspicious-prefix";
 
-  return true;
+  return null;
 };
 
 const buildPublicationSeed = (
@@ -388,7 +473,8 @@ const buildPublicationSeed = (
 ): PublicationSeedManifest => {
   const energyFocusedDomains = parseDomains(derivedStoreFilter);
   const generalOutletDomains = parseGeneralOutletDomains(derivedStoreFilter);
-
+  const energyFocusedDomainSet = new Set(energyFocusedDomains);
+  const generalOutletDomainSet = new Set(generalOutletDomains);
   const tierByHostname = new Map<string, PublicationSeedTier>();
 
   for (const hostname of energyFocusedDomains) {
@@ -401,6 +487,27 @@ const buildPublicationSeed = (
     }
   }
 
+  // Keep one generated seed, but allow a small checked-in supplement for
+  // high-confidence mainstream publishers that are not yet curated upstream.
+  for (const entry of curatedPublicationSupplement) {
+    const existingTier = tierByHostname.get(entry.hostname);
+    if (
+      existingTier === undefined ||
+      publicationTierStrength[entry.tier] > publicationTierStrength[existingTier]
+    ) {
+      tierByHostname.set(entry.hostname, entry.tier);
+    }
+  }
+
+  const curatedFromOntologyTotal = new Set([
+    ...energyFocusedDomainSet,
+    ...generalOutletDomainSet
+  ]).size;
+  const curatedSupplementTotal = curatedPublicationSupplement.filter(
+    (entry) =>
+      !energyFocusedDomainSet.has(entry.hostname) &&
+      !generalOutletDomainSet.has(entry.hostname)
+  ).length;
   const curatedTotal = tierByHostname.size;
 
   const aboxDomains = aboxTtl === undefined
@@ -409,13 +516,24 @@ const buildPublicationSeed = (
 
   let acceptedAbox = 0;
   let rejectedAbox = 0;
+  const rejectedAboxByReason = new Map<PublicationHostnameRejectionReason, number>();
 
   for (const hostname of aboxDomains) {
-    if (!tierByHostname.has(hostname) && isLikelyPublicationHostname(hostname)) {
+    if (tierByHostname.has(hostname)) {
+      continue;
+    }
+
+    const rejectionReason = publicationHostnameRejectionReason(hostname);
+
+    if (rejectionReason === null) {
       tierByHostname.set(hostname, "unknown");
       acceptedAbox++;
-    } else if (!tierByHostname.has(hostname)) {
+    } else {
       rejectedAbox++;
+      rejectedAboxByReason.set(
+        rejectionReason,
+        (rejectedAboxByReason.get(rejectionReason) ?? 0) + 1
+      );
     }
   }
 
@@ -425,9 +543,16 @@ const buildPublicationSeed = (
   })).sort((a, b) => a.hostname.localeCompare(b.hostname));
 
   console.log(`[publications-seed] curated total: ${curatedTotal}`);
+  console.log(`[publications-seed] curated ontology total: ${curatedFromOntologyTotal}`);
+  console.log(`[publications-seed] curated supplement total: ${curatedSupplementTotal}`);
   console.log(`[publications-seed] raw ABox total: ${aboxDomains.length}`);
   console.log(`[publications-seed] accepted ABox additions: ${acceptedAbox}`);
   console.log(`[publications-seed] rejected ABox additions: ${rejectedAbox}`);
+  for (const [reason, count] of Array.from(rejectedAboxByReason.entries()).sort(([left], [right]) =>
+    left.localeCompare(right)
+  )) {
+    console.log(`[publications-seed] rejected ABox ${reason}: ${count}`);
+  }
   console.log(`[publications-seed] final seed total: ${publications.length}`);
 
   return {

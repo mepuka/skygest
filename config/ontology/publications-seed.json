@@ -1,6 +1,6 @@
 {
   "ontologyVersion": "0.3.0",
-  "snapshotVersion": "0.3.0-7b3ce31da96e",
+  "snapshotVersion": "0.3.0-1f1f1b1426bb",
   "publications": [
     {
       "hostname": "10news.com",
@@ -83,19 +83,11 @@
       "tier": "unknown"
     },
     {
-      "hostname": "about.bnef.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "abudhabimagazine.ae",
       "tier": "unknown"
     },
     {
       "hostname": "aceee.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "afdc.energy.gov",
       "tier": "unknown"
     },
     {
@@ -144,10 +136,6 @@
     },
     {
       "hostname": "americanprogress.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "amp.knowyourmeme.com",
       "tier": "unknown"
     },
     {
@@ -211,10 +199,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "atg.wa.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "atlanticcouncil.org",
       "tier": "unknown"
     },
@@ -271,10 +255,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "berkeley.us13.list-manage.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "berkeleyside.org",
       "tier": "unknown"
     },
@@ -284,10 +264,6 @@
     },
     {
       "hostname": "beyondfossilfuels.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "bharatcharge.blogspot.com",
       "tier": "unknown"
     },
     {
@@ -304,10 +280,6 @@
     },
     {
       "hostname": "blog.yesenergy.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "bloomberg.avature.net",
       "tier": "unknown"
     },
     {
@@ -328,10 +300,6 @@
     },
     {
       "hostname": "bntmedia.uk",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "boem.gov",
       "tier": "unknown"
     },
     {
@@ -363,23 +331,11 @@
       "tier": "unknown"
     },
     {
-      "hostname": "brookings.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "bruegel.org",
       "tier": "unknown"
     },
     {
       "hostname": "brusselstimes.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "budget.senate.gov",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "buff.ly",
       "tier": "unknown"
     },
     {
@@ -405,6 +361,10 @@
     {
       "hostname": "businessgreen.com",
       "tier": "unknown"
+    },
+    {
+      "hostname": "businessinsider.com",
+      "tier": "general-outlet"
     },
     {
       "hostname": "businesspost.ie",
@@ -448,10 +408,6 @@
     },
     {
       "hostname": "caiso.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "calendar.boell.de",
       "tier": "unknown"
     },
     {
@@ -528,10 +484,6 @@
     },
     {
       "hostname": "cbsnews.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "ceees.nd.edu",
       "tier": "unknown"
     },
     {
@@ -675,10 +627,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "climatesolutions.berkeley.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "climatetechatlas.com",
       "tier": "unknown"
     },
@@ -719,10 +667,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "colorado.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "coloradonewsline.com",
       "tier": "unknown"
     },
@@ -736,10 +680,6 @@
     },
     {
       "hostname": "computeforecast.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "conference.sej.org",
       "tier": "unknown"
     },
     {
@@ -775,10 +715,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "covidtests.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "cowboystatedaily.com",
       "tier": "unknown"
     },
@@ -796,10 +732,6 @@
     },
     {
       "hostname": "cpr.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "cpuc.ca.gov",
       "tier": "unknown"
     },
     {
@@ -839,6 +771,10 @@
       "tier": "unknown"
     },
     {
+      "hostname": "dailymail.co.uk",
+      "tier": "general-outlet"
+    },
+    {
       "hostname": "dailymemphian.com",
       "tier": "unknown"
     },
@@ -868,10 +804,6 @@
     },
     {
       "hostname": "deeppressanalysis.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "defense.gov",
       "tier": "unknown"
     },
     {
@@ -915,31 +847,11 @@
       "tier": "unknown"
     },
     {
-      "hostname": "discovery.ucl.ac.uk",
-      "tier": "unknown"
-    },
-    {
       "hostname": "distilled.earth",
       "tier": "unknown"
     },
     {
       "hostname": "diw.de",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "documentcloud.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "documents.dps.ny.gov",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "documents.house.mo.gov",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "doi.org",
       "tier": "unknown"
     },
     {
@@ -972,10 +884,6 @@
     },
     {
       "hostname": "duke-energy.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "e360.yale.edu",
       "tier": "unknown"
     },
     {
@@ -1039,10 +947,6 @@
       "tier": "energy-focused"
     },
     {
-      "hostname": "efiling.energy.ca.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "eia.gov",
       "tier": "energy-focused"
     },
@@ -1063,14 +967,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "elements.lbl.gov",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "elibrary.ferc.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "elpais.com",
       "tier": "unknown"
     },
@@ -1087,19 +983,11 @@
       "tier": "unknown"
     },
     {
-      "hostname": "emp.lbl.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "en.ecoaction.org.ua",
       "tier": "unknown"
     },
     {
       "hostname": "en.m.wikipedia.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "en.wikipedia.org",
       "tier": "unknown"
     },
     {
@@ -1131,23 +1019,11 @@
       "tier": "energy-focused"
     },
     {
-      "hostname": "energy.stanford.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "energyandpolicy.org",
       "tier": "unknown"
     },
     {
       "hostname": "energychangemakers.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "energychoice.ohio.gov",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "energycommerce.house.gov",
       "tier": "unknown"
     },
     {
@@ -1191,23 +1067,11 @@
       "tier": "unknown"
     },
     {
-      "hostname": "energypolicy.columbia.edu",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "energysense.uillinois.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "energyvoice.com",
       "tier": "energy-focused"
     },
     {
       "hostname": "energywatch.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "engineering.cmu.edu",
       "tier": "unknown"
     },
     {
@@ -1251,10 +1115,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "epa.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "equinor.com",
       "tier": "unknown"
     },
@@ -1283,10 +1143,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "event.newschool.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "evinfo.net",
       "tier": "unknown"
     },
@@ -1307,10 +1163,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "faculty.haas.berkeley.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "farmersjournal.ie",
       "tier": "unknown"
     },
@@ -1320,14 +1172,6 @@
     },
     {
       "hostname": "fayobserver.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "federalregister.gov",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "federalreserve.gov",
       "tier": "unknown"
     },
     {
@@ -1379,10 +1223,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "flowcharts.llnl.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "focus.de",
       "tier": "unknown"
     },
@@ -1397,6 +1237,10 @@
     {
       "hostname": "foreignaffairs.com",
       "tier": "unknown"
+    },
+    {
+      "hostname": "foreignpolicy.com",
+      "tier": "general-outlet"
     },
     {
       "hostname": "fortune.com",
@@ -1417,6 +1261,10 @@
     {
       "hostname": "foxbusiness.com",
       "tier": "unknown"
+    },
+    {
+      "hostname": "foxnews.com",
+      "tier": "general-outlet"
     },
     {
       "hostname": "fr.de",
@@ -1503,27 +1351,11 @@
       "tier": "unknown"
     },
     {
-      "hostname": "gov.ca.gov",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "gov.uk",
-      "tier": "unknown"
-    },
-    {
       "hostname": "govconintelligence.com",
       "tier": "unknown"
     },
     {
       "hostname": "governing.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "governor.ny.gov",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "governorsoffice.colorado.gov",
       "tier": "unknown"
     },
     {
@@ -1595,10 +1427,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "haas.berkeley.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "halcyon.eco",
       "tier": "unknown"
     },
@@ -1616,10 +1444,6 @@
     },
     {
       "hostname": "harvardbusiness.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "hayestownshipmi.gov",
       "tier": "unknown"
     },
     {
@@ -1643,10 +1467,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "help.senate.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "heraldextra.com",
       "tier": "unknown"
     },
@@ -1656,10 +1476,6 @@
     },
     {
       "hostname": "holesinthewallcollective.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "home.treasury.gov",
       "tier": "unknown"
     },
     {
@@ -1676,10 +1492,6 @@
     },
     {
       "hostname": "hs.fi",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "hsr.ca.gov",
       "tier": "unknown"
     },
     {
@@ -1943,10 +1755,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "kleinmanenergy.upenn.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "klimareporter.de",
       "tier": "unknown"
     },
@@ -2039,10 +1847,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "lnkd.in",
-      "tier": "unknown"
-    },
-    {
       "hostname": "lombardi.group",
       "tier": "unknown"
     },
@@ -2128,14 +1932,6 @@
     },
     {
       "hostname": "mdr.de",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "mecco.colorado.edu",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "media.mit.edu",
       "tier": "unknown"
     },
     {
@@ -2287,10 +2083,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "nca2023.globalchange.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "ncnewsline.com",
       "tier": "unknown"
     },
@@ -2335,10 +2127,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "news.berkeley.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "news.dealershipguy.com",
       "tier": "unknown"
     },
@@ -2355,15 +2143,7 @@
       "tier": "unknown"
     },
     {
-      "hostname": "news.mit.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "news.mongabay.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "news.stanford.edu",
       "tier": "unknown"
     },
     {
@@ -2403,10 +2183,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "nhc.noaa.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "niemanlab.org",
       "tier": "unknown"
     },
@@ -2419,15 +2195,7 @@
       "tier": "unknown"
     },
     {
-      "hostname": "njoag.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "njspotlightnews.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "noaa.gov",
       "tier": "unknown"
     },
     {
@@ -2457,10 +2225,6 @@
     {
       "hostname": "npr.org",
       "tier": "general-outlet"
-    },
-    {
-      "hostname": "nps.gov",
-      "tier": "unknown"
     },
     {
       "hostname": "nrdc.org",
@@ -2503,8 +2267,8 @@
       "tier": "unknown"
     },
     {
-      "hostname": "nyserda.ny.gov",
-      "tier": "unknown"
+      "hostname": "nypost.com",
+      "tier": "general-outlet"
     },
     {
       "hostname": "nysfocus.com",
@@ -2520,10 +2284,6 @@
     },
     {
       "hostname": "oaarchive.arctic-council.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "oag.ca.gov",
       "tier": "unknown"
     },
     {
@@ -2591,10 +2351,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "open.spotify.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "opendatascience.com",
       "tier": "unknown"
     },
@@ -2636,10 +2392,6 @@
     },
     {
       "hostname": "overshootconference.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "ox.ac.uk",
       "tier": "unknown"
     },
     {
@@ -2688,10 +2440,6 @@
     },
     {
       "hostname": "pnas.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "pnnl.gov",
       "tier": "unknown"
     },
     {
@@ -2859,10 +2607,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "raleighnc.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "rangetherapy.org",
       "tier": "unknown"
     },
@@ -3019,10 +2763,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "sd11.senate.ca.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "seai.ie",
       "tier": "unknown"
     },
@@ -3036,10 +2776,6 @@
     },
     {
       "hostname": "seattletimes.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "sec.gov",
       "tier": "unknown"
     },
     {
@@ -3104,10 +2840,6 @@
     },
     {
       "hostname": "sierraclub.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "sites.nd.edu",
       "tier": "unknown"
     },
     {
@@ -3191,14 +2923,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "starw1.ncuc.gov",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "state.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "stateline.org",
       "tier": "unknown"
     },
@@ -3220,10 +2944,6 @@
     },
     {
       "hostname": "stbaldricks.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "stern.nyu.edu",
       "tier": "unknown"
     },
     {
@@ -3264,10 +2984,6 @@
     },
     {
       "hostname": "sunrisestate.in",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "supremecourt.gov",
       "tier": "unknown"
     },
     {
@@ -3343,10 +3059,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "tceq.texas.gov",
-      "tier": "unknown"
-    },
-    {
       "hostname": "techcrunch.com",
       "tier": "unknown"
     },
@@ -3361,6 +3073,14 @@
     {
       "hostname": "ted.com",
       "tier": "unknown"
+    },
+    {
+      "hostname": "telegraph.co.uk",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "texastribune.org",
+      "tier": "general-outlet"
     },
     {
       "hostname": "theadvocate.com",
@@ -3443,6 +3163,10 @@
       "tier": "unknown"
     },
     {
+      "hostname": "theintercept.com",
+      "tier": "general-outlet"
+    },
+    {
       "hostname": "thejournal.ie",
       "tier": "unknown"
     },
@@ -3511,6 +3235,10 @@
       "tier": "unknown"
     },
     {
+      "hostname": "thestar.com",
+      "tier": "general-outlet"
+    },
+    {
       "hostname": "thestatesman.com",
       "tier": "unknown"
     },
@@ -3549,6 +3277,10 @@
     {
       "hostname": "threads.net",
       "tier": "unknown"
+    },
+    {
+      "hostname": "time.com",
+      "tier": "general-outlet"
     },
     {
       "hostname": "timesfreepress.com",
@@ -3607,23 +3339,7 @@
       "tier": "unknown"
     },
     {
-      "hostname": "uh.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "uk.pinterest.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "ukerc.ac.uk",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "unaeco-lithium-ion-battery.blogspot.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "uncg.edu",
       "tier": "unknown"
     },
     {
@@ -3751,14 +3467,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "web.archive.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "web.stanford.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "westorlandonews.com",
       "tier": "unknown"
     },
@@ -3772,10 +3480,6 @@
     },
     {
       "hostname": "whas11.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "whitehouse.gov",
       "tier": "unknown"
     },
     {
@@ -3855,10 +3559,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "wp.me",
-      "tier": "unknown"
-    },
-    {
       "hostname": "wpr.org",
       "tier": "unknown"
     },
@@ -3883,15 +3583,7 @@
       "tier": "unknown"
     },
     {
-      "hostname": "wusfnews.wusf.usf.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "wvxu.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "wwd.ca.gov",
       "tier": "unknown"
     },
     {
