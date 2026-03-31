@@ -5,6 +5,7 @@ import {
   formatSlimPostRecordDecodeError,
   extractLinkRecords
 } from "../bluesky/PostRecord";
+import { extractEmbedKind } from "../bluesky/EmbedExtract";
 import type { RawEventBatch } from "../domain/types";
 import type { DeletedKnowledgePost, KnowledgePost } from "../domain/bi";
 import { KnowledgeRepo } from "../services/KnowledgeRepo";
@@ -85,6 +86,7 @@ export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (ba
       }
 
       const decoded = record.right;
+      const embedType = extractEmbedKind(decoded.embed ?? null);
       const text = decoded.text?.trim() ?? "";
       const links = extractLinkRecords(decoded, event.did, indexedAt);
       const domains = links
@@ -114,6 +116,7 @@ export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (ba
                     hasLinks: links.length > 0,
                     status: "active",
                     ingestId,
+                    embedType,
                     topics,
                     links
                   }

@@ -175,6 +175,7 @@ export const KnowledgePost = Schema.Struct({
   hasLinks: Schema.Boolean,
   status: Schema.Literal("active", "deleted"),
   ingestId: Schema.String,
+  embedType: Schema.NullOr(EmbedKind),
   topics: Schema.Array(MatchedTopic),
   links: Schema.Array(LinkRecord)
 });

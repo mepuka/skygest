@@ -71,7 +71,8 @@ describe("phase-one migrations", () => {
         { id: 12, name: "post_payloads" },
         { id: 13, name: "post_curation" },
         { id: 14, name: "post_enrichments" },
-        { id: 15, name: "post_enrichment_runs" }
+        { id: 15, name: "post_enrichment_runs" },
+        { id: 16, name: "posts_embed_type" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );

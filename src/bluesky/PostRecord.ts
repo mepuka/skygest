@@ -71,6 +71,7 @@ export const SlimPostRecord = Schema.Struct({
   tags: Schema.optional(Schema.Array(Schema.String)),
   label_values: Schema.optional(Schema.Array(Schema.String)),
   embed: Schema.optional(Schema.Struct({
+    $type: Schema.optional(Schema.String),
     external: Schema.optional(EmbeddedExternal),
     record: Schema.optional(EmbeddedRecord)
   }))
@@ -119,6 +120,7 @@ export const slimPostRecordFromUnknown = (record: unknown): SlimPostRecord =>
       label_values: post.labels?.values.map((label) => label.val),
       embed: post.embed
         ? {
+            $type: post.embed.$type,
             external: post.embed.external
               ? {
                   uri: post.embed.external.uri,
