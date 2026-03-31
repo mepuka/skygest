@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { AtUri } from "./types";
-import { KnowledgePostResult } from "./bi";
+import { FlexibleNumber, KnowledgePostResult } from "./bi";
 
 export const CurationStatus = Schema.Literal("flagged", "curated", "rejected");
 export type CurationStatus = Schema.Schema.Type<typeof CurationStatus>;
@@ -29,10 +29,10 @@ export type CurationRecord = Schema.Schema.Type<typeof CurationRecord>;
 
 export const ListCurationCandidatesInput = Schema.Struct({
   status: Schema.optional(CurationStatus.annotations({ description: "Filter by curation status (default: flagged)" })),
-  minScore: Schema.optional(CurationSignalScore.annotations({ description: "Minimum signal score (0-100) to include" })),
+  minScore: Schema.optional(Schema.Union(CurationSignalScore, Schema.compose(Schema.NumberFromString, CurationSignalScore)).annotations({ description: "Minimum signal score (0-100) to include" })),
   topic: Schema.optional(Schema.String.annotations({ description: "Topic slug to filter by" })),
-  since: Schema.optional(Schema.Number.annotations({ description: "Filter posts flagged after this Unix epoch timestamp (milliseconds)" })),
-  limit: Schema.optional(Schema.Number.annotations({ description: "Maximum number of results to return" }))
+  since: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts flagged after this Unix epoch timestamp (milliseconds)" })),
+  limit: Schema.optional(FlexibleNumber.annotations({ description: "Maximum number of results to return" }))
 });
 export type ListCurationCandidatesInput = Schema.Schema.Type<typeof ListCurationCandidatesInput>;
 

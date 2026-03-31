@@ -2,6 +2,8 @@ import { Schema } from "effect";
 import { AtUri, Did, HttpsUrl } from "./types";
 import { EmbedKind, EmbedPayload } from "./embed";
 
+export const FlexibleNumber = Schema.Union(Schema.Number, Schema.NumberFromString);
+
 export const TopicSlug = Schema.String.pipe(
   Schema.minLength(1),
   Schema.brand("TopicSlug")
@@ -191,9 +193,9 @@ export type DeletedKnowledgePost = Schema.Schema.Type<typeof DeletedKnowledgePos
 export const SearchPostsInput = Schema.Struct({
   query: Schema.String.annotations({ description: "Full-text search query" }),
   topic: Schema.optional(Schema.String.annotations({ description: "Topic slug to filter by, e.g. 'solar' or 'hydrogen'" })),
-  since: Schema.optional(Schema.Number.annotations({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
-  until: Schema.optional(Schema.Number.annotations({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
-  limit: Schema.optional(Schema.Number.annotations({ description: "Maximum number of results to return" }))
+  since: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
+  until: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
+  limit: Schema.optional(FlexibleNumber.annotations({ description: "Maximum number of results to return" }))
 });
 export type SearchPostsInput = Schema.Schema.Type<typeof SearchPostsInput>;
 
@@ -206,10 +208,10 @@ export type KnowledgePostCursor = Schema.Schema.Type<typeof KnowledgePostCursor>
 export const GetRecentPostsInput = Schema.Struct({
   topic: Schema.optional(Schema.String.annotations({ description: "Topic slug to filter by, e.g. 'solar' or 'hydrogen'" })),
   expertDid: Schema.optional(Did),
-  since: Schema.optional(Schema.Number.annotations({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
-  until: Schema.optional(Schema.Number.annotations({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
+  since: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
+  until: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
   cursor: Schema.optional(KnowledgePostCursor),
-  limit: Schema.optional(Schema.Number.annotations({ description: "Maximum number of results to return" }))
+  limit: Schema.optional(FlexibleNumber.annotations({ description: "Maximum number of results to return" }))
 });
 export type GetRecentPostsInput = Schema.Schema.Type<typeof GetRecentPostsInput>;
 
@@ -223,10 +225,10 @@ export type KnowledgeLinkCursor = Schema.Schema.Type<typeof KnowledgeLinkCursor>
 export const GetPostLinksInput = Schema.Struct({
   domain: Schema.optional(Schema.String.annotations({ description: "Link hostname to filter by, e.g. 'reuters.com'" })),
   topic: Schema.optional(Schema.String.annotations({ description: "Topic slug to filter by, e.g. 'solar' or 'hydrogen'" })),
-  since: Schema.optional(Schema.Number.annotations({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
-  until: Schema.optional(Schema.Number.annotations({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
+  since: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
+  until: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
   cursor: Schema.optional(KnowledgeLinkCursor),
-  limit: Schema.optional(Schema.Number.annotations({ description: "Maximum number of results to return" }))
+  limit: Schema.optional(FlexibleNumber.annotations({ description: "Maximum number of results to return" }))
 });
 export type GetPostLinksInput = Schema.Schema.Type<typeof GetPostLinksInput>;
 
@@ -262,7 +264,7 @@ export type GetPostLinksQueryInput = Schema.Schema.Type<typeof GetPostLinksQuery
 export const ListExpertsInput = Schema.Struct({
   domain: Schema.optional(Schema.String.annotations({ description: "Knowledge domain, e.g. 'energy'" })),
   active: Schema.optional(Schema.Boolean.annotations({ description: "Filter by active status" })),
-  limit: Schema.optional(Schema.Number.annotations({ description: "Maximum number of results to return" }))
+  limit: Schema.optional(FlexibleNumber.annotations({ description: "Maximum number of results to return" }))
 });
 export type ListExpertsInput = Schema.Schema.Type<typeof ListExpertsInput>;
 
@@ -576,12 +578,12 @@ export const GetPostThreadInput = Schema.Struct({
     description: "AT Protocol URI of the post to get thread context for"
   }),
   depth: Schema.optional(
-    Schema.Number.pipe(Schema.int(), Schema.between(0, 10)).annotations({
+    FlexibleNumber.pipe(Schema.int(), Schema.between(0, 10)).annotations({
       description: "Reply depth levels to include (0-10, default 3)"
     })
   ),
   parentHeight: Schema.optional(
-    Schema.Number.pipe(Schema.int(), Schema.between(0, 10)).annotations({
+    FlexibleNumber.pipe(Schema.int(), Schema.between(0, 10)).annotations({
       description: "Parent context levels to include (0-10, default 3)"
     })
   )
@@ -625,27 +627,27 @@ export const GetThreadDocumentInput = Schema.Struct({
     description: "AT Protocol URI of the post to render as a document"
   }),
   depth: Schema.optional(
-    Schema.Number.pipe(Schema.int(), Schema.between(0, 10)).annotations({
+    FlexibleNumber.pipe(Schema.int(), Schema.between(0, 10)).annotations({
       description: "Reply depth levels to fetch from Bluesky API (0-10, default 3)"
     })
   ),
   parentHeight: Schema.optional(
-    Schema.Number.pipe(Schema.int(), Schema.between(0, 10)).annotations({
+    FlexibleNumber.pipe(Schema.int(), Schema.between(0, 10)).annotations({
       description: "Parent context levels to fetch (0-10, default 3)"
     })
   ),
   maxDepth: Schema.optional(
-    Schema.Number.pipe(Schema.int(), Schema.between(1, 10)).annotations({
+    FlexibleNumber.pipe(Schema.int(), Schema.between(1, 10)).annotations({
       description: "Max reply nesting depth to include in document (1-10)"
     })
   ),
   minLikes: Schema.optional(
-    Schema.Number.pipe(Schema.int(), Schema.greaterThanOrEqualTo(0)).annotations({
+    FlexibleNumber.pipe(Schema.int(), Schema.greaterThanOrEqualTo(0)).annotations({
       description: "Minimum likes for a reply to be included"
     })
   ),
   topN: Schema.optional(
-    Schema.Number.pipe(Schema.int(), Schema.between(1, 50)).annotations({
+    FlexibleNumber.pipe(Schema.int(), Schema.between(1, 50)).annotations({
       description: "Keep only the N highest-engagement replies (1-50)"
     })
   )
