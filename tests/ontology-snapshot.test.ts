@@ -55,7 +55,27 @@ describe("ontology snapshot builder", () => {
     }
   });
 
-  it("keeps obvious utility and institutional hosts out of the ABox publication seed", () => {
+  it("changes the publication seed version when ABox-only entries change without changing the ontology snapshot version", () => {
+    const base = buildOntologyArtifacts({
+      ttl: readSource("energy-news-reference-individuals.ttl"),
+      derivedStoreFilter: readSource("derived-store-filter.md"),
+      owlJson: readSource("energy-news.json")
+    });
+    const withAbox = buildOntologyArtifacts({
+      ttl: readSource("energy-news-reference-individuals.ttl"),
+      derivedStoreFilter: readSource("derived-store-filter.md"),
+      owlJson: readSource("energy-news.json"),
+      aboxTtl: 'enews:one enews:siteDomain "example.com" .'
+    });
+
+    expect(withAbox.publicationsSeed.publications).toHaveLength(
+      base.publicationsSeed.publications.length + 1
+    );
+    expect(withAbox.snapshot.snapshotVersion).toBe(base.snapshot.snapshotVersion);
+    expect(withAbox.publicationsSeed.snapshotVersion).not.toBe(base.publicationsSeed.snapshotVersion);
+  });
+
+  it("keeps targeted junk hosts out of the ABox seed while allowing institutional hosts through", () => {
     const { publicationsSeed } = buildOntologyArtifacts({
       ttl: readSource("energy-news-reference-individuals.ttl"),
       derivedStoreFilter: readSource("derived-store-filter.md"),
@@ -84,13 +104,13 @@ describe("ontology snapshot builder", () => {
     expect(seededHostnames.has("apply.interfolio.com")).toBe(false);
     expect(seededHostnames.has("app.galabid.com")).toBe(false);
     expect(seededHostnames.has("docs.google.com")).toBe(false);
-    expect(seededHostnames.has("news.berkeley.edu")).toBe(false);
-    expect(seededHostnames.has("whitehouse.gov")).toBe(false);
     expect(seededHostnames.has("buff.ly")).toBe(false);
     expect(seededHostnames.has("wp.me")).toBe(false);
     expect(seededHostnames.has("blogname.blogspot.com")).toBe(false);
     expect(seededHostnames.has("about.bnef.com")).toBe(false);
 
+    expect(seededHostnames.has("news.berkeley.edu")).toBe(true);
+    expect(seededHostnames.has("whitehouse.gov")).toBe(true);
     expect(seededHostnames.has("businessinsider.com")).toBe(true);
     expect(seededHostnames.has("foxnews.com")).toBe(true);
     expect(seededHostnames.has("bbc.co.uk")).toBe(true);

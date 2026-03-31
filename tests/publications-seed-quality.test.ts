@@ -19,21 +19,17 @@ const seededHostnames = new Set(
 );
 
 describe("checked-in publications seed quality", () => {
-  it("keeps known junk, utility, and institutional hosts out of the seed", () => {
+  it("keeps known junk, utility, and service hosts out of the seed", () => {
     for (const hostname of [
       "amazon.com",
       "apple.news",
       "apply.interfolio.com",
       "app.galabid.com",
       "docs.google.com",
-      "news.berkeley.edu",
-      "whitehouse.gov",
       "buff.ly",
       "wp.me",
       "bharatcharge.blogspot.com",
       "about.bnef.com",
-      "afdc.energy.gov",
-      "brookings.edu",
       "doi.org",
       "en.wikipedia.org",
       "open.spotify.com"
@@ -49,6 +45,18 @@ describe("checked-in publications seed quality", () => {
       "carbonbrief.org",
       "bbc.co.uk",
       "abc.net.au"
+    ]) {
+      expect(seededHostnames.has(hostname), `${hostname} should stay seeded`).toBe(true);
+    }
+  });
+
+  it("retains institutional publication hosts that were restored by the targeted filter", () => {
+    for (const hostname of [
+      "brookings.edu",
+      "e360.yale.edu",
+      "news.mit.edu",
+      "news.stanford.edu",
+      "federalregister.gov"
     ]) {
       expect(seededHostnames.has(hostname), `${hostname} should stay seeded`).toBe(true);
     }

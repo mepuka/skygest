@@ -261,6 +261,20 @@ const makeSourceDigest = (input: BuildOntologySnapshotInput) =>
     .update(input.owlJson ?? "")
     .digest("hex");
 
+const makePublicationSeedVersion = (
+  ontologyVersion: string,
+  publications: ReadonlyArray<PublicationSeed>
+) => {
+  const digest = createHash("sha256")
+    .update(JSON.stringify({
+      ontologyVersion,
+      publications
+    }))
+    .digest("hex");
+
+  return `${ontologyVersion}-${digest.slice(0, 12)}`;
+};
+
 const validateMappingCoverage = (concepts: ReadonlyArray<ParsedConcept>) => {
   const parsedSlugs = new Set(concepts.map((concept) => concept.slug));
   const mappingSlugs = new Set(Object.keys(conceptToCanonicalTopicSlug));
@@ -427,28 +441,14 @@ const SUSPICIOUS_SUBDOMAIN_PREFIXES = [
 
 type PublicationHostnameRejectionReason =
   | "exact-denylist"
-  | "government-or-academic"
   | "infrastructure-suffix"
   | "platform-hosting"
   | "suspicious-prefix";
-
-const isGovernmentOrAcademicHostname = (hostname: string): boolean =>
-  hostname === "gov.uk" ||
-  hostname.endsWith(".gov") ||
-  hostname.includes(".gov.") ||
-  hostname.endsWith(".gov.uk") ||
-  hostname.includes(".gov.uk.") ||
-  hostname.endsWith(".edu") ||
-  hostname.includes(".edu.") ||
-  hostname.endsWith(".ac.uk") ||
-  hostname.includes(".ac.uk.");
 
 const publicationHostnameRejectionReason = (
   hostname: string
 ): PublicationHostnameRejectionReason | null => {
   if (HOSTNAME_DENYLIST.has(hostname)) return "exact-denylist";
-
-  if (isGovernmentOrAcademicHostname(hostname)) return "government-or-academic";
 
   if (INFRASTRUCTURE_SUFFIX_DENYLIST.some(
     (suffix) => hostname === suffix || hostname.endsWith(`.${suffix}`)
@@ -468,7 +468,6 @@ const publicationHostnameRejectionReason = (
 const buildPublicationSeed = (
   derivedStoreFilter: string,
   ontologyVersion: string,
-  snapshotVersion: string,
   aboxTtl?: string
 ): PublicationSeedManifest => {
   const energyFocusedDomains = parseDomains(derivedStoreFilter);
@@ -541,6 +540,10 @@ const buildPublicationSeed = (
     hostname,
     tier
   })).sort((a, b) => a.hostname.localeCompare(b.hostname));
+  const snapshotVersion = makePublicationSeedVersion(
+    ontologyVersion,
+    publications
+  );
 
   console.log(`[publications-seed] curated total: ${curatedTotal}`);
   console.log(`[publications-seed] curated ontology total: ${curatedFromOntologyTotal}`);
@@ -569,7 +572,6 @@ export const buildOntologyArtifacts = (
   const publicationsSeed = buildPublicationSeed(
     input.derivedStoreFilter,
     snapshot.ontologyVersion,
-    snapshot.snapshotVersion,
     input.aboxTtl
   );
 

@@ -124,7 +124,8 @@ const unknownPublications = publicationsSeed.publications.filter(
 );
 
 console.log(`ontologyVersion=${snapshot.ontologyVersion}`);
-console.log(`snapshotVersion=${snapshot.snapshotVersion}`);
+console.log(`ontologySnapshotVersion=${snapshot.snapshotVersion}`);
+console.log(`publicationsSeedVersion=${publicationsSeed.snapshotVersion}`);
 console.log(`canonicalTopics=${snapshot.canonicalTopics.length}`);
 console.log(`concepts=${snapshot.concepts.length}`);
 console.log(`publications=${publicationsSeed.publications.length}`);
