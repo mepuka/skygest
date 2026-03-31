@@ -232,7 +232,7 @@ const runSeedPublications = (options: {
     const result = yield* client.seedPublications(baseUrl, secret);
 
     yield* Console.log(
-      `Seeded ${result.seeded} publications (snapshot ${result.snapshotVersion})`
+      `Seeded ${result.seeded} publications (seed version ${result.snapshotVersion})`
     );
   });
 

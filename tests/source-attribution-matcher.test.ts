@@ -236,6 +236,34 @@ describe("SourceAttributionMatcher", () => {
     })
   );
 
+  it.effect("populates contentSource.publication for curated follow-up publisher domains", () =>
+    Effect.gen(function* () {
+      const result = yield* runMatch({
+        post: {
+          did: "did:plc:test" as any,
+          handle: null,
+          text: "Interesting read"
+        },
+        links: [
+          {
+            url: "https://www.businessinsider.com/energy-grid-story-2026-03",
+            domain: "businessinsider.com",
+            title: "Energy grid story",
+            description: null,
+            imageUrl: null,
+            extractedAt: 0
+          }
+        ],
+        linkCards: [],
+        vision: null
+      });
+
+      expect(result.resolution).toBe("unmatched");
+      expect(result.contentSource).not.toBeNull();
+      expect(result.contentSource!.publication).toBe("businessinsider.com");
+    })
+  );
+
   it.effect("resolves brand shortener to publication label via matcher", () =>
     Effect.gen(function* () {
       const result = yield* runMatch({
@@ -261,6 +289,90 @@ describe("SourceAttributionMatcher", () => {
       expect(result.resolution).toBe("unmatched");
       expect(result.contentSource).not.toBeNull();
       expect(result.contentSource!.publication).toBe("Reuters");
+    })
+  );
+
+  it.effect("resolves deeper seeded publication subdomains via matcher", () =>
+    Effect.gen(function* () {
+      const result = yield* runMatch({
+        post: {
+          did: "did:plc:test" as any,
+          handle: null,
+          text: "Interesting BBC article"
+        },
+        links: [
+          {
+            url: "https://news.bbc.co.uk/2/hi/science/nature/123456.stm",
+            domain: "news.bbc.co.uk",
+            title: null,
+            description: null,
+            imageUrl: null,
+            extractedAt: 0
+          }
+        ],
+        linkCards: [],
+        vision: null
+      });
+
+      expect(result.resolution).toBe("unmatched");
+      expect(result.contentSource).not.toBeNull();
+      expect(result.contentSource!.publication).toBe("bbc.co.uk");
+    })
+  );
+
+  it.effect("keeps utility hosts out of the publication field via matcher", () =>
+    Effect.gen(function* () {
+      const result = yield* runMatch({
+        post: {
+          did: "did:plc:test" as any,
+          handle: null,
+          text: "Paper DOI"
+        },
+        links: [
+          {
+            url: "https://doi.org/10.1126/science.1234567",
+            domain: "doi.org",
+            title: null,
+            description: null,
+            imageUrl: null,
+            extractedAt: 0
+          }
+        ],
+        linkCards: [],
+        vision: null
+      });
+
+      expect(result.resolution).toBe("unmatched");
+      expect(result.contentSource).not.toBeNull();
+      expect(result.contentSource!.publication).toBeNull();
+    })
+  );
+
+  it.effect("keeps repository and aggregator hosts out of the publication field via matcher", () =>
+    Effect.gen(function* () {
+      const result = yield* runMatch({
+        post: {
+          did: "did:plc:test" as any,
+          handle: null,
+          text: "Interesting paper"
+        },
+        links: [
+          {
+            url: "https://www.sciencedirect.com/science/article/pii/S1234567890123456",
+            domain: "sciencedirect.com",
+            title: null,
+            description: null,
+            imageUrl: null,
+            extractedAt: 0
+          }
+        ],
+        linkCards: [],
+        vision: null
+      });
+
+      expect(result.resolution).toBe("unmatched");
+      expect(result.contentSource).not.toBeNull();
+      expect(result.contentSource!.publication).toBeNull();
     })
   );
 

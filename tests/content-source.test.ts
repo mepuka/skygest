@@ -55,6 +55,29 @@ describe("choosePrimaryContentSource — publication resolution", () => {
     expect(result!.publication).toBe("carbonbrief.org");
   });
 
+  it("populates publication for a curated follow-up publisher domain", () => {
+    const result = choosePrimaryContentSource(
+      {
+        linkCards: [],
+        links: [
+          {
+            url: "https://www.businessinsider.com/energy-grid-story-2026-03",
+            domain: "businessinsider.com",
+            title: "Energy grid story",
+            description: null,
+            imageUrl: null,
+            extractedAt: 0
+          }
+        ]
+      },
+      publicationContext
+    );
+
+    expect(result).not.toBeNull();
+    expect(result!.domain).toBe("businessinsider.com");
+    expect(result!.publication).toBe("businessinsider.com");
+  });
+
   it("resolves brand shortener domain to canonical publication", () => {
     const result = choosePrimaryContentSource(
       {
@@ -78,7 +101,7 @@ describe("choosePrimaryContentSource — publication resolution", () => {
     expect(result!.publication).toBe("Reuters");
   });
 
-  it("resolves reuters.com subdomain to Reuters via root extraction", () => {
+  it("resolves reuters.com subdomain to Reuters via parent-domain fallback", () => {
     const result = choosePrimaryContentSource(
       {
         linkCards: [
@@ -97,6 +120,96 @@ describe("choosePrimaryContentSource — publication resolution", () => {
 
     expect(result).not.toBeNull();
     expect(result!.publication).toBe("Reuters");
+  });
+
+  it("resolves multi-label country domains via parent-domain fallback", () => {
+    const result = choosePrimaryContentSource(
+      {
+        linkCards: [
+          {
+            source: "embed",
+            uri: "https://news.bbc.co.uk/2/hi/science/nature/123456.stm",
+            title: "BBC story",
+            description: null,
+            thumb: null
+          }
+        ],
+        links: []
+      },
+      publicationContext
+    );
+
+    expect(result).not.toBeNull();
+    expect(result!.domain).toBe("news.bbc.co.uk");
+    expect(result!.publication).toBe("bbc.co.uk");
+  });
+
+  it("resolves seeded publication subdomains before collapsing to the site root", () => {
+    const result = choosePrimaryContentSource(
+      {
+        linkCards: [],
+        links: [
+          {
+            url: "https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2024EF123456",
+            domain: "agupubs.onlinelibrary.wiley.com",
+            title: "AGU paper",
+            description: null,
+            imageUrl: null,
+            extractedAt: 0
+          }
+        ]
+      },
+      publicationContext
+    );
+
+    expect(result).not.toBeNull();
+    expect(result!.publication).toBe("onlinelibrary.wiley.com");
+  });
+
+  it("suppresses publication labels for utility and reference hosts", () => {
+    const result = choosePrimaryContentSource(
+      {
+        linkCards: [],
+        links: [
+          {
+            url: "https://doi.org/10.1126/science.1234567",
+            domain: "doi.org",
+            title: null,
+            description: null,
+            imageUrl: null,
+            extractedAt: 0
+          }
+        ]
+      },
+      publicationContext
+    );
+
+    expect(result).not.toBeNull();
+    expect(result!.domain).toBe("doi.org");
+    expect(result!.publication).toBeNull();
+  });
+
+  it("suppresses publication labels for repository and aggregator hosts that remain matchable", () => {
+    const result = choosePrimaryContentSource(
+      {
+        linkCards: [],
+        links: [
+          {
+            url: "https://www.sciencedirect.com/science/article/pii/S1234567890123456",
+            domain: "sciencedirect.com",
+            title: null,
+            description: null,
+            imageUrl: null,
+            extractedAt: 0
+          }
+        ]
+      },
+      publicationContext
+    );
+
+    expect(result).not.toBeNull();
+    expect(result!.domain).toBe("sciencedirect.com");
+    expect(result!.publication).toBeNull();
   });
 
   it("returns publication = null for unknown domains", () => {

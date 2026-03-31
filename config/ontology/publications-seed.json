@@ -1,6 +1,6 @@
 {
   "ontologyVersion": "0.3.0",
-  "snapshotVersion": "0.3.0-7b3ce31da96e",
+  "snapshotVersion": "0.3.0-23b38664fbd9",
   "publications": [
     {
       "hostname": "10news.com",
@@ -83,10 +83,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "about.bnef.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "abudhabimagazine.ae",
       "tier": "unknown"
     },
@@ -144,10 +140,6 @@
     },
     {
       "hostname": "americanprogress.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "amp.knowyourmeme.com",
       "tier": "unknown"
     },
     {
@@ -271,10 +263,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "berkeley.us13.list-manage.com",
-      "tier": "unknown"
-    },
-    {
       "hostname": "berkeleyside.org",
       "tier": "unknown"
     },
@@ -284,10 +272,6 @@
     },
     {
       "hostname": "beyondfossilfuels.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "bharatcharge.blogspot.com",
       "tier": "unknown"
     },
     {
@@ -304,10 +288,6 @@
     },
     {
       "hostname": "blog.yesenergy.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "bloomberg.avature.net",
       "tier": "unknown"
     },
     {
@@ -379,10 +359,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "buff.ly",
-      "tier": "unknown"
-    },
-    {
       "hostname": "buildingconnections.eu",
       "tier": "unknown"
     },
@@ -405,6 +381,10 @@
     {
       "hostname": "businessgreen.com",
       "tier": "unknown"
+    },
+    {
+      "hostname": "businessinsider.com",
+      "tier": "general-outlet"
     },
     {
       "hostname": "businesspost.ie",
@@ -448,10 +428,6 @@
     },
     {
       "hostname": "caiso.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "calendar.boell.de",
       "tier": "unknown"
     },
     {
@@ -739,10 +715,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "conference.sej.org",
-      "tier": "unknown"
-    },
-    {
       "hostname": "consilium.europa.eu",
       "tier": "unknown"
     },
@@ -839,6 +811,10 @@
       "tier": "unknown"
     },
     {
+      "hostname": "dailymail.co.uk",
+      "tier": "general-outlet"
+    },
+    {
       "hostname": "dailymemphian.com",
       "tier": "unknown"
     },
@@ -927,19 +903,11 @@
       "tier": "unknown"
     },
     {
-      "hostname": "documentcloud.org",
-      "tier": "unknown"
-    },
-    {
       "hostname": "documents.dps.ny.gov",
       "tier": "unknown"
     },
     {
       "hostname": "documents.house.mo.gov",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "doi.org",
       "tier": "unknown"
     },
     {
@@ -1096,10 +1064,6 @@
     },
     {
       "hostname": "en.m.wikipedia.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "en.wikipedia.org",
       "tier": "unknown"
     },
     {
@@ -1283,10 +1247,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "event.newschool.edu",
-      "tier": "unknown"
-    },
-    {
       "hostname": "evinfo.net",
       "tier": "unknown"
     },
@@ -1399,6 +1359,10 @@
       "tier": "unknown"
     },
     {
+      "hostname": "foreignpolicy.com",
+      "tier": "general-outlet"
+    },
+    {
       "hostname": "fortune.com",
       "tier": "unknown"
     },
@@ -1417,6 +1381,10 @@
     {
       "hostname": "foxbusiness.com",
       "tier": "unknown"
+    },
+    {
+      "hostname": "foxnews.com",
+      "tier": "general-outlet"
     },
     {
       "hostname": "fr.de",
@@ -2039,10 +2007,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "lnkd.in",
-      "tier": "unknown"
-    },
-    {
       "hostname": "lombardi.group",
       "tier": "unknown"
     },
@@ -2503,6 +2467,10 @@
       "tier": "unknown"
     },
     {
+      "hostname": "nypost.com",
+      "tier": "general-outlet"
+    },
+    {
       "hostname": "nyserda.ny.gov",
       "tier": "unknown"
     },
@@ -2588,10 +2556,6 @@
     },
     {
       "hostname": "opb.org",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "open.spotify.com",
       "tier": "unknown"
     },
     {
@@ -3363,6 +3327,14 @@
       "tier": "unknown"
     },
     {
+      "hostname": "telegraph.co.uk",
+      "tier": "general-outlet"
+    },
+    {
+      "hostname": "texastribune.org",
+      "tier": "general-outlet"
+    },
+    {
       "hostname": "theadvocate.com",
       "tier": "unknown"
     },
@@ -3443,6 +3415,10 @@
       "tier": "unknown"
     },
     {
+      "hostname": "theintercept.com",
+      "tier": "general-outlet"
+    },
+    {
       "hostname": "thejournal.ie",
       "tier": "unknown"
     },
@@ -3511,6 +3487,10 @@
       "tier": "unknown"
     },
     {
+      "hostname": "thestar.com",
+      "tier": "general-outlet"
+    },
+    {
       "hostname": "thestatesman.com",
       "tier": "unknown"
     },
@@ -3549,6 +3529,10 @@
     {
       "hostname": "threads.net",
       "tier": "unknown"
+    },
+    {
+      "hostname": "time.com",
+      "tier": "general-outlet"
     },
     {
       "hostname": "timesfreepress.com",
@@ -3616,10 +3600,6 @@
     },
     {
       "hostname": "ukerc.ac.uk",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "unaeco-lithium-ion-battery.blogspot.com",
       "tier": "unknown"
     },
     {
@@ -3751,10 +3731,6 @@
       "tier": "unknown"
     },
     {
-      "hostname": "web.archive.org",
-      "tier": "unknown"
-    },
-    {
       "hostname": "web.stanford.edu",
       "tier": "unknown"
     },
@@ -3852,10 +3828,6 @@
     },
     {
       "hostname": "worldscientific.com",
-      "tier": "unknown"
-    },
-    {
-      "hostname": "wp.me",
       "tier": "unknown"
     },
     {

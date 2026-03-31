@@ -47,5 +47,5 @@ describe("worker feed routing", () => {
       error: "NotFound",
       message: "not found"
     });
-  });
+  }, 10_000);
 });

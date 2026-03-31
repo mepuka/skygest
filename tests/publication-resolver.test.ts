@@ -2,6 +2,7 @@ import { describe, expect, it } from "@effect/vitest";
 import {
   buildPublicationIndex,
   extractRootDomain,
+  publicationDisplayLabel,
   resolvePublicationEntry,
   type PublicationLike,
 } from "../src/source/publicationResolver";
@@ -13,6 +14,10 @@ const entries: ReadonlyArray<PublicationLike> = [
   { hostname: "nytimes.com" },
   { hostname: "washingtonpost.com" },
   { hostname: "cbc.ca" },
+  { hostname: "bbc.co.uk" },
+  { hostname: "abc.net.au" },
+  { hostname: "onlinelibrary.wiley.com" },
+  { hostname: "doi.org" },
 ];
 
 const index = buildPublicationIndex(entries);
@@ -47,6 +52,16 @@ describe("resolvePublicationEntry", () => {
     expect(result).toEqual({ hostname: "reuters.com" });
   });
 
+  it("walks parent domains for multi-label country domains", () => {
+    const result = resolvePublicationEntry("news.bbc.co.uk", index, brandShortenerMap);
+    expect(result).toEqual({ hostname: "bbc.co.uk" });
+  });
+
+  it("walks parent domains for seeded subdomain publications", () => {
+    const result = resolvePublicationEntry("agupubs.onlinelibrary.wiley.com", index, brandShortenerMap);
+    expect(result).toEqual({ hostname: "onlinelibrary.wiley.com" });
+  });
+
   it("shortener expansion (reut.rs → reuters.com)", () => {
     const result = resolvePublicationEntry("reut.rs", index, brandShortenerMap);
     expect(result).toEqual({ hostname: "reuters.com" });
@@ -65,5 +80,25 @@ describe("resolvePublicationEntry", () => {
   it("null domain returns null", () => {
     const result = resolvePublicationEntry(null, index, brandShortenerMap);
     expect(result).toBeNull();
+  });
+});
+
+describe("publicationDisplayLabel", () => {
+  it("returns a friendly label for mapped publications", () => {
+    expect(publicationDisplayLabel("reuters.com")).toBe("Reuters");
+  });
+
+  it("suppresses obvious utility, repository, and aggregator hosts", () => {
+    for (const hostname of [
+      "doi.org",
+      "arxiv.org",
+      "link.springer.com",
+      "sciencedirect.com",
+      "yahoo.com",
+      "msn.com",
+      "soundcloud.com"
+    ]) {
+      expect(publicationDisplayLabel(hostname), `${hostname} should not display as a publication`).toBeNull();
+    }
   });
 });

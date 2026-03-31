@@ -1,0 +1,42 @@
+[
+  {
+    "hostname": "businessinsider.com",
+    "tier": "general-outlet"
+  },
+  {
+    "hostname": "dailymail.co.uk",
+    "tier": "general-outlet"
+  },
+  {
+    "hostname": "foreignpolicy.com",
+    "tier": "general-outlet"
+  },
+  {
+    "hostname": "foxnews.com",
+    "tier": "general-outlet"
+  },
+  {
+    "hostname": "nypost.com",
+    "tier": "general-outlet"
+  },
+  {
+    "hostname": "telegraph.co.uk",
+    "tier": "general-outlet"
+  },
+  {
+    "hostname": "texastribune.org",
+    "tier": "general-outlet"
+  },
+  {
+    "hostname": "theintercept.com",
+    "tier": "general-outlet"
+  },
+  {
+    "hostname": "thestar.com",
+    "tier": "general-outlet"
+  },
+  {
+    "hostname": "time.com",
+    "tier": "general-outlet"
+  }
+]
