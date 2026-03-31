@@ -190,6 +190,7 @@ describe("repository layers", () => {
         hasLinks: false,
         status: "active",
         ingestId: `${runPrefix}-${i}`,
+        embedType: null,
         topics: [],
         links: []
       });

@@ -395,6 +395,14 @@ const migration15: D1Migration = {
   ]
 };
 
+const migration16: D1Migration = {
+  id: 16,
+  name: "posts_embed_type",
+  statements: [
+    `ALTER TABLE posts ADD COLUMN embed_type TEXT CHECK (embed_type IN ('link', 'img', 'quote', 'media', 'video'))`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -410,5 +418,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration12,
   migration13,
   migration14,
-  migration15
+  migration15,
+  migration16
 ];

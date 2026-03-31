@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { AtUri } from "./types";
-import { KnowledgePostResult } from "./bi";
+import { FlexibleNumber, KnowledgePostResult } from "./bi";
 
 export const EditorialScore = Schema.Number.pipe(
   Schema.greaterThanOrEqualTo(0),
@@ -42,9 +42,9 @@ export const RemoveEditorialPickInput = Schema.Struct({
 export type RemoveEditorialPickInput = Schema.Schema.Type<typeof RemoveEditorialPickInput>;
 
 export const ListEditorialPicksInput = Schema.Struct({
-  minScore: Schema.optional(EditorialScore.annotations({ description: "Minimum editorial score (0-100) to include" })),
-  since: Schema.optional(Schema.Number.annotations({ description: "Filter picks created after this Unix epoch timestamp (milliseconds)" })),
-  limit: Schema.optional(Schema.Number.annotations({ description: "Maximum number of results to return" }))
+  minScore: Schema.optional(Schema.Union(EditorialScore, Schema.compose(Schema.NumberFromString, EditorialScore)).annotations({ description: "Minimum editorial score (0-100) to include" })),
+  since: Schema.optional(FlexibleNumber.annotations({ description: "Filter picks created after this Unix epoch timestamp (milliseconds)" })),
+  limit: Schema.optional(FlexibleNumber.annotations({ description: "Maximum number of results to return" }))
 });
 export type ListEditorialPicksInput = Schema.Schema.Type<typeof ListEditorialPicksInput>;
 

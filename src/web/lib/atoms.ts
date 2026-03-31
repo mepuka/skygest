@@ -18,16 +18,6 @@ export const publicationsAtom = SkygestApi.query("publications", "list", {
   Atom.keepAlive
 );
 
-export const postsAtom = SkygestApi.runtime.atom(() =>
-  Effect.gen(function* () {
-    const client = yield* SkygestApi;
-    const result = yield* client.posts.recent({
-      urlParams: { limit: 30 }
-    });
-    return result.items;
-  })
-);
-
 export const linksAtom = SkygestApi.runtime.atom(() =>
   Effect.gen(function* () {
     const client = yield* SkygestApi;

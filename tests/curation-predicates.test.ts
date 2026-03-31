@@ -34,6 +34,7 @@ const makePost = (overrides: Partial<KnowledgePost> = {}): KnowledgePost =>
     hasLinks: false,
     status: "active",
     ingestId: "test-ingest-1",
+    embedType: null,
     topics: [makeTopic("solar")],
     links: [],
     ...overrides
