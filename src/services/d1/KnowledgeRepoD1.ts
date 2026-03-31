@@ -419,14 +419,15 @@ const makeDeleteStatements = (
   db.prepare(`
     INSERT INTO posts (
       uri, did, cid, text, created_at, indexed_at,
-      has_links, status, ingest_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      has_links, status, ingest_id, embed_type
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(uri) DO UPDATE SET
       did = excluded.did,
       cid = excluded.cid,
       indexed_at = excluded.indexed_at,
       status = excluded.status,
-      ingest_id = excluded.ingest_id
+      ingest_id = excluded.ingest_id,
+      embed_type = excluded.embed_type
   `).bind(
     post.uri,
     post.did,
@@ -436,7 +437,8 @@ const makeDeleteStatements = (
     post.indexedAt,
     0,
     "deleted",
-    post.ingestId
+    post.ingestId,
+    null
   ),
   db.prepare("DELETE FROM post_topics WHERE post_uri = ?").bind(post.uri),
   db.prepare("DELETE FROM links WHERE post_uri = ?").bind(post.uri)
@@ -566,7 +568,7 @@ export const KnowledgeRepoD1 = {
           yield* sql`
               INSERT INTO posts (
                 uri, did, cid, text, created_at, indexed_at,
-                has_links, status, ingest_id
+                has_links, status, ingest_id, embed_type
               ) VALUES (
                 ${validated.uri},
                 ${validated.did},
@@ -576,14 +578,16 @@ export const KnowledgeRepoD1 = {
                 ${validated.indexedAt},
                 0,
                 'deleted',
-                ${validated.ingestId}
+                ${validated.ingestId},
+                ${null}
               )
               ON CONFLICT(uri) DO UPDATE SET
                 did = excluded.did,
                 cid = excluded.cid,
                 indexed_at = excluded.indexed_at,
                 status = excluded.status,
-                ingest_id = excluded.ingest_id
+                ingest_id = excluded.ingest_id,
+                embed_type = excluded.embed_type
             `.pipe(Effect.asVoid);
 
           yield* sql`DELETE FROM post_topics WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);

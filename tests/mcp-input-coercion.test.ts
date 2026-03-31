@@ -23,6 +23,11 @@ describe("MCP input schemas accept string-encoded numbers", () => {
     expect(result.limit).toBe(20);
   });
 
+  it("SearchPostsInput rejects non-finite numeric strings", () => {
+    expect(() => decodeSync(SearchPostsInput)({ query: "solar", limit: "Infinity" })).toThrow();
+    expect(() => decodeSync(SearchPostsInput)({ query: "solar", since: "NaN" })).toThrow();
+  });
+
   it("GetRecentPostsInput accepts limit as string", () => {
     const result = decodeSync(GetRecentPostsInput)({ limit: "10" });
     expect(result.limit).toBe(10);

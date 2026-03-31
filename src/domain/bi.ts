@@ -2,7 +2,14 @@ import { Schema } from "effect";
 import { AtUri, Did, HttpsUrl } from "./types";
 import { EmbedKind, EmbedPayload } from "./embed";
 
-export const FlexibleNumber = Schema.Union(Schema.Number, Schema.NumberFromString);
+const isFiniteNumber = (value: number) => Number.isFinite(value);
+
+const FiniteNumber = Schema.Number.pipe(Schema.filter(isFiniteNumber));
+
+export const FlexibleNumber = Schema.Union(
+  FiniteNumber,
+  Schema.NumberFromString.pipe(Schema.filter(isFiniteNumber))
+);
 
 export const TopicSlug = Schema.String.pipe(
   Schema.minLength(1),

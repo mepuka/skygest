@@ -1,7 +1,7 @@
 import { SqlClient } from "@effect/sql";
 import { Effect, Layer } from "effect";
 import { describe, expect, it } from "@effect/vitest";
-import type { KnowledgePost } from "../src/domain/bi";
+import type { DeletedKnowledgePost, KnowledgePost } from "../src/domain/bi";
 import type { EmbedKind } from "../src/domain/embed";
 import { KnowledgeRepo } from "../src/services/KnowledgeRepo";
 import { KnowledgeRepoD1 } from "../src/services/d1/KnowledgeRepoD1";
@@ -26,6 +26,15 @@ const makePost = (uri: string, embedType: EmbedKind | null): KnowledgePost => ({
   embedType,
   topics: [],
   links: []
+});
+
+const makeDeletedPost = (uri: string): DeletedKnowledgePost => ({
+  uri: uri as any,
+  did: "did:plc:test" as any,
+  cid: null,
+  createdAt: Date.now(),
+  indexedAt: Date.now(),
+  ingestId: `${uri}:delete:none:${Date.now()}`
 });
 
 const seedTestExpert = Effect.gen(function* () {
@@ -78,6 +87,25 @@ describe("embed type persisted during ingest", () => {
       const rows = yield* sql<{ embed_type: string | null }>`
         SELECT embed_type FROM posts WHERE uri = ${"at://did:plc:test/app.bsky.feed.post/text1"}
       `;
+      expect(rows[0]?.embed_type).toBeNull();
+    }).pipe(Effect.provide(makeLayer()))
+  );
+
+  it.effect("clears embed_type when a stored post is deleted", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      yield* seedTestExpert;
+      const repo = yield* KnowledgeRepo;
+      const uri = "at://did:plc:test/app.bsky.feed.post/deleted1";
+
+      yield* repo.upsertPosts([makePost(uri, "img")]);
+      yield* repo.markDeleted([makeDeletedPost(uri)]);
+
+      const sql = yield* SqlClient.SqlClient;
+      const rows = yield* sql<{ status: string; embed_type: string | null }>`
+        SELECT status, embed_type FROM posts WHERE uri = ${uri}
+      `;
+      expect(rows[0]?.status).toBe("deleted");
       expect(rows[0]?.embed_type).toBeNull();
     }).pipe(Effect.provide(makeLayer()))
   );
