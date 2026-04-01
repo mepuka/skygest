@@ -537,6 +537,9 @@ export const formatCurationCandidates = (items: ReadonlyArray<CurationCandidateO
   const rows: SDoc[] = items.map((p, i) => {
     const tag = `[C${i + 1}]`;
     const handle = p.handle ? `@${p.handle}` : p.did;
+    const readinessTag = p.enrichmentReadiness !== undefined && p.enrichmentReadiness !== "none"
+      ? ` · ${p.enrichmentReadiness}`
+      : "";
     const header = Doc.hsep([
       Doc.text(tag),
       Doc.text(handle),
@@ -545,7 +548,7 @@ export const formatCurationCandidates = (items: ReadonlyArray<CurationCandidateO
       Doc.text("\u00B7"),
       Doc.text(formatTimestamp(p.createdAt)),
       Doc.text("\u00B7"),
-      Doc.text(`score:${p.signalScore}`)
+      Doc.text(`score:${p.signalScore}${readinessTag}`)
     ]);
 
     const bodyText = truncate(collapse(p.text), 200);

@@ -547,6 +547,14 @@ const makeReadOnlyHandlers = (
     ),
   list_curation_candidates: (input: typeof ListCurationCandidatesInput.Type) =>
     curationService.listCandidates(input).pipe(
+      Effect.flatMap((items) =>
+        Effect.forEach(items, (item) =>
+          enrichmentReadService.getPost(item.uri).pipe(
+            Effect.map((e) => ({ ...item, enrichmentReadiness: e.readiness }))
+          ),
+          { concurrency: "unbounded" }
+        )
+      ),
       Effect.map((items) => ({
         items,
         _display: formatCurationCandidates(items)

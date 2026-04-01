@@ -17,7 +17,7 @@ import { EnrichmentRunsRepo } from "../src/services/EnrichmentRunsRepo";
 import { EnrichmentRunsRepoD1 } from "../src/services/d1/EnrichmentRunsRepoD1";
 import { makeBiLayer, seedKnowledgeBase, sampleDid } from "./support/runtime";
 import { runMigrations } from "../src/db/migrate";
-import { formatEnrichments } from "../src/mcp/Fmt";
+import { formatEnrichments, formatCurationCandidates } from "../src/mcp/Fmt";
 
 describe("enrichment read model domain schemas", () => {
   it("decodes EnrichmentReadiness literals", () => {
@@ -328,5 +328,54 @@ describe("formatEnrichments", () => {
     });
     expect(result).toContain("Readiness: pending");
     expect(result).toContain("vision: queued");
+  });
+});
+
+describe("formatCurationCandidates with enrichmentReadiness", () => {
+  const makeCandidate = (overrides: Record<string, unknown> = {}) => ({
+    uri: "at://did:plc:abc/app.bsky.feed.post/xyz" as any,
+    did: "did:plc:abc" as any,
+    handle: "alice.bsky.social",
+    avatar: null,
+    text: "Solar capacity surged in Q1",
+    createdAt: 1710000000000,
+    topics: ["solar"] as readonly string[],
+    tier: "energy-focused" as const,
+    replyCount: null,
+    embedType: null,
+    embedContent: null,
+    signalScore: 72 as any,
+    curationStatus: "flagged" as const,
+    predicatesApplied: ["expert-tier-1"] as readonly string[],
+    flaggedAt: 1710000000000,
+    enrichmentReadiness: "none" as const,
+    ...overrides
+  });
+
+  it("omits readiness tag when enrichmentReadiness is none", () => {
+    const result = formatCurationCandidates([makeCandidate()]);
+    expect(result).toContain("score:72");
+    expect(result).not.toContain("pending");
+    expect(result).not.toContain("complete");
+  });
+
+  it("shows readiness tag when enrichmentReadiness is pending", () => {
+    const result = formatCurationCandidates([makeCandidate({ enrichmentReadiness: "pending" })]);
+    expect(result).toContain("score:72 · pending");
+  });
+
+  it("shows readiness tag when enrichmentReadiness is complete", () => {
+    const result = formatCurationCandidates([makeCandidate({ enrichmentReadiness: "complete" })]);
+    expect(result).toContain("score:72 · complete");
+  });
+
+  it("shows readiness tag when enrichmentReadiness is failed", () => {
+    const result = formatCurationCandidates([makeCandidate({ enrichmentReadiness: "failed" })]);
+    expect(result).toContain("score:72 · failed");
+  });
+
+  it("shows readiness tag when enrichmentReadiness is needs-review", () => {
+    const result = formatCurationCandidates([makeCandidate({ enrichmentReadiness: "needs-review" })]);
+    expect(result).toContain("score:72 · needs-review");
   });
 });
