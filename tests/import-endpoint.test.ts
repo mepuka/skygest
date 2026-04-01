@@ -194,6 +194,15 @@ const postWithNullEmbed: ImportPostsInput["posts"][number] = {
   links: []
 };
 
+const hashtagOnlyPost: ImportPostsInput["posts"][number] = {
+  uri: "x://user1/status/555555" as PostUri,
+  did: decodeDid("did:plc:importtest1"),
+  text: "Big energy announcement today.",
+  createdAt: 1700000000000,
+  hashtags: ["solarenergy"],
+  links: []
+};
+
 describe("POST /admin/import/posts", () => {
   it.live("imports posts that match topics, skips those that don't", () =>
     Effect.promise(() =>
@@ -241,6 +250,63 @@ describe("POST /admin/import/posts", () => {
         expect(expert!.source).toBe("twitter-import");
         expect(expert!.tier).toBe("energy-focused");
         expect(expert!.domain).toBe("energy");
+      })
+    )
+  );
+
+  it.live("preserves existing expert activation and editorial metadata on re-import", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeImportTestLayer({ filename });
+
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            const experts = yield* ExpertsRepo;
+            yield* experts.upsert({
+              did: solarExpert.did,
+              handle: "existing-handle",
+              displayName: "Existing Name",
+              description: "keep this description",
+              avatar: null,
+              domain: "energy",
+              source: "manual",
+              sourceRef: "manual-source",
+              shard: 0,
+              active: true,
+              tier: "general-outlet",
+              addedAt: 123,
+              lastSyncedAt: 456
+            });
+          }).pipe(Effect.provide(layer))
+        );
+
+        await postImport(layer, {
+          experts: [{
+            ...solarExpert,
+            handle: "updated-handle",
+            displayName: "Updated Name"
+          }],
+          posts: [solarPost]
+        });
+
+        const expert = await Effect.runPromise(
+          Effect.gen(function* () {
+            const experts = yield* ExpertsRepo;
+            return yield* experts.getByDid(solarExpert.did);
+          }).pipe(Effect.provide(layer))
+        );
+
+        expect(expert).not.toBeNull();
+        expect(expert!.active).toBe(true);
+        expect(expert!.source).toBe("manual");
+        expect(expert!.sourceRef).toBe("manual-source");
+        expect(expert!.tier).toBe("general-outlet");
+        expect(expert!.description).toBe("keep this description");
+        expect(expert!.addedAt).toBe(123);
+        expect(expert!.lastSyncedAt).toBe(456);
+        expect(expert!.handle).toBe("updated-handle");
+        expect(expert!.displayName).toBe("Updated Name");
       })
     )
   );
@@ -401,6 +467,26 @@ describe("POST /admin/import/posts", () => {
       })
     )
   );
+
+  it.live("imports posts that match through hashtags even when text is generic", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeImportTestLayer({ filename });
+
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        const response = await postImport(layer, {
+          experts: [solarExpert],
+          posts: [hashtagOnlyPost]
+        });
+
+        const body = await expectJsonResponse<ImportPostsOutput>(response);
+
+        expect(body.imported).toBe(1);
+        expect(body.skipped).toBe(0);
+      })
+    )
+  );
 });
 
 describe("curate_post Twitter branch", () => {
@@ -428,11 +514,7 @@ describe("curate_post Twitter branch", () => {
         const layer = makeImportTestLayer({ filename });
 
         // Run migrations and import a Twitter post
-        await Effect.runPromise(
-          Effect.gen(function* () {
-            yield* runMigrations;
-          }).pipe(Effect.provide(layer))
-        );
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
 
         const importResponse = await postImport(layer, {
           experts: [twitterExpert],
@@ -449,7 +531,7 @@ describe("curate_post Twitter branch", () => {
               postUri: "x://12345/status/99001" as PostUri,
               action: "curate" as const,
               note: "interesting chart"
-            });
+            }, "test-curator");
           }).pipe(Effect.provide(layer))
         );
 
@@ -474,11 +556,7 @@ describe("curate_post Twitter branch", () => {
       withTempSqliteFile(async (filename) => {
         const layer = makeImportTestLayer({ filename });
 
-        await Effect.runPromise(
-          Effect.gen(function* () {
-            yield* runMigrations;
-          }).pipe(Effect.provide(layer))
-        );
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
 
         const plainTextPost: ImportPostsInput["posts"][number] = {
           ...twitterPost,
@@ -501,7 +579,7 @@ describe("curate_post Twitter branch", () => {
               postUri: "x://12345/status/99002" as PostUri,
               action: "curate" as const,
               note: "insightful take"
-            });
+            }, "test-curator");
           }).pipe(Effect.provide(layer))
         );
 

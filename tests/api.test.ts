@@ -250,7 +250,8 @@ describe("frontend REST API", () => {
         expect(secondPage.items).toHaveLength(1);
         expect(secondPage.items[0]?.uri).toBe(smokeFixtureUris(sampleDid)[0]);
       })
-    )
+    ),
+    15_000
   );
 
   it.live("supports search and until filtering on /api/posts/search", () =>

@@ -195,6 +195,21 @@ const importExpertToRecord = (
   lastSyncedAt: null
 });
 
+const mergeImportedExpertRecord = (
+  imported: ImportExpertInput,
+  existing: ExpertRecord | undefined,
+  shardCount: number,
+  addedAt: number
+): ExpertRecord =>
+  existing === undefined
+    ? importExpertToRecord(imported, shardCount, addedAt)
+    : {
+        ...existing,
+        handle: imported.handle,
+        displayName: imported.displayName ?? existing.displayName,
+        avatar: imported.avatar ? parseAvatarUrl(imported.avatar) : existing.avatar
+      };
+
 const importLinkToLinkRecord = (
   link: ImportPostInput["links"][number],
   indexedAt: number
@@ -386,10 +401,19 @@ const AdminHandlers = Layer.mergeAll(
 
         const now = Date.now();
 
-        // 1. Upsert experts with active: false (not polled)
+        // 1. Insert new experts; preserve existing activation/tier/editorial metadata
         if (payload.experts.length > 0) {
-          const expertRecords = payload.experts.map((e) =>
-            importExpertToRecord(e, config.ingestShardCount, now)
+          const existingExperts = yield* expertsRepo.getByDids(
+            [...new Set(payload.experts.map((expert) => expert.did))]
+          );
+          const existingByDid = new Map(existingExperts.map((expert) => [expert.did, expert]));
+          const expertRecords = payload.experts.map((expert) =>
+            mergeImportedExpertRecord(
+              expert,
+              existingByDid.get(expert.did),
+              config.ingestShardCount,
+              now
+            )
           );
           yield* expertsRepo.upsertMany(expertRecords);
         }
@@ -403,7 +427,7 @@ const AdminHandlers = Layer.mergeAll(
           const topics = yield* matchTopics({
             text: post.text,
             links,
-            hashtags: []
+            hashtags: post.hashtags ?? []
           });
 
           if (topics.length === 0) {
@@ -455,8 +479,7 @@ const AdminHandlers = Layer.mergeAll(
               Effect.logWarning("import payload save failed").pipe(
                 Effect.annotateLogs({ postUri: post.uri, error: String(e) })
               )
-            ),
-            Effect.catchAll(() => Effect.void)
+            )
           );
         }
 

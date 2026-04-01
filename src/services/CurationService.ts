@@ -213,6 +213,13 @@ const clampCurationLimit = (limit: number | undefined) =>
 
         if (isTwitter && input.action === "curate") {
           const existingPayload = yield* payloadService.getPayload(input.postUri);
+          const storedEmbedType = yield* curationRepo.getPostEmbedType(input.postUri);
+
+          if (storedEmbedType !== null && existingPayload?.embedPayload == null) {
+            return yield* new BlueskyApiError({
+              message: `Imported post ${input.postUri} is missing stored media details and cannot be curated yet`
+            });
+          }
 
           if (existingPayload !== null && existingPayload.captureStage !== "picked") {
             yield* payloadService.markPicked(input.postUri);

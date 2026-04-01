@@ -27,6 +27,29 @@ import type {
 } from "./TwitterNormalizer";
 import { WranglerCli } from "./WranglerCli";
 
+type TwitterPublicService = {
+  readonly getProfile: (username: string) => Effect.Effect<ScraperProfile, unknown, never>;
+  readonly getTweets: (
+    username: string,
+    options?: { readonly limit?: number }
+  ) => Stream.Stream<ScraperTweet, unknown, never>;
+};
+
+type TwitterTweetsService = {
+  readonly getTweet: (id: string) => Effect.Effect<{
+    readonly focalTweetId: string;
+    readonly tweets: ReadonlyArray<ScraperTweetDetailNode>;
+  }, unknown, never>;
+};
+
+type TwitterPublicModule = {
+  readonly TwitterPublic: Effect.Effect<TwitterPublicService, unknown, never>;
+};
+
+type TwitterTweetsModule = {
+  readonly TwitterTweets: Effect.Effect<TwitterTweetsService, unknown, never>;
+};
+
 const deployWorkers = [
   "all",
   "ingest",
@@ -696,14 +719,13 @@ const tweetIdArg = Args.text({ name: "tweet-id" });
 
 /**
  * Dynamically import the twitter scraper at runtime.
- * Returns `any` because the scraper is NOT a compile-time dependency
- * of skygest-cloudflare — it lives in a sibling directory and is only
- * available on the operator's machine.
+ * The scraper is not a compile-time dependency of skygest-cloudflare:
+ * it lives in a sibling directory and is only available on the
+ * operator's machine.
  */
-const importScraper = (modulePath: string) =>
+const importScraper = <A>(modulePath: string) =>
   Effect.tryPromise({
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    try: (): Promise<any> => import(/* @vite-ignore */ modulePath),
+    try: (): Promise<A> => import(/* @vite-ignore */ modulePath) as Promise<A>,
     catch: () =>
       new SmokeAssertionError({
         message: `Failed to import ${modulePath} — is better_twitter_scraper available?`
@@ -711,6 +733,16 @@ const importScraper = (modulePath: string) =>
   });
 
 const SCRAPER_ROOT = process.env.TWITTER_SCRAPER_PATH ?? "/Users/pooks/Dev/better_twitter_scraper/src";
+
+const loadTwitterPublic = (modulePath: string) =>
+  importScraper<TwitterPublicModule>(modulePath).pipe(
+    Effect.flatMap((module) => module.TwitterPublic)
+  );
+
+const loadTwitterTweets = (modulePath: string) =>
+  importScraper<TwitterTweetsModule>(modulePath).pipe(
+    Effect.flatMap((module) => module.TwitterTweets)
+  );
 
 const runTwitterAddExpert = (options: {
   readonly handle: string;
@@ -724,9 +756,8 @@ const runTwitterAddExpert = (options: {
 
     yield* Console.log(`Fetching profile for @${options.handle}`);
 
-    const scraperMod = yield* importScraper(`${SCRAPER_ROOT}/public`);
-    const twitter = yield* scraperMod.TwitterPublic as Effect.Effect<any, any, any>;
-    const profile: ScraperProfile = yield* (twitter.getProfile(options.handle) as Effect.Effect<ScraperProfile, any, any>);
+    const twitter = yield* loadTwitterPublic(`${SCRAPER_ROOT}/public`);
+    const profile = yield* twitter.getProfile(options.handle);
 
     const expert = normalizeProfile(profile, options.tier);
     if (expert === null) {
@@ -762,9 +793,8 @@ const runTwitterImportTimeline = (options: {
       `Importing timeline for @${options.handle} (limit=${String(options.limit)})`
     );
 
-    const scraperMod = yield* importScraper(`${SCRAPER_ROOT}/public`);
-    const twitter = yield* scraperMod.TwitterPublic as Effect.Effect<any, any, any>;
-    const profile: ScraperProfile = yield* (twitter.getProfile(options.handle) as Effect.Effect<ScraperProfile, any, any>);
+    const twitter = yield* loadTwitterPublic(`${SCRAPER_ROOT}/public`);
+    const profile = yield* twitter.getProfile(options.handle);
 
     const expert = normalizeProfile(profile, "independent");
     if (expert === null) {
@@ -773,7 +803,7 @@ const runTwitterImportTimeline = (options: {
     }
 
     const tweetStream = twitter.getTweets(options.handle, { limit: options.limit });
-    const chunk = yield* (Stream.runCollect(tweetStream) as Effect.Effect<any, any, any>);
+    const chunk = yield* Stream.runCollect(tweetStream);
     const tweets: ScraperTweet[] = [...chunk];
 
     const posts = tweets
@@ -804,14 +834,11 @@ const runTwitterImportTweet = (options: {
 
     yield* Console.log(`Importing tweet ${options.tweetId}`);
 
-    const scraperMod = yield* importScraper(`${SCRAPER_ROOT}/public`);
-    const tweetsMod = yield* importScraper(`${SCRAPER_ROOT}/tweets`);
-
-    const twitter = yield* scraperMod.TwitterPublic as Effect.Effect<any, any, any>;
-    const tweetsSvc = yield* tweetsMod.TwitterTweets as Effect.Effect<any, any, any>;
+    const twitter = yield* loadTwitterPublic(`${SCRAPER_ROOT}/public`);
+    const tweetsSvc = yield* loadTwitterTweets(`${SCRAPER_ROOT}/tweets`);
 
     // Get the detail document for this tweet
-    const doc = yield* (tweetsSvc.getTweet(options.tweetId) as Effect.Effect<any, any, any>);
+    const doc = yield* tweetsSvc.getTweet(options.tweetId);
 
     const focal = (doc.tweets as ScraperTweetDetailNode[]).find(
       (t) => t.id === doc.focalTweetId
@@ -828,9 +855,9 @@ const runTwitterImportTweet = (options: {
     }
 
     // Also fetch the profile so we can register the expert
-    const profile: ScraperProfile = yield* (twitter.getProfile(
+    const profile = yield* twitter.getProfile(
       focal.username ?? focal.userId ?? ""
-    ) as Effect.Effect<ScraperProfile, any, any>);
+    );
     const expert = normalizeProfile(profile, "independent");
 
     const result = yield* client.importPosts(baseUrl, secret, {

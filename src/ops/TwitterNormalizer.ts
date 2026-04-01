@@ -129,6 +129,7 @@ export interface NormalizedPost {
   readonly did: Did;
   readonly text: string;
   readonly createdAt: number;
+  readonly hashtags?: readonly string[];
   readonly embedType?: EmbedKind | null;
   readonly embedPayload?: EmbedPayload | null;
   readonly links: readonly ImportLinkInput[];
@@ -155,6 +156,7 @@ export const normalizeTweet = (tweet: ScraperTweet): NormalizedPost | null => {
     did,
     text: tweet.text ?? "",
     createdAt,
+    hashtags: tweet.hashtags,
     ...(embed !== null
       ? { embedType: embed.embedType, embedPayload: embed.embedPayload }
       : {}),

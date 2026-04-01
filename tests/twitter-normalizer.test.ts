@@ -36,6 +36,7 @@ describe("normalizeTweet", () => {
     expect(result!.uri).toBe("x://user42/status/123456789");
     expect(result!.did).toBe("did:x:user42");
     expect(result!.text).toBe("Solar is booming");
+    expect(result!.hashtags).toEqual([]);
     expect(result!.links).toHaveLength(0);
   });
 
@@ -133,6 +134,15 @@ describe("normalizeTweet", () => {
       { url: "https://reuters.com/article/energy", domain: "reuters.com" },
       { url: "https://www.nytimes.com/solar", domain: "www.nytimes.com" }
     ]);
+  });
+
+  it("preserves hashtags for downstream topic matching", () => {
+    const tweet: ScraperTweet = {
+      ...baseTweet,
+      hashtags: ["solarenergy", "grid"]
+    };
+    const result = normalizeTweet(tweet);
+    expect(result!.hashtags).toEqual(["solarenergy", "grid"]);
   });
 
   it("handles malformed URLs gracefully (no domain)", () => {

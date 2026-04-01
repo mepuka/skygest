@@ -7,6 +7,7 @@ import type {
   CurationCandidateOutput,
   ListCurationCandidatesInput
 } from "../domain/curation";
+import type { KnowledgePost } from "../domain/bi";
 
 export class CurationRepo extends Context.Tag("@skygest/CurationRepo")<
   CurationRepo,
@@ -38,5 +39,9 @@ export class CurationRepo extends Context.Tag("@skygest/CurationRepo")<
     readonly postExists: (
       postUri: string
     ) => Effect.Effect<boolean, SqlError | DbError>;
+
+    readonly getPostEmbedType: (
+      postUri: string
+    ) => Effect.Effect<KnowledgePost["embedType"], SqlError | DbError>;
   }
 >() {}

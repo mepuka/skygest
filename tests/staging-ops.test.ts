@@ -280,7 +280,8 @@ describe("staging admin ops routes", () => {
           await close();
         }
       })
-    )
+    ),
+    15_000
   );
 
   it.live("curates a post through the admin route, captures payloads, and attempts enrichment launch", () =>

@@ -6,7 +6,7 @@ import {
   CurationRecord as CurationRecordSchema,
   CurationCandidateOutput as CurationCandidateOutputSchema
 } from "../../domain/curation";
-import { emptyKnowledgePostHydration } from "../../domain/bi";
+import { emptyKnowledgePostHydration, ThreadEmbedType } from "../../domain/bi";
 import { decodeWithDbError } from "./schemaDecode";
 import { topicFilterExists } from "./queryFragments";
 
@@ -50,6 +50,11 @@ const CandidateRowSchema = Schema.Struct({
 });
 const CandidateRowsSchema = Schema.Array(CandidateRowSchema);
 type CandidateRow = Schema.Schema.Type<typeof CandidateRowSchema>;
+const PostEmbedTypeRowsSchema = Schema.Array(
+  Schema.Struct({
+    embedType: Schema.NullOr(ThreadEmbedType)
+  })
+);
 
 const toCandidateOutput = (row: CandidateRow) => ({
   uri: row.uri,
@@ -260,13 +265,32 @@ export const CurationRepoD1 = {
         Effect.map((rows) => rows.length > 0)
       );
 
+    const getPostEmbedType = (postUri: string) =>
+      sql<any>`
+        SELECT
+          embed_type as embedType
+        FROM posts
+        WHERE uri = ${postUri}
+        LIMIT 1
+      `.pipe(
+        Effect.flatMap((rows) =>
+          decodeWithDbError(
+            PostEmbedTypeRowsSchema,
+            rows,
+            `Failed to decode post embed type for ${postUri}`
+          )
+        ),
+        Effect.map((rows) => rows[0]?.embedType ?? null)
+      );
+
     return CurationRepo.of({
       upsertFlag,
       bulkUpsertFlags,
       updateStatus,
       getByPostUri,
       listCandidates,
-      postExists
+      postExists,
+      getPostEmbedType
     });
   }))
 };

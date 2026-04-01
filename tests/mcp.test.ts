@@ -76,7 +76,8 @@ describe("read-only MCP server", () => {
           await close();
         }
       })
-    )
+    ),
+    15_000
   );
 });
 
@@ -448,6 +449,62 @@ describe("MCP submit_editorial_pick readiness gate", () => {
             (c): c is { type: "text"; text: string } => c.type === "text"
           );
           expect(text!.text).toContain("enrichment is not complete");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("rejects pick when an embedded post is missing stored media details", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const now = Date.now();
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            yield* sql`
+              UPDATE posts
+              SET embed_type = 'img'
+              WHERE uri = ${solarUri}
+            `;
+            yield* sql`
+              INSERT INTO post_curation
+                (post_uri, status, signal_score, predicates_applied, flagged_at, curated_at, curated_by, review_note)
+              VALUES
+                (${solarUri}, 'curated', ${0}, ${"[]"}, ${now}, ${now}, 'test-curator', 'test')
+              ON CONFLICT(post_uri) DO UPDATE SET
+                status = 'curated',
+                curated_at = ${now},
+                curated_by = 'test-curator',
+                review_note = 'test'
+            `;
+          }).pipe(Effect.provide(layer))
+        );
+
+        const { client, close } = await createMcpClient(
+          makeBiLayer({ filename }),
+          workflowIdentity
+        );
+
+        try {
+          const result = await client.callTool({
+            name: "submit_editorial_pick",
+            arguments: {
+              postUri: solarUri,
+              score: 80,
+              reason: "test pick"
+            }
+          });
+
+          expect(result.isError).toBe(true);
+          const text = result.content.find(
+            (c): c is { type: "text"; text: string } => c.type === "text"
+          );
+          expect(text!.text).toContain("missing stored media details");
         } finally {
           await close();
         }

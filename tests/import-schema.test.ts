@@ -33,6 +33,7 @@ const validPostX = {
   did: "did:x:user123",
   text: "Wind capacity surges in Q3",
   createdAt: 1700000000000,
+  hashtags: ["windpower"],
   links: [{ url: "https://example.com/article", title: "Wind report" }]
 };
 
@@ -158,6 +159,14 @@ describe("ImportPostInput", () => {
     const result = decodeImportPostInput(validPostAt);
     expect(result.embedType).toBeUndefined();
     expect(result.embedPayload).toBeUndefined();
+  });
+
+  it("accepts optional hashtags when provided", () => {
+    const result = decodeImportPostInput({
+      ...validPostAt,
+      hashtags: ["solarenergy", "grid"]
+    });
+    expect(result.hashtags).toEqual(["solarenergy", "grid"]);
   });
 
   it("accepts links with only url (other fields optional)", () => {

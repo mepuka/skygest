@@ -697,6 +697,7 @@ export const ImportPostInput = Schema.Struct({
   did: Did,
   text: Schema.String,
   createdAt: Schema.Number,
+  hashtags: Schema.optional(Schema.Array(Schema.String)),
   embedType: Schema.optional(Schema.NullOr(EmbedKind)),
   embedPayload: Schema.optional(Schema.NullOr(EmbedPayload)),
   links: Schema.Array(ImportLinkInput)
