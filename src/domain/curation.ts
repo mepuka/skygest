@@ -1,6 +1,7 @@
 import { Schema } from "effect";
 import { AtUri } from "./types";
 import { FlexibleNumber, KnowledgePostResult } from "./bi";
+import { EnrichmentReadiness } from "./enrichment";
 
 export const CurationStatus = Schema.Literal("flagged", "curated", "rejected");
 export type CurationStatus = Schema.Schema.Type<typeof CurationStatus>;
@@ -49,7 +50,8 @@ export const CurationCandidateOutput = Schema.extend(
     signalScore: CurationSignalScore,
     curationStatus: CurationStatus,
     predicatesApplied: Schema.Array(Schema.String),
-    flaggedAt: Schema.Number
+    flaggedAt: Schema.Number,
+    enrichmentReadiness: Schema.optionalWith(EnrichmentReadiness, { default: () => "none" as const })
   })
 );
 export type CurationCandidateOutput = Schema.Schema.Type<typeof CurationCandidateOutput>;
