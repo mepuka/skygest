@@ -569,3 +569,11 @@ export const formatCurationCandidates = (items: ReadonlyArray<CurationCandidateO
 
   return render(Doc.vsep(rows));
 };
+
+/**
+ * Format enrichment read model output for MCP display.
+ *
+ * Stub -- implementation in SKY-77 Task 5.
+ */
+export const formatEnrichments = (_output: unknown): string =>
+  "Enrichment formatting not yet implemented.";
