@@ -170,3 +170,58 @@ describe("computeReadiness", () => {
     expect(computeReadiness(enrichments, runs)).toBe("complete");
   });
 });
+
+describe("PostEnrichmentReadService", () => {
+  const makeServiceLayer = () => {
+    const base = makeBiLayer();
+    const enrichmentRunsLayer = EnrichmentRunsRepoD1.layer.pipe(
+      Layer.provideMerge(base)
+    );
+    return PostEnrichmentReadService.layer.pipe(
+      Layer.provideMerge(Layer.mergeAll(base, enrichmentRunsLayer))
+    );
+  };
+
+  it.effect("returns none readiness for a post with no enrichments or runs", () =>
+    Effect.gen(function* () {
+      yield* seedKnowledgeBase();
+      const service = yield* PostEnrichmentReadService;
+      const result = yield* service.getPost(
+        `at://${sampleDid}/app.bsky.feed.post/post-solar`
+      );
+      expect(result.readiness).toBe("none");
+      expect(result.enrichments).toHaveLength(0);
+      expect(result.latestRuns).toHaveLength(0);
+    }).pipe(Effect.provide(makeServiceLayer()))
+  );
+
+  it.effect("returns none readiness for a post that does not exist", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      const service = yield* PostEnrichmentReadService;
+      const result = yield* service.getPost(
+        "at://did:plc:nonexistent/app.bsky.feed.post/fake"
+      );
+      expect(result.readiness).toBe("none");
+      expect(result.enrichments).toHaveLength(0);
+    }).pipe(Effect.provide(makeServiceLayer()))
+  );
+
+  it.effect("works without EnrichmentRunsRepo in the environment", () =>
+    Effect.gen(function* () {
+      yield* seedKnowledgeBase();
+      const service = yield* PostEnrichmentReadService;
+      const result = yield* service.getPost(
+        `at://${sampleDid}/app.bsky.feed.post/post-solar`
+      );
+      expect(result.readiness).toBe("none");
+      expect(result.latestRuns).toHaveLength(0);
+    }).pipe(
+      Effect.provide(
+        PostEnrichmentReadService.layer.pipe(
+          Layer.provideMerge(makeBiLayer())
+        )
+      )
+    )
+  );
+});
