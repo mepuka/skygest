@@ -127,7 +127,9 @@ export class IngestRunWorkflow extends WorkflowEntrypoint<
 
         const experts = yield* ExpertsRepo;
         const active = yield* experts.listActive();
-        return active.map((expert) => expert.did);
+        return active
+          .filter((e) => !(e.did as string).startsWith("did:x:"))
+          .map((expert) => expert.did);
       })
     );
   }
