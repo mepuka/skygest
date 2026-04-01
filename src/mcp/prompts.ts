@@ -128,16 +128,14 @@ WORKFLOW:
    Call start_enrichment(postUri: <uri>) to queue enrichment processing.
    The enrichment type is auto-detected: vision for charts/screenshots, source-attribution for links.
    You can override: start_enrichment(postUri: <uri>, enrichmentType: "vision").
-   IMPORTANT: Posts with visual embeds may need TWO enrichment passes \u2014
-   first vision (chart analysis), then source-attribution (which uses vision output).
-   After vision completes, call start_enrichment again to trigger source-attribution.
+   For visual posts, the workflow automatically chains source-attribution after vision completes \u2014
+   you only need to call start_enrichment once.
 
 6. VERIFY READINESS \u2014 Enriching \u2192 Reviewable
    Call get_post_enrichments(postUri: <uri>) to check readiness.
    Readiness values: none (not started), pending (running), complete (ready), failed, needs-review.
    If pending: continue evaluating other candidates and check back later.
-   If complete: check whether all expected enrichments are present (vision AND source-attribution for visual posts).
-     If source-attribution is missing after vision completes, call start_enrichment again.
+   If complete: proceed to step 8 (ACCEPT BRIEF).
    If failed or needs-review: note the issue and skip for now.
 
 7. DEDUPLICATE

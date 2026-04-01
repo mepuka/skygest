@@ -371,6 +371,25 @@ export const KnowledgeMcpToolkit = ReadOnlyMcpToolkit;
 // Internal helpers
 // ---------------------------------------------------------------------------
 
+/** Check whether an embed payload contains visual assets (img/video).
+ *  Recurses into `media` embeds to check nested media — a media embed
+ *  with only a link card is NOT visual. Mirrors CurationService logic. */
+const hasVisualEmbedPayload = (embedPayload: unknown): boolean => {
+  if (embedPayload === null || embedPayload === undefined || typeof embedPayload !== "object") {
+    return false;
+  }
+  const ep = embedPayload as Record<string, unknown>;
+  switch (ep.kind) {
+    case "img":
+    case "video":
+      return true;
+    case "media":
+      return ep.media !== null && hasVisualEmbedPayload(ep.media);
+    default:
+      return false;
+  }
+};
+
 const extractText = (record: unknown): string => {
   if (typeof record === "object" && record !== null && "text" in record) {
     return typeof record.text === "string" ? record.text : "";
@@ -690,8 +709,9 @@ const makeStartEnrichmentHandler = () => ({
             error: new Error("payload not found")
           });
         }
-        // Detect from embed type: img/video/media -> vision, everything else -> source-attribution
-        enrichmentType = (payload.embedType === "img" || payload.embedType === "video" || payload.embedType === "media")
+        // Detect from embed payload, not just embedType string.
+        // A "media" embed may contain only a link card (no visual assets).
+        enrichmentType = hasVisualEmbedPayload(payload.embedPayload)
           ? "vision" as const
           : "source-attribution" as const;
       }

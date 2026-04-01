@@ -99,7 +99,7 @@ Use \`_display\` for reading results at a glance. Reference items by their ident
 
 **curate_post** — Advance a candidate to Enriching (curate) or Rejected (reject). Curating fetches live embed data from Bluesky and captures the payload. Call start_enrichment separately to queue enrichment processing. Requires curation:write scope.
 
-**start_enrichment** — Queue enrichment for a curated post. Auto-detects type from embed (vision for charts/screenshots, source-attribution for links). Visual posts may need two passes: vision first, then source-attribution. Use get_post_enrichments to poll readiness. Requires curation:write scope.
+**start_enrichment** — Queue enrichment for a curated post. Auto-detects type from embed (vision for charts/screenshots, source-attribution for links). For visual posts, source-attribution is automatically chained after vision completes. Use get_post_enrichments to poll readiness. Requires curation:write scope.
 
 **submit_editorial_pick** — Accept a reviewable brief into the curated feed with a quality score, reason, and optional category. Post must have enrichment readiness = complete. Requires editorial:write scope.
 
