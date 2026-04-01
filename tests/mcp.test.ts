@@ -12,6 +12,8 @@ import { smokeFixtureUris } from "../src/staging/SmokeFixture";
 import {
   createMcpClient,
   makeBiLayer,
+  readOnlyIdentity,
+  workflowIdentity,
   sampleDid,
   seedKnowledgeBase,
   withTempSqliteFile
@@ -262,6 +264,46 @@ describe("MCP list_editorial_picks", () => {
           });
           const allPicks = decodeEditorialPicksResponse(all);
           expect(allPicks.items).toHaveLength(2);
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+});
+
+describe("MCP prompts by profile", () => {
+  it.live("read-only profile exposes 3 prompts (no curate-session)", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(makeBiLayer({ filename }), readOnlyIdentity);
+
+        try {
+          const prompts = await client.listPrompts();
+          const names = prompts.prompts.map((p) => p.name).sort();
+          expect(names).toEqual(["assess-expert", "curate-digest", "explore-topic"]);
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("workflow-write profile exposes 4 prompts including curate-session", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(makeBiLayer({ filename }), workflowIdentity);
+
+        try {
+          const prompts = await client.listPrompts();
+          const names = prompts.prompts.map((p) => p.name).sort();
+          expect(names).toEqual(["assess-expert", "curate-digest", "curate-session", "explore-topic"]);
         } finally {
           await close();
         }

@@ -10,7 +10,7 @@ import { runMigrations } from "../../src/db/migrate";
 import { CandidatePayloadService } from "../../src/services/CandidatePayloadService";
 import { RawEventBatch } from "../../src/domain/types";
 import { processBatch } from "../../src/filter/FilterWorker";
-import { callTool, listTools, type McpToolCall } from "../../src/mcp/Client";
+import { callTool, listTools, listPrompts, type McpToolCall } from "../../src/mcp/Client";
 import { handleMcpRequestWithLayer } from "../../src/mcp/Router";
 import { AppConfig, type AppConfigShape } from "../../src/platform/Config";
 import { EditorialService } from "../../src/services/EditorialService";
@@ -185,29 +185,21 @@ export const createMcpClient = async (
     return handleMcpRequestWithLayer(request, layer, identity);
   }) as typeof globalThis.fetch;
 
+  const clientOptions = {
+    baseUrl,
+    fetch: localFetch,
+    clientName: "skygest-bi-tests",
+    clientVersion: "0.1.0"
+  };
+
   return {
     client: {
       listTools: () =>
-        Effect.runPromise(
-          listTools({
-            baseUrl,
-            fetch: localFetch,
-            clientName: "skygest-bi-tests",
-            clientVersion: "0.1.0"
-          })
-        ),
+        Effect.runPromise(listTools(clientOptions)),
+      listPrompts: () =>
+        Effect.runPromise(listPrompts(clientOptions)),
       callTool: (input: McpToolCall) =>
-        Effect.runPromise(
-          callTool(
-            {
-              baseUrl,
-              fetch: localFetch,
-              clientName: "skygest-bi-tests",
-              clientVersion: "0.1.0"
-            },
-            input
-          )
-        )
+        Effect.runPromise(callTool(clientOptions, input))
     },
     close: async () => {}
   };

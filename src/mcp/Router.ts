@@ -8,7 +8,7 @@ import { CurationService } from "../services/CurationService";
 import { EditorialService } from "../services/EditorialService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { GLOSSARY_CONTENT } from "./glossary";
-import { PromptsLayer } from "./prompts";
+import { ReadOnlyPromptsLayer, WorkflowPromptsLayer } from "./prompts";
 import { toolkitWithDisplayText } from "./registerToolkitWithDisplayText.ts";
 import {
   ReadOnlyMcpToolkit,
@@ -66,9 +66,13 @@ const makeMcpLayer = (
     }
   })();
 
+  const promptsLayer: Layer.Layer<never, never, never> = profile === "workflow-write"
+    ? WorkflowPromptsLayer
+    : ReadOnlyPromptsLayer;
+
   return toolkitAndHandlers.pipe(
     Layer.provideMerge(GlossaryResource),
-    Layer.provideMerge(PromptsLayer),
+    Layer.provideMerge(promptsLayer),
     Layer.provideMerge(mcpServerLayer)
   );
 };
