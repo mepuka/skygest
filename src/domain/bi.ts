@@ -23,7 +23,7 @@ export const OntologyConceptSlug = Schema.String.pipe(
 );
 export type OntologyConceptSlug = Schema.Schema.Type<typeof OntologyConceptSlug>;
 
-export const ExpertSource = Schema.Literal("manual", "starter_pack", "list", "network");
+export const ExpertSource = Schema.Literal("manual", "starter_pack", "list", "network", "twitter-import");
 export type ExpertSource = Schema.Schema.Type<typeof ExpertSource>;
 
 export const ExpertTier = Schema.Literal("energy-focused", "general-outlet", "independent");
