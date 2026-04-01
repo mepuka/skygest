@@ -121,7 +121,7 @@ describe("validateStoredEnrichment", () => {
 
 describe("computeReadiness", () => {
   it("returns complete when validated enrichments exist and no active runs", () => {
-    const enrichments = [{ kind: "vision" }] as ReadonlyArray<PostEnrichmentResult>;
+    const enrichments = [{ kind: "vision" }] as unknown as ReadonlyArray<PostEnrichmentResult>;
     const runs: ReadonlyArray<PostEnrichmentRunSummary> = [];
     expect(computeReadiness(enrichments, runs)).toBe("complete");
   });
@@ -155,7 +155,7 @@ describe("computeReadiness", () => {
   });
 
   it("returns pending when enrichments exist but a run is still active", () => {
-    const enrichments = [{ kind: "vision" }] as ReadonlyArray<PostEnrichmentResult>;
+    const enrichments = [{ kind: "vision" }] as unknown as ReadonlyArray<PostEnrichmentResult>;
     const runs = [
       { enrichmentType: "source-attribution", status: "queued", phase: "queued", lastProgressAt: null, finishedAt: null }
     ] as ReadonlyArray<PostEnrichmentRunSummary>;
@@ -163,7 +163,7 @@ describe("computeReadiness", () => {
   });
 
   it("returns complete only when enrichments exist and no runs are active", () => {
-    const enrichments = [{ kind: "vision" }] as ReadonlyArray<PostEnrichmentResult>;
+    const enrichments = [{ kind: "vision" }] as unknown as ReadonlyArray<PostEnrichmentResult>;
     const runs = [
       { enrichmentType: "vision", status: "complete", phase: "complete", lastProgressAt: 1710000000000, finishedAt: 1710000000000 }
     ] as ReadonlyArray<PostEnrichmentRunSummary>;

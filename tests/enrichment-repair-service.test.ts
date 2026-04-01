@@ -99,6 +99,7 @@ const makeRepoLayer = (
         }
       }),
     markNeedsReview: () => Effect.void,
+    listLatestByPostUri: () => Effect.succeed([]),
     resetForRetry: (input) =>
       Effect.sync(() => {
         events.push({ type: "resetForRetry", input });

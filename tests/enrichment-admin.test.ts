@@ -85,7 +85,8 @@ const makeLayer = (state?: {
       markComplete: () => Effect.void,
       markFailed: () => Effect.void,
       markNeedsReview: () => Effect.void,
-      resetForRetry: () => Effect.succeed(false)
+      resetForRetry: () => Effect.succeed(false),
+      listLatestByPostUri: () => Effect.succeed([])
     }),
     Layer.succeed(EnrichmentRepairService, {
       retryRun: (runId: string, _now?: number) =>

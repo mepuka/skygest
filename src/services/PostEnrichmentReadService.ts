@@ -30,7 +30,7 @@ export class PostEnrichmentReadService extends Context.Tag(
 
       const getPost = Effect.fn("PostEnrichmentReadService.getPost")(
         function* (postUri: string) {
-          const payload = yield* payloadService.getPayload(postUri);
+          const payload = yield* payloadService.getPayload(postUri as GetPostEnrichmentsOutput["postUri"]);
 
           const enrichments =
             payload === null

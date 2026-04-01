@@ -212,6 +212,7 @@ describe("EnrichmentRunWorkflow", () => {
             }
           }),
         resetForRetry: () => Effect.succeed(false),
+        listLatestByPostUri: () => Effect.succeed([]),
         markComplete: (input) =>
           Effect.sync(() => {
             completions.push(input);
@@ -341,6 +342,7 @@ describe("EnrichmentRunWorkflow", () => {
         listStaleActive: () => Effect.succeed([]),
         markPhase: () => Effect.void,
         resetForRetry: () => Effect.succeed(false),
+        listLatestByPostUri: () => Effect.succeed([]),
         markComplete: () => Effect.void,
         markFailed: (input) =>
           Effect.sync(() => {
@@ -408,6 +410,7 @@ describe("EnrichmentRunWorkflow", () => {
         listStaleActive: () => Effect.succeed([]),
         markPhase: () => Effect.void,
         resetForRetry: () => Effect.succeed(false),
+        listLatestByPostUri: () => Effect.succeed([]),
         markComplete: () => Effect.void,
         markFailed: () => Effect.void,
         markNeedsReview: (input) =>
@@ -554,6 +557,7 @@ describe("EnrichmentRunWorkflow", () => {
             }
           }),
         resetForRetry: () => Effect.succeed(false),
+        listLatestByPostUri: () => Effect.succeed([]),
         markComplete: (input) =>
           Effect.sync(() => {
             completions.push(input);
