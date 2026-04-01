@@ -349,7 +349,7 @@ export class ExpertPollExecutor extends Context.Tag("@skygest/ExpertPollExecutor
           since: oldestCreatedAt,
           limit: records.length
         });
-        const remoteUris = new Set(records.map((record) => record.uri));
+        const remoteUris: ReadonlySet<string> = new Set(records.map((record) => record.uri));
         const indexedAt = Date.now();
         const deletions = local
           .filter((post) => !remoteUris.has(post.uri))

@@ -26,6 +26,20 @@ export const AtUri = Schema.String.pipe(
 ).annotations({ description: "AT Protocol URI, e.g. at://did:plc:abc/app.bsky.feed.post/rkey" });
 export type AtUri = Schema.Schema.Type<typeof AtUri>;
 
+export const PostUri = Schema.String.pipe(
+  Schema.pattern(/^(at|x):\/\//),
+  Schema.brand("PostUri")
+).annotations({ description: "Post URI — at:// (Bluesky) or x:// (Twitter)" });
+export type PostUri = Schema.Schema.Type<typeof PostUri>;
+
+export type Platform = "bluesky" | "twitter";
+
+/** Safe widening — every AtUri matches PostUri's pattern (at:// ⊂ at://|x://) */
+export const atUriToPostUri = (uri: AtUri): PostUri => uri as unknown as PostUri;
+
+export const platformFromUri = (uri: PostUri): Platform =>
+  (uri as string).startsWith("at://") ? "bluesky" : "twitter";
+
 export const FeedItem = Schema.Struct({
   post: AtUri,
   reason: Schema.optional(Schema.Unknown)

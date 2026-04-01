@@ -1,6 +1,7 @@
-import { Command, Options } from "@effect/cli";
-import { Console, Effect, Option, Redacted } from "effect";
+import { Args, Command, Options } from "@effect/cli";
+import { Console, Effect, Option, Redacted, Stream } from "effect";
 import { energySeedDid } from "../bootstrap/CheckedInExpertSeeds";
+import type { ExpertTier } from "../domain/bi";
 import type { CurationAction } from "../domain/curation";
 import { defaultSchemaVersionForEnrichmentKind } from "../domain/enrichment";
 import type { EnrichmentRunRecord } from "../domain/enrichmentRun";
@@ -14,7 +15,40 @@ import {
 import { OperatorSecret } from "./OperatorSecret";
 import { runSearchSmokeChecks } from "./SearchSmokeRunner";
 import { StagingOperatorClient } from "./StagingOperatorClient";
+import {
+  normalizeTweet,
+  normalizeTweetDetail,
+  normalizeProfile
+} from "./TwitterNormalizer";
+import type {
+  ScraperTweet,
+  ScraperTweetDetailNode,
+  ScraperProfile
+} from "./TwitterNormalizer";
 import { WranglerCli } from "./WranglerCli";
+
+type TwitterPublicService = {
+  readonly getProfile: (username: string) => Effect.Effect<ScraperProfile, unknown, never>;
+  readonly getTweets: (
+    username: string,
+    options?: { readonly limit?: number }
+  ) => Stream.Stream<ScraperTweet, unknown, never>;
+};
+
+type TwitterTweetsService = {
+  readonly getTweet: (id: string) => Effect.Effect<{
+    readonly focalTweetId: string;
+    readonly tweets: ReadonlyArray<ScraperTweetDetailNode>;
+  }, unknown, never>;
+};
+
+type TwitterPublicModule = {
+  readonly TwitterPublic: Effect.Effect<TwitterPublicService, unknown, never>;
+};
+
+type TwitterTweetsModule = {
+  readonly TwitterTweets: Effect.Effect<TwitterTweetsService, unknown, never>;
+};
 
 const deployWorkers = [
   "all",
@@ -39,6 +73,11 @@ const enrichmentKinds = [
 const curationActions = [
   "curate",
   "reject"
+] as const;
+const expertTiers = [
+  "energy-focused",
+  "general-outlet",
+  "independent"
 ] as const;
 
 const envOption = Options.text("env").pipe(
@@ -657,8 +696,223 @@ const stageCommand = Command.make("stage", {}, () => Effect.void).pipe(
   ])
 );
 
+// ---------------------------------------------------------------------------
+// Twitter import commands
+// ---------------------------------------------------------------------------
+
+const tierOption = Options.choice("tier", expertTiers).pipe(
+  Options.withDescription("Expert tier classification")
+);
+
+const twitterLimitOption = Options.integer("limit").pipe(
+  Options.withDescription("Maximum tweets to import"),
+  Options.withDefault(100)
+);
+
+const sinceOption = Options.text("since").pipe(
+  Options.withDescription("Only import tweets after this ISO date"),
+  Options.optional
+);
+
+const handleArg = Args.text({ name: "handle" });
+const tweetIdArg = Args.text({ name: "tweet-id" });
+
+/**
+ * Dynamically import the twitter scraper at runtime.
+ * The scraper is not a compile-time dependency of skygest-cloudflare:
+ * it lives in a sibling directory and is only available on the
+ * operator's machine.
+ */
+const importScraper = <A>(modulePath: string) =>
+  Effect.tryPromise({
+    try: (): Promise<A> => import(/* @vite-ignore */ modulePath) as Promise<A>,
+    catch: () =>
+      new SmokeAssertionError({
+        message: `Failed to import ${modulePath} — is better_twitter_scraper available?`
+      })
+  });
+
+const SCRAPER_ROOT = process.env.TWITTER_SCRAPER_PATH ?? "/Users/pooks/Dev/better_twitter_scraper/src";
+
+const loadTwitterPublic = (modulePath: string) =>
+  importScraper<TwitterPublicModule>(modulePath).pipe(
+    Effect.flatMap((module) => module.TwitterPublic)
+  );
+
+const loadTwitterTweets = (modulePath: string) =>
+  importScraper<TwitterTweetsModule>(modulePath).pipe(
+    Effect.flatMap((module) => module.TwitterTweets)
+  );
+
+const runTwitterAddExpert = (options: {
+  readonly handle: string;
+  readonly tier: ExpertTier;
+  readonly baseUrl: string;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+
+    yield* Console.log(`Fetching profile for @${options.handle}`);
+
+    const twitter = yield* loadTwitterPublic(`${SCRAPER_ROOT}/public`);
+    const profile = yield* twitter.getProfile(options.handle);
+
+    const expert = normalizeProfile(profile, options.tier);
+    if (expert === null) {
+      yield* Console.log("Profile missing userId, skipping");
+      return;
+    }
+
+    const result = yield* client.importPosts(baseUrl, secret, {
+      experts: [expert],
+      posts: []
+    });
+
+    yield* Console.log(
+      `Added expert ${expert.did} (${expert.handle}) imported=${String(result.imported)} skipped=${String(result.skipped)}`
+    );
+  });
+
+const runTwitterImportTimeline = (options: {
+  readonly handle: string;
+  readonly limit: number;
+  readonly since: Option.Option<string>;
+  readonly baseUrl: string;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+    const sinceMs = Option.map(options.since, (s) => new Date(s).getTime()).pipe(
+      Option.getOrUndefined
+    );
+
+    yield* Console.log(
+      `Importing timeline for @${options.handle} (limit=${String(options.limit)})`
+    );
+
+    const twitter = yield* loadTwitterPublic(`${SCRAPER_ROOT}/public`);
+    const profile = yield* twitter.getProfile(options.handle);
+
+    const expert = normalizeProfile(profile, "independent");
+    if (expert === null) {
+      yield* Console.log("Profile missing userId, skipping");
+      return;
+    }
+
+    const tweetStream = twitter.getTweets(options.handle, { limit: options.limit });
+    const chunk = yield* Stream.runCollect(tweetStream);
+    const tweets: ScraperTweet[] = [...chunk];
+
+    const posts = tweets
+      .map(normalizeTweet)
+      .filter((p): p is NonNullable<typeof p> => p !== null)
+      .filter((p) => sinceMs === undefined || p.createdAt >= sinceMs);
+
+    yield* Console.log(`Normalized ${String(posts.length)} posts from ${String(tweets.length)} tweets`);
+
+    const result = yield* client.importPosts(baseUrl, secret, {
+      experts: [expert],
+      posts
+    });
+
+    yield* Console.log(
+      `Import complete: imported=${String(result.imported)} flagged=${String(result.flagged)} skipped=${String(result.skipped)}`
+    );
+  });
+
+const runTwitterImportTweet = (options: {
+  readonly tweetId: string;
+  readonly baseUrl: string;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+
+    yield* Console.log(`Importing tweet ${options.tweetId}`);
+
+    const twitter = yield* loadTwitterPublic(`${SCRAPER_ROOT}/public`);
+    const tweetsSvc = yield* loadTwitterTweets(`${SCRAPER_ROOT}/tweets`);
+
+    // Get the detail document for this tweet
+    const doc = yield* tweetsSvc.getTweet(options.tweetId);
+
+    const focal = (doc.tweets as ScraperTweetDetailNode[]).find(
+      (t) => t.id === doc.focalTweetId
+    );
+    if (!focal) {
+      yield* Console.log("Focal tweet not found in detail document");
+      return;
+    }
+
+    const post = normalizeTweetDetail(focal);
+    if (post === null) {
+      yield* Console.log("Tweet missing userId, skipping");
+      return;
+    }
+
+    // Also fetch the profile so we can register the expert
+    const profile = yield* twitter.getProfile(
+      focal.username ?? focal.userId ?? ""
+    );
+    const expert = normalizeProfile(profile, "independent");
+
+    const result = yield* client.importPosts(baseUrl, secret, {
+      experts: expert !== null ? [expert] : [],
+      posts: [post]
+    });
+
+    yield* Console.log(
+      `Import complete: imported=${String(result.imported)} flagged=${String(result.flagged)} skipped=${String(result.skipped)}`
+    );
+  });
+
+const twitterAddExpertCommand = Command.make(
+  "add-expert",
+  {
+    handle: handleArg,
+    tier: tierOption,
+    baseUrl: baseUrlOption
+  },
+  ({ handle, tier, baseUrl }) =>
+    runTwitterAddExpert({ handle, tier: tier as ExpertTier, baseUrl })
+);
+
+const twitterImportTimelineCommand = Command.make(
+  "import-timeline",
+  {
+    handle: handleArg,
+    limit: twitterLimitOption,
+    since: sinceOption,
+    baseUrl: baseUrlOption
+  },
+  ({ handle, limit, since, baseUrl }) =>
+    runTwitterImportTimeline({ handle, limit, since, baseUrl })
+);
+
+const twitterImportTweetCommand = Command.make(
+  "import-tweet",
+  {
+    tweetId: tweetIdArg,
+    baseUrl: baseUrlOption
+  },
+  ({ tweetId, baseUrl }) =>
+    runTwitterImportTweet({ tweetId, baseUrl })
+);
+
+const twitterCommand = Command.make("twitter", {}, () => Effect.void).pipe(
+  Command.withSubcommands([
+    twitterAddExpertCommand,
+    twitterImportTimelineCommand,
+    twitterImportTweetCommand
+  ])
+);
+
 export const opsCommand = Command.make("ops", {}, () => Effect.void).pipe(
-  Command.withSubcommands([deployCommand, stageCommand])
+  Command.withSubcommands([deployCommand, stageCommand, twitterCommand])
 );
 
 const cli = Command.run(opsCommand, {

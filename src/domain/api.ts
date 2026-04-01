@@ -6,8 +6,10 @@ import {
   BootstrapExpertsResult,
   ExpandTopicsInput,
   ExpandedTopicsOutput,
-  ExplainPostTopicsOutput,
   ExpertListOutput,
+  ExpertSource,
+  ExpertTier,
+  ExplainPostTopicsOutput,
   GetTopicInput,
   KnowledgeLinkResult,
   KnowledgePostResult,
@@ -43,6 +45,7 @@ import {
   EnrichmentRunStatus,
   EnrichmentRunsOutput
 } from "./enrichmentRun";
+import { EmbedKind, EmbedPayload } from "./embed";
 import { EnrichmentKind, PostEnrichmentsOutput } from "./enrichment";
 import {
   EditorialScore,
@@ -57,7 +60,7 @@ import {
   CuratePostInput,
   CuratePostOutput
 } from "./curation";
-import { AtUri, Did } from "./types";
+import { AtUri, Did, PostUri } from "./types";
 
 const withStatus = <A, I, R>(
   schema: Schema.Schema<A, I, R>,
@@ -273,6 +276,7 @@ const OptionalBooleanFromString = Schema.optional(Schema.BooleanFromString);
 const OptionalString = Schema.optional(Schema.String);
 const DecodedDid = Schema.compose(Schema.StringFromUriComponent, Did);
 const DecodedAtUri = Schema.compose(Schema.StringFromUriComponent, AtUri);
+const DecodedPostUri = Schema.compose(Schema.StringFromUriComponent, PostUri);
 const DecodedSlug = Schema.compose(
   Schema.StringFromUriComponent,
   Schema.String.pipe(Schema.minLength(1))
@@ -285,13 +289,13 @@ const DecodedId = Schema.compose(
 
 export const ChronologicalCursor = Schema.Struct({
   createdAt: Schema.Number,
-  uri: AtUri
+  uri: PostUri
 });
 export type ChronologicalCursor = Schema.Schema.Type<typeof ChronologicalCursor>;
 
 export const LinkPageCursor = Schema.Struct({
   createdAt: Schema.Number,
-  postUri: AtUri,
+  postUri: PostUri,
   url: Schema.String
 });
 export type LinkPageCursor = Schema.Schema.Type<typeof LinkPageCursor>;
@@ -319,7 +323,7 @@ export const encodeLinkPageCursor = (cursor: LinkPageCursor | null) =>
 export const SearchPostsCursor = Schema.Struct({
   rank: Schema.Number,
   createdAt: Schema.Number,
-  uri: AtUri
+  uri: PostUri
 });
 export type SearchPostsCursor = Schema.Schema.Type<typeof SearchPostsCursor>;
 
@@ -474,10 +478,21 @@ export const TopicPathParams = Schema.Struct({
 });
 export type TopicPathParams = Schema.Schema.Type<typeof TopicPathParams>;
 
-export const PostUriPathParams = Schema.Struct({
+/** Thread path param — AT Protocol only (Bluesky thread expansion) */
+export const PostUriThreadPath = Schema.Struct({
   uri: DecodedAtUri
 });
-export type PostUriPathParams = Schema.Schema.Type<typeof PostUriPathParams>;
+export type PostUriThreadPath = Schema.Schema.Type<typeof PostUriThreadPath>;
+
+/** Enrichments/topics path param — platform-agnostic (at:// or x://) */
+export const PostUriEnrichmentsPath = Schema.Struct({
+  uri: DecodedPostUri
+});
+export type PostUriEnrichmentsPath = Schema.Schema.Type<typeof PostUriEnrichmentsPath>;
+
+/** @deprecated Use PostUriThreadPath or PostUriEnrichmentsPath */
+export const PostUriPathParams = PostUriEnrichmentsPath;
+export type PostUriPathParams = PostUriEnrichmentsPath;
 
 export const IngestRunPathParams = Schema.Struct({
   id: DecodedId
@@ -569,7 +584,7 @@ export type ListEnrichmentRunsUrlParams = Schema.Schema.Type<
 >;
 
 export const StartEnrichmentInput = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   enrichmentType: EnrichmentKind,
   schemaVersion: Schema.optional(
     Schema.String.pipe(Schema.minLength(1))
@@ -590,7 +605,8 @@ export const PublicReadRequestSchemas = {
   expandTopic: ExpandTopicUrlParams,
   expertPath: ExpertDidPathParams,
   topicPath: TopicPathParams,
-  postUriPath: PostUriPathParams,
+  postUriPath: PostUriEnrichmentsPath,
+  postUriThreadPath: PostUriThreadPath,
   thread: GetThreadUrlParams,
   curatedFeed: GetCuratedFeedUrlParams
 } as const;
@@ -653,6 +669,54 @@ export const StagingStats = Schema.Struct({
   lastIngest: Schema.NullOr(StagingStatsLastIngest)
 });
 
+// ---------------------------------------------------------------------------
+// Import schemas (Twitter cross-post pipeline)
+// ---------------------------------------------------------------------------
+
+export const ImportLinkInput = Schema.Struct({
+  url: Schema.String,
+  title: Schema.optional(Schema.String),
+  description: Schema.optional(Schema.String),
+  domain: Schema.optional(Schema.String)
+});
+export type ImportLinkInput = Schema.Schema.Type<typeof ImportLinkInput>;
+
+export const ImportExpertInput = Schema.Struct({
+  did: Did,
+  handle: Schema.String,
+  domain: Schema.String,
+  source: ExpertSource,
+  tier: ExpertTier,
+  displayName: Schema.optional(Schema.String),
+  avatar: Schema.optional(Schema.String)
+});
+export type ImportExpertInput = Schema.Schema.Type<typeof ImportExpertInput>;
+
+export const ImportPostInput = Schema.Struct({
+  uri: PostUri,
+  did: Did,
+  text: Schema.String,
+  createdAt: Schema.Number,
+  hashtags: Schema.optional(Schema.Array(Schema.String)),
+  embedType: Schema.optional(Schema.NullOr(EmbedKind)),
+  embedPayload: Schema.optional(Schema.NullOr(EmbedPayload)),
+  links: Schema.Array(ImportLinkInput)
+});
+export type ImportPostInput = Schema.Schema.Type<typeof ImportPostInput>;
+
+export const ImportPostsInput = Schema.Struct({
+  experts: Schema.Array(ImportExpertInput),
+  posts: Schema.Array(ImportPostInput)
+});
+export type ImportPostsInput = Schema.Schema.Type<typeof ImportPostsInput>;
+
+export const ImportPostsOutput = Schema.Struct({
+  imported: Schema.Number,
+  flagged: Schema.Number,
+  skipped: Schema.Number
+});
+export type ImportPostsOutput = Schema.Schema.Type<typeof ImportPostsOutput>;
+
 export const AdminRequestSchemas = {
   addExpert: AddExpertInput,
   listExperts: ListExpertsUrlParams,
@@ -661,7 +725,8 @@ export const AdminRequestSchemas = {
   curatePost: CuratePostInput,
   submitEditorialPick: SubmitEditorialPickInput,
   retractEditorialPick: RemoveEditorialPickInput,
-  listEditorialPicks: ListEditorialPicksUrlParams
+  listEditorialPicks: ListEditorialPicksUrlParams,
+  importPosts: ImportPostsInput
 } as const;
 
 export const AdminResponseSchemas = {
@@ -677,6 +742,7 @@ export const AdminResponseSchemas = {
   submitEditorialPick: SubmitEditorialPickOutput,
   retractEditorialPick: RemoveEditorialPickOutput,
   listEditorialPicks: EditorialPicksOutput,
+  importPosts: ImportPostsOutput,
   stats: StagingStats
 } as const;
 

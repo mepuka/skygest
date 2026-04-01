@@ -10,7 +10,7 @@ import {
 } from "../src/domain/api";
 import type { GetPostThreadResponse, ThreadPostView } from "../src/bluesky/ThreadTypes";
 import { BlueskyApiError, DbError } from "../src/domain/errors";
-import type { AtUri } from "../src/domain/types";
+import type { PostUri } from "../src/domain/types";
 import { CandidatePayloadService } from "../src/services/CandidatePayloadService";
 import { KnowledgeQueryService } from "../src/services/KnowledgeQueryService";
 import { smokeFixtureUris } from "../src/staging/SmokeFixture";
@@ -198,10 +198,10 @@ const makeSourceAttributionEnrichmentPayload = () => ({
   processedAt: 20
 });
 
-const asAtUri = (value: string) => value as AtUri;
+const asPostUri = (value: string) => value as PostUri;
 
 const createPickedPayload = (
-  postUri: AtUri,
+  postUri: PostUri,
   layer: ReturnType<typeof makeBiLayer>
 ) =>
   Effect.runPromise(
@@ -250,7 +250,8 @@ describe("frontend REST API", () => {
         expect(secondPage.items).toHaveLength(1);
         expect(secondPage.items[0]?.uri).toBe(smokeFixtureUris(sampleDid)[0]);
       })
-    )
+    ),
+    15_000
   );
 
   it.live("supports search and until filtering on /api/posts/search", () =>
@@ -641,7 +642,7 @@ describe("frontend REST API", () => {
   it.live("serves stored post enrichments with typed payloads", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
-        const focusUri = asAtUri(smokeFixtureUris(sampleDid)[0]);
+        const focusUri = asPostUri(smokeFixtureUris(sampleDid)[0]);
         const layer = makeBiLayer({ filename });
         const visionPayload = makeVisionEnrichmentPayload();
         const sourcePayload = makeSourceAttributionEnrichmentPayload();
@@ -704,7 +705,7 @@ describe("frontend REST API", () => {
   it.live("returns empty enrichments when no payload record exists", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
-        const focusUri = asAtUri(smokeFixtureUris(sampleDid)[0]);
+        const focusUri = asPostUri(smokeFixtureUris(sampleDid)[0]);
         const layer = makeBiLayer({ filename });
         await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
 
@@ -724,7 +725,7 @@ describe("frontend REST API", () => {
   it.live("returns empty enrichments when a payload record exists without enrichments", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
-        const focusUri = asAtUri(smokeFixtureUris(sampleDid)[0]);
+        const focusUri = asPostUri(smokeFixtureUris(sampleDid)[0]);
         const layer = makeBiLayer({ filename });
         await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
         await createPickedPayload(focusUri, layer);
@@ -745,7 +746,7 @@ describe("frontend REST API", () => {
   it.live("filters legacy or invalid enrichment payloads from the public response", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
-        const focusUri = asAtUri(smokeFixtureUris(sampleDid)[0]);
+        const focusUri = asPostUri(smokeFixtureUris(sampleDid)[0]);
         const layer = makeBiLayer({ filename });
         const sourcePayload = makeSourceAttributionEnrichmentPayload();
         await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));

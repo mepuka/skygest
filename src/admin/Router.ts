@@ -18,15 +18,23 @@ import {
   UnauthorizedError,
   UpstreamFailureError
 } from "../domain/api";
+import type { ImportPostInput, ImportExpertInput } from "../domain/api";
+import type { KnowledgePost, ExpertRecord, LinkRecord } from "../domain/bi";
 import { CurationService } from "../services/CurationService";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { EditorialService } from "../services/EditorialService";
 import { StagingOpsService } from "../services/StagingOpsService";
+import { ExpertsRepo } from "../services/ExpertsRepo";
+import { KnowledgeRepo } from "../services/KnowledgeRepo";
+import { CandidatePayloadService } from "../services/CandidatePayloadService";
+import { matchTopics } from "../filter/TopicMatcher";
+import { computeShard } from "../bootstrap/ExpertSeeds";
 import { AppConfig } from "../platform/Config";
 import { OperatorIdentity, operatorIdentityContext } from "../http/Identity";
 import { handleWithApiLayer, makeCachedApiHandler } from "../http/ApiSupport";
 import { getStringField, isTaggedError, toUpstreamFailure, withHttpErrorMapping } from "../http/ErrorMapping";
 import { makeAdminWorkerLayer } from "../edge/Layer";
+import { parseAvatarUrl } from "../bluesky/BskyCdn";
 import type { EnvBindings } from "../platform/Env";
 
 const AdminApi = HttpApi.make("admin")
@@ -102,6 +110,14 @@ const AdminApi = HttpApi.make("admin")
           .addSuccess(AdminResponseSchemas.listEditorialPicks)
       )
   )
+  .add(
+    HttpApiGroup.make("import")
+      .add(
+        HttpApiEndpoint.post("importPosts", "/admin/import/posts")
+          .setPayload(AdminRequestSchemas.importPosts)
+          .addSuccess(AdminResponseSchemas.importPosts)
+      )
+  )
   .addError(BadRequestError)
   .addError(UnauthorizedError)
   .addError(ForbiddenError)
@@ -153,6 +169,57 @@ const ensureStagingOpsEnabled = Effect.gen(function* () {
   if (config.enableStagingOps !== true) {
     return yield* Effect.fail(notFoundError("not found"));
   }
+});
+
+// ---------------------------------------------------------------------------
+// Import helpers
+// ---------------------------------------------------------------------------
+
+const importExpertToRecord = (
+  expert: ImportExpertInput,
+  shardCount: number,
+  addedAt: number
+): ExpertRecord => ({
+  did: expert.did,
+  handle: expert.handle,
+  displayName: expert.displayName ?? null,
+  description: null,
+  avatar: expert.avatar ? parseAvatarUrl(expert.avatar) : null,
+  domain: expert.domain,
+  source: expert.source,
+  sourceRef: null,
+  shard: computeShard(expert.did, shardCount),
+  active: false,
+  tier: expert.tier,
+  addedAt,
+  lastSyncedAt: null
+});
+
+const mergeImportedExpertRecord = (
+  imported: ImportExpertInput,
+  existing: ExpertRecord | undefined,
+  shardCount: number,
+  addedAt: number
+): ExpertRecord =>
+  existing === undefined
+    ? importExpertToRecord(imported, shardCount, addedAt)
+    : {
+        ...existing,
+        handle: imported.handle,
+        displayName: imported.displayName ?? existing.displayName,
+        avatar: imported.avatar ? parseAvatarUrl(imported.avatar) : existing.avatar
+      };
+
+const importLinkToLinkRecord = (
+  link: ImportPostInput["links"][number],
+  indexedAt: number
+): LinkRecord => ({
+  url: link.url,
+  title: link.title ?? null,
+  description: link.description ?? null,
+  imageUrl: null,
+  domain: link.domain ?? null,
+  extractedAt: indexedAt
 });
 
 const AdminHandlers = Layer.mergeAll(
@@ -322,6 +389,121 @@ const AdminHandlers = Layer.mergeAll(
           return { items };
         }))
       )
+  ),
+  HttpApiBuilder.group(AdminApi, "import", (handlers) =>
+    handlers.handle("importPosts", ({ payload }) =>
+      withAdminErrors("/admin/import/posts", Effect.gen(function* () {
+        const config = yield* AppConfig;
+        const expertsRepo = yield* ExpertsRepo;
+        const knowledgeRepo = yield* KnowledgeRepo;
+        const curationService = yield* CurationService;
+        const payloadService = yield* CandidatePayloadService;
+
+        const now = Date.now();
+
+        // 1. Insert new experts; preserve existing activation/tier/editorial metadata
+        if (payload.experts.length > 0) {
+          const existingExperts = yield* expertsRepo.getByDids(
+            [...new Set(payload.experts.map((expert) => expert.did))]
+          );
+          const existingByDid = new Map(existingExperts.map((expert) => [expert.did, expert]));
+          const expertRecords = payload.experts.map((expert) =>
+            mergeImportedExpertRecord(
+              expert,
+              existingByDid.get(expert.did),
+              config.ingestShardCount,
+              now
+            )
+          );
+          yield* expertsRepo.upsertMany(expertRecords);
+        }
+
+        // 2. For each post: run matchTopics — skip if no topics
+        const importedPosts: KnowledgePost[] = [];
+        let skipped = 0;
+
+        for (const post of payload.posts) {
+          const links = post.links.map((l) => importLinkToLinkRecord(l, now));
+          const topics = yield* matchTopics({
+            text: post.text,
+            links,
+            hashtags: post.hashtags ?? []
+          });
+
+          if (topics.length === 0) {
+            skipped += 1;
+            continue;
+          }
+
+          // 3. Build KnowledgePost
+          const knowledgePost: KnowledgePost = {
+            uri: post.uri,
+            did: post.did,
+            cid: null,
+            text: post.text,
+            createdAt: post.createdAt,
+            indexedAt: now,
+            hasLinks: links.length > 0,
+            status: "active",
+            ingestId: `import:${post.uri}:${String(now)}`,
+            embedType: post.embedType ?? null,
+            topics,
+            links
+          };
+
+          importedPosts.push(knowledgePost);
+        }
+
+        // Upsert all imported posts
+        if (importedPosts.length > 0) {
+          yield* knowledgeRepo.upsertPosts(importedPosts);
+        }
+
+        // 4. Store embed payloads for posts that have them
+        for (const post of payload.posts) {
+          // Only store for posts that survived topic matching
+          const wasImported = importedPosts.some((ip) => ip.uri === post.uri);
+          if (!wasImported) continue;
+
+          // Posts with null/undefined embedPayload get NO payload row
+          const embedPayload = post.embedPayload ?? null;
+          if (embedPayload === null) continue;
+
+          yield* payloadService.capturePayload({
+            postUri: post.uri,
+            captureStage: "candidate",
+            embedType: post.embedType ?? null,
+            embedPayload
+          }).pipe(
+            Effect.tapError((e) =>
+              Effect.logWarning("import payload save failed").pipe(
+                Effect.annotateLogs({ postUri: post.uri, error: String(e) })
+              )
+            )
+          );
+        }
+
+        // 5. Flag all imported posts via CurationService.flagBatch (error-tolerant)
+        let flagged = 0;
+        if (importedPosts.length > 0) {
+          flagged = yield* curationService.flagBatch(importedPosts).pipe(
+            Effect.tapError((e) =>
+              Effect.logWarning("import curation flagging failed, continuing").pipe(
+                Effect.annotateLogs({ error: String(e) })
+              )
+            ),
+            Effect.catchAll(() => Effect.succeed(0))
+          );
+        }
+
+        // 6. Return summary
+        return {
+          imported: importedPosts.length,
+          flagged,
+          skipped
+        };
+      }))
+    )
   )
 );
 

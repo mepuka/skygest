@@ -33,7 +33,7 @@ export const PublicReadApi = HttpApi.make("public-read")
       )
       .add(
         HttpApiEndpoint.get("thread", "/posts/:uri/thread")
-          .setPath(PublicReadRequestSchemas.postUriPath)
+          .setPath(PublicReadRequestSchemas.postUriThreadPath)
           .setUrlParams(PublicReadRequestSchemas.thread)
           .addSuccess(PublicReadResponseSchemas.thread)
       )

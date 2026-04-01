@@ -99,8 +99,16 @@ export class PostHydrationService extends Context.Tag("@skygest/PostHydrationSer
           }
         }
 
+        // Only fetch from Bluesky API for at:// URIs; x:// URIs get empty hydration
+        const blueskyMisses = misses.filter((uri) => uri.startsWith("at://"));
+        for (const uri of misses) {
+          if (!uri.startsWith("at://")) {
+            yield* cache.set(uri, emptyKnowledgePostHydration());
+          }
+        }
+
         yield* Effect.forEach(
-          chunk(misses, GET_POSTS_CHUNK_SIZE),
+          chunk(blueskyMisses, GET_POSTS_CHUNK_SIZE),
           (uris) =>
             populateChunk(uris).pipe(
               Effect.catchAll(() => Effect.void)

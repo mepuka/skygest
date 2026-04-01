@@ -1,7 +1,7 @@
 import { Clock, Context, Effect, Layer } from "effect";
 import type { SqlError } from "@effect/sql/SqlError";
 import type { DbError } from "../domain/errors";
-import type { AtUri } from "../domain/types";
+import type { PostUri } from "../domain/types";
 import type {
   SubmitEditorialPickInput,
   SubmitEditorialPickOutput,
@@ -76,7 +76,7 @@ export class EditorialService extends Context.Tag("@skygest/EditorialService")<
     const retractPick = Effect.fn("EditorialService.retractPick")(
       function* (postUri: string) {
         const removed = yield* repo.retractPick(postUri);
-        return { postUri: postUri as AtUri, removed };
+        return { postUri: postUri as PostUri, removed };
       }
     );
 

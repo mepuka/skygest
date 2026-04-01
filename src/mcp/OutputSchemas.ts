@@ -21,7 +21,7 @@ import {
 import { EditorialPicksOutput, SubmitEditorialPickOutput } from "../domain/editorial.ts";
 import { CurationCandidatesOutput, CuratePostOutput } from "../domain/curation.ts";
 import { GetPostEnrichmentsOutput, EnrichmentKind } from "../domain/enrichment.ts";
-import { AtUri } from "../domain/types.ts";
+import { PostUri } from "../domain/types.ts";
 
 const DisplayField = Schema.Struct({ _display: Schema.String });
 
@@ -69,7 +69,7 @@ export type PostEnrichmentsMcpOutput = Schema.Schema.Type<typeof PostEnrichments
 
 export const StartEnrichmentMcpOutput = Schema.extend(
   Schema.Struct({
-    postUri: AtUri,
+    postUri: PostUri,
     enrichmentType: EnrichmentKind,
     status: Schema.Literal("queued"),
     runId: Schema.String

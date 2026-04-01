@@ -267,7 +267,7 @@ export const StartEnrichmentTool = Tool.make("start_enrichment", {
   .annotate(Tool.OpenWorld, true);
 
 export const CuratePostTool = Tool.make("curate_post", {
-  description: "Curate or reject a post. Curating fetches live embed data from Bluesky and captures the payload. Call start_enrichment separately to queue enrichment processing. Rejecting dismisses the post. Idempotent.",
+  description: "Curate or reject a post. Curating captures embed data for enrichment. For Bluesky posts, fetches live data. For Twitter posts, uses stored import data. Call start_enrichment separately to queue enrichment processing. Rejecting dismisses the post. Idempotent.",
   parameters: CuratePostInput.fields,
   success: CuratePostMcpOutput,
   failure: McpToolQueryError
@@ -656,14 +656,31 @@ const makeSubmitPickHandler = (editorialService: EditorialServiceI) => ({
       }
 
       // Gate: verify enrichment is complete before accepting a pick.
-      const enrichmentReadService = yield* PostEnrichmentReadService;
-      const enrichment = yield* enrichmentReadService.getPost(input.postUri);
-      if (enrichment.readiness !== "complete") {
+      // Plain-text posts (no payload) have nothing to enrich — allow them through.
+      const payloadService = yield* CandidatePayloadService;
+      const payload = yield* payloadService.getPayload(input.postUri);
+      const storedEmbedType = yield* curationRepo.getPostEmbedType(input.postUri);
+      const hasEnrichableContent =
+        storedEmbedType !== null || payload?.embedPayload !== null;
+
+      if (hasEnrichableContent && payload?.embedPayload == null) {
         return yield* McpToolQueryError.make({
           tool: "submit_editorial_pick",
-          message: `Post enrichment is not complete (readiness: ${enrichment.readiness}). Use start_enrichment to trigger enrichment, then poll get_post_enrichments until readiness is "complete".`,
-          error: new Error("enrichment not complete")
+          message: "Post is missing stored media details. Re-import or re-curate it before accepting as a brief.",
+          error: new Error("payload missing for embedded post")
         });
+      }
+
+      if (hasEnrichableContent) {
+        const enrichmentReadService = yield* PostEnrichmentReadService;
+        const enrichment = yield* enrichmentReadService.getPost(input.postUri);
+        if (enrichment.readiness !== "complete") {
+          return yield* McpToolQueryError.make({
+            tool: "submit_editorial_pick",
+            message: `Post enrichment is not complete (readiness: ${enrichment.readiness}). Use start_enrichment to trigger enrichment, then poll get_post_enrichments until readiness is "complete".`,
+            error: new Error("enrichment not complete")
+          });
+        }
       }
 
       const identity = yield* OperatorIdentity;
@@ -698,17 +715,25 @@ const makeStartEnrichmentHandler = () => ({
       const trigger = triggerOption.value;
 
       // Auto-detect enrichment type if not specified
+      const payloadService = yield* CandidatePayloadService;
+      const payload = yield* payloadService.getPayload(input.postUri);
+      if (payload === null) {
+        return yield* McpToolQueryError.make({
+          tool: "start_enrichment",
+          message: "Post must be curated before starting enrichment. Call curate_post first.",
+          error: new Error("payload not found")
+        });
+      }
+      if (payload.captureStage !== "picked") {
+        return yield* McpToolQueryError.make({
+          tool: "start_enrichment",
+          message: "Post must be curated before starting enrichment. Call curate_post first.",
+          error: new Error("payload not picked")
+        });
+      }
+
       let enrichmentType = input.enrichmentType;
       if (enrichmentType === undefined) {
-        const payloadService = yield* CandidatePayloadService;
-        const payload = yield* payloadService.getPayload(input.postUri);
-        if (payload === null) {
-          return yield* McpToolQueryError.make({
-            tool: "start_enrichment",
-            message: "Post must be curated before starting enrichment. Call curate_post first.",
-            error: new Error("payload not found")
-          });
-        }
         // Detect from embed payload, not just embedType string.
         // A "media" embed may contain only a link card (no visual assets).
         enrichmentType = hasVisualEmbedPayload(payload.embedPayload)

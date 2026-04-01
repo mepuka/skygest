@@ -2,7 +2,7 @@ import { SqlClient } from "@effect/sql";
 import { Effect, Layer } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { runMigrations } from "../src/db/migrate";
-import type { AtUri } from "../src/domain/types";
+import type { PostUri } from "../src/domain/types";
 import { EnrichmentRunsRepo } from "../src/services/EnrichmentRunsRepo";
 import { EnrichmentRunsRepoD1 } from "../src/services/d1/EnrichmentRunsRepoD1";
 import {
@@ -21,14 +21,14 @@ const makeLayer = () => {
 };
 
 const makePostUri = (suffix: string) =>
-  `at://${sampleDid}/app.bsky.feed.post/${suffix}` as AtUri;
+  `at://${sampleDid}/app.bsky.feed.post/${suffix}` as PostUri;
 
 const postUri = makePostUri("post-solar");
 
 type QueuedInput = {
   readonly id: string;
   readonly workflowInstanceId: string;
-  readonly postUri: AtUri;
+  readonly postUri: PostUri;
   readonly enrichmentType: "vision";
   readonly schemaVersion: string;
   readonly triggeredBy: "pick";
@@ -58,7 +58,7 @@ const makeQueuedInput = (
 
 const queuedInput = makeQueuedInput();
 
-const seedPickedPayload = (uri: AtUri = postUri, timestamp = 1) =>
+const seedPickedPayload = (uri: PostUri = postUri, timestamp = 1) =>
   Effect.gen(function* () {
     yield* seedKnowledgeBase();
     const sql = yield* SqlClient.SqlClient;

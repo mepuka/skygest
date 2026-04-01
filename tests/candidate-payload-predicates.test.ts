@@ -4,12 +4,12 @@ import {
   isPickedCandidatePayloadStage
 } from "../src/domain/CandidatePayloadPredicates";
 import type { CandidatePayloadRecord } from "../src/domain/candidatePayload";
-import type { AtUri } from "../src/domain/types";
+import type { PostUri } from "../src/domain/types";
 
 const makePayload = (
   captureStage: CandidatePayloadRecord["captureStage"]
 ): CandidatePayloadRecord => ({
-  postUri: "at://did:plc:test/app.bsky.feed.post/test" as AtUri,
+  postUri: "at://did:plc:test/app.bsky.feed.post/test" as PostUri,
   captureStage,
   embedType: null,
   embedPayload: null,

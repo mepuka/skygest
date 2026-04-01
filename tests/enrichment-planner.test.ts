@@ -10,9 +10,9 @@ import {
   sampleDid,
   seedKnowledgeBase
 } from "./support/runtime";
-import type { AtUri } from "../src/domain/types";
+import type { PostUri } from "../src/domain/types";
 
-const solarUri = `at://${sampleDid}/app.bsky.feed.post/post-solar` as AtUri;
+const solarUri = `at://${sampleDid}/app.bsky.feed.post/post-solar` as PostUri;
 
 const makeLayer = () => {
   const baseLayer = makeBiLayer();

@@ -6,11 +6,11 @@ import {
   extractLinkRecords
 } from "../bluesky/PostRecord";
 import { extractEmbedKind } from "../bluesky/EmbedExtract";
-import type { RawEventBatch } from "../domain/types";
+import { atUriToPostUri, type RawEventBatch } from "../domain/types";
 import type { DeletedKnowledgePost, KnowledgePost } from "../domain/bi";
 import { KnowledgeRepo } from "../services/KnowledgeRepo";
 import { CurationService } from "../services/CurationService";
-import { OntologyCatalog } from "../services/OntologyCatalog";
+import { matchTopics } from "./TopicMatcher";
 
 const makeIngestId = (
   uri: string,
@@ -39,7 +39,6 @@ const emptyBatchActions = (): BatchActions => ({
 
 export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (batch: RawEventBatch) {
   const knowledgeRepo = yield* KnowledgeRepo;
-  const ontology = yield* OntologyCatalog;
 
   const actions = yield* Effect.reduce(
     batch.events,
@@ -59,7 +58,7 @@ export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (ba
           deletions: [
             ...state.deletions,
             {
-              uri: event.uri,
+              uri: atUriToPostUri(event.uri),
               did: event.did,
               cid: event.cid ?? null,
               createdAt,
@@ -89,15 +88,12 @@ export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (ba
       const embedType = extractEmbedKind(decoded.embed ?? null);
       const text = decoded.text?.trim() ?? "";
       const links = extractLinkRecords(decoded, event.did, indexedAt);
-      const domains = links
-        .map((link) => link.domain)
-        .filter((domain): domain is string => domain !== null && domain.length > 0);
 
-      return ontology.match({
+      return matchTopics({
         text,
         metadataTexts: collectMetadataTexts(decoded),
         hashtags: decoded.tags ?? [],
-        domains
+        links
       }).pipe(
         Effect.map((topics) =>
           topics.length === 0
@@ -107,7 +103,7 @@ export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (ba
                 upserts: [
                   ...state.upserts,
                   {
-                    uri: event.uri,
+                    uri: atUriToPostUri(event.uri),
                     did: event.did,
                     cid: event.cid ?? null,
                     text,

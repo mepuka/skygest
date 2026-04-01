@@ -2,7 +2,7 @@ import { Clock, Context, Effect, Layer, Option } from "effect";
 import type { SqlError } from "@effect/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import { BlueskyApiError } from "../domain/errors";
-import type { AtUri } from "../domain/types";
+import type { PostUri } from "../domain/types";
 import type {
   CurationCandidateOutput,
   CuratePostOutput,
@@ -80,7 +80,7 @@ const clampCurationLimit = (limit: number | undefined) =>
 
     const queuePickedEnrichment = Effect.fn(
       "CurationService.queuePickedEnrichment"
-    )(function* (postUri: AtUri, embedPayload: EmbedPayload | null, curator: string) {
+    )(function* (postUri: PostUri, embedPayload: EmbedPayload | null, curator: string) {
       const maybeLauncher = yield* Effect.serviceOption(EnrichmentWorkflowLauncher);
 
       if (Option.isNone(maybeLauncher)) {
@@ -208,6 +208,33 @@ const clampCurationLimit = (limit: number | undefined) =>
 
         const previousStatus = existing?.status ?? null;
 
+        // Twitter posts: skip Bluesky thread fetch, use stored payload from import
+        const isTwitter = (input.postUri as string).startsWith("x://");
+
+        if (isTwitter && input.action === "curate") {
+          const existingPayload = yield* payloadService.getPayload(input.postUri);
+          const storedEmbedType = yield* curationRepo.getPostEmbedType(input.postUri);
+
+          if (storedEmbedType !== null && existingPayload?.embedPayload == null) {
+            return yield* new BlueskyApiError({
+              message: `Imported post ${input.postUri} is missing stored media details and cannot be curated yet`
+            });
+          }
+
+          if (existingPayload !== null && existingPayload.captureStage !== "picked") {
+            yield* payloadService.markPicked(input.postUri);
+          }
+
+          yield* curationRepo.updateStatus(input.postUri, "curated", curator, input.note ?? null, now);
+
+          if (existingPayload !== null) {
+            yield* queuePickedEnrichment(input.postUri, existingPayload.embedPayload, curator)
+              .pipe(Effect.catchAll(() => Effect.succeed(false)));
+          }
+
+          return { postUri: input.postUri, action: input.action, previousStatus, newStatus: "curated" as const };
+        }
+
         if (input.action === "reject") {
           yield* curationRepo.updateStatus(
             input.postUri,
@@ -248,13 +275,13 @@ const clampCurationLimit = (limit: number | undefined) =>
         // Writing status last ensures the idempotency guard (early return on "curated")
         // only triggers after payload is safely persisted.
         yield* payloadService.capturePayload({
-          postUri: input.postUri as AtUri,
+          postUri: input.postUri,
           captureStage: "candidate",
           embedType: embedType as any,
           embedPayload
         });
 
-        yield* payloadService.markPicked(input.postUri as AtUri);
+        yield* payloadService.markPicked(input.postUri);
 
         yield* curationRepo.updateStatus(
           input.postUri,
@@ -265,7 +292,7 @@ const clampCurationLimit = (limit: number | undefined) =>
         );
 
         yield* queuePickedEnrichment(
-          input.postUri as AtUri,
+          input.postUri,
           embedPayload,
           curator
         ).pipe(

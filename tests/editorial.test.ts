@@ -37,7 +37,7 @@ import { encodeJsonString } from "../src/platform/Json";
 import { smokeFixtureUris } from "../src/staging/SmokeFixture";
 import type { EditorialPickRecord } from "../src/domain/editorial";
 import type { TopicSlug } from "../src/domain/bi";
-import type { AtUri } from "../src/domain/types";
+import type { PostUri } from "../src/domain/types";
 
 const makeEditorialLayer = (options?: { filename?: string }) => {
   const base = makeBiLayer(options);
@@ -235,8 +235,8 @@ const expectJsonResponse = async <A>(
 const decodeCuratedPostsPage = Schema.decodeUnknownSync(CuratedPostsPageOutput);
 
 const fixtureUris = smokeFixtureUris(sampleDid);
-const solarUri = fixtureUris[0] as AtUri;
-const windUri = fixtureUris[1] as AtUri;
+const solarUri = fixtureUris[0] as PostUri;
+const windUri = fixtureUris[1] as PostUri;
 
 const makePick = (
   overrides: Partial<EditorialPickRecord> = {}
@@ -932,7 +932,7 @@ describe("EditorialService", () => {
             const outcome = yield* editorial
               .submitPick(
                 {
-                  postUri: "at://did:plc:fake/app.bsky.feed.post/nope" as AtUri,
+                  postUri: "at://did:plc:fake/app.bsky.feed.post/nope" as PostUri,
                   score: 80 as any,
                   reason: "Nonexistent"
                 },

@@ -1,7 +1,7 @@
 import { Schema } from "effect";
 import { ThreadEmbedType } from "./bi";
 import { EmbedPayload } from "./embed";
-import { AtUri } from "./types";
+import { PostUri } from "./types";
 
 export const CandidatePayloadStage = Schema.Literal("candidate", "picked");
 export type CandidatePayloadStage = Schema.Schema.Type<typeof CandidatePayloadStage>;
@@ -20,7 +20,7 @@ export type CandidatePayloadEnrichmentRecord = Schema.Schema.Type<
 >;
 
 export const CandidatePayloadRecord = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   captureStage: CandidatePayloadStage,
   embedType: Schema.NullOr(ThreadEmbedType),
   embedPayload: Schema.NullOr(EmbedPayload),
@@ -32,7 +32,7 @@ export const CandidatePayloadRecord = Schema.Struct({
 export type CandidatePayloadRecord = Schema.Schema.Type<typeof CandidatePayloadRecord>;
 
 export const SaveCandidatePayloadInput = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   captureStage: CandidatePayloadStage,
   embedType: Schema.NullOr(ThreadEmbedType),
   embedPayload: Schema.NullOr(EmbedPayload)
@@ -40,7 +40,7 @@ export const SaveCandidatePayloadInput = Schema.Struct({
 export type SaveCandidatePayloadInput = Schema.Schema.Type<typeof SaveCandidatePayloadInput>;
 
 export const SaveCandidateEnrichmentInput = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   enrichmentType: CandidateEnrichmentType,
   enrichmentPayload: Schema.Unknown
 });
@@ -49,7 +49,7 @@ export type SaveCandidateEnrichmentInput = Schema.Schema.Type<typeof SaveCandida
 export class CandidatePayloadNotPickedError extends Schema.TaggedError<CandidatePayloadNotPickedError>()(
   "CandidatePayloadNotPickedError",
   {
-    postUri: AtUri,
+    postUri: PostUri,
     captureStage: CandidatePayloadStage
   }
 ) {}
