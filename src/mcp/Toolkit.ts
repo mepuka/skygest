@@ -47,6 +47,7 @@ import {
 } from "./Fmt.ts";
 import { EditorialService } from "../services/EditorialService";
 import { CurationService } from "../services/CurationService";
+import { CurationRepo } from "../services/CurationRepo";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { extractEmbedKind, buildTypedEmbed } from "../bluesky/EmbedExtract";
@@ -239,7 +240,7 @@ export const CuratePostTool = Tool.make("curate_post", {
   .annotate(Tool.OpenWorld, true);
 
 export const SubmitEditorialPickTool = Tool.make("submit_editorial_pick", {
-  description: "Accept a reviewable brief into the curated feed. Requires prior curation (curate_post) and enrichment verification (get_post_enrichments). Provide a quality score and reason.",
+  description: "Accept a curated post into the editorial feed. The post must have been curated first via curate_post. Provide a quality score (0-100) and reason.",
   parameters: SubmitEditorialPickMcpInput.fields,
   success: SubmitEditorialPickMcpOutput,
   failure: McpToolQueryError
@@ -559,14 +560,34 @@ const makeCuratePostHandler = (curationService: CurationServiceI) => ({
 
 const makeSubmitPickHandler = (editorialService: EditorialServiceI) => ({
   submit_editorial_pick: (input: typeof SubmitEditorialPickMcpInput.Type) =>
-    Effect.flatMap(OperatorIdentity, (identity) =>
-      editorialService.submitPick(input, identity.email ?? identity.subject ?? "mcp-operator")
-    ).pipe(
-      Effect.map((result) => ({
+    Effect.gen(function* () {
+      // Gate: verify the post was curated before accepting a pick.
+      // This prevents skipping straight from Discovered to Accepted.
+      const curationRepo = yield* CurationRepo;
+      const curation = yield* curationRepo.getByPostUri(input.postUri);
+      if (curation === null || curation.status !== "curated") {
+        return yield* McpToolQueryError.make({
+          tool: "submit_editorial_pick",
+          message: `Post must be curated before accepting as a brief. Current status: ${curation?.status ?? "not curated"}`,
+          error: new Error("post not curated")
+        });
+      }
+
+      const identity = yield* OperatorIdentity;
+      const result = yield* editorialService.submitPick(
+        input,
+        identity.email ?? identity.subject ?? "mcp-operator"
+      );
+      return {
         ...result,
         _display: formatSubmitPickResult(result)
-      })),
-      Effect.mapError(toQueryError("submit_editorial_pick"))
+      };
+    }).pipe(
+      Effect.mapError((e) =>
+        "_tag" in e && (e as any)._tag === "McpToolQueryError"
+          ? (e as McpToolQueryError)
+          : toQueryError("submit_editorial_pick")(e as any)
+      )
     ) as any
 });
 

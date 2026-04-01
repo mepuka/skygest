@@ -125,9 +125,10 @@ WORKFLOW:
    Reject weak candidates: curate_post(postUri: <uri>, action: "reject", note: "<reason>").
 
 5. VERIFY READINESS \u2014 Enriching \u2192 Reviewable
-   Call get_post_enrichments(postUri: <uri>) to check enrichment status.
-   If enrichment is still pending, continue evaluating other candidates and check back.
-   Vision enrichment extracts chart data; source attribution identifies the content source.
+   After curating, enrichment runs automatically (vision for charts/screenshots, source attribution for links).
+   Allow a few minutes for enrichment to complete before proceeding to step 7.
+   Continue evaluating and curating other candidates while waiting.
+   Note: enrichment inspection tools are coming in a future update.
 
 6. DEDUPLICATE
    Call list_editorial_picks(since: <24h ago>) to see existing picks.
