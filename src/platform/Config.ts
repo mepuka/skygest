@@ -1,18 +1,6 @@
 import { Array, Config, ConfigProvider, Context, Effect, Layer, Option, Redacted } from "effect";
 import { CloudflareEnv } from "./Env";
 
-export type OperatorAuthMode = "access" | "shared-secret";
-
-const parseOperatorAuthMode = (value: string): OperatorAuthMode => {
-  if (value === "access" || value === "shared-secret") {
-    return value;
-  }
-
-  throw new Error(
-    `OPERATOR_AUTH_MODE must be "access" or "shared-secret", received: ${value}`
-  );
-};
-
 const RawConfigSchema = Config.all({
   publicApi: Config.withDefault(
     Config.string("PUBLIC_BSKY_API"),
@@ -22,25 +10,16 @@ const RawConfigSchema = Config.all({
   defaultDomain: Config.withDefault(Config.string("DEFAULT_DOMAIN"), "energy"),
   mcpLimitDefault: Config.withDefault(Config.integer("MCP_LIMIT_DEFAULT"), 20),
   mcpLimitMax: Config.withDefault(Config.integer("MCP_LIMIT_MAX"), 100),
-  operatorAuthMode: Config.withDefault(Config.string("OPERATOR_AUTH_MODE"), "access"),
   operatorSecret: Config.withDefault(
     Config.redacted("OPERATOR_SECRET"),
     Redacted.make("")
   ),
-  accessTeamDomain: Config.withDefault(
-    Config.string("ACCESS_TEAM_DOMAIN"),
-    ""
-  ),
-  accessAud: Config.withDefault(Config.string("ACCESS_AUD"), ""),
+  enableStagingOps: Config.withDefault(Config.boolean("ENABLE_STAGING_OPS"), false),
   editorialDefaultExpiryHours: Config.withDefault(Config.integer("EDITORIAL_DEFAULT_EXPIRY_HOURS"), 24),
   curationMinSignalScore: Config.withDefault(Config.integer("CURATION_MIN_SIGNAL_SCORE"), 30)
 });
 
-type RawAppConfigShape = Config.Config.Success<typeof RawConfigSchema>;
-
-export type AppConfigShape = Omit<RawAppConfigShape, "operatorAuthMode"> & {
-  readonly operatorAuthMode: OperatorAuthMode;
-};
+export type AppConfigShape = Config.Config.Success<typeof RawConfigSchema>;
 
 export class AppConfig extends Context.Tag("@skygest/AppConfig")<
   AppConfig,
@@ -57,10 +36,8 @@ export class AppConfig extends Context.Tag("@skygest/AppConfig")<
           ["DEFAULT_DOMAIN", env.DEFAULT_DOMAIN],
           ["MCP_LIMIT_DEFAULT", env.MCP_LIMIT_DEFAULT],
           ["MCP_LIMIT_MAX", env.MCP_LIMIT_MAX],
-          ["OPERATOR_AUTH_MODE", env.OPERATOR_AUTH_MODE],
           ["OPERATOR_SECRET", env.OPERATOR_SECRET],
-          ["ACCESS_TEAM_DOMAIN", env.ACCESS_TEAM_DOMAIN],
-          ["ACCESS_AUD", env.ACCESS_AUD],
+          ["ENABLE_STAGING_OPS", env.ENABLE_STAGING_OPS],
           ["EDITORIAL_DEFAULT_EXPIRY_HOURS", env.EDITORIAL_DEFAULT_EXPIRY_HOURS],
           ["CURATION_MIN_SIGNAL_SCORE", env.CURATION_MIN_SIGNAL_SCORE]
         ] as const,
@@ -72,10 +49,7 @@ export class AppConfig extends Context.Tag("@skygest/AppConfig")<
       const provider = ConfigProvider.fromMap(new Map(entries));
       const config = yield* provider.load(RawConfigSchema);
 
-      return {
-        ...config,
-        operatorAuthMode: parseOperatorAuthMode(config.operatorAuthMode)
-      } satisfies AppConfigShape;
+      return config satisfies AppConfigShape;
     })
   );
 }

@@ -216,14 +216,7 @@ const makeAdminEditorialLayer = (options: {
 const operatorIdentity: AccessIdentity = {
   subject: "did:example:operator",
   email: "operator@example.com",
-  issuer: "https://access.example.com",
-  audience: ["skygest-mcp"],
-  scopes: ["editorial:read", "editorial:write", "experts:read", "experts:write", "ops:read", "ops:refresh"],
-  payload: {
-    sub: "did:example:operator",
-    email: "operator@example.com",
-    scope: "editorial:read editorial:write experts:read experts:write ops:read ops:refresh"
-  }
+  scopes: ["editorial:read", "editorial:write", "experts:read", "experts:write", "ops:read", "ops:refresh"]
 };
 
 const expectJsonResponse = async <A>(

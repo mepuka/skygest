@@ -1,27 +1,7 @@
 import { Context, Effect, Layer, Redacted, Schema } from "effect";
-import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
 import { AppConfig } from "../platform/Config";
-import { stringifyUnknown } from "../platform/Json";
 
-const ACCESS_HEADER = "cf-access-jwt-assertion";
-const OPERATOR_SECRET_HEADER = "x-skygest-operator-secret";
-
-const normalizeTeamDomain = (value: string) =>
-  value.startsWith("http://") || value.startsWith("https://")
-    ? value.replace(/\/+$/, "")
-    : `https://${value.replace(/\/+$/, "")}`;
-
-export class MissingAccessJwtError extends Schema.TaggedError<MissingAccessJwtError>()(
-  "MissingAccessJwtError",
-  {}
-) {}
-
-export class InvalidAccessJwtError extends Schema.TaggedError<InvalidAccessJwtError>()(
-  "InvalidAccessJwtError",
-  {
-    message: Schema.String
-  }
-) {}
+const AUTHORIZATION_HEADER = "authorization";
 
 export class MissingOperatorSecretError extends Schema.TaggedError<MissingOperatorSecretError>()(
   "MissingOperatorSecretError",
@@ -33,59 +13,10 @@ export class InvalidOperatorSecretError extends Schema.TaggedError<InvalidOperat
   {}
 ) {}
 
-export class ForbiddenAccessJwtError extends Schema.TaggedError<ForbiddenAccessJwtError>()(
-  "ForbiddenAccessJwtError",
-  {
-    reason: Schema.String
-  }
-) {}
-
-export class InvalidAuthConfigError extends Schema.TaggedError<InvalidAuthConfigError>()(
-  "InvalidAuthConfigError",
-  {
-    missing: Schema.String
-  }
-) {}
-
 export type AccessIdentity = {
   readonly subject: string | null;
   readonly email: string | null;
-  readonly issuer: string;
-  readonly audience: ReadonlyArray<string>;
   readonly scopes: ReadonlyArray<string>;
-  readonly payload: JWTPayload;
-};
-
-const toAudience = (payload: JWTPayload): ReadonlyArray<string> => {
-  if (Array.isArray(payload.aud)) {
-    return payload.aud.filter((value): value is string => typeof value === "string");
-  }
-  return typeof payload.aud === "string" ? [payload.aud] : [];
-};
-
-const toScopes = (payload: JWTPayload): ReadonlyArray<string> => {
-  const collect = (value: unknown): ReadonlyArray<string> => {
-    if (typeof value === "string") {
-      return value
-        .split(/\s+/u)
-        .map((scope) => scope.trim())
-        .filter((scope) => scope.length > 0);
-    }
-
-    if (Array.isArray(value)) {
-      return value.filter((scope): scope is string => typeof scope === "string");
-    }
-
-    return [];
-  };
-
-  return Array.from(
-    new Set([
-      ...collect(payload.scope),
-      ...collect(payload.scopes),
-      ...collect(payload.permissions)
-    ])
-  );
 };
 
 const operatorScopes: ReadonlyArray<string> = [
@@ -99,44 +30,48 @@ const operatorScopes: ReadonlyArray<string> = [
   "editorial:write"
 ];
 
+const extractBearerToken = (header: string): string | null => {
+  const match = /^Bearer\s+(\S+)$/iu.exec(header);
+  return match === null ? null : match[1]!;
+};
+
+const timingSafeEqual = (a: string, b: string): Effect.Effect<boolean> => {
+  if (a.length !== b.length) {
+    return Effect.succeed(false);
+  }
+
+  return Effect.sync(() => {
+    const encoder = new TextEncoder();
+    const bufA = encoder.encode(a);
+    const bufB = encoder.encode(b);
+
+    // Cloudflare Workers runtime provides crypto.subtle.timingSafeEqual
+    const subtle = crypto.subtle as SubtleCrypto & {
+      readonly timingSafeEqual?: (a: ArrayBuffer, b: ArrayBuffer) => boolean;
+    };
+
+    if (typeof subtle.timingSafeEqual === "function") {
+      return subtle.timingSafeEqual(bufA.buffer, bufB.buffer);
+    }
+
+    // Fallback for non-Workers runtimes (test / Node / Bun):
+    // constant-time comparison via bitwise OR accumulator
+    let mismatch = 0;
+    for (let i = 0; i < bufA.length; i++) {
+      mismatch |= bufA[i]! ^ bufB[i]!;
+    }
+    return mismatch === 0;
+  });
+};
+
 export class AuthService extends Context.Tag("@skygest/AuthService")<
   AuthService,
   {
-    readonly requireAccess: (
-      headers: Headers
-    ) => Effect.Effect<
-      AccessIdentity,
-      MissingAccessJwtError | InvalidAccessJwtError | ForbiddenAccessJwtError | InvalidAuthConfigError
-    >;
-    readonly requireScopes: (
-      headers: Headers,
-      requiredScopes: ReadonlyArray<string>
-    ) => Effect.Effect<
-      AccessIdentity,
-      MissingAccessJwtError | InvalidAccessJwtError | ForbiddenAccessJwtError | InvalidAuthConfigError
-    >;
     readonly requireOperator: (
       headers: Headers
     ) => Effect.Effect<
       AccessIdentity,
-      | MissingAccessJwtError
-      | InvalidAccessJwtError
-      | ForbiddenAccessJwtError
-      | MissingOperatorSecretError
-      | InvalidOperatorSecretError
-      | InvalidAuthConfigError
-    >;
-    readonly requireOperatorScopes: (
-      headers: Headers,
-      requiredScopes: ReadonlyArray<string>
-    ) => Effect.Effect<
-      AccessIdentity,
-      | MissingAccessJwtError
-      | InvalidAccessJwtError
-      | ForbiddenAccessJwtError
-      | MissingOperatorSecretError
-      | InvalidOperatorSecretError
-      | InvalidAuthConfigError
+      MissingOperatorSecretError | InvalidOperatorSecretError
     >;
   }
 >() {
@@ -144,128 +79,34 @@ export class AuthService extends Context.Tag("@skygest/AuthService")<
     AuthService,
     Effect.gen(function* () {
       const config = yield* AppConfig;
-      const issuer = normalizeTeamDomain(config.accessTeamDomain);
-      const jwks = createRemoteJWKSet(new URL(`${issuer}/cdn-cgi/access/certs`));
 
-      const requireAccess = Effect.fn("AuthService.requireAccess")(function* (headers: Headers) {
-        if (config.accessTeamDomain.length === 0) {
-          return yield* InvalidAuthConfigError.make({ missing: "ACCESS_TEAM_DOMAIN" });
-        }
-
-        if (config.accessAud.length === 0) {
-          return yield* InvalidAuthConfigError.make({ missing: "ACCESS_AUD" });
-        }
-
-        const token = headers.get(ACCESS_HEADER);
-        if (token === null || token.trim().length === 0) {
-          return yield* MissingAccessJwtError.make({});
-        }
-
-        const { payload } = yield* Effect.tryPromise({
-          try: () => jwtVerify(token, jwks),
-          catch: (error) =>
-            InvalidAccessJwtError.make({
-              message: stringifyUnknown(error)
-            })
-        });
-
-        const audience = toAudience(payload);
-        if (payload.iss !== issuer) {
-          return yield* ForbiddenAccessJwtError.make({ reason: "invalid issuer" });
-        }
-
-        if (!audience.includes(config.accessAud)) {
-          return yield* ForbiddenAccessJwtError.make({ reason: "invalid audience" });
-        }
-
-        return {
-          subject: typeof payload.sub === "string" ? payload.sub : null,
-          email: typeof payload.email === "string" ? payload.email : null,
-          issuer,
-          audience,
-          scopes: toScopes(payload),
-          payload
-        } satisfies AccessIdentity;
-      });
-
-      const requireScopes = Effect.fn("AuthService.requireScopes")(function* (
-        headers: Headers,
-        requiredScopes: ReadonlyArray<string>
-      ) {
-        const identity = yield* requireAccess(headers);
-        const missing = requiredScopes.filter((scope) => !identity.scopes.includes(scope));
-
-        if (missing.length > 0) {
-          return yield* ForbiddenAccessJwtError.make({
-            reason: `missing scopes: ${missing.join(", ")}`
-          });
-        }
-
-        return identity;
-      });
-
-      const requireSharedSecret = Effect.fn("AuthService.requireSharedSecret")(function* (
+      const requireOperator = Effect.fn("AuthService.requireOperator")(function* (
         headers: Headers
       ) {
-        const configuredOperatorSecret = Redacted.value(config.operatorSecret);
+        const configuredSecret = Redacted.value(config.operatorSecret);
 
-        if (configuredOperatorSecret.length === 0) {
-          return yield* InvalidAuthConfigError.make({ missing: "OPERATOR_SECRET" });
+        const authHeader = headers.get(AUTHORIZATION_HEADER);
+        const token = authHeader !== null ? extractBearerToken(authHeader) : null;
+
+        if (token === null) {
+          return yield* new MissingOperatorSecretError();
         }
 
-        const operatorSecret = headers.get(OPERATOR_SECRET_HEADER);
-        if (operatorSecret === null || operatorSecret.trim().length === 0) {
-          return yield* MissingOperatorSecretError.make({});
-        }
+        const isValid = yield* timingSafeEqual(token, configuredSecret);
 
-        if (operatorSecret !== configuredOperatorSecret) {
-          return yield* InvalidOperatorSecretError.make({});
+        if (!isValid) {
+          return yield* new InvalidOperatorSecretError();
         }
 
         return {
-          subject: "staging-shared-secret-operator",
-          email: "staging-operator@skygest.local",
-          issuer: "shared-secret",
-          audience: [],
-          scopes: [...operatorScopes],
-          payload: {
-            sub: "staging-shared-secret-operator",
-            email: "staging-operator@skygest.local",
-            iss: "shared-secret",
-            aud: []
-          }
+          subject: "operator",
+          email: null,
+          scopes: [...operatorScopes]
         } satisfies AccessIdentity;
-      });
-
-      const requireOperator = Effect.fn("AuthService.requireOperator")(function* (headers: Headers) {
-        return yield* (
-          config.operatorAuthMode === "shared-secret"
-            ? requireSharedSecret(headers)
-            : requireAccess(headers)
-        );
-      });
-
-      const requireOperatorScopes = Effect.fn("AuthService.requireOperatorScopes")(function* (
-        headers: Headers,
-        requiredScopes: ReadonlyArray<string>
-      ) {
-        const identity = yield* requireOperator(headers);
-        const missing = requiredScopes.filter((scope) => !identity.scopes.includes(scope));
-
-        if (missing.length > 0) {
-          return yield* ForbiddenAccessJwtError.make({
-            reason: `missing scopes: ${missing.join(", ")}`
-          });
-        }
-
-        return identity;
       });
 
       return AuthService.of({
-        requireAccess,
-        requireScopes,
-        requireOperator,
-        requireOperatorScopes
+        requireOperator
       });
     })
   );

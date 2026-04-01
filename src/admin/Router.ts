@@ -150,7 +150,7 @@ const withAdminErrors = <A, R>(
 const ensureStagingOpsEnabled = Effect.gen(function* () {
   const config = yield* AppConfig;
 
-  if (config.operatorAuthMode !== "shared-secret") {
+  if (config.enableStagingOps !== true) {
     return yield* Effect.fail(notFoundError("not found"));
   }
 });

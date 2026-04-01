@@ -35,10 +35,8 @@ export const testConfig = (
   defaultDomain: "energy",
   mcpLimitDefault: 20,
   mcpLimitMax: 100,
-  operatorAuthMode: "access",
   operatorSecret: Redacted.make(""),
-  accessTeamDomain: "https://access.example.com",
-  accessAud: "skygest-mcp",
+  enableStagingOps: false,
   editorialDefaultExpiryHours: 24,
   curationMinSignalScore: 30,
   ...overrides

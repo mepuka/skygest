@@ -38,17 +38,9 @@ const decodeSearchResponse = decodeCallToolResultWith(KnowledgePostsMcpOutput);
 const decodeExpertsResponse = decodeCallToolResultWith(ExpertListMcpOutput);
 
 const operatorIdentity: AccessIdentity = {
-  subject: "staging-shared-secret-operator",
+  subject: "operator",
   email: "staging-operator@skygest.local",
-  issuer: "shared-secret",
-  audience: [],
-  scopes: ["experts:write", "curation:write", "ops:refresh"],
-  payload: {
-    sub: "staging-shared-secret-operator",
-    email: "staging-operator@skygest.local",
-    iss: "shared-secret",
-    aud: []
-  }
+  scopes: ["experts:write", "curation:write", "ops:refresh"]
 };
 
 const makeThreadNode = (
@@ -101,7 +93,7 @@ const makeStagingAdminLayer = (options: {
 }) => {
   const sqliteLayer = makeSqliteLayer(options.filename);
   const configLayer = Layer.succeed(AppConfig, testConfig({
-    operatorAuthMode: "shared-secret",
+    enableStagingOps: true,
     operatorSecret: Redacted.make("stage-secret"),
     ...options.config
   }));
@@ -183,12 +175,12 @@ const makeStagingAdminLayer = (options: {
 };
 
 describe("staging admin ops routes", () => {
-  it.live("returns 404 for staging ops routes when shared-secret mode is disabled", () =>
+  it.live("returns 404 for staging ops routes when enableStagingOps is disabled", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const layer = makeStagingAdminLayer({
           filename,
-          config: { operatorAuthMode: "access", operatorSecret: Redacted.make("") }
+          config: { enableStagingOps: false, operatorSecret: Redacted.make("") }
         });
 
         const response = await handleAdminRequestWithLayer(
@@ -338,7 +330,7 @@ describe("staging admin ops routes", () => {
             Effect.provide(
               makeBiLayer({
                 filename,
-                config: { operatorAuthMode: "shared-secret", operatorSecret: Redacted.make("stage-secret") },
+                config: { enableStagingOps: true, operatorSecret: Redacted.make("stage-secret") },
                 blueskyClient: blueskyLayer
               })
             )
@@ -412,7 +404,7 @@ describe("staging admin ops routes", () => {
             Effect.provide(
               makeBiLayer({
                 filename,
-                config: { operatorAuthMode: "shared-secret", operatorSecret: Redacted.make("stage-secret") }
+                config: { enableStagingOps: true, operatorSecret: Redacted.make("stage-secret") }
               })
             )
           )
@@ -465,7 +457,7 @@ describe("staging admin ops routes", () => {
             Effect.provide(
               makeBiLayer({
                 filename,
-                config: { operatorAuthMode: "shared-secret", operatorSecret: Redacted.make("stage-secret") }
+                config: { enableStagingOps: true, operatorSecret: Redacted.make("stage-secret") }
               })
             )
           )
@@ -524,7 +516,7 @@ describe("staging admin ops routes", () => {
             Effect.provide(
               makeBiLayer({
                 filename,
-                config: { operatorAuthMode: "shared-secret", operatorSecret: Redacted.make("stage-secret") },
+                config: { enableStagingOps: true, operatorSecret: Redacted.make("stage-secret") },
                 blueskyClient: blueskyLayer
               })
             )

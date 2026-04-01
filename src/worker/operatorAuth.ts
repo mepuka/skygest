@@ -2,16 +2,10 @@ import { Effect } from "effect";
 import {
   type AccessIdentity,
   AuthService,
-  ForbiddenAccessJwtError,
-  InvalidAccessJwtError,
-  InvalidAuthConfigError,
   InvalidOperatorSecretError,
-  MissingAccessJwtError,
   MissingOperatorSecretError
 } from "../auth/AuthService";
 import {
-  forbiddenError,
-  internalServerError,
   notFoundError,
   unauthorizedError
 } from "../domain/api";
@@ -105,6 +99,13 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
   if (request.method === "GET" && isEnrichmentRunPath(pathname)) {
     return {
       action: "get_enrichment_run",
+      scopes: ["ops:read"]
+    };
+  }
+
+  if (request.method === "GET" && pathname === "/admin/ops/stats") {
+    return {
+      action: "ops_stats",
       scopes: ["ops:read"]
     };
   }
@@ -218,19 +219,25 @@ export const authorizeOperator = (
     env,
     Effect.gen(function* () {
       const auth = yield* AuthService;
-      return yield* (
-        requiredScopes.length === 0
-          ? auth.requireOperator(request.headers)
-          : auth.requireOperatorScopes(request.headers, requiredScopes)
-      );
+      const identity = yield* auth.requireOperator(request.headers);
+
+      if (requiredScopes.length > 0) {
+        const missing = requiredScopes.filter(
+          (scope) => !identity.scopes.includes(scope)
+        );
+
+        if (missing.length > 0) {
+          return yield* new InvalidOperatorSecretError();
+        }
+      }
+
+      return identity;
     }),
     { operation: "authorizeOperator" }
   );
 
 export const toAuthErrorResponse = (error: unknown) => {
   if (
-    error instanceof MissingAccessJwtError ||
-    error instanceof InvalidAccessJwtError ||
     error instanceof MissingOperatorSecretError ||
     error instanceof InvalidOperatorSecretError
   ) {
@@ -245,34 +252,10 @@ export const toAuthErrorResponse = (error: unknown) => {
     );
   }
 
-  if (error instanceof ForbiddenAccessJwtError) {
-    return new Response(
-      encodeJsonString(forbiddenError("forbidden")),
-      {
-        status: 403,
-        headers: {
-          "content-type": "application/json"
-        }
-      }
-    );
-  }
-
-  if (error instanceof InvalidAuthConfigError) {
-    return new Response(
-      encodeJsonString(internalServerError("invalid auth config")),
-      {
-        status: 500,
-        headers: {
-          "content-type": "application/json"
-        }
-      }
-    );
-  }
-
   return new Response(
-    encodeJsonString(internalServerError("internal error")),
+    encodeJsonString(unauthorizedError("unauthorized")),
     {
-      status: 500,
+      status: 401,
       headers: {
         "content-type": "application/json"
       }
@@ -289,17 +272,11 @@ export const logDeniedOperatorRequest = async (
     return;
   }
 
-  const reason = error instanceof ForbiddenAccessJwtError
-    ? error.reason
-    : error instanceof InvalidAccessJwtError
-      ? error.message
-      : error instanceof InvalidOperatorSecretError
-        ? "invalid operator secret"
-        : error instanceof InvalidAuthConfigError
-          ? `missing ${error.missing}`
-          : error instanceof MissingOperatorSecretError
-            ? "missing operator secret"
-            : "missing or invalid access token";
+  const reason = error instanceof InvalidOperatorSecretError
+    ? "invalid operator secret"
+    : error instanceof MissingOperatorSecretError
+      ? "missing operator secret"
+      : "missing or invalid bearer token";
 
   await Effect.runPromise(
     Effect.logWarning("operator request denied").pipe(
@@ -331,9 +308,6 @@ export const notFoundJsonResponse = () =>
       }
     }
   );
-
-export const isSharedSecretMode = (env: EnvBindings) =>
-  env.OPERATOR_AUTH_MODE === "shared-secret";
 
 export const isStagingOpsPath = (pathname: string) =>
   pathname.startsWith("/admin/ops/");

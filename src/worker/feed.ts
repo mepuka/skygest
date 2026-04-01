@@ -4,7 +4,6 @@ import { handleMcpRequest } from "../mcp/Router";
 import type { AgentWorkerEnvBindings } from "../platform/Env";
 import {
   authorizeOperator,
-  isSharedSecretMode,
   isStagingOpsPath,
   logDeniedOperatorRequest,
   notFoundJsonResponse,
@@ -45,7 +44,7 @@ export const fetch = async (request: Request, env: AgentWorkerEnvBindings) => {
   }
 
   if (url.pathname.startsWith("/admin")) {
-    if (isStagingOpsPath(url.pathname) && !isSharedSecretMode(env)) {
+    if (isStagingOpsPath(url.pathname) && env.ENABLE_STAGING_OPS !== "true") {
       return notFoundJsonResponse();
     }
 
