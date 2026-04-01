@@ -2,9 +2,9 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Import Twitter posts into the Skygest pipeline so they appear in search, curation candidates, and can flow through curation, enrichment, and editorial picks — the same end-to-end workflow as Bluesky posts.
+**Goal:** Import Twitter posts into Skygest so they can be searched, curated, enriched, and editorially accepted. Thread expansion and live thread display are out of scope for v1 — imported posts work through the pipeline but `get_post_thread` / `get_thread_document` are Bluesky-only.
 
-**Architecture:** Widen the `AtUri` regex to accept both `at://` and `x://` schemes. This single change unlocks every read and write schema in the app. Add a platform-agnostic import endpoint at `POST /admin/import/posts`. The local CLI uses the Twitter scraper to fetch tweets, normalizes them, and uploads via this endpoint. `curate_post` gains a Twitter branch that skips the live Bluesky fetch and uses stored payloads. Hydration skips live Bluesky fetch for `x://` URIs (empty hydration — expert metadata comes from DB join).
+**Architecture:** Introduce `PostUri` (`/^(at|x):\/\//`) as a separate type from `AtUri` (`/^at:\/\//`). Migrate platform-agnostic schemas (posts, curation, enrichment, editorial) to `PostUri`. Leave Bluesky-specific schemas (firehose events, polling, sync state, feed items) on `AtUri`. Add a platform-agnostic import endpoint and local CLI commands.
 
 **Tech Stack:** Effect.ts, D1 SQL, Cloudflare Workers admin API, Bun CLI, better_twitter_scraper
 
@@ -12,806 +12,404 @@
 
 ## Design Decisions
 
-1. **Widen `AtUri` regex** — Change `/^at:\/\//` to `/^(at|x):\/\//` in `src/domain/types.ts`. One-line change. Every schema that uses `AtUri` instantly accepts Twitter URIs. No find-and-replace needed.
-2. **No schema migration** — DID prefix (`did:x:`) discriminates platform. The `Did` regex (`/^did:/`) already accepts `did:x:...`.
-3. **Poller protection via `did:x:` blacklist** — `IngestRunWorkflow.resolveTargets` filters out `did:x:` experts. Future non-PLC Bluesky identities (`did:web:`) are not affected.
-4. **Payload stored at import as `"candidate"` stage** — not `"picked"`. Curation transitions to `"picked"`. Enrichment requires `"picked"` (same rule for both platforms).
-5. **`curate_post` gains a Twitter branch** — detects `x://`, skips Bluesky fetch, verifies stored payload, transitions to `"picked"`, queues enrichment.
-6. **Hydration: empty for Twitter v1** — `PostHydrationService` skips live fetch for `x://` URIs. Expert handle/avatar come from the DB join, not hydration. Enrichment data comes from payloads.
-7. **Import endpoint at `/admin/import/posts`** — NOT `/admin/ingest/import` (that path is intercepted by the ingest service proxy in feed.ts).
-8. **Two normalization functions** — `Tweet` (lighter, from timeline API) and `TweetDetailNode` (richer, from detail API) map differently.
+1. **Two URI types** — `AtUri` stays `/^at:\/\//` for Bluesky-only paths. New `PostUri` accepts `/^(at|x):\/\//` for platform-agnostic paths. Both are branded strings. `AtUri` is assignable to `PostUri` (narrower to wider).
+2. **Explicit schema migration** — Each schema that needs to handle both platforms changes from `AtUri` to `PostUri`. Bluesky-only schemas stay on `AtUri`. ~15 files, all mechanical.
+3. **No DB migration** — URIs are `TEXT` in D1. The branded type is TypeScript-only enforcement.
+4. **Poller protection** — `did:x:` blacklist in `resolveTargets`.
+5. **Payload handling** — Import stores payloads as `captureStage: "candidate"` for posts with embeds. Plain-text tweets get no payload row. `curate_post` Twitter branch checks post existence (not payload existence) and transitions to `"picked"` if a payload exists. Plain-text tweets can be curated but not enriched (no visual/link content).
+6. **Enrichment stage gate** — `start_enrichment` checks `captureStage === "picked"`, not just payload existence.
+7. **Hydration** — `PostHydrationService` skips live Bluesky fetch for `x://` URIs. Empty hydration is acceptable — expert handle/avatar come from DB join.
+8. **Import path** — `POST /admin/import/posts` (not `/admin/ingest/*` which is proxied to ingest worker).
+9. **curate_post Twitter branch** — detects `x://` prefix, skips Bluesky thread fetch, uses stored payload if present, transitions to `"picked"`, queues enrichment.
+10. **Tool/schema descriptions** — Updated to say "post URI" instead of "AT Protocol URI".
 
 ---
 
-## Task 1: Widen AtUri Regex
+## Task 1: Introduce PostUri Type
 
 **Files:**
-- Modify: `src/domain/types.ts:23-26`
+- Modify: `src/domain/types.ts`
+- Test: `tests/post-uri.test.ts`
 
-### Step 1: Change the regex
+Add `PostUri` as a new branded type alongside `AtUri`:
 
-Current:
 ```ts
-export const AtUri = Schema.String.pipe(
-  Schema.pattern(/^at:\/\//),
-  Schema.brand("AtUri")
-).annotations({ description: "AT Protocol URI, e.g. at://did:plc:abc/app.bsky.feed.post/rkey" });
-```
-
-New:
-```ts
-export const AtUri = Schema.String.pipe(
+export const PostUri = Schema.String.pipe(
   Schema.pattern(/^(at|x):\/\//),
-  Schema.brand("AtUri")
+  Schema.brand("PostUri")
 ).annotations({ description: "Post URI — at:// (Bluesky) or x:// (Twitter)" });
-```
+export type PostUri = Schema.Schema.Type<typeof PostUri>;
 
-Also add the platform helper:
-
-```ts
 export type Platform = "bluesky" | "twitter";
 
-export const platformFromUri = (uri: AtUri): Platform =>
+export const platformFromUri = (uri: PostUri): Platform =>
   (uri as string).startsWith("at://") ? "bluesky" : "twitter";
 ```
 
-### Step 2: Run tests
+`AtUri` stays exactly as-is. Test that `PostUri` accepts both schemes and `AtUri` still rejects `x://`.
 
-Run: `bun run test`
-Expected: All 540 tests pass — existing tests all use `at://` URIs which still match.
-
-### Step 3: Add a test for the new scheme
-
-Add to an existing test file or create `tests/post-uri.test.ts`:
-
-```ts
-import { Schema } from "effect";
-import { describe, expect, it } from "@effect/vitest";
-import { AtUri, platformFromUri } from "../src/domain/types";
-
-describe("AtUri accepts x:// scheme", () => {
-  const decode = Schema.decodeUnknownSync(AtUri);
-
-  it("accepts at:// URIs", () => {
-    expect(decode("at://did:plc:abc/app.bsky.feed.post/xyz")).toBe(
-      "at://did:plc:abc/app.bsky.feed.post/xyz"
-    );
-  });
-
-  it("accepts x:// URIs", () => {
-    expect(decode("x://12345/status/9876543210")).toBe(
-      "x://12345/status/9876543210"
-    );
-  });
-
-  it("rejects other schemes", () => {
-    expect(() => decode("https://example.com")).toThrow();
-    expect(() => decode("")).toThrow();
-  });
-});
-
-describe("platformFromUri", () => {
-  it("returns bluesky for at://", () => {
-    expect(platformFromUri("at://did:plc:abc/app.bsky.feed.post/xyz" as any)).toBe("bluesky");
-  });
-
-  it("returns twitter for x://", () => {
-    expect(platformFromUri("x://12345/status/9876543210" as any)).toBe("twitter");
-  });
-});
-```
-
-### Step 4: Run tests
-
-Run: `bun run test`
-Expected: All tests pass including new ones
-
-### Step 5: Commit
+### Commit
 
 ```bash
-git add src/domain/types.ts tests/post-uri.test.ts
-git commit -m "feat(domain): widen AtUri to accept x:// scheme for Twitter posts"
+git commit -m "feat(domain): add PostUri type for platform-agnostic post identity"
 ```
 
 ---
 
-## Task 2: Widen ExpertSource + Add PostUri Helper
+## Task 2: Migrate Platform-Agnostic Schemas to PostUri
+
+**Files to change `AtUri` → `PostUri` for post URI fields:**
+
+Each file below has specific fields that change from `AtUri` to `PostUri`. The changes are mechanical — import `PostUri` from `../domain/types` (or adjust existing import), change the field type.
+
+**Domain schemas:**
+- `src/domain/bi.ts` — `KnowledgePost.uri`, `KnowledgePostResult.uri`, `DeletedKnowledgePost.uri`, `KnowledgeLinkResult.postUri`, `GetPostThreadInput.postUri`, `GetThreadDocumentInput.postUri`, `ExplainPostTopicsInput.postUri`
+- `src/domain/curation.ts` — `CuratePostInput.postUri`, `CuratePostOutput.postUri`, `CurationPostNotFoundError.postUri`
+- `src/domain/editorial.ts` — `SubmitEditorialPickInput.postUri`, `SubmitEditorialPickOutput.postUri`, `EditorialPickOutput.postUri`
+- `src/domain/enrichment.ts` — `GetPostEnrichmentsInput.postUri`, `GetPostEnrichmentsOutput.postUri`, `PostEnrichmentsOutput.postUri`
+- `src/domain/candidatePayload.ts` — `CandidatePayloadRecord.postUri`, `SaveCandidatePayloadInput.postUri`, `SaveCandidateEnrichmentInput.postUri`, `CandidatePayloadNotPickedError.postUri`
+- `src/domain/enrichmentRun.ts` — `EnrichmentRunRecord.postUri`, `CreateQueuedEnrichmentRun.postUri`, `EnrichmentRunParams.postUri`
+- `src/domain/api.ts` — `StartEnrichmentInput.postUri`, API path params that take post URIs
+
+**DO NOT change these (Bluesky-only):**
+- `src/domain/types.ts` — `RawEvent.uri`, `RawEvent.did`, `FeedItem.post` — stay `AtUri`
+- `src/domain/polling.ts` — all polling schemas stay `AtUri`/`Did`
+- `src/domain/types.ts` — `PostprocessMessage` stays `Did`
+
+**D1 repos that decode rows** — these read `TEXT` from D1 and decode through schemas. Once the schema field changes to `PostUri`, the decode automatically accepts `x://` values from the database:
+- `src/services/d1/KnowledgeRepoD1.ts` — row decode schemas
+- `src/services/d1/CurationRepoD1.ts` — row decode schemas  
+- `src/services/d1/EditorialRepoD1.ts` — row decode schemas
+- `src/services/d1/CandidatePayloadRepoD1.ts` — row decode schemas
+- `src/services/d1/EnrichmentRunsRepoD1.ts` — row decode schemas
+
+**Service interfaces:**
+- `src/services/CandidatePayloadService.ts` — method signatures use `AtUri` for `postUri` params
+- `src/services/CandidatePayloadRepo.ts` — same
+- `src/services/PostEnrichmentReadService.ts` — `getPost` param is `string`, no change needed
+- `src/services/EnrichmentRunsRepo.ts` — `listLatestByPostUri` param is `string`, no change needed
+
+**MCP layer:**
+- `src/mcp/Toolkit.ts` — input schemas reference domain types, will pick up `PostUri` automatically
+- `src/mcp/OutputSchemas.ts` — extends domain types, will pick up `PostUri` automatically
+
+**Strategy:** Start from the domain schemas (leaf types), then work outward. Each file change is: add `PostUri` import, replace `AtUri` with `PostUri` on the specific fields. Run `bunx tsc --noEmit` after each file to catch cascading type errors.
+
+**CRITICAL:** Do NOT blindly find-and-replace `AtUri` → `PostUri`. Only change the fields listed above. Read each file and understand which fields are post URIs (platform-agnostic) vs. which are AT Protocol URIs (Bluesky-only).
+
+### Verify
+
+Run: `bunx tsc --noEmit` — zero errors
+Run: `bun run test` — all tests pass (existing tests use `at://` which matches both types)
+
+### Commit
+
+```bash
+git commit -m "refactor(domain): migrate platform-agnostic schemas from AtUri to PostUri"
+```
+
+---
+
+## Task 3: Update Tool and Schema Descriptions
+
+**Files:**
+- `src/domain/curation.ts` — `CuratePostInput.postUri` annotation: change "AT Protocol URI" to "Post URI (at:// or x://)"
+- `src/domain/editorial.ts` — `SubmitEditorialPickInput.postUri` annotation: same
+- `src/domain/enrichment.ts` — `GetPostEnrichmentsInput.postUri` annotation: same
+- `src/mcp/Toolkit.ts` — `CuratePostTool` description: change "Curating fetches live embed data from Bluesky" to "Curating captures embed data for enrichment. For Bluesky posts, fetches live data. For Twitter posts, uses stored import data."
+- `src/mcp/glossary.ts` — update `curate_post` description similarly
+
+### Commit
+
+```bash
+git commit -m "docs(mcp): update tool descriptions for multi-platform support"
+```
+
+---
+
+## Task 4: Widen ExpertSource
 
 **Files:**
 - Modify: `src/domain/bi.ts:26`
 
-### Step 1: Add `"twitter-import"` to ExpertSource
+Add `"twitter-import"` to `ExpertSource`:
 
-Current:
-```ts
-export const ExpertSource = Schema.Literal("manual", "starter_pack", "list", "network");
-```
-
-New:
 ```ts
 export const ExpertSource = Schema.Literal("manual", "starter_pack", "list", "network", "twitter-import");
 ```
 
-### Step 2: Run tests
-
-Run: `bun run test`
-Expected: All tests pass
-
-### Step 3: Commit
+### Commit
 
 ```bash
-git add src/domain/bi.ts
 git commit -m "feat(domain): add twitter-import expert source"
 ```
 
 ---
 
-## Task 3: Import Request/Response Schemas
-
-**Files:**
-- Modify: `src/domain/api.ts`
-- Test: `tests/import-schema.test.ts`
-
-### Step 1: Write the failing test
-
-Create `tests/import-schema.test.ts`:
-
-```ts
-import { Schema } from "effect";
-import { describe, expect, it } from "@effect/vitest";
-import { ImportPostsInput, ImportPostsOutput } from "../src/domain/api";
-
-describe("ImportPostsInput", () => {
-  const decode = Schema.decodeUnknownSync(ImportPostsInput);
-
-  it("decodes valid import with Twitter expert and post", () => {
-    const result = decode({
-      experts: [{
-        did: "did:x:12345",
-        handle: "energyexpert",
-        domain: "energy",
-        source: "twitter-import",
-        tier: "energy-focused"
-      }],
-      posts: [{
-        uri: "x://12345/status/9876543210",
-        did: "did:x:12345",
-        text: "Solar curtailment hit a new record in CAISO",
-        createdAt: 1741234567000,
-        links: []
-      }]
-    });
-    expect(result.experts).toHaveLength(1);
-    expect(result.posts).toHaveLength(1);
-  });
-
-  it("decodes import with embed payload", () => {
-    const result = decode({
-      experts: [],
-      posts: [{
-        uri: "x://12345/status/111",
-        did: "did:x:12345",
-        text: "Chart shows solar growth",
-        createdAt: 1741234567000,
-        embedType: "img",
-        embedPayload: {
-          kind: "img",
-          images: [{ thumb: "https://pbs.twimg.com/media/abc_small.jpg", fullsize: "https://pbs.twimg.com/media/abc.jpg", alt: "Solar chart" }]
-        },
-        links: []
-      }]
-    });
-    expect(result.posts[0]?.embedType).toBe("img");
-    expect(result.posts[0]?.embedPayload).toBeDefined();
-  });
-
-  it("also accepts Bluesky URIs", () => {
-    const result = decode({
-      experts: [],
-      posts: [{
-        uri: "at://did:plc:abc/app.bsky.feed.post/xyz",
-        did: "did:plc:abc",
-        text: "Test",
-        createdAt: 1741234567000,
-        links: []
-      }]
-    });
-    expect(result.posts).toHaveLength(1);
-  });
-});
-```
-
-### Step 2: Run test — should fail
-
-Run: `bun run test tests/import-schema.test.ts`
-Expected: FAIL — `ImportPostsInput` not exported
-
-### Step 3: Implement
-
-Read `src/domain/api.ts` to understand existing patterns. Add after the existing admin schemas:
-
-```ts
-// Import schemas
-const ImportExpertInput = Schema.Struct({
-  did: Did,
-  handle: Schema.String,
-  displayName: Schema.optional(Schema.String),
-  avatar: Schema.optional(Schema.String),
-  domain: Schema.String,
-  source: ExpertSource,
-  tier: ExpertTier
-});
-
-const ImportPostInput = Schema.Struct({
-  uri: AtUri,
-  did: Did,
-  text: Schema.String,
-  createdAt: Schema.Number,
-  embedType: Schema.optional(Schema.NullOr(ThreadEmbedType)),
-  embedPayload: Schema.optional(Schema.NullOr(EmbedPayload)),
-  links: Schema.Array(Schema.Struct({
-    url: Schema.String,
-    title: Schema.optional(Schema.NullOr(Schema.String)),
-    description: Schema.optional(Schema.NullOr(Schema.String)),
-    domain: Schema.optional(Schema.NullOr(Schema.String))
-  }))
-});
-
-export const ImportPostsInput = Schema.Struct({
-  experts: Schema.Array(ImportExpertInput),
-  posts: Schema.Array(ImportPostInput)
-});
-export type ImportPostsInput = Schema.Schema.Type<typeof ImportPostsInput>;
-
-export const ImportPostsOutput = Schema.Struct({
-  imported: Schema.Number,
-  flagged: Schema.Number,
-  skipped: Schema.Number
-});
-export type ImportPostsOutput = Schema.Schema.Type<typeof ImportPostsOutput>;
-```
-
-NOTE: `ImportPostInput.uri` uses `AtUri` — which now accepts `x://` thanks to Task 1. `embedPayload` uses `EmbedPayload` from `src/domain/embed.ts` — check the import exists. `ThreadEmbedType` for `embedType`.
-
-Add to `AdminRequestSchemas` and `AdminResponseSchemas`:
-
-```ts
-importPosts: ImportPostsInput,
-// and
-importPosts: ImportPostsOutput,
-```
-
-### Step 4: Run tests
-
-Run: `bun run test tests/import-schema.test.ts`
-Expected: PASS
-
-### Step 5: Commit
-
-```bash
-git add src/domain/api.ts tests/import-schema.test.ts
-git commit -m "feat(domain): add import posts request/response schemas"
-```
-
----
-
-## Task 4: Extract Topic Matching from FilterWorker
+## Task 5: Extract TopicMatcher from FilterWorker
 
 **Files:**
 - Create: `src/filter/TopicMatcher.ts`
 - Modify: `src/filter/FilterWorker.ts`
 - Test: `tests/topic-matcher.test.ts`
 
-### Step 1: Write the failing test
+Extract the `ontology.match()` call into a reusable `matchTopics` function. Update FilterWorker to use it. Test that topic matching works independently.
 
-Create `tests/topic-matcher.test.ts`:
-
-```ts
-import { Effect } from "effect";
-import { describe, expect, it } from "@effect/vitest";
-import { matchTopics } from "../src/filter/TopicMatcher";
-import { OntologyCatalog } from "../src/services/OntologyCatalog";
-
-describe("matchTopics", () => {
-  it.effect("matches topics from text and domains", () =>
-    Effect.gen(function* () {
-      const topics = yield* matchTopics({
-        text: "Solar power capacity reached new records in California",
-        links: [{ domain: "gridstatus.io" }]
-      });
-      expect(topics.length).toBeGreaterThan(0);
-      expect(topics.some((t) => t.topicSlug === "solar")).toBe(true);
-    }).pipe(Effect.provide(OntologyCatalog.layer))
-  );
-
-  it.effect("returns empty for irrelevant text", () =>
-    Effect.gen(function* () {
-      const topics = yield* matchTopics({
-        text: "The weather is nice today",
-        links: []
-      });
-      expect(topics).toHaveLength(0);
-    }).pipe(Effect.provide(OntologyCatalog.layer))
-  );
-});
-```
-
-### Step 2: Run test — should fail
-
-Run: `bun run test tests/topic-matcher.test.ts`
-Expected: FAIL
-
-### Step 3: Implement
-
-Create `src/filter/TopicMatcher.ts`:
+The function signature:
 
 ```ts
-import { Effect } from "effect";
-import type { MatchedTopic } from "../domain/bi";
-import { OntologyCatalog } from "../services/OntologyCatalog";
-
 export const matchTopics = (input: {
   readonly text: string;
   readonly links: ReadonlyArray<{ readonly domain?: string | null }>;
   readonly hashtags?: ReadonlyArray<string>;
   readonly metadataTexts?: ReadonlyArray<string>;
-}): Effect.Effect<ReadonlyArray<MatchedTopic>, never, OntologyCatalog> =>
-  Effect.flatMap(OntologyCatalog, (ontology) =>
-    ontology.match({
-      text: input.text,
-      metadataTexts: input.metadataTexts ?? [],
-      hashtags: input.hashtags ?? [],
-      domains: input.links
-        .map((l) => l.domain)
-        .filter((d): d is string => d !== null && d !== undefined && d.length > 0)
-    })
-  );
+}): Effect.Effect<ReadonlyArray<MatchedTopic>, never, OntologyCatalog>
 ```
 
-Then update `src/filter/FilterWorker.ts` to import and use `matchTopics` instead of the inline `ontology.match()` call. Read the file carefully — remove the `yield* OntologyCatalog` line and replace the inline `ontology.match(...)` (around line 96) with `matchTopics(...)`.
-
-### Step 4: Run tests
-
-Run: `bun run test`
-Expected: All tests pass — FilterWorker behavior unchanged
-
-### Step 5: Commit
+### Commit
 
 ```bash
-git add src/filter/TopicMatcher.ts src/filter/FilterWorker.ts tests/topic-matcher.test.ts
 git commit -m "refactor(filter): extract topic matching into reusable TopicMatcher"
 ```
 
 ---
 
-## Task 5: Import Admin Endpoint
+## Task 6: Import Request/Response Schemas
+
+**Files:**
+- Modify: `src/domain/api.ts`
+- Test: `tests/import-schema.test.ts`
+
+Add `ImportPostsInput` and `ImportPostsOutput` schemas. The import post input uses `PostUri` for `uri` (not `AtUri`). Expert input uses `Did` (which already accepts `did:x:`). Add to `AdminRequestSchemas` and `AdminResponseSchemas`.
+
+Key schema shapes:
+
+```ts
+ImportExpertInput: { did: Did, handle: string, domain: string, source: ExpertSource, tier: ExpertTier, displayName?: string, avatar?: string }
+ImportPostInput: { uri: PostUri, did: Did, text: string, createdAt: number, embedType?: EmbedKind | null, embedPayload?: EmbedPayload | null, links: Array<{ url, title?, description?, domain? }> }
+ImportPostsInput: { experts: Array<ImportExpertInput>, posts: Array<ImportPostInput> }
+ImportPostsOutput: { imported: number, flagged: number, skipped: number }
+```
+
+### Commit
+
+```bash
+git commit -m "feat(domain): add import posts request/response schemas"
+```
+
+---
+
+## Task 7: Import Admin Endpoint
 
 **Files:**
 - Modify: `src/admin/Router.ts`
 - Modify: `src/worker/operatorAuth.ts`
 - Test: `tests/import-endpoint.test.ts`
 
-### Step 1: Add operator auth policy
+### Operator auth
 
-In `src/worker/operatorAuth.ts`, add to `operatorRequestPolicy`:
+Add to `operatorRequestPolicy` in `src/worker/operatorAuth.ts`:
 
 ```ts
 if (request.method === "POST" && pathname === "/admin/import/posts") {
-  return {
-    action: "import_posts",
-    scopes: ["ops:refresh"]
-  };
+  return { action: "import_posts", scopes: ["ops:refresh"] };
 }
 ```
 
-NOTE: Path is `/admin/import/posts`, NOT `/admin/ingest/import`. The `/admin/ingest/*` prefix is intercepted by `feed.ts:36` and proxied to the ingest worker.
+### Endpoint + handler
 
-### Step 2: Add API endpoint
+Add `POST /admin/import/posts` to `AdminApi` and handler layer.
 
-In `src/admin/Router.ts`, add a new API group to `AdminApi`:
+Handler logic:
 
-```ts
-.add(
-  HttpApiGroup.make("import")
-    .add(
-      HttpApiEndpoint.post("importPosts", "/admin/import/posts")
-        .setPayload(AdminRequestSchemas.importPosts)
-        .addSuccess(AdminResponseSchemas.importPosts)
-    )
-)
-```
+1. Upsert experts with `active: false` (not polled)
+2. For each post: run `matchTopics()` — skip if no topics
+3. Build `KnowledgePost` objects, upsert via `KnowledgeRepo`
+4. For imported posts that have `embedPayload`: store in `post_payloads` with `captureStage: "candidate"`
+5. Flag all imported posts via `CurationService.flagBatch()` (error-tolerant)
+6. Return `{ imported, flagged, skipped }`
 
-### Step 3: Add handler
+**Payload handling rules:**
+- Only store payloads for posts that were actually imported (survived topic matching)
+- Posts with `embedPayload: null` get NO payload row — they're plain-text, cannot be enriched
+- Do NOT swallow payload-save failures silently — log them as warnings
 
-Add handler layer. Read existing handlers to match the exact pattern (error wrapping, layer composition).
-
-The handler:
-
-```ts
-HttpApiBuilder.group(AdminApi, "import", (handlers) =>
-  handlers
-    .handle("importPosts", ({ payload }) =>
-      withAdminErrors("/admin/import/posts", Effect.gen(function* () {
-        const expertsRepo = yield* ExpertsRepo;
-        const knowledgeRepo = yield* KnowledgeRepo;
-        const payloadService = yield* CandidatePayloadService;
-        const curationService = yield* CurationService;
-        const now = Date.now();
-
-        // 1. Upsert experts (inactive — not polled by Bluesky ingest)
-        if (payload.experts.length > 0) {
-          yield* expertsRepo.upsertMany(
-            payload.experts.map((e) => ({
-              did: e.did,
-              handle: e.handle,
-              displayName: e.displayName ?? null,
-              description: null,
-              avatar: e.avatar ?? null,
-              domain: e.domain,
-              source: e.source,
-              sourceRef: null,
-              shard: 1,
-              active: false,
-              tier: e.tier,
-              addedAt: now,
-              lastSyncedAt: null
-            }))
-          );
-        }
-
-        // 2. Match topics + build KnowledgePost objects
-        let skipped = 0;
-        const posts: KnowledgePost[] = [];
-
-        for (const post of payload.posts) {
-          const topics = yield* matchTopics({
-            text: post.text,
-            links: post.links
-          });
-
-          if (topics.length === 0) {
-            skipped++;
-            continue;
-          }
-
-          const links = post.links.map((l) => ({
-            url: l.url,
-            title: l.title ?? null,
-            description: l.description ?? null,
-            imageUrl: null,
-            domain: l.domain ?? null,
-            extractedAt: now
-          }));
-
-          posts.push({
-            uri: post.uri,
-            did: post.did,
-            cid: null,
-            text: post.text,
-            createdAt: post.createdAt,
-            indexedAt: now,
-            hasLinks: links.length > 0,
-            status: "active",
-            ingestId: `import-${String(post.uri)}-${now}`,
-            embedType: post.embedType ?? null,
-            topics,
-            links
-          } as KnowledgePost);
-        }
-
-        // 3. Store posts
-        if (posts.length > 0) {
-          yield* knowledgeRepo.upsertPosts(posts);
-        }
-
-        // 4. Store embed payloads as "candidate" stage
-        for (const post of payload.posts) {
-          if (post.embedPayload != null) {
-            yield* payloadService.capturePayload({
-              postUri: post.uri,
-              captureStage: "candidate",
-              embedType: post.embedType ?? null,
-              embedPayload: post.embedPayload
-            }).pipe(Effect.catchAll(() => Effect.succeed(false)));
-          }
-        }
-
-        // 5. Flag for curation (error-tolerant)
-        const flagged = yield* curationService.flagBatch(posts).pipe(
-          Effect.catchAll(() => Effect.succeed(0))
-        );
-
-        return { imported: posts.length, flagged, skipped };
-      }))
-    )
-)
-```
-
-Add necessary imports: `matchTopics` from `../filter/TopicMatcher`, `ExpertsRepo`, `KnowledgeRepo`, `CandidatePayloadService`, `CurationService`, `KnowledgePost` type.
-
-### Step 4: Write test
-
-Create `tests/import-endpoint.test.ts`. Use `makeBiLayer` + `withTempSqliteFile` pattern. Test:
-- Import with valid expert + post → returns `{ imported: 1, flagged: ?, skipped: 0 }`
-- Post with no topic matches → skipped
-- Post with embed payload → stored in post_payloads
-
-### Step 5: Run tests
-
-Run: `bun run test`
-Expected: All tests pass
-
-### Step 6: Commit
+### Commit
 
 ```bash
-git add src/admin/Router.ts src/worker/operatorAuth.ts tests/import-endpoint.test.ts
-git commit -m "feat(admin): add /admin/import/posts endpoint for platform-agnostic post import"
+git commit -m "feat(admin): add /admin/import/posts endpoint"
 ```
 
 ---
 
-## Task 6: Protect Bluesky Poller
+## Task 8: Protect Bluesky Poller
 
 **Files:**
 - Modify: `src/ingest/IngestRunWorkflow.ts`
 
-### Step 1: Add DID prefix filter
-
-In `resolveTargets` (around line 121), after getting active experts, filter out `did:x:` experts:
+In `resolveTargets`, after getting active experts, filter out `did:x:` experts:
 
 ```ts
-const active = yield* experts.listActive();
-// Exclude non-Bluesky experts (e.g. did:x: for Twitter)
 return active
   .filter((e) => !(e.did as string).startsWith("did:x:"))
   .map((e) => e.did);
 ```
 
-### Step 2: Run tests
-
-Run: `bun run test tests/ingest-run-workflow.test.ts`
-Expected: PASS
-
-### Step 3: Commit
+### Commit
 
 ```bash
-git add src/ingest/IngestRunWorkflow.ts
 git commit -m "fix(ingest): exclude did:x: experts from Bluesky poll targets"
 ```
 
 ---
 
-## Task 7: PostHydrationService Skips Twitter
+## Task 9: PostHydrationService Skips Twitter
 
 **Files:**
 - Modify: `src/services/PostHydrationService.ts`
 
-### Step 1: Filter URIs before Bluesky fetch
-
-Read `PostHydrationService.ts`. In the hydration flow, before sending URIs to `bluesky.getPosts()`, filter to Bluesky-only:
-
-In the `populateChunk` function or wherever URIs are batched, filter:
+Filter URIs before sending to `bluesky.getPosts()`:
 
 ```ts
 const blueskyUris = uris.filter((uri) => uri.startsWith("at://"));
-if (blueskyUris.length > 0) {
-  const posts = yield* bluesky.getPosts(blueskyUris);
-  // ... populate cache for Bluesky URIs
-}
-// Non-Bluesky URIs get empty hydration (already the default cache miss behavior)
 ```
 
-Read the full hydration flow to understand where URIs enter and how the cache works. The key is: don't send `x://` URIs to the Bluesky API. Let them fall through to empty hydration.
+Only send Bluesky URIs for live fetch. Non-Bluesky URIs get empty hydration (default cache miss behavior). Expert handle/avatar come from the DB join, not hydration.
 
-### Step 2: Run tests
-
-Run: `bun run test`
-Expected: All tests pass
-
-### Step 3: Commit
+### Commit
 
 ```bash
-git add src/services/PostHydrationService.ts
 git commit -m "fix(hydration): skip Bluesky API fetch for non-at:// URIs"
 ```
 
 ---
 
-## Task 8: curate_post Twitter Branch
+## Task 10: curate_post Twitter Branch
 
 **Files:**
 - Modify: `src/services/CurationService.ts`
 
-### Step 1: Add platform branch in curatePost
-
-In `CurationService.ts`, the `curatePost` function (around line 176) calls `bskyClient.getPostThread()` to fetch embed data. For Twitter posts, skip this — the payload was already stored at import time.
-
-Read the full `curatePost` function. After the post existence check and before the Bluesky thread fetch, add:
+In `curatePost`, after the post existence check and idempotency guard, detect platform:
 
 ```ts
-// Platform-aware curation
 const isTwitter = (input.postUri as string).startsWith("x://");
 
-if (isTwitter) {
-  // Twitter: payload already stored at import time — just mark picked + update status
-  const existingPayload = yield* payloadService.getPayload(input.postUri as AtUri);
-  if (existingPayload === null) {
-    return yield* new BlueskyApiError({
-      message: `No stored payload for Twitter post ${input.postUri} — import the tweet first`
-    });
+if (isTwitter && input.action === "curate") {
+  // Twitter: skip Bluesky thread fetch
+  // Check if payload exists (may not for plain-text tweets)
+  const existingPayload = yield* payloadService.getPayload(input.postUri);
+
+  if (existingPayload !== null && existingPayload.captureStage !== "picked") {
+    yield* payloadService.markPicked(input.postUri);
   }
 
-  if (existingPayload.captureStage !== "picked") {
-    yield* payloadService.markPicked(input.postUri as AtUri);
+  yield* curationRepo.updateStatus(input.postUri, "curated", curator, input.note ?? null, now);
+
+  if (existingPayload !== null) {
+    yield* queuePickedEnrichment(input.postUri, existingPayload.embedPayload, curator)
+      .pipe(Effect.catchAll(() => Effect.succeed(false)));
   }
 
-  yield* curationRepo.updateStatus(
-    input.postUri,
-    "curated",
-    curator,
-    input.note ?? null,
-    now
-  );
-
-  yield* queuePickedEnrichment(
-    input.postUri as AtUri,
-    existingPayload.embedPayload,
-    curator
-  ).pipe(Effect.catchAll(() => Effect.succeed(false)));
-
-  return {
-    postUri: input.postUri,
-    action: input.action,
-    previousStatus,
-    newStatus: "curated" as const
-  };
+  return { postUri: input.postUri, action: input.action, previousStatus, newStatus: "curated" as const };
 }
 
-// Bluesky: existing live fetch path (unchanged)
-const threadResponse = yield* bskyClient.getPostThread(input.postUri, { ... });
+// Bluesky path (existing, unchanged)...
 ```
 
-### Step 2: Run tests
+**Plain-text tweets:** No payload → curated but no enrichment queued. That's correct — nothing to enrich.
 
-Run: `bun run test`
-Expected: All tests pass — existing tests use `at://` URIs and hit the Bluesky branch
+**Tweets with embeds:** Payload transitions `"candidate"` → `"picked"`, enrichment queued.
 
-### Step 3: Commit
+### Commit
 
 ```bash
-git add src/services/CurationService.ts
-git commit -m "feat(curation): add Twitter branch in curate_post — use stored payload"
+git commit -m "feat(curation): add Twitter branch in curate_post"
 ```
 
 ---
 
-## Task 9: Ops CLI — Import Method on StagingOperatorClient
+## Task 11: Enforce Picked Stage in start_enrichment
+
+**Files:**
+- Modify: `src/mcp/Toolkit.ts`
+
+In `makeStartEnrichmentHandler`, after checking the payload exists, verify stage:
+
+```ts
+if (payload.captureStage !== "picked") {
+  return yield* McpToolQueryError.make({
+    tool: "start_enrichment",
+    message: "Post must be curated before starting enrichment. Call curate_post first.",
+    error: new Error("payload not picked")
+  });
+}
+```
+
+This enforces the curation-before-enrichment rule for both platforms.
+
+### Commit
+
+```bash
+git commit -m "fix(mcp): enforce picked stage before enrichment trigger"
+```
+
+---
+
+## Task 12: StagingOperatorClient Import Method
 
 **Files:**
 - Modify: `src/ops/StagingOperatorClient.ts`
 
-### Step 1: Add importPosts method
+Add `importPosts` method following the existing pattern (POST to `/admin/import/posts`).
 
-Follow the existing pattern in `StagingOperatorClient`. Add:
-
-```ts
-readonly importPosts: (
-  baseUrl: URL,
-  secret: Redacted.Redacted<string>,
-  input: ImportPostsInput
-) => Effect.Effect<ImportPostsOutput, StagingClientError>;
-```
-
-Implementation: POST to `/admin/import/posts` with the payload, decode response as `ImportPostsOutput`.
-
-### Step 2: Run tests
-
-Run: `bun run test`
-Expected: PASS
-
-### Step 3: Commit
+### Commit
 
 ```bash
-git add src/ops/StagingOperatorClient.ts
-git commit -m "feat(ops): add importPosts method to StagingOperatorClient"
+git commit -m "feat(ops): add importPosts to StagingOperatorClient"
 ```
 
 ---
 
-## Task 10: Ops CLI — Twitter Commands
+## Task 13: Twitter Normalizer + CLI Commands
 
 **Files:**
-- Modify: `src/ops/Cli.ts`
 - Create: `src/ops/TwitterNormalizer.ts`
+- Modify: `src/ops/Cli.ts`
+- Test: `tests/twitter-normalizer.test.ts`
 
-### Step 1: Create TwitterNormalizer
+### TwitterNormalizer
 
-Create `src/ops/TwitterNormalizer.ts` with two functions:
+Two normalization functions:
 
-```ts
-// For timeline API (returns Tweet — lighter model)
-export const normalizeTweet = (tweet: Tweet): ImportPostInput | null => {
-  if (tweet.userId === undefined) return null;  // Can't construct URI without userId
+`normalizeTweet(tweet: Tweet)` — for timeline API (lighter model):
+- URI: `x://{userId}/status/{id}` — skip if `userId` missing
+- DID: `did:x:{userId}`
+- `createdAt`: `tweet.timestamp * 1000` (scraper uses seconds, DB uses milliseconds)
+- Embed: `photos[]` → img, `videos[]` → video, `urls[]` → link
+- Links: extract domain from each URL
 
-  return {
-    uri: `x://${tweet.userId}/status/${tweet.id}` as AtUri,
-    did: `did:x:${tweet.userId}` as Did,
-    text: tweet.text ?? "",
-    createdAt: (tweet.timestamp ?? 0) * 1000,  // Scraper uses SECONDS
-    embedType: tweet.photos.length > 0 ? "img"
-      : tweet.videos.length > 0 ? "video"
-      : tweet.urls.length > 0 ? "link"
-      : null,
-    embedPayload: extractTweetEmbed(tweet),
-    links: tweet.urls.map((url) => {
-      try { return { url, domain: new URL(url).hostname }; }
-      catch { return { url, domain: null }; }
-    })
-  };
-};
+`normalizeTweetDetail(node: TweetDetailNode)` — for detail API (richer model):
+- Same mapping but richer embed extraction
+- Access to conversation metadata
 
-// For detail API (returns TweetDetailNode — richer model)
-export const normalizeTweetDetail = (node: TweetDetailNode): ImportPostInput | null => {
-  if (node.userId === undefined) return null;
+`normalizeProfile(profile: Profile, tier: ExpertTier)` → expert input:
+- Skip if `userId` missing
+- DID: `did:x:{userId}`
 
-  return {
-    uri: `x://${node.userId}/status/${node.id}` as AtUri,
-    did: `did:x:${node.userId}` as Did,
-    text: node.text ?? "",
-    createdAt: (node.timestamp ?? 0) * 1000,
-    embedType: node.photos.length > 0 ? "img"
-      : node.videos.length > 0 ? "video"
-      : node.urls.length > 0 ? "link"
-      : null,
-    embedPayload: extractTweetDetailEmbed(node),
-    links: node.urls.map((url) => {
-      try { return { url, domain: new URL(url).hostname }; }
-      catch { return { url, domain: null }; }
-    })
-  };
-};
+### CLI Commands
 
-// Profile → ImportExpertInput
-export const normalizeProfile = (
-  profile: Profile,
-  tier: ExpertTier
-): ImportExpertInput | null => {
-  if (profile.userId === undefined) return null;
-
-  return {
-    did: `did:x:${profile.userId}` as Did,
-    handle: profile.username ?? profile.userId,
-    displayName: profile.name,
-    avatar: profile.avatar,
-    domain: "energy",
-    source: "twitter-import",
-    tier
-  };
-};
-```
-
-The `extractTweetEmbed` and `extractTweetDetailEmbed` functions map:
-- `photos[]` → `{ kind: "img", images: [{ thumb: photo.url, fullsize: photo.url, alt: photo.altText ?? "" }] }`
-- `videos[]` → `{ kind: "video", playlist: video.url, thumbnail: video.preview }`
-- `urls[]` (no media) → `{ kind: "link", uri: urls[0], title: null, description: null }`
-
-### Step 2: Add CLI commands
-
-In `src/ops/Cli.ts`, add three commands under a `twitter` subcommand group:
+Three commands under `twitter` subcommand:
 
 - `twitter add-expert <handle> --tier <tier> --base-url <url>`
-- `twitter import-timeline <handle> --limit <N> --since <date> --base-url <url>`
+- `twitter import-timeline <handle> --limit <N> --since <date> --base-url <url>`  
 - `twitter import-tweet <tweet-id> --base-url <url>`
 
-Each reads `TWITTER_COOKIES` or similar from env for scraper auth.
+Scraper auth from env (`TWITTER_COOKIES` or cookie file path).
 
-Read the existing CLI structure to match the pattern (Effect CLI, `Options`, `Args`, `Command`).
-
-### Step 3: Commit
+### Commit
 
 ```bash
-git add src/ops/TwitterNormalizer.ts src/ops/Cli.ts
-git commit -m "feat(ops): add twitter import CLI commands"
+git commit -m "feat(ops): add Twitter normalizer and CLI import commands"
 ```
 
 ---
@@ -820,32 +418,29 @@ git commit -m "feat(ops): add twitter import CLI commands"
 
 1. `bunx tsc --noEmit` — zero errors
 2. `bun run test` — all tests pass
-3. **Bluesky pipeline completely unaffected:**
-   - Existing tests all pass (they use `at://` URIs)
+3. **Bluesky pipeline untouched:**
+   - `AtUri` still `/^at:\/\//` — Bluesky-only schemas reject `x://`
+   - `RawEvent`, `FeedItem`, polling schemas stay `AtUri`
    - Poller filters out `did:x:` experts
    - Hydration skips `x://` URIs
-   - `curate_post` with `at://` takes the existing Bluesky path
-4. **Twitter posts flow end-to-end:**
-   - Import endpoint stores posts, experts, payloads, topics, curation flags
-   - `search_posts` returns imported tweets
-   - `list_curation_candidates` shows flagged tweets
+   - `curate_post` with `at://` takes existing Bluesky path
+4. **Twitter posts work through pipeline:**
+   - Import stores posts, experts (inactive), payloads (candidate stage), topics, curation flags
+   - `search_posts`, `get_recent_posts`, `list_curation_candidates` return imported tweets
    - `curate_post` with `x://` uses stored payload, transitions to picked
-   - `start_enrichment` queues enrichment (payload already picked)
+   - `start_enrichment` enforces picked stage
    - `get_post_enrichments` shows readiness
    - `submit_editorial_pick` accepts enriched tweet
-5. **Import endpoint:**
-   - Path: `POST /admin/import/posts` (not `/admin/ingest/*`)
-   - Auth: `ops:refresh` scope
-   - Experts stored with `active: false`
-   - Payloads stored as `captureStage: "candidate"`
-   - Topics matched via `TopicMatcher`
-   - Curation flagging via `CurationService.flagBatch`
+5. **Type safety:**
+   - `PostUri` used for platform-agnostic schemas
+   - `AtUri` used for Bluesky-only schemas
+   - No `as unknown as` casts between the two (AtUri is assignable to PostUri)
 
-## Explicitly Out of Scope
+## Out of Scope (v2)
 
-- `get_post_thread` / `get_thread_document` for Twitter URIs (errors gracefully — v2 ThreadClient)
+- `get_post_thread` / `get_thread_document` for Twitter URIs — `ThreadClient` interface
+- Enhanced hydration reading from post_payloads
 - Thread graph storage for imported conversations
-- Enhanced hydration reading from post_payloads (v2)
-- `platform` column on experts/posts tables (v2)
-- Twitter expert cross-linking with Bluesky experts
+- `platform` column on experts/posts tables
 - Automated Twitter polling
+- Twitter expert cross-linking with Bluesky experts
