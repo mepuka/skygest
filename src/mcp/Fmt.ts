@@ -580,6 +580,14 @@ export const formatCurationCandidates = (items: ReadonlyArray<CurationCandidateO
  * Shows readiness status, validated enrichments (kind, key details),
  * and active run summaries.
  */
+export const formatStartEnrichment = (result: {
+  postUri: string;
+  enrichmentType: string;
+  status: string;
+  runId: string;
+}): string =>
+  `Enrichment started: ${result.enrichmentType} for ${result.postUri}\n  Run ID: ${result.runId}\n  Status: ${result.status}\n  Use get_post_enrichments to check readiness.`;
+
 export const formatEnrichments = (
   output: GetPostEnrichmentsOutput
 ): string => {

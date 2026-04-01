@@ -313,6 +313,143 @@ describe("MCP prompts by profile", () => {
   );
 });
 
+describe("MCP tool visibility by profile", () => {
+  it.live("workflow-write profile includes start_enrichment", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const seedLayer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(
+          makeBiLayer({ filename }),
+          workflowIdentity
+        );
+
+        try {
+          const tools = await client.listTools();
+          const names = tools.tools.map((t) => t.name);
+          expect(names).toContain("start_enrichment");
+          expect(names).toContain("curate_post");
+          expect(names).toContain("submit_editorial_pick");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("read-only profile does not include start_enrichment", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const seedLayer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(
+          makeBiLayer({ filename }),
+          readOnlyIdentity
+        );
+
+        try {
+          const tools = await client.listTools();
+          const names = tools.tools.map((t) => t.name);
+          expect(names).not.toContain("start_enrichment");
+          expect(names).not.toContain("curate_post");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+});
+
+describe("MCP start_enrichment", () => {
+  it.live("returns error when trigger client not available", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const seedLayer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(
+          makeBiLayer({ filename }),
+          workflowIdentity
+        );
+
+        try {
+          const result = await client.callTool({
+            name: "start_enrichment",
+            arguments: { postUri: `at://${sampleDid}/app.bsky.feed.post/post-solar` }
+          });
+          expect(result.isError).toBe(true);
+          const text = result.content.find(
+            (c): c is { type: "text"; text: string } => c.type === "text"
+          );
+          expect(text!.text).toContain("not available");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+});
+
+describe("MCP submit_editorial_pick readiness gate", () => {
+  const solarUri = `at://${sampleDid}/app.bsky.feed.post/post-solar`;
+
+  it.live("rejects pick when enrichment not complete", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        // Directly set curation status to "curated" via SQL so we bypass the
+        // Bluesky API call that curate_post would make.
+        const now = Date.now();
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            yield* sql`
+              INSERT INTO post_curation
+                (post_uri, status, signal_score, predicates_applied, flagged_at, curated_at, curated_by, review_note)
+              VALUES
+                (${solarUri}, 'curated', ${0}, ${"[]"}, ${now}, ${now}, 'test-curator', 'test')
+              ON CONFLICT(post_uri) DO UPDATE SET
+                status = 'curated',
+                curated_at = ${now},
+                curated_by = 'test-curator',
+                review_note = 'test'
+            `;
+          }).pipe(Effect.provide(layer))
+        );
+
+        const { client, close } = await createMcpClient(
+          makeBiLayer({ filename }),
+          workflowIdentity
+        );
+
+        try {
+          // Try to accept — should fail because no enrichment
+          const result = await client.callTool({
+            name: "submit_editorial_pick",
+            arguments: {
+              postUri: solarUri,
+              score: 80,
+              reason: "test pick"
+            }
+          });
+
+          expect(result.isError).toBe(true);
+          const text = result.content.find(
+            (c): c is { type: "text"; text: string } => c.type === "text"
+          );
+          expect(text!.text).toContain("enrichment is not complete");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+});
+
 describe("MCP get_post_enrichments", () => {
   it.live("returns readiness for a post with no enrichments", () =>
     Effect.promise(() =>
