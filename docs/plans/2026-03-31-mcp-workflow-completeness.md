@@ -1,6 +1,8 @@
 # MCP Workflow Completeness Implementation Plan
 
-**Goal:** Close the MCP workflow gap so an LLM can complete the full curation loop through MCP alone: discover -> evaluate -> curate -> observe enrichment -> submit editorial pick.
+**Goal:** Close the MCP workflow gap so an LLM can complete the full brief pipeline through MCP alone: discover candidates → evaluate → curate (Candidate → Enriching) → verify readiness (Enriching → Reviewable) → accept brief (Reviewable → Accepted).
+
+**Pipeline vocabulary:** See `docs/plans/2026-03-31-canonical-domain-model.md` for the canonical object and state definitions used throughout this plan.
 
 ## Revised Architecture
 
@@ -55,13 +57,14 @@ This makes tool and prompt discovery scope-aware without caching per-user identi
 
 | Issue | Title | Type | Depends On |
 |-------|-------|------|------------|
-| SKY-A | MCP boundary auth + capability-aware handler routing | feat | — |
-| SKY-B | Request-scoped actor context + write-capable MCP toolkits | feat | SKY-A |
-| SKY-C | Shared enrichment read model + `get_post_enrichments` | feat | SKY-A |
-| SKY-D | Enrichment readiness on curation candidates | feat | SKY-C |
-| SKY-E | Prompt/glossary cleanup + auth/test hardening | feat | SKY-A, SKY-B, SKY-C, SKY-D |
+| SKY-29 | MCP boundary auth + capability-aware handler routing | feat | — |
+| SKY-76 | Request-scoped actor context + write-capable MCP toolkits | feat | SKY-29 |
+| SKY-77 | Brief and claim read model exposure | feat | SKY-29 |
+| SKY-81 | Candidate readiness surfacing in review queue | feat | SKY-78 |
+| SKY-79 | Domain glossary and ontology alignment | feat | SKY-29, SKY-76, SKY-77 |
+| SKY-82 | Verification prompt packs | feat | SKY-29, SKY-76 |
 
-## Task 1: MCP Boundary Auth and Capability Routing (SKY-A)
+## Task 1: MCP Boundary Auth and Capability Routing (SKY-29)
 
 **Outcome:** `/mcp` remains a single route, but dispatch becomes per-request and scope-aware without leaking identity across requests.
 
@@ -151,9 +154,9 @@ Update `tests/feed.test.ts`:
 - `/mcp` path passes the authorized identity to MCP routing
 - unauthorized and forbidden cases still return the correct HTTP status
 
-## Task 2: Request-Scoped Actor Context and Write Toolkits (SKY-B)
+## Task 2: Request-Scoped Actor Context and Write Toolkits (SKY-76)
 
-**Outcome:** Write tools use the current operator as the actor, but tool visibility is handled by the capability router rather than by runtime scope checks inside cached handlers.
+**Outcome:** Write tools use the current operator as the actor for pipeline transitions (Candidate → Enriching, Reviewable → Accepted). Tool visibility is handled by the capability router rather than by runtime scope checks inside cached handlers.
 
 **Files:**
 - Modify: `src/mcp/Toolkit.ts`
@@ -219,9 +222,9 @@ Add `tests/mcp-write-tools.test.ts`:
 - `curate_post` records the correct curator from the current identity
 - `submit_editorial_pick` records the correct curator from the current identity
 
-## Task 3: Shared Enrichment Read Model and `get_post_enrichments` (SKY-C)
+## Task 3: Brief and Claim Read Model Exposure (SKY-77)
 
-**Outcome:** MCP and public API use the same validated enrichment read model, and the MCP tool can distinguish pending vs failed vs complete vs absent.
+**Outcome:** MCP and public API use the same validated enrichment read model. The MCP tool exposes enrichment readiness so agents can determine whether a candidate is Reviewable (enrichment complete) or still Enriching (pending/failed/needs-review).
 
 **Files:**
 - Create: `src/enrichment/PostEnrichmentReadModel.ts`
@@ -339,9 +342,9 @@ Add `tests/mcp-enrichments.test.ts` covering:
 - MCP tool returns `latestRuns`
 - MCP tool display text distinguishes pending/failed/none/complete
 
-## Task 4: Surface Enrichment Readiness in Curation Candidates (SKY-D)
+## Task 4: Candidate Readiness Surfacing in Review Queue (SKY-81)
 
-**Outcome:** `list_curation_candidates` shows trustworthy enrichment state derived from the shared read model, not from ad hoc SQL that can drift from payload truth.
+**Outcome:** `list_curation_candidates` shows pipeline readiness (Enriching/Reviewable/Failed) derived from the shared read model, not from ad hoc SQL that can drift from payload truth. Agents can triage candidates by whether they are ready for the Reviewable → Accepted transition.
 
 **Files:**
 - Modify: `src/domain/curation.ts`
@@ -382,9 +385,9 @@ Add cases for:
 - candidate with failed run and no payload -> `failed`
 - candidate with no run and no payload -> `none`
 
-## Task 5: Prompt, Glossary, and Verification Cleanup (SKY-E)
+## Task 5: Glossary Alignment and Verification Prompt Packs (SKY-79, SKY-82)
 
-**Outcome:** MCP prompts match the new scoped tool surface, defaults actually work, and the glossary stays aligned with what the agent sees.
+**Outcome:** MCP prompts and glossary use the brief pipeline vocabulary consistently. Prompts guide agents through pipeline transitions (Candidate → Enriching → Reviewable → Accepted) using the canonical stage names. Glossary documents all pipeline stages, readiness values, and write tool semantics.
 
 **Files:**
 - Modify: `src/mcp/prompts.ts`
@@ -393,31 +396,42 @@ Add cases for:
 
 ### Prompt changes
 
-1. Add `curate-session`.
+1. Add `curate-session` prompt (SKY-82).
+
+   The prompt must use pipeline vocabulary throughout:
+   - "Discover candidates" not "find posts"
+   - "Advance to Enriching" not "curate the post"
+   - "Verify Reviewable" not "check enrichment"
+   - "Accept the brief" not "submit editorial pick"
+
+   Workflow steps should reference transitions:
+   - DISCOVER: find candidates (Discovered → Candidate already happened via flagging)
+   - EVALUATE: read thread, assess quality
+   - CURATE: `curate_post` (Candidate → Enriching)
+   - VERIFY: `get_post_enrichments` (wait for Enriching → Reviewable)
+   - ACCEPT: `submit_editorial_pick` (Reviewable → Accepted)
 
 2. Make `hours` optional.
 
-Use `Schema.optional(FlexibleNumber...)` or `Schema.optional(Schema.String...)`. Do not repeat the current bug where the prompt says it defaults to 24 but the schema still requires it.
+   Use `Schema.optional(FlexibleNumber...)` or `Schema.optional(Schema.String...)`. Do not repeat the current bug where the prompt says it defaults to 24 but the schema still requires it.
 
 3. Expose `curate-session` only in the `workflow-write` profile.
 
-4. Update `curate-digest` so it no longer points users back to admin REST endpoints.
+4. Update `curate-digest` so it uses pipeline vocabulary.
 
-It should either:
+   - If on read-only profile: "produce brief recommendations only — accepting briefs requires the workflow-write profile"
+   - If on workflow-write profile: use write tools with pipeline stage names
 
-- use MCP write tools when they are available
-- or, if it stays on the read-only profile, clearly say "produce recommendations only"
+### Glossary changes (SKY-79)
 
-### Glossary changes
+Update the glossary to document the brief pipeline:
 
-Update the glossary so it documents:
-
-- `[C#]` curation candidate display IDs
-- enrichment readiness values
-- `get_post_enrichments`
-- `curate_post`
-- `submit_editorial_pick`
-- any enrichment display markers the formatter emits
+- **Pipeline stages:** Discovered, Candidate, Enriching, Reviewable, Accepted, Rejected, Retracted, Expired
+- **Enrichment readiness:** none, pending, complete, failed, needs-review
+- **Write tools:** `curate_post` (Candidate → Enriching/Rejected), `submit_editorial_pick` (Reviewable → Accepted)
+- **Read tools:** `get_post_enrichments` (inspect enrichment state and readiness)
+- **Display IDs:** `[C#]` for curation candidates, enrichment readiness markers
+- **Decision audit:** all transitions logged to `curation_decisions` with actor and timestamp
 
 ### Verification notes
 
