@@ -1,6 +1,6 @@
 import { McpServer } from "@effect/ai";
 import * as HttpLayerRouter from "@effect/platform/HttpLayerRouter";
-import { Effect, Layer } from "effect";
+import { Context, Effect, Layer } from "effect";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { makeQueryLayer } from "../edge/Layer";
 import type { EnvBindings } from "../platform/Env";
@@ -10,7 +10,19 @@ import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { GLOSSARY_CONTENT } from "./glossary";
 import { PromptsLayer } from "./prompts";
 import { toolkitWithDisplayText } from "./registerToolkitWithDisplayText.ts";
-import { KnowledgeMcpHandlers, KnowledgeMcpToolkit } from "./Toolkit";
+import {
+  ReadOnlyMcpToolkit,
+  ReadOnlyMcpHandlers,
+  CurationWriteMcpToolkit,
+  CurationWriteMcpHandlers,
+  EditorialWriteMcpToolkit,
+  EditorialWriteMcpHandlers,
+  WorkflowWriteMcpToolkit,
+  WorkflowWriteMcpHandlers
+} from "./Toolkit";
+import { profileForIdentity, type McpCapabilityProfile } from "./RequestAuth";
+import type { AccessIdentity } from "../auth/AuthService";
+import { OperatorIdentity, operatorIdentityContext } from "../http/Identity";
 
 const GlossaryResource = McpServer.resource({
   uri: "skygest://glossary",
@@ -21,58 +33,93 @@ const GlossaryResource = McpServer.resource({
   content: Effect.succeed(GLOSSARY_CONTENT)
 });
 
+type QueryLayer = Layer.Layer<KnowledgeQueryService | EditorialService | CurationService | BlueskyClient, any, never>;
+
+const mcpServerLayer = McpServer.layerHttpRouter({
+  name: "skygest-bi-mcp",
+  version: "0.1.0",
+  path: "/mcp"
+}).pipe(Layer.provideMerge(HttpLayerRouter.layer));
+
 const makeMcpLayer = (
-  queryLayer: Layer.Layer<KnowledgeQueryService | EditorialService | CurationService | BlueskyClient, any, never>
-): Layer.Layer<HttpLayerRouter.HttpRouter, any, never> =>
-  toolkitWithDisplayText(KnowledgeMcpToolkit).pipe(
-    Layer.provideMerge(
-      KnowledgeMcpHandlers.pipe(Layer.provideMerge(queryLayer))
-    ),
+  queryLayer: QueryLayer,
+  profile: McpCapabilityProfile
+) => {
+  const toolkitAndHandlers = (() => {
+    switch (profile) {
+      case "read-only":
+        return toolkitWithDisplayText(ReadOnlyMcpToolkit).pipe(
+          Layer.provideMerge(ReadOnlyMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
+        );
+      case "curation-write":
+        return toolkitWithDisplayText(CurationWriteMcpToolkit).pipe(
+          Layer.provideMerge(CurationWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
+        );
+      case "editorial-write":
+        return toolkitWithDisplayText(EditorialWriteMcpToolkit).pipe(
+          Layer.provideMerge(EditorialWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
+        );
+      case "workflow-write":
+        return toolkitWithDisplayText(WorkflowWriteMcpToolkit).pipe(
+          Layer.provideMerge(WorkflowWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
+        );
+    }
+  })();
+
+  return toolkitAndHandlers.pipe(
     Layer.provideMerge(GlossaryResource),
     Layer.provideMerge(PromptsLayer),
-    Layer.provideMerge(
-      McpServer.layerHttpRouter({
-        name: "skygest-bi-mcp",
-        version: "0.1.0",
-        path: "/mcp"
-      }).pipe(Layer.provideMerge(HttpLayerRouter.layer))
-    )
+    Layer.provideMerge(mcpServerLayer)
   );
+};
 
 export const handleMcpRequestWithLayer = async (
   request: Request,
-  layer: Layer.Layer<KnowledgeQueryService | EditorialService | CurationService | BlueskyClient, any, never>
+  layer: QueryLayer,
+  identity: AccessIdentity = { subject: null, email: null, scopes: ["mcp:read"] }
 ): Promise<Response> => {
-  const webHandler = HttpLayerRouter.toWebHandler(makeMcpLayer(layer));
+  const profile = profileForIdentity(identity);
+  const webHandler = HttpLayerRouter.toWebHandler(makeMcpLayer(layer, profile));
 
   try {
-    return await webHandler.handler(request, undefined as never);
+    return await webHandler.handler(request, operatorIdentityContext(identity));
   } finally {
     await webHandler.dispose();
   }
 };
 
-const makeCachedMcpHandler = <Env extends object>(
-  buildLayer: (env: Env) => Layer.Layer<KnowledgeQueryService | EditorialService | CurationService | BlueskyClient, any, never>
-) => {
-  let cached: {
-    readonly env: Env;
-    readonly webHandler: ReturnType<typeof HttpLayerRouter.toWebHandler>;
-  } | null = null;
+/** Web handler shape with an explicit context parameter for OperatorIdentity */
+type McpWebHandler = {
+  readonly handler: (request: globalThis.Request, context: Context.Context<OperatorIdentity>) => Promise<Response>;
+  readonly dispose: () => Promise<void>;
+};
 
-  return async (request: Request, env: Env): Promise<Response> => {
-    if (cached === null || cached.env !== env) {
-      if (cached !== null) {
-        await cached.webHandler.dispose();
+const makeCachedMcpHandler = <Env extends object>(
+  buildLayer: (env: Env) => QueryLayer
+) => {
+  const cache = new Map<string, {
+    readonly env: Env;
+    readonly webHandler: McpWebHandler;
+  }>();
+
+  return async (request: Request, env: Env, identity: AccessIdentity): Promise<Response> => {
+    const profile = profileForIdentity(identity);
+    const cacheKey = profile;
+
+    let entry = cache.get(cacheKey);
+    if (!entry || entry.env !== env) {
+      if (entry) {
+        await entry.webHandler.dispose();
       }
 
-      cached = {
+      entry = {
         env,
-        webHandler: HttpLayerRouter.toWebHandler(makeMcpLayer(buildLayer(env)))
+        webHandler: HttpLayerRouter.toWebHandler(makeMcpLayer(buildLayer(env), profile)) as unknown as McpWebHandler
       };
+      cache.set(cacheKey, entry);
     }
 
-    return cached.webHandler.handler(request, undefined as never);
+    return entry.webHandler.handler(request, operatorIdentityContext(identity));
   };
 };
 
@@ -80,5 +127,6 @@ const handleCachedMcpRequest = makeCachedMcpHandler(makeQueryLayer);
 
 export const handleMcpRequest = (
   request: Request,
-  env: EnvBindings
-) => handleCachedMcpRequest(request, env);
+  env: EnvBindings,
+  identity: AccessIdentity
+) => handleCachedMcpRequest(request, env, identity);

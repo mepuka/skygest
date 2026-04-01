@@ -23,14 +23,14 @@ export const fetch = async (request: Request, env: AgentWorkerEnvBindings) => {
   }
 
   if (url.pathname === "/mcp") {
+    let identity;
     try {
-      await authorizeOperator(request, env, requiredOperatorScopes(request));
+      identity = await authorizeOperator(request, env, requiredOperatorScopes(request));
     } catch (error) {
       await logDeniedOperatorRequest(request, error);
       return toAuthErrorResponse(error);
     }
-
-    return handleMcpRequest(request, env);
+    return handleMcpRequest(request, env, identity);
   }
 
   if (url.pathname.startsWith("/admin/ingest/")) {

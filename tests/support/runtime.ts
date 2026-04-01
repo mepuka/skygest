@@ -26,6 +26,19 @@ import { KnowledgeRepoD1 } from "../../src/services/d1/KnowledgeRepoD1";
 import { PublicationsRepoD1 } from "../../src/services/d1/PublicationsRepoD1";
 import { ProviderRegistry } from "../../src/services/ProviderRegistry";
 import { makeSmokeFixtureBatch } from "../../src/staging/SmokeFixture";
+import type { AccessIdentity } from "../../src/auth/AuthService";
+
+export const readOnlyIdentity: AccessIdentity = {
+  subject: "test-reader",
+  email: null,
+  scopes: ["mcp:read"]
+};
+
+export const workflowIdentity: AccessIdentity = {
+  subject: "test-operator",
+  email: "op@test.com",
+  scopes: ["mcp:read", "curation:write", "editorial:write", "experts:read", "experts:write", "ops:read", "ops:refresh", "editorial:read"]
+};
 
 export const testConfig = (
   overrides: Partial<AppConfigShape> = {}
@@ -160,13 +173,16 @@ export const withTempSqliteFile = <A>(
   });
 };
 
-export const createMcpClient = async (layer: Layer.Layer<any, any, never>) => {
+export const createMcpClient = async (
+  layer: Layer.Layer<any, any, never>,
+  identity: AccessIdentity = readOnlyIdentity
+) => {
   const baseUrl = new URL("https://skygest.local");
   const localFetch = ((input, init) => {
     const request = input instanceof Request
       ? new Request(input, init)
       : new Request(input.toString(), init);
-    return handleMcpRequestWithLayer(request, layer);
+    return handleMcpRequestWithLayer(request, layer, identity);
   }) as typeof globalThis.fetch;
 
   return {

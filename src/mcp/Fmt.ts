@@ -522,6 +522,14 @@ export const formatEditorialPicks = (items: ReadonlyArray<EditorialPickOutput>):
  *      URI: at://...
  * ```
  */
+export const formatCuratePostResult = (result: { postUri: string; action: string; previousStatus: string | null; newStatus: string }) =>
+  `${result.action === "curate" ? "Curated" : "Rejected"}: ${result.postUri}\n  Status: ${result.previousStatus ?? "none"} → ${result.newStatus}`;
+
+export const formatSubmitPickResult = (result: { postUri: string; created: boolean }) =>
+  result.created
+    ? `Editorial pick created: ${result.postUri}`
+    : `Editorial pick updated: ${result.postUri}`;
+
 export const formatCurationCandidates = (items: ReadonlyArray<CurationCandidateOutput>): string => {
   if (items.length === 0) return "No curation candidates found.";
 

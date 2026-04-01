@@ -18,7 +18,7 @@ import {
   PostThreadOutput,
   ThreadDocumentOutput
 } from "../domain/bi.ts";
-import { EditorialPicksOutput } from "../domain/editorial.ts";
+import { EditorialPicksOutput, SubmitEditorialPickOutput } from "../domain/editorial.ts";
 import { CurationCandidatesOutput, CuratePostOutput } from "../domain/curation.ts";
 
 const DisplayField = Schema.Struct({ _display: Schema.String });
@@ -58,3 +58,6 @@ export type CurationCandidatesMcpOutput = Schema.Schema.Type<typeof CurationCand
 
 export const CuratePostMcpOutput = Schema.extend(CuratePostOutput, DisplayField);
 export type CuratePostMcpOutput = Schema.Schema.Type<typeof CuratePostMcpOutput>;
+
+export const SubmitEditorialPickMcpOutput = Schema.extend(SubmitEditorialPickOutput, DisplayField);
+export type SubmitEditorialPickMcpOutput = Schema.Schema.Type<typeof SubmitEditorialPickMcpOutput>;
