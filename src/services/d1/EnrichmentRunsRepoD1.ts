@@ -354,6 +354,23 @@ export const EnrichmentRunsRepoD1 = {
         )
       );
 
+    const listLatestByPostUri = (postUri: string) =>
+      sql<any>`
+        SELECT ${selectColumns}
+        FROM post_enrichment_runs
+        WHERE (post_uri, enrichment_type, started_at) IN (
+          SELECT post_uri, enrichment_type, MAX(started_at)
+          FROM post_enrichment_runs
+          WHERE post_uri = ${postUri}
+          GROUP BY post_uri, enrichment_type
+        )
+        ORDER BY enrichment_type ASC
+      `.pipe(
+        Effect.flatMap((rows) =>
+          decodeRows(rows, `Failed to decode latest enrichment runs for ${postUri}`)
+        )
+      );
+
     return EnrichmentRunsRepo.of({
       createQueuedIfAbsent,
       getById,
@@ -365,7 +382,8 @@ export const EnrichmentRunsRepoD1 = {
       markComplete,
       markFailed,
       markNeedsReview,
-      resetForRetry
+      resetForRetry,
+      listLatestByPostUri
     });
   }))
 };

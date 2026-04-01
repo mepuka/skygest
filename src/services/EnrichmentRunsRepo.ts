@@ -45,5 +45,8 @@ export class EnrichmentRunsRepo extends Context.Tag("@skygest/EnrichmentRunsRepo
     readonly resetForRetry: (
       input: ResetEnrichmentRunForRetry
     ) => Effect.Effect<boolean, SqlError | DbError>;
+    readonly listLatestByPostUri: (
+      postUri: string
+    ) => Effect.Effect<ReadonlyArray<EnrichmentRunRecord>, SqlError | DbError>;
   }
 >() {}
