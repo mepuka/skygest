@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { AtUri } from "./types";
+import { PostUri } from "./types";
 import { FlexibleNumber, KnowledgePostResult } from "./bi";
 
 export const EditorialScore = Schema.Number.pipe(
@@ -16,7 +16,7 @@ export const EditorialPickStatus = Schema.Literal("active", "expired", "retracte
 export type EditorialPickStatus = Schema.Schema.Type<typeof EditorialPickStatus>;
 
 export const EditorialPickRecord = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   score: EditorialScore,
   reason: Schema.String,
   category: Schema.NullOr(EditorialPickCategory),
@@ -28,7 +28,7 @@ export const EditorialPickRecord = Schema.Struct({
 export type EditorialPickRecord = Schema.Schema.Type<typeof EditorialPickRecord>;
 
 export const SubmitEditorialPickInput = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   score: EditorialScore,
   reason: Schema.String.pipe(Schema.minLength(1)),
   category: Schema.optional(EditorialPickCategory),
@@ -37,7 +37,7 @@ export const SubmitEditorialPickInput = Schema.Struct({
 export type SubmitEditorialPickInput = Schema.Schema.Type<typeof SubmitEditorialPickInput>;
 
 export const SubmitEditorialPickMcpInput = Schema.Struct({
-  postUri: AtUri.annotations({ description: "AT Protocol URI of the post to pick" }),
+  postUri: PostUri.annotations({ description: "Post URI of the post to pick" }),
   score: Schema.Union(EditorialScore, Schema.compose(Schema.NumberFromString, EditorialScore)).annotations({ description: "Editorial quality score (0-100). 80+=must-read, 60-79=strong, 40-59=notable" }),
   reason: Schema.String.pipe(Schema.minLength(1)).annotations({ description: "1-2 sentence explanation of why this post was selected" }),
   category: Schema.optional(EditorialPickCategory.annotations({ description: "Pick category: breaking, analysis, discussion, data, or opinion" })),
@@ -46,7 +46,7 @@ export const SubmitEditorialPickMcpInput = Schema.Struct({
 export type SubmitEditorialPickMcpInput = Schema.Schema.Type<typeof SubmitEditorialPickMcpInput>;
 
 export const RemoveEditorialPickInput = Schema.Struct({
-  postUri: AtUri
+  postUri: PostUri
 });
 export type RemoveEditorialPickInput = Schema.Schema.Type<typeof RemoveEditorialPickInput>;
 
@@ -66,7 +66,7 @@ export const GetCuratedFeedInput = Schema.Struct({
 export type GetCuratedFeedInput = Schema.Schema.Type<typeof GetCuratedFeedInput>;
 
 export const EditorialPickOutput = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   score: EditorialScore,
   reason: Schema.String,
   category: Schema.NullOr(EditorialPickCategory),
@@ -76,13 +76,13 @@ export const EditorialPickOutput = Schema.Struct({
 export type EditorialPickOutput = Schema.Schema.Type<typeof EditorialPickOutput>;
 
 export const SubmitEditorialPickOutput = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   created: Schema.Boolean
 });
 export type SubmitEditorialPickOutput = Schema.Schema.Type<typeof SubmitEditorialPickOutput>;
 
 export const RemoveEditorialPickOutput = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   removed: Schema.Boolean
 });
 export type RemoveEditorialPickOutput = Schema.Schema.Type<typeof RemoveEditorialPickOutput>;
@@ -105,6 +105,6 @@ export type CuratedPostResult = Schema.Schema.Type<typeof CuratedPostResult>;
 export class EditorialPostNotFoundError extends Schema.TaggedError<EditorialPostNotFoundError>()(
   "EditorialPostNotFoundError",
   {
-    postUri: AtUri
+    postUri: PostUri
   }
 ) {}

@@ -21,7 +21,7 @@ import {
   type VisionEnrichment
 } from "../domain/enrichment";
 import type { EmbedPayload, LinkEmbed } from "../domain/embed";
-import type { AtUri } from "../domain/types";
+import type { PostUri } from "../domain/types";
 import { CandidatePayloadRepo } from "../services/CandidatePayloadRepo";
 import { decodeWithDbError } from "../services/d1/schemaDecode";
 import {
@@ -234,7 +234,7 @@ export class EnrichmentPlanner extends Context.Tag("@skygest/EnrichmentPlanner")
       const payloads = yield* CandidatePayloadRepo;
 
       const loadPickedPayload = Effect.fn("EnrichmentPlanner.loadPickedPayload")(
-        function* (postUri: AtUri) {
+        function* (postUri: PostUri) {
           const payload = yield* payloads.getByPostUri(postUri);
 
           if (payload === null) {
@@ -253,7 +253,7 @@ export class EnrichmentPlanner extends Context.Tag("@skygest/EnrichmentPlanner")
       );
 
       const loadPostContext = Effect.fn("EnrichmentPlanner.loadPostContext")(
-        function* (postUri: AtUri) {
+        function* (postUri: PostUri) {
           const rows = yield* sql<any>`
             SELECT
               uri as postUri,
@@ -331,7 +331,7 @@ export class EnrichmentPlanner extends Context.Tag("@skygest/EnrichmentPlanner")
 
           return {
             post: {
-              postUri: row.postUri as AtUri,
+              postUri: row.postUri as PostUri,
               did: row.did,
               handle: row.handle,
               text: row.text,

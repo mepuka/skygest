@@ -2,7 +2,7 @@ import { Clock, Context, Effect, Layer, Option } from "effect";
 import type { SqlError } from "@effect/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import { BlueskyApiError } from "../domain/errors";
-import type { AtUri } from "../domain/types";
+import type { PostUri } from "../domain/types";
 import type {
   CurationCandidateOutput,
   CuratePostOutput,
@@ -80,7 +80,7 @@ const clampCurationLimit = (limit: number | undefined) =>
 
     const queuePickedEnrichment = Effect.fn(
       "CurationService.queuePickedEnrichment"
-    )(function* (postUri: AtUri, embedPayload: EmbedPayload | null, curator: string) {
+    )(function* (postUri: PostUri, embedPayload: EmbedPayload | null, curator: string) {
       const maybeLauncher = yield* Effect.serviceOption(EnrichmentWorkflowLauncher);
 
       if (Option.isNone(maybeLauncher)) {
@@ -248,13 +248,13 @@ const clampCurationLimit = (limit: number | undefined) =>
         // Writing status last ensures the idempotency guard (early return on "curated")
         // only triggers after payload is safely persisted.
         yield* payloadService.capturePayload({
-          postUri: input.postUri as AtUri,
+          postUri: input.postUri,
           captureStage: "candidate",
           embedType: embedType as any,
           embedPayload
         });
 
-        yield* payloadService.markPicked(input.postUri as AtUri);
+        yield* payloadService.markPicked(input.postUri);
 
         yield* curationRepo.updateStatus(
           input.postUri,
@@ -265,7 +265,7 @@ const clampCurationLimit = (limit: number | undefined) =>
         );
 
         yield* queuePickedEnrichment(
-          input.postUri as AtUri,
+          input.postUri,
           embedPayload,
           curator
         ).pipe(

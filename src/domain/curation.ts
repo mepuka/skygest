@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { AtUri } from "./types";
+import { PostUri } from "./types";
 import { FlexibleNumber, KnowledgePostResult } from "./bi";
 import { EnrichmentReadiness } from "./enrichment";
 
@@ -17,7 +17,7 @@ export const CurationSignalScore = Schema.Number.pipe(
 export type CurationSignalScore = Schema.Schema.Type<typeof CurationSignalScore>;
 
 export const CurationRecord = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   status: CurationStatus,
   signalScore: CurationSignalScore,
   predicatesApplied: Schema.Array(Schema.String),
@@ -38,7 +38,7 @@ export const ListCurationCandidatesInput = Schema.Struct({
 export type ListCurationCandidatesInput = Schema.Schema.Type<typeof ListCurationCandidatesInput>;
 
 export const CuratePostInput = Schema.Struct({
-  postUri: AtUri.annotations({ description: "AT Protocol URI of the post to curate" }),
+  postUri: PostUri.annotations({ description: "Post URI of the post to curate" }),
   action: CurationAction.annotations({ description: "Action: 'curate' to approve for enrichment, 'reject' to dismiss" }),
   note: Schema.optional(Schema.String.annotations({ description: "Optional review note explaining the curation decision" }))
 });
@@ -62,7 +62,7 @@ export const CurationCandidatesOutput = Schema.Struct({
 export type CurationCandidatesOutput = Schema.Schema.Type<typeof CurationCandidatesOutput>;
 
 export const CuratePostOutput = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   action: CurationAction,
   previousStatus: Schema.NullOr(CurationStatus),
   newStatus: CurationStatus
@@ -72,6 +72,6 @@ export type CuratePostOutput = Schema.Schema.Type<typeof CuratePostOutput>;
 export class CurationPostNotFoundError extends Schema.TaggedError<CurationPostNotFoundError>()(
   "CurationPostNotFoundError",
   {
-    postUri: AtUri
+    postUri: PostUri
   }
 ) {}

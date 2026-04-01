@@ -9,7 +9,7 @@ import type {
   EnrichmentRunParams,
   EnrichmentRunRecord
 } from "../src/domain/enrichmentRun";
-import type { AtUri } from "../src/domain/types";
+import type { PostUri } from "../src/domain/types";
 import { EnrichmentPlanner } from "../src/enrichment/EnrichmentPlanner";
 import { EnrichmentWorkflowLauncher } from "../src/enrichment/EnrichmentWorkflowLauncher";
 import { VisionEnrichmentExecutor } from "../src/enrichment/VisionEnrichmentExecutor";
@@ -35,14 +35,14 @@ vi.mock("../src/enrichment/Layer", () => ({
   makeWorkflowEnrichmentLayer: () => currentLayer
 }));
 
-const asAtUri = (value: string) => value as AtUri;
+const asPostUri = (value: string) => value as PostUri;
 
 const makeRunRecord = (
   overrides: Partial<EnrichmentRunRecord> = {}
 ): EnrichmentRunRecord => ({
   id: "run-1",
   workflowInstanceId: "run-1",
-  postUri: asAtUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+  postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
   enrichmentType: "vision",
   schemaVersion: "v1",
   triggeredBy: "admin",
@@ -78,13 +78,13 @@ const makeStep = () =>
 const makePlan = (
   overrides: Partial<EnrichmentExecutionPlan> = {}
 ): EnrichmentExecutionPlan => ({
-  postUri: asAtUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+  postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
   enrichmentType: "vision",
   schemaVersion: "v1",
   decision: "execute",
   captureStage: "picked",
   post: {
-    postUri: asAtUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+    postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
     did: "did:plc:test" as any,
     handle: null,
     text: "Stored post text",
@@ -285,7 +285,7 @@ describe("EnrichmentRunWorkflow", () => {
         {
           instanceId: "run-1",
           payload: {
-            postUri: asAtUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+            postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
             enrichmentType: "vision",
             schemaVersion: "v1",
             triggeredBy: "admin",
@@ -449,7 +449,7 @@ describe("EnrichmentRunWorkflow", () => {
         {
           instanceId: "run-1",
           payload: {
-            postUri: asAtUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+            postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
             enrichmentType: "vision",
             schemaVersion: "v1",
             triggeredBy: "admin",
@@ -626,7 +626,7 @@ describe("EnrichmentRunWorkflow", () => {
         {
           instanceId: "run-1",
           payload: {
-            postUri: asAtUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+            postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
             enrichmentType: "vision",
             schemaVersion: "v1",
             triggeredBy: "admin",

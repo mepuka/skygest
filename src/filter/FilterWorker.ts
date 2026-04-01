@@ -6,7 +6,7 @@ import {
   extractLinkRecords
 } from "../bluesky/PostRecord";
 import { extractEmbedKind } from "../bluesky/EmbedExtract";
-import type { RawEventBatch } from "../domain/types";
+import { atUriToPostUri, type RawEventBatch } from "../domain/types";
 import type { DeletedKnowledgePost, KnowledgePost } from "../domain/bi";
 import { KnowledgeRepo } from "../services/KnowledgeRepo";
 import { CurationService } from "../services/CurationService";
@@ -59,7 +59,7 @@ export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (ba
           deletions: [
             ...state.deletions,
             {
-              uri: event.uri,
+              uri: atUriToPostUri(event.uri),
               did: event.did,
               cid: event.cid ?? null,
               createdAt,
@@ -107,7 +107,7 @@ export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (ba
                 upserts: [
                   ...state.upserts,
                   {
-                    uri: event.uri,
+                    uri: atUriToPostUri(event.uri),
                     did: event.did,
                     cid: event.cid ?? null,
                     text,

@@ -57,7 +57,7 @@ import {
   CuratePostInput,
   CuratePostOutput
 } from "./curation";
-import { AtUri, Did } from "./types";
+import { AtUri, Did, PostUri } from "./types";
 
 const withStatus = <A, I, R>(
   schema: Schema.Schema<A, I, R>,
@@ -273,6 +273,7 @@ const OptionalBooleanFromString = Schema.optional(Schema.BooleanFromString);
 const OptionalString = Schema.optional(Schema.String);
 const DecodedDid = Schema.compose(Schema.StringFromUriComponent, Did);
 const DecodedAtUri = Schema.compose(Schema.StringFromUriComponent, AtUri);
+const DecodedPostUri = Schema.compose(Schema.StringFromUriComponent, PostUri);
 const DecodedSlug = Schema.compose(
   Schema.StringFromUriComponent,
   Schema.String.pipe(Schema.minLength(1))
@@ -285,13 +286,13 @@ const DecodedId = Schema.compose(
 
 export const ChronologicalCursor = Schema.Struct({
   createdAt: Schema.Number,
-  uri: AtUri
+  uri: PostUri
 });
 export type ChronologicalCursor = Schema.Schema.Type<typeof ChronologicalCursor>;
 
 export const LinkPageCursor = Schema.Struct({
   createdAt: Schema.Number,
-  postUri: AtUri,
+  postUri: PostUri,
   url: Schema.String
 });
 export type LinkPageCursor = Schema.Schema.Type<typeof LinkPageCursor>;
@@ -319,7 +320,7 @@ export const encodeLinkPageCursor = (cursor: LinkPageCursor | null) =>
 export const SearchPostsCursor = Schema.Struct({
   rank: Schema.Number,
   createdAt: Schema.Number,
-  uri: AtUri
+  uri: PostUri
 });
 export type SearchPostsCursor = Schema.Schema.Type<typeof SearchPostsCursor>;
 
@@ -474,10 +475,21 @@ export const TopicPathParams = Schema.Struct({
 });
 export type TopicPathParams = Schema.Schema.Type<typeof TopicPathParams>;
 
-export const PostUriPathParams = Schema.Struct({
+/** Thread path param — AT Protocol only (Bluesky thread expansion) */
+export const PostUriThreadPath = Schema.Struct({
   uri: DecodedAtUri
 });
-export type PostUriPathParams = Schema.Schema.Type<typeof PostUriPathParams>;
+export type PostUriThreadPath = Schema.Schema.Type<typeof PostUriThreadPath>;
+
+/** Enrichments/topics path param — platform-agnostic (at:// or x://) */
+export const PostUriEnrichmentsPath = Schema.Struct({
+  uri: DecodedPostUri
+});
+export type PostUriEnrichmentsPath = Schema.Schema.Type<typeof PostUriEnrichmentsPath>;
+
+/** @deprecated Use PostUriThreadPath or PostUriEnrichmentsPath */
+export const PostUriPathParams = PostUriEnrichmentsPath;
+export type PostUriPathParams = PostUriEnrichmentsPath;
 
 export const IngestRunPathParams = Schema.Struct({
   id: DecodedId
@@ -569,7 +581,7 @@ export type ListEnrichmentRunsUrlParams = Schema.Schema.Type<
 >;
 
 export const StartEnrichmentInput = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   enrichmentType: EnrichmentKind,
   schemaVersion: Schema.optional(
     Schema.String.pipe(Schema.minLength(1))
@@ -590,7 +602,8 @@ export const PublicReadRequestSchemas = {
   expandTopic: ExpandTopicUrlParams,
   expertPath: ExpertDidPathParams,
   topicPath: TopicPathParams,
-  postUriPath: PostUriPathParams,
+  postUriPath: PostUriEnrichmentsPath,
+  postUriThreadPath: PostUriThreadPath,
   thread: GetThreadUrlParams,
   curatedFeed: GetCuratedFeedUrlParams
 } as const;

@@ -7,7 +7,7 @@ import type {
   SaveCandidateEnrichmentInput,
   SaveCandidatePayloadInput
 } from "../domain/candidatePayload";
-import type { AtUri } from "../domain/types";
+import type { PostUri } from "../domain/types";
 import { CandidatePayloadRepo } from "./CandidatePayloadRepo";
 
 export class CandidatePayloadService extends Context.Tag("@skygest/CandidatePayloadService")<
@@ -18,7 +18,7 @@ export class CandidatePayloadService extends Context.Tag("@skygest/CandidatePayl
     ) => Effect.Effect<boolean, SqlError | DbError>;
 
     readonly markPicked: (
-      postUri: AtUri
+      postUri: PostUri
     ) => Effect.Effect<boolean, SqlError | DbError>;
 
     readonly saveEnrichment: (
@@ -26,7 +26,7 @@ export class CandidatePayloadService extends Context.Tag("@skygest/CandidatePayl
     ) => Effect.Effect<boolean, SqlError | DbError | CandidatePayloadNotPickedError>;
 
     readonly getPayload: (
-      postUri: AtUri
+      postUri: PostUri
     ) => Effect.Effect<CandidatePayloadRecord | null, SqlError | DbError>;
   }
 >() {
@@ -49,7 +49,7 @@ export class CandidatePayloadService extends Context.Tag("@skygest/CandidatePayl
       });
     });
 
-    const markPicked = Effect.fn("CandidatePayloadService.markPicked")(function* (postUri: AtUri) {
+    const markPicked = Effect.fn("CandidatePayloadService.markPicked")(function* (postUri: PostUri) {
       const now = yield* Clock.currentTimeMillis;
       return yield* repo.markPicked(postUri, now);
     });
@@ -61,7 +61,7 @@ export class CandidatePayloadService extends Context.Tag("@skygest/CandidatePayl
       return yield* repo.saveEnrichment(input, now, now);
     });
 
-    const getPayload = Effect.fn("CandidatePayloadService.getPayload")(function* (postUri: AtUri) {
+    const getPayload = Effect.fn("CandidatePayloadService.getPayload")(function* (postUri: PostUri) {
       return yield* repo.getByPostUri(postUri);
     });
 

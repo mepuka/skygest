@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { AtUri, Did, HttpsUrl } from "./types";
+import { AtUri, Did, HttpsUrl, PostUri } from "./types";
 import { EmbedKind, EmbedPayload } from "./embed";
 
 const isFiniteNumber = (value: number) => Number.isFinite(value);
@@ -173,7 +173,7 @@ export const LinkRecord = Schema.Struct({
 export type LinkRecord = Schema.Schema.Type<typeof LinkRecord>;
 
 export const KnowledgePost = Schema.Struct({
-  uri: AtUri,
+  uri: PostUri,
   did: Did,
   cid: Schema.NullOr(Schema.String),
   text: Schema.String,
@@ -189,7 +189,7 @@ export const KnowledgePost = Schema.Struct({
 export type KnowledgePost = Schema.Schema.Type<typeof KnowledgePost>;
 
 export const DeletedKnowledgePost = Schema.Struct({
-  uri: AtUri,
+  uri: PostUri,
   did: Did,
   cid: Schema.NullOr(Schema.String),
   createdAt: Schema.Number,
@@ -209,7 +209,7 @@ export type SearchPostsInput = Schema.Schema.Type<typeof SearchPostsInput>;
 
 export const KnowledgePostCursor = Schema.Struct({
   createdAt: Schema.Number,
-  uri: AtUri
+  uri: PostUri
 });
 export type KnowledgePostCursor = Schema.Schema.Type<typeof KnowledgePostCursor>;
 
@@ -225,7 +225,7 @@ export type GetRecentPostsInput = Schema.Schema.Type<typeof GetRecentPostsInput>
 
 export const KnowledgeLinkCursor = Schema.Struct({
   createdAt: Schema.Number,
-  postUri: AtUri,
+  postUri: PostUri,
   url: Schema.String
 });
 export type KnowledgeLinkCursor = Schema.Schema.Type<typeof KnowledgeLinkCursor>;
@@ -305,7 +305,7 @@ export const emptyKnowledgePostHydration = (): KnowledgePostHydration => ({
 });
 
 export const KnowledgePostResult = Schema.extend(Schema.Struct({
-  uri: AtUri,
+  uri: PostUri,
   did: Did,
   handle: Schema.NullOr(Schema.String),
   avatar: Schema.NullOr(HttpsUrl),
@@ -318,7 +318,7 @@ export const KnowledgePostResult = Schema.extend(Schema.Struct({
 export type KnowledgePostResult = Schema.Schema.Type<typeof KnowledgePostResult>;
 
 export const KnowledgeLinkResult = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   url: Schema.String,
   domain: Schema.NullOr(Schema.String),
   title: Schema.NullOr(Schema.String),
@@ -380,7 +380,7 @@ export const ExpandTopicsInput = Schema.Struct({
 export type ExpandTopicsInput = Schema.Schema.Type<typeof ExpandTopicsInput>;
 
 export const ExplainPostTopicsInput = Schema.Struct({
-  postUri: AtUri.annotations({ description: "AT Protocol URI of the post to explain topic matches for" })
+  postUri: PostUri.annotations({ description: "Post URI of the post to explain topic matches for" })
 });
 export type ExplainPostTopicsInput = Schema.Schema.Type<typeof ExplainPostTopicsInput>;
 
@@ -405,7 +405,7 @@ export const ExpandedTopicsOutput = Schema.Struct({
 export type ExpandedTopicsOutput = Schema.Schema.Type<typeof ExpandedTopicsOutput>;
 
 export const StoredTopicMatch = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   topicSlug: TopicSlug,
   matchedTerm: Schema.NullOr(Schema.String),
   matchSignal: MatchSignal,
@@ -417,7 +417,7 @@ export const StoredTopicMatch = Schema.Struct({
 export type StoredTopicMatch = Schema.Schema.Type<typeof StoredTopicMatch>;
 
 export const ExplainedPostTopic = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   topicSlug: TopicSlug,
   topicLabel: Schema.String,
   conceptSlugs: Schema.Array(OntologyConceptSlug),
@@ -431,7 +431,7 @@ export const ExplainedPostTopic = Schema.Struct({
 export type ExplainedPostTopic = Schema.Schema.Type<typeof ExplainedPostTopic>;
 
 export const ExplainPostTopicsOutput = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   items: Schema.Array(ExplainedPostTopic)
 });
 export type ExplainPostTopicsOutput = Schema.Schema.Type<typeof ExplainPostTopicsOutput>;

@@ -1,7 +1,7 @@
 import { Schema } from "effect";
 import { EnrichmentErrorEnvelope } from "./errors";
 import { EnrichmentKind } from "./enrichment";
-import { AtUri } from "./types";
+import { PostUri } from "./types";
 
 const EpochMillis = Schema.NonNegativeInt;
 const Counter = Schema.NonNegativeInt;
@@ -45,7 +45,7 @@ export type EnrichmentRunActivePhase = Schema.Schema.Type<
 export const EnrichmentRunRecord = Schema.Struct({
   id: Schema.String,
   workflowInstanceId: Schema.String,
-  postUri: AtUri,
+  postUri: PostUri,
   enrichmentType: EnrichmentKind,
   schemaVersion: Schema.String.pipe(Schema.minLength(1)),
   triggeredBy: EnrichmentTrigger,
@@ -67,7 +67,7 @@ export type EnrichmentRunRecord = Schema.Schema.Type<typeof EnrichmentRunRecord>
 export const CreateQueuedEnrichmentRun = Schema.Struct({
   id: Schema.String,
   workflowInstanceId: Schema.String,
-  postUri: AtUri,
+  postUri: PostUri,
   enrichmentType: EnrichmentKind,
   schemaVersion: Schema.String.pipe(Schema.minLength(1)),
   triggeredBy: EnrichmentTrigger,
@@ -117,7 +117,7 @@ export type MarkEnrichmentRunNeedsReview = Schema.Schema.Type<
 >;
 
 export const EnrichmentRunParams = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   enrichmentType: EnrichmentKind,
   schemaVersion: Schema.String.pipe(Schema.minLength(1)),
   triggeredBy: EnrichmentTrigger,

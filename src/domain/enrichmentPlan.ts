@@ -6,7 +6,7 @@ import {
   EnrichmentOutput,
   VisionEnrichment
 } from "./enrichment";
-import { AtUri, Did } from "./types";
+import { Did, PostUri } from "./types";
 
 export const EnrichmentPlannerDecision = Schema.Literal("execute", "skip");
 export type EnrichmentPlannerDecision = Schema.Schema.Type<
@@ -24,7 +24,7 @@ export type EnrichmentPlannerStopReason = Schema.Schema.Type<
 >;
 
 export const EnrichmentPlannerInput = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   enrichmentType: EnrichmentKind,
   schemaVersion: Schema.String.pipe(Schema.minLength(1))
 });
@@ -33,7 +33,7 @@ export type EnrichmentPlannerInput = Schema.Schema.Type<
 >;
 
 export const EnrichmentPlannedPostContext = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   did: Did,
   handle: Schema.NullOr(Schema.String),
   text: Schema.String,
@@ -109,7 +109,7 @@ export type EnrichmentPlannedExistingEnrichment = Schema.Schema.Type<
 >;
 
 export const EnrichmentExecutionPlan = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   enrichmentType: EnrichmentKind,
   schemaVersion: Schema.String.pipe(Schema.minLength(1)),
   decision: EnrichmentPlannerDecision,

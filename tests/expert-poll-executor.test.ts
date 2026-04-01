@@ -10,7 +10,7 @@ import type {
 } from "../src/domain/bi";
 import { emptyKnowledgePostHydration as makeEmptyKnowledgePostHydration } from "../src/domain/bi";
 import type { ExpertSyncStateRecord, ListRecordsResult, PollRequest } from "../src/domain/polling";
-import type { AtUri, Did } from "../src/domain/types";
+import type { AtUri, Did, PostUri } from "../src/domain/types";
 import { RepoRecordsClient } from "../src/bluesky/RepoRecordsClient";
 import { ExpertPollExecutor } from "../src/ingest/ExpertPollExecutor";
 import { ExpertSyncStateRepo } from "../src/services/ExpertSyncStateRepo";
@@ -21,6 +21,7 @@ import { OntologyCatalog } from "../src/services/OntologyCatalog";
 
 const asDid = (value: string) => value as Did;
 const asUri = (value: string) => value as AtUri;
+const asPostUri = (value: string) => value as PostUri;
 
 const makeExpert = (did: Did): ExpertRecord => ({
   did,
@@ -304,7 +305,7 @@ describe("ExpertPollExecutor", () => {
   it.live("returns deep reconcile continuation state and records deletes for missing local posts", () =>
     Effect.promise(async () => {
       const did = asDid("did:plc:expert-1");
-      const missingUri = asUri(`at://${did}/app.bsky.feed.post/missing-local`);
+      const missingUri = asPostUri(`at://${did}/app.bsky.feed.post/missing-local`);
       const harness = makeHarness({
         pages: {
           "cursor-1": makeRecordPage(did, ["remote-4", "remote-3"], "cursor-2", Date.UTC(2026, 2, 8, 9, 0, 0)),

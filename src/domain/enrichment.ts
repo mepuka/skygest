@@ -8,7 +8,7 @@
  */
 
 import { Schema } from "effect";
-import { AtUri } from "./types";
+import { PostUri } from "./types";
 import {
   MediaType,
   ChartType,
@@ -303,7 +303,7 @@ export type PostEnrichmentResult = Schema.Schema.Type<
 >;
 
 export const PostEnrichmentsOutput = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   enrichments: Schema.Array(PostEnrichmentResult)
 });
 export type PostEnrichmentsOutput = Schema.Schema.Type<
@@ -324,7 +324,7 @@ export const EnrichmentReadiness = Schema.Literal(
 export type EnrichmentReadiness = Schema.Schema.Type<typeof EnrichmentReadiness>;
 
 export const GetPostEnrichmentsInput = Schema.Struct({
-  postUri: AtUri
+  postUri: PostUri
 });
 export type GetPostEnrichmentsInput = Schema.Schema.Type<typeof GetPostEnrichmentsInput>;
 
@@ -345,7 +345,7 @@ export const PostEnrichmentRunSummary = Schema.Struct({
 export type PostEnrichmentRunSummary = Schema.Schema.Type<typeof PostEnrichmentRunSummary>;
 
 export const GetPostEnrichmentsOutput = Schema.Struct({
-  postUri: AtUri,
+  postUri: PostUri,
   readiness: EnrichmentReadiness,
   enrichments: Schema.Array(PostEnrichmentResult),
   latestRuns: Schema.Array(PostEnrichmentRunSummary)

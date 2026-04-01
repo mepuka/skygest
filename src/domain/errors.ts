@@ -1,6 +1,6 @@
 import { Either, Schema } from "effect";
 import { CandidatePayloadStage } from "./candidatePayload";
-import { AtUri, Did } from "./types";
+import { Did, PostUri } from "./types";
 import {
   decodeJsonStringEitherWith,
   encodeJsonStringWith
@@ -35,14 +35,14 @@ export class EnrichmentRunNotFoundError extends Schema.TaggedError<EnrichmentRun
 export class EnrichmentPayloadMissingError extends Schema.TaggedError<EnrichmentPayloadMissingError>()(
   "EnrichmentPayloadMissingError",
   {
-    postUri: AtUri
+    postUri: PostUri
   }
 ) {}
 
 export class EnrichmentQualityGateError extends Schema.TaggedError<EnrichmentQualityGateError>()(
   "EnrichmentQualityGateError",
   {
-    postUri: AtUri,
+    postUri: PostUri,
     reason: Schema.String
   }
 ) {}
@@ -50,14 +50,14 @@ export class EnrichmentQualityGateError extends Schema.TaggedError<EnrichmentQua
 export class EnrichmentPostContextMissingError extends Schema.TaggedError<EnrichmentPostContextMissingError>()(
   "EnrichmentPostContextMissingError",
   {
-    postUri: AtUri
+    postUri: PostUri
   }
 ) {}
 
 export class EnrichmentPayloadNotPickedError extends Schema.TaggedError<EnrichmentPayloadNotPickedError>()(
   "EnrichmentPayloadNotPickedError",
   {
-    postUri: AtUri,
+    postUri: PostUri,
     captureStage: CandidatePayloadStage
   }
 ) {}
@@ -197,7 +197,7 @@ export class EnrichmentDependencyPendingError extends Schema.TaggedError<Enrichm
   "EnrichmentDependencyPendingError",
   {
     dependency: Schema.String,
-    postUri: Schema.optional(AtUri),
+    postUri: Schema.optional(PostUri),
     operation: Schema.optional(Schema.String)
   }
 ) {}

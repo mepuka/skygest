@@ -2,20 +2,20 @@ import { Effect, Exit, Layer } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { vi } from "vitest";
 import type { VisionExecutionPlan } from "../src/domain/enrichmentPlan";
-import type { AtUri } from "../src/domain/types";
+import type { PostUri } from "../src/domain/types";
 import { GeminiVisionService } from "../src/enrichment/GeminiVisionService";
 import { VisionEnrichmentExecutor } from "../src/enrichment/VisionEnrichmentExecutor";
 
-const asAtUri = (value: string) => value as AtUri;
+const asPostUri = (value: string) => value as PostUri;
 
 const makePlan = (): VisionExecutionPlan => ({
-  postUri: asAtUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+  postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
   enrichmentType: "vision",
   schemaVersion: "v1",
   decision: "execute",
   captureStage: "picked",
   post: {
-    postUri: asAtUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+    postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
     did: "did:plc:test" as any,
     handle: null,
     text: "Stored post text",
