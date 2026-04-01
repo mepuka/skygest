@@ -401,8 +401,8 @@ describe("MCP submit_editorial_pick readiness gate", () => {
         const layer = makeBiLayer({ filename });
         await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
 
-        // Directly set curation status to "curated" via SQL so we bypass the
-        // Bluesky API call that curate_post would make.
+        // Directly set curation status to "curated" and add a payload row
+        // so the enrichment readiness gate is exercised.
         const now = Date.now();
         await Effect.runPromise(
           Effect.gen(function* () {
@@ -418,6 +418,12 @@ describe("MCP submit_editorial_pick readiness gate", () => {
                 curated_by = 'test-curator',
                 review_note = 'test'
             `;
+            // Add a payload row so the enrichment readiness gate is exercised
+            const embedPayloadJson = JSON.stringify({ kind: "link", uri: "https://example.com/article", title: "Test", description: "Test article", thumb: null });
+            yield* sql`
+              INSERT INTO post_payloads (post_uri, capture_stage, embed_type, embed_payload_json, captured_at, updated_at)
+              VALUES (${solarUri}, 'picked', 'link', ${embedPayloadJson}, ${now}, ${now})
+            `;
           }).pipe(Effect.provide(layer))
         );
 
@@ -427,7 +433,7 @@ describe("MCP submit_editorial_pick readiness gate", () => {
         );
 
         try {
-          // Try to accept — should fail because no enrichment
+          // Try to accept — should fail because enrichment not complete
           const result = await client.callTool({
             name: "submit_editorial_pick",
             arguments: {
