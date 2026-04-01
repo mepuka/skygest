@@ -194,6 +194,10 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
     };
   }
 
+  if (request.method === "POST" && pathname === "/admin/import/posts") {
+    return { action: "import_posts", scopes: ["ops:refresh"] };
+  }
+
   if (request.method === "POST" && pathname === "/admin/editorial/pick") {
     return { action: "submit_editorial_pick", scopes: ["editorial:write"] };
   }
