@@ -267,7 +267,7 @@ export const StartEnrichmentTool = Tool.make("start_enrichment", {
   .annotate(Tool.OpenWorld, true);
 
 export const CuratePostTool = Tool.make("curate_post", {
-  description: "Curate or reject a post. Curating fetches live embed data from Bluesky, captures the payload, and marks it for enrichment. Rejecting dismisses the post. Idempotent — re-curating an already-curated post is a no-op.",
+  description: "Curate or reject a post. Curating fetches live embed data from Bluesky and captures the payload. Call start_enrichment separately to queue enrichment processing. Rejecting dismisses the post. Idempotent.",
   parameters: CuratePostInput.fields,
   success: CuratePostMcpOutput,
   failure: McpToolQueryError

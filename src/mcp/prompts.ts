@@ -121,25 +121,35 @@ WORKFLOW:
 
 4. CURATE \u2014 Candidate \u2192 Enriching
    Call curate_post(postUri: <uri>, action: "curate", note: "<1 sentence reason>").
-   This fetches embed data and queues enrichment automatically.
+   This captures the post's embed data for enrichment.
    Reject weak candidates: curate_post(postUri: <uri>, action: "reject", note: "<reason>").
 
-5. VERIFY READINESS \u2014 Enriching \u2192 Reviewable
-   After curating, enrichment runs automatically (vision for charts/screenshots, source attribution for links).
-   Allow a few minutes for enrichment to complete before proceeding to step 7.
-   Continue evaluating and curating other candidates while waiting.
-   Note: enrichment inspection tools are coming in a future update.
+5. START ENRICHMENT
+   Call start_enrichment(postUri: <uri>) to queue enrichment processing.
+   The enrichment type is auto-detected: vision for charts/screenshots, source-attribution for links.
+   You can override: start_enrichment(postUri: <uri>, enrichmentType: "vision").
+   IMPORTANT: Posts with visual embeds may need TWO enrichment passes \u2014
+   first vision (chart analysis), then source-attribution (which uses vision output).
+   After vision completes, call start_enrichment again to trigger source-attribution.
 
-6. DEDUPLICATE
+6. VERIFY READINESS \u2014 Enriching \u2192 Reviewable
+   Call get_post_enrichments(postUri: <uri>) to check readiness.
+   Readiness values: none (not started), pending (running), complete (ready), failed, needs-review.
+   If pending: continue evaluating other candidates and check back later.
+   If complete: check whether all expected enrichments are present (vision AND source-attribution for visual posts).
+     If source-attribution is missing after vision completes, call start_enrichment again.
+   If failed or needs-review: note the issue and skip for now.
+
+7. DEDUPLICATE
    Call list_editorial_picks(since: <24h ago>) to see existing picks.
    Do not re-pick posts that are already active editorial picks.
 
-7. ACCEPT BRIEF \u2014 Reviewable \u2192 Accepted
+8. ACCEPT BRIEF \u2014 Reviewable \u2192 Accepted
    Call submit_editorial_pick(postUri: <uri>, score: <0-100>, reason: "<1-2 sentences>", category: "<type>").
    Score guide: 80+=must-read, 60-79=strong, 40-59=notable.
    Categories: breaking, analysis, discussion, data, opinion.
 
-8. REPORT
+9. REPORT
    Summarize: candidates reviewed, curated, rejected, accepted. Note any posts still awaiting enrichment.`
     );
   }
