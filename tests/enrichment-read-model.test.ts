@@ -225,3 +225,92 @@ describe("PostEnrichmentReadService", () => {
     )
   );
 });
+
+describe("formatEnrichments", () => {
+  it("formats empty enrichments with none readiness", () => {
+    const result = formatEnrichments({
+      postUri: "at://did:plc:abc/app.bsky.feed.post/xyz" as any,
+      readiness: "none",
+      enrichments: [],
+      latestRuns: []
+    });
+    expect(result).toContain("at://did:plc:abc/app.bsky.feed.post/xyz");
+    expect(result).toContain("Readiness: none");
+    expect(result).toContain("No enrichments");
+  });
+
+  it("formats vision enrichment with complete readiness", () => {
+    const result = formatEnrichments({
+      postUri: "at://did:plc:abc/app.bsky.feed.post/xyz" as any,
+      readiness: "complete",
+      enrichments: [{
+        kind: "vision",
+        payload: {
+          kind: "vision",
+          summary: {
+            text: "Chart shows solar capacity growth in 2025",
+            mediaTypes: ["chart"],
+            chartTypes: ["line-chart"],
+            titles: ["US Solar Capacity"],
+            keyFindings: [{ text: "Solar up 30%", assetKeys: ["a1"] }]
+          },
+          assets: [
+            {
+              assetKey: "a1",
+              assetType: "image",
+              source: "embed",
+              index: 0,
+              originalAltText: null,
+              analysis: {
+                mediaType: "chart",
+                chartTypes: ["line-chart"],
+                altText: "Solar capacity line chart",
+                altTextProvenance: "generated",
+                xAxis: null,
+                yAxis: null,
+                series: [],
+                sourceLines: [],
+                temporalCoverage: null,
+                keyFindings: ["Solar up 30%"],
+                visibleUrls: [],
+                organizationMentions: [],
+                logoText: [],
+                title: "US Solar Capacity",
+                modelId: "gemini-2.5-flash",
+                processedAt: 1710000000000
+              }
+            }
+          ],
+          modelId: "gemini-2.5-flash",
+          promptVersion: "v2",
+          processedAt: 1710000000000
+        },
+        enrichedAt: 1710000000000
+      }] as any,
+      latestRuns: []
+    });
+    expect(result).toContain("Readiness: complete");
+    expect(result).toContain("[V] vision");
+    expect(result).toContain("1 asset");
+    expect(result).toContain("solar capacity");
+  });
+
+  it("formats pending runs", () => {
+    const result = formatEnrichments({
+      postUri: "at://did:plc:abc/app.bsky.feed.post/xyz" as any,
+      readiness: "pending",
+      enrichments: [],
+      latestRuns: [
+        {
+          enrichmentType: "vision",
+          status: "queued",
+          phase: "queued",
+          lastProgressAt: 1710000000000,
+          finishedAt: null
+        }
+      ] as any
+    });
+    expect(result).toContain("Readiness: pending");
+    expect(result).toContain("vision: queued");
+  });
+});

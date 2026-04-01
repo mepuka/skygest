@@ -17,6 +17,7 @@ import {
 } from "../domain/bi";
 import { ListEditorialPicksInput, SubmitEditorialPickMcpInput } from "../domain/editorial";
 import { ListCurationCandidatesInput, CuratePostInput } from "../domain/curation";
+import { GetPostEnrichmentsInput } from "../domain/enrichment";
 import {
   KnowledgePostsMcpOutput,
   KnowledgeLinksMcpOutput,
@@ -30,7 +31,8 @@ import {
   ThreadDocumentMcpOutput,
   CurationCandidatesMcpOutput,
   CuratePostMcpOutput,
-  SubmitEditorialPickMcpOutput
+  SubmitEditorialPickMcpOutput,
+  PostEnrichmentsMcpOutput
 } from "./OutputSchemas.ts";
 import {
   formatPosts,
@@ -43,7 +45,8 @@ import {
   formatEditorialPicks,
   formatCurationCandidates,
   formatCuratePostResult,
-  formatSubmitPickResult
+  formatSubmitPickResult,
+  formatEnrichments
 } from "./Fmt.ts";
 import { EditorialService } from "../services/EditorialService";
 import { CurationService } from "../services/CurationService";
@@ -227,6 +230,18 @@ export const ListCurationCandidatesTool = Tool.make("list_curation_candidates", 
   .annotate(Tool.Idempotent, true)
   .annotate(Tool.OpenWorld, false);
 
+export const GetPostEnrichmentsTool = Tool.make("get_post_enrichments", {
+  description: "Inspect enrichment state and readiness for a post. Returns validated enrichment payloads (vision, source-attribution, grounding) and latest enrichment run summaries. Readiness values: none, pending, complete, failed, needs-review.",
+  parameters: GetPostEnrichmentsInput.fields,
+  success: PostEnrichmentsMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Get Post Enrichments")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
+
 export const CuratePostTool = Tool.make("curate_post", {
   description: "Curate or reject a post. Curating fetches live embed data from Bluesky, captures the payload, and marks it for enrichment. Rejecting dismisses the post. Idempotent — re-curating an already-curated post is a no-op.",
   parameters: CuratePostInput.fields,
@@ -267,7 +282,8 @@ export const ReadOnlyMcpToolkit = Toolkit.make(
   ListEditorialPicksTool,
   GetPostThreadTool,
   GetThreadDocumentTool,
-  ListCurationCandidatesTool
+  ListCurationCandidatesTool,
+  GetPostEnrichmentsTool
 );
 
 export const CurationWriteMcpToolkit = Toolkit.make(
@@ -283,6 +299,7 @@ export const CurationWriteMcpToolkit = Toolkit.make(
   GetPostThreadTool,
   GetThreadDocumentTool,
   ListCurationCandidatesTool,
+  GetPostEnrichmentsTool,
   CuratePostTool
 );
 
@@ -299,6 +316,7 @@ export const EditorialWriteMcpToolkit = Toolkit.make(
   GetPostThreadTool,
   GetThreadDocumentTool,
   ListCurationCandidatesTool,
+  GetPostEnrichmentsTool,
   SubmitEditorialPickTool
 );
 
@@ -315,6 +333,7 @@ export const WorkflowWriteMcpToolkit = Toolkit.make(
   GetPostThreadTool,
   GetThreadDocumentTool,
   ListCurationCandidatesTool,
+  GetPostEnrichmentsTool,
   CuratePostTool,
   SubmitEditorialPickTool
 );
@@ -530,6 +549,15 @@ const makeReadOnlyHandlers = (
         _display: formatCurationCandidates(items)
       })),
       Effect.mapError(toQueryError("list_curation_candidates"))
+    ),
+  // Stub — real handler wired in Task 6 (SKY-77)
+  get_post_enrichments: (_input: typeof GetPostEnrichmentsInput.Type) =>
+    Effect.fail(
+      McpToolQueryError.make({
+        tool: "get_post_enrichments",
+        message: "Handler not yet wired — see SKY-77 Task 6",
+        error: new Error("not wired")
+      })
     )
 });
 
