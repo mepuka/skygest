@@ -6,7 +6,8 @@ import {
 import { Effect, Either, ManagedRuntime, Schema } from "effect";
 import {
   defaultSchemaVersionForEnrichmentKind,
-  type EnrichmentOutput
+  type EnrichmentOutput,
+  type VisionEnrichment
 } from "../domain/enrichment";
 import {
   describeEnrichmentPlanStopReason,
@@ -23,6 +24,7 @@ import {
 import {
   EnrichmentDependencyPendingError,
   EnrichmentPayloadMissingError,
+  EnrichmentQualityGateError,
   EnrichmentRunNotFoundError,
   EnrichmentSchemaDecodeError,
   toEnrichmentErrorEnvelope
@@ -39,6 +41,7 @@ import {
   isSkippedEnrichmentPlan
 } from "./EnrichmentPredicates";
 import { EnrichmentWorkflowLauncher } from "./EnrichmentWorkflowLauncher";
+import { assessVisionQuality } from "./EnrichmentQualityGate";
 import { SourceAttributionExecutor } from "./SourceAttributionExecutor";
 import { VisionEnrichmentExecutor } from "./VisionEnrichmentExecutor";
 
@@ -292,6 +295,45 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
           "EnrichmentRunWorkflow.persistEnrichment"
         )
       );
+
+      // --- Quality gate (Enriching → Reviewable transition) ---
+      // Classification only, no retry. Vision output is deterministic for
+      // a given input. Quality improvement comes from prompt tuning
+      // (SKY-42/SKY-51) and manual retry via EnrichmentRepairService.
+      if (isVisionExecutionPlan(plan)) {
+        const verdict = assessVisionQuality(enrichment as VisionEnrichment);
+        if (verdict.outcome === "needs-review") {
+          await step.do("mark needs review (quality gate)", async () =>
+            this.runEffect(
+              Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+                runs.markNeedsReview({
+                  id: run.id,
+                  lastProgressAt: Date.now(),
+                  resultWrittenAt,
+                  error: toEnrichmentErrorEnvelope(
+                    EnrichmentQualityGateError.make({
+                      postUri: plan.postUri,
+                      reason: verdict.reason
+                    }),
+                    {
+                      runId,
+                      operation: "EnrichmentRunWorkflow.qualityGate"
+                    }
+                  )
+                })
+              ),
+              "EnrichmentRunWorkflow.markNeedsReviewQuality"
+            )
+          );
+
+          // Early return — source-attribution is NOT queued.
+          // Intentional: weak vision output makes downstream attribution unreliable.
+          return {
+            runId,
+            status: "needs-review"
+          } as const;
+        }
+      }
 
       if (isVisionExecutionPlan(plan)) {
         await step.do("queue source attribution", async () =>

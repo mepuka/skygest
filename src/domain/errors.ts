@@ -39,6 +39,14 @@ export class EnrichmentPayloadMissingError extends Schema.TaggedError<Enrichment
   }
 ) {}
 
+export class EnrichmentQualityGateError extends Schema.TaggedError<EnrichmentQualityGateError>()(
+  "EnrichmentQualityGateError",
+  {
+    postUri: AtUri,
+    reason: Schema.String
+  }
+) {}
+
 export class EnrichmentPostContextMissingError extends Schema.TaggedError<EnrichmentPostContextMissingError>()(
   "EnrichmentPostContextMissingError",
   {

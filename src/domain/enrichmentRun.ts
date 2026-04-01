@@ -109,6 +109,7 @@ export type FailEnrichmentRun = Schema.Schema.Type<typeof FailEnrichmentRun>;
 export const MarkEnrichmentRunNeedsReview = Schema.Struct({
   id: Schema.String,
   lastProgressAt: EpochMillis,
+  resultWrittenAt: Schema.optional(Schema.NullOr(EpochMillis)),
   error: Schema.NullOr(EnrichmentErrorEnvelope)
 });
 export type MarkEnrichmentRunNeedsReview = Schema.Schema.Type<

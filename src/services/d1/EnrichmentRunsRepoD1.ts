@@ -321,6 +321,7 @@ export const EnrichmentRunsRepoD1 = {
                 phase = 'needs-review',
                 finished_at = ${validated.lastProgressAt},
                 last_progress_at = ${validated.lastProgressAt},
+                result_written_at = COALESCE(${validated.resultWrittenAt ?? null}, result_written_at),
                 error = ${encodeStoredEnrichmentError(validated.error)}
             WHERE id = ${validated.id}
               AND status = 'running'

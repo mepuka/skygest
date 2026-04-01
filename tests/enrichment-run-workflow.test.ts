@@ -472,4 +472,194 @@ describe("EnrichmentRunWorkflow", () => {
       );
     })
   );
+
+  it.live("marks needs-review when the quality gate rejects a weak vision enrichment", () =>
+    Effect.promise(async () => {
+      const { EnrichmentRunWorkflow } = await import(
+        "../src/enrichment/EnrichmentRunWorkflow"
+      );
+
+      const phases: Array<EnrichmentRunRecord["phase"]> = [];
+      const completions: Array<unknown> = [];
+      const persisted: Array<unknown> = [];
+      const reviewMarks: Array<unknown> = [];
+      const failures: Array<unknown> = [];
+      const launcherCalls: Array<unknown> = [];
+
+      const weakVisionEnrichment: VisionEnrichment = {
+        kind: "vision",
+        summary: {
+          text: "A photo.",
+          mediaTypes: ["photo"],
+          chartTypes: [],
+          titles: [],
+          keyFindings: []
+        },
+        assets: [
+          {
+            assetKey: "embed:0:https://cdn.bsky.app/full-1.jpg",
+            assetType: "image",
+            source: "embed",
+            index: 0,
+            originalAltText: null,
+            analysis: {
+              mediaType: "photo",
+              chartTypes: [],
+              altText: "A photo.",
+              altTextProvenance: "synthetic",
+              xAxis: null,
+              yAxis: null,
+              series: [],
+              sourceLines: [],
+              temporalCoverage: null,
+              keyFindings: [],
+              visibleUrls: [],
+              organizationMentions: [],
+              logoText: [],
+              title: null,
+              modelId: "gemini-2.5-flash",
+              processedAt: 10
+            }
+          }
+        ],
+        modelId: "gemini-2.5-flash",
+        promptVersion: "v2.0.0",
+        processedAt: 10
+      };
+
+      const runState = {
+        status: "queued" as EnrichmentRunRecord["status"],
+        phase: "queued" as EnrichmentRunRecord["phase"],
+        attemptCount: 0,
+        lastProgressAt: null as number | null,
+        finishedAt: null as number | null,
+        error: null as EnrichmentErrorEnvelope | null
+      };
+
+      currentLayer = Layer.succeed(EnrichmentRunsRepo, {
+        createQueuedIfAbsent: () => Effect.succeed(true),
+        getById: () => Effect.succeed(makeRunRecord(runState)),
+        listRunning: () => Effect.succeed([]),
+        listRecent: () => Effect.succeed([]),
+        listActive: () => Effect.succeed([]),
+        listStaleActive: () => Effect.succeed([]),
+        markPhase: (input) =>
+          Effect.sync(() => {
+            phases.push(input.phase);
+            runState.status = "running";
+            runState.phase = input.phase;
+            runState.lastProgressAt = input.lastProgressAt;
+            if (runState.attemptCount === 0) {
+              runState.attemptCount = 1;
+            }
+          }),
+        resetForRetry: () => Effect.succeed(false),
+        markComplete: (input) =>
+          Effect.sync(() => {
+            completions.push(input);
+            runState.status = "complete";
+            runState.phase = "complete";
+            runState.finishedAt = input.finishedAt;
+            runState.lastProgressAt = input.finishedAt;
+          }),
+        markFailed: (input) =>
+          Effect.sync(() => {
+            failures.push(input);
+            runState.status = "failed";
+            runState.phase = "failed";
+            runState.finishedAt = input.finishedAt;
+            runState.error = input.error;
+          }),
+        markNeedsReview: (input) =>
+          Effect.sync(() => {
+            reviewMarks.push(input);
+            runState.status = "needs-review";
+            runState.phase = "needs-review";
+            runState.lastProgressAt = input.lastProgressAt;
+            runState.error = input.error;
+          })
+      }).pipe(
+        Layer.provideMerge(
+          Layer.mergeAll(
+            Layer.succeed(EnrichmentPlanner, {
+              plan: () => Effect.succeed(makePlan())
+            }),
+            Layer.succeed(VisionEnrichmentExecutor, {
+              execute: () => Effect.succeed(weakVisionEnrichment)
+            }),
+            Layer.succeed(EnrichmentWorkflowLauncher, {
+              start: () =>
+                Effect.succeed({
+                  runId: "source-attribution-queued",
+                  workflowInstanceId: "source-attribution-queued",
+                  status: "queued" as const
+                }),
+              startIfAbsent: (input) =>
+                Effect.sync(() => {
+                  launcherCalls.push(input);
+                  return true;
+                })
+            }),
+            Layer.succeed(CandidatePayloadRepo, {
+              upsertCapture: () => Effect.succeed(false),
+              getByPostUri: () => Effect.succeed(null),
+              markPicked: () => Effect.succeed(false),
+              saveEnrichment: (input) =>
+                Effect.sync(() => {
+                  persisted.push(input);
+                  return true;
+                })
+            })
+          )
+        )
+      );
+
+      const workflow = new EnrichmentRunWorkflow(
+        {} as ExecutionContext,
+        makeEnv()
+      );
+      const result = await workflow.run(
+        {
+          instanceId: "run-1",
+          payload: {
+            postUri: asAtUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+            enrichmentType: "vision",
+            schemaVersion: "v1",
+            triggeredBy: "admin",
+            requestedBy: "operator@example.com"
+          } satisfies EnrichmentRunParams
+        } as any,
+        makeStep()
+      );
+
+      // Result status is "needs-review"
+      expect(result).toEqual({
+        runId: "run-1",
+        status: "needs-review"
+      });
+
+      // Payload was persisted before the gate rejected it
+      expect(persisted).toHaveLength(1);
+
+      // Run was marked needs-review with EnrichmentQualityGateError
+      expect(reviewMarks).toHaveLength(1);
+      expect(reviewMarks[0]).toEqual(
+        expect.objectContaining({
+          error: expect.objectContaining({
+            tag: "EnrichmentQualityGateError"
+          })
+        })
+      );
+
+      // The needs-review mark includes resultWrittenAt as a number
+      const mark = reviewMarks[0] as { resultWrittenAt?: unknown };
+      expect(typeof mark.resultWrittenAt).toBe("number");
+
+      // Source attribution was NOT queued
+      expect(launcherCalls).toEqual([]);
+
+      // markComplete was NOT called
+      expect(completions).toEqual([]);
+    })
+  );
 });
