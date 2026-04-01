@@ -208,6 +208,26 @@ const clampCurationLimit = (limit: number | undefined) =>
 
         const previousStatus = existing?.status ?? null;
 
+        // Twitter posts: skip Bluesky thread fetch, use stored payload from import
+        const isTwitter = (input.postUri as string).startsWith("x://");
+
+        if (isTwitter && input.action === "curate") {
+          const existingPayload = yield* payloadService.getPayload(input.postUri);
+
+          if (existingPayload !== null && existingPayload.captureStage !== "picked") {
+            yield* payloadService.markPicked(input.postUri);
+          }
+
+          yield* curationRepo.updateStatus(input.postUri, "curated", curator, input.note ?? null, now);
+
+          if (existingPayload !== null) {
+            yield* queuePickedEnrichment(input.postUri, existingPayload.embedPayload, curator)
+              .pipe(Effect.catchAll(() => Effect.succeed(false)));
+          }
+
+          return { postUri: input.postUri, action: input.action, previousStatus, newStatus: "curated" as const };
+        }
+
         if (input.action === "reject") {
           yield* curationRepo.updateStatus(
             input.postUri,
