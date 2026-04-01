@@ -1,7 +1,7 @@
 import type { SqlError } from "@effect/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import { Tool, Toolkit } from "@effect/ai";
-import { Context, Effect, Layer, Schema } from "effect";
+import { Context, Effect, Layer, Option, Schema } from "effect";
 import {
   ExplainPostTopicsInput,
   ExpandTopicsInput,
@@ -17,7 +17,7 @@ import {
 } from "../domain/bi";
 import { ListEditorialPicksInput, SubmitEditorialPickMcpInput } from "../domain/editorial";
 import { ListCurationCandidatesInput, CuratePostInput } from "../domain/curation";
-import { GetPostEnrichmentsInput } from "../domain/enrichment";
+import { GetPostEnrichmentsInput, EnrichmentKind } from "../domain/enrichment";
 import {
   KnowledgePostsMcpOutput,
   KnowledgeLinksMcpOutput,
@@ -32,7 +32,8 @@ import {
   CurationCandidatesMcpOutput,
   CuratePostMcpOutput,
   SubmitEditorialPickMcpOutput,
-  PostEnrichmentsMcpOutput
+  PostEnrichmentsMcpOutput,
+  StartEnrichmentMcpOutput
 } from "./OutputSchemas.ts";
 import {
   formatPosts,
@@ -46,7 +47,8 @@ import {
   formatCurationCandidates,
   formatCuratePostResult,
   formatSubmitPickResult,
-  formatEnrichments
+  formatEnrichments,
+  formatStartEnrichment
 } from "./Fmt.ts";
 import { EditorialService } from "../services/EditorialService";
 import { CurationService } from "../services/CurationService";
@@ -54,6 +56,8 @@ import { CurationRepo } from "../services/CurationRepo";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
+import { EnrichmentTriggerClient } from "../services/EnrichmentTriggerClient";
+import { CandidatePayloadService } from "../services/CandidatePayloadService";
 import { extractEmbedKind, buildTypedEmbed } from "../bluesky/EmbedExtract";
 import { flattenThread } from "../bluesky/ThreadFlatten.ts";
 import { printThread } from "../bluesky/ThreadPrinter.ts";
@@ -78,6 +82,13 @@ const GetPostLinksMcpInput = Schema.Struct({
   since: GetPostLinksInput.fields.since,
   until: GetPostLinksInput.fields.until,
   limit: GetPostLinksInput.fields.limit
+});
+
+const StartEnrichmentMcpInput = Schema.Struct({
+  postUri: GetPostEnrichmentsInput.fields.postUri,
+  enrichmentType: Schema.optional(EnrichmentKind.annotations({
+    description: "Enrichment type: 'vision' for charts/screenshots, 'source-attribution' for links. If omitted, auto-detected from embed type."
+  }))
 });
 
 const toQueryError = (tool: string) => (error: { message: string }) =>
@@ -243,6 +254,18 @@ export const GetPostEnrichmentsTool = Tool.make("get_post_enrichments", {
   .annotate(Tool.Idempotent, true)
   .annotate(Tool.OpenWorld, false);
 
+export const StartEnrichmentTool = Tool.make("start_enrichment", {
+  description: "Trigger enrichment for a curated post. Queues vision analysis (for charts/screenshots) or source attribution (for links). Use get_post_enrichments to poll readiness after triggering. The post must have been curated first via curate_post.",
+  parameters: StartEnrichmentMcpInput.fields,
+  success: StartEnrichmentMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Start Enrichment")
+  .annotate(Tool.Readonly, false)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, true);
+
 export const CuratePostTool = Tool.make("curate_post", {
   description: "Curate or reject a post. Curating fetches live embed data from Bluesky, captures the payload, and marks it for enrichment. Rejecting dismisses the post. Idempotent — re-curating an already-curated post is a no-op.",
   parameters: CuratePostInput.fields,
@@ -301,7 +324,8 @@ export const CurationWriteMcpToolkit = Toolkit.make(
   GetThreadDocumentTool,
   ListCurationCandidatesTool,
   GetPostEnrichmentsTool,
-  CuratePostTool
+  CuratePostTool,
+  StartEnrichmentTool
 );
 
 export const EditorialWriteMcpToolkit = Toolkit.make(
@@ -336,7 +360,8 @@ export const WorkflowWriteMcpToolkit = Toolkit.make(
   ListCurationCandidatesTool,
   GetPostEnrichmentsTool,
   CuratePostTool,
-  SubmitEditorialPickTool
+  SubmitEditorialPickTool,
+  StartEnrichmentTool
 );
 
 // Keep legacy export for backward compatibility in tests
@@ -629,6 +654,71 @@ const makeSubmitPickHandler = (editorialService: EditorialServiceI) => ({
     ) as any
 });
 
+const makeStartEnrichmentHandler = () => ({
+  start_enrichment: (input: typeof StartEnrichmentMcpInput.Type) =>
+    Effect.gen(function* () {
+      const triggerOption = yield* Effect.serviceOption(EnrichmentTriggerClient);
+      if (Option.isNone(triggerOption)) {
+        return yield* McpToolQueryError.make({
+          tool: "start_enrichment",
+          message: "Enrichment trigger is not available in this deployment. Use the admin enrichment endpoint on the ingest worker.",
+          error: new Error("EnrichmentTriggerClient not available")
+        });
+      }
+      const trigger = triggerOption.value;
+
+      // Auto-detect enrichment type if not specified
+      let enrichmentType = input.enrichmentType;
+      if (enrichmentType === undefined) {
+        const payloadService = yield* CandidatePayloadService;
+        const payload = yield* payloadService.getPayload(input.postUri);
+        if (payload === null) {
+          return yield* McpToolQueryError.make({
+            tool: "start_enrichment",
+            message: "Post must be curated before starting enrichment. Call curate_post first.",
+            error: new Error("payload not found")
+          });
+        }
+        // Detect from embed type: img/video/media -> vision, everything else -> source-attribution
+        enrichmentType = (payload.embedType === "img" || payload.embedType === "video" || payload.embedType === "media")
+          ? "vision" as const
+          : "source-attribution" as const;
+      }
+
+      const result = yield* trigger.start({
+        postUri: input.postUri,
+        enrichmentType
+      }).pipe(
+        Effect.mapError((e) =>
+          McpToolQueryError.make({
+            tool: "start_enrichment",
+            message: e.message,
+            error: e
+          })
+        )
+      );
+
+      return {
+        postUri: input.postUri,
+        enrichmentType,
+        status: result.status,
+        runId: result.runId,
+        _display: formatStartEnrichment({
+          postUri: input.postUri,
+          enrichmentType,
+          status: result.status,
+          runId: result.runId
+        })
+      };
+    }).pipe(
+      Effect.mapError((e) =>
+        "_tag" in (e as any) && (e as any)._tag === "McpToolQueryError"
+          ? (e as McpToolQueryError)
+          : toQueryError("start_enrichment")(e as any)
+      )
+    ) as any
+});
+
 // ---------------------------------------------------------------------------
 // Handler layers — one per toolkit variant
 // ---------------------------------------------------------------------------
@@ -657,7 +747,8 @@ export const CurationWriteMcpHandlers = CurationWriteMcpToolkit.toLayer(
 
     return CurationWriteMcpToolkit.of({
       ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
-      ...makeCuratePostHandler(curationService)
+      ...makeCuratePostHandler(curationService),
+      ...makeStartEnrichmentHandler()
     });
   })
 );
@@ -688,7 +779,8 @@ export const WorkflowWriteMcpHandlers = WorkflowWriteMcpToolkit.toLayer(
     return WorkflowWriteMcpToolkit.of({
       ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
       ...makeCuratePostHandler(curationService),
-      ...makeSubmitPickHandler(editorialService)
+      ...makeSubmitPickHandler(editorialService),
+      ...makeStartEnrichmentHandler()
     });
   })
 );

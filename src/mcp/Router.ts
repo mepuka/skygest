@@ -6,6 +6,7 @@ import { makeQueryLayer } from "../edge/Layer";
 import type { EnvBindings } from "../platform/Env";
 import { CurationService } from "../services/CurationService";
 import { EditorialService } from "../services/EditorialService";
+import { EnrichmentTriggerClient } from "../services/EnrichmentTriggerClient";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
 import { GLOSSARY_CONTENT } from "./glossary";
@@ -128,7 +129,26 @@ const makeCachedMcpHandler = <Env extends object>(
   };
 };
 
-const handleCachedMcpRequest = makeCachedMcpHandler(makeQueryLayer);
+/**
+ * Build a query layer that includes the EnrichmentTriggerClient when the env
+ * exposes an INGEST_SERVICE fetcher binding (agent worker only).
+ */
+const makeQueryLayerWithTrigger = (env: EnvBindings): QueryLayer => {
+  const base = makeQueryLayer(env);
+  const fetcher = (env as unknown as Record<string, unknown>)["INGEST_SERVICE"] as Fetcher | undefined;
+  const secret = env.OPERATOR_SECRET;
+
+  if (fetcher && secret) {
+    return Layer.provideMerge(
+      EnrichmentTriggerClient.layerFromFetcher(fetcher, secret),
+      base
+    ) as unknown as QueryLayer;
+  }
+
+  return base;
+};
+
+const handleCachedMcpRequest = makeCachedMcpHandler(makeQueryLayerWithTrigger);
 
 export const handleMcpRequest = (
   request: Request,
