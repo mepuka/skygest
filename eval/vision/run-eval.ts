@@ -87,7 +87,15 @@ const evaluateEntry = (entry: GoldenEntry, runDir: string) =>
     const svc = yield* GeminiVisionService;
     const start = Date.now();
 
-    const analysis = yield* svc.extractChartData(entry.url, "image/jpeg");
+    // Resolve MIME type from response headers — don't hardcode JPEG.
+    // CDN serves a mix of jpeg, png, and webp.
+    const headResponse = yield* Effect.tryPromise({
+      try: () => fetch(entry.url, { method: "HEAD" }),
+      catch: () => new Error(`Failed to HEAD ${entry.url}`)
+    });
+    const mimeType = headResponse.headers.get("content-type") ?? "image/jpeg";
+
+    const analysis = yield* svc.extractChartData(entry.url, mimeType);
 
     const elapsed = Date.now() - start;
 
@@ -176,6 +184,29 @@ const evaluateEntry = (entry: GoldenEntry, runDir: string) =>
             ? err.message
             : String(err);
         yield* Effect.logError(`${entry.slug}: FAILED — ${message}`);
+
+        // Persist failure record so it survives console scrollback
+        const failureOutput = {
+          slug: entry.slug,
+          thread: entry.thread,
+          context: entry.context,
+          gateVerdict: null,
+          hasFindings: false,
+          rubric: null,
+          analysis: null,
+          error: message,
+          _meta: {
+            processedAt: null,
+            modelId: null,
+            elapsed: 0,
+            evalTimestamp: new Date().toISOString()
+          }
+        };
+        fs.writeFileSync(
+          path.join(runDir, `${entry.slug}.json`),
+          JSON.stringify(failureOutput, null, 2)
+        );
+
         const result: EvalResult = {
           slug: entry.slug,
           thread: entry.thread,
@@ -350,7 +381,7 @@ const program = Effect.gen(function* () {
     `Running eval on ${entries.length} of ${allEntries.length} golden set entries`
   );
 
-  // Create timestamped output directory
+  // Create timestamped output directory (includes seconds to avoid collisions)
   const now = new Date();
   const timestamp = [
     now.getFullYear(),
@@ -359,6 +390,7 @@ const program = Effect.gen(function* () {
     "-",
     String(now.getHours()).padStart(2, "0"),
     String(now.getMinutes()).padStart(2, "0"),
+    String(now.getSeconds()).padStart(2, "0"),
   ].join("");
   const runDir = path.join(import.meta.dir, "runs", timestamp);
   fs.mkdirSync(runDir, { recursive: true });
