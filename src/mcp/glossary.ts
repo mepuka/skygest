@@ -91,6 +91,10 @@ Use \`_display\` for reading results at a glance. Reference items by their ident
 
 **needs-review** — Enrichment output flagged by quality gate for manual review.
 
+## Read Tools
+
+**get_post_enrichments** — Inspect enrichment state and readiness for a post. Returns validated enrichment payloads and run summaries. Use to verify a candidate is Reviewable before accepting as a brief.
+
 ## Write Tools
 
 **curate_post** — Advance a candidate to Enriching (curate) or Rejected (reject). Curating fetches live embed data from Bluesky, captures the payload, and queues enrichment. Requires curation:write scope.
