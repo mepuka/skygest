@@ -14,7 +14,7 @@ import {
   SeedPublicationsResult
 } from "../domain/bi";
 import { CuratePostInput, CuratePostOutput } from "../domain/curation";
-import { StagingStats } from "../domain/api";
+import { ImportPostsInput, ImportPostsOutput, StagingStats } from "../domain/api";
 import {
   IngestQueuedResponse,
   IngestRepairSummary,
@@ -223,6 +223,11 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
       secret: Redacted.Redacted<string>,
       query: string
     ) => Effect.Effect<ReadonlyArray<{ readonly uri: string; readonly topics: ReadonlyArray<string> }>, StagingRequestError>;
+    readonly importPosts: (
+      baseUrl: URL,
+      secret: Redacted.Redacted<string>,
+      input: Schema.Schema.Encoded<typeof ImportPostsInput>
+    ) => Effect.Effect<Schema.Schema.Type<typeof ImportPostsOutput>, StagingRequestError>;
   }
 >() {
   static readonly live = Layer.effect(
@@ -413,6 +418,15 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
               arguments: { query }
             },
             (text) => decodeSearchPostsResponse(text).items
+          ),
+        importPosts: (baseUrl, secret, input) =>
+          jsonRequest(
+            http.post(new URL("/admin/import/posts", baseUrl), {
+              headers: { "content-type": "application/json", ...secretHeader(secret) },
+              body: HttpBody.unsafeJson(input)
+            }),
+            ImportPostsOutput,
+            "import-posts"
           )
       });
     })

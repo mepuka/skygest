@@ -225,6 +225,11 @@ const makeCliLayer = (options?: {
           lastIngest: null
         } as const;
       }),
+    importPosts: (_baseUrl: URL, secret: Redacted.Redacted<string>, _input) =>
+      Effect.sync(() => {
+        remoteCalls.push({ action: "import-posts", secret: reveal(secret) });
+        return { imported: 0, flagged: 0, skipped: 0 } as const;
+      }),
     refreshProfiles: () => Effect.succeed({ updated: 0, failed: 0 })
   });
   const operatorSecretLayer = options?.operatorSecretLayer ?? Layer.succeed(
@@ -571,6 +576,7 @@ describe("ops CLI", () => {
               enrichment: { queued: 0, running: 0, complete: 5, failed: 1, needsReview: 0 },
               lastIngest: null
             } as const),
+          importPosts: () => Effect.succeed({ imported: 0, flagged: 0, skipped: 0 } as const),
           refreshProfiles: () => Effect.succeed({ updated: 0, failed: 0 })
         })
       }).layer;
@@ -711,6 +717,7 @@ describe("ops CLI", () => {
               enrichment: { queued: 0, running: 0, complete: 5, failed: 1, needsReview: 0 },
               lastIngest: null
             } as const),
+          importPosts: () => Effect.succeed({ imported: 0, flagged: 0, skipped: 0 } as const),
           refreshProfiles: () => Effect.succeed({ updated: 0, failed: 0 })
         })
       }).layer;
