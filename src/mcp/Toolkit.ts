@@ -53,6 +53,7 @@ import { CurationService } from "../services/CurationService";
 import { CurationRepo } from "../services/CurationRepo";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
+import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
 import { extractEmbedKind, buildTypedEmbed } from "../bluesky/EmbedExtract";
 import { flattenThread } from "../bluesky/ThreadFlatten.ts";
 import { printThread } from "../bluesky/ThreadPrinter.ts";
@@ -367,6 +368,7 @@ type KnowledgeQueryServiceI = Context.Tag.Service<typeof KnowledgeQueryService>;
 type EditorialServiceI = Context.Tag.Service<typeof EditorialService>;
 type CurationServiceI = Context.Tag.Service<typeof CurationService>;
 type BlueskyClientI = Context.Tag.Service<typeof BlueskyClient>;
+type PostEnrichmentReadServiceI = Context.Tag.Service<typeof PostEnrichmentReadService>;
 
 // ---------------------------------------------------------------------------
 // Shared read-only handler implementations
@@ -376,7 +378,8 @@ const makeReadOnlyHandlers = (
   queryService: KnowledgeQueryServiceI,
   editorialService: EditorialServiceI,
   curationService: CurationServiceI,
-  bskyClient: BlueskyClientI
+  bskyClient: BlueskyClientI,
+  enrichmentReadService: PostEnrichmentReadServiceI
 ) => ({
   search_posts: (input: typeof SearchPostsInput.Type) =>
     queryService.searchPosts(input).pipe(
@@ -550,14 +553,13 @@ const makeReadOnlyHandlers = (
       })),
       Effect.mapError(toQueryError("list_curation_candidates"))
     ),
-  // Stub — real handler wired in Task 6 (SKY-77)
-  get_post_enrichments: (_input: typeof GetPostEnrichmentsInput.Type) =>
-    Effect.fail(
-      McpToolQueryError.make({
-        tool: "get_post_enrichments",
-        message: "Handler not yet wired — see SKY-77 Task 6",
-        error: new Error("not wired")
-      })
+  get_post_enrichments: (input: typeof GetPostEnrichmentsInput.Type) =>
+    enrichmentReadService.getPost(input.postUri).pipe(
+      Effect.map((result) => ({
+        ...result,
+        _display: formatEnrichments(result)
+      })),
+      Effect.mapError(toQueryError("get_post_enrichments"))
     )
 });
 
@@ -629,9 +631,10 @@ export const ReadOnlyMcpHandlers = ReadOnlyMcpToolkit.toLayer(
     const editorialService = yield* EditorialService;
     const curationService = yield* CurationService;
     const bskyClient = yield* BlueskyClient;
+    const enrichmentReadService = yield* PostEnrichmentReadService;
 
     return ReadOnlyMcpToolkit.of(
-      makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient)
+      makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService)
     );
   })
 );
@@ -642,9 +645,10 @@ export const CurationWriteMcpHandlers = CurationWriteMcpToolkit.toLayer(
     const editorialService = yield* EditorialService;
     const curationService = yield* CurationService;
     const bskyClient = yield* BlueskyClient;
+    const enrichmentReadService = yield* PostEnrichmentReadService;
 
     return CurationWriteMcpToolkit.of({
-      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient),
+      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
       ...makeCuratePostHandler(curationService)
     });
   })
@@ -656,9 +660,10 @@ export const EditorialWriteMcpHandlers = EditorialWriteMcpToolkit.toLayer(
     const editorialService = yield* EditorialService;
     const curationService = yield* CurationService;
     const bskyClient = yield* BlueskyClient;
+    const enrichmentReadService = yield* PostEnrichmentReadService;
 
     return EditorialWriteMcpToolkit.of({
-      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient),
+      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
       ...makeSubmitPickHandler(editorialService)
     });
   })
@@ -670,9 +675,10 @@ export const WorkflowWriteMcpHandlers = WorkflowWriteMcpToolkit.toLayer(
     const editorialService = yield* EditorialService;
     const curationService = yield* CurationService;
     const bskyClient = yield* BlueskyClient;
+    const enrichmentReadService = yield* PostEnrichmentReadService;
 
     return WorkflowWriteMcpToolkit.of({
-      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient),
+      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
       ...makeCuratePostHandler(curationService),
       ...makeSubmitPickHandler(editorialService)
     });

@@ -19,6 +19,7 @@ import { PostHydrationService } from "../../src/services/PostHydrationService";
 import { KnowledgeQueryService } from "../../src/services/KnowledgeQueryService";
 import { CurationService } from "../../src/services/CurationService";
 import { CandidatePayloadRepoD1 } from "../../src/services/d1/CandidatePayloadRepoD1";
+import { PostEnrichmentReadService } from "../../src/services/PostEnrichmentReadService";
 import { CurationRepoD1 } from "../../src/services/d1/CurationRepoD1";
 import { EditorialRepoD1 } from "../../src/services/d1/EditorialRepoD1";
 import { ExpertsRepoD1 } from "../../src/services/d1/ExpertsRepoD1";
@@ -123,6 +124,10 @@ export const makeBiLayer = (options?: {
     )
   );
 
+  const enrichmentReadServiceLayer = PostEnrichmentReadService.layer.pipe(
+    Layer.provideMerge(candidatePayloadServiceLayer)
+  );
+
   return Layer.mergeAll(
     baseLayer,
     postHydrationLayer,
@@ -130,7 +135,8 @@ export const makeBiLayer = (options?: {
     editorialServiceLayer,
     candidatePayloadServiceLayer,
     curationServiceLayer,
-    blueskyLayer
+    blueskyLayer,
+    enrichmentReadServiceLayer
   );
 };
 
