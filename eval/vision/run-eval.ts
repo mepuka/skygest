@@ -193,11 +193,136 @@ const evaluateEntry = (entry: GoldenEntry, runDir: string) =>
   );
 
 // ---------------------------------------------------------------------------
-// Placeholder: write summary report (Task 3 will fill this in)
+// Summary report generator
 // ---------------------------------------------------------------------------
 
-const writeSummary = (_results: ReadonlyArray<EvalResult>, _runDir: string) =>
-  Effect.void;
+const formatGate = (result: EvalResult): string => {
+  if (result.error) return "error";
+  if (!result.gateVerdict) return "error";
+  return result.gateVerdict.outcome;
+};
+
+const formatAltText = (result: EvalResult): string => {
+  if (!result.rubric || !result.analysis) return "—";
+  if (!result.rubric.altTextUseful) return "no";
+  const len = result.analysis.altText?.length ?? 0;
+  return `yes (${len}ch)`;
+};
+
+const formatChartTypes = (result: EvalResult): string => {
+  if (!result.analysis) return "—";
+  return result.analysis.chartTypes.length > 0
+    ? result.analysis.chartTypes.join(", ")
+    : "—";
+};
+
+const formatFindings = (result: EvalResult): string => {
+  if (!result.analysis) return "—";
+  return String(result.analysis.keyFindings.length);
+};
+
+const formatSignals = (result: EvalResult): string => {
+  if (!result.analysis) return "—";
+  const a = result.analysis;
+  const present: string[] = [];
+  if (a.title) present.push("title");
+  if (a.sourceLines.length > 0) present.push("sourceLines");
+  if (a.visibleUrls.length > 0) present.push("visibleUrls");
+  if (a.organizationMentions.length > 0) present.push("organizationMentions");
+  if (a.logoText.length > 0) present.push("logoText");
+  return present.length > 0 ? present.join(", ") : "—";
+};
+
+const writeSummary = (results: ReadonlyArray<EvalResult>, runDir: string) =>
+  Effect.sync(() => {
+    const now = new Date();
+    const dateStr = [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, "0"),
+      String(now.getDate()).padStart(2, "0"),
+    ].join("-");
+    const timeStr = [
+      String(now.getHours()).padStart(2, "0"),
+      String(now.getMinutes()).padStart(2, "0"),
+    ].join(":");
+
+    const total = results.length;
+    const passed = results.filter(
+      (r) => r.gateVerdict?.outcome === "usable"
+    ).length;
+    const needsReview = results.filter(
+      (r) => r.gateVerdict?.outcome === "needs-review"
+    ).length;
+    const errors = results.filter((r) => r.error !== null).length;
+
+    // --- Header ---
+    const lines: string[] = [];
+    lines.push(`# Vision Eval Run — ${dateStr} ${timeStr}`);
+    lines.push("");
+    lines.push(
+      `Golden set: ${total} images | Passed: ${passed} | Needs Review: ${needsReview} | Errors: ${errors}`
+    );
+    lines.push("");
+
+    // --- Rubric table ---
+    lines.push(
+      "| Slug | Gate | Chart? | Alt Text? | Src Clues | Media | Chart Types | Findings | Signals |"
+    );
+    lines.push(
+      "|------|------|--------|-----------|-----------|-------|-------------|----------|---------|"
+    );
+
+    for (const r of results) {
+      if (r.error) {
+        lines.push(
+          `| ${r.slug} | error | — | — | — | — | — | — | — |`
+        );
+      } else {
+        lines.push(
+          `| ${r.slug} | ${formatGate(r)} | ${r.rubric?.chartUnderstanding ? "yes" : "no"} | ${formatAltText(r)} | ${r.rubric?.sourceClueCount ?? 0} | ${r.analysis?.mediaType ?? "—"} | ${formatChartTypes(r)} | ${formatFindings(r)} | ${formatSignals(r)} |`
+        );
+      }
+    }
+
+    lines.push("");
+
+    // --- Rubric summary ---
+    const withAnalysis = results.filter((r) => r.analysis !== null);
+    const m = withAnalysis.length;
+
+    const chartCount = withAnalysis.filter(
+      (r) => r.analysis!.chartTypes.length > 0
+    ).length;
+
+    const altTextCount = withAnalysis.filter(
+      (r) => r.analysis!.altText !== null && r.analysis!.altText.length > 20
+    ).length;
+
+    const sourceClues = withAnalysis.map(
+      (r) => r.rubric!.sourceClueCount
+    );
+    const avgClues = m > 0
+      ? (sourceClues.reduce((a, b) => a + b, 0) / m).toFixed(1)
+      : "0.0";
+    const minClues = m > 0 ? Math.min(...sourceClues) : 0;
+    const maxClues = m > 0 ? Math.max(...sourceClues) : 0;
+
+    lines.push("## Rubric Summary");
+    lines.push("");
+    lines.push(`- Chart understanding: ${chartCount}/${m} images with chart type detected`);
+    lines.push(`- Alt text useful: ${altTextCount}/${m} images with alt text > 20 chars`);
+    lines.push(`- Source clues: avg ${avgClues} per image (min ${minClues}, max ${maxClues})`);
+    lines.push(`- Gate pass rate: ${passed}/${m} usable`);
+    lines.push("");
+
+    const content = lines.join("\n");
+
+    // Write file
+    fs.writeFileSync(path.join(runDir, "summary.md"), content);
+
+    // Print to stdout
+    console.log("\n" + content);
+  });
 
 // ---------------------------------------------------------------------------
 // Main program
