@@ -1,5 +1,5 @@
 import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder";
-import { Either, Effect, Layer, Schema } from "effect";
+import { Effect, Layer } from "effect";
 import { makeQueryLayer } from "../edge/Layer";
 import type {
   KnowledgeLinkResult,
@@ -9,8 +9,6 @@ import type {
   ThreadPostResult as ThreadPostResultShape
 } from "../domain/bi";
 import {
-  EnrichmentOutput as EnrichmentOutputSchema,
-  type PostEnrichmentResult as PostEnrichmentResultShape,
   type PostEnrichmentsOutput as PostEnrichmentsOutputShape
 } from "../domain/enrichment";
 import {
@@ -38,7 +36,7 @@ import { buildTypedEmbed, extractEmbedKind } from "../bluesky/EmbedExtract";
 import type { FlattenedPost } from "../bluesky/ThreadFlatten";
 import { flattenThread } from "../bluesky/ThreadFlatten";
 import type { EnvBindings } from "../platform/Env";
-import { CandidatePayloadService } from "../services/CandidatePayloadService";
+import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
 import { EditorialService } from "../services/EditorialService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { PostHydrationService } from "../services/PostHydrationService";
@@ -166,45 +164,6 @@ const toThreadPostResult = (
   embedContent: buildTypedEmbed(flatPost.post.embed) as ThreadPostResultShape["embedContent"]
 });
 
-const toPostEnrichmentResult = (enrichment: {
-  readonly enrichmentType: string;
-  readonly enrichmentPayload: unknown;
-  readonly enrichedAt: number;
-}): PostEnrichmentResultShape | null => {
-  const decoded = Schema.decodeUnknownEither(EnrichmentOutputSchema)(
-    enrichment.enrichmentPayload
-  );
-
-  if (Either.isLeft(decoded)) {
-    return null;
-  }
-
-  if (decoded.right.kind !== enrichment.enrichmentType) {
-    return null;
-  }
-
-  switch (decoded.right.kind) {
-    case "vision":
-      return {
-        kind: "vision",
-        payload: decoded.right,
-        enrichedAt: enrichment.enrichedAt
-      };
-    case "source-attribution":
-      return {
-        kind: "source-attribution",
-        payload: decoded.right,
-        enrichedAt: enrichment.enrichedAt
-      };
-    case "grounding":
-      return {
-        kind: "grounding",
-        payload: decoded.right,
-        enrichedAt: enrichment.enrichedAt
-      };
-  }
-};
-
 const PublicReadHandlers = Layer.mergeAll(
   HttpApiBuilder.group(PublicReadApi, "posts", (handlers) =>
     handlers
@@ -274,17 +233,12 @@ const PublicReadHandlers = Layer.mergeAll(
       .handle("enrichments", ({ path }) =>
         withReadErrors(
           "/api/posts/:uri/enrichments",
-          Effect.flatMap(CandidatePayloadService, (payloads) =>
-            payloads.getPayload(path.uri)
+          Effect.flatMap(PostEnrichmentReadService, (service) =>
+            service.getPost(path.uri)
           ).pipe(
-            Effect.map((payload) => ({
-              postUri: path.uri,
-              enrichments: payload === null
-                ? []
-                : payload.enrichments.flatMap((enrichment) => {
-                    const result = toPostEnrichmentResult(enrichment);
-                    return result === null ? [] : [result];
-                  })
+            Effect.map((result) => ({
+              postUri: result.postUri,
+              enrichments: result.enrichments
             } satisfies PostEnrichmentsOutputShape))
           )
         )

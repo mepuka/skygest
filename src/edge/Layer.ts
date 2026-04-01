@@ -36,6 +36,7 @@ import { KnowledgeRepoD1 } from "../services/d1/KnowledgeRepoD1";
 import { PublicationsRepoD1 } from "../services/d1/PublicationsRepoD1";
 import { ProviderRegistry } from "../services/ProviderRegistry";
 import { EnrichmentWorkflowLauncher } from "../enrichment/EnrichmentWorkflowLauncher";
+import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
 
 const makeBaseLayer = (env: EnvBindings) =>
   Layer.mergeAll(
@@ -75,6 +76,16 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
               enrichmentWorkflowEnvLayer,
               enrichmentRunsLayer
             )
+          )
+        );
+  const enrichmentReadServiceLayer =
+    enrichmentRunsLayer === null
+      ? PostEnrichmentReadService.layer.pipe(
+          Layer.provideMerge(candidatePayloadServiceLayer)
+        )
+      : PostEnrichmentReadService.layer.pipe(
+          Layer.provideMerge(
+            Layer.mergeAll(candidatePayloadServiceLayer, enrichmentRunsLayer)
           )
         );
   const curationRepoLayer = CurationRepoD1.layer.pipe(
@@ -126,6 +137,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     blueskyLayer,
     postHydrationLayer,
     candidatePayloadServiceLayer,
+    enrichmentReadServiceLayer,
     KnowledgeQueryService.layer.pipe(
       Layer.provideMerge(Layer.mergeAll(queryRepositoriesLayer, configLayer))
     ),
@@ -170,6 +182,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         stagingOpsLayer,
         editorialServiceLayer,
         candidatePayloadServiceLayer,
+        enrichmentReadServiceLayer,
         curationServiceLayer
       )
     : Layer.mergeAll(
@@ -187,6 +200,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         stagingOpsLayer,
         editorialServiceLayer,
         candidatePayloadServiceLayer,
+        enrichmentReadServiceLayer,
         curationServiceLayer,
         enrichmentLauncherLayer
       );
@@ -201,6 +215,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     publicationsLayer,
     candidatePayloadRepoLayer,
     candidatePayloadServiceLayer,
+    enrichmentReadServiceLayer,
     curationRepoLayer,
     curationServiceLayer,
     queryLayer,
