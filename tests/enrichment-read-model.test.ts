@@ -62,3 +62,111 @@ describe("enrichment read model domain schemas", () => {
     expect(output.latestRuns).toHaveLength(0);
   });
 });
+
+describe("validateStoredEnrichment", () => {
+  it("returns typed result for valid vision enrichment", () => {
+    const result = validateStoredEnrichment({
+      enrichmentType: "vision",
+      enrichmentPayload: {
+        kind: "vision",
+        summary: {
+          text: "Chart shows solar growth",
+          mediaTypes: ["chart"],
+          chartTypes: ["line-chart"],
+          titles: ["Solar Capacity"],
+          keyFindings: []
+        },
+        assets: [],
+        modelId: "gemini-2.5-flash",
+        promptVersion: "v2",
+        processedAt: 1710000000000
+      },
+      enrichedAt: 1710000000000
+    });
+    expect(result).not.toBeNull();
+    expect(result!.kind).toBe("vision");
+  });
+
+  it("returns null for decode failure", () => {
+    const result = validateStoredEnrichment({
+      enrichmentType: "vision",
+      enrichmentPayload: { kind: "vision", garbage: true },
+      enrichedAt: 1710000000000
+    });
+    expect(result).toBeNull();
+  });
+
+  it("returns null for kind mismatch", () => {
+    const result = validateStoredEnrichment({
+      enrichmentType: "source-attribution",
+      enrichmentPayload: {
+        kind: "vision",
+        summary: {
+          text: "test",
+          mediaTypes: ["chart"],
+          chartTypes: ["line-chart"],
+          titles: [],
+          keyFindings: []
+        },
+        assets: [],
+        modelId: "gemini-2.5-flash",
+        promptVersion: "v2",
+        processedAt: 1710000000000
+      },
+      enrichedAt: 1710000000000
+    });
+    expect(result).toBeNull();
+  });
+});
+
+describe("computeReadiness", () => {
+  it("returns complete when validated enrichments exist and no active runs", () => {
+    const enrichments = [{ kind: "vision" }] as ReadonlyArray<PostEnrichmentResult>;
+    const runs: ReadonlyArray<PostEnrichmentRunSummary> = [];
+    expect(computeReadiness(enrichments, runs)).toBe("complete");
+  });
+
+  it("returns needs-review when any run is needs-review", () => {
+    const enrichments: ReadonlyArray<PostEnrichmentResult> = [];
+    const runs = [
+      { enrichmentType: "vision", status: "needs-review", phase: "needs-review", lastProgressAt: null, finishedAt: null }
+    ] as ReadonlyArray<PostEnrichmentRunSummary>;
+    expect(computeReadiness(enrichments, runs)).toBe("needs-review");
+  });
+
+  it("returns failed when any run is failed and none are needs-review", () => {
+    const enrichments: ReadonlyArray<PostEnrichmentResult> = [];
+    const runs = [
+      { enrichmentType: "vision", status: "failed", phase: "failed", lastProgressAt: null, finishedAt: null }
+    ] as ReadonlyArray<PostEnrichmentRunSummary>;
+    expect(computeReadiness(enrichments, runs)).toBe("failed");
+  });
+
+  it("returns pending when any run is queued or running", () => {
+    const enrichments: ReadonlyArray<PostEnrichmentResult> = [];
+    const runs = [
+      { enrichmentType: "vision", status: "queued", phase: "queued", lastProgressAt: null, finishedAt: null }
+    ] as ReadonlyArray<PostEnrichmentRunSummary>;
+    expect(computeReadiness(enrichments, runs)).toBe("pending");
+  });
+
+  it("returns none when no enrichments and no runs", () => {
+    expect(computeReadiness([], [])).toBe("none");
+  });
+
+  it("returns pending when enrichments exist but a run is still active", () => {
+    const enrichments = [{ kind: "vision" }] as ReadonlyArray<PostEnrichmentResult>;
+    const runs = [
+      { enrichmentType: "source-attribution", status: "queued", phase: "queued", lastProgressAt: null, finishedAt: null }
+    ] as ReadonlyArray<PostEnrichmentRunSummary>;
+    expect(computeReadiness(enrichments, runs)).toBe("pending");
+  });
+
+  it("returns complete only when enrichments exist and no runs are active", () => {
+    const enrichments = [{ kind: "vision" }] as ReadonlyArray<PostEnrichmentResult>;
+    const runs = [
+      { enrichmentType: "vision", status: "complete", phase: "complete", lastProgressAt: 1710000000000, finishedAt: 1710000000000 }
+    ] as ReadonlyArray<PostEnrichmentRunSummary>;
+    expect(computeReadiness(enrichments, runs)).toBe("complete");
+  });
+});
