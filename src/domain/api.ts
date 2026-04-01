@@ -6,8 +6,10 @@ import {
   BootstrapExpertsResult,
   ExpandTopicsInput,
   ExpandedTopicsOutput,
-  ExplainPostTopicsOutput,
   ExpertListOutput,
+  ExpertSource,
+  ExpertTier,
+  ExplainPostTopicsOutput,
   GetTopicInput,
   KnowledgeLinkResult,
   KnowledgePostResult,
@@ -43,6 +45,7 @@ import {
   EnrichmentRunStatus,
   EnrichmentRunsOutput
 } from "./enrichmentRun";
+import { EmbedKind, EmbedPayload } from "./embed";
 import { EnrichmentKind, PostEnrichmentsOutput } from "./enrichment";
 import {
   EditorialScore,
@@ -666,6 +669,53 @@ export const StagingStats = Schema.Struct({
   lastIngest: Schema.NullOr(StagingStatsLastIngest)
 });
 
+// ---------------------------------------------------------------------------
+// Import schemas (Twitter cross-post pipeline)
+// ---------------------------------------------------------------------------
+
+export const ImportLinkInput = Schema.Struct({
+  url: Schema.String,
+  title: Schema.optional(Schema.String),
+  description: Schema.optional(Schema.String),
+  domain: Schema.optional(Schema.String)
+});
+export type ImportLinkInput = Schema.Schema.Type<typeof ImportLinkInput>;
+
+export const ImportExpertInput = Schema.Struct({
+  did: Did,
+  handle: Schema.String,
+  domain: Schema.String,
+  source: ExpertSource,
+  tier: ExpertTier,
+  displayName: Schema.optional(Schema.String),
+  avatar: Schema.optional(Schema.String)
+});
+export type ImportExpertInput = Schema.Schema.Type<typeof ImportExpertInput>;
+
+export const ImportPostInput = Schema.Struct({
+  uri: PostUri,
+  did: Did,
+  text: Schema.String,
+  createdAt: Schema.Number,
+  embedType: Schema.optional(Schema.NullOr(EmbedKind)),
+  embedPayload: Schema.optional(Schema.NullOr(EmbedPayload)),
+  links: Schema.Array(ImportLinkInput)
+});
+export type ImportPostInput = Schema.Schema.Type<typeof ImportPostInput>;
+
+export const ImportPostsInput = Schema.Struct({
+  experts: Schema.Array(ImportExpertInput),
+  posts: Schema.Array(ImportPostInput)
+});
+export type ImportPostsInput = Schema.Schema.Type<typeof ImportPostsInput>;
+
+export const ImportPostsOutput = Schema.Struct({
+  imported: Schema.Number,
+  flagged: Schema.Number,
+  skipped: Schema.Number
+});
+export type ImportPostsOutput = Schema.Schema.Type<typeof ImportPostsOutput>;
+
 export const AdminRequestSchemas = {
   addExpert: AddExpertInput,
   listExperts: ListExpertsUrlParams,
@@ -674,7 +724,8 @@ export const AdminRequestSchemas = {
   curatePost: CuratePostInput,
   submitEditorialPick: SubmitEditorialPickInput,
   retractEditorialPick: RemoveEditorialPickInput,
-  listEditorialPicks: ListEditorialPicksUrlParams
+  listEditorialPicks: ListEditorialPicksUrlParams,
+  importPosts: ImportPostsInput
 } as const;
 
 export const AdminResponseSchemas = {
@@ -690,6 +741,7 @@ export const AdminResponseSchemas = {
   submitEditorialPick: SubmitEditorialPickOutput,
   retractEditorialPick: RemoveEditorialPickOutput,
   listEditorialPicks: EditorialPicksOutput,
+  importPosts: ImportPostsOutput,
   stats: StagingStats
 } as const;
 
