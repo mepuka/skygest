@@ -47,7 +47,8 @@ describe("EnrichmentWorkflowLauncher", () => {
               resetForRetry: () => Effect.succeed(false),
               markComplete: () => Effect.void,
               markFailed: () => Effect.void,
-              markNeedsReview: () => Effect.void
+              markNeedsReview: () => Effect.void,
+              listLatestByPostUri: () => Effect.succeed([])
             })
           )
         )
@@ -127,7 +128,8 @@ describe("EnrichmentWorkflowLauncher", () => {
                 Effect.sync(() => {
                   failures.push(input);
                 }),
-              markNeedsReview: () => Effect.void
+              markNeedsReview: () => Effect.void,
+              listLatestByPostUri: () => Effect.succeed([])
             })
           )
         )

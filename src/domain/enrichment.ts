@@ -309,3 +309,45 @@ export const PostEnrichmentsOutput = Schema.Struct({
 export type PostEnrichmentsOutput = Schema.Schema.Type<
   typeof PostEnrichmentsOutput
 >;
+
+// ---------------------------------------------------------------------------
+// Enrichment readiness (SKY-77: shared read model)
+// ---------------------------------------------------------------------------
+
+export const EnrichmentReadiness = Schema.Literal(
+  "none",
+  "pending",
+  "complete",
+  "failed",
+  "needs-review"
+);
+export type EnrichmentReadiness = Schema.Schema.Type<typeof EnrichmentReadiness>;
+
+export const GetPostEnrichmentsInput = Schema.Struct({
+  postUri: AtUri
+});
+export type GetPostEnrichmentsInput = Schema.Schema.Type<typeof GetPostEnrichmentsInput>;
+
+/**
+ * Run summary status/phase literals mirror enrichmentRun.ts values.
+ * Declared inline to avoid a circular import (enrichmentRun -> enrichment).
+ */
+export const PostEnrichmentRunSummary = Schema.Struct({
+  enrichmentType: EnrichmentKind,
+  status: Schema.Literal("queued", "running", "complete", "failed", "needs-review"),
+  phase: Schema.Literal(
+    "queued", "assembling", "planning", "executing",
+    "validating", "persisting", "complete", "failed", "needs-review"
+  ),
+  lastProgressAt: Schema.NullOr(Schema.Number),
+  finishedAt: Schema.NullOr(Schema.Number)
+});
+export type PostEnrichmentRunSummary = Schema.Schema.Type<typeof PostEnrichmentRunSummary>;
+
+export const GetPostEnrichmentsOutput = Schema.Struct({
+  postUri: AtUri,
+  readiness: EnrichmentReadiness,
+  enrichments: Schema.Array(PostEnrichmentResult),
+  latestRuns: Schema.Array(PostEnrichmentRunSummary)
+});
+export type GetPostEnrichmentsOutput = Schema.Schema.Type<typeof GetPostEnrichmentsOutput>;

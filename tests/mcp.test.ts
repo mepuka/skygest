@@ -38,6 +38,7 @@ describe("read-only MCP server", () => {
           expect(tools.tools.map((tool) => tool.name).sort()).toEqual([
             "expand_topics",
             "explain_post_topics",
+            "get_post_enrichments",
             "get_post_links",
             "get_post_thread",
             "get_recent_posts",
@@ -304,6 +305,34 @@ describe("MCP prompts by profile", () => {
           const prompts = await client.listPrompts();
           const names = prompts.prompts.map((p) => p.name).sort();
           expect(names).toEqual(["assess-expert", "curate-digest", "curate-session", "explore-topic"]);
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+});
+
+describe("MCP get_post_enrichments", () => {
+  it.live("returns readiness for a post with no enrichments", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const seedLayer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(makeBiLayer({ filename }));
+
+        try {
+          const result = await client.callTool({
+            name: "get_post_enrichments",
+            arguments: { postUri: `at://${sampleDid}/app.bsky.feed.post/post-solar` }
+          });
+          expect(result.isError).toBe(false);
+          const text = result.content.find(
+            (c): c is { type: "text"; text: string } => c.type === "text"
+          );
+          expect(text).toBeDefined();
+          expect(text!.text).toContain("Readiness: none");
         } finally {
           await close();
         }

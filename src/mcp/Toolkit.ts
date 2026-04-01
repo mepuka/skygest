@@ -17,6 +17,7 @@ import {
 } from "../domain/bi";
 import { ListEditorialPicksInput, SubmitEditorialPickMcpInput } from "../domain/editorial";
 import { ListCurationCandidatesInput, CuratePostInput } from "../domain/curation";
+import { GetPostEnrichmentsInput } from "../domain/enrichment";
 import {
   KnowledgePostsMcpOutput,
   KnowledgeLinksMcpOutput,
@@ -30,7 +31,8 @@ import {
   ThreadDocumentMcpOutput,
   CurationCandidatesMcpOutput,
   CuratePostMcpOutput,
-  SubmitEditorialPickMcpOutput
+  SubmitEditorialPickMcpOutput,
+  PostEnrichmentsMcpOutput
 } from "./OutputSchemas.ts";
 import {
   formatPosts,
@@ -43,13 +45,15 @@ import {
   formatEditorialPicks,
   formatCurationCandidates,
   formatCuratePostResult,
-  formatSubmitPickResult
+  formatSubmitPickResult,
+  formatEnrichments
 } from "./Fmt.ts";
 import { EditorialService } from "../services/EditorialService";
 import { CurationService } from "../services/CurationService";
 import { CurationRepo } from "../services/CurationRepo";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
+import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
 import { extractEmbedKind, buildTypedEmbed } from "../bluesky/EmbedExtract";
 import { flattenThread } from "../bluesky/ThreadFlatten.ts";
 import { printThread } from "../bluesky/ThreadPrinter.ts";
@@ -227,6 +231,18 @@ export const ListCurationCandidatesTool = Tool.make("list_curation_candidates", 
   .annotate(Tool.Idempotent, true)
   .annotate(Tool.OpenWorld, false);
 
+export const GetPostEnrichmentsTool = Tool.make("get_post_enrichments", {
+  description: "Inspect enrichment state and readiness for a post. Returns validated enrichment payloads (vision, source-attribution, grounding) and latest enrichment run summaries. Readiness values: none, pending, complete, failed, needs-review.",
+  parameters: GetPostEnrichmentsInput.fields,
+  success: PostEnrichmentsMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Get Post Enrichments")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
+
 export const CuratePostTool = Tool.make("curate_post", {
   description: "Curate or reject a post. Curating fetches live embed data from Bluesky, captures the payload, and marks it for enrichment. Rejecting dismisses the post. Idempotent — re-curating an already-curated post is a no-op.",
   parameters: CuratePostInput.fields,
@@ -267,7 +283,8 @@ export const ReadOnlyMcpToolkit = Toolkit.make(
   ListEditorialPicksTool,
   GetPostThreadTool,
   GetThreadDocumentTool,
-  ListCurationCandidatesTool
+  ListCurationCandidatesTool,
+  GetPostEnrichmentsTool
 );
 
 export const CurationWriteMcpToolkit = Toolkit.make(
@@ -283,6 +300,7 @@ export const CurationWriteMcpToolkit = Toolkit.make(
   GetPostThreadTool,
   GetThreadDocumentTool,
   ListCurationCandidatesTool,
+  GetPostEnrichmentsTool,
   CuratePostTool
 );
 
@@ -299,6 +317,7 @@ export const EditorialWriteMcpToolkit = Toolkit.make(
   GetPostThreadTool,
   GetThreadDocumentTool,
   ListCurationCandidatesTool,
+  GetPostEnrichmentsTool,
   SubmitEditorialPickTool
 );
 
@@ -315,6 +334,7 @@ export const WorkflowWriteMcpToolkit = Toolkit.make(
   GetPostThreadTool,
   GetThreadDocumentTool,
   ListCurationCandidatesTool,
+  GetPostEnrichmentsTool,
   CuratePostTool,
   SubmitEditorialPickTool
 );
@@ -348,6 +368,7 @@ type KnowledgeQueryServiceI = Context.Tag.Service<typeof KnowledgeQueryService>;
 type EditorialServiceI = Context.Tag.Service<typeof EditorialService>;
 type CurationServiceI = Context.Tag.Service<typeof CurationService>;
 type BlueskyClientI = Context.Tag.Service<typeof BlueskyClient>;
+type PostEnrichmentReadServiceI = Context.Tag.Service<typeof PostEnrichmentReadService>;
 
 // ---------------------------------------------------------------------------
 // Shared read-only handler implementations
@@ -357,7 +378,8 @@ const makeReadOnlyHandlers = (
   queryService: KnowledgeQueryServiceI,
   editorialService: EditorialServiceI,
   curationService: CurationServiceI,
-  bskyClient: BlueskyClientI
+  bskyClient: BlueskyClientI,
+  enrichmentReadService: PostEnrichmentReadServiceI
 ) => ({
   search_posts: (input: typeof SearchPostsInput.Type) =>
     queryService.searchPosts(input).pipe(
@@ -530,6 +552,14 @@ const makeReadOnlyHandlers = (
         _display: formatCurationCandidates(items)
       })),
       Effect.mapError(toQueryError("list_curation_candidates"))
+    ),
+  get_post_enrichments: (input: typeof GetPostEnrichmentsInput.Type) =>
+    enrichmentReadService.getPost(input.postUri).pipe(
+      Effect.map((result) => ({
+        ...result,
+        _display: formatEnrichments(result)
+      })),
+      Effect.mapError(toQueryError("get_post_enrichments"))
     )
 });
 
@@ -601,9 +631,10 @@ export const ReadOnlyMcpHandlers = ReadOnlyMcpToolkit.toLayer(
     const editorialService = yield* EditorialService;
     const curationService = yield* CurationService;
     const bskyClient = yield* BlueskyClient;
+    const enrichmentReadService = yield* PostEnrichmentReadService;
 
     return ReadOnlyMcpToolkit.of(
-      makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient)
+      makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService)
     );
   })
 );
@@ -614,9 +645,10 @@ export const CurationWriteMcpHandlers = CurationWriteMcpToolkit.toLayer(
     const editorialService = yield* EditorialService;
     const curationService = yield* CurationService;
     const bskyClient = yield* BlueskyClient;
+    const enrichmentReadService = yield* PostEnrichmentReadService;
 
     return CurationWriteMcpToolkit.of({
-      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient),
+      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
       ...makeCuratePostHandler(curationService)
     });
   })
@@ -628,9 +660,10 @@ export const EditorialWriteMcpHandlers = EditorialWriteMcpToolkit.toLayer(
     const editorialService = yield* EditorialService;
     const curationService = yield* CurationService;
     const bskyClient = yield* BlueskyClient;
+    const enrichmentReadService = yield* PostEnrichmentReadService;
 
     return EditorialWriteMcpToolkit.of({
-      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient),
+      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
       ...makeSubmitPickHandler(editorialService)
     });
   })
@@ -642,9 +675,10 @@ export const WorkflowWriteMcpHandlers = WorkflowWriteMcpToolkit.toLayer(
     const editorialService = yield* EditorialService;
     const curationService = yield* CurationService;
     const bskyClient = yield* BlueskyClient;
+    const enrichmentReadService = yield* PostEnrichmentReadService;
 
     return WorkflowWriteMcpToolkit.of({
-      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient),
+      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
       ...makeCuratePostHandler(curationService),
       ...makeSubmitPickHandler(editorialService)
     });

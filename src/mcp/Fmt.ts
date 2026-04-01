@@ -23,6 +23,7 @@ import type {
 } from "../domain/bi.ts";
 import type { EditorialPickOutput } from "../domain/editorial.ts";
 import type { CurationCandidateOutput } from "../domain/curation.ts";
+import type { GetPostEnrichmentsOutput } from "../domain/enrichment.ts";
 
 // ---------------------------------------------------------------------------
 // Internal helpers (not exported)
@@ -568,4 +569,64 @@ export const formatCurationCandidates = (items: ReadonlyArray<CurationCandidateO
   });
 
   return render(Doc.vsep(rows));
+};
+
+/**
+ * Format enrichment state and readiness for MCP display.
+ *
+ * Shows readiness status, validated enrichments (kind, key details),
+ * and active run summaries.
+ */
+export const formatEnrichments = (
+  output: GetPostEnrichmentsOutput
+): string => {
+  const lines: string[] = [
+    `Post: ${output.postUri}`,
+    `Readiness: ${output.readiness}`
+  ];
+
+  if (output.enrichments.length === 0 && output.latestRuns.length === 0) {
+    lines.push("No enrichments or active runs.");
+    return lines.join("\n");
+  }
+
+  if (output.enrichments.length > 0) {
+    lines.push("");
+    for (const e of output.enrichments) {
+      const date = formatTimestamp(e.enrichedAt);
+      switch (e.kind) {
+        case "vision": {
+          const assetCount = e.payload.assets.length;
+          const summary = truncate(collapse(e.payload.summary.text), 120);
+          lines.push(`[V] vision \u00B7 ${assetCount} asset${assetCount !== 1 ? "s" : ""} \u00B7 ${date}`);
+          lines.push(`    ${summary}`);
+          break;
+        }
+        case "source-attribution": {
+          const provider = e.payload.provider?.providerLabel ?? "no provider";
+          const resolution = e.payload.resolution;
+          lines.push(`[S] source-attribution \u00B7 ${resolution} \u00B7 ${provider} \u00B7 ${date}`);
+          break;
+        }
+        case "grounding": {
+          const evidenceCount = e.payload.supportingEvidence.length;
+          const claim = truncate(collapse(e.payload.claimText), 100);
+          lines.push(`[G] grounding \u00B7 ${evidenceCount} evidence \u00B7 ${date}`);
+          lines.push(`    ${claim}`);
+          break;
+        }
+      }
+    }
+  }
+
+  if (output.latestRuns.length > 0) {
+    lines.push("");
+    lines.push("Runs:");
+    for (const r of output.latestRuns) {
+      const progress = r.lastProgressAt !== null ? ` \u00B7 ${formatTimestamp(r.lastProgressAt)}` : "";
+      lines.push(`  ${r.enrichmentType}: ${r.status} (${r.phase})${progress}`);
+    }
+  }
+
+  return lines.join("\n");
 };

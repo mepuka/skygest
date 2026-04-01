@@ -443,6 +443,84 @@ describe("EnrichmentRunsRepoD1", () => {
     }).pipe(Effect.provide(makeLayer()))
   );
 
+  it.effect("listLatestByPostUri returns latest run per enrichment type", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      yield* seedPickedPayload();
+      const repo = yield* EnrichmentRunsRepo;
+      const uri = queuedInput.postUri;
+      const now = Date.now();
+
+      // Create two vision runs with different schema versions so the
+      // unique index (post_uri, enrichment_type, schema_version) allows both.
+      yield* repo.createQueuedIfAbsent({
+        ...queuedInput,
+        id: "run-latest-v1",
+        workflowInstanceId: "wf-latest-v1",
+        schemaVersion: "v1",
+        startedAt: now - 10_000
+      });
+      yield* repo.createQueuedIfAbsent({
+        ...queuedInput,
+        id: "run-latest-v2",
+        workflowInstanceId: "wf-latest-v2",
+        schemaVersion: "v2",
+        startedAt: now
+      });
+
+      // Create a source-attribution run
+      yield* repo.createQueuedIfAbsent({
+        ...queuedInput,
+        id: "run-sa1",
+        workflowInstanceId: "wf-sa1",
+        enrichmentType: "source-attribution" as any,
+        schemaVersion: "v2",
+        startedAt: now
+      });
+
+      const results = yield* repo.listLatestByPostUri(uri);
+      expect(results).toHaveLength(2);
+
+      const visionRun = results.find((r) => r.enrichmentType === "vision");
+      expect(visionRun?.id).toBe("run-latest-v2");
+
+      const saRun = results.find((r) => r.enrichmentType === "source-attribution");
+      expect(saRun?.id).toBe("run-sa1");
+    }).pipe(Effect.provide(makeLayer()))
+  );
+
+  it.effect("listLatestByPostUri returns exactly one row per type even when timestamps tie", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      yield* seedPickedPayload();
+      const repo = yield* EnrichmentRunsRepo;
+      const uri = queuedInput.postUri;
+      const now = Date.now();
+
+      // Two vision runs with the same startedAt but different schema versions
+      yield* repo.createQueuedIfAbsent({
+        ...queuedInput,
+        id: "run-tie-a",
+        workflowInstanceId: "wf-tie-a",
+        schemaVersion: "v1",
+        startedAt: now
+      });
+      yield* repo.createQueuedIfAbsent({
+        ...queuedInput,
+        id: "run-tie-b",
+        workflowInstanceId: "wf-tie-b",
+        schemaVersion: "v2",
+        startedAt: now
+      });
+
+      const results = yield* repo.listLatestByPostUri(uri);
+      const visionRuns = results.filter((r) => r.enrichmentType === "vision");
+      expect(visionRuns).toHaveLength(1);
+      // Tiebreaker is id DESC, so "run-tie-b" > "run-tie-a"
+      expect(visionRuns[0]?.id).toBe("run-tie-b");
+    }).pipe(Effect.provide(makeLayer()))
+  );
+
   it.effect("finds stale queued and running runs without returning fresh ones", () =>
     Effect.gen(function* () {
       yield* runMigrations;

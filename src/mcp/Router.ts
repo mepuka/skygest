@@ -7,6 +7,7 @@ import type { EnvBindings } from "../platform/Env";
 import { CurationService } from "../services/CurationService";
 import { EditorialService } from "../services/EditorialService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
+import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
 import { GLOSSARY_CONTENT } from "./glossary";
 import { ReadOnlyPromptsLayer, WorkflowPromptsLayer } from "./prompts";
 import { toolkitWithDisplayText } from "./registerToolkitWithDisplayText.ts";
@@ -33,7 +34,7 @@ const GlossaryResource = McpServer.resource({
   content: Effect.succeed(GLOSSARY_CONTENT)
 });
 
-type QueryLayer = Layer.Layer<KnowledgeQueryService | EditorialService | CurationService | BlueskyClient, any, never>;
+type QueryLayer = Layer.Layer<KnowledgeQueryService | EditorialService | CurationService | BlueskyClient | PostEnrichmentReadService, any, never>;
 
 const mcpServerLayer = McpServer.layerHttpRouter({
   name: "skygest-bi-mcp",
