@@ -167,12 +167,14 @@ describe("EnrichmentQualityGate", () => {
         reason: "vision produced zero asset analyses"
       });
     });
-    it("returns needs-review for no findings", () => {
+    it("returns usable when no findings but has analysis signal", () => {
       const e = makeEnrichment({
         assets: [makeAsset({ keyFindings: [] })],
         summary: { keyFindings: [] }
       });
-      expect(assessVisionQuality(e).outcome).toBe("needs-review");
+      // hasFindings is NOT part of the gate — analysis signal (chart types,
+      // URLs, org mentions, etc.) is sufficient for source attribution
+      expect(assessVisionQuality(e)).toEqual({ outcome: "usable" });
     });
     it("returns needs-review for no analysis signal", () => {
       const e = makeEnrichment({

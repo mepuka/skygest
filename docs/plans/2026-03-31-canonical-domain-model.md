@@ -43,7 +43,8 @@ Each state transition has exactly one owning service.
 | Discovered → Candidate | `CurationService.flagBatch()` | Automatic, during ingest post-processing |
 | Candidate → Enriching | `CurationService.curatePost(action: "curate")` | Manual, curator decision |
 | Candidate → Rejected | `CurationService.curatePost(action: "reject")` | Manual, curator decision |
-| Enriching → Reviewable | `EnrichmentRunsRepo.markComplete()` | Automatic, enrichment workflow finishes |
+| Enriching → Reviewable | `EnrichmentRunsRepo.markComplete()` | Automatic, enrichment workflow finishes and quality gate passes |
+| Enriching → Needs Review | `EnrichmentRunsRepo.markNeedsReview()` | Automatic, quality gate (SKY-41) classifies output as weak |
 | Enriching → Failed | `EnrichmentRunsRepo.markFailed()` | Automatic, enrichment errors |
 | Reviewable → Accepted | `EditorialService.submitPick()` | Manual, curator decision |
 | Accepted → Retracted | `EditorialService.retractPick()` | Manual, curator decision |
@@ -178,7 +179,7 @@ Every active issue should reference which object and transition it touches:
 |---|---|---|
 | SKY-16 | BriefDraft (enrichment payload) | Enriching → Reviewable (vision) |
 | SKY-17 | BriefDraft (enrichment payload) | Enriching → Reviewable (source-attribution) |
-| SKY-41 | BriefDraft (enrichment payload) | Enriching → Reviewable vs Failed (gate) |
+| SKY-41 | BriefDraft (enrichment payload) | Enriching → Reviewable vs Needs Review (quality gate) |
 | SKY-42 | BriefDraft (enrichment payload) | Measures Enriching → Reviewable quality |
 | SKY-48 | BriefDraft (enrichment payload) | Measures source-attribution quality |
 | SKY-71 | ReviewDecision | Audit trail for all transitions |

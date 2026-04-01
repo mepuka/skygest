@@ -35,10 +35,18 @@ export const hasAnalysisSignal: Predicate.Predicate<VisionEnrichment> =
 // Composed gate
 // ---------------------------------------------------------------------------
 
-/** All three checks must pass for the enrichment to be considered usable. */
+/**
+ * Gate predicates: hasAssets AND hasAnalysisSignal.
+ *
+ * hasFindings is intentionally NOT part of the gate. A screenshot with
+ * strong source clues (URLs, org mentions, source lines) but no explicit
+ * "key findings" text is still useful for downstream source attribution.
+ * hasFindings is exported for eval/reporting (SKY-42) but does not block
+ * the Enriching → Reviewable transition.
+ */
 export const isUsable: Predicate.Predicate<VisionEnrichment> = Predicate.and(
   hasAssets,
-  Predicate.and(hasFindings, hasAnalysisSignal)
+  hasAnalysisSignal
 );
 
 // ---------------------------------------------------------------------------
@@ -56,10 +64,6 @@ type QualityCheck = {
 
 const qualityChecks: ReadonlyArray<QualityCheck> = [
   { predicate: hasAssets, reason: "vision produced zero asset analyses" },
-  {
-    predicate: hasFindings,
-    reason: "vision produced no key findings across all assets"
-  },
   {
     predicate: hasAnalysisSignal,
     reason: "vision produced no analysis signal (no chart types, URLs, organizations, sources, logos, or titles)"
