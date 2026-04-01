@@ -656,14 +656,21 @@ const makeSubmitPickHandler = (editorialService: EditorialServiceI) => ({
       }
 
       // Gate: verify enrichment is complete before accepting a pick.
-      const enrichmentReadService = yield* PostEnrichmentReadService;
-      const enrichment = yield* enrichmentReadService.getPost(input.postUri);
-      if (enrichment.readiness !== "complete") {
-        return yield* McpToolQueryError.make({
-          tool: "submit_editorial_pick",
-          message: `Post enrichment is not complete (readiness: ${enrichment.readiness}). Use start_enrichment to trigger enrichment, then poll get_post_enrichments until readiness is "complete".`,
-          error: new Error("enrichment not complete")
-        });
+      // Plain-text posts (no payload) have nothing to enrich — allow them through.
+      const payloadService = yield* CandidatePayloadService;
+      const payload = yield* payloadService.getPayload(input.postUri);
+      const hasEnrichableContent = payload !== null && payload.embedPayload !== null;
+
+      if (hasEnrichableContent) {
+        const enrichmentReadService = yield* PostEnrichmentReadService;
+        const enrichment = yield* enrichmentReadService.getPost(input.postUri);
+        if (enrichment.readiness !== "complete") {
+          return yield* McpToolQueryError.make({
+            tool: "submit_editorial_pick",
+            message: `Post enrichment is not complete (readiness: ${enrichment.readiness}). Use start_enrichment to trigger enrichment, then poll get_post_enrichments until readiness is "complete".`,
+            error: new Error("enrichment not complete")
+          });
+        }
       }
 
       const identity = yield* OperatorIdentity;
@@ -707,6 +714,13 @@ const makeStartEnrichmentHandler = () => ({
             tool: "start_enrichment",
             message: "Post must be curated before starting enrichment. Call curate_post first.",
             error: new Error("payload not found")
+          });
+        }
+        if (payload.captureStage !== "picked") {
+          return yield* McpToolQueryError.make({
+            tool: "start_enrichment",
+            message: "Post must be curated before starting enrichment. Call curate_post first.",
+            error: new Error("payload not picked")
           });
         }
         // Detect from embed payload, not just embedType string.
