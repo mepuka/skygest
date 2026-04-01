@@ -489,6 +489,38 @@ describe("EnrichmentRunsRepoD1", () => {
     }).pipe(Effect.provide(makeLayer()))
   );
 
+  it.effect("listLatestByPostUri returns exactly one row per type even when timestamps tie", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      yield* seedPickedPayload();
+      const repo = yield* EnrichmentRunsRepo;
+      const uri = queuedInput.postUri;
+      const now = Date.now();
+
+      // Two vision runs with the same startedAt but different schema versions
+      yield* repo.createQueuedIfAbsent({
+        ...queuedInput,
+        id: "run-tie-a",
+        workflowInstanceId: "wf-tie-a",
+        schemaVersion: "v1",
+        startedAt: now
+      });
+      yield* repo.createQueuedIfAbsent({
+        ...queuedInput,
+        id: "run-tie-b",
+        workflowInstanceId: "wf-tie-b",
+        schemaVersion: "v2",
+        startedAt: now
+      });
+
+      const results = yield* repo.listLatestByPostUri(uri);
+      const visionRuns = results.filter((r) => r.enrichmentType === "vision");
+      expect(visionRuns).toHaveLength(1);
+      // Tiebreaker is id DESC, so "run-tie-b" > "run-tie-a"
+      expect(visionRuns[0]?.id).toBe("run-tie-b");
+    }).pipe(Effect.provide(makeLayer()))
+  );
+
   it.effect("finds stale queued and running runs without returning fresh ones", () =>
     Effect.gen(function* () {
       yield* runMigrations;

@@ -169,6 +169,22 @@ describe("computeReadiness", () => {
     ] as ReadonlyArray<PostEnrichmentRunSummary>;
     expect(computeReadiness(enrichments, runs)).toBe("complete");
   });
+
+  it("returns needs-review when run completed but no valid enrichments survived", () => {
+    const enrichments: ReadonlyArray<PostEnrichmentResult> = [];
+    const runs = [
+      { enrichmentType: "vision", status: "complete", phase: "complete", lastProgressAt: 1710000000000, finishedAt: 1710000000000 }
+    ] as ReadonlyArray<PostEnrichmentRunSummary>;
+    expect(computeReadiness(enrichments, runs)).toBe("needs-review");
+  });
+
+  it("needs-review takes priority over failed", () => {
+    const runs = [
+      { enrichmentType: "vision", status: "failed", phase: "failed", lastProgressAt: null, finishedAt: null },
+      { enrichmentType: "source-attribution", status: "needs-review", phase: "needs-review", lastProgressAt: null, finishedAt: null }
+    ] as ReadonlyArray<PostEnrichmentRunSummary>;
+    expect(computeReadiness([], runs)).toBe("needs-review");
+  });
 });
 
 describe("PostEnrichmentReadService", () => {

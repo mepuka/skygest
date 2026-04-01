@@ -357,14 +357,17 @@ export const EnrichmentRunsRepoD1 = {
     const listLatestByPostUri = (postUri: string) =>
       sql<any>`
         SELECT ${selectColumns}
-        FROM post_enrichment_runs
-        WHERE (post_uri, enrichment_type, started_at) IN (
-          SELECT post_uri, enrichment_type, MAX(started_at)
-          FROM post_enrichment_runs
-          WHERE post_uri = ${postUri}
-          GROUP BY post_uri, enrichment_type
-        )
-        ORDER BY enrichment_type ASC
+        FROM post_enrichment_runs r
+        WHERE r.post_uri = ${postUri}
+          AND r.id = (
+            SELECT sub.id
+            FROM post_enrichment_runs sub
+            WHERE sub.post_uri = r.post_uri
+              AND sub.enrichment_type = r.enrichment_type
+            ORDER BY sub.started_at DESC, sub.id DESC
+            LIMIT 1
+          )
+        ORDER BY r.enrichment_type ASC
       `.pipe(
         Effect.flatMap((rows) =>
           decodeRows(rows, `Failed to decode latest enrichment runs for ${postUri}`)

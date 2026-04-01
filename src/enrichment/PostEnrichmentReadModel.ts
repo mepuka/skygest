@@ -43,14 +43,17 @@ export const validateStoredEnrichment = (enrichment: {
  * `complete` when enrichments exist AND no runs are still active.
  *
  * Priority order:
- * 1. any run is needs-review                        → needs-review
- * 2. any run is failed                              → failed
- * 3. any run is queued/running                      → pending
- * 4. validated enrichments exist (no active runs)   → complete
- * 5. else                                           → none
+ * 1. any run is needs-review                                → needs-review
+ * 2. any run is failed                                      → failed
+ * 3. any run is queued/running                              → pending
+ * 4. validated enrichments exist (no active runs)           → complete
+ * 5. any run completed but no valid enrichments survived    → needs-review
+ * 6. else                                                   → none
  *
- * This matches the glossary definition: a post is Reviewable only
- * when ALL enrichments are finished successfully.
+ * Rule 5 catches the case where enrichment ran to completion but the
+ * persisted payload is corrupt or schema-mismatched.  Reporting `none`
+ * would hide the fact that work was attempted; `needs-review` surfaces
+ * the data-quality issue.
  */
 export const computeReadiness = (
   enrichments: ReadonlyArray<PostEnrichmentResult>,
@@ -60,5 +63,6 @@ export const computeReadiness = (
   if (latestRuns.some((r) => r.status === "failed")) return "failed";
   if (latestRuns.some((r) => r.status === "queued" || r.status === "running")) return "pending";
   if (enrichments.length > 0) return "complete";
+  if (latestRuns.some((r) => r.status === "complete")) return "needs-review";
   return "none";
 };
