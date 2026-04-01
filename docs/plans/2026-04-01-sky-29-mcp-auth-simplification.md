@@ -4,11 +4,23 @@
 
 **Goal:** Simplify auth to bearer-token only, add MCP request classification for capability-aware tool/prompt visibility, and expose write tools (`curate_post`, `submit_editorial_pick`) through scoped MCP toolkits.
 
-**Architecture:** Replace the dual-mode auth (CF Access JWT + shared secret) with a single `Authorization: Bearer <token>` path. The bearer token is validated server-side against the `OPERATOR_SECRET` Worker secret. Remove `jose` dependency, CF Access config, and auth mode switching. Add an MCP request classifier that inspects the JSON-RPC envelope to determine capability profile (read-only, curation-write, editorial-write, workflow-write). Cache MCP handlers by env + capability profile.
+**Architecture:** Replace the dual-mode auth (CF Access JWT + shared secret) with a single `Authorization: Bearer <token>` path. The bearer token is validated server-side using timing-safe comparison against the `OPERATOR_SECRET` Worker secret. Remove `jose` dependency, CF Access config, and auth mode switching. Add an MCP request classifier that inspects the JSON-RPC envelope to determine capability profile (read-only, curation-write, editorial-write, workflow-write). Cache MCP handlers by env + capability profile. Pass `operatorIdentityContext(identity)` to `webHandler.handler(request, context)` — confirmed that `HttpLayerRouter.toWebHandler` merges request-time context into the runtime context, so `OperatorIdentity` is available inside MCP tool handlers without modifying `registerToolkitWithDisplayText`.
 
-**Tech Stack:** Effect (`Context.Tag`, `Layer.effect`, `Schema`), Cloudflare Workers, existing `OperatorIdentity` from `src/http/Identity.ts`.
+**Tech Stack:** Effect (`Context.Tag`, `Layer.effect`, `Schema`), Cloudflare Workers (`crypto.subtle.timingSafeEqual`), existing `OperatorIdentity` from `src/http/Identity.ts`.
 
 **Auth decision:** Bearer-token only. Single operator. See `project_auth_decision.md` memory.
+
+**Review findings addressed:**
+- Critical: Timing-safe comparison via `crypto.subtle.timingSafeEqual`
+- Critical: Request body clone order explicit (clone for classifier, original to MCP handler)
+- Critical: `registerToolkitWithDisplayText` does NOT need modification — `HttpLayerRouter.toWebHandler.handler(request, context)` already merges request-time context into runtime context (verified in `@effect/platform` source: `HttpApp.toWebHandlerRuntime`)
+- Important: `/admin/ops/stats` scope enforcement added
+- Important: Legacy header deprecation log via `Effect.logWarning`
+- Important: `AccessIdentity` simplified — no code reads `issuer`/`audience`/`payload`
+- Important: Tool counts adjusted to 12/13/13/14 (`get_post_enrichments` is SKY-77, not in scope)
+- Suggestion: Staging ops guard uses `ENABLE_STAGING_OPS` env var instead of `operatorAuthMode`
+- Suggestion: File named `RequestAuth.ts` per MCP workflow plan
+- Suggestion: Test infrastructure includes identity helpers
 
 ---
 
@@ -20,67 +32,91 @@
 - Modify: `src/platform/Env.ts`
 - Modify: `src/worker/operatorAuth.ts`
 - Modify: `src/worker/feed.ts`
-- Modify: `src/worker/filter.ts`
+- Modify: `src/admin/Router.ts`
 - Modify: `src/edge/Layer.ts`
+- Modify: `tests/support/runtime.ts`
 - Test: `tests/operator-auth.test.ts`
 - Remove dependency: `jose` from `package.json`
 
 **What to do:**
 
-1. **Simplify `AuthService`** — remove `jose` import, remove `createRemoteJWKSet`/`jwtVerify`, remove `MissingAccessJwtError`/`InvalidAccessJwtError`/`ForbiddenAccessJwtError`/`InvalidAuthConfigError`. Keep `MissingOperatorSecretError` and `InvalidOperatorSecretError`. Replace the dual-mode `requireOperator` with a single path that reads `Authorization: Bearer <token>` header:
+1. **Simplify `AuthService`** — remove `jose` import, `createRemoteJWKSet`/`jwtVerify`, and all CF Access error classes (`MissingAccessJwtError`, `InvalidAccessJwtError`, `ForbiddenAccessJwtError`, `InvalidAuthConfigError`). Keep `MissingOperatorSecretError` and `InvalidOperatorSecretError`.
+
+   Replace the dual-mode `requireOperator` with a single bearer-token path:
 
    ```ts
-   const AUTHORIZATION_HEADER = "authorization";
-   const BEARER_PREFIX = "Bearer ";
+   const extractToken = (headers: Headers): string | null => {
+     const auth = headers.get("authorization");
+     if (auth !== null && auth.startsWith("Bearer ")) {
+       return auth.slice(7).trim();
+     }
+     // Legacy fallback (deprecated)
+     const legacy = headers.get("x-skygest-operator-secret");
+     if (legacy !== null && legacy.trim().length > 0) {
+       return legacy.trim();
+     }
+     return null;
+   };
    ```
 
-   The `requireOperator` method:
-   - Extracts the `Authorization` header
-   - Checks it starts with `Bearer `
-   - Compares the token against `Redacted.value(config.operatorSecret)`
-   - Returns an `AccessIdentity` with all `operatorScopes`
+   **Timing-safe comparison** — use `crypto.subtle.timingSafeEqual` (available in CF Workers):
 
-   Keep the `AccessIdentity` type unchanged — it's used in 8+ files. Just remove the `issuer`, `audience`, and `payload` fields since they're CF Access concepts. Actually — check if any code reads those fields. If not, simplify the type. If yes, keep compatible values.
+   ```ts
+   const timingSafeCompare = async (a: string, b: string): Promise<boolean> => {
+     const encoder = new TextEncoder();
+     const aBytes = encoder.encode(a);
+     const bBytes = encoder.encode(b);
+     if (aBytes.byteLength !== bBytes.byteLength) return false;
+     return crypto.subtle.timingSafeEqual(aBytes, bBytes);
+   };
+   ```
 
-2. **Simplify `AppConfig`** — remove `operatorAuthMode`, `accessTeamDomain`, `accessAud` config entries. Remove `OperatorAuthMode` type. Keep `operatorSecret`.
+   Wrap in `Effect.tryPromise` inside the `requireOperator` method.
 
-3. **Simplify `Env.ts`** — remove `OPERATOR_AUTH_MODE`, `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD` from `EnvBindings`.
+   **Legacy header deprecation:** When the token is extracted from `x-skygest-operator-secret`, log a warning:
 
-4. **Update `operatorAuth.ts`** — the `authorizeOperator` function and `requiredOperatorScopes` stay the same. Just update error handling to remove CF Access error types.
+   ```ts
+   yield* Effect.logWarning("x-skygest-operator-secret header is deprecated, use Authorization: Bearer");
+   ```
 
-5. **Update `feed.ts` and `filter.ts`** — no structural changes needed if `authorizeOperator` signature stays the same.
+   **Simplify `AccessIdentity`** — no code reads `issuer`, `audience`, or `payload` outside AuthService. Simplify to:
 
-6. **Update `edge/Layer.ts`** — `authLayer` construction should use the simplified `AuthService.layer`.
+   ```ts
+   export type AccessIdentity = {
+     readonly subject: string | null;
+     readonly email: string | null;
+     readonly scopes: ReadonlyArray<string>;
+   };
+   ```
 
-7. **Remove `jose` from `package.json`** — run `bun remove jose`.
+   Remove `requireAccess`, `requireScopes`, `requireOperatorScopes`. Keep only `requireOperator` which returns `AccessIdentity` with all `operatorScopes`.
 
-8. **Update `operatorAuth.ts` error handling** — `toAuthErrorResponse` and `logDeniedOperatorRequest` reference CF Access error classes. Update to only handle `MissingOperatorSecretError` and `InvalidOperatorSecretError`.
+2. **Simplify `AppConfig`** — remove `operatorAuthMode`, `accessTeamDomain`, `accessAud`. Remove `OperatorAuthMode` type. Add `enableStagingOps: Config.withDefault(Config.boolean("ENABLE_STAGING_OPS"), false)` to replace the auth-mode-based staging guard.
 
-**Backward compatibility for ops CLI:**
+3. **Simplify `Env.ts`** — remove `OPERATOR_AUTH_MODE`, `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD` from `EnvBindings`. Add `ENABLE_STAGING_OPS?: string`.
 
-The ops CLI currently sends `x-skygest-operator-secret`. Update the auth to accept BOTH `Authorization: Bearer` (preferred) AND `x-skygest-operator-secret` (legacy fallback) during transition. Document that the legacy header is deprecated.
+4. **Update staging ops guard** — in `src/admin/Router.ts`, change `ensureStagingOpsEnabled` from checking `operatorAuthMode !== "shared-secret"` to checking `config.enableStagingOps !== true`. In `src/worker/feed.ts`, replace `isSharedSecretMode(env)` with checking `env.ENABLE_STAGING_OPS === "true"`.
 
-```ts
-const extractToken = (headers: Headers): string | null => {
-  // Preferred: Authorization: Bearer <token>
-  const auth = headers.get("authorization");
-  if (auth !== null && auth.startsWith("Bearer ")) {
-    return auth.slice(7).trim();
-  }
-  // Legacy fallback (deprecated)
-  const legacy = headers.get("x-skygest-operator-secret");
-  if (legacy !== null && legacy.trim().length > 0) {
-    return legacy.trim();
-  }
-  return null;
-};
-```
+5. **Update `operatorAuth.ts`** — remove CF Access error class imports and handlers from `toAuthErrorResponse` and `logDeniedOperatorRequest`. Add `/admin/ops/stats` scope entry:
+
+   ```ts
+   if (request.method === "GET" && pathname === "/admin/ops/stats") {
+     return { action: "ops_stats", scopes: ["ops:read"] };
+   }
+   ```
+
+6. **Update `edge/Layer.ts`** — `authLayer` uses simplified `AuthService.layer`.
+
+7. **Update `tests/support/runtime.ts`** — remove `operatorAuthMode`, `accessTeamDomain`, `accessAud` from test config. Add `enableStagingOps: false`.
+
+8. **Remove `jose`** — `bun remove jose`.
 
 **Tests:**
-- Update `tests/operator-auth.test.ts` — test `Authorization: Bearer` header
-- Test legacy `x-skygest-operator-secret` still works
-- Test missing/invalid token returns 401
-- Test `/admin/ops/stats` requires `ops:read` scope (fix from MCP plan)
+- `Authorization: Bearer <valid>` → 200
+- `Authorization: Bearer <invalid>` → 401
+- Legacy `x-skygest-operator-secret: <valid>` → 200 (with deprecation warning)
+- Missing token → 401
+- `/admin/ops/stats` without `ops:read` → 403
 
 **Commit:**
 ```bash
@@ -92,49 +128,63 @@ git commit -m "feat(auth): simplify to bearer-token only, remove CF Access JWT (
 ### Task 2: MCP Request Classifier
 
 **Files:**
-- Create: `src/mcp/McpRequestAuth.ts`
+- Create: `src/mcp/RequestAuth.ts`
 - Test: `tests/mcp-request-auth.test.ts`
 
 **What to do:**
 
-Create a small module that classifies MCP JSON-RPC requests to determine capability requirements.
+Create a pure module that classifies MCP JSON-RPC requests.
 
 ```ts
-// src/mcp/McpRequestAuth.ts
+// src/mcp/RequestAuth.ts
 
 export type McpCapabilityProfile =
   | "read-only"
   | "curation-write"
   | "editorial-write"
   | "workflow-write";
+```
 
-export type McpRequestClassification = {
-  readonly method: string;
-  readonly toolOrPromptName: string | null;
-  readonly requiredScopes: ReadonlyArray<string>;
-  readonly capabilityProfile: McpCapabilityProfile;
+The classifier function takes a **cloned** request (caller must clone before passing):
+
+```ts
+export const classifyMcpRequest = async (
+  request: Request
+): Promise<McpRequestClassification>
+```
+
+It reads the JSON body, extracts the method and tool/prompt name, maps to scopes.
+
+**Request body handling:** The caller in `Router.ts` or `feed.ts` must clone the request BEFORE classification:
+
+```ts
+const classifierRequest = request.clone();  // clone for classifier
+const classification = await classifyMcpRequest(classifierRequest);
+// pass original `request` to MCP handler (body unconsumed)
+```
+
+**Capability profile determination** — for `tools/list` and `prompts/list`, the profile is determined by the caller's scopes (from `AccessIdentity`), not by the request content:
+
+```ts
+export const profileForIdentity = (identity: AccessIdentity): McpCapabilityProfile => {
+  const has = (scope: string) => identity.scopes.includes(scope);
+  if (has("curation:write") && has("editorial:write")) return "workflow-write";
+  if (has("curation:write")) return "curation-write";
+  if (has("editorial:write")) return "editorial-write";
+  return "read-only";
 };
 ```
 
-The classifier:
-1. Reads the request body as JSON (for `tools/call` and `prompts/get`, extracts the tool/prompt name from the params)
-2. Maps tool/prompt names to required scopes:
-   - `curate_post` → `curation:write`
-   - `submit_editorial_pick` → `editorial:write`
-   - `curate-session` prompt → `curation:write` + `editorial:write`
-   - everything else → `mcp:read` (already enforced at HTTP boundary)
-3. Determines the capability profile based on which scopes the caller has
-
-For `tools/list` and `prompts/list`: no extra scopes needed, but the response should only include tools/prompts matching the caller's profile. This is handled in Task 3 (toolkit splitting), not here.
-
-**Important:** The classifier must clone or buffer the request body because the MCP server also needs to read it. Use `request.clone()` before reading.
+Since the single operator has all scopes, `profileForIdentity` will return `"workflow-write"`. But the structure supports future multi-user scenarios.
 
 **Tests:**
 - `tools/call` with `curate_post` → requires `curation:write`
-- `tools/call` with `search_posts` → requires `mcp:read` only
-- `prompts/get` with `curate-session` → requires both `curation:write` and `editorial:write`
-- `tools/list` → no extra scope
-- Non-JSON-RPC request → defaults to `read-only`
+- `tools/call` with `search_posts` → no extra scope
+- `prompts/get` with `curate-session` → requires `curation:write` + `editorial:write`
+- `tools/list` → no extra scope, profile from identity
+- Non-JSON-RPC body → defaults to `read-only`
+- `profileForIdentity` with all scopes → `workflow-write`
+- `profileForIdentity` with only `mcp:read` → `read-only`
 
 **Commit:**
 ```bash
@@ -151,41 +201,52 @@ git commit -m "feat(mcp): add request classifier for capability-aware routing (S
 - Modify: `src/mcp/OutputSchemas.ts`
 - Modify: `src/mcp/Fmt.ts`
 - Modify: `src/domain/editorial.ts`
+- Modify: `tests/support/runtime.ts`
 - Test: `tests/mcp-write-tools.test.ts`
 
 **What to do:**
 
 1. **Split toolkits by capability profile** in `Toolkit.ts`:
-   - `ReadOnlyMcpToolkit` — current 12 read tools + `get_post_enrichments` (13 total)
-   - `CurationWriteMcpToolkit` — read-only + `curate_post` (14 total)
-   - `EditorialWriteMcpToolkit` — read-only + `submit_editorial_pick` (14 total)
-   - `WorkflowWriteMcpToolkit` — read-only + `curate_post` + `submit_editorial_pick` (15 total)
+   - `ReadOnlyMcpToolkit` — current 12 read tools (no change)
+   - `CurationWriteMcpToolkit` — read-only + `curate_post` (13 total)
+   - `EditorialWriteMcpToolkit` — read-only + `submit_editorial_pick` (13 total)
+   - `WorkflowWriteMcpToolkit` — read-only + `curate_post` + `submit_editorial_pick` (14 total)
 
-2. **Re-enable `curate_post` handler** — remove the exclusion note. The handler uses `OperatorIdentity` from request context for the actor string.
+   Note: `get_post_enrichments` (SKY-77) is not in scope. Current read-only count stays at 12.
 
-3. **Add `submit_editorial_pick` tool + handler** — MCP-compatible input with `FlexibleNumber` for score/expiresInHours. Handler delegates to `EditorialService.submitPick()`.
+2. **Re-enable `curate_post` handler** — remove the exclusion note. The handler uses `yield* OperatorIdentity` for the actor string (not a separate McpIdentity). `OperatorIdentity` is available because `webHandler.handler(request, operatorIdentityContext(identity))` merges it into the runtime context.
 
-4. **Add MCP input schema** for `submit_editorial_pick` in `src/domain/editorial.ts` (already designed in the MCP plan — `SubmitEditorialPickMcpInput`).
+3. **Add `submit_editorial_pick` tool + handler** — MCP-compatible input with `FlexibleNumber` for score/expiresInHours. `SubmitEditorialPickMcpInput` in `src/domain/editorial.ts`.
 
-5. **Add formatters** in `Fmt.ts` — `formatCuratePostResult`, `formatSubmitPickResult`.
+4. **Add formatters** in `Fmt.ts` — `formatCuratePostResult`, `formatSubmitPickResult`.
 
-6. **Add output schema** in `OutputSchemas.ts` — `SubmitEditorialPickMcpOutput`.
+5. **Add output schema** in `OutputSchemas.ts` — `SubmitEditorialPickMcpOutput`.
 
-7. **Update `Router.ts`** to:
-   - Accept identity from `feed.ts` (passed through from `authorizeOperator`)
-   - Use `McpRequestAuth.classifyRequest()` to determine capability profile
-   - Select the right toolkit variant based on profile
-   - Cache handlers by env + capability profile
-   - Pass `operatorIdentityContext(identity)` to `webHandler.handler(request, context)`
-   - Update `registerToolkitWithDisplayText.ts` to merge request-time context with registration context
+6. **Update `Router.ts`**:
+   - Accept `identity: AccessIdentity` parameter from `feed.ts`
+   - Use `profileForIdentity(identity)` to select toolkit variant
+   - Cache handlers by `env + McpCapabilityProfile` (4 possible cache entries)
+   - Pass `operatorIdentityContext(identity)` as the context arg to `webHandler.handler(request, context)`
+   - **Do NOT modify `registerToolkitWithDisplayText.ts`** — context merging is handled by the runtime
+
+7. **Update test support** — add identity helpers to `tests/support/runtime.ts`:
+
+   ```ts
+   export const readOnlyIdentity: AccessIdentity = {
+     subject: "test-reader", email: null, scopes: ["mcp:read"]
+   };
+   export const workflowIdentity: AccessIdentity = {
+     subject: "test-operator", email: "op@test.com",
+     scopes: ["mcp:read", "curation:write", "editorial:write"]
+   };
+   ```
 
 **Tests:**
-- Read-only profile sees 13 tools
-- Curation-write profile sees 14 tools (includes `curate_post`)
-- Workflow-write profile sees 15 tools (includes both write tools)
-- `curate_post` handler records the correct curator from identity
-- `submit_editorial_pick` handler records the correct curator from identity
-- Missing write scope returns error on `tools/call`
+- Read-only profile sees 12 tools (no write tools)
+- Curation-write profile sees 13 tools (includes `curate_post`)
+- Workflow-write profile sees 14 tools (includes both write tools)
+- `curate_post` handler records correct curator from `OperatorIdentity`
+- `submit_editorial_pick` handler records correct curator from `OperatorIdentity`
 
 **Commit:**
 ```bash
@@ -203,20 +264,30 @@ git commit -m "feat(mcp): capability-scoped toolkits with curate_post and submit
 
 **What to do:**
 
-1. **Add `curate-session` prompt** — workflow prompt using pipeline vocabulary (per SKY-82 and the MCP plan). Only visible on `workflow-write` profile.
+1. **Add `curate-session` prompt** — uses pipeline vocabulary (Candidate → Enriching → Reviewable → Accepted). Only visible on `workflow-write` profile. This means prompts must also be split by profile, similar to toolkits. The `PromptsLayer` in `Router.ts` should vary by capability profile.
 
-2. **Make `hours` parameter optional** in `curate-digest` and `curate-session` — use `Schema.optional(Schema.String)` with a default in the prompt text.
+2. **Make `hours` parameter optional** in `curate-digest` and `curate-session`:
 
-3. **Update `curate-digest`** — if on read-only profile, clearly say "produce recommendations only." If on workflow-write, reference write tools by pipeline transition name.
+   ```ts
+   hours: Schema.optional(Schema.String.annotations({
+     description: "Hours to look back (default: 24)"
+   }))
+   ```
 
-4. **Update glossary** — add pipeline stages, enrichment readiness values, write tool descriptions with transition names, `curation_decisions` audit trail (per SKY-79).
+3. **Update `curate-digest`** — on read-only profile, text says "produce brief recommendations only." On workflow-write, references write tools with pipeline transition names.
 
-5. **Update prompt visibility** — `curate-session` only on `workflow-write` profile. Existing prompts on all profiles.
+4. **Update glossary** — add:
+   - Pipeline stages: Discovered, Candidate, Enriching, Reviewable, Accepted, Rejected, Retracted, Expired
+   - Enrichment readiness: none, pending, complete, failed, needs-review
+   - Write tools: `curate_post` (Candidate → Enriching/Rejected), `submit_editorial_pick` (Reviewable → Accepted)
+   - Decision audit: all transitions logged to `curation_decisions`
+
+5. **Prompt visibility** — `curate-session` only on `workflow-write`. Existing prompts on all profiles.
 
 **Tests:**
 - Read-only profile has 3 prompts
 - Workflow-write profile has 4 prompts (includes `curate-session`)
-- Prompt parameter defaults actually work
+- `hours` parameter omitted → prompt uses "24" default in text
 
 **Commit:**
 ```bash
@@ -231,21 +302,24 @@ git commit -m "feat(mcp): add curate-session prompt and align glossary with pipe
 2. `bun run test` — all pass
 3. `jose` removed from `package.json`
 4. `Authorization: Bearer` header works for all admin + MCP routes
-5. Legacy `x-skygest-operator-secret` still works (deprecated)
-6. Missing/invalid token returns 401
-7. Read-only MCP caller sees 13 tools, 3 prompts
-8. Workflow-write MCP caller sees 15 tools, 4 prompts
-9. `curate_post` records correct actor from identity
-10. `submit_editorial_pick` records correct actor from identity
-11. Denied write tool call returns error with tool name in message
-12. MCP handler cache is keyed by env + capability profile (not by identity)
-13. No auth state leaks between requests on a warm worker
-14. Glossary documents pipeline stages, readiness values, write tools
-15. `curate-session` prompt uses pipeline vocabulary throughout
+5. Legacy `x-skygest-operator-secret` still works with deprecation warning
+6. Token comparison uses `crypto.subtle.timingSafeEqual`
+7. Missing/invalid token returns 401
+8. `/admin/ops/stats` requires `ops:read` scope
+9. Staging ops routes gated by `ENABLE_STAGING_OPS` env var (not auth mode)
+10. Read-only MCP caller sees 12 tools, 3 prompts
+11. Workflow-write MCP caller sees 14 tools, 4 prompts
+12. `curate_post` records correct actor from `OperatorIdentity`
+13. `submit_editorial_pick` records correct actor from `OperatorIdentity`
+14. MCP handler cache keyed by env + capability profile (not identity)
+15. `registerToolkitWithDisplayText` unchanged — context merging handled by runtime
+16. Request body: clone for classifier, original to MCP handler
+17. `AccessIdentity` simplified to `{ subject, email, scopes }`
+18. Glossary documents pipeline stages, readiness values, write tools
+19. `curate-session` prompt uses pipeline vocabulary throughout
 
 ## Issues Resolved
 
-This plan covers work from multiple Linear issues:
 - **SKY-29** — MCP boundary auth + capability routing (Tasks 1-2)
 - **SKY-76** — Request-scoped actor context + scoped write toolkits (Task 3)
 - **SKY-79** — Domain glossary and ontology alignment (Task 4)
