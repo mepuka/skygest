@@ -550,8 +550,7 @@ const makeReadOnlyHandlers = (
       Effect.flatMap((items) =>
         Effect.forEach(items, (item) =>
           enrichmentReadService.getPost(item.uri).pipe(
-            Effect.map((e) => ({ ...item, enrichmentReadiness: e.readiness })),
-            Effect.orElseSucceed(() => item)
+            Effect.map((e) => ({ ...item, enrichmentReadiness: e.readiness }))
           ),
           { concurrency: "unbounded" }
         )
