@@ -49,3 +49,4 @@ memory
 
 # Vision eval run outputs
 eval/vision/runs/
+analysis/threads.db

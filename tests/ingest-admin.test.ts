@@ -13,14 +13,7 @@ import { IngestRunsRepo } from "../src/services/IngestRunsRepo";
 const operatorIdentity: AccessIdentity = {
   subject: "did:example:operator",
   email: "operator@example.com",
-  issuer: "https://access.example.com",
-  audience: ["skygest-mcp"],
-  scopes: ["ops:read", "ops:refresh"],
-  payload: {
-    sub: "did:example:operator",
-    email: "operator@example.com",
-    scope: "ops:read ops:refresh"
-  }
+  scopes: ["ops:read", "ops:refresh"]
 };
 
 const sampleQueued = {

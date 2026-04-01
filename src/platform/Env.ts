@@ -12,10 +12,8 @@ export interface EnvBindings {
   readonly DEFAULT_DOMAIN?: string;
   readonly MCP_LIMIT_DEFAULT?: string;
   readonly MCP_LIMIT_MAX?: string;
-  readonly OPERATOR_AUTH_MODE?: string;
   readonly OPERATOR_SECRET?: string;
-  readonly ACCESS_TEAM_DOMAIN?: string;
-  readonly ACCESS_AUD?: string;
+  readonly ENABLE_STAGING_OPS?: string;
   readonly EDITORIAL_DEFAULT_EXPIRY_HOURS?: string;
   readonly CURATION_MIN_SIGNAL_SCORE?: string;
   readonly GOOGLE_API_KEY?: string;

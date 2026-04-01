@@ -59,4 +59,44 @@ Tool responses include a \`_display\` field with a compact text summary using ad
 - \`[F]\` — Thread focus post
 - \`[R1]\`, \`[R2]\` — Thread replies
 
-Use \`_display\` for reading results at a glance. Reference items by their identifier from the structured \`items\` array for follow-up tool calls (e.g., \`items[n].uri\` for posts, \`items[n].did\` for experts).`;
+Use \`_display\` for reading results at a glance. Reference items by their identifier from the structured \`items\` array for follow-up tool calls (e.g., \`items[n].uri\` for posts, \`items[n].did\` for experts).
+
+## Pipeline Stages
+
+**Discovered** — Raw post ingested, no curation record yet.
+
+**Candidate** — Post flagged by curation predicates, awaiting review. Has a signal score (0-100) and list of matched predicates.
+
+**Enriching** — Post curated, enrichment in progress. Vision analyzes charts/screenshots; source attribution identifies content providers.
+
+**Reviewable** — All enrichments complete. Ready for editorial decision.
+
+**Accepted** — Editorial pick submitted. Brief is in the curated feed with score, reason, and category.
+
+**Rejected** — Curator dismissed the candidate.
+
+**Retracted** — Accepted brief withdrawn from feed.
+
+**Expired** — Accepted brief auto-expired by time.
+
+## Enrichment Readiness
+
+**none** — Not curated, no enrichment queued.
+
+**pending** — Enrichment queued or running.
+
+**complete** — All enrichments finished successfully.
+
+**failed** — At least one enrichment failed.
+
+**needs-review** — Enrichment output flagged by quality gate for manual review.
+
+## Write Tools
+
+**curate_post** — Advance a candidate to Enriching (curate) or Rejected (reject). Curating fetches live embed data from Bluesky, captures the payload, and queues enrichment. Requires curation:write scope.
+
+**submit_editorial_pick** — Accept a reviewable brief into the curated feed with a quality score, reason, and optional category. Requires editorial:write scope.
+
+## Decision Audit
+
+All pipeline transitions are logged with actor and timestamp for audit trail reconstruction.`;

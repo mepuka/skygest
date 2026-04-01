@@ -1,7 +1,7 @@
 import type { SqlError } from "@effect/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import { Tool, Toolkit } from "@effect/ai";
-import { Effect, Schema } from "effect";
+import { Context, Effect, Layer, Schema } from "effect";
 import {
   ExplainPostTopicsInput,
   ExpandTopicsInput,
@@ -15,7 +15,7 @@ import {
   McpToolQueryError,
   SearchPostsInput
 } from "../domain/bi";
-import { ListEditorialPicksInput } from "../domain/editorial";
+import { ListEditorialPicksInput, SubmitEditorialPickMcpInput } from "../domain/editorial";
 import { ListCurationCandidatesInput, CuratePostInput } from "../domain/curation";
 import {
   KnowledgePostsMcpOutput,
@@ -29,7 +29,8 @@ import {
   PostThreadMcpOutput,
   ThreadDocumentMcpOutput,
   CurationCandidatesMcpOutput,
-  CuratePostMcpOutput
+  CuratePostMcpOutput,
+  SubmitEditorialPickMcpOutput
 } from "./OutputSchemas.ts";
 import {
   formatPosts,
@@ -40,15 +41,20 @@ import {
   formatExpandedTopics,
   formatExplainedPostTopics,
   formatEditorialPicks,
-  formatCurationCandidates
+  formatCurationCandidates,
+  formatCuratePostResult,
+  formatSubmitPickResult
 } from "./Fmt.ts";
 import { EditorialService } from "../services/EditorialService";
 import { CurationService } from "../services/CurationService";
+import { CurationRepo } from "../services/CurationRepo";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { extractEmbedKind, buildTypedEmbed } from "../bluesky/EmbedExtract";
 import { flattenThread } from "../bluesky/ThreadFlatten.ts";
 import { printThread } from "../bluesky/ThreadPrinter.ts";
+import { OperatorIdentity } from "../http/Identity";
+import type { McpCapabilityProfile } from "./RequestAuth";
 
 // ---------------------------------------------------------------------------
 // MCP-specific input schemas — strip cursor fields that LLMs cannot construct
@@ -70,7 +76,7 @@ const GetPostLinksMcpInput = Schema.Struct({
   limit: GetPostLinksInput.fields.limit
 });
 
-const toQueryError = (tool: string) => (error: SqlError | DbError) =>
+const toQueryError = (tool: string) => (error: { message: string }) =>
   McpToolQueryError.make({
     tool,
     message: error.message,
@@ -233,12 +239,23 @@ export const CuratePostTool = Tool.make("curate_post", {
   .annotate(Tool.Idempotent, true)
   .annotate(Tool.OpenWorld, true);
 
-// NOTE: CuratePostTool is defined but intentionally excluded from the shared
-// MCP toolkit. The /mcp route is gated by mcp:read scope only — exposing a
-// write tool here would bypass auth. curate_post will be added back once the
-// MCP route supports write-scope gating (or it moves to the admin surface).
+export const SubmitEditorialPickTool = Tool.make("submit_editorial_pick", {
+  description: "Accept a curated post into the editorial feed. The post must have been curated first via curate_post. Provide a quality score (0-100) and reason.",
+  parameters: SubmitEditorialPickMcpInput.fields,
+  success: SubmitEditorialPickMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Submit Editorial Pick")
+  .annotate(Tool.Readonly, false)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
 
-export const KnowledgeMcpToolkit = Toolkit.make(
+// ---------------------------------------------------------------------------
+// Capability-scoped toolkit variants
+// ---------------------------------------------------------------------------
+
+export const ReadOnlyMcpToolkit = Toolkit.make(
   SearchPostsTool,
   GetRecentPostsTool,
   GetPostLinksTool,
@@ -252,6 +269,62 @@ export const KnowledgeMcpToolkit = Toolkit.make(
   GetThreadDocumentTool,
   ListCurationCandidatesTool
 );
+
+export const CurationWriteMcpToolkit = Toolkit.make(
+  SearchPostsTool,
+  GetRecentPostsTool,
+  GetPostLinksTool,
+  ListExpertsTool,
+  ListTopicsTool,
+  GetTopicTool,
+  ExpandTopicsTool,
+  ExplainPostTopicsTool,
+  ListEditorialPicksTool,
+  GetPostThreadTool,
+  GetThreadDocumentTool,
+  ListCurationCandidatesTool,
+  CuratePostTool
+);
+
+export const EditorialWriteMcpToolkit = Toolkit.make(
+  SearchPostsTool,
+  GetRecentPostsTool,
+  GetPostLinksTool,
+  ListExpertsTool,
+  ListTopicsTool,
+  GetTopicTool,
+  ExpandTopicsTool,
+  ExplainPostTopicsTool,
+  ListEditorialPicksTool,
+  GetPostThreadTool,
+  GetThreadDocumentTool,
+  ListCurationCandidatesTool,
+  SubmitEditorialPickTool
+);
+
+export const WorkflowWriteMcpToolkit = Toolkit.make(
+  SearchPostsTool,
+  GetRecentPostsTool,
+  GetPostLinksTool,
+  ListExpertsTool,
+  ListTopicsTool,
+  GetTopicTool,
+  ExpandTopicsTool,
+  ExplainPostTopicsTool,
+  ListEditorialPicksTool,
+  GetPostThreadTool,
+  GetThreadDocumentTool,
+  ListCurationCandidatesTool,
+  CuratePostTool,
+  SubmitEditorialPickTool
+);
+
+// Keep legacy export for backward compatibility in tests
+export const KnowledgeMcpToolkit = ReadOnlyMcpToolkit;
+
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
 
 const extractText = (record: unknown): string => {
   if (typeof record === "object" && record !== null && "text" in record) {
@@ -267,188 +340,333 @@ const extractCreatedAt = (record: unknown, fallbackIndexedAt: string): string =>
   return fallbackIndexedAt;
 };
 
-export const KnowledgeMcpHandlers = KnowledgeMcpToolkit.toLayer(
+// ---------------------------------------------------------------------------
+// Service inner types (what `yield*` returns from Context.Tag)
+// ---------------------------------------------------------------------------
+
+type KnowledgeQueryServiceI = Context.Tag.Service<typeof KnowledgeQueryService>;
+type EditorialServiceI = Context.Tag.Service<typeof EditorialService>;
+type CurationServiceI = Context.Tag.Service<typeof CurationService>;
+type BlueskyClientI = Context.Tag.Service<typeof BlueskyClient>;
+
+// ---------------------------------------------------------------------------
+// Shared read-only handler implementations
+// ---------------------------------------------------------------------------
+
+const makeReadOnlyHandlers = (
+  queryService: KnowledgeQueryServiceI,
+  editorialService: EditorialServiceI,
+  curationService: CurationServiceI,
+  bskyClient: BlueskyClientI
+) => ({
+  search_posts: (input: typeof SearchPostsInput.Type) =>
+    queryService.searchPosts(input).pipe(
+      Effect.map((items) => ({
+        items,
+        _display: formatPosts(items)
+      })),
+      Effect.mapError(toQueryError("search_posts"))
+    ),
+  get_recent_posts: (input: typeof GetRecentPostsMcpInput.Type) =>
+    queryService.getRecentPosts(input).pipe(
+      Effect.map((items) => ({
+        items,
+        _display: formatPosts(items)
+      })),
+      Effect.mapError(toQueryError("get_recent_posts"))
+    ),
+  get_post_links: (input: typeof GetPostLinksMcpInput.Type) =>
+    queryService.getPostLinks(input).pipe(
+      Effect.map((items) => ({
+        items,
+        _display: formatLinks(items)
+      })),
+      Effect.mapError(toQueryError("get_post_links"))
+    ),
+  list_experts: (input: typeof ListExpertsInput.Type) =>
+    queryService.listExperts(input).pipe(
+      Effect.map((items) => ({
+        items,
+        _display: formatExperts(items)
+      })),
+      Effect.mapError(toQueryError("list_experts"))
+    ),
+  list_topics: (input: typeof ListTopicsInput.Type) =>
+    queryService.listTopics(input).pipe(
+      Effect.map((items) => ({
+        view: input.view ?? "facets",
+        items,
+        _display: formatTopics(items, input.view ?? "facets")
+      })),
+      Effect.mapError(toQueryError("list_topics"))
+    ),
+  get_topic: (input: typeof GetTopicInput.Type) =>
+    queryService.getTopic(input).pipe(
+      Effect.map((item) => ({
+        item,
+        _display: item !== null ? formatTopic(item) : "Topic not found."
+      })),
+      Effect.mapError(toQueryError("get_topic"))
+    ),
+  expand_topics: (input: typeof ExpandTopicsInput.Type) =>
+    queryService.expandTopics(input).pipe(
+      Effect.map((result) => ({
+        ...result,
+        _display: formatExpandedTopics(result)
+      })),
+      Effect.mapError(toQueryError("expand_topics"))
+    ),
+  explain_post_topics: (input: typeof ExplainPostTopicsInput.Type) =>
+    queryService.explainPostTopics(input.postUri).pipe(
+      Effect.map((result) => ({
+        ...result,
+        _display: formatExplainedPostTopics(result)
+      })),
+      Effect.mapError(toQueryError("explain_post_topics"))
+    ),
+  list_editorial_picks: (input: typeof ListEditorialPicksInput.Type) =>
+    editorialService.listPicks(input).pipe(
+      Effect.map((items) => ({
+        items,
+        _display: formatEditorialPicks(items)
+      })),
+      Effect.mapError(toQueryError("list_editorial_picks"))
+    ),
+  get_post_thread: (input: typeof GetPostThreadInput.Type) =>
+    bskyClient.getPostThread(input.postUri, {
+      depth: input.depth ?? 3,
+      parentHeight: input.parentHeight ?? 3
+    }).pipe(
+      Effect.flatMap((response) => {
+        const flat = flattenThread(response.thread);
+        if (!flat) {
+          return Effect.fail(McpToolQueryError.make({
+            tool: "get_post_thread",
+            message: "Post not found or thread unavailable",
+            error: new Error("thread decode failed")
+          }));
+        }
+
+        const toResult = (
+          fp: { post: any; depth: number; parentUri: string | null },
+          position: "ancestor" | "focus" | "reply"
+        ) => ({
+          uri: fp.post.uri as string,
+          did: fp.post.author.did as string,
+          handle: (fp.post.author.handle ?? null) as string | null,
+          displayName: (fp.post.author.displayName ?? null) as string | null,
+          text: extractText(fp.post.record),
+          createdAt: extractCreatedAt(fp.post.record, fp.post.indexedAt),
+          replyCount: (fp.post.replyCount ?? null) as number | null,
+          repostCount: (fp.post.repostCount ?? null) as number | null,
+          likeCount: (fp.post.likeCount ?? null) as number | null,
+          quoteCount: (fp.post.quoteCount ?? null) as number | null,
+          position,
+          depth: fp.depth,
+          parentUri: (fp.parentUri ?? null) as string | null,
+          embedType: extractEmbedKind(fp.post.embed),
+          embedContent: buildTypedEmbed(fp.post.embed)
+        });
+
+        const result = {
+          focusUri: flat.focus.post.uri as string,
+          ancestors: flat.ancestors.map(p => toResult(p, "ancestor")),
+          focus: toResult(flat.focus, "focus"),
+          replies: flat.replies.map(p => toResult(p, "reply"))
+        };
+
+        return Effect.succeed({
+          ...result,
+          _display: printThread(flat, {}).body
+        } as unknown as PostThreadMcpOutput);
+      }),
+      Effect.mapError((error) =>
+        "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
+          ? error as McpToolQueryError
+          : McpToolQueryError.make({
+              tool: "get_post_thread",
+              message: error instanceof Error ? error.message : String(error),
+              error
+            })
+      )
+    ),
+  get_thread_document: (input: typeof GetThreadDocumentInput.Type) =>
+    bskyClient.getPostThread(input.postUri, {
+      depth: input.depth ?? 3,
+      parentHeight: input.parentHeight ?? 3
+    }).pipe(
+      Effect.flatMap((response) => {
+        const flat = flattenThread(response.thread);
+        if (!flat) {
+          return Effect.fail(McpToolQueryError.make({
+            tool: "get_thread_document",
+            message: "Post not found or thread unavailable",
+            error: new Error("thread decode failed")
+          }));
+        }
+
+        const doc = printThread(flat, {
+          maxDepth: input.maxDepth,
+          minLikes: input.minLikes,
+          topN: input.topN
+        });
+
+        return Effect.succeed(doc);
+      }),
+      Effect.mapError((error) =>
+        "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
+          ? error as McpToolQueryError
+          : McpToolQueryError.make({
+              tool: "get_thread_document",
+              message: error instanceof Error ? error.message : String(error),
+              error
+            })
+      )
+    ),
+  list_curation_candidates: (input: typeof ListCurationCandidatesInput.Type) =>
+    curationService.listCandidates(input).pipe(
+      Effect.map((items) => ({
+        items,
+        _display: formatCurationCandidates(items)
+      })),
+      Effect.mapError(toQueryError("list_curation_candidates"))
+    )
+});
+
+// ---------------------------------------------------------------------------
+// Write tool handler implementations
+// ---------------------------------------------------------------------------
+
+/**
+ * OperatorIdentity is a request-scoped service provided at runtime via
+ * `HttpLayerRouter.toWebHandler.handler(request, context)`.  The Fiber
+ * context will contain it, so `yield* OperatorIdentity` resolves at
+ * call time.  We assert `as any` on the return to remove the compile-time
+ * `R = OperatorIdentity` requirement — the Toolkit type system expects
+ * `R = never` for handler functions.
+ */
+const makeCuratePostHandler = (curationService: CurationServiceI) => ({
+  curate_post: (input: typeof CuratePostInput.Type) =>
+    Effect.flatMap(OperatorIdentity, (identity) =>
+      curationService.curatePost(input, identity.email ?? identity.subject ?? "mcp-operator")
+    ).pipe(
+      Effect.map((result) => ({
+        ...result,
+        _display: formatCuratePostResult(result)
+      })),
+      Effect.mapError(toQueryError("curate_post"))
+    ) as any
+});
+
+const makeSubmitPickHandler = (editorialService: EditorialServiceI) => ({
+  submit_editorial_pick: (input: typeof SubmitEditorialPickMcpInput.Type) =>
+    Effect.gen(function* () {
+      // Gate: verify the post was curated before accepting a pick.
+      // This prevents skipping straight from Discovered to Accepted.
+      const curationRepo = yield* CurationRepo;
+      const curation = yield* curationRepo.getByPostUri(input.postUri);
+      if (curation === null || curation.status !== "curated") {
+        return yield* McpToolQueryError.make({
+          tool: "submit_editorial_pick",
+          message: `Post must be curated before accepting as a brief. Current status: ${curation?.status ?? "not curated"}`,
+          error: new Error("post not curated")
+        });
+      }
+
+      const identity = yield* OperatorIdentity;
+      const result = yield* editorialService.submitPick(
+        input,
+        identity.email ?? identity.subject ?? "mcp-operator"
+      );
+      return {
+        ...result,
+        _display: formatSubmitPickResult(result)
+      };
+    }).pipe(
+      Effect.mapError((e) =>
+        "_tag" in e && (e as any)._tag === "McpToolQueryError"
+          ? (e as McpToolQueryError)
+          : toQueryError("submit_editorial_pick")(e as any)
+      )
+    ) as any
+});
+
+// ---------------------------------------------------------------------------
+// Handler layers — one per toolkit variant
+// ---------------------------------------------------------------------------
+
+export const ReadOnlyMcpHandlers = ReadOnlyMcpToolkit.toLayer(
   Effect.gen(function* () {
     const queryService = yield* KnowledgeQueryService;
     const editorialService = yield* EditorialService;
     const curationService = yield* CurationService;
     const bskyClient = yield* BlueskyClient;
-    // curationService is used for list_curation_candidates (read-only).
-    // curate_post handler removed — see note above KnowledgeMcpToolkit.
 
-    return KnowledgeMcpToolkit.of({
-      search_posts: (input) =>
-        queryService.searchPosts(input).pipe(
-          Effect.map((items) => ({
-            items,
-            _display: formatPosts(items)
-          })),
-          Effect.mapError(toQueryError("search_posts"))
-        ),
-      get_recent_posts: (input) =>
-        queryService.getRecentPosts(input).pipe(
-          Effect.map((items) => ({
-            items,
-            _display: formatPosts(items)
-          })),
-          Effect.mapError(toQueryError("get_recent_posts"))
-        ),
-      get_post_links: (input) =>
-        queryService.getPostLinks(input).pipe(
-          Effect.map((items) => ({
-            items,
-            _display: formatLinks(items)
-          })),
-          Effect.mapError(toQueryError("get_post_links"))
-        ),
-      list_experts: (input) =>
-        queryService.listExperts(input).pipe(
-          Effect.map((items) => ({
-            items,
-            _display: formatExperts(items)
-          })),
-          Effect.mapError(toQueryError("list_experts"))
-        ),
-      list_topics: (input) =>
-        queryService.listTopics(input).pipe(
-          Effect.map((items) => ({
-            view: input.view ?? "facets",
-            items,
-            _display: formatTopics(items, input.view ?? "facets")
-          })),
-          Effect.mapError(toQueryError("list_topics"))
-        ),
-      get_topic: (input) =>
-        queryService.getTopic(input).pipe(
-          Effect.map((item) => ({
-            item,
-            _display: item !== null ? formatTopic(item) : "Topic not found."
-          })),
-          Effect.mapError(toQueryError("get_topic"))
-        ),
-      expand_topics: (input) =>
-        queryService.expandTopics(input).pipe(
-          Effect.map((result) => ({
-            ...result,
-            _display: formatExpandedTopics(result)
-          })),
-          Effect.mapError(toQueryError("expand_topics"))
-        ),
-      explain_post_topics: (input) =>
-        queryService.explainPostTopics(input.postUri).pipe(
-          Effect.map((result) => ({
-            ...result,
-            _display: formatExplainedPostTopics(result)
-          })),
-          Effect.mapError(toQueryError("explain_post_topics"))
-        ),
-      list_editorial_picks: (input) =>
-        editorialService.listPicks(input).pipe(
-          Effect.map((items) => ({
-            items,
-            _display: formatEditorialPicks(items)
-          })),
-          Effect.mapError(toQueryError("list_editorial_picks"))
-        ),
-      get_post_thread: (input) =>
-        bskyClient.getPostThread(input.postUri, {
-          depth: input.depth ?? 3,
-          parentHeight: input.parentHeight ?? 3
-        }).pipe(
-          Effect.flatMap((response) => {
-            const flat = flattenThread(response.thread);
-            if (!flat) {
-              return Effect.fail(McpToolQueryError.make({
-                tool: "get_post_thread",
-                message: "Post not found or thread unavailable",
-                error: new Error("thread decode failed")
-              }));
-            }
+    return ReadOnlyMcpToolkit.of(
+      makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient)
+    );
+  })
+);
 
-            const toResult = (
-              fp: { post: any; depth: number; parentUri: string | null },
-              position: "ancestor" | "focus" | "reply"
-            ) => ({
-              uri: fp.post.uri as string,
-              did: fp.post.author.did as string,
-              handle: (fp.post.author.handle ?? null) as string | null,
-              displayName: (fp.post.author.displayName ?? null) as string | null,
-              text: extractText(fp.post.record),
-              createdAt: extractCreatedAt(fp.post.record, fp.post.indexedAt),
-              replyCount: (fp.post.replyCount ?? null) as number | null,
-              repostCount: (fp.post.repostCount ?? null) as number | null,
-              likeCount: (fp.post.likeCount ?? null) as number | null,
-              quoteCount: (fp.post.quoteCount ?? null) as number | null,
-              position,
-              depth: fp.depth,
-              parentUri: (fp.parentUri ?? null) as string | null,
-              embedType: extractEmbedKind(fp.post.embed),
-              embedContent: buildTypedEmbed(fp.post.embed)
-            });
+export const CurationWriteMcpHandlers = CurationWriteMcpToolkit.toLayer(
+  Effect.gen(function* () {
+    const queryService = yield* KnowledgeQueryService;
+    const editorialService = yield* EditorialService;
+    const curationService = yield* CurationService;
+    const bskyClient = yield* BlueskyClient;
 
-            const result = {
-              focusUri: flat.focus.post.uri as string,
-              ancestors: flat.ancestors.map(p => toResult(p, "ancestor")),
-              focus: toResult(flat.focus, "focus"),
-              replies: flat.replies.map(p => toResult(p, "reply"))
-            };
-
-            return Effect.succeed({
-              ...result,
-              _display: printThread(flat, {}).body
-            } as unknown as PostThreadMcpOutput);
-          }),
-          Effect.mapError((error) =>
-            "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
-              ? error as McpToolQueryError
-              : McpToolQueryError.make({
-                  tool: "get_post_thread",
-                  message: error instanceof Error ? error.message : String(error),
-                  error
-                })
-          )
-        ),
-      get_thread_document: (input) =>
-        bskyClient.getPostThread(input.postUri, {
-          depth: input.depth ?? 3,
-          parentHeight: input.parentHeight ?? 3
-        }).pipe(
-          Effect.flatMap((response) => {
-            const flat = flattenThread(response.thread);
-            if (!flat) {
-              return Effect.fail(McpToolQueryError.make({
-                tool: "get_thread_document",
-                message: "Post not found or thread unavailable",
-                error: new Error("thread decode failed")
-              }));
-            }
-
-            const doc = printThread(flat, {
-              maxDepth: input.maxDepth,
-              minLikes: input.minLikes,
-              topN: input.topN
-            });
-
-            return Effect.succeed(doc);
-          }),
-          Effect.mapError((error) =>
-            "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
-              ? error as McpToolQueryError
-              : McpToolQueryError.make({
-                  tool: "get_thread_document",
-                  message: error instanceof Error ? error.message : String(error),
-                  error
-                })
-          )
-        ),
-      list_curation_candidates: (input) =>
-        curationService.listCandidates(input).pipe(
-          Effect.map((items) => ({
-            items,
-            _display: formatCurationCandidates(items)
-          })),
-          Effect.mapError(toQueryError("list_curation_candidates"))
-        )
+    return CurationWriteMcpToolkit.of({
+      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient),
+      ...makeCuratePostHandler(curationService)
     });
   })
 );
+
+export const EditorialWriteMcpHandlers = EditorialWriteMcpToolkit.toLayer(
+  Effect.gen(function* () {
+    const queryService = yield* KnowledgeQueryService;
+    const editorialService = yield* EditorialService;
+    const curationService = yield* CurationService;
+    const bskyClient = yield* BlueskyClient;
+
+    return EditorialWriteMcpToolkit.of({
+      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient),
+      ...makeSubmitPickHandler(editorialService)
+    });
+  })
+);
+
+export const WorkflowWriteMcpHandlers = WorkflowWriteMcpToolkit.toLayer(
+  Effect.gen(function* () {
+    const queryService = yield* KnowledgeQueryService;
+    const editorialService = yield* EditorialService;
+    const curationService = yield* CurationService;
+    const bskyClient = yield* BlueskyClient;
+
+    return WorkflowWriteMcpToolkit.of({
+      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient),
+      ...makeCuratePostHandler(curationService),
+      ...makeSubmitPickHandler(editorialService)
+    });
+  })
+);
+
+// Keep legacy export for backward compatibility
+export const KnowledgeMcpHandlers = ReadOnlyMcpHandlers;
+
+// ---------------------------------------------------------------------------
+// Toolkit selection by profile
+// ---------------------------------------------------------------------------
+
+export const toolkitForProfile = (profile: McpCapabilityProfile) => {
+  switch (profile) {
+    case "read-only":
+      return { toolkit: ReadOnlyMcpToolkit, handlers: ReadOnlyMcpHandlers };
+    case "curation-write":
+      return { toolkit: CurationWriteMcpToolkit, handlers: CurationWriteMcpHandlers };
+    case "editorial-write":
+      return { toolkit: EditorialWriteMcpToolkit, handlers: EditorialWriteMcpHandlers };
+    case "workflow-write":
+      return { toolkit: WorkflowWriteMcpToolkit, handlers: WorkflowWriteMcpHandlers };
+  }
+};

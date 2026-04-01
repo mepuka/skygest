@@ -214,6 +214,8 @@ const initializeClient = (options: McpClientOptions) =>
     )
   );
 
+export type McpListPromptsResult = typeof McpSchema.ListPromptsResult.Type;
+
 export const listTools = (
   options: McpClientOptions
 ): Effect.Effect<McpListToolsResult, McpRequestError> =>
@@ -224,6 +226,20 @@ export const listTools = (
         "mcp:list_tools",
         "tools/list",
         McpSchema.ListToolsResult
+      )
+    )
+  );
+
+export const listPrompts = (
+  options: McpClientOptions
+): Effect.Effect<McpListPromptsResult, McpRequestError> =>
+  initializeClient(options).pipe(
+    Effect.zipRight(
+      requestJsonRpc(
+        options,
+        "mcp:list_prompts",
+        "prompts/list",
+        McpSchema.ListPromptsResult
       )
     )
   );

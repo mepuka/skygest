@@ -14,10 +14,7 @@ class TestMutationError extends Schema.TaggedError<TestMutationError>()(
 const actor: AccessIdentity = {
   subject: null,
   email: null,
-  issuer: "https://access.example.com",
-  audience: ["skygest-mcp"],
-  scopes: ["ops:refresh"],
-  payload: {}
+  scopes: ["ops:refresh"]
 };
 
 const getAnnotation = (

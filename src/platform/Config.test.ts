@@ -11,10 +11,8 @@ describe("AppConfig", () => {
       DEFAULT_DOMAIN: "grid",
       MCP_LIMIT_DEFAULT: "15",
       MCP_LIMIT_MAX: "75",
-      OPERATOR_AUTH_MODE: "shared-secret",
       OPERATOR_SECRET: "top-secret",
-      ACCESS_TEAM_DOMAIN: "https://access.example.com",
-      ACCESS_AUD: "skygest-api",
+      ENABLE_STAGING_OPS: "true",
       EDITORIAL_DEFAULT_EXPIRY_HOURS: "48",
       CURATION_MIN_SIGNAL_SCORE: "55"
     } satisfies EnvBindings;
@@ -30,9 +28,7 @@ describe("AppConfig", () => {
       defaultDomain: "grid",
       mcpLimitDefault: 15,
       mcpLimitMax: 75,
-      operatorAuthMode: "shared-secret",
-      accessTeamDomain: "https://access.example.com",
-      accessAud: "skygest-api",
+      enableStagingOps: true,
       editorialDefaultExpiryHours: 48,
       curationMinSignalScore: 55
     });

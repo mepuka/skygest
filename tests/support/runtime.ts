@@ -10,7 +10,7 @@ import { runMigrations } from "../../src/db/migrate";
 import { CandidatePayloadService } from "../../src/services/CandidatePayloadService";
 import { RawEventBatch } from "../../src/domain/types";
 import { processBatch } from "../../src/filter/FilterWorker";
-import { callTool, listTools, type McpToolCall } from "../../src/mcp/Client";
+import { callTool, listTools, listPrompts, type McpToolCall } from "../../src/mcp/Client";
 import { handleMcpRequestWithLayer } from "../../src/mcp/Router";
 import { AppConfig, type AppConfigShape } from "../../src/platform/Config";
 import { EditorialService } from "../../src/services/EditorialService";
@@ -26,6 +26,19 @@ import { KnowledgeRepoD1 } from "../../src/services/d1/KnowledgeRepoD1";
 import { PublicationsRepoD1 } from "../../src/services/d1/PublicationsRepoD1";
 import { ProviderRegistry } from "../../src/services/ProviderRegistry";
 import { makeSmokeFixtureBatch } from "../../src/staging/SmokeFixture";
+import type { AccessIdentity } from "../../src/auth/AuthService";
+
+export const readOnlyIdentity: AccessIdentity = {
+  subject: "test-reader",
+  email: null,
+  scopes: ["mcp:read"]
+};
+
+export const workflowIdentity: AccessIdentity = {
+  subject: "test-operator",
+  email: "op@test.com",
+  scopes: ["mcp:read", "curation:write", "editorial:write", "experts:read", "experts:write", "ops:read", "ops:refresh", "editorial:read"]
+};
 
 export const testConfig = (
   overrides: Partial<AppConfigShape> = {}
@@ -35,10 +48,8 @@ export const testConfig = (
   defaultDomain: "energy",
   mcpLimitDefault: 20,
   mcpLimitMax: 100,
-  operatorAuthMode: "access",
   operatorSecret: Redacted.make(""),
-  accessTeamDomain: "https://access.example.com",
-  accessAud: "skygest-mcp",
+  enableStagingOps: false,
   editorialDefaultExpiryHours: 24,
   curationMinSignalScore: 30,
   ...overrides
@@ -162,38 +173,33 @@ export const withTempSqliteFile = <A>(
   });
 };
 
-export const createMcpClient = async (layer: Layer.Layer<any, any, never>) => {
+export const createMcpClient = async (
+  layer: Layer.Layer<any, any, never>,
+  identity: AccessIdentity = readOnlyIdentity
+) => {
   const baseUrl = new URL("https://skygest.local");
   const localFetch = ((input, init) => {
     const request = input instanceof Request
       ? new Request(input, init)
       : new Request(input.toString(), init);
-    return handleMcpRequestWithLayer(request, layer);
+    return handleMcpRequestWithLayer(request, layer, identity);
   }) as typeof globalThis.fetch;
+
+  const clientOptions = {
+    baseUrl,
+    fetch: localFetch,
+    clientName: "skygest-bi-tests",
+    clientVersion: "0.1.0"
+  };
 
   return {
     client: {
       listTools: () =>
-        Effect.runPromise(
-          listTools({
-            baseUrl,
-            fetch: localFetch,
-            clientName: "skygest-bi-tests",
-            clientVersion: "0.1.0"
-          })
-        ),
+        Effect.runPromise(listTools(clientOptions)),
+      listPrompts: () =>
+        Effect.runPromise(listPrompts(clientOptions)),
       callTool: (input: McpToolCall) =>
-        Effect.runPromise(
-          callTool(
-            {
-              baseUrl,
-              fetch: localFetch,
-              clientName: "skygest-bi-tests",
-              clientVersion: "0.1.0"
-            },
-            input
-          )
-        )
+        Effect.runPromise(callTool(clientOptions, input))
     },
     close: async () => {}
   };

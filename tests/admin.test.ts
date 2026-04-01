@@ -26,14 +26,7 @@ import {
 const operatorIdentity: AccessIdentity = {
   subject: "did:example:operator",
   email: "operator@example.com",
-  issuer: "https://access.example.com",
-  audience: ["skygest-mcp"],
-  scopes: ["experts:read", "experts:write", "ops:read", "ops:refresh"],
-  payload: {
-    sub: "did:example:operator",
-    email: "operator@example.com",
-    scope: "experts:read experts:write ops:read ops:refresh"
-  }
+  scopes: ["experts:read", "experts:write", "ops:read", "ops:refresh"]
 };
 
 const decodeDid = Schema.decodeUnknownSync(Did);

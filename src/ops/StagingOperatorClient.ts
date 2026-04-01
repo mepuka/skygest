@@ -84,7 +84,7 @@ const textRequest = (
 const decodeSearchPostsResponse = decodeCallToolResultWith(KnowledgePostsMcpOutput);
 const decodeMcpExpertsResponse = decodeCallToolResultWith(ExpertListMcpOutput);
 const secretHeader = (secret: Redacted.Redacted<string>) => ({
-  "x-skygest-operator-secret": Redacted.value(secret)
+  authorization: `Bearer ${Redacted.value(secret)}`
 });
 
 const callMcpTool = <A>(

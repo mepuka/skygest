@@ -26,15 +26,14 @@ vi.mock("../src/ingest/IngestRunWorkflow", () => ({
 }));
 
 describe("worker feed routing", () => {
-  it("returns JSON 404 for staging ops when shared-secret mode is disabled", async () => {
+  it("returns JSON 404 for staging ops when ENABLE_STAGING_OPS is not set", async () => {
     const { fetch } = await import("../src/worker/feed");
     const response = await fetch(
       new Request("https://skygest.local/admin/ops/migrate", {
         method: "POST"
       }),
       {
-        DB: {} as D1Database,
-        OPERATOR_AUTH_MODE: "access"
+        DB: {} as D1Database
       } as any
     );
     const body = await response.json() as {
