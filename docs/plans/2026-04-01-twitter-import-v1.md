@@ -18,6 +18,8 @@
 4. **Poller protection** — `did:x:` blacklist in `resolveTargets`.
 5. **Payload handling** — Import stores payloads as `captureStage: "candidate"` for posts with embeds. Plain-text tweets get no payload row. `curate_post` Twitter branch checks post existence (not payload existence) and transitions to `"picked"` if a payload exists. Plain-text tweets can be curated but not enriched (no visual/link content).
 6. **Enrichment stage gate** — `start_enrichment` checks `captureStage === "picked"`, not just payload existence.
+7. **Plain-text tweet editorial gate** — `submit_editorial_pick` skips the readiness check for posts with no payload (nothing to enrich = effectively complete). Posts with embeds still require `readiness === "complete"`.
+8. **Payload save failures** — If a payload save fails during import, the entire post is skipped (not imported). The import response reports it in `skipped` count. No silent data loss.
 7. **Hydration** — `PostHydrationService` skips live Bluesky fetch for `x://` URIs. Empty hydration is acceptable — expert handle/avatar come from DB join.
 8. **Import path** — `POST /admin/import/posts` (not `/admin/ingest/*` which is proxied to ingest worker).
 9. **curate_post Twitter branch** — detects `x://` prefix, skips Bluesky thread fetch, uses stored payload if present, transitions to `"picked"`, queues enrichment.
@@ -62,26 +64,46 @@ git commit -m "feat(domain): add PostUri type for platform-agnostic post identit
 
 Each file below has specific fields that change from `AtUri` to `PostUri`. The changes are mechanical — import `PostUri` from `../domain/types` (or adjust existing import), change the field type.
 
-**Domain schemas:**
-- `src/domain/bi.ts` — `KnowledgePost.uri`, `KnowledgePostResult.uri`, `DeletedKnowledgePost.uri`, `KnowledgeLinkResult.postUri`, `GetPostThreadInput.postUri`, `GetThreadDocumentInput.postUri`, `ExplainPostTopicsInput.postUri`
-- `src/domain/curation.ts` — `CuratePostInput.postUri`, `CuratePostOutput.postUri`, `CurationPostNotFoundError.postUri`
-- `src/domain/editorial.ts` — `SubmitEditorialPickInput.postUri`, `SubmitEditorialPickOutput.postUri`, `EditorialPickOutput.postUri`
+**Domain schemas — CHANGE to PostUri:**
+- `src/domain/bi.ts` — `KnowledgePost.uri`, `KnowledgePostResult.uri`, `DeletedKnowledgePost.uri`, `KnowledgeLinkResult.postUri`, `ExplainPostTopicsInput.postUri`, `SearchPostsCursor.lastUri`, `RecentPostsCursor.lastUri`, `PostEnrichmentsOutputShape.postUri`
+- `src/domain/curation.ts` — `CurationRecord.postUri`, `CuratePostInput.postUri`, `CuratePostOutput.postUri`, `CurationCandidateOutput` (inherits from KnowledgePostResult), `CurationPostNotFoundError.postUri`
+- `src/domain/editorial.ts` — `EditorialPickRecord.postUri`, `SubmitEditorialPickInput.postUri`, `SubmitEditorialPickMcpInput.postUri`, `SubmitEditorialPickOutput.postUri`, `EditorialPickOutput.postUri`, `RemoveEditorialPickOutput.postUri`, `EditorialPickNotFoundError.postUri`
 - `src/domain/enrichment.ts` — `GetPostEnrichmentsInput.postUri`, `GetPostEnrichmentsOutput.postUri`, `PostEnrichmentsOutput.postUri`
 - `src/domain/candidatePayload.ts` — `CandidatePayloadRecord.postUri`, `SaveCandidatePayloadInput.postUri`, `SaveCandidateEnrichmentInput.postUri`, `CandidatePayloadNotPickedError.postUri`
 - `src/domain/enrichmentRun.ts` — `EnrichmentRunRecord.postUri`, `CreateQueuedEnrichmentRun.postUri`, `EnrichmentRunParams.postUri`
-- `src/domain/api.ts` — `StartEnrichmentInput.postUri`, API path params that take post URIs
+- `src/domain/enrichmentPlan.ts` — `EnrichmentExecutionPlan.postUri`, `SkippedEnrichmentPlan.postUri`, `EnrichmentPlanningContext.postUri`
+- `src/domain/errors.ts` — `CandidatePayloadNotPickedError.postUri`, `EnrichmentRunNotFoundError.postUri`, and other error schemas that carry postUri
+- `src/domain/api.ts` — `StartEnrichmentInput.postUri`, `PostEnrichmentsPathParams.uri` (shares path with thread — see note below), `PostSearchResultRow.uri`, `PostResultRow.uri`
 
-**DO NOT change these (Bluesky-only):**
-- `src/domain/types.ts` — `RawEvent.uri`, `RawEvent.did`, `FeedItem.post` — stay `AtUri`
-- `src/domain/polling.ts` — all polling schemas stay `AtUri`/`Did`
-- `src/domain/types.ts` — `PostprocessMessage` stays `Did`
+**Domain schemas — DO NOT change (Bluesky-only):**
+- `src/domain/types.ts` — `RawEvent.uri`, `FeedItem.post` — stay `AtUri`
+- `src/domain/polling.ts` — all polling schemas stay `AtUri`/`Did` (headUri, sync state)
+- `src/domain/bi.ts` — `GetPostThreadInput.postUri`, `GetThreadDocumentInput.postUri` — stay `AtUri` (thread expansion is Bluesky-only in v1)
 
-**D1 repos that decode rows** — these read `TEXT` from D1 and decode through schemas. Once the schema field changes to `PostUri`, the decode automatically accepts `x://` values from the database:
-- `src/services/d1/KnowledgeRepoD1.ts` — row decode schemas
-- `src/services/d1/CurationRepoD1.ts` — row decode schemas  
-- `src/services/d1/EditorialRepoD1.ts` — row decode schemas
-- `src/services/d1/CandidatePayloadRepoD1.ts` — row decode schemas
-- `src/services/d1/EnrichmentRunsRepoD1.ts` — row decode schemas
+**Thread/enrichment path param split:** `src/domain/api.ts` currently has one shared `postUriPath` used by both `/posts/:uri/thread` and `/posts/:uri/enrichments`. These need separate path param schemas: thread stays `AtUri`, enrichments uses `PostUri`. Read `src/api/PublicReadApi.ts` to see how they share. Split into `PostUriThreadPath` (AtUri) and `PostUriEnrichmentsPath` (PostUri).
+
+**Services — CHANGE method signatures:**
+- `src/services/CandidatePayloadService.ts` — `markPicked(postUri)`, `getPayload(postUri)`, `saveEnrichment(input)` — change `AtUri` params to `PostUri`
+- `src/services/CandidatePayloadRepo.ts` — corresponding interface methods
+- `src/services/CurationService.ts` — internal `queuePickedEnrichment` param
+- `src/services/EditorialService.ts` — `removePick` return cast
+- `src/enrichment/EnrichmentPlanner.ts` — method params and internal casts
+- `src/enrichment/Router.ts` — `ensureEnrichmentStartAllowed` param type
+
+**MCP layer — CHANGE:**
+- `src/mcp/OutputSchemas.ts` — `StartEnrichmentMcpOutput.postUri` (currently AtUri, line 72)
+
+**D1 repos that decode rows** — row decode schemas will automatically accept `x://` once the domain schema field changes to `PostUri`:
+- `src/services/d1/KnowledgeRepoD1.ts` — row decode schemas for posts, search results, cursors
+- `src/services/d1/CurationRepoD1.ts` — row decode schemas for curation records, candidates
+- `src/services/d1/EditorialRepoD1.ts` — row decode schemas for editorial picks
+- `src/services/d1/CandidatePayloadRepoD1.ts` — row decode schemas for payloads
+- `src/services/d1/EnrichmentRunsRepoD1.ts` — row decode schemas for runs
+
+**Ingest — DO NOT change (Bluesky-only):**
+- `src/ingest/ExpertPollExecutor.ts` — stays `AtUri`
+- `src/filter/FilterWorker.ts` — stays `AtUri` (processes Bluesky events)
+- `src/bluesky/*` — all Bluesky client code stays `AtUri`
 
 **Service interfaces:**
 - `src/services/CandidatePayloadService.ts` — method signatures use `AtUri` for `postUri` params
@@ -343,6 +365,38 @@ if (payload.captureStage !== "picked") {
     error: new Error("payload not picked")
   });
 }
+```
+
+### Commit
+
+```bash
+git commit -m "fix(mcp): enforce picked stage before enrichment trigger"
+```
+
+---
+
+## Task 12: Editorial Gate for Plain-Text Posts
+
+**Files:**
+- Modify: `src/mcp/Toolkit.ts`
+
+In `makeSubmitPickHandler`, the current readiness gate rejects posts where `readiness !== "complete"`. For posts with no payload (plain-text tweets), readiness will be `"none"` forever because there's nothing to enrich. These should be allowed through.
+
+After the readiness check, add a fallback:
+
+```ts
+const enrichment = yield* enrichmentReadService.getPost(input.postUri);
+const payload = yield* payloadService.getPayload(input.postUri);
+const hasEnrichableContent = payload !== null && payload.embedPayload !== null;
+
+if (hasEnrichableContent && enrichment.readiness !== "complete") {
+  return yield* McpToolQueryError.make({
+    tool: "submit_editorial_pick",
+    message: `Post enrichment is not complete (readiness: ${enrichment.readiness}). Use start_enrichment to trigger enrichment, then poll get_post_enrichments until readiness is "complete".`,
+    error: new Error("enrichment not complete")
+  });
+}
+// Plain-text posts (no enrichable content) pass through — nothing to enrich
 ```
 
 This enforces the curation-before-enrichment rule for both platforms.
