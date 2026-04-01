@@ -402,3 +402,121 @@ describe("POST /admin/import/posts", () => {
     )
   );
 });
+
+describe("curate_post Twitter branch", () => {
+  const twitterExpert: ImportPostsInput["experts"][number] = {
+    did: decodeDid("did:x:12345"),
+    handle: "energyanalyst",
+    domain: "energy",
+    source: "twitter-import",
+    tier: "energy-focused"
+  };
+
+  const twitterPost: ImportPostsInput["posts"][number] = {
+    uri: "x://12345/status/99001" as PostUri,
+    did: decodeDid("did:x:12345"),
+    text: "Solar curtailment in CAISO hit a new record today — 5.2 GWh curtailed. Grid operators are struggling.",
+    createdAt: 1_710_000_000_000,
+    embedType: "img",
+    embedPayload: { kind: "img", images: [{ thumb: "https://pbs.twimg.com/media/thumb.jpg", fullsize: "https://pbs.twimg.com/media/full.jpg", alt: "chart" }] },
+    links: []
+  };
+
+  it.live("curates a Twitter post using stored payload, skipping Bluesky fetch", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeImportTestLayer({ filename });
+
+        // Run migrations and import a Twitter post
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            yield* runMigrations;
+          }).pipe(Effect.provide(layer))
+        );
+
+        const importResponse = await postImport(layer, {
+          experts: [twitterExpert],
+          posts: [twitterPost]
+        });
+        const importBody = await expectJsonResponse<ImportPostsOutput>(importResponse);
+        expect(importBody.imported).toBe(1);
+
+        // Curate the Twitter post via CurationService
+        const curateResult = await Effect.runPromise(
+          Effect.gen(function* () {
+            const curation = yield* CurationService;
+            return yield* curation.curatePost({
+              postUri: "x://12345/status/99001" as PostUri,
+              action: "curate" as const,
+              note: "interesting chart"
+            });
+          }).pipe(Effect.provide(layer))
+        );
+
+        expect(curateResult.newStatus).toBe("curated");
+
+        // Verify payload transitioned to "picked"
+        const payload = await Effect.runPromise(
+          Effect.gen(function* () {
+            const payloadService = yield* CandidatePayloadService;
+            return yield* payloadService.getPayload("x://12345/status/99001" as PostUri);
+          }).pipe(Effect.provide(layer))
+        );
+
+        expect(payload).not.toBeNull();
+        expect(payload!.captureStage).toBe("picked");
+      })
+    )
+  );
+
+  it.live("curates a plain-text Twitter post without enrichment", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeImportTestLayer({ filename });
+
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            yield* runMigrations;
+          }).pipe(Effect.provide(layer))
+        );
+
+        const plainTextPost: ImportPostsInput["posts"][number] = {
+          ...twitterPost,
+          uri: "x://12345/status/99002" as PostUri,
+          embedType: null,
+          embedPayload: null,
+          links: []
+        };
+
+        await postImport(layer, {
+          experts: [twitterExpert],
+          posts: [plainTextPost]
+        });
+
+        // Curate — should succeed without payload
+        const curateResult = await Effect.runPromise(
+          Effect.gen(function* () {
+            const curation = yield* CurationService;
+            return yield* curation.curatePost({
+              postUri: "x://12345/status/99002" as PostUri,
+              action: "curate" as const,
+              note: "insightful take"
+            });
+          }).pipe(Effect.provide(layer))
+        );
+
+        expect(curateResult.newStatus).toBe("curated");
+
+        // No payload should exist
+        const payload = await Effect.runPromise(
+          Effect.gen(function* () {
+            const payloadService = yield* CandidatePayloadService;
+            return yield* payloadService.getPayload("x://12345/status/99002" as PostUri);
+          }).pipe(Effect.provide(layer))
+        );
+
+        expect(payload).toBeNull();
+      })
+    )
+  );
+});

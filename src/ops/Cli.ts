@@ -710,7 +710,7 @@ const importScraper = (modulePath: string) =>
       })
   });
 
-const SCRAPER_ROOT = "/Users/pooks/Dev/better_twitter_scraper/src";
+const SCRAPER_ROOT = process.env.TWITTER_SCRAPER_PATH ?? "/Users/pooks/Dev/better_twitter_scraper/src";
 
 const runTwitterAddExpert = (options: {
   readonly handle: string;
