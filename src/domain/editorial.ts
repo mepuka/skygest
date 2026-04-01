@@ -37,7 +37,7 @@ export const SubmitEditorialPickInput = Schema.Struct({
 export type SubmitEditorialPickInput = Schema.Schema.Type<typeof SubmitEditorialPickInput>;
 
 export const SubmitEditorialPickMcpInput = Schema.Struct({
-  postUri: PostUri.annotations({ description: "Post URI of the post to pick" }),
+  postUri: PostUri.annotations({ description: "Post URI (at:// or x://) of the post to pick" }),
   score: Schema.Union(EditorialScore, Schema.compose(Schema.NumberFromString, EditorialScore)).annotations({ description: "Editorial quality score (0-100). 80+=must-read, 60-79=strong, 40-59=notable" }),
   reason: Schema.String.pipe(Schema.minLength(1)).annotations({ description: "1-2 sentence explanation of why this post was selected" }),
   category: Schema.optional(EditorialPickCategory.annotations({ description: "Pick category: breaking, analysis, discussion, data, or opinion" })),

@@ -97,7 +97,7 @@ Use \`_display\` for reading results at a glance. Reference items by their ident
 
 ## Write Tools
 
-**curate_post** — Advance a candidate to Enriching (curate) or Rejected (reject). Curating fetches live embed data from Bluesky and captures the payload. Call start_enrichment separately to queue enrichment processing. Requires curation:write scope.
+**curate_post** — Advance a candidate to Enriching (curate) or Rejected (reject). Curating captures embed data for enrichment. For Bluesky posts, fetches live data. For Twitter posts, uses stored import data. Call start_enrichment separately to queue enrichment processing. Requires curation:write scope.
 
 **start_enrichment** — Queue enrichment for a curated post. Auto-detects type from embed (vision for charts/screenshots, source-attribution for links). For visual posts, source-attribution is automatically chained after vision completes. Use get_post_enrichments to poll readiness. Requires curation:write scope.
 

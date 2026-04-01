@@ -324,7 +324,7 @@ export const EnrichmentReadiness = Schema.Literal(
 export type EnrichmentReadiness = Schema.Schema.Type<typeof EnrichmentReadiness>;
 
 export const GetPostEnrichmentsInput = Schema.Struct({
-  postUri: PostUri
+  postUri: PostUri.annotations({ description: "Post URI (at:// or x://) of the post to inspect" })
 });
 export type GetPostEnrichmentsInput = Schema.Schema.Type<typeof GetPostEnrichmentsInput>;
 

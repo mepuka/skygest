@@ -38,7 +38,7 @@ export const ListCurationCandidatesInput = Schema.Struct({
 export type ListCurationCandidatesInput = Schema.Schema.Type<typeof ListCurationCandidatesInput>;
 
 export const CuratePostInput = Schema.Struct({
-  postUri: PostUri.annotations({ description: "Post URI of the post to curate" }),
+  postUri: PostUri.annotations({ description: "Post URI (at:// or x://) of the post to curate" }),
   action: CurationAction.annotations({ description: "Action: 'curate' to approve for enrichment, 'reject' to dismiss" }),
   note: Schema.optional(Schema.String.annotations({ description: "Optional review note explaining the curation decision" }))
 });
