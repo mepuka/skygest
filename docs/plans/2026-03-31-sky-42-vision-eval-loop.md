@@ -2,11 +2,17 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Create a repeatable, Effect-native eval script that runs the golden set through the vision pipeline and produces diffable per-image output with a summary report.
+**Goal:** Create a repeatable, Effect-native eval script that runs the golden set through the vision pipeline and produces diffable per-image output with a review rubric and summary report.
 
-**Architecture:** A `bun` entry point at `eval/vision/run-eval.ts` builds a minimal Effect layer (GeminiVisionService + AppConfig, no D1/KV/Cloudflare), reads `eval/vision/golden-set.jsonl`, runs each image through Gemini with `Effect.forEach({ concurrency: 3 })`, writes per-image JSON + summary markdown to a timestamped output directory. Optional slug filter for single-image iteration.
+**Architecture:** A `bun` entry point at `eval/vision/run-eval.ts` builds a minimal Effect layer following the same pattern as `scripts/test-vision.ts`: `GeminiVisionServiceLive` + `ConfigProvider.fromEnv()` + `BunContext.layer` + `BunRuntime.runMain`. Reads `eval/vision/golden-set.jsonl` via `Schema.decode` per line, runs each image through Gemini with `Effect.forEach({ concurrency: 3 })`, writes per-image JSON + summary markdown to a timestamped output directory. Optional slug filter for single-image iteration.
 
-**Tech Stack:** Effect (`Effect.gen`, `Effect.forEach`, `Layer`, `Schema`), existing `GeminiVisionService`, existing vision prompt from `src/enrichment/prompts.ts`, `assessVisionQuality` + `hasFindings` from `EnrichmentQualityGate.ts`.
+**Tech Stack:** Effect (`Effect.gen`, `Effect.forEach`, `Layer`, `Schema`, `ConfigProvider`, `BunRuntime`), existing `GeminiVisionServiceLive` (reads `GOOGLE_API_KEY` from env), `assessVisionQuality` + `hasFindings` from `EnrichmentQualityGate.ts`.
+
+**Review findings addressed:**
+- P1: Per-image output splits into stable `analysis` (diffable) and `_meta` (volatile — `processedAt`, `elapsed`, timestamps)
+- P1: Summary includes review rubric columns: chart understanding, alt text usefulness, source clue quality
+- P2: Layer uses `ConfigProvider.fromEnv()` + `GOOGLE_API_KEY` (matching `scripts/test-vision.ts` and `GeminiVisionServiceLive`)
+- P2: Golden set loaded via `Schema.decode` per line, not raw `JSON.parse`
 
 ---
 
@@ -26,11 +32,15 @@ eval/vision/runs/
 
 **Step 2: Create the script skeleton**
 
+Follow the same layer + runtime pattern as `scripts/test-vision.ts`:
+
 ```ts
 // eval/vision/run-eval.ts
-import { Effect, Schema, Array as Arr } from "effect";
+import { BunContext, BunRuntime } from "@effect/platform-bun";
+import { ConfigProvider, Effect, Layer, Logger, LogLevel, Schema } from "effect";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { GeminiVisionServiceLive } from "../../src/enrichment/GeminiVisionServiceLive";
 
 // ---------------------------------------------------------------------------
 // Golden set schema
@@ -44,16 +54,13 @@ const GoldenSetEntry = Schema.Struct({
 });
 type GoldenSetEntry = Schema.Schema.Type<typeof GoldenSetEntry>;
 
-const GoldenSetEntries = Schema.Array(GoldenSetEntry);
+const decodeGoldenSetEntry = Schema.decodeUnknown(GoldenSetEntry);
 
 // ---------------------------------------------------------------------------
-// Load golden set
+// Load golden set — Schema.decode per line, not raw JSON.parse
 // ---------------------------------------------------------------------------
 
-const GOLDEN_SET_PATH = path.resolve(
-  import.meta.dir,
-  "golden-set.jsonl"
-);
+const GOLDEN_SET_PATH = path.resolve(import.meta.dir, "golden-set.jsonl");
 
 const loadGoldenSet = Effect.gen(function* () {
   const raw = fs.readFileSync(GOLDEN_SET_PATH, "utf-8");
@@ -62,8 +69,19 @@ const loadGoldenSet = Effect.gen(function* () {
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
 
-  const parsed = lines.map((line) => JSON.parse(line));
-  return yield* Schema.decode(GoldenSetEntries)(parsed);
+  const entries: GoldenSetEntry[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const parsed = yield* Effect.try({
+      try: () => JSON.parse(lines[i]!),
+      catch: () => new Error(`golden-set.jsonl line ${i + 1}: invalid JSON`)
+    });
+    const entry = yield* decodeGoldenSetEntry(parsed).pipe(
+      Effect.mapError((e) => new Error(`golden-set.jsonl line ${i + 1}: ${e.message}`))
+    );
+    entries.push(entry);
+  }
+
+  return entries;
 });
 
 // ---------------------------------------------------------------------------
@@ -95,6 +113,7 @@ const ensureDir = (dirPath: string) =>
 const evaluateEntry = (_entry: GoldenSetEntry, _outputDir: string) =>
   Effect.succeed({ slug: _entry.slug });
 
+// Placeholder — filled in Task 3
 const writeSummary = (_outputDir: string, _results: ReadonlyArray<unknown>) =>
   Effect.void;
 
@@ -131,10 +150,18 @@ const program = Effect.gen(function* () {
   yield* Effect.log(`Eval complete: ${results.length} images → ${outputDir}`);
 });
 
-Effect.runPromise(program).catch((error) => {
-  console.error("Eval failed:", error);
-  process.exit(1);
-});
+// ---------------------------------------------------------------------------
+// Layer + runtime — same pattern as scripts/test-vision.ts
+// ---------------------------------------------------------------------------
+
+const configLayer = Layer.setConfigProvider(ConfigProvider.fromEnv());
+const visionLayer = GeminiVisionServiceLive.pipe(Layer.provide(configLayer));
+
+program.pipe(
+  Effect.provide(Layer.mergeAll(visionLayer, BunContext.layer)),
+  Logger.withMinimumLogLevel(LogLevel.Debug),
+  BunRuntime.runMain
+);
 ```
 
 **Step 3: Verify the skeleton runs**
@@ -164,19 +191,17 @@ git commit -m "feat(eval): vision eval loop skeleton with golden set loader (SKY
 
 This task wires in the actual Gemini call and writes per-image output files.
 
-**Step 1: Build the minimal eval layer**
+**Step 1: Implement `evaluateEntry`**
 
-The eval script needs `GeminiVisionService` which depends on `AppConfig` (for `GEMINI_API_KEY` and model config). Check what the existing `GeminiVisionService` layer requires by reading `src/enrichment/GeminiVisionService.ts` and its dependencies. Build the smallest possible layer that satisfies those requirements.
+The `GeminiVisionService` interface (check `src/enrichment/GeminiVisionService.ts`) exposes `classifyImage` and `extractChartData`. The eval script should call `extractChartData` (the full pipeline) for each golden set image, same as `scripts/test-vision.ts --extract`.
 
-If `GeminiVisionService` depends on services beyond `AppConfig` and HTTP, create stub layers for anything the eval path doesn't actually call (e.g., if it depends on `EnrichmentRunsRepo` transitively through the layer graph).
-
-The key constraint: bun loads `.env` automatically, so `GEMINI_API_KEY` is available via `process.env`. Build `AppConfig` from env vars with safe defaults for non-vision fields.
-
-**Step 2: Implement `evaluateEntry`**
+Per-image output splits into stable and volatile sections:
 
 ```ts
+import { GeminiVisionService } from "../../src/enrichment/GeminiVisionService";
 import { assessVisionQuality, hasFindings } from "../../src/enrichment/EnrichmentQualityGate";
-import type { VisionAssetAnalysis } from "../../src/domain/enrichment";
+import type { VisionAssetAnalysis, VisionEnrichment } from "../../src/domain/enrichment";
+import type { GateVerdict } from "../../src/enrichment/EnrichmentQualityGate";
 
 type EvalResult = {
   readonly slug: string;
@@ -184,31 +209,55 @@ type EvalResult = {
   readonly context: string;
   readonly gateVerdict: GateVerdict | null;
   readonly hasFindings: boolean;
+  // Review rubric (machine-checkable)
+  readonly rubric: {
+    readonly chartUnderstanding: boolean;  // has at least one chart type
+    readonly altTextUseful: boolean;       // altText non-null and length > 20
+    readonly sourceClueCount: number;      // sourceLines + visibleUrls + orgMentions + logoText
+  } | null;
   readonly analysis: VisionAssetAnalysis | null;
-  readonly elapsed: number;
   readonly error: string | null;
+};
+
+// Per-image output file shape — stable analysis + volatile meta
+type EvalOutputFile = {
+  readonly slug: string;
+  readonly thread: string;
+  readonly context: string;
+  readonly gateVerdict: GateVerdict | null;
+  readonly hasFindings: boolean;
+  readonly rubric: EvalResult["rubric"];
+  readonly analysis: Omit<VisionAssetAnalysis, "processedAt" | "modelId"> | null;
+  readonly error: string | null;
+  readonly _meta: {
+    readonly processedAt: number | null;
+    readonly modelId: string | null;
+    readonly elapsed: number;
+    readonly evalTimestamp: string;
+  };
 };
 ```
 
 The function should:
 
-1. Start a timer
-2. Fetch the image from the CDN URL (raw bytes)
-3. Send to Gemini via the service/client with the production vision prompt
-4. Decode the response using `VisionAssetAnalysis` schema (same as production)
-5. Wrap in a minimal `VisionEnrichment` to run `assessVisionQuality`
-6. Check `hasFindings` separately (informational, not gating)
-7. Write `<slug>.json` to the output directory
-8. Return the `EvalResult`
+1. Start a timer via `Effect.clockWith`
+2. Call `svc.extractChartData(entry.url, "image/jpeg")` via `yield* GeminiVisionService`
+3. Wrap in a minimal `VisionEnrichment` to run `assessVisionQuality`
+4. Compute review rubric fields from the analysis
+5. Split `processedAt` and `modelId` into `_meta` (volatile), keep the rest in `analysis` (stable/diffable)
+6. Write `<slug>.json` to the output directory using `Effect.sync` + `fs.writeFileSync`
+7. Return the `EvalResult`
 
-Error handling: if the image fetch or Gemini call fails, catch the error, record `{ slug, error: message, analysis: null, gateVerdict: null }`, and continue.
+Error handling: wrap each entry evaluation in `Effect.catchAll` — on failure, record `{ slug, error: message, analysis: null, gateVerdict: null, rubric: null }` and continue.
 
-Use `Effect.catchAll` to handle errors per-entry without aborting the run.
-
-**Step 3: Verify with a single image**
+**Step 2: Verify with a single image**
 
 Run: `bun eval/vision/run-eval.ts shaffer-hydro-01`
-Expected: Creates `eval/vision/runs/<timestamp>/shaffer-hydro-01.json` with analysis output
+Expected: Creates `eval/vision/runs/<timestamp>/shaffer-hydro-01.json` with stable analysis body and `_meta` section
+
+**Step 3: Verify diffability**
+
+Run the same image twice. Diff the two output files — `analysis` section should be identical, only `_meta.elapsed` and `_meta.evalTimestamp` should differ.
 
 **Step 4: Commit**
 
@@ -219,7 +268,7 @@ git commit -m "feat(eval): wire Gemini vision calls into eval loop (SKY-42)"
 
 ---
 
-### Task 3: Summary Report
+### Task 3: Summary Report with Review Rubric
 
 **Files:**
 - Modify: `eval/vision/run-eval.ts`
@@ -235,24 +284,35 @@ Header:
 Golden set: N images | Passed: N | Needs Review: N | Errors: N
 ```
 
-Table:
+Review rubric table:
 ```markdown
-| Slug | Gate | Media | Chart Types | Findings | Signals | Time |
-|------|------|-------|-------------|----------|---------|------|
-| shaffer-hydro-01 | usable | chart | bar-chart | 3 | title, sourceLines | 2.1s |
-| joshi-data-centres-01 | usable | photo | — | 0 | visibleUrls, orgMentions | 1.8s |
-| shaffer-hydro-03 | needs-review | — | — | 0 | — | 1.5s |
+| Slug | Gate | Chart? | Alt Text? | Source Clues | Media | Chart Types | Findings | Signals |
+|------|------|--------|-----------|-------------|-------|-------------|----------|---------|
+| shaffer-hydro-01 | usable | yes | yes (142ch) | 3 | chart | bar-chart | 3 | title, sourceLines |
+| joshi-data-centres-01 | usable | no | yes (89ch) | 5 | photo | — | 0 | visibleUrls, orgMentions |
+| shaffer-hydro-03 | needs-review | no | no | 0 | — | — | 0 | — |
 ```
 
 Where:
 - Gate: `usable` / `needs-review` / `error`
+- Chart?: did the model identify at least one chart type (yes/no)
+- Alt Text?: is altText non-null and >20 chars (yes/no + length)
+- Source Clues: count of sourceLines + visibleUrls + orgMentions + logoText entries
 - Media: `analysis.mediaType`
 - Chart Types: comma-joined `analysis.chartTypes` or `—`
 - Findings: count of `analysis.keyFindings`
 - Signals: which non-empty signal fields (title, sourceLines, visibleUrls, orgMentions, logoText)
-- Time: elapsed in seconds with 1 decimal
 
-Also print the summary table to stdout so you see it immediately.
+Rubric summary at the bottom:
+```markdown
+## Rubric Summary
+
+- Chart understanding: N/M images with chart type detected
+- Alt text useful: N/M images with alt text > 20 chars
+- Source clues: avg N per image (min M, max M)
+```
+
+Also print the summary table and rubric to stdout.
 
 **Step 2: Run the full golden set**
 
@@ -263,7 +323,7 @@ Expected: Creates timestamped directory with 16 JSON files + summary.md. Summary
 
 ```bash
 git add eval/vision/run-eval.ts
-git commit -m "feat(eval): add summary report to vision eval loop (SKY-42)"
+git commit -m "feat(eval): add summary report with review rubric to vision eval loop (SKY-42)"
 ```
 
 ---
@@ -274,8 +334,11 @@ git commit -m "feat(eval): add summary report to vision eval loop (SKY-42)"
 2. `bun eval/vision/run-eval.ts shaffer-hydro-01` — runs single image
 3. `bun eval/vision/run-eval.ts nonexistent` — warns, exits cleanly
 4. `eval/vision/runs/` is git-ignored
-5. Per-image JSON contains full `VisionAssetAnalysis` (diffable between runs)
-6. Summary table shows gate verdict, media type, chart types, findings count, signal types
-7. Failed images produce error entries without aborting the run
-8. `bun run typecheck` — clean (eval script type-checks against domain schemas)
-9. No production code changes — eval is standalone
+5. Per-image JSON has stable `analysis` body (no `processedAt`/`modelId`) and volatile `_meta` section — diffable between runs
+6. Summary table includes review rubric: chart understanding, alt text usefulness, source clue count
+7. Rubric summary shows aggregate stats at the bottom
+8. Failed images produce error entries without aborting the run
+9. `bun run typecheck` — clean (eval script type-checks against domain schemas)
+10. No production code changes — eval is standalone
+11. Layer follows `scripts/test-vision.ts` pattern: `ConfigProvider.fromEnv()` + `GeminiVisionServiceLive` + `BunContext.layer` + `BunRuntime.runMain`
+12. Golden set loaded via `Schema.decodeUnknown` per line (not raw `JSON.parse`)
