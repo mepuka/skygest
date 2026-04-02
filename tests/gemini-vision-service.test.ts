@@ -381,7 +381,7 @@ describe("GeminiVisionService", () => {
     );
 
     it.effect(
-      "fails with GeminiParseError when mediaType has invalid enum value",
+      "normalizes unknown mediaType to 'photo' instead of failing",
       () =>
         Effect.gen(function* () {
           mockGenerateContent.mockReset();
@@ -395,15 +395,60 @@ describe("GeminiVisionService", () => {
           });
 
           const svc = yield* GeminiVisionService;
-          const exit = yield* Effect.exit(
-            svc.classifyImage("https://gemini.files/abc", "image/png")
+          const result = yield* svc.classifyImage(
+            "https://gemini.files/abc",
+            "image/png"
           );
 
-          expect(Exit.isFailure(exit)).toBe(true);
-          if (Exit.isFailure(exit)) {
-            const error = Cause.squash(exit.cause);
-            expect((error as any)._tag).toBe("GeminiParseError");
-          }
+          expect(result.mediaType).toBe("photo");
+        }).pipe(runWith)
+    );
+
+    it.effect(
+      "normalizes Gemini 'document' mediaType to 'document-excerpt'",
+      () =>
+        Effect.gen(function* () {
+          mockGenerateContent.mockReset();
+          mockGenerateContent.mockResolvedValueOnce({
+            text: encodeJsonString({
+              mediaType: "document",
+              chartTypes: [],
+              hasDataPoints: false,
+              isCompound: false
+            })
+          });
+
+          const svc = yield* GeminiVisionService;
+          const result = yield* svc.classifyImage(
+            "https://gemini.files/abc",
+            "image/png"
+          );
+
+          expect(result.mediaType).toBe("document-excerpt");
+        }).pipe(runWith)
+    );
+
+    it.effect(
+      "normalizes Gemini 'article' mediaType to 'document-excerpt'",
+      () =>
+        Effect.gen(function* () {
+          mockGenerateContent.mockReset();
+          mockGenerateContent.mockResolvedValueOnce({
+            text: encodeJsonString({
+              mediaType: "article",
+              chartTypes: [],
+              hasDataPoints: true,
+              isCompound: false
+            })
+          });
+
+          const svc = yield* GeminiVisionService;
+          const result = yield* svc.classifyImage(
+            "https://gemini.files/abc",
+            "image/png"
+          );
+
+          expect(result.mediaType).toBe("document-excerpt");
         }).pipe(runWith)
     );
   });

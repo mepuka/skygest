@@ -15,17 +15,25 @@ import { Schema } from "effect";
 // Media classification (what the content actually depicts)
 // ---------------------------------------------------------------------------
 
-export const MediaType = Schema.Literals([
+export const MediaTypeMembers = [
   "chart",
   "document-excerpt",
   "photo",
   "infographic",
   "video"
-]);
+] as const;
+
+export const MediaType = Schema.Literals([...MediaTypeMembers]);
 export type MediaType = Schema.Schema.Type<typeof MediaType>;
 
+export const isKnownMediaType = (
+  value: string
+): value is (typeof MediaTypeMembers)[number] =>
+  MediaTypeMembers.includes(value as (typeof MediaTypeMembers)[number]);
+
 /** Normalize a Gemini mediaType to canonical form before storage/enrichment.
- *  Maps "image" → "photo" for downstream consistency. Case-insensitive. */
+ *  Maps aliases to enum values and falls back to "photo" for unknown types
+ *  so decoding never fails on unexpected Gemini responses. Case-insensitive. */
 export const normalizeMediaType = (raw: string): string => {
   const lower = raw.toLowerCase().trim();
   const aliases: Record<string, string> = {
@@ -34,9 +42,16 @@ export const normalizeMediaType = (raw: string): string => {
     photograph: "photo",
     diagram: "infographic",
     graph: "chart",
-    table: "chart"
+    table: "chart",
+    document: "document-excerpt",
+    article: "document-excerpt",
+    "news article": "document-excerpt",
+    "text document": "document-excerpt",
+    "web page": "document-excerpt",
+    webpage: "document-excerpt"
   };
-  return aliases[lower] ?? lower;
+  const normalized = aliases[lower] ?? lower;
+  return isKnownMediaType(normalized) ? normalized : "photo";
 };
 
 // ---------------------------------------------------------------------------
