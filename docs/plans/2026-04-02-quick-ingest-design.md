@@ -10,9 +10,9 @@
 
 **CLI-first.** The `ops ingest-url <url>` command handles both platforms locally, calling existing remote endpoints via `StagingOperatorClient`. No cross-platform MCP tool -- the Worker cannot fetch Twitter (CycleTLS requires native binaries that V8 isolates don't support). If MCP convenience is needed later, add a Bluesky-only tool separately.
 
-**Compose, don't duplicate.** The command chains two existing endpoints: `POST /admin/import/posts` (import + flag) then `POST /admin/curation/curate` (curate + auto-enrich). No new service abstraction needed.
+**Compose, don't duplicate.** The command chains two existing endpoints: `POST /admin/import/posts` (import + flag) then `POST /admin/curation/curate` (curate). No new service abstraction needed.
 
-**Enrichment is not a separate step.** `curatePost` already queues enrichment internally via `queuePickedEnrichment` for both Twitter (`CurationService.ts:231`) and Bluesky (`CurationService.ts:294`). The `start_enrichment` MCP tool stays as a manual retry/override tool only.
+**Enrichment is a separate step.** The agent worker lacks the `ENRICHMENT_RUN_WORKFLOW` binding by design (SKY-108). `curatePost` on the agent worker captures the embed payload and marks it picked, but cannot launch workflows. The operator must call `start_enrichment` (MCP tool) or `ops stage enrichment-start` after curating. This follows the established two-tool async pattern: curate -> start_enrichment -> get_post_enrichments.
 
 ---
 
@@ -36,8 +36,8 @@ bun src/scripts/ops.ts -- ingest-url "https://bsky.app/profile/drsimevans.bsky.s
 2. **Fetch post locally** -- Twitter: CycleTLS scraper via `scraperLayer`. Bluesky: `BlueskyClient` against public API, scoped via `Effect.provide(blueskyCliLayer)` to avoid HttpClient conflicts.
 3. **Normalize** -- Convert to `ImportPostInput` + `ImportExpertInput`. Capture embed payload at this stage so `curatePost` doesn't need to re-fetch the thread.
 4. **Import** -- Call `StagingOperatorClient.importPosts()` with `operatorOverride: true`. This imports the post even if topic matching yields zero matches.
-5. **Curate** -- Call `StagingOperatorClient.curatePost(action: "curate")`. Enrichment starts automatically inside `curatePost`.
-6. **Report** -- Print whether post was newly imported or already existed, and curation state change. Enrichment is queued automatically inside `curatePost` but its status is not returned in `CuratePostOutput` -- use `get_post_enrichments` MCP tool or `ops stage enrichment-status` to check.
+5. **Curate** -- Call `StagingOperatorClient.curatePost(action: "curate")`. This marks the post as curated and captures the embed payload, but does NOT start enrichment (the agent worker lacks the workflow binding per SKY-108).
+6. **Report** -- Print post URI, import/curation state. Prompt the operator to start enrichment separately via `start_enrichment` MCP tool or `ops stage enrichment-start`.
 
 **Options:**
 - `--tier <tier>` -- Expert tier if new (default: `energy-focused`). Existing experts keep their current tier via `mergeImportedExpertRecord`.
@@ -94,7 +94,7 @@ The CLI uses `StagingOperatorClient` which authenticates with the operator beare
 - No web share page or admin ingest-url endpoint (YAGNI)
 - No `additionalTopics` AI-assisted topic flow (belongs on a future MCP tool)
 - No change to default batch import behavior (`operatorOverride` must be explicitly set)
-- No separate "start enrichment" step -- `curatePost` handles it
+- No auto-enrichment -- operator must call `start_enrichment` after curating (SKY-108 design)
 
 ---
 

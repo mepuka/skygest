@@ -961,7 +961,7 @@ const runIngestUrl = (options: {
 
     yield* Console.log(
       `Done. URI: ${postUri}\n` +
-      `Enrichment queued automatically by curation. Check status via get_post_enrichments or ops stage enrichment-runs.`
+      `To start enrichment: use start_enrichment MCP tool or ops stage enrichment-start --post-uri "${postUri}"`
     );
   });
 
