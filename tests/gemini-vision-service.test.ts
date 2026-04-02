@@ -206,6 +206,35 @@ describe("GeminiVisionService", () => {
       }).pipe(runWith)
     );
 
+    it.effect(
+      "parses isCompound: true for compound dashboard classification",
+      () =>
+        Effect.gen(function* () {
+          mockGenerateContent.mockReset();
+          mockGenerateContent.mockResolvedValueOnce({
+            text: encodeJsonString({
+              mediaType: "chart",
+              chartTypes: ["bar-chart", "line-chart"],
+              hasDataPoints: true,
+              isCompound: true
+            })
+          });
+
+          const svc = yield* GeminiVisionService;
+          const result = yield* svc.classifyImage(
+            "https://gemini.files/abc",
+            "image/png"
+          );
+
+          expect(result).toEqual({
+            mediaType: "chart",
+            chartTypes: ["bar-chart", "line-chart"],
+            hasDataPoints: true,
+            isCompound: true
+          });
+        }).pipe(runWith)
+    );
+
     it.effect("fails with GeminiParseError for non-JSON text", () =>
       Effect.gen(function* () {
         mockGenerateContent.mockReset();
