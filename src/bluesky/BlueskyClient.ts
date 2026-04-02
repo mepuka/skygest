@@ -24,10 +24,10 @@ import { AtUri, Did } from "../domain/types";
 import { GetPostThreadResponse, GetPostsResponse, type ThreadPostView } from "./ThreadTypes";
 
 const FollowsResponse = Schema.Struct({
-  cursor: Schema.optional(Schema.String),
+  cursor: Schema.optionalKey(Schema.String),
   follows: Schema.Array(Schema.Struct({
     did: Schema.String,
-    handle: Schema.optional(Schema.String)
+    handle: Schema.optionalKey(Schema.String)
   }))
 });
 
@@ -37,26 +37,26 @@ const ResolveHandleResponse = Schema.Struct({
 
 const ResolveIdentityResponse = Schema.Struct({
   did: Did,
-  handle: Schema.optional(Schema.String),
-  didDoc: Schema.optional(Schema.Unknown)
+  handle: Schema.optionalKey(Schema.String),
+  didDoc: Schema.optionalKey(Schema.Unknown)
 });
 
 export const ProfileResponse = Schema.Struct({
   did: Did,
-  handle: Schema.optional(Schema.String),
-  displayName: Schema.optional(Schema.String),
-  description: Schema.optional(Schema.String),
-  avatar: Schema.optional(Schema.String)
+  handle: Schema.optionalKey(Schema.String),
+  displayName: Schema.optionalKey(Schema.String),
+  description: Schema.optionalKey(Schema.String),
+  avatar: Schema.optionalKey(Schema.String)
 });
 
 const RepoServiceEntry = Schema.Struct({
-  id: Schema.optional(Schema.String),
-  type: Schema.optional(Schema.String),
-  serviceEndpoint: Schema.optional(Schema.String)
+  id: Schema.optionalKey(Schema.String),
+  type: Schema.optionalKey(Schema.String),
+  serviceEndpoint: Schema.optionalKey(Schema.String)
 });
 
 const DidDocument = Schema.Struct({
-  service: Schema.optional(Schema.Array(RepoServiceEntry))
+  service: Schema.optionalKey(Schema.Array(RepoServiceEntry))
 });
 
 const getErrorStatus = (error: unknown): number | undefined => {

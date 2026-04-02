@@ -109,7 +109,7 @@ export type FailEnrichmentRun = Schema.Schema.Type<typeof FailEnrichmentRun>;
 export const MarkEnrichmentRunNeedsReview = Schema.Struct({
   id: Schema.String,
   lastProgressAt: EpochMillis,
-  resultWrittenAt: Schema.optional(Schema.NullOr(EpochMillis)),
+  resultWrittenAt: Schema.optionalKey(Schema.NullOr(EpochMillis)),
   error: Schema.NullOr(EnrichmentErrorEnvelope)
 });
 export type MarkEnrichmentRunNeedsReview = Schema.Schema.Type<
@@ -121,7 +121,7 @@ export const EnrichmentRunParams = Schema.Struct({
   enrichmentType: EnrichmentKind,
   schemaVersion: Schema.String.pipe(Schema.minLength(1)),
   triggeredBy: EnrichmentTrigger,
-  requestedBy: Schema.optional(Schema.NullOr(Schema.String))
+  requestedBy: Schema.optionalKey(Schema.NullOr(Schema.String))
 });
 export type EnrichmentRunParams = Schema.Schema.Type<typeof EnrichmentRunParams>;
 
@@ -135,7 +135,7 @@ export type EnrichmentQueuedResponse = Schema.Schema.Type<
 >;
 
 export const EnrichmentRunListOptions = Schema.Struct({
-  status: Schema.optional(EnrichmentRunStatus),
+  status: Schema.optionalKey(EnrichmentRunStatus),
   limit: Schema.Int.pipe(Schema.between(1, 100))
 });
 export type EnrichmentRunListOptions = Schema.Schema.Type<

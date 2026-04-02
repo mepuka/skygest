@@ -13,7 +13,7 @@ const TopicWithOptionalHours = Schema.Struct({
   topic: Schema.String.annotations({
     description: "Topic slug to curate, e.g. 'solar' or 'hydrogen'"
   }),
-  hours: Schema.optional(Schema.String.annotations({
+  hours: Schema.optionalKey(Schema.String.annotations({
     description: "Hours to look back (default: 24)"
   }))
 }) as unknown as Schema.Schema<

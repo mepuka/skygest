@@ -20,20 +20,20 @@ const ExternalEmbed = Schema.Struct({
   uri: Schema.String,
   title: Schema.String,
   description: Schema.String,
-  thumb: Schema.optional(Schema.Unknown)
+  thumb: Schema.optionalKey(Schema.Unknown)
 });
 
 const RecordEmbed = Schema.Struct({
-  uri: Schema.optional(Schema.String),
-  value: Schema.optional(Schema.Struct({
-    text: Schema.optional(Schema.String)
+  uri: Schema.optionalKey(Schema.String),
+  value: Schema.optionalKey(Schema.Struct({
+    text: Schema.optionalKey(Schema.String)
   }))
 });
 
 const Embed = Schema.Struct({
-  $type: Schema.optional(Schema.String),
-  external: Schema.optional(ExternalEmbed),
-  record: Schema.optional(RecordEmbed)
+  $type: Schema.optionalKey(Schema.String),
+  external: Schema.optionalKey(ExternalEmbed),
+  record: Schema.optionalKey(RecordEmbed)
 });
 
 const Label = Schema.Struct({
@@ -45,35 +45,35 @@ const SelfLabels = Schema.Struct({
 });
 
 export const BlueskyPostRecord = Schema.Struct({
-  text: Schema.optional(Schema.String),
-  facets: Schema.optional(Schema.Array(Facet)),
-  embed: Schema.optional(Embed),
-  tags: Schema.optional(Schema.Array(Schema.String)),
-  labels: Schema.optional(SelfLabels)
+  text: Schema.optionalKey(Schema.String),
+  facets: Schema.optionalKey(Schema.Array(Facet)),
+  embed: Schema.optionalKey(Embed),
+  tags: Schema.optionalKey(Schema.Array(Schema.String)),
+  labels: Schema.optionalKey(SelfLabels)
 });
 export type BlueskyPostRecord = Schema.Schema.Type<typeof BlueskyPostRecord>;
 
 const EmbeddedExternal = Schema.Struct({
-  uri: Schema.optional(Schema.String),
-  title: Schema.optional(Schema.String),
-  description: Schema.optional(Schema.String),
-  thumb: Schema.optional(Schema.Unknown)
+  uri: Schema.optionalKey(Schema.String),
+  title: Schema.optionalKey(Schema.String),
+  description: Schema.optionalKey(Schema.String),
+  thumb: Schema.optionalKey(Schema.Unknown)
 });
 
 const EmbeddedRecord = Schema.Struct({
-  uri: Schema.optional(Schema.String),
-  text: Schema.optional(Schema.String)
+  uri: Schema.optionalKey(Schema.String),
+  text: Schema.optionalKey(Schema.String)
 });
 
 export const SlimPostRecord = Schema.Struct({
-  text: Schema.optional(Schema.String),
-  urls: Schema.optional(Schema.Array(Schema.String)),
-  tags: Schema.optional(Schema.Array(Schema.String)),
-  label_values: Schema.optional(Schema.Array(Schema.String)),
-  embed: Schema.optional(Schema.Struct({
-    $type: Schema.optional(Schema.String),
-    external: Schema.optional(EmbeddedExternal),
-    record: Schema.optional(EmbeddedRecord)
+  text: Schema.optionalKey(Schema.String),
+  urls: Schema.optionalKey(Schema.Array(Schema.String)),
+  tags: Schema.optionalKey(Schema.Array(Schema.String)),
+  label_values: Schema.optionalKey(Schema.Array(Schema.String)),
+  embed: Schema.optionalKey(Schema.Struct({
+    $type: Schema.optionalKey(Schema.String),
+    external: Schema.optionalKey(EmbeddedExternal),
+    record: Schema.optionalKey(EmbeddedRecord)
   }))
 });
 export type SlimPostRecord = Schema.Schema.Type<typeof SlimPostRecord>;

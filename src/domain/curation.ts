@@ -29,18 +29,18 @@ export const CurationRecord = Schema.Struct({
 export type CurationRecord = Schema.Schema.Type<typeof CurationRecord>;
 
 export const ListCurationCandidatesInput = Schema.Struct({
-  status: Schema.optional(CurationStatus.annotations({ description: "Filter by curation status (default: flagged)" })),
-  minScore: Schema.optional(Schema.Union(CurationSignalScore, Schema.compose(Schema.NumberFromString, CurationSignalScore)).annotations({ description: "Minimum signal score (0-100) to include" })),
-  topic: Schema.optional(Schema.String.annotations({ description: "Topic slug to filter by" })),
-  since: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts flagged after this Unix epoch timestamp (milliseconds)" })),
-  limit: Schema.optional(FlexibleNumber.annotations({ description: "Maximum number of results to return" }))
+  status: Schema.optionalKey(CurationStatus.annotations({ description: "Filter by curation status (default: flagged)" })),
+  minScore: Schema.optionalKey(Schema.Union(CurationSignalScore, Schema.compose(Schema.NumberFromString, CurationSignalScore)).annotations({ description: "Minimum signal score (0-100) to include" })),
+  topic: Schema.optionalKey(Schema.String.annotations({ description: "Topic slug to filter by" })),
+  since: Schema.optionalKey(FlexibleNumber.annotations({ description: "Filter posts flagged after this Unix epoch timestamp (milliseconds)" })),
+  limit: Schema.optionalKey(FlexibleNumber.annotations({ description: "Maximum number of results to return" }))
 });
 export type ListCurationCandidatesInput = Schema.Schema.Type<typeof ListCurationCandidatesInput>;
 
 export const CuratePostInput = Schema.Struct({
   postUri: PostUri.annotations({ description: "Post URI (at:// or x://) of the post to curate" }),
   action: CurationAction.annotations({ description: "Action: 'curate' to approve for enrichment, 'reject' to dismiss" }),
-  note: Schema.optional(Schema.String.annotations({ description: "Optional review note explaining the curation decision" }))
+  note: Schema.optionalKey(Schema.String.annotations({ description: "Optional review note explaining the curation decision" }))
 });
 export type CuratePostInput = Schema.Schema.Type<typeof CuratePostInput>;
 
@@ -51,7 +51,7 @@ export const CurationCandidateOutput = Schema.extend(
     curationStatus: CurationStatus,
     predicatesApplied: Schema.Array(Schema.String),
     flaggedAt: Schema.Number,
-    enrichmentReadiness: Schema.optionalWith(EnrichmentReadiness, { default: () => "none" as const })
+    enrichmentReadiness: EnrichmentReadiness.pipe(Schema.withDecodingDefaultKey(() => "none" as const))
   })
 );
 export type CurationCandidateOutput = Schema.Schema.Type<typeof CurationCandidateOutput>;

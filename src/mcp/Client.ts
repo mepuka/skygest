@@ -15,19 +15,19 @@ const JsonRpcId = Schema.Union(Schema.Number, Schema.String, Schema.Null);
 const JsonRpcError = Schema.Struct({
   code: Schema.Number,
   message: Schema.String,
-  data: Schema.optional(Schema.Unknown)
+  data: Schema.optionalKey(Schema.Unknown)
 });
 
 const makeJsonRpcSuccess = <A, I>(schema: Schema.Schema<A, I, never>) =>
   Schema.Struct({
     jsonrpc: Schema.Literal("2.0"),
-    id: Schema.optional(JsonRpcId),
+    id: Schema.optionalKey(JsonRpcId),
     result: schema
   });
 
 const makeJsonRpcFailure = Schema.Struct({
   jsonrpc: Schema.Literal("2.0"),
-  id: Schema.optional(JsonRpcId),
+  id: Schema.optionalKey(JsonRpcId),
   error: JsonRpcError
 });
 
@@ -36,7 +36,7 @@ export class McpRequestError extends Schema.TaggedErrorClass<McpRequestError>()(
   {
     operation: Schema.String,
     message: Schema.String,
-    status: Schema.optional(Schema.Number)
+    status: Schema.optionalKey(Schema.Number)
   }
 ) {}
 

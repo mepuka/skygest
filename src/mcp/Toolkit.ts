@@ -86,7 +86,7 @@ const GetPostLinksMcpInput = Schema.Struct({
 
 const StartEnrichmentMcpInput = Schema.Struct({
   postUri: GetPostEnrichmentsInput.fields.postUri,
-  enrichmentType: Schema.optional(EnrichmentKind.annotations({
+  enrichmentType: Schema.optionalKey(EnrichmentKind.annotations({
     description: "Enrichment type: 'vision' for charts/screenshots, 'source-attribution' for links. If omitted, auto-detected from embed type."
   }))
 });

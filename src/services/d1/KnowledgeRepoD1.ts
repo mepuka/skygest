@@ -57,7 +57,7 @@ const PostRowSchema = Schema.Struct({
   did: Schema.String,
   handle: Schema.NullOr(Schema.String),
   avatar: Schema.NullOr(Schema.String),
-  tier: Schema.optionalWith(Schema.String, { default: () => "independent" }),
+  tier: Schema.String.pipe(Schema.withDecodingDefaultKey(() => "independent")),
   text: Schema.String,
   createdAt: Schema.Number,
   topicsCsv: Schema.NullOr(Schema.String)
@@ -82,7 +82,7 @@ const SearchPostRowSchema = Schema.Struct({
   did: Schema.String,
   handle: Schema.NullOr(Schema.String),
   avatar: Schema.NullOr(Schema.String),
-  tier: Schema.optionalWith(Schema.String, { default: () => "independent" }),
+  tier: Schema.String.pipe(Schema.withDecodingDefaultKey(() => "independent")),
   text: Schema.String,
   createdAt: Schema.Number,
   topicsCsv: Schema.NullOr(Schema.String),

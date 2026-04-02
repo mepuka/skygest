@@ -113,7 +113,7 @@ export const EnrichmentExecutionPlan = Schema.Struct({
   enrichmentType: EnrichmentKind,
   schemaVersion: Schema.String.pipe(Schema.minLength(1)),
   decision: EnrichmentPlannerDecision,
-  stopReason: Schema.optional(EnrichmentPlannerStopReason),
+  stopReason: Schema.optionalKey(EnrichmentPlannerStopReason),
   captureStage: Schema.Literal("picked"),
   post: EnrichmentPlannedPostContext,
   embedType: Schema.NullOr(ThreadEmbedType),

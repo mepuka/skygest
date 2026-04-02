@@ -10,7 +10,7 @@ export class BlueskyApiError extends Schema.TaggedErrorClass<BlueskyApiError>()(
   "BlueskyApiError",
   {
     message: Schema.String,
-    status: Schema.optional(Schema.Number)
+    status: Schema.optionalKey(Schema.Number)
   }
 ) {}
 
@@ -66,7 +66,7 @@ export class IngestSchemaDecodeError extends Schema.TaggedErrorClass<IngestSchem
   "IngestSchemaDecodeError",
   {
     message: Schema.String,
-    operation: Schema.optional(Schema.String)
+    operation: Schema.optionalKey(Schema.String)
   }
 ) {}
 
@@ -82,7 +82,7 @@ export class EnrichmentSchemaDecodeError extends Schema.TaggedErrorClass<Enrichm
   "EnrichmentSchemaDecodeError",
   {
     message: Schema.String,
-    operation: Schema.optional(Schema.String)
+    operation: Schema.optionalKey(Schema.String)
   }
 ) {}
 
@@ -124,7 +124,7 @@ export class IngestBoundaryError extends Schema.TaggedErrorClass<IngestBoundaryE
   "IngestBoundaryError",
   {
     message: Schema.String,
-    operation: Schema.optional(Schema.String)
+    operation: Schema.optionalKey(Schema.String)
   }
 ) {}
 
@@ -162,7 +162,7 @@ export class HistoricalRunRepairError extends Schema.TaggedErrorClass<Historical
   {
     message: Schema.String,
     runId: Schema.String,
-    did: Schema.optional(Did),
+    did: Schema.optionalKey(Did),
     operation: Schema.String
   }
 ) {}
@@ -171,7 +171,7 @@ export class GeminiApiError extends Schema.TaggedErrorClass<GeminiApiError>()(
   "GeminiApiError",
   {
     message: Schema.String,
-    status: Schema.optional(Schema.Number)
+    status: Schema.optionalKey(Schema.Number)
   }
 ) {}
 
@@ -179,7 +179,7 @@ export class GeminiParseError extends Schema.TaggedErrorClass<GeminiParseError>(
   "GeminiParseError",
   {
     message: Schema.String,
-    rawOutput: Schema.optional(Schema.String)
+    rawOutput: Schema.optionalKey(Schema.String)
   }
 ) {}
 
@@ -188,7 +188,7 @@ export class EnrichmentAssetFetchError extends Schema.TaggedErrorClass<Enrichmen
   {
     assetKey: Schema.String,
     message: Schema.String,
-    status: Schema.optional(Schema.Number),
+    status: Schema.optionalKey(Schema.Number),
     operation: Schema.String
   }
 ) {}
@@ -197,8 +197,8 @@ export class EnrichmentDependencyPendingError extends Schema.TaggedErrorClass<En
   "EnrichmentDependencyPendingError",
   {
     dependency: Schema.String,
-    postUri: Schema.optional(PostUri),
-    operation: Schema.optional(Schema.String)
+    postUri: Schema.optionalKey(PostUri),
+    operation: Schema.optionalKey(Schema.String)
   }
 ) {}
 
@@ -206,20 +206,20 @@ export const IngestErrorEnvelope = Schema.Struct({
   tag: Schema.String.pipe(Schema.minLength(1)),
   message: Schema.String,
   retryable: Schema.Boolean,
-  status: Schema.optional(Schema.Number),
-  did: Schema.optional(Did),
-  runId: Schema.optional(Schema.String),
-  operation: Schema.optional(Schema.String)
+  status: Schema.optionalKey(Schema.Number),
+  did: Schema.optionalKey(Did),
+  runId: Schema.optionalKey(Schema.String),
+  operation: Schema.optionalKey(Schema.String)
 });
 export type IngestErrorEnvelope = Schema.Schema.Type<typeof IngestErrorEnvelope>;
 
 export const IngestErrorResponse = Schema.Struct({
   error: Schema.String.pipe(Schema.minLength(1)),
   message: Schema.String,
-  retryable: Schema.optional(Schema.Boolean),
-  status: Schema.optional(Schema.Number),
-  did: Schema.optional(Did),
-  runId: Schema.optional(Schema.String)
+  retryable: Schema.optionalKey(Schema.Boolean),
+  status: Schema.optionalKey(Schema.Number),
+  did: Schema.optionalKey(Did),
+  runId: Schema.optionalKey(Schema.String)
 });
 export type IngestErrorResponse = Schema.Schema.Type<typeof IngestErrorResponse>;
 
@@ -227,9 +227,9 @@ export const EnrichmentErrorEnvelope = Schema.Struct({
   tag: Schema.String.pipe(Schema.minLength(1)),
   message: Schema.String,
   retryable: Schema.Boolean,
-  status: Schema.optional(Schema.Number),
-  runId: Schema.optional(Schema.String),
-  operation: Schema.optional(Schema.String)
+  status: Schema.optionalKey(Schema.Number),
+  runId: Schema.optionalKey(Schema.String),
+  operation: Schema.optionalKey(Schema.String)
 });
 export type EnrichmentErrorEnvelope = Schema.Schema.Type<
   typeof EnrichmentErrorEnvelope

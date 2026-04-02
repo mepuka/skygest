@@ -47,7 +47,7 @@ export const BackfillTaskSchema = Schema.Struct({
   mode: Schema.Literal("backfill"),
   runIds: Schema.Tuple(Schema.String),
   requestedAt: Schema.NonNegativeInt,
-  maxAgeDays: Schema.optional(Schema.NonNegativeInt),
+  maxAgeDays: Schema.optionalKey(Schema.NonNegativeInt),
   remainingMaxPosts: Schema.NonNegativeInt,
   totals: TaskTotalsSchema
 });
@@ -128,8 +128,8 @@ export type EnqueueHeadCoordinatorInput = {
 export const EnqueueBackfillCoordinatorInputSchema = Schema.Struct({
   did: Did,
   runId: Schema.String,
-  maxPosts: Schema.optional(Schema.NonNegativeInt),
-  maxAgeDays: Schema.optional(Schema.NonNegativeInt)
+  maxPosts: Schema.optionalKey(Schema.NonNegativeInt),
+  maxAgeDays: Schema.optionalKey(Schema.NonNegativeInt)
 });
 export type EnqueueBackfillCoordinatorInput = {
   readonly did: DidValue;
@@ -141,7 +141,7 @@ export type EnqueueBackfillCoordinatorInput = {
 export const EnqueueReconcileCoordinatorInputSchema = Schema.Struct({
   did: Did,
   runId: Schema.String,
-  depth: Schema.optional(ReconcileDepthSchema)
+  depth: Schema.optionalKey(ReconcileDepthSchema)
 });
 export type EnqueueReconcileCoordinatorInput = {
   readonly did: DidValue;

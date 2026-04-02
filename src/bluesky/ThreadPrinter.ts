@@ -15,9 +15,9 @@ import type { FlattenedPost, FlattenedThread } from "./ThreadFlatten.ts";
 // ---------------------------------------------------------------------------
 
 export const PrinterConfig = Schema.Struct({
-  maxDepth: Schema.optional(Schema.Number),
-  minLikes: Schema.optional(Schema.Number),
-  topN: Schema.optional(Schema.Number)
+  maxDepth: Schema.optionalKey(Schema.Number),
+  minLikes: Schema.optionalKey(Schema.Number),
+  topN: Schema.optionalKey(Schema.Number)
 });
 export type PrinterConfig = Schema.Schema.Type<typeof PrinterConfig>;
 

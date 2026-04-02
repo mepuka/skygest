@@ -19,7 +19,7 @@ const ExpertListRowSchema = Schema.Struct({
   domain: Schema.String,
   source: Schema.String,
   active: ActiveFlag,
-  tier: Schema.optionalWith(Schema.NullOr(Schema.String), { default: () => null })
+  tier: Schema.NullOr(Schema.String).pipe(Schema.withDecodingDefaultKey(() => null))
 });
 const ExpertRecordRowSchema = Schema.Struct({
   did: Schema.String,
@@ -32,7 +32,7 @@ const ExpertRecordRowSchema = Schema.Struct({
   sourceRef: Schema.NullOr(Schema.String),
   shard: Schema.Number,
   active: ActiveFlag,
-  tier: Schema.optionalWith(Schema.NullOr(Schema.String), { default: () => null }),
+  tier: Schema.NullOr(Schema.String).pipe(Schema.withDecodingDefaultKey(() => null)),
   addedAt: Schema.Number,
   lastSyncedAt: Schema.NullOr(Schema.Number)
 });

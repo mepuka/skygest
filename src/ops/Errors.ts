@@ -19,7 +19,7 @@ export class StagingRequestError extends Schema.TaggedErrorClass<StagingRequestE
   {
     operation: Schema.String,
     message: Schema.String,
-    status: Schema.optional(Schema.Number)
+    status: Schema.optionalKey(Schema.Number)
   }
 ) {}
 

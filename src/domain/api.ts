@@ -70,7 +70,7 @@ const withStatus = <A, I, R>(
 const ErrorMessage = Schema.String.pipe(Schema.minLength(1));
 const ErrorFields = {
   message: ErrorMessage,
-  retryable: Schema.optional(Schema.Boolean)
+  retryable: Schema.optionalKey(Schema.Boolean)
 } as const;
 
 export const BadRequestError = withStatus(
@@ -271,9 +271,9 @@ const StringFromBase64Url = Schema.transformOrFail(
   }
 ).annotations({ identifier: "StringFromBase64Url" });
 
-const OptionalNumberFromString = Schema.optional(Schema.NumberFromString);
-const OptionalBooleanFromString = Schema.optional(Schema.BooleanFromString);
-const OptionalString = Schema.optional(Schema.String);
+const OptionalNumberFromString = Schema.optionalKey(Schema.NumberFromString);
+const OptionalBooleanFromString = Schema.optionalKey(Schema.BooleanFromString);
+const OptionalString = Schema.optionalKey(Schema.String);
 const DecodedDid = Schema.compose(Schema.StringFromUriComponent, Did);
 const DecodedAtUri = Schema.compose(Schema.StringFromUriComponent, AtUri);
 const DecodedPostUri = Schema.compose(Schema.StringFromUriComponent, PostUri);
@@ -343,27 +343,27 @@ export const SearchPostsUrlParams = Schema.Struct({
   since: OptionalNumberFromString,
   until: OptionalNumberFromString,
   limit: OptionalNumberFromString,
-  cursor: Schema.optional(SearchPostsCursorString)
+  cursor: Schema.optionalKey(SearchPostsCursorString)
 });
 export type SearchPostsUrlParams = Schema.Schema.Type<typeof SearchPostsUrlParams>;
 
 export const SearchPostsPageInput = Schema.Struct({
   query: Schema.String,
-  topic: Schema.optional(Schema.String),
-  since: Schema.optional(Schema.Number),
-  until: Schema.optional(Schema.Number),
-  limit: Schema.optional(Schema.Number),
-  cursor: Schema.optional(SearchPostsCursor)
+  topic: Schema.optionalKey(Schema.String),
+  since: Schema.optionalKey(Schema.Number),
+  until: Schema.optionalKey(Schema.Number),
+  limit: Schema.optionalKey(Schema.Number),
+  cursor: Schema.optionalKey(SearchPostsCursor)
 });
 export type SearchPostsPageInput = Schema.Schema.Type<typeof SearchPostsPageInput>;
 
 export const SearchPostsPageQueryInput = Schema.Struct({
   query: Schema.String,
-  topicSlugs: Schema.optional(Schema.Array(TopicSlug)),
-  since: Schema.optional(Schema.Number),
-  until: Schema.optional(Schema.Number),
-  limit: Schema.optional(Schema.Number),
-  cursor: Schema.optional(SearchPostsCursor)
+  topicSlugs: Schema.optionalKey(Schema.Array(TopicSlug)),
+  since: Schema.optionalKey(Schema.Number),
+  until: Schema.optionalKey(Schema.Number),
+  limit: Schema.optionalKey(Schema.Number),
+  cursor: Schema.optionalKey(SearchPostsCursor)
 });
 export type SearchPostsPageQueryInput = Schema.Schema.Type<typeof SearchPostsPageQueryInput>;
 
@@ -373,22 +373,22 @@ export type SearchPostsPageResult = {
 };
 
 export const GetRecentPostsPageInput = Schema.Struct({
-  topic: Schema.optional(Schema.String),
-  expertDid: Schema.optional(Did),
-  since: Schema.optional(Schema.Number),
-  until: Schema.optional(Schema.Number),
-  limit: Schema.optional(Schema.Number),
-  cursor: Schema.optional(ChronologicalCursor)
+  topic: Schema.optionalKey(Schema.String),
+  expertDid: Schema.optionalKey(Did),
+  since: Schema.optionalKey(Schema.Number),
+  until: Schema.optionalKey(Schema.Number),
+  limit: Schema.optionalKey(Schema.Number),
+  cursor: Schema.optionalKey(ChronologicalCursor)
 });
 export type GetRecentPostsPageInput = Schema.Schema.Type<typeof GetRecentPostsPageInput>;
 
 export const GetRecentPostsPageUrlParams = Schema.Struct({
   topic: OptionalString,
-  expertDid: Schema.optional(DecodedDid),
+  expertDid: Schema.optionalKey(DecodedDid),
   since: OptionalNumberFromString,
   until: OptionalNumberFromString,
   limit: OptionalNumberFromString,
-  cursor: Schema.optional(ChronologicalCursorString)
+  cursor: Schema.optionalKey(ChronologicalCursorString)
 });
 export type GetRecentPostsPageUrlParams = Schema.Schema.Type<typeof GetRecentPostsPageUrlParams>;
 
@@ -397,11 +397,11 @@ export const GetExpertPostsPageUrlParams = Schema.Struct({
   since: OptionalNumberFromString,
   until: OptionalNumberFromString,
   limit: OptionalNumberFromString,
-  cursor: Schema.optional(ChronologicalCursorString)
+  cursor: Schema.optionalKey(ChronologicalCursorString)
 });
 export type GetExpertPostsPageUrlParams = Schema.Schema.Type<typeof GetExpertPostsPageUrlParams>;
 
-const OptionalThreadTraversalDepthFromString = Schema.optional(
+const OptionalThreadTraversalDepthFromString = Schema.optionalKey(
   Schema.NumberFromString.pipe(Schema.int(), Schema.between(0, 10))
 );
 
@@ -412,22 +412,22 @@ export const GetThreadUrlParams = Schema.Struct({
 export type GetThreadUrlParams = Schema.Schema.Type<typeof GetThreadUrlParams>;
 
 export const GetRecentPostsPageQueryInput = Schema.Struct({
-  topicSlugs: Schema.optional(Schema.Array(TopicSlug)),
-  expertDid: Schema.optional(Did),
-  since: Schema.optional(Schema.Number),
-  until: Schema.optional(Schema.Number),
-  limit: Schema.optional(Schema.Number),
-  cursor: Schema.optional(ChronologicalCursor)
+  topicSlugs: Schema.optionalKey(Schema.Array(TopicSlug)),
+  expertDid: Schema.optionalKey(Did),
+  since: Schema.optionalKey(Schema.Number),
+  until: Schema.optionalKey(Schema.Number),
+  limit: Schema.optionalKey(Schema.Number),
+  cursor: Schema.optionalKey(ChronologicalCursor)
 });
 export type GetRecentPostsPageQueryInput = Schema.Schema.Type<typeof GetRecentPostsPageQueryInput>;
 
 export const GetPostLinksPageInput = Schema.Struct({
-  domain: Schema.optional(Schema.String),
-  topic: Schema.optional(Schema.String),
-  since: Schema.optional(Schema.Number),
-  until: Schema.optional(Schema.Number),
-  limit: Schema.optional(Schema.Number),
-  cursor: Schema.optional(LinkPageCursor)
+  domain: Schema.optionalKey(Schema.String),
+  topic: Schema.optionalKey(Schema.String),
+  since: Schema.optionalKey(Schema.Number),
+  until: Schema.optionalKey(Schema.Number),
+  limit: Schema.optionalKey(Schema.Number),
+  cursor: Schema.optionalKey(LinkPageCursor)
 });
 export type GetPostLinksPageInput = Schema.Schema.Type<typeof GetPostLinksPageInput>;
 
@@ -437,17 +437,17 @@ export const GetPostLinksPageUrlParams = Schema.Struct({
   since: OptionalNumberFromString,
   until: OptionalNumberFromString,
   limit: OptionalNumberFromString,
-  cursor: Schema.optional(LinkPageCursorString)
+  cursor: Schema.optionalKey(LinkPageCursorString)
 });
 export type GetPostLinksPageUrlParams = Schema.Schema.Type<typeof GetPostLinksPageUrlParams>;
 
 export const GetPostLinksPageQueryInput = Schema.Struct({
-  domain: Schema.optional(Schema.String),
-  topicSlugs: Schema.optional(Schema.Array(TopicSlug)),
-  since: Schema.optional(Schema.Number),
-  until: Schema.optional(Schema.Number),
-  limit: Schema.optional(Schema.Number),
-  cursor: Schema.optional(LinkPageCursor)
+  domain: Schema.optionalKey(Schema.String),
+  topicSlugs: Schema.optionalKey(Schema.Array(TopicSlug)),
+  since: Schema.optionalKey(Schema.Number),
+  until: Schema.optionalKey(Schema.Number),
+  limit: Schema.optionalKey(Schema.Number),
+  cursor: Schema.optionalKey(LinkPageCursor)
 });
 export type GetPostLinksPageQueryInput = Schema.Schema.Type<typeof GetPostLinksPageQueryInput>;
 
@@ -459,12 +459,12 @@ export const ListExpertsUrlParams = Schema.Struct({
 export type ListExpertsUrlParams = Schema.Schema.Type<typeof ListExpertsUrlParams>;
 
 export const ListTopicsUrlParams = Schema.Struct({
-  view: Schema.optional(Schema.Literal("facets", "concepts"))
+  view: Schema.optionalKey(Schema.Literal("facets", "concepts"))
 });
 export type ListTopicsUrlParams = Schema.Schema.Type<typeof ListTopicsUrlParams>;
 
 export const ExpandTopicUrlParams = Schema.Struct({
-  mode: Schema.optional(Schema.Literal("exact", "descendants", "ancestors"))
+  mode: Schema.optionalKey(Schema.Literal("exact", "descendants", "ancestors"))
 });
 export type ExpandTopicUrlParams = Schema.Schema.Type<typeof ExpandTopicUrlParams>;
 
@@ -537,13 +537,13 @@ export type PostLinksPageResult = {
 };
 
 export const ListPublicationsUrlParams = Schema.Struct({
-  tier: Schema.optional(PublicationTier),
-  source: Schema.optional(PublicationSource),
+  tier: Schema.optionalKey(PublicationTier),
+  source: Schema.optionalKey(PublicationSource),
   limit: OptionalNumberFromString
 });
 export type ListPublicationsUrlParams = Schema.Schema.Type<typeof ListPublicationsUrlParams>;
 
-const OptionalEditorialScoreFromString = Schema.optional(
+const OptionalEditorialScoreFromString = Schema.optionalKey(
   Schema.compose(Schema.NumberFromString, EditorialScore)
 );
 
@@ -576,7 +576,7 @@ export type EnrichmentRunPathParams = Schema.Schema.Type<
 >;
 
 export const ListEnrichmentRunsUrlParams = Schema.Struct({
-  status: Schema.optional(EnrichmentRunStatus),
+  status: Schema.optionalKey(EnrichmentRunStatus),
   limit: OptionalNumberFromString
 });
 export type ListEnrichmentRunsUrlParams = Schema.Schema.Type<
@@ -586,7 +586,7 @@ export type ListEnrichmentRunsUrlParams = Schema.Schema.Type<
 export const StartEnrichmentInput = Schema.Struct({
   postUri: PostUri,
   enrichmentType: EnrichmentKind,
-  schemaVersion: Schema.optional(
+  schemaVersion: Schema.optionalKey(
     Schema.String.pipe(Schema.minLength(1))
   )
 });
@@ -675,9 +675,9 @@ export const StagingStats = Schema.Struct({
 
 export const ImportLinkInput = Schema.Struct({
   url: Schema.String,
-  title: Schema.optional(Schema.String),
-  description: Schema.optional(Schema.String),
-  domain: Schema.optional(Schema.String)
+  title: Schema.optionalKey(Schema.String),
+  description: Schema.optionalKey(Schema.String),
+  domain: Schema.optionalKey(Schema.String)
 });
 export type ImportLinkInput = Schema.Schema.Type<typeof ImportLinkInput>;
 
@@ -687,8 +687,8 @@ export const ImportExpertInput = Schema.Struct({
   domain: Schema.String,
   source: ExpertSource,
   tier: ExpertTier,
-  displayName: Schema.optional(Schema.String),
-  avatar: Schema.optional(Schema.String)
+  displayName: Schema.optionalKey(Schema.String),
+  avatar: Schema.optionalKey(Schema.String)
 });
 export type ImportExpertInput = Schema.Schema.Type<typeof ImportExpertInput>;
 
@@ -697,9 +697,9 @@ export const ImportPostInput = Schema.Struct({
   did: Did,
   text: Schema.String,
   createdAt: Schema.Number,
-  hashtags: Schema.optional(Schema.Array(Schema.String)),
-  embedType: Schema.optional(Schema.NullOr(EmbedKind)),
-  embedPayload: Schema.optional(Schema.NullOr(EmbedPayload)),
+  hashtags: Schema.optionalKey(Schema.Array(Schema.String)),
+  embedType: Schema.optionalKey(Schema.NullOr(EmbedKind)),
+  embedPayload: Schema.optionalKey(Schema.NullOr(EmbedPayload)),
   links: Schema.Array(ImportLinkInput)
 });
 export type ImportPostInput = Schema.Schema.Type<typeof ImportPostInput>;

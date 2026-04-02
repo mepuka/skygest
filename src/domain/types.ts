@@ -42,7 +42,7 @@ export const platformFromUri = (uri: PostUri): Platform =>
 
 export const FeedItem = Schema.Struct({
   post: AtUri,
-  reason: Schema.optional(Schema.Unknown)
+  reason: Schema.optionalKey(Schema.Unknown)
 });
 export type FeedItem = Schema.Schema.Type<typeof FeedItem>;
 
@@ -56,14 +56,14 @@ export const RawEvent = Schema.Struct({
   collection: Schema.String,
   did: Did,
   uri: AtUri,
-  cid: Schema.optional(Schema.String),
-  record: Schema.optional(Schema.Unknown),
+  cid: Schema.optionalKey(Schema.String),
+  record: Schema.optionalKey(Schema.Unknown),
   timeUs: Schema.Number
 });
 export type RawEvent = Schema.Schema.Type<typeof RawEvent>;
 
 export const RawEventBatch = Schema.Struct({
-  cursor: Schema.optional(Schema.Number),
+  cursor: Schema.optionalKey(Schema.Number),
   events: Schema.Array(RawEvent)
 });
 export type RawEventBatch = Schema.Schema.Type<typeof RawEventBatch>;
@@ -81,7 +81,7 @@ export const PostprocessMessage = Schema.Struct({
   limit: Schema.Number,
   cursorStart: Schema.Number,
   cursorEnd: Schema.Number,
-  defaultFrom: Schema.optional(Schema.Number),
+  defaultFrom: Schema.optionalKey(Schema.Number),
   recs: Schema.Array(FeedItem)
 });
 export type PostprocessMessage = Schema.Schema.Type<typeof PostprocessMessage>;
