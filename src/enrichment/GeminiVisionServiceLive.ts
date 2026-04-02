@@ -22,6 +22,7 @@ import {
   MediaType,
   normalizeMediaType,
   ChartType,
+  ChartTypeMembers,
   normalizeChartType,
   ChartAxis,
   ChartSeries,
@@ -100,6 +101,33 @@ const LenientChartType = Schema.String.pipe(
     encode: SchemaGetter.passthrough()
   })
 );
+
+const isKnownChartType = (
+  value: string
+): value is (typeof ChartTypeMembers)[number] =>
+  ChartTypeMembers.includes(value as (typeof ChartTypeMembers)[number]);
+
+/** Classification only uses chartTypes as routing hints, so decode leniently.
+ *  Normalize loose spellings and drop unknown values instead of failing the
+ *  whole classification and falling back to full extraction. */
+const LenientClassificationChartTypes = Schema.Array(Schema.String).pipe(
+  Schema.decode({
+    decode: SchemaGetter.transform((chartTypes: ReadonlyArray<string>) =>
+      chartTypes.map(normalizeChartType).filter(isKnownChartType)
+    ),
+    encode: SchemaGetter.passthrough()
+  }),
+  Schema.decodeTo(Schema.Array(ChartType))
+);
+
+const ClassificationDecoder = Schema.Struct({
+  mediaType: LenientMediaType,
+  chartTypes: LenientClassificationChartTypes.pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  ),
+  hasDataPoints: Schema.Boolean,
+  isCompound: Schema.Boolean
+});
 
 /** Shared metadata decoder fields — tolerates missing keys and loose values. */
 const metadataDecoderFields = {
@@ -249,8 +277,7 @@ const inferMediaType = (
     candidate.xAxis !== null ||
     candidate.yAxis !== null ||
     candidate.series.length > 0 ||
-    candidate.temporalCoverage !== null ||
-    candidate.sourceLines.length > 0
+    candidate.temporalCoverage !== null
   );
 
   return chartLike ? "chart" : "photo";
@@ -404,7 +431,7 @@ export const GeminiVisionServiceLive = Layer.effect(
         }
 
         const classification = yield* Schema.decodeUnknownEffect(
-          Schema.fromJsonString(ImageClassification)
+          Schema.fromJsonString(ClassificationDecoder)
         )(rawText).pipe(
           Effect.mapError((error) =>
             new GeminiParseError({

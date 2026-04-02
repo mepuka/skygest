@@ -235,6 +235,35 @@ describe("GeminiVisionService", () => {
         }).pipe(runWith)
     );
 
+    it.effect(
+      "normalizes known classification chart types and ignores unknown ones",
+      () =>
+        Effect.gen(function* () {
+          mockGenerateContent.mockReset();
+          mockGenerateContent.mockResolvedValueOnce({
+            text: encodeJsonString({
+              mediaType: "chart",
+              chartTypes: ["Contour Map", "Sunburst Chart"],
+              hasDataPoints: true,
+              isCompound: true
+            })
+          });
+
+          const svc = yield* GeminiVisionService;
+          const result = yield* svc.classifyImage(
+            "https://gemini.files/abc",
+            "image/png"
+          );
+
+          expect(result).toEqual({
+            mediaType: "chart",
+            chartTypes: ["contour-map"],
+            hasDataPoints: true,
+            isCompound: true
+          });
+        }).pipe(runWith)
+    );
+
     it.effect("fails with GeminiParseError for non-JSON text", () =>
       Effect.gen(function* () {
         mockGenerateContent.mockReset();
@@ -883,6 +912,44 @@ describe("GeminiVisionService", () => {
         const result = yield* svc.extractChartData("https://gemini.files/abc", "image/png");
         expect(result.chartTypes).toEqual(["heatmap", "scatter-plot"]);
       }).pipe(runWith)
+    );
+  });
+
+  describe("extractImageSummary", () => {
+    it.effect(
+      "defaults omitted mediaType to photo when lightweight output only has provenance signals",
+      () =>
+        Effect.gen(function* () {
+          mockGenerateContent.mockReset();
+          mockGenerateContent.mockResolvedValueOnce({
+            text: encodeJsonString({
+              chartTypes: [],
+              altText: "Screenshot of a quarterly report footer",
+              title: "Quarterly report",
+              keyFindings: ["Report highlights storage additions"],
+              sourceLines: [{ sourceText: "Source: EIA", datasetName: null }],
+              visibleUrls: ["eia.gov"],
+              organizationMentions: [{ name: "EIA", location: "footer" }],
+              logoText: ["EIA"]
+            })
+          });
+
+          const svc = yield* GeminiVisionService;
+          const result = yield* svc.extractImageSummary(
+            "https://gemini.files/abc",
+            "image/png"
+          );
+
+          expect(result.mediaType).toBe("photo");
+          expect(result.chartTypes).toEqual([]);
+          expect(result.sourceLines).toEqual([
+            { sourceText: "Source: EIA", datasetName: null }
+          ]);
+          expect(result.visibleUrls).toEqual(["eia.gov"]);
+          expect(result.organizationMentions).toEqual([
+            { name: "EIA", location: "footer" }
+          ]);
+        }).pipe(runWith)
     );
   });
 });
