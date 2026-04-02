@@ -91,6 +91,18 @@ export const normalizeChartType = (raw: string): string => {
 };
 
 // ---------------------------------------------------------------------------
+// Image classification (lightweight classify-step output)
+// ---------------------------------------------------------------------------
+
+export const ImageClassification = Schema.Struct({
+  mediaType: MediaType,
+  chartTypes: Schema.Array(ChartType),
+  hasDataPoints: Schema.Boolean,
+  isCompound: Schema.Boolean
+});
+export type ImageClassification = Schema.Schema.Type<typeof ImageClassification>;
+
+// ---------------------------------------------------------------------------
 // Alt text provenance (from AltTextProvenanceScheme)
 // ---------------------------------------------------------------------------
 

@@ -12,20 +12,11 @@
 
 import { ServiceMap, Effect, Schema } from "effect";
 import type { VisionAssetAnalysis } from "../domain/enrichment";
-import { MediaType, ChartType } from "../domain/media";
 import type { GeminiApiError, GeminiParseError } from "../domain/errors";
+import type { ImageClassification } from "../domain/media";
 
-// ---------------------------------------------------------------------------
-// ImageClassification — lightweight classify-step output
-// ---------------------------------------------------------------------------
-
-export const ImageClassification = Schema.Struct({
-  mediaType: MediaType,
-  chartTypes: Schema.Array(ChartType),
-  hasDataPoints: Schema.Boolean,
-  isCompound: Schema.Boolean
-});
-export type ImageClassification = Schema.Schema.Type<typeof ImageClassification>;
+// Re-export from domain — canonical definition lives in src/domain/media.ts
+export { ImageClassification } from "../domain/media";
 
 // ---------------------------------------------------------------------------
 // Upload result
