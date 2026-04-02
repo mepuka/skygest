@@ -15,8 +15,8 @@ export type ParsedPostUrl = {
   readonly id: string;
 };
 
-const BSKY_RE = /^https:\/\/bsky\.app\/profile\/([^/]+)\/post\/([a-zA-Z0-9]+)$/;
-const TWITTER_RE = /^https:\/\/(?:x\.com|twitter\.com)\/([^/]+)\/status\/(\d+)$/;
+const BSKY_RE = /^https:\/\/bsky\.app\/profile\/([^/]+)\/post\/([a-zA-Z0-9]+)/;
+const TWITTER_RE = /^https:\/\/(?:x\.com|twitter\.com)\/([^/]+)\/status\/(\d+)/;
 
 const SUPPORTED_FORMATS =
   `Supported:\n` +

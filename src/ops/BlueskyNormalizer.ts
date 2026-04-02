@@ -79,7 +79,7 @@ export const normalizeBlueskyThread = (
     } as ImportPostInput,
     expert: {
       did: author.did as Did,
-      handle: author.handle ?? "unknown",
+      handle: author.handle && author.handle !== "handle.invalid" ? author.handle : `did:${author.did}`,
       domain: "energy",
       source: "bluesky-import" as const,
       tier: tierDefault as any,
