@@ -49,4 +49,5 @@ memory
 
 # Vision eval run outputs
 eval/vision/runs/
+eval/source-attribution/runs/
 analysis/threads.db
