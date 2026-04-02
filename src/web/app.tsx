@@ -1,4 +1,4 @@
-import { RegistryProvider } from "@effect-atom/atom-react";
+import { RegistryProvider } from "./lib/react.tsx";
 import { createRoot } from "react-dom/client";
 import { Shell } from "./components/Shell.tsx";
 

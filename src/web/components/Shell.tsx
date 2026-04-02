@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import { useAtomValue } from "@effect-atom/atom-react";
-import { Result } from "@effect-atom/atom";
+import { useAtomValue } from "../lib/react.tsx";
+import { AsyncResult } from "effect/unstable/reactivity";
 import { feedAtom, publicationsAtom, topicLookupAtom } from "../lib/atoms.ts";
 import type { TopicEntry } from "../lib/types.ts";
 import { PostCard } from "./PostCard.tsx";
@@ -15,7 +15,7 @@ export function Shell() {
 
   const [activePostUri, setActivePostUri] = useState<string | null>(null);
 
-  const pubIndex = Result.getOrElse(pubsResult, () => EMPTY_PUBS);
+  const pubIndex = AsyncResult.getOrElse(pubsResult, () => EMPTY_PUBS);
 
   const resolveTopicEntries = useCallback(
     (slugs: readonly string[]): readonly TopicEntry[] =>
@@ -44,13 +44,13 @@ export function Shell() {
 
             {/* Main Column — magazine layer */}
             <div className="w-[680px] shrink-0 max-lg:w-full">
-              {Result.builder(feedResult)
+              {AsyncResult.builder(feedResult)
                 .onInitialOrWaiting(() => (
                   <div className="py-8 text-center text-mid text-sm">
                     Loading…
                   </div>
                 ))
-                .onError((error) => (
+                .onError((error: any) => (
                   <div className="py-8 text-center text-accent text-sm">
                     {"message" in error ? String(error.message) : "Something went wrong."}
                   </div>
@@ -60,7 +60,7 @@ export function Shell() {
                     Something went wrong.
                   </div>
                 ))
-                .onSuccess((feed) => {
+                .onSuccess((feed: any) => {
                   const feedLinks = feed.linksMap;
                   return feed.items.length === 0 ? (
                     <div className="py-8 text-center text-mid text-sm">
@@ -68,7 +68,7 @@ export function Shell() {
                     </div>
                   ) : (
                     <>
-                      {feed.items.map((post) => (
+                      {feed.items.map((post: any) => (
                         <PostCard
                           key={post.uri}
                           post={post}

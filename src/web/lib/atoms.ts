@@ -1,32 +1,29 @@
-import { Atom, Result } from "@effect-atom/atom";
+import { AsyncResult, Atom } from "effect/unstable/reactivity";
 import { Effect } from "effect";
 import { SkygestApi } from "./client.ts";
 import { buildPublicationIndex } from "./publications.ts";
 import type { TopicEntry } from "./types.ts";
 
-// @ts-expect-error — @effect-atom/atom types lag behind Effect 4 HttpApi changes
 export const topicsAtom = SkygestApi.query("topics", "list", {
-  urlParams: {}
+  query: {}
 }).pipe(
   Atom.mapResult((res: any) => res.items),
   Atom.keepAlive
 );
 
-// @ts-expect-error — @effect-atom/atom types lag behind Effect 4 HttpApi changes
 export const publicationsAtom = SkygestApi.query("publications", "list", {
-  urlParams: {}
+  query: {}
 }).pipe(
   Atom.mapResult((res: any) => buildPublicationIndex(res.items)),
   Atom.keepAlive
 );
 
-// @ts-expect-error — @effect-atom/atom types lag behind Effect 4 HttpApi changes
-export const linksAtom = SkygestApi.runtime.atom(() =>
+// @ts-expect-error — `as any` client casts widen requirements to `unknown`
+export const linksAtom = SkygestApi.runtime.atom((_get) =>
   Effect.gen(function* () {
-    // @ts-expect-error — @effect-atom/atom types lag behind Effect 4
     const client = yield* SkygestApi;
     const result = yield* (client as any).links.list({
-      urlParams: { limit: 100 }
+      query: { limit: 100 }
     });
     const byPostUri = new Map<string, any>();
     for (const link of (result as any).items) {
@@ -38,19 +35,18 @@ export const linksAtom = SkygestApi.runtime.atom(() =>
   })
 );
 
-// @ts-expect-error — @effect-atom/atom types lag behind Effect 4 HttpApi changes
-export const feedAtom = SkygestApi.runtime.atom(() =>
+// @ts-expect-error — `as any` client casts widen requirements to `unknown`
+export const feedAtom = SkygestApi.runtime.atom((_get) =>
   Effect.gen(function* () {
-    // @ts-expect-error — @effect-atom/atom types lag behind Effect 4
     const client = yield* SkygestApi;
     const curated = yield* (client as any).posts.curated({
-      urlParams: { limit: 30 }
+      query: { limit: 30 }
     });
     // Curated picks may reference older posts — fetch links without the
     // recent-window constraint that linksAtom uses, so previews render
     // regardless of post age.
     const linksResult = yield* (client as any).links.list({
-      urlParams: { limit: 100 }
+      query: { limit: 100 }
     });
     const linksMap = new Map<string, any>();
     for (const link of (linksResult as any).items) {
@@ -64,7 +60,7 @@ export const feedAtom = SkygestApi.runtime.atom(() =>
 
 /** Resolve topic slugs to label entries for OntologyBreadcrumb */
 export const topicLookupAtom = Atom.make((get) => {
-  const items = Result.getOrElse(get(topicsAtom), () => [] as readonly never[]);
+  const items = AsyncResult.getOrElse(get(topicsAtom), () => [] as readonly never[]);
   const map = new Map<string, TopicEntry>();
   for (const t of items) {
     map.set(t.slug, { slug: t.slug, label: t.label });
