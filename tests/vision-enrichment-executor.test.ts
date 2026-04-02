@@ -94,10 +94,10 @@ describe("fullExtractionEligible", () => {
     ).toBe(false);
   });
 
-  it("document → false", () => {
+  it("document-excerpt → false", () => {
     expect(
       fullExtractionEligible({
-        mediaType: "document",
+        mediaType: "document-excerpt",
         chartTypes: [],
         hasDataPoints: false,
         isCompound: false
@@ -127,13 +127,13 @@ describe("fullExtractionEligible", () => {
     ).toBe(false);
   });
 
-  it("chart with isCompound: true → false", () => {
+  it("video → false", () => {
     expect(
       fullExtractionEligible({
-        mediaType: "chart",
-        chartTypes: ["bar-chart"],
-        hasDataPoints: true,
-        isCompound: true
+        mediaType: "video",
+        chartTypes: [],
+        hasDataPoints: false,
+        isCompound: false
       })
     ).toBe(false);
   });
