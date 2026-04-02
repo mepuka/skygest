@@ -45,35 +45,29 @@ const MigrateResponse = Schema.Struct({
   ok: Schema.Literal(true)
 });
 
-const extractStatus = (error: unknown): number | undefined => {
-  if (typeof error !== "object" || error === null) return undefined;
+const wrapError = (operation: string) => (error: unknown) =>
+  error instanceof StagingRequestError
+    ? error
+    : new StagingRequestError({
+        operation,
+        message: stringifyUnknown(error)
+      });
 
-  // Effect 4: HttpClientError wraps reason (StatusCodeError) inside .reason
-  const reason = "reason" in error ? (error as Record<string, unknown>).reason : error;
-  if (typeof reason !== "object" || reason === null) return undefined;
-
-  if (
-    "_tag" in reason &&
-    (reason as Record<string, unknown>)._tag === "StatusCodeError" &&
-    "response" in reason
-  ) {
-    const response = (reason as Record<string, unknown>).response;
-    if (typeof response === "object" && response !== null && "status" in response) {
-      return (response as Record<string, unknown>).status as number;
-    }
-  }
-
-  return undefined;
-};
-
-const wrapError = (operation: string) => (error: unknown) => {
-  const status = extractStatus(error);
-  return new StagingRequestError({
-    operation,
-    message: stringifyUnknown(error),
-    ...(status !== undefined ? { status } : {})
-  });
-};
+const assertOk = (
+  response: HttpClientResponse.HttpClientResponse,
+  operation: string
+): Effect.Effect<HttpClientResponse.HttpClientResponse, StagingRequestError> =>
+  response.status >= 200 && response.status < 300
+    ? Effect.succeed(response)
+    : Effect.gen(function* () {
+        const body = yield* response.text.pipe(Effect.orElseSucceed(() => ""));
+        const truncated = body.slice(0, 500);
+        return yield* new StagingRequestError({
+          operation,
+          message: `${response.status} ${response.request.method} ${response.request.url}${truncated ? `\n${truncated}` : ""}`,
+          status: response.status
+        });
+      });
 
 const jsonRequest = <S extends Schema.Top>(
   request: Effect.Effect<HttpClientResponse.HttpClientResponse, HttpClientError.HttpClientError>,
@@ -81,7 +75,8 @@ const jsonRequest = <S extends Schema.Top>(
   operation: string
 ) =>
   request.pipe(
-    Effect.flatMap(HttpClientResponse.filterStatusOk),
+    Effect.mapError(wrapError(operation)),
+    Effect.flatMap((response) => assertOk(response, operation)),
     Effect.flatMap(HttpClientResponse.schemaBodyJson(schema)),
     Effect.mapError(wrapError(operation))
   );
@@ -91,7 +86,8 @@ const textRequest = (
   operation: string
 ) =>
   request.pipe(
-    Effect.flatMap(HttpClientResponse.filterStatusOk),
+    Effect.mapError(wrapError(operation)),
+    Effect.flatMap((response) => assertOk(response, operation)),
     Effect.flatMap((response) => response.text),
     Effect.mapError(wrapError(operation))
   );
