@@ -62,7 +62,7 @@ const VisionAssetSource = Schema.Literals(["embed", "media"]);
 
 const VisionAssetAnalysisV2 = Schema.Struct({
   mediaType: MediaType,
-  chartTypes: Schema.Array(ChartType),
+  chartTypes: Schema.Array(Schema.String),
   altText: Schema.NullOr(Schema.String),
   altTextProvenance: AltTextProvenance,
   xAxis: Schema.NullOr(ChartAxis),
@@ -80,7 +80,7 @@ const VisionAssetAnalysisV2 = Schema.Struct({
 });
 const LegacyVisionAssetAnalysis = Schema.Struct({
   mediaType: MediaType,
-  chartTypes: Schema.Array(ChartType),
+  chartTypes: Schema.Array(Schema.String),
   altText: Schema.NullOr(Schema.String),
   altTextProvenance: AltTextProvenance,
   xAxis: Schema.NullOr(ChartAxis),

@@ -48,18 +48,45 @@ export const ChartType = Schema.Literals([
   "bar-chart",
   "candlestick-chart",
   "choropleth-map",
+  "contour-map",
   "data-table",
   "dual-axis-chart",
+  "flow-chart",
+  "gauge-chart",
   "heatmap",
   "line-chart",
   "pie-chart",
   "point-map",
+  "radar-chart",
   "sankey-diagram",
   "scatter-plot",
   "stacked-bar-chart",
-  "treemap"
+  "timeline-chart",
+  "treemap",
+  "waterfall-chart"
 ]);
 export type ChartType = Schema.Schema.Type<typeof ChartType>;
+
+/** Normalize a Gemini chartType to canonical kebab-case form.
+ *  Handles PascalCase, spaces, and common aliases. */
+export const normalizeChartType = (raw: string): string => {
+  // Lowercase, trim, replace spaces with hyphens
+  const kebab = raw.toLowerCase().trim().replace(/\s+/g, "-");
+  const aliases: Record<string, string> = {
+    "contour": "contour-map",
+    "heat-map": "heatmap",
+    "donut-chart": "pie-chart",
+    "doughnut-chart": "pie-chart",
+    "column-chart": "bar-chart",
+    "histogram": "bar-chart",
+    "bubble-chart": "scatter-plot",
+    "map": "choropleth-map",
+    "table": "data-table",
+    "gantt-chart": "timeline-chart",
+    "funnel-chart": "flow-chart"
+  };
+  return aliases[kebab] ?? kebab;
+};
 
 // ---------------------------------------------------------------------------
 // Alt text provenance (from AltTextProvenanceScheme)

@@ -21,6 +21,7 @@ import {
   MediaType,
   normalizeMediaType,
   ChartType,
+  normalizeChartType,
   ChartAxis,
   ChartSeries,
   TemporalCoverage
@@ -83,10 +84,20 @@ const LenientMediaType = Schema.String.pipe(
   Schema.decodeTo(MediaType)
 );
 
+/** Lenient ChartType: normalizes to kebab-case but accepts any value.
+ *  The contract sends the enum to guide Gemini, but the decoder is permissive
+ *  so unknown chart types don't fail enrichment. Validate downstream if needed. */
+const LenientChartType = Schema.String.pipe(
+  Schema.decode({
+    decode: SchemaGetter.transform(normalizeChartType),
+    encode: SchemaGetter.passthrough()
+  })
+);
+
 /** Lenient decoder for Gemini responses — tolerates missing keys and loose values. */
 const GeminiExtractionDecoder = Schema.Struct({
   mediaType: Schema.optionalKey(LenientMediaType),
-  chartTypes: Schema.Array(ChartType).pipe(
+  chartTypes: Schema.Array(LenientChartType).pipe(
     Schema.withDecodingDefaultKey(() => [] as const)
   ),
   altText: Schema.NullOr(Schema.String).pipe(
