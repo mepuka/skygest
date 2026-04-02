@@ -2,7 +2,7 @@ import type { D1Database, D1PreparedStatement } from "@cloudflare/workers-types"
 import { D1Client } from "@effect/sql-d1";
 import { Array as A, Effect, Layer, Option, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
-import { SqlError } from "effect/unstable/sql";
+import { SqlError, UnknownError as SqlUnknownError } from "effect/unstable/sql/SqlError";
 import type {
   GetPostLinksPageQueryInput,
   GetRecentPostsPageQueryInput,
@@ -110,8 +110,10 @@ const toSearchPostResult = (row: SearchPostRow) => ({
 
 const makeBatchError = (cause: unknown, message: string) =>
   new SqlError({
-    cause,
-    message: `${message}: ${toCauseMessage(cause)}`
+    reason: new SqlUnknownError({
+      cause,
+      message: `${message}: ${toCauseMessage(cause)}`
+    })
   });
 
 type D1BatchBindValue = string | number | null;

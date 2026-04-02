@@ -1,10 +1,12 @@
-import { Option, Schema } from "effect";
+import { Result, Schema } from "effect";
 import { HttpsUrl, type Did } from "../domain/types";
 
-const decodeHttpsUrl = Schema.decodeUnknownOption(HttpsUrl);
+const decodeHttpsUrl = Schema.decodeUnknownResult(HttpsUrl);
 
-export const parseAvatarUrl = (raw: string): HttpsUrl | null =>
-  Option.getOrNull(decodeHttpsUrl(raw));
+export const parseAvatarUrl = (raw: string): HttpsUrl | null => {
+  const result = decodeHttpsUrl(raw);
+  return Result.isSuccess(result) ? result.success : null;
+};
 
 export const feedThumbnailUrl = (did: Did, blobCid: string): HttpsUrl => {
   const url = `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${blobCid}@jpeg`;

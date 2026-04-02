@@ -1,4 +1,4 @@
-import { Args, Command, Options } from "effect/unstable/cli";
+import { Argument, Command, Flag } from "effect/unstable/cli";
 import { Console, Effect, Option, Redacted, Stream } from "effect";
 import { energySeedDid } from "../bootstrap/CheckedInExpertSeeds";
 import type { ExpertTier } from "../domain/bi";
@@ -80,66 +80,66 @@ const expertTiers = [
   "independent"
 ] as const;
 
-const envOption = Options.text("env").pipe(
-  Options.withDescription("Wrangler environment name"),
-  Options.withDefault("staging")
+const envOption = Flag.string("env").pipe(
+  Flag.withDescription("Wrangler environment name"),
+  Flag.withDefault("staging")
 );
 
-const workerOption = Options.choice("worker", deployWorkers).pipe(
-  Options.withDescription("Worker selection"),
-  Options.withDefault("all")
+const workerOption = Flag.choice("worker", deployWorkers).pipe(
+  Flag.withDescription("Worker selection"),
+  Flag.withDefault("all")
 );
 
-const baseUrlOption = Options.text("base-url").pipe(
-  Options.withDescription("Base workers.dev URL for the staging agent worker")
+const baseUrlOption = Flag.string("base-url").pipe(
+  Flag.withDescription("Base workers.dev URL for the staging agent worker")
 );
 
-const enrichmentStatusOption = Options.choice("status", enrichmentStatuses).pipe(
-  Options.withDescription("Filter enrichment runs by status"),
-  Options.withDefault("all")
+const enrichmentStatusOption = Flag.choice("status", enrichmentStatuses).pipe(
+  Flag.withDescription("Filter enrichment runs by status"),
+  Flag.withDefault("all")
 );
 
-const enrichmentLimitOption = Options.integer("limit").pipe(
-  Options.withDescription("Maximum enrichment runs to show"),
-  Options.withDefault(20)
+const enrichmentLimitOption = Flag.integer("limit").pipe(
+  Flag.withDescription("Maximum enrichment runs to show"),
+  Flag.withDefault(20)
 );
 
-const runIdOption = Options.text("run-id").pipe(
-  Options.withDescription("Run id")
+const runIdOption = Flag.string("run-id").pipe(
+  Flag.withDescription("Run id")
 );
 
-const postUriOption = Options.text("post-uri").pipe(
-  Options.withDescription("Post URI")
+const postUriOption = Flag.string("post-uri").pipe(
+  Flag.withDescription("Post URI")
 );
 
-const curationActionOption = Options.choice("action", curationActions).pipe(
-  Options.withDescription("Curation action"),
-  Options.withDefault("curate")
+const curationActionOption = Flag.choice("action", curationActions).pipe(
+  Flag.withDescription("Curation action"),
+  Flag.withDefault("curate")
 );
 
-const noteOption = Options.text("note").pipe(
-  Options.withDescription("Optional review note"),
-  Options.optional
+const noteOption = Flag.string("note").pipe(
+  Flag.withDescription("Optional review note"),
+  Flag.optional
 );
 
-const enrichmentTypeOption = Options.choice("enrichment-type", enrichmentKinds).pipe(
-  Options.withDescription("Enrichment lane to run")
+const enrichmentTypeOption = Flag.choice("enrichment-type", enrichmentKinds).pipe(
+  Flag.withDescription("Enrichment lane to run")
 );
 
-const schemaVersionOption = Options.text("schema-version").pipe(
-  Options.withDescription("Schema version"),
-  Options.withDefault("auto")
+const schemaVersionOption = Flag.string("schema-version").pipe(
+  Flag.withDescription("Schema version"),
+  Flag.withDefault("auto")
 );
 
 const expectCondition = (condition: boolean, message: string) =>
   condition
     ? Effect.void
-    : SmokeAssertionError.make({ message });
+    : Effect.fail(new SmokeAssertionError({ message }));
 
 const expectNonEmpty = <A>(items: ReadonlyArray<A>, message: string) =>
   items.length > 0
     ? Effect.succeed(items)
-    : SmokeAssertionError.make({ message });
+    : Effect.fail(new SmokeAssertionError({ message }));
 
 const waitForIngestRun = Effect.fn("ops.waitForIngestRun")(function* (
   baseUrl: URL,
@@ -148,40 +148,30 @@ const waitForIngestRun = Effect.fn("ops.waitForIngestRun")(function* (
 ) {
   const client = yield* StagingOperatorClient;
   const queued = yield* client.pollIngest(baseUrl, secret, did);
-  const finalState = yield* Effect.iterate(
-    {
-      attempt: 0,
-      run: null as IngestRunRecord | null
-    },
-    {
-      while: ({ attempt, run }) =>
-        attempt < 30 && (run === null || (run.status !== "complete" && run.status !== "failed")),
-      body: ({ attempt }) =>
-        client.getIngestRun(baseUrl, secret, queued.runId).pipe(
-          Effect.tap((run) =>
-            run.status === "complete" || run.status === "failed"
-              ? Effect.void
-              : Effect.sleep(1000)
-          ),
-          Effect.map((run) => ({
-            attempt: attempt + 1,
-            run
-          }))
-        )
+  let iterState = { attempt: 0, run: null as IngestRunRecord | null };
+  while (
+    iterState.attempt < 30 &&
+    (iterState.run === null || (iterState.run.status !== "complete" && iterState.run.status !== "failed"))
+  ) {
+    const run = yield* client.getIngestRun(baseUrl, secret, queued.runId);
+    if (run.status !== "complete" && run.status !== "failed") {
+      yield* Effect.sleep(1000);
     }
-  );
+    iterState = { attempt: iterState.attempt + 1, run };
+  }
+  const finalState = iterState;
 
   if (finalState.run?.status === "complete") {
     return finalState.run;
   }
 
   if (finalState.run?.status === "failed") {
-    return yield* SmokeAssertionError.make({
+    return yield* new SmokeAssertionError({
       message: `ingest run ${finalState.run.id} failed: ${stringifyUnknown(finalState.run.error ?? "unknown error")}`
     });
   }
 
-  return yield* SmokeAssertionError.make({
+  return yield* new SmokeAssertionError({
     message: `ingest run ${queued.runId} did not finish within the expected window`
   });
 });
@@ -190,7 +180,7 @@ const parseBaseUrl = Effect.fn("ops.parseBaseUrl")(function* (value: string) {
   return yield* Effect.try({
     try: () => new URL(value.endsWith("/") ? value : `${value}/`),
     catch: () =>
-      InvalidBaseUrlError.make({
+      new InvalidBaseUrlError({
         value
       })
   });
@@ -700,22 +690,22 @@ const stageCommand = Command.make("stage", {}, () => Effect.void).pipe(
 // Twitter import commands
 // ---------------------------------------------------------------------------
 
-const tierOption = Options.choice("tier", expertTiers).pipe(
-  Options.withDescription("Expert tier classification")
+const tierOption = Flag.choice("tier", expertTiers).pipe(
+  Flag.withDescription("Expert tier classification")
 );
 
-const twitterLimitOption = Options.integer("limit").pipe(
-  Options.withDescription("Maximum tweets to import"),
-  Options.withDefault(100)
+const twitterLimitOption = Flag.integer("limit").pipe(
+  Flag.withDescription("Maximum tweets to import"),
+  Flag.withDefault(100)
 );
 
-const sinceOption = Options.text("since").pipe(
-  Options.withDescription("Only import tweets after this ISO date"),
-  Options.optional
+const sinceOption = Flag.string("since").pipe(
+  Flag.withDescription("Only import tweets after this ISO date"),
+  Flag.optional
 );
 
-const handleArg = Args.text({ name: "handle" });
-const tweetIdArg = Args.text({ name: "tweet-id" });
+const handleArg = Argument.string("handle");
+const tweetIdArg = Argument.string("tweet-id");
 
 /**
  * Dynamically import the twitter scraper at runtime.
@@ -915,8 +905,7 @@ export const opsCommand = Command.make("ops", {}, () => Effect.void).pipe(
   Command.withSubcommands([deployCommand, stageCommand, twitterCommand])
 );
 
-const cli = Command.run(opsCommand, {
-  name: "Skygest Ops",
+const cli = Command.runWith(opsCommand, {
   version: "0.1.0"
 });
 

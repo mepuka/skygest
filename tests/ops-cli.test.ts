@@ -1,5 +1,4 @@
-// TODO(effect4): BunContext.layer was removed; using ChildProcessSpawner as stand-in
-import { ChildProcessSpawner as BunContext } from "effect/unstable/process";
+import * as BunContext from "./helpers/BunContext";
 import { FetchHttpClient } from "effect/unstable/http";
 import { Effect, Layer, Redacted } from "effect";
 import { describe, expect, it } from "@effect/vitest";
@@ -448,7 +447,7 @@ describe("ops CLI", () => {
         makeCliLayer({
           operatorSecretLayer: Layer.effect(
             OperatorSecret,
-            MissingOperatorSecretEnvError.make({
+            new MissingOperatorSecretEnvError({
               envVar: "SKYGEST_OPERATOR_SECRET"
             })
           )
@@ -472,7 +471,7 @@ describe("ops CLI", () => {
       const failingLayer = makeCliLayer({
         client: Layer.succeed(StagingOperatorClient, {
           health: (baseUrl) =>
-            Effect.fail(StagingRequestError.make({
+            Effect.fail(new StagingRequestError({
               operation: "health",
               status: baseUrl.hostname.length,
               message: "boom"

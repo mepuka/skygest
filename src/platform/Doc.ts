@@ -123,5 +123,5 @@ const renderDoc = <A>(doc: Doc<A>, currentIndent: number): string => {
  */
 export const render = <A>(
   doc: Doc<A>,
-  _options?: { readonly style?: string }
+  _options?: { readonly style?: string; readonly options?: { readonly lineWidth?: number } }
 ): string => renderDoc(doc, 0);

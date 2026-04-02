@@ -1,13 +1,9 @@
-import * as HttpApiBuilder from "effect/unstable/httpapi/HttpApiBuilder";
-import * as HttpServer from "effect/unstable/http/HttpServer";
+import * as HttpRouter from "effect/unstable/http/HttpRouter";
 import { type ServiceMap, Layer } from "effect";
 import { badRequestError } from "../domain/api";
 import { encodeJsonString } from "../platform/Json";
 
-type WebHandler = ReturnType<typeof HttpApiBuilder.toWebHandler>;
-
-const withPlatformLayer = (layer: Layer.Layer<any, any, never>) =>
-  Layer.mergeAll(layer, HttpServer.layerContext);
+type WebHandler = ReturnType<typeof HttpRouter.toWebHandler>;
 
 const isDecodeErrorBody = (
   value: unknown
@@ -48,7 +44,7 @@ export const handleWithApiLayer = async (
   layer: Layer.Layer<any, any, never>,
   context?: ServiceMap.ServiceMap<never>
 ): Promise<Response> => {
-  const webHandler = HttpApiBuilder.toWebHandler(withPlatformLayer(layer));
+  const webHandler = HttpRouter.toWebHandler(layer as any);
 
   try {
     return await normalizeBadRequestResponse(
@@ -79,12 +75,12 @@ export const makeCachedApiHandler = <Env>(
 
       cached = {
         env,
-        webHandler: HttpApiBuilder.toWebHandler(withPlatformLayer(buildLayer(env)))
+        webHandler: HttpRouter.toWebHandler(buildLayer(env) as any)
       };
     }
 
     return normalizeBadRequestResponse(
-      await cached.webHandler.handler(request, context)
+      await cached.webHandler.handler(request, context as ServiceMap.ServiceMap<unknown>)
     );
   };
 };

@@ -1,4 +1,4 @@
-import { ChildProcess as Command, ChildProcessSpawner as CommandExecutor } from "effect/unstable/process";
+import { ChildProcess as Command, ChildProcessSpawner as CPS } from "effect/unstable/process";
 import { ServiceMap, Effect, Layer } from "effect";
 import { stringifyUnknown } from "../platform/Json";
 import { WranglerDeployError } from "./Errors";
@@ -15,29 +15,24 @@ export class WranglerCli extends ServiceMap.Service<
   static readonly live = Layer.effect(
     WranglerCli,
     Effect.gen(function* () {
-      const executor = yield* CommandExecutor.CommandExecutor;
+      const spawner = yield* CPS.ChildProcessSpawner;
 
-      const deploy = Effect.fn("WranglerCli.deploy")(function* (
+      const deploy = (
         configFile: string,
         env: string
-      ) {
+      ) => Effect.gen(function* () {
         const commandText = `bunx wrangler deploy --config ${configFile} --env ${env}`;
-        const exitCode = yield* executor.exitCode(
-          Command.make(
-            "bunx",
-            "wrangler",
-            "deploy",
-            "--config",
-            configFile,
-            "--env",
-            env
-          ).pipe(
-            Command.stdout("inherit"),
-            Command.stderr("inherit")
-          )
-        ).pipe(
+        const cmd = Command.make("bunx", [
+          "wrangler",
+          "deploy",
+          "--config",
+          configFile,
+          "--env",
+          env
+        ]);
+        const exitCode = yield* spawner.exitCode(cmd).pipe(
           Effect.mapError((error) =>
-            WranglerDeployError.make({
+            new WranglerDeployError({
               command: commandText,
               message: stringifyUnknown(error)
             })
@@ -45,10 +40,10 @@ export class WranglerCli extends ServiceMap.Service<
         );
 
         if (exitCode !== 0) {
-          return yield* WranglerDeployError.make({
+          return yield* Effect.fail(new WranglerDeployError({
             command: commandText,
             message: `wrangler exited with status ${String(exitCode)}`
-          });
+          }));
         }
       });
 

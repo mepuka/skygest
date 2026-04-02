@@ -7,7 +7,7 @@
  * Enrichment types use media.ts types for chart/vision domain concepts.
  */
 
-import { Schema } from "effect";
+import { Schema, SchemaGetter } from "effect";
 import { PostUri } from "./types";
 import {
   MediaType,
@@ -34,11 +34,11 @@ import {
 // Enrichment kind discriminator
 // ---------------------------------------------------------------------------
 
-export const EnrichmentKind = Schema.Literal(
+export const EnrichmentKind = Schema.Literals([
   "vision",
   "source-attribution",
   "grounding"
-);
+]);
 export type EnrichmentKind = Schema.Schema.Type<typeof EnrichmentKind>;
 
 export const defaultSchemaVersionForEnrichmentKind = (
@@ -53,8 +53,8 @@ export const defaultSchemaVersionForEnrichmentKind = (
   }
 };
 
-const VisionAssetType = Schema.Literal("image", "video");
-const VisionAssetSource = Schema.Literal("embed", "media");
+const VisionAssetType = Schema.Literals(["image", "video"]);
+const VisionAssetSource = Schema.Literals(["embed", "media"]);
 
 // ---------------------------------------------------------------------------
 // Vision enrichment (SKY-16: chart analysis + alt text)
@@ -93,12 +93,9 @@ const LegacyVisionAssetAnalysis = Schema.Struct({
   modelId: Schema.String,
   processedAt: Schema.Number
 });
-const LegacyVisionAssetAnalysisNormalized = Schema.transform(
-  LegacyVisionAssetAnalysis,
-  VisionAssetAnalysisV2,
-  {
-    strict: true,
-    decode: (legacy) =>
+const LegacyVisionAssetAnalysisNormalized = LegacyVisionAssetAnalysis.pipe(
+  Schema.decodeTo(VisionAssetAnalysisV2, {
+    decode: SchemaGetter.transform((legacy: Schema.Schema.Type<typeof LegacyVisionAssetAnalysis>) =>
       ({
         ...legacy,
         sourceLines: legacy.sourceLines.map((sourceLine) => ({
@@ -108,8 +105,8 @@ const LegacyVisionAssetAnalysisNormalized = Schema.transform(
         visibleUrls: [],
         organizationMentions: [],
         logoText: []
-      }),
-    encode: (value) =>
+      })),
+    encode: SchemaGetter.transform((value: Schema.Schema.Type<typeof VisionAssetAnalysisV2>) =>
       ({
         mediaType: value.mediaType,
         chartTypes: value.chartTypes,
@@ -126,37 +123,37 @@ const LegacyVisionAssetAnalysisNormalized = Schema.transform(
         title: value.title,
         modelId: value.modelId,
         processedAt: value.processedAt
-      })
-  }
+      }))
+  })
 );
-export const VisionAssetAnalysis = Schema.Union(
+export const VisionAssetAnalysis = Schema.Union([
   VisionAssetAnalysisV2,
   LegacyVisionAssetAnalysisNormalized
-);
+]);
 export type VisionAssetAnalysis = Schema.Schema.Type<typeof VisionAssetAnalysis>;
 
 export const VisionSynthesisFinding = Schema.Struct({
-  text: Schema.String.pipe(Schema.minLength(1)),
-  assetKeys: Schema.Array(Schema.String.pipe(Schema.minLength(1)))
+  text: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
+  assetKeys: Schema.Array(Schema.String.pipe(Schema.check(Schema.isMinLength(1))))
 });
 export type VisionSynthesisFinding = Schema.Schema.Type<
   typeof VisionSynthesisFinding
 >;
 
 export const VisionPostSummary = Schema.Struct({
-  text: Schema.String.pipe(Schema.minLength(1)),
+  text: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   mediaTypes: Schema.Array(MediaType),
   chartTypes: Schema.Array(ChartType),
-  titles: Schema.Array(Schema.String.pipe(Schema.minLength(1))),
+  titles: Schema.Array(Schema.String.pipe(Schema.check(Schema.isMinLength(1)))),
   keyFindings: Schema.Array(VisionSynthesisFinding)
 });
 export type VisionPostSummary = Schema.Schema.Type<typeof VisionPostSummary>;
 
 export const VisionAssetEnrichment = Schema.Struct({
-  assetKey: Schema.String.pipe(Schema.minLength(1)),
+  assetKey: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   assetType: VisionAssetType,
   source: VisionAssetSource,
-  index: Schema.NonNegativeInt,
+  index: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   originalAltText: Schema.NullOr(Schema.String),
   analysis: VisionAssetAnalysis
 });
@@ -169,7 +166,7 @@ export const VisionEnrichment = Schema.Struct({
   summary: VisionPostSummary,
   assets: Schema.Array(VisionAssetEnrichment),
   modelId: Schema.String,
-  promptVersion: Schema.String.pipe(Schema.minLength(1)),
+  promptVersion: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   processedAt: Schema.Number
 });
 export type VisionEnrichment = Schema.Schema.Type<typeof VisionEnrichment>;
@@ -194,27 +191,24 @@ const LegacySourceAttributionEnrichment = Schema.Struct({
   socialProvenance: Schema.NullOr(SocialProvenance),
   processedAt: Schema.Number
 });
-const LegacySourceAttributionEnrichmentNormalized = Schema.transform(
-  LegacySourceAttributionEnrichment,
-  SourceAttributionEnrichmentV2,
-  {
-    strict: true,
-    decode: (
-      legacy
+const LegacySourceAttributionEnrichmentNormalized = LegacySourceAttributionEnrichment.pipe(
+  Schema.decodeTo(SourceAttributionEnrichmentV2, {
+    decode: SchemaGetter.transform((
+      legacy: Schema.Schema.Type<typeof LegacySourceAttributionEnrichment>
     ): Schema.Schema.Type<typeof SourceAttributionEnrichmentV2> => {
       const resolution = legacy.provider === null
-        ? "unmatched"
-        : "matched";
+        ? "unmatched" as const
+        : "matched" as const;
 
       return {
         ...legacy,
         resolution,
         providerCandidates: []
       };
-    },
-    encode: (
-      value
-    ): Schema.Schema.Type<typeof LegacySourceAttributionEnrichment> => ({
+    }),
+    encode: SchemaGetter.transform((
+      value: Schema.Schema.Type<typeof SourceAttributionEnrichmentV2>
+    ) => ({
         kind: value.kind,
         provider:
           value.provider as Schema.Schema.Type<
@@ -226,13 +220,13 @@ const LegacySourceAttributionEnrichmentNormalized = Schema.transform(
             typeof LegacySourceAttributionEnrichment
           >["socialProvenance"],
         processedAt: value.processedAt
-      })
-  }
+      })) as any
+  })
 );
-export const SourceAttributionEnrichment = Schema.Union(
+export const SourceAttributionEnrichment = Schema.Union([
   SourceAttributionEnrichmentV2,
   LegacySourceAttributionEnrichmentNormalized
-);
+]);
 export type SourceAttributionEnrichment = Schema.Schema.Type<
   typeof SourceAttributionEnrichment
 >;
@@ -259,11 +253,11 @@ export type GroundingEnrichment = Schema.Schema.Type<typeof GroundingEnrichment>
 // EnrichmentOutput union
 // ---------------------------------------------------------------------------
 
-export const EnrichmentOutput = Schema.Union(
+export const EnrichmentOutput = Schema.Union([
   VisionEnrichment,
   SourceAttributionEnrichment,
   GroundingEnrichment
-);
+]);
 export type EnrichmentOutput = Schema.Schema.Type<typeof EnrichmentOutput>;
 
 export const VisionPostEnrichmentResult = Schema.Struct({
@@ -293,11 +287,11 @@ export type GroundingPostEnrichmentResult = Schema.Schema.Type<
   typeof GroundingPostEnrichmentResult
 >;
 
-export const PostEnrichmentResult = Schema.Union(
+export const PostEnrichmentResult = Schema.Union([
   VisionPostEnrichmentResult,
   SourceAttributionPostEnrichmentResult,
   GroundingPostEnrichmentResult
-);
+]);
 export type PostEnrichmentResult = Schema.Schema.Type<
   typeof PostEnrichmentResult
 >;
@@ -314,17 +308,17 @@ export type PostEnrichmentsOutput = Schema.Schema.Type<
 // Enrichment readiness (SKY-77: shared read model)
 // ---------------------------------------------------------------------------
 
-export const EnrichmentReadiness = Schema.Literal(
+export const EnrichmentReadiness = Schema.Literals([
   "none",
   "pending",
   "complete",
   "failed",
   "needs-review"
-);
+]);
 export type EnrichmentReadiness = Schema.Schema.Type<typeof EnrichmentReadiness>;
 
 export const GetPostEnrichmentsInput = Schema.Struct({
-  postUri: PostUri.annotations({ description: "Post URI (at:// or x://) of the post to inspect" })
+  postUri: PostUri.annotate({ description: "Post URI (at:// or x://) of the post to inspect" })
 });
 export type GetPostEnrichmentsInput = Schema.Schema.Type<typeof GetPostEnrichmentsInput>;
 
@@ -334,11 +328,11 @@ export type GetPostEnrichmentsInput = Schema.Schema.Type<typeof GetPostEnrichmen
  */
 export const PostEnrichmentRunSummary = Schema.Struct({
   enrichmentType: EnrichmentKind,
-  status: Schema.Literal("queued", "running", "complete", "failed", "needs-review"),
-  phase: Schema.Literal(
+  status: Schema.Literals(["queued", "running", "complete", "failed", "needs-review"]),
+  phase: Schema.Literals([
     "queued", "assembling", "planning", "executing",
     "validating", "persisting", "complete", "failed", "needs-review"
-  ),
+  ]),
   lastProgressAt: Schema.NullOr(Schema.Number),
   finishedAt: Schema.NullOr(Schema.Number)
 });

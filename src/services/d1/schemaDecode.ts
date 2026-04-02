@@ -14,15 +14,15 @@ const toDecodeMessage = (cause: unknown) => {
   }
 };
 
-export const decodeWithDbError = <A, I>(
-  schema: Schema.Schema<A, I, never>,
+export const decodeWithDbError = <S extends Schema.Decoder<unknown>>(
+  schema: S,
   input: unknown,
   message: string
-) =>
+): Effect.Effect<S["Type"], DbError> =>
   Effect.try({
     try: () => Schema.decodeUnknownSync(schema)(input),
     catch: (cause) =>
-      DbError.make({
+      new DbError({
         message: `${message}: ${toDecodeMessage(cause)}`
       })
   });

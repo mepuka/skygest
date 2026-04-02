@@ -1,5 +1,7 @@
-import { Config, ServiceMap, Effect, Layer, Redacted } from "effect";
+import { Config, ConfigProvider, ServiceMap, Effect, Layer, Redacted } from "effect";
 import { MissingOperatorSecretEnvError } from "./Errors";
+
+const SecretConfig = Config.redacted("SKYGEST_OPERATOR_SECRET");
 
 export class OperatorSecret extends ServiceMap.Service<
   OperatorSecret,
@@ -10,18 +12,19 @@ export class OperatorSecret extends ServiceMap.Service<
   static readonly live = Layer.effect(
     OperatorSecret,
     Effect.gen(function* () {
-      const value = yield* Config.redacted("SKYGEST_OPERATOR_SECRET").pipe(
+      const provider = ConfigProvider.fromEnv();
+      const value = yield* SecretConfig.parse(provider).pipe(
         Effect.mapError(() =>
-          MissingOperatorSecretEnvError.make({
+          new MissingOperatorSecretEnvError({
             envVar: "SKYGEST_OPERATOR_SECRET"
           })
         )
       );
 
       if (Redacted.value(value).trim().length === 0) {
-        return yield* MissingOperatorSecretEnvError.make({
+        return yield* Effect.fail(new MissingOperatorSecretEnvError({
           envVar: "SKYGEST_OPERATOR_SECRET"
-        });
+        }));
       }
 
       return { value };

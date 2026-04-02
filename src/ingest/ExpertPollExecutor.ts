@@ -1,5 +1,6 @@
 import { ServiceMap, Effect, Layer } from "effect";
-import type { SqlError } from "effect/unstable/sql";
+import { SqlError } from "effect/unstable/sql/SqlError";
+import { stripUndefined } from "../platform/Json";
 import type { DbError } from "../domain/errors";
 import type {
   DeletedKnowledgePost,
@@ -285,23 +286,20 @@ export class ExpertPollExecutor extends ServiceMap.Service<
           } satisfies PollWindowState;
         };
 
-        const finalState = yield* Effect.iterate(
-          emptyPollWindowState(options.initialCursor),
-          {
-            while: (state) =>
-              state.pagesFetched < options.maxPages &&
-              !state.completed,
-            body: (state) =>
-              repoRecords.listRecords({
-                repo: expert.did,
-                collection: POSTS_COLLECTION,
-                cursor: state.cursor ?? undefined,
-                limit: HEAD_PAGE_LIMIT
-              }).pipe(
-                Effect.map((page) => applyPage(state, page))
-              )
-          }
-        );
+        let iterState = emptyPollWindowState(options.initialCursor);
+        while (
+          iterState.pagesFetched < options.maxPages &&
+          !iterState.completed
+        ) {
+          const page = yield* repoRecords.listRecords(stripUndefined({
+            repo: expert.did,
+            collection: POSTS_COLLECTION,
+            cursor: iterState.cursor ?? undefined,
+            limit: HEAD_PAGE_LIMIT
+          }));
+          iterState = applyPage(iterState, page);
+        }
+        const finalState = iterState;
 
         return {
           fetchedRecords: finalState.fetchedRecords,
@@ -499,9 +497,9 @@ export class ExpertPollExecutor extends ServiceMap.Service<
             nextCursor: window.completed ? null : window.nextCursor
           } satisfies ExpertPollExecutionResult;
         }).pipe(
-          Effect.catchAll((error) =>
+          Effect.catch((error) =>
             persistFailure(expert.did, request, error).pipe(
-              Effect.zipRight(
+              Effect.andThen(
                 Effect.failSync(() => error as BlueskyApiError | SqlError | DbError)
               )
             )
@@ -516,7 +514,7 @@ export class ExpertPollExecutor extends ServiceMap.Service<
       ) {
         const expert = yield* expertsRepo.getByDid(did);
         if (expert === null) {
-          return yield* ExpertNotFoundError.make({ did });
+          return yield* new ExpertNotFoundError({ did });
         }
 
         return yield* runExpert(expert, request, options);

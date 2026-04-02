@@ -1,27 +1,24 @@
 import { ChildProcessSpawner } from "effect/unstable/process";
-import { Effect, Layer, Logger, LogLevel, Runtime } from "effect";
+import { Effect, Layer, Runtime } from "effect";
 import { runOpsCli } from "../ops/Cli";
 import { OperatorSecret } from "../ops/OperatorSecret";
 import { StagingOperatorClient } from "../ops/StagingOperatorClient";
 import { WranglerCli } from "../ops/WranglerCli";
 
-// TODO(effect4): BunContext.layer was removed; provide individual platform layers
-const bunLayer = ChildProcessSpawner.layer;
-const wranglerLayer = WranglerCli.live.pipe(Layer.provideMerge(bunLayer));
+// TODO(effect4): provide a real ChildProcessSpawner implementation for Bun
+const wranglerLayer = WranglerCli.live;
 const liveLayer = Layer.mergeAll(
-  bunLayer,
   wranglerLayer,
-  OperatorSecret.live,
-  StagingOperatorClient.live
+  OperatorSecret.live
+).pipe(
+  Layer.provideMerge(StagingOperatorClient.live)
 );
 
-// TODO(effect4): BunRuntime.runMain replaced with Runtime.makeRunMain
 const runMain = Runtime.makeRunMain(({ fiber, teardown }) => {
-  fiber.addObserver((exit) => teardown(exit));
+  fiber.addObserver((exit) => teardown(exit, (code) => process.exit(code)));
 });
 
 Effect.suspend(() => runOpsCli(process.argv)).pipe(
   Effect.provide(liveLayer),
-  Logger.withMinimumLogLevel(LogLevel.Info),
   runMain
 );

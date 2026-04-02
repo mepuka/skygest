@@ -63,8 +63,8 @@ describe("EnrichmentTriggerClient", () => {
           postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
           enrichmentType: "vision"
         })
-        .pipe(Effect.either);
-      expect(result._tag).toBe("Left");
+        .pipe(Effect.result);
+      expect(result._tag).toBe("Err");
     }).pipe(Effect.provide(layer));
   });
 

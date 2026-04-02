@@ -37,7 +37,7 @@ const GlossaryResource = McpServer.resource({
 
 type QueryLayer = Layer.Layer<KnowledgeQueryService | EditorialService | CurationService | BlueskyClient | PostEnrichmentReadService, any, never>;
 
-const mcpServerLayer = McpServer.layerHttpRouter({
+const mcpServerLayer = McpServer.layerHttp({
   name: "skygest-bi-mcp",
   version: "0.1.0",
   path: "/mcp"
@@ -68,9 +68,9 @@ const makeMcpLayer = (
     }
   })();
 
-  const promptsLayer: Layer.Layer<never, never, never> = profile === "workflow-write"
+  const promptsLayer = (profile === "workflow-write"
     ? WorkflowPromptsLayer
-    : ReadOnlyPromptsLayer;
+    : ReadOnlyPromptsLayer) as Layer.Layer<never, never, never>;
 
   return toolkitAndHandlers.pipe(
     Layer.provideMerge(GlossaryResource),

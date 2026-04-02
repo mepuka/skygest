@@ -51,7 +51,7 @@ const timingSafeEqual = (a: string, b: string): Effect.Effect<boolean> => {
     };
 
     if (typeof subtle.timingSafeEqual === "function") {
-      return subtle.timingSafeEqual(bufA.buffer, bufB.buffer);
+      return subtle.timingSafeEqual(bufA.buffer as ArrayBuffer, bufB.buffer as ArrayBuffer);
     }
 
     // Fallback for non-Workers runtimes (test / Node / Bun):
@@ -83,7 +83,7 @@ export class AuthService extends ServiceMap.Service<
       const requireOperator = Effect.fn("AuthService.requireOperator")(function* (
         headers: Headers
       ) {
-        const configuredSecret = Redacted.value(config.operatorSecret);
+        const configuredSecret: string = Redacted.value(config.operatorSecret) as string;
 
         const authHeader = headers.get(AUTHORIZATION_HEADER);
         const token = authHeader !== null ? extractBearerToken(authHeader) : null;

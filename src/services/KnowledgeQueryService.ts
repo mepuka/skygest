@@ -1,5 +1,6 @@
 import { ServiceMap, Effect, Layer } from "effect";
-import type { SqlError } from "effect/unstable/sql";
+import { stripUndefined } from "../platform/Json";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type {
   GetPostLinksPageInput,
@@ -90,13 +91,13 @@ export class KnowledgeQueryService extends ServiceMap.Service<
 
       const searchPosts = Effect.fn("KnowledgeQueryService.searchPosts")(function* (input: SearchPostsInput) {
         const topicSlugs = yield* ontology.resolveCanonicalTopicSlugs(input.topic);
-        return yield* knowledgeRepo.searchPosts({
+        return yield* knowledgeRepo.searchPosts(stripUndefined({
           query: input.query,
           since: input.since,
           until: input.until,
           limit: clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax),
           ...(topicSlugs === undefined ? {} : { topicSlugs })
-        });
+        }));
       });
 
       const searchPostsPage = Effect.fn("KnowledgeQueryService.searchPostsPage")(function* (
@@ -126,14 +127,14 @@ export class KnowledgeQueryService extends ServiceMap.Service<
 
       const getRecentPosts = Effect.fn("KnowledgeQueryService.getRecentPosts")(function* (input: GetRecentPostsInput) {
         const topicSlugs = yield* ontology.resolveCanonicalTopicSlugs(input.topic);
-        return yield* knowledgeRepo.getRecentPosts({
+        return yield* knowledgeRepo.getRecentPosts(stripUndefined({
           expertDid: input.expertDid,
           since: input.since,
           until: input.until,
           cursor: input.cursor,
           limit: clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax),
           ...(topicSlugs === undefined ? {} : { topicSlugs })
-        });
+        }));
       });
 
       const getRecentPostsPage = Effect.fn("KnowledgeQueryService.getRecentPostsPage")(function* (
@@ -141,14 +142,14 @@ export class KnowledgeQueryService extends ServiceMap.Service<
       ) {
         const topicSlugs = yield* ontology.resolveCanonicalTopicSlugs(input.topic);
         const limit = clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax);
-        const rows = yield* knowledgeRepo.getRecentPostsPage({
+        const rows = yield* knowledgeRepo.getRecentPostsPage(stripUndefined({
           expertDid: input.expertDid,
           since: input.since,
           until: input.until,
           limit: limit + 1,
           ...(input.cursor === undefined ? {} : { cursor: input.cursor }),
           ...(topicSlugs === undefined ? {} : { topicSlugs })
-        });
+        }));
         const hasMore = rows.length > limit;
         const items = hasMore ? rows.slice(0, limit) : rows;
         const lastItem = items[items.length - 1];
@@ -166,14 +167,14 @@ export class KnowledgeQueryService extends ServiceMap.Service<
 
       const getPostLinks = Effect.fn("KnowledgeQueryService.getPostLinks")(function* (input: GetPostLinksInput) {
         const topicSlugs = yield* ontology.resolveCanonicalTopicSlugs(input.topic);
-        return yield* knowledgeRepo.getPostLinks({
+        return yield* knowledgeRepo.getPostLinks(stripUndefined({
           domain: input.domain,
           since: input.since,
           until: input.until,
           cursor: input.cursor,
           limit: clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax),
           ...(topicSlugs === undefined ? {} : { topicSlugs })
-        });
+        }));
       });
 
       const getPostLinksPage = Effect.fn("KnowledgeQueryService.getPostLinksPage")(function* (
@@ -181,14 +182,14 @@ export class KnowledgeQueryService extends ServiceMap.Service<
       ) {
         const topicSlugs = yield* ontology.resolveCanonicalTopicSlugs(input.topic);
         const limit = clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax);
-        const rows = yield* knowledgeRepo.getPostLinksPage({
+        const rows = yield* knowledgeRepo.getPostLinksPage(stripUndefined({
           domain: input.domain,
           since: input.since,
           until: input.until,
           limit: limit + 1,
           ...(input.cursor === undefined ? {} : { cursor: input.cursor }),
           ...(topicSlugs === undefined ? {} : { topicSlugs })
-        });
+        }));
         const hasMore = rows.length > limit;
         const items = hasMore ? rows.slice(0, limit) : rows;
         const lastItem = items[items.length - 1];
@@ -263,11 +264,11 @@ export class KnowledgeQueryService extends ServiceMap.Service<
       });
 
       const listPublications = Effect.fn("KnowledgeQueryService.listPublications")(function* (input: ListPublicationsInput) {
-        return yield* publicationsRepo.list({
+        return yield* publicationsRepo.list(stripUndefined({
           tier: input.tier,
           source: input.source,
           limit: clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax)
-        });
+        }));
       });
 
       return {

@@ -1,5 +1,5 @@
 import { DurableObject } from "cloudflare:workers";
-import { Effect, Either, ManagedRuntime, Schema } from "effect";
+import { Effect, Result, ManagedRuntime, Schema } from "effect";
 import type { Did as DidValue } from "../domain/types";
 import {
   IngestSchemaDecodeError,
@@ -78,18 +78,18 @@ export class ExpertPollCoordinatorDo extends DurableObject<WorkflowIngestEnvBind
       Effect.annotateLogs(annotations)
     );
 
-  private decode<A, I>(
-    schema: Schema.Schema<A, I, never>,
+  private decode<S extends Schema.Decoder<unknown>>(
+    schema: S,
     input: unknown,
     operation: string
-  ): A {
-    const decoded = Schema.decodeUnknownEither(schema)(input);
-    if (Either.isRight(decoded)) {
-      return decoded.right;
+  ): S["Type"] {
+    const decoded = Schema.decodeUnknownResult(schema)(input);
+    if (Result.isSuccess(decoded)) {
+      return decoded.success;
     }
 
-    throw IngestSchemaDecodeError.make({
-      message: formatSchemaParseError(decoded.left),
+    throw new IngestSchemaDecodeError({
+      message: formatSchemaParseError(decoded.failure),
       operation
     });
   }

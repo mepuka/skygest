@@ -1,6 +1,7 @@
-import { Array as Arr, Either, Option, ParseResult, Schema } from "effect";
+import { Array as Arr, Result, Option, Schema, SchemaIssue } from "effect";
 import type { LinkRecord } from "../domain/bi";
 import { normalizeDomain } from "../domain/normalize";
+import { stripUndefined } from "../platform/Json";
 import type { Did } from "../domain/types";
 import { extractBlobCid, feedThumbnailUrl } from "./BskyCdn";
 
@@ -10,10 +11,10 @@ const LinkFeature = Schema.Struct({
 });
 
 const Facet = Schema.Struct({
-  features: Schema.Array(Schema.Union(
+  features: Schema.Array(Schema.Union([
     LinkFeature,
     Schema.Unknown
-  ))
+  ]))
 });
 
 const ExternalEmbed = Schema.Struct({
@@ -78,16 +79,17 @@ export const SlimPostRecord = Schema.Struct({
 });
 export type SlimPostRecord = Schema.Schema.Type<typeof SlimPostRecord>;
 
-const decodeBlueskyPostRecord = Schema.decodeUnknownOption(BlueskyPostRecord);
-export const decodeSlimPostRecordEither = Schema.decodeUnknownEither(SlimPostRecord);
+const decodeBlueskyPostRecord = Schema.decodeUnknownResult(BlueskyPostRecord);
+export const decodeSlimPostRecordEither = Schema.decodeUnknownResult(SlimPostRecord);
 export const decodeSlimPostRecord = (input: unknown) =>
-  Either.match(decodeSlimPostRecordEither(input), {
-    onLeft: () => Option.none(),
-    onRight: Option.some
+  Result.match(decodeSlimPostRecordEither(input), {
+    onFailure: () => Option.none(),
+    onSuccess: Option.some
   });
 
-export const formatSlimPostRecordDecodeError = (error: ParseResult.ParseError) =>
-  ParseResult.TreeFormatter.formatErrorSync(error);
+const _issueFormatter = SchemaIssue.makeFormatterDefault();
+export const formatSlimPostRecordDecodeError = (error: SchemaIssue.Issue) =>
+  _issueFormatter(error);
 
 export const extractFacetUrls = (
   facets: ReadonlyArray<{ readonly features: ReadonlyArray<unknown> }> | undefined
@@ -101,42 +103,42 @@ export const extractFacetUrls = (
       if (typeof feature === "object" && feature !== null) {
         const value = feature as Record<string, unknown>;
         if (value.$type === "app.bsky.richtext.facet#link" && typeof value.uri === "string") {
-          return Option.some(value.uri);
+          return Result.succeed(value.uri);
         }
       }
 
-      return Option.none();
+      return Result.failVoid;
     })
   );
 };
 
 export const slimPostRecordFromUnknown = (record: unknown): SlimPostRecord =>
-  Option.match(decodeBlueskyPostRecord(record), {
-    onNone: () => ({}),
-    onSome: (post) => ({
+  Result.match(decodeBlueskyPostRecord(record), {
+    onFailure: () => ({}),
+    onSuccess: (post) => stripUndefined({
       text: post.text,
       urls: extractFacetUrls(post.facets),
       tags: post.tags,
       label_values: post.labels?.values.map((label) => label.val),
       embed: post.embed
-        ? {
+        ? stripUndefined({
             $type: post.embed.$type,
             external: post.embed.external
-              ? {
+              ? stripUndefined({
                   uri: post.embed.external.uri,
                   title: post.embed.external.title,
                   description: post.embed.external.description
-                }
+                })
               : undefined,
             record: post.embed.record
-              ? {
+              ? stripUndefined({
                   text: post.embed.record.value?.text,
                   uri: post.embed.record.uri
-                }
+                })
               : undefined
-          }
+          })
         : undefined
-    })
+    }) as SlimPostRecord
   });
 
 const hostnameFor = (value: string): string | null => {

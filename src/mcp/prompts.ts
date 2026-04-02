@@ -9,24 +9,20 @@ import { Effect, Layer, Schema } from "effect";
  * At runtime `registerPrompt` correctly reads `isOptional` from the AST and
  * emits `required: false` in the prompt argument list, so the cast is safe.
  */
-const TopicWithOptionalHours = Schema.Struct({
-  topic: Schema.String.annotations({
+const TopicWithOptionalHoursFields = {
+  topic: Schema.String.annotate({
     description: "Topic slug to curate, e.g. 'solar' or 'hydrogen'"
   }),
-  hours: Schema.optionalKey(Schema.String.annotations({
+  hours: Schema.optionalKey(Schema.String.annotate({
     description: "Hours to look back (default: 24)"
   }))
-}) as unknown as Schema.Schema<
-  { readonly topic: string; readonly hours?: string | undefined },
-  Record<string, string>,
-  never
->;
+};
 
 export const CurateDigestPrompt = McpServer.prompt({
   name: "curate-digest",
   description:
     "Guide an agent through curating editorial picks for a topic digest",
-  parameters: TopicWithOptionalHours,
+  parameters: TopicWithOptionalHoursFields,
   content: ({ topic, hours }) => {
     const h = hours || "24";
     return Effect.succeed(
@@ -49,11 +45,11 @@ export const ExploreTopicPrompt = McpServer.prompt({
   name: "explore-topic",
   description:
     "Explore a topic area by navigating the ontology and finding relevant posts",
-  parameters: Schema.Struct({
-    query: Schema.String.annotations({
+  parameters: {
+    query: Schema.String.annotate({
       description: "Topic name, slug, or keyword to explore"
     })
-  }),
+  },
   content: ({ query }) =>
     Effect.succeed(
       `Explore the Skygest energy knowledge base to map out the topic area around "${query}".
@@ -72,11 +68,11 @@ export const AssessExpertPrompt = McpServer.prompt({
   name: "assess-expert",
   description:
     "Evaluate a domain expert's recent contributions, topics, and source quality",
-  parameters: Schema.Struct({
-    domain: Schema.String.annotations({
+  parameters: {
+    domain: Schema.String.annotate({
       description: "Knowledge domain (default: 'energy')"
     })
-  }),
+  },
   content: ({ domain }) => {
     const d = domain || "energy";
     return Effect.succeed(
@@ -97,7 +93,7 @@ export const CurateSessionPrompt = McpServer.prompt({
   name: "curate-session",
   description:
     "Run a complete curation session: discover candidates, evaluate, curate (Candidate \u2192 Enriching), verify enrichment readiness, and accept briefs (Reviewable \u2192 Accepted)",
-  parameters: TopicWithOptionalHours,
+  parameters: TopicWithOptionalHoursFields,
   content: ({ topic, hours }) => {
     const h = hours || "24";
     return Effect.succeed(
