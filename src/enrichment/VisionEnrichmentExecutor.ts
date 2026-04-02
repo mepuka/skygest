@@ -281,11 +281,21 @@ export class VisionEnrichmentExecutor extends ServiceMap.Service<
           ...assets.map((asset) => asset.analysis.processedAt)
         );
 
-        const chartTypes = uniqueValues(
+        const allChartTypes = uniqueValues(
           assets.flatMap((asset) => asset.analysis.chartTypes)
-        ).filter((ct): ct is typeof ChartTypeMembers[number] =>
-          (ChartTypeMembers as ReadonlyArray<string>).includes(ct)
         );
+        const chartTypes = allChartTypes.filter(
+          (ct): ct is typeof ChartTypeMembers[number] =>
+            (ChartTypeMembers as ReadonlyArray<string>).includes(ct)
+        );
+        const droppedChartTypes = allChartTypes.filter(
+          (ct) => !(ChartTypeMembers as ReadonlyArray<string>).includes(ct)
+        );
+        if (droppedChartTypes.length > 0) {
+          yield* Effect.logWarning(
+            `Dropped non-enum chartTypes from summary: ${droppedChartTypes.join(", ")}`
+          );
+        }
 
         return yield* Schema.decodeUnknownEffect(VisionEnrichmentSchema)({
           kind: "vision",
