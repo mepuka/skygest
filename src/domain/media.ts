@@ -19,10 +19,26 @@ export const MediaType = Schema.Literals([
   "chart",
   "document-excerpt",
   "photo",
+  "image",
   "infographic",
   "video"
 ]);
 export type MediaType = Schema.Schema.Type<typeof MediaType>;
+
+/** Normalize a Gemini mediaType to canonical form before storage/enrichment.
+ *  Maps "image" → "photo" for downstream consistency. Case-insensitive. */
+export const normalizeMediaType = (raw: string): string => {
+  const lower = raw.toLowerCase().trim();
+  const aliases: Record<string, string> = {
+    image: "photo",
+    screenshot: "photo",
+    photograph: "photo",
+    diagram: "infographic",
+    graph: "chart",
+    table: "chart"
+  };
+  return aliases[lower] ?? lower;
+};
 
 // ---------------------------------------------------------------------------
 // Chart type taxonomy (from ChartTypeScheme, 14 concepts)

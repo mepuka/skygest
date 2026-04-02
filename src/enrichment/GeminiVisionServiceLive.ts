@@ -19,6 +19,7 @@ import * as JsonSchema from "effect/JsonSchema";
 import { VisionAssetAnalysis as VisionAssetAnalysisSchema } from "../domain/enrichment";
 import {
   MediaType,
+  normalizeMediaType,
   ChartType,
   ChartAxis,
   ChartSeries,
@@ -46,7 +47,7 @@ import {
 
 const GeminiExtractionOutput = Schema.Struct({
   mediaType: MediaType,
-  chartTypes: Schema.Array(ChartType),
+  chartTypes: Schema.Array(ChartType).pipe(Schema.withDecodingDefaultKey(() => [] as const)),
   altText: Schema.NullOr(Schema.String),
   title: Schema.NullOr(Schema.String),
   xAxis: Schema.NullOr(ChartAxis),
@@ -226,9 +227,14 @@ export const GeminiVisionServiceLive = Layer.effect(
           )
         );
 
+        // Normalize mediaType aliases ("image" → "photo", case fixes)
+        // before passing to the storage schema which uses canonical values
+        const normalizedMediaType = normalizeMediaType(geminiResult.mediaType);
+
         const now = yield* Clock.currentTimeMillis;
         const enrichment = yield* Schema.decodeUnknownEffect(VisionAssetAnalysisSchema)({
           ...geminiResult,
+          mediaType: normalizedMediaType,
           altTextProvenance: "synthetic" as const,
           modelId: model,
           processedAt: now
