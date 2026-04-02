@@ -240,16 +240,16 @@ const makeCliLayer = (options?: {
 
   // Stub layers for the Twitter scraper services — these are never invoked
   // by the non-twitter CLI paths but must be present in the context.
-  // Cast the tag to work around the linked scraper having its own effect copy.
-  const twitterPublicStub = Layer.effect(
+  // Use Layer.succeed with tag cast to avoid R=any leaking into test Effects.
+  const twitterPublicStub = Layer.succeed(
     TwitterPublic as any,
-    Effect.succeed({})
-  ) as Layer.Layer<TwitterPublic>;
+    {}
+  ) as Layer.Layer<TwitterPublic, never, never>;
 
-  const twitterTweetsStub = Layer.effect(
+  const twitterTweetsStub = Layer.succeed(
     TwitterTweets as any,
-    Effect.succeed({})
-  ) as Layer.Layer<TwitterTweets>;
+    {}
+  ) as Layer.Layer<TwitterTweets, never, never>;
 
   return {
     layer: Layer.mergeAll(wranglerLayer, clientLayer, operatorSecretLayer, twitterPublicStub, twitterTweetsStub),
