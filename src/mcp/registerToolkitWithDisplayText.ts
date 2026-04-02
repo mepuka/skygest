@@ -7,9 +7,8 @@
  * from `@effect/ai` — the only change is in the `onSuccess` text branch.
  */
 import { McpSchema, McpServer, Tool as AiTool, Toolkit } from "effect/unstable/ai";
-import { Schema } from "effect";
+import { Cause, Option, Sink, Stream } from "effect";
 import * as Effect from "effect/Effect";
-import type * as JsonSchema from "effect/JsonSchema";
 import * as Layer from "effect/Layer";
 import * as ServiceMap from "effect/ServiceMap";
 
@@ -29,18 +28,6 @@ const displayText = (encodedResult: unknown): string => {
 };
 
 // ---------------------------------------------------------------------------
-// Internal helper — build MCP-compatible JSON Schema from an AiTool schema
-// ---------------------------------------------------------------------------
-const makeJsonSchema = (schema: { readonly ast: import("effect/SchemaAST").AST }): JsonSchema.JsonSchema => {
-  try {
-    const doc = Schema.toJsonSchemaDocument(schema as Schema.Top);
-    return (doc as any).schema ?? doc;
-  } catch {
-    return { type: "object", properties: {}, required: [], additionalProperties: false } as any;
-  }
-};
-
-// ---------------------------------------------------------------------------
 // registerToolkitWithDisplayText — mirrors McpServer.registerToolkit
 // ---------------------------------------------------------------------------
 const registerToolkitWithDisplayText = <
@@ -57,31 +44,45 @@ const registerToolkitWithDisplayText = <
   Effect.gen(function* () {
     const registry = yield* McpServer.McpServer;
     const built: Toolkit.WithHandler<Tools> = yield* toolkit as any;
+    const services = yield* Effect.services<never>();
     for (const tool of Object.values(built.tools) as any[]) {
-      const annotations = ServiceMap.empty() as ServiceMap.ServiceMap<never>;
+      const annotations = tool.annotations ?? (ServiceMap.empty() as ServiceMap.ServiceMap<never>);
+      const toolMeta = ServiceMap.getOrUndefined(annotations, AiTool.Meta);
       const mcpTool = new McpSchema.Tool({
         name: tool.name,
-        description: tool.description,
-        inputSchema: makeJsonSchema(tool.parametersSchema)
+        description: AiTool.getDescription(tool),
+        inputSchema: AiTool.getJsonSchema(tool),
+        annotations: {
+          ...(ServiceMap.getOption(tool.annotations, AiTool.Title).pipe(
+            Option.map((title: string) => ({ title })),
+            Option.getOrUndefined
+          )),
+          readOnlyHint: ServiceMap.get(tool.annotations, AiTool.Readonly),
+          destructiveHint: ServiceMap.get(tool.annotations, AiTool.Destructive),
+          idempotentHint: ServiceMap.get(tool.annotations, AiTool.Idempotent),
+          openWorldHint: ServiceMap.get(tool.annotations, AiTool.OpenWorld)
+        },
+        _meta: toolMeta
       });
       yield* registry.addTool({
         tool: mcpTool,
         annotations,
         handle(payload: any) {
           return built.handle(tool.name as any, payload).pipe(
-            Effect.match({
+            Stream.unwrap,
+            Stream.run(Sink.last()),
+            Effect.flatMap(Effect.fromOption),
+            Effect.provideServices(services as ServiceMap.ServiceMap<any>),
+            Effect.matchCause({
               // Failure path — identical to stock implementation
-              onFailure: (error: any) =>
+              onFailure: (cause: any) =>
                 new McpSchema.CallToolResult({
                   isError: true,
-                  structuredContent:
-                    typeof error === "object" ? error : undefined,
-                  content: [
-                    {
-                      type: "text",
-                      text: JSON.stringify(error)
-                    }
-                  ]
+                  structuredContent: undefined,
+                  content: [{
+                    type: "text",
+                    text: Cause.pretty(cause)
+                  }]
                 }),
               // Success path — uses _display when present
               onSuccess: (result: any) => {
@@ -92,15 +93,14 @@ const registerToolkitWithDisplayText = <
                 return new McpSchema.CallToolResult({
                   isError: false,
                   structuredContent: structured,
-                  content: [
-                    {
-                      type: "text",
-                      text: displayText(result.encodedResult)
-                    }
-                  ]
+                  content: [{
+                    type: "text",
+                    text: displayText(result.encodedResult)
+                  }]
                 });
               }
-            })
+            }),
+            Effect.tapCause(Effect.log)
           ) as any;
         }
       });

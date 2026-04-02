@@ -20,9 +20,9 @@ import { GeminiVisionService } from "./GeminiVisionService";
 import { VISION_PROMPT_VERSION } from "./prompts";
 
 const decodeVisionPlan = (input: unknown) =>
-  Schema.decodeUnknown(VisionExecutionPlan)(input).pipe(
+  Schema.decodeUnknownEffect(VisionExecutionPlan)(input).pipe(
     Effect.mapError((error) =>
-      EnrichmentSchemaDecodeError.make({
+      new EnrichmentSchemaDecodeError({
         message: formatSchemaParseError(error),
         operation: "VisionEnrichmentExecutor.execute"
       })
@@ -68,7 +68,7 @@ const getAssetFetchUrl = (
     case "video":
       return asset.thumbnail === null
         ? Effect.fail(
-            EnrichmentAssetFetchError.make({
+            new EnrichmentAssetFetchError({
               assetKey: asset.assetKey,
               message: `video asset ${asset.assetKey} is missing a thumbnail`,
               operation: "VisionEnrichmentExecutor.fetchAsset"
@@ -163,7 +163,7 @@ export class VisionEnrichmentExecutor extends ServiceMap.Service<
           const response = yield* Effect.tryPromise({
             try: () => fetch(assetUrl),
             catch: (cause) =>
-              EnrichmentAssetFetchError.make({
+              new EnrichmentAssetFetchError({
                 assetKey: asset.assetKey,
                 message: cause instanceof Error
                   ? cause.message
@@ -173,7 +173,7 @@ export class VisionEnrichmentExecutor extends ServiceMap.Service<
           });
 
           if (!response.ok) {
-            return yield* EnrichmentAssetFetchError.make({
+            return yield* new EnrichmentAssetFetchError({
               assetKey: asset.assetKey,
               message: `asset fetch failed for ${asset.assetKey}`,
               status: response.status,
@@ -184,7 +184,7 @@ export class VisionEnrichmentExecutor extends ServiceMap.Service<
           const bytes = new Uint8Array(yield* Effect.tryPromise({
             try: () => response.arrayBuffer(),
             catch: (cause) =>
-              EnrichmentAssetFetchError.make({
+              new EnrichmentAssetFetchError({
                 assetKey: asset.assetKey,
                 message: cause instanceof Error
                   ? cause.message
@@ -194,7 +194,7 @@ export class VisionEnrichmentExecutor extends ServiceMap.Service<
           }));
 
           if (bytes.byteLength === 0) {
-            return yield* EnrichmentAssetFetchError.make({
+            return yield* new EnrichmentAssetFetchError({
               assetKey: asset.assetKey,
               message: `asset ${asset.assetKey} returned empty content`,
               operation: "VisionEnrichmentExecutor.fetchAsset"
@@ -223,7 +223,7 @@ export class VisionEnrichmentExecutor extends ServiceMap.Service<
             fetched.mimeType
           );
 
-          return yield* Schema.decodeUnknown(VisionAssetEnrichmentSchema)({
+          return yield* Schema.decodeUnknownEffect(VisionAssetEnrichmentSchema)({
             assetKey: asset.assetKey,
             assetType: asset.assetType,
             source: asset.source,
@@ -232,7 +232,7 @@ export class VisionEnrichmentExecutor extends ServiceMap.Service<
             analysis
           }).pipe(
             Effect.mapError((error) =>
-              EnrichmentSchemaDecodeError.make({
+              new EnrichmentSchemaDecodeError({
                 message: formatSchemaParseError(error),
                 operation: "VisionEnrichmentExecutor.analyzeAsset"
               })
@@ -263,7 +263,7 @@ export class VisionEnrichmentExecutor extends ServiceMap.Service<
           ...assets.map((asset) => asset.analysis.processedAt)
         );
 
-        return yield* Schema.decodeUnknown(VisionEnrichmentSchema)({
+        return yield* Schema.decodeUnknownEffect(VisionEnrichmentSchema)({
           kind: "vision",
           summary: {
             text: toSummaryText(assets.length, titles, keyFindings),
@@ -282,7 +282,7 @@ export class VisionEnrichmentExecutor extends ServiceMap.Service<
           processedAt
         }).pipe(
           Effect.mapError((error) =>
-            EnrichmentSchemaDecodeError.make({
+            new EnrichmentSchemaDecodeError({
               message: formatSchemaParseError(error),
               operation: "VisionEnrichmentExecutor.execute"
             })

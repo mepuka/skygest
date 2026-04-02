@@ -192,12 +192,13 @@ const makeHarness = (options: {
 
   const executorLayer = ExpertPollExecutor.layer.pipe(Layer.provideMerge(layer));
 
-  const runDid = (request: PollRequest, options?: Parameters<typeof ExpertPollExecutor.Service.runDid>[2]) =>
+  const runDid = (request: PollRequest, options?: Parameters<ExpertPollExecutor["Service"]["runDid"]>[2]) =>
     Effect.runPromise(
       Effect.scoped(
-        Effect.flatMap(ExpertPollExecutor, (executor) => executor.runDid(did, request, options)).pipe(
-          Effect.provide(executorLayer)
-        )
+        Effect.gen(function* () {
+          const executor = yield* ExpertPollExecutor;
+          return yield* executor.runDid(did, request, options);
+        }).pipe(Effect.provide(executorLayer))
       )
     );
 

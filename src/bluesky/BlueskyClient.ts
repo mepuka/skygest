@@ -7,6 +7,7 @@ import {
   Layer,
   Schedule,
   Schema,
+  Semaphore,
   SynchronizedRef
 } from "effect";
 import { FetchHttpClient, HttpClient, HttpClientResponse } from "effect/unstable/http";
@@ -81,11 +82,13 @@ const getErrorStatus = (error: unknown): number | undefined => {
   return undefined;
 };
 
-const toBlueskyApiError = (error: unknown) =>
-  BlueskyApiError.make({
+const toBlueskyApiError = (error: unknown) => {
+  const status = getErrorStatus(error);
+  return new BlueskyApiError({
     message: stringifyUnknown(error),
-    status: getErrorStatus(error)
+    ...(status !== undefined ? { status } : {})
   });
+};
 
 export const isRetryableBlueskyError = (error: unknown) => {
   if (typeof error !== "object" || error === null) {
@@ -127,7 +130,7 @@ export const extractPdsServiceUrl = (didDoc: unknown): string => {
 };
 
 type HostGate = {
-  readonly semaphore: Effect.Semaphore;
+  readonly semaphore: Semaphore.Semaphore;
   readonly lastCompletedAt: SynchronizedRef.SynchronizedRef<number>;
 };
 
@@ -170,8 +173,7 @@ export const makeBlueskyClient = (base: string) =>
     const minInterval = Duration.toMillis(Duration.millis(250));
     const retrySchedule = Schedule.exponential(Duration.millis(250)).pipe(
       Schedule.jittered,
-      Schedule.intersect(Schedule.recurWhile(isRetryableBlueskyError)),
-      Schedule.intersect(Schedule.recurs(5))
+      Schedule.both(Schedule.recurs(5))
     );
 
     const hostGates = yield* Cache.make({
@@ -179,7 +181,7 @@ export const makeBlueskyClient = (base: string) =>
       timeToLive: Duration.infinity,
       lookup: () =>
         Effect.all([
-          Effect.makeSemaphore(1),
+          Semaphore.make(1),
           SynchronizedRef.make(-minInterval)
         ]).pipe(
           Effect.map(([semaphore, lastCompletedAt]) => ({
@@ -191,7 +193,7 @@ export const makeBlueskyClient = (base: string) =>
 
     const withRateLimit = <A, E, R>(url: string, effect: Effect.Effect<A, E, R>) =>
       Effect.gen(function* () {
-        const gate = yield* hostGates.get(new URL(url).host);
+        const gate = yield* Cache.get(hostGates, new URL(url).host);
 
         return yield* gate.semaphore.withPermits(1)(
           Effect.gen(function* () {
@@ -213,19 +215,19 @@ export const makeBlueskyClient = (base: string) =>
         );
       });
 
-    const requestJson = <A, I>(
+    const requestJson = <S extends Schema.Top>(
       url: string,
-      schema: Schema.Schema<A, I, never>,
-      urlParams?: Record<string, string | ReadonlyArray<string> | undefined>
+      schema: S,
+      params?: Record<string, string | ReadonlyArray<string> | undefined>
     ) =>
       withRateLimit(
         url,
-        http.get(url, { urlParams }).pipe(
+        http.get(url, { urlParams: params }).pipe(
           Effect.flatMap(HttpClientResponse.filterStatusOk),
           Effect.flatMap(HttpClientResponse.schemaBodyJson(schema))
         )
       ).pipe(
-        Effect.retry(retrySchedule),
+        Effect.retry({ schedule: retrySchedule, while: isRetryableBlueskyError }),
         Effect.mapError(toBlueskyApiError)
       );
 
@@ -288,7 +290,7 @@ export const makeBlueskyClient = (base: string) =>
           Effect.flatMap(HttpClientResponse.schemaBodyJson(DidDocument))
         )
       ).pipe(
-        Effect.retry(retrySchedule),
+        Effect.retry({ schedule: retrySchedule, while: isRetryableBlueskyError }),
         Effect.mapError(toBlueskyApiError),
         Effect.flatMap((doc) =>
           Effect.try({

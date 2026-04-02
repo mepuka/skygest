@@ -1,5 +1,5 @@
 import { ServiceMap, Effect, Layer } from "effect";
-import type { SqlError } from "effect/unstable/sql";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type { AccessIdentity } from "../auth/AuthService";
 import { computeShard } from "../bootstrap/ExpertSeeds";
@@ -84,11 +84,11 @@ export class ExpertRegistryService extends ServiceMap.Service<
         tag: "resolve" | "profile"
       ) =>
         tag === "resolve"
-          ? HandleResolutionError.make({
+          ? new HandleResolutionError({
             didOrHandle,
             message: error.message
           })
-          : ProfileLookupError.make({
+          : new ProfileLookupError({
             didOrHandle,
             message: error.message
           });
@@ -132,7 +132,7 @@ export class ExpertRegistryService extends ServiceMap.Service<
       ) {
         const profile = yield* bluesky.getProfile(did).pipe(
           Effect.mapError((error) =>
-            ProfileLookupError.make({
+            new ProfileLookupError({
               didOrHandle: did,
               message: error.message
             })
@@ -205,7 +205,7 @@ export class ExpertRegistryService extends ServiceMap.Service<
         const program = Effect.gen(function* () {
           const existing = yield* expertsRepo.getByDid(did);
           if (existing === null) {
-            return yield* ExpertNotFoundError.make({ did });
+            return yield* new ExpertNotFoundError({ did });
           }
 
           yield* expertsRepo.setActive(did, input.active);

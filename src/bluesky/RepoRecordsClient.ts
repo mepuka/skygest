@@ -1,5 +1,5 @@
-import { Cache, Clock, ServiceMap, Duration, Effect, Either, Layer } from "effect";
-import type { SqlError } from "effect/unstable/sql";
+import { Cache, Clock, ServiceMap, Duration, Effect, Option, Result, Layer } from "effect";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import { BlueskyClient } from "./BlueskyClient";
 import { BlueskyApiError } from "../domain/errors";
@@ -102,30 +102,22 @@ export class RepoRecordsClient extends ServiceMap.Service<
         repo: Did
       ) {
         const resolution = yield* resolveRemotely(repo);
-        yield* repoServiceCache.set(repo, resolution);
+        yield* Cache.set(repoServiceCache, repo, resolution);
         return resolution;
       });
 
       const resolveForRequest = Effect.fn("RepoRecordsClient.resolveForRequest")(function* (
         repo: Did
       ) {
-        const cachedOrLoaded = yield* repoServiceCache.getEither(repo);
-
-        if (Either.isLeft(cachedOrLoaded)) {
-          return {
-            resolution: cachedOrLoaded.left,
-            usedCachedOrHinted: true
-          };
-        }
-
+        const resolution = yield* Cache.get(repoServiceCache, repo);
         return {
-          resolution: cachedOrLoaded.right,
-          usedCachedOrHinted: cachedOrLoaded.right.source === "hint"
+          resolution,
+          usedCachedOrHinted: resolution.source === "hint"
         };
       });
 
       const invalidateRepo = Effect.fn("RepoRecordsClient.invalidateRepo")(function* (repo: Did) {
-        yield* repoServiceCache.invalidate(repo);
+        yield* Cache.invalidate(repoServiceCache, repo);
       });
 
       const listRecords = Effect.fn("RepoRecordsClient.listRecords")(function* (
@@ -143,7 +135,7 @@ export class RepoRecordsClient extends ServiceMap.Service<
           Effect.catchTag("BlueskyApiError", (error) =>
             usedCachedOrHinted && shouldRefreshRepoEndpoint(error)
               ? invalidateRepo(input.repo).pipe(
-                  Effect.zipRight(refreshRepoService(input.repo)),
+                  Effect.andThen(refreshRepoService(input.repo)),
                   Effect.flatMap((refreshed) => runListRecords(refreshed.serviceUrl))
                 )
               : Effect.fail(error)

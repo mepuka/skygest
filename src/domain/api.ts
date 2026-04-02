@@ -1,5 +1,5 @@
 import * as HttpApiSchema from "effect/unstable/httpapi/HttpApiSchema";
-import { ParseResult, Schema } from "effect";
+import { Schema, SchemaGetter } from "effect";
 import {
   AddExpertInput,
   AdminExpertResult,
@@ -62,12 +62,12 @@ import {
 } from "./curation";
 import { AtUri, Did, PostUri } from "./types";
 
-const withStatus = <A, I, R>(
-  schema: Schema.Schema<A, I, R>,
-  status: number
-) => schema.annotations(HttpApiSchema.annotations({ status }));
+const withStatus = <S extends Schema.Top>(
+  schema: S,
+  statusCode: number
+) => schema.pipe(HttpApiSchema.status(statusCode));
 
-const ErrorMessage = Schema.String.pipe(Schema.minLength(1));
+const ErrorMessage = Schema.String.pipe(Schema.check(Schema.isMinLength(1)));
 const ErrorFields = {
   message: ErrorMessage,
   retryable: Schema.optionalKey(Schema.Boolean)
@@ -145,7 +145,8 @@ export const InternalServerError = withStatus(
 );
 export type InternalServerError = Schema.Schema.Type<typeof InternalServerError>;
 
-export const HttpErrorEnvelope = Schema.Union(
+/** Error schemas array for HttpApi endpoint error declarations */
+export const ApiErrorSchemas = [
   BadRequestError,
   UnauthorizedError,
   ForbiddenError,
@@ -154,7 +155,18 @@ export const HttpErrorEnvelope = Schema.Union(
   UpstreamFailureError,
   ServiceUnavailableError,
   InternalServerError
-);
+] as const;
+
+export const HttpErrorEnvelope = Schema.Union([
+  BadRequestError,
+  UnauthorizedError,
+  ForbiddenError,
+  NotFoundError,
+  ConflictError,
+  UpstreamFailureError,
+  ServiceUnavailableError,
+  InternalServerError
+]);
 export type HttpErrorEnvelope = Schema.Schema.Type<typeof HttpErrorEnvelope>;
 
 export const badRequestError = (
@@ -250,40 +262,39 @@ const fromBase64Url = (value: string) => {
   return textDecoder.decode(bytes);
 };
 
-const formatUnknown = (value: unknown) =>
-  value instanceof Error ? value.message : String(value);
+const StringFromBase64Url = Schema.String.pipe(
+  Schema.decodeTo(Schema.String, {
+    decode: SchemaGetter.transform((value: string) => fromBase64Url(value)),
+    encode: SchemaGetter.transform((value: string) => toBase64Url(value))
+  })
+).annotate({ identifier: "StringFromBase64Url" });
 
-const StringFromBase64Url = Schema.transformOrFail(
-  Schema.String,
-  Schema.String,
-  {
-    strict: true,
-    decode: (value, _, ast) =>
-      ParseResult.try({
-        try: () => fromBase64Url(value),
-        catch: (error) => new ParseResult.Type(ast, value, formatUnknown(error))
-      }),
-    encode: (value, _, ast) =>
-      ParseResult.try({
-        try: () => toBase64Url(value),
-        catch: (error) => new ParseResult.Type(ast, value, formatUnknown(error))
-      })
-  }
-).annotations({ identifier: "StringFromBase64Url" });
+const BooleanFromString = Schema.String.pipe(
+  Schema.refine((s): s is "true" | "false" => s === "true" || s === "false"),
+  Schema.decodeTo(Schema.Boolean, {
+    decode: SchemaGetter.transform((s) => s === "true"),
+    encode: SchemaGetter.transform((b) => b ? "true" as const : "false" as const)
+  })
+);
+
+const StringFromUriComponent = Schema.String.pipe(
+  Schema.decodeTo(Schema.String, {
+    decode: SchemaGetter.transform((s: string) => decodeURIComponent(s)),
+    encode: SchemaGetter.transform((s: string) => encodeURIComponent(s))
+  })
+);
 
 const OptionalNumberFromString = Schema.optionalKey(Schema.NumberFromString);
-const OptionalBooleanFromString = Schema.optionalKey(Schema.BooleanFromString);
+const OptionalBooleanFromString = Schema.optionalKey(BooleanFromString);
 const OptionalString = Schema.optionalKey(Schema.String);
-const DecodedDid = Schema.compose(Schema.StringFromUriComponent, Did);
-const DecodedAtUri = Schema.compose(Schema.StringFromUriComponent, AtUri);
-const DecodedPostUri = Schema.compose(Schema.StringFromUriComponent, PostUri);
-const DecodedSlug = Schema.compose(
-  Schema.StringFromUriComponent,
-  Schema.String.pipe(Schema.minLength(1))
+const DecodedDid = StringFromUriComponent.pipe(Schema.decodeTo(Did));
+const DecodedAtUri = StringFromUriComponent.pipe(Schema.decodeTo(AtUri));
+const DecodedPostUri = StringFromUriComponent.pipe(Schema.decodeTo(PostUri));
+const DecodedSlug = StringFromUriComponent.pipe(
+  Schema.decodeTo(Schema.String.pipe(Schema.check(Schema.isMinLength(1))))
 );
-const DecodedId = Schema.compose(
-  Schema.StringFromUriComponent,
-  Schema.String.pipe(Schema.minLength(1))
+const DecodedId = StringFromUriComponent.pipe(
+  Schema.decodeTo(Schema.String.pipe(Schema.check(Schema.isMinLength(1))))
 );
 
 
@@ -300,14 +311,12 @@ export const LinkPageCursor = Schema.Struct({
 });
 export type LinkPageCursor = Schema.Schema.Type<typeof LinkPageCursor>;
 
-const ChronologicalCursorString = Schema.compose(
-  StringFromBase64Url,
-  Schema.parseJson(ChronologicalCursor)
+const ChronologicalCursorString = StringFromBase64Url.pipe(
+  Schema.decodeTo(Schema.fromJsonString(ChronologicalCursor))
 );
 
-const LinkPageCursorString = Schema.compose(
-  StringFromBase64Url,
-  Schema.parseJson(LinkPageCursor)
+const LinkPageCursorString = StringFromBase64Url.pipe(
+  Schema.decodeTo(Schema.fromJsonString(LinkPageCursor))
 );
 
 export const encodeChronologicalCursor = (cursor: ChronologicalCursor | null) =>
@@ -327,9 +336,8 @@ export const SearchPostsCursor = Schema.Struct({
 });
 export type SearchPostsCursor = Schema.Schema.Type<typeof SearchPostsCursor>;
 
-const SearchPostsCursorString = Schema.compose(
-  StringFromBase64Url,
-  Schema.parseJson(SearchPostsCursor)
+const SearchPostsCursorString = StringFromBase64Url.pipe(
+  Schema.decodeTo(Schema.fromJsonString(SearchPostsCursor))
 );
 
 export const encodeSearchPostsCursor = (cursor: SearchPostsCursor | null) =>
@@ -338,7 +346,7 @@ export const encodeSearchPostsCursor = (cursor: SearchPostsCursor | null) =>
     : Schema.encodeSync(SearchPostsCursorString)(cursor);
 
 export const SearchPostsUrlParams = Schema.Struct({
-  q: Schema.String.pipe(Schema.minLength(1)),
+  q: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   topic: OptionalString,
   since: OptionalNumberFromString,
   until: OptionalNumberFromString,
@@ -402,7 +410,7 @@ export const GetExpertPostsPageUrlParams = Schema.Struct({
 export type GetExpertPostsPageUrlParams = Schema.Schema.Type<typeof GetExpertPostsPageUrlParams>;
 
 const OptionalThreadTraversalDepthFromString = Schema.optionalKey(
-  Schema.NumberFromString.pipe(Schema.int(), Schema.between(0, 10))
+  Schema.NumberFromString.pipe(Schema.check(Schema.isInt()), Schema.check(Schema.isBetween({ minimum: 0, maximum: 10 })))
 );
 
 export const GetThreadUrlParams = Schema.Struct({
@@ -459,12 +467,12 @@ export const ListExpertsUrlParams = Schema.Struct({
 export type ListExpertsUrlParams = Schema.Schema.Type<typeof ListExpertsUrlParams>;
 
 export const ListTopicsUrlParams = Schema.Struct({
-  view: Schema.optionalKey(Schema.Literal("facets", "concepts"))
+  view: Schema.optionalKey(Schema.Literals(["facets", "concepts"]))
 });
 export type ListTopicsUrlParams = Schema.Schema.Type<typeof ListTopicsUrlParams>;
 
 export const ExpandTopicUrlParams = Schema.Struct({
-  mode: Schema.optionalKey(Schema.Literal("exact", "descendants", "ancestors"))
+  mode: Schema.optionalKey(Schema.Literals(["exact", "descendants", "ancestors"]))
 });
 export type ExpandTopicUrlParams = Schema.Schema.Type<typeof ExpandTopicUrlParams>;
 
@@ -544,7 +552,7 @@ export const ListPublicationsUrlParams = Schema.Struct({
 export type ListPublicationsUrlParams = Schema.Schema.Type<typeof ListPublicationsUrlParams>;
 
 const OptionalEditorialScoreFromString = Schema.optionalKey(
-  Schema.compose(Schema.NumberFromString, EditorialScore)
+  Schema.NumberFromString.pipe(Schema.decodeTo(EditorialScore))
 );
 
 export const ListEditorialPicksUrlParams = Schema.Struct({
@@ -587,7 +595,7 @@ export const StartEnrichmentInput = Schema.Struct({
   postUri: PostUri,
   enrichmentType: EnrichmentKind,
   schemaVersion: Schema.optionalKey(
-    Schema.String.pipe(Schema.minLength(1))
+    Schema.String.pipe(Schema.check(Schema.isMinLength(1)))
   )
 });
 export type StartEnrichmentInput = Schema.Schema.Type<
@@ -626,42 +634,42 @@ export const PublicReadResponseSchemas = {
 } as const;
 
 export const StagingStatsExperts = Schema.Struct({
-  total: Schema.NonNegativeInt,
-  active: Schema.NonNegativeInt
+  total: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  active: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
 });
 
 export const StagingStatsPosts = Schema.Struct({
-  total: Schema.NonNegativeInt,
-  inLast24h: Schema.NonNegativeInt,
-  withLinks: Schema.NonNegativeInt
+  total: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  inLast24h: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  withLinks: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
 });
 
 export const StagingStatsCuration = Schema.Struct({
-  flagged: Schema.NonNegativeInt,
-  curated: Schema.NonNegativeInt,
-  rejected: Schema.NonNegativeInt
+  flagged: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  curated: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  rejected: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
 });
 
 export const StagingStatsEnrichment = Schema.Struct({
-  queued: Schema.NonNegativeInt,
-  running: Schema.NonNegativeInt,
-  complete: Schema.NonNegativeInt,
-  failed: Schema.NonNegativeInt,
-  needsReview: Schema.NonNegativeInt
+  queued: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  running: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  complete: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failed: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  needsReview: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
 });
 
 export const StagingStatsLastIngest = Schema.Struct({
   runId: Schema.String,
   kind: Schema.String,
   status: Schema.String,
-  startedAt: Schema.NonNegativeInt,
-  finishedAt: Schema.NullOr(Schema.NonNegativeInt),
-  postsSeen: Schema.NonNegativeInt,
-  postsStored: Schema.NonNegativeInt
+  startedAt: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  finishedAt: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  postsSeen: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  postsStored: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
 });
 
 export const StagingStats = Schema.Struct({
-  timestamp: Schema.NonNegativeInt,
+  timestamp: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   experts: StagingStatsExperts,
   posts: StagingStatsPosts,
   curation: StagingStatsCuration,

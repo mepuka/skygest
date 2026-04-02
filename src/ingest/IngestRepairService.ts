@@ -1,5 +1,5 @@
 import { ServiceMap, Effect, Layer } from "effect";
-import type { SqlError } from "effect/unstable/sql";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import {
   HistoricalRunRepairError,
@@ -92,7 +92,7 @@ export class IngestRepairService extends ServiceMap.Service<
               finishedAt,
               ...summary,
               error: summary.error ?? toIngestErrorEnvelope(
-                HistoricalRunRepairError.make({
+                new HistoricalRunRepairError({
                   message: fallbackMessage,
                   runId,
                   operation
@@ -127,11 +127,11 @@ export class IngestRepairService extends ServiceMap.Service<
               mode: item.mode,
               lastProgressAt: now
             }).pipe(
-              Effect.zipRight(
+              Effect.andThen(
                 Effect.logInfo("requeued stale dispatched ingest item").pipe(
                   Effect.annotateLogs(
                     toIngestErrorEnvelope(
-                      StaleDispatchedIngestItemError.make({
+                      new StaleDispatchedIngestItemError({
                         message: "requeued stale dispatched ingest item",
                         did: item.did,
                         runId: item.runId,
@@ -159,7 +159,7 @@ export class IngestRepairService extends ServiceMap.Service<
               postsDeleted: item.postsDeleted,
               finishedAt: now,
               error: toIngestErrorEnvelope(
-                StaleRunningIngestItemError.make({
+                new StaleRunningIngestItemError({
                   message: "failed stale running ingest item",
                   did: item.did,
                   runId: item.runId,
@@ -194,7 +194,7 @@ export class IngestRepairService extends ServiceMap.Service<
             postsStored: 0,
             postsDeleted: 0,
             error: toIngestErrorEnvelope(
-              HistoricalRunRepairError.make({
+              new HistoricalRunRepairError({
                 message: "repaired abandoned run with no ingest items",
                 runId: run.id,
                 operation: "IngestRepairService.repairHistoricalRuns"
@@ -260,7 +260,7 @@ export class IngestRepairService extends ServiceMap.Service<
               postsDeleted: item.postsDeleted,
               finishedAt: now,
               error: toIngestErrorEnvelope(
-                HistoricalRunRepairError.make({
+                new HistoricalRunRepairError({
                   message: `repaired historical ${item.status} ingest item`,
                   runId: item.runId,
                   did: item.did,

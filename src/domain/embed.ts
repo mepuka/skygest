@@ -19,7 +19,7 @@ import { Schema } from "effect";
 // Re-exports the same values as ThreadEmbedType in bi.ts
 // ---------------------------------------------------------------------------
 
-export const EmbedKind = Schema.Literal("link", "img", "quote", "media", "video");
+export const EmbedKind = Schema.Literals(["link", "img", "quote", "media", "video"]);
 export type EmbedKind = Schema.Schema.Type<typeof EmbedKind>;
 
 // ---------------------------------------------------------------------------
@@ -87,7 +87,7 @@ export type QuoteEmbed = Schema.Schema.Type<typeof QuoteEmbed>;
 export const MediaComboEmbed = Schema.Struct({
   kind: Schema.Literal("media").pipe(Schema.withDecodingDefaultKey(() => "media" as const)),
   record: Schema.NullOr(QuoteRef),
-  media: Schema.NullOr(Schema.Union(LinkEmbed, ImageEmbed, VideoEmbed))
+  media: Schema.NullOr(Schema.Union([LinkEmbed, ImageEmbed, VideoEmbed]))
 });
 export type MediaComboEmbed = Schema.Schema.Type<typeof MediaComboEmbed>;
 
@@ -95,11 +95,11 @@ export type MediaComboEmbed = Schema.Schema.Type<typeof MediaComboEmbed>;
 // EmbedPayload union
 // ---------------------------------------------------------------------------
 
-export const EmbedPayload = Schema.Union(
+export const EmbedPayload = Schema.Union([
   LinkEmbed,
   ImageEmbed,
   VideoEmbed,
   QuoteEmbed,
   MediaComboEmbed
-);
+]);
 export type EmbedPayload = Schema.Schema.Type<typeof EmbedPayload>;

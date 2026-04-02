@@ -15,20 +15,20 @@ import { Schema } from "effect";
 // Media classification (what the content actually depicts)
 // ---------------------------------------------------------------------------
 
-export const MediaType = Schema.Literal(
+export const MediaType = Schema.Literals([
   "chart",
   "document-excerpt",
   "photo",
   "infographic",
   "video"
-);
+]);
 export type MediaType = Schema.Schema.Type<typeof MediaType>;
 
 // ---------------------------------------------------------------------------
 // Chart type taxonomy (from ChartTypeScheme, 14 concepts)
 // ---------------------------------------------------------------------------
 
-export const ChartType = Schema.Literal(
+export const ChartType = Schema.Literals([
   "area-chart",
   "bar-chart",
   "candlestick-chart",
@@ -43,18 +43,18 @@ export const ChartType = Schema.Literal(
   "scatter-plot",
   "stacked-bar-chart",
   "treemap"
-);
+]);
 export type ChartType = Schema.Schema.Type<typeof ChartType>;
 
 // ---------------------------------------------------------------------------
 // Alt text provenance (from AltTextProvenanceScheme)
 // ---------------------------------------------------------------------------
 
-export const AltTextProvenance = Schema.Literal(
+export const AltTextProvenance = Schema.Literals([
   "original",
   "synthetic",
   "absent"
-);
+]);
 export type AltTextProvenance = Schema.Schema.Type<typeof AltTextProvenance>;
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 import { Effect, Layer } from "effect";
-import { SqlError } from "effect/unstable/sql";
+import { SqlError, UnknownError as SqlUnknownError } from "effect/unstable/sql/SqlError";
 import { describe, expect, it } from "@effect/vitest";
 import { vi } from "vitest";
 import type { IngestErrorEnvelope } from "../src/domain/errors";
@@ -450,7 +450,7 @@ describe("IngestRunWorkflow", () => {
         getPostLinks: () => Effect.succeed([]),
         getPostLinksPage: () => Effect.succeed([]),
         getPostTopicMatches: () => Effect.succeed([]),
-        optimizeFts: () => Effect.fail(new SqlError({ cause: "test", message: "optimize failed" }))
+        optimizeFts: () => Effect.fail(new SqlError({ reason: new SqlUnknownError({ cause: new Error("test"), message: "optimize failed" }) }))
       });
 
       currentLayer = Layer.mergeAll(

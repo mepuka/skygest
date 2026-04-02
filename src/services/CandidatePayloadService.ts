@@ -1,5 +1,5 @@
 import { Clock, ServiceMap, Effect, Layer } from "effect";
-import type { SqlError } from "effect/unstable/sql";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type {
   CandidatePayloadNotPickedError,

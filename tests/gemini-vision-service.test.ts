@@ -170,9 +170,7 @@ describe("GeminiVisionService", () => {
 
           expect(Exit.isFailure(exit)).toBe(true);
           if (Exit.isFailure(exit)) {
-            const error = exit.cause.pipe(
-              (c) => c._tag === "Fail" ? c.error : null
-            );
+            const error = Cause.squash(exit.cause);
             expect((error as any)._tag).toBe("GeminiApiError");
             expect((error as any).status).toBe(429);
           }
@@ -247,9 +245,7 @@ describe("GeminiVisionService", () => {
 
           expect(Exit.isFailure(exit)).toBe(true);
           if (Exit.isFailure(exit)) {
-            const error = exit.cause.pipe(
-              (c) => c._tag === "Fail" ? c.error : null
-            );
+            const error = Cause.squash(exit.cause);
             expect((error as any)._tag).toBe("GeminiParseError");
             expect((error as any).message).toContain(
               "Classification parse/validation failed"
@@ -291,9 +287,7 @@ describe("GeminiVisionService", () => {
 
           expect(Exit.isFailure(exit)).toBe(true);
           if (Exit.isFailure(exit)) {
-            const error = exit.cause.pipe(
-              (c) => c._tag === "Fail" ? c.error : null
-            );
+            const error = Cause.squash(exit.cause);
             expect((error as any)._tag).toBe("GeminiParseError");
             expect((error as any).message).toContain("empty response");
           }
@@ -318,9 +312,7 @@ describe("GeminiVisionService", () => {
 
           expect(Exit.isFailure(exit)).toBe(true);
           if (Exit.isFailure(exit)) {
-            const error = exit.cause.pipe(
-              (c) => c._tag === "Fail" ? c.error : null
-            );
+            const error = Cause.squash(exit.cause);
             expect((error as any)._tag).toBe("GeminiApiError");
             expect((error as any).message).toBe("quota exceeded");
             expect((error as any).status).toBe(429);
@@ -348,9 +340,7 @@ describe("GeminiVisionService", () => {
 
           expect(Exit.isFailure(exit)).toBe(true);
           if (Exit.isFailure(exit)) {
-            const error = exit.cause.pipe(
-              (c) => c._tag === "Fail" ? c.error : null
-            );
+            const error = Cause.squash(exit.cause);
             expect((error as any)._tag).toBe("GeminiParseError");
           }
         }).pipe(runWith)
@@ -471,9 +461,7 @@ describe("GeminiVisionService", () => {
 
           expect(Exit.isFailure(exit)).toBe(true);
           if (Exit.isFailure(exit)) {
-            const error = exit.cause.pipe(
-              (c) => c._tag === "Fail" ? c.error : null
-            );
+            const error = Cause.squash(exit.cause);
             expect((error as any)._tag).toBe("GeminiApiError");
             expect((error as any).message).toBe("internal server error");
           }
@@ -502,9 +490,7 @@ describe("GeminiVisionService", () => {
 
           expect(Exit.isFailure(exit)).toBe(true);
           if (Exit.isFailure(exit)) {
-            const error = exit.cause.pipe(
-              (c) => c._tag === "Fail" ? c.error : null
-            );
+            const error = Cause.squash(exit.cause);
             expect((error as any)._tag).toBe("GeminiParseError");
             expect((error as any).message).toContain(
               "Extraction parse/validation failed"

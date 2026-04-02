@@ -93,8 +93,8 @@ export type ThreadPostView = Schema.Schema.Type<typeof ThreadPostView>;
 export const ThreadViewPostNode = Schema.Struct({
   $type: Schema.optionalKey(Schema.String),
   post: ThreadPostView,
-  parent: Schema.optionalKey(Schema.Unknown),
-  replies: Schema.optionalKey(Schema.Array(Schema.Unknown))
+  parent: Schema.optionalKey(Schema.UndefinedOr(Schema.Unknown)),
+  replies: Schema.optionalKey(Schema.UndefinedOr(Schema.Array(Schema.Unknown)))
 });
 export type ThreadViewPostNode = Schema.Schema.Type<typeof ThreadViewPostNode>;
 

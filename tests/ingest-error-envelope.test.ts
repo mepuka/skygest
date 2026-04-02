@@ -23,7 +23,7 @@ const did = "did:plc:expert-a" as Did;
 describe("ingest error envelopes", () => {
   it("round-trips structured envelopes through D1 text storage", () => {
     const envelope = toIngestErrorEnvelope(
-      IngestWorkflowLaunchError.make({
+      new IngestWorkflowLaunchError({
         message: "workflow create failed",
         operation: "IngestWorkflowLauncher.start"
       }),
@@ -46,7 +46,7 @@ describe("ingest error envelopes", () => {
 
   it("maps envelopes to the admin HTTP error contract", () => {
     const response = toIngestErrorResponse(
-      IngestWorkflowLaunchError.make({
+      new IngestWorkflowLaunchError({
         message: "workflow create failed",
         operation: "IngestWorkflowLauncher.start"
       })
@@ -63,7 +63,7 @@ describe("ingest error envelopes", () => {
 describe("toIngestErrorEnvelope domain error classification", () => {
   it("DbError => non-retryable", () => {
     const envelope = toIngestErrorEnvelope(
-      DbError.make({ message: "decode failed" })
+      new DbError({ message: "decode failed" })
     );
     expect(envelope.tag).toBe("DbError");
     expect(envelope.retryable).toBe(false);
@@ -82,7 +82,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
 
   it("BlueskyApiError with 429 => retryable", () => {
     const envelope = toIngestErrorEnvelope(
-      BlueskyApiError.make({ message: "rate limited", status: 429 })
+      new BlueskyApiError({ message: "rate limited", status: 429 })
     );
     expect(envelope.tag).toBe("BlueskyApiError");
     expect(envelope.retryable).toBe(true);
@@ -92,7 +92,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
 
   it("BlueskyApiError with 404 => non-retryable", () => {
     const envelope = toIngestErrorEnvelope(
-      BlueskyApiError.make({ message: "not found", status: 404 })
+      new BlueskyApiError({ message: "not found", status: 404 })
     );
     expect(envelope.tag).toBe("BlueskyApiError");
     expect(envelope.retryable).toBe(false);
@@ -102,7 +102,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
 
   it("BlueskyApiError without status => non-retryable", () => {
     const envelope = toIngestErrorEnvelope(
-      BlueskyApiError.make({ message: "parse failure" })
+      new BlueskyApiError({ message: "parse failure" })
     );
     expect(envelope.tag).toBe("BlueskyApiError");
     expect(envelope.retryable).toBe(false);
@@ -112,7 +112,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
 
   it("IngestRunNotFoundError", () => {
     const envelope = toIngestErrorEnvelope(
-      IngestRunNotFoundError.make({ runId: "run-42" })
+      new IngestRunNotFoundError({ runId: "run-42" })
     );
     expect(envelope.tag).toBe("IngestRunNotFoundError");
     expect(envelope.retryable).toBe(false);
@@ -121,7 +121,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
 
   it("IngestBoundaryError", () => {
     const envelope = toIngestErrorEnvelope(
-      IngestBoundaryError.make({ message: "boundary fail", operation: "test" })
+      new IngestBoundaryError({ message: "boundary fail", operation: "test" })
     );
     expect(envelope.tag).toBe("IngestBoundaryError");
     expect(envelope.retryable).toBe(false);
@@ -131,7 +131,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
 
   it("StaleDispatchedIngestItemError => retryable", () => {
     const envelope = toIngestErrorEnvelope(
-      StaleDispatchedIngestItemError.make({
+      new StaleDispatchedIngestItemError({
         message: "stale",
         did,
         runId: "run-1",
@@ -145,7 +145,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
 
   it("StaleRunningIngestItemError => non-retryable", () => {
     const envelope = toIngestErrorEnvelope(
-      StaleRunningIngestItemError.make({
+      new StaleRunningIngestItemError({
         message: "stale running",
         did,
         runId: "run-1",
@@ -158,7 +158,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
 
   it("WorkflowRunCompensationError", () => {
     const envelope = toIngestErrorEnvelope(
-      WorkflowRunCompensationError.make({
+      new WorkflowRunCompensationError({
         message: "compensation fail",
         runId: "run-1",
         operation: "test"
@@ -171,7 +171,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
 
   it("HistoricalRunRepairError", () => {
     const envelope = toIngestErrorEnvelope(
-      HistoricalRunRepairError.make({
+      new HistoricalRunRepairError({
         message: "repair fail",
         runId: "run-1",
         did,
@@ -220,7 +220,7 @@ describe("toIngestErrorEnvelope domain error classification", () => {
 
   it("override precedence for did, runId, operation", () => {
     const envelope = toIngestErrorEnvelope(
-      IngestBoundaryError.make({ message: "fail", operation: "original" }),
+      new IngestBoundaryError({ message: "fail", operation: "original" }),
       { did, runId: "override-run", operation: "override-op" }
     );
     expect(envelope.did).toBe(did);

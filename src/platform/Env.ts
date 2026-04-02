@@ -72,7 +72,7 @@ export class CloudflareEnv extends ServiceMap.Service<
 
       return yield* Option.match(missing, {
         onNone: () => Effect.succeed(env),
-        onSome: (key) => Effect.fail(EnvError.make({ missing: String(key) }))
+        onSome: (key) => Effect.fail(new EnvError({ missing: String(key) }))
       });
     })
   );
@@ -85,7 +85,7 @@ export const requireEnvBinding = <K extends keyof EnvBindings>(
   const value = env[key];
 
   if (value == null) {
-    throw EnvError.make({ missing: String(key) });
+    throw new EnvError({ missing: String(key) });
   }
 
   return value as NonNullable<EnvBindings[K]>;

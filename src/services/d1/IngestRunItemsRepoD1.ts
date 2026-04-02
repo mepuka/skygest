@@ -1,6 +1,6 @@
 import { Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
-import type { SqlError } from "effect/unstable/sql";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../../domain/errors";
 import {
   decodeStoredIngestError,
@@ -40,33 +40,33 @@ const RawIngestRunItemRowSchema = Schema.Struct({
   did: Schema.String,
   mode: Schema.String,
   status: Schema.String,
-  enqueuedAt: Schema.NullOr(Schema.NonNegativeInt),
-  attemptCount: Schema.NonNegativeInt,
-  startedAt: Schema.NullOr(Schema.NonNegativeInt),
-  finishedAt: Schema.NullOr(Schema.NonNegativeInt),
-  lastProgressAt: Schema.NullOr(Schema.NonNegativeInt),
-  pagesFetched: Schema.NonNegativeInt,
-  postsSeen: Schema.NonNegativeInt,
-  postsStored: Schema.NonNegativeInt,
-  postsDeleted: Schema.NonNegativeInt,
+  enqueuedAt: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  attemptCount: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  startedAt: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  finishedAt: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  lastProgressAt: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  pagesFetched: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  postsSeen: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  postsStored: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  postsDeleted: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   error: Schema.NullOr(Schema.String)
 });
 const RawIngestRunItemRowsSchema = Schema.Array(RawIngestRunItemRowSchema);
 const IngestRunItemRowsSchema = Schema.Array(IngestRunItemRecordSchema);
 const CountRowsSchema = Schema.Array(
   Schema.Struct({
-    count: Schema.NonNegativeInt
+    count: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
   })
 );
 const RawIngestRunItemSummaryRowsSchema = Schema.Array(
   Schema.Struct({
-    totalExperts: Schema.NonNegativeInt,
-    expertsSucceeded: Schema.NonNegativeInt,
-    expertsFailed: Schema.NonNegativeInt,
-    pagesFetched: Schema.NonNegativeInt,
-    postsSeen: Schema.NonNegativeInt,
-    postsStored: Schema.NonNegativeInt,
-    postsDeleted: Schema.NonNegativeInt
+    totalExperts: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+    expertsSucceeded: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+    expertsFailed: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+    pagesFetched: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+    postsSeen: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+    postsStored: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+    postsDeleted: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
   })
 );
 const ErrorRowsSchema = Schema.Array(

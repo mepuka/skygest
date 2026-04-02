@@ -1,5 +1,6 @@
 import { SqlClient } from "effect/unstable/sql";
-import { Effect, Layer, TestClock } from "effect";
+import { Effect, Layer } from "effect";
+import { TestClock } from "effect/testing";
 import { describe, expect, it } from "@effect/vitest";
 import {
   CandidatePayloadNotPickedError

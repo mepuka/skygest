@@ -1,5 +1,5 @@
 import { Clock, ServiceMap, Effect, Layer } from "effect";
-import type { SqlError } from "effect/unstable/sql";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type { PostUri } from "../domain/types";
 import type {
@@ -52,7 +52,7 @@ export class EditorialService extends ServiceMap.Service<
       function* (input: SubmitEditorialPickInput, curator: string) {
         const exists = yield* repo.postExists(input.postUri);
         if (!exists) {
-          return yield* EditorialPostNotFoundError.make({ postUri: input.postUri });
+          return yield* new EditorialPostNotFoundError({ postUri: input.postUri });
         }
         const now = yield* Clock.currentTimeMillis;
         const defaultExpiryHours = Math.max(1, config.editorialDefaultExpiryHours);

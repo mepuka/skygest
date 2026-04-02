@@ -11,7 +11,7 @@ import { CandidatePayloadService } from "../../src/services/CandidatePayloadServ
 import { RawEventBatch } from "../../src/domain/types";
 import { processBatch } from "../../src/filter/FilterWorker";
 import { callTool, listTools, listPrompts, type McpToolCall } from "../../src/mcp/Client";
-import { handleMcpRequestWithLayer } from "../../src/mcp/Router";
+import { handleMcpRequestWithLayer, createPersistentMcpHandler } from "../../src/mcp/Router";
 import { AppConfig, type AppConfigShape } from "../../src/platform/Config";
 import { EditorialService } from "../../src/services/EditorialService";
 import { OntologyCatalog } from "../../src/services/OntologyCatalog";
@@ -184,11 +184,12 @@ export const createMcpClient = async (
   identity: AccessIdentity = readOnlyIdentity
 ) => {
   const baseUrl = new URL("https://skygest.local");
+  const webHandler = createPersistentMcpHandler(layer, identity);
   const localFetch = ((input, init) => {
     const request = input instanceof Request
       ? new Request(input, init)
       : new Request(input.toString(), init);
-    return handleMcpRequestWithLayer(request, layer, identity);
+    return webHandler.handler(request);
   }) as typeof globalThis.fetch;
 
   const clientOptions = {
@@ -207,6 +208,6 @@ export const createMcpClient = async (
       callTool: (input: McpToolCall) =>
         Effect.runPromise(callTool(clientOptions, input))
     },
-    close: async () => {}
+    close: () => webHandler.dispose()
   };
 };

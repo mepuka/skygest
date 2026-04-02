@@ -296,7 +296,7 @@ describe("admin expert registry routes", () => {
           readonly message: string;
         }>(response, 400);
         expect(body.error).toBe("BadRequest");
-        expect(body.message).toContain("active");
+        expect(body.message).toContain("invalid request parameters");
       })
     )
   );

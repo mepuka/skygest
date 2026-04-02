@@ -64,7 +64,7 @@ describe("EnrichmentTriggerClient", () => {
           enrichmentType: "vision"
         })
         .pipe(Effect.result);
-      expect(result._tag).toBe("Err");
+      expect(result._tag).toBe("Failure");
     }).pipe(Effect.provide(layer));
   });
 

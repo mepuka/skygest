@@ -447,9 +447,9 @@ describe("ops CLI", () => {
         makeCliLayer({
           operatorSecretLayer: Layer.effect(
             OperatorSecret,
-            new MissingOperatorSecretEnvError({
+            Effect.fail(new MissingOperatorSecretEnvError({
               envVar: "SKYGEST_OPERATOR_SECRET"
-            })
+            }))
           )
         }).layer
       );
@@ -757,7 +757,7 @@ describe("ops CLI", () => {
       );
       const httpLayer = FetchHttpClient.layer.pipe(Layer.provide(fakeFetchLayer));
       const clientLayer = StagingOperatorClient.live.pipe(Layer.provide(httpLayer));
-      const client = yield* StagingOperatorClient.pipe(Effect.provide(clientLayer));
+      const client = yield* Effect.service(StagingOperatorClient).pipe(Effect.provide(clientLayer));
       const error = yield* client.health(new URL("https://broken.test")).pipe(Effect.flip);
 
       expect(error._tag).toBe("StagingRequestError");

@@ -272,7 +272,7 @@ const collectVisionEvidence = (
             matchedAlias: mention.name
           }))
         ),
-        () => Option.fromNullable(collectWholeWordAliasMatches(mention.name, lookup)[0])
+        () => Option.fromNullishOr(collectWholeWordAliasMatches(mention.name, lookup)[0])
       );
 
       Option.match(mentionMatch, {
@@ -297,7 +297,7 @@ const collectVisionEvidence = (
             matchedAlias: logoText
           }))
         ),
-        () => Option.fromNullable(collectWholeWordAliasMatches(logoText, lookup)[0])
+        () => Option.fromNullishOr(collectWholeWordAliasMatches(logoText, lookup)[0])
       );
 
       Option.match(logoMatch, {

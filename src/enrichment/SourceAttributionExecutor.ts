@@ -12,9 +12,9 @@ import { formatSchemaParseError } from "../platform/Json";
 import { SourceAttributionMatcher } from "../source/SourceAttributionMatcher";
 
 const decodePlan = (input: unknown) =>
-  Schema.decodeUnknown(SourceAttributionExecutionPlan)(input).pipe(
+  Schema.decodeUnknownEffect(SourceAttributionExecutionPlan)(input).pipe(
     Effect.mapError((error) =>
-      EnrichmentSchemaDecodeError.make({
+      new EnrichmentSchemaDecodeError({
         message: formatSchemaParseError(error),
         operation: "SourceAttributionExecutor.execute"
       })
@@ -64,7 +64,7 @@ export class SourceAttributionExecutor extends ServiceMap.Service<SourceAttribut
           const match = yield* matcher.match(toMatcherInput(plan));
           const processedAt = yield* Clock.currentTimeMillis;
 
-          return yield* Schema.decodeUnknown(SourceAttributionEnrichment)({
+          return yield* Schema.decodeUnknownEffect(SourceAttributionEnrichment)({
             kind: "source-attribution",
             provider: match.provider,
             resolution: match.resolution,
@@ -74,7 +74,7 @@ export class SourceAttributionExecutor extends ServiceMap.Service<SourceAttribut
             processedAt
           }).pipe(
             Effect.mapError((error) =>
-              EnrichmentSchemaDecodeError.make({
+              new EnrichmentSchemaDecodeError({
                 message: formatSchemaParseError(error),
                 operation: "SourceAttributionExecutor.execute"
               })

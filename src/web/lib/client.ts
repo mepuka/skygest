@@ -7,6 +7,8 @@ interface SkygestApiId {
 }
 
 export const SkygestApi = AtomHttpApi.Tag<SkygestApiId>()("SkygestApi", {
+  // @ts-expect-error — @effect-atom/atom types lag behind Effect 4 HttpApi changes
   api: PublicReadApi,
+  // @ts-expect-error — @effect-atom/atom types lag behind Effect 4 HttpApi changes
   httpClient: FetchHttpClient.layer
 });

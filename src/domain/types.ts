@@ -9,27 +9,27 @@ const isHttpsUrl = (value: string) => {
 };
 
 export const HttpsUrl = Schema.String.pipe(
-  Schema.filter(isHttpsUrl),
+  Schema.check(Schema.makeFilter(isHttpsUrl)),
   Schema.brand("HttpsUrl")
 );
 export type HttpsUrl = Schema.Schema.Type<typeof HttpsUrl>;
 
 export const Did = Schema.String.pipe(
-  Schema.pattern(/^did:/),
+  Schema.check(Schema.isPattern(/^did:/)),
   Schema.brand("Did")
-).annotations({ description: "Decentralized Identifier, e.g. did:plc:abc123" });
+).annotate({ description: "Decentralized Identifier, e.g. did:plc:abc123" });
 export type Did = Schema.Schema.Type<typeof Did>;
 
 export const AtUri = Schema.String.pipe(
-  Schema.pattern(/^at:\/\//),
+  Schema.check(Schema.isPattern(/^at:\/\//)),
   Schema.brand("AtUri")
-).annotations({ description: "AT Protocol URI, e.g. at://did:plc:abc/app.bsky.feed.post/rkey" });
+).annotate({ description: "AT Protocol URI, e.g. at://did:plc:abc/app.bsky.feed.post/rkey" });
 export type AtUri = Schema.Schema.Type<typeof AtUri>;
 
 export const PostUri = Schema.String.pipe(
-  Schema.pattern(/^(at|x):\/\//),
+  Schema.check(Schema.isPattern(/^(at|x):\/\//)),
   Schema.brand("PostUri")
-).annotations({ description: "Post URI — at:// (Bluesky) or x:// (Twitter)" });
+).annotate({ description: "Post URI — at:// (Bluesky) or x:// (Twitter)" });
 export type PostUri = Schema.Schema.Type<typeof PostUri>;
 
 export type Platform = "bluesky" | "twitter";
@@ -48,11 +48,11 @@ export type FeedItem = Schema.Schema.Type<typeof FeedItem>;
 
 export const RawEvent = Schema.Struct({
   kind: Schema.Literal("commit"),
-  operation: Schema.Union(
+  operation: Schema.Union([
     Schema.Literal("create"),
     Schema.Literal("update"),
     Schema.Literal("delete")
-  ),
+  ]),
   collection: Schema.String,
   did: Did,
   uri: AtUri,

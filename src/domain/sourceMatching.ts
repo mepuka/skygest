@@ -8,22 +8,22 @@ import {
   SocialProvenance
 } from "./source";
 
-export const SourceAttributionResolution = Schema.Literal(
+export const SourceAttributionResolution = Schema.Literals([
   "matched",
   "ambiguous",
   "unmatched"
-);
+]);
 export type SourceAttributionResolution = Schema.Schema.Type<
   typeof SourceAttributionResolution
 >;
 
-export const VisionOrganizationMentionLocation = Schema.Literal(
+export const VisionOrganizationMentionLocation = Schema.Literals([
   "title",
   "subtitle",
   "footer",
   "watermark",
   "body"
-);
+]);
 export type VisionOrganizationMentionLocation = Schema.Schema.Type<
   typeof VisionOrganizationMentionLocation
 >;
@@ -122,7 +122,7 @@ export type LogoTextAliasEvidence = Schema.Schema.Type<
   typeof LogoTextAliasEvidence
 >;
 
-export const SourceAttributionEvidence = Schema.Union(
+export const SourceAttributionEvidence = Schema.Union([
   SourceLineAliasEvidence,
   SourceLineDomainEvidence,
   ChartTitleAliasEvidence,
@@ -132,7 +132,7 @@ export const SourceAttributionEvidence = Schema.Union(
   PostTextMentionEvidence,
   OrganizationMentionAliasEvidence,
   LogoTextAliasEvidence
-);
+]);
 export type SourceAttributionEvidence = Schema.Schema.Type<
   typeof SourceAttributionEvidence
 >;
@@ -141,7 +141,7 @@ export const SourceAttributionProviderCandidate = Schema.Struct({
   providerId: ProviderId,
   providerLabel: Schema.String,
   sourceFamily: Schema.NullOr(Schema.String),
-  bestRank: Schema.Int.pipe(Schema.between(1, 9)),
+  bestRank: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: 9 }))),
   evidence: Schema.Array(SourceAttributionEvidence)
 });
 export type SourceAttributionProviderCandidate = Schema.Schema.Type<
@@ -206,7 +206,7 @@ export const SourceAttributionMatcherInput = Schema.Struct({
   ),
   linkCards: Schema.Array(
     Schema.Struct({
-      source: Schema.Literal("embed", "media"),
+      source: Schema.Literals(["embed", "media"]),
       uri: Schema.String,
       title: Schema.NullOr(Schema.String),
       description: Schema.NullOr(Schema.String),

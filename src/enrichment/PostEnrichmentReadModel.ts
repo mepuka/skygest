@@ -1,4 +1,4 @@
-import { Either, Schema } from "effect";
+import { Result, Schema } from "effect";
 import {
   EnrichmentOutput,
   type PostEnrichmentResult,
@@ -18,21 +18,21 @@ export const validateStoredEnrichment = (enrichment: {
   readonly enrichmentPayload: unknown;
   readonly enrichedAt: number;
 }): PostEnrichmentResult | null => {
-  const decoded = Schema.decodeUnknownEither(EnrichmentOutput)(
+  const decoded = Schema.decodeUnknownResult(EnrichmentOutput)(
     enrichment.enrichmentPayload
   );
 
-  if (Either.isLeft(decoded)) {
+  if (Result.isFailure(decoded)) {
     return null;
   }
 
-  if (decoded.right.kind !== enrichment.enrichmentType) {
+  if (decoded.success.kind !== enrichment.enrichmentType) {
     return null;
   }
 
   return {
-    kind: decoded.right.kind,
-    payload: decoded.right,
+    kind: decoded.success.kind,
+    payload: decoded.success,
     enrichedAt: enrichment.enrichedAt
   } as PostEnrichmentResult;
 };

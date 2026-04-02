@@ -4,8 +4,8 @@ import { SearchPostsInput, GetRecentPostsInput, GetPostLinksInput, ListExpertsIn
 import { ListEditorialPicksInput } from "../src/domain/editorial";
 import { ListCurationCandidatesInput } from "../src/domain/curation";
 
-const decodeSync = <A, I>(schema: Schema.Schema<A, I>) =>
-  (input: unknown) => Schema.decodeUnknownSync(schema)(input);
+const decodeSync = <S extends Schema.Decoder<unknown>>(schema: S) =>
+  (input: unknown): S["Type"] => Schema.decodeUnknownSync(schema)(input);
 
 describe("MCP input schemas accept string-encoded numbers", () => {
   it("SearchPostsInput accepts limit as string", () => {

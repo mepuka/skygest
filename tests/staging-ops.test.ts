@@ -502,7 +502,7 @@ describe("staging admin ops routes", () => {
           resolveRepoService: () => Effect.die("unexpected resolveRepoService"),
           listRecordsAtService: () => Effect.die("unexpected listRecordsAtService"),
           getPostThread: () =>
-            Effect.fail(BlueskyApiError.make({
+            Effect.fail(new BlueskyApiError({
               message: "boom"
             })),
           getPosts: () => Effect.succeed([])

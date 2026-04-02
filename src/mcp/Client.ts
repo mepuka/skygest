@@ -108,7 +108,8 @@ const requestJsonRpc = <S extends Schema.Decoder<unknown>>(
   operation: string,
   method: string,
   schema: S,
-  params?: unknown
+  params?: unknown,
+  captureSessionId = false
 ) =>
   Effect.tryPromise({
     try: async () => {
@@ -133,6 +134,16 @@ const requestJsonRpc = <S extends Schema.Decoder<unknown>>(
           status: response.status,
           message: text || response.statusText
         });
+      }
+
+      if (captureSessionId) {
+        const sessionId = response.headers.get("mcp-session-id");
+        if (sessionId) {
+          (options as { headers?: Record<string, string> }).headers = {
+            ...(options.headers ?? {}),
+            "mcp-session-id": sessionId
+          };
+        }
       }
 
       return decodeUnknownSuccess(
@@ -203,7 +214,8 @@ const initializeClient = (options: McpClientOptions) =>
         name: options.clientName ?? "skygest-mcp-client",
         version: options.clientVersion ?? "0.1.0"
       }
-    }
+    },
+    true
   ).pipe(
     Effect.tap(() =>
       notifyJsonRpc(

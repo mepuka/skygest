@@ -149,7 +149,7 @@ describe("VisionEnrichmentExecutor", () => {
           )
         );
 
-        const executor = yield* VisionEnrichmentExecutor.pipe(
+        const executor = yield* Effect.service(VisionEnrichmentExecutor).pipe(
           Effect.provide(executorLayer)
         );
         const result = yield* executor.execute(makePlan());
@@ -203,7 +203,7 @@ describe("VisionEnrichmentExecutor", () => {
           )
         );
 
-        const executor = yield* VisionEnrichmentExecutor.pipe(
+        const executor = yield* Effect.service(VisionEnrichmentExecutor).pipe(
           Effect.provide(executorLayer)
         );
         const exit = yield* Effect.exit(

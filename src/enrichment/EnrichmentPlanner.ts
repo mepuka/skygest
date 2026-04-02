@@ -1,6 +1,6 @@
 import { SqlClient } from "effect/unstable/sql";
-import type { SqlError } from "effect/unstable/sql";
-import { ServiceMap, Effect, Either, Layer, Schema } from "effect";
+import { SqlError } from "effect/unstable/sql/SqlError";
+import { ServiceMap, Effect, Result, Layer, Schema } from "effect";
 import {
   CandidatePayloadNotPickedError,
   type CandidatePayloadRecord
@@ -34,7 +34,7 @@ const PlannerPostRowSchema = Schema.Struct({
   did: Schema.String,
   handle: Schema.NullOr(Schema.String),
   text: Schema.String,
-  createdAt: Schema.NonNegativeInt,
+  createdAt: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   status: Schema.String
 });
 const PlannerPostRowsSchema = Schema.Array(PlannerPostRowSchema);
@@ -45,7 +45,7 @@ const PlannerLinkRowSchema = Schema.Struct({
   description: Schema.NullOr(Schema.String),
   imageUrl: Schema.NullOr(Schema.String),
   domain: Schema.NullOr(Schema.String),
-  extractedAt: Schema.NonNegativeInt
+  extractedAt: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
 });
 const PlannerLinkRowsSchema = Schema.Array(PlannerLinkRowSchema);
 
@@ -174,14 +174,14 @@ const extractAssets = (embedPayload: EmbedPayload | null) => {
 
 const decodeExistingEnrichments = (payload: CandidatePayloadRecord) =>
   payload.enrichments.flatMap((enrichment) => {
-    const decoded = Schema.decodeUnknownEither(EnrichmentOutput)(
+    const decoded = Schema.decodeUnknownResult(EnrichmentOutput)(
       enrichment.enrichmentPayload
     );
 
-    return Either.isRight(decoded)
+    return Result.isSuccess(decoded)
       ? [
           {
-            output: decoded.right,
+            output: decoded.success,
             updatedAt: enrichment.updatedAt,
             enrichedAt: enrichment.enrichedAt
           }
@@ -238,11 +238,11 @@ export class EnrichmentPlanner extends ServiceMap.Service<
           const payload = yield* payloads.getByPostUri(postUri);
 
           if (payload === null) {
-            return yield* EnrichmentPayloadMissingError.make({ postUri });
+            return yield* new EnrichmentPayloadMissingError({ postUri });
           }
 
           if (!isPickedCandidatePayloadRecord(payload)) {
-            return yield* CandidatePayloadNotPickedError.make({
+            return yield* new CandidatePayloadNotPickedError({
               postUri,
               captureStage: payload.captureStage
             });
@@ -282,7 +282,7 @@ export class EnrichmentPlanner extends ServiceMap.Service<
 
           const row = rows[0];
           if (row === undefined || row.status !== "active") {
-            return yield* EnrichmentPostContextMissingError.make({ postUri });
+            return yield* new EnrichmentPostContextMissingError({ postUri });
           }
 
           const links = yield* sql<any>`

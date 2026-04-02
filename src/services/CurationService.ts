@@ -1,5 +1,5 @@
 import { Clock, ServiceMap, Effect, Layer, Option } from "effect";
-import type { SqlError } from "effect/unstable/sql";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import { BlueskyApiError } from "../domain/errors";
 import type { PostUri } from "../domain/types";
@@ -180,7 +180,7 @@ const clampCurationLimit = (limit: number | undefined) =>
         // Verify post exists in D1
         const exists = yield* curationRepo.postExists(input.postUri);
         if (!exists) {
-          return yield* CurationPostNotFoundError.make({ postUri: input.postUri });
+          return yield* new CurationPostNotFoundError({ postUri: input.postUri });
         }
 
         // Check current curation state
@@ -229,7 +229,7 @@ const clampCurationLimit = (limit: number | undefined) =>
 
           if (existingPayload !== null) {
             yield* queuePickedEnrichment(input.postUri, existingPayload.embedPayload, curator)
-              .pipe(Effect.catchAll(() => Effect.succeed(false)));
+              .pipe(Effect.catch(() => Effect.succeed(false)));
           }
 
           return { postUri: input.postUri, action: input.action, previousStatus, newStatus: "curated" as const };
@@ -296,7 +296,7 @@ const clampCurationLimit = (limit: number | undefined) =>
           embedPayload,
           curator
         ).pipe(
-          Effect.catchAll(() => Effect.succeed(false))
+          Effect.catch(() => Effect.succeed(false))
         );
 
         return {

@@ -22,9 +22,9 @@ export const makeWorkflowEnrichmentLayer = (
 ) => {
   // Build a ConfigProvider from Worker env bindings so Config.string()
   // resolves GOOGLE_API_KEY, GEMINI_VISION_MODEL, etc. at runtime.
-  const configLayer = Layer.setConfigProvider(
-    ConfigProvider.fromMap(
-      new Map(
+  const configLayer = ConfigProvider.layer(
+    ConfigProvider.fromUnknown(
+      Object.fromEntries(
         Object.entries(env).filter(
           (entry): entry is [string, string] => typeof entry[1] === "string"
         )

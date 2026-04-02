@@ -46,8 +46,21 @@ const MigrateResponse = Schema.Struct({
 });
 
 const extractStatus = (error: unknown): number | undefined => {
-  if (error instanceof HttpClientError.StatusCodeError) {
-    return error.response.status;
+  if (typeof error !== "object" || error === null) return undefined;
+
+  // Effect 4: HttpClientError wraps reason (StatusCodeError) inside .reason
+  const reason = "reason" in error ? (error as Record<string, unknown>).reason : error;
+  if (typeof reason !== "object" || reason === null) return undefined;
+
+  if (
+    "_tag" in reason &&
+    (reason as Record<string, unknown>)._tag === "StatusCodeError" &&
+    "response" in reason
+  ) {
+    const response = (reason as Record<string, unknown>).response;
+    if (typeof response === "object" && response !== null && "status" in response) {
+      return (response as Record<string, unknown>).status as number;
+    }
   }
 
   return undefined;

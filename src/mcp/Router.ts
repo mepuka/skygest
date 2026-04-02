@@ -94,6 +94,26 @@ export const handleMcpRequestWithLayer = async (
   }
 };
 
+/**
+ * Create a persistent MCP handler that keeps the web handler alive across
+ * requests. This is required because the MCP server tracks sessions — the
+ * session created during `initialize` must be available for subsequent
+ * `tools/list`, `tools/call`, etc. requests.
+ */
+export const createPersistentMcpHandler = (
+  layer: QueryLayer,
+  identity: AccessIdentity = { subject: null, email: null, scopes: ["mcp:read"] }
+) => {
+  const profile = profileForIdentity(identity);
+  const webHandler = HttpLayerRouter.toWebHandler(makeMcpLayer(layer, profile));
+  const context = operatorIdentityContext(identity);
+
+  return {
+    handler: (request: Request) => webHandler.handler(request, context),
+    dispose: () => webHandler.dispose()
+  };
+};
+
 /** Web handler shape with an explicit context parameter for OperatorIdentity */
 type McpWebHandler = {
   readonly handler: (request: globalThis.Request, context: ServiceMap.ServiceMap<OperatorIdentity>) => Promise<Response>;

@@ -910,4 +910,4 @@ const cli = Command.runWith(opsCommand, {
 });
 
 export const runOpsCli = (argv: ReadonlyArray<string>) =>
-  Effect.suspend(() => cli(Array.from(argv)));
+  Effect.suspend(() => cli(Array.from(argv).slice(2)));

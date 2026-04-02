@@ -22,21 +22,36 @@ const normalizeBadRequestResponse = async (
     return response;
   }
 
-  const body = await response.clone().json().catch(() => null);
-  if (!isDecodeErrorBody(body)) {
-    return response;
+  const text = await response.clone().text().catch(() => "");
+
+  // Effect 4 returns empty-body 400 for schema decode errors
+  if (text.length === 0) {
+    const headers = new Headers(response.headers);
+    headers.set("content-type", "application/json");
+
+    return new Response(
+      encodeJsonString(badRequestError("invalid request parameters")),
+      { status: 400, headers }
+    );
   }
 
-  const headers = new Headers(response.headers);
-  headers.set("content-type", "application/json");
+  // Effect 3 compatibility: body with HttpApiDecodeError shape
+  try {
+    const body = JSON.parse(text);
+    if (isDecodeErrorBody(body)) {
+      const headers = new Headers(response.headers);
+      headers.set("content-type", "application/json");
 
-  return new Response(
-    encodeJsonString(badRequestError(body.message)),
-    {
-      status: 400,
-      headers
+      return new Response(
+        encodeJsonString(badRequestError(body.message)),
+        { status: 400, headers }
+      );
     }
-  );
+  } catch {
+    // Not JSON, leave as-is
+  }
+
+  return response;
 };
 
 export const handleWithApiLayer = async (

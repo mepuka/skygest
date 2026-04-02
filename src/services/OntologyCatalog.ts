@@ -85,7 +85,7 @@ const loadCatalogFromKv = (env: EnvBindings): Effect.Effect<CatalogLoadResult> =
 
     const pointerJson = yield* Effect.tryPromise({
       try: () => kv.get(ACTIVE_POINTER_KEY, "json"),
-      catch: (error) => OntologyKvReadError.make({
+      catch: (error) => new OntologyKvReadError({
         operation: "getPointer",
         key: ACTIVE_POINTER_KEY,
         error
@@ -96,8 +96,8 @@ const loadCatalogFromKv = (env: EnvBindings): Effect.Effect<CatalogLoadResult> =
       return localCatalogResult(false);
     }
 
-    const pointer = yield* Schema.decodeUnknown(SnapshotPointerSchema)(pointerJson).pipe(
-      Effect.mapError((error) => OntologyKvDecodeError.make({
+    const pointer = yield* Schema.decodeUnknownEffect(SnapshotPointerSchema)(pointerJson).pipe(
+      Effect.mapError((error) => new OntologyKvDecodeError({
         operation: "decodePointer",
         key: ACTIVE_POINTER_KEY,
         error
@@ -108,7 +108,7 @@ const loadCatalogFromKv = (env: EnvBindings): Effect.Effect<CatalogLoadResult> =
 
     const rawSnapshot = yield* Effect.tryPromise({
       try: () => kv.get(snapshotKey, "json"),
-      catch: (error) => OntologyKvReadError.make({
+      catch: (error) => new OntologyKvReadError({
         operation: "getSnapshot",
         key: snapshotKey,
         error
@@ -119,8 +119,8 @@ const loadCatalogFromKv = (env: EnvBindings): Effect.Effect<CatalogLoadResult> =
       return localCatalogResult(false);
     }
 
-    const snapshot = yield* Schema.decodeUnknown(OntologySnapshot)(rawSnapshot).pipe(
-      Effect.mapError((error) => OntologyKvDecodeError.make({
+    const snapshot = yield* Schema.decodeUnknownEffect(OntologySnapshot)(rawSnapshot).pipe(
+      Effect.mapError((error) => new OntologyKvDecodeError({
         operation: "decodeSnapshot",
         key: snapshotKey,
         error
@@ -132,7 +132,7 @@ const loadCatalogFromKv = (env: EnvBindings): Effect.Effect<CatalogLoadResult> =
       cacheable: true
     } satisfies CatalogLoadResult;
   }).pipe(
-    Effect.catchAll((error) =>
+    Effect.catch((error) =>
       Effect.logWarning("Ontology KV load failed, falling back to local snapshot").pipe(
         Effect.annotateLogs({
           failureTag: error._tag,

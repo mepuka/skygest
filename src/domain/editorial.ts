@@ -3,16 +3,16 @@ import { PostUri } from "./types";
 import { FlexibleNumber, KnowledgePostResult } from "./bi";
 
 export const EditorialScore = Schema.Number.pipe(
-  Schema.greaterThanOrEqualTo(0),
-  Schema.lessThanOrEqualTo(100),
+  Schema.check(Schema.isGreaterThanOrEqualTo(0)),
+  Schema.check(Schema.isLessThanOrEqualTo(100)),
   Schema.brand("EditorialScore")
 );
 export type EditorialScore = Schema.Schema.Type<typeof EditorialScore>;
 
-export const EditorialPickCategory = Schema.Literal("breaking", "analysis", "discussion", "data", "opinion");
+export const EditorialPickCategory = Schema.Literals(["breaking", "analysis", "discussion", "data", "opinion"]);
 export type EditorialPickCategory = Schema.Schema.Type<typeof EditorialPickCategory>;
 
-export const EditorialPickStatus = Schema.Literal("active", "expired", "retracted");
+export const EditorialPickStatus = Schema.Literals(["active", "expired", "retracted"]);
 export type EditorialPickStatus = Schema.Schema.Type<typeof EditorialPickStatus>;
 
 export const EditorialPickRecord = Schema.Struct({
@@ -30,18 +30,18 @@ export type EditorialPickRecord = Schema.Schema.Type<typeof EditorialPickRecord>
 export const SubmitEditorialPickInput = Schema.Struct({
   postUri: PostUri,
   score: EditorialScore,
-  reason: Schema.String.pipe(Schema.minLength(1)),
+  reason: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   category: Schema.optionalKey(EditorialPickCategory),
-  expiresInHours: Schema.optionalKey(Schema.Number.pipe(Schema.greaterThan(0)))
+  expiresInHours: Schema.optionalKey(Schema.Number.pipe(Schema.check(Schema.isGreaterThan(0))))
 });
 export type SubmitEditorialPickInput = Schema.Schema.Type<typeof SubmitEditorialPickInput>;
 
 export const SubmitEditorialPickMcpInput = Schema.Struct({
-  postUri: PostUri.annotations({ description: "Post URI (at:// or x://) of the post to pick" }),
-  score: Schema.Union(EditorialScore, Schema.compose(Schema.NumberFromString, EditorialScore)).annotations({ description: "Editorial quality score (0-100). 80+=must-read, 60-79=strong, 40-59=notable" }),
-  reason: Schema.String.pipe(Schema.minLength(1)).annotations({ description: "1-2 sentence explanation of why this post was selected" }),
-  category: Schema.optionalKey(EditorialPickCategory.annotations({ description: "Pick category: breaking, analysis, discussion, data, or opinion" })),
-  expiresInHours: Schema.optionalKey(FlexibleNumber.annotations({ description: "Auto-expire pick after N hours (default: configured default)" }))
+  postUri: PostUri.annotate({ description: "Post URI (at:// or x://) of the post to pick" }),
+  score: Schema.Union([EditorialScore, Schema.NumberFromString.pipe(Schema.decodeTo(EditorialScore))]).annotate({ description: "Editorial quality score (0-100). 80+=must-read, 60-79=strong, 40-59=notable" }),
+  reason: Schema.String.pipe(Schema.check(Schema.isMinLength(1))).annotate({ description: "1-2 sentence explanation of why this post was selected" }),
+  category: Schema.optionalKey(EditorialPickCategory.annotate({ description: "Pick category: breaking, analysis, discussion, data, or opinion" })),
+  expiresInHours: Schema.optionalKey(FlexibleNumber.annotate({ description: "Auto-expire pick after N hours (default: configured default)" }))
 });
 export type SubmitEditorialPickMcpInput = Schema.Schema.Type<typeof SubmitEditorialPickMcpInput>;
 
@@ -51,9 +51,9 @@ export const RemoveEditorialPickInput = Schema.Struct({
 export type RemoveEditorialPickInput = Schema.Schema.Type<typeof RemoveEditorialPickInput>;
 
 export const ListEditorialPicksInput = Schema.Struct({
-  minScore: Schema.optionalKey(Schema.Union(EditorialScore, Schema.compose(Schema.NumberFromString, EditorialScore)).annotations({ description: "Minimum editorial score (0-100) to include" })),
-  since: Schema.optionalKey(FlexibleNumber.annotations({ description: "Filter picks created after this Unix epoch timestamp (milliseconds)" })),
-  limit: Schema.optionalKey(FlexibleNumber.annotations({ description: "Maximum number of results to return" }))
+  minScore: Schema.optionalKey(Schema.Union([EditorialScore, Schema.NumberFromString.pipe(Schema.decodeTo(EditorialScore))]).annotate({ description: "Minimum editorial score (0-100) to include" })),
+  since: Schema.optionalKey(FlexibleNumber.annotate({ description: "Filter picks created after this Unix epoch timestamp (milliseconds)" })),
+  limit: Schema.optionalKey(FlexibleNumber.annotate({ description: "Maximum number of results to return" }))
 });
 export type ListEditorialPicksInput = Schema.Schema.Type<typeof ListEditorialPicksInput>;
 
@@ -92,15 +92,13 @@ export const EditorialPicksOutput = Schema.Struct({
 });
 export type EditorialPicksOutput = Schema.Schema.Type<typeof EditorialPicksOutput>;
 
-export const CuratedPostResult = Schema.extend(
-  KnowledgePostResult,
-  Schema.Struct({
-    editorialScore: EditorialScore,
-    editorialReason: Schema.String,
-    editorialCategory: Schema.NullOr(EditorialPickCategory)
-  })
-);
-export type CuratedPostResult = Schema.Schema.Type<typeof CuratedPostResult>;
+export const CuratedPostResult = Schema.Struct({
+  ...KnowledgePostResult.fields,
+  editorialScore: EditorialScore,
+  editorialReason: Schema.String,
+  editorialCategory: Schema.NullOr(EditorialPickCategory)
+});
+export type CuratedPostResult = typeof CuratedPostResult.Type;
 
 export class EditorialPostNotFoundError extends Schema.TaggedErrorClass<EditorialPostNotFoundError>()(
   "EditorialPostNotFoundError",

@@ -40,10 +40,10 @@ export class WranglerCli extends ServiceMap.Service<
         );
 
         if (exitCode !== 0) {
-          return yield* Effect.fail(new WranglerDeployError({
+          return yield* new WranglerDeployError({
             command: commandText,
             message: `wrangler exited with status ${String(exitCode)}`
-          }));
+          });
         }
       });
 

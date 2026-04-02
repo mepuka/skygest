@@ -22,9 +22,9 @@ export class OperatorSecret extends ServiceMap.Service<
       );
 
       if (Redacted.value(value).trim().length === 0) {
-        return yield* Effect.fail(new MissingOperatorSecretEnvError({
+        return yield* new MissingOperatorSecretEnvError({
           envVar: "SKYGEST_OPERATOR_SECRET"
-        }));
+        });
       }
 
       return { value };

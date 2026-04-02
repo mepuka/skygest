@@ -10,7 +10,7 @@ import {
 } from "../../domain/bi";
 import { decodeWithDbError } from "./schemaDecode";
 
-const ActiveFlag = Schema.Union(Schema.Literal(0), Schema.Literal(1));
+const ActiveFlag = Schema.Union([Schema.Literal(0), Schema.Literal(1)]);
 const ExpertListRowSchema = Schema.Struct({
   did: Schema.String,
   handle: Schema.NullOr(Schema.String),

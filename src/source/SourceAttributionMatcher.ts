@@ -18,9 +18,9 @@ const publicationContext: PublicationContext = {
 };
 
 const decodeMatcherInput = (input: unknown) =>
-  Schema.decodeUnknown(SourceAttributionMatcherInput)(input).pipe(
+  Schema.decodeUnknownEffect(SourceAttributionMatcherInput)(input).pipe(
     Effect.mapError((error) =>
-      EnrichmentSchemaDecodeError.make({
+      new EnrichmentSchemaDecodeError({
         message: formatSchemaParseError(error),
         operation: "SourceAttributionMatcher.match"
       })
@@ -29,7 +29,7 @@ const decodeMatcherInput = (input: unknown) =>
 
 export class SourceAttributionMatcher extends ServiceMap.Service<SourceAttributionMatcher, {
   readonly match: (
-    input: Schema.Schema.Encoded<typeof SourceAttributionMatcherInput>
+    input: Schema.Codec.Encoded<typeof SourceAttributionMatcherInput>
   ) => Effect.Effect<SourceAttributionMatchResult, EnrichmentSchemaDecodeError>;
 }>()("@skygest/SourceAttributionMatcher") {
   static readonly layer = Layer.effect(
@@ -38,7 +38,7 @@ export class SourceAttributionMatcher extends ServiceMap.Service<SourceAttributi
       const registry = yield* ProviderRegistry;
 
       const match = Effect.fn("SourceAttributionMatcher.match")(function* (
-        input: Schema.Schema.Encoded<typeof SourceAttributionMatcherInput>
+        input: Schema.Codec.Encoded<typeof SourceAttributionMatcherInput>
       ) {
         const decoded = yield* decodeMatcherInput(input);
         return matchSourceAttribution(decoded, registry.lookup, publicationContext);

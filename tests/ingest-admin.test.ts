@@ -208,7 +208,7 @@ describe("ingest admin routes", () => {
 
       expect(response.status).toBe(400);
       expect(body.error).toBe("BadRequest");
-      expect(body.message).toContain("NonNegativeInt");
+      expect(body.message).toContain("invalid request parameters");
     })
   );
 
@@ -227,7 +227,7 @@ describe("ingest admin routes", () => {
           Layer.succeed(IngestWorkflowLauncher, {
             start: () =>
               Effect.fail(
-                IngestWorkflowLaunchError.make({
+                new IngestWorkflowLaunchError({
                   message: "workflow create failed",
                   operation: "test"
                 })

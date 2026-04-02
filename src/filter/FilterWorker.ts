@@ -1,4 +1,4 @@
-import { Effect, Either } from "effect";
+import { Effect, Result } from "effect";
 import {
   collectMetadataTexts,
   decodeSlimPostRecordEither,
@@ -40,88 +40,84 @@ const emptyBatchActions = (): BatchActions => ({
 export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (batch: RawEventBatch) {
   const knowledgeRepo = yield* KnowledgeRepo;
 
-  const actions = yield* Effect.reduce(
-    batch.events,
-    emptyBatchActions(),
-    (state, event) => {
-      if (event.collection !== "app.bsky.feed.post") {
-        return Effect.succeed(state);
-      }
-
-      const indexedAt = Date.now();
-      const createdAt = Math.floor(event.timeUs / 1000);
-      const ingestId = makeIngestId(event.uri, event.operation, event.cid ?? null, event.timeUs);
-
-      if (event.operation === "delete") {
-        return Effect.succeed({
-          ...state,
-          deletions: [
-            ...state.deletions,
-            {
-              uri: atUriToPostUri(event.uri),
-              did: event.did,
-              cid: event.cid ?? null,
-              createdAt,
-              indexedAt,
-              ingestId
-            }
-          ]
-        });
-      }
-
-      const record = decodeSlimPostRecordEither(event.record);
-      if (Either.isLeft(record)) {
-        return Effect.logWarning("skipping undecodable bluesky post record").pipe(
-          Effect.annotateLogs({
-            uri: event.uri,
-            did: event.did,
-            operation: event.operation,
-            decodeError: formatSlimPostRecordDecodeError(record.left)
-          }),
-          Effect.as({
-            ...state
-          })
-        );
-      }
-
-      const decoded = record.right;
-      const embedType = extractEmbedKind(decoded.embed ?? null);
-      const text = decoded.text?.trim() ?? "";
-      const links = extractLinkRecords(decoded, event.did, indexedAt);
-
-      return matchTopics({
-        text,
-        metadataTexts: collectMetadataTexts(decoded),
-        hashtags: decoded.tags ?? [],
-        links
-      }).pipe(
-        Effect.map((topics) =>
-          topics.length === 0
-            ? { ...state, dropped: state.dropped + 1 }
-            : {
-                ...state,
-                upserts: [
-                  ...state.upserts,
-                  {
-                    uri: atUriToPostUri(event.uri),
-                    did: event.did,
-                    cid: event.cid ?? null,
-                    text,
-                    createdAt,
-                    indexedAt,
-                    hasLinks: links.length > 0,
-                    status: "active",
-                    ingestId,
-                    embedType,
-                    topics,
-                    links
-                  }
-                ]
-              }
-        )
-      );
+  let actions = emptyBatchActions();
+  for (const event of batch.events) {
+    if (event.collection !== "app.bsky.feed.post") {
+      continue;
     }
-  );
+
+    const indexedAt = Date.now();
+    const createdAt = Math.floor(event.timeUs / 1000);
+    const ingestId = makeIngestId(event.uri, event.operation, event.cid ?? null, event.timeUs);
+
+    if (event.operation === "delete") {
+      actions = {
+        ...actions,
+        deletions: [
+          ...actions.deletions,
+          {
+            uri: atUriToPostUri(event.uri),
+            did: event.did,
+            cid: event.cid ?? null,
+            createdAt,
+            indexedAt,
+            ingestId
+          }
+        ]
+      };
+      continue;
+    }
+
+    const record = decodeSlimPostRecordEither(event.record);
+    if (Result.isFailure(record)) {
+      yield* Effect.logWarning("skipping undecodable bluesky post record").pipe(
+        Effect.annotateLogs({
+          uri: event.uri,
+          did: event.did,
+          operation: event.operation,
+          decodeError: formatSlimPostRecordDecodeError(record.failure)
+        })
+      );
+      continue;
+    }
+
+    const decoded = record.success;
+    const embedType = extractEmbedKind(decoded.embed ?? null);
+    const text = decoded.text?.trim() ?? "";
+    const links = extractLinkRecords(decoded, event.did, indexedAt);
+
+    const topics = yield* matchTopics({
+      text,
+      metadataTexts: collectMetadataTexts(decoded),
+      hashtags: decoded.tags ?? [],
+      links
+    });
+
+    if (topics.length === 0) {
+      actions = { ...actions, dropped: actions.dropped + 1 };
+    } else {
+      actions = {
+        ...actions,
+        upserts: [
+          ...actions.upserts,
+          {
+            uri: atUriToPostUri(event.uri),
+            did: event.did,
+            cid: event.cid ?? null,
+            text,
+            createdAt,
+            indexedAt,
+            hasLinks: links.length > 0,
+            status: "active",
+            ingestId,
+            embedType,
+            topics,
+            links
+          }
+        ]
+      };
+    }
+  }
 
   yield* knowledgeRepo.upsertPosts(actions.upserts);
   yield* knowledgeRepo.markDeleted(actions.deletions);
@@ -134,7 +130,7 @@ export const processBatch = Effect.fn("FilterWorker.processBatch")(function* (ba
         Effect.annotateLogs({ error: String(e) })
       )
     ),
-    Effect.catchAll(() => Effect.succeed(0))
+    Effect.catch(() => Effect.succeed(0))
   );
 
   return {

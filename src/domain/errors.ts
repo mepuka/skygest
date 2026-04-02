@@ -1,4 +1,4 @@
-import { Either, Schema } from "effect";
+import { Result, Schema } from "effect";
 import { CandidatePayloadStage } from "./candidatePayload";
 import { Did, PostUri } from "./types";
 import {
@@ -203,7 +203,7 @@ export class EnrichmentDependencyPendingError extends Schema.TaggedErrorClass<En
 ) {}
 
 export const IngestErrorEnvelope = Schema.Struct({
-  tag: Schema.String.pipe(Schema.minLength(1)),
+  tag: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   message: Schema.String,
   retryable: Schema.Boolean,
   status: Schema.optionalKey(Schema.Number),
@@ -214,7 +214,7 @@ export const IngestErrorEnvelope = Schema.Struct({
 export type IngestErrorEnvelope = Schema.Schema.Type<typeof IngestErrorEnvelope>;
 
 export const IngestErrorResponse = Schema.Struct({
-  error: Schema.String.pipe(Schema.minLength(1)),
+  error: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   message: Schema.String,
   retryable: Schema.optionalKey(Schema.Boolean),
   status: Schema.optionalKey(Schema.Number),
@@ -224,7 +224,7 @@ export const IngestErrorResponse = Schema.Struct({
 export type IngestErrorResponse = Schema.Schema.Type<typeof IngestErrorResponse>;
 
 export const EnrichmentErrorEnvelope = Schema.Struct({
-  tag: Schema.String.pipe(Schema.minLength(1)),
+  tag: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   message: Schema.String,
   retryable: Schema.Boolean,
   status: Schema.optionalKey(Schema.Number),
@@ -235,10 +235,10 @@ export type EnrichmentErrorEnvelope = Schema.Schema.Type<
   typeof EnrichmentErrorEnvelope
 >;
 
-const decodeEnvelope = Schema.decodeUnknownEither(IngestErrorEnvelope);
+const decodeEnvelope = Schema.decodeUnknownResult(IngestErrorEnvelope);
 const encodeEnvelope = encodeJsonStringWith(IngestErrorEnvelope);
 const decodeEnvelopeJson = decodeJsonStringEitherWith(IngestErrorEnvelope);
-const decodeEnrichmentEnvelope = Schema.decodeUnknownEither(EnrichmentErrorEnvelope);
+const decodeEnrichmentEnvelope = Schema.decodeUnknownResult(EnrichmentErrorEnvelope);
 const encodeEnrichmentEnvelope = encodeJsonStringWith(EnrichmentErrorEnvelope);
 const decodeEnrichmentEnvelopeJson = decodeJsonStringEitherWith(EnrichmentErrorEnvelope);
 
@@ -359,8 +359,8 @@ export const decodeStoredIngestError = (value: string | null) => {
   }
 
   const decoded = decodeEnvelopeJson(value);
-  if (Either.isRight(decoded)) {
-    return sanitizeIngestErrorEnvelope(decoded.right);
+  if (Result.isSuccess(decoded)) {
+    return sanitizeIngestErrorEnvelope(decoded.success);
   }
 
   return legacyIngestErrorEnvelope("legacy ingest failure");
@@ -379,8 +379,8 @@ export const decodeStoredEnrichmentError = (value: string | null) => {
   }
 
   const decoded = decodeEnrichmentEnvelopeJson(value);
-  if (Either.isRight(decoded)) {
-    return decoded.right;
+  if (Result.isSuccess(decoded)) {
+    return decoded.success;
   }
 
   return legacyEnrichmentErrorEnvelope("legacy enrichment failure");
@@ -404,8 +404,8 @@ export const toIngestErrorEnvelope = (
   });
 
   const asEnvelope = decodeEnvelope(error);
-  if (Either.isRight(asEnvelope)) {
-    return withOverrides(asEnvelope.right);
+  if (Result.isSuccess(asEnvelope)) {
+    return withOverrides(asEnvelope.success);
   }
 
   if (error instanceof BlueskyApiError || isTagged(error, "BlueskyApiError")) {
@@ -626,8 +626,8 @@ export const toEnrichmentErrorEnvelope = (
   });
 
   const asEnvelope = decodeEnrichmentEnvelope(error);
-  if (Either.isRight(asEnvelope)) {
-    return withOverrides(asEnvelope.right);
+  if (Result.isSuccess(asEnvelope)) {
+    return withOverrides(asEnvelope.success);
   }
 
   if (

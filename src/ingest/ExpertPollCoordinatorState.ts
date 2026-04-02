@@ -11,17 +11,17 @@ import type { Did as DidValue } from "../domain/types";
 
 const DEFAULT_BACKFILL_TOTAL_POSTS = 300;
 
-const BackfillTaskKey = Schema.String.pipe(Schema.pattern(/^backfill:.+/u));
+const BackfillTaskKey = Schema.String.pipe(Schema.check(Schema.isPattern(/^backfill:.+/u)));
 const ReconcileTaskKey = Schema.String.pipe(
-  Schema.pattern(/^reconcile:.+:(recent|deep)$/u)
+  Schema.check(Schema.isPattern(/^reconcile:.+:(recent|deep)$/u))
 );
 
 export const TaskTotalsSchema = Schema.Struct({
-  attemptCount: Schema.NonNegativeInt,
-  pagesFetched: Schema.NonNegativeInt,
-  postsSeen: Schema.NonNegativeInt,
-  postsStored: Schema.NonNegativeInt,
-  postsDeleted: Schema.NonNegativeInt
+  attemptCount: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  pagesFetched: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  postsSeen: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  postsStored: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  postsDeleted: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
 });
 type TaskTotals = Schema.Schema.Type<typeof TaskTotalsSchema>;
 
@@ -37,7 +37,7 @@ export const HeadTaskSchema = Schema.Struct({
   key: Schema.Literal("head"),
   mode: Schema.Literal("head"),
   runIds: Schema.Array(Schema.String),
-  requestedAt: Schema.NonNegativeInt,
+  requestedAt: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   totals: TaskTotalsSchema
 });
 export type HeadTask = Schema.Schema.Type<typeof HeadTaskSchema>;
@@ -45,10 +45,10 @@ export type HeadTask = Schema.Schema.Type<typeof HeadTaskSchema>;
 export const BackfillTaskSchema = Schema.Struct({
   key: BackfillTaskKey,
   mode: Schema.Literal("backfill"),
-  runIds: Schema.Tuple(Schema.String),
-  requestedAt: Schema.NonNegativeInt,
-  maxAgeDays: Schema.optionalKey(Schema.NonNegativeInt),
-  remainingMaxPosts: Schema.NonNegativeInt,
+  runIds: Schema.Tuple([Schema.String]),
+  requestedAt: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  maxAgeDays: Schema.optionalKey(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  remainingMaxPosts: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   totals: TaskTotalsSchema
 });
 export type BackfillTask = Schema.Schema.Type<typeof BackfillTaskSchema>;
@@ -56,19 +56,19 @@ export type BackfillTask = Schema.Schema.Type<typeof BackfillTaskSchema>;
 export const ReconcileTaskSchema = Schema.Struct({
   key: ReconcileTaskKey,
   mode: Schema.Literal("reconcile"),
-  runIds: Schema.Tuple(Schema.String),
-  requestedAt: Schema.NonNegativeInt,
+  runIds: Schema.Tuple([Schema.String]),
+  requestedAt: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   depth: ReconcileDepthSchema,
   cursor: Schema.NullOr(Schema.String),
   totals: TaskTotalsSchema
 });
 export type ReconcileTask = Schema.Schema.Type<typeof ReconcileTaskSchema>;
 
-export const CoordinatorTaskSchema = Schema.Union(
+export const CoordinatorTaskSchema = Schema.Union([
   HeadTaskSchema,
   BackfillTaskSchema,
   ReconcileTaskSchema
-);
+]);
 export type CoordinatorTask = Schema.Schema.Type<typeof CoordinatorTaskSchema>;
 
 export const ExpertPollCoordinatorStateSchema = Schema.Struct({
@@ -96,7 +96,7 @@ export const ExpertPollCoordinatorStoredStateCompatSchema = Schema.Struct({
     current: Schema.NullOr(CoordinatorTaskSchema),
     pending: Schema.Array(CoordinatorTaskSchema),
     lastCompletedRunId: Schema.NullOr(Schema.String),
-    lastFailure: Schema.NullOr(Schema.Union(IngestErrorEnvelope, Schema.String))
+    lastFailure: Schema.NullOr(Schema.Union([IngestErrorEnvelope, Schema.String]))
   })
 });
 
@@ -128,8 +128,8 @@ export type EnqueueHeadCoordinatorInput = {
 export const EnqueueBackfillCoordinatorInputSchema = Schema.Struct({
   did: Did,
   runId: Schema.String,
-  maxPosts: Schema.optionalKey(Schema.NonNegativeInt),
-  maxAgeDays: Schema.optionalKey(Schema.NonNegativeInt)
+  maxPosts: Schema.optionalKey(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  maxAgeDays: Schema.optionalKey(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))))
 });
 export type EnqueueBackfillCoordinatorInput = {
   readonly did: DidValue;

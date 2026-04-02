@@ -1,5 +1,5 @@
 import { SqlClient } from "effect/unstable/sql";
-import type { SqlError } from "effect/unstable/sql";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import { ServiceMap, Effect, Layer } from "effect";
 import type { AccessIdentity } from "../auth/AuthService";
@@ -170,7 +170,7 @@ export class StagingOpsService extends ServiceMap.Service<
                 Effect.tap(() =>
                   Effect.sync(() => { updated++; })
                 ),
-                Effect.catchAll((error) =>
+                Effect.catch((error) =>
                   Effect.logWarning("failed to refresh expert profile").pipe(
                     Effect.annotateLogs({
                       did: expert.did,

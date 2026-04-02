@@ -3,22 +3,22 @@ import { EnrichmentErrorEnvelope } from "./errors";
 import { EnrichmentKind } from "./enrichment";
 import { PostUri } from "./types";
 
-const EpochMillis = Schema.NonNegativeInt;
-const Counter = Schema.NonNegativeInt;
+const EpochMillis = Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)));
+const Counter = Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)));
 
-export const EnrichmentTrigger = Schema.Literal("pick", "admin", "repair");
+export const EnrichmentTrigger = Schema.Literals(["pick", "admin", "repair"]);
 export type EnrichmentTrigger = Schema.Schema.Type<typeof EnrichmentTrigger>;
 
-export const EnrichmentRunStatus = Schema.Literal(
+export const EnrichmentRunStatus = Schema.Literals([
   "queued",
   "running",
   "complete",
   "failed",
   "needs-review"
-);
+]);
 export type EnrichmentRunStatus = Schema.Schema.Type<typeof EnrichmentRunStatus>;
 
-export const EnrichmentRunPhase = Schema.Literal(
+export const EnrichmentRunPhase = Schema.Literals([
   "queued",
   "assembling",
   "planning",
@@ -28,16 +28,16 @@ export const EnrichmentRunPhase = Schema.Literal(
   "complete",
   "failed",
   "needs-review"
-);
+]);
 export type EnrichmentRunPhase = Schema.Schema.Type<typeof EnrichmentRunPhase>;
 
-export const EnrichmentRunActivePhase = Schema.Literal(
+export const EnrichmentRunActivePhase = Schema.Literals([
   "assembling",
   "planning",
   "executing",
   "validating",
   "persisting"
-);
+]);
 export type EnrichmentRunActivePhase = Schema.Schema.Type<
   typeof EnrichmentRunActivePhase
 >;
@@ -47,12 +47,12 @@ export const EnrichmentRunRecord = Schema.Struct({
   workflowInstanceId: Schema.String,
   postUri: PostUri,
   enrichmentType: EnrichmentKind,
-  schemaVersion: Schema.String.pipe(Schema.minLength(1)),
+  schemaVersion: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   triggeredBy: EnrichmentTrigger,
   requestedBy: Schema.NullOr(Schema.String),
   status: EnrichmentRunStatus,
   phase: EnrichmentRunPhase,
-  attemptCount: Schema.NonNegativeInt,
+  attemptCount: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   modelLane: Schema.NullOr(Schema.String),
   promptVersion: Schema.NullOr(Schema.String),
   inputFingerprint: Schema.NullOr(Schema.String),
@@ -69,7 +69,7 @@ export const CreateQueuedEnrichmentRun = Schema.Struct({
   workflowInstanceId: Schema.String,
   postUri: PostUri,
   enrichmentType: EnrichmentKind,
-  schemaVersion: Schema.String.pipe(Schema.minLength(1)),
+  schemaVersion: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   triggeredBy: EnrichmentTrigger,
   requestedBy: Schema.NullOr(Schema.String),
   modelLane: Schema.NullOr(Schema.String),
@@ -119,7 +119,7 @@ export type MarkEnrichmentRunNeedsReview = Schema.Schema.Type<
 export const EnrichmentRunParams = Schema.Struct({
   postUri: PostUri,
   enrichmentType: EnrichmentKind,
-  schemaVersion: Schema.String.pipe(Schema.minLength(1)),
+  schemaVersion: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   triggeredBy: EnrichmentTrigger,
   requestedBy: Schema.optionalKey(Schema.NullOr(Schema.String))
 });
@@ -136,7 +136,7 @@ export type EnrichmentQueuedResponse = Schema.Schema.Type<
 
 export const EnrichmentRunListOptions = Schema.Struct({
   status: Schema.optionalKey(EnrichmentRunStatus),
-  limit: Schema.Int.pipe(Schema.between(1, 100))
+  limit: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: 100 })))
 });
 export type EnrichmentRunListOptions = Schema.Schema.Type<
   typeof EnrichmentRunListOptions

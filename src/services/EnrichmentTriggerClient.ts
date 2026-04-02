@@ -98,7 +98,7 @@ export class EnrichmentTriggerClient extends ServiceMap.Service<
             }
           }).pipe(
             Effect.flatMap((body) =>
-              Schema.decodeUnknown(StartEnrichmentResult)(body).pipe(
+              Schema.decodeUnknownEffect(StartEnrichmentResult)(body).pipe(
                 Effect.mapError(
                   (parseError) =>
                     new EnrichmentTriggerError({

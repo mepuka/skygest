@@ -1,6 +1,6 @@
 import { Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
-import type { SqlError } from "effect/unstable/sql";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../../domain/errors";
 import {
   CandidatePayloadEnrichmentRecord as CandidatePayloadEnrichmentRecordSchema,
@@ -248,7 +248,7 @@ export const CandidatePayloadRepoD1 = {
 
               if (!isPickedCandidatePayloadStage(row.captureStage)) {
                 return Effect.fail(
-                  CandidatePayloadNotPickedError.make({
+                  new CandidatePayloadNotPickedError({
                     postUri: validated.postUri,
                     captureStage: row.captureStage
                   })
