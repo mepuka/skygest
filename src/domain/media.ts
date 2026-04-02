@@ -43,7 +43,7 @@ export const normalizeMediaType = (raw: string): string => {
 // Chart type taxonomy (from ChartTypeScheme, 14 concepts)
 // ---------------------------------------------------------------------------
 
-export const ChartType = Schema.Literals([
+export const ChartTypeMembers = [
   "area-chart",
   "bar-chart",
   "candlestick-chart",
@@ -64,7 +64,9 @@ export const ChartType = Schema.Literals([
   "timeline-chart",
   "treemap",
   "waterfall-chart"
-]);
+] as const;
+
+export const ChartType = Schema.Literals(ChartTypeMembers);
 export type ChartType = Schema.Schema.Type<typeof ChartType>;
 
 /** Normalize a Gemini chartType to canonical kebab-case form.
@@ -87,6 +89,18 @@ export const normalizeChartType = (raw: string): string => {
   };
   return aliases[kebab] ?? kebab;
 };
+
+// ---------------------------------------------------------------------------
+// Image classification (lightweight classify-step output)
+// ---------------------------------------------------------------------------
+
+export const ImageClassification = Schema.Struct({
+  mediaType: MediaType,
+  chartTypes: Schema.Array(ChartType),
+  hasDataPoints: Schema.Boolean,
+  isCompound: Schema.Boolean
+});
+export type ImageClassification = Schema.Schema.Type<typeof ImageClassification>;
 
 // ---------------------------------------------------------------------------
 // Alt text provenance (from AltTextProvenanceScheme)

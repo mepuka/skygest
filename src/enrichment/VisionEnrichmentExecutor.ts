@@ -15,8 +15,9 @@ import {
   VisionExecutionPlan,
   type VisionExecutionPlan as VisionExecutionPlanValue
 } from "../domain/enrichmentPlan";
+import { ChartTypeMembers } from "../domain/media";
 import { formatSchemaParseError } from "../platform/Json";
-import { GeminiVisionService } from "./GeminiVisionService";
+import { GeminiVisionService, type ImageClassification } from "./GeminiVisionService";
 import { VISION_PROMPT_VERSION } from "./prompts";
 
 const decodeVisionPlan = (input: unknown) =>
@@ -138,6 +139,10 @@ const combineFindings = (
   }));
 };
 
+/** Pure routing predicate: full extraction for non-compound charts with data. */
+export const fullExtractionEligible = (c: ImageClassification): boolean =>
+  !c.isCompound && c.mediaType === "chart" && c.hasDataPoints;
+
 export class VisionEnrichmentExecutor extends ServiceMap.Service<
   VisionEnrichmentExecutor,
   {
@@ -218,10 +223,22 @@ export class VisionEnrichmentExecutor extends ServiceMap.Service<
             fetched.bytes,
             fetched.mimeType
           );
-          const analysis = yield* gemini.extractChartData(
-            uploaded.uri,
-            fetched.mimeType
+
+          const classification = yield* gemini.classifyImage(uploaded.uri, fetched.mimeType).pipe(
+            Effect.catch(() =>
+              Effect.succeed({
+                mediaType: "chart" as const,
+                chartTypes: [] as readonly [],
+                hasDataPoints: true,
+                isCompound: false
+              })
+            )
           );
+
+          const eligible = fullExtractionEligible(classification);
+          const analysis = eligible
+            ? yield* gemini.extractChartData(uploaded.uri, fetched.mimeType)
+            : yield* gemini.extractImageSummary(uploaded.uri, fetched.mimeType);
 
           return yield* Schema.decodeUnknownEffect(VisionAssetEnrichmentSchema)({
             assetKey: asset.assetKey,
@@ -229,6 +246,7 @@ export class VisionEnrichmentExecutor extends ServiceMap.Service<
             source: asset.source,
             index: asset.index,
             originalAltText: getOriginalAltText(asset),
+            extractionRoute: eligible ? "full" : "lightweight",
             analysis
           }).pipe(
             Effect.mapError((error) =>
@@ -263,6 +281,22 @@ export class VisionEnrichmentExecutor extends ServiceMap.Service<
           ...assets.map((asset) => asset.analysis.processedAt)
         );
 
+        const allChartTypes = uniqueValues(
+          assets.flatMap((asset) => asset.analysis.chartTypes)
+        );
+        const chartTypes = allChartTypes.filter(
+          (ct): ct is typeof ChartTypeMembers[number] =>
+            (ChartTypeMembers as ReadonlyArray<string>).includes(ct)
+        );
+        const droppedChartTypes = allChartTypes.filter(
+          (ct) => !(ChartTypeMembers as ReadonlyArray<string>).includes(ct)
+        );
+        if (droppedChartTypes.length > 0) {
+          yield* Effect.logWarning(
+            `Dropped non-enum chartTypes from summary: ${droppedChartTypes.join(", ")}`
+          );
+        }
+
         return yield* Schema.decodeUnknownEffect(VisionEnrichmentSchema)({
           kind: "vision",
           summary: {
@@ -270,9 +304,7 @@ export class VisionEnrichmentExecutor extends ServiceMap.Service<
             mediaTypes: uniqueValues(
               assets.map((asset) => asset.analysis.mediaType)
             ),
-            chartTypes: uniqueValues(
-              assets.flatMap((asset) => asset.analysis.chartTypes)
-            ),
+            chartTypes,
             titles,
             keyFindings
           },

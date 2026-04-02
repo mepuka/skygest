@@ -1,29 +1,22 @@
 /**
  * GeminiVisionService — interface for Gemini 2.5 Flash vision analysis.
  *
- * Three-step workflow:
+ * Four-step workflow:
  * 1. uploadImage — push image bytes to the Gemini Files API (48h TTL)
  * 2. classifyImage — lightweight classification (mediaType + chartTypes)
- * 3. extractChartData — full structured extraction → VisionEnrichment
+ * 3. extractChartData — full structured extraction → VisionAssetAnalysis
+ * 4. extractImageSummary — lightweight extraction (metadata + provenance only)
  *
  * Implementation lives in a separate module (Task 2).
  */
 
 import { ServiceMap, Effect, Schema } from "effect";
 import type { VisionAssetAnalysis } from "../domain/enrichment";
-import { MediaType, ChartType } from "../domain/media";
 import type { GeminiApiError, GeminiParseError } from "../domain/errors";
+import type { ImageClassification } from "../domain/media";
 
-// ---------------------------------------------------------------------------
-// ImageClassification — lightweight classify-step output
-// ---------------------------------------------------------------------------
-
-export const ImageClassification = Schema.Struct({
-  mediaType: MediaType,
-  chartTypes: Schema.Array(ChartType),
-  hasDataPoints: Schema.Boolean
-});
-export type ImageClassification = Schema.Schema.Type<typeof ImageClassification>;
+// Re-export from domain — canonical definition lives in src/domain/media.ts
+export { ImageClassification } from "../domain/media";
 
 // ---------------------------------------------------------------------------
 // Upload result
@@ -53,6 +46,11 @@ export class GeminiVisionService extends ServiceMap.Service<
     ) => Effect.Effect<ImageClassification, GeminiApiError | GeminiParseError>;
 
     readonly extractChartData: (
+      imageUri: string,
+      mimeType: string
+    ) => Effect.Effect<VisionAssetAnalysis, GeminiApiError | GeminiParseError>;
+
+    readonly extractImageSummary: (
       imageUri: string,
       mimeType: string
     ) => Effect.Effect<VisionAssetAnalysis, GeminiApiError | GeminiParseError>;
