@@ -18,6 +18,16 @@
 4. **Explicit topic override.** Add `operatorOverride` flag to `ImportPostsInput`. When true, posts with zero topic matches are still imported. Default batch import behavior is unchanged.
 5. **Detailed return shape.** CLI reports whether post was newly imported or already existed, curation state change, and enrichment status.
 
+## Implementation Notes (from architecture review)
+
+- **`ExpertSource` needs `"bluesky-import"`** — The current `ExpertSource` schema in `src/domain/bi.ts` only has `"manual"`, `"starter_pack"`, `"list"`, `"network"`, `"twitter-import"`. Task 4 adds `"bluesky-import"` for provenance tracking.
+- **`tierOption` has no default** — The existing `tierOption` in `Cli.ts` is required. The `ingest-url` command defines its own with `Flag.withDefault("energy-focused")` to reduce friction.
+- **`GetPostThreadResponse.thread` is `Schema.Unknown`** — Use `flattenThread` from `src/bluesky/ThreadFlatten.ts` to safely decode the thread, not raw property access. This matches the pattern in `CurationService.ts`.
+- **`StagingOperatorClient` needs no changes** — It passes raw input as JSON body via `jsonBody(input)`. The `operatorOverride` field flows through automatically.
+- **CycleTLS/FetchHttpClient isolation** — The `blueskyCliLayer` uses `FetchHttpClient.layer`, scoped via `Effect.provide(blueskyCliLayer)`. The `scraperLayer` is similarly scoped. Neither leaks into the shared layer. This mirrors the existing pattern in `runTwitterImportTweet`.
+- **`buildTypedEmbed` and `extractEmbedKind`** — Verify these are exported from `src/bluesky/EmbedExtract.ts`. If not, extract them from `CurationService.ts` first.
+- **External link card in links array** — When embed is `"external"`, add the card URL to the `links` array so `hasLinks` is correct. The Twitter normalizer already does this for tweet URLs.
+
 ---
 
 ## Task 1: URL Parser
@@ -258,11 +268,13 @@ In `src/services/CurationService.ts`, in the `action === "curate"` Bluesky path 
 
 ```ts
 // action === "curate" (Bluesky)
-// Check if payload already exists (e.g., captured at import time)
+// Check if payload already exists (e.g., captured at import time by CLI ingest-url)
 const existingPayload = yield* payloadService.getPayload(input.postUri);
+const storedEmbedType = yield* curationRepo.getPostEmbedType(input.postUri);
 
 if (existingPayload !== null && existingPayload.embedPayload != null) {
   // Payload exists from import — use stored data, skip live fetch
+  // (mirrors the Twitter path at lines 214-235)
   if (existingPayload.captureStage !== "picked") {
     yield* payloadService.markPicked(input.postUri);
   }
@@ -273,6 +285,14 @@ if (existingPayload !== null && existingPayload.embedPayload != null) {
     .pipe(Effect.catch(() => Effect.succeed(false)));
 
   return { postUri: input.postUri, action: input.action, previousStatus, newStatus: "curated" as const };
+}
+
+// Guard: if the post has a known embed type but the stored payload is null,
+// it cannot be curated yet — same guard as the Twitter path (line 218)
+if (storedEmbedType !== null && existingPayload?.embedPayload == null && existingPayload !== null) {
+  return yield* new BlueskyApiError({
+    message: `Post ${input.postUri} has embed type "${storedEmbedType}" but no stored media data — cannot curate yet`
+  });
 }
 
 // No stored payload — fetch live thread from Bluesky (existing behavior)
@@ -306,7 +326,10 @@ git commit -m "fix(curation): skip Bluesky thread fetch when stored payload exis
 
 The CLI needs to fetch a Bluesky thread and normalize it to `ImportPostInput` + `ImportExpertInput`, matching the shape that `StagingOperatorClient.importPosts` expects.
 
+**Prerequisite:** Add `"bluesky-import"` to `ExpertSource` in `src/domain/bi.ts`. The current schema only has `"manual"`, `"starter_pack"`, `"list"`, `"network"`, `"twitter-import"`. Without this, the import endpoint will reject the payload with a schema validation error.
+
 **Files:**
+- Modify: `src/domain/bi.ts` — add `"bluesky-import"` to `ExpertSource`
 - Create: `src/ops/BlueskyNormalizer.ts`
 - Create: `tests/bluesky-normalizer.test.ts`
 
@@ -373,7 +396,7 @@ describe("normalizeBlueskyThread", () => {
       const result = normalizeBlueskyThread(threadFixture as any);
       expect(result.expert.did).toBe("did:plc:abc123");
       expect(result.expert.handle).toBe("simonevans.bsky.social");
-      expect(result.expert.source).toBe("bluesky");
+      expect(result.expert.source).toBe("bluesky-import");
     })
   );
 
@@ -400,24 +423,28 @@ Expected: FAIL — module not found
 import type { GetPostThreadResponse } from "../bluesky/ThreadTypes";
 import type { ImportPostInput, ImportExpertInput } from "../domain/api";
 import type { PostUri, Did } from "../domain/types";
+import { flattenThread } from "../bluesky/ThreadFlatten";
 import { buildTypedEmbed, extractEmbedKind } from "../bluesky/EmbedExtract";
 
 /**
  * Normalize a Bluesky thread response into import-ready shapes.
- * Extracts post data, expert data, links, hashtags, and embed payload
- * so the import endpoint receives everything in one call.
+ * Uses flattenThread to safely decode the Schema.Unknown thread,
+ * matching the pattern in CurationService.ts.
  */
 export const normalizeBlueskyThread = (
   thread: GetPostThreadResponse,
   tierDefault: string = "energy-focused"
 ): { post: ImportPostInput; expert: ImportExpertInput } => {
-  const post = thread.thread?.post;
-  if (!post || !post.record) {
-    throw new Error("Thread response missing post or record");
+  // flattenThread safely decodes the Schema.Unknown thread field
+  const flat = flattenThread(thread.thread);
+  const focusPost = flat?.focus?.post;
+
+  if (!focusPost) {
+    throw new Error("Thread response missing focus post");
   }
 
-  const record = post.record as Record<string, unknown>;
-  const author = post.author as Record<string, unknown>;
+  const record = focusPost.record as Record<string, unknown>;
+  const author = focusPost.author as Record<string, unknown>;
 
   const text = typeof record.text === "string" ? record.text : "";
   const createdAtStr = typeof record.createdAt === "string" ? record.createdAt : new Date().toISOString();
@@ -442,13 +469,28 @@ export const normalizeBlueskyThread = (
     }
   }
 
-  // Extract embed
-  const embedType = extractEmbedKind(post.embed as any);
-  const embedPayload = buildTypedEmbed(post.embed);
+  // Add external link card URL to links array if embed is external
+  // (mirrors TwitterNormalizer which includes card URLs in tweet.urls)
+  const embed = focusPost.embed as Record<string, unknown> | null;
+  if (embed && typeof embed.$type === "string" && embed.$type.includes("external")) {
+    const external = embed.external as Record<string, unknown> | undefined;
+    if (external && typeof external.uri === "string") {
+      const alreadyInLinks = links.some((l) => l.url === external.uri);
+      if (!alreadyInLinks) {
+        try {
+          links.push({ url: external.uri as string, domain: new URL(external.uri as string).hostname });
+        } catch { /* skip malformed */ }
+      }
+    }
+  }
+
+  // Extract embed type and payload
+  const embedType = extractEmbedKind(focusPost.embed as any);
+  const embedPayload = buildTypedEmbed(focusPost.embed);
 
   return {
     post: {
-      uri: post.uri as PostUri,
+      uri: focusPost.uri as PostUri,
       did: (author.did as string) as Did,
       text,
       createdAt,
@@ -461,7 +503,7 @@ export const normalizeBlueskyThread = (
       did: (author.did as string) as Did,
       handle: (author.handle as string) ?? "unknown",
       domain: "bsky.social",
-      source: "bluesky" as const,
+      source: "bluesky-import" as const,
       tier: tierDefault as any,
       displayName: typeof author.displayName === "string" ? author.displayName : undefined,
       avatar: typeof author.avatar === "string" ? author.avatar : undefined
@@ -498,21 +540,35 @@ Compose: parse URL → fetch (scraper or Bluesky API) → importPosts (with oper
 **Files:**
 - Modify: `src/ops/Cli.ts`
 
-### Step 1: Add the BlueskyClient layer for CLI
+### Step 1: Add imports and the BlueskyClient layer for CLI
 
-The BlueskyClient needs `AppConfig` (for `publicApi` URL) and `HttpClient.HttpClient`. For CLI use, provide a minimal layer:
+Add to the imports in `Cli.ts`:
 
 ```ts
-import { BlueskyClient, makeBlueskyClient } from "../bluesky/BlueskyClient";
+import { Layer } from "effect";  // add Layer to the existing effect import
 import { FetchHttpClient } from "effect/unstable/http";
+import { BlueskyClient, makeBlueskyClient } from "../bluesky/BlueskyClient";
+import { parsePostUrl } from "../domain/ingestUrl";
+import { normalizeBlueskyThread } from "./BlueskyNormalizer";
+```
 
+The BlueskyClient needs `HttpClient.HttpClient`. For CLI use, provide a minimal layer using FetchHttpClient (NOT CycleTLS — that would conflict with StagingOperatorClient). Scoped via `Effect.provide()` like scraperLayer.
+
+```ts
 const blueskyCliLayer = Layer.effect(
   BlueskyClient,
   makeBlueskyClient("https://public.api.bsky.app")
 ).pipe(Layer.provide(FetchHttpClient.layer));
 ```
 
-This uses FetchHttpClient (standard fetch, no CycleTLS conflict) and hard-codes the public API URL so no AppConfig is needed.
+Add a local tier option with a default (the existing `tierOption` has no default and would force `--tier` on every invocation):
+
+```ts
+const ingestTierOption = Flag.choice("tier", expertTiers).pipe(
+  Flag.withDescription("Expert tier (default: energy-focused)"),
+  Flag.withDefault("energy-focused")
+);
+```
 
 ### Step 2: Add the ingest-url runner
 
@@ -620,7 +676,7 @@ const ingestUrlCommand = Command.make(
   "ingest-url",
   {
     url: urlArg,
-    tier: tierOption,
+    tier: ingestTierOption,
     note: noteOption,
     baseUrl: baseUrlOption
   },
@@ -695,6 +751,7 @@ git commit -m "test: verify full suite passes with quick-ingest (SKY-143)"
 | File | Change |
 |------|--------|
 | `src/domain/ingestUrl.ts` | NEW — URL parser (pure function) |
+| `src/domain/bi.ts` | Add `"bluesky-import"` to `ExpertSource` |
 | `src/domain/api.ts` | Add `operatorOverride` to `ImportPostsInput` |
 | `src/admin/Router.ts` | Respect `operatorOverride` in import handler |
 | `src/services/CurationService.ts` | Skip Bluesky thread fetch when stored payload exists |
