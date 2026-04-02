@@ -176,25 +176,27 @@ const sessionMissTo404 = async (response: Response): Promise<Response> => {
 
 /** @internal Exported for integration testing of session handling */
 export const makeCachedMcpHandler = <Env extends object>(
-  buildLayer: (env: Env) => QueryLayer
+  buildLayer: (env: Env) => QueryLayer,
+  envKey: (env: Env) => string = () => "default"
 ) => {
   const cache = new Map<string, {
-    readonly env: Env;
+    readonly envKey: string;
     readonly webHandler: McpWebHandler;
   }>();
 
   return async (request: Request, env: Env, identity: AccessIdentity): Promise<Response> => {
     const profile = profileForIdentity(identity);
     const cacheKey = profile;
+    const currentEnvKey = envKey(env);
 
     let entry = cache.get(cacheKey);
-    if (!entry || entry.env !== env) {
+    if (!entry || entry.envKey !== currentEnvKey) {
       if (entry) {
         await entry.webHandler.dispose();
       }
 
       entry = {
-        env,
+        envKey: currentEnvKey,
         webHandler: HttpLayerRouter.toWebHandler(makeMcpLayer(buildLayer(env), profile)) as unknown as McpWebHandler
       };
       cache.set(cacheKey, entry);
@@ -224,7 +226,10 @@ const makeQueryLayerWithTrigger = (env: EnvBindings): QueryLayer => {
   return base;
 };
 
-const handleCachedMcpRequest = makeCachedMcpHandler(makeQueryLayerWithTrigger);
+const handleCachedMcpRequest = makeCachedMcpHandler(
+  makeQueryLayerWithTrigger,
+  (env) => env.OPERATOR_SECRET ?? "default"
+);
 
 export const handleMcpRequest = (
   request: Request,

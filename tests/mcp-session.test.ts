@@ -51,7 +51,8 @@ describe("MCP stateless session handling (makeCachedMcpHandler)", () => {
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
-          () => makeBiLayer({ filename })
+          (env: { marker: string }) => makeBiLayer({ filename }),
+          (env) => env.marker
         );
 
         await Effect.runPromise(
@@ -76,7 +77,8 @@ describe("MCP stateless session handling (makeCachedMcpHandler)", () => {
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
-          () => makeBiLayer({ filename })
+          (env: { marker: string }) => makeBiLayer({ filename }),
+          (env) => env.marker
         );
 
         await Effect.runPromise(
@@ -120,7 +122,8 @@ describe("MCP stateless session handling (makeCachedMcpHandler)", () => {
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
-          () => makeBiLayer({ filename })
+          (env: { marker: string }) => makeBiLayer({ filename }),
+          (env) => env.marker
         );
 
         await Effect.runPromise(
@@ -144,7 +147,8 @@ describe("MCP stateless session handling (makeCachedMcpHandler)", () => {
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
-          () => makeBiLayer({ filename })
+          (env: { marker: string }) => makeBiLayer({ filename }),
+          (env) => env.marker
         );
 
         await Effect.runPromise(
@@ -177,7 +181,8 @@ describe("MCP stateless session handling (makeCachedMcpHandler)", () => {
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
-          () => makeBiLayer({ filename })
+          (env: { marker: string }) => makeBiLayer({ filename }),
+          (env) => env.marker
         );
 
         await Effect.runPromise(
