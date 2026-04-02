@@ -9,36 +9,36 @@
  * AltTextAbsent → "absent").
  */
 
-import { Schema, SchemaGetter } from "effect";
+import { Schema } from "effect";
 
 // ---------------------------------------------------------------------------
 // Media classification (what the content actually depicts)
 // ---------------------------------------------------------------------------
 
-const mediaTypeCanonical = ["chart", "document-excerpt", "photo", "infographic", "video"] as const;
-
-const mediaTypeAliases: Record<string, (typeof mediaTypeCanonical)[number]> = {
-  image: "photo",
-  screenshot: "photo",
-  photograph: "photo",
-  diagram: "infographic",
-  graph: "chart",
-  table: "chart"
-};
-
-/** MediaType with case-insensitive + alias normalization.
- *  Accepts "Image", "Chart", "image" etc. and maps to canonical lowercase. */
-export const MediaType = Schema.String.pipe(
-  Schema.decode({
-    decode: SchemaGetter.transform((raw: string): string => {
-      const lower = raw.toLowerCase().trim();
-      return mediaTypeAliases[lower] ?? lower;
-    }),
-    encode: SchemaGetter.passthrough()
-  }),
-  Schema.decodeTo(Schema.Literals(mediaTypeCanonical))
-);
+export const MediaType = Schema.Literals([
+  "chart",
+  "document-excerpt",
+  "photo",
+  "image",
+  "infographic",
+  "video"
+]);
 export type MediaType = Schema.Schema.Type<typeof MediaType>;
+
+/** Normalize a Gemini mediaType to canonical form before storage/enrichment.
+ *  Maps "image" → "photo" for downstream consistency. Case-insensitive. */
+export const normalizeMediaType = (raw: string): string => {
+  const lower = raw.toLowerCase().trim();
+  const aliases: Record<string, string> = {
+    image: "photo",
+    screenshot: "photo",
+    photograph: "photo",
+    diagram: "infographic",
+    graph: "chart",
+    table: "chart"
+  };
+  return aliases[lower] ?? lower;
+};
 
 // ---------------------------------------------------------------------------
 // Chart type taxonomy (from ChartTypeScheme, 14 concepts)

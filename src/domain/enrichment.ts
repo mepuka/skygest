@@ -106,7 +106,24 @@ const LegacyVisionAssetAnalysisNormalized = LegacyVisionAssetAnalysis.pipe(
         organizationMentions: [],
         logoText: []
       })),
-    encode: SchemaGetter.passthrough({ strict: false })
+    encode: SchemaGetter.transform((value: Schema.Schema.Type<typeof VisionAssetAnalysisV2>) =>
+      ({
+        mediaType: value.mediaType,
+        chartTypes: value.chartTypes,
+        altText: value.altText,
+        altTextProvenance: value.altTextProvenance,
+        xAxis: value.xAxis,
+        yAxis: value.yAxis,
+        series: value.series,
+        sourceLines: value.sourceLines.map((sourceLine) => ({
+          sourceText: sourceLine.sourceText
+        })),
+        temporalCoverage: value.temporalCoverage,
+        keyFindings: value.keyFindings,
+        title: value.title,
+        modelId: value.modelId,
+        processedAt: value.processedAt
+      }))
   })
 );
 export const VisionAssetAnalysis = Schema.Union([
