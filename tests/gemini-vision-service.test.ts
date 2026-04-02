@@ -798,5 +798,59 @@ describe("GeminiVisionService", () => {
         expect(result.mediaType).toBe("infographic");
       }).pipe(runWith)
     );
+
+    it.effect("normalizes PascalCase chartTypes ('Contour Map' → 'contour-map')", () =>
+      Effect.gen(function* () {
+        mockGenerateContent.mockReset();
+        mockGenerateContent.mockResolvedValueOnce({
+          text: encodeJsonString({
+            mediaType: "chart",
+            chartTypes: ["Contour Map", "Pie Chart"],
+            altText: "SPP grid status dashboard",
+            title: "SPP Real-Time",
+            xAxis: null,
+            yAxis: null,
+            series: [],
+            sourceLines: [],
+            temporalCoverage: null,
+            keyFindings: ["Wind dominates East BA"],
+            visibleUrls: [],
+            organizationMentions: [],
+            logoText: []
+          })
+        });
+
+        const svc = yield* GeminiVisionService;
+        const result = yield* svc.extractChartData("https://gemini.files/abc", "image/png");
+        expect(result.chartTypes).toEqual(["contour-map", "pie-chart"]);
+      }).pipe(runWith)
+    );
+
+    it.effect("normalizes lowercase spaced chartType ('heatmap' stays, 'scatter plot' → 'scatter-plot')", () =>
+      Effect.gen(function* () {
+        mockGenerateContent.mockReset();
+        mockGenerateContent.mockResolvedValueOnce({
+          text: encodeJsonString({
+            mediaType: "chart",
+            chartTypes: ["heatmap", "scatter plot"],
+            altText: "Temperature data",
+            title: null,
+            xAxis: null,
+            yAxis: null,
+            series: [],
+            sourceLines: [],
+            temporalCoverage: null,
+            keyFindings: [],
+            visibleUrls: [],
+            organizationMentions: [],
+            logoText: []
+          })
+        });
+
+        const svc = yield* GeminiVisionService;
+        const result = yield* svc.extractChartData("https://gemini.files/abc", "image/png");
+        expect(result.chartTypes).toEqual(["heatmap", "scatter-plot"]);
+      }).pipe(runWith)
+    );
   });
 });
