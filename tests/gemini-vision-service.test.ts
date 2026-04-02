@@ -473,13 +473,22 @@ describe("GeminiVisionService", () => {
       () =>
         Effect.gen(function* () {
           mockGenerateContent.mockReset();
-          // Valid JSON but missing required fields like title, xAxis, yAxis, etc.
+          // Valid JSON structure but invalid field types/enum values.
           mockGenerateContent.mockResolvedValueOnce({
             text: encodeJsonString({
               mediaType: "chart",
-              chartTypes: ["bar-chart"],
-              altText: "some alt text"
-              // missing title, xAxis, yAxis, series, sourceLines, etc.
+              chartTypes: ["not-a-chart"],
+              altText: "some alt text",
+              title: "Broken payload",
+              xAxis: null,
+              yAxis: null,
+              series: [],
+              sourceLines: [],
+              temporalCoverage: null,
+              keyFindings: "not-an-array",
+              visibleUrls: [],
+              organizationMentions: [],
+              logoText: []
             })
           });
 
@@ -672,6 +681,94 @@ describe("GeminiVisionService", () => {
         expect(result.title).toBeNull();
         expect(result.altText).toBeNull();
         expect(result.mediaType).toBe("infographic");
+      }).pipe(runWith)
+    );
+
+    it.effect("collapses multi-panel array responses into a single analysis", () =>
+      Effect.gen(function* () {
+        mockGenerateContent.mockReset();
+        mockGenerateContent.mockResolvedValueOnce({
+          text: encodeJsonString([
+            {
+              mediaType: "chart",
+              chartTypes: ["choropleth-map"],
+              altText: "SPP dashboard with a price contour map and generation mix panels",
+              chartTitle: "Price Contour Map",
+              sourceLines: [{ sourceText: "Source: SPP", datasetName: null }],
+              keyFindings: ["High prices cluster in the central region"],
+              visibleUrls: ["spp.org"],
+              organizationMentions: [{ name: "SPP", location: "footer" }],
+              logoText: ["SPP"]
+            },
+            {
+              chartTypes: ["pie-chart"],
+              chartTitle: "East BA Generation Mix",
+              series: [
+                { legendLabel: "Gas", unit: "%" },
+                { legendLabel: "Wind", unit: "%" }
+              ],
+              keyFindings: ["Gas dominates the east balancing area mix"],
+              sourceLines: [{ sourceText: "Source: SPP", datasetName: null }],
+              organizationMentions: [{ name: "SPP", location: "footer" }],
+              logoText: ["SPP"]
+            }
+          ])
+        });
+
+        const svc = yield* GeminiVisionService;
+        const result = yield* svc.extractChartData("https://gemini.files/abc", "image/png");
+
+        expect(result.mediaType).toBe("chart");
+        expect(result.chartTypes).toEqual(["choropleth-map", "pie-chart"]);
+        expect(result.title).toBe("Price Contour Map");
+        expect(result.altText).toBe(
+          "SPP dashboard with a price contour map and generation mix panels"
+        );
+        expect(result.series).toEqual([
+          { legendLabel: "Gas", unit: "%" },
+          { legendLabel: "Wind", unit: "%" }
+        ]);
+        expect(result.sourceLines).toEqual([
+          { sourceText: "Source: SPP", datasetName: null }
+        ]);
+        expect(result.keyFindings).toEqual([
+          "High prices cluster in the central region",
+          "Gas dominates the east balancing area mix"
+        ]);
+        expect(result.visibleUrls).toEqual(["spp.org"]);
+        expect(result.organizationMentions).toEqual([
+          { name: "SPP", location: "footer" }
+        ]);
+        expect(result.logoText).toEqual(["SPP"]);
+      }).pipe(runWith)
+    );
+
+    it.effect("infers chart mediaType when Gemini omits it on chart-like output", () =>
+      Effect.gen(function* () {
+        mockGenerateContent.mockReset();
+        mockGenerateContent.mockResolvedValueOnce({
+          text: encodeJsonString({
+            chartTypes: ["line-chart"],
+            altText: "Line chart of hourly demand",
+            title: "Hourly Demand",
+            xAxis: { label: "Hour", unit: null },
+            yAxis: { label: "Load", unit: "MW" },
+            series: [{ legendLabel: "Demand", unit: "MW" }],
+            sourceLines: [],
+            temporalCoverage: null,
+            keyFindings: ["Demand peaks in the evening"],
+            visibleUrls: [],
+            organizationMentions: [],
+            logoText: []
+          })
+        });
+
+        const svc = yield* GeminiVisionService;
+        const result = yield* svc.extractChartData("https://gemini.files/abc", "image/png");
+
+        expect(result.mediaType).toBe("chart");
+        expect(result.chartTypes).toEqual(["line-chart"]);
+        expect(result.title).toBe("Hourly Demand");
       }).pipe(runWith)
     );
 
