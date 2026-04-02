@@ -120,7 +120,62 @@ type McpWebHandler = {
   readonly dispose: () => Promise<void>;
 };
 
-const makeCachedMcpHandler = <Env extends object>(
+/**
+ * Detect Effect 4's MCP session-miss error in a JSON-RPC response.
+ *
+ * Effect's McpServer calls `Effect.die(new Error("Mcp-Session-Id does not exist"))`
+ * when a non-initialize request arrives without a valid session. The HTTP adapter
+ * converts this into an HTTP 200 with a JSON-RPC error containing a Die defect.
+ * We detect this specific error structure and convert to HTTP 404 per MCP spec
+ * so clients re-initialize.
+ *
+ * The detection parses the response JSON and checks the `error.data` array for
+ * a Die defect with the session-miss message — avoiding false positives from
+ * substring matching against tool descriptions or other response content.
+ */
+const SESSION_MISS_MESSAGE = "Mcp-Session-Id does not exist";
+
+const isSessionMissError = (parsed: unknown): boolean => {
+  if (typeof parsed !== "object" || parsed === null) return false;
+  const obj = parsed as Record<string, unknown>;
+  if (!obj.error || typeof obj.error !== "object") return false;
+  const err = obj.error as Record<string, unknown>;
+  if (!Array.isArray(err.data)) return false;
+  return err.data.some(
+    (entry: unknown) =>
+      typeof entry === "object" && entry !== null &&
+      (entry as Record<string, unknown>)._tag === "Die" &&
+      typeof (entry as Record<string, unknown>).defect === "object" &&
+      ((entry as Record<string, unknown>).defect as Record<string, unknown>)?.message === SESSION_MISS_MESSAGE
+  );
+};
+
+const sessionMissTo404 = async (response: Response): Promise<Response> => {
+  const body = await response.text();
+  try {
+    const parsed = JSON.parse(body);
+    if (isSessionMissError(parsed)) {
+      return new Response(
+        JSON.stringify({
+          jsonrpc: "2.0",
+          error: { code: -32000, message: "Session expired. Please re-initialize." },
+          id: null
+        }),
+        { status: 404, headers: { "content-type": "application/json" } }
+      );
+    }
+  } catch {
+    // Not valid JSON — pass through as-is
+  }
+  // Re-attach the consumed body to the original response
+  return new Response(body, {
+    status: response.status,
+    headers: response.headers
+  });
+};
+
+/** @internal Exported for integration testing of session handling */
+export const makeCachedMcpHandler = <Env extends object>(
   buildLayer: (env: Env) => QueryLayer
 ) => {
   const cache = new Map<string, {
@@ -145,7 +200,8 @@ const makeCachedMcpHandler = <Env extends object>(
       cache.set(cacheKey, entry);
     }
 
-    return entry.webHandler.handler(request, operatorIdentityContext(identity));
+    const response = await entry.webHandler.handler(request, operatorIdentityContext(identity));
+    return sessionMissTo404(response);
   };
 };
 
