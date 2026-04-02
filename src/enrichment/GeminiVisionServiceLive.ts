@@ -42,24 +42,18 @@ import {
 } from "./prompts";
 
 // ---------------------------------------------------------------------------
-// Gemini extraction output schema (same fields as VisionAssetAnalysis minus runtime metadata)
+// Gemini extraction schemas
+//
+// Two schemas serve different purposes:
+// - GeminiExtractionContract: strict schema sent TO Gemini via structured output.
+//   Preserves enum constraints and required fields to maximize response quality.
+// - GeminiExtractionDecoder: lenient schema for decoding Gemini's response.
+//   Normalizes loose mediaType values (case, aliases) and defaults missing
+//   optional fields. Acts as a safety net for when Gemini returns off-spec.
 // ---------------------------------------------------------------------------
 
-/** Lenient MediaType that normalizes Gemini's loose responses (case, aliases)
- *  before validating against the canonical enum. */
-const LenientMediaType = Schema.String.pipe(
-  Schema.decode({
-    decode: SchemaGetter.transform(normalizeMediaType),
-    encode: SchemaGetter.passthrough()
-  }),
-  Schema.decodeTo(MediaType)
-);
-
-const GeminiExtractionOutput = Schema.Struct({
-  mediaType: LenientMediaType,
-  chartTypes: Schema.Array(ChartType).pipe(Schema.withDecodingDefaultKey(() => [] as const)),
-  altText: Schema.NullOr(Schema.String).pipe(Schema.withDecodingDefaultKey(() => null)),
-  title: Schema.NullOr(Schema.String).pipe(Schema.withDecodingDefaultKey(() => null)),
+/** Shared struct fields used by both contract and decoder schemas. */
+const extractionFields = {
   xAxis: Schema.NullOr(ChartAxis),
   yAxis: Schema.NullOr(ChartAxis),
   series: Schema.Array(ChartSeries),
@@ -69,6 +63,33 @@ const GeminiExtractionOutput = Schema.Struct({
   visibleUrls: Schema.Array(Schema.String),
   organizationMentions: Schema.Array(VisionOrganizationMention),
   logoText: Schema.Array(Schema.String)
+} as const;
+
+/** Strict schema sent to Gemini — preserves enum + required in JSON schema. */
+const GeminiExtractionContract = Schema.Struct({
+  mediaType: MediaType,
+  chartTypes: Schema.Array(ChartType),
+  altText: Schema.NullOr(Schema.String),
+  title: Schema.NullOr(Schema.String),
+  ...extractionFields
+});
+
+/** Lenient MediaType: normalizes case + aliases before validating against enum. */
+const LenientMediaType = Schema.String.pipe(
+  Schema.decode({
+    decode: SchemaGetter.transform(normalizeMediaType),
+    encode: SchemaGetter.passthrough()
+  }),
+  Schema.decodeTo(MediaType)
+);
+
+/** Lenient decoder for Gemini responses — tolerates missing keys and loose values. */
+const GeminiExtractionDecoder = Schema.Struct({
+  mediaType: LenientMediaType,
+  chartTypes: Schema.Array(ChartType).pipe(Schema.withDecodingDefaultKey(() => [] as const)),
+  altText: Schema.NullOr(Schema.String).pipe(Schema.withDecodingDefaultKey(() => null)),
+  title: Schema.NullOr(Schema.String).pipe(Schema.withDecodingDefaultKey(() => null)),
+  ...extractionFields
 });
 
 // ---------------------------------------------------------------------------
@@ -95,7 +116,7 @@ const makeJsonSchema = (schema: Schema.Top): JsonSchema.JsonSchema => {
 };
 
 const CLASSIFICATION_JSON_SCHEMA = makeJsonSchema(ImageClassification);
-const EXTRACTION_JSON_SCHEMA = makeJsonSchema(GeminiExtractionOutput);
+const EXTRACTION_JSON_SCHEMA = makeJsonSchema(GeminiExtractionContract);
 
 // ---------------------------------------------------------------------------
 // Layer
@@ -227,7 +248,7 @@ export const GeminiVisionServiceLive = Layer.effect(
         }
 
         const geminiResult = yield* Schema.decodeUnknownEffect(
-          Schema.fromJsonString(GeminiExtractionOutput)
+          Schema.fromJsonString(GeminiExtractionDecoder)
         )(rawText).pipe(
           Effect.mapError((error) =>
             new GeminiParseError({
