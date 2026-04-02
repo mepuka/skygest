@@ -16,7 +16,15 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Link twitter scraper
+        run: |
+          git clone --depth 1 https://github.com/mepuka/better-twitter-scraper.git ../better_twitter_scraper
+          cd ../better_twitter_scraper && bun install && bun run build && bun link
+
       - run: bun install --frozen-lockfile
+
+      - name: Resolve twitter scraper link
+        run: bun link @pooks/twitter-scraper
 
       - name: Type check
         run: bunx tsc --noEmit
