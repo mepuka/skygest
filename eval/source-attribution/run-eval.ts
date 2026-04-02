@@ -20,6 +20,7 @@ import {
   formatActualProvider,
   formatExpectedProvider,
   loadGoldenSetFromString,
+  summarizeAncillaryAssertions,
   type SourceAttributionEvalGoldenEntry,
   type SourceAttributionEvalResult
 } from "./shared";
@@ -34,8 +35,38 @@ const formatTimestamp = (date: Date) =>
     "-",
     String(date.getHours()).padStart(2, "0"),
     String(date.getMinutes()).padStart(2, "0"),
-    String(date.getSeconds()).padStart(2, "0")
+    String(date.getSeconds()).padStart(2, "0"),
+    "-",
+    String(date.getMilliseconds()).padStart(3, "0")
   ].join("");
+
+const createRunDirectory = (runsRoot: string) =>
+  Effect.sync(() => {
+    fs.mkdirSync(runsRoot, { recursive: true });
+
+    const baseTimestamp = formatTimestamp(new Date());
+    for (let attempt = 0; attempt < 1000; attempt++) {
+      const suffix = attempt === 0
+        ? ""
+        : `-${String(attempt).padStart(2, "0")}`;
+      const runDir = path.join(runsRoot, `${baseTimestamp}${suffix}`);
+
+      try {
+        fs.mkdirSync(runDir);
+        return runDir;
+      } catch (error) {
+        if (
+          !(error instanceof Error) ||
+          !("code" in error) ||
+          error.code !== "EEXIST"
+        ) {
+          throw error;
+        }
+      }
+    }
+
+    throw new Error(`Failed to create a unique run directory under ${runsRoot}`);
+  });
 
 const loadGoldenSet = Effect.gen(function* () {
   const raw = yield* Effect.try({
@@ -49,8 +80,13 @@ const loadGoldenSet = Effect.gen(function* () {
 
 const formatCell = (value: string) => value.replaceAll("|", "\\|");
 
-const formatOptionalComparison = (expected: string | null, actual: string | null) =>
-  expected === actual
+const formatOptionalComparison = (
+  expected: string | null | undefined,
+  actual: string | null
+) =>
+  expected === undefined
+    ? "—"
+    : expected === actual
     ? actual ?? "—"
     : `! ${expected ?? "—"} -> ${actual ?? "—"}`;
 
@@ -117,15 +153,7 @@ const writeSummary = (
       (result) => result.rubric?.overall === "needs-review"
     ).length;
     const errorCount = results.filter((result) => result.error !== null).length;
-    const contentSourceMatchCount = results.filter(
-      (result) => result.rubric?.contentSourceMatches
-    ).length;
-    const publicationMatchCount = results.filter(
-      (result) => result.rubric?.publicationMatches
-    ).length;
-    const sourceFamilyMatchCount = results.filter(
-      (result) => result.rubric?.sourceFamilyMatches
-    ).length;
+    const ancillarySummary = summarizeAncillaryAssertions(results);
     const providerVerdictCounts = {
       trueMatch: results.filter(
         (result) => result.rubric?.providerVerdict === "true-match"
@@ -146,6 +174,13 @@ const writeSummary = (
     const findings = results
       .filter((result) => result.rubric?.hasFindings || result.error !== null)
       .map((result) => result.slug);
+    const formatAssertionSummary = (
+      label: string,
+      summary: { readonly matched: number; readonly asserted: number }
+    ) =>
+      summary.asserted === 0
+        ? `no ${label} assertions`
+        : `${summary.matched}/${summary.asserted} ${label} assertions matched`;
 
     const lines: Array<string> = [];
     lines.push(`# Source Attribution Eval Run — ${headerStamp}`);
@@ -186,7 +221,7 @@ const writeSummary = (
       `- Provider failures: ${providerVerdictCounts.falsePositive} false positives, ${providerVerdictCounts.miss} misses`
     );
     lines.push(
-      `- Ancillary checks: ${contentSourceMatchCount}/${results.length} content source matches, ${publicationMatchCount}/${results.length} publication matches, ${sourceFamilyMatchCount}/${results.length} source family matches`
+      `- Ancillary checks: ${formatAssertionSummary("content source", ancillarySummary.contentSource)}, ${formatAssertionSummary("publication", ancillarySummary.publication)}, ${formatAssertionSummary("source family", ancillarySummary.sourceFamily)}`
     );
     lines.push(
       `- Needs review: ${findings.length > 0 ? findings.join(", ") : "none"}`
@@ -218,14 +253,12 @@ const program = Effect.gen(function* () {
     `Running source attribution eval on ${entries.length} of ${allEntries.length} golden set entries`
   );
 
-  const runDir = path.join(
-    import.meta.dir,
-    "runs",
-    formatTimestamp(new Date())
+  const runDir = yield* createRunDirectory(
+    path.join(
+      import.meta.dir,
+      "runs"
+    )
   );
-  yield* Effect.sync(() => {
-    fs.mkdirSync(runDir, { recursive: true });
-  });
   yield* Effect.log(`Output directory: ${runDir}`);
 
   const results = yield* Effect.forEach(

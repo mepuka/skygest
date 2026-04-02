@@ -8,7 +8,8 @@ import {
   assessEvalResult,
   buildFailureResult,
   classifyProviderVerdict,
-  loadGoldenSetFromString
+  loadGoldenSetFromString,
+  summarizeAncillaryAssertions
 } from "../eval/source-attribution/shared";
 
 const goldenSetPath = path.join(
@@ -38,6 +39,7 @@ describe("source attribution eval helpers", () => {
       expect(entries[3]?.expected.sourceFamily).toBe(
         "Monthly Outlook for Resource Adequacy (MORA)"
       );
+      expect(entries[6]?.expected.candidateIds).toEqual(["caiso", "ercot"]);
     })
   );
 
@@ -102,6 +104,36 @@ describe("source attribution eval helpers", () => {
     expect(verdict).toBe("miss");
   });
 
+  it("fails ambiguous cases when the tied providers drift", () => {
+    const verdict = classifyProviderVerdict(
+      {
+        resolution: "ambiguous",
+        candidateIds: ["caiso", "ercot"] as any
+      },
+      makeResult({
+        resolution: "ambiguous",
+        providerCandidates: [
+          {
+            providerId: "miso" as any,
+            providerLabel: "MISO",
+            sourceFamily: null,
+            bestRank: 7,
+            evidence: []
+          },
+          {
+            providerId: "pjm" as any,
+            providerLabel: "PJM",
+            sourceFamily: null,
+            bestRank: 7,
+            evidence: []
+          }
+        ]
+      })
+    );
+
+    expect(verdict).toBe("miss");
+  });
+
   it("surfaces ancillary mismatches without hiding provider passes", () => {
     const assessed = assessEvalResult(
       {
@@ -145,8 +177,62 @@ describe("source attribution eval helpers", () => {
     );
 
     expect(assessed.rubric?.providerVerdict).toBe("true-match");
+    expect(assessed.rubric?.contentSourceAsserted).toBe(true);
     expect(assessed.rubric?.contentSourceMatches).toBe(false);
     expect(assessed.rubric?.overall).toBe("needs-review");
+  });
+
+  it("does not count omitted ancillary expectations as matched checks", () => {
+    const assessed = assessEvalResult(
+      {
+        slug: "ercot-caiso-comparison",
+        thread: "Regional load comparison",
+        context: "Ambiguous provider tie.",
+        notes: "No ancillary assertions here.",
+        input: {
+          post: {
+            did: "did:plc:test" as any,
+            handle: "power-markets.bsky.social",
+            text: "Comparing ERCOT and CAISO load data side by side."
+          },
+          links: [],
+          linkCards: [],
+          vision: null
+        },
+        expected: {
+          resolution: "ambiguous",
+          candidateIds: ["caiso", "ercot"] as any
+        }
+      },
+      makeResult({
+        resolution: "ambiguous",
+        providerCandidates: [
+          {
+            providerId: "caiso" as any,
+            providerLabel: "California ISO",
+            sourceFamily: null,
+            bestRank: 7,
+            evidence: []
+          },
+          {
+            providerId: "ercot" as any,
+            providerLabel: "ERCOT",
+            sourceFamily: null,
+            bestRank: 7,
+            evidence: []
+          }
+        ]
+      }),
+      5
+    );
+    const summary = summarizeAncillaryAssertions([assessed]);
+
+    expect(assessed.rubric?.publicationAsserted).toBe(false);
+    expect(assessed.rubric?.contentSourceAsserted).toBe(false);
+    expect(assessed.rubric?.sourceFamilyAsserted).toBe(false);
+    expect(summary.contentSource).toEqual({ matched: 0, asserted: 0 });
+    expect(summary.publication).toEqual({ matched: 0, asserted: 0 });
+    expect(summary.sourceFamily).toEqual({ matched: 0, asserted: 0 });
   });
 
   it("builds failure records without inventing results", () => {
@@ -167,11 +253,7 @@ describe("source attribution eval helpers", () => {
           vision: null
         },
         expected: {
-          resolution: "unmatched",
-          providerId: null,
-          sourceFamily: null,
-          contentSourceDomain: null,
-          publication: null
+          resolution: "unmatched"
         }
       },
       "boom"

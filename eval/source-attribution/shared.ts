@@ -20,10 +20,11 @@ export class SourceAttributionEvalGoldenSetDecodeError extends Schema.TaggedErro
 
 export const SourceAttributionEvalExpectation = Schema.Struct({
   resolution: SourceAttributionResolution,
-  providerId: Schema.NullOr(ProviderId),
-  sourceFamily: Schema.NullOr(Schema.String),
-  contentSourceDomain: Schema.NullOr(Schema.String),
-  publication: Schema.NullOr(Schema.String)
+  providerId: Schema.optionalKey(Schema.NullOr(ProviderId)),
+  candidateIds: Schema.optionalKey(Schema.Array(ProviderId)),
+  sourceFamily: Schema.optionalKey(Schema.NullOr(Schema.String)),
+  contentSourceDomain: Schema.optionalKey(Schema.NullOr(Schema.String)),
+  publication: Schema.optionalKey(Schema.NullOr(Schema.String))
 });
 export type SourceAttributionEvalExpectation = Schema.Schema.Type<
   typeof SourceAttributionEvalExpectation
@@ -61,8 +62,11 @@ export type SourceAttributionEvalActual = {
 
 export type SourceAttributionEvalRubric = {
   readonly providerVerdict: ProviderEvalVerdict;
+  readonly contentSourceAsserted: boolean;
   readonly contentSourceMatches: boolean;
+  readonly publicationAsserted: boolean;
   readonly publicationMatches: boolean;
+  readonly sourceFamilyAsserted: boolean;
   readonly sourceFamilyMatches: boolean;
   readonly hasFindings: boolean;
   readonly overall: "ok" | "needs-review";
@@ -124,6 +128,34 @@ const bestSignals = (
   return [...signals].sort();
 };
 
+const normalizeIds = (ids: ReadonlyArray<string>) =>
+  [...new Set(ids)].sort((left, right) => left.localeCompare(right));
+
+const candidateIdsMatch = (
+  expected: ReadonlyArray<string> | undefined,
+  actual: ReadonlyArray<string>
+) => {
+  if (expected === undefined) {
+    return true;
+  }
+
+  const expectedIds = normalizeIds(expected);
+  const actualIds = normalizeIds(actual);
+
+  return (
+    expectedIds.length === actualIds.length &&
+    expectedIds.every((value, index) => value === actualIds[index])
+  );
+};
+
+const compareOptionalAssertion = (
+  expected: string | null | undefined,
+  actual: string | null
+) => ({
+  asserted: expected !== undefined,
+  matches: expected === undefined ? true : expected === actual
+});
+
 export const loadGoldenSetFromString = (raw: string) =>
   Effect.forEach(toGoldenSetLines(raw), (line, index) =>
     Effect.try({
@@ -151,7 +183,13 @@ export const classifyProviderVerdict = (
 
       return result.resolution === "matched" ? "false-positive" : "miss";
     case "ambiguous":
-      if (result.resolution === "ambiguous") {
+      if (
+        result.resolution === "ambiguous" &&
+        candidateIdsMatch(
+          expected.candidateIds,
+          result.providerCandidates.map((candidate) => candidate.providerId)
+        )
+      ) {
         return "ambiguous-case";
       }
 
@@ -183,17 +221,23 @@ export const assessEvalResult = (
 ): SourceAttributionEvalResult => {
   const actual = summarizeMatchResult(result);
   const providerVerdict = classifyProviderVerdict(entry.expected, result);
-  const contentSourceMatches =
-    entry.expected.contentSourceDomain === actual.contentSourceDomain;
-  const publicationMatches =
-    entry.expected.publication === actual.publication;
-  const sourceFamilyMatches =
-    entry.expected.sourceFamily === actual.sourceFamily;
+  const contentSourceCheck = compareOptionalAssertion(
+    entry.expected.contentSourceDomain,
+    actual.contentSourceDomain
+  );
+  const publicationCheck = compareOptionalAssertion(
+    entry.expected.publication,
+    actual.publication
+  );
+  const sourceFamilyCheck = compareOptionalAssertion(
+    entry.expected.sourceFamily,
+    actual.sourceFamily
+  );
   const hasFindings =
     !providerPassVerdicts.has(providerVerdict) ||
-    !contentSourceMatches ||
-    !publicationMatches ||
-    !sourceFamilyMatches;
+    !contentSourceCheck.matches ||
+    !publicationCheck.matches ||
+    !sourceFamilyCheck.matches;
 
   return {
     slug: entry.slug,
@@ -204,9 +248,12 @@ export const assessEvalResult = (
     actual,
     rubric: {
       providerVerdict,
-      contentSourceMatches,
-      publicationMatches,
-      sourceFamilyMatches,
+      contentSourceAsserted: contentSourceCheck.asserted,
+      contentSourceMatches: contentSourceCheck.matches,
+      publicationAsserted: publicationCheck.asserted,
+      publicationMatches: publicationCheck.matches,
+      sourceFamilyAsserted: sourceFamilyCheck.asserted,
+      sourceFamilyMatches: sourceFamilyCheck.matches,
       hasFindings,
       overall: hasFindings ? "needs-review" : "ok"
     },
@@ -242,11 +289,50 @@ export const formatExpectedProvider = (
         ? `matched:${expected.providerId ?? "none"}`
         : `matched:${expected.providerId ?? "none"} (${expected.sourceFamily})`;
     case "ambiguous":
-      return "ambiguous";
+      return expected.candidateIds === undefined
+        ? "ambiguous"
+        : `ambiguous:${normalizeIds(expected.candidateIds).join(",")}`;
     case "unmatched":
       return "unmatched";
   }
 };
+
+type AssertionSummary = {
+  readonly matched: number;
+  readonly asserted: number;
+};
+
+const summarizeAssertion = (
+  results: ReadonlyArray<SourceAttributionEvalResult>,
+  assertedSelector: (result: SourceAttributionEvalResult) => boolean,
+  matchedSelector: (result: SourceAttributionEvalResult) => boolean
+): AssertionSummary => {
+  const asserted = results.filter(assertedSelector);
+  return {
+    matched: asserted.filter(matchedSelector).length,
+    asserted: asserted.length
+  };
+};
+
+export const summarizeAncillaryAssertions = (
+  results: ReadonlyArray<SourceAttributionEvalResult>
+) => ({
+  contentSource: summarizeAssertion(
+    results,
+    (result) => result.rubric?.contentSourceAsserted === true,
+    (result) => result.rubric?.contentSourceMatches === true
+  ),
+  publication: summarizeAssertion(
+    results,
+    (result) => result.rubric?.publicationAsserted === true,
+    (result) => result.rubric?.publicationMatches === true
+  ),
+  sourceFamily: summarizeAssertion(
+    results,
+    (result) => result.rubric?.sourceFamilyAsserted === true,
+    (result) => result.rubric?.sourceFamilyMatches === true
+  )
+});
 
 export const formatActualProvider = (
   actual: SourceAttributionEvalActual | null
