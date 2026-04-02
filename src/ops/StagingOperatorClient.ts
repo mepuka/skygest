@@ -38,7 +38,7 @@ import {
   ExpertListMcpOutput
 } from "../mcp/OutputSchemas";
 import { HttpClientError } from "effect/unstable/http";
-import { stringifyUnknown } from "../platform/Json";
+import { encodeJsonString, stringifyUnknown } from "../platform/Json";
 import { StagingRequestError } from "./Errors";
 
 const MigrateResponse = Schema.Struct({
@@ -97,6 +97,10 @@ const decodeMcpExpertsResponse = decodeCallToolResultWith(ExpertListMcpOutput);
 const secretHeader = (secret: Redacted.Redacted<string>) => ({
   authorization: `Bearer ${Redacted.value(secret)}`
 });
+const jsonBody = (body: unknown) =>
+  HttpBody.raw(encodeJsonString(body), {
+    contentType: "application/json"
+  });
 
 const callMcpTool = <A>(
   baseUrl: URL,
@@ -253,7 +257,7 @@ export class StagingOperatorClient extends ServiceMap.Service<
           jsonRequest(
             http.post(new URL("/admin/ops/migrate", baseUrl), {
               headers: { "content-type": "application/json", ...secretHeader(secret) },
-              body: HttpBody.jsonUnsafe({})
+              body: jsonBody({})
             }),
             MigrateResponse,
             "migrate"
@@ -262,7 +266,7 @@ export class StagingOperatorClient extends ServiceMap.Service<
           jsonRequest(
             http.post(new URL("/admin/ops/bootstrap-experts", baseUrl), {
               headers: { "content-type": "application/json", ...secretHeader(secret) },
-              body: HttpBody.jsonUnsafe({})
+              body: jsonBody({})
             }),
             BootstrapExpertsResult,
             "bootstrap-experts"
@@ -271,7 +275,7 @@ export class StagingOperatorClient extends ServiceMap.Service<
           jsonRequest(
             http.post(new URL("/admin/ops/load-smoke-fixture", baseUrl), {
               headers: { "content-type": "application/json", ...secretHeader(secret) },
-              body: HttpBody.jsonUnsafe({})
+              body: jsonBody({})
             }),
             LoadSmokeFixtureResult,
             "load-smoke-fixture"
@@ -280,7 +284,7 @@ export class StagingOperatorClient extends ServiceMap.Service<
           jsonRequest(
             http.post(new URL("/admin/ops/refresh-profiles", baseUrl), {
               headers: { "content-type": "application/json", ...secretHeader(secret) },
-              body: HttpBody.jsonUnsafe({})
+              body: jsonBody({})
             }),
             RefreshProfilesResult,
             "refresh-profiles"
@@ -289,7 +293,7 @@ export class StagingOperatorClient extends ServiceMap.Service<
           jsonRequest(
             http.post(new URL("/admin/curation/curate", baseUrl), {
               headers: { "content-type": "application/json", ...secretHeader(secret) },
-              body: HttpBody.jsonUnsafe(input)
+              body: jsonBody(input)
             }),
             CuratePostOutput,
             "curate-post"
@@ -298,7 +302,7 @@ export class StagingOperatorClient extends ServiceMap.Service<
           jsonRequest(
             http.post(new URL("/admin/ingest/poll", baseUrl), {
               headers: { "content-type": "application/json", ...secretHeader(secret) },
-              body: HttpBody.jsonUnsafe(did === undefined ? {} : { did })
+              body: jsonBody(did === undefined ? {} : { did })
             }),
             IngestQueuedResponse,
             "poll-ingest"
@@ -315,7 +319,7 @@ export class StagingOperatorClient extends ServiceMap.Service<
           jsonRequest(
             http.post(new URL("/admin/ingest/repair", baseUrl), {
               headers: { "content-type": "application/json", ...secretHeader(secret) },
-              body: HttpBody.jsonUnsafe({})
+              body: jsonBody({})
             }),
             IngestRepairSummary,
             "repair-ingest"
@@ -324,7 +328,7 @@ export class StagingOperatorClient extends ServiceMap.Service<
           jsonRequest(
             http.post(new URL("/admin/enrichment/start", baseUrl), {
               headers: { "content-type": "application/json", ...secretHeader(secret) },
-              body: HttpBody.jsonUnsafe({
+              body: jsonBody({
                 postUri: input.postUri,
                 enrichmentType: input.enrichmentType,
                 ...(input.schemaVersion === undefined
@@ -361,7 +365,7 @@ export class StagingOperatorClient extends ServiceMap.Service<
           jsonRequest(
             http.post(new URL(`/admin/enrichment/runs/${runId}/retry`, baseUrl), {
               headers: { "content-type": "application/json", ...secretHeader(secret) },
-              body: HttpBody.jsonUnsafe({})
+              body: jsonBody({})
             }),
             EnrichmentQueuedResponse,
             "retry-enrichment"
@@ -370,7 +374,7 @@ export class StagingOperatorClient extends ServiceMap.Service<
           jsonRequest(
             http.post(new URL("/admin/enrichment/repair", baseUrl), {
               headers: { "content-type": "application/json", ...secretHeader(secret) },
-              body: HttpBody.jsonUnsafe({})
+              body: jsonBody({})
             }),
             EnrichmentRepairSummary,
             "repair-enrichment"
@@ -379,7 +383,7 @@ export class StagingOperatorClient extends ServiceMap.Service<
           jsonRequest(
             http.post(new URL("/admin/ops/seed-publications", baseUrl), {
               headers: { "content-type": "application/json", ...secretHeader(secret) },
-              body: HttpBody.jsonUnsafe({})
+              body: jsonBody({})
             }),
             SeedPublicationsResult,
             "seed-publications"
@@ -434,7 +438,7 @@ export class StagingOperatorClient extends ServiceMap.Service<
           jsonRequest(
             http.post(new URL("/admin/import/posts", baseUrl), {
               headers: { "content-type": "application/json", ...secretHeader(secret) },
-              body: HttpBody.jsonUnsafe(input)
+              body: jsonBody(input)
             }),
             ImportPostsOutput,
             "import-posts"

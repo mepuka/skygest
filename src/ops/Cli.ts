@@ -2,6 +2,7 @@ import { Argument, Command, Flag } from "effect/unstable/cli";
 import { Console, Effect, Option, Redacted, Stream } from "effect";
 import { TwitterPublic, TwitterTweets } from "@pooks/twitter-scraper";
 import type { Tweet, TweetDetailNode } from "@pooks/twitter-scraper";
+import { scraperLayer } from "./ScraperLayer";
 import { energySeedDid } from "../bootstrap/CheckedInExpertSeeds";
 import type { ExpertTier } from "../domain/bi";
 import type { CurationAction } from "../domain/curation";
@@ -693,8 +694,10 @@ const runTwitterAddExpert = (options: {
 
     yield* Console.log(`Fetching profile for @${options.handle}`);
 
-    const twitter = yield* TwitterPublic;
-    const profile = yield* twitter.getProfile(options.handle);
+    const profile = yield* Effect.gen(function* () {
+      const twitter = yield* TwitterPublic;
+      return yield* twitter.getProfile(options.handle);
+    }).pipe(Effect.provide(scraperLayer));
 
     const expert = normalizeProfile(profile, options.tier);
     if (expert === null) {
@@ -730,18 +733,19 @@ const runTwitterImportTimeline = (options: {
       `Importing timeline for @${options.handle} (limit=${String(options.limit)})`
     );
 
-    const twitter = yield* TwitterPublic;
-    const profile = yield* twitter.getProfile(options.handle);
+    const { profile, tweets } = yield* Effect.gen(function* () {
+      const twitter = yield* TwitterPublic;
+      const profile = yield* twitter.getProfile(options.handle);
+      const tweetStream = twitter.getTweets(options.handle, { limit: options.limit });
+      const chunk = yield* Stream.runCollect(tweetStream);
+      return { profile, tweets: [...chunk] as Tweet[] };
+    }).pipe(Effect.provide(scraperLayer));
 
     const expert = normalizeProfile(profile, "independent");
     if (expert === null) {
       yield* Console.log("Profile missing userId, skipping");
       return;
     }
-
-    const tweetStream = twitter.getTweets(options.handle, { limit: options.limit });
-    const chunk = yield* Stream.runCollect(tweetStream);
-    const tweets: Tweet[] = [...chunk];
 
     const posts = tweets
       .map(normalizeTweet)
@@ -771,15 +775,18 @@ const runTwitterImportTweet = (options: {
 
     yield* Console.log(`Importing tweet ${options.tweetId}`);
 
-    const twitter = yield* TwitterPublic;
-    const tweetsSvc = yield* TwitterTweets;
+    const { focal, profile } = yield* Effect.gen(function* () {
+      const twitter = yield* TwitterPublic;
+      const tweetsSvc = yield* TwitterTweets;
 
-    // Get the detail document for this tweet
-    const doc = yield* tweetsSvc.getTweet(options.tweetId);
+      const doc = yield* tweetsSvc.getTweet(options.tweetId);
+      const focal = doc.tweets.find((t) => t.id === doc.focalTweetId);
+      if (!focal) return { focal: null as TweetDetailNode | null, profile: null as any };
 
-    const focal = doc.tweets.find(
-      (t) => t.id === doc.focalTweetId
-    );
+      const profile = yield* twitter.getProfile(focal.username ?? focal.userId ?? "");
+      return { focal, profile };
+    }).pipe(Effect.provide(scraperLayer));
+
     if (!focal) {
       yield* Console.log("Focal tweet not found in detail document");
       return;
@@ -791,10 +798,6 @@ const runTwitterImportTweet = (options: {
       return;
     }
 
-    // Also fetch the profile so we can register the expert
-    const profile = yield* twitter.getProfile(
-      focal.username ?? focal.userId ?? ""
-    );
     const expert = normalizeProfile(profile, "independent");
 
     const result = yield* client.importPosts(baseUrl, secret, {

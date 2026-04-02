@@ -779,4 +779,36 @@ describe("ops CLI", () => {
       expect(error.status).toBe(500);
     })
   );
+
+  it.effect("StagingOperatorClient.live sends JSON posts as plain strings without preset content length", () =>
+    Effect.gen(function* () {
+      let capturedInit: RequestInit | undefined;
+
+      const fakeFetchLayer = Layer.succeed(
+        FetchHttpClient.Fetch,
+        ((_url: string | URL | Request, init?: RequestInit) => {
+          capturedInit = init;
+          return Promise.resolve(
+            Response.json({ ok: true })
+          );
+        }) as typeof globalThis.fetch
+      );
+      const httpLayer = FetchHttpClient.layer.pipe(Layer.provide(fakeFetchLayer));
+      const clientLayer = StagingOperatorClient.live.pipe(Layer.provide(httpLayer));
+      const client = yield* Effect.service(StagingOperatorClient).pipe(Effect.provide(clientLayer));
+
+      const result = yield* client.migrate(
+        new URL("https://staging.test"),
+        Redacted.make("stage-secret")
+      );
+
+      const headers = new Headers(capturedInit?.headers);
+
+      expect(result).toEqual({ ok: true });
+      expect(capturedInit?.method).toBe("POST");
+      expect(capturedInit?.body).toBe("{}");
+      expect(headers.get("content-type")).toBe("application/json");
+      expect(headers.get("content-length")).toBeNull();
+    })
+  );
 });
