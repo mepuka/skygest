@@ -1,12 +1,22 @@
-# Quick-Ingest MCP Tool Implementation Plan
+# Quick-Ingest CLI Command Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Add an `ingest_url` MCP tool that takes a Bluesky or Twitter URL and imports, curates, and starts enrichment in one call.
+**Goal:** Add an `ops ingest-url <url>` CLI command that imports a Bluesky or Twitter post, curates it, and lets enrichment start automatically — all in one step.
 
-**Architecture:** The MCP handler composes existing services (BlueskyClient, CurationService, ExpertsRepo, KnowledgeRepo, TopicMatcher) directly -- no new service abstraction. Bluesky URLs are handled fully server-side. Twitter URLs require the post to already be imported via CLI; the tool then curates + enriches. AI-assisted topic supplementation via `additionalTopics` input.
+**Architecture:** CLI-first. The command orchestrates existing remote endpoints (`importPosts` + `curatePost`) via `StagingOperatorClient`. No new MCP tool — the CLI handles both platforms locally. For Twitter, the scraper fetches the tweet. For Bluesky, a lightweight `BlueskyClient` layer fetches the thread from the public API. `curatePost` already queues enrichment internally, so no separate enrichment step. Topic gate bypass is an explicit `operatorOverride` flag on the import endpoint, not a change to default batch behavior.
 
-**Tech Stack:** Effect.ts 4, Cloudflare Workers, D1, MCP Toolkit (effect/unstable/McpSchema), BlueskyClient (AT Protocol XRPC)
+**Tech Stack:** Effect.ts 4 CLI (`effect/unstable/cli`), StagingOperatorClient (HTTP), BlueskyClient (AT Protocol XRPC), `@pooks/twitter-scraper` (CycleTLS)
+
+---
+
+## Design Decisions (from code review)
+
+1. **No cross-platform MCP tool.** Ship CLI first. If MCP convenience matters later, add a Bluesky-only MCP tool separately.
+2. **No separate enrichment step.** `curatePost` already calls `queuePickedEnrichment` for both Twitter (line 231) and Bluesky (line 294) of `CurationService.ts`. `start_enrichment` stays as a manual retry tool.
+3. **Avoid double Bluesky fetch.** The CLI captures embed payload at import time. `curatePost`'s Bluesky path is updated to use stored payload when one exists, mirroring the Twitter path. This eliminates a redundant thread fetch.
+4. **Explicit topic override.** Add `operatorOverride` flag to `ImportPostsInput`. When true, posts with zero topic matches are still imported. Default batch import behavior is unchanged.
+5. **Detailed return shape.** CLI reports whether post was newly imported or already existed, curation state change, and enrichment status.
 
 ---
 
@@ -21,8 +31,8 @@
 ```ts
 // tests/ingest-url-parser.test.ts
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, Schema } from "effect";
-import { parsePostUrl, ParsedPostUrl, IngestUrlInput, IngestUrlOutput } from "../src/domain/ingestUrl";
+import { Effect } from "effect";
+import { parsePostUrl } from "../src/domain/ingestUrl";
 
 describe("parsePostUrl", () => {
   it.effect("parses bsky.app URL", () =>
@@ -52,15 +62,15 @@ describe("parsePostUrl", () => {
     })
   );
 
-  it.effect("returns error for unsupported URL", () =>
+  it.effect("throws for unsupported URL", () =>
     Effect.gen(function* () {
-      expect(() => parsePostUrl("https://mastodon.social/@user/123")).toThrow();
+      expect(() => parsePostUrl("https://mastodon.social/@user/123")).toThrow(/Unsupported URL/);
     })
   );
 
-  it.effect("returns error for malformed URL", () =>
+  it.effect("throws for malformed input", () =>
     Effect.gen(function* () {
-      expect(() => parsePostUrl("not-a-url")).toThrow();
+      expect(() => parsePostUrl("not-a-url")).toThrow(/Unsupported URL/);
     })
   );
 });
@@ -69,19 +79,13 @@ describe("parsePostUrl", () => {
 ### Step 2: Run test to verify it fails
 
 Run: `bun run test tests/ingest-url-parser.test.ts`
-Expected: FAIL — module `../src/domain/ingestUrl` not found
+Expected: FAIL — module not found
 
 ### Step 3: Write minimal implementation
 
 ```ts
 // src/domain/ingestUrl.ts
-import { Schema } from "effect";
-import { PostUri, Platform } from "./types";
-import { ExpertTier, TopicSlug } from "./bi";
-
-// ---------------------------------------------------------------------------
-// URL parser (pure, no Effect)
-// ---------------------------------------------------------------------------
+import type { Platform } from "./types";
 
 export type ParsedPostUrl = {
   readonly platform: Platform;
@@ -106,46 +110,6 @@ export const parsePostUrl = (url: string): ParsedPostUrl => {
     `  https://twitter.com/<handle>/status/<id>`
   );
 };
-
-// ---------------------------------------------------------------------------
-// MCP tool schemas
-// ---------------------------------------------------------------------------
-
-export const IngestUrlInput = Schema.Struct({
-  url: Schema.String.annotate({
-    description: "Tweet URL (x.com or twitter.com) or Bluesky post URL (bsky.app)"
-  }),
-  tier: Schema.optionalKey(ExpertTier.annotate({
-    description: "Expert tier to assign if expert is new (default: energy-focused). Ignored if expert already exists with a tier."
-  })),
-  additionalTopics: Schema.optionalKey(Schema.Array(TopicSlug).annotate({
-    description: "Additional topic slugs to assign beyond automated matching. Invalid slugs are warned about but skipped."
-  })),
-  note: Schema.optionalKey(Schema.String.annotate({
-    description: "Optional curation note explaining why this post was ingested"
-  }))
-});
-export type IngestUrlInput = typeof IngestUrlInput.Type;
-
-export const IngestUrlOutput = Schema.Struct({
-  postUri: PostUri,
-  platform: Schema.Literals(["bluesky", "twitter"]),
-  expert: Schema.Struct({
-    did: Schema.String,
-    handle: Schema.String,
-    isNew: Schema.Boolean
-  }),
-  topicsMatched: Schema.Array(TopicSlug),
-  topicsAdded: Schema.Array(TopicSlug),
-  topicsInvalid: Schema.Array(Schema.String),
-  curationStatus: Schema.Literals(["curated"]),
-  enrichment: Schema.Struct({
-    type: Schema.Literals(["vision", "source-attribution"]),
-    status: Schema.Literals(["queued", "already-running", "skipped"])
-  }),
-  _display: Schema.String
-});
-export type IngestUrlOutput = typeof IngestUrlOutput.Type;
 ```
 
 ### Step 4: Run test to verify it passes
@@ -162,610 +126,566 @@ Expected: 0 errors
 
 ```bash
 git add src/domain/ingestUrl.ts tests/ingest-url-parser.test.ts
-git commit -m "feat(domain): add URL parser and ingest_url schemas (SKY-143)"
+git commit -m "feat(domain): add URL parser for quick-ingest (SKY-143)"
 ```
 
 ---
 
-## Task 2: IngestUrl MCP Tool Definition
+## Task 2: Operator Override on Import Endpoint
+
+Add an explicit `operatorOverride` flag to `ImportPostsInput`. When true, zero-topic-match posts are still imported. Default behavior (skip on zero topics) is unchanged.
 
 **Files:**
-- Modify: `src/mcp/Toolkit.ts`
+- Modify: `src/domain/api.ts` — add flag to schema
+- Modify: `src/admin/Router.ts` — respect flag in import handler
+- Modify: `tests/import-endpoint.test.ts` — add test for override behavior
 
-### Step 1: Add the tool definition
+### Step 1: Write the failing test
 
-Add imports at the top of `src/mcp/Toolkit.ts`:
-
-```ts
-import { IngestUrlInput, IngestUrlOutput, parsePostUrl } from "../domain/ingestUrl";
-```
-
-Add the tool definition after `CuratePostTool` (around line 280):
+Add to `tests/import-endpoint.test.ts`:
 
 ```ts
-export const IngestUrlTool = Tool.make("ingest_url", {
-  description: "Quick-ingest: paste a Bluesky or Twitter post URL to import, curate, and start enrichment in one step. " +
-    "For Bluesky URLs, handles everything server-side. " +
-    "For Twitter URLs, the post must already be imported via CLI (import-tweet); this tool then curates and starts enrichment. " +
-    "Accepts optional additionalTopics for AI-assisted topic assignment beyond automated matching. " +
-    "Idempotent for already-curated posts.",
-  parameters: IngestUrlInput,
-  success: IngestUrlOutput,
-  failure: McpToolQueryError
-})
-  .annotate(Tool.Title, "Ingest URL")
-  .annotate(Tool.Readonly, false)
-  .annotate(Tool.Destructive, false)
-  .annotate(Tool.Idempotent, true)
-  .annotate(Tool.OpenWorld, true);
-```
-
-Add `IngestUrlTool` to `CurationWriteMcpToolkit` and `WorkflowWriteMcpToolkit` (both toolkit definitions):
-
-```ts
-export const CurationWriteMcpToolkit = Toolkit.make(
-  // ... existing tools ...
-  CuratePostTool,
-  StartEnrichmentTool,
-  IngestUrlTool              // <-- add
-);
-
-export const WorkflowWriteMcpToolkit = Toolkit.make(
-  // ... existing tools ...
-  CuratePostTool,
-  SubmitEditorialPickTool,
-  StartEnrichmentTool,
-  IngestUrlTool              // <-- add
-);
-```
-
-### Step 2: Type check
-
-Run: `bunx tsc --noEmit`
-Expected: Errors — the handler hasn't been implemented yet, so toolkit `.of()` calls are missing the `ingest_url` handler. That's expected; we'll fix in Task 3.
-
-### Step 3: Commit (WIP — tool definition only)
-
-```bash
-git add src/mcp/Toolkit.ts
-git commit -m "feat(mcp): add ingest_url tool definition to toolkit (SKY-143)"
-```
-
----
-
-## Task 3: Ingest URL Handler — Bluesky Path
-
-This is the core handler. It handles the Bluesky path fully and the Twitter path for already-imported posts.
-
-**Files:**
-- Modify: `src/mcp/Toolkit.ts`
-- Modify: `src/mcp/Fmt.ts`
-
-### Step 1: Add the formatter in Fmt.ts
-
-Add to the imports at the top of `src/mcp/Fmt.ts`:
-
-```ts
-import type { IngestUrlOutput } from "../domain/ingestUrl.ts";
-```
-
-Add the formatter function:
-
-```ts
-export const formatIngestUrlResult = (r: IngestUrlOutput): string => {
-  const topicList = [...r.topicsMatched, ...r.topicsAdded];
-  const topicsStr = topicList.length > 0 ? topicList.join(", ") : "(none)";
-  const invalidStr = r.topicsInvalid.length > 0
-    ? `\nInvalid topics (skipped): ${r.topicsInvalid.join(", ")}`
-    : "";
-
-  const lines = [
-    `Ingested ${r.platform} post`,
-    `URI: ${r.postUri}`,
-    `Expert: @${r.expert.handle} (${r.expert.did})${r.expert.isNew ? " [NEW]" : ""}`,
-    `Topics matched: ${r.topicsMatched.length > 0 ? r.topicsMatched.join(", ") : "(none)"}`,
-    ...(r.topicsAdded.length > 0 ? [`Topics added: ${r.topicsAdded.join(", ")}`] : []),
-    invalidStr,
-    `Curation: ${r.curationStatus}`,
-    `Enrichment: ${r.enrichment.type} — ${r.enrichment.status}`
-  ].filter(Boolean);
-
-  return lines.join("\n");
-};
-```
-
-### Step 2: Write the handler in Toolkit.ts
-
-Add to the imports if not already present:
-
-```ts
-import { OntologyCatalog } from "../filter/OntologyCatalog";
-import { matchTopics } from "../filter/TopicMatcher";
-```
-
-Add helper type aliases (near existing ones around line 412):
-
-```ts
-type ExpertsRepoI = (typeof ExpertsRepo)["Service"];
-type KnowledgeRepoI = (typeof KnowledgeRepo)["Service"];
-```
-
-Add the handler factory function:
-
-```ts
-const makeIngestUrlHandler = (
-  bskyClient: BlueskyClientI,
-  curationService: CurationServiceI,
-  expertsRepo: ExpertsRepoI,
-  knowledgeRepo: KnowledgeRepoI
-) => ({
-  ingest_url: (input: typeof IngestUrlInput.Type) =>
-    Effect.gen(function* () {
-      const parsed = (() => {
-        try { return parsePostUrl(input.url); }
-        catch (e) {
-          return null;
-        }
-      })();
-      if (parsed === null) {
-        return yield* new McpToolQueryError({
-          tool: "ingest_url",
-          message: `Unsupported URL format. Supported:\n  https://bsky.app/profile/<handle>/post/<rkey>\n  https://x.com/<handle>/status/<id>\n  https://twitter.com/<handle>/status/<id>`,
-          error: new Error("parse failed")
-        });
-      }
-
-      // Resolve post URI
-      let postUri: PostUri;
-      let expertDid: string;
-      let expertHandle: string = parsed.handle;
-      let isNewExpert = false;
-
-      if (parsed.platform === "bluesky") {
-        // Resolve DID from handle
-        const resolved = yield* bskyClient.resolveDidOrHandle(parsed.handle).pipe(
-          Effect.mapError((e) => new McpToolQueryError({
-            tool: "ingest_url",
-            message: `Could not resolve Bluesky handle "${parsed.handle}": ${e.message}`,
-            error: e
-          }))
-        );
-        expertDid = resolved.did;
-        expertHandle = resolved.handle ?? parsed.handle;
-
-        const atUri = `at://${resolved.did}/app.bsky.feed.post/${parsed.id}` as PostUri;
-        postUri = atUri;
-
-        // Check if post already exists
-        const existingPosts = yield* knowledgeRepo.searchPosts({
-          query: atUri as string,
-          limit: 1
-        }).pipe(Effect.catchAll(() => Effect.succeed([] as any[])));
-
-        if (existingPosts.length === 0) {
-          // Fetch thread from Bluesky
-          const thread = yield* bskyClient.getPostThread(atUri as string, { depth: 0, parentHeight: 0 }).pipe(
-            Effect.mapError((e) => new McpToolQueryError({
-              tool: "ingest_url",
-              message: `Post not found on Bluesky: ${e.message}`,
-              error: e
-            }))
-          );
-
-          // Extract post data from thread
-          const post = thread.thread?.post;
-          if (!post || !post.record) {
-            return yield* new McpToolQueryError({
-              tool: "ingest_url",
-              message: "Could not extract post data from Bluesky thread response",
-              error: new Error("missing post record")
-            });
-          }
-
-          const text = typeof post.record === "object" && post.record !== null && "text" in post.record
-            ? String((post.record as any).text)
-            : "";
-          const createdAt = typeof post.record === "object" && post.record !== null && "createdAt" in post.record
-            ? new Date((post.record as any).createdAt).getTime()
-            : Date.now();
-
-          // Extract links from facets
-          const links: Array<{ url: string; domain: string | null }> = [];
-          const facets = typeof post.record === "object" && post.record !== null && "facets" in post.record
-            ? (post.record as any).facets ?? []
-            : [];
-          for (const facet of facets) {
-            for (const feature of facet?.features ?? []) {
-              if (feature?.$type === "app.bsky.richtext.facet#link" && typeof feature.uri === "string") {
-                try {
-                  const u = new URL(feature.uri);
-                  links.push({ url: feature.uri, domain: u.hostname });
-                } catch { /* skip malformed */ }
-              }
-            }
-          }
-
-          // Extract hashtags from facets
-          const hashtags: string[] = [];
-          for (const facet of facets) {
-            for (const feature of facet?.features ?? []) {
-              if (feature?.$type === "app.bsky.richtext.facet#tag" && typeof feature.tag === "string") {
-                hashtags.push(feature.tag);
-              }
-            }
-          }
-
-          // Topic matching (automated)
-          const matchedTopics = yield* matchTopics({
-            text,
-            links: links.map((l) => ({ domain: l.domain })),
-            hashtags
-          });
-
-          // Build embed type from thread
-          const embedType = post.embed?.$type
-            ? (post.embed.$type as string).replace("app.bsky.embed.", "").replace("#view", "") as any
-            : null;
-
-          const now = Date.now();
-
-          // Build and store KnowledgePost
-          const knowledgePost = {
-            uri: postUri,
-            did: resolved.did,
-            cid: post.cid ?? null,
-            text,
-            createdAt,
-            indexedAt: now,
-            hasLinks: links.length > 0,
-            status: "active" as const,
-            ingestId: `ingest-url:${postUri}:${String(now)}`,
-            embedType,
-            topics: matchedTopics,
-            links: links.map((l) => ({
-              postUri: postUri as string,
-              url: l.url,
-              domain: l.domain,
-              title: null,
-              indexedAt: now
-            }))
-          };
-
-          yield* knowledgeRepo.upsertPosts([knowledgePost as any]);
-
-          // Flag via curation service (so curatePost can find it)
-          yield* curationService.flagBatch([knowledgePost as any]).pipe(
-            Effect.catchAll(() => Effect.succeed(0))
-          );
-        }
-      } else {
-        // Twitter — construct x:// URI, check if exists
-        postUri = `x://${parsed.handle}/status/${parsed.id}` as PostUri;
-        expertDid = `did:x:${parsed.handle}`;
-
-        // Check if post exists in DB
-        const existingPosts = yield* knowledgeRepo.searchPosts({
-          query: postUri as string,
-          limit: 1
-        }).pipe(Effect.catchAll(() => Effect.succeed([] as any[])));
-
-        if (existingPosts.length === 0) {
-          return yield* new McpToolQueryError({
-            tool: "ingest_url",
-            message: `Tweet not yet imported. Run:\n  bun src/scripts/ops.ts -- import-tweet "${input.url}"`,
-            error: new Error("twitter post not imported")
-          });
-        }
-      }
-
-      // Ensure expert record exists (merge-safe)
-      const existingExpert = yield* expertsRepo.getByDid(expertDid).pipe(
-        Effect.catchAll(() => Effect.succeed(null))
-      );
-      if (existingExpert === null) {
-        isNewExpert = true;
-        const tier = input.tier ?? ("energy-focused" as any);
-        yield* expertsRepo.upsert({
-          did: expertDid,
-          handle: expertHandle,
-          displayName: null,
-          avatar: null,
-          source: parsed.platform === "bluesky" ? "bluesky" : "twitter" as any,
-          tier,
-          active: false,
-          shard: 0,
-          addedAt: Date.now(),
-          profileRefreshedAt: null,
-          editorial: false
-        } as any);
-      }
-
-      // Validate and filter additionalTopics
-      const topicsAdded: string[] = [];
-      const topicsInvalid: string[] = [];
-      if (input.additionalTopics && input.additionalTopics.length > 0) {
-        const ontology = yield* OntologyCatalog;
-        for (const slug of input.additionalTopics) {
-          const topic = yield* ontology.getTopic(slug).pipe(
-            Effect.catchAll(() => Effect.succeed(null))
-          );
-          if (topic !== null) {
-            topicsAdded.push(slug);
-          } else {
-            topicsInvalid.push(slug);
-          }
-        }
-
-        // Store additional topic associations if any valid ones
-        if (topicsAdded.length > 0) {
-          yield* knowledgeRepo.addTopicsToPost(postUri as string, topicsAdded).pipe(
-            Effect.catchAll(() => Effect.void)
-          );
-        }
-      }
-
-      // Get current matched topics from DB
-      const storedTopics = yield* knowledgeRepo.getPostTopicMatches(postUri as string).pipe(
-        Effect.catchAll(() => Effect.succeed([] as any[]))
-      );
-      const topicsMatched = storedTopics
-        .map((t: any) => t.topicSlug ?? t.topic_slug)
-        .filter((s: any): s is string => typeof s === "string" && !topicsAdded.includes(s));
-
-      // Curate
-      const curateResult = yield* curationService.curatePost(
-        { postUri, action: "curate" as const, ...(input.note ? { note: input.note } : {}) },
-        "mcp-operator"
-      ).pipe(
-        Effect.mapError((e) => new McpToolQueryError({
-          tool: "ingest_url",
-          message: `Curation failed: ${"message" in (e as any) ? (e as any).message : String(e)}`,
-          error: e
-        }))
-      );
-
-      // Start enrichment
-      const payloadService = yield* CandidatePayloadService;
-      const payload = yield* payloadService.getPayload(postUri).pipe(
-        Effect.catchAll(() => Effect.succeed(null))
-      );
-
-      let enrichmentType: "vision" | "source-attribution" = "source-attribution";
-      let enrichmentStatus: "queued" | "already-running" | "skipped" = "skipped";
-
-      if (payload !== null && payload.captureStage === "picked") {
-        enrichmentType = hasVisualEmbedPayload(payload.embedPayload)
-          ? "vision"
-          : "source-attribution";
-
-        const triggerOption = yield* Effect.serviceOption(EnrichmentTriggerClient);
-        if (Option.isSome(triggerOption)) {
-          const triggerResult = yield* triggerOption.value.start({
-            postUri,
-            enrichmentType
-          }).pipe(
-            Effect.map((r) => r.status as string),
-            Effect.catchAll(() => Effect.succeed("skipped"))
-          );
-          enrichmentStatus = triggerResult === "queued" ? "queued" : "already-running";
-        }
-      }
-
-      const result: IngestUrlOutput = {
-        postUri,
-        platform: parsed.platform,
-        expert: { did: expertDid, handle: expertHandle, isNew: isNewExpert },
-        topicsMatched: topicsMatched as any,
-        topicsAdded: topicsAdded as any,
-        topicsInvalid,
-        curationStatus: "curated",
-        enrichment: { type: enrichmentType, status: enrichmentStatus },
-        _display: ""
-      };
-
-      return { ...result, _display: formatIngestUrlResult(result) };
-    }).pipe(
-      Effect.mapError((e) =>
-        "_tag" in (e as any) && (e as any)._tag === "McpToolQueryError"
-          ? (e as McpToolQueryError)
-          : toQueryError("ingest_url")(e as any)
-      )
-    ) as any
-});
-```
-
-### Step 3: Wire the handler into toolkit layers
-
-Update `CurationWriteMcpHandlers` (around line 797):
-
-```ts
-export const CurationWriteMcpHandlers = CurationWriteMcpToolkit.toLayer(
+it.effect("imports post with zero topics when operatorOverride is true", () =>
   Effect.gen(function* () {
-    const queryService = yield* KnowledgeQueryService;
-    const editorialService = yield* EditorialService;
-    const curationService = yield* CurationService;
-    const bskyClient = yield* BlueskyClient;
-    const enrichmentReadService = yield* PostEnrichmentReadService;
-    const expertsRepo = yield* ExpertsRepo;
-    const knowledgeRepo = yield* KnowledgeRepo;
-
-    return CurationWriteMcpToolkit.of({
-      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
-      ...makeCuratePostHandler(curationService),
-      ...makeStartEnrichmentHandler(),
-      ...makeIngestUrlHandler(bskyClient, curationService, expertsRepo, knowledgeRepo)
+    // Post with text that won't match any topics
+    const result = yield* importWithOverride({
+      experts: [testExpert],
+      posts: [{ ...testPost, text: "completely unrelated gibberish" }],
+      operatorOverride: true
     });
+    expect(result.imported).toBe(1);
+    expect(result.skipped).toBe(0);
   })
 );
 ```
 
-Do the same for `WorkflowWriteMcpHandlers`.
+### Step 2: Run test to verify it fails
 
-### Step 4: Add required imports
+Run: `bun run test tests/import-endpoint.test.ts`
+Expected: FAIL — `operatorOverride` not recognized or post still skipped
 
-Add to existing imports in `Toolkit.ts`:
+### Step 3: Add flag to ImportPostsInput schema
+
+In `src/domain/api.ts`, modify `ImportPostsInput`:
 
 ```ts
-import { ExpertsRepo } from "../services/ExpertsRepo";
-import { KnowledgeRepo } from "../services/KnowledgeRepo";
-import { OntologyCatalog } from "../filter/OntologyCatalog";
-import { matchTopics } from "../filter/TopicMatcher";
-import { IngestUrlInput, IngestUrlOutput, parsePostUrl } from "../domain/ingestUrl";
-import { formatIngestUrlResult } from "./Fmt";
+export const ImportPostsInput = Schema.Struct({
+  experts: Schema.Array(ImportExpertInput),
+  posts: Schema.Array(ImportPostInput),
+  operatorOverride: Schema.optionalKey(Schema.Boolean.annotate({
+    description: "When true, import posts even with zero topic matches. For operator-submitted posts where the human has already judged relevance."
+  }))
+});
+```
+
+### Step 4: Respect flag in import handler
+
+In `src/admin/Router.ts`, modify the topic matching loop (around line 460):
+
+```ts
+if (topics.length === 0 && !payload.operatorOverride) {
+  skipped += 1;
+  continue;
+}
+```
+
+No other changes — the rest of the import handler works the same whether topics are empty or not.
+
+### Step 5: Run test to verify it passes
+
+Run: `bun run test tests/import-endpoint.test.ts`
+Expected: PASS — including existing test that verifies default skip behavior
+
+### Step 6: Type check
+
+Run: `bunx tsc --noEmit`
+Expected: 0 errors
+
+### Step 7: Commit
+
+```bash
+git add src/domain/api.ts src/admin/Router.ts tests/import-endpoint.test.ts
+git commit -m "feat(import): add operatorOverride flag for topic gate bypass (SKY-143)"
+```
+
+---
+
+## Task 3: CuratePost Skip-Fetch When Payload Exists
+
+Currently `curatePost` for Bluesky always fetches the live thread (line 256 of `CurationService.ts`), even if an embed payload was already captured at import time. When the CLI captures embed payload during import, the curation step should use the stored payload instead of re-fetching.
+
+This makes the Bluesky path work like the Twitter path: use stored data when available, only fetch live when no payload exists.
+
+**Files:**
+- Modify: `src/services/CurationService.ts`
+- Modify: `tests/curation.test.ts` — add test for skip-fetch
+
+### Step 1: Write the failing test
+
+Add to `tests/curation.test.ts`:
+
+```ts
+it.effect("curates Bluesky post with stored payload without re-fetching", () =>
+  Effect.gen(function* () {
+    // Pre-store a payload at "candidate" stage (simulating import with captured embed)
+    yield* payloadService.capturePayload({
+      postUri: testBlueskyUri,
+      captureStage: "candidate",
+      embedType: "external",
+      embedPayload: { kind: "link", url: "https://example.com", title: "Test" }
+    });
+
+    // curatePost should succeed WITHOUT calling BlueskyClient.getPostThread
+    const result = yield* curationService.curatePost(
+      { postUri: testBlueskyUri, action: "curate" },
+      "test-operator"
+    );
+    expect(result.newStatus).toBe("curated");
+    // Verify: no BlueskyApiError thrown (which would happen if it tried to fetch
+    // and the test has no real Bluesky backend)
+  })
+);
+```
+
+### Step 2: Run test to verify it fails
+
+Run: `bun run test tests/curation.test.ts`
+Expected: FAIL — curatePost tries to fetch thread from Bluesky and fails
+
+### Step 3: Modify curatePost Bluesky path
+
+In `src/services/CurationService.ts`, in the `action === "curate"` Bluesky path (around line 254), check for stored payload first:
+
+```ts
+// action === "curate" (Bluesky)
+// Check if payload already exists (e.g., captured at import time)
+const existingPayload = yield* payloadService.getPayload(input.postUri);
+
+if (existingPayload !== null && existingPayload.embedPayload != null) {
+  // Payload exists from import — use stored data, skip live fetch
+  if (existingPayload.captureStage !== "picked") {
+    yield* payloadService.markPicked(input.postUri);
+  }
+
+  yield* curationRepo.updateStatus(input.postUri, "curated", curator, input.note ?? null, now);
+
+  yield* queuePickedEnrichment(input.postUri, existingPayload.embedPayload, curator)
+    .pipe(Effect.catch(() => Effect.succeed(false)));
+
+  return { postUri: input.postUri, action: input.action, previousStatus, newStatus: "curated" as const };
+}
+
+// No stored payload — fetch live thread from Bluesky (existing behavior)
+const threadResponse = yield* bskyClient.getPostThread(input.postUri, {
+  depth: 0,
+  parentHeight: 0
+});
+// ... rest of existing code unchanged
+```
+
+### Step 4: Run test to verify it passes
+
+Run: `bun run test tests/curation.test.ts`
+Expected: PASS — all existing tests still pass, new test passes
+
+### Step 5: Type check
+
+Run: `bunx tsc --noEmit`
+Expected: 0 errors
+
+### Step 6: Commit
+
+```bash
+git add src/services/CurationService.ts tests/curation.test.ts
+git commit -m "fix(curation): skip Bluesky thread fetch when stored payload exists (SKY-143)"
+```
+
+---
+
+## Task 4: Bluesky Normalizer for CLI
+
+The CLI needs to fetch a Bluesky thread and normalize it to `ImportPostInput` + `ImportExpertInput`, matching the shape that `StagingOperatorClient.importPosts` expects.
+
+**Files:**
+- Create: `src/ops/BlueskyNormalizer.ts`
+- Create: `tests/bluesky-normalizer.test.ts`
+
+### Step 1: Write the failing test
+
+```ts
+// tests/bluesky-normalizer.test.ts
+import { describe, expect, it } from "@effect/vitest";
+import { Effect } from "effect";
+import { normalizeBlueskyThread } from "../src/ops/BlueskyNormalizer";
+
+// Minimal thread fixture matching GetPostThreadResponse shape
+const threadFixture = {
+  thread: {
+    $type: "app.bsky.feed.defs#threadViewPost",
+    post: {
+      uri: "at://did:plc:abc123/app.bsky.feed.post/3xyz",
+      cid: "bafyrei...",
+      author: {
+        did: "did:plc:abc123",
+        handle: "simonevans.bsky.social",
+        displayName: "Simon Evans",
+        avatar: "https://cdn.bsky.app/img/avatar/plain/did:plc:abc123/abc@jpeg"
+      },
+      record: {
+        $type: "app.bsky.feed.post",
+        text: "UK grid carbon intensity hit a new low",
+        createdAt: "2026-03-15T10:30:00.000Z",
+        facets: [
+          {
+            features: [{ $type: "app.bsky.richtext.facet#link", uri: "https://carbonintensity.org.uk" }],
+            index: { byteStart: 0, byteEnd: 5 }
+          },
+          {
+            features: [{ $type: "app.bsky.richtext.facet#tag", tag: "energy" }],
+            index: { byteStart: 10, byteEnd: 17 }
+          }
+        ]
+      },
+      embed: {
+        $type: "app.bsky.embed.external#view",
+        external: { uri: "https://carbonintensity.org.uk", title: "Carbon Intensity", description: "..." }
+      },
+      indexedAt: "2026-03-15T10:30:05.000Z"
+    }
+  }
+};
+
+describe("normalizeBlueskyThread", () => {
+  it.effect("extracts post data from thread", () =>
+    Effect.gen(function* () {
+      const result = normalizeBlueskyThread(threadFixture as any);
+      expect(result.post.uri).toBe("at://did:plc:abc123/app.bsky.feed.post/3xyz");
+      expect(result.post.did).toBe("did:plc:abc123");
+      expect(result.post.text).toBe("UK grid carbon intensity hit a new low");
+      expect(result.post.hashtags).toEqual(["energy"]);
+      expect(result.post.links.length).toBe(1);
+      expect(result.post.links[0].url).toBe("https://carbonintensity.org.uk");
+    })
+  );
+
+  it.effect("extracts expert data from author", () =>
+    Effect.gen(function* () {
+      const result = normalizeBlueskyThread(threadFixture as any);
+      expect(result.expert.did).toBe("did:plc:abc123");
+      expect(result.expert.handle).toBe("simonevans.bsky.social");
+      expect(result.expert.source).toBe("bluesky");
+    })
+  );
+
+  it.effect("captures embed payload", () =>
+    Effect.gen(function* () {
+      const result = normalizeBlueskyThread(threadFixture as any);
+      expect(result.post.embedType).toBe("external");
+      expect(result.post.embedPayload).toBeDefined();
+      expect((result.post.embedPayload as any).kind).toBe("link");
+    })
+  );
+});
+```
+
+### Step 2: Run test to verify it fails
+
+Run: `bun run test tests/bluesky-normalizer.test.ts`
+Expected: FAIL — module not found
+
+### Step 3: Write implementation
+
+```ts
+// src/ops/BlueskyNormalizer.ts
+import type { GetPostThreadResponse } from "../bluesky/ThreadTypes";
+import type { ImportPostInput, ImportExpertInput } from "../domain/api";
+import type { PostUri, Did } from "../domain/types";
+import { buildTypedEmbed, extractEmbedKind } from "../bluesky/EmbedExtract";
+
+/**
+ * Normalize a Bluesky thread response into import-ready shapes.
+ * Extracts post data, expert data, links, hashtags, and embed payload
+ * so the import endpoint receives everything in one call.
+ */
+export const normalizeBlueskyThread = (
+  thread: GetPostThreadResponse,
+  tierDefault: string = "energy-focused"
+): { post: ImportPostInput; expert: ImportExpertInput } => {
+  const post = thread.thread?.post;
+  if (!post || !post.record) {
+    throw new Error("Thread response missing post or record");
+  }
+
+  const record = post.record as Record<string, unknown>;
+  const author = post.author as Record<string, unknown>;
+
+  const text = typeof record.text === "string" ? record.text : "";
+  const createdAtStr = typeof record.createdAt === "string" ? record.createdAt : new Date().toISOString();
+  const createdAt = new Date(createdAtStr).getTime();
+
+  // Extract links from facets
+  const facets = Array.isArray(record.facets) ? record.facets : [];
+  const links: Array<{ url: string; domain: string | null }> = [];
+  const hashtags: string[] = [];
+
+  for (const facet of facets) {
+    const features = Array.isArray(facet?.features) ? facet.features : [];
+    for (const feature of features) {
+      if (feature?.$type === "app.bsky.richtext.facet#link" && typeof feature.uri === "string") {
+        try {
+          links.push({ url: feature.uri, domain: new URL(feature.uri).hostname });
+        } catch { /* skip malformed */ }
+      }
+      if (feature?.$type === "app.bsky.richtext.facet#tag" && typeof feature.tag === "string") {
+        hashtags.push(feature.tag);
+      }
+    }
+  }
+
+  // Extract embed
+  const embedType = extractEmbedKind(post.embed as any);
+  const embedPayload = buildTypedEmbed(post.embed);
+
+  return {
+    post: {
+      uri: post.uri as PostUri,
+      did: (author.did as string) as Did,
+      text,
+      createdAt,
+      hashtags: hashtags.length > 0 ? hashtags : undefined,
+      embedType: embedType as any,
+      embedPayload: embedPayload as any,
+      links: links.map((l) => ({ url: l.url, domain: l.domain }))
+    } as ImportPostInput,
+    expert: {
+      did: (author.did as string) as Did,
+      handle: (author.handle as string) ?? "unknown",
+      domain: "bsky.social",
+      source: "bluesky" as const,
+      tier: tierDefault as any,
+      displayName: typeof author.displayName === "string" ? author.displayName : undefined,
+      avatar: typeof author.avatar === "string" ? author.avatar : undefined
+    } as ImportExpertInput
+  };
+};
+```
+
+### Step 4: Run test to verify it passes
+
+Run: `bun run test tests/bluesky-normalizer.test.ts`
+Expected: PASS
+
+Note: `buildTypedEmbed` and `extractEmbedKind` are imported from `src/bluesky/EmbedExtract.ts`. Verify these exports exist. If they are currently only used inside `CurationService.ts`, they may need to be extracted to a shared module. If so, extract them before this step.
+
+### Step 5: Type check
+
+Run: `bunx tsc --noEmit`
+Expected: 0 errors
+
+### Step 6: Commit
+
+```bash
+git add src/ops/BlueskyNormalizer.ts tests/bluesky-normalizer.test.ts
+git commit -m "feat(ops): add Bluesky thread normalizer for CLI import (SKY-143)"
+```
+
+---
+
+## Task 5: CLI `ingest-url` Command
+
+Compose: parse URL → fetch (scraper or Bluesky API) → importPosts (with operatorOverride) → curatePost. Enrichment starts automatically inside curatePost.
+
+**Files:**
+- Modify: `src/ops/Cli.ts`
+
+### Step 1: Add the BlueskyClient layer for CLI
+
+The BlueskyClient needs `AppConfig` (for `publicApi` URL) and `HttpClient.HttpClient`. For CLI use, provide a minimal layer:
+
+```ts
+import { BlueskyClient, makeBlueskyClient } from "../bluesky/BlueskyClient";
+import { FetchHttpClient } from "effect/unstable/http";
+
+const blueskyCliLayer = Layer.effect(
+  BlueskyClient,
+  makeBlueskyClient("https://public.api.bsky.app")
+).pipe(Layer.provide(FetchHttpClient.layer));
+```
+
+This uses FetchHttpClient (standard fetch, no CycleTLS conflict) and hard-codes the public API URL so no AppConfig is needed.
+
+### Step 2: Add the ingest-url runner
+
+```ts
+import { parsePostUrl } from "../domain/ingestUrl";
+import { normalizeBlueskyThread } from "./BlueskyNormalizer";
+
+const runIngestUrl = (options: {
+  readonly url: string;
+  readonly baseUrl: string;
+  readonly tier: string;
+  readonly note: Option.Option<string>;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+    const note = Option.getOrUndefined(options.note);
+
+    const parsed = parsePostUrl(options.url);
+    yield* Console.log(`Ingesting ${parsed.platform} post: ${options.url}`);
+
+    let importInput: any;
+
+    if (parsed.platform === "twitter") {
+      // Fetch via scraper (same pattern as runTwitterImportTweet)
+      const { focal, profile } = yield* Effect.gen(function* () {
+        const twitter = yield* TwitterPublic;
+        const tweetsSvc = yield* TwitterTweets;
+        const doc = yield* tweetsSvc.getTweet(parsed.id);
+        const focal = doc.tweets.find((t) => t.id === doc.focalTweetId);
+        if (!focal) return { focal: null as TweetDetailNode | null, profile: null as any };
+        const profile = yield* twitter.getProfile(focal.username ?? focal.userId ?? "");
+        return { focal, profile };
+      }).pipe(Effect.provide(scraperLayer));
+
+      if (!focal) {
+        yield* Console.log("Tweet not found");
+        return;
+      }
+
+      const post = normalizeTweetDetail(focal);
+      if (post === null) {
+        yield* Console.log("Tweet missing userId, skipping");
+        return;
+      }
+
+      const expert = normalizeProfile(profile, options.tier as ExpertTier);
+      importInput = {
+        experts: expert !== null ? [expert] : [],
+        posts: [post],
+        operatorOverride: true
+      };
+    } else {
+      // Fetch via Bluesky public API
+      const { post, expert } = yield* Effect.gen(function* () {
+        const bsky = yield* BlueskyClient;
+        const resolved = yield* bsky.resolveDidOrHandle(parsed.handle);
+        const atUri = `at://${resolved.did}/app.bsky.feed.post/${parsed.id}`;
+        const thread = yield* bsky.getPostThread(atUri, { depth: 0, parentHeight: 0 });
+        return normalizeBlueskyThread(thread, options.tier);
+      }).pipe(Effect.provide(blueskyCliLayer));
+
+      importInput = {
+        experts: [expert],
+        posts: [post],
+        operatorOverride: true
+      };
+    }
+
+    // Import
+    const importResult = yield* client.importPosts(baseUrl, secret, importInput);
+    const wasNew = importResult.imported > 0;
+    yield* Console.log(
+      wasNew
+        ? `Imported: ${String(importResult.imported)} post(s), ${String(importResult.flagged)} flagged`
+        : `Post already exists (skipped import)`
+    );
+
+    // Curate (enrichment starts automatically inside curatePost)
+    const postUri = importInput.posts[0].uri;
+    const curateResult = yield* client.curatePost(baseUrl, secret, {
+      postUri,
+      action: "curate",
+      ...(note === undefined ? {} : { note })
+    });
+
+    const stateChanged = curateResult.previousStatus !== curateResult.newStatus;
+    yield* Console.log(
+      stateChanged
+        ? `Curated: ${String(curateResult.previousStatus ?? "none")} → ${curateResult.newStatus}`
+        : `Already curated (no change)`
+    );
+
+    yield* Console.log(`Done. Post URI: ${postUri}`);
+  });
+```
+
+### Step 3: Add the CLI command
+
+```ts
+const urlArg = Argument.string("url");
+
+const ingestUrlCommand = Command.make(
+  "ingest-url",
+  {
+    url: urlArg,
+    tier: tierOption,
+    note: noteOption,
+    baseUrl: baseUrlOption
+  },
+  ({ url, tier, note, baseUrl }) =>
+    runIngestUrl({ url, tier: tier as string, note, baseUrl })
+);
+```
+
+### Step 4: Wire into the CLI
+
+Add `ingestUrlCommand` as a top-level subcommand of `opsCommand`:
+
+```ts
+export const opsCommand = Command.make("ops", {}, () => Effect.void).pipe(
+  Command.withSubcommands([deployCommand, stageCommand, twitterCommand, ingestUrlCommand])
+);
 ```
 
 ### Step 5: Type check
 
 Run: `bunx tsc --noEmit`
-Expected: 0 errors. If there are type mismatches on KnowledgePost construction or repo methods, adjust the types to match what the repos actually expect.
+Expected: 0 errors
 
 ### Step 6: Commit
 
 ```bash
-git add src/mcp/Toolkit.ts src/mcp/Fmt.ts
-git commit -m "feat(mcp): implement ingest_url handler with Bluesky + Twitter paths (SKY-143)"
+git add src/ops/Cli.ts
+git commit -m "feat(ops): add ingest-url CLI command for quick ingest (SKY-143)"
 ```
 
 ---
 
-## Task 4: KnowledgeRepo.addTopicsToPost
-
-The handler needs a way to add additional topics to a post after initial import. Check if `KnowledgeRepo` already has this method. If not, add it.
+## Task 6: Integration Test
 
 **Files:**
-- Modify: `src/services/KnowledgeRepo.ts` (service interface)
-- Modify: `src/services/d1/KnowledgeRepoD1.ts` (D1 implementation)
+- Modify: `tests/ingest-url-parser.test.ts` — already covers URL parser
+- The Bluesky normalizer test covers normalization
+- The import endpoint test covers operatorOverride
+- The curation test covers skip-fetch optimization
 
-### Step 1: Check if addTopicsToPost exists
-
-Run: `grep -r "addTopicsToPost" src/`
-
-If it exists, skip this task. If not:
-
-### Step 2: Add to service interface
-
-Add to `KnowledgeRepo` service definition:
-
-```ts
-readonly addTopicsToPost: (
-  postUri: string,
-  topicSlugs: ReadonlyArray<string>
-) => Effect.Effect<void, SqlError | DbError>;
-```
-
-### Step 3: Implement in D1 repo
-
-Add to `KnowledgeRepoD1`:
-
-```ts
-addTopicsToPost: (postUri, topicSlugs) =>
-  Effect.gen(function* () {
-    const sql = yield* SqlClient;
-    const now = Date.now();
-    for (const slug of topicSlugs) {
-      yield* sql`INSERT OR IGNORE INTO post_topics (post_uri, topic_slug, score, matched_at)
-        VALUES (${postUri}, ${slug}, ${1.0}, ${now})`;
-    }
-  })
-```
-
-### Step 4: Type check and test
-
-Run: `bunx tsc --noEmit`
-Expected: 0 errors
-
-### Step 5: Commit
-
-```bash
-git add src/services/KnowledgeRepo.ts src/services/d1/KnowledgeRepoD1.ts
-git commit -m "feat(repo): add addTopicsToPost to KnowledgeRepo (SKY-143)"
-```
-
----
-
-## Task 5: Integration Test
-
-**Files:**
-- Create: `tests/ingest-url.test.ts`
-
-### Step 1: Write integration test
-
-This test exercises the handler through the MCP toolkit layer with test fixtures. Follow the pattern from existing MCP tests.
-
-```ts
-// tests/ingest-url.test.ts
-import { describe, expect, it } from "@effect/vitest";
-import { Effect } from "effect";
-
-describe("ingest_url MCP tool", () => {
-  it.effect("returns error for unsupported URL format", () =>
-    Effect.gen(function* () {
-      // Call parsePostUrl directly — no service layer needed
-      const { parsePostUrl } = yield* Effect.promise(() => import("../src/domain/ingestUrl"));
-      expect(() => parsePostUrl("https://mastodon.social/@user/123")).toThrow(/Unsupported URL/);
-    })
-  );
-
-  it.effect("returns CLI command for un-imported Twitter URL", () =>
-    Effect.gen(function* () {
-      // The handler should detect the post doesn't exist and return the CLI command
-      // This requires the full MCP handler — test via the handler function directly
-      // or via a minimal layer stack
-    })
-  );
-
-  it.effect("parses bsky.app URL correctly", () =>
-    Effect.gen(function* () {
-      const { parsePostUrl } = yield* Effect.promise(() => import("../src/domain/ingestUrl"));
-      const result = parsePostUrl("https://bsky.app/profile/drsimevans.bsky.social/post/3lnk7z2abc");
-      expect(result).toEqual({
-        platform: "bluesky",
-        handle: "drsimevans.bsky.social",
-        id: "3lnk7z2abc"
-      });
-    })
-  );
-});
-```
-
-### Step 2: Run test
-
-Run: `bun run test tests/ingest-url.test.ts`
-Expected: PASS
-
-### Step 3: Commit
-
-```bash
-git add tests/ingest-url.test.ts
-git commit -m "test: add ingest_url parser and integration tests (SKY-143)"
-```
-
----
-
-## Task 6: Type Check + Full Test Suite
-
-### Step 1: Run full type check
-
-Run: `bunx tsc --noEmit`
-Expected: 0 errors
-
-### Step 2: Run full test suite
+### Step 1: Verify all tests pass together
 
 Run: `bun run test`
-Expected: All tests pass
+Expected: All pass
 
-### Step 3: Fix any issues
+### Step 2: Type check
 
-If type errors or test failures, fix them. Common issues:
-- `KnowledgePost` type mismatch when constructing from thread data — adjust field names
-- Missing `OntologyCatalog` in the MCP handler layer — it should already be in `queryLayer`
-- `ExpertsRepo` or `KnowledgeRepo` not in the handler's layer — add them to the service resolution in the handler layer
+Run: `bunx tsc --noEmit`
+Expected: 0 errors
+
+### Step 3: Manual smoke test (optional)
+
+```bash
+# Twitter (requires scraper cookies)
+bun src/scripts/ops.ts -- ingest-url "https://x.com/JesseJenkins/status/123456" --base-url "$SKYGEST_STAGING_BASE_URL"
+
+# Bluesky
+bun src/scripts/ops.ts -- ingest-url "https://bsky.app/profile/drsimevans.bsky.social/post/3lnk7z2abc" --base-url "$SKYGEST_STAGING_BASE_URL"
+```
 
 ### Step 4: Final commit
 
 ```bash
 git add -A
-git commit -m "fix: resolve type and test issues for ingest_url (SKY-143)"
+git commit -m "test: verify full suite passes with quick-ingest (SKY-143)"
 ```
 
 ---
@@ -774,10 +694,20 @@ git commit -m "fix: resolve type and test issues for ingest_url (SKY-143)"
 
 | File | Change |
 |------|--------|
-| `src/domain/ingestUrl.ts` | NEW — URL parser, IngestUrlInput/Output schemas |
-| `src/mcp/Toolkit.ts` | Tool definition, handler, toolkit wiring |
-| `src/mcp/Fmt.ts` | `formatIngestUrlResult` formatter |
-| `src/services/KnowledgeRepo.ts` | `addTopicsToPost` method (if needed) |
-| `src/services/d1/KnowledgeRepoD1.ts` | D1 implementation of addTopicsToPost (if needed) |
+| `src/domain/ingestUrl.ts` | NEW — URL parser (pure function) |
+| `src/domain/api.ts` | Add `operatorOverride` to `ImportPostsInput` |
+| `src/admin/Router.ts` | Respect `operatorOverride` in import handler |
+| `src/services/CurationService.ts` | Skip Bluesky thread fetch when stored payload exists |
+| `src/ops/BlueskyNormalizer.ts` | NEW — Bluesky thread → ImportPostInput normalizer |
+| `src/ops/Cli.ts` | `ingest-url` command + BlueskyClient CLI layer |
 | `tests/ingest-url-parser.test.ts` | URL parser unit tests |
-| `tests/ingest-url.test.ts` | Integration tests |
+| `tests/bluesky-normalizer.test.ts` | Bluesky normalizer tests |
+| `tests/import-endpoint.test.ts` | operatorOverride test |
+| `tests/curation.test.ts` | Skip-fetch optimization test |
+
+## What This Does NOT Do
+
+- No MCP tool. If MCP convenience is needed, add a Bluesky-only `ingest_bluesky_url` tool in a follow-up.
+- No web share page or admin ingest-url endpoint. YAGNI for now.
+- No `additionalTopics` AI-assisted topic flow. That belongs on the MCP tool if/when it ships.
+- Does not change default batch import behavior. `operatorOverride` must be explicitly set.
