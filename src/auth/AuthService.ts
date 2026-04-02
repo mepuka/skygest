@@ -3,12 +3,12 @@ import { AppConfig } from "../platform/Config";
 
 const AUTHORIZATION_HEADER = "authorization";
 
-export class MissingOperatorSecretError extends Schema.TaggedError<MissingOperatorSecretError>()(
+export class MissingOperatorSecretError extends Schema.TaggedErrorClass<MissingOperatorSecretError>()(
   "MissingOperatorSecretError",
   {}
 ) {}
 
-export class InvalidOperatorSecretError extends Schema.TaggedError<InvalidOperatorSecretError>()(
+export class InvalidOperatorSecretError extends Schema.TaggedErrorClass<InvalidOperatorSecretError>()(
   "InvalidOperatorSecretError",
   {}
 ) {}

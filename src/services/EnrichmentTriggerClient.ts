@@ -7,7 +7,7 @@ import { defaultSchemaVersionForEnrichmentKind } from "../domain/enrichment";
 // Error
 // ---------------------------------------------------------------------------
 
-export class EnrichmentTriggerError extends Schema.TaggedError<EnrichmentTriggerError>()(
+export class EnrichmentTriggerError extends Schema.TaggedErrorClass<EnrichmentTriggerError>()(
   "EnrichmentTriggerError",
   {
     message: Schema.String,

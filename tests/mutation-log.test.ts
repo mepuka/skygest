@@ -3,7 +3,7 @@ import { describe, expect, it } from "@effect/vitest";
 import type { AccessIdentity } from "../src/auth/AuthService";
 import { withMutationAudit } from "../src/platform/MutationLog";
 
-class TestMutationError extends Schema.TaggedError<TestMutationError>()(
+class TestMutationError extends Schema.TaggedErrorClass<TestMutationError>()(
   "TestMutationError",
   {
     message: Schema.String,

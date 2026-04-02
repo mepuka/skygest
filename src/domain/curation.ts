@@ -69,7 +69,7 @@ export const CuratePostOutput = Schema.Struct({
 });
 export type CuratePostOutput = Schema.Schema.Type<typeof CuratePostOutput>;
 
-export class CurationPostNotFoundError extends Schema.TaggedError<CurationPostNotFoundError>()(
+export class CurationPostNotFoundError extends Schema.TaggedErrorClass<CurationPostNotFoundError>()(
   "CurationPostNotFoundError",
   {
     postUri: PostUri

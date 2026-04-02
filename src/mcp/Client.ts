@@ -31,7 +31,7 @@ const makeJsonRpcFailure = Schema.Struct({
   error: JsonRpcError
 });
 
-export class McpRequestError extends Schema.TaggedError<McpRequestError>()(
+export class McpRequestError extends Schema.TaggedErrorClass<McpRequestError>()(
   "McpRequestError",
   {
     operation: Schema.String,

@@ -6,7 +6,7 @@ import {
   encodeJsonStringWith
 } from "../platform/Json";
 
-export class BlueskyApiError extends Schema.TaggedError<BlueskyApiError>()(
+export class BlueskyApiError extends Schema.TaggedErrorClass<BlueskyApiError>()(
   "BlueskyApiError",
   {
     message: Schema.String,
@@ -14,32 +14,32 @@ export class BlueskyApiError extends Schema.TaggedError<BlueskyApiError>()(
   }
 ) {}
 
-export class DbError extends Schema.TaggedError<DbError>()("DbError", {
+export class DbError extends Schema.TaggedErrorClass<DbError>()("DbError", {
   message: Schema.String
 }) {}
 
-export class IngestRunNotFoundError extends Schema.TaggedError<IngestRunNotFoundError>()(
+export class IngestRunNotFoundError extends Schema.TaggedErrorClass<IngestRunNotFoundError>()(
   "IngestRunNotFoundError",
   {
     runId: Schema.String
   }
 ) {}
 
-export class EnrichmentRunNotFoundError extends Schema.TaggedError<EnrichmentRunNotFoundError>()(
+export class EnrichmentRunNotFoundError extends Schema.TaggedErrorClass<EnrichmentRunNotFoundError>()(
   "EnrichmentRunNotFoundError",
   {
     runId: Schema.String
   }
 ) {}
 
-export class EnrichmentPayloadMissingError extends Schema.TaggedError<EnrichmentPayloadMissingError>()(
+export class EnrichmentPayloadMissingError extends Schema.TaggedErrorClass<EnrichmentPayloadMissingError>()(
   "EnrichmentPayloadMissingError",
   {
     postUri: PostUri
   }
 ) {}
 
-export class EnrichmentQualityGateError extends Schema.TaggedError<EnrichmentQualityGateError>()(
+export class EnrichmentQualityGateError extends Schema.TaggedErrorClass<EnrichmentQualityGateError>()(
   "EnrichmentQualityGateError",
   {
     postUri: PostUri,
@@ -47,14 +47,14 @@ export class EnrichmentQualityGateError extends Schema.TaggedError<EnrichmentQua
   }
 ) {}
 
-export class EnrichmentPostContextMissingError extends Schema.TaggedError<EnrichmentPostContextMissingError>()(
+export class EnrichmentPostContextMissingError extends Schema.TaggedErrorClass<EnrichmentPostContextMissingError>()(
   "EnrichmentPostContextMissingError",
   {
     postUri: PostUri
   }
 ) {}
 
-export class EnrichmentPayloadNotPickedError extends Schema.TaggedError<EnrichmentPayloadNotPickedError>()(
+export class EnrichmentPayloadNotPickedError extends Schema.TaggedErrorClass<EnrichmentPayloadNotPickedError>()(
   "EnrichmentPayloadNotPickedError",
   {
     postUri: PostUri,
@@ -62,7 +62,7 @@ export class EnrichmentPayloadNotPickedError extends Schema.TaggedError<Enrichme
   }
 ) {}
 
-export class IngestSchemaDecodeError extends Schema.TaggedError<IngestSchemaDecodeError>()(
+export class IngestSchemaDecodeError extends Schema.TaggedErrorClass<IngestSchemaDecodeError>()(
   "IngestSchemaDecodeError",
   {
     message: Schema.String,
@@ -70,7 +70,7 @@ export class IngestSchemaDecodeError extends Schema.TaggedError<IngestSchemaDeco
   }
 ) {}
 
-export class IngestWorkflowLaunchError extends Schema.TaggedError<IngestWorkflowLaunchError>()(
+export class IngestWorkflowLaunchError extends Schema.TaggedErrorClass<IngestWorkflowLaunchError>()(
   "IngestWorkflowLaunchError",
   {
     message: Schema.String,
@@ -78,7 +78,7 @@ export class IngestWorkflowLaunchError extends Schema.TaggedError<IngestWorkflow
   }
 ) {}
 
-export class EnrichmentSchemaDecodeError extends Schema.TaggedError<EnrichmentSchemaDecodeError>()(
+export class EnrichmentSchemaDecodeError extends Schema.TaggedErrorClass<EnrichmentSchemaDecodeError>()(
   "EnrichmentSchemaDecodeError",
   {
     message: Schema.String,
@@ -86,7 +86,7 @@ export class EnrichmentSchemaDecodeError extends Schema.TaggedError<EnrichmentSc
   }
 ) {}
 
-export class EnrichmentWorkflowLaunchError extends Schema.TaggedError<EnrichmentWorkflowLaunchError>()(
+export class EnrichmentWorkflowLaunchError extends Schema.TaggedErrorClass<EnrichmentWorkflowLaunchError>()(
   "EnrichmentWorkflowLaunchError",
   {
     message: Schema.String,
@@ -94,7 +94,7 @@ export class EnrichmentWorkflowLaunchError extends Schema.TaggedError<Enrichment
   }
 ) {}
 
-export class EnrichmentWorkflowControlError extends Schema.TaggedError<EnrichmentWorkflowControlError>()(
+export class EnrichmentWorkflowControlError extends Schema.TaggedErrorClass<EnrichmentWorkflowControlError>()(
   "EnrichmentWorkflowControlError",
   {
     message: Schema.String,
@@ -103,7 +103,7 @@ export class EnrichmentWorkflowControlError extends Schema.TaggedError<Enrichmen
   }
 ) {}
 
-export class EnrichmentRetryNotAllowedError extends Schema.TaggedError<EnrichmentRetryNotAllowedError>()(
+export class EnrichmentRetryNotAllowedError extends Schema.TaggedErrorClass<EnrichmentRetryNotAllowedError>()(
   "EnrichmentRetryNotAllowedError",
   {
     runId: Schema.String,
@@ -111,7 +111,7 @@ export class EnrichmentRetryNotAllowedError extends Schema.TaggedError<Enrichmen
   }
 ) {}
 
-export class HistoricalEnrichmentRepairError extends Schema.TaggedError<HistoricalEnrichmentRepairError>()(
+export class HistoricalEnrichmentRepairError extends Schema.TaggedErrorClass<HistoricalEnrichmentRepairError>()(
   "HistoricalEnrichmentRepairError",
   {
     message: Schema.String,
@@ -120,7 +120,7 @@ export class HistoricalEnrichmentRepairError extends Schema.TaggedError<Historic
   }
 ) {}
 
-export class IngestBoundaryError extends Schema.TaggedError<IngestBoundaryError>()(
+export class IngestBoundaryError extends Schema.TaggedErrorClass<IngestBoundaryError>()(
   "IngestBoundaryError",
   {
     message: Schema.String,
@@ -128,7 +128,7 @@ export class IngestBoundaryError extends Schema.TaggedError<IngestBoundaryError>
   }
 ) {}
 
-export class WorkflowRunCompensationError extends Schema.TaggedError<WorkflowRunCompensationError>()(
+export class WorkflowRunCompensationError extends Schema.TaggedErrorClass<WorkflowRunCompensationError>()(
   "WorkflowRunCompensationError",
   {
     message: Schema.String,
@@ -137,7 +137,7 @@ export class WorkflowRunCompensationError extends Schema.TaggedError<WorkflowRun
   }
 ) {}
 
-export class StaleDispatchedIngestItemError extends Schema.TaggedError<StaleDispatchedIngestItemError>()(
+export class StaleDispatchedIngestItemError extends Schema.TaggedErrorClass<StaleDispatchedIngestItemError>()(
   "StaleDispatchedIngestItemError",
   {
     message: Schema.String,
@@ -147,7 +147,7 @@ export class StaleDispatchedIngestItemError extends Schema.TaggedError<StaleDisp
   }
 ) {}
 
-export class StaleRunningIngestItemError extends Schema.TaggedError<StaleRunningIngestItemError>()(
+export class StaleRunningIngestItemError extends Schema.TaggedErrorClass<StaleRunningIngestItemError>()(
   "StaleRunningIngestItemError",
   {
     message: Schema.String,
@@ -157,7 +157,7 @@ export class StaleRunningIngestItemError extends Schema.TaggedError<StaleRunning
   }
 ) {}
 
-export class HistoricalRunRepairError extends Schema.TaggedError<HistoricalRunRepairError>()(
+export class HistoricalRunRepairError extends Schema.TaggedErrorClass<HistoricalRunRepairError>()(
   "HistoricalRunRepairError",
   {
     message: Schema.String,
@@ -167,7 +167,7 @@ export class HistoricalRunRepairError extends Schema.TaggedError<HistoricalRunRe
   }
 ) {}
 
-export class GeminiApiError extends Schema.TaggedError<GeminiApiError>()(
+export class GeminiApiError extends Schema.TaggedErrorClass<GeminiApiError>()(
   "GeminiApiError",
   {
     message: Schema.String,
@@ -175,7 +175,7 @@ export class GeminiApiError extends Schema.TaggedError<GeminiApiError>()(
   }
 ) {}
 
-export class GeminiParseError extends Schema.TaggedError<GeminiParseError>()(
+export class GeminiParseError extends Schema.TaggedErrorClass<GeminiParseError>()(
   "GeminiParseError",
   {
     message: Schema.String,
@@ -183,7 +183,7 @@ export class GeminiParseError extends Schema.TaggedError<GeminiParseError>()(
   }
 ) {}
 
-export class EnrichmentAssetFetchError extends Schema.TaggedError<EnrichmentAssetFetchError>()(
+export class EnrichmentAssetFetchError extends Schema.TaggedErrorClass<EnrichmentAssetFetchError>()(
   "EnrichmentAssetFetchError",
   {
     assetKey: Schema.String,
@@ -193,7 +193,7 @@ export class EnrichmentAssetFetchError extends Schema.TaggedError<EnrichmentAsse
   }
 ) {}
 
-export class EnrichmentDependencyPendingError extends Schema.TaggedError<EnrichmentDependencyPendingError>()(
+export class EnrichmentDependencyPendingError extends Schema.TaggedErrorClass<EnrichmentDependencyPendingError>()(
   "EnrichmentDependencyPendingError",
   {
     dependency: Schema.String,

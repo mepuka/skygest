@@ -46,7 +46,7 @@ export const SaveCandidateEnrichmentInput = Schema.Struct({
 });
 export type SaveCandidateEnrichmentInput = Schema.Schema.Type<typeof SaveCandidateEnrichmentInput>;
 
-export class CandidatePayloadNotPickedError extends Schema.TaggedError<CandidatePayloadNotPickedError>()(
+export class CandidatePayloadNotPickedError extends Schema.TaggedErrorClass<CandidatePayloadNotPickedError>()(
   "CandidatePayloadNotPickedError",
   {
     postUri: PostUri,

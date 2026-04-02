@@ -2,7 +2,7 @@ import { Array, Context, Effect, Layer, Option, Schema } from "effect";
 import type { IngestRunParams } from "../domain/polling";
 import type { EnrichmentRunParams } from "../domain/enrichmentRun";
 
-export class EnvError extends Schema.TaggedError<EnvError>()("EnvError", {
+export class EnvError extends Schema.TaggedErrorClass<EnvError>()("EnvError", {
   missing: Schema.String
 }) {}
 

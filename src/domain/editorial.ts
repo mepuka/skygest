@@ -102,7 +102,7 @@ export const CuratedPostResult = Schema.extend(
 );
 export type CuratedPostResult = Schema.Schema.Type<typeof CuratedPostResult>;
 
-export class EditorialPostNotFoundError extends Schema.TaggedError<EditorialPostNotFoundError>()(
+export class EditorialPostNotFoundError extends Schema.TaggedErrorClass<EditorialPostNotFoundError>()(
   "EditorialPostNotFoundError",
   {
     postUri: PostUri

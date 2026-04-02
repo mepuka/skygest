@@ -22,7 +22,7 @@ const SNAPSHOT_PREFIX = "ontology:energy:snapshots:";
 const CATALOG_CACHE_TTL = Duration.seconds(30);
 const CATALOG_CACHE_TTL_MS = Duration.toMillis(CATALOG_CACHE_TTL);
 
-class OntologyKvReadError extends Schema.TaggedError<OntologyKvReadError>()(
+class OntologyKvReadError extends Schema.TaggedErrorClass<OntologyKvReadError>()(
   "OntologyKvReadError",
   {
     operation: Schema.String,
@@ -31,7 +31,7 @@ class OntologyKvReadError extends Schema.TaggedError<OntologyKvReadError>()(
   }
 ) {}
 
-class OntologyKvDecodeError extends Schema.TaggedError<OntologyKvDecodeError>()(
+class OntologyKvDecodeError extends Schema.TaggedErrorClass<OntologyKvDecodeError>()(
   "OntologyKvDecodeError",
   {
     operation: Schema.String,

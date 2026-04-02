@@ -488,14 +488,14 @@ export const RankedKnowledgePostResult = Schema.extend(
 );
 export type RankedKnowledgePostResult = Schema.Schema.Type<typeof RankedKnowledgePostResult>;
 
-export class ExpertNotFoundError extends Schema.TaggedError<ExpertNotFoundError>()(
+export class ExpertNotFoundError extends Schema.TaggedErrorClass<ExpertNotFoundError>()(
   "ExpertNotFoundError",
   {
     did: Did
   }
 ) {}
 
-export class HandleResolutionError extends Schema.TaggedError<HandleResolutionError>()(
+export class HandleResolutionError extends Schema.TaggedErrorClass<HandleResolutionError>()(
   "HandleResolutionError",
   {
     didOrHandle: Schema.String,
@@ -503,7 +503,7 @@ export class HandleResolutionError extends Schema.TaggedError<HandleResolutionEr
   }
 ) {}
 
-export class ProfileLookupError extends Schema.TaggedError<ProfileLookupError>()(
+export class ProfileLookupError extends Schema.TaggedErrorClass<ProfileLookupError>()(
   "ProfileLookupError",
   {
     didOrHandle: Schema.String,
@@ -511,7 +511,7 @@ export class ProfileLookupError extends Schema.TaggedError<ProfileLookupError>()
   }
 ) {}
 
-export class McpToolQueryError extends Schema.TaggedError<McpToolQueryError>()(
+export class McpToolQueryError extends Schema.TaggedErrorClass<McpToolQueryError>()(
   "McpToolQueryError",
   {
     tool: Schema.String,
