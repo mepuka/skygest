@@ -42,10 +42,11 @@ Additional instructions:
 - visibleUrls: Extract visible URLs or bare domains printed inside the image, especially in footers or watermarks.
 - organizationMentions: Extract organization names visibly present in the image and label where they appear (title, subtitle, footer, watermark, or body).
 - logoText: Extract short organization or platform text that appears as a logo or watermark.
+- If the image is a dashboard, collage, or multi-panel screenshot, return one object for the whole image, not an array. Use chartTypes to list the visible panel types, choose the primary panel for single-value fields like title/xAxis/yAxis when panels differ, and aggregate shared source clues and key findings across panels.
 - For non-chart images (photos, documents), still provide altText and mediaType. Set chart-specific fields to null/empty as appropriate.`;
 
 /**
  * Prompt version identifier — bump when prompt text changes materially.
  * Stored alongside enrichment results for audit and quality tracking.
  */
-export const VISION_PROMPT_VERSION = "v2.0.0";
+export const VISION_PROMPT_VERSION = "v2.1.0";

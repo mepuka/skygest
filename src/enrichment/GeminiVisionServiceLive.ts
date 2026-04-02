@@ -85,12 +85,54 @@ const LenientMediaType = Schema.String.pipe(
 
 /** Lenient decoder for Gemini responses — tolerates missing keys and loose values. */
 const GeminiExtractionDecoder = Schema.Struct({
-  mediaType: LenientMediaType,
-  chartTypes: Schema.Array(ChartType).pipe(Schema.withDecodingDefaultKey(() => [] as const)),
-  altText: Schema.NullOr(Schema.String).pipe(Schema.withDecodingDefaultKey(() => null)),
-  title: Schema.NullOr(Schema.String).pipe(Schema.withDecodingDefaultKey(() => null)),
-  ...extractionFields
+  mediaType: Schema.optionalKey(LenientMediaType),
+  chartTypes: Schema.Array(ChartType).pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  ),
+  altText: Schema.NullOr(Schema.String).pipe(
+    Schema.withDecodingDefaultKey(() => null)
+  ),
+  title: Schema.NullOr(Schema.String).pipe(
+    Schema.withDecodingDefaultKey(() => null)
+  ),
+  chartTitle: Schema.NullOr(Schema.String).pipe(
+    Schema.withDecodingDefaultKey(() => null)
+  ),
+  xAxis: Schema.NullOr(ChartAxis).pipe(
+    Schema.withDecodingDefaultKey(() => null)
+  ),
+  yAxis: Schema.NullOr(ChartAxis).pipe(
+    Schema.withDecodingDefaultKey(() => null)
+  ),
+  series: Schema.Array(ChartSeries).pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  ),
+  sourceLines: Schema.Array(VisionSourceLineAttribution).pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  ),
+  temporalCoverage: Schema.NullOr(TemporalCoverage).pipe(
+    Schema.withDecodingDefaultKey(() => null)
+  ),
+  keyFindings: Schema.Array(Schema.String).pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  ),
+  visibleUrls: Schema.Array(Schema.String).pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  ),
+  organizationMentions: Schema.Array(VisionOrganizationMention).pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  ),
+  logoText: Schema.Array(Schema.String).pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  )
 });
+
+const GeminiExtractionResponseDecoder = Schema.Union([
+  GeminiExtractionDecoder,
+  Schema.Array(GeminiExtractionDecoder)
+]);
+
+type GeminiExtractionCandidate = Schema.Schema.Type<typeof GeminiExtractionDecoder>;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -102,6 +144,117 @@ const extractErrorStatus = (cause: unknown): number | undefined => {
     return typeof status === "number" ? status : undefined;
   }
   return undefined;
+};
+
+const isNonEmptyString = (value: string | null | undefined): value is string =>
+  value !== null && value !== undefined && value.trim().length > 0;
+
+const firstNonNull = <A>(
+  values: ReadonlyArray<A | null | undefined>
+): A | null => {
+  for (const value of values) {
+    if (value !== null && value !== undefined) {
+      return value;
+    }
+  }
+  return null;
+};
+
+const firstNonEmptyArray = <A>(
+  values: ReadonlyArray<ReadonlyArray<A>>
+): ReadonlyArray<A> => {
+  for (const value of values) {
+    if (value.length > 0) {
+      return value;
+    }
+  }
+  return [];
+};
+
+const uniqueBy = <A>(
+  values: ReadonlyArray<A>,
+  keyOf: (value: A) => string
+): ReadonlyArray<A> =>
+  Array.from(
+    values.reduce(
+      (map, value) => map.set(keyOf(value), value),
+      new Map<string, A>()
+    ).values()
+  );
+
+const inferMediaType = (
+  candidates: ReadonlyArray<GeminiExtractionCandidate>
+): Schema.Schema.Type<typeof MediaType> => {
+  const explicit = firstNonNull(
+    candidates.map((candidate) => candidate.mediaType)
+  );
+  if (explicit !== null) {
+    return explicit;
+  }
+
+  const chartLike = candidates.some((candidate) =>
+    candidate.chartTypes.length > 0 ||
+    candidate.xAxis !== null ||
+    candidate.yAxis !== null ||
+    candidate.series.length > 0 ||
+    candidate.temporalCoverage !== null ||
+    candidate.sourceLines.length > 0
+  );
+
+  return chartLike ? "chart" : "photo";
+};
+
+const normalizeExtractionResponse = (
+  decoded: GeminiExtractionCandidate | ReadonlyArray<GeminiExtractionCandidate>
+) => {
+  const candidates = Array.isArray(decoded) ? decoded : [decoded];
+
+  return {
+    mediaType: inferMediaType(candidates),
+    chartTypes: Array.from(
+      new Set(candidates.flatMap((candidate) => candidate.chartTypes))
+    ),
+    altText: firstNonNull(candidates.map((candidate) => candidate.altText)),
+    title: firstNonNull(
+      candidates.map((candidate) => candidate.title ?? candidate.chartTitle)
+    ),
+    xAxis: firstNonNull(candidates.map((candidate) => candidate.xAxis)),
+    yAxis: firstNonNull(candidates.map((candidate) => candidate.yAxis)),
+    series: firstNonEmptyArray(candidates.map((candidate) => candidate.series)),
+    sourceLines: uniqueBy(
+      candidates.flatMap((candidate) => candidate.sourceLines),
+      (sourceLine) =>
+        `${sourceLine.sourceText}::${sourceLine.datasetName ?? ""}`
+    ),
+    temporalCoverage: firstNonNull(
+      candidates.map((candidate) => candidate.temporalCoverage)
+    ),
+    keyFindings: Array.from(
+      new Set(
+        candidates.flatMap((candidate) =>
+          candidate.keyFindings.filter(isNonEmptyString)
+        )
+      )
+    ).slice(0, 5),
+    visibleUrls: Array.from(
+      new Set(
+        candidates.flatMap((candidate) =>
+          candidate.visibleUrls.filter(isNonEmptyString)
+        )
+      )
+    ),
+    organizationMentions: uniqueBy(
+      candidates.flatMap((candidate) => candidate.organizationMentions),
+      (mention) => `${mention.name}::${mention.location}`
+    ),
+    logoText: Array.from(
+      new Set(
+        candidates.flatMap((candidate) =>
+          candidate.logoText.filter(isNonEmptyString)
+        )
+      )
+    )
+  };
 };
 
 // ---------------------------------------------------------------------------
@@ -248,7 +401,7 @@ export const GeminiVisionServiceLive = Layer.effect(
         }
 
         const geminiResult = yield* Schema.decodeUnknownEffect(
-          Schema.fromJsonString(GeminiExtractionDecoder)
+          Schema.fromJsonString(GeminiExtractionResponseDecoder)
         )(rawText).pipe(
           Effect.mapError((error) =>
             new GeminiParseError({
@@ -258,12 +411,11 @@ export const GeminiVisionServiceLive = Layer.effect(
           )
         );
 
-        const normalizedMediaType = geminiResult.mediaType;
+        const normalizedResult = normalizeExtractionResponse(geminiResult);
 
         const now = yield* Clock.currentTimeMillis;
         const enrichment = yield* Schema.decodeUnknownEffect(VisionAssetAnalysisSchema)({
-          ...geminiResult,
-          mediaType: normalizedMediaType,
+          ...normalizedResult,
           altTextProvenance: "synthetic" as const,
           modelId: model,
           processedAt: now
