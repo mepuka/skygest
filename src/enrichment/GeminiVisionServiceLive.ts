@@ -46,7 +46,7 @@ import {
 
 const GeminiExtractionOutput = Schema.Struct({
   mediaType: MediaType,
-  chartTypes: Schema.Array(ChartType),
+  chartTypes: Schema.Array(ChartType).pipe(Schema.withDecodingDefaultKey(() => [] as const)),
   altText: Schema.NullOr(Schema.String),
   title: Schema.NullOr(Schema.String),
   xAxis: Schema.NullOr(ChartAxis),

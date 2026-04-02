@@ -9,19 +9,35 @@
  * AltTextAbsent → "absent").
  */
 
-import { Schema } from "effect";
+import { Schema, SchemaGetter } from "effect";
 
 // ---------------------------------------------------------------------------
 // Media classification (what the content actually depicts)
 // ---------------------------------------------------------------------------
 
-export const MediaType = Schema.Literals([
-  "chart",
-  "document-excerpt",
-  "photo",
-  "infographic",
-  "video"
-]);
+const mediaTypeCanonical = ["chart", "document-excerpt", "photo", "infographic", "video"] as const;
+
+const mediaTypeAliases: Record<string, (typeof mediaTypeCanonical)[number]> = {
+  image: "photo",
+  screenshot: "photo",
+  photograph: "photo",
+  diagram: "infographic",
+  graph: "chart",
+  table: "chart"
+};
+
+/** MediaType with case-insensitive + alias normalization.
+ *  Accepts "Image", "Chart", "image" etc. and maps to canonical lowercase. */
+export const MediaType = Schema.String.pipe(
+  Schema.decode({
+    decode: SchemaGetter.transform((raw: string): string => {
+      const lower = raw.toLowerCase().trim();
+      return mediaTypeAliases[lower] ?? lower;
+    }),
+    encode: SchemaGetter.passthrough()
+  }),
+  Schema.decodeTo(Schema.Literals(mediaTypeCanonical))
+);
 export type MediaType = Schema.Schema.Type<typeof MediaType>;
 
 // ---------------------------------------------------------------------------
