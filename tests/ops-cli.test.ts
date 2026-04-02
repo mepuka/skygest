@@ -1,7 +1,8 @@
 import * as BunContext from "./helpers/BunContext";
 import { FetchHttpClient } from "effect/unstable/http";
-import { Effect, Layer, Redacted } from "effect";
+import { Effect, Layer, Redacted, Stream } from "effect";
 import { describe, expect, it } from "@effect/vitest";
+import { TwitterPublic, TwitterTweets } from "@pooks/twitter-scraper";
 import { energySeedDid } from "../src/bootstrap/CheckedInExpertSeeds";
 import { runOpsCli } from "../src/ops/Cli";
 import {
@@ -237,8 +238,21 @@ const makeCliLayer = (options?: {
     OperatorSecret.of({ value: Redacted.make("stage-secret") })
   );
 
+  // Stub layers for the Twitter scraper services — these are never invoked
+  // by the non-twitter CLI paths but must be present in the context.
+  // Cast the tag to work around the linked scraper having its own effect copy.
+  const twitterPublicStub = Layer.effect(
+    TwitterPublic as any,
+    Effect.succeed({})
+  ) as Layer.Layer<TwitterPublic>;
+
+  const twitterTweetsStub = Layer.effect(
+    TwitterTweets as any,
+    Effect.succeed({})
+  ) as Layer.Layer<TwitterTweets>;
+
   return {
-    layer: Layer.mergeAll(wranglerLayer, clientLayer, operatorSecretLayer),
+    layer: Layer.mergeAll(wranglerLayer, clientLayer, operatorSecretLayer, twitterPublicStub, twitterTweetsStub),
     deployCalls,
     remoteCalls
   };

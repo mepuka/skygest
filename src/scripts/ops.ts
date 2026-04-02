@@ -1,5 +1,14 @@
 import { ChildProcessSpawner } from "effect/unstable/process";
 import { Effect, FileSystem, Layer, Path, Runtime, Stdio, Stream, Terminal } from "effect";
+import {
+  CookieManager,
+  GuestAuth,
+  ScraperStrategy,
+  TwitterConfig,
+  TwitterHttpClient,
+  TwitterPublic,
+  TwitterTweets
+} from "@pooks/twitter-scraper";
 import { runOpsCli } from "../ops/Cli";
 import { OperatorSecret } from "../ops/OperatorSecret";
 import { StagingOperatorClient } from "../ops/StagingOperatorClient";
@@ -8,13 +17,26 @@ import { WranglerCli } from "../ops/WranglerCli";
 const die = (label: string) => (..._args: Array<any>): any =>
   Effect.die(new Error(`${label}: not used in ops CLI`));
 
+// Twitter scraper layer stack (CLI-only, reads TWITTER_* env vars via Effect Config)
+const scraperLayer = Layer.mergeAll(
+  TwitterPublic.layer,
+  TwitterTweets.layer
+).pipe(
+  Layer.provideMerge(ScraperStrategy.standardLayer),
+  Layer.provideMerge(GuestAuth.liveLayer),
+  Layer.provideMerge(TwitterHttpClient.fetchLayer),
+  Layer.provideMerge(CookieManager.liveLayer),
+  Layer.provideMerge(TwitterConfig.fromEnvLayer)
+);
+
 // TODO(effect4): provide a real ChildProcessSpawner implementation for Bun
 const wranglerLayer = WranglerCli.live;
 const liveLayer = Layer.mergeAll(
   wranglerLayer,
   OperatorSecret.live
 ).pipe(
-  Layer.provideMerge(StagingOperatorClient.live)
+  Layer.provideMerge(StagingOperatorClient.live),
+  Layer.provideMerge(scraperLayer)
 );
 
 // CLI Environment stubs — the ops CLI doesn't use these directly
