@@ -1,4 +1,4 @@
-import { McpSchema } from "@effect/ai";
+import { McpSchema } from "effect/unstable/ai";
 import { Either, Effect, Schema } from "effect";
 import {
   decodeJsonString,

@@ -9,7 +9,7 @@ import {
   Schema,
   SynchronizedRef
 } from "effect";
-import { FetchHttpClient, HttpClient, HttpClientResponse } from "@effect/platform";
+import { FetchHttpClient, HttpClient, HttpClientResponse } from "effect/unstable/http";
 import { BlueskyApiError } from "../domain/errors";
 import { AppConfig } from "../platform/Config";
 import { stringifyUnknown } from "../platform/Json";

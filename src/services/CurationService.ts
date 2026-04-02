@@ -1,5 +1,5 @@
 import { Clock, Context, Effect, Layer, Option } from "effect";
-import type { SqlError } from "@effect/sql/SqlError";
+import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import { BlueskyApiError } from "../domain/errors";
 import type { PostUri } from "../domain/types";

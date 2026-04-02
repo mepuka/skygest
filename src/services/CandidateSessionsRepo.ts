@@ -1,5 +1,4 @@
-import { Context, Effect } from "effect";
-import type * as PlatformError from "@effect/platform/Error";
+import { Context, Effect, type PlatformError } from "effect";
 
 export class CandidateSessionsRepo extends Context.Tag("@skygest/CandidateSessionsRepo")<
   CandidateSessionsRepo,

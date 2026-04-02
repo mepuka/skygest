@@ -10,7 +10,7 @@ import {
   TestClock
 } from "effect";
 import { describe, expect, it } from "@effect/vitest";
-import { HttpClient, HttpClientResponse } from "@effect/platform";
+import { HttpClient, HttpClientResponse } from "effect/unstable/http";
 import { makeBlueskyClient } from "../src/bluesky/BlueskyClient";
 import { Did } from "../src/domain/types";
 

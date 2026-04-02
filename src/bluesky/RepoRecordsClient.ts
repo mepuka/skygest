@@ -1,5 +1,5 @@
 import { Cache, Clock, Context, Duration, Effect, Either, Layer } from "effect";
-import type { SqlError } from "@effect/sql/SqlError";
+import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import { BlueskyClient } from "./BlueskyClient";
 import { BlueskyApiError } from "../domain/errors";

@@ -7,7 +7,7 @@
 
 import { Schema, Order, Array as A } from "effect";
 import { flow, identity } from "effect/Function";
-import * as Doc from "@effect/printer/Doc";
+import * as Doc from "../platform/Doc";
 import type { FlattenedPost, FlattenedThread } from "./ThreadFlatten.ts";
 
 // ---------------------------------------------------------------------------

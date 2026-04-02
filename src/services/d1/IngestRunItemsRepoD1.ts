@@ -1,6 +1,6 @@
 import { Effect, Layer, Schema } from "effect";
-import { SqlClient } from "@effect/sql";
-import type { SqlError } from "@effect/sql/SqlError";
+import { SqlClient } from "effect/unstable/sql";
+import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../../domain/errors";
 import {
   decodeStoredIngestError,

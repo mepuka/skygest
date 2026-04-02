@@ -1,8 +1,8 @@
 import type { D1Database, D1PreparedStatement } from "@cloudflare/workers-types";
 import { D1Client } from "@effect/sql-d1";
 import { Array as A, Effect, Layer, Option, Schema } from "effect";
-import { SqlClient } from "@effect/sql";
-import { SqlError } from "@effect/sql/SqlError";
+import { SqlClient } from "effect/unstable/sql";
+import { SqlError } from "effect/unstable/sql";
 import type {
   GetPostLinksPageQueryInput,
   GetRecentPostsPageQueryInput,

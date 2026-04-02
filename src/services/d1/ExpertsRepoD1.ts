@@ -1,5 +1,5 @@
 import { Effect, Layer, Schema } from "effect";
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import { ExpertsRepo } from "../ExpertsRepo";
 import {
   ExpertListItem as ExpertListItemSchema,

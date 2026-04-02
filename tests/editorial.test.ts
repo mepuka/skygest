@@ -8,7 +8,7 @@ import {
   withTempSqliteFile,
   sampleDid
 } from "./support/runtime";
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import { EditorialRepo } from "../src/services/EditorialRepo";
 import { EditorialRepoD1 } from "../src/services/d1/EditorialRepoD1";
 import { EditorialService } from "../src/services/EditorialService";

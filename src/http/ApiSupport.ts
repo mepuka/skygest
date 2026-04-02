@@ -1,7 +1,6 @@
-import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder";
-import * as HttpServer from "@effect/platform/HttpServer";
-import type * as Context from "effect/Context";
-import { Layer } from "effect";
+import * as HttpApiBuilder from "effect/unstable/httpapi/HttpApiBuilder";
+import * as HttpServer from "effect/unstable/http/HttpServer";
+import { type Context, Layer } from "effect";
 import { badRequestError } from "../domain/api";
 import { encodeJsonString } from "../platform/Json";
 

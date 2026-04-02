@@ -1,8 +1,8 @@
-import { Command, CommandExecutor, FetchHttpClient, FileSystem } from "@effect/platform";
-import { BunContext, BunRuntime } from "@effect/platform-bun";
+import { ChildProcess as Command, ChildProcessSpawner as CommandExecutor } from "effect/unstable/process";
+import { FetchHttpClient } from "effect/unstable/http";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { Config, Console, Effect, Either, Layer, Schema } from "effect";
+import { Config, Console, Effect, Either, FileSystem, Layer, Runtime, Schema } from "effect";
 import {
   assertUniqueExpertSeeds,
   assertValidExpertSeedManifest,
@@ -383,7 +383,13 @@ const main = program.pipe(
   Effect.provide(blueskyLayer)
 );
 
+// TODO(effect4): BunContext.layer was removed; provide individual platform layers
+// TODO(effect4): BunRuntime.runMain replaced with Runtime.makeRunMain
+const runMain = Runtime.makeRunMain(({ fiber, teardown }) => {
+  fiber.addObserver((exit) => teardown(exit));
+});
+
 main.pipe(
-  Effect.provide(BunContext.layer),
-  BunRuntime.runMain
+  Effect.provide(CommandExecutor.layer),
+  runMain
 );

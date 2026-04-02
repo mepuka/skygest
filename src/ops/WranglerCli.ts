@@ -1,4 +1,4 @@
-import { Command, CommandExecutor } from "@effect/platform";
+import { ChildProcess as Command, ChildProcessSpawner as CommandExecutor } from "effect/unstable/process";
 import { Context, Effect, Layer } from "effect";
 import { stringifyUnknown } from "../platform/Json";
 import { WranglerDeployError } from "./Errors";

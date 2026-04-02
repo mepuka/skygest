@@ -1,5 +1,5 @@
 import { Effect, Layer } from "effect";
-import { SqlError } from "@effect/sql/SqlError";
+import { SqlError } from "effect/unstable/sql";
 import { describe, expect, it } from "@effect/vitest";
 import { vi } from "vitest";
 import type { IngestErrorEnvelope } from "../src/domain/errors";

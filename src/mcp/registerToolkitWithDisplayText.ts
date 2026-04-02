@@ -6,9 +6,9 @@
  * This is a minimal fork of `McpServer.registerToolkit` / `McpServer.toolkit`
  * from `@effect/ai` — the only change is in the `onSuccess` text branch.
  */
-import { McpSchema, McpServer, Tool as AiTool } from "@effect/ai";
-import type * as Toolkit from "@effect/ai/Toolkit";
-import * as Context from "effect/Context";
+import { McpSchema, McpServer, Tool as AiTool } from "effect/unstable/ai";
+import type * as Toolkit from "effect/unstable/ai";
+import * as Context from "effect/ServiceMap";
 import * as Effect from "effect/Effect";
 import * as JsonSchema from "effect/JSONSchema";
 import * as Layer from "effect/Layer";

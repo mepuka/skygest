@@ -4,7 +4,7 @@ import {
   HttpBody,
   HttpClient,
   HttpClientResponse
-} from "@effect/platform";
+} from "effect/unstable/http";
 import {
   BootstrapExpertsResult,
   ExpertListOutput,
@@ -37,7 +37,7 @@ import {
   KnowledgePostsMcpOutput,
   ExpertListMcpOutput
 } from "../mcp/OutputSchemas";
-import { HttpClientError } from "@effect/platform";
+import { HttpClientError } from "effect/unstable/http";
 import { stringifyUnknown } from "../platform/Json";
 import { StagingRequestError } from "./Errors";
 

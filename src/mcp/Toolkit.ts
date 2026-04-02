@@ -1,6 +1,6 @@
-import type { SqlError } from "@effect/sql/SqlError";
+import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
-import { Tool, Toolkit } from "@effect/ai";
+import { Tool, Toolkit } from "effect/unstable/ai";
 import { Context, Effect, Layer, Option, Schema } from "effect";
 import {
   ExplainPostTopicsInput,

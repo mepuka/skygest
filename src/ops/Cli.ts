@@ -1,4 +1,4 @@
-import { Args, Command, Options } from "@effect/cli";
+import { Args, Command, Options } from "effect/unstable/cli";
 import { Console, Effect, Option, Redacted, Stream } from "effect";
 import { energySeedDid } from "../bootstrap/CheckedInExpertSeeds";
 import type { ExpertTier } from "../domain/bi";

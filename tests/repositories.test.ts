@@ -1,4 +1,4 @@
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import { Effect, Schema } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { bootstrapExperts } from "../src/bootstrap/ExpertSeeds";

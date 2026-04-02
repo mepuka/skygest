@@ -1,5 +1,5 @@
 import { AtomHttpApi } from "@effect-atom/atom";
-import { FetchHttpClient } from "@effect/platform";
+import { FetchHttpClient } from "effect/unstable/http";
 import { PublicReadApi } from "../../api/PublicReadApi.ts";
 
 interface SkygestApiId {

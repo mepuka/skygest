@@ -1,5 +1,5 @@
-import { McpServer } from "@effect/ai";
-import * as HttpLayerRouter from "@effect/platform/HttpLayerRouter";
+import { McpServer } from "effect/unstable/ai";
+import * as HttpLayerRouter from "effect/unstable/http/HttpRouter";
 import { Context, Effect, Layer } from "effect";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { makeQueryLayer } from "../edge/Layer";

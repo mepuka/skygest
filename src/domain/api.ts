@@ -1,4 +1,4 @@
-import * as HttpApiSchema from "@effect/platform/HttpApiSchema";
+import * as HttpApiSchema from "effect/unstable/httpapi/HttpApiSchema";
 import { ParseResult, Schema } from "effect";
 import {
   AddExpertInput,

@@ -1,5 +1,6 @@
-import { BunContext } from "@effect/platform-bun";
-import { FetchHttpClient } from "@effect/platform";
+// TODO(effect4): BunContext.layer was removed; using ChildProcessSpawner as stand-in
+import { ChildProcessSpawner as BunContext } from "effect/unstable/process";
+import { FetchHttpClient } from "effect/unstable/http";
 import { Effect, Layer, Redacted } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { energySeedDid } from "../src/bootstrap/CheckedInExpertSeeds";

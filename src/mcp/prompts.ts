@@ -1,4 +1,4 @@
-import { McpServer } from "@effect/ai";
+import { McpServer } from "effect/unstable/ai";
 import { Effect, Layer, Schema } from "effect";
 
 /**

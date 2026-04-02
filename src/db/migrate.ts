@@ -1,5 +1,5 @@
-import { SqlClient } from "@effect/sql";
-import type { SqlError } from "@effect/sql/SqlError";
+import { SqlClient } from "effect/unstable/sql";
+import type { SqlError } from "effect/unstable/sql";
 import { Effect } from "effect";
 import { migrations } from "./migrations";
 
