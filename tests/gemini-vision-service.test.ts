@@ -538,5 +538,141 @@ describe("GeminiVisionService", () => {
           expect(result.keyFindings).toEqual([]);
         }).pipe(runWith)
     );
+
+    it.effect("normalizes 'image' mediaType to 'photo'", () =>
+      Effect.gen(function* () {
+        mockGenerateContent.mockReset();
+        mockGenerateContent.mockResolvedValueOnce({
+          text: encodeJsonString({
+            mediaType: "image",
+            chartTypes: [],
+            altText: "A photo of solar panels",
+            title: null,
+            xAxis: null,
+            yAxis: null,
+            series: [],
+            sourceLines: [],
+            temporalCoverage: null,
+            keyFindings: [],
+            visibleUrls: [],
+            organizationMentions: [],
+            logoText: []
+          })
+        });
+
+        const svc = yield* GeminiVisionService;
+        const result = yield* svc.extractChartData("https://gemini.files/abc", "image/jpeg");
+        expect(result.mediaType).toBe("photo");
+      }).pipe(runWith)
+    );
+
+    it.effect("normalizes PascalCase 'Chart' mediaType to 'chart'", () =>
+      Effect.gen(function* () {
+        mockGenerateContent.mockReset();
+        mockGenerateContent.mockResolvedValueOnce({
+          text: encodeJsonString({
+            mediaType: "Chart",
+            chartTypes: ["bar-chart"],
+            altText: "Bar chart of energy output",
+            title: "Energy Output",
+            xAxis: { label: "Month", unit: null },
+            yAxis: { label: "GWh", unit: "GWh" },
+            series: [{ legendLabel: "Output", unit: "GWh" }],
+            sourceLines: [],
+            temporalCoverage: null,
+            keyFindings: ["Output rose 15%"],
+            visibleUrls: [],
+            organizationMentions: [],
+            logoText: []
+          })
+        });
+
+        const svc = yield* GeminiVisionService;
+        const result = yield* svc.extractChartData("https://gemini.files/abc", "image/png");
+        expect(result.mediaType).toBe("chart");
+        expect(result.chartTypes).toEqual(["bar-chart"]);
+      }).pipe(runWith)
+    );
+
+    it.effect("defaults missing chartTypes to empty array", () =>
+      Effect.gen(function* () {
+        mockGenerateContent.mockReset();
+        mockGenerateContent.mockResolvedValueOnce({
+          text: encodeJsonString({
+            mediaType: "photo",
+            altText: "Wind turbines",
+            title: null,
+            xAxis: null,
+            yAxis: null,
+            series: [],
+            sourceLines: [],
+            temporalCoverage: null,
+            keyFindings: [],
+            visibleUrls: [],
+            organizationMentions: [],
+            logoText: []
+          })
+        });
+
+        const svc = yield* GeminiVisionService;
+        const result = yield* svc.extractChartData("https://gemini.files/abc", "image/jpeg");
+        expect(result.chartTypes).toEqual([]);
+        expect(result.mediaType).toBe("photo");
+      }).pipe(runWith)
+    );
+
+    it.effect("defaults missing title and altText to null", () =>
+      Effect.gen(function* () {
+        mockGenerateContent.mockReset();
+        mockGenerateContent.mockResolvedValueOnce({
+          text: encodeJsonString({
+            mediaType: "infographic",
+            chartTypes: [],
+            xAxis: null,
+            yAxis: null,
+            series: [],
+            sourceLines: [],
+            temporalCoverage: null,
+            keyFindings: [],
+            visibleUrls: [],
+            organizationMentions: [],
+            logoText: []
+          })
+        });
+
+        const svc = yield* GeminiVisionService;
+        const result = yield* svc.extractChartData("https://gemini.files/abc", "image/png");
+        expect(result.title).toBeNull();
+        expect(result.altText).toBeNull();
+        expect(result.mediaType).toBe("infographic");
+      }).pipe(runWith)
+    );
+
+    it.effect("normalizes 'Infographic' (PascalCase) to 'infographic'", () =>
+      Effect.gen(function* () {
+        mockGenerateContent.mockReset();
+        mockGenerateContent.mockResolvedValueOnce({
+          text: encodeJsonString({
+            mediaType: "Infographic",
+            chartTypes: [],
+            altText: null,
+            title: null,
+            xAxis: null,
+            yAxis: null,
+            series: [],
+            sourceLines: [],
+            temporalCoverage: null,
+            keyFindings: [],
+            visibleUrls: [],
+            organizationMentions: [],
+            logoText: []
+          })
+        });
+
+        const svc = yield* GeminiVisionService;
+        const result = yield* svc.extractChartData("https://gemini.files/abc", "image/png");
+        expect(result.mediaType).toBe("infographic");
+      }).pipe(runWith)
+    );
   });
 });

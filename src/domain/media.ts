@@ -19,7 +19,6 @@ export const MediaType = Schema.Literals([
   "chart",
   "document-excerpt",
   "photo",
-  "image",
   "infographic",
   "video"
 ]);

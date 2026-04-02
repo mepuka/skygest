@@ -14,7 +14,7 @@
  */
 
 import { GoogleGenAI, createUserContent, createPartFromUri } from "@google/genai";
-import { Clock, Config, Effect, Layer, Schema } from "effect";
+import { Clock, Config, Effect, Layer, Schema, SchemaGetter } from "effect";
 import * as JsonSchema from "effect/JsonSchema";
 import { VisionAssetAnalysis as VisionAssetAnalysisSchema } from "../domain/enrichment";
 import {
@@ -45,11 +45,21 @@ import {
 // Gemini extraction output schema (same fields as VisionAssetAnalysis minus runtime metadata)
 // ---------------------------------------------------------------------------
 
+/** Lenient MediaType that normalizes Gemini's loose responses (case, aliases)
+ *  before validating against the canonical enum. */
+const LenientMediaType = Schema.String.pipe(
+  Schema.decode({
+    decode: SchemaGetter.transform(normalizeMediaType),
+    encode: SchemaGetter.passthrough()
+  }),
+  Schema.decodeTo(MediaType)
+);
+
 const GeminiExtractionOutput = Schema.Struct({
-  mediaType: MediaType,
+  mediaType: LenientMediaType,
   chartTypes: Schema.Array(ChartType).pipe(Schema.withDecodingDefaultKey(() => [] as const)),
-  altText: Schema.NullOr(Schema.String),
-  title: Schema.NullOr(Schema.String),
+  altText: Schema.NullOr(Schema.String).pipe(Schema.withDecodingDefaultKey(() => null)),
+  title: Schema.NullOr(Schema.String).pipe(Schema.withDecodingDefaultKey(() => null)),
   xAxis: Schema.NullOr(ChartAxis),
   yAxis: Schema.NullOr(ChartAxis),
   series: Schema.Array(ChartSeries),
@@ -227,9 +237,7 @@ export const GeminiVisionServiceLive = Layer.effect(
           )
         );
 
-        // Normalize mediaType aliases ("image" → "photo", case fixes)
-        // before passing to the storage schema which uses canonical values
-        const normalizedMediaType = normalizeMediaType(geminiResult.mediaType);
+        const normalizedMediaType = geminiResult.mediaType;
 
         const now = yield* Clock.currentTimeMillis;
         const enrichment = yield* Schema.decodeUnknownEffect(VisionAssetAnalysisSchema)({
