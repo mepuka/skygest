@@ -4,13 +4,9 @@ import {
   normalizeTweetDetail,
   normalizeProfile
 } from "../src/ops/TwitterNormalizer";
-import type {
-  ScraperTweet,
-  ScraperTweetDetailNode,
-  ScraperProfile
-} from "../src/ops/TwitterNormalizer";
+import type { Tweet, TweetDetailNode, Profile } from "@pooks/twitter-scraper";
 
-const baseTweet: ScraperTweet = {
+const baseTweet: Tweet = {
   id: "123456789",
   userId: "user42",
   username: "alice",
@@ -18,6 +14,7 @@ const baseTweet: ScraperTweet = {
   text: "Solar is booming",
   timestamp: 1700000000, // seconds
   hashtags: [],
+  mentions: [],
   urls: [],
   photos: [],
   videos: [],
@@ -47,12 +44,12 @@ describe("normalizeTweet", () => {
 
   it("returns null when userId is missing", () => {
     const { userId: _, ...rest } = baseTweet;
-    const tweet: ScraperTweet = rest;
+    const tweet: Tweet = rest;
     expect(normalizeTweet(tweet)).toBeNull();
   });
 
   it("maps photos to an img embed", () => {
-    const tweet: ScraperTweet = {
+    const tweet: Tweet = {
       ...baseTweet,
       photos: [
         { id: "p1", url: "https://pbs.twimg.com/media/abc.jpg", altText: "solar panel" }
@@ -73,7 +70,7 @@ describe("normalizeTweet", () => {
   });
 
   it("maps photos without altText to null alt", () => {
-    const tweet: ScraperTweet = {
+    const tweet: Tweet = {
       ...baseTweet,
       photos: [{ id: "p1", url: "https://example.com/img.png" }]
     };
@@ -91,7 +88,7 @@ describe("normalizeTweet", () => {
   });
 
   it("maps videos to a video embed", () => {
-    const tweet: ScraperTweet = {
+    const tweet: Tweet = {
       ...baseTweet,
       videos: [
         { id: "v1", preview: "https://pbs.twimg.com/thumb.jpg", url: "https://video.twimg.com/v.mp4" }
@@ -108,7 +105,7 @@ describe("normalizeTweet", () => {
   });
 
   it("maps video without url to null playlist", () => {
-    const tweet: ScraperTweet = {
+    const tweet: Tweet = {
       ...baseTweet,
       videos: [{ id: "v1", preview: "https://pbs.twimg.com/thumb.jpg" }]
     };
@@ -122,7 +119,7 @@ describe("normalizeTweet", () => {
   });
 
   it("extracts links with domains from URLs", () => {
-    const tweet: ScraperTweet = {
+    const tweet: Tweet = {
       ...baseTweet,
       urls: [
         "https://reuters.com/article/energy",
@@ -137,7 +134,7 @@ describe("normalizeTweet", () => {
   });
 
   it("preserves hashtags for downstream topic matching", () => {
-    const tweet: ScraperTweet = {
+    const tweet: Tweet = {
       ...baseTweet,
       hashtags: ["solarenergy", "grid"]
     };
@@ -146,7 +143,7 @@ describe("normalizeTweet", () => {
   });
 
   it("handles malformed URLs gracefully (no domain)", () => {
-    const tweet: ScraperTweet = {
+    const tweet: Tweet = {
       ...baseTweet,
       urls: ["not-a-url"]
     };
@@ -155,7 +152,7 @@ describe("normalizeTweet", () => {
   });
 
   it("prefers photos over videos when both exist", () => {
-    const tweet: ScraperTweet = {
+    const tweet: Tweet = {
       ...baseTweet,
       photos: [{ id: "p1", url: "https://example.com/img.png" }],
       videos: [{ id: "v1", preview: "https://example.com/thumb.jpg" }]
@@ -166,7 +163,7 @@ describe("normalizeTweet", () => {
 
   it("uses empty string for missing text", () => {
     const { text: _, ...rest } = baseTweet;
-    const tweet: ScraperTweet = rest;
+    const tweet: Tweet = rest;
     const result = normalizeTweet(tweet);
     expect(result!.text).toBe("");
   });
@@ -174,11 +171,14 @@ describe("normalizeTweet", () => {
 
 describe("normalizeTweetDetail", () => {
   it("normalizes a detail node the same as a timeline tweet", () => {
-    const node: ScraperTweetDetailNode = {
+    const node: TweetDetailNode = {
       ...baseTweet,
       resolution: "full",
       versions: [],
-      isEdited: false
+      isEdited: false,
+      isPin: false,
+      isSelfThread: false,
+      sensitiveContent: false
     };
     const result = normalizeTweetDetail(node);
     expect(result).not.toBeNull();
@@ -189,18 +189,21 @@ describe("normalizeTweetDetail", () => {
 
   it("returns null when userId is missing", () => {
     const { userId: _, ...rest } = baseTweet;
-    const node: ScraperTweetDetailNode = {
+    const node: TweetDetailNode = {
       ...rest,
       resolution: "full",
       versions: [],
-      isEdited: false
+      isEdited: false,
+      isPin: false,
+      isSelfThread: false,
+      sensitiveContent: false
     };
     expect(normalizeTweetDetail(node)).toBeNull();
   });
 });
 
 describe("normalizeProfile", () => {
-  const baseProfile: ScraperProfile = {
+  const baseProfile: Profile = {
     userId: "user42",
     username: "alice",
     name: "Alice Energy",
@@ -226,7 +229,7 @@ describe("normalizeProfile", () => {
   });
 
   it("omits displayName and avatar when not provided", () => {
-    const profile: ScraperProfile = {
+    const profile: Profile = {
       userId: "user42",
       username: "alice"
     };
@@ -236,12 +239,12 @@ describe("normalizeProfile", () => {
   });
 
   it("returns null when userId is missing", () => {
-    const profile: ScraperProfile = { username: "alice" };
+    const profile: Profile = { username: "alice" };
     expect(normalizeProfile(profile, "energy-focused")).toBeNull();
   });
 
   it("falls back to userId as handle when username is missing", () => {
-    const profile: ScraperProfile = { userId: "user42" };
+    const profile: Profile = { userId: "user42" };
     const result = normalizeProfile(profile, "independent");
     expect(result!.handle).toBe("user42");
   });

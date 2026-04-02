@@ -1,11 +1,9 @@
 /**
  * Pure normalizer functions that convert Twitter scraper shapes into the
  * ImportPostsInput format accepted by `POST /admin/import/posts`.
- *
- * These interfaces duck-type the scraper models so that skygest-cloudflare
- * has no hard dependency on the scraper package.
  */
 
+import type { Tweet, TweetDetailNode, Profile, TweetPhoto, TweetVideo } from "@pooks/twitter-scraper";
 import type { Did, PostUri } from "../domain/types";
 import type { ExpertTier } from "../domain/bi";
 import type {
@@ -16,54 +14,21 @@ import type {
 import type { EmbedKind, EmbedPayload } from "../domain/embed";
 
 // ---------------------------------------------------------------------------
-// Lightweight input interfaces (duck-typed to scraper shapes)
+// Internal structural type for the fields normalizeTweet actually accesses.
+// Both Tweet and TweetDetailNode satisfy this shape, avoiding nominal
+// incompatibilities between the two Schema.Class types.
 // ---------------------------------------------------------------------------
 
-export interface ScraperTweetPhoto {
+interface NormalizableFields {
   readonly id: string;
-  readonly url: string;
-  readonly altText?: string;
-}
-
-export interface ScraperTweetVideo {
-  readonly id: string;
-  readonly preview: string;
-  readonly url?: string;
-}
-
-export interface ScraperTweet {
-  readonly id: string;
-  readonly userId?: string;
-  readonly username?: string;
-  readonly name?: string;
-  readonly text?: string;
-  readonly timestamp?: number; // seconds since epoch
+  readonly userId?: string | undefined;
+  readonly username?: string | undefined;
+  readonly text?: string | undefined;
+  readonly timestamp?: number | undefined;
   readonly hashtags: readonly string[];
   readonly urls: readonly string[];
-  readonly photos: readonly ScraperTweetPhoto[];
-  readonly videos: readonly ScraperTweetVideo[];
-  readonly likes?: number;
-  readonly retweets?: number;
-  readonly replies?: number;
-  readonly isQuoted: boolean;
-  readonly quotedTweetId?: string;
-  readonly isRetweet: boolean;
-  readonly isReply: boolean;
-}
-
-export interface ScraperTweetDetailNode extends ScraperTweet {
-  readonly resolution?: string;
-  readonly versions?: readonly string[];
-  readonly isEdited?: boolean;
-}
-
-export interface ScraperProfile {
-  readonly userId?: string;
-  readonly username?: string;
-  readonly name?: string;
-  readonly avatar?: string;
-  readonly biography?: string;
-  readonly followersCount?: number;
+  readonly photos: readonly TweetPhoto[];
+  readonly videos: readonly TweetVideo[];
 }
 
 // ---------------------------------------------------------------------------
@@ -88,7 +53,7 @@ const buildLinks = (urls: readonly string[]): ImportLinkInput[] =>
   });
 
 const buildEmbed = (
-  tweet: ScraperTweet
+  tweet: NormalizableFields
 ): { embedType: EmbedKind; embedPayload: EmbedPayload } | null => {
   if (tweet.photos.length > 0) {
     return {
@@ -136,10 +101,9 @@ export interface NormalizedPost {
 }
 
 /**
- * Normalize a timeline Tweet into the import post shape.
- * Returns null when the tweet lacks a userId (skip).
+ * Internal: normalize any object satisfying NormalizableFields into a post.
  */
-export const normalizeTweet = (tweet: ScraperTweet): NormalizedPost | null => {
+const normalizeTweetFromFields = (tweet: NormalizableFields): NormalizedPost | null => {
   if (!tweet.userId) {
     return null;
   }
@@ -165,14 +129,21 @@ export const normalizeTweet = (tweet: ScraperTweet): NormalizedPost | null => {
 };
 
 /**
+ * Normalize a timeline Tweet into the import post shape.
+ * Returns null when the tweet lacks a userId (skip).
+ */
+export const normalizeTweet = (tweet: Tweet): NormalizedPost | null =>
+  normalizeTweetFromFields(tweet);
+
+/**
  * Normalize a TweetDetailNode (richer model from tweet detail API).
  * Same mapping as normalizeTweet but accepts the detail shape.
  */
 export const normalizeTweetDetail = (
-  node: ScraperTweetDetailNode
+  node: TweetDetailNode
 ): NormalizedPost | null => {
-  // Delegate to the same core logic — the detail node is a superset of Tweet
-  return normalizeTweet(node);
+  // Delegate to the same core logic — both types share the NormalizableFields shape
+  return normalizeTweetFromFields(node);
 };
 
 /**
@@ -180,7 +151,7 @@ export const normalizeTweetDetail = (
  * Returns null when the profile lacks a userId (skip).
  */
 export const normalizeProfile = (
-  profile: ScraperProfile,
+  profile: Profile,
   tier: ExpertTier
 ): ImportExpertInput | null => {
   if (!profile.userId) {

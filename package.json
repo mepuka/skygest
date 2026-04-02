@@ -24,6 +24,7 @@
     "@effect/sql-sqlite-node": "4.0.0-beta.43",
     "@effect/vitest": "4.0.0-beta.43",
     "@observablehq/plot": "^0.6.17",
+    "@pooks/twitter-scraper": "../better_twitter_scraper",
     "@tailwindcss/cli": "^4.2.1",
     "@types/bun": "latest",
     "@types/react": "^19.2.14",
