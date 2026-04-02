@@ -341,9 +341,11 @@ const normalizeExtractionResponse = (
 // ---------------------------------------------------------------------------
 
 const makeJsonSchema = (schema: Schema.Top): JsonSchema.JsonSchema => {
-  const doc = Schema.toJsonSchemaDocument(schema);
-  // Gemini expects the schema without $schema and $defs at the top level
-  const { $schema: _, ...rest } = doc as unknown as Record<string, unknown>;
+  const doc = Schema.toJsonSchemaDocument(schema) as unknown as Record<string, unknown>;
+  // Effect wraps the schema in { $schema, dialect, schema, definitions }.
+  // Gemini's responseJsonSchema expects the raw JSON Schema object directly.
+  const inner = (doc.schema ?? doc) as Record<string, unknown>;
+  const { $schema: _, $defs: _defs, ...rest } = inner;
   return rest as JsonSchema.JsonSchema;
 };
 
