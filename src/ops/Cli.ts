@@ -1,8 +1,12 @@
 import { Argument, Command, Flag } from "effect/unstable/cli";
-import { Console, Effect, Option, Redacted, Stream } from "effect";
+import { Console, Effect, Layer, Option, Redacted, Stream } from "effect";
 import { TwitterPublic, TwitterTweets } from "@pooks/twitter-scraper";
 import type { Tweet, TweetDetailNode } from "@pooks/twitter-scraper";
+import { FetchHttpClient } from "effect/unstable/http";
+import { BlueskyClient, makeBlueskyClient } from "../bluesky/BlueskyClient";
+import { parsePostUrl, SUPPORTED_FORMATS } from "../domain/ingestUrl";
 import { scraperLayer } from "./ScraperLayer";
+import { normalizeBlueskyThread } from "./BlueskyNormalizer";
 import { energySeedDid } from "../bootstrap/CheckedInExpertSeeds";
 import type { ExpertTier } from "../domain/bi";
 import type { CurationAction } from "../domain/curation";
@@ -24,6 +28,11 @@ import {
   normalizeProfile
 } from "./TwitterNormalizer";
 import { WranglerCli } from "./WranglerCli";
+
+const blueskyCliLayer = Layer.effect(
+  BlueskyClient,
+  makeBlueskyClient("https://public.api.bsky.app")
+).pipe(Layer.provide(FetchHttpClient.layer));
 
 const deployWorkers = [
   "all",
@@ -95,6 +104,11 @@ const curationActionOption = Flag.choice("action", curationActions).pipe(
 const noteOption = Flag.string("note").pipe(
   Flag.withDescription("Optional review note"),
   Flag.optional
+);
+
+const ingestTierOption = Flag.choice("tier", expertTiers).pipe(
+  Flag.withDescription("Expert tier (default: energy-focused)"),
+  Flag.withDefault("energy-focused")
 );
 
 const enrichmentTypeOption = Flag.choice("enrichment-type", enrichmentKinds).pipe(
@@ -843,6 +857,128 @@ const twitterImportTweetCommand = Command.make(
     runTwitterImportTweet({ tweetId, baseUrl })
 );
 
+// ---------------------------------------------------------------------------
+// ingest-url command
+// ---------------------------------------------------------------------------
+
+const runIngestUrl = (options: {
+  readonly url: string;
+  readonly baseUrl: string;
+  readonly tier: string;
+  readonly note: Option.Option<string>;
+}) =>
+  Effect.gen(function* () {
+    const { value: secret } = yield* OperatorSecret;
+    const client = yield* StagingOperatorClient;
+    const baseUrl = yield* parseBaseUrl(options.baseUrl);
+    const note = Option.getOrUndefined(options.note);
+
+    const parsedOpt = parsePostUrl(options.url);
+    if (Option.isNone(parsedOpt)) {
+      yield* Console.log(`Unsupported URL format: ${options.url}\n${SUPPORTED_FORMATS}`);
+      return;
+    }
+    const parsed = parsedOpt.value;
+    yield* Console.log(`Ingesting ${parsed.platform} post: ${options.url}`);
+
+    let importInput: any;
+
+    if (parsed.platform === "twitter") {
+      // Fetch via scraper (same pattern as runTwitterImportTweet)
+      const { focal, profile } = yield* Effect.gen(function* () {
+        const twitter = yield* TwitterPublic;
+        const tweetsSvc = yield* TwitterTweets;
+        const doc = yield* tweetsSvc.getTweet(parsed.id);
+        const focal = doc.tweets.find((t) => t.id === doc.focalTweetId);
+        if (!focal) return { focal: null as TweetDetailNode | null, profile: null as any };
+        const profile = yield* twitter.getProfile(focal.username ?? focal.userId ?? "");
+        return { focal, profile };
+      }).pipe(Effect.provide(scraperLayer));
+
+      if (!focal) {
+        yield* Console.log("Tweet not found");
+        return;
+      }
+
+      const post = normalizeTweetDetail(focal);
+      if (post === null) {
+        yield* Console.log("Tweet missing userId, skipping");
+        return;
+      }
+
+      const expert = normalizeProfile(profile, options.tier as ExpertTier);
+      importInput = {
+        experts: expert !== null ? [expert] : [],
+        posts: [post],
+        operatorOverride: true
+      };
+    } else {
+      // Fetch via Bluesky public API
+      const normalized = yield* Effect.gen(function* () {
+        const bsky = yield* BlueskyClient;
+        const resolved = yield* bsky.resolveDidOrHandle(parsed.handle);
+        const atUri = `at://${resolved.did}/app.bsky.feed.post/${parsed.id}`;
+        const thread = yield* bsky.getPostThread(atUri, { depth: 0, parentHeight: 0 });
+        return normalizeBlueskyThread(thread, options.tier);
+      }).pipe(Effect.provide(blueskyCliLayer));
+
+      if (Option.isNone(normalized)) {
+        yield* Console.log("Could not extract post from Bluesky thread");
+        return;
+      }
+      const { post, expert } = normalized.value;
+
+      importInput = {
+        experts: [expert],
+        posts: [post],
+        operatorOverride: true
+      };
+    }
+
+    // Import
+    const importResult = yield* client.importPosts(baseUrl, secret, importInput);
+    const wasNew = importResult.imported > 0;
+    yield* Console.log(
+      wasNew
+        ? `Imported: ${String(importResult.imported)} post(s), ${String(importResult.flagged)} flagged`
+        : `Post already exists (skipped import)`
+    );
+
+    // Curate (enrichment starts automatically inside curatePost)
+    const postUri = importInput.posts[0].uri;
+    const curateResult = yield* client.curatePost(baseUrl, secret, {
+      postUri,
+      action: "curate",
+      ...(note === undefined ? {} : { note })
+    });
+
+    const stateChanged = curateResult.previousStatus !== curateResult.newStatus;
+    yield* Console.log(
+      stateChanged
+        ? `Curated: ${String(curateResult.previousStatus ?? "none")} → ${curateResult.newStatus}`
+        : `Already curated (no change)`
+    );
+
+    yield* Console.log(
+      `Done. URI: ${postUri}\n` +
+      `Enrichment queued automatically by curation. Check status via get_post_enrichments or ops stage enrichment-status.`
+    );
+  });
+
+const urlArg = Argument.string("url");
+
+const ingestUrlCommand = Command.make(
+  "ingest-url",
+  {
+    url: urlArg,
+    tier: ingestTierOption,
+    note: noteOption,
+    baseUrl: baseUrlOption
+  },
+  ({ url, tier, note, baseUrl }) =>
+    runIngestUrl({ url, tier: tier as string, note, baseUrl })
+);
+
 const twitterCommand = Command.make("twitter", {}, () => Effect.void).pipe(
   Command.withSubcommands([
     twitterAddExpertCommand,
@@ -852,7 +988,7 @@ const twitterCommand = Command.make("twitter", {}, () => Effect.void).pipe(
 );
 
 export const opsCommand = Command.make("ops", {}, () => Effect.void).pipe(
-  Command.withSubcommands([deployCommand, stageCommand, twitterCommand])
+  Command.withSubcommands([deployCommand, stageCommand, twitterCommand, ingestUrlCommand])
 );
 
 const cli = Command.runWith(opsCommand, {
