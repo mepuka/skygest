@@ -54,29 +54,65 @@ Additional instructions:
  * Same four-step process (Extract → Sort → Verify → Analyze) but does
  * NOT request axis labels, data series, or temporal coverage.
  */
-export const VISION_LIGHTWEIGHT_EXTRACTION_PROMPT = `You are an expert energy-sector data analyst performing structured chart/image analysis. Follow the Charts-of-Thought process:
+export const VISION_LIGHTWEIGHT_EXTRACTION_PROMPT = `You are an expert energy-sector data analyst. Analyze this image and return structured JSON matching the provided schema exactly.
 
-**Step 1 — Extract**: Identify the title, visible text, source attributions, logos, URLs, and organization names. Note the overall media type and any chart types present.
+## Process
 
-**Step 2 — Sort**: Organize the extracted information into the structured fields: altText, mediaType, chartTypes, title, keyFindings, sourceLines, visibleUrls, organizationMentions, and logoText.
+**Step 1 — Extract**: Identify the title, visible text, source attributions, logos, URLs, and organization names. Note the media type and any chart types present.
 
-**Step 3 — Verify**: Cross-check that extracted source lines match visible attributions, organization mentions match logos and text, and chart types match what is actually shown.
+**Step 2 — Sort**: Map each piece of extracted information into the correct JSON field using the exact object structures described below.
 
-**Step 4 — Analyze**: Write 1-5 key findings as concise energy-domain statements. Focus on the overall message, trends, and takeaways communicated by the image.
+**Step 3 — Verify**: Confirm every field value matches the schema. sourceLines must be objects, not strings. organizationMentions must be objects, not strings.
 
-Do not extract individual axis labels, data series values, or temporal coverage ranges. Focus on what the image communicates and where the data comes from.
+**Step 4 — Analyze**: Write 1-5 key findings as concise energy-domain statements about the image's message and trends.
 
-Additional instructions:
-- altText: Write a concise, accessible description suitable for screen readers. Describe what the image shows and its overall message.
-- sourceLines: Extract verbatim source/attribution text (e.g., "Source: EIA", "Data: AESO"). If a source line also names a dataset or report family, capture that as datasetName. Otherwise set datasetName to null.
-- keyFindings: Energy-domain insights, not generic observations. Be specific about the message conveyed.
-- visibleUrls: Extract visible URLs or bare domains printed inside the image, especially in footers or watermarks.
-- organizationMentions: Extract organization names visibly present in the image and label where they appear (title, subtitle, footer, watermark, or body).
-- logoText: Extract short organization or platform text that appears as a logo or watermark.
-- For non-chart images (photos, documents), still provide altText and mediaType. Set chart-specific fields to null/empty as appropriate.`;
+Do not extract axis labels, data series, or temporal coverage. Focus on what the image communicates and where the data comes from.
+
+## Field specifications
+
+**mediaType**: One of: "chart", "document-excerpt", "photo", "infographic", "video".
+
+**chartTypes**: Array of chart type strings from the enum. Empty array if no charts are present.
+
+**altText**: A concise, accessible description of what the image shows and its overall message.
+
+**title**: The main title or headline visible in the image, or null if none.
+
+**keyFindings**: Array of energy-domain insight strings. Be specific about the message conveyed, not generic.
+
+**sourceLines**: Array of objects. Each entry MUST be a JSON object with two keys:
+  - "sourceText": the verbatim attribution text (e.g. "Source: EIA", "Data: AESO")
+  - "datasetName": the dataset or report name if mentioned, otherwise null
+  Example: [{"sourceText": "Source: Wood Mackenzie", "datasetName": "US gas turbine market report"}]
+  If there are no source attributions visible, return an empty array [].
+  NEVER return a plain string — always return an object with both keys.
+
+**visibleUrls**: Array of URLs or bare domains printed in the image (footers, watermarks).
+
+**organizationMentions**: Array of objects. Each entry MUST be a JSON object with two keys:
+  - "name": the organization name
+  - "location": where it appears — one of "title", "subtitle", "footer", "watermark", or "body"
+  Example: [{"name": "Wood Mackenzie", "location": "body"}]
+  NEVER return a plain string — always return an object with both keys.
+
+**logoText**: Array of strings — short text that appears as a logo or watermark.
+
+## Example output
+
+{
+  "mediaType": "chart",
+  "chartTypes": ["bar-chart"],
+  "altText": "Bar chart showing US gas turbine orders by year from 2018 to 2025",
+  "title": "US Gas Turbine Orders (GW)",
+  "keyFindings": ["Global gas turbine orders reached 110 GW, driven by data center demand"],
+  "sourceLines": [{"sourceText": "Source: Wood Mackenzie", "datasetName": "US gas turbine market report"}],
+  "visibleUrls": ["woodmac.com"],
+  "organizationMentions": [{"name": "Wood Mackenzie", "location": "footer"}],
+  "logoText": ["WoodMac"]
+}`;
 
 /**
  * Prompt version identifier — bump when prompt text changes materially.
  * Stored alongside enrichment results for audit and quality tracking.
  */
-export const VISION_PROMPT_VERSION = "v3.0.0";
+export const VISION_PROMPT_VERSION = "v3.1.0";
