@@ -100,7 +100,7 @@ const toQueryError = (tool: string) => (error: { message: string }) =>
   });
 
 export const SearchPostsTool = Tool.make("search_posts", {
-  description: "Search expert posts by keyword using full-text search. Supports topic and time range filters. Use this for keyword-based discovery; use get_recent_posts for chronological browsing.",
+  description: "Search expert posts using SQLite full-text search. Matches post text, expert handles, and stored topic-match terms. Full handle strings like solar-desk.bsky.social are treated as exact handle phrases. Supports quoted phrases, OR / NOT boolean logic, and prefix search with *. Supports topic and time range filters. Use this for keyword, handle, and topic-term discovery; use get_recent_posts for chronological browsing.",
   parameters: SearchPostsInput,
   success: KnowledgePostsMcpOutput,
   failure: McpToolQueryError

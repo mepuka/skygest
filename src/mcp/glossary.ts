@@ -6,6 +6,8 @@ export const GLOSSARY_CONTENT = `# Skygest Knowledge Base — Domain Glossary
 
 **KnowledgePost** — A Bluesky post by a tracked expert that matched at least one ontology topic. Contains text, AT Protocol URI, author DID, matched topics with scores, and extracted links.
 
+**search_posts** — Full-text search over KnowledgePosts. Matches post body text, tracked expert handles, and stored topic-match terms. Full handle strings like \`solar-desk.bsky.social\` are treated as exact handle phrases. Query syntax supports quoted phrases (e.g. \`"solar storage"\`), boolean logic (\`solar OR hydrogen\`, \`solar NOT wind\`), and prefix search with \`*\` (e.g. \`electro*\`). Use \`topic\`, \`since\`, and \`until\` to narrow broad searches.
+
 **Link** — A URL embedded in a KnowledgePost with extracted metadata: title, description, image URL, and hostname. Filterable by hostname (e.g., "reuters.com", "canary.media").
 
 **Topic (Canonical Topic)** — A human-facing category for post classification. ~30 topics (e.g., "solar", "hydrogen", "offshore-wind", "energy-storage", "grid-and-infrastructure", "carbon-capture", "energy-policy", "energy-markets", "critical-minerals"). Each aggregates ontology concepts and defines matching terms, hashtags, and signal domains.
@@ -45,6 +47,8 @@ export const GLOSSARY_CONTENT = `# Skygest Knowledge Base — Domain Glossary
 ## Data Flow
 
 Experts post on Bluesky → ingest pipeline fetches posts → ontology matcher classifies by topic (term/hashtag/domain signals) → matched posts stored with extracted link metadata (title, description, image, hostname) → curators submit editorial picks with scores → curated feed serves top picks by score, filterable by topic.
+
+Search reads both the post body and selected derived metadata. That means a query can match because the text says it directly, because the author handle is indexed, or because the ontology matcher attached a topic term such as \`pv\` or \`interconnection\`.
 
 ## Display Convention
 

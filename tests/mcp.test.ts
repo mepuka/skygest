@@ -2,6 +2,7 @@ import { Effect } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { describe, expect, it } from "@effect/vitest";
 import { decodeCallToolResultWith } from "../src/mcp/Client";
+import { createPersistentMcpHandler } from "../src/mcp/Router";
 import {
   KnowledgePostsMcpOutput,
   ExpertListMcpOutput,
@@ -23,6 +24,73 @@ const decodeSearchResponse = decodeCallToolResultWith(KnowledgePostsMcpOutput);
 const decodeExpertsResponse = decodeCallToolResultWith(ExpertListMcpOutput);
 const decodeTopicsResponse = decodeCallToolResultWith(OntologyTopicsMcpOutput);
 const decodeEditorialPicksResponse = decodeCallToolResultWith(EditorialPicksMcpOutput);
+
+const initializePersistentPromptSession = async (
+  layer: ReturnType<typeof makeBiLayer>
+) => {
+  const webHandler = createPersistentMcpHandler(layer, readOnlyIdentity);
+
+  const post = async (
+    body: unknown,
+    headers: Record<string, string> = {}
+  ) =>
+    webHandler.handler(new Request("https://skygest.local/mcp", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        ...headers
+      },
+      body: JSON.stringify(body)
+    }));
+
+  const initResponse = await post({
+    jsonrpc: "2.0",
+    id: 1,
+    method: "initialize",
+    params: {
+      protocolVersion: "2025-06-18",
+      capabilities: {},
+      clientInfo: {
+        name: "skygest-mcp-tests",
+        version: "0.1.0"
+      }
+    }
+  });
+
+  const sessionId = initResponse.headers.get("mcp-session-id");
+  if (sessionId == null) {
+    throw new Error("missing MCP session id");
+  }
+
+  await post(
+    {
+      jsonrpc: "2.0",
+      method: "notifications/initialized",
+      params: {}
+    },
+    { "mcp-session-id": sessionId }
+  );
+
+  return {
+    getPrompt: async (name: string, args: Record<string, string>) => {
+      const response = await post(
+        {
+          jsonrpc: "2.0",
+          id: 2,
+          method: "prompts/get",
+          params: {
+            name,
+            arguments: args
+          }
+        },
+        { "mcp-session-id": sessionId }
+      );
+
+      return response.text();
+    },
+    close: () => webHandler.dispose()
+  };
+};
 
 describe("read-only MCP server", () => {
   it.live("serves the phase-one tools and returns structured search data", () =>
@@ -66,12 +134,18 @@ describe("read-only MCP server", () => {
           const searchItems = decodeSearchResponse(search).items;
           const expertItems = decodeExpertsResponse(experts).items;
           const topicItems = decodeTopicsResponse(topics).items;
+          const searchTool = tools.tools.find((tool) => tool.name === "search_posts");
 
           expect(searchItems).toHaveLength(1);
           expect(searchItems[0]?.topics).toContain("solar");
           expect(expertItems.length).toBeGreaterThan(0);
           expect(expertItems[0]?.domain).toBe("energy");
           expect(topicItems.some((item) => item.slug === "solar")).toBe(true);
+          expect(searchTool?.description).toContain("quoted phrases");
+          expect(searchTool?.description).toContain("OR / NOT");
+          expect(searchTool?.description).toContain("expert handles");
+          expect(searchTool?.description).toContain("exact handle phrases");
+          expect(searchTool?.description).toContain("topic-match terms");
         } finally {
           await close();
         }
@@ -306,6 +380,28 @@ describe("MCP prompts by profile", () => {
           const prompts = await client.listPrompts();
           const names = prompts.prompts.map((p) => p.name).sort();
           expect(names).toEqual(["assess-expert", "curate-digest", "curate-session", "explore-topic"]);
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("explore-topic prompt teaches the model the supported search syntax", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const { getPrompt, close } = await initializePersistentPromptSession(layer);
+
+        try {
+          const promptJson = await getPrompt("explore-topic", { query: "solar" });
+          expect(promptJson).toContain("quoted phrases");
+          expect(promptJson).toContain("OR / NOT");
+          expect(promptJson).toContain("prefix search");
+          expect(promptJson).toContain("full Bluesky handle");
+          expect(promptJson).toContain("electro*");
         } finally {
           await close();
         }

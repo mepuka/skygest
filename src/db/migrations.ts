@@ -403,6 +403,38 @@ const migration16: D1Migration = {
   ]
 };
 
+const migration17: D1Migration = {
+  id: 17,
+  name: "fts_search_metadata",
+  statements: [
+    `DROP TABLE IF EXISTS posts_fts`,
+    `CREATE VIRTUAL TABLE posts_fts USING fts5(
+      uri UNINDEXED,
+      text,
+      handle,
+      topic_terms,
+      tokenize='porter unicode61'
+    )`,
+    `INSERT INTO posts_fts (rowid, uri, text, handle, topic_terms)
+      SELECT
+        p.rowid,
+        p.uri,
+        p.text,
+        COALESCE(e.handle, ''),
+        COALESCE((
+          SELECT group_concat(
+            COALESCE(NULLIF(pt.match_value, ''), NULLIF(pt.matched_term, ''), pt.topic_slug),
+            ' '
+          )
+          FROM post_topics pt
+          WHERE pt.post_uri = p.uri
+        ), '')
+      FROM posts p
+      LEFT JOIN experts e ON e.did = p.did
+      WHERE p.status = 'active'`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -419,5 +451,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration13,
   migration14,
   migration15,
-  migration16
+  migration16,
+  migration17
 ];

@@ -72,7 +72,8 @@ describe("phase-one migrations", () => {
         { id: 13, name: "post_curation" },
         { id: 14, name: "post_enrichments" },
         { id: 15, name: "post_enrichment_runs" },
-        { id: 16, name: "posts_embed_type" }
+        { id: 16, name: "posts_embed_type" },
+        { id: 17, name: "fts_search_metadata" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );

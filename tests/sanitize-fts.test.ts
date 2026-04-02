@@ -6,44 +6,54 @@ describe("sanitizeFtsQuery", () => {
     expect(sanitizeFtsQuery("solar energy")).toBe("solar energy");
   });
 
-  test("strips FTS5 boolean operators", () => {
-    expect(sanitizeFtsQuery("solar AND wind")).toBe("solar wind");
-    expect(sanitizeFtsQuery("solar OR wind")).toBe("solar wind");
-    expect(sanitizeFtsQuery("solar NOT wind")).toBe("solar wind");
+  test("preserves boolean operators", () => {
+    expect(sanitizeFtsQuery("solar AND wind")).toBe("solar AND wind");
+    expect(sanitizeFtsQuery("solar OR wind")).toBe("solar OR wind");
+    expect(sanitizeFtsQuery("solar NOT wind")).toBe("solar NOT wind");
   });
 
-  test("strips NEAR operator", () => {
-    expect(sanitizeFtsQuery("NEAR(solar wind)")).toBe("solar wind");
+  test("canonicalizes lowercase boolean operators", () => {
+    expect(sanitizeFtsQuery("solar and wind")).toBe("solar AND wind");
+    expect(sanitizeFtsQuery("solar or wind")).toBe("solar OR wind");
+    expect(sanitizeFtsQuery("solar not wind")).toBe("solar NOT wind");
   });
 
-  test("is case-insensitive for operators", () => {
-    expect(sanitizeFtsQuery("solar and wind")).toBe("solar wind");
-    expect(sanitizeFtsQuery("solar Or wind")).toBe("solar wind");
-    expect(sanitizeFtsQuery("solar not wind")).toBe("solar wind");
+  test("accepts common 'AND NOT' syntax and normalizes it", () => {
+    expect(sanitizeFtsQuery("solar AND NOT wind")).toBe("solar NOT wind");
   });
 
-  test("strips double quotes", () => {
-    expect(sanitizeFtsQuery('"solar panels"')).toBe("solar panels");
+  test("preserves phrase queries", () => {
+    expect(sanitizeFtsQuery('"solar panels"')).toBe('"solar panels"');
   });
 
-  test("strips unbalanced quotes", () => {
+  test("falls back safely for unbalanced quotes", () => {
     expect(sanitizeFtsQuery('solar "panels')).toBe("solar panels");
   });
 
-  test("strips wildcard asterisks", () => {
-    expect(sanitizeFtsQuery("solar*")).toBe("solar");
+  test("preserves wildcard prefixes", () => {
+    expect(sanitizeFtsQuery("solar*")).toBe("solar*");
   });
 
-  test("strips caret and colon (column weight) operator", () => {
+  test("preserves NEAR groups", () => {
+    expect(sanitizeFtsQuery("NEAR(solar wind, 5)")).toBe("NEAR(solar wind, 5)");
+  });
+
+  test("preserves parentheses around boolean expressions", () => {
+    expect(sanitizeFtsQuery("(solar OR wind)")).toBe("(solar OR wind)");
+  });
+
+  test("strips unsupported column and weighting syntax", () => {
     expect(sanitizeFtsQuery("title:^2 solar")).toBe("title 2 solar");
+    expect(sanitizeFtsQuery("title:solar")).toBe("title solar");
   });
 
-  test("strips curly braces and brackets", () => {
+  test("treats plain handle-like queries as exact phrases", () => {
+    expect(sanitizeFtsQuery("ferc-watch.bsky.social")).toBe("\"ferc watch bsky social\"");
+    expect(sanitizeFtsQuery("@gridwonk.bsky.social")).toBe("\"gridwonk bsky social\"");
+  });
+
+  test("normalizes non-handle punctuation into token separators", () => {
     expect(sanitizeFtsQuery("{solar} [wind]")).toBe("solar wind");
-  });
-
-  test("strips parentheses", () => {
-    expect(sanitizeFtsQuery("(solar OR wind)")).toBe("solar wind");
   });
 
   test("collapses multiple spaces", () => {
@@ -66,13 +76,17 @@ describe("sanitizeFtsQuery", () => {
     expect(sanitizeFtsQuery("AND OR NOT")).toBe("");
   });
 
-  test("strips colons to prevent FTS5 column prefix errors", () => {
-    expect(sanitizeFtsQuery("title:solar")).toBe("title solar");
+  test("falls back to plain terms when syntax is malformed", () => {
+    expect(sanitizeFtsQuery("(solar OR wind")).toBe("solar wind");
+    expect(sanitizeFtsQuery("NEAR(solar, foo)")).toBe("solar foo");
+    expect(sanitizeFtsQuery("solar OR")).toBe("solar");
+    expect(sanitizeFtsQuery("solar AND")).toBe("solar");
+    expect(sanitizeFtsQuery("solar NOT")).toBe("solar");
   });
 
   test("handles mixed special chars and operators", () => {
     expect(sanitizeFtsQuery('"solar" AND (wind OR "nuclear")')).toBe(
-      "solar wind nuclear"
+      "solar AND (wind OR nuclear)"
     );
   });
 });
