@@ -24,9 +24,9 @@ const scraperLayer = Layer.mergeAll(
 ).pipe(
   Layer.provideMerge(ScraperStrategy.standardLayer),
   Layer.provideMerge(GuestAuth.liveLayer),
-  Layer.provideMerge(TwitterHttpClient.fetchLayer),
+  Layer.provideMerge(TwitterHttpClient.cycleTlsLayer()),
   Layer.provideMerge(CookieManager.liveLayer),
-  Layer.provideMerge(TwitterConfig.fromEnvLayer)
+  Layer.provideMerge(TwitterConfig.testLayer())
 );
 
 // TODO(effect4): provide a real ChildProcessSpawner implementation for Bun
