@@ -1,4 +1,4 @@
-import { Clock, Context, Effect, Layer } from "effect";
+import { Clock, ServiceMap, Effect, Layer } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import type { PostUri } from "../domain/types";
@@ -17,7 +17,7 @@ import { clampLimit } from "../platform/Limit";
 import { EditorialRepo } from "./EditorialRepo";
 import { OntologyCatalog } from "./OntologyCatalog";
 
-export class EditorialService extends Context.Tag("@skygest/EditorialService")<
+export class EditorialService extends ServiceMap.Service<
   EditorialService,
   {
     readonly submitPick: (
@@ -39,7 +39,7 @@ export class EditorialService extends Context.Tag("@skygest/EditorialService")<
 
     readonly expireStale: () => Effect.Effect<number, SqlError | DbError>;
   }
->() {
+>()("@skygest/EditorialService") {
   static readonly layer = Layer.effect(EditorialService, Effect.gen(function* () {
     const repo = yield* EditorialRepo;
     const config = yield* AppConfig;
@@ -115,12 +115,12 @@ export class EditorialService extends Context.Tag("@skygest/EditorialService")<
       return yield* repo.expireStale(now);
     });
 
-    return EditorialService.of({
+    return {
       submitPick,
       retractPick,
       listPicks,
       getCuratedFeed,
       expireStale
-    });
+    };
   }));
 }

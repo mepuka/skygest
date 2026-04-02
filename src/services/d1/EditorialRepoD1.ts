@@ -295,13 +295,13 @@ export const EditorialRepoD1 = {
         )
       );
 
-    return EditorialRepo.of({
+    return {
       upsertPick,
       retractPick,
       listPicks,
       postExists,
       getCuratedFeed,
       expireStale
-    });
+    };
   }))
 };

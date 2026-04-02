@@ -521,7 +521,7 @@ export const IngestRunItemsRepoD1 = {
         )
       );
 
-    return IngestRunItemsRepo.of({
+    return {
       createMany,
       markDispatched,
       markQueued,
@@ -536,6 +536,6 @@ export const IngestRunItemsRepoD1 = {
       listStaleDispatchedByRun,
       listStaleRunningByRun,
       summarizeByRun
-    });
+    };
   }))
 };

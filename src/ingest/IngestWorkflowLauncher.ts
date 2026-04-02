@@ -1,4 +1,4 @@
-import { Context, Effect, Either, Layer, Schema } from "effect";
+import { ServiceMap, Effect, Either, Layer, Schema } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import {
@@ -43,7 +43,7 @@ const launchWorkflow = <A>(
       })
   });
 
-export class IngestWorkflowLauncher extends Context.Tag("@skygest/IngestWorkflowLauncher")<
+export class IngestWorkflowLauncher extends ServiceMap.Service<
   IngestWorkflowLauncher,
   {
     readonly start: (
@@ -59,7 +59,7 @@ export class IngestWorkflowLauncher extends Context.Tag("@skygest/IngestWorkflow
       SqlError | DbError | IngestSchemaDecodeError | IngestWorkflowLaunchError
     >;
   }
->() {
+>()("@skygest/IngestWorkflowLauncher") {
   static readonly layer = Layer.effect(
     IngestWorkflowLauncher,
     Effect.gen(function* () {
@@ -167,10 +167,10 @@ export class IngestWorkflowLauncher extends Context.Tag("@skygest/IngestWorkflow
         );
       });
 
-      return IngestWorkflowLauncher.of({
+      return {
         start,
         startCronHeadSweep
-      });
+      };
     })
   );
 }

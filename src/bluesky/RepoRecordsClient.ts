@@ -1,4 +1,4 @@
-import { Cache, Clock, Context, Duration, Effect, Either, Layer } from "effect";
+import { Cache, Clock, ServiceMap, Duration, Effect, Either, Layer } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import { BlueskyClient } from "./BlueskyClient";
@@ -44,7 +44,7 @@ const hasFreshPdsHint = (
 const shouldRefreshRepoEndpoint = (error: BlueskyApiError) =>
   error.status === 404 || error.status === undefined;
 
-export class RepoRecordsClient extends Context.Tag("@skygest/RepoRecordsClient")<
+export class RepoRecordsClient extends ServiceMap.Service<
   RepoRecordsClient,
   {
     readonly listRecords: (
@@ -52,7 +52,7 @@ export class RepoRecordsClient extends Context.Tag("@skygest/RepoRecordsClient")
     ) => Effect.Effect<ListRecordsResult, BlueskyApiError | SqlError | DbError>;
     readonly invalidateRepo: (repo: Did) => Effect.Effect<void>;
   }
->() {
+>()("@skygest/RepoRecordsClient") {
   static readonly layer = Layer.effect(
     RepoRecordsClient,
     Effect.gen(function* () {
@@ -151,10 +151,10 @@ export class RepoRecordsClient extends Context.Tag("@skygest/RepoRecordsClient")
         );
       });
 
-      return RepoRecordsClient.of({
+      return {
         listRecords,
         invalidateRepo
-      });
+      };
     })
   );
 }

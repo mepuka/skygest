@@ -1,4 +1,4 @@
-import { Array, Context, Effect, Layer, Option, Schema } from "effect";
+import { Array, ServiceMap, Effect, Layer, Option, Schema } from "effect";
 import type { IngestRunParams } from "../domain/polling";
 import type { EnrichmentRunParams } from "../domain/enrichmentRun";
 
@@ -42,15 +42,15 @@ export type WorkflowFilterEnvBindings =
   & WorkflowIngestEnvBindings
   & WorkflowEnrichmentEnvBindings;
 
-export class WorkflowIngestEnv extends Context.Tag("@skygest/WorkflowIngestEnv")<
+export class WorkflowIngestEnv extends ServiceMap.Service<
   WorkflowIngestEnv,
   WorkflowIngestEnvBindings
->() {}
+>()("@skygest/WorkflowIngestEnv") {}
 
-export class WorkflowEnrichmentEnv extends Context.Tag("@skygest/WorkflowEnrichmentEnv")<
+export class WorkflowEnrichmentEnv extends ServiceMap.Service<
   WorkflowEnrichmentEnv,
   WorkflowEnrichmentEnvBindings
->() {}
+>()("@skygest/WorkflowEnrichmentEnv") {}
 
 const defaultRequired = [
   "DB"
@@ -60,10 +60,10 @@ type EnvRequirementOptions = {
   readonly required?: ReadonlyArray<keyof EnvBindings>;
 };
 
-export class CloudflareEnv extends Context.Tag("@skygest/CloudflareEnv")<
+export class CloudflareEnv extends ServiceMap.Service<
   CloudflareEnv,
   EnvBindings
->() {
+>()("@skygest/CloudflareEnv") {
   static layer = (env: EnvBindings, options?: EnvRequirementOptions) => Layer.effect(
     CloudflareEnv,
     Effect.gen(function* () {

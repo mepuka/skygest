@@ -1,4 +1,4 @@
-import { Context, Effect, Either, Layer } from "effect";
+import { ServiceMap, Effect, Either, Layer } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import {
@@ -47,7 +47,7 @@ const workflowControlFailure = (
     message: stringifyUnknown(cause)
   });
 
-export class EnrichmentRepairService extends Context.Tag("@skygest/EnrichmentRepairService")<
+export class EnrichmentRepairService extends ServiceMap.Service<
   EnrichmentRepairService,
   {
     readonly retryRun: (
@@ -65,7 +65,7 @@ export class EnrichmentRepairService extends Context.Tag("@skygest/EnrichmentRep
       now?: number
     ) => Effect.Effect<EnrichmentRepairSummary, SqlError | DbError>;
   }
->() {
+>()("@skygest/EnrichmentRepairService") {
   static readonly layer = Layer.effect(
     EnrichmentRepairService,
     Effect.gen(function* () {
@@ -232,10 +232,10 @@ export class EnrichmentRepairService extends Context.Tag("@skygest/EnrichmentRep
         } satisfies EnrichmentRepairSummary;
       });
 
-      return EnrichmentRepairService.of({
+      return {
         retryRun,
         repairHistoricalRuns
-      });
+      };
     })
   );
 }

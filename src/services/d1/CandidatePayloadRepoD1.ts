@@ -299,11 +299,11 @@ export const CandidatePayloadRepoD1 = {
         )
       );
 
-    return CandidatePayloadRepo.of({
+    return {
       upsertCapture,
       getByPostUri,
       markPicked,
       saveEnrichment
-    });
+    };
   }))
 };

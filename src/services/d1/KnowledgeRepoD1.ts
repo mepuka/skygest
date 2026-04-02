@@ -992,7 +992,7 @@ export const KnowledgeRepoD1 = {
       yield* sql`INSERT INTO posts_fts(posts_fts) VALUES ('optimize')`.pipe(Effect.asVoid);
     });
 
-    return KnowledgeRepo.of({
+    return {
       upsertPosts,
       markDeleted,
       searchPosts,
@@ -1003,6 +1003,6 @@ export const KnowledgeRepoD1 = {
       getPostLinksPage,
       getPostTopicMatches,
       optimizeFts
-    });
+    };
   }))
 };

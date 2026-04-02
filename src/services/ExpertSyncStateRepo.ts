@@ -1,10 +1,10 @@
-import { Context, Effect } from "effect";
+import { ServiceMap, Effect } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import type { Did } from "../domain/types";
 import type { ExpertSyncStateRecord } from "../domain/polling";
 
-export class ExpertSyncStateRepo extends Context.Tag("@skygest/ExpertSyncStateRepo")<
+export class ExpertSyncStateRepo extends ServiceMap.Service<
   ExpertSyncStateRepo,
   {
     readonly getByDid: (
@@ -14,4 +14,4 @@ export class ExpertSyncStateRepo extends Context.Tag("@skygest/ExpertSyncStateRe
       state: ExpertSyncStateRecord
     ) => Effect.Effect<void, SqlError | DbError>;
   }
->() {}
+>()("@skygest/ExpertSyncStateRepo") {}

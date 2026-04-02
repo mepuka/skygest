@@ -1,4 +1,4 @@
-import { Clock, Context, Effect, Layer } from "effect";
+import { Clock, ServiceMap, Effect, Layer } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import type {
@@ -10,7 +10,7 @@ import type {
 import type { PostUri } from "../domain/types";
 import { CandidatePayloadRepo } from "./CandidatePayloadRepo";
 
-export class CandidatePayloadService extends Context.Tag("@skygest/CandidatePayloadService")<
+export class CandidatePayloadService extends ServiceMap.Service<
   CandidatePayloadService,
   {
     readonly capturePayload: (
@@ -29,7 +29,7 @@ export class CandidatePayloadService extends Context.Tag("@skygest/CandidatePayl
       postUri: PostUri
     ) => Effect.Effect<CandidatePayloadRecord | null, SqlError | DbError>;
   }
->() {
+>()("@skygest/CandidatePayloadService") {
   static readonly layer = Layer.effect(CandidatePayloadService, Effect.gen(function* () {
     const repo = yield* CandidatePayloadRepo;
 
@@ -65,11 +65,11 @@ export class CandidatePayloadService extends Context.Tag("@skygest/CandidatePayl
       return yield* repo.getByPostUri(postUri);
     });
 
-    return CandidatePayloadService.of({
+    return {
       capturePayload,
       markPicked,
       saveEnrichment,
       getPayload
-    });
+    };
   }));
 }

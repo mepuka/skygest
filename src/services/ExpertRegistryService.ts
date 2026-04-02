@@ -1,4 +1,4 @@
-import { Context, Effect, Layer } from "effect";
+import { ServiceMap, Effect, Layer } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import type { AccessIdentity } from "../auth/AuthService";
@@ -39,7 +39,7 @@ const toAdminExpertResult = (expert: ExpertRecord): AdminExpertResult => ({
   tier: expert.tier
 });
 
-export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryService")<
+export class ExpertRegistryService extends ServiceMap.Service<
   ExpertRegistryService,
   {
     readonly addExpert: (
@@ -67,7 +67,7 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
       did: Did
     ) => Effect.Effect<ExpertRecord, ProfileLookupError | SqlError | DbError>;
   }
->() {
+>()("@skygest/ExpertRegistryService") {
   static readonly layer = Layer.effect(
     ExpertRegistryService,
     Effect.gen(function* () {
@@ -243,12 +243,12 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
         );
       });
 
-      return ExpertRegistryService.of({
+      return {
         addExpert,
         setExpertActive,
         listExperts,
         refreshExpertProfile
-      });
+      };
     })
   );
 }

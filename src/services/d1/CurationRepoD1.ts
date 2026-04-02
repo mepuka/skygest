@@ -283,7 +283,7 @@ export const CurationRepoD1 = {
         Effect.map((rows) => rows[0]?.embedType ?? null)
       );
 
-    return CurationRepo.of({
+    return {
       upsertFlag,
       bulkUpsertFlags,
       updateStatus,
@@ -291,6 +291,6 @@ export const CurationRepoD1 = {
       listCandidates,
       postExists,
       getPostEmbedType
-    });
+    };
   }))
 };

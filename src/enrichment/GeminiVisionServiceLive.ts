@@ -262,10 +262,10 @@ export const GeminiVisionServiceLive = Layer.effect(
     // Service
     // -----------------------------------------------------------------------
 
-    return GeminiVisionService.of({
+    return {
       uploadImage,
       classifyImage,
       extractChartData
-    });
+    };
   })
 );

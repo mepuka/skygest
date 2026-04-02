@@ -119,9 +119,9 @@ export const ExpertSyncStateRepoD1 = {
         )
       );
 
-    return ExpertSyncStateRepo.of({
+    return {
       getByDid,
       upsert
-    });
+    };
   }))
 };

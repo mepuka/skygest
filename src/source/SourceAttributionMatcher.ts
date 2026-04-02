@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Schema } from "effect";
+import { ServiceMap, Effect, Layer, Schema } from "effect";
 import { EnrichmentSchemaDecodeError } from "../domain/errors";
 import {
   SourceAttributionMatcherInput,
@@ -27,13 +27,11 @@ const decodeMatcherInput = (input: unknown) =>
     )
   );
 
-export class SourceAttributionMatcher extends Context.Tag(
-  "@skygest/SourceAttributionMatcher"
-)<SourceAttributionMatcher, {
+export class SourceAttributionMatcher extends ServiceMap.Service<SourceAttributionMatcher, {
   readonly match: (
     input: Schema.Schema.Encoded<typeof SourceAttributionMatcherInput>
   ) => Effect.Effect<SourceAttributionMatchResult, EnrichmentSchemaDecodeError>;
-}>() {
+}>()("@skygest/SourceAttributionMatcher") {
   static readonly layer = Layer.effect(
     SourceAttributionMatcher,
     Effect.gen(function* () {
@@ -46,7 +44,7 @@ export class SourceAttributionMatcher extends Context.Tag(
         return matchSourceAttribution(decoded, registry.lookup, publicationContext);
       });
 
-      return SourceAttributionMatcher.of({ match });
+      return { match };
     })
   );
 }

@@ -1,4 +1,4 @@
-import { Context, Effect, Either, Layer, Schema } from "effect";
+import { ServiceMap, Effect, Either, Layer, Schema } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import {
@@ -38,7 +38,7 @@ const launchWorkflow = <A>(operation: string, thunk: () => Promise<A>) =>
       })
   });
 
-export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/EnrichmentWorkflowLauncher")<
+export class EnrichmentWorkflowLauncher extends ServiceMap.Service<
   EnrichmentWorkflowLauncher,
   {
     readonly start: (
@@ -54,7 +54,7 @@ export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/Enrichment
       SqlError | DbError | EnrichmentSchemaDecodeError | EnrichmentWorkflowLaunchError
     >;
   }
->() {
+>()("@skygest/EnrichmentWorkflowLauncher") {
   static readonly layer = Layer.effect(
     EnrichmentWorkflowLauncher,
     Effect.gen(function* () {
@@ -141,10 +141,10 @@ export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/Enrichment
         return queued;
       });
 
-      return EnrichmentWorkflowLauncher.of({
+      return {
         start,
         startIfAbsent
-      });
+      };
     })
   );
 }

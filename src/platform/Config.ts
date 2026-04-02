@@ -1,4 +1,4 @@
-import { Array, Config, ConfigProvider, Context, Effect, Layer, Option, Redacted } from "effect";
+import { Array, Config, ConfigProvider, ServiceMap, Effect, Layer, Option, Redacted } from "effect";
 import { CloudflareEnv } from "./Env";
 
 const RawConfigSchema = Config.all({
@@ -21,10 +21,10 @@ const RawConfigSchema = Config.all({
 
 export type AppConfigShape = Config.Config.Success<typeof RawConfigSchema>;
 
-export class AppConfig extends Context.Tag("@skygest/AppConfig")<
+export class AppConfig extends ServiceMap.Service<
   AppConfig,
   AppConfigShape
->() {
+>()("@skygest/AppConfig") {
   static layer = Layer.effect(
     AppConfig,
     Effect.gen(function* () {

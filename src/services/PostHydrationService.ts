@@ -1,6 +1,6 @@
 import {
   Cache,
-  Context,
+  ServiceMap,
   Duration,
   Effect,
   Layer,
@@ -38,14 +38,14 @@ const toHydration = (post: ThreadPostView): KnowledgePostHydration => ({
   embedContent: buildTypedEmbed(post.embed)
 });
 
-export class PostHydrationService extends Context.Tag("@skygest/PostHydrationService")<
+export class PostHydrationService extends ServiceMap.Service<
   PostHydrationService,
   {
     readonly hydratePosts: <A extends HydratablePost>(
       items: ReadonlyArray<A>
     ) => Effect.Effect<ReadonlyArray<A>>;
   }
->() {
+>()("@skygest/PostHydrationService") {
   static readonly layer = Layer.effect(
     PostHydrationService,
     Effect.gen(function* () {
@@ -145,9 +145,9 @@ export class PostHydrationService extends Context.Tag("@skygest/PostHydrationSer
           Effect.map((hydrated) => hydrated as unknown as ReadonlyArray<A>)
         );
 
-      return PostHydrationService.of({
+      return {
         hydratePosts
-      });
+      };
     })
   );
 }

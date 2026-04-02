@@ -374,7 +374,7 @@ export const EnrichmentRunsRepoD1 = {
         )
       );
 
-    return EnrichmentRunsRepo.of({
+    return {
       createQueuedIfAbsent,
       getById,
       listRunning,
@@ -387,6 +387,6 @@ export const EnrichmentRunsRepoD1 = {
       markNeedsReview,
       resetForRetry,
       listLatestByPostUri
-    });
+    };
   }))
 };

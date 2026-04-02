@@ -1,6 +1,6 @@
 import * as HttpApiBuilder from "effect/unstable/httpapi/HttpApiBuilder";
 import * as HttpServer from "effect/unstable/http/HttpServer";
-import { type Context, Layer } from "effect";
+import { type ServiceMap, Layer } from "effect";
 import { badRequestError } from "../domain/api";
 import { encodeJsonString } from "../platform/Json";
 
@@ -46,7 +46,7 @@ const normalizeBadRequestResponse = async (
 export const handleWithApiLayer = async (
   request: Request,
   layer: Layer.Layer<any, any, never>,
-  context?: Context.Context<never>
+  context?: ServiceMap.ServiceMap<never>
 ): Promise<Response> => {
   const webHandler = HttpApiBuilder.toWebHandler(withPlatformLayer(layer));
 
@@ -70,7 +70,7 @@ export const makeCachedApiHandler = <Env>(
   return async (
     request: Request,
     env: Env,
-    context?: Context.Context<never>
+    context?: ServiceMap.ServiceMap<never>
   ): Promise<Response> => {
     if (cached === null || cached.env !== env) {
       if (cached !== null) {

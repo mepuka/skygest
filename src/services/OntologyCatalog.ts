@@ -1,4 +1,4 @@
-import { Context, Duration, Effect, Layer, Option, Schema } from "effect";
+import { ServiceMap, Duration, Effect, Layer, Option, Schema } from "effect";
 import snapshotJson from "../../config/ontology/energy-snapshot.json";
 import {
   type ExpandedTopicsOutput as ExpandedTopicsOutputType,
@@ -217,7 +217,7 @@ const resolveExpansion = (
   });
 };
 
-export class OntologyCatalog extends Context.Tag("@skygest/OntologyCatalog")<
+export class OntologyCatalog extends ServiceMap.Service<
   OntologyCatalog,
   {
     readonly snapshot: OntologySnapshotType;
@@ -240,7 +240,7 @@ export class OntologyCatalog extends Context.Tag("@skygest/OntologyCatalog")<
       topic: string | undefined
     ) => Effect.Effect<ReadonlyArray<TopicSlug> | undefined>;
   }
->() {
+>()("@skygest/OntologyCatalog") {
   static readonly layer = Layer.effect(
     OntologyCatalog,
     Effect.gen(function* () {
@@ -296,7 +296,7 @@ export class OntologyCatalog extends Context.Tag("@skygest/OntologyCatalog")<
         }
         ).pipe(Effect.withSpan("OntologyCatalog.expandTopics"));
 
-      return OntologyCatalog.of({
+      return {
         get snapshot() {
           return currentCatalog.snapshot;
         },
@@ -316,7 +316,7 @@ export class OntologyCatalog extends Context.Tag("@skygest/OntologyCatalog")<
             Effect.map((r) => r.canonicalTopicSlugs)
           );
         }
-      });
+      };
     })
   );
 }

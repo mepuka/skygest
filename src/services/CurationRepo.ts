@@ -1,4 +1,4 @@
-import { Context, Effect } from "effect";
+import { ServiceMap, Effect } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import type {
@@ -9,7 +9,7 @@ import type {
 } from "../domain/curation";
 import type { KnowledgePost } from "../domain/bi";
 
-export class CurationRepo extends Context.Tag("@skygest/CurationRepo")<
+export class CurationRepo extends ServiceMap.Service<
   CurationRepo,
   {
     readonly upsertFlag: (
@@ -44,4 +44,4 @@ export class CurationRepo extends Context.Tag("@skygest/CurationRepo")<
       postUri: string
     ) => Effect.Effect<KnowledgePost["embedType"], SqlError | DbError>;
   }
->() {}
+>()("@skygest/CurationRepo") {}

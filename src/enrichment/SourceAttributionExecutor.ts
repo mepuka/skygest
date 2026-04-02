@@ -1,4 +1,4 @@
-import { Clock, Context, Effect, Layer, Schema } from "effect";
+import { Clock, ServiceMap, Effect, Layer, Schema } from "effect";
 import {
   SourceAttributionEnrichment,
   type SourceAttributionEnrichment as SourceAttributionEnrichmentShape
@@ -45,16 +45,14 @@ const toMatcherInput = (plan: SourceAttributionExecutionPlanShape) => ({
       }
 });
 
-export class SourceAttributionExecutor extends Context.Tag(
-  "@skygest/SourceAttributionExecutor"
-)<SourceAttributionExecutor, {
+export class SourceAttributionExecutor extends ServiceMap.Service<SourceAttributionExecutor, {
   readonly execute: (
     input: SourceAttributionExecutionPlanShape
   ) => Effect.Effect<
     SourceAttributionEnrichmentShape,
     EnrichmentSchemaDecodeError
   >;
-}>() {
+}>()("@skygest/SourceAttributionExecutor") {
   static readonly layer = Layer.effect(
     SourceAttributionExecutor,
     Effect.gen(function* () {
@@ -85,7 +83,7 @@ export class SourceAttributionExecutor extends Context.Tag(
         }
       );
 
-      return SourceAttributionExecutor.of({ execute });
+      return { execute };
     })
   );
 }

@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Redacted, Schema } from "effect";
+import { ServiceMap, Effect, Layer, Redacted, Schema } from "effect";
 import {
   FetchHttpClient,
   HttpBody,
@@ -115,7 +115,7 @@ const callMcpTool = <A>(
     )
   );
 
-export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperatorClient")<
+export class StagingOperatorClient extends ServiceMap.Service<
   StagingOperatorClient,
   {
     readonly health: (baseUrl: URL) => Effect.Effect<string, StagingRequestError>;
@@ -229,13 +229,13 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
       input: Schema.Schema.Encoded<typeof ImportPostsInput>
     ) => Effect.Effect<Schema.Schema.Type<typeof ImportPostsOutput>, StagingRequestError>;
   }
->() {
+>()("@skygest/StagingOperatorClient") {
   static readonly live = Layer.effect(
     StagingOperatorClient,
     Effect.gen(function* () {
       const http = yield* HttpClient.HttpClient;
 
-      return StagingOperatorClient.of({
+      return {
         health: (baseUrl) =>
           textRequest(http.get(new URL("/health", baseUrl)), "health"),
         migrate: (baseUrl, secret) =>
@@ -428,7 +428,7 @@ export class StagingOperatorClient extends Context.Tag("@skygest/StagingOperator
             ImportPostsOutput,
             "import-posts"
           )
-      });
+      };
     })
   ).pipe(Layer.provide(FetchHttpClient.layer));
 }

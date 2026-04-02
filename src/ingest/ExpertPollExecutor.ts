@@ -1,4 +1,4 @@
-import { Context, Effect, Layer } from "effect";
+import { ServiceMap, Effect, Layer } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import type {
@@ -170,7 +170,7 @@ const emptyPollWindowState = (initialCursor?: string | null): PollWindowState =>
   completed: false
 });
 
-export class ExpertPollExecutor extends Context.Tag("@skygest/ExpertPollExecutor")<
+export class ExpertPollExecutor extends ServiceMap.Service<
   ExpertPollExecutor,
   {
     readonly runExpert: (
@@ -187,7 +187,7 @@ export class ExpertPollExecutor extends Context.Tag("@skygest/ExpertPollExecutor
       ExpertNotFoundError | BlueskyApiError | SqlError | DbError
     >;
   }
->() {
+>()("@skygest/ExpertPollExecutor") {
   static readonly layer = Layer.effect(
     ExpertPollExecutor,
     Effect.gen(function* () {
@@ -522,10 +522,10 @@ export class ExpertPollExecutor extends Context.Tag("@skygest/ExpertPollExecutor
         return yield* runExpert(expert, request, options);
       });
 
-      return ExpertPollExecutor.of({
+      return {
         runExpert,
         runDid
-      });
+      };
     })
   );
 }

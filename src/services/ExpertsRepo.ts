@@ -1,9 +1,9 @@
-import { Context, Effect } from "effect";
+import { ServiceMap, Effect } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import type { ExpertListItem, ExpertRecord } from "../domain/bi";
 
-export class ExpertsRepo extends Context.Tag("@skygest/ExpertsRepo")<
+export class ExpertsRepo extends ServiceMap.Service<
   ExpertsRepo,
   {
     readonly upsert: (expert: ExpertRecord) => Effect.Effect<void, SqlError | DbError>;
@@ -28,4 +28,4 @@ export class ExpertsRepo extends Context.Tag("@skygest/ExpertsRepo")<
       dids: ReadonlyArray<string>
     ) => Effect.Effect<ReadonlyArray<ExpertRecord>, SqlError | DbError>;
   }
->() {}
+>()("@skygest/ExpertsRepo") {}

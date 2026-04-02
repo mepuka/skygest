@@ -319,7 +319,7 @@ export const IngestRunsRepoD1 = {
         Effect.flatMap((validated) => applyTerminalUpdate("failed", validated))
       );
 
-    return IngestRunsRepo.of({
+    return {
       createQueuedIfAbsent,
       getById,
       listRunning,
@@ -329,6 +329,6 @@ export const IngestRunsRepoD1 = {
       updateProgress,
       markComplete,
       markFailed
-    });
+    };
   }))
 };

@@ -96,7 +96,7 @@ const registerToolkitWithDisplayText: <
       tool: mcpTool,
       handle(payload) {
         return built.handle(tool.name as any, payload).pipe(
-          Effect.provide(context as Context.Context<any>),
+          Effect.provide(context as Context.ServiceMap<any>),
           Effect.match({
             // Failure path — identical to stock implementation
             onFailure: (error) =>

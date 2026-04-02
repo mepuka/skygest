@@ -1,4 +1,4 @@
-import { Context, Effect, Layer } from "effect";
+import { ServiceMap, Effect, Layer } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import type {
@@ -38,7 +38,7 @@ import type {
 } from "../domain/bi";
 import { PublicationsRepo } from "./PublicationsRepo";
 
-export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryService")<
+export class KnowledgeQueryService extends ServiceMap.Service<
   KnowledgeQueryService,
   {
     readonly searchPosts: (
@@ -78,7 +78,7 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
       input: ListPublicationsInput
     ) => Effect.Effect<ReadonlyArray<PublicationListItem>, SqlError | DbError>;
   }
->() {
+>()("@skygest/KnowledgeQueryService") {
   static readonly layer = Layer.effect(
     KnowledgeQueryService,
     Effect.gen(function* () {
@@ -270,7 +270,7 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
         });
       });
 
-      return KnowledgeQueryService.of({
+      return {
         searchPosts,
         searchPostsPage,
         getRecentPosts,
@@ -283,7 +283,7 @@ export class KnowledgeQueryService extends Context.Tag("@skygest/KnowledgeQueryS
         expandTopics,
         explainPostTopics,
         listPublications
-      });
+      };
     })
   );
 }

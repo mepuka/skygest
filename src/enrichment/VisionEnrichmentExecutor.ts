@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Schema } from "effect";
+import { ServiceMap, Effect, Layer, Schema } from "effect";
 import {
   type VisionEnrichment,
   VisionEnrichment as VisionEnrichmentSchema,
@@ -138,7 +138,7 @@ const combineFindings = (
   }));
 };
 
-export class VisionEnrichmentExecutor extends Context.Tag("@skygest/VisionEnrichmentExecutor")<
+export class VisionEnrichmentExecutor extends ServiceMap.Service<
   VisionEnrichmentExecutor,
   {
     readonly execute: (
@@ -151,7 +151,7 @@ export class VisionEnrichmentExecutor extends Context.Tag("@skygest/VisionEnrich
       | GeminiParseError
     >;
   }
->() {
+>()("@skygest/VisionEnrichmentExecutor") {
   static readonly layer = Layer.effect(
     VisionEnrichmentExecutor,
     Effect.gen(function* () {
@@ -290,9 +290,9 @@ export class VisionEnrichmentExecutor extends Context.Tag("@skygest/VisionEnrich
         );
       });
 
-      return VisionEnrichmentExecutor.of({
+      return {
         execute
-      });
+      };
     })
   );
 }

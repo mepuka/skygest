@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Option } from "effect";
+import { ServiceMap, Effect, Layer, Option } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import type {
@@ -12,16 +12,14 @@ import {
   computeReadiness
 } from "../enrichment/PostEnrichmentReadModel";
 
-export class PostEnrichmentReadService extends Context.Tag(
-  "@skygest/PostEnrichmentReadService"
-)<
+export class PostEnrichmentReadService extends ServiceMap.Service<
   PostEnrichmentReadService,
   {
     readonly getPost: (
       postUri: string
     ) => Effect.Effect<GetPostEnrichmentsOutput, SqlError | DbError>;
   }
->() {
+>()("@skygest/PostEnrichmentReadService") {
   static readonly layer = Layer.effect(
     PostEnrichmentReadService,
     Effect.gen(function* () {
@@ -68,7 +66,7 @@ export class PostEnrichmentReadService extends Context.Tag(
         }
       );
 
-      return PostEnrichmentReadService.of({ getPost });
+      return { getPost };
     })
   );
 }

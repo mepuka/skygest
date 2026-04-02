@@ -318,7 +318,7 @@ export const ExpertsRepoD1 = {
       );
     };
 
-    return ExpertsRepo.of({
+    return {
       upsert,
       upsertMany,
       getByDid,
@@ -328,6 +328,6 @@ export const ExpertsRepoD1 = {
       listActiveByShard,
       list,
       getByDids
-    });
+    };
   }))
 };

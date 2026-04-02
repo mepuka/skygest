@@ -1,4 +1,4 @@
-import { Context, Effect, Layer } from "effect";
+import { ServiceMap, Effect, Layer } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import {
@@ -61,7 +61,7 @@ const itemFailureAttemptCount = (item: IngestRunItemRecord) =>
     ? Math.max(item.attemptCount, 1)
     : item.attemptCount;
 
-export class IngestRepairService extends Context.Tag("@skygest/IngestRepairService")<
+export class IngestRepairService extends ServiceMap.Service<
   IngestRepairService,
   {
     readonly repairLiveRun: (
@@ -72,7 +72,7 @@ export class IngestRepairService extends Context.Tag("@skygest/IngestRepairServi
       now?: number
     ) => Effect.Effect<IngestRepairSummary, SqlError | DbError>;
   }
->() {
+>()("@skygest/IngestRepairService") {
   static readonly layer = Layer.effect(
     IngestRepairService,
     Effect.gen(function* () {
@@ -301,10 +301,10 @@ export class IngestRepairService extends Context.Tag("@skygest/IngestRepairServi
         return summaries.reduce(addRepairSummary, emptyRepairSummary());
       });
 
-      return IngestRepairService.of({
+      return {
         repairLiveRun,
         repairHistoricalRuns
-      });
+      };
     })
   );
 }

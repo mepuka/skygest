@@ -1,12 +1,12 @@
-import { Config, Context, Effect, Layer, Redacted } from "effect";
+import { Config, ServiceMap, Effect, Layer, Redacted } from "effect";
 import { MissingOperatorSecretEnvError } from "./Errors";
 
-export class OperatorSecret extends Context.Tag("@skygest/OperatorSecret")<
+export class OperatorSecret extends ServiceMap.Service<
   OperatorSecret,
   {
     readonly value: Redacted.Redacted<string>;
   }
->() {
+>()("@skygest/OperatorSecret") {
   static readonly live = Layer.effect(
     OperatorSecret,
     Effect.gen(function* () {
@@ -24,7 +24,7 @@ export class OperatorSecret extends Context.Tag("@skygest/OperatorSecret")<
         });
       }
 
-      return OperatorSecret.of({ value });
+      return { value };
     })
   );
 }

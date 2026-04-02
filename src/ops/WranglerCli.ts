@@ -1,9 +1,9 @@
 import { ChildProcess as Command, ChildProcessSpawner as CommandExecutor } from "effect/unstable/process";
-import { Context, Effect, Layer } from "effect";
+import { ServiceMap, Effect, Layer } from "effect";
 import { stringifyUnknown } from "../platform/Json";
 import { WranglerDeployError } from "./Errors";
 
-export class WranglerCli extends Context.Tag("@skygest/WranglerCli")<
+export class WranglerCli extends ServiceMap.Service<
   WranglerCli,
   {
     readonly deploy: (
@@ -11,7 +11,7 @@ export class WranglerCli extends Context.Tag("@skygest/WranglerCli")<
       env: string
     ) => Effect.Effect<void, WranglerDeployError>;
   }
->() {
+>()("@skygest/WranglerCli") {
   static readonly live = Layer.effect(
     WranglerCli,
     Effect.gen(function* () {
@@ -52,9 +52,9 @@ export class WranglerCli extends Context.Tag("@skygest/WranglerCli")<
         }
       });
 
-      return WranglerCli.of({
+      return {
         deploy
-      });
+      };
     })
   );
 }

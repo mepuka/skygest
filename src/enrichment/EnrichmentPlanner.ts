@@ -1,6 +1,6 @@
 import { SqlClient } from "effect/unstable/sql";
 import type { SqlError } from "effect/unstable/sql";
-import { Context, Effect, Either, Layer, Schema } from "effect";
+import { ServiceMap, Effect, Either, Layer, Schema } from "effect";
 import {
   CandidatePayloadNotPickedError,
   type CandidatePayloadRecord
@@ -212,7 +212,7 @@ const selectVisionEnrichment = (
   return selected;
 };
 
-export class EnrichmentPlanner extends Context.Tag("@skygest/EnrichmentPlanner")<
+export class EnrichmentPlanner extends ServiceMap.Service<
   EnrichmentPlanner,
   {
     readonly plan: (
@@ -226,7 +226,7 @@ export class EnrichmentPlanner extends Context.Tag("@skygest/EnrichmentPlanner")
       | EnrichmentPostContextMissingError
     >;
   }
->() {
+>()("@skygest/EnrichmentPlanner") {
   static readonly layer = Layer.effect(
     EnrichmentPlanner,
     Effect.gen(function* () {
@@ -396,9 +396,9 @@ export class EnrichmentPlanner extends Context.Tag("@skygest/EnrichmentPlanner")
         );
       });
 
-      return EnrichmentPlanner.of({
+      return {
         plan
-      });
+      };
     })
   );
 }

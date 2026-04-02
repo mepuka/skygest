@@ -1,4 +1,4 @@
-import { Clock, Context, Effect, Layer, Option } from "effect";
+import { Clock, ServiceMap, Effect, Layer, Option } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import { BlueskyApiError } from "../domain/errors";
@@ -34,7 +34,7 @@ import {
 import type { PostContext } from "../curation/CurationPredicates";
 import { EnrichmentWorkflowLauncher } from "../enrichment/EnrichmentWorkflowLauncher";
 
-export class CurationService extends Context.Tag("@skygest/CurationService")<
+export class CurationService extends ServiceMap.Service<
   CurationService,
   {
     readonly flagBatch: (
@@ -50,7 +50,7 @@ export class CurationService extends Context.Tag("@skygest/CurationService")<
       curator: string
     ) => Effect.Effect<CuratePostOutput, SqlError | DbError | CurationPostNotFoundError | BlueskyApiError>;
   }
->() {
+>()("@skygest/CurationService") {
   static readonly layer = Layer.effect(CurationService, Effect.gen(function* () {
     const curationRepo = yield* CurationRepo;
     const expertsRepo = yield* ExpertsRepo;
@@ -308,10 +308,10 @@ const clampCurationLimit = (limit: number | undefined) =>
       }
     );
 
-    return CurationService.of({
+    return {
       flagBatch,
       listCandidates,
       curatePost
-    });
+    };
   }));
 }

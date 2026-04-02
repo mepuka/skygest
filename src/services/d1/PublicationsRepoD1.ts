@@ -205,11 +205,11 @@ export const PublicationsRepoD1 = {
       );
     };
 
-    return PublicationsRepo.of({
+    return {
       seedCurated,
       list,
       ensureDomains,
       getByHostnames
-    });
+    };
   }))
 };

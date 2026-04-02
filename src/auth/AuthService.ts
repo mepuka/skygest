@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Redacted, Schema } from "effect";
+import { ServiceMap, Effect, Layer, Redacted, Schema } from "effect";
 import { AppConfig } from "../platform/Config";
 
 const AUTHORIZATION_HEADER = "authorization";
@@ -64,7 +64,7 @@ const timingSafeEqual = (a: string, b: string): Effect.Effect<boolean> => {
   });
 };
 
-export class AuthService extends Context.Tag("@skygest/AuthService")<
+export class AuthService extends ServiceMap.Service<
   AuthService,
   {
     readonly requireOperator: (
@@ -74,7 +74,7 @@ export class AuthService extends Context.Tag("@skygest/AuthService")<
       MissingOperatorSecretError | InvalidOperatorSecretError
     >;
   }
->() {
+>()("@skygest/AuthService") {
   static readonly layer = Layer.effect(
     AuthService,
     Effect.gen(function* () {
@@ -105,9 +105,9 @@ export class AuthService extends Context.Tag("@skygest/AuthService")<
         } satisfies AccessIdentity;
       });
 
-      return AuthService.of({
+      return {
         requireOperator
-      });
+      };
     })
   );
 }

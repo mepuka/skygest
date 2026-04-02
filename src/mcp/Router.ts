@@ -1,6 +1,6 @@
 import { McpServer } from "effect/unstable/ai";
 import * as HttpLayerRouter from "effect/unstable/http/HttpRouter";
-import { Context, Effect, Layer } from "effect";
+import { ServiceMap, Effect, Layer } from "effect";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { makeQueryLayer } from "../edge/Layer";
 import type { EnvBindings } from "../platform/Env";
@@ -96,7 +96,7 @@ export const handleMcpRequestWithLayer = async (
 
 /** Web handler shape with an explicit context parameter for OperatorIdentity */
 type McpWebHandler = {
-  readonly handler: (request: globalThis.Request, context: Context.Context<OperatorIdentity>) => Promise<Response>;
+  readonly handler: (request: globalThis.Request, context: ServiceMap.ServiceMap<OperatorIdentity>) => Promise<Response>;
   readonly dispose: () => Promise<void>;
 };
 

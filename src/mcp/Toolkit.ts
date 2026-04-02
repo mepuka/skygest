@@ -1,7 +1,7 @@
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import { Tool, Toolkit } from "effect/unstable/ai";
-import { Context, Effect, Layer, Option, Schema } from "effect";
+import { Effect, Layer, Option, Schema } from "effect";
 import {
   ExplainPostTopicsInput,
   ExpandTopicsInput,
@@ -405,14 +405,14 @@ const extractCreatedAt = (record: unknown, fallbackIndexedAt: string): string =>
 };
 
 // ---------------------------------------------------------------------------
-// Service inner types (what `yield*` returns from Context.Tag)
+// Service inner types (what `yield*` returns from ServiceMap.Service)
 // ---------------------------------------------------------------------------
 
-type KnowledgeQueryServiceI = Context.Tag.Service<typeof KnowledgeQueryService>;
-type EditorialServiceI = Context.Tag.Service<typeof EditorialService>;
-type CurationServiceI = Context.Tag.Service<typeof CurationService>;
-type BlueskyClientI = Context.Tag.Service<typeof BlueskyClient>;
-type PostEnrichmentReadServiceI = Context.Tag.Service<typeof PostEnrichmentReadService>;
+type KnowledgeQueryServiceI = (typeof KnowledgeQueryService)["Service"];
+type EditorialServiceI = (typeof EditorialService)["Service"];
+type CurationServiceI = (typeof CurationService)["Service"];
+type BlueskyClientI = (typeof BlueskyClient)["Service"];
+type PostEnrichmentReadServiceI = (typeof PostEnrichmentReadService)["Service"];
 
 // ---------------------------------------------------------------------------
 // Shared read-only handler implementations

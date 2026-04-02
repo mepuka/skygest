@@ -1,4 +1,4 @@
-import { Context, Effect } from "effect";
+import { ServiceMap, Effect } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import type {
@@ -14,7 +14,7 @@ import type {
   UpdateIngestRunItemCounts
 } from "../domain/polling";
 
-export class IngestRunItemsRepo extends Context.Tag("@skygest/IngestRunItemsRepo")<
+export class IngestRunItemsRepo extends ServiceMap.Service<
   IngestRunItemsRepo,
   {
     readonly createMany: (
@@ -63,4 +63,4 @@ export class IngestRunItemsRepo extends Context.Tag("@skygest/IngestRunItemsRepo
       runId: string
     ) => Effect.Effect<IngestRunItemSummary, SqlError | DbError>;
   }
->() {}
+>()("@skygest/IngestRunItemsRepo") {}

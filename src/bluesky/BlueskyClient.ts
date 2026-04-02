@@ -1,7 +1,7 @@
 import {
   Cache,
   Clock,
-  Context,
+  ServiceMap,
   Duration,
   Effect,
   Layer,
@@ -131,7 +131,7 @@ type HostGate = {
   readonly lastCompletedAt: SynchronizedRef.SynchronizedRef<number>;
 };
 
-export class BlueskyClient extends Context.Tag("@skygest/BlueskyClient")<
+export class BlueskyClient extends ServiceMap.Service<
   BlueskyClient,
   {
     readonly resolveDidOrHandle: (
@@ -162,7 +162,7 @@ export class BlueskyClient extends Context.Tag("@skygest/BlueskyClient")<
       uris: ReadonlyArray<string>
     ) => Effect.Effect<ReadonlyArray<ThreadPostView>, BlueskyApiError>;
   }
->() {}
+>()("@skygest/BlueskyClient") {}
 
 export const makeBlueskyClient = (base: string) =>
   Effect.gen(function* () {
@@ -335,7 +335,7 @@ export const makeBlueskyClient = (base: string) =>
             Effect.map((body) => body.posts)
           );
 
-    return BlueskyClient.of({
+    return {
       resolveDidOrHandle,
       getProfile,
       getFollows,
@@ -343,7 +343,7 @@ export const makeBlueskyClient = (base: string) =>
       listRecordsAtService,
       getPostThread,
       getPosts
-    });
+    };
   });
 
 export const layer = Layer.effect(

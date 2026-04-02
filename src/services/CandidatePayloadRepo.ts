@@ -1,4 +1,4 @@
-import { Context, Effect } from "effect";
+import { ServiceMap, Effect } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import type {
@@ -7,7 +7,7 @@ import type {
   SaveCandidateEnrichmentInput
 } from "../domain/candidatePayload";
 
-export class CandidatePayloadRepo extends Context.Tag("@skygest/CandidatePayloadRepo")<
+export class CandidatePayloadRepo extends ServiceMap.Service<
   CandidatePayloadRepo,
   {
     /** Upsert a durable candidate/picked payload snapshot. Returns true if new, false if updated. */
@@ -33,4 +33,4 @@ export class CandidatePayloadRepo extends Context.Tag("@skygest/CandidatePayload
       enrichedAt: number
     ) => Effect.Effect<boolean, SqlError | DbError | CandidatePayloadNotPickedError>;
   }
->() {}
+>()("@skygest/CandidatePayloadRepo") {}

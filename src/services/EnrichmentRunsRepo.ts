@@ -1,4 +1,4 @@
-import { Context, Effect } from "effect";
+import { ServiceMap, Effect } from "effect";
 import type { SqlError } from "effect/unstable/sql";
 import type { DbError } from "../domain/errors";
 import type {
@@ -13,7 +13,7 @@ import type {
   ResetEnrichmentRunForRetry
 } from "../domain/enrichmentRun";
 
-export class EnrichmentRunsRepo extends Context.Tag("@skygest/EnrichmentRunsRepo")<
+export class EnrichmentRunsRepo extends ServiceMap.Service<
   EnrichmentRunsRepo,
   {
     readonly createQueuedIfAbsent: (
@@ -49,4 +49,4 @@ export class EnrichmentRunsRepo extends Context.Tag("@skygest/EnrichmentRunsRepo
       postUri: string
     ) => Effect.Effect<ReadonlyArray<EnrichmentRunRecord>, SqlError | DbError>;
   }
->() {}
+>()("@skygest/EnrichmentRunsRepo") {}
