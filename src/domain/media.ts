@@ -43,7 +43,7 @@ export const normalizeMediaType = (raw: string): string => {
 // Chart type taxonomy (from ChartTypeScheme, 14 concepts)
 // ---------------------------------------------------------------------------
 
-export const ChartType = Schema.Literals([
+export const ChartTypeMembers = [
   "area-chart",
   "bar-chart",
   "candlestick-chart",
@@ -64,7 +64,9 @@ export const ChartType = Schema.Literals([
   "timeline-chart",
   "treemap",
   "waterfall-chart"
-]);
+] as const;
+
+export const ChartType = Schema.Literals(ChartTypeMembers);
 export type ChartType = Schema.Schema.Type<typeof ChartType>;
 
 /** Normalize a Gemini chartType to canonical kebab-case form.

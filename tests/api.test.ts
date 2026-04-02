@@ -148,6 +148,7 @@ const makeVisionEnrichmentPayload = () => ({
       source: "embed" as const,
       index: 0,
       originalAltText: null,
+      extractionRoute: "full" as const,
       analysis: {
         mediaType: "chart" as const,
         chartTypes: ["bar-chart"] as const,

@@ -56,6 +56,9 @@ export const defaultSchemaVersionForEnrichmentKind = (
 const VisionAssetType = Schema.Literals(["image", "video"]);
 const VisionAssetSource = Schema.Literals(["embed", "media"]);
 
+export const ExtractionRoute = Schema.Literals(["full", "lightweight"]);
+export type ExtractionRoute = Schema.Schema.Type<typeof ExtractionRoute>;
+
 // ---------------------------------------------------------------------------
 // Vision enrichment (SKY-16: chart analysis + alt text)
 // ---------------------------------------------------------------------------
@@ -155,6 +158,9 @@ export const VisionAssetEnrichment = Schema.Struct({
   source: VisionAssetSource,
   index: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   originalAltText: Schema.NullOr(Schema.String),
+  extractionRoute: ExtractionRoute.pipe(
+    Schema.withDecodingDefaultKey(() => "full" as const)
+  ),
   analysis: VisionAssetAnalysis
 });
 export type VisionAssetEnrichment = Schema.Schema.Type<

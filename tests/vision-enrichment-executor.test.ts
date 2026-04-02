@@ -92,9 +92,14 @@ describe("VisionEnrichmentExecutor", () => {
                   };
                 }),
               classifyImage: () =>
-                Effect.die("classification is not used in SKY-40"),
+                Effect.succeed({
+                  mediaType: "chart" as const,
+                  chartTypes: ["bar-chart" as const],
+                  hasDataPoints: true,
+                  isCompound: false
+                }),
               extractImageSummary: () =>
-                Effect.die("extractImageSummary is not used in SKY-40"),
+                Effect.die("extractImageSummary should not run for eligible charts"),
               extractChartData: (_imageUri, _mimeType) =>
                 Effect.sync(() => {
                   analysisIndex += 1;

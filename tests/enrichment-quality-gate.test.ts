@@ -16,6 +16,7 @@ const makeAsset = (
   source: "embed",
   index: 0,
   originalAltText: null,
+  extractionRoute: "full",
   analysis: {
     mediaType: "chart",
     chartTypes: ["line-chart"],

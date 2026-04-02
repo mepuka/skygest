@@ -143,6 +143,7 @@ const makeVisionEnrichment = (): VisionEnrichment => ({
       source: "embed",
       index: 0,
       originalAltText: null,
+      extractionRoute: "full",
       analysis: {
         mediaType: "chart",
         chartTypes: ["bar-chart"],
@@ -505,6 +506,7 @@ describe("EnrichmentRunWorkflow", () => {
             source: "embed",
             index: 0,
             originalAltText: null,
+            extractionRoute: "full",
             analysis: {
               mediaType: "photo",
               chartTypes: [],
