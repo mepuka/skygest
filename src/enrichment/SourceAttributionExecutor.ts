@@ -1,4 +1,4 @@
-import { Clock, Context, Effect, Layer, Schema } from "effect";
+import { Clock, ServiceMap, Effect, Layer, Schema } from "effect";
 import {
   SourceAttributionEnrichment,
   type SourceAttributionEnrichment as SourceAttributionEnrichmentShape
@@ -12,9 +12,9 @@ import { formatSchemaParseError } from "../platform/Json";
 import { SourceAttributionMatcher } from "../source/SourceAttributionMatcher";
 
 const decodePlan = (input: unknown) =>
-  Schema.decodeUnknown(SourceAttributionExecutionPlan)(input).pipe(
+  Schema.decodeUnknownEffect(SourceAttributionExecutionPlan)(input).pipe(
     Effect.mapError((error) =>
-      EnrichmentSchemaDecodeError.make({
+      new EnrichmentSchemaDecodeError({
         message: formatSchemaParseError(error),
         operation: "SourceAttributionExecutor.execute"
       })
@@ -45,16 +45,14 @@ const toMatcherInput = (plan: SourceAttributionExecutionPlanShape) => ({
       }
 });
 
-export class SourceAttributionExecutor extends Context.Tag(
-  "@skygest/SourceAttributionExecutor"
-)<SourceAttributionExecutor, {
+export class SourceAttributionExecutor extends ServiceMap.Service<SourceAttributionExecutor, {
   readonly execute: (
     input: SourceAttributionExecutionPlanShape
   ) => Effect.Effect<
     SourceAttributionEnrichmentShape,
     EnrichmentSchemaDecodeError
   >;
-}>() {
+}>()("@skygest/SourceAttributionExecutor") {
   static readonly layer = Layer.effect(
     SourceAttributionExecutor,
     Effect.gen(function* () {
@@ -66,7 +64,7 @@ export class SourceAttributionExecutor extends Context.Tag(
           const match = yield* matcher.match(toMatcherInput(plan));
           const processedAt = yield* Clock.currentTimeMillis;
 
-          return yield* Schema.decodeUnknown(SourceAttributionEnrichment)({
+          return yield* Schema.decodeUnknownEffect(SourceAttributionEnrichment)({
             kind: "source-attribution",
             provider: match.provider,
             resolution: match.resolution,
@@ -76,7 +74,7 @@ export class SourceAttributionExecutor extends Context.Tag(
             processedAt
           }).pipe(
             Effect.mapError((error) =>
-              EnrichmentSchemaDecodeError.make({
+              new EnrichmentSchemaDecodeError({
                 message: formatSchemaParseError(error),
                 operation: "SourceAttributionExecutor.execute"
               })
@@ -85,7 +83,7 @@ export class SourceAttributionExecutor extends Context.Tag(
         }
       );
 
-      return SourceAttributionExecutor.of({ execute });
+      return { execute };
     })
   );
 }

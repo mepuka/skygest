@@ -1,6 +1,6 @@
-import { McpServer } from "@effect/ai";
-import * as HttpLayerRouter from "@effect/platform/HttpLayerRouter";
-import { Context, Effect, Layer } from "effect";
+import { McpServer } from "effect/unstable/ai";
+import * as HttpLayerRouter from "effect/unstable/http/HttpRouter";
+import { ServiceMap, Effect, Layer } from "effect";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { makeQueryLayer } from "../edge/Layer";
 import type { EnvBindings } from "../platform/Env";
@@ -37,7 +37,7 @@ const GlossaryResource = McpServer.resource({
 
 type QueryLayer = Layer.Layer<KnowledgeQueryService | EditorialService | CurationService | BlueskyClient | PostEnrichmentReadService, any, never>;
 
-const mcpServerLayer = McpServer.layerHttpRouter({
+const mcpServerLayer = McpServer.layerHttp({
   name: "skygest-bi-mcp",
   version: "0.1.0",
   path: "/mcp"
@@ -68,9 +68,9 @@ const makeMcpLayer = (
     }
   })();
 
-  const promptsLayer: Layer.Layer<never, never, never> = profile === "workflow-write"
+  const promptsLayer = (profile === "workflow-write"
     ? WorkflowPromptsLayer
-    : ReadOnlyPromptsLayer;
+    : ReadOnlyPromptsLayer) as Layer.Layer<never, never, never>;
 
   return toolkitAndHandlers.pipe(
     Layer.provideMerge(GlossaryResource),
@@ -94,9 +94,29 @@ export const handleMcpRequestWithLayer = async (
   }
 };
 
+/**
+ * Create a persistent MCP handler that keeps the web handler alive across
+ * requests. This is required because the MCP server tracks sessions — the
+ * session created during `initialize` must be available for subsequent
+ * `tools/list`, `tools/call`, etc. requests.
+ */
+export const createPersistentMcpHandler = (
+  layer: QueryLayer,
+  identity: AccessIdentity = { subject: null, email: null, scopes: ["mcp:read"] }
+) => {
+  const profile = profileForIdentity(identity);
+  const webHandler = HttpLayerRouter.toWebHandler(makeMcpLayer(layer, profile));
+  const context = operatorIdentityContext(identity);
+
+  return {
+    handler: (request: Request) => webHandler.handler(request, context),
+    dispose: () => webHandler.dispose()
+  };
+};
+
 /** Web handler shape with an explicit context parameter for OperatorIdentity */
 type McpWebHandler = {
-  readonly handler: (request: globalThis.Request, context: Context.Context<OperatorIdentity>) => Promise<Response>;
+  readonly handler: (request: globalThis.Request, context: ServiceMap.ServiceMap<OperatorIdentity>) => Promise<Response>;
   readonly dispose: () => Promise<void>;
 };
 

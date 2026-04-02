@@ -9,7 +9,7 @@
  * Implementation lives in a separate module (Task 2).
  */
 
-import { Context, Effect, Schema } from "effect";
+import { ServiceMap, Effect, Schema } from "effect";
 import type { VisionAssetAnalysis } from "../domain/enrichment";
 import { MediaType, ChartType } from "../domain/media";
 import type { GeminiApiError, GeminiParseError } from "../domain/errors";
@@ -39,7 +39,7 @@ export type UploadedFile = Schema.Schema.Type<typeof UploadedFile>;
 // Service interface
 // ---------------------------------------------------------------------------
 
-export class GeminiVisionService extends Context.Tag("@skygest/GeminiVisionService")<
+export class GeminiVisionService extends ServiceMap.Service<
   GeminiVisionService,
   {
     readonly uploadImage: (
@@ -57,4 +57,4 @@ export class GeminiVisionService extends Context.Tag("@skygest/GeminiVisionServi
       mimeType: string
     ) => Effect.Effect<VisionAssetAnalysis, GeminiApiError | GeminiParseError>;
   }
->() {}
+>()("@skygest/GeminiVisionService") {}

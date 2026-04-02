@@ -1,5 +1,5 @@
 import { Effect, Layer, Schema } from "effect";
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import { PublicationsRepo } from "../PublicationsRepo";
 import type {
   ListPublicationsInput,
@@ -205,11 +205,11 @@ export const PublicationsRepoD1 = {
       );
     };
 
-    return PublicationsRepo.of({
+    return {
       seedCurated,
       list,
       ensureDomains,
       getByHostnames
-    });
+    };
   }))
 };

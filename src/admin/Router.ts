@@ -1,22 +1,15 @@
-import * as HttpApi from "@effect/platform/HttpApi";
-import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder";
-import * as HttpApiEndpoint from "@effect/platform/HttpApiEndpoint";
-import * as HttpApiGroup from "@effect/platform/HttpApiGroup";
-import { SqlClient } from "@effect/sql";
+import * as HttpApi from "effect/unstable/httpapi/HttpApi";
+import * as HttpApiBuilder from "effect/unstable/httpapi/HttpApiBuilder";
+import * as HttpApiEndpoint from "effect/unstable/httpapi/HttpApiEndpoint";
+import * as HttpApiGroup from "effect/unstable/httpapi/HttpApiGroup";
+import { SqlClient } from "effect/unstable/sql";
 import { Effect, Layer } from "effect";
 import type { AccessIdentity } from "../auth/AuthService";
 import {
   AdminRequestSchemas,
   AdminResponseSchemas,
-  BadRequestError,
-  ConflictError,
-  ForbiddenError,
-  InternalServerError,
-  notFoundError,
-  NotFoundError,
-  ServiceUnavailableError,
-  UnauthorizedError,
-  UpstreamFailureError
+  ApiErrorSchemas,
+  notFoundError
 } from "../domain/api";
 import type { ImportPostInput, ImportExpertInput } from "../domain/api";
 import type { KnowledgePost, ExpertRecord, LinkRecord } from "../domain/bi";
@@ -41,91 +34,125 @@ const AdminApi = HttpApi.make("admin")
   .add(
     HttpApiGroup.make("experts")
       .add(
-        HttpApiEndpoint.get("list", "/admin/experts")
-          .setUrlParams(AdminRequestSchemas.listExperts)
-          .addSuccess(AdminResponseSchemas.listExperts)
+        HttpApiEndpoint.get("list", "/admin/experts", {
+          disableCodecs: true,
+          query: AdminRequestSchemas.listExperts,
+          success: AdminResponseSchemas.listExperts,
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.post("add", "/admin/experts")
-          .setPayload(AdminRequestSchemas.addExpert)
-          .addSuccess(AdminResponseSchemas.addExpert)
+        HttpApiEndpoint.post("add", "/admin/experts", {
+          disableCodecs: true,
+          payload: AdminRequestSchemas.addExpert,
+          success: AdminResponseSchemas.addExpert,
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.post("setActive", "/admin/experts/:did/activate")
-          .setPath(AdminRequestSchemas.expertPath)
-          .setPayload(AdminRequestSchemas.setExpertActive)
-          .addSuccess(AdminResponseSchemas.setExpertActive)
+        HttpApiEndpoint.post("setActive", "/admin/experts/:did/activate", {
+          disableCodecs: true,
+          params: AdminRequestSchemas.expertPath,
+          payload: AdminRequestSchemas.setExpertActive,
+          success: AdminResponseSchemas.setExpertActive,
+          error: ApiErrorSchemas
+        })
       )
   )
   .add(
     HttpApiGroup.make("stagingOps")
       .add(
-        HttpApiEndpoint.post("migrate", "/admin/ops/migrate")
-          .addSuccess(AdminResponseSchemas.migrate)
+        HttpApiEndpoint.post("migrate", "/admin/ops/migrate", {
+          disableCodecs: true,
+          success: AdminResponseSchemas.migrate,
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.post("bootstrapExperts", "/admin/ops/bootstrap-experts")
-          .addSuccess(AdminResponseSchemas.bootstrapExperts)
+        HttpApiEndpoint.post("bootstrapExperts", "/admin/ops/bootstrap-experts", {
+          disableCodecs: true,
+          success: AdminResponseSchemas.bootstrapExperts,
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.post("loadSmokeFixture", "/admin/ops/load-smoke-fixture")
-          .addSuccess(AdminResponseSchemas.loadSmokeFixture)
+        HttpApiEndpoint.post("loadSmokeFixture", "/admin/ops/load-smoke-fixture", {
+          disableCodecs: true,
+          success: AdminResponseSchemas.loadSmokeFixture,
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.post("refreshProfiles", "/admin/ops/refresh-profiles")
-          .addSuccess(AdminResponseSchemas.refreshProfiles)
+        HttpApiEndpoint.post("refreshProfiles", "/admin/ops/refresh-profiles", {
+          disableCodecs: true,
+          success: AdminResponseSchemas.refreshProfiles,
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.post("seedPublications", "/admin/ops/seed-publications")
-          .addSuccess(AdminResponseSchemas.seedPublications)
+        HttpApiEndpoint.post("seedPublications", "/admin/ops/seed-publications", {
+          disableCodecs: true,
+          success: AdminResponseSchemas.seedPublications,
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.get("stats", "/admin/ops/stats")
-          .addSuccess(AdminResponseSchemas.stats)
+        HttpApiEndpoint.get("stats", "/admin/ops/stats", {
+          disableCodecs: true,
+          success: AdminResponseSchemas.stats,
+          error: ApiErrorSchemas
+        })
       )
   )
   .add(
     HttpApiGroup.make("curation")
       .add(
-        HttpApiEndpoint.post("curate", "/admin/curation/curate")
-          .setPayload(AdminRequestSchemas.curatePost)
-          .addSuccess(AdminResponseSchemas.curatePost)
+        HttpApiEndpoint.post("curate", "/admin/curation/curate", {
+          disableCodecs: true,
+          payload: AdminRequestSchemas.curatePost,
+          success: AdminResponseSchemas.curatePost,
+          error: ApiErrorSchemas
+        })
       )
   )
   .add(
     HttpApiGroup.make("editorial")
       .add(
-        HttpApiEndpoint.post("submitPick", "/admin/editorial/pick")
-          .setPayload(AdminRequestSchemas.submitEditorialPick)
-          .addSuccess(AdminResponseSchemas.submitEditorialPick)
+        HttpApiEndpoint.post("submitPick", "/admin/editorial/pick", {
+          disableCodecs: true,
+          payload: AdminRequestSchemas.submitEditorialPick,
+          success: AdminResponseSchemas.submitEditorialPick,
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.post("retractPick", "/admin/editorial/retract")
-          .setPayload(AdminRequestSchemas.retractEditorialPick)
-          .addSuccess(AdminResponseSchemas.retractEditorialPick)
+        HttpApiEndpoint.post("retractPick", "/admin/editorial/retract", {
+          disableCodecs: true,
+          payload: AdminRequestSchemas.retractEditorialPick,
+          success: AdminResponseSchemas.retractEditorialPick,
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.get("listPicks", "/admin/editorial/picks")
-          .setUrlParams(AdminRequestSchemas.listEditorialPicks)
-          .addSuccess(AdminResponseSchemas.listEditorialPicks)
+        HttpApiEndpoint.get("listPicks", "/admin/editorial/picks", {
+          disableCodecs: true,
+          query: AdminRequestSchemas.listEditorialPicks,
+          success: AdminResponseSchemas.listEditorialPicks,
+          error: ApiErrorSchemas
+        })
       )
   )
   .add(
     HttpApiGroup.make("import")
       .add(
-        HttpApiEndpoint.post("importPosts", "/admin/import/posts")
-          .setPayload(AdminRequestSchemas.importPosts)
-          .addSuccess(AdminResponseSchemas.importPosts)
+        HttpApiEndpoint.post("importPosts", "/admin/import/posts", {
+          disableCodecs: true,
+          payload: AdminRequestSchemas.importPosts,
+          success: AdminResponseSchemas.importPosts,
+          error: ApiErrorSchemas
+        })
       )
-  )
-  .addError(BadRequestError)
-  .addError(UnauthorizedError)
-  .addError(ForbiddenError)
-  .addError(ConflictError)
-  .addError(NotFoundError)
-  .addError(UpstreamFailureError)
-  .addError(ServiceUnavailableError)
-  .addError(InternalServerError);
+  );
 
 const withAdminErrors = <A, R>(
   route: string,
@@ -225,8 +252,8 @@ const importLinkToLinkRecord = (
 const AdminHandlers = Layer.mergeAll(
   HttpApiBuilder.group(AdminApi, "experts", (handlers) =>
     handlers
-      .handle("list", ({ urlParams }) =>
-        withAdminErrors("/admin/experts", Effect.flatMap(ExpertRegistryService, (registry) =>
+      .handle("list", ({ query: urlParams }) =>
+        withAdminErrors("/admin/experts", ExpertRegistryService.use( (registry) =>
           registry.listExperts(urlParams)
         )).pipe(
           Effect.map((items) => ({ items }))
@@ -239,7 +266,7 @@ const AdminHandlers = Layer.mergeAll(
           return yield* registry.addExpert(actor, payload);
         }))
       )
-      .handle("setActive", ({ path, payload }) =>
+      .handle("setActive", ({ params: path, payload }) =>
         withAdminErrors("/admin/experts/:did/activate", Effect.gen(function* () {
           const actor = yield* OperatorIdentity;
           const registry = yield* ExpertRegistryService;
@@ -382,7 +409,7 @@ const AdminHandlers = Layer.mergeAll(
           return yield* editorial.retractPick(payload.postUri);
         }))
       )
-      .handle("listPicks", ({ urlParams }) =>
+      .handle("listPicks", ({ query: urlParams }) =>
         withAdminErrors("/admin/editorial/picks", Effect.gen(function* () {
           const editorial = yield* EditorialService;
           const items = yield* editorial.listPicks(urlParams);
@@ -492,7 +519,7 @@ const AdminHandlers = Layer.mergeAll(
                 Effect.annotateLogs({ error: String(e) })
               )
             ),
-            Effect.catchAll(() => Effect.succeed(0))
+            Effect.catch(() => Effect.succeed(0))
           );
         }
 
@@ -513,7 +540,7 @@ const makeAdminApiLayer = (serviceLayer: Layer.Layer<any, any, never>) =>
       Layer.provideMerge(serviceLayer)
     );
 
-    return HttpApiBuilder.api(AdminApi).pipe(
+    return HttpApiBuilder.layer(AdminApi).pipe(
       Layer.provideMerge(handlersLayer)
     );
   })();

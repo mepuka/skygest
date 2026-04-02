@@ -2,8 +2,8 @@ import { Schema } from "effect";
 import { IngestErrorEnvelope } from "./errors";
 import { AtUri, Did } from "./types";
 
-const EpochMillis = Schema.NonNegativeInt;
-const Counter = Schema.NonNegativeInt;
+const EpochMillis = Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)));
+const Counter = Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)));
 
 const IngestRunSummaryCounterFields = {
   totalExperts: Counter,
@@ -18,61 +18,61 @@ const IngestRunSummaryCounterFields = {
 const IngestRunItemKeyFields = {
   runId: Schema.String,
   did: Did,
-  mode: Schema.Literal("head", "backfill", "reconcile")
+  mode: Schema.Literals(["head", "backfill", "reconcile"])
 } as const;
 
-export const PollMode = Schema.Literal("head", "backfill", "reconcile");
+export const PollMode = Schema.Literals(["head", "backfill", "reconcile"]);
 export type PollMode = Schema.Schema.Type<typeof PollMode>;
 
-export const IngestTrigger = Schema.Literal("admin", "cron");
+export const IngestTrigger = Schema.Literals(["admin", "cron"]);
 export type IngestTrigger = Schema.Schema.Type<typeof IngestTrigger>;
 
-export const IngestRunKind = Schema.Literal("head-sweep", "backfill", "reconcile");
+export const IngestRunKind = Schema.Literals(["head-sweep", "backfill", "reconcile"]);
 export type IngestRunKind = Schema.Schema.Type<typeof IngestRunKind>;
 
-export const IngestRunStatus = Schema.Literal("queued", "running", "complete", "failed");
+export const IngestRunStatus = Schema.Literals(["queued", "running", "complete", "failed"]);
 export type IngestRunStatus = Schema.Schema.Type<typeof IngestRunStatus>;
 
-export const IngestRunPhase = Schema.Literal(
+export const IngestRunPhase = Schema.Literals([
   "queued",
   "preparing",
   "dispatching",
   "finalizing",
   "complete",
   "failed"
-);
+]);
 export type IngestRunPhase = Schema.Schema.Type<typeof IngestRunPhase>;
 
-export const IngestRunItemStatus = Schema.Literal(
+export const IngestRunItemStatus = Schema.Literals([
   "queued",
   "dispatched",
   "running",
   "complete",
   "failed"
-);
+]);
 export type IngestRunItemStatus = Schema.Schema.Type<typeof IngestRunItemStatus>;
 
-export const ReconcileDepth = Schema.Literal("recent", "deep");
+export const ReconcileDepth = Schema.Literals(["recent", "deep"]);
 export type ReconcileDepth = Schema.Schema.Type<typeof ReconcileDepth>;
 
-export const BackfillStatus = Schema.Literal("idle", "running", "complete", "failed");
+export const BackfillStatus = Schema.Literals(["idle", "running", "complete", "failed"]);
 export type BackfillStatus = Schema.Schema.Type<typeof BackfillStatus>;
 
 export const PollHeadInput = Schema.Struct({
-  did: Schema.optional(Did)
+  did: Schema.optionalKey(Did)
 });
 export type PollHeadInput = Schema.Schema.Type<typeof PollHeadInput>;
 
 export const PollBackfillInput = Schema.Struct({
-  did: Schema.optional(Did),
-  maxPosts: Schema.optional(Schema.NonNegativeInt),
-  maxAgeDays: Schema.optional(Schema.NonNegativeInt)
+  did: Schema.optionalKey(Did),
+  maxPosts: Schema.optionalKey(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  maxAgeDays: Schema.optionalKey(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))))
 });
 export type PollBackfillInput = Schema.Schema.Type<typeof PollBackfillInput>;
 
 export const PollReconcileInput = Schema.Struct({
-  did: Schema.optional(Did),
-  depth: Schema.optional(ReconcileDepth)
+  did: Schema.optionalKey(Did),
+  depth: Schema.optionalKey(ReconcileDepth)
 });
 export type PollReconcileInput = Schema.Schema.Type<typeof PollReconcileInput>;
 
@@ -117,36 +117,36 @@ export type IngestQueuedResponse = Schema.Schema.Type<typeof IngestQueuedRespons
 
 export const HeadSweepRunParams = Schema.Struct({
   kind: Schema.Literal("head-sweep"),
-  dids: Schema.optional(Schema.Array(Did)),
+  dids: Schema.optionalKey(Schema.Array(Did)),
   triggeredBy: IngestTrigger,
-  requestedBy: Schema.optional(Schema.NullOr(Schema.String))
+  requestedBy: Schema.optionalKey(Schema.NullOr(Schema.String))
 });
 export type HeadSweepRunParams = Schema.Schema.Type<typeof HeadSweepRunParams>;
 
 export const BackfillRunParams = Schema.Struct({
   kind: Schema.Literal("backfill"),
-  dids: Schema.optional(Schema.Array(Did)),
-  maxPosts: Schema.optional(Schema.NonNegativeInt),
-  maxAgeDays: Schema.optional(Schema.NonNegativeInt),
+  dids: Schema.optionalKey(Schema.Array(Did)),
+  maxPosts: Schema.optionalKey(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  maxAgeDays: Schema.optionalKey(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
   triggeredBy: Schema.Literal("admin"),
-  requestedBy: Schema.optional(Schema.NullOr(Schema.String))
+  requestedBy: Schema.optionalKey(Schema.NullOr(Schema.String))
 });
 export type BackfillRunParams = Schema.Schema.Type<typeof BackfillRunParams>;
 
 export const ReconcileRunParams = Schema.Struct({
   kind: Schema.Literal("reconcile"),
-  dids: Schema.optional(Schema.Array(Did)),
-  depth: Schema.optional(ReconcileDepth),
+  dids: Schema.optionalKey(Schema.Array(Did)),
+  depth: Schema.optionalKey(ReconcileDepth),
   triggeredBy: Schema.Literal("admin"),
-  requestedBy: Schema.optional(Schema.NullOr(Schema.String))
+  requestedBy: Schema.optionalKey(Schema.NullOr(Schema.String))
 });
 export type ReconcileRunParams = Schema.Schema.Type<typeof ReconcileRunParams>;
 
-export const IngestRunParams = Schema.Union(
+export const IngestRunParams = Schema.Union([
   HeadSweepRunParams,
   BackfillRunParams,
   ReconcileRunParams
-);
+]);
 export type IngestRunParams = Schema.Schema.Type<typeof IngestRunParams>;
 
 export const IngestRunSummaryCounters = Schema.Struct(IngestRunSummaryCounterFields);
@@ -219,13 +219,13 @@ export const FailIngestRun = Schema.Struct({
   id: Schema.String,
   finishedAt: EpochMillis,
   error: IngestErrorEnvelope,
-  totalExperts: Schema.optional(Counter),
-  expertsSucceeded: Schema.optional(Counter),
-  expertsFailed: Schema.optional(Counter),
-  pagesFetched: Schema.optional(Counter),
-  postsSeen: Schema.optional(Counter),
-  postsStored: Schema.optional(Counter),
-  postsDeleted: Schema.optional(Counter)
+  totalExperts: Schema.optionalKey(Counter),
+  expertsSucceeded: Schema.optionalKey(Counter),
+  expertsFailed: Schema.optionalKey(Counter),
+  pagesFetched: Schema.optionalKey(Counter),
+  postsSeen: Schema.optionalKey(Counter),
+  postsStored: Schema.optionalKey(Counter),
+  postsDeleted: Schema.optionalKey(Counter)
 });
 export type FailIngestRun = Schema.Schema.Type<typeof FailIngestRun>;
 
@@ -291,24 +291,24 @@ export type FailIngestRunItem = Schema.Schema.Type<typeof FailIngestRunItem>;
 
 export const HeadPollRequest = Schema.Struct({
   mode: Schema.Literal("head"),
-  did: Schema.optional(Did)
+  did: Schema.optionalKey(Did)
 });
 export const BackfillPollRequest = Schema.Struct({
   mode: Schema.Literal("backfill"),
-  did: Schema.optional(Did),
-  maxPosts: Schema.optional(Schema.NonNegativeInt),
-  maxAgeDays: Schema.optional(Schema.NonNegativeInt)
+  did: Schema.optionalKey(Did),
+  maxPosts: Schema.optionalKey(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  maxAgeDays: Schema.optionalKey(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))))
 });
 export const ReconcilePollRequest = Schema.Struct({
   mode: Schema.Literal("reconcile"),
-  did: Schema.optional(Did),
-  depth: Schema.optional(ReconcileDepth)
+  did: Schema.optionalKey(Did),
+  depth: Schema.optionalKey(ReconcileDepth)
 });
-export const PollRequest = Schema.Union(
+export const PollRequest = Schema.Union([
   HeadPollRequest,
   BackfillPollRequest,
   ReconcilePollRequest
-);
+]);
 export type PollRequest = Schema.Schema.Type<typeof PollRequest>;
 
 export const ExpertSyncStateRecord = Schema.Struct({
@@ -329,9 +329,9 @@ export type ExpertSyncStateRecord = Schema.Schema.Type<typeof ExpertSyncStateRec
 export const RepoListRecordsInput = Schema.Struct({
   repo: Did,
   collection: Schema.String,
-  cursor: Schema.optional(Schema.String),
-  limit: Schema.NonNegativeInt,
-  reverse: Schema.optional(Schema.Boolean)
+  cursor: Schema.optionalKey(Schema.String),
+  limit: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  reverse: Schema.optionalKey(Schema.Boolean)
 });
 export type RepoListRecordsInput = Schema.Schema.Type<typeof RepoListRecordsInput>;
 
@@ -339,19 +339,19 @@ export const ServiceListRecordsInput = Schema.Struct({
   serviceUrl: Schema.String,
   repo: Did,
   collection: Schema.String,
-  cursor: Schema.optional(Schema.String),
-  limit: Schema.NonNegativeInt,
-  reverse: Schema.optional(Schema.Boolean)
+  cursor: Schema.optionalKey(Schema.String),
+  limit: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  reverse: Schema.optionalKey(Schema.Boolean)
 });
 export type ServiceListRecordsInput = Schema.Schema.Type<typeof ServiceListRecordsInput>;
 
 export const RepoPostRecordValue = Schema.Struct({
   createdAt: Schema.String,
-  text: Schema.optional(Schema.String),
-  facets: Schema.optional(Schema.Array(Schema.Unknown)),
-  embed: Schema.optional(Schema.Unknown),
-  tags: Schema.optional(Schema.Array(Schema.String)),
-  labels: Schema.optional(Schema.Unknown)
+  text: Schema.optionalKey(Schema.String),
+  facets: Schema.optionalKey(Schema.Array(Schema.Unknown)),
+  embed: Schema.optionalKey(Schema.Unknown),
+  tags: Schema.optionalKey(Schema.Array(Schema.String)),
+  labels: Schema.optionalKey(Schema.Unknown)
 });
 export type RepoPostRecordValue = Schema.Schema.Type<typeof RepoPostRecordValue>;
 
@@ -364,8 +364,6 @@ export type RepoRecord = Schema.Schema.Type<typeof RepoRecord>;
 
 export const ListRecordsResult = Schema.Struct({
   records: Schema.Array(RepoRecord),
-  cursor: Schema.optionalWith(Schema.NullOr(Schema.String), {
-    default: () => null
-  })
+  cursor: Schema.NullOr(Schema.String).pipe(Schema.withDecodingDefaultKey(() => null))
 });
 export type ListRecordsResult = Schema.Schema.Type<typeof ListRecordsResult>;

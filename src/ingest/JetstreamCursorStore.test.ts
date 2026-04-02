@@ -1,7 +1,7 @@
 import { it, expect } from "bun:test";
 import { Effect, Layer } from "effect";
 import { SqliteClient } from "@effect/sql-sqlite-bun";
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import { JetstreamCursorStore } from "./JetstreamCursorStore";
 
 it("stores cursor", async () => {

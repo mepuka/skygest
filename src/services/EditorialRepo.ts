@@ -1,5 +1,5 @@
-import { Context, Effect } from "effect";
-import type { SqlError } from "@effect/sql/SqlError";
+import { ServiceMap, Effect } from "effect";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type {
   EditorialPickRecord,
@@ -9,7 +9,7 @@ import type {
 } from "../domain/editorial";
 import type { TopicSlug } from "../domain/bi";
 
-export class EditorialRepo extends Context.Tag("@skygest/EditorialRepo")<
+export class EditorialRepo extends ServiceMap.Service<
   EditorialRepo,
   {
     /** Upsert a pick (last write wins). Returns true if new, false if updated. */
@@ -53,4 +53,4 @@ export class EditorialRepo extends Context.Tag("@skygest/EditorialRepo")<
       now: number
     ) => Effect.Effect<number, SqlError | DbError>;
   }
->() {}
+>()("@skygest/EditorialRepo") {}

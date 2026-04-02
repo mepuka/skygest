@@ -1,4 +1,4 @@
-import { Context, Duration, Effect, Layer, Option, Schema } from "effect";
+import { ServiceMap, Duration, Effect, Layer, Option, Schema } from "effect";
 import snapshotJson from "../../config/ontology/energy-snapshot.json";
 import {
   type ExpandedTopicsOutput as ExpandedTopicsOutputType,
@@ -22,7 +22,7 @@ const SNAPSHOT_PREFIX = "ontology:energy:snapshots:";
 const CATALOG_CACHE_TTL = Duration.seconds(30);
 const CATALOG_CACHE_TTL_MS = Duration.toMillis(CATALOG_CACHE_TTL);
 
-class OntologyKvReadError extends Schema.TaggedError<OntologyKvReadError>()(
+class OntologyKvReadError extends Schema.TaggedErrorClass<OntologyKvReadError>()(
   "OntologyKvReadError",
   {
     operation: Schema.String,
@@ -31,7 +31,7 @@ class OntologyKvReadError extends Schema.TaggedError<OntologyKvReadError>()(
   }
 ) {}
 
-class OntologyKvDecodeError extends Schema.TaggedError<OntologyKvDecodeError>()(
+class OntologyKvDecodeError extends Schema.TaggedErrorClass<OntologyKvDecodeError>()(
   "OntologyKvDecodeError",
   {
     operation: Schema.String,
@@ -85,7 +85,7 @@ const loadCatalogFromKv = (env: EnvBindings): Effect.Effect<CatalogLoadResult> =
 
     const pointerJson = yield* Effect.tryPromise({
       try: () => kv.get(ACTIVE_POINTER_KEY, "json"),
-      catch: (error) => OntologyKvReadError.make({
+      catch: (error) => new OntologyKvReadError({
         operation: "getPointer",
         key: ACTIVE_POINTER_KEY,
         error
@@ -96,8 +96,8 @@ const loadCatalogFromKv = (env: EnvBindings): Effect.Effect<CatalogLoadResult> =
       return localCatalogResult(false);
     }
 
-    const pointer = yield* Schema.decodeUnknown(SnapshotPointerSchema)(pointerJson).pipe(
-      Effect.mapError((error) => OntologyKvDecodeError.make({
+    const pointer = yield* Schema.decodeUnknownEffect(SnapshotPointerSchema)(pointerJson).pipe(
+      Effect.mapError((error) => new OntologyKvDecodeError({
         operation: "decodePointer",
         key: ACTIVE_POINTER_KEY,
         error
@@ -108,7 +108,7 @@ const loadCatalogFromKv = (env: EnvBindings): Effect.Effect<CatalogLoadResult> =
 
     const rawSnapshot = yield* Effect.tryPromise({
       try: () => kv.get(snapshotKey, "json"),
-      catch: (error) => OntologyKvReadError.make({
+      catch: (error) => new OntologyKvReadError({
         operation: "getSnapshot",
         key: snapshotKey,
         error
@@ -119,8 +119,8 @@ const loadCatalogFromKv = (env: EnvBindings): Effect.Effect<CatalogLoadResult> =
       return localCatalogResult(false);
     }
 
-    const snapshot = yield* Schema.decodeUnknown(OntologySnapshot)(rawSnapshot).pipe(
-      Effect.mapError((error) => OntologyKvDecodeError.make({
+    const snapshot = yield* Schema.decodeUnknownEffect(OntologySnapshot)(rawSnapshot).pipe(
+      Effect.mapError((error) => new OntologyKvDecodeError({
         operation: "decodeSnapshot",
         key: snapshotKey,
         error
@@ -132,7 +132,7 @@ const loadCatalogFromKv = (env: EnvBindings): Effect.Effect<CatalogLoadResult> =
       cacheable: true
     } satisfies CatalogLoadResult;
   }).pipe(
-    Effect.catchAll((error) =>
+    Effect.catch((error) =>
       Effect.logWarning("Ontology KV load failed, falling back to local snapshot").pipe(
         Effect.annotateLogs({
           failureTag: error._tag,
@@ -217,7 +217,7 @@ const resolveExpansion = (
   });
 };
 
-export class OntologyCatalog extends Context.Tag("@skygest/OntologyCatalog")<
+export class OntologyCatalog extends ServiceMap.Service<
   OntologyCatalog,
   {
     readonly snapshot: OntologySnapshotType;
@@ -240,7 +240,7 @@ export class OntologyCatalog extends Context.Tag("@skygest/OntologyCatalog")<
       topic: string | undefined
     ) => Effect.Effect<ReadonlyArray<TopicSlug> | undefined>;
   }
->() {
+>()("@skygest/OntologyCatalog") {
   static readonly layer = Layer.effect(
     OntologyCatalog,
     Effect.gen(function* () {
@@ -296,7 +296,7 @@ export class OntologyCatalog extends Context.Tag("@skygest/OntologyCatalog")<
         }
         ).pipe(Effect.withSpan("OntologyCatalog.expandTopics"));
 
-      return OntologyCatalog.of({
+      return {
         get snapshot() {
           return currentCatalog.snapshot;
         },
@@ -316,7 +316,7 @@ export class OntologyCatalog extends Context.Tag("@skygest/OntologyCatalog")<
             Effect.map((r) => r.canonicalTopicSlugs)
           );
         }
-      });
+      };
     })
   );
 }

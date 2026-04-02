@@ -4,39 +4,39 @@ import { EmbedKind, EmbedPayload } from "./embed";
 
 const isFiniteNumber = (value: number) => Number.isFinite(value);
 
-const FiniteNumber = Schema.Number.pipe(Schema.filter(isFiniteNumber));
+const FiniteNumber = Schema.Number.pipe(Schema.check(Schema.makeFilter(isFiniteNumber)));
 
-export const FlexibleNumber = Schema.Union(
+export const FlexibleNumber = Schema.Union([
   FiniteNumber,
-  Schema.NumberFromString.pipe(Schema.filter(isFiniteNumber))
-);
+  Schema.NumberFromString.pipe(Schema.check(Schema.makeFilter(isFiniteNumber)))
+]);
 
 export const TopicSlug = Schema.String.pipe(
-  Schema.minLength(1),
+  Schema.check(Schema.isMinLength(1)),
   Schema.brand("TopicSlug")
 );
 export type TopicSlug = Schema.Schema.Type<typeof TopicSlug>;
 
 export const OntologyConceptSlug = Schema.String.pipe(
-  Schema.minLength(1),
+  Schema.check(Schema.isMinLength(1)),
   Schema.brand("OntologyConceptSlug")
 );
 export type OntologyConceptSlug = Schema.Schema.Type<typeof OntologyConceptSlug>;
 
-export const ExpertSource = Schema.Literal("manual", "starter_pack", "list", "network", "twitter-import");
+export const ExpertSource = Schema.Literals(["manual", "starter_pack", "list", "network", "twitter-import"]);
 export type ExpertSource = Schema.Schema.Type<typeof ExpertSource>;
 
-export const ExpertTier = Schema.Literal("energy-focused", "general-outlet", "independent");
+export const ExpertTier = Schema.Literals(["energy-focused", "general-outlet", "independent"]);
 export type ExpertTier = Schema.Schema.Type<typeof ExpertTier>;
 
 export const ExpertSeed = Schema.Struct({
   did: Did,
-  handle: Schema.optional(Schema.String),
-  displayName: Schema.optional(Schema.String),
-  description: Schema.optional(Schema.String),
+  handle: Schema.optionalKey(Schema.String),
+  displayName: Schema.optionalKey(Schema.String),
+  description: Schema.optionalKey(Schema.String),
   source: ExpertSource,
-  sourceRef: Schema.optional(Schema.String),
-  active: Schema.optionalWith(Schema.Boolean, { default: () => true })
+  sourceRef: Schema.optionalKey(Schema.String),
+  active: Schema.Boolean.pipe(Schema.withDecodingDefaultKey(() => true))
 });
 export type ExpertSeed = Schema.Schema.Type<typeof ExpertSeed>;
 
@@ -57,7 +57,7 @@ export const ExpertRecord = Schema.Struct({
   sourceRef: Schema.NullOr(Schema.String),
   shard: Schema.Number,
   active: Schema.Boolean,
-  tier: Schema.optionalWith(ExpertTier, { default: () => "independent" as const }),
+  tier: ExpertTier.pipe(Schema.withDecodingDefaultKey(() => "independent" as const)),
   addedAt: Schema.Number,
   lastSyncedAt: Schema.NullOr(Schema.Number)
 });
@@ -71,7 +71,7 @@ export const ExpertListItem = Schema.Struct({
   domain: Schema.String,
   source: ExpertSource,
   active: Schema.Boolean,
-  tier: Schema.optionalWith(ExpertTier, { default: () => "independent" as const })
+  tier: ExpertTier.pipe(Schema.withDecodingDefaultKey(() => "independent" as const))
 });
 export type ExpertListItem = Schema.Schema.Type<typeof ExpertListItem>;
 
@@ -116,7 +116,7 @@ export const OntologyConcept = Schema.Struct({
 });
 export type OntologyConcept = Schema.Schema.Type<typeof OntologyConcept>;
 
-export const MatchSignal = Schema.Literal("term", "hashtag", "domain");
+export const MatchSignal = Schema.Literals(["term", "hashtag", "domain"]);
 export type MatchSignal = Schema.Schema.Type<typeof MatchSignal>;
 
 export const OntologySignalCatalog = Schema.Struct({
@@ -180,7 +180,7 @@ export const KnowledgePost = Schema.Struct({
   createdAt: Schema.Number,
   indexedAt: Schema.Number,
   hasLinks: Schema.Boolean,
-  status: Schema.Literal("active", "deleted"),
+  status: Schema.Literals(["active", "deleted"]),
   ingestId: Schema.String,
   embedType: Schema.NullOr(EmbedKind),
   topics: Schema.Array(MatchedTopic),
@@ -199,11 +199,11 @@ export const DeletedKnowledgePost = Schema.Struct({
 export type DeletedKnowledgePost = Schema.Schema.Type<typeof DeletedKnowledgePost>;
 
 export const SearchPostsInput = Schema.Struct({
-  query: Schema.String.annotations({ description: "Full-text search query" }),
-  topic: Schema.optional(Schema.String.annotations({ description: "Topic slug to filter by, e.g. 'solar' or 'hydrogen'" })),
-  since: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
-  until: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
-  limit: Schema.optional(FlexibleNumber.annotations({ description: "Maximum number of results to return" }))
+  query: Schema.String.annotate({ description: "Full-text search query" }),
+  topic: Schema.optionalKey(Schema.String.annotate({ description: "Topic slug to filter by, e.g. 'solar' or 'hydrogen'" })),
+  since: Schema.optionalKey(FlexibleNumber.annotate({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
+  until: Schema.optionalKey(FlexibleNumber.annotate({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
+  limit: Schema.optionalKey(FlexibleNumber.annotate({ description: "Maximum number of results to return" }))
 });
 export type SearchPostsInput = Schema.Schema.Type<typeof SearchPostsInput>;
 
@@ -214,12 +214,12 @@ export const KnowledgePostCursor = Schema.Struct({
 export type KnowledgePostCursor = Schema.Schema.Type<typeof KnowledgePostCursor>;
 
 export const GetRecentPostsInput = Schema.Struct({
-  topic: Schema.optional(Schema.String.annotations({ description: "Topic slug to filter by, e.g. 'solar' or 'hydrogen'" })),
-  expertDid: Schema.optional(Did),
-  since: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
-  until: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
-  cursor: Schema.optional(KnowledgePostCursor),
-  limit: Schema.optional(FlexibleNumber.annotations({ description: "Maximum number of results to return" }))
+  topic: Schema.optionalKey(Schema.String.annotate({ description: "Topic slug to filter by, e.g. 'solar' or 'hydrogen'" })),
+  expertDid: Schema.optionalKey(Did),
+  since: Schema.optionalKey(FlexibleNumber.annotate({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
+  until: Schema.optionalKey(FlexibleNumber.annotate({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
+  cursor: Schema.optionalKey(KnowledgePostCursor),
+  limit: Schema.optionalKey(FlexibleNumber.annotate({ description: "Maximum number of results to return" }))
 });
 export type GetRecentPostsInput = Schema.Schema.Type<typeof GetRecentPostsInput>;
 
@@ -231,55 +231,55 @@ export const KnowledgeLinkCursor = Schema.Struct({
 export type KnowledgeLinkCursor = Schema.Schema.Type<typeof KnowledgeLinkCursor>;
 
 export const GetPostLinksInput = Schema.Struct({
-  domain: Schema.optional(Schema.String.annotations({ description: "Link hostname to filter by, e.g. 'reuters.com'" })),
-  topic: Schema.optional(Schema.String.annotations({ description: "Topic slug to filter by, e.g. 'solar' or 'hydrogen'" })),
-  since: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
-  until: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
-  cursor: Schema.optional(KnowledgeLinkCursor),
-  limit: Schema.optional(FlexibleNumber.annotations({ description: "Maximum number of results to return" }))
+  domain: Schema.optionalKey(Schema.String.annotate({ description: "Link hostname to filter by, e.g. 'reuters.com'" })),
+  topic: Schema.optionalKey(Schema.String.annotate({ description: "Topic slug to filter by, e.g. 'solar' or 'hydrogen'" })),
+  since: Schema.optionalKey(FlexibleNumber.annotate({ description: "Filter posts created after this Unix epoch timestamp (milliseconds)" })),
+  until: Schema.optionalKey(FlexibleNumber.annotate({ description: "Filter posts created before this Unix epoch timestamp (milliseconds)" })),
+  cursor: Schema.optionalKey(KnowledgeLinkCursor),
+  limit: Schema.optionalKey(FlexibleNumber.annotate({ description: "Maximum number of results to return" }))
 });
 export type GetPostLinksInput = Schema.Schema.Type<typeof GetPostLinksInput>;
 
 export const SearchPostsQueryInput = Schema.Struct({
   query: Schema.String,
-  topicSlugs: Schema.optional(Schema.Array(TopicSlug)),
-  since: Schema.optional(Schema.Number),
-  until: Schema.optional(Schema.Number),
-  limit: Schema.optional(Schema.Number)
+  topicSlugs: Schema.optionalKey(Schema.Array(TopicSlug)),
+  since: Schema.optionalKey(Schema.Number),
+  until: Schema.optionalKey(Schema.Number),
+  limit: Schema.optionalKey(Schema.Number)
 });
 export type SearchPostsQueryInput = Schema.Schema.Type<typeof SearchPostsQueryInput>;
 
 export const GetRecentPostsQueryInput = Schema.Struct({
-  topicSlugs: Schema.optional(Schema.Array(TopicSlug)),
-  expertDid: Schema.optional(Did),
-  since: Schema.optional(Schema.Number),
-  until: Schema.optional(Schema.Number),
-  cursor: Schema.optional(KnowledgePostCursor),
-  limit: Schema.optional(Schema.Number)
+  topicSlugs: Schema.optionalKey(Schema.Array(TopicSlug)),
+  expertDid: Schema.optionalKey(Did),
+  since: Schema.optionalKey(Schema.Number),
+  until: Schema.optionalKey(Schema.Number),
+  cursor: Schema.optionalKey(KnowledgePostCursor),
+  limit: Schema.optionalKey(Schema.Number)
 });
 export type GetRecentPostsQueryInput = Schema.Schema.Type<typeof GetRecentPostsQueryInput>;
 
 export const GetPostLinksQueryInput = Schema.Struct({
-  domain: Schema.optional(Schema.String),
-  topicSlugs: Schema.optional(Schema.Array(TopicSlug)),
-  since: Schema.optional(Schema.Number),
-  until: Schema.optional(Schema.Number),
-  cursor: Schema.optional(KnowledgeLinkCursor),
-  limit: Schema.optional(Schema.Number)
+  domain: Schema.optionalKey(Schema.String),
+  topicSlugs: Schema.optionalKey(Schema.Array(TopicSlug)),
+  since: Schema.optionalKey(Schema.Number),
+  until: Schema.optionalKey(Schema.Number),
+  cursor: Schema.optionalKey(KnowledgeLinkCursor),
+  limit: Schema.optionalKey(Schema.Number)
 });
 export type GetPostLinksQueryInput = Schema.Schema.Type<typeof GetPostLinksQueryInput>;
 
 export const ListExpertsInput = Schema.Struct({
-  domain: Schema.optional(Schema.String.annotations({ description: "Knowledge domain, e.g. 'energy'" })),
-  active: Schema.optional(Schema.Boolean.annotations({ description: "Filter by active status" })),
-  limit: Schema.optional(FlexibleNumber.annotations({ description: "Maximum number of results to return" }))
+  domain: Schema.optionalKey(Schema.String.annotate({ description: "Knowledge domain, e.g. 'energy'" })),
+  active: Schema.optionalKey(Schema.Boolean.annotate({ description: "Filter by active status" })),
+  limit: Schema.optionalKey(FlexibleNumber.annotate({ description: "Maximum number of results to return" }))
 });
 export type ListExpertsInput = Schema.Schema.Type<typeof ListExpertsInput>;
 
 export const AddExpertInput = Schema.Struct({
-  didOrHandle: Schema.String.pipe(Schema.minLength(1)),
-  domain: Schema.optional(Schema.String),
-  active: Schema.optional(Schema.Boolean)
+  didOrHandle: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
+  domain: Schema.optionalKey(Schema.String),
+  active: Schema.optionalKey(Schema.Boolean)
 });
 export type AddExpertInput = Schema.Schema.Type<typeof AddExpertInput>;
 
@@ -304,7 +304,7 @@ export const emptyKnowledgePostHydration = (): KnowledgePostHydration => ({
   embedContent: null
 });
 
-export const KnowledgePostResult = Schema.extend(Schema.Struct({
+export const KnowledgePostResult = Schema.Struct({
   uri: PostUri,
   did: Did,
   handle: Schema.NullOr(Schema.String),
@@ -312,10 +312,11 @@ export const KnowledgePostResult = Schema.extend(Schema.Struct({
   text: Schema.String,
   createdAt: Schema.Number,
   topics: Schema.Array(Schema.String),
-  snippet: Schema.optional(Schema.NullOr(Schema.String)),
-  tier: Schema.optionalWith(ExpertTier, { default: () => "independent" as const })
-}), KnowledgePostHydration);
-export type KnowledgePostResult = Schema.Schema.Type<typeof KnowledgePostResult>;
+  snippet: Schema.optionalKey(Schema.NullOr(Schema.String)),
+  tier: ExpertTier.pipe(Schema.withDecodingDefaultKey(() => "independent" as const)),
+  ...KnowledgePostHydration.fields
+});
+export type KnowledgePostResult = typeof KnowledgePostResult.Type;
 
 export const KnowledgeLinkResult = Schema.Struct({
   postUri: PostUri,
@@ -338,13 +339,13 @@ export const KnowledgeLinksOutput = Schema.Struct({
 });
 export type KnowledgeLinksOutput = Schema.Schema.Type<typeof KnowledgeLinksOutput>;
 
-export const OntologyTopicView = Schema.Literal("facets", "concepts");
+export const OntologyTopicView = Schema.Literals(["facets", "concepts"]);
 export type OntologyTopicView = Schema.Schema.Type<typeof OntologyTopicView>;
 
-export const OntologyExpandMode = Schema.Literal("exact", "descendants", "ancestors");
+export const OntologyExpandMode = Schema.Literals(["exact", "descendants", "ancestors"]);
 export type OntologyExpandMode = Schema.Schema.Type<typeof OntologyExpandMode>;
 
-export const OntologyNodeKind = Schema.Literal("canonical-topic", "concept");
+export const OntologyNodeKind = Schema.Literals(["canonical-topic", "concept"]);
 export type OntologyNodeKind = Schema.Schema.Type<typeof OntologyNodeKind>;
 
 export const OntologyListTopic = Schema.Struct({
@@ -364,23 +365,23 @@ export const OntologyListTopic = Schema.Struct({
 export type OntologyListTopic = Schema.Schema.Type<typeof OntologyListTopic>;
 
 export const ListTopicsInput = Schema.Struct({
-  view: Schema.optional(OntologyTopicView.annotations({ description: "Topic view: 'facets' for high-level categories, 'concepts' for fine-grained ontology nodes" }))
+  view: Schema.optionalKey(OntologyTopicView.annotate({ description: "Topic view: 'facets' for high-level categories, 'concepts' for fine-grained ontology nodes" }))
 });
 export type ListTopicsInput = Schema.Schema.Type<typeof ListTopicsInput>;
 
 export const GetTopicInput = Schema.Struct({
-  slug: Schema.String.pipe(Schema.minLength(1)).annotations({ description: "Topic slug to look up" })
+  slug: Schema.String.pipe(Schema.check(Schema.isMinLength(1))).annotate({ description: "Topic slug to look up" })
 });
 export type GetTopicInput = Schema.Schema.Type<typeof GetTopicInput>;
 
 export const ExpandTopicsInput = Schema.Struct({
-  slugs: Schema.Array(Schema.String.pipe(Schema.minLength(1))).annotations({ description: "Topic slugs to expand" }),
-  mode: Schema.optional(OntologyExpandMode.annotations({ description: "Expansion mode: 'exact' for direct matches, 'descendants' for narrower sub-topics, 'ancestors' for broader parent topics" }))
+  slugs: Schema.Array(Schema.String.pipe(Schema.check(Schema.isMinLength(1)))).annotate({ description: "Topic slugs to expand" }),
+  mode: Schema.optionalKey(OntologyExpandMode.annotate({ description: "Expansion mode: 'exact' for direct matches, 'descendants' for narrower sub-topics, 'ancestors' for broader parent topics" }))
 });
 export type ExpandTopicsInput = Schema.Schema.Type<typeof ExpandTopicsInput>;
 
 export const ExplainPostTopicsInput = Schema.Struct({
-  postUri: PostUri.annotations({ description: "Post URI of the post to explain topic matches for" })
+  postUri: PostUri.annotate({ description: "Post URI of the post to explain topic matches for" })
 });
 export type ExplainPostTopicsInput = Schema.Schema.Type<typeof ExplainPostTopicsInput>;
 
@@ -450,7 +451,7 @@ export const AdminExpertResult = Schema.Struct({
   shard: Schema.Number,
   active: Schema.Boolean,
   source: ExpertSource,
-  tier: Schema.optionalWith(ExpertTier, { default: () => "independent" as const })
+  tier: ExpertTier.pipe(Schema.withDecodingDefaultKey(() => "independent" as const))
 });
 export type AdminExpertResult = Schema.Schema.Type<typeof AdminExpertResult>;
 
@@ -480,22 +481,20 @@ export const RefreshProfilesResult = Schema.Struct({
 });
 export type RefreshProfilesResult = Schema.Schema.Type<typeof RefreshProfilesResult>;
 
-export const RankedKnowledgePostResult = Schema.extend(
-  KnowledgePostResult,
-  Schema.Struct({
-    rank: Schema.Number
-  })
-);
-export type RankedKnowledgePostResult = Schema.Schema.Type<typeof RankedKnowledgePostResult>;
+export const RankedKnowledgePostResult = Schema.Struct({
+  ...KnowledgePostResult.fields,
+  rank: Schema.Number
+});
+export type RankedKnowledgePostResult = typeof RankedKnowledgePostResult.Type;
 
-export class ExpertNotFoundError extends Schema.TaggedError<ExpertNotFoundError>()(
+export class ExpertNotFoundError extends Schema.TaggedErrorClass<ExpertNotFoundError>()(
   "ExpertNotFoundError",
   {
     did: Did
   }
 ) {}
 
-export class HandleResolutionError extends Schema.TaggedError<HandleResolutionError>()(
+export class HandleResolutionError extends Schema.TaggedErrorClass<HandleResolutionError>()(
   "HandleResolutionError",
   {
     didOrHandle: Schema.String,
@@ -503,7 +502,7 @@ export class HandleResolutionError extends Schema.TaggedError<HandleResolutionEr
   }
 ) {}
 
-export class ProfileLookupError extends Schema.TaggedError<ProfileLookupError>()(
+export class ProfileLookupError extends Schema.TaggedErrorClass<ProfileLookupError>()(
   "ProfileLookupError",
   {
     didOrHandle: Schema.String,
@@ -511,7 +510,7 @@ export class ProfileLookupError extends Schema.TaggedError<ProfileLookupError>()
   }
 ) {}
 
-export class McpToolQueryError extends Schema.TaggedError<McpToolQueryError>()(
+export class McpToolQueryError extends Schema.TaggedErrorClass<McpToolQueryError>()(
   "McpToolQueryError",
   {
     tool: Schema.String,
@@ -524,10 +523,10 @@ export class McpToolQueryError extends Schema.TaggedError<McpToolQueryError>()(
 // Publications & Expert Tiers (Phase A — Foundation)
 // ---------------------------------------------------------------------------
 
-export const PublicationTier = Schema.Literal("energy-focused", "general-outlet", "unknown");
+export const PublicationTier = Schema.Literals(["energy-focused", "general-outlet", "unknown"]);
 export type PublicationTier = Schema.Schema.Type<typeof PublicationTier>;
 
-export const PublicationSource = Schema.Literal("seed", "discovered");
+export const PublicationSource = Schema.Literals(["seed", "discovered"]);
 export type PublicationSource = Schema.Schema.Type<typeof PublicationSource>;
 
 export const PublicationSeed = Schema.Struct({
@@ -562,9 +561,9 @@ export const PublicationListItem = Schema.Struct({
 export type PublicationListItem = Schema.Schema.Type<typeof PublicationListItem>;
 
 export const ListPublicationsInput = Schema.Struct({
-  tier: Schema.optional(PublicationTier),
-  source: Schema.optional(PublicationSource),
-  limit: Schema.optional(Schema.Number)
+  tier: Schema.optionalKey(PublicationTier),
+  source: Schema.optionalKey(PublicationSource),
+  limit: Schema.optionalKey(Schema.Number)
 });
 export type ListPublicationsInput = Schema.Schema.Type<typeof ListPublicationsInput>;
 
@@ -582,23 +581,23 @@ export type SeedPublicationsResult = Schema.Schema.Type<typeof SeedPublicationsR
 // --- Thread expansion ---
 
 export const GetPostThreadInput = Schema.Struct({
-  postUri: AtUri.annotations({
+  postUri: AtUri.annotate({
     description: "AT Protocol URI of the post to get thread context for"
   }),
-  depth: Schema.optional(
-    FlexibleNumber.pipe(Schema.int(), Schema.between(0, 10)).annotations({
+  depth: Schema.optionalKey(
+    FlexibleNumber.pipe(Schema.check(Schema.isInt()), Schema.check(Schema.isBetween({ minimum: 0, maximum: 10 }))).annotate({
       description: "Reply depth levels to include (0-10, default 3)"
     })
   ),
-  parentHeight: Schema.optional(
-    FlexibleNumber.pipe(Schema.int(), Schema.between(0, 10)).annotations({
+  parentHeight: Schema.optionalKey(
+    FlexibleNumber.pipe(Schema.check(Schema.isInt()), Schema.check(Schema.isBetween({ minimum: 0, maximum: 10 }))).annotate({
       description: "Parent context levels to include (0-10, default 3)"
     })
   )
 });
 export type GetPostThreadInput = Schema.Schema.Type<typeof GetPostThreadInput>;
 
-export const ThreadPostPosition = Schema.Literal("ancestor", "focus", "reply");
+export const ThreadPostPosition = Schema.Literals(["ancestor", "focus", "reply"]);
 export type ThreadPostPosition = Schema.Schema.Type<typeof ThreadPostPosition>;
 
 export const ThreadPostResult = Schema.Struct({
@@ -631,31 +630,31 @@ export type PostThreadOutput = Schema.Schema.Type<typeof PostThreadOutput>;
 // --- Thread document (printer) ---
 
 export const GetThreadDocumentInput = Schema.Struct({
-  postUri: AtUri.annotations({
+  postUri: AtUri.annotate({
     description: "AT Protocol URI of the post to render as a document"
   }),
-  depth: Schema.optional(
-    FlexibleNumber.pipe(Schema.int(), Schema.between(0, 10)).annotations({
+  depth: Schema.optionalKey(
+    FlexibleNumber.pipe(Schema.check(Schema.isInt()), Schema.check(Schema.isBetween({ minimum: 0, maximum: 10 }))).annotate({
       description: "Reply depth levels to fetch from Bluesky API (0-10, default 3)"
     })
   ),
-  parentHeight: Schema.optional(
-    FlexibleNumber.pipe(Schema.int(), Schema.between(0, 10)).annotations({
+  parentHeight: Schema.optionalKey(
+    FlexibleNumber.pipe(Schema.check(Schema.isInt()), Schema.check(Schema.isBetween({ minimum: 0, maximum: 10 }))).annotate({
       description: "Parent context levels to fetch (0-10, default 3)"
     })
   ),
-  maxDepth: Schema.optional(
-    FlexibleNumber.pipe(Schema.int(), Schema.between(1, 10)).annotations({
+  maxDepth: Schema.optionalKey(
+    FlexibleNumber.pipe(Schema.check(Schema.isInt()), Schema.check(Schema.isBetween({ minimum: 1, maximum: 10 }))).annotate({
       description: "Max reply nesting depth to include in document (1-10)"
     })
   ),
-  minLikes: Schema.optional(
-    FlexibleNumber.pipe(Schema.int(), Schema.greaterThanOrEqualTo(0)).annotations({
+  minLikes: Schema.optionalKey(
+    FlexibleNumber.pipe(Schema.check(Schema.isInt()), Schema.check(Schema.isGreaterThanOrEqualTo(0))).annotate({
       description: "Minimum likes for a reply to be included"
     })
   ),
-  topN: Schema.optional(
-    FlexibleNumber.pipe(Schema.int(), Schema.between(1, 50)).annotations({
+  topN: Schema.optionalKey(
+    FlexibleNumber.pipe(Schema.check(Schema.isInt()), Schema.check(Schema.isBetween({ minimum: 1, maximum: 50 }))).annotate({
       description: "Keep only the N highest-engagement replies (1-50)"
     })
   )

@@ -8,17 +8,17 @@ import {
 } from "./enrichment";
 import { Did, PostUri } from "./types";
 
-export const EnrichmentPlannerDecision = Schema.Literal("execute", "skip");
+export const EnrichmentPlannerDecision = Schema.Literals(["execute", "skip"]);
 export type EnrichmentPlannerDecision = Schema.Schema.Type<
   typeof EnrichmentPlannerDecision
 >;
 
-export const EnrichmentPlannerStopReason = Schema.Literal(
+export const EnrichmentPlannerStopReason = Schema.Literals([
   "no-visual-assets",
   "no-source-signals",
   "no-grounding-signals",
   "awaiting-vision"
-);
+]);
 export type EnrichmentPlannerStopReason = Schema.Schema.Type<
   typeof EnrichmentPlannerStopReason
 >;
@@ -26,7 +26,7 @@ export type EnrichmentPlannerStopReason = Schema.Schema.Type<
 export const EnrichmentPlannerInput = Schema.Struct({
   postUri: PostUri,
   enrichmentType: EnrichmentKind,
-  schemaVersion: Schema.String.pipe(Schema.minLength(1))
+  schemaVersion: Schema.String.pipe(Schema.check(Schema.isMinLength(1)))
 });
 export type EnrichmentPlannerInput = Schema.Schema.Type<
   typeof EnrichmentPlannerInput
@@ -37,7 +37,7 @@ export const EnrichmentPlannedPostContext = Schema.Struct({
   did: Did,
   handle: Schema.NullOr(Schema.String),
   text: Schema.String,
-  createdAt: Schema.NonNegativeInt,
+  createdAt: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   threadCoverage: Schema.Literal("focus-only")
 });
 export type EnrichmentPlannedPostContext = Schema.Schema.Type<
@@ -45,7 +45,7 @@ export type EnrichmentPlannedPostContext = Schema.Schema.Type<
 >;
 
 export const EnrichmentPlannedLinkCardContext = Schema.Struct({
-  source: Schema.Literal("embed", "media"),
+  source: Schema.Literals(["embed", "media"]),
   uri: Schema.String,
   title: Schema.NullOr(Schema.String),
   description: Schema.NullOr(Schema.String),
@@ -55,21 +55,17 @@ export type EnrichmentPlannedLinkCardContext = Schema.Schema.Type<
   typeof EnrichmentPlannedLinkCardContext
 >;
 
-export const EnrichmentPlannedQuoteContext = Schema.extend(
-  QuoteRef,
-  Schema.Struct({
-    source: Schema.Literal("embed", "media")
-  })
-);
-export type EnrichmentPlannedQuoteContext = Schema.Schema.Type<
-  typeof EnrichmentPlannedQuoteContext
->;
+export const EnrichmentPlannedQuoteContext = Schema.Struct({
+  ...QuoteRef.fields,
+  source: Schema.Literals(["embed", "media"])
+});
+export type EnrichmentPlannedQuoteContext = typeof EnrichmentPlannedQuoteContext.Type;
 
 export const EnrichmentPlannedImageAsset = Schema.Struct({
-  assetKey: Schema.String.pipe(Schema.minLength(1)),
+  assetKey: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   assetType: Schema.Literal("image"),
-  source: Schema.Literal("embed", "media"),
-  index: Schema.NonNegativeInt,
+  source: Schema.Literals(["embed", "media"]),
+  index: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   thumb: Schema.String,
   fullsize: Schema.String,
   alt: Schema.NullOr(Schema.String)
@@ -79,10 +75,10 @@ export type EnrichmentPlannedImageAsset = Schema.Schema.Type<
 >;
 
 export const EnrichmentPlannedVideoAsset = Schema.Struct({
-  assetKey: Schema.String.pipe(Schema.minLength(1)),
+  assetKey: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   assetType: Schema.Literal("video"),
-  source: Schema.Literal("embed", "media"),
-  index: Schema.NonNegativeInt,
+  source: Schema.Literals(["embed", "media"]),
+  index: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   playlist: Schema.NullOr(Schema.String),
   thumbnail: Schema.NullOr(Schema.String),
   alt: Schema.NullOr(Schema.String)
@@ -91,18 +87,18 @@ export type EnrichmentPlannedVideoAsset = Schema.Schema.Type<
   typeof EnrichmentPlannedVideoAsset
 >;
 
-export const EnrichmentPlannedAsset = Schema.Union(
+export const EnrichmentPlannedAsset = Schema.Union([
   EnrichmentPlannedImageAsset,
   EnrichmentPlannedVideoAsset
-);
+]);
 export type EnrichmentPlannedAsset = Schema.Schema.Type<
   typeof EnrichmentPlannedAsset
 >;
 
 export const EnrichmentPlannedExistingEnrichment = Schema.Struct({
   output: EnrichmentOutput,
-  updatedAt: Schema.NonNegativeInt,
-  enrichedAt: Schema.NonNegativeInt
+  updatedAt: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  enrichedAt: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
 });
 export type EnrichmentPlannedExistingEnrichment = Schema.Schema.Type<
   typeof EnrichmentPlannedExistingEnrichment
@@ -111,9 +107,9 @@ export type EnrichmentPlannedExistingEnrichment = Schema.Schema.Type<
 export const EnrichmentExecutionPlan = Schema.Struct({
   postUri: PostUri,
   enrichmentType: EnrichmentKind,
-  schemaVersion: Schema.String.pipe(Schema.minLength(1)),
+  schemaVersion: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   decision: EnrichmentPlannerDecision,
-  stopReason: Schema.optional(EnrichmentPlannerStopReason),
+  stopReason: Schema.optionalKey(EnrichmentPlannerStopReason),
   captureStage: Schema.Literal("picked"),
   post: EnrichmentPlannedPostContext,
   embedType: Schema.NullOr(ThreadEmbedType),
@@ -138,7 +134,7 @@ export const isVisionExecutionPlan = (
 } => plan.enrichmentType === "vision" && plan.decision === "execute";
 
 export const VisionExecutionPlan = EnrichmentExecutionPlan.pipe(
-  Schema.filter(isVisionExecutionPlan)
+  Schema.check(Schema.makeFilter(isVisionExecutionPlan))
 );
 export type VisionExecutionPlan = Schema.Schema.Type<typeof VisionExecutionPlan>;
 
@@ -153,7 +149,7 @@ export const isSourceAttributionExecutionPlan = (
   (plan.assets.length === 0 || plan.vision !== null);
 
 export const SourceAttributionExecutionPlan = EnrichmentExecutionPlan.pipe(
-  Schema.filter(isSourceAttributionExecutionPlan)
+  Schema.check(Schema.makeFilter(isSourceAttributionExecutionPlan))
 );
 export type SourceAttributionExecutionPlan = Schema.Schema.Type<
   typeof SourceAttributionExecutionPlan

@@ -1,5 +1,5 @@
-import { Context, Effect } from "effect";
-import type { SqlError } from "@effect/sql/SqlError";
+import { ServiceMap, Effect } from "effect";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type {
   GetPostLinksPageQueryInput,
@@ -18,7 +18,7 @@ import type {
   StoredTopicMatch
 } from "../domain/bi";
 
-export class KnowledgeRepo extends Context.Tag("@skygest/KnowledgeRepo")<
+export class KnowledgeRepo extends ServiceMap.Service<
   KnowledgeRepo,
   {
     readonly upsertPosts: (posts: ReadonlyArray<KnowledgePost>) => Effect.Effect<void, SqlError | DbError>;
@@ -46,4 +46,4 @@ export class KnowledgeRepo extends Context.Tag("@skygest/KnowledgeRepo")<
     ) => Effect.Effect<ReadonlyArray<RankedKnowledgePostResult>, SqlError | DbError>;
     readonly optimizeFts: () => Effect.Effect<void, SqlError | DbError>;
   }
->() {}
+>()("@skygest/KnowledgeRepo") {}

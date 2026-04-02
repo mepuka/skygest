@@ -154,28 +154,28 @@ const makeWorkflowLayer = (handlers: {
 };
 
 describe("EnrichmentRepairService", () => {
-  it.effect("retries failed runs by resetting the same record and restarting the workflow", () =>
-    Effect.gen(function* () {
-      const state = new Map([
-        ["run-1", makeRun()]
-      ]);
-      const events: Array<unknown> = [];
-      const restarted: Array<string> = [];
+  it.effect("retries failed runs by resetting the same record and restarting the workflow", () => {
+    const state = new Map([
+      ["run-1", makeRun()]
+    ]);
+    const events: Array<unknown> = [];
+    const restarted: Array<string> = [];
 
-      const layer = EnrichmentRepairService.layer.pipe(
-        Layer.provideMerge(
-          Layer.mergeAll(
-            makeRepoLayer(state, events),
-            makeWorkflowLayer({
-              restart: async (runId) => {
-                restarted.push(runId);
-              }
-            })
-          )
+    const layer = EnrichmentRepairService.layer.pipe(
+      Layer.provideMerge(
+        Layer.mergeAll(
+          makeRepoLayer(state, events),
+          makeWorkflowLayer({
+            restart: async (runId) => {
+              restarted.push(runId);
+            }
+          })
         )
-      );
+      )
+    );
 
-      const repair = yield* EnrichmentRepairService.pipe(Effect.provide(layer));
+    return Effect.gen(function* () {
+      const repair = yield* EnrichmentRepairService;
       const queued = yield* repair.retryRun("run-1", 100);
 
       expect(queued).toEqual({
@@ -201,32 +201,32 @@ describe("EnrichmentRepairService", () => {
           input: { id: "run-1", queuedAt: 100 }
         }
       ]);
-    })
-  );
+    }).pipe(Effect.provide(layer));
+  });
 
-  it.effect("rejects retry when the run is not in a terminal retryable state", () =>
-    Effect.gen(function* () {
-      const state = new Map([
-        [
-          "run-1",
-          makeRun({
-            status: "complete" satisfies EnrichmentRunStatus,
-            phase: "complete",
-            error: null
-          })
-        ]
-      ]);
+  it.effect("rejects retry when the run is not in a terminal retryable state", () => {
+    const state = new Map([
+      [
+        "run-1",
+        makeRun({
+          status: "complete" satisfies EnrichmentRunStatus,
+          phase: "complete",
+          error: null
+        })
+      ]
+    ]);
 
-      const layer = EnrichmentRepairService.layer.pipe(
-        Layer.provideMerge(
-          Layer.mergeAll(
-            makeRepoLayer(state, []),
-            makeWorkflowLayer({})
-          )
+    const layer = EnrichmentRepairService.layer.pipe(
+      Layer.provideMerge(
+        Layer.mergeAll(
+          makeRepoLayer(state, []),
+          makeWorkflowLayer({})
         )
-      );
+      )
+    );
 
-      const repair = yield* EnrichmentRepairService.pipe(Effect.provide(layer));
+    return Effect.gen(function* () {
+      const repair = yield* EnrichmentRepairService;
       const failure = yield* Effect.flip(repair.retryRun("run-1", 100));
 
       expect(failure).toMatchObject({
@@ -234,36 +234,36 @@ describe("EnrichmentRepairService", () => {
         runId: "run-1",
         status: "complete"
       });
-    })
-  );
+    }).pipe(Effect.provide(layer));
+  });
 
-  it.effect("re-fails the same run when workflow restart control fails", () =>
-    Effect.gen(function* () {
-      const state = new Map([
-        [
-          "run-1",
-          makeRun({
-            status: "needs-review",
-            phase: "needs-review"
+  it.effect("re-fails the same run when workflow restart control fails", () => {
+    const state = new Map([
+      [
+        "run-1",
+        makeRun({
+          status: "needs-review",
+          phase: "needs-review"
+        })
+      ]
+    ]);
+    const events: Array<unknown> = [];
+
+    const layer = EnrichmentRepairService.layer.pipe(
+      Layer.provideMerge(
+        Layer.mergeAll(
+          makeRepoLayer(state, events),
+          makeWorkflowLayer({
+            restart: async () => {
+              throw new Error("boom");
+            }
           })
-        ]
-      ]);
-      const events: Array<unknown> = [];
-
-      const layer = EnrichmentRepairService.layer.pipe(
-        Layer.provideMerge(
-          Layer.mergeAll(
-            makeRepoLayer(state, events),
-            makeWorkflowLayer({
-              restart: async () => {
-                throw new Error("boom");
-              }
-            })
-          )
         )
-      );
+      )
+    );
 
-      const repair = yield* EnrichmentRepairService.pipe(Effect.provide(layer));
+    return Effect.gen(function* () {
+      const repair = yield* EnrichmentRepairService;
       const failure = yield* Effect.flip(repair.retryRun("run-1", 100));
 
       expect(failure).toMatchObject({
@@ -296,70 +296,70 @@ describe("EnrichmentRepairService", () => {
           })
         }
       ]);
-    })
-  );
+    }).pipe(Effect.provide(layer));
+  });
 
-  it.effect("repairs stale runs and leaves fresh active runs untouched across repeated passes", () =>
-    Effect.gen(function* () {
-      const state = new Map([
-        [
-          "stale-queued",
-          makeRun({
-            id: "stale-queued",
-            workflowInstanceId: "stale-queued",
-            status: "queued",
-            phase: "queued",
-            startedAt: 10,
-            finishedAt: null,
-            lastProgressAt: 10,
-            error: null
-          })
-        ],
-        [
-          "stale-running",
-          makeRun({
-            id: "stale-running",
-            workflowInstanceId: "stale-running",
-            status: "running",
-            phase: "planning",
-            startedAt: 20,
-            finishedAt: null,
-            lastProgressAt: 20,
-            error: null
-          })
-        ],
-        [
-          "fresh-running",
-          makeRun({
-            id: "fresh-running",
-            workflowInstanceId: "fresh-running",
-            status: "running",
-            phase: "executing",
-            startedAt: 1_900_000,
-            finishedAt: null,
-            lastProgressAt: 1_900_000,
-            error: null
-          })
-        ]
-      ]);
-      const events: Array<unknown> = [];
+  it.effect("repairs stale runs and leaves fresh active runs untouched across repeated passes", () => {
+    const state = new Map([
+      [
+        "stale-queued",
+        makeRun({
+          id: "stale-queued",
+          workflowInstanceId: "stale-queued",
+          status: "queued",
+          phase: "queued",
+          startedAt: 10,
+          finishedAt: null,
+          lastProgressAt: 10,
+          error: null
+        })
+      ],
+      [
+        "stale-running",
+        makeRun({
+          id: "stale-running",
+          workflowInstanceId: "stale-running",
+          status: "running",
+          phase: "planning",
+          startedAt: 20,
+          finishedAt: null,
+          lastProgressAt: 20,
+          error: null
+        })
+      ],
+      [
+        "fresh-running",
+        makeRun({
+          id: "fresh-running",
+          workflowInstanceId: "fresh-running",
+          status: "running",
+          phase: "executing",
+          startedAt: 1_900_000,
+          finishedAt: null,
+          lastProgressAt: 1_900_000,
+          error: null
+        })
+      ]
+    ]);
+    const events: Array<unknown> = [];
 
-      const layer = EnrichmentRepairService.layer.pipe(
-        Layer.provideMerge(
-          Layer.mergeAll(
-            makeRepoLayer(state, events),
-            makeWorkflowLayer({
-              terminate: async (runId) => {
-                if (runId === "stale-running") {
-                  throw new Error("terminate failed");
-                }
+    const layer = EnrichmentRepairService.layer.pipe(
+      Layer.provideMerge(
+        Layer.mergeAll(
+          makeRepoLayer(state, events),
+          makeWorkflowLayer({
+            terminate: async (runId) => {
+              if (runId === "stale-running") {
+                throw new Error("terminate failed");
               }
-            })
-          )
+            }
+          })
         )
-      );
+      )
+    );
 
-      const repair = yield* EnrichmentRepairService.pipe(Effect.provide(layer));
+    return Effect.gen(function* () {
+      const repair = yield* EnrichmentRepairService;
       const first = yield* repair.repairHistoricalRuns(2_000_000);
       const second = yield* repair.repairHistoricalRuns(2_000_000);
 
@@ -405,6 +405,6 @@ describe("EnrichmentRepairService", () => {
         "type" in event &&
         event.type === "markFailed"
       )).toHaveLength(2);
-    })
-  );
+    }).pipe(Effect.provide(layer));
+  });
 });

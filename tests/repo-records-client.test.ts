@@ -1,4 +1,5 @@
-import { Deferred, Duration, Effect, Fiber, Layer, Schema, TestClock } from "effect";
+import { Deferred, Duration, Effect, Fiber, Layer, Schema } from "effect";
+import { TestClock } from "effect/testing";
 import { describe, expect, it } from "@effect/vitest";
 import { BlueskyClient } from "../src/bluesky/BlueskyClient";
 import { RepoRecordsClient } from "../src/bluesky/RepoRecordsClient";
@@ -79,14 +80,15 @@ const makeRepoRecordsLayer = (
   );
 };
 
-const listRepoRecords = Effect.flatMap(RepoRecordsClient, (client) =>
-  client.listRecords({
+const listRepoRecords = Effect.gen(function* () {
+  const client = yield* RepoRecordsClient;
+  return yield* client.listRecords({
     repo,
     collection: "app.bsky.feed.post",
     limit: 100,
     reverse: true
-  })
-);
+  });
+});
 
 describe("RepoRecordsClient", () => {
   it.effect("uses a fresh D1 hint without resolving the repo service remotely", () =>
@@ -208,7 +210,7 @@ describe("RepoRecordsClient", () => {
         concurrency: "unbounded"
       }).pipe(
         Effect.provide(layer),
-        Effect.fork
+        Effect.forkChild
       );
 
       yield* Deferred.await(started);
@@ -245,10 +247,10 @@ describe("RepoRecordsClient", () => {
             Effect.sync(() => {
               listCalls.push(serviceUrl);
             }).pipe(
-              Effect.zipRight(
+              Effect.andThen(
                 serviceUrl === "https://stale.example.com"
                   ? Effect.fail(
-                      BlueskyApiError.make({
+                      new BlueskyApiError({
                         message: "not found",
                         status: 404
                       })

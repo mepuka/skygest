@@ -3,15 +3,15 @@ import { PostUri } from "./types";
 import { FlexibleNumber, KnowledgePostResult } from "./bi";
 import { EnrichmentReadiness } from "./enrichment";
 
-export const CurationStatus = Schema.Literal("flagged", "curated", "rejected");
+export const CurationStatus = Schema.Literals(["flagged", "curated", "rejected"]);
 export type CurationStatus = Schema.Schema.Type<typeof CurationStatus>;
 
-export const CurationAction = Schema.Literal("curate", "reject");
+export const CurationAction = Schema.Literals(["curate", "reject"]);
 export type CurationAction = Schema.Schema.Type<typeof CurationAction>;
 
 export const CurationSignalScore = Schema.Number.pipe(
-  Schema.greaterThanOrEqualTo(0),
-  Schema.lessThanOrEqualTo(100),
+  Schema.check(Schema.isGreaterThanOrEqualTo(0)),
+  Schema.check(Schema.isLessThanOrEqualTo(100)),
   Schema.brand("CurationSignalScore")
 );
 export type CurationSignalScore = Schema.Schema.Type<typeof CurationSignalScore>;
@@ -29,32 +29,30 @@ export const CurationRecord = Schema.Struct({
 export type CurationRecord = Schema.Schema.Type<typeof CurationRecord>;
 
 export const ListCurationCandidatesInput = Schema.Struct({
-  status: Schema.optional(CurationStatus.annotations({ description: "Filter by curation status (default: flagged)" })),
-  minScore: Schema.optional(Schema.Union(CurationSignalScore, Schema.compose(Schema.NumberFromString, CurationSignalScore)).annotations({ description: "Minimum signal score (0-100) to include" })),
-  topic: Schema.optional(Schema.String.annotations({ description: "Topic slug to filter by" })),
-  since: Schema.optional(FlexibleNumber.annotations({ description: "Filter posts flagged after this Unix epoch timestamp (milliseconds)" })),
-  limit: Schema.optional(FlexibleNumber.annotations({ description: "Maximum number of results to return" }))
+  status: Schema.optionalKey(CurationStatus.annotate({ description: "Filter by curation status (default: flagged)" })),
+  minScore: Schema.optionalKey(Schema.Union([CurationSignalScore, Schema.NumberFromString.pipe(Schema.decodeTo(CurationSignalScore))]).annotate({ description: "Minimum signal score (0-100) to include" })),
+  topic: Schema.optionalKey(Schema.String.annotate({ description: "Topic slug to filter by" })),
+  since: Schema.optionalKey(FlexibleNumber.annotate({ description: "Filter posts flagged after this Unix epoch timestamp (milliseconds)" })),
+  limit: Schema.optionalKey(FlexibleNumber.annotate({ description: "Maximum number of results to return" }))
 });
 export type ListCurationCandidatesInput = Schema.Schema.Type<typeof ListCurationCandidatesInput>;
 
 export const CuratePostInput = Schema.Struct({
-  postUri: PostUri.annotations({ description: "Post URI (at:// or x://) of the post to curate" }),
-  action: CurationAction.annotations({ description: "Action: 'curate' to approve for enrichment, 'reject' to dismiss" }),
-  note: Schema.optional(Schema.String.annotations({ description: "Optional review note explaining the curation decision" }))
+  postUri: PostUri.annotate({ description: "Post URI (at:// or x://) of the post to curate" }),
+  action: CurationAction.annotate({ description: "Action: 'curate' to approve for enrichment, 'reject' to dismiss" }),
+  note: Schema.optionalKey(Schema.String.annotate({ description: "Optional review note explaining the curation decision" }))
 });
 export type CuratePostInput = Schema.Schema.Type<typeof CuratePostInput>;
 
-export const CurationCandidateOutput = Schema.extend(
-  KnowledgePostResult,
-  Schema.Struct({
-    signalScore: CurationSignalScore,
-    curationStatus: CurationStatus,
-    predicatesApplied: Schema.Array(Schema.String),
-    flaggedAt: Schema.Number,
-    enrichmentReadiness: Schema.optionalWith(EnrichmentReadiness, { default: () => "none" as const })
-  })
-);
-export type CurationCandidateOutput = Schema.Schema.Type<typeof CurationCandidateOutput>;
+export const CurationCandidateOutput = Schema.Struct({
+  ...KnowledgePostResult.fields,
+  signalScore: CurationSignalScore,
+  curationStatus: CurationStatus,
+  predicatesApplied: Schema.Array(Schema.String),
+  flaggedAt: Schema.Number,
+  enrichmentReadiness: EnrichmentReadiness.pipe(Schema.withDecodingDefaultKey(() => "none" as const))
+});
+export type CurationCandidateOutput = typeof CurationCandidateOutput.Type;
 
 export const CurationCandidatesOutput = Schema.Struct({
   items: Schema.Array(CurationCandidateOutput)
@@ -69,7 +67,7 @@ export const CuratePostOutput = Schema.Struct({
 });
 export type CuratePostOutput = Schema.Schema.Type<typeof CuratePostOutput>;
 
-export class CurationPostNotFoundError extends Schema.TaggedError<CurationPostNotFoundError>()(
+export class CurationPostNotFoundError extends Schema.TaggedErrorClass<CurationPostNotFoundError>()(
   "CurationPostNotFoundError",
   {
     postUri: PostUri

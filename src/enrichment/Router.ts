@@ -1,21 +1,15 @@
-import * as HttpApi from "@effect/platform/HttpApi";
-import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder";
-import * as HttpApiEndpoint from "@effect/platform/HttpApiEndpoint";
-import * as HttpApiGroup from "@effect/platform/HttpApiGroup";
+import * as HttpApi from "effect/unstable/httpapi/HttpApi";
+import * as HttpApiBuilder from "effect/unstable/httpapi/HttpApiBuilder";
+import * as HttpApiEndpoint from "effect/unstable/httpapi/HttpApiEndpoint";
+import * as HttpApiGroup from "effect/unstable/httpapi/HttpApiGroup";
 import { Effect, Layer } from "effect";
 import type { AccessIdentity } from "../auth/AuthService";
+import * as HttpApiSchema from "effect/unstable/httpapi/HttpApiSchema";
 import {
-  BadRequestError,
-  ConflictError,
+  ApiErrorSchemas,
   EnrichmentRequestSchemas,
   EnrichmentResponseSchemas,
-  ForbiddenError,
-  InternalServerError,
   notFoundError,
-  NotFoundError,
-  ServiceUnavailableError,
-  UnauthorizedError,
-  UpstreamFailureError,
   conflictError,
   serviceUnavailableError
 } from "../domain/api";
@@ -77,41 +71,48 @@ const EnrichmentApi = HttpApi.make("enrichment")
   .add(
     HttpApiGroup.make("commands")
       .add(
-        HttpApiEndpoint.post("start", "/admin/enrichment/start")
-          .setPayload(EnrichmentRequestSchemas.start)
-          .addSuccess(EnrichmentResponseSchemas.queued, { status: 202 })
+        HttpApiEndpoint.post("start", "/admin/enrichment/start", {
+          disableCodecs: true,
+          payload: EnrichmentRequestSchemas.start,
+          success: EnrichmentResponseSchemas.queued.pipe(HttpApiSchema.status(202)),
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.post("repair", "/admin/enrichment/repair")
-          .addSuccess(EnrichmentResponseSchemas.repair)
+        HttpApiEndpoint.post("repair", "/admin/enrichment/repair", {
+          disableCodecs: true,
+          success: EnrichmentResponseSchemas.repair,
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.post("retry", "/admin/enrichment/runs/:id/retry")
-          .setPath(EnrichmentRequestSchemas.runPath)
-          .addSuccess(EnrichmentResponseSchemas.queued, { status: 202 })
+        HttpApiEndpoint.post("retry", "/admin/enrichment/runs/:id/retry", {
+          disableCodecs: true,
+          params: EnrichmentRequestSchemas.runPath,
+          success: EnrichmentResponseSchemas.queued.pipe(HttpApiSchema.status(202)),
+          error: ApiErrorSchemas
+        })
       )
   )
   .add(
     HttpApiGroup.make("runs")
       .add(
-        HttpApiEndpoint.get("list", "/admin/enrichment/runs")
-          .setUrlParams(EnrichmentRequestSchemas.runs)
-          .addSuccess(EnrichmentResponseSchemas.runs)
+        HttpApiEndpoint.get("list", "/admin/enrichment/runs", {
+          disableCodecs: true,
+          query: EnrichmentRequestSchemas.runs,
+          success: EnrichmentResponseSchemas.runs,
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.get("get", "/admin/enrichment/runs/:id")
-          .setPath(EnrichmentRequestSchemas.runPath)
-          .addSuccess(EnrichmentResponseSchemas.run)
+        HttpApiEndpoint.get("get", "/admin/enrichment/runs/:id", {
+          disableCodecs: true,
+          params: EnrichmentRequestSchemas.runPath,
+          success: EnrichmentResponseSchemas.run,
+          error: ApiErrorSchemas
+        })
       )
-  )
-  .addError(BadRequestError)
-  .addError(UnauthorizedError)
-  .addError(ForbiddenError)
-  .addError(ConflictError)
-  .addError(NotFoundError)
-  .addError(UpstreamFailureError)
-  .addError(ServiceUnavailableError)
-  .addError(InternalServerError);
+  );
 
 const withEnrichmentErrors = <A, R>(
   route: string,
@@ -190,15 +191,15 @@ const EnrichmentHandlers = Layer.mergeAll(
       .handle("repair", () =>
         withEnrichmentErrors(
           "/admin/enrichment/repair",
-          Effect.flatMap(EnrichmentRepairService, (repair) =>
+          EnrichmentRepairService.use( (repair) =>
             repair.repairHistoricalRuns()
           )
         )
       )
-      .handle("retry", ({ path }) =>
+      .handle("retry", ({ params: path }) =>
         withEnrichmentErrors(
           "/admin/enrichment/runs/:id/retry",
-          Effect.flatMap(EnrichmentRepairService, (repair) =>
+          EnrichmentRepairService.use( (repair) =>
             repair.retryRun(path.id)
           )
         )
@@ -206,10 +207,10 @@ const EnrichmentHandlers = Layer.mergeAll(
   ),
   HttpApiBuilder.group(EnrichmentApi, "runs", (handlers) =>
     handlers
-      .handle("list", ({ urlParams }) =>
+      .handle("list", ({ query: urlParams }) =>
         withEnrichmentErrors(
           "/admin/enrichment/runs",
-          Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+          EnrichmentRunsRepo.use( (runs) =>
             runs.listRecent({
               ...(urlParams.status === undefined ? {} : { status: urlParams.status }),
               limit: clampListLimit(urlParams.limit)
@@ -219,16 +220,16 @@ const EnrichmentHandlers = Layer.mergeAll(
           )
         )
       )
-      .handle("get", ({ path }) =>
+      .handle("get", ({ params: path }) =>
         withEnrichmentErrors(
           "/admin/enrichment/runs/:id",
-          Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+          EnrichmentRunsRepo.use( (runs) =>
             runs.getById(path.id)
           ).pipe(
             Effect.flatMap((run) =>
               run === null
                 ? Effect.fail(
-                    EnrichmentRunNotFoundError.make({
+                    new EnrichmentRunNotFoundError({
                       runId: path.id
                     })
                   )
@@ -246,7 +247,7 @@ const makeEnrichmentApiLayer = (serviceLayer: Layer.Layer<any, any, never>) =>
       Layer.provideMerge(serviceLayer)
     );
 
-    return HttpApiBuilder.api(EnrichmentApi).pipe(
+    return HttpApiBuilder.layer(EnrichmentApi).pipe(
       Layer.provideMerge(handlersLayer)
     );
   })();

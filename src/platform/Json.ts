@@ -1,24 +1,39 @@
-import { ParseResult, Schema } from "effect";
+import { Schema } from "effect";
 
-const JsonStringSchema = Schema.parseJson();
+export const encodeJsonString = Schema.encodeUnknownSync(Schema.UnknownFromJsonString);
+export const decodeJsonString = Schema.decodeUnknownSync(Schema.UnknownFromJsonString);
 
-export const encodeJsonString = Schema.encodeUnknownSync(JsonStringSchema);
-export const decodeJsonString = Schema.decodeUnknownSync(JsonStringSchema);
+export const encodeJsonStringWith = <S extends Schema.Encoder<unknown>>(schema: S) =>
+  (input: S["Type"]) => encodeJsonString(Schema.encodeUnknownSync(schema)(input));
 
-export const encodeJsonStringWith = <A, I>(schema: Schema.Schema<A, I, never>) =>
-  (input: A) => encodeJsonString(Schema.encodeUnknownSync(schema)(input));
+export const decodeJsonStringWith = <S extends Schema.Decoder<unknown>>(schema: S) =>
+  Schema.decodeUnknownSync(Schema.fromJsonString(schema as Schema.Top & S) as Schema.Decoder<unknown>) as
+    (input: unknown, options?: import("effect/SchemaAST").ParseOptions) => S["Type"];
 
-export const decodeJsonStringWith = <A, I>(schema: Schema.Schema<A, I, never>) =>
-  Schema.decodeUnknownSync(Schema.parseJson(schema));
+export const decodeJsonStringEitherWith = <S extends Schema.Decoder<unknown>>(schema: S) =>
+  Schema.decodeUnknownResult(Schema.fromJsonString(schema as Schema.Top & S) as Schema.Decoder<unknown>) as
+    (input: unknown, options?: import("effect/SchemaAST").ParseOptions) => import("effect/Result").Result<S["Type"], import("effect/SchemaIssue").Issue>;
 
-export const decodeJsonStringEitherWith = <A, I>(schema: Schema.Schema<A, I, never>) =>
-  Schema.decodeUnknownEither(Schema.parseJson(schema));
+export const decodeUnknownEitherWith = <S extends Schema.Decoder<unknown>>(schema: S) =>
+  Schema.decodeUnknownResult(schema);
 
-export const decodeUnknownEitherWith = <A, I>(schema: Schema.Schema<A, I, never>) =>
-  Schema.decodeUnknownEither(schema);
+export const formatSchemaParseError = (error: Schema.SchemaError | import("effect/SchemaIssue").Issue) =>
+  "issue" in error ? String(error.issue) : String(error);
 
-export const formatSchemaParseError = (error: ParseResult.ParseError) =>
-  ParseResult.TreeFormatter.formatErrorSync(error);
+/**
+ * Strip keys whose value is `undefined` so the object satisfies
+ * `exactOptionalPropertyTypes`. Useful when Schema-decoded optional
+ * fields produce `T | undefined` but the target signature uses `prop?: T`.
+ */
+export const stripUndefined = <T extends Record<string, unknown>>(obj: T): { [K in keyof T]: Exclude<T[K], undefined> } => {
+  const result: any = {};
+  for (const key of Object.keys(obj)) {
+    if ((obj as any)[key] !== undefined) {
+      result[key] = (obj as any)[key];
+    }
+  }
+  return result;
+};
 
 export const stringifyUnknown = (value: unknown): string => {
   if (typeof value === "string") {

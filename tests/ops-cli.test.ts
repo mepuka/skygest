@@ -1,5 +1,5 @@
-import { BunContext } from "@effect/platform-bun";
-import { FetchHttpClient } from "@effect/platform";
+import * as BunContext from "./helpers/BunContext";
+import { FetchHttpClient } from "effect/unstable/http";
 import { Effect, Layer, Redacted } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { energySeedDid } from "../src/bootstrap/CheckedInExpertSeeds";
@@ -447,9 +447,9 @@ describe("ops CLI", () => {
         makeCliLayer({
           operatorSecretLayer: Layer.effect(
             OperatorSecret,
-            MissingOperatorSecretEnvError.make({
+            Effect.fail(new MissingOperatorSecretEnvError({
               envVar: "SKYGEST_OPERATOR_SECRET"
-            })
+            }))
           )
         }).layer
       );
@@ -471,7 +471,7 @@ describe("ops CLI", () => {
       const failingLayer = makeCliLayer({
         client: Layer.succeed(StagingOperatorClient, {
           health: (baseUrl) =>
-            Effect.fail(StagingRequestError.make({
+            Effect.fail(new StagingRequestError({
               operation: "health",
               status: baseUrl.hostname.length,
               message: "boom"
@@ -757,7 +757,7 @@ describe("ops CLI", () => {
       );
       const httpLayer = FetchHttpClient.layer.pipe(Layer.provide(fakeFetchLayer));
       const clientLayer = StagingOperatorClient.live.pipe(Layer.provide(httpLayer));
-      const client = yield* StagingOperatorClient.pipe(Effect.provide(clientLayer));
+      const client = yield* Effect.service(StagingOperatorClient).pipe(Effect.provide(clientLayer));
       const error = yield* client.health(new URL("https://broken.test")).pipe(Effect.flip);
 
       expect(error._tag).toBe("StagingRequestError");

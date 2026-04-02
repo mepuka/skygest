@@ -1,4 +1,4 @@
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import { Effect, Layer } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { runMigrations } from "../src/db/migrate";
@@ -32,8 +32,9 @@ const makeLayer = () => {
 };
 
 const insertExpert = (did: Did, addedAt: number) =>
-  Effect.flatMap(SqlClient.SqlClient, (sql) =>
-    sql`
+  Effect.gen(function* () {
+    const sql = yield* SqlClient.SqlClient;
+    yield* sql`
       INSERT INTO experts (
         did,
         handle,
@@ -59,8 +60,8 @@ const insertExpert = (did: Did, addedAt: number) =>
         ${addedAt},
         NULL
       )
-    `.pipe(Effect.asVoid)
-  );
+    `.pipe(Effect.asVoid);
+  });
 
 describe("IngestRepairService", () => {
   it.effect("requeues stale dispatched items and fails stale running items for a live run", () =>

@@ -1,14 +1,9 @@
-import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder";
-import * as HttpServer from "@effect/platform/HttpServer";
-import type * as Context from "effect/Context";
-import { Layer } from "effect";
+import * as HttpRouter from "effect/unstable/http/HttpRouter";
+import { type ServiceMap, Layer } from "effect";
 import { badRequestError } from "../domain/api";
 import { encodeJsonString } from "../platform/Json";
 
-type WebHandler = ReturnType<typeof HttpApiBuilder.toWebHandler>;
-
-const withPlatformLayer = (layer: Layer.Layer<any, any, never>) =>
-  Layer.mergeAll(layer, HttpServer.layerContext);
+type WebHandler = ReturnType<typeof HttpRouter.toWebHandler>;
 
 const isDecodeErrorBody = (
   value: unknown
@@ -27,29 +22,44 @@ const normalizeBadRequestResponse = async (
     return response;
   }
 
-  const body = await response.clone().json().catch(() => null);
-  if (!isDecodeErrorBody(body)) {
-    return response;
+  const text = await response.clone().text().catch(() => "");
+
+  // Effect 4 returns empty-body 400 for schema decode errors
+  if (text.length === 0) {
+    const headers = new Headers(response.headers);
+    headers.set("content-type", "application/json");
+
+    return new Response(
+      encodeJsonString(badRequestError("invalid request parameters")),
+      { status: 400, headers }
+    );
   }
 
-  const headers = new Headers(response.headers);
-  headers.set("content-type", "application/json");
+  // Effect 3 compatibility: body with HttpApiDecodeError shape
+  try {
+    const body = JSON.parse(text);
+    if (isDecodeErrorBody(body)) {
+      const headers = new Headers(response.headers);
+      headers.set("content-type", "application/json");
 
-  return new Response(
-    encodeJsonString(badRequestError(body.message)),
-    {
-      status: 400,
-      headers
+      return new Response(
+        encodeJsonString(badRequestError(body.message)),
+        { status: 400, headers }
+      );
     }
-  );
+  } catch {
+    // Not JSON, leave as-is
+  }
+
+  return response;
 };
 
 export const handleWithApiLayer = async (
   request: Request,
   layer: Layer.Layer<any, any, never>,
-  context?: Context.Context<never>
+  context?: ServiceMap.ServiceMap<never>
 ): Promise<Response> => {
-  const webHandler = HttpApiBuilder.toWebHandler(withPlatformLayer(layer));
+  const webHandler = HttpRouter.toWebHandler(layer as any);
 
   try {
     return await normalizeBadRequestResponse(
@@ -71,7 +81,7 @@ export const makeCachedApiHandler = <Env>(
   return async (
     request: Request,
     env: Env,
-    context?: Context.Context<never>
+    context?: ServiceMap.ServiceMap<never>
   ): Promise<Response> => {
     if (cached === null || cached.env !== env) {
       if (cached !== null) {
@@ -80,12 +90,12 @@ export const makeCachedApiHandler = <Env>(
 
       cached = {
         env,
-        webHandler: HttpApiBuilder.toWebHandler(withPlatformLayer(buildLayer(env)))
+        webHandler: HttpRouter.toWebHandler(buildLayer(env) as any)
       };
     }
 
     return normalizeBadRequestResponse(
-      await cached.webHandler.handler(request, context)
+      await cached.webHandler.handler(request, context as ServiceMap.ServiceMap<unknown>)
     );
   };
 };

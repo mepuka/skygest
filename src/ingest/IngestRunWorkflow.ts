@@ -3,7 +3,7 @@ import {
   type WorkflowEvent,
   type WorkflowStep
 } from "cloudflare:workers";
-import { Effect, Either, ManagedRuntime, Schema } from "effect";
+import { Effect, Result, ManagedRuntime, Schema } from "effect";
 import type { Did } from "../domain/types";
 import {
   IngestSchemaDecodeError,
@@ -63,12 +63,12 @@ const fanoutForKind = (kind: IngestRunParams["kind"]): number => {
 
 const decodeIngestRunParams = (input: unknown) =>
   (() => {
-    const decoded = Schema.decodeUnknownEither(IngestRunParamsSchema)(input);
-    return Either.isRight(decoded)
-      ? Effect.succeed(decoded.right)
+    const decoded = Schema.decodeUnknownResult(IngestRunParamsSchema)(input);
+    return Result.isSuccess(decoded)
+      ? Effect.succeed(decoded.success)
       : Effect.fail(
-          IngestSchemaDecodeError.make({
-            message: formatSchemaParseError(decoded.left),
+          new IngestSchemaDecodeError({
+            message: formatSchemaParseError(decoded.failure),
             operation: "IngestRunWorkflow.run"
           })
         );
@@ -186,7 +186,7 @@ export class IngestRunWorkflow extends WorkflowEntrypoint<
 
   private async repairLiveRun(runId: string) {
     return await this.runEffect(
-      Effect.flatMap(IngestRepairService, (repair) =>
+      IngestRepairService.use( (repair) =>
         repair.repairLiveRun(runId)
       ),
       "IngestRunWorkflow.repairLiveRun"
@@ -234,7 +234,7 @@ export class IngestRunWorkflow extends WorkflowEntrypoint<
                   });
                 }
               }).pipe(
-                Effect.zipRight(
+                Effect.andThen(
                   items.markDispatched({
                     runId,
                     did: item.did,
@@ -260,7 +260,7 @@ export class IngestRunWorkflow extends WorkflowEntrypoint<
             ...counters
           });
         }).pipe(
-          Effect.catchAll((cause) =>
+          Effect.catch((cause) =>
             Effect.logWarning("progress rollup failed, continuing").pipe(
               Effect.annotateLogs({ runId, error: String(cause) })
             )
@@ -323,7 +323,7 @@ export class IngestRunWorkflow extends WorkflowEntrypoint<
           finishedAt,
           ...summary,
           error: toIngestErrorEnvelope(
-            WorkflowRunCompensationError.make({
+            new WorkflowRunCompensationError({
               message: `workflow failed after run creation: ${stringifyUnknown(error)}`,
               runId,
               operation: "IngestRunWorkflow.run"
@@ -346,45 +346,36 @@ export class IngestRunWorkflow extends WorkflowEntrypoint<
     runId: string,
     payload: IngestRunParams
   ) {
-    await this.runEffect(
-      Effect.iterate(
-        {
-          iteration: 0,
-          terminal: false
-        },
-        {
-          while: ({ terminal }) => !terminal,
-          body: ({ iteration }) =>
-            Effect.promise(async () =>
-              await step.do(`dispatch-${iteration}`, async () => {
-                const dispatch = await this.dispatchAvailable(runId, payload);
-                await this.logEvent("ingest-workflow-dispatch", {
-                  runId,
-                  iteration,
-                  terminal: dispatch.terminal,
-                  requeuedItems: dispatch.recovered.requeuedItems,
-                  failedItems: dispatch.recovered.failedItems
-                });
-                return dispatch;
-              })
-            ).pipe(
-              Effect.flatMap((dispatch) =>
-                dispatch.terminal
-                  ? Effect.succeed({
-                      iteration,
-                      terminal: true
-                    })
-                  : Effect.promise(async () => {
-                      await step.sleep(`wait-${iteration}`, WORKFLOW_POLL_INTERVAL_MS);
-                      return {
-                        iteration: iteration + 1,
-                        terminal: false
-                      };
-                    })
-              )
-            )
+    const self = this;
+    await self.runEffect(
+      Effect.gen(function* () {
+        let iteration = 0;
+        let terminal = false;
+        while (!terminal) {
+          const currentIteration = iteration;
+          const dispatch = yield* Effect.promise(async () =>
+            await step.do(`dispatch-${currentIteration}`, async () => {
+              const d = await self.dispatchAvailable(runId, payload);
+              await self.logEvent("ingest-workflow-dispatch", {
+                runId,
+                iteration: currentIteration,
+                terminal: d.terminal,
+                requeuedItems: d.recovered.requeuedItems,
+                failedItems: d.recovered.failedItems
+              });
+              return d;
+            })
+          );
+          if (dispatch.terminal) {
+            terminal = true;
+          } else {
+            yield* Effect.promise(async () => {
+              await step.sleep(`wait-${currentIteration}`, WORKFLOW_POLL_INTERVAL_MS);
+            });
+            iteration = currentIteration + 1;
+          }
         }
-      ),
+      }),
       "IngestRunWorkflow.dispatchUntilTerminal"
     );
   }
@@ -447,7 +438,7 @@ export class IngestRunWorkflow extends WorkflowEntrypoint<
           Effect.gen(function* () {
             const repo = yield* KnowledgeRepo;
             yield* repo.optimizeFts().pipe(
-              Effect.catchAll((error) =>
+              Effect.catch((error) =>
                 Effect.logWarning("FTS optimize failed (non-fatal)").pipe(
                   Effect.annotateLogs({ error: String(error) })
                 )

@@ -1,7 +1,7 @@
-import { SqlClient } from "@effect/sql";
-import type { SqlError } from "@effect/sql/SqlError";
+import { SqlClient } from "effect/unstable/sql";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
-import { Context, Effect, Layer } from "effect";
+import { ServiceMap, Effect, Layer } from "effect";
 import type { AccessIdentity } from "../auth/AuthService";
 import { energySeedDid, energySeedManifest } from "../bootstrap/CheckedInExpertSeeds";
 import { publicationsSeedManifest } from "../bootstrap/CheckedInPublications";
@@ -26,7 +26,7 @@ import { makeSmokeFixtureBatch, smokeFixtureUris } from "../staging/SmokeFixture
 
 const MUTATION_LABEL = "staging ops mutation";
 
-export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")<
+export class StagingOpsService extends ServiceMap.Service<
   StagingOpsService,
   {
     readonly migrate: (
@@ -45,7 +45,7 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
       actor: AccessIdentity
     ) => Effect.Effect<SeedPublicationsResult, SqlError | DbError>;
   }
->() {
+>()("@skygest/StagingOpsService") {
   static readonly layer = Layer.effect(
     StagingOpsService,
     Effect.gen(function* () {
@@ -170,7 +170,7 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
                 Effect.tap(() =>
                   Effect.sync(() => { updated++; })
                 ),
-                Effect.catchAll((error) =>
+                Effect.catch((error) =>
                   Effect.logWarning("failed to refresh expert profile").pipe(
                     Effect.annotateLogs({
                       did: expert.did,
@@ -219,13 +219,13 @@ export class StagingOpsService extends Context.Tag("@skygest/StagingOpsService")
         );
       });
 
-      return StagingOpsService.of({
+      return {
         migrate,
         bootstrapExperts: bootstrapCheckedInExperts,
         loadSmokeFixture,
         refreshProfiles,
         seedPublications
-      });
+      };
     })
   );
 }

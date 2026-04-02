@@ -1,5 +1,5 @@
 import { Effect, Layer, Schema } from "effect";
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import {
   decodeStoredIngestError,
   encodeStoredIngestError
@@ -32,16 +32,16 @@ const RawIngestRunRowSchema = Schema.Struct({
   requestedBy: Schema.NullOr(Schema.String),
   status: Schema.String,
   phase: Schema.String,
-  startedAt: Schema.NonNegativeInt,
-  finishedAt: Schema.NullOr(Schema.NonNegativeInt),
-  lastProgressAt: Schema.NullOr(Schema.NonNegativeInt),
-  totalExperts: Schema.NonNegativeInt,
-  expertsSucceeded: Schema.NonNegativeInt,
-  expertsFailed: Schema.NonNegativeInt,
-  pagesFetched: Schema.NonNegativeInt,
-  postsSeen: Schema.NonNegativeInt,
-  postsStored: Schema.NonNegativeInt,
-  postsDeleted: Schema.NonNegativeInt,
+  startedAt: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  finishedAt: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  lastProgressAt: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  totalExperts: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  expertsSucceeded: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  expertsFailed: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  pagesFetched: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  postsSeen: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  postsStored: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  postsDeleted: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   error: Schema.NullOr(Schema.String)
 });
 const RawIngestRunRowsSchema = Schema.Array(RawIngestRunRowSchema);
@@ -319,7 +319,7 @@ export const IngestRunsRepoD1 = {
         Effect.flatMap((validated) => applyTerminalUpdate("failed", validated))
       );
 
-    return IngestRunsRepo.of({
+    return {
       createQueuedIfAbsent,
       getById,
       listRunning,
@@ -329,6 +329,6 @@ export const IngestRunsRepoD1 = {
       updateProgress,
       markComplete,
       markFailed
-    });
+    };
   }))
 };

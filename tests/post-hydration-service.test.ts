@@ -100,7 +100,7 @@ describe("PostHydrationService", () => {
         )
       );
 
-      const hydrated = yield* Effect.flatMap(PostHydrationService, (service) =>
+      const hydrated = yield* PostHydrationService.use( (service) =>
         service.hydratePosts([makePost(uri), makePost(uri)])
       ).pipe(Effect.provide(layer));
 
@@ -123,7 +123,7 @@ describe("PostHydrationService", () => {
         )
       );
 
-      const hydrated = yield* Effect.flatMap(PostHydrationService, (service) =>
+      const hydrated = yield* PostHydrationService.use( (service) =>
         service.hydratePosts(uris.map(makePost))
       ).pipe(Effect.provide(layer));
 
@@ -162,7 +162,7 @@ describe("PostHydrationService", () => {
       const uri = "at://did:plc:expert-a/app.bsky.feed.post/flaky";
       const layer = makeHydrationLayer((_uris) =>
         Ref.update(calls, (count) => count + 1).pipe(
-          Effect.zipRight(Effect.fail(BlueskyApiError.make({
+          Effect.andThen(Effect.fail(new BlueskyApiError({
             message: "temporary outage",
             status: 503
           })))

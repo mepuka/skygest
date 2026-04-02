@@ -1,5 +1,5 @@
-import { Context, Effect, Either, Layer } from "effect";
-import type { SqlError } from "@effect/sql/SqlError";
+import { ServiceMap, Effect, Result, Layer } from "effect";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import {
   EnrichmentRetryNotAllowedError,
@@ -31,7 +31,7 @@ const emptyRepairSummary = (): EnrichmentRepairSummary => ({
 });
 
 const asRetryConflict = (run: EnrichmentRunRecord) =>
-  EnrichmentRetryNotAllowedError.make({
+  new EnrichmentRetryNotAllowedError({
     runId: run.id,
     status: run.status
   });
@@ -41,13 +41,13 @@ const workflowControlFailure = (
   operation: string,
   cause: unknown
 ) =>
-  EnrichmentWorkflowControlError.make({
+  new EnrichmentWorkflowControlError({
     runId,
     operation,
     message: stringifyUnknown(cause)
   });
 
-export class EnrichmentRepairService extends Context.Tag("@skygest/EnrichmentRepairService")<
+export class EnrichmentRepairService extends ServiceMap.Service<
   EnrichmentRepairService,
   {
     readonly retryRun: (
@@ -65,7 +65,7 @@ export class EnrichmentRepairService extends Context.Tag("@skygest/EnrichmentRep
       now?: number
     ) => Effect.Effect<EnrichmentRepairSummary, SqlError | DbError>;
   }
->() {
+>()("@skygest/EnrichmentRepairService") {
   static readonly layer = Layer.effect(
     EnrichmentRepairService,
     Effect.gen(function* () {
@@ -128,7 +128,7 @@ export class EnrichmentRepairService extends Context.Tag("@skygest/EnrichmentRep
         const run = yield* runs.getById(runId).pipe(
           Effect.flatMap((record) =>
             record === null
-              ? Effect.fail(EnrichmentRunNotFoundError.make({ runId }))
+              ? Effect.fail(new EnrichmentRunNotFoundError({ runId }))
               : Effect.succeed(record)
           )
         );
@@ -154,7 +154,7 @@ export class EnrichmentRepairService extends Context.Tag("@skygest/EnrichmentRep
           run.id,
           "EnrichmentRepairService.retryRun"
         ).pipe(
-          Effect.catchAll((error) =>
+          Effect.catch((error) =>
             runs.markFailed({
               id: run.id,
               finishedAt: Date.now(),
@@ -162,7 +162,7 @@ export class EnrichmentRepairService extends Context.Tag("@skygest/EnrichmentRep
                 runId: run.id,
                 operation: "EnrichmentRepairService.retryRun"
               })
-            }).pipe(Effect.zipRight(Effect.fail(error)))
+            }).pipe(Effect.andThen(Effect.fail(error)))
           )
         );
 
@@ -196,7 +196,7 @@ export class EnrichmentRepairService extends Context.Tag("@skygest/EnrichmentRep
           staleRuns,
           (run) =>
             Effect.gen(function* () {
-              const termination = yield* Effect.either(
+              const termination = yield* Effect.result(
                 terminateWorkflowInstance(
                   run.workflowInstanceId,
                   run.id,
@@ -204,13 +204,13 @@ export class EnrichmentRepairService extends Context.Tag("@skygest/EnrichmentRep
                 )
               );
 
-              const error = Either.isRight(termination)
-                ? HistoricalEnrichmentRepairError.make({
+              const error = Result.isSuccess(termination)
+                ? new HistoricalEnrichmentRepairError({
                     runId: run.id,
                     operation: "EnrichmentRepairService.repairHistoricalRuns",
                     message: `repaired stale enrichment ${run.status} run`
                   })
-                : termination.left;
+                : termination.failure;
 
               yield* runs.markFailed({
                 id: run.id,
@@ -232,10 +232,10 @@ export class EnrichmentRepairService extends Context.Tag("@skygest/EnrichmentRep
         } satisfies EnrichmentRepairSummary;
       });
 
-      return EnrichmentRepairService.of({
+      return {
         retryRun,
         repairHistoricalRuns
-      });
+      };
     })
   );
 }

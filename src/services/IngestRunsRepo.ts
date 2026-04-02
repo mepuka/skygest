@@ -1,5 +1,5 @@
-import { Context, Effect } from "effect";
-import type { SqlError } from "@effect/sql/SqlError";
+import { ServiceMap, Effect } from "effect";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type {
   CompleteIngestRun,
@@ -12,7 +12,7 @@ import type {
   UpdateIngestRunProgress
 } from "../domain/polling";
 
-export class IngestRunsRepo extends Context.Tag("@skygest/IngestRunsRepo")<
+export class IngestRunsRepo extends ServiceMap.Service<
   IngestRunsRepo,
   {
     readonly createQueuedIfAbsent: (
@@ -41,4 +41,4 @@ export class IngestRunsRepo extends Context.Tag("@skygest/IngestRunsRepo")<
       input: FailIngestRun
     ) => Effect.Effect<void, SqlError | DbError>;
   }
->() {}
+>()("@skygest/IngestRunsRepo") {}

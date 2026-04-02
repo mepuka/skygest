@@ -1,4 +1,4 @@
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import { Effect, Layer, Schema } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { handleAdminRequestWithLayer } from "../src/admin/Router";

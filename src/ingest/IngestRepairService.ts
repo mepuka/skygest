@@ -1,5 +1,5 @@
-import { Context, Effect, Layer } from "effect";
-import type { SqlError } from "@effect/sql/SqlError";
+import { ServiceMap, Effect, Layer } from "effect";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import {
   HistoricalRunRepairError,
@@ -61,7 +61,7 @@ const itemFailureAttemptCount = (item: IngestRunItemRecord) =>
     ? Math.max(item.attemptCount, 1)
     : item.attemptCount;
 
-export class IngestRepairService extends Context.Tag("@skygest/IngestRepairService")<
+export class IngestRepairService extends ServiceMap.Service<
   IngestRepairService,
   {
     readonly repairLiveRun: (
@@ -72,7 +72,7 @@ export class IngestRepairService extends Context.Tag("@skygest/IngestRepairServi
       now?: number
     ) => Effect.Effect<IngestRepairSummary, SqlError | DbError>;
   }
->() {
+>()("@skygest/IngestRepairService") {
   static readonly layer = Layer.effect(
     IngestRepairService,
     Effect.gen(function* () {
@@ -92,7 +92,7 @@ export class IngestRepairService extends Context.Tag("@skygest/IngestRepairServi
               finishedAt,
               ...summary,
               error: summary.error ?? toIngestErrorEnvelope(
-                HistoricalRunRepairError.make({
+                new HistoricalRunRepairError({
                   message: fallbackMessage,
                   runId,
                   operation
@@ -127,11 +127,11 @@ export class IngestRepairService extends Context.Tag("@skygest/IngestRepairServi
               mode: item.mode,
               lastProgressAt: now
             }).pipe(
-              Effect.zipRight(
+              Effect.andThen(
                 Effect.logInfo("requeued stale dispatched ingest item").pipe(
                   Effect.annotateLogs(
                     toIngestErrorEnvelope(
-                      StaleDispatchedIngestItemError.make({
+                      new StaleDispatchedIngestItemError({
                         message: "requeued stale dispatched ingest item",
                         did: item.did,
                         runId: item.runId,
@@ -159,7 +159,7 @@ export class IngestRepairService extends Context.Tag("@skygest/IngestRepairServi
               postsDeleted: item.postsDeleted,
               finishedAt: now,
               error: toIngestErrorEnvelope(
-                StaleRunningIngestItemError.make({
+                new StaleRunningIngestItemError({
                   message: "failed stale running ingest item",
                   did: item.did,
                   runId: item.runId,
@@ -194,7 +194,7 @@ export class IngestRepairService extends Context.Tag("@skygest/IngestRepairServi
             postsStored: 0,
             postsDeleted: 0,
             error: toIngestErrorEnvelope(
-              HistoricalRunRepairError.make({
+              new HistoricalRunRepairError({
                 message: "repaired abandoned run with no ingest items",
                 runId: run.id,
                 operation: "IngestRepairService.repairHistoricalRuns"
@@ -260,7 +260,7 @@ export class IngestRepairService extends Context.Tag("@skygest/IngestRepairServi
               postsDeleted: item.postsDeleted,
               finishedAt: now,
               error: toIngestErrorEnvelope(
-                HistoricalRunRepairError.make({
+                new HistoricalRunRepairError({
                   message: `repaired historical ${item.status} ingest item`,
                   runId: item.runId,
                   did: item.did,
@@ -301,10 +301,10 @@ export class IngestRepairService extends Context.Tag("@skygest/IngestRepairServi
         return summaries.reduce(addRepairSummary, emptyRepairSummary());
       });
 
-      return IngestRepairService.of({
+      return {
         repairLiveRun,
         repairHistoricalRuns
-      });
+      };
     })
   );
 }

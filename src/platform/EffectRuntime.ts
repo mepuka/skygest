@@ -9,12 +9,12 @@ const throwFailureCause = (
   cause: Cause.Cause<unknown>,
   options?: BoundaryOptions
 ): never => {
-  const failure = Cause.failureOption(cause);
+  const failure = Cause.findErrorOption(cause);
   if (Option.isSome(failure)) {
     throw failure.value;
   }
 
-  throw IngestBoundaryError.make({
+  throw new IngestBoundaryError({
     message: Cause.pretty(cause),
     ...(options?.operation === undefined ? {} : { operation: options.operation })
   });

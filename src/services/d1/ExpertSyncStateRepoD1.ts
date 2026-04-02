@@ -1,5 +1,5 @@
 import { Effect, Layer, Schema } from "effect";
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import { ExpertSyncStateRepo } from "../ExpertSyncStateRepo";
 import {
   ExpertSyncStateRecord as ExpertSyncStateRecordSchema,
@@ -14,12 +14,12 @@ import { decodeWithDbError } from "./schemaDecode";
 const RawExpertSyncStateRowSchema = Schema.Struct({
   did: Schema.String,
   pdsUrl: Schema.NullOr(Schema.String),
-  pdsVerifiedAt: Schema.NullOr(Schema.NonNegativeInt),
+  pdsVerifiedAt: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
   headUri: Schema.NullOr(Schema.String),
   headRkey: Schema.NullOr(Schema.String),
-  headCreatedAt: Schema.NullOr(Schema.NonNegativeInt),
-  lastPolledAt: Schema.NullOr(Schema.NonNegativeInt),
-  lastCompletedAt: Schema.NullOr(Schema.NonNegativeInt),
+  headCreatedAt: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  lastPolledAt: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  lastCompletedAt: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
   backfillCursor: Schema.NullOr(Schema.String),
   backfillStatus: Schema.String,
   lastError: Schema.NullOr(Schema.String)
@@ -119,9 +119,9 @@ export const ExpertSyncStateRepoD1 = {
         )
       );
 
-    return ExpertSyncStateRepo.of({
+    return {
       getByDid,
       upsert
-    });
+    };
   }))
 };

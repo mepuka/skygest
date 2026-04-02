@@ -1,5 +1,5 @@
 import { Effect, Layer, Schema } from "effect";
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import {
   decodeStoredEnrichmentError,
   encodeStoredEnrichmentError
@@ -36,14 +36,14 @@ const RawEnrichmentRunRowSchema = Schema.Struct({
   requestedBy: Schema.NullOr(Schema.String),
   status: Schema.String,
   phase: Schema.String,
-  attemptCount: Schema.NonNegativeInt,
+  attemptCount: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   modelLane: Schema.NullOr(Schema.String),
   promptVersion: Schema.NullOr(Schema.String),
   inputFingerprint: Schema.NullOr(Schema.String),
-  startedAt: Schema.NonNegativeInt,
-  finishedAt: Schema.NullOr(Schema.NonNegativeInt),
-  lastProgressAt: Schema.NullOr(Schema.NonNegativeInt),
-  resultWrittenAt: Schema.NullOr(Schema.NonNegativeInt),
+  startedAt: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  finishedAt: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  lastProgressAt: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
+  resultWrittenAt: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))),
   error: Schema.NullOr(Schema.String)
 });
 const RawEnrichmentRunRowsSchema = Schema.Array(RawEnrichmentRunRowSchema);
@@ -374,7 +374,7 @@ export const EnrichmentRunsRepoD1 = {
         )
       );
 
-    return EnrichmentRunsRepo.of({
+    return {
       createQueuedIfAbsent,
       getById,
       listRunning,
@@ -387,6 +387,6 @@ export const EnrichmentRunsRepoD1 = {
       markNeedsReview,
       resetForRetry,
       listLatestByPostUri
-    });
+    };
   }))
 };

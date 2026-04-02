@@ -1,14 +1,14 @@
-import { Context, Effect, Layer, Redacted, Schema } from "effect";
+import { ServiceMap, Effect, Layer, Redacted, Schema } from "effect";
 import { AppConfig } from "../platform/Config";
 
 const AUTHORIZATION_HEADER = "authorization";
 
-export class MissingOperatorSecretError extends Schema.TaggedError<MissingOperatorSecretError>()(
+export class MissingOperatorSecretError extends Schema.TaggedErrorClass<MissingOperatorSecretError>()(
   "MissingOperatorSecretError",
   {}
 ) {}
 
-export class InvalidOperatorSecretError extends Schema.TaggedError<InvalidOperatorSecretError>()(
+export class InvalidOperatorSecretError extends Schema.TaggedErrorClass<InvalidOperatorSecretError>()(
   "InvalidOperatorSecretError",
   {}
 ) {}
@@ -51,7 +51,7 @@ const timingSafeEqual = (a: string, b: string): Effect.Effect<boolean> => {
     };
 
     if (typeof subtle.timingSafeEqual === "function") {
-      return subtle.timingSafeEqual(bufA.buffer, bufB.buffer);
+      return subtle.timingSafeEqual(bufA.buffer as ArrayBuffer, bufB.buffer as ArrayBuffer);
     }
 
     // Fallback for non-Workers runtimes (test / Node / Bun):
@@ -64,7 +64,7 @@ const timingSafeEqual = (a: string, b: string): Effect.Effect<boolean> => {
   });
 };
 
-export class AuthService extends Context.Tag("@skygest/AuthService")<
+export class AuthService extends ServiceMap.Service<
   AuthService,
   {
     readonly requireOperator: (
@@ -74,7 +74,7 @@ export class AuthService extends Context.Tag("@skygest/AuthService")<
       MissingOperatorSecretError | InvalidOperatorSecretError
     >;
   }
->() {
+>()("@skygest/AuthService") {
   static readonly layer = Layer.effect(
     AuthService,
     Effect.gen(function* () {
@@ -83,7 +83,7 @@ export class AuthService extends Context.Tag("@skygest/AuthService")<
       const requireOperator = Effect.fn("AuthService.requireOperator")(function* (
         headers: Headers
       ) {
-        const configuredSecret = Redacted.value(config.operatorSecret);
+        const configuredSecret: string = Redacted.value(config.operatorSecret) as string;
 
         const authHeader = headers.get(AUTHORIZATION_HEADER);
         const token = authHeader !== null ? extractBearerToken(authHeader) : null;
@@ -105,9 +105,9 @@ export class AuthService extends Context.Tag("@skygest/AuthService")<
         } satisfies AccessIdentity;
       });
 
-      return AuthService.of({
+      return {
         requireOperator
-      });
+      };
     })
   );
 }

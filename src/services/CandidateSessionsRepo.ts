@@ -1,7 +1,6 @@
-import { Context, Effect } from "effect";
-import type * as PlatformError from "@effect/platform/Error";
+import { ServiceMap, Effect, type PlatformError } from "effect";
 
-export class CandidateSessionsRepo extends Context.Tag("@skygest/CandidateSessionsRepo")<
+export class CandidateSessionsRepo extends ServiceMap.Service<
   CandidateSessionsRepo,
   {
     readonly put: (
@@ -13,4 +12,4 @@ export class CandidateSessionsRepo extends Context.Tag("@skygest/CandidateSessio
       sessionId: string
     ) => Effect.Effect<ReadonlyArray<string> | null, PlatformError.PlatformError>;
   }
->() {}
+>()("@skygest/CandidateSessionsRepo") {}

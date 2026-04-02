@@ -31,7 +31,7 @@ const fetchPublicJson = <A>(
       const text = await response.text();
 
       if (!response.ok) {
-        throw StagingRequestError.make({
+        throw new StagingRequestError({
           operation: `GET ${path}`,
           status: response.status,
           message: text || response.statusText
@@ -43,7 +43,7 @@ const fetchPublicJson = <A>(
     catch: (error) =>
       error instanceof StagingRequestError
         ? error
-        : StagingRequestError.make({
+        : new StagingRequestError({
             operation: `GET ${path}`,
             message: stringifyUnknown(error)
           })
@@ -51,11 +51,11 @@ const fetchPublicJson = <A>(
 
 const check = (name: string, effect: Effect.Effect<void, StagingRequestError | SmokeAssertionError>) =>
   Console.log(`  [check] ${name}`).pipe(
-    Effect.zipRight(effect),
-    Effect.zipRight(Console.log(`  [pass]  ${name}`)),
+    Effect.andThen(effect),
+    Effect.andThen(Console.log(`  [pass]  ${name}`)),
     Effect.mapError((error) =>
       error._tag === "SmokeAssertionError"
-        ? SmokeAssertionError.make({ message: `${name}: ${error.message}` })
+        ? new SmokeAssertionError({ message: `${name}: ${error.message}` })
         : error
     )
   );
@@ -63,7 +63,7 @@ const check = (name: string, effect: Effect.Effect<void, StagingRequestError | S
 const expect = (condition: boolean, message: string) =>
   condition
     ? Effect.void
-    : Effect.fail(SmokeAssertionError.make({ message }));
+    : Effect.fail(new SmokeAssertionError({ message }));
 
 // Test 1: Porter stemming — "photovoltaic" in the fixture should match
 // a search for the stem variant "photovoltaics"

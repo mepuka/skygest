@@ -1,21 +1,15 @@
-import * as HttpApi from "@effect/platform/HttpApi";
-import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder";
-import * as HttpApiEndpoint from "@effect/platform/HttpApiEndpoint";
-import * as HttpApiGroup from "@effect/platform/HttpApiGroup";
+import * as HttpApi from "effect/unstable/httpapi/HttpApi";
+import * as HttpApiBuilder from "effect/unstable/httpapi/HttpApiBuilder";
+import * as HttpApiEndpoint from "effect/unstable/httpapi/HttpApiEndpoint";
+import * as HttpApiGroup from "effect/unstable/httpapi/HttpApiGroup";
 import { Effect, Layer } from "effect";
 import type { AccessIdentity } from "../auth/AuthService";
+import * as HttpApiSchema from "effect/unstable/httpapi/HttpApiSchema";
 import {
-  BadRequestError,
-  ConflictError,
-  ForbiddenError,
+  ApiErrorSchemas,
   IngestRequestSchemas,
   IngestResponseSchemas,
-  InternalServerError,
-  notFoundError,
-  NotFoundError,
-  ServiceUnavailableError,
-  UnauthorizedError,
-  UpstreamFailureError
+  notFoundError
 } from "../domain/api";
 import { makeIngestWorkerLayer } from "../edge/Layer";
 import { handleWithApiLayer, makeCachedApiHandler } from "../http/ApiSupport";
@@ -39,46 +33,56 @@ const IngestApi = HttpApi.make("ingest")
   .add(
     HttpApiGroup.make("commands")
       .add(
-        HttpApiEndpoint.post("poll", "/admin/ingest/poll")
-          .setPayload(IngestRequestSchemas.poll)
-          .addSuccess(IngestResponseSchemas.queued, { status: 202 })
+        HttpApiEndpoint.post("poll", "/admin/ingest/poll", {
+          disableCodecs: true,
+          payload: IngestRequestSchemas.poll,
+          success: IngestResponseSchemas.queued.pipe(HttpApiSchema.status(202)),
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.post("backfill", "/admin/ingest/backfill")
-          .setPayload(IngestRequestSchemas.backfill)
-          .addSuccess(IngestResponseSchemas.queued, { status: 202 })
+        HttpApiEndpoint.post("backfill", "/admin/ingest/backfill", {
+          disableCodecs: true,
+          payload: IngestRequestSchemas.backfill,
+          success: IngestResponseSchemas.queued.pipe(HttpApiSchema.status(202)),
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.post("reconcile", "/admin/ingest/reconcile")
-          .setPayload(IngestRequestSchemas.reconcile)
-          .addSuccess(IngestResponseSchemas.queued, { status: 202 })
+        HttpApiEndpoint.post("reconcile", "/admin/ingest/reconcile", {
+          disableCodecs: true,
+          payload: IngestRequestSchemas.reconcile,
+          success: IngestResponseSchemas.queued.pipe(HttpApiSchema.status(202)),
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.post("repair", "/admin/ingest/repair")
-          .addSuccess(IngestResponseSchemas.repair)
+        HttpApiEndpoint.post("repair", "/admin/ingest/repair", {
+          disableCodecs: true,
+          success: IngestResponseSchemas.repair,
+          error: ApiErrorSchemas
+        })
       )
   )
   .add(
     HttpApiGroup.make("runs")
       .add(
-        HttpApiEndpoint.get("get", "/admin/ingest/runs/:id")
-          .setPath(IngestRequestSchemas.runPath)
-          .addSuccess(IngestResponseSchemas.run)
+        HttpApiEndpoint.get("get", "/admin/ingest/runs/:id", {
+          disableCodecs: true,
+          params: IngestRequestSchemas.runPath,
+          success: IngestResponseSchemas.run,
+          error: ApiErrorSchemas
+        })
       )
       .add(
-        HttpApiEndpoint.get("items", "/admin/ingest/runs/:id/items")
-          .setPath(IngestRequestSchemas.runPath)
-          .addSuccess(IngestResponseSchemas.runItems)
+        HttpApiEndpoint.get("items", "/admin/ingest/runs/:id/items", {
+          disableCodecs: true,
+          params: IngestRequestSchemas.runPath,
+          success: IngestResponseSchemas.runItems,
+          error: ApiErrorSchemas
+        })
       )
-  )
-  .addError(BadRequestError)
-  .addError(UnauthorizedError)
-  .addError(ForbiddenError)
-  .addError(ConflictError)
-  .addError(NotFoundError)
-  .addError(UpstreamFailureError)
-  .addError(ServiceUnavailableError)
-  .addError(InternalServerError);
+  );
 
 const withIngestErrors = <A, R>(
   route: string,
@@ -141,15 +145,15 @@ const IngestHandlers = Layer.mergeAll(
         }))
       )
       .handle("repair", () =>
-        withIngestErrors("/admin/ingest/repair", Effect.flatMap(IngestRepairService, (repair) =>
+        withIngestErrors("/admin/ingest/repair", IngestRepairService.use( (repair) =>
           repair.repairHistoricalRuns()
         ))
       )
   ),
   HttpApiBuilder.group(IngestApi, "runs", (handlers) =>
     handlers
-      .handle("get", ({ path }) =>
-        withIngestErrors("/admin/ingest/runs/:id", Effect.flatMap(IngestRunsRepo, (runs) =>
+      .handle("get", ({ params: path }) =>
+        withIngestErrors("/admin/ingest/runs/:id", IngestRunsRepo.use( (runs) =>
           runs.getById(path.id)
         ).pipe(
           Effect.flatMap((run) =>
@@ -159,7 +163,7 @@ const IngestHandlers = Layer.mergeAll(
           )
         ))
       )
-      .handle("items", ({ path }) =>
+      .handle("items", ({ params: path }) =>
         withIngestErrors("/admin/ingest/runs/:id/items", Effect.gen(function* () {
           const runs = yield* IngestRunsRepo;
           const runItems = yield* IngestRunItemsRepo;
@@ -184,7 +188,7 @@ const makeIngestApiLayer = (serviceLayer: Layer.Layer<any, any, never>) =>
       Layer.provideMerge(serviceLayer)
     );
 
-    return HttpApiBuilder.api(IngestApi).pipe(
+    return HttpApiBuilder.layer(IngestApi).pipe(
       Layer.provideMerge(handlersLayer)
     );
   })();

@@ -1,6 +1,6 @@
 import {
   Cache,
-  Context,
+  ServiceMap,
   Duration,
   Effect,
   Layer,
@@ -38,14 +38,14 @@ const toHydration = (post: ThreadPostView): KnowledgePostHydration => ({
   embedContent: buildTypedEmbed(post.embed)
 });
 
-export class PostHydrationService extends Context.Tag("@skygest/PostHydrationService")<
+export class PostHydrationService extends ServiceMap.Service<
   PostHydrationService,
   {
     readonly hydratePosts: <A extends HydratablePost>(
       items: ReadonlyArray<A>
     ) => Effect.Effect<ReadonlyArray<A>>;
   }
->() {
+>()("@skygest/PostHydrationService") {
   static readonly layer = Layer.effect(
     PostHydrationService,
     Effect.gen(function* () {
@@ -53,7 +53,7 @@ export class PostHydrationService extends Context.Tag("@skygest/PostHydrationSer
       const cache = yield* Cache.make<string, KnowledgePostHydration>({
         capacity: CACHE_CAPACITY,
         timeToLive: CACHE_TTL,
-        lookup: () => Effect.dieMessage("PostHydrationService cache is write-through only")
+        lookup: () => Effect.die(new Error("PostHydrationService cache is write-through only"))
       });
 
       const populateChunk = Effect.fn("PostHydrationService.populateChunk")(function* (
@@ -66,7 +66,7 @@ export class PostHydrationService extends Context.Tag("@skygest/PostHydrationSer
 
         yield* Effect.forEach(
           uris,
-          (uri) => cache.set(uri, hydratedByUri.get(uri) ?? emptyKnowledgePostHydration()),
+          (uri) => Cache.set(cache, uri, hydratedByUri.get(uri) ?? emptyKnowledgePostHydration()),
           { discard: true }
         );
       });
@@ -82,7 +82,7 @@ export class PostHydrationService extends Context.Tag("@skygest/PostHydrationSer
         const cachedEntries = yield* Effect.forEach(
           uniqueUris,
           (uri) =>
-            cache.getOption(uri).pipe(
+            Cache.getOption(cache, uri).pipe(
               Effect.map((maybeHydration) => [uri, maybeHydration] as const)
             ),
           { concurrency: "unbounded" }
@@ -103,7 +103,7 @@ export class PostHydrationService extends Context.Tag("@skygest/PostHydrationSer
         const blueskyMisses = misses.filter((uri) => uri.startsWith("at://"));
         for (const uri of misses) {
           if (!uri.startsWith("at://")) {
-            yield* cache.set(uri, emptyKnowledgePostHydration());
+            yield* Cache.set(cache, uri, emptyKnowledgePostHydration());
           }
         }
 
@@ -111,7 +111,7 @@ export class PostHydrationService extends Context.Tag("@skygest/PostHydrationSer
           chunk(blueskyMisses, GET_POSTS_CHUNK_SIZE),
           (uris) =>
             populateChunk(uris).pipe(
-              Effect.catchAll(() => Effect.void)
+              Effect.catch(() => Effect.void)
             ),
           {
             concurrency: GET_POSTS_CONCURRENCY,
@@ -122,7 +122,7 @@ export class PostHydrationService extends Context.Tag("@skygest/PostHydrationSer
         const loadedEntries = yield* Effect.forEach(
           misses,
           (uri) =>
-            cache.getOption(uri).pipe(
+            Cache.getOption(cache, uri).pipe(
               Effect.map((maybeHydration) => [uri, maybeHydration] as const)
             ),
           { concurrency: "unbounded" }
@@ -145,9 +145,9 @@ export class PostHydrationService extends Context.Tag("@skygest/PostHydrationSer
           Effect.map((hydrated) => hydrated as unknown as ReadonlyArray<A>)
         );
 
-      return PostHydrationService.of({
+      return {
         hydratePosts
-      });
+      };
     })
   );
 }

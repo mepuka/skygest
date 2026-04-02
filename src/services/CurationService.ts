@@ -1,5 +1,5 @@
-import { Clock, Context, Effect, Layer, Option } from "effect";
-import type { SqlError } from "@effect/sql/SqlError";
+import { Clock, ServiceMap, Effect, Layer, Option } from "effect";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import { BlueskyApiError } from "../domain/errors";
 import type { PostUri } from "../domain/types";
@@ -34,7 +34,7 @@ import {
 import type { PostContext } from "../curation/CurationPredicates";
 import { EnrichmentWorkflowLauncher } from "../enrichment/EnrichmentWorkflowLauncher";
 
-export class CurationService extends Context.Tag("@skygest/CurationService")<
+export class CurationService extends ServiceMap.Service<
   CurationService,
   {
     readonly flagBatch: (
@@ -50,7 +50,7 @@ export class CurationService extends Context.Tag("@skygest/CurationService")<
       curator: string
     ) => Effect.Effect<CuratePostOutput, SqlError | DbError | CurationPostNotFoundError | BlueskyApiError>;
   }
->() {
+>()("@skygest/CurationService") {
   static readonly layer = Layer.effect(CurationService, Effect.gen(function* () {
     const curationRepo = yield* CurationRepo;
     const expertsRepo = yield* ExpertsRepo;
@@ -180,7 +180,7 @@ const clampCurationLimit = (limit: number | undefined) =>
         // Verify post exists in D1
         const exists = yield* curationRepo.postExists(input.postUri);
         if (!exists) {
-          return yield* CurationPostNotFoundError.make({ postUri: input.postUri });
+          return yield* new CurationPostNotFoundError({ postUri: input.postUri });
         }
 
         // Check current curation state
@@ -229,7 +229,7 @@ const clampCurationLimit = (limit: number | undefined) =>
 
           if (existingPayload !== null) {
             yield* queuePickedEnrichment(input.postUri, existingPayload.embedPayload, curator)
-              .pipe(Effect.catchAll(() => Effect.succeed(false)));
+              .pipe(Effect.catch(() => Effect.succeed(false)));
           }
 
           return { postUri: input.postUri, action: input.action, previousStatus, newStatus: "curated" as const };
@@ -296,7 +296,7 @@ const clampCurationLimit = (limit: number | undefined) =>
           embedPayload,
           curator
         ).pipe(
-          Effect.catchAll(() => Effect.succeed(false))
+          Effect.catch(() => Effect.succeed(false))
         );
 
         return {
@@ -308,10 +308,10 @@ const clampCurationLimit = (limit: number | undefined) =>
       }
     );
 
-    return CurationService.of({
+    return {
       flagBatch,
       listCandidates,
       curatePost
-    });
+    };
   }));
 }

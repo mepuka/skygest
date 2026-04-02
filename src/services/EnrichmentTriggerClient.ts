@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Schema } from "effect";
+import { ServiceMap, Effect, Layer, Schema } from "effect";
 import type { AtUri } from "../domain/types";
 import type { EnrichmentKind } from "../domain/enrichment";
 import { defaultSchemaVersionForEnrichmentKind } from "../domain/enrichment";
@@ -7,7 +7,7 @@ import { defaultSchemaVersionForEnrichmentKind } from "../domain/enrichment";
 // Error
 // ---------------------------------------------------------------------------
 
-export class EnrichmentTriggerError extends Schema.TaggedError<EnrichmentTriggerError>()(
+export class EnrichmentTriggerError extends Schema.TaggedErrorClass<EnrichmentTriggerError>()(
   "EnrichmentTriggerError",
   {
     message: Schema.String,
@@ -31,9 +31,7 @@ export type StartEnrichmentResult = Schema.Schema.Type<typeof StartEnrichmentRes
 // Service
 // ---------------------------------------------------------------------------
 
-export class EnrichmentTriggerClient extends Context.Tag(
-  "@skygest/EnrichmentTriggerClient"
-)<
+export class EnrichmentTriggerClient extends ServiceMap.Service<
   EnrichmentTriggerClient,
   {
     readonly start: (
@@ -44,7 +42,7 @@ export class EnrichmentTriggerClient extends Context.Tag(
       }
     ) => Effect.Effect<StartEnrichmentResult, EnrichmentTriggerError>;
   }
->() {
+>()("@skygest/EnrichmentTriggerClient") {
   static readonly layerFromFetcher = (fetcher: Fetcher, operatorSecret: string) =>
     Layer.succeed(
       EnrichmentTriggerClient,
@@ -100,7 +98,7 @@ export class EnrichmentTriggerClient extends Context.Tag(
             }
           }).pipe(
             Effect.flatMap((body) =>
-              Schema.decodeUnknown(StartEnrichmentResult)(body).pipe(
+              Schema.decodeUnknownEffect(StartEnrichmentResult)(body).pipe(
                 Effect.mapError(
                   (parseError) =>
                     new EnrichmentTriggerError({

@@ -23,57 +23,54 @@ import { CurationCandidatesOutput, CuratePostOutput } from "../domain/curation.t
 import { GetPostEnrichmentsOutput, EnrichmentKind } from "../domain/enrichment.ts";
 import { PostUri } from "../domain/types.ts";
 
-const DisplayField = Schema.Struct({ _display: Schema.String });
+const displayFields = { _display: Schema.String } as const;
 
-export const KnowledgePostsMcpOutput = Schema.extend(KnowledgePostsOutput, DisplayField);
-export type KnowledgePostsMcpOutput = Schema.Schema.Type<typeof KnowledgePostsMcpOutput>;
+export const KnowledgePostsMcpOutput = KnowledgePostsOutput.pipe(Schema.fieldsAssign(displayFields));
+export type KnowledgePostsMcpOutput = typeof KnowledgePostsMcpOutput.Type;
 
-export const KnowledgeLinksMcpOutput = Schema.extend(KnowledgeLinksOutput, DisplayField);
-export type KnowledgeLinksMcpOutput = Schema.Schema.Type<typeof KnowledgeLinksMcpOutput>;
+export const KnowledgeLinksMcpOutput = KnowledgeLinksOutput.pipe(Schema.fieldsAssign(displayFields));
+export type KnowledgeLinksMcpOutput = typeof KnowledgeLinksMcpOutput.Type;
 
-export const ExpertListMcpOutput = Schema.extend(ExpertListOutput, DisplayField);
-export type ExpertListMcpOutput = Schema.Schema.Type<typeof ExpertListMcpOutput>;
+export const ExpertListMcpOutput = ExpertListOutput.pipe(Schema.fieldsAssign(displayFields));
+export type ExpertListMcpOutput = typeof ExpertListMcpOutput.Type;
 
-export const OntologyTopicsMcpOutput = Schema.extend(OntologyTopicsOutput, DisplayField);
-export type OntologyTopicsMcpOutput = Schema.Schema.Type<typeof OntologyTopicsMcpOutput>;
+export const OntologyTopicsMcpOutput = OntologyTopicsOutput.pipe(Schema.fieldsAssign(displayFields));
+export type OntologyTopicsMcpOutput = typeof OntologyTopicsMcpOutput.Type;
 
-export const OntologyTopicMcpOutput = Schema.extend(OntologyTopicOutput, DisplayField);
-export type OntologyTopicMcpOutput = Schema.Schema.Type<typeof OntologyTopicMcpOutput>;
+export const OntologyTopicMcpOutput = OntologyTopicOutput.pipe(Schema.fieldsAssign(displayFields));
+export type OntologyTopicMcpOutput = typeof OntologyTopicMcpOutput.Type;
 
-export const ExpandedTopicsMcpOutput = Schema.extend(ExpandedTopicsOutput, DisplayField);
-export type ExpandedTopicsMcpOutput = Schema.Schema.Type<typeof ExpandedTopicsMcpOutput>;
+export const ExpandedTopicsMcpOutput = ExpandedTopicsOutput.pipe(Schema.fieldsAssign(displayFields));
+export type ExpandedTopicsMcpOutput = typeof ExpandedTopicsMcpOutput.Type;
 
-export const ExplainPostTopicsMcpOutput = Schema.extend(ExplainPostTopicsOutput, DisplayField);
-export type ExplainPostTopicsMcpOutput = Schema.Schema.Type<typeof ExplainPostTopicsMcpOutput>;
+export const ExplainPostTopicsMcpOutput = ExplainPostTopicsOutput.pipe(Schema.fieldsAssign(displayFields));
+export type ExplainPostTopicsMcpOutput = typeof ExplainPostTopicsMcpOutput.Type;
 
-export const EditorialPicksMcpOutput = Schema.extend(EditorialPicksOutput, DisplayField);
-export type EditorialPicksMcpOutput = Schema.Schema.Type<typeof EditorialPicksMcpOutput>;
+export const EditorialPicksMcpOutput = EditorialPicksOutput.pipe(Schema.fieldsAssign(displayFields));
+export type EditorialPicksMcpOutput = typeof EditorialPicksMcpOutput.Type;
 
-export const PostThreadMcpOutput = Schema.extend(PostThreadOutput, DisplayField);
-export type PostThreadMcpOutput = Schema.Schema.Type<typeof PostThreadMcpOutput>;
+export const PostThreadMcpOutput = PostThreadOutput.pipe(Schema.fieldsAssign(displayFields));
+export type PostThreadMcpOutput = typeof PostThreadMcpOutput.Type;
 
 export const ThreadDocumentMcpOutput = ThreadDocumentOutput;
-export type ThreadDocumentMcpOutput = Schema.Schema.Type<typeof ThreadDocumentMcpOutput>;
+export type ThreadDocumentMcpOutput = typeof ThreadDocumentMcpOutput.Type;
 
-export const CurationCandidatesMcpOutput = Schema.extend(CurationCandidatesOutput, DisplayField);
-export type CurationCandidatesMcpOutput = Schema.Schema.Type<typeof CurationCandidatesMcpOutput>;
+export const CurationCandidatesMcpOutput = CurationCandidatesOutput.pipe(Schema.fieldsAssign(displayFields));
+export type CurationCandidatesMcpOutput = typeof CurationCandidatesMcpOutput.Type;
 
-export const CuratePostMcpOutput = Schema.extend(CuratePostOutput, DisplayField);
-export type CuratePostMcpOutput = Schema.Schema.Type<typeof CuratePostMcpOutput>;
+export const CuratePostMcpOutput = CuratePostOutput.pipe(Schema.fieldsAssign(displayFields));
+export type CuratePostMcpOutput = typeof CuratePostMcpOutput.Type;
 
-export const SubmitEditorialPickMcpOutput = Schema.extend(SubmitEditorialPickOutput, DisplayField);
-export type SubmitEditorialPickMcpOutput = Schema.Schema.Type<typeof SubmitEditorialPickMcpOutput>;
+export const SubmitEditorialPickMcpOutput = SubmitEditorialPickOutput.pipe(Schema.fieldsAssign(displayFields));
+export type SubmitEditorialPickMcpOutput = typeof SubmitEditorialPickMcpOutput.Type;
 
-export const PostEnrichmentsMcpOutput = Schema.extend(GetPostEnrichmentsOutput, DisplayField);
-export type PostEnrichmentsMcpOutput = Schema.Schema.Type<typeof PostEnrichmentsMcpOutput>;
+export const PostEnrichmentsMcpOutput = GetPostEnrichmentsOutput.pipe(Schema.fieldsAssign(displayFields));
+export type PostEnrichmentsMcpOutput = typeof PostEnrichmentsMcpOutput.Type;
 
-export const StartEnrichmentMcpOutput = Schema.extend(
-  Schema.Struct({
-    postUri: PostUri,
-    enrichmentType: EnrichmentKind,
-    status: Schema.Literal("queued"),
-    runId: Schema.String
-  }),
-  DisplayField
-);
-export type StartEnrichmentMcpOutput = Schema.Schema.Type<typeof StartEnrichmentMcpOutput>;
+export const StartEnrichmentMcpOutput = Schema.Struct({
+  postUri: PostUri,
+  enrichmentType: EnrichmentKind,
+  status: Schema.Literal("queued"),
+  runId: Schema.String
+}).pipe(Schema.fieldsAssign(displayFields));
+export type StartEnrichmentMcpOutput = typeof StartEnrichmentMcpOutput.Type;

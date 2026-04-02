@@ -1,4 +1,4 @@
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import { Effect, Layer, Schema } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { handleAdminRequestWithLayer } from "../src/admin/Router";
@@ -296,7 +296,7 @@ describe("admin expert registry routes", () => {
           readonly message: string;
         }>(response, 400);
         expect(body.error).toBe("BadRequest");
-        expect(body.message).toContain("active");
+        expect(body.message).toContain("invalid request parameters");
       })
     )
   );

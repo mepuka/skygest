@@ -1,4 +1,4 @@
-import { Context, Effect, Layer } from "effect";
+import { ServiceMap, Effect, Layer } from "effect";
 import {
   energyProviderRegistry,
   energyProviderRegistryManifest
@@ -11,20 +11,20 @@ import {
   type ProviderLookup
 } from "../source/registry";
 
-export class ProviderRegistry extends Context.Tag("@skygest/ProviderRegistry")<
+export class ProviderRegistry extends ServiceMap.Service<
   ProviderRegistry,
   {
     readonly manifest: ProviderRegistryManifest;
     readonly lookup: ProviderLookup;
   }
->() {
+>()("@skygest/ProviderRegistry") {
   static readonly layer = Layer.effect(
     ProviderRegistry,
     Effect.gen(function* () {
-      return ProviderRegistry.of({
+      return {
         manifest: energyProviderRegistryManifest,
         lookup: toProviderLookup(energyProviderRegistry)
-      });
+      };
     })
   );
 }

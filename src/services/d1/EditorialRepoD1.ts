@@ -1,5 +1,5 @@
 import { Effect, Layer, Schema } from "effect";
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import { EditorialRepo } from "../EditorialRepo";
 import type {
   EditorialPickRecord,
@@ -40,7 +40,7 @@ const CuratedPostRowSchema = Schema.Struct({
   did: Schema.String,
   handle: Schema.NullOr(Schema.String),
   avatar: Schema.NullOr(Schema.String),
-  tier: Schema.optionalWith(Schema.String, { default: () => "independent" }),
+  tier: Schema.String.pipe(Schema.withDecodingDefaultKey(() => "independent")),
   text: Schema.String,
   createdAt: Schema.Number,
   topicsCsv: Schema.NullOr(Schema.String),
@@ -295,13 +295,13 @@ export const EditorialRepoD1 = {
         )
       );
 
-    return EditorialRepo.of({
+    return {
       upsertPick,
       retractPick,
       listPicks,
       postExists,
       getCuratedFeed,
       expireStale
-    });
+    };
   }))
 };

@@ -70,15 +70,15 @@ export const resolveUniqueBest = <EntityId extends string, Signal extends Ranked
   const buckets = Chunk.sort(
     Chunk.fromIterable(HashMap.values(index)),
     Order.mapInput(
-      Order.tuple(Order.number, Order.string),
+      Order.Tuple([Order.Number, Order.String]),
       (bucket: EvidenceBucket<EntityId, Signal>) =>
         [bucket.bestRank, bucket.entityId] as const
     )
   );
-  const bestRank = Chunk.unsafeGet(buckets, 0).bestRank;
+  const bestRank = Chunk.getUnsafe(buckets, 0).bestRank;
   const top = Chunk.filter(buckets, (bucket) => bucket.bestRank === bestRank);
 
   return Chunk.size(top) === 1
-    ? { _tag: "Matched", winner: Chunk.unsafeGet(top, 0) }
+    ? { _tag: "Matched", winner: Chunk.getUnsafe(top, 0) }
     : { _tag: "Ambiguous", candidates: top };
 };

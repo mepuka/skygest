@@ -1,4 +1,4 @@
-import { ConfigProvider, Effect, Exit, Layer } from "effect";
+import { Cause, ConfigProvider, Effect, Exit, Layer } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { vi } from "vitest";
 import { encodeJsonString } from "../src/platform/Json.ts";
@@ -32,13 +32,11 @@ const { GeminiVisionService } = await import(
 // ---------------------------------------------------------------------------
 
 /** Config layer that satisfies the service's Config requirements. */
-const TestConfig = Layer.setConfigProvider(
-  ConfigProvider.fromMap(
-    new Map([
-      ["GOOGLE_API_KEY", "test-api-key"],
-      ["GEMINI_VISION_MODEL", "test-model"]
-    ])
-  )
+const TestConfig = ConfigProvider.layer(
+  ConfigProvider.fromUnknown({
+    GOOGLE_API_KEY: "test-api-key",
+    GEMINI_VISION_MODEL: "test-model"
+  })
 );
 
 /** Full test layer: live service backed by our mocked SDK + test config. */
@@ -124,10 +122,8 @@ describe("GeminiVisionService", () => {
 
         expect(Exit.isFailure(exit)).toBe(true);
         if (Exit.isFailure(exit)) {
-          const error = exit.cause.pipe(
-            (c) => c._tag === "Fail" ? c.error : null
-          );
-          expect(error).not.toBeNull();
+          const error = Cause.squash(exit.cause);
+          expect(error).toBeDefined();
           expect((error as any)._tag).toBe("GeminiApiError");
           expect((error as any).message).toBe("network timeout");
         }
@@ -149,10 +145,8 @@ describe("GeminiVisionService", () => {
 
         expect(Exit.isFailure(exit)).toBe(true);
         if (Exit.isFailure(exit)) {
-          const error = exit.cause.pipe(
-            (c) => c._tag === "Fail" ? c.error : null
-          );
-          expect(error).not.toBeNull();
+          const error = Cause.squash(exit.cause);
+          expect(error).toBeDefined();
           expect((error as any)._tag).toBe("GeminiApiError");
           expect((error as any).message).toContain("missing uri or name");
         }
@@ -176,9 +170,7 @@ describe("GeminiVisionService", () => {
 
           expect(Exit.isFailure(exit)).toBe(true);
           if (Exit.isFailure(exit)) {
-            const error = exit.cause.pipe(
-              (c) => c._tag === "Fail" ? c.error : null
-            );
+            const error = Cause.squash(exit.cause);
             expect((error as any)._tag).toBe("GeminiApiError");
             expect((error as any).status).toBe(429);
           }
@@ -226,9 +218,7 @@ describe("GeminiVisionService", () => {
 
         expect(Exit.isFailure(exit)).toBe(true);
         if (Exit.isFailure(exit)) {
-          const error = exit.cause.pipe(
-            (c) => c._tag === "Fail" ? c.error : null
-          );
+          const error = Cause.squash(exit.cause);
           expect((error as any)._tag).toBe("GeminiParseError");
           expect((error as any).message).toContain("Classification parse/validation failed");
           expect((error as any).rawOutput).toBe(
@@ -255,9 +245,7 @@ describe("GeminiVisionService", () => {
 
           expect(Exit.isFailure(exit)).toBe(true);
           if (Exit.isFailure(exit)) {
-            const error = exit.cause.pipe(
-              (c) => c._tag === "Fail" ? c.error : null
-            );
+            const error = Cause.squash(exit.cause);
             expect((error as any)._tag).toBe("GeminiParseError");
             expect((error as any).message).toContain(
               "Classification parse/validation failed"
@@ -278,9 +266,7 @@ describe("GeminiVisionService", () => {
 
         expect(Exit.isFailure(exit)).toBe(true);
         if (Exit.isFailure(exit)) {
-          const error = exit.cause.pipe(
-            (c) => c._tag === "Fail" ? c.error : null
-          );
+          const error = Cause.squash(exit.cause);
           expect((error as any)._tag).toBe("GeminiParseError");
           expect((error as any).message).toContain("empty response");
         }
@@ -301,9 +287,7 @@ describe("GeminiVisionService", () => {
 
           expect(Exit.isFailure(exit)).toBe(true);
           if (Exit.isFailure(exit)) {
-            const error = exit.cause.pipe(
-              (c) => c._tag === "Fail" ? c.error : null
-            );
+            const error = Cause.squash(exit.cause);
             expect((error as any)._tag).toBe("GeminiParseError");
             expect((error as any).message).toContain("empty response");
           }
@@ -328,9 +312,7 @@ describe("GeminiVisionService", () => {
 
           expect(Exit.isFailure(exit)).toBe(true);
           if (Exit.isFailure(exit)) {
-            const error = exit.cause.pipe(
-              (c) => c._tag === "Fail" ? c.error : null
-            );
+            const error = Cause.squash(exit.cause);
             expect((error as any)._tag).toBe("GeminiApiError");
             expect((error as any).message).toBe("quota exceeded");
             expect((error as any).status).toBe(429);
@@ -358,9 +340,7 @@ describe("GeminiVisionService", () => {
 
           expect(Exit.isFailure(exit)).toBe(true);
           if (Exit.isFailure(exit)) {
-            const error = exit.cause.pipe(
-              (c) => c._tag === "Fail" ? c.error : null
-            );
+            const error = Cause.squash(exit.cause);
             expect((error as any)._tag).toBe("GeminiParseError");
           }
         }).pipe(runWith)
@@ -436,9 +416,7 @@ describe("GeminiVisionService", () => {
 
         expect(Exit.isFailure(exit)).toBe(true);
         if (Exit.isFailure(exit)) {
-          const error = exit.cause.pipe(
-            (c) => c._tag === "Fail" ? c.error : null
-          );
+          const error = Cause.squash(exit.cause);
           expect((error as any)._tag).toBe("GeminiParseError");
           expect((error as any).message).toContain(
             "Extraction parse/validation failed"
@@ -460,9 +438,7 @@ describe("GeminiVisionService", () => {
 
         expect(Exit.isFailure(exit)).toBe(true);
         if (Exit.isFailure(exit)) {
-          const error = exit.cause.pipe(
-            (c) => c._tag === "Fail" ? c.error : null
-          );
+          const error = Cause.squash(exit.cause);
           expect((error as any)._tag).toBe("GeminiParseError");
           expect((error as any).message).toContain("empty response");
         }
@@ -485,9 +461,7 @@ describe("GeminiVisionService", () => {
 
           expect(Exit.isFailure(exit)).toBe(true);
           if (Exit.isFailure(exit)) {
-            const error = exit.cause.pipe(
-              (c) => c._tag === "Fail" ? c.error : null
-            );
+            const error = Cause.squash(exit.cause);
             expect((error as any)._tag).toBe("GeminiApiError");
             expect((error as any).message).toBe("internal server error");
           }
@@ -516,9 +490,7 @@ describe("GeminiVisionService", () => {
 
           expect(Exit.isFailure(exit)).toBe(true);
           if (Exit.isFailure(exit)) {
-            const error = exit.cause.pipe(
-              (c) => c._tag === "Fail" ? c.error : null
-            );
+            const error = Cause.squash(exit.cause);
             expect((error as any)._tag).toBe("GeminiParseError");
             expect((error as any).message).toContain(
               "Extraction parse/validation failed"

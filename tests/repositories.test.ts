@@ -1,4 +1,4 @@
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import { Effect, Schema } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { bootstrapExperts } from "../src/bootstrap/ExpertSeeds";
@@ -163,7 +163,7 @@ describe("repository layers", () => {
       expect(rows.length).toBeGreaterThan(0);
 
       // Should already be normalized through the schema — verify by re-decoding
-      const decoded = yield* Schema.decodeUnknown(Schema.Array(RankedKnowledgePostResult))(rows);
+      const decoded = yield* Schema.decodeUnknownEffect(Schema.Array(RankedKnowledgePostResult))(rows);
       expect(decoded.length).toBe(rows.length);
       expect(typeof decoded[0]?.rank).toBe("number");
     }).pipe(Effect.provide(makeBiLayer()))

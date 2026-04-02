@@ -18,7 +18,7 @@ Cloudflare Worker with D1 (SQLite), KV, Workflows, and Durable Objects. Entry po
 
 ```
 src/domain/     → Schemas, branded types, errors (single source of truth)
-src/services/   → Context.Tag services + Layer.effect implementations
+src/services/   → ServiceMap.Service services + Layer.effect implementations
 src/services/d1/→ D1 repository implementations
 src/api/        → HttpApi route handlers
 src/platform/   → Config, runtime, logging, JSON helpers
@@ -31,9 +31,9 @@ src/ingest/     → Bluesky ingest pipeline (Workflows + Durable Objects)
 1. **Stay in Effect.** No `async function`, `try-catch`, `new Promise` except at Worker entry points (`src/worker/`). Use `Effect.gen` with `yield*` everywhere else.
 2. **Check effect-solutions first.** Run `effect-solutions show <topic>` before implementing any Effect pattern. Topics: quick-start, project-setup, tsconfig, basics, services-and-layers, data-modeling, error-handling, config, testing, cli.
 3. **Schema.parseJson, not JSON.parse.** Use `Schema.parseJson(TargetSchema)` or helpers in `src/platform/Json.ts`. Never manual `JSON.parse` + decode.
-4. **Schema.TaggedError for all errors.** Define in `src/domain/errors.ts`. No plain `Error` or `throw`.
+4. **Schema.TaggedErrorClass for all errors.** Define in `src/domain/errors.ts`. No plain `Error` or `throw`.
 5. **No duplicate helpers.** Search `src/platform/` and `src/services/d1/` before writing any utility function.
-6. **Services follow one pattern:** `Context.Tag` + `Layer.effect` + `Effect.gen` + `yield*` for dependency injection.
+6. **Services follow one pattern:** `ServiceMap.Service` + `Layer.effect` + `Effect.gen` + `yield*` for dependency injection.
 
 ## Domain-First Schemas (see skill: domain-modeling)
 
@@ -62,5 +62,6 @@ import { describe, expect, it } from "@effect/vitest";
 ## Effect Reference
 
 Run `effect-solutions list` to see guides. Run `effect-solutions show <topic>...` for patterns.
-Search `.reference/effect/` for real Effect library implementations.
+Search `.reference/effect/` for Effect 4 library source (effect-smol repo, tagged at `effect@4.0.0-beta.43`).
+Key source paths: `.reference/effect/packages/effect/src/` for core, `unstable/` subdirectories for platform/ai/sql/cli modules.
 <!-- effect-solutions:end -->

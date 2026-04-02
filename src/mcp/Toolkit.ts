@@ -1,7 +1,8 @@
-import type { SqlError } from "@effect/sql/SqlError";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
-import { Tool, Toolkit } from "@effect/ai";
-import { Context, Effect, Layer, Option, Schema } from "effect";
+import { Tool, Toolkit } from "effect/unstable/ai";
+import { Effect, Layer, Option, Schema } from "effect";
+import { stripUndefined } from "../platform/Json";
 import {
   ExplainPostTopicsInput,
   ExpandTopicsInput,
@@ -86,13 +87,13 @@ const GetPostLinksMcpInput = Schema.Struct({
 
 const StartEnrichmentMcpInput = Schema.Struct({
   postUri: GetPostEnrichmentsInput.fields.postUri,
-  enrichmentType: Schema.optional(EnrichmentKind.annotations({
+  enrichmentType: Schema.optionalKey(EnrichmentKind.annotate({
     description: "Enrichment type: 'vision' for charts/screenshots, 'source-attribution' for links. If omitted, auto-detected from embed type."
   }))
 });
 
 const toQueryError = (tool: string) => (error: { message: string }) =>
-  McpToolQueryError.make({
+  new McpToolQueryError({
     tool,
     message: error.message,
     error
@@ -100,7 +101,7 @@ const toQueryError = (tool: string) => (error: { message: string }) =>
 
 export const SearchPostsTool = Tool.make("search_posts", {
   description: "Search expert posts by keyword using full-text search. Supports topic and time range filters. Use this for keyword-based discovery; use get_recent_posts for chronological browsing.",
-  parameters: SearchPostsInput.fields,
+  parameters: SearchPostsInput,
   success: KnowledgePostsMcpOutput,
   failure: McpToolQueryError
 })
@@ -112,7 +113,7 @@ export const SearchPostsTool = Tool.make("search_posts", {
 
 export const GetRecentPostsTool = Tool.make("get_recent_posts", {
   description: "Browse posts in reverse chronological order. Filter by topic slug or expert DID. Use this for chronological browsing; use search_posts for keyword matching.",
-  parameters: GetRecentPostsMcpInput.fields,
+  parameters: GetRecentPostsMcpInput,
   success: KnowledgePostsMcpOutput,
   failure: McpToolQueryError
 })
@@ -124,7 +125,7 @@ export const GetRecentPostsTool = Tool.make("get_recent_posts", {
 
 export const GetPostLinksTool = Tool.make("get_post_links", {
   description: "List URLs shared in expert posts. Filter by link hostname (e.g. 'reuters.com') or topic. Returns title, description, and image metadata for each link.",
-  parameters: GetPostLinksMcpInput.fields,
+  parameters: GetPostLinksMcpInput,
   success: KnowledgeLinksMcpOutput,
   failure: McpToolQueryError
 })
@@ -136,7 +137,7 @@ export const GetPostLinksTool = Tool.make("get_post_links", {
 
 export const ListExpertsTool = Tool.make("list_experts", {
   description: "List domain experts tracked by the knowledge base. Filter by knowledge domain (e.g. 'energy') or active status.",
-  parameters: ListExpertsInput.fields,
+  parameters: ListExpertsInput,
   success: ExpertListMcpOutput,
   failure: McpToolQueryError
 })
@@ -148,7 +149,7 @@ export const ListExpertsTool = Tool.make("list_experts", {
 
 export const ListTopicsTool = Tool.make("list_topics", {
   description: "List topics used to classify posts. Use view='facets' for high-level categories (e.g. Solar, Hydrogen, Wind) or view='concepts' for fine-grained ontology nodes.",
-  parameters: ListTopicsInput.fields,
+  parameters: ListTopicsInput,
   success: OntologyTopicsMcpOutput,
   failure: McpToolQueryError
 })
@@ -160,7 +161,7 @@ export const ListTopicsTool = Tool.make("list_topics", {
 
 export const GetTopicTool = Tool.make("get_topic", {
   description: "Look up a single topic by its slug. Returns label, kind, description, concept slugs, parent/child relationships, matching terms, hashtags, and signal domains.",
-  parameters: GetTopicInput.fields,
+  parameters: GetTopicInput,
   success: OntologyTopicMcpOutput,
   failure: McpToolQueryError
 })
@@ -172,7 +173,7 @@ export const GetTopicTool = Tool.make("get_topic", {
 
 export const ExpandTopicsTool = Tool.make("expand_topics", {
   description: "Given topic slugs, find related topics. mode='exact' (default) for direct matches, mode='descendants' for narrower sub-topics, mode='ancestors' for broader parent topics.",
-  parameters: ExpandTopicsInput.fields,
+  parameters: ExpandTopicsInput,
   success: ExpandedTopicsMcpOutput,
   failure: McpToolQueryError
 })
@@ -184,7 +185,7 @@ export const ExpandTopicsTool = Tool.make("expand_topics", {
 
 export const ExplainPostTopicsTool = Tool.make("explain_post_topics", {
   description: "Explain why a post was classified under its topics. Shows the matched term, signal type (term, hashtag, or domain), and match score for each topic assignment.",
-  parameters: ExplainPostTopicsInput.fields,
+  parameters: ExplainPostTopicsInput,
   success: ExplainPostTopicsMcpOutput,
   failure: McpToolQueryError
 })
@@ -196,7 +197,7 @@ export const ExplainPostTopicsTool = Tool.make("explain_post_topics", {
 
 export const ListEditorialPicksTool = Tool.make("list_editorial_picks", {
   description: "List posts that have been editorially selected for the curated feed. Filter by minimum score (0-100) or pick date. Returns the post URI, score, reason, category, curator, and pick timestamp for each pick.",
-  parameters: ListEditorialPicksInput.fields,
+  parameters: ListEditorialPicksInput,
   success: EditorialPicksMcpOutput,
   failure: McpToolQueryError
 })
@@ -208,7 +209,7 @@ export const ListEditorialPicksTool = Tool.make("list_editorial_picks", {
 
 export const GetPostThreadTool = Tool.make("get_post_thread", {
   description: "Get the thread context for a Bluesky post. Returns ancestor posts (conversation history), the focus post, and replies. Includes engagement metrics (likes, reposts, reply counts). Calls the live Bluesky API.",
-  parameters: GetPostThreadInput.fields,
+  parameters: GetPostThreadInput,
   success: PostThreadMcpOutput,
   failure: McpToolQueryError
 })
@@ -220,7 +221,7 @@ export const GetPostThreadTool = Tool.make("get_post_thread", {
 
 export const GetThreadDocumentTool = Tool.make("get_thread_document", {
   description: "Render a Bluesky thread as a readable document. Returns the thread author's posts as a narrative with numbered sections, plus filtered expert discussion. Use this to read and understand threads — prefer over get_post_thread for analysis. Supports filtering replies by engagement (minLikes), depth (maxDepth), and top-N.",
-  parameters: GetThreadDocumentInput.fields,
+  parameters: GetThreadDocumentInput,
   success: ThreadDocumentMcpOutput,
   failure: McpToolQueryError
 })
@@ -232,7 +233,7 @@ export const GetThreadDocumentTool = Tool.make("get_thread_document", {
 
 export const ListCurationCandidatesTool = Tool.make("list_curation_candidates", {
   description: "List posts flagged by curation predicates for editorial review. Shows signal score, matched predicates, and post details. Use to find high-signal posts that may warrant enrichment.",
-  parameters: ListCurationCandidatesInput.fields,
+  parameters: ListCurationCandidatesInput,
   success: CurationCandidatesMcpOutput,
   failure: McpToolQueryError
 })
@@ -244,7 +245,7 @@ export const ListCurationCandidatesTool = Tool.make("list_curation_candidates", 
 
 export const GetPostEnrichmentsTool = Tool.make("get_post_enrichments", {
   description: "Inspect enrichment state and readiness for a post. Returns validated enrichment payloads (vision, source-attribution, grounding) and latest enrichment run summaries. Readiness values: none, pending, complete, failed, needs-review.",
-  parameters: GetPostEnrichmentsInput.fields,
+  parameters: GetPostEnrichmentsInput,
   success: PostEnrichmentsMcpOutput,
   failure: McpToolQueryError
 })
@@ -256,7 +257,7 @@ export const GetPostEnrichmentsTool = Tool.make("get_post_enrichments", {
 
 export const StartEnrichmentTool = Tool.make("start_enrichment", {
   description: "Trigger enrichment for a curated post. Queues vision analysis (for charts/screenshots) or source attribution (for links). Use get_post_enrichments to poll readiness after triggering. The post must have been curated first via curate_post.",
-  parameters: StartEnrichmentMcpInput.fields,
+  parameters: StartEnrichmentMcpInput,
   success: StartEnrichmentMcpOutput,
   failure: McpToolQueryError
 })
@@ -268,7 +269,7 @@ export const StartEnrichmentTool = Tool.make("start_enrichment", {
 
 export const CuratePostTool = Tool.make("curate_post", {
   description: "Curate or reject a post. Curating captures embed data for enrichment. For Bluesky posts, fetches live data. For Twitter posts, uses stored import data. Call start_enrichment separately to queue enrichment processing. Rejecting dismisses the post. Idempotent.",
-  parameters: CuratePostInput.fields,
+  parameters: CuratePostInput,
   success: CuratePostMcpOutput,
   failure: McpToolQueryError
 })
@@ -280,7 +281,7 @@ export const CuratePostTool = Tool.make("curate_post", {
 
 export const SubmitEditorialPickTool = Tool.make("submit_editorial_pick", {
   description: "Accept a curated post into the editorial feed. The post must have been curated first via curate_post. Provide a quality score (0-100) and reason.",
-  parameters: SubmitEditorialPickMcpInput.fields,
+  parameters: SubmitEditorialPickMcpInput,
   success: SubmitEditorialPickMcpOutput,
   failure: McpToolQueryError
 })
@@ -405,14 +406,14 @@ const extractCreatedAt = (record: unknown, fallbackIndexedAt: string): string =>
 };
 
 // ---------------------------------------------------------------------------
-// Service inner types (what `yield*` returns from Context.Tag)
+// Service inner types (what `yield*` returns from ServiceMap.Service)
 // ---------------------------------------------------------------------------
 
-type KnowledgeQueryServiceI = Context.Tag.Service<typeof KnowledgeQueryService>;
-type EditorialServiceI = Context.Tag.Service<typeof EditorialService>;
-type CurationServiceI = Context.Tag.Service<typeof CurationService>;
-type BlueskyClientI = Context.Tag.Service<typeof BlueskyClient>;
-type PostEnrichmentReadServiceI = Context.Tag.Service<typeof PostEnrichmentReadService>;
+type KnowledgeQueryServiceI = (typeof KnowledgeQueryService)["Service"];
+type EditorialServiceI = (typeof EditorialService)["Service"];
+type CurationServiceI = (typeof CurationService)["Service"];
+type BlueskyClientI = (typeof BlueskyClient)["Service"];
+type PostEnrichmentReadServiceI = (typeof PostEnrichmentReadService)["Service"];
 
 // ---------------------------------------------------------------------------
 // Shared read-only handler implementations
@@ -506,7 +507,7 @@ const makeReadOnlyHandlers = (
       Effect.flatMap((response) => {
         const flat = flattenThread(response.thread);
         if (!flat) {
-          return Effect.fail(McpToolQueryError.make({
+          return Effect.fail(new McpToolQueryError({
             tool: "get_post_thread",
             message: "Post not found or thread unavailable",
             error: new Error("thread decode failed")
@@ -549,7 +550,7 @@ const makeReadOnlyHandlers = (
       Effect.mapError((error) =>
         "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
           ? error as McpToolQueryError
-          : McpToolQueryError.make({
+          : new McpToolQueryError({
               tool: "get_post_thread",
               message: error instanceof Error ? error.message : String(error),
               error
@@ -564,25 +565,25 @@ const makeReadOnlyHandlers = (
       Effect.flatMap((response) => {
         const flat = flattenThread(response.thread);
         if (!flat) {
-          return Effect.fail(McpToolQueryError.make({
+          return Effect.fail(new McpToolQueryError({
             tool: "get_thread_document",
             message: "Post not found or thread unavailable",
             error: new Error("thread decode failed")
           }));
         }
 
-        const doc = printThread(flat, {
+        const doc = printThread(flat, stripUndefined({
           maxDepth: input.maxDepth,
           minLikes: input.minLikes,
           topN: input.topN
-        });
+        }));
 
         return Effect.succeed(doc);
       }),
       Effect.mapError((error) =>
         "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
           ? error as McpToolQueryError
-          : McpToolQueryError.make({
+          : new McpToolQueryError({
               tool: "get_thread_document",
               message: error instanceof Error ? error.message : String(error),
               error
@@ -629,7 +630,7 @@ const makeReadOnlyHandlers = (
  */
 const makeCuratePostHandler = (curationService: CurationServiceI) => ({
   curate_post: (input: typeof CuratePostInput.Type) =>
-    Effect.flatMap(OperatorIdentity, (identity) =>
+    OperatorIdentity.use( (identity) =>
       curationService.curatePost(input, identity.email ?? identity.subject ?? "mcp-operator")
     ).pipe(
       Effect.map((result) => ({
@@ -648,7 +649,7 @@ const makeSubmitPickHandler = (editorialService: EditorialServiceI) => ({
       const curationRepo = yield* CurationRepo;
       const curation = yield* curationRepo.getByPostUri(input.postUri);
       if (curation === null || curation.status !== "curated") {
-        return yield* McpToolQueryError.make({
+        return yield* new McpToolQueryError({
           tool: "submit_editorial_pick",
           message: `Post must be curated before accepting as a brief. Current status: ${curation?.status ?? "not curated"}`,
           error: new Error("post not curated")
@@ -664,7 +665,7 @@ const makeSubmitPickHandler = (editorialService: EditorialServiceI) => ({
         storedEmbedType !== null || payload?.embedPayload !== null;
 
       if (hasEnrichableContent && payload?.embedPayload == null) {
-        return yield* McpToolQueryError.make({
+        return yield* new McpToolQueryError({
           tool: "submit_editorial_pick",
           message: "Post is missing stored media details. Re-import or re-curate it before accepting as a brief.",
           error: new Error("payload missing for embedded post")
@@ -675,7 +676,7 @@ const makeSubmitPickHandler = (editorialService: EditorialServiceI) => ({
         const enrichmentReadService = yield* PostEnrichmentReadService;
         const enrichment = yield* enrichmentReadService.getPost(input.postUri);
         if (enrichment.readiness !== "complete") {
-          return yield* McpToolQueryError.make({
+          return yield* new McpToolQueryError({
             tool: "submit_editorial_pick",
             message: `Post enrichment is not complete (readiness: ${enrichment.readiness}). Use start_enrichment to trigger enrichment, then poll get_post_enrichments until readiness is "complete".`,
             error: new Error("enrichment not complete")
@@ -706,7 +707,7 @@ const makeStartEnrichmentHandler = () => ({
     Effect.gen(function* () {
       const triggerOption = yield* Effect.serviceOption(EnrichmentTriggerClient);
       if (Option.isNone(triggerOption)) {
-        return yield* McpToolQueryError.make({
+        return yield* new McpToolQueryError({
           tool: "start_enrichment",
           message: "Enrichment trigger is not available in this deployment. Use the admin enrichment endpoint on the ingest worker.",
           error: new Error("EnrichmentTriggerClient not available")
@@ -718,14 +719,14 @@ const makeStartEnrichmentHandler = () => ({
       const payloadService = yield* CandidatePayloadService;
       const payload = yield* payloadService.getPayload(input.postUri);
       if (payload === null) {
-        return yield* McpToolQueryError.make({
+        return yield* new McpToolQueryError({
           tool: "start_enrichment",
           message: "Post must be curated before starting enrichment. Call curate_post first.",
           error: new Error("payload not found")
         });
       }
       if (payload.captureStage !== "picked") {
-        return yield* McpToolQueryError.make({
+        return yield* new McpToolQueryError({
           tool: "start_enrichment",
           message: "Post must be curated before starting enrichment. Call curate_post first.",
           error: new Error("payload not picked")
@@ -746,7 +747,7 @@ const makeStartEnrichmentHandler = () => ({
         enrichmentType
       }).pipe(
         Effect.mapError((e) =>
-          McpToolQueryError.make({
+          new McpToolQueryError({
             tool: "start_enrichment",
             message: e.message,
             error: e

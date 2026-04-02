@@ -1,5 +1,5 @@
-import { Clock, Context, Effect, Layer } from "effect";
-import type { SqlError } from "@effect/sql/SqlError";
+import { Clock, ServiceMap, Effect, Layer } from "effect";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type { PostUri } from "../domain/types";
 import type {
@@ -17,7 +17,7 @@ import { clampLimit } from "../platform/Limit";
 import { EditorialRepo } from "./EditorialRepo";
 import { OntologyCatalog } from "./OntologyCatalog";
 
-export class EditorialService extends Context.Tag("@skygest/EditorialService")<
+export class EditorialService extends ServiceMap.Service<
   EditorialService,
   {
     readonly submitPick: (
@@ -39,7 +39,7 @@ export class EditorialService extends Context.Tag("@skygest/EditorialService")<
 
     readonly expireStale: () => Effect.Effect<number, SqlError | DbError>;
   }
->() {
+>()("@skygest/EditorialService") {
   static readonly layer = Layer.effect(EditorialService, Effect.gen(function* () {
     const repo = yield* EditorialRepo;
     const config = yield* AppConfig;
@@ -52,7 +52,7 @@ export class EditorialService extends Context.Tag("@skygest/EditorialService")<
       function* (input: SubmitEditorialPickInput, curator: string) {
         const exists = yield* repo.postExists(input.postUri);
         if (!exists) {
-          return yield* EditorialPostNotFoundError.make({ postUri: input.postUri });
+          return yield* new EditorialPostNotFoundError({ postUri: input.postUri });
         }
         const now = yield* Clock.currentTimeMillis;
         const defaultExpiryHours = Math.max(1, config.editorialDefaultExpiryHours);
@@ -115,12 +115,12 @@ export class EditorialService extends Context.Tag("@skygest/EditorialService")<
       return yield* repo.expireStale(now);
     });
 
-    return EditorialService.of({
+    return {
       submitPick,
       retractPick,
       listPicks,
       getCuratedFeed,
       expireStale
-    });
+    };
   }));
 }

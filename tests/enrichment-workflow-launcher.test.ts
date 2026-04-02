@@ -9,52 +9,52 @@ import { EnrichmentWorkflowLauncher } from "../src/enrichment/EnrichmentWorkflow
 import { EnrichmentRunsRepo } from "../src/services/EnrichmentRunsRepo";
 
 describe("EnrichmentWorkflowLauncher", () => {
-  it.effect("creates a queued run and launches the workflow with the same instance id", () =>
-    Effect.gen(function* () {
-      const rows: Array<unknown> = [];
-      const launched: Array<{ readonly id?: string; readonly params: EnrichmentRunParams }> = [];
+  it.effect("creates a queued run and launches the workflow with the same instance id", () => {
+    const rows: Array<unknown> = [];
+    const launched: Array<{ readonly id?: string; readonly params: EnrichmentRunParams }> = [];
 
-      const workflow = {
-        create: async (input: { readonly id?: string; readonly params: EnrichmentRunParams }) => {
-          launched.push(input);
-          return { id: input.id ?? "missing-id" };
-        },
-        get: async () => ({ id: "unused" }),
-        createBatch: async () => []
-      } as unknown as WorkflowEnrichmentEnvBindings["ENRICHMENT_RUN_WORKFLOW"];
+    const workflow = {
+      create: async (input: { readonly id?: string; readonly params: EnrichmentRunParams }) => {
+        launched.push(input);
+        return { id: input.id ?? "missing-id" };
+      },
+      get: async () => ({ id: "unused" }),
+      createBatch: async () => []
+    } as unknown as WorkflowEnrichmentEnvBindings["ENRICHMENT_RUN_WORKFLOW"];
 
-      const env: WorkflowEnrichmentEnvBindings = {
-        DB: {} as D1Database,
-        ENRICHMENT_RUN_WORKFLOW: workflow
-      };
+    const env: WorkflowEnrichmentEnvBindings = {
+      DB: {} as D1Database,
+      ENRICHMENT_RUN_WORKFLOW: workflow
+    };
 
-      const layer = EnrichmentWorkflowLauncher.layer.pipe(
-        Layer.provideMerge(
-          Layer.mergeAll(
-            Layer.succeed(WorkflowEnrichmentEnv, env),
-            Layer.succeed(EnrichmentRunsRepo, {
-              createQueuedIfAbsent: (input) =>
-                Effect.sync(() => {
-                  rows.push(input);
-                  return true;
-                }),
-              getById: () => Effect.succeed(null),
-              listRunning: () => Effect.succeed([]),
-              listRecent: () => Effect.succeed([]),
-              listActive: () => Effect.succeed([]),
-              listStaleActive: () => Effect.succeed([]),
-              markPhase: () => Effect.void,
-              resetForRetry: () => Effect.succeed(false),
-              markComplete: () => Effect.void,
-              markFailed: () => Effect.void,
-              markNeedsReview: () => Effect.void,
-              listLatestByPostUri: () => Effect.succeed([])
-            })
-          )
+    const layer = EnrichmentWorkflowLauncher.layer.pipe(
+      Layer.provideMerge(
+        Layer.mergeAll(
+          Layer.succeed(WorkflowEnrichmentEnv, env),
+          Layer.succeed(EnrichmentRunsRepo, {
+            createQueuedIfAbsent: (input) =>
+              Effect.sync(() => {
+                rows.push(input);
+                return true;
+              }),
+            getById: () => Effect.succeed(null),
+            listRunning: () => Effect.succeed([]),
+            listRecent: () => Effect.succeed([]),
+            listActive: () => Effect.succeed([]),
+            listStaleActive: () => Effect.succeed([]),
+            markPhase: () => Effect.void,
+            resetForRetry: () => Effect.succeed(false),
+            markComplete: () => Effect.void,
+            markFailed: () => Effect.void,
+            markNeedsReview: () => Effect.void,
+            listLatestByPostUri: () => Effect.succeed([])
+          })
         )
-      );
+      )
+    );
 
-      const launcher = yield* EnrichmentWorkflowLauncher.pipe(Effect.provide(layer));
+    return Effect.gen(function* () {
+      const launcher = yield* EnrichmentWorkflowLauncher;
       const queued = yield* launcher.start({
         postUri: "at://did:plc:test/app.bsky.feed.post/post-1" as any,
         enrichmentType: "vision",
@@ -90,52 +90,52 @@ describe("EnrichmentWorkflowLauncher", () => {
         workflowInstanceId: expect.any(String),
         status: "queued"
       });
-    })
-  );
+    }).pipe(Effect.provide(layer));
+  });
 
-  it.effect("marks the run failed when workflow creation throws", () =>
-    Effect.gen(function* () {
-      const failures: Array<unknown> = [];
+  it.effect("marks the run failed when workflow creation throws", () => {
+    const failures: Array<unknown> = [];
 
-      const workflow = {
-        create: async () => {
-          throw new Error("boom");
-        },
-        get: async () => ({ id: "unused" }),
-        createBatch: async () => []
-      } as unknown as WorkflowEnrichmentEnvBindings["ENRICHMENT_RUN_WORKFLOW"];
+    const workflow = {
+      create: async () => {
+        throw new Error("boom");
+      },
+      get: async () => ({ id: "unused" }),
+      createBatch: async () => []
+    } as unknown as WorkflowEnrichmentEnvBindings["ENRICHMENT_RUN_WORKFLOW"];
 
-      const env: WorkflowEnrichmentEnvBindings = {
-        DB: {} as D1Database,
-        ENRICHMENT_RUN_WORKFLOW: workflow
-      };
+    const env: WorkflowEnrichmentEnvBindings = {
+      DB: {} as D1Database,
+      ENRICHMENT_RUN_WORKFLOW: workflow
+    };
 
-      const layer = EnrichmentWorkflowLauncher.layer.pipe(
-        Layer.provideMerge(
-          Layer.mergeAll(
-            Layer.succeed(WorkflowEnrichmentEnv, env),
-            Layer.succeed(EnrichmentRunsRepo, {
-              createQueuedIfAbsent: () => Effect.succeed(true),
-              getById: () => Effect.succeed(null),
-              listRunning: () => Effect.succeed([]),
-              listRecent: () => Effect.succeed([]),
-              listActive: () => Effect.succeed([]),
-              listStaleActive: () => Effect.succeed([]),
-              markPhase: () => Effect.void,
-              resetForRetry: () => Effect.succeed(false),
-              markComplete: () => Effect.void,
-              markFailed: (input) =>
-                Effect.sync(() => {
-                  failures.push(input);
-                }),
-              markNeedsReview: () => Effect.void,
-              listLatestByPostUri: () => Effect.succeed([])
-            })
-          )
+    const layer = EnrichmentWorkflowLauncher.layer.pipe(
+      Layer.provideMerge(
+        Layer.mergeAll(
+          Layer.succeed(WorkflowEnrichmentEnv, env),
+          Layer.succeed(EnrichmentRunsRepo, {
+            createQueuedIfAbsent: () => Effect.succeed(true),
+            getById: () => Effect.succeed(null),
+            listRunning: () => Effect.succeed([]),
+            listRecent: () => Effect.succeed([]),
+            listActive: () => Effect.succeed([]),
+            listStaleActive: () => Effect.succeed([]),
+            markPhase: () => Effect.void,
+            resetForRetry: () => Effect.succeed(false),
+            markComplete: () => Effect.void,
+            markFailed: (input) =>
+              Effect.sync(() => {
+                failures.push(input);
+              }),
+            markNeedsReview: () => Effect.void,
+            listLatestByPostUri: () => Effect.succeed([])
+          })
         )
-      );
+      )
+    );
 
-      const launcher = yield* EnrichmentWorkflowLauncher.pipe(Effect.provide(layer));
+    return Effect.gen(function* () {
+      const launcher = yield* EnrichmentWorkflowLauncher;
       const exit = yield* Effect.exit(
         launcher.start({
           postUri: "at://did:plc:test/app.bsky.feed.post/post-2" as any,
@@ -157,6 +157,6 @@ describe("EnrichmentWorkflowLauncher", () => {
           })
         })
       );
-    })
-  );
+    }).pipe(Effect.provide(layer));
+  });
 });

@@ -1,4 +1,4 @@
-import { Effect, Exit, Layer } from "effect";
+import { Cause, Effect, Exit, Layer } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { vi } from "vitest";
 import type { VisionExecutionPlan } from "../src/domain/enrichmentPlan";
@@ -149,7 +149,7 @@ describe("VisionEnrichmentExecutor", () => {
           )
         );
 
-        const executor = yield* VisionEnrichmentExecutor.pipe(
+        const executor = yield* Effect.service(VisionEnrichmentExecutor).pipe(
           Effect.provide(executorLayer)
         );
         const result = yield* executor.execute(makePlan());
@@ -203,7 +203,7 @@ describe("VisionEnrichmentExecutor", () => {
           )
         );
 
-        const executor = yield* VisionEnrichmentExecutor.pipe(
+        const executor = yield* Effect.service(VisionEnrichmentExecutor).pipe(
           Effect.provide(executorLayer)
         );
         const exit = yield* Effect.exit(
@@ -211,8 +211,9 @@ describe("VisionEnrichmentExecutor", () => {
         );
 
         expect(Exit.isFailure(exit)).toBe(true);
-        if (Exit.isFailure(exit) && exit.cause._tag === "Fail") {
-          expect(exit.cause.error).toMatchObject({
+        if (Exit.isFailure(exit)) {
+          const error = Cause.squash(exit.cause);
+          expect(error).toMatchObject({
             _tag: "EnrichmentAssetFetchError",
             assetKey: "embed:0:https://cdn.bsky.app/full-1.jpg",
             status: 503

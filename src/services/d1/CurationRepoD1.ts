@@ -1,5 +1,5 @@
 import { Effect, Layer, Schema } from "effect";
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import { CurationRepo } from "../CurationRepo";
 import type { CurationRecord, ListCurationCandidatesInput } from "../../domain/curation";
 import {
@@ -39,7 +39,7 @@ const CandidateRowSchema = Schema.Struct({
   did: Schema.String,
   handle: Schema.NullOr(Schema.String),
   avatar: Schema.NullOr(Schema.String),
-  tier: Schema.optionalWith(Schema.String, { default: () => "independent" }),
+  tier: Schema.String.pipe(Schema.withDecodingDefaultKey(() => "independent")),
   text: Schema.String,
   createdAt: Schema.Number,
   topicsCsv: Schema.NullOr(Schema.String),
@@ -283,7 +283,7 @@ export const CurationRepoD1 = {
         Effect.map((rows) => rows[0]?.embedType ?? null)
       );
 
-    return CurationRepo.of({
+    return {
       upsertFlag,
       bulkUpsertFlags,
       updateStatus,
@@ -291,6 +291,6 @@ export const CurationRepoD1 = {
       listCandidates,
       postExists,
       getPostEmbedType
-    });
+    };
   }))
 };

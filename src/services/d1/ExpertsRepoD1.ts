@@ -1,5 +1,5 @@
 import { Effect, Layer, Schema } from "effect";
-import { SqlClient } from "@effect/sql";
+import { SqlClient } from "effect/unstable/sql";
 import { ExpertsRepo } from "../ExpertsRepo";
 import {
   ExpertListItem as ExpertListItemSchema,
@@ -10,7 +10,7 @@ import {
 } from "../../domain/bi";
 import { decodeWithDbError } from "./schemaDecode";
 
-const ActiveFlag = Schema.Union(Schema.Literal(0), Schema.Literal(1));
+const ActiveFlag = Schema.Union([Schema.Literal(0), Schema.Literal(1)]);
 const ExpertListRowSchema = Schema.Struct({
   did: Schema.String,
   handle: Schema.NullOr(Schema.String),
@@ -19,7 +19,7 @@ const ExpertListRowSchema = Schema.Struct({
   domain: Schema.String,
   source: Schema.String,
   active: ActiveFlag,
-  tier: Schema.optionalWith(Schema.NullOr(Schema.String), { default: () => null })
+  tier: Schema.NullOr(Schema.String).pipe(Schema.withDecodingDefaultKey(() => null))
 });
 const ExpertRecordRowSchema = Schema.Struct({
   did: Schema.String,
@@ -32,7 +32,7 @@ const ExpertRecordRowSchema = Schema.Struct({
   sourceRef: Schema.NullOr(Schema.String),
   shard: Schema.Number,
   active: ActiveFlag,
-  tier: Schema.optionalWith(Schema.NullOr(Schema.String), { default: () => null }),
+  tier: Schema.NullOr(Schema.String).pipe(Schema.withDecodingDefaultKey(() => null)),
   addedAt: Schema.Number,
   lastSyncedAt: Schema.NullOr(Schema.Number)
 });
@@ -318,7 +318,7 @@ export const ExpertsRepoD1 = {
       );
     };
 
-    return ExpertsRepo.of({
+    return {
       upsert,
       upsertMany,
       getByDid,
@@ -328,6 +328,6 @@ export const ExpertsRepoD1 = {
       listActiveByShard,
       list,
       getByDids
-    });
+    };
   }))
 };

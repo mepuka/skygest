@@ -1,5 +1,5 @@
-import { McpSchema } from "@effect/ai";
-import { Either, Effect, Schema } from "effect";
+import { McpSchema } from "effect/unstable/ai";
+import { Result, Effect, Schema } from "effect";
 import {
   decodeJsonString,
   decodeJsonStringEitherWith,
@@ -10,33 +10,33 @@ import {
 
 const MCP_PROTOCOL_VERSION = "2025-06-18";
 
-const JsonRpcId = Schema.Union(Schema.Number, Schema.String, Schema.Null);
+const JsonRpcId = Schema.Union([Schema.Number, Schema.String, Schema.Null]);
 
 const JsonRpcError = Schema.Struct({
   code: Schema.Number,
   message: Schema.String,
-  data: Schema.optional(Schema.Unknown)
+  data: Schema.optionalKey(Schema.Unknown)
 });
 
-const makeJsonRpcSuccess = <A, I>(schema: Schema.Schema<A, I, never>) =>
+const makeJsonRpcSuccess = <S extends Schema.Decoder<unknown>>(schema: S) =>
   Schema.Struct({
     jsonrpc: Schema.Literal("2.0"),
-    id: Schema.optional(JsonRpcId),
+    id: Schema.optionalKey(JsonRpcId),
     result: schema
   });
 
 const makeJsonRpcFailure = Schema.Struct({
   jsonrpc: Schema.Literal("2.0"),
-  id: Schema.optional(JsonRpcId),
+  id: Schema.optionalKey(JsonRpcId),
   error: JsonRpcError
 });
 
-export class McpRequestError extends Schema.TaggedError<McpRequestError>()(
+export class McpRequestError extends Schema.TaggedErrorClass<McpRequestError>()(
   "McpRequestError",
   {
     operation: Schema.String,
     message: Schema.String,
-    status: Schema.optional(Schema.Number)
+    status: Schema.optionalKey(Schema.Number)
   }
 ) {}
 
@@ -65,50 +65,51 @@ const requestHeaders = (headers?: Record<string, string>) => ({
   ...(headers ?? {})
 });
 
-const decodeUnknownSuccess = <A, I>(
+const decodeUnknownSuccess = <S extends Schema.Decoder<unknown>>(
   operation: string,
-  schema: Schema.Schema<A, I, never>,
+  schema: S,
   payload: unknown
-) => {
+): S["Type"] => {
   const responses = Array.isArray(payload) ? payload : [payload];
   const response = responses[0];
 
   if (response === undefined) {
-    throw McpRequestError.make({
+    throw new McpRequestError({
       operation,
       message: "empty JSON-RPC response"
     });
   }
 
-  const failureResult = Schema.decodeUnknownEither(makeJsonRpcFailure)(response);
+  const failureResult = Schema.decodeUnknownResult(makeJsonRpcFailure)(response);
 
-  if (Either.isRight(failureResult)) {
-    throw McpRequestError.make({
+  if (Result.isSuccess(failureResult)) {
+    throw new McpRequestError({
       operation,
-      message: failureResult.right.error.message
+      message: failureResult.success.error.message
     });
   }
 
-  const successResult = Schema.decodeUnknownEither(makeJsonRpcSuccess(schema))(
+  const successResult = Schema.decodeUnknownResult(makeJsonRpcSuccess(schema))(
     response
   );
 
-  if (Either.isRight(successResult)) {
-    return successResult.right.result;
+  if (Result.isSuccess(successResult)) {
+    return (successResult.success as any).result;
   }
 
-  throw McpRequestError.make({
+  throw new McpRequestError({
     operation,
-    message: formatSchemaParseError(successResult.left)
+    message: formatSchemaParseError(successResult.failure)
   });
 };
 
-const requestJsonRpc = <A, I>(
+const requestJsonRpc = <S extends Schema.Decoder<unknown>>(
   options: McpClientOptions,
   operation: string,
   method: string,
-  schema: Schema.Schema<A, I, never>,
-  params?: unknown
+  schema: S,
+  params?: unknown,
+  captureSessionId = false
 ) =>
   Effect.tryPromise({
     try: async () => {
@@ -128,11 +129,21 @@ const requestJsonRpc = <A, I>(
       const text = await response.text();
 
       if (!response.ok) {
-        throw McpRequestError.make({
+        throw new McpRequestError({
           operation,
           status: response.status,
           message: text || response.statusText
         });
+      }
+
+      if (captureSessionId) {
+        const sessionId = response.headers.get("mcp-session-id");
+        if (sessionId) {
+          (options as { headers?: Record<string, string> }).headers = {
+            ...(options.headers ?? {}),
+            "mcp-session-id": sessionId
+          };
+        }
       }
 
       return decodeUnknownSuccess(
@@ -144,7 +155,7 @@ const requestJsonRpc = <A, I>(
     catch: (error) =>
       error instanceof McpRequestError
         ? error
-        : McpRequestError.make({
+        : new McpRequestError({
             operation,
             message: stringifyUnknown(error)
           })
@@ -174,7 +185,7 @@ const notifyJsonRpc = (
       if (!response.ok) {
         const text = await response.text();
 
-        throw McpRequestError.make({
+        throw new McpRequestError({
           operation,
           status: response.status,
           message: text || response.statusText
@@ -184,7 +195,7 @@ const notifyJsonRpc = (
     catch: (error) =>
       error instanceof McpRequestError
         ? error
-        : McpRequestError.make({
+        : new McpRequestError({
             operation,
             message: stringifyUnknown(error)
           })
@@ -203,7 +214,8 @@ const initializeClient = (options: McpClientOptions) =>
         name: options.clientName ?? "skygest-mcp-client",
         version: options.clientVersion ?? "0.1.0"
       }
-    }
+    },
+    true
   ).pipe(
     Effect.tap(() =>
       notifyJsonRpc(
@@ -220,7 +232,7 @@ export const listTools = (
   options: McpClientOptions
 ): Effect.Effect<McpListToolsResult, McpRequestError> =>
   initializeClient(options).pipe(
-    Effect.zipRight(
+    Effect.andThen(
       requestJsonRpc(
         options,
         "mcp:list_tools",
@@ -234,7 +246,7 @@ export const listPrompts = (
   options: McpClientOptions
 ): Effect.Effect<McpListPromptsResult, McpRequestError> =>
   initializeClient(options).pipe(
-    Effect.zipRight(
+    Effect.andThen(
       requestJsonRpc(
         options,
         "mcp:list_prompts",
@@ -249,7 +261,7 @@ export const callTool = (
   input: McpToolCall
 ): Effect.Effect<McpCallToolResult, McpRequestError> =>
   initializeClient(options).pipe(
-    Effect.zipRight(
+    Effect.andThen(
       requestJsonRpc(
         options,
         `mcp:${input.name}`,
@@ -269,10 +281,10 @@ const readFirstTextContent = (result: McpCallToolResult) =>
       content.type === "text"
   )?.text;
 
-export const decodeCallToolResultWith = <A, I>(
-  schema: Schema.Schema<A, I, never>
+export const decodeCallToolResultWith = <S extends Schema.Decoder<unknown>>(
+  schema: S
 ) => {
-  const decodeStructured = Schema.decodeUnknownEither(schema);
+  const decodeStructured = Schema.decodeUnknownResult(schema);
   const decodeJson = decodeJsonStringEitherWith(schema);
 
   return (result: McpCallToolResult) => {
@@ -285,19 +297,19 @@ export const decodeCallToolResultWith = <A, I>(
     if (result.structuredContent !== undefined) {
       const structuredResult = decodeStructured(result.structuredContent);
 
-      if (Either.isRight(structuredResult)) {
-        return structuredResult.right;
+      if (Result.isSuccess(structuredResult)) {
+        return structuredResult.success;
       }
     }
 
     if (text !== undefined) {
       const textResult = decodeJson(text);
 
-      if (Either.isRight(textResult)) {
-        return textResult.right;
+      if (Result.isSuccess(textResult)) {
+        return textResult.success;
       }
 
-      throw new Error(formatSchemaParseError(textResult.left));
+      throw new Error(formatSchemaParseError(textResult.failure));
     }
 
     throw new Error(

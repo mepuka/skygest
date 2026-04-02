@@ -1,8 +1,8 @@
 import type { D1Database, D1PreparedStatement } from "@cloudflare/workers-types";
 import { D1Client } from "@effect/sql-d1";
 import { Array as A, Effect, Layer, Option, Schema } from "effect";
-import { SqlClient } from "@effect/sql";
-import { SqlError } from "@effect/sql/SqlError";
+import { SqlClient } from "effect/unstable/sql";
+import { SqlError, UnknownError as SqlUnknownError } from "effect/unstable/sql/SqlError";
 import type {
   GetPostLinksPageQueryInput,
   GetRecentPostsPageQueryInput,
@@ -57,7 +57,7 @@ const PostRowSchema = Schema.Struct({
   did: Schema.String,
   handle: Schema.NullOr(Schema.String),
   avatar: Schema.NullOr(Schema.String),
-  tier: Schema.optionalWith(Schema.String, { default: () => "independent" }),
+  tier: Schema.String.pipe(Schema.withDecodingDefaultKey(() => "independent")),
   text: Schema.String,
   createdAt: Schema.Number,
   topicsCsv: Schema.NullOr(Schema.String)
@@ -82,7 +82,7 @@ const SearchPostRowSchema = Schema.Struct({
   did: Schema.String,
   handle: Schema.NullOr(Schema.String),
   avatar: Schema.NullOr(Schema.String),
-  tier: Schema.optionalWith(Schema.String, { default: () => "independent" }),
+  tier: Schema.String.pipe(Schema.withDecodingDefaultKey(() => "independent")),
   text: Schema.String,
   createdAt: Schema.Number,
   topicsCsv: Schema.NullOr(Schema.String),
@@ -110,8 +110,10 @@ const toSearchPostResult = (row: SearchPostRow) => ({
 
 const makeBatchError = (cause: unknown, message: string) =>
   new SqlError({
-    cause,
-    message: `${message}: ${toCauseMessage(cause)}`
+    reason: new SqlUnknownError({
+      cause,
+      message: `${message}: ${toCauseMessage(cause)}`
+    })
   });
 
 type D1BatchBindValue = string | number | null;
@@ -992,7 +994,7 @@ export const KnowledgeRepoD1 = {
       yield* sql`INSERT INTO posts_fts(posts_fts) VALUES ('optimize')`.pipe(Effect.asVoid);
     });
 
-    return KnowledgeRepo.of({
+    return {
       upsertPosts,
       markDeleted,
       searchPosts,
@@ -1003,6 +1005,6 @@ export const KnowledgeRepoD1 = {
       getPostLinksPage,
       getPostTopicMatches,
       optimizeFts
-    });
+    };
   }))
 };

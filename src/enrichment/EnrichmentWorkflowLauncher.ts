@@ -1,5 +1,5 @@
-import { Context, Effect, Either, Layer, Schema } from "effect";
-import type { SqlError } from "@effect/sql/SqlError";
+import { ServiceMap, Effect, Result, Layer, Schema } from "effect";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import {
   EnrichmentRunParams,
@@ -17,12 +17,12 @@ import { VISION_PROMPT_VERSION } from "./prompts";
 
 const decodeEnrichmentRunParams = (input: unknown, operation: string) =>
   (() => {
-    const decoded = Schema.decodeUnknownEither(EnrichmentRunParams)(input);
-    return Either.isRight(decoded)
-      ? Effect.succeed(decoded.right)
+    const decoded = Schema.decodeUnknownResult(EnrichmentRunParams)(input);
+    return Result.isSuccess(decoded)
+      ? Effect.succeed(decoded.success)
       : Effect.fail(
-          EnrichmentSchemaDecodeError.make({
-            message: formatSchemaParseError(decoded.left),
+          new EnrichmentSchemaDecodeError({
+            message: formatSchemaParseError(decoded.failure),
             operation
           })
         );
@@ -32,13 +32,13 @@ const launchWorkflow = <A>(operation: string, thunk: () => Promise<A>) =>
   Effect.tryPromise({
     try: thunk,
     catch: (cause) =>
-      EnrichmentWorkflowLaunchError.make({
+      new EnrichmentWorkflowLaunchError({
         message: stringifyUnknown(cause),
         operation
       })
   });
 
-export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/EnrichmentWorkflowLauncher")<
+export class EnrichmentWorkflowLauncher extends ServiceMap.Service<
   EnrichmentWorkflowLauncher,
   {
     readonly start: (
@@ -54,7 +54,7 @@ export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/Enrichment
       SqlError | DbError | EnrichmentSchemaDecodeError | EnrichmentWorkflowLaunchError
     >;
   }
->() {
+>()("@skygest/EnrichmentWorkflowLauncher") {
   static readonly layer = Layer.effect(
     EnrichmentWorkflowLauncher,
     Effect.gen(function* () {
@@ -100,7 +100,7 @@ export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/Enrichment
             params: validatedParams
           })
         ).pipe(
-          Effect.catchAll((error) =>
+          Effect.catch((error) =>
             runs.markFailed({
               id: runId,
               finishedAt: Date.now(),
@@ -108,7 +108,7 @@ export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/Enrichment
                 runId,
                 operation
               })
-            }).pipe(Effect.zipRight(Effect.fail(error)))
+            }).pipe(Effect.andThen(Effect.fail(error)))
           )
         );
 
@@ -132,7 +132,7 @@ export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/Enrichment
         const queued = yield* queueRun(params);
 
         if (queued === null) {
-          return yield* EnrichmentWorkflowLaunchError.make({
+          return yield* new EnrichmentWorkflowLaunchError({
             message: `enrichment run already exists for ${params.postUri}`,
             operation: "EnrichmentWorkflowLauncher.start"
           });
@@ -141,10 +141,10 @@ export class EnrichmentWorkflowLauncher extends Context.Tag("@skygest/Enrichment
         return queued;
       });
 
-      return EnrichmentWorkflowLauncher.of({
+      return {
         start,
         startIfAbsent
-      });
+      };
     })
   );
 }

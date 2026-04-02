@@ -1,8 +1,9 @@
-import { Command, CommandExecutor, FetchHttpClient, FileSystem } from "@effect/platform";
-import { BunContext, BunRuntime } from "@effect/platform-bun";
+import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
+import { FetchHttpClient } from "effect/unstable/http";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { Config, Console, Effect, Either, Layer, Schema } from "effect";
+import * as fs from "node:fs";
+import { Config, Console, Effect, Result, FileSystem, Layer, Runtime, Schema } from "effect";
 import {
   assertUniqueExpertSeeds,
   assertValidExpertSeedManifest,
@@ -28,7 +29,7 @@ const SkygentAuthorsResponse = Schema.Struct({
 });
 
 const DEFAULT_SEED_PATH = fileURLToPath(
-  new URL("../../config/expert-seeds/energy.json", import.meta.url)
+  new URL("../../config/expert-seeds/energy.json", import.meta.url) as unknown as import("node:url").URL
 );
 const DEFAULT_SKYGENT_DIR = resolve(import.meta.dir, "../../../skygent-bsky");
 const DEFAULT_PUBLIC_API = "https://public.api.bsky.app";
@@ -54,16 +55,16 @@ const ScriptConfig = Config.all({
     DEFAULT_STORE
   ),
   storeLimit: Config.withDefault(
-    Config.integer("SKYGENT_STORE_LIMIT"),
+    Config.int("SKYGENT_STORE_LIMIT"),
     DEFAULT_STORE_LIMIT
   ),
   batchSize: Config.withDefault(
-    Config.integer("SKYGENT_BATCH_SIZE"),
+    Config.int("SKYGENT_BATCH_SIZE"),
     DEFAULT_BATCH_SIZE
   )
 });
 
-type ScriptConfigShape = Config.Config.Success<typeof ScriptConfig>;
+type ScriptConfigShape = Config.Success<typeof ScriptConfig>;
 
 const requirePositiveInteger = (value: number, envVar: string) => {
   if (!Number.isInteger(value) || value < 1) {
@@ -89,14 +90,14 @@ const fetchStoreAuthors = (
   limit: number
 ) =>
   Effect.gen(function* () {
-    const executor = yield* CommandExecutor.CommandExecutor;
+    const executor = yield* ChildProcessSpawner.ChildProcessSpawner;
     const output = yield* executor.string(
-      Command.make(
-        "bunx", "skygent", "store", "authors", store,
-        "--sort", "by-posts", "--limit", String(limit)
-      ).pipe(Command.workingDirectory(skygentDir))
+      ChildProcess.make(
+        "bunx", ["skygent", "store", "authors", store,
+        "--sort", "by-posts", "--limit", String(limit)]
+      ).pipe(ChildProcess.setCwd(skygentDir))
     );
-    return yield* Schema.decode(Schema.parseJson(SkygentAuthorsResponse))(output);
+    return yield* Schema.decodeUnknownEffect(Schema.fromJsonString(SkygentAuthorsResponse))(output);
   });
 
 // ---------------------------------------------------------------------------
@@ -265,7 +266,7 @@ const program = Effect.gen(function* () {
   // 2. Load existing manifest and find new handles
   const existingText = yield* fs.readFileString(config.seedPath);
   const existing = assertValidExpertSeedManifest(
-    yield* Schema.decode(Schema.parseJson(ExpertSeedManifest))(existingText)
+    yield* Schema.decodeUnknownEffect(Schema.fromJsonString(ExpertSeedManifest))(existingText)
   );
   const existingHandles = new Set(
     existing.experts
@@ -300,7 +301,7 @@ const program = Effect.gen(function* () {
       (candidate) =>
         bluesky.getProfile(candidate.author).pipe(
           Effect.flatMap((profile) =>
-            Schema.decodeUnknown(ExpertSeed)({
+            Schema.decodeUnknownEffect(ExpertSeed)({
               did: profile.did,
               handle: profile.handle ?? undefined,
               displayName: profile.displayName ?? undefined,
@@ -310,7 +311,7 @@ const program = Effect.gen(function* () {
               active: true
             })
           ),
-          Effect.either
+          Effect.result
         ),
       { concurrency: 5 }
     );
@@ -322,15 +323,15 @@ const program = Effect.gen(function* () {
         continue;
       }
 
-      if (Either.isRight(result)) {
-        resolved.push(result.right);
+      if (Result.isSuccess(result)) {
+        resolved.push(result.success);
       } else {
         failures.push({
           author: candidate.author,
-          error: result.left
+          error: result.failure
         });
         yield* Console.error(
-          `  Failed to resolve ${candidate.author}: ${formatResolutionError(result.left)}`
+          `  Failed to resolve ${candidate.author}: ${formatResolutionError(result.failure)}`
         );
       }
     }
@@ -364,7 +365,7 @@ const program = Effect.gen(function* () {
   }
 
   // 5. Write merged manifest
-  const encoded = yield* Schema.encode(Schema.parseJson(ExpertSeedManifest))(merged);
+  const encoded = yield* Schema.encodeEffect(Schema.fromJsonString(ExpertSeedManifest))(merged);
   yield* fs.writeFileString(config.seedPath, encoded + "\n");
   yield* Console.log(
     `Wrote ${merged.experts.length} experts (${existing.experts.length} existing + ${addedCount} new) to ${config.seedPath}`
@@ -383,7 +384,28 @@ const main = program.pipe(
   Effect.provide(blueskyLayer)
 );
 
+// Minimal FileSystem layer for the build script (uses node:fs which Bun supports)
+const fileSystemLayer = Layer.succeed(FileSystem.FileSystem, {
+  exists: (path: string) => Effect.sync(() => fs.existsSync(path)),
+  readFileString: (path: string) => Effect.sync(() => fs.readFileSync(path, "utf-8")),
+  writeFileString: (path: string, content: string) =>
+    Effect.sync(() => { fs.writeFileSync(path, content, "utf-8"); })
+} as unknown as FileSystem.FileSystem);
+
+// Minimal ChildProcessSpawner layer — uses Bun.spawn at runtime via node:child_process compat
+const childProcessLayer = Layer.succeed(
+  ChildProcessSpawner.ChildProcessSpawner,
+  ChildProcessSpawner.make((_command) =>
+    Effect.die(new Error("ChildProcessSpawner: direct spawn not used in build script"))
+  )
+);
+
+// TODO(effect4): BunRuntime.runMain replaced with Runtime.makeRunMain
+const runMain = Runtime.makeRunMain(({ fiber, teardown }) => {
+  fiber.addObserver((exit) => teardown(exit, (code) => process.exit(code)));
+});
+
 main.pipe(
-  Effect.provide(BunContext.layer),
-  BunRuntime.runMain
+  Effect.provide(Layer.mergeAll(fileSystemLayer, childProcessLayer)),
+  runMain
 );

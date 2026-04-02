@@ -3,7 +3,7 @@ import {
   type WorkflowEvent,
   type WorkflowStep
 } from "cloudflare:workers";
-import { Effect, Either, ManagedRuntime, Schema } from "effect";
+import { Effect, Result, ManagedRuntime, Schema } from "effect";
 import {
   defaultSchemaVersionForEnrichmentKind,
   type EnrichmentOutput,
@@ -47,12 +47,12 @@ import { VisionEnrichmentExecutor } from "./VisionEnrichmentExecutor";
 
 const decodeEnrichmentRunParams = (input: unknown) =>
   (() => {
-    const decoded = Schema.decodeUnknownEither(EnrichmentRunParams)(input);
-    return Either.isRight(decoded)
-      ? Effect.succeed(decoded.right)
+    const decoded = Schema.decodeUnknownResult(EnrichmentRunParams)(input);
+    return Result.isSuccess(decoded)
+      ? Effect.succeed(decoded.success)
       : Effect.fail(
-          EnrichmentSchemaDecodeError.make({
-            message: formatSchemaParseError(decoded.left),
+          new EnrichmentSchemaDecodeError({
+            message: formatSchemaParseError(decoded.failure),
             operation: "EnrichmentRunWorkflow.run"
           })
         );
@@ -118,7 +118,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
     enrichment: EnrichmentOutput,
     resultWrittenAt: number
   ) {
-    return Effect.flatMap(CandidatePayloadRepo, (payloads) =>
+    return CandidatePayloadRepo.use( (payloads) =>
       payloads.saveEnrichment(
         {
           postUri: plan.postUri,
@@ -133,7 +133,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
         saved
           ? Effect.void
           : Effect.fail(
-              EnrichmentPayloadMissingError.make({
+              new EnrichmentPayloadMissingError({
                 postUri: plan.postUri
               })
             )
@@ -155,7 +155,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
 
       await step.do("mark assembling", async () =>
         this.runEffect(
-          Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+          EnrichmentRunsRepo.use( (runs) =>
             runs.markPhase({
               id: runId,
               phase: "assembling",
@@ -168,13 +168,13 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
 
       const run = await step.do("load run", async () =>
         this.runEffect(
-          Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+          EnrichmentRunsRepo.use( (runs) =>
             runs.getById(runId)
           ).pipe(
             Effect.flatMap((record) =>
               record === null
                 ? Effect.fail(
-                    EnrichmentRunNotFoundError.make({ runId })
+                    new EnrichmentRunNotFoundError({ runId })
                   )
                 : Effect.succeed(record)
             )
@@ -185,7 +185,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
 
       await step.do("mark planning", async () =>
         this.runEffect(
-          Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+          EnrichmentRunsRepo.use( (runs) =>
             runs.markPhase({
               id: run.id,
               phase: "planning",
@@ -198,7 +198,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
 
       const plan = await step.do("assemble enrichment plan", async () =>
         this.runEffect(
-          Effect.flatMap(EnrichmentPlanner, (planner) =>
+          EnrichmentPlanner.use( (planner) =>
             planner.plan({
               postUri: run.postUri,
               enrichmentType: run.enrichmentType,
@@ -215,11 +215,11 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
         plan.stopReason === "awaiting-vision"
       ) {
         await this.runEffect(
-          EnrichmentDependencyPendingError.make({
+          Effect.fail(new EnrichmentDependencyPendingError({
             dependency: "vision",
             postUri: plan.postUri,
             operation: "EnrichmentRunWorkflow.run"
-          }),
+          })),
           "EnrichmentRunWorkflow.awaitingVision"
         );
       }
@@ -227,7 +227,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
       if (!isVisionExecutionPlan(plan) && !isSourceAttributionExecutionPlan(plan)) {
         await step.do("mark needs review", async () =>
           this.runEffect(
-            Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+            EnrichmentRunsRepo.use( (runs) =>
               runs.markNeedsReview({
                 id: run.id,
                 lastProgressAt: Date.now(),
@@ -246,7 +246,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
 
       await step.do("mark executing", async () =>
         this.runEffect(
-          Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+          EnrichmentRunsRepo.use( (runs) =>
             runs.markPhase({
               id: run.id,
               phase: "executing",
@@ -260,7 +260,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
       const enrichment = isVisionExecutionPlan(plan)
         ? await step.do("execute vision enrichment", async () =>
             this.runEffect(
-              Effect.flatMap(VisionEnrichmentExecutor, (executor) =>
+              VisionEnrichmentExecutor.use( (executor) =>
                 executor.execute(plan as VisionExecutionPlanValue)
               ),
               "EnrichmentRunWorkflow.executeVision"
@@ -268,7 +268,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
           )
         : await step.do("execute source attribution", async () =>
             this.runEffect(
-              Effect.flatMap(SourceAttributionExecutor, (executor) =>
+              SourceAttributionExecutor.use( (executor) =>
                 executor.execute(plan as SourceAttributionExecutionPlanValue)
               ),
               "EnrichmentRunWorkflow.executeSourceAttribution"
@@ -277,7 +277,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
 
       await step.do("mark persisting", async () =>
         this.runEffect(
-          Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+          EnrichmentRunsRepo.use( (runs) =>
             runs.markPhase({
               id: run.id,
               phase: "persisting",
@@ -305,13 +305,13 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
         if (verdict.outcome === "needs-review") {
           await step.do("mark needs review (quality gate)", async () =>
             this.runEffect(
-              Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+              EnrichmentRunsRepo.use( (runs) =>
                 runs.markNeedsReview({
                   id: run.id,
                   lastProgressAt: Date.now(),
                   resultWrittenAt,
                   error: toEnrichmentErrorEnvelope(
-                    EnrichmentQualityGateError.make({
+                    new EnrichmentQualityGateError({
                       postUri: plan.postUri,
                       reason: verdict.reason
                     }),
@@ -338,7 +338,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
       if (isVisionExecutionPlan(plan)) {
         await step.do("queue source attribution", async () =>
           this.runEffect(
-            Effect.flatMap(EnrichmentWorkflowLauncher, (launcher) =>
+            EnrichmentWorkflowLauncher.use( (launcher) =>
               launcher.startIfAbsent({
                 postUri: plan.postUri,
                 enrichmentType: "source-attribution",
@@ -356,7 +356,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
 
       await step.do("mark complete", async () =>
         this.runEffect(
-          Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+          EnrichmentRunsRepo.use( (runs) =>
             runs.markComplete({
               id: run.id,
               finishedAt: Date.now(),
@@ -373,7 +373,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
       } as const;
     } catch (error) {
       await this.runEffect(
-        Effect.flatMap(EnrichmentRunsRepo, (runs) =>
+        EnrichmentRunsRepo.use( (runs) =>
           runs.markFailed({
             id: runId,
             finishedAt: Date.now(),

@@ -1,6 +1,7 @@
-import { Array as Arr, Either, Option, ParseResult, Schema } from "effect";
+import { Array as Arr, Result, Option, Schema, SchemaIssue } from "effect";
 import type { LinkRecord } from "../domain/bi";
 import { normalizeDomain } from "../domain/normalize";
+import { stripUndefined } from "../platform/Json";
 import type { Did } from "../domain/types";
 import { extractBlobCid, feedThumbnailUrl } from "./BskyCdn";
 
@@ -10,30 +11,30 @@ const LinkFeature = Schema.Struct({
 });
 
 const Facet = Schema.Struct({
-  features: Schema.Array(Schema.Union(
+  features: Schema.Array(Schema.Union([
     LinkFeature,
     Schema.Unknown
-  ))
+  ]))
 });
 
 const ExternalEmbed = Schema.Struct({
   uri: Schema.String,
   title: Schema.String,
   description: Schema.String,
-  thumb: Schema.optional(Schema.Unknown)
+  thumb: Schema.optionalKey(Schema.Unknown)
 });
 
 const RecordEmbed = Schema.Struct({
-  uri: Schema.optional(Schema.String),
-  value: Schema.optional(Schema.Struct({
-    text: Schema.optional(Schema.String)
+  uri: Schema.optionalKey(Schema.String),
+  value: Schema.optionalKey(Schema.Struct({
+    text: Schema.optionalKey(Schema.String)
   }))
 });
 
 const Embed = Schema.Struct({
-  $type: Schema.optional(Schema.String),
-  external: Schema.optional(ExternalEmbed),
-  record: Schema.optional(RecordEmbed)
+  $type: Schema.optionalKey(Schema.String),
+  external: Schema.optionalKey(ExternalEmbed),
+  record: Schema.optionalKey(RecordEmbed)
 });
 
 const Label = Schema.Struct({
@@ -45,49 +46,50 @@ const SelfLabels = Schema.Struct({
 });
 
 export const BlueskyPostRecord = Schema.Struct({
-  text: Schema.optional(Schema.String),
-  facets: Schema.optional(Schema.Array(Facet)),
-  embed: Schema.optional(Embed),
-  tags: Schema.optional(Schema.Array(Schema.String)),
-  labels: Schema.optional(SelfLabels)
+  text: Schema.optionalKey(Schema.String),
+  facets: Schema.optionalKey(Schema.Array(Facet)),
+  embed: Schema.optionalKey(Embed),
+  tags: Schema.optionalKey(Schema.Array(Schema.String)),
+  labels: Schema.optionalKey(SelfLabels)
 });
 export type BlueskyPostRecord = Schema.Schema.Type<typeof BlueskyPostRecord>;
 
 const EmbeddedExternal = Schema.Struct({
-  uri: Schema.optional(Schema.String),
-  title: Schema.optional(Schema.String),
-  description: Schema.optional(Schema.String),
-  thumb: Schema.optional(Schema.Unknown)
+  uri: Schema.optionalKey(Schema.String),
+  title: Schema.optionalKey(Schema.String),
+  description: Schema.optionalKey(Schema.String),
+  thumb: Schema.optionalKey(Schema.Unknown)
 });
 
 const EmbeddedRecord = Schema.Struct({
-  uri: Schema.optional(Schema.String),
-  text: Schema.optional(Schema.String)
+  uri: Schema.optionalKey(Schema.String),
+  text: Schema.optionalKey(Schema.String)
 });
 
 export const SlimPostRecord = Schema.Struct({
-  text: Schema.optional(Schema.String),
-  urls: Schema.optional(Schema.Array(Schema.String)),
-  tags: Schema.optional(Schema.Array(Schema.String)),
-  label_values: Schema.optional(Schema.Array(Schema.String)),
-  embed: Schema.optional(Schema.Struct({
-    $type: Schema.optional(Schema.String),
-    external: Schema.optional(EmbeddedExternal),
-    record: Schema.optional(EmbeddedRecord)
+  text: Schema.optionalKey(Schema.String),
+  urls: Schema.optionalKey(Schema.Array(Schema.String)),
+  tags: Schema.optionalKey(Schema.Array(Schema.String)),
+  label_values: Schema.optionalKey(Schema.Array(Schema.String)),
+  embed: Schema.optionalKey(Schema.Struct({
+    $type: Schema.optionalKey(Schema.String),
+    external: Schema.optionalKey(EmbeddedExternal),
+    record: Schema.optionalKey(EmbeddedRecord)
   }))
 });
 export type SlimPostRecord = Schema.Schema.Type<typeof SlimPostRecord>;
 
-const decodeBlueskyPostRecord = Schema.decodeUnknownOption(BlueskyPostRecord);
-export const decodeSlimPostRecordEither = Schema.decodeUnknownEither(SlimPostRecord);
+const decodeBlueskyPostRecord = Schema.decodeUnknownResult(BlueskyPostRecord);
+export const decodeSlimPostRecordEither = Schema.decodeUnknownResult(SlimPostRecord);
 export const decodeSlimPostRecord = (input: unknown) =>
-  Either.match(decodeSlimPostRecordEither(input), {
-    onLeft: () => Option.none(),
-    onRight: Option.some
+  Result.match(decodeSlimPostRecordEither(input), {
+    onFailure: () => Option.none(),
+    onSuccess: Option.some
   });
 
-export const formatSlimPostRecordDecodeError = (error: ParseResult.ParseError) =>
-  ParseResult.TreeFormatter.formatErrorSync(error);
+const _issueFormatter = SchemaIssue.makeFormatterDefault();
+export const formatSlimPostRecordDecodeError = (error: SchemaIssue.Issue) =>
+  _issueFormatter(error);
 
 export const extractFacetUrls = (
   facets: ReadonlyArray<{ readonly features: ReadonlyArray<unknown> }> | undefined
@@ -101,42 +103,42 @@ export const extractFacetUrls = (
       if (typeof feature === "object" && feature !== null) {
         const value = feature as Record<string, unknown>;
         if (value.$type === "app.bsky.richtext.facet#link" && typeof value.uri === "string") {
-          return Option.some(value.uri);
+          return Result.succeed(value.uri);
         }
       }
 
-      return Option.none();
+      return Result.failVoid;
     })
   );
 };
 
 export const slimPostRecordFromUnknown = (record: unknown): SlimPostRecord =>
-  Option.match(decodeBlueskyPostRecord(record), {
-    onNone: () => ({}),
-    onSome: (post) => ({
+  Result.match(decodeBlueskyPostRecord(record), {
+    onFailure: () => ({}),
+    onSuccess: (post) => stripUndefined({
       text: post.text,
       urls: extractFacetUrls(post.facets),
       tags: post.tags,
       label_values: post.labels?.values.map((label) => label.val),
       embed: post.embed
-        ? {
+        ? stripUndefined({
             $type: post.embed.$type,
             external: post.embed.external
-              ? {
+              ? stripUndefined({
                   uri: post.embed.external.uri,
                   title: post.embed.external.title,
                   description: post.embed.external.description
-                }
+                })
               : undefined,
             record: post.embed.record
-              ? {
+              ? stripUndefined({
                   text: post.embed.record.value?.text,
                   uri: post.embed.record.uri
-                }
+                })
               : undefined
-          }
+          })
         : undefined
-    })
+    }) as SlimPostRecord
   });
 
 const hostnameFor = (value: string): string | null => {

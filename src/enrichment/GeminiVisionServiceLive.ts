@@ -15,8 +15,7 @@
 
 import { GoogleGenAI, createUserContent, createPartFromUri } from "@google/genai";
 import { Clock, Config, Effect, Layer, Schema } from "effect";
-import * as JsonSchema from "effect/JSONSchema";
-import * as AST from "effect/SchemaAST";
+import * as JsonSchema from "effect/JsonSchema";
 import { VisionAssetAnalysis as VisionAssetAnalysisSchema } from "../domain/enrichment";
 import {
   MediaType,
@@ -77,27 +76,15 @@ const extractErrorStatus = (cause: unknown): number | undefined => {
 // JSON Schemas for Gemini structured output (derived from Effect schemas)
 // ---------------------------------------------------------------------------
 
-const makeJsonSchema = (ast: AST.AST): JsonSchema.JsonSchema7 => {
-  const props = AST.getPropertySignatures(ast);
-  if (props.length === 0) {
-    return {
-      type: "object",
-      properties: {},
-      required: [],
-      additionalProperties: false
-    };
-  }
-  const $defs: Record<string, JsonSchema.JsonSchema7> = {};
-  const schema = JsonSchema.fromAST(ast, {
-    definitions: $defs,
-    topLevelReferenceStrategy: "skip"
-  });
-  if (Object.keys($defs).length === 0) return schema;
-  return { ...schema, $defs } as unknown as JsonSchema.JsonSchema7;
+const makeJsonSchema = (schema: Schema.Top): JsonSchema.JsonSchema => {
+  const doc = Schema.toJsonSchemaDocument(schema);
+  // Gemini expects the schema without $schema and $defs at the top level
+  const { $schema: _, ...rest } = doc as unknown as Record<string, unknown>;
+  return rest as JsonSchema.JsonSchema;
 };
 
-const CLASSIFICATION_JSON_SCHEMA = makeJsonSchema(ImageClassification.ast);
-const EXTRACTION_JSON_SCHEMA = makeJsonSchema(GeminiExtractionOutput.ast);
+const CLASSIFICATION_JSON_SCHEMA = makeJsonSchema(ImageClassification);
+const EXTRACTION_JSON_SCHEMA = makeJsonSchema(GeminiExtractionOutput);
 
 // ---------------------------------------------------------------------------
 // Layer
@@ -129,7 +116,7 @@ export const GeminiVisionServiceLive = Layer.effect(
               message: cause instanceof Error
                 ? cause.message
                 : "Gemini Files API upload failed",
-              status: extractErrorStatus(cause)
+              ...(extractErrorStatus(cause) !== undefined ? { status: extractErrorStatus(cause)! } : {})
             })
         });
 
@@ -167,7 +154,7 @@ export const GeminiVisionServiceLive = Layer.effect(
               message: cause instanceof Error
                 ? cause.message
                 : "Gemini generateContent failed during classification",
-              status: extractErrorStatus(cause)
+              ...(extractErrorStatus(cause) !== undefined ? { status: extractErrorStatus(cause)! } : {})
             })
         });
 
@@ -178,8 +165,8 @@ export const GeminiVisionServiceLive = Layer.effect(
           });
         }
 
-        const classification = yield* Schema.decodeUnknown(
-          Schema.parseJson(ImageClassification)
+        const classification = yield* Schema.decodeUnknownEffect(
+          Schema.fromJsonString(ImageClassification)
         )(rawText).pipe(
           Effect.mapError((error) =>
             new GeminiParseError({
@@ -217,7 +204,7 @@ export const GeminiVisionServiceLive = Layer.effect(
               message: cause instanceof Error
                 ? cause.message
                 : "Gemini generateContent failed during extraction",
-              status: extractErrorStatus(cause)
+              ...(extractErrorStatus(cause) !== undefined ? { status: extractErrorStatus(cause)! } : {})
             })
         });
 
@@ -228,8 +215,8 @@ export const GeminiVisionServiceLive = Layer.effect(
           });
         }
 
-        const geminiResult = yield* Schema.decodeUnknown(
-          Schema.parseJson(GeminiExtractionOutput)
+        const geminiResult = yield* Schema.decodeUnknownEffect(
+          Schema.fromJsonString(GeminiExtractionOutput)
         )(rawText).pipe(
           Effect.mapError((error) =>
             new GeminiParseError({
@@ -240,7 +227,7 @@ export const GeminiVisionServiceLive = Layer.effect(
         );
 
         const now = yield* Clock.currentTimeMillis;
-        const enrichment = yield* Schema.decodeUnknown(VisionAssetAnalysisSchema)({
+        const enrichment = yield* Schema.decodeUnknownEffect(VisionAssetAnalysisSchema)({
           ...geminiResult,
           altTextProvenance: "synthetic" as const,
           modelId: model,
@@ -262,10 +249,10 @@ export const GeminiVisionServiceLive = Layer.effect(
     // Service
     // -----------------------------------------------------------------------
 
-    return GeminiVisionService.of({
+    return {
       uploadImage,
       classifyImage,
       extractChartData
-    });
+    };
   })
 );

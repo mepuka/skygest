@@ -217,15 +217,15 @@ export const toProviderLookup = (
   providers: Chunk.fromIterable(prepared.providers),
   aliasEntries: Chunk.fromIterable(prepared.aliasEntries),
   findById: (providerId: string) =>
-    Option.fromNullable(
+    Option.fromNullishOr(
       prepared.providerById.get(normalizeProviderIdKey(providerId))
     ),
   findByAlias: (alias: string) =>
-    Option.fromNullable(
+    Option.fromNullishOr(
       prepared.providerByAlias.get(normalizeProviderLookupKey(alias))
     ),
   findByDomain: (domain: string) =>
-    Option.fromNullable(prepared.providerByDomain.get(normalizeDomain(domain))),
+    Option.fromNullishOr(prepared.providerByDomain.get(normalizeDomain(domain))),
   findBySourceFamily: (sourceFamily: string) =>
     Chunk.fromIterable(
       prepared.providersBySourceFamily.get(

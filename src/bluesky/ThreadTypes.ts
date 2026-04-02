@@ -12,9 +12,9 @@ import { Schema } from "effect";
 
 export const ThreadProfileBasic = Schema.Struct({
   did: Schema.String,
-  handle: Schema.optional(Schema.String),
-  displayName: Schema.optional(Schema.String),
-  avatar: Schema.optional(Schema.String)
+  handle: Schema.optionalKey(Schema.String),
+  displayName: Schema.optionalKey(Schema.String),
+  avatar: Schema.optionalKey(Schema.String)
 });
 export type ThreadProfileBasic = Schema.Schema.Type<typeof ThreadProfileBasic>;
 
@@ -23,8 +23,8 @@ export type ThreadProfileBasic = Schema.Schema.Type<typeof ThreadProfileBasic>;
 export const ThreadImageView = Schema.Struct({
   thumb: Schema.String,
   fullsize: Schema.String,
-  alt: Schema.optional(Schema.String),
-  aspectRatio: Schema.optional(Schema.Struct({
+  alt: Schema.optionalKey(Schema.String),
+  aspectRatio: Schema.optionalKey(Schema.Struct({
     width: Schema.Number,
     height: Schema.Number
   }))
@@ -33,42 +33,42 @@ export type ThreadImageView = Schema.Schema.Type<typeof ThreadImageView>;
 
 const ThreadExternalView = Schema.Struct({
   uri: Schema.String,
-  title: Schema.optional(Schema.String),
-  description: Schema.optional(Schema.String),
-  thumb: Schema.optional(Schema.String)
+  title: Schema.optionalKey(Schema.String),
+  description: Schema.optionalKey(Schema.String),
+  thumb: Schema.optionalKey(Schema.String)
 });
 
 const ThreadRecordViewRecord = Schema.Struct({
-  uri: Schema.optional(Schema.String),
-  cid: Schema.optional(Schema.String),
-  author: Schema.optional(ThreadProfileBasic),
-  value: Schema.optional(Schema.Unknown)
+  uri: Schema.optionalKey(Schema.String),
+  cid: Schema.optionalKey(Schema.String),
+  author: Schema.optionalKey(ThreadProfileBasic),
+  value: Schema.optionalKey(Schema.Unknown)
 });
 
 export const ThreadEmbedView = Schema.Struct({
-  $type: Schema.optional(Schema.String),
+  $type: Schema.optionalKey(Schema.String),
   // images#view
-  images: Schema.optional(Schema.Array(ThreadImageView)),
+  images: Schema.optionalKey(Schema.Array(ThreadImageView)),
   // external#view
-  external: Schema.optional(ThreadExternalView),
+  external: Schema.optionalKey(ThreadExternalView),
   // record#view — contains a "record" sub-object
-  record: Schema.optional(ThreadRecordViewRecord),
+  record: Schema.optionalKey(ThreadRecordViewRecord),
   // recordWithMedia#view — media sub-object
-  media: Schema.optional(Schema.Struct({
-    $type: Schema.optional(Schema.String),
-    images: Schema.optional(Schema.Array(ThreadImageView)),
-    external: Schema.optional(ThreadExternalView),
+  media: Schema.optionalKey(Schema.Struct({
+    $type: Schema.optionalKey(Schema.String),
+    images: Schema.optionalKey(Schema.Array(ThreadImageView)),
+    external: Schema.optionalKey(ThreadExternalView),
     // video fields when media is a video
-    cid: Schema.optional(Schema.String),
-    playlist: Schema.optional(Schema.String),
-    thumbnail: Schema.optional(Schema.String),
-    alt: Schema.optional(Schema.String)
+    cid: Schema.optionalKey(Schema.String),
+    playlist: Schema.optionalKey(Schema.String),
+    thumbnail: Schema.optionalKey(Schema.String),
+    alt: Schema.optionalKey(Schema.String)
   })),
   // video#view — fields live directly on embed
-  cid: Schema.optional(Schema.String),
-  playlist: Schema.optional(Schema.String),
-  thumbnail: Schema.optional(Schema.String),
-  alt: Schema.optional(Schema.String)
+  cid: Schema.optionalKey(Schema.String),
+  playlist: Schema.optionalKey(Schema.String),
+  thumbnail: Schema.optionalKey(Schema.String),
+  alt: Schema.optionalKey(Schema.String)
 });
 export type ThreadEmbedView = Schema.Schema.Type<typeof ThreadEmbedView>;
 
@@ -79,11 +79,11 @@ export const ThreadPostView = Schema.Struct({
   cid: Schema.String,
   author: ThreadProfileBasic,
   record: Schema.Unknown,
-  embed: Schema.optional(ThreadEmbedView),
-  replyCount: Schema.optional(Schema.Number),
-  repostCount: Schema.optional(Schema.Number),
-  likeCount: Schema.optional(Schema.Number),
-  quoteCount: Schema.optional(Schema.Number),
+  embed: Schema.optionalKey(ThreadEmbedView),
+  replyCount: Schema.optionalKey(Schema.Number),
+  repostCount: Schema.optionalKey(Schema.Number),
+  likeCount: Schema.optionalKey(Schema.Number),
+  quoteCount: Schema.optionalKey(Schema.Number),
   indexedAt: Schema.String
 });
 export type ThreadPostView = Schema.Schema.Type<typeof ThreadPostView>;
@@ -91,10 +91,10 @@ export type ThreadPostView = Schema.Schema.Type<typeof ThreadPostView>;
 // --- ThreadViewPost node (recursive — parent/replies decoded lazily) ---
 
 export const ThreadViewPostNode = Schema.Struct({
-  $type: Schema.optional(Schema.String),
+  $type: Schema.optionalKey(Schema.String),
   post: ThreadPostView,
-  parent: Schema.optional(Schema.Unknown),
-  replies: Schema.optional(Schema.Array(Schema.Unknown))
+  parent: Schema.optionalKey(Schema.UndefinedOr(Schema.Unknown)),
+  replies: Schema.optionalKey(Schema.UndefinedOr(Schema.Array(Schema.Unknown)))
 });
 export type ThreadViewPostNode = Schema.Schema.Type<typeof ThreadViewPostNode>;
 

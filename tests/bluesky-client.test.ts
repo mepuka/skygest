@@ -4,13 +4,13 @@ import {
   Effect,
   Fiber,
   Layer,
-  Option,
+  Random,
   Ref,
-  Schema,
-  TestClock
+  Schema
 } from "effect";
+import { TestClock } from "effect/testing";
 import { describe, expect, it } from "@effect/vitest";
-import { HttpClient, HttpClientResponse } from "@effect/platform";
+import { HttpClient, HttpClientResponse } from "effect/unstable/http";
 import { makeBlueskyClient } from "../src/bluesky/BlueskyClient";
 import { Did } from "../src/domain/types";
 
@@ -68,7 +68,7 @@ describe("BlueskyClient", () => {
         });
       }).pipe(Effect.provide(layer));
 
-      const fiber = yield* Effect.fork(program);
+      const fiber = yield* Effect.forkChild(program);
 
       yield* Deferred.await(started);
 
@@ -111,7 +111,7 @@ describe("BlueskyClient", () => {
         })
       );
 
-      const fiber = yield* Effect.fork(
+      const fiber = yield* Effect.forkChild(
         Effect.gen(function* () {
           const client = yield* makeBlueskyClient("https://public.api.bsky.app");
 
@@ -188,15 +188,15 @@ describe("BlueskyClient", () => {
         return yield* client.getProfile("did:plc:expert-a");
       }).pipe(
         Effect.provide(layer),
-        Effect.withRandomFixed([0])
+        Random.withSeed(0)
       );
 
-      const fiber = yield* Effect.fork(program);
+      const fiber = yield* Effect.forkChild(program);
 
       yield* Deferred.await(started);
 
       expect(yield* Ref.get(attempts)).toBe(1);
-      expect(Option.isNone(yield* Fiber.poll(fiber))).toBe(true);
+      expect(fiber.pollUnsafe()).toBeUndefined();
 
       yield* TestClock.adjust("5 seconds");
 
@@ -226,7 +226,7 @@ describe("BlueskyClient", () => {
         return yield* client.getProfile("did:plc:nonexistent");
       }).pipe(
         Effect.provide(layer),
-        Effect.withRandomFixed([0]),
+        Random.withSeed(0),
         Effect.flip
       );
 

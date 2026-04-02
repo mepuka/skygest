@@ -1,9 +1,9 @@
-import { Command, CommandExecutor } from "@effect/platform";
-import { Context, Effect, Layer } from "effect";
+import { ChildProcess as Command, ChildProcessSpawner as CPS } from "effect/unstable/process";
+import { ServiceMap, Effect, Layer } from "effect";
 import { stringifyUnknown } from "../platform/Json";
 import { WranglerDeployError } from "./Errors";
 
-export class WranglerCli extends Context.Tag("@skygest/WranglerCli")<
+export class WranglerCli extends ServiceMap.Service<
   WranglerCli,
   {
     readonly deploy: (
@@ -11,33 +11,28 @@ export class WranglerCli extends Context.Tag("@skygest/WranglerCli")<
       env: string
     ) => Effect.Effect<void, WranglerDeployError>;
   }
->() {
+>()("@skygest/WranglerCli") {
   static readonly live = Layer.effect(
     WranglerCli,
     Effect.gen(function* () {
-      const executor = yield* CommandExecutor.CommandExecutor;
+      const spawner = yield* CPS.ChildProcessSpawner;
 
-      const deploy = Effect.fn("WranglerCli.deploy")(function* (
+      const deploy = (
         configFile: string,
         env: string
-      ) {
+      ) => Effect.gen(function* () {
         const commandText = `bunx wrangler deploy --config ${configFile} --env ${env}`;
-        const exitCode = yield* executor.exitCode(
-          Command.make(
-            "bunx",
-            "wrangler",
-            "deploy",
-            "--config",
-            configFile,
-            "--env",
-            env
-          ).pipe(
-            Command.stdout("inherit"),
-            Command.stderr("inherit")
-          )
-        ).pipe(
+        const cmd = Command.make("bunx", [
+          "wrangler",
+          "deploy",
+          "--config",
+          configFile,
+          "--env",
+          env
+        ]);
+        const exitCode = yield* spawner.exitCode(cmd).pipe(
           Effect.mapError((error) =>
-            WranglerDeployError.make({
+            new WranglerDeployError({
               command: commandText,
               message: stringifyUnknown(error)
             })
@@ -45,16 +40,16 @@ export class WranglerCli extends Context.Tag("@skygest/WranglerCli")<
         );
 
         if (exitCode !== 0) {
-          return yield* WranglerDeployError.make({
+          return yield* new WranglerDeployError({
             command: commandText,
             message: `wrangler exited with status ${String(exitCode)}`
           });
         }
       });
 
-      return WranglerCli.of({
+      return {
         deploy
-      });
+      };
     })
   );
 }

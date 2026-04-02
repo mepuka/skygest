@@ -262,7 +262,7 @@ describe("enrichment admin routes", () => {
         makeLayer({
           retry: () =>
             Effect.fail(
-              EnrichmentRetryNotAllowedError.make({
+              new EnrichmentRetryNotAllowedError({
                 runId: "run-1",
                 status: "running"
               })

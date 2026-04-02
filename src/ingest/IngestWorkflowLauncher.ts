@@ -1,5 +1,5 @@
-import { Context, Effect, Either, Layer, Schema } from "effect";
-import type { SqlError } from "@effect/sql/SqlError";
+import { ServiceMap, Effect, Result, Layer, Schema } from "effect";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import {
   IngestRunParams,
@@ -19,12 +19,12 @@ const toCronSlotId = (scheduledTime: number) =>
 
 const decodeIngestRunParams = (input: unknown, operation: string) =>
   (() => {
-    const decoded = Schema.decodeUnknownEither(IngestRunParams)(input);
-    return Either.isRight(decoded)
-      ? Effect.succeed(decoded.right)
+    const decoded = Schema.decodeUnknownResult(IngestRunParams)(input);
+    return Result.isSuccess(decoded)
+      ? Effect.succeed(decoded.success)
       : Effect.fail(
-          IngestSchemaDecodeError.make({
-            message: formatSchemaParseError(decoded.left),
+          new IngestSchemaDecodeError({
+            message: formatSchemaParseError(decoded.failure),
             operation
           })
         );
@@ -37,13 +37,13 @@ const launchWorkflow = <A>(
   Effect.tryPromise({
     try: thunk,
     catch: (cause) =>
-      IngestWorkflowLaunchError.make({
+      new IngestWorkflowLaunchError({
         message: stringifyUnknown(cause),
         operation
       })
   });
 
-export class IngestWorkflowLauncher extends Context.Tag("@skygest/IngestWorkflowLauncher")<
+export class IngestWorkflowLauncher extends ServiceMap.Service<
   IngestWorkflowLauncher,
   {
     readonly start: (
@@ -59,7 +59,7 @@ export class IngestWorkflowLauncher extends Context.Tag("@skygest/IngestWorkflow
       SqlError | DbError | IngestSchemaDecodeError | IngestWorkflowLaunchError
     >;
   }
->() {
+>()("@skygest/IngestWorkflowLauncher") {
   static readonly layer = Layer.effect(
     IngestWorkflowLauncher,
     Effect.gen(function* () {
@@ -85,7 +85,7 @@ export class IngestWorkflowLauncher extends Context.Tag("@skygest/IngestWorkflow
         });
 
         if (!inserted) {
-          return yield* IngestWorkflowLaunchError.make({
+          return yield* new IngestWorkflowLaunchError({
             message: `ingest run id already exists: ${runId}`,
             operation
           });
@@ -97,7 +97,7 @@ export class IngestWorkflowLauncher extends Context.Tag("@skygest/IngestWorkflow
             params: validatedParams
           })
         ).pipe(
-          Effect.catchAll((error) =>
+          Effect.catch((error) =>
             runs.markFailed({
               id: runId,
               finishedAt: Date.now(),
@@ -105,7 +105,7 @@ export class IngestWorkflowLauncher extends Context.Tag("@skygest/IngestWorkflow
                 runId,
                 operation
               })
-            }).pipe(Effect.zipRight(Effect.fail(error)))
+            }).pipe(Effect.andThen(Effect.fail(error)))
           )
         );
 
@@ -154,7 +154,7 @@ export class IngestWorkflowLauncher extends Context.Tag("@skygest/IngestWorkflow
           ])
         ).pipe(
           Effect.asVoid,
-          Effect.catchAll((error) =>
+          Effect.catch((error) =>
             runs.markFailed({
               id: runId,
               finishedAt: Date.now(),
@@ -162,15 +162,15 @@ export class IngestWorkflowLauncher extends Context.Tag("@skygest/IngestWorkflow
                 runId,
                 operation
               })
-            }).pipe(Effect.zipRight(Effect.fail(error)))
+            }).pipe(Effect.andThen(Effect.fail(error)))
           )
         );
       });
 
-      return IngestWorkflowLauncher.of({
+      return {
         start,
         startCronHeadSweep
-      });
+      };
     })
   );
 }

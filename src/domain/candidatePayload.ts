@@ -3,10 +3,10 @@ import { ThreadEmbedType } from "./bi";
 import { EmbedPayload } from "./embed";
 import { PostUri } from "./types";
 
-export const CandidatePayloadStage = Schema.Literal("candidate", "picked");
+export const CandidatePayloadStage = Schema.Literals(["candidate", "picked"]);
 export type CandidatePayloadStage = Schema.Schema.Type<typeof CandidatePayloadStage>;
 
-export const CandidateEnrichmentType = Schema.String.pipe(Schema.minLength(1));
+export const CandidateEnrichmentType = Schema.String.pipe(Schema.check(Schema.isMinLength(1)));
 export type CandidateEnrichmentType = Schema.Schema.Type<typeof CandidateEnrichmentType>;
 
 export const CandidatePayloadEnrichmentRecord = Schema.Struct({
@@ -46,7 +46,7 @@ export const SaveCandidateEnrichmentInput = Schema.Struct({
 });
 export type SaveCandidateEnrichmentInput = Schema.Schema.Type<typeof SaveCandidateEnrichmentInput>;
 
-export class CandidatePayloadNotPickedError extends Schema.TaggedError<CandidatePayloadNotPickedError>()(
+export class CandidatePayloadNotPickedError extends Schema.TaggedErrorClass<CandidatePayloadNotPickedError>()(
   "CandidatePayloadNotPickedError",
   {
     postUri: PostUri,

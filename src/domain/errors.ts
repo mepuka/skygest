@@ -1,4 +1,4 @@
-import { Either, Schema } from "effect";
+import { Result, Schema } from "effect";
 import { CandidatePayloadStage } from "./candidatePayload";
 import { Did, PostUri } from "./types";
 import {
@@ -6,40 +6,40 @@ import {
   encodeJsonStringWith
 } from "../platform/Json";
 
-export class BlueskyApiError extends Schema.TaggedError<BlueskyApiError>()(
+export class BlueskyApiError extends Schema.TaggedErrorClass<BlueskyApiError>()(
   "BlueskyApiError",
   {
     message: Schema.String,
-    status: Schema.optional(Schema.Number)
+    status: Schema.optionalKey(Schema.Number)
   }
 ) {}
 
-export class DbError extends Schema.TaggedError<DbError>()("DbError", {
+export class DbError extends Schema.TaggedErrorClass<DbError>()("DbError", {
   message: Schema.String
 }) {}
 
-export class IngestRunNotFoundError extends Schema.TaggedError<IngestRunNotFoundError>()(
+export class IngestRunNotFoundError extends Schema.TaggedErrorClass<IngestRunNotFoundError>()(
   "IngestRunNotFoundError",
   {
     runId: Schema.String
   }
 ) {}
 
-export class EnrichmentRunNotFoundError extends Schema.TaggedError<EnrichmentRunNotFoundError>()(
+export class EnrichmentRunNotFoundError extends Schema.TaggedErrorClass<EnrichmentRunNotFoundError>()(
   "EnrichmentRunNotFoundError",
   {
     runId: Schema.String
   }
 ) {}
 
-export class EnrichmentPayloadMissingError extends Schema.TaggedError<EnrichmentPayloadMissingError>()(
+export class EnrichmentPayloadMissingError extends Schema.TaggedErrorClass<EnrichmentPayloadMissingError>()(
   "EnrichmentPayloadMissingError",
   {
     postUri: PostUri
   }
 ) {}
 
-export class EnrichmentQualityGateError extends Schema.TaggedError<EnrichmentQualityGateError>()(
+export class EnrichmentQualityGateError extends Schema.TaggedErrorClass<EnrichmentQualityGateError>()(
   "EnrichmentQualityGateError",
   {
     postUri: PostUri,
@@ -47,14 +47,14 @@ export class EnrichmentQualityGateError extends Schema.TaggedError<EnrichmentQua
   }
 ) {}
 
-export class EnrichmentPostContextMissingError extends Schema.TaggedError<EnrichmentPostContextMissingError>()(
+export class EnrichmentPostContextMissingError extends Schema.TaggedErrorClass<EnrichmentPostContextMissingError>()(
   "EnrichmentPostContextMissingError",
   {
     postUri: PostUri
   }
 ) {}
 
-export class EnrichmentPayloadNotPickedError extends Schema.TaggedError<EnrichmentPayloadNotPickedError>()(
+export class EnrichmentPayloadNotPickedError extends Schema.TaggedErrorClass<EnrichmentPayloadNotPickedError>()(
   "EnrichmentPayloadNotPickedError",
   {
     postUri: PostUri,
@@ -62,15 +62,15 @@ export class EnrichmentPayloadNotPickedError extends Schema.TaggedError<Enrichme
   }
 ) {}
 
-export class IngestSchemaDecodeError extends Schema.TaggedError<IngestSchemaDecodeError>()(
+export class IngestSchemaDecodeError extends Schema.TaggedErrorClass<IngestSchemaDecodeError>()(
   "IngestSchemaDecodeError",
   {
     message: Schema.String,
-    operation: Schema.optional(Schema.String)
+    operation: Schema.optionalKey(Schema.String)
   }
 ) {}
 
-export class IngestWorkflowLaunchError extends Schema.TaggedError<IngestWorkflowLaunchError>()(
+export class IngestWorkflowLaunchError extends Schema.TaggedErrorClass<IngestWorkflowLaunchError>()(
   "IngestWorkflowLaunchError",
   {
     message: Schema.String,
@@ -78,15 +78,15 @@ export class IngestWorkflowLaunchError extends Schema.TaggedError<IngestWorkflow
   }
 ) {}
 
-export class EnrichmentSchemaDecodeError extends Schema.TaggedError<EnrichmentSchemaDecodeError>()(
+export class EnrichmentSchemaDecodeError extends Schema.TaggedErrorClass<EnrichmentSchemaDecodeError>()(
   "EnrichmentSchemaDecodeError",
   {
     message: Schema.String,
-    operation: Schema.optional(Schema.String)
+    operation: Schema.optionalKey(Schema.String)
   }
 ) {}
 
-export class EnrichmentWorkflowLaunchError extends Schema.TaggedError<EnrichmentWorkflowLaunchError>()(
+export class EnrichmentWorkflowLaunchError extends Schema.TaggedErrorClass<EnrichmentWorkflowLaunchError>()(
   "EnrichmentWorkflowLaunchError",
   {
     message: Schema.String,
@@ -94,7 +94,7 @@ export class EnrichmentWorkflowLaunchError extends Schema.TaggedError<Enrichment
   }
 ) {}
 
-export class EnrichmentWorkflowControlError extends Schema.TaggedError<EnrichmentWorkflowControlError>()(
+export class EnrichmentWorkflowControlError extends Schema.TaggedErrorClass<EnrichmentWorkflowControlError>()(
   "EnrichmentWorkflowControlError",
   {
     message: Schema.String,
@@ -103,7 +103,7 @@ export class EnrichmentWorkflowControlError extends Schema.TaggedError<Enrichmen
   }
 ) {}
 
-export class EnrichmentRetryNotAllowedError extends Schema.TaggedError<EnrichmentRetryNotAllowedError>()(
+export class EnrichmentRetryNotAllowedError extends Schema.TaggedErrorClass<EnrichmentRetryNotAllowedError>()(
   "EnrichmentRetryNotAllowedError",
   {
     runId: Schema.String,
@@ -111,7 +111,7 @@ export class EnrichmentRetryNotAllowedError extends Schema.TaggedError<Enrichmen
   }
 ) {}
 
-export class HistoricalEnrichmentRepairError extends Schema.TaggedError<HistoricalEnrichmentRepairError>()(
+export class HistoricalEnrichmentRepairError extends Schema.TaggedErrorClass<HistoricalEnrichmentRepairError>()(
   "HistoricalEnrichmentRepairError",
   {
     message: Schema.String,
@@ -120,15 +120,15 @@ export class HistoricalEnrichmentRepairError extends Schema.TaggedError<Historic
   }
 ) {}
 
-export class IngestBoundaryError extends Schema.TaggedError<IngestBoundaryError>()(
+export class IngestBoundaryError extends Schema.TaggedErrorClass<IngestBoundaryError>()(
   "IngestBoundaryError",
   {
     message: Schema.String,
-    operation: Schema.optional(Schema.String)
+    operation: Schema.optionalKey(Schema.String)
   }
 ) {}
 
-export class WorkflowRunCompensationError extends Schema.TaggedError<WorkflowRunCompensationError>()(
+export class WorkflowRunCompensationError extends Schema.TaggedErrorClass<WorkflowRunCompensationError>()(
   "WorkflowRunCompensationError",
   {
     message: Schema.String,
@@ -137,7 +137,7 @@ export class WorkflowRunCompensationError extends Schema.TaggedError<WorkflowRun
   }
 ) {}
 
-export class StaleDispatchedIngestItemError extends Schema.TaggedError<StaleDispatchedIngestItemError>()(
+export class StaleDispatchedIngestItemError extends Schema.TaggedErrorClass<StaleDispatchedIngestItemError>()(
   "StaleDispatchedIngestItemError",
   {
     message: Schema.String,
@@ -147,7 +147,7 @@ export class StaleDispatchedIngestItemError extends Schema.TaggedError<StaleDisp
   }
 ) {}
 
-export class StaleRunningIngestItemError extends Schema.TaggedError<StaleRunningIngestItemError>()(
+export class StaleRunningIngestItemError extends Schema.TaggedErrorClass<StaleRunningIngestItemError>()(
   "StaleRunningIngestItemError",
   {
     message: Schema.String,
@@ -157,88 +157,88 @@ export class StaleRunningIngestItemError extends Schema.TaggedError<StaleRunning
   }
 ) {}
 
-export class HistoricalRunRepairError extends Schema.TaggedError<HistoricalRunRepairError>()(
+export class HistoricalRunRepairError extends Schema.TaggedErrorClass<HistoricalRunRepairError>()(
   "HistoricalRunRepairError",
   {
     message: Schema.String,
     runId: Schema.String,
-    did: Schema.optional(Did),
+    did: Schema.optionalKey(Did),
     operation: Schema.String
   }
 ) {}
 
-export class GeminiApiError extends Schema.TaggedError<GeminiApiError>()(
+export class GeminiApiError extends Schema.TaggedErrorClass<GeminiApiError>()(
   "GeminiApiError",
   {
     message: Schema.String,
-    status: Schema.optional(Schema.Number)
+    status: Schema.optionalKey(Schema.Number)
   }
 ) {}
 
-export class GeminiParseError extends Schema.TaggedError<GeminiParseError>()(
+export class GeminiParseError extends Schema.TaggedErrorClass<GeminiParseError>()(
   "GeminiParseError",
   {
     message: Schema.String,
-    rawOutput: Schema.optional(Schema.String)
+    rawOutput: Schema.optionalKey(Schema.String)
   }
 ) {}
 
-export class EnrichmentAssetFetchError extends Schema.TaggedError<EnrichmentAssetFetchError>()(
+export class EnrichmentAssetFetchError extends Schema.TaggedErrorClass<EnrichmentAssetFetchError>()(
   "EnrichmentAssetFetchError",
   {
     assetKey: Schema.String,
     message: Schema.String,
-    status: Schema.optional(Schema.Number),
+    status: Schema.optionalKey(Schema.Number),
     operation: Schema.String
   }
 ) {}
 
-export class EnrichmentDependencyPendingError extends Schema.TaggedError<EnrichmentDependencyPendingError>()(
+export class EnrichmentDependencyPendingError extends Schema.TaggedErrorClass<EnrichmentDependencyPendingError>()(
   "EnrichmentDependencyPendingError",
   {
     dependency: Schema.String,
-    postUri: Schema.optional(PostUri),
-    operation: Schema.optional(Schema.String)
+    postUri: Schema.optionalKey(PostUri),
+    operation: Schema.optionalKey(Schema.String)
   }
 ) {}
 
 export const IngestErrorEnvelope = Schema.Struct({
-  tag: Schema.String.pipe(Schema.minLength(1)),
+  tag: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   message: Schema.String,
   retryable: Schema.Boolean,
-  status: Schema.optional(Schema.Number),
-  did: Schema.optional(Did),
-  runId: Schema.optional(Schema.String),
-  operation: Schema.optional(Schema.String)
+  status: Schema.optionalKey(Schema.Number),
+  did: Schema.optionalKey(Did),
+  runId: Schema.optionalKey(Schema.String),
+  operation: Schema.optionalKey(Schema.String)
 });
 export type IngestErrorEnvelope = Schema.Schema.Type<typeof IngestErrorEnvelope>;
 
 export const IngestErrorResponse = Schema.Struct({
-  error: Schema.String.pipe(Schema.minLength(1)),
+  error: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   message: Schema.String,
-  retryable: Schema.optional(Schema.Boolean),
-  status: Schema.optional(Schema.Number),
-  did: Schema.optional(Did),
-  runId: Schema.optional(Schema.String)
+  retryable: Schema.optionalKey(Schema.Boolean),
+  status: Schema.optionalKey(Schema.Number),
+  did: Schema.optionalKey(Did),
+  runId: Schema.optionalKey(Schema.String)
 });
 export type IngestErrorResponse = Schema.Schema.Type<typeof IngestErrorResponse>;
 
 export const EnrichmentErrorEnvelope = Schema.Struct({
-  tag: Schema.String.pipe(Schema.minLength(1)),
+  tag: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   message: Schema.String,
   retryable: Schema.Boolean,
-  status: Schema.optional(Schema.Number),
-  runId: Schema.optional(Schema.String),
-  operation: Schema.optional(Schema.String)
+  status: Schema.optionalKey(Schema.Number),
+  runId: Schema.optionalKey(Schema.String),
+  operation: Schema.optionalKey(Schema.String)
 });
 export type EnrichmentErrorEnvelope = Schema.Schema.Type<
   typeof EnrichmentErrorEnvelope
 >;
 
-const decodeEnvelope = Schema.decodeUnknownEither(IngestErrorEnvelope);
+const decodeEnvelope = Schema.decodeUnknownResult(IngestErrorEnvelope);
 const encodeEnvelope = encodeJsonStringWith(IngestErrorEnvelope);
 const decodeEnvelopeJson = decodeJsonStringEitherWith(IngestErrorEnvelope);
-const decodeEnrichmentEnvelope = Schema.decodeUnknownEither(EnrichmentErrorEnvelope);
+const decodeEnrichmentEnvelope = Schema.decodeUnknownResult(EnrichmentErrorEnvelope);
 const encodeEnrichmentEnvelope = encodeJsonStringWith(EnrichmentErrorEnvelope);
 const decodeEnrichmentEnvelopeJson = decodeJsonStringEitherWith(EnrichmentErrorEnvelope);
 
@@ -359,8 +359,8 @@ export const decodeStoredIngestError = (value: string | null) => {
   }
 
   const decoded = decodeEnvelopeJson(value);
-  if (Either.isRight(decoded)) {
-    return sanitizeIngestErrorEnvelope(decoded.right);
+  if (Result.isSuccess(decoded)) {
+    return sanitizeIngestErrorEnvelope(decoded.success);
   }
 
   return legacyIngestErrorEnvelope("legacy ingest failure");
@@ -379,8 +379,8 @@ export const decodeStoredEnrichmentError = (value: string | null) => {
   }
 
   const decoded = decodeEnrichmentEnvelopeJson(value);
-  if (Either.isRight(decoded)) {
-    return decoded.right;
+  if (Result.isSuccess(decoded)) {
+    return decoded.success;
   }
 
   return legacyEnrichmentErrorEnvelope("legacy enrichment failure");
@@ -404,8 +404,8 @@ export const toIngestErrorEnvelope = (
   });
 
   const asEnvelope = decodeEnvelope(error);
-  if (Either.isRight(asEnvelope)) {
-    return withOverrides(asEnvelope.right);
+  if (Result.isSuccess(asEnvelope)) {
+    return withOverrides(asEnvelope.success);
   }
 
   if (error instanceof BlueskyApiError || isTagged(error, "BlueskyApiError")) {
@@ -626,8 +626,8 @@ export const toEnrichmentErrorEnvelope = (
   });
 
   const asEnvelope = decodeEnrichmentEnvelope(error);
-  if (Either.isRight(asEnvelope)) {
-    return withOverrides(asEnvelope.right);
+  if (Result.isSuccess(asEnvelope)) {
+    return withOverrides(asEnvelope.success);
   }
 
   if (

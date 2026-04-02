@@ -6,37 +6,11 @@
  * This is a minimal fork of `McpServer.registerToolkit` / `McpServer.toolkit`
  * from `@effect/ai` — the only change is in the `onSuccess` text branch.
  */
-import { McpSchema, McpServer, Tool as AiTool } from "@effect/ai";
-import type * as Toolkit from "@effect/ai/Toolkit";
-import * as Context from "effect/Context";
+import { McpSchema, McpServer, Tool as AiTool, Toolkit } from "effect/unstable/ai";
+import { Cause, Option, Sink, Stream } from "effect";
 import * as Effect from "effect/Effect";
-import * as JsonSchema from "effect/JSONSchema";
 import * as Layer from "effect/Layer";
-import * as Option from "effect/Option";
-import * as AST from "effect/SchemaAST";
-
-// ---------------------------------------------------------------------------
-// Internal helper copied from @effect/ai — not exported by the package
-// ---------------------------------------------------------------------------
-const makeJsonSchema = (ast: AST.AST): JsonSchema.JsonSchema7 => {
-  const props = AST.getPropertySignatures(ast);
-  if (props.length === 0) {
-    return {
-      type: "object",
-      properties: {},
-      required: [],
-      additionalProperties: false
-    };
-  }
-  const $defs = {};
-  const schema = JsonSchema.fromAST(ast, {
-    definitions: $defs,
-    topLevelReferenceStrategy: "skip"
-  });
-  if (Object.keys($defs).length === 0) return schema;
-  (schema as any).$defs = $defs;
-  return schema;
-};
+import * as ServiceMap from "effect/ServiceMap";
 
 // ---------------------------------------------------------------------------
 // Display-text aware success text extraction
@@ -56,84 +30,82 @@ const displayText = (encodedResult: unknown): string => {
 // ---------------------------------------------------------------------------
 // registerToolkitWithDisplayText — mirrors McpServer.registerToolkit
 // ---------------------------------------------------------------------------
-const registerToolkitWithDisplayText: <
+const registerToolkitWithDisplayText = <
   Tools extends Record<string, AiTool.Any>
 >(
   toolkit: Toolkit.Toolkit<Tools>
-) => Effect.Effect<
+): Effect.Effect<
   void,
   never,
   | McpServer.McpServer
   | AiTool.HandlersFor<Tools>
-  | Exclude<AiTool.Requirements<Tools>, McpSchema.McpServerClient>
-> = Effect.fnUntraced(function*<Tools extends Record<string, AiTool.Any>>(
-  toolkit: Toolkit.Toolkit<Tools>
-) {
-  const registry = yield* McpServer.McpServer;
-  const built = yield* toolkit as any as Effect.Effect<
-    Toolkit.WithHandler<Tools>,
-    never,
-    Exclude<AiTool.HandlersFor<Tools>, McpSchema.McpServerClient>
-  >;
-  const context = yield* Effect.context<never>();
-  for (const tool of Object.values(built.tools)) {
-    const mcpTool = new McpSchema.Tool({
-      name: tool.name,
-      description: tool.description,
-      inputSchema: makeJsonSchema(tool.parametersSchema.ast),
-      annotations: new McpSchema.ToolAnnotations({
-        ...Context.getOption(tool.annotations, AiTool.Title).pipe(
-          Option.map((title) => ({ title })),
-          Option.getOrUndefined
-        ),
-        readOnlyHint: Context.get(tool.annotations, AiTool.Readonly),
-        destructiveHint: Context.get(tool.annotations, AiTool.Destructive),
-        idempotentHint: Context.get(tool.annotations, AiTool.Idempotent),
-        openWorldHint: Context.get(tool.annotations, AiTool.OpenWorld)
-      })
-    });
-    yield* registry.addTool({
-      tool: mcpTool,
-      handle(payload) {
-        return built.handle(tool.name as any, payload).pipe(
-          Effect.provide(context as Context.Context<any>),
-          Effect.match({
-            // Failure path — identical to stock implementation
-            onFailure: (error) =>
-              new McpSchema.CallToolResult({
-                isError: true,
-                structuredContent:
-                  typeof error === "object" ? error : undefined,
-                content: [
-                  {
+  | Exclude<AiTool.HandlerServices<Tools>, McpSchema.McpServerClient>
+> =>
+  Effect.gen(function* () {
+    const registry = yield* McpServer.McpServer;
+    const built: Toolkit.WithHandler<Tools> = yield* toolkit as any;
+    const services = yield* Effect.services<never>();
+    for (const tool of Object.values(built.tools) as any[]) {
+      const annotations = tool.annotations ?? (ServiceMap.empty() as ServiceMap.ServiceMap<never>);
+      const toolMeta = ServiceMap.getOrUndefined(annotations, AiTool.Meta);
+      const mcpTool = new McpSchema.Tool({
+        name: tool.name,
+        description: AiTool.getDescription(tool),
+        inputSchema: AiTool.getJsonSchema(tool),
+        annotations: {
+          ...(ServiceMap.getOption(tool.annotations, AiTool.Title).pipe(
+            Option.map((title: string) => ({ title })),
+            Option.getOrUndefined
+          )),
+          readOnlyHint: ServiceMap.get(tool.annotations, AiTool.Readonly),
+          destructiveHint: ServiceMap.get(tool.annotations, AiTool.Destructive),
+          idempotentHint: ServiceMap.get(tool.annotations, AiTool.Idempotent),
+          openWorldHint: ServiceMap.get(tool.annotations, AiTool.OpenWorld)
+        },
+        _meta: toolMeta
+      });
+      yield* registry.addTool({
+        tool: mcpTool,
+        annotations,
+        handle(payload: any) {
+          return built.handle(tool.name as any, payload).pipe(
+            Stream.unwrap,
+            Stream.run(Sink.last()),
+            Effect.flatMap(Effect.fromOption),
+            Effect.provideServices(services as ServiceMap.ServiceMap<any>),
+            Effect.matchCause({
+              // Failure path — identical to stock implementation
+              onFailure: (cause: any) =>
+                new McpSchema.CallToolResult({
+                  isError: true,
+                  structuredContent: undefined,
+                  content: [{
                     type: "text",
-                    text: JSON.stringify(error)
-                  }
-                ]
-              }),
-            // Success path — uses _display when present
-            onSuccess: (result) => {
-              const structured =
-                typeof result.encodedResult === "object"
-                  ? result.encodedResult
-                  : undefined;
-              return new McpSchema.CallToolResult({
-                isError: false,
-                structuredContent: structured,
-                content: [
-                  {
+                    text: Cause.pretty(cause)
+                  }]
+                }),
+              // Success path — uses _display when present
+              onSuccess: (result: any) => {
+                const structured =
+                  typeof result.encodedResult === "object"
+                    ? result.encodedResult
+                    : undefined;
+                return new McpSchema.CallToolResult({
+                  isError: false,
+                  structuredContent: structured,
+                  content: [{
                     type: "text",
                     text: displayText(result.encodedResult)
-                  }
-                ]
-              });
-            }
-          })
-        ) as any;
-      }
-    });
-  }
-});
+                  }]
+                });
+              }
+            }),
+            Effect.tapCause(Effect.log)
+          ) as any;
+        }
+      });
+    }
+  }) as any;
 
 // ---------------------------------------------------------------------------
 // toolkitWithDisplayText — drop-in replacement for McpServer.toolkit
@@ -146,8 +118,6 @@ export const toolkitWithDisplayText = <
   never,
   never,
   | AiTool.HandlersFor<Tools>
-  | Exclude<AiTool.Requirements<Tools>, McpSchema.McpServerClient>
+  | Exclude<AiTool.HandlerServices<Tools>, McpSchema.McpServerClient>
 > =>
-  Layer.effectDiscard(registerToolkitWithDisplayText(toolkit)).pipe(
-    Layer.provide(McpServer.McpServer.layer)
-  );
+  Layer.effectDiscard(registerToolkitWithDisplayText(toolkit)) as any;

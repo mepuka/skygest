@@ -12,7 +12,7 @@
  * - Prefer `snippet` over `text` when present on posts
  */
 
-import * as Doc from "@effect/printer/Doc";
+import * as Doc from "../platform/Doc";
 import type {
   KnowledgePostResult,
   KnowledgeLinkResult,

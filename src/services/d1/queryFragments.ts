@@ -1,4 +1,4 @@
-import type { SqlClient } from "@effect/sql";
+import type { SqlClient } from "effect/unstable/sql";
 
 export const topicFilterExists = (
   sql: SqlClient.SqlClient,

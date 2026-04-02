@@ -1,4 +1,4 @@
-import * as HttpApiBuilder from "@effect/platform/HttpApiBuilder";
+import * as HttpApiBuilder from "effect/unstable/httpapi/HttpApiBuilder";
 import { Effect, Layer } from "effect";
 import { makeQueryLayer } from "../edge/Layer";
 import type {
@@ -41,6 +41,7 @@ import { EditorialService } from "../services/EditorialService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { PostHydrationService } from "../services/PostHydrationService";
 import { handleWithApiLayer, makeCachedApiHandler } from "../http/ApiSupport";
+import { stripUndefined } from "../platform/Json";
 import {
   isTaggedError,
   toUpstreamFailure,
@@ -123,7 +124,7 @@ const toLinksPage = (
   });
 
 const hydratePosts = <A extends KnowledgePostResult>(items: ReadonlyArray<A>) =>
-  Effect.flatMap(PostHydrationService, (hydration) =>
+  PostHydrationService.use( (hydration) =>
     hydration.hydratePosts(items)
   );
 
@@ -167,16 +168,16 @@ const toThreadPostResult = (
 const PublicReadHandlers = Layer.mergeAll(
   HttpApiBuilder.group(PublicReadApi, "posts", (handlers) =>
     handlers
-      .handle("search", ({ urlParams }) =>
-        withReadErrors("/api/posts/search", Effect.flatMap(KnowledgeQueryService, (query) =>
-          query.searchPostsPage({
+      .handle("search", ({ query: urlParams }) =>
+        withReadErrors("/api/posts/search", KnowledgeQueryService.use( (query) =>
+          query.searchPostsPage(stripUndefined({
             query: urlParams.q,
             topic: urlParams.topic,
             since: urlParams.since,
             until: urlParams.until,
             limit: urlParams.limit,
             cursor: urlParams.cursor
-          })
+          }))
         )).pipe(
           Effect.flatMap((page: SearchPostsPageResult) =>
             hydratePosts(page.items).pipe(
@@ -188,8 +189,8 @@ const PublicReadHandlers = Layer.mergeAll(
           )
         )
       )
-      .handle("recent", ({ urlParams }) =>
-        withReadErrors("/api/posts/recent", Effect.flatMap(KnowledgeQueryService, (query) =>
+      .handle("recent", ({ query: urlParams }) =>
+        withReadErrors("/api/posts/recent", KnowledgeQueryService.use( (query) =>
           query.getRecentPostsPage(urlParams)
         )).pipe(
           Effect.flatMap((page) =>
@@ -199,15 +200,15 @@ const PublicReadHandlers = Layer.mergeAll(
           )
         )
       )
-      .handle("explainTopics", ({ path }) =>
-        withReadErrors("/api/posts/:uri/topics", Effect.flatMap(KnowledgeQueryService, (query) =>
+      .handle("explainTopics", ({ params: path }) =>
+        withReadErrors("/api/posts/:uri/topics", KnowledgeQueryService.use( (query) =>
           query.explainPostTopics(path.uri)
         ))
       )
-      .handle("thread", ({ path, urlParams }) =>
+      .handle("thread", ({ params: path, query: urlParams }) =>
         withThreadReadErrors(
           "/api/posts/:uri/thread",
-          Effect.flatMap(BlueskyClient, (bluesky) =>
+          BlueskyClient.use( (bluesky) =>
             bluesky.getPostThread(path.uri, {
               depth: urlParams.depth ?? 3,
               parentHeight: urlParams.parentHeight ?? 3
@@ -230,10 +231,10 @@ const PublicReadHandlers = Layer.mergeAll(
           )
         )
       )
-      .handle("enrichments", ({ path }) =>
+      .handle("enrichments", ({ params: path }) =>
         withReadErrors(
           "/api/posts/:uri/enrichments",
-          Effect.flatMap(PostEnrichmentReadService, (service) =>
+          PostEnrichmentReadService.use( (service) =>
             service.getPost(path.uri)
           ).pipe(
             Effect.map((result) => ({
@@ -243,14 +244,14 @@ const PublicReadHandlers = Layer.mergeAll(
           )
         )
       )
-      .handle("curated", ({ urlParams }) =>
-        withReadErrors("/api/posts/curated", Effect.flatMap(EditorialService, (editorial) =>
-          editorial.getCuratedFeed({
+      .handle("curated", ({ query: urlParams }) =>
+        withReadErrors("/api/posts/curated", EditorialService.use( (editorial) =>
+          editorial.getCuratedFeed(stripUndefined({
             topic: urlParams.topic,
             minScore: urlParams.minScore,
             since: urlParams.since,
             limit: urlParams.limit
-          })
+          }))
         )).pipe(
           Effect.flatMap((items) =>
             hydratePosts(items).pipe(
@@ -264,8 +265,8 @@ const PublicReadHandlers = Layer.mergeAll(
       )
   ),
   HttpApiBuilder.group(PublicReadApi, "links", (handlers) =>
-    handlers.handle("list", ({ urlParams }) =>
-      withReadErrors("/api/links", Effect.flatMap(KnowledgeQueryService, (query) =>
+    handlers.handle("list", ({ query: urlParams }) =>
+      withReadErrors("/api/links", KnowledgeQueryService.use( (query) =>
         query.getPostLinksPage(urlParams)
       )).pipe(
         Effect.map((page) => toLinksPage(page.items, page.nextCursor))
@@ -274,23 +275,23 @@ const PublicReadHandlers = Layer.mergeAll(
   ),
   HttpApiBuilder.group(PublicReadApi, "experts", (handlers) =>
     handlers
-      .handle("list", ({ urlParams }) =>
-        withReadErrors("/api/experts", Effect.flatMap(KnowledgeQueryService, (query) =>
+      .handle("list", ({ query: urlParams }) =>
+        withReadErrors("/api/experts", KnowledgeQueryService.use( (query) =>
           query.listExperts(urlParams)
         )).pipe(
           Effect.map((items) => ({ items }))
         )
       )
-      .handle("posts", ({ path, urlParams }) =>
-        withReadErrors("/api/experts/:did/posts", Effect.flatMap(KnowledgeQueryService, (query) =>
-          query.getRecentPostsPage({
+      .handle("posts", ({ params: path, query: urlParams }) =>
+        withReadErrors("/api/experts/:did/posts", KnowledgeQueryService.use( (query) =>
+          query.getRecentPostsPage(stripUndefined({
             topic: urlParams.topic,
             expertDid: path.did,
             since: urlParams.since,
             until: urlParams.until,
             limit: urlParams.limit,
             cursor: urlParams.cursor
-          })
+          }))
         )).pipe(
           Effect.flatMap((page) =>
             hydratePosts(page.items).pipe(
@@ -301,8 +302,8 @@ const PublicReadHandlers = Layer.mergeAll(
       )
   ),
   HttpApiBuilder.group(PublicReadApi, "publications", (handlers) =>
-    handlers.handle("list", ({ urlParams }) =>
-      withReadErrors("/api/publications", Effect.flatMap(KnowledgeQueryService, (query) =>
+    handlers.handle("list", ({ query: urlParams }) =>
+      withReadErrors("/api/publications", KnowledgeQueryService.use( (query) =>
         query.listPublications(urlParams)
       )).pipe(
         Effect.map((items) => ({ items }))
@@ -311,8 +312,8 @@ const PublicReadHandlers = Layer.mergeAll(
   ),
   HttpApiBuilder.group(PublicReadApi, "topics", (handlers) =>
     handlers
-      .handle("list", ({ urlParams }) =>
-        withReadErrors("/api/topics", Effect.flatMap(KnowledgeQueryService, (query) =>
+      .handle("list", ({ query: urlParams }) =>
+        withReadErrors("/api/topics", KnowledgeQueryService.use( (query) =>
           query.listTopics(urlParams)
         )).pipe(
           Effect.map((items) => ({
@@ -321,10 +322,10 @@ const PublicReadHandlers = Layer.mergeAll(
           }))
         )
       )
-      .handle("get", ({ path }) =>
+      .handle("get", ({ params: path }) =>
         withReadErrors(
           "/api/topics/:slug",
-          Effect.flatMap(KnowledgeQueryService, (query) =>
+          KnowledgeQueryService.use( (query) =>
             query.getTopic({ slug: path.slug })
           )
             .pipe(
@@ -336,29 +337,27 @@ const PublicReadHandlers = Layer.mergeAll(
             )
         )
       )
-      .handle("expand", ({ path, urlParams }) =>
-        withReadErrors("/api/topics/:slug/expand", Effect.flatMap(KnowledgeQueryService, (query) =>
-          query.expandTopics({
+      .handle("expand", ({ params: path, query: urlParams }) =>
+        withReadErrors("/api/topics/:slug/expand", KnowledgeQueryService.use( (query) =>
+          query.expandTopics(stripUndefined({
             slugs: [path.slug],
             mode: urlParams.mode
-          })
+          }))
         ))
       )
   )
 );
-
-const PublicReadCorsLayer = HttpApiBuilder.middlewareCors();
 
 const makePublicReadLayer = (serviceLayer: Layer.Layer<any, any, never>) =>
   (() => {
     const handlersLayer = PublicReadHandlers.pipe(
       Layer.provideMerge(serviceLayer)
     );
-    const apiLayer = HttpApiBuilder.api(PublicReadApi).pipe(
+    const apiLayer = HttpApiBuilder.layer(PublicReadApi).pipe(
       Layer.provideMerge(handlersLayer)
     );
 
-    return Layer.mergeAll(apiLayer, PublicReadCorsLayer);
+    return apiLayer;
   })();
 
 const handleCachedPublicReadRequest = makeCachedApiHandler(

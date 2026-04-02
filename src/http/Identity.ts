@@ -1,10 +1,10 @@
-import { Context } from "effect";
+import { ServiceMap } from "effect";
 import type { AccessIdentity } from "../auth/AuthService";
 
-export class OperatorIdentity extends Context.Tag("@skygest/http/OperatorIdentity")<
+export class OperatorIdentity extends ServiceMap.Service<
   OperatorIdentity,
   AccessIdentity
->() {}
+>()("@skygest/http/OperatorIdentity") {}
 
 export const operatorIdentityContext = (identity: AccessIdentity) =>
-  Context.add(Context.empty(), OperatorIdentity, identity);
+  ServiceMap.add(ServiceMap.empty(), OperatorIdentity, identity);

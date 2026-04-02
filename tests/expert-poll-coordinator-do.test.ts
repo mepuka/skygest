@@ -61,8 +61,8 @@ describe("ExpertPollCoordinatorDo", () => {
 
       currentLayer = Layer.mergeAll(
         Layer.succeed(ExpertPollExecutor, {
-          runExpert: () => Effect.dieMessage("not used"),
-          runDid: (failedDid) => Effect.fail(ExpertNotFoundError.make({ did: failedDid }))
+          runExpert: () => Effect.die(new Error("not used")),
+          runDid: (failedDid) => Effect.fail(new ExpertNotFoundError({ did: failedDid }))
         }),
         Layer.succeed(IngestRunItemsRepo, {
           createMany: () => Effect.void,

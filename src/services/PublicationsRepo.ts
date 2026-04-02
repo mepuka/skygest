@@ -1,5 +1,5 @@
-import { Context, Effect } from "effect";
-import type { SqlError } from "@effect/sql/SqlError";
+import { ServiceMap, Effect } from "effect";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type {
   PublicationListItem,
@@ -9,7 +9,7 @@ import type {
   SeedPublicationsResult
 } from "../domain/bi";
 
-export class PublicationsRepo extends Context.Tag("@skygest/PublicationsRepo")<
+export class PublicationsRepo extends ServiceMap.Service<
   PublicationsRepo,
   {
     readonly seedCurated: (
@@ -28,4 +28,4 @@ export class PublicationsRepo extends Context.Tag("@skygest/PublicationsRepo")<
       hostnames: ReadonlyArray<string>
     ) => Effect.Effect<ReadonlyArray<PublicationRecord>, SqlError | DbError>;
   }
->() {}
+>()("@skygest/PublicationsRepo") {}

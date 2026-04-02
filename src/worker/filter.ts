@@ -59,7 +59,7 @@ export const scheduled = async (
   const task = withManagedRuntime(layer, (runtime) =>
     runScopedWithRuntime(
       runtime,
-      Effect.flatMap(IngestWorkflowLauncher, (launcher) =>
+      IngestWorkflowLauncher.use( (launcher) =>
         launcher.startCronHeadSweep(_controller.scheduledTime)
       ),
       { operation: "IngestWorker.scheduled" }

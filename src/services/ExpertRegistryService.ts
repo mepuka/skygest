@@ -1,5 +1,5 @@
-import { Context, Effect, Layer } from "effect";
-import type { SqlError } from "@effect/sql/SqlError";
+import { ServiceMap, Effect, Layer } from "effect";
+import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type { AccessIdentity } from "../auth/AuthService";
 import { computeShard } from "../bootstrap/ExpertSeeds";
@@ -39,7 +39,7 @@ const toAdminExpertResult = (expert: ExpertRecord): AdminExpertResult => ({
   tier: expert.tier
 });
 
-export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryService")<
+export class ExpertRegistryService extends ServiceMap.Service<
   ExpertRegistryService,
   {
     readonly addExpert: (
@@ -67,7 +67,7 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
       did: Did
     ) => Effect.Effect<ExpertRecord, ProfileLookupError | SqlError | DbError>;
   }
->() {
+>()("@skygest/ExpertRegistryService") {
   static readonly layer = Layer.effect(
     ExpertRegistryService,
     Effect.gen(function* () {
@@ -84,11 +84,11 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
         tag: "resolve" | "profile"
       ) =>
         tag === "resolve"
-          ? HandleResolutionError.make({
+          ? new HandleResolutionError({
             didOrHandle,
             message: error.message
           })
-          : ProfileLookupError.make({
+          : new ProfileLookupError({
             didOrHandle,
             message: error.message
           });
@@ -132,7 +132,7 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
       ) {
         const profile = yield* bluesky.getProfile(did).pipe(
           Effect.mapError((error) =>
-            ProfileLookupError.make({
+            new ProfileLookupError({
               didOrHandle: did,
               message: error.message
             })
@@ -205,7 +205,7 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
         const program = Effect.gen(function* () {
           const existing = yield* expertsRepo.getByDid(did);
           if (existing === null) {
-            return yield* ExpertNotFoundError.make({ did });
+            return yield* new ExpertNotFoundError({ did });
           }
 
           yield* expertsRepo.setActive(did, input.active);
@@ -243,12 +243,12 @@ export class ExpertRegistryService extends Context.Tag("@skygest/ExpertRegistryS
         );
       });
 
-      return ExpertRegistryService.of({
+      return {
         addExpert,
         setExpertActive,
         listExperts,
         refreshExpertProfile
-      });
+      };
     })
   );
 }
