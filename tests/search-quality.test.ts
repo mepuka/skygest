@@ -4,6 +4,7 @@ import { describe, expect, it } from "@effect/vitest";
 import { bootstrapExperts } from "../src/bootstrap/ExpertSeeds";
 import { runMigrations } from "../src/db/migrate";
 import type { KnowledgePost, MatchedTopic } from "../src/domain/bi";
+import { ExpertsRepo } from "../src/services/ExpertsRepo";
 import { KnowledgeRepo } from "../src/services/KnowledgeRepo";
 import { makeBiLayer } from "./support/runtime";
 
@@ -30,6 +31,13 @@ const assessmentManifest = {
       did: "did:plc:grid",
       handle: "gridwonk.bsky.social",
       displayName: "Grid Wonk",
+      source: "manual",
+      active: true
+    },
+    {
+      did: "did:plc:desk",
+      handle: "desk.bsky.social",
+      displayName: "Desk Reporter",
       source: "manual",
       active: true
     }
@@ -117,6 +125,20 @@ const assessmentPosts: ReadonlyArray<KnowledgePost> = [
     embedType: null,
     topics: [makeTopic("solar", "PV")],
     links: []
+  },
+  {
+    uri: "at://did:plc:desk/app.bsky.feed.post/mixed-handle" as any,
+    did: "did:plc:desk" as any,
+    cid: null,
+    text: "Solar developers want cheaper debt financing.",
+    createdAt: assessmentNow + 5,
+    indexedAt: assessmentNow + 5,
+    hasLinks: false,
+    status: "active",
+    ingestId: "assessment-mixed-handle",
+    embedType: null,
+    topics: [makeTopic("solar", "solar")],
+    links: []
   }
 ];
 
@@ -172,6 +194,20 @@ describe("search quality assessment", () => {
     }).pipe(Effect.provide(makeBiLayer()))
   );
 
+  it.effect("treats full handle queries as exact handle phrases instead of mixing text from other rows", () =>
+    Effect.gen(function* () {
+      const repo = yield* seedAssessmentPosts;
+      const results = yield* repo.searchPosts({ query: "solar-desk.bsky.social", limit: 10 });
+
+      expect(new Set(results.map((result) => result.uri))).toEqual(new Set([
+        "at://did:plc:solar/app.bsky.feed.post/exact-phrase",
+        "at://did:plc:solar/app.bsky.feed.post/loose-phrase",
+        "at://did:plc:solar/app.bsky.feed.post/topic-only"
+      ]));
+      expect(results.some((result) => result.uri === "at://did:plc:desk/app.bsky.feed.post/mixed-handle")).toBe(false);
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
   it.effect("searches matched topic terms even when they do not appear in body text", () =>
     Effect.gen(function* () {
       const repo = yield* seedAssessmentPosts;
@@ -203,6 +239,7 @@ describe("search quality assessment", () => {
         "at://did:plc:solar/app.bsky.feed.post/exact-phrase",
         "at://did:plc:solar/app.bsky.feed.post/loose-phrase",
         "at://did:plc:solar/app.bsky.feed.post/topic-only",
+        "at://did:plc:desk/app.bsky.feed.post/mixed-handle",
         "at://did:plc:hydrogen/app.bsky.feed.post/h2"
       ]));
     }).pipe(Effect.provide(makeBiLayer()))
@@ -232,8 +269,36 @@ describe("search quality assessment", () => {
       expect(new Set(results.map((result) => result.uri))).toEqual(new Set([
         "at://did:plc:solar/app.bsky.feed.post/exact-phrase",
         "at://did:plc:solar/app.bsky.feed.post/loose-phrase",
-        "at://did:plc:solar/app.bsky.feed.post/topic-only"
+        "at://did:plc:solar/app.bsky.feed.post/topic-only",
+        "at://did:plc:desk/app.bsky.feed.post/mixed-handle"
       ]));
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
+  it.effect("refreshes indexed handle matches when an expert profile changes", () =>
+    Effect.gen(function* () {
+      const repo = yield* seedAssessmentPosts;
+      const expertsRepo = yield* ExpertsRepo;
+      const existing = yield* expertsRepo.getByDid("did:plc:grid");
+
+      expect(existing).not.toBeNull();
+
+      yield* expertsRepo.upsert({
+        ...existing!,
+        handle: "transmission-watch.bsky.social",
+        lastSyncedAt: assessmentNow + 10
+      });
+
+      const newHandleResults = yield* repo.searchPosts({
+        query: "transmission-watch.bsky.social",
+        limit: 10
+      });
+      const oldHandleResults = yield* repo.searchPosts({ query: "gridwonk.bsky.social", limit: 10 });
+
+      expect(newHandleResults.map((result) => result.uri)).toEqual([
+        "at://did:plc:grid/app.bsky.feed.post/interconnection"
+      ]);
+      expect(oldHandleResults).toEqual([]);
     }).pipe(Effect.provide(makeBiLayer()))
   );
 });

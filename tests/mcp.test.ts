@@ -144,6 +144,7 @@ describe("read-only MCP server", () => {
           expect(searchTool?.description).toContain("quoted phrases");
           expect(searchTool?.description).toContain("OR / NOT");
           expect(searchTool?.description).toContain("expert handles");
+          expect(searchTool?.description).toContain("exact handle phrases");
           expect(searchTool?.description).toContain("topic-match terms");
         } finally {
           await close();
@@ -399,6 +400,7 @@ describe("MCP prompts by profile", () => {
           expect(promptJson).toContain("quoted phrases");
           expect(promptJson).toContain("OR / NOT");
           expect(promptJson).toContain("prefix search");
+          expect(promptJson).toContain("full Bluesky handle");
           expect(promptJson).toContain("electro*");
         } finally {
           await close();

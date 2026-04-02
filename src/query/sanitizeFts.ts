@@ -30,8 +30,34 @@ const normalizeTerms = (value: string) =>
     .split(" ")
     .filter((term) => term.length > 0);
 
-const fallbackQuery = (raw: string) =>
-  normalizeTerms(raw).join(" ");
+const fallbackQuery = (tokens: ReadonlyArray<Token>) =>
+  tokens.flatMap((token) => {
+    switch (token.type) {
+      case "TERM":
+        return [token.value];
+      case "PHRASE":
+        return normalizeTerms(token.value);
+      default:
+        return [];
+    }
+  }).join(" ");
+
+const HANDLE_QUERY = /^@?[\p{L}\p{N}._-]+$/u;
+
+const isPlainHandleLikeQuery = (raw: string) => {
+  const trimmed = raw.trim();
+  return trimmed.length > 0
+    && !trimmed.includes(" ")
+    && trimmed.includes(".")
+    && HANDLE_QUERY.test(trimmed);
+};
+
+const exactHandleQuery = (raw: string) => {
+  const normalized = normalizeTerms(raw).join(" ");
+  return normalized.length === 0
+    ? ""
+    : `"${normalized.replaceAll("\"", "\"\"")}"`;
+};
 
 const pushNormalizedText = (tokens: Array<Token>, value: string) => {
   const terms = normalizeTerms(value);
@@ -355,6 +381,10 @@ const serialize = (node: QueryNode, parentPrecedence = -1): string => {
 };
 
 export const sanitizeFtsQuery = (raw: string): string => {
+  if (isPlainHandleLikeQuery(raw)) {
+    return exactHandleQuery(raw);
+  }
+
   const tokens = lex(raw);
   if (tokens.length === 0) {
     return "";
@@ -367,6 +397,6 @@ export const sanitizeFtsQuery = (raw: string): string => {
   try {
     return serialize(new Parser(tokens).parse());
   } catch {
-    return fallbackQuery(raw);
+    return fallbackQuery(tokens);
   }
 };

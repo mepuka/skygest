@@ -47,8 +47,12 @@ describe("sanitizeFtsQuery", () => {
     expect(sanitizeFtsQuery("title:solar")).toBe("title solar");
   });
 
-  test("normalizes punctuation into token separators", () => {
-    expect(sanitizeFtsQuery("ferc-watch.bsky.social")).toBe("ferc watch bsky social");
+  test("treats plain handle-like queries as exact phrases", () => {
+    expect(sanitizeFtsQuery("ferc-watch.bsky.social")).toBe("\"ferc watch bsky social\"");
+    expect(sanitizeFtsQuery("@gridwonk.bsky.social")).toBe("\"gridwonk bsky social\"");
+  });
+
+  test("normalizes non-handle punctuation into token separators", () => {
     expect(sanitizeFtsQuery("{solar} [wind]")).toBe("solar wind");
   });
 
@@ -73,8 +77,11 @@ describe("sanitizeFtsQuery", () => {
   });
 
   test("falls back to plain terms when syntax is malformed", () => {
-    expect(sanitizeFtsQuery("(solar OR wind")).toBe("solar or wind");
-    expect(sanitizeFtsQuery("NEAR(solar, foo)")).toBe("near solar foo");
+    expect(sanitizeFtsQuery("(solar OR wind")).toBe("solar wind");
+    expect(sanitizeFtsQuery("NEAR(solar, foo)")).toBe("solar foo");
+    expect(sanitizeFtsQuery("solar OR")).toBe("solar");
+    expect(sanitizeFtsQuery("solar AND")).toBe("solar");
+    expect(sanitizeFtsQuery("solar NOT")).toBe("solar");
   });
 
   test("handles mixed special chars and operators", () => {

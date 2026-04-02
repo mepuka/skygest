@@ -6,7 +6,7 @@ export const GLOSSARY_CONTENT = `# Skygest Knowledge Base — Domain Glossary
 
 **KnowledgePost** — A Bluesky post by a tracked expert that matched at least one ontology topic. Contains text, AT Protocol URI, author DID, matched topics with scores, and extracted links.
 
-**search_posts** — Full-text search over KnowledgePosts. Matches post body text, tracked expert handles, and stored topic-match terms. Query syntax supports quoted phrases (e.g. \`"solar storage"\`), boolean logic (\`solar OR hydrogen\`, \`solar NOT wind\`), and prefix search with \`*\` (e.g. \`electro*\`). Use \`topic\`, \`since\`, and \`until\` to narrow broad searches.
+**search_posts** — Full-text search over KnowledgePosts. Matches post body text, tracked expert handles, and stored topic-match terms. Full handle strings like \`solar-desk.bsky.social\` are treated as exact handle phrases. Query syntax supports quoted phrases (e.g. \`"solar storage"\`), boolean logic (\`solar OR hydrogen\`, \`solar NOT wind\`), and prefix search with \`*\` (e.g. \`electro*\`). Use \`topic\`, \`since\`, and \`until\` to narrow broad searches.
 
 **Link** — A URL embedded in a KnowledgePost with extracted metadata: title, description, image URL, and hostname. Filterable by hostname (e.g., "reuters.com", "canary.media").
 

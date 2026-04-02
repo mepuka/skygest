@@ -56,7 +56,7 @@ export const ExploreTopicPrompt = McpServer.prompt({
 
 WORKFLOW:
 1. FIND — Call list_topics(view: "facets") to scan categories. If "${query}" matches a slug, proceed. Otherwise try list_topics(view: "concepts") or search_posts(query: "${query}", limit: 5) and inspect topic slugs in results.
-   Search tips: use quoted phrases for exact wording (e.g. "solar storage"), OR / NOT for alternatives or exclusions, and prefix search with * for partial tokens (e.g. electro*).
+   Search tips: use quoted phrases for exact wording (e.g. "solar storage"), OR / NOT for alternatives or exclusions, prefix search with * for partial tokens (e.g. electro*), and pass a full Bluesky handle like solar-desk.bsky.social when you want exact handle matching.
 2. INSPECT — Call get_topic(slug: <slug>) for label, description, matching terms, hashtags, and signal domains.
 3. EXPAND — Call expand_topics(slugs: [<slug>], mode: "descendants") for narrower sub-topics, then mode: "ancestors" for broader parents. Note the hierarchy.
 4. SAMPLE — Call get_recent_posts(topic: <slug>, limit: 10). If interesting sub-topics emerged, sample 3-5 posts from those too.
@@ -84,7 +84,7 @@ WORKFLOW:
 2. POSTS — Call get_recent_posts(expertDid: <did>, limit: 20). Note posting frequency, topic distribution, and content style (original analysis vs. link-sharing).
 3. LINKS — From posts with links, note hostnames. Do they share primary sources (government reports, trade press) or aggregation?
 4. TOPICS — For their top 2-3 topics, call get_topic(slug: <slug>). Call explain_post_topics(postUri: <uri>) on 2-3 posts to verify classification accuracy.
-5. CROSS-REF — Call search_posts(query: <handle>, limit: 5) to find this expert's posts or posts that mention the handle. search_posts also matches stored topic terms, so use it to probe adjacent concepts when an expert's language is more specialized than the canonical topic slug.
+5. CROSS-REF — Call search_posts(query: <handle>, limit: 5) to find this expert's posts or posts that mention the full handle. Pass the full handle string (for example solar-desk.bsky.social), not fragments. search_posts also matches stored topic terms, so use it to probe adjacent concepts when an expert's language is more specialized than the canonical topic slug.
 6. REPORT — Profile (handle, tier, source), posting cadence, topical focus, source quality, classifier accuracy, tier adjustment recommendation.`
     );
   }

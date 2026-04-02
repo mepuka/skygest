@@ -57,6 +57,22 @@ const toExpertListItem = (row: ExpertListRow) => ({
   tier: (row.tier ?? "independent") as ExpertTier
 });
 
+const syncIndexedHandle = (
+  sql: SqlClient.SqlClient,
+  did: string,
+  handle: string | null
+) =>
+  sql`
+    UPDATE posts_fts
+    SET handle = ${handle ?? ""}
+    WHERE rowid IN (
+      SELECT rowid
+      FROM posts
+      WHERE did = ${did}
+        AND status = 'active'
+    )
+  `.pipe(Effect.asVoid);
+
 export const ExpertsRepoD1 = {
   layer: Layer.effect(ExpertsRepo, Effect.gen(function* () {
     const sql = yield* SqlClient.SqlClient;
@@ -69,37 +85,40 @@ export const ExpertsRepoD1 = {
       ).pipe(
         Effect.flatMap((validated) =>
           sql`
-            INSERT INTO experts (
-              did, handle, display_name, description, avatar, domain,
-              source, source_ref, shard, active, tier, added_at, last_synced_at
-            ) VALUES (
-              ${validated.did},
-              ${validated.handle},
-              ${validated.displayName},
-              ${validated.description},
-              ${validated.avatar},
-              ${validated.domain},
-              ${validated.source},
-              ${validated.sourceRef},
-              ${validated.shard},
-              ${validated.active ? 1 : 0},
-              ${validated.tier},
-              ${validated.addedAt},
-              ${validated.lastSyncedAt}
-            )
+              INSERT INTO experts (
+                did, handle, display_name, description, avatar, domain,
+                source, source_ref, shard, active, tier, added_at, last_synced_at
+              ) VALUES (
+                ${validated.did},
+                ${validated.handle},
+                ${validated.displayName},
+                ${validated.description},
+                ${validated.avatar},
+                ${validated.domain},
+                ${validated.source},
+                ${validated.sourceRef},
+                ${validated.shard},
+                ${validated.active ? 1 : 0},
+                ${validated.tier},
+                ${validated.addedAt},
+                ${validated.lastSyncedAt}
+              )
             ON CONFLICT(did) DO UPDATE SET
               handle = excluded.handle,
               display_name = excluded.display_name,
               description = excluded.description,
               avatar = excluded.avatar,
-              domain = excluded.domain,
-              source = excluded.source,
-              source_ref = excluded.source_ref,
+                domain = excluded.domain,
+                source = excluded.source,
+                source_ref = excluded.source_ref,
               shard = excluded.shard,
               active = excluded.active,
               tier = excluded.tier,
               last_synced_at = excluded.last_synced_at
-          `.pipe(Effect.asVoid)
+            `.pipe(
+            Effect.asVoid,
+            Effect.flatMap(() => syncIndexedHandle(sql, validated.did, validated.handle))
+          )
         )
       );
 
