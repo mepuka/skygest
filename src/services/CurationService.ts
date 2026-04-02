@@ -252,7 +252,34 @@ const clampCurationLimit = (limit: number | undefined) =>
         }
 
         // action === "curate"
-        // Fetch live thread from Bluesky to get embed data
+        // Check if payload already exists (e.g., captured at import time by CLI ingest-url)
+        const existingPayload = yield* payloadService.getPayload(input.postUri);
+        const storedEmbedType = yield* curationRepo.getPostEmbedType(input.postUri);
+
+        if (existingPayload !== null && existingPayload.embedPayload != null) {
+          // Payload exists from import — use stored data, skip live fetch
+          // (mirrors the Twitter path at lines 214-235)
+          if (existingPayload.captureStage !== "picked") {
+            yield* payloadService.markPicked(input.postUri);
+          }
+
+          yield* curationRepo.updateStatus(input.postUri, "curated", curator, input.note ?? null, now);
+
+          yield* queuePickedEnrichment(input.postUri, existingPayload.embedPayload, curator)
+            .pipe(Effect.catch(() => Effect.succeed(false)));
+
+          return { postUri: input.postUri, action: input.action, previousStatus, newStatus: "curated" as const };
+        }
+
+        // Guard: if the post has a known embed type but the stored payload is null,
+        // it cannot be curated yet — same guard as the Twitter path (line 218)
+        if (storedEmbedType !== null && existingPayload?.embedPayload == null && existingPayload !== null) {
+          return yield* new BlueskyApiError({
+            message: `Post ${input.postUri} has embed type "${String(storedEmbedType)}" but no stored media data — cannot curate yet`
+          });
+        }
+
+        // No stored payload — fetch live thread from Bluesky (existing behavior)
         const threadResponse = yield* bskyClient.getPostThread(input.postUri, {
           depth: 0,
           parentHeight: 0

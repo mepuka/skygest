@@ -9,6 +9,8 @@ import {
   testConfig,
   withTempSqliteFile
 } from "./support/runtime";
+import { BlueskyClient } from "../src/bluesky/BlueskyClient";
+import { CandidatePayloadService } from "../src/services/CandidatePayloadService";
 import { CurationRepo } from "../src/services/CurationRepo";
 import { CurationService } from "../src/services/CurationService";
 import { KnowledgeRepo } from "../src/services/KnowledgeRepo";
@@ -170,6 +172,62 @@ describe("CurationService.flagBatch", () => {
             const repo = yield* CurationRepo;
             const candidates = yield* repo.listCandidates({});
             expect(candidates).toHaveLength(0);
+          }).pipe(Effect.provide(layer))
+        );
+      })
+    )
+  );
+});
+
+const failingBlueskyClient = Layer.succeed(BlueskyClient, {
+  resolveDidOrHandle: () => Effect.die("BlueskyClient should not be called"),
+  getProfile: () => Effect.die("BlueskyClient should not be called"),
+  getFollows: () => Effect.die("BlueskyClient should not be called"),
+  resolveRepoService: () => Effect.die("BlueskyClient should not be called"),
+  listRecordsAtService: () => Effect.die("BlueskyClient should not be called"),
+  getPostThread: () => Effect.die("BlueskyClient should not be called"),
+  getPosts: () => Effect.die("BlueskyClient should not be called"),
+} as any);
+
+describe("CurationService.curatePost skip-fetch", () => {
+  it.live("curates Bluesky post with stored payload without re-fetching", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename, blueskyClient: failingBlueskyClient });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            const payloadService = yield* CandidatePayloadService;
+            const curationService = yield* CurationService;
+            const curationRepo = yield* CurationRepo;
+
+            // Flag the post first
+            yield* curationRepo.upsertFlag({
+              postUri: solarUri as any,
+              status: "flagged",
+              signalScore: 50 as any,
+              predicatesApplied: ["energy-focused-expert"],
+              flaggedAt: Date.now(),
+              curatedAt: null,
+              curatedBy: null,
+              reviewNote: null
+            });
+
+            // Pre-store payload (simulating import with captured embed)
+            yield* payloadService.capturePayload({
+              postUri: solarUri as any,
+              captureStage: "candidate",
+              embedType: "link",
+              embedPayload: { kind: "link", uri: "https://example.com", title: "Test", description: null, thumb: null }
+            });
+
+            // curatePost should succeed using stored payload — NOT calling BlueskyClient
+            const result = yield* curationService.curatePost(
+              { postUri: solarUri as any, action: "curate" },
+              "test-operator"
+            );
+            expect(result.newStatus).toBe("curated");
           }).pipe(Effect.provide(layer))
         );
       })
