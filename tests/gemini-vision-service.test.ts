@@ -50,7 +50,8 @@ const runWith = (effect: Effect.Effect<any, any, any>) => Effect.provide(effect,
 const validClassificationJson = encodeJsonString({
   mediaType: "chart",
   chartTypes: ["bar-chart"],
-  hasDataPoints: true
+  hasDataPoints: true,
+  isCompound: false
 });
 
 /** Valid extraction JSON that matches GeminiExtractionOutput schema. */
@@ -199,7 +200,8 @@ describe("GeminiVisionService", () => {
         expect(result).toEqual({
           mediaType: "chart",
           chartTypes: ["bar-chart"],
-          hasDataPoints: true
+          hasDataPoints: true,
+          isCompound: false
         });
       }).pipe(runWith)
     );
@@ -329,7 +331,8 @@ describe("GeminiVisionService", () => {
             text: encodeJsonString({
               mediaType: "invalid-type",
               chartTypes: [],
-              hasDataPoints: false
+              hasDataPoints: false,
+              isCompound: false
             })
           });
 

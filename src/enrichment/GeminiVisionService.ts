@@ -21,7 +21,8 @@ import type { GeminiApiError, GeminiParseError } from "../domain/errors";
 export const ImageClassification = Schema.Struct({
   mediaType: MediaType,
   chartTypes: Schema.Array(ChartType),
-  hasDataPoints: Schema.Boolean
+  hasDataPoints: Schema.Boolean,
+  isCompound: Schema.Boolean
 });
 export type ImageClassification = Schema.Schema.Type<typeof ImageClassification>;
 
