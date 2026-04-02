@@ -344,10 +344,12 @@ const makeUpsertStatements = (
   );
 
   return [
-    // 1. Delete old FTS entry BEFORE upsert (reads old text from posts)
+    // 1. Delete old FTS entry before upsert so search stays in sync.
     db.prepare(`
-      INSERT INTO posts_fts(posts_fts, rowid, text)
-      SELECT 'delete', rowid, text FROM posts WHERE uri = ?
+      DELETE FROM posts_fts
+      WHERE rowid IN (
+        SELECT rowid FROM posts WHERE uri = ?
+      )
     `).bind(post.uri),
     // 2. Upsert the post row (changes text in posts table)
     db.prepare(`
@@ -400,10 +402,25 @@ const makeUpsertStatements = (
       );
       return publicationsInsert === null ? [] : [publicationsInsert];
     })(),
-    // 4. Insert new FTS entry AFTER upsert (reads new text from posts)
+    // 4. Insert the rebuilt FTS row after text and topic writes succeed.
     db.prepare(`
-      INSERT INTO posts_fts(rowid, text)
-      SELECT rowid, text FROM posts WHERE uri = ?
+      INSERT INTO posts_fts(rowid, uri, text, handle, topic_terms)
+      SELECT
+        p.rowid,
+        p.uri,
+        p.text,
+        COALESCE(e.handle, ''),
+        COALESCE((
+          SELECT group_concat(
+            COALESCE(NULLIF(pt.match_value, ''), NULLIF(pt.matched_term, ''), pt.topic_slug),
+            ' '
+          )
+          FROM post_topics pt
+          WHERE pt.post_uri = p.uri
+        ), '')
+      FROM posts p
+      LEFT JOIN experts e ON e.did = p.did
+      WHERE p.uri = ?
     `).bind(post.uri)
   ];
 };
@@ -412,11 +429,12 @@ const makeDeleteStatements = (
   db: D1Database,
   post: DeletedKnowledgePost
 ): ReadonlyArray<D1PreparedStatement> => [
-  // Delete old FTS entry BEFORE upsert — no FTS re-insert needed since
-  // deleted posts (empty text, status='deleted') should not be searchable.
+  // Delete old FTS entry before upsert — deleted posts should not remain searchable.
   db.prepare(`
-    INSERT INTO posts_fts(posts_fts, rowid, text)
-    SELECT 'delete', rowid, text FROM posts WHERE uri = ?
+    DELETE FROM posts_fts
+    WHERE rowid IN (
+      SELECT rowid FROM posts WHERE uri = ?
+    )
   `).bind(post.uri),
   db.prepare(`
     INSERT INTO posts (
@@ -483,10 +501,12 @@ export const KnowledgeRepoD1 = {
 
       yield* sql.withTransaction(
         Effect.gen(function* () {
-          // Delete old FTS entry BEFORE upsert (reads old text)
+          // Delete the old FTS row before rewriting post metadata.
           yield* sql`
-            INSERT INTO posts_fts(posts_fts, rowid, text)
-            SELECT 'delete', rowid, text FROM posts WHERE uri = ${validated.uri}
+            DELETE FROM posts_fts
+            WHERE rowid IN (
+              SELECT rowid FROM posts WHERE uri = ${validated.uri}
+            )
           `.pipe(Effect.asVoid);
 
           yield* sql`
@@ -524,10 +544,25 @@ export const KnowledgeRepoD1 = {
           yield* insertLinks(sql, validated);
           yield* insertDiscoveredPublications(sql, validated);
 
-          // Insert new FTS entry AFTER upsert (reads new text)
+          // Rebuild the FTS row from post text plus joined metadata.
           yield* sql`
-            INSERT INTO posts_fts(rowid, text)
-            SELECT rowid, text FROM posts WHERE uri = ${validated.uri}
+            INSERT INTO posts_fts(rowid, uri, text, handle, topic_terms)
+            SELECT
+              p.rowid,
+              p.uri,
+              p.text,
+              COALESCE(e.handle, ''),
+              COALESCE((
+                SELECT group_concat(
+                  COALESCE(NULLIF(pt.match_value, ''), NULLIF(pt.matched_term, ''), pt.topic_slug),
+                  ' '
+                )
+                FROM post_topics pt
+                WHERE pt.post_uri = p.uri
+              ), '')
+            FROM posts p
+            LEFT JOIN experts e ON e.did = p.did
+            WHERE p.uri = ${validated.uri}
           `.pipe(Effect.asVoid);
         })
       );
@@ -563,8 +598,10 @@ export const KnowledgeRepoD1 = {
       yield* sql.withTransaction(
         Effect.gen(function* () {
           yield* sql`
-            INSERT INTO posts_fts(posts_fts, rowid, text)
-            SELECT 'delete', rowid, text FROM posts WHERE uri = ${validated.uri}
+            DELETE FROM posts_fts
+            WHERE rowid IN (
+              SELECT rowid FROM posts WHERE uri = ${validated.uri}
+            )
           `.pipe(Effect.asVoid);
 
           yield* sql`
@@ -794,7 +831,7 @@ export const KnowledgeRepoD1 = {
               SELECT
                 p.uri, p.did, e.handle, e.avatar, COALESCE(e.tier, 'independent') as tier, p.text,
                 p.created_at as createdAt,
-                snippet(posts_fts, 0, '<mark>', '</mark>', '...', 30) as snippet,
+                snippet(posts_fts, 1, '<mark>', '</mark>', '...', 30) as snippet,
                 posts_fts.rank as rank
               FROM posts_fts
               JOIN posts p ON p.rowid = posts_fts.rowid

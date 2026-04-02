@@ -82,18 +82,25 @@ const checkPorterStemming = (baseUrl: URL) =>
     );
   }));
 
-// Test 2: FTS5 sanitization — operators should not cause server errors
-const checkFtsSanitization = (baseUrl: URL) =>
-  check("FTS5 sanitization", Effect.gen(function* () {
+// Test 2: FTS5 boolean operators — NOT exclusions should be preserved
+const checkFtsOperators = (baseUrl: URL) =>
+  check("FTS5 boolean operators", Effect.gen(function* () {
     const page = yield* fetchPublicJson(
       baseUrl,
       `/api/posts/search?q=${encodeURIComponent("solar AND NOT wind")}&limit=5`,
       decodePostsPage
     );
 
+    const foundSolar = page.items.some((item) => item.uri === expectedSolarUri);
+    const foundWind = page.items.some((item) => item.uri === expectedWindUri);
+
     yield* expect(
-      Array.isArray(page.items),
-      "expected FTS5 operators to be stripped without causing a server error"
+      foundSolar,
+      `expected fixture post ${expectedSolarUri} to match boolean query`
+    );
+    yield* expect(
+      !foundWind,
+      `expected fixture post ${expectedWindUri} to be excluded by NOT`
     );
   }));
 
@@ -178,7 +185,7 @@ const checkTopicFiltering = (baseUrl: URL) =>
 
 // Test 6: FTS sync — the fixture solar post should be findable via search
 const checkFtsSyncSanity = (baseUrl: URL) =>
-  check("FTS external-content sync", Effect.gen(function* () {
+  check("FTS index sync", Effect.gen(function* () {
     const page = yield* fetchPublicJson(
       baseUrl,
       `/api/posts/search?q=${encodeURIComponent("photovoltaic battery storage")}&limit=5`,
@@ -271,7 +278,7 @@ export const runSearchSmokeChecks = (baseUrl: URL) =>
     yield* Console.log("Running search infrastructure smoke checks...");
 
     yield* checkPorterStemming(baseUrl);
-    yield* checkFtsSanitization(baseUrl);
+    yield* checkFtsOperators(baseUrl);
     yield* checkSearchSnippet(baseUrl);
     yield* checkSearchPagination(baseUrl);
     yield* checkTopicFiltering(baseUrl);
