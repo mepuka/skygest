@@ -326,7 +326,15 @@ git commit -m "fix(curation): skip Bluesky thread fetch when stored payload exis
 
 The CLI needs to fetch a Bluesky thread and normalize it to `ImportPostInput` + `ImportExpertInput`, matching the shape that `StagingOperatorClient.importPosts` expects.
 
-**Prerequisite:** Add `"bluesky-import"` to `ExpertSource` in `src/domain/bi.ts`. The current schema only has `"manual"`, `"starter_pack"`, `"list"`, `"network"`, `"twitter-import"`. Without this, the import endpoint will reject the payload with a schema validation error.
+**Prerequisite:** Add `"bluesky-import"` to `ExpertSource` in `src/domain/bi.ts`. The current definition is:
+```ts
+export const ExpertSource = Schema.Literals(["manual", "starter_pack", "list", "network", "twitter-import"]);
+```
+Change to:
+```ts
+export const ExpertSource = Schema.Literals(["manual", "starter_pack", "list", "network", "twitter-import", "bluesky-import"]);
+```
+Without this, the import endpoint will reject the payload with a schema validation error.
 
 **Files:**
 - Modify: `src/domain/bi.ts` — add `"bluesky-import"` to `ExpertSource`
@@ -403,7 +411,7 @@ describe("normalizeBlueskyThread", () => {
   it.effect("captures embed payload", () =>
     Effect.gen(function* () {
       const result = normalizeBlueskyThread(threadFixture as any);
-      expect(result.post.embedType).toBe("external");
+      expect(result.post.embedType).toBe("link");
       expect(result.post.embedPayload).toBeDefined();
       expect((result.post.embedPayload as any).kind).toBe("link");
     })
@@ -443,8 +451,10 @@ export const normalizeBlueskyThread = (
     throw new Error("Thread response missing focus post");
   }
 
+  // focusPost.author is typed as ThreadProfileBasic (did, handle?, displayName?, avatar?)
+  const author = focusPost.author;
+  // focusPost.record is Schema.Unknown — needs manual access
   const record = focusPost.record as Record<string, unknown>;
-  const author = focusPost.author as Record<string, unknown>;
 
   const text = typeof record.text === "string" ? record.text : "";
   const createdAtStr = typeof record.createdAt === "string" ? record.createdAt : new Date().toISOString();
@@ -491,7 +501,7 @@ export const normalizeBlueskyThread = (
   return {
     post: {
       uri: focusPost.uri as PostUri,
-      did: (author.did as string) as Did,
+      did: author.did as Did,
       text,
       createdAt,
       hashtags: hashtags.length > 0 ? hashtags : undefined,
@@ -500,13 +510,13 @@ export const normalizeBlueskyThread = (
       links: links.map((l) => ({ url: l.url, domain: l.domain }))
     } as ImportPostInput,
     expert: {
-      did: (author.did as string) as Did,
-      handle: (author.handle as string) ?? "unknown",
-      domain: "bsky.social",
+      did: author.did as Did,
+      handle: author.handle ?? "unknown",
+      domain: author.handle?.split(".").slice(1).join(".") ?? "bsky.social",
       source: "bluesky-import" as const,
       tier: tierDefault as any,
-      displayName: typeof author.displayName === "string" ? author.displayName : undefined,
-      avatar: typeof author.avatar === "string" ? author.avatar : undefined
+      displayName: author.displayName,
+      avatar: author.avatar
     } as ImportExpertInput
   };
 };
