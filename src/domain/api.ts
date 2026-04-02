@@ -714,7 +714,10 @@ export type ImportPostInput = Schema.Schema.Type<typeof ImportPostInput>;
 
 export const ImportPostsInput = Schema.Struct({
   experts: Schema.Array(ImportExpertInput),
-  posts: Schema.Array(ImportPostInput)
+  posts: Schema.Array(ImportPostInput),
+  operatorOverride: Schema.optionalKey(Schema.Boolean.annotate({
+    description: "When true, import posts even with zero topic matches. For operator-submitted posts where the human has already judged relevance."
+  }))
 });
 export type ImportPostsInput = Schema.Schema.Type<typeof ImportPostsInput>;
 

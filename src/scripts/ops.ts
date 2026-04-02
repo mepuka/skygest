@@ -57,7 +57,7 @@ const cliEnvLayer = Layer.mergeAll(
     args: Effect.succeed(process.argv),
     stdout: die("Stdio.stdout"),
     stderr: die("Stdio.stderr"),
-    stdin: Stream.empty as any
+    stdin: Stream.empty
   } as unknown as Stdio.Stdio)
 );
 

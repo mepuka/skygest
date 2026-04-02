@@ -468,6 +468,25 @@ describe("POST /admin/import/posts", () => {
     )
   );
 
+  it.live("imports post with zero topics when operatorOverride is true", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeImportTestLayer({ filename });
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        const response = await postImport(layer, {
+          experts: [solarExpert],
+          posts: [offTopicPost],
+          operatorOverride: true
+        });
+
+        const body = await expectJsonResponse<ImportPostsOutput>(response);
+        expect(body.imported).toBe(1);
+        expect(body.skipped).toBe(0);
+      })
+    )
+  );
+
   it.live("imports posts that match through hashtags even when text is generic", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {

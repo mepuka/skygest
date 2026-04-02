@@ -46,5 +46,5 @@ export const scraperLayer = Layer.mergeAll(
   Layer.provideMerge(GuestAuth.liveLayer),
   Layer.provideMerge(TwitterHttpClient.cycleTlsLayer()),
   Layer.provideMerge(cookieManagerLayer),
-  Layer.provideMerge(TwitterConfig.testLayer())
+  Layer.provideMerge(TwitterConfig.defaultLayer())
 );
