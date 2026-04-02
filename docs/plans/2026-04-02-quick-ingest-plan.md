@@ -160,15 +160,19 @@ Add an explicit `operatorOverride` flag to `ImportPostsInput`. When true, zero-t
 
 ### Step 1: Write the failing test
 
-Add to `tests/import-endpoint.test.ts`:
+Add to `tests/import-endpoint.test.ts`. Wire into the existing test structure — reuse the `solarExpert` fixture (line 143) and `callImport` helper (line 130). The test should POST to the import endpoint with `operatorOverride: true` and a post whose text won't match any ontology topics:
 
 ```ts
 it.effect("imports post with zero topics when operatorOverride is true", () =>
   Effect.gen(function* () {
-    // Post with text that won't match any topics
-    const result = yield* importWithOverride({
-      experts: [testExpert],
-      posts: [{ ...testPost, text: "completely unrelated gibberish" }],
+    // Reuse existing solarExpert fixture; post text won't match any topics
+    const result = yield* callImport({
+      experts: [solarExpert],
+      posts: [{
+        ...solarPost,
+        uri: "at://did:plc:importtest1/app.bsky.feed.post/override1" as PostUri,
+        text: "completely unrelated gibberish with no energy terms"
+      }],
       operatorOverride: true
     });
     expect(result.imported).toBe(1);
@@ -240,30 +244,54 @@ This makes the Bluesky path work like the Twitter path: use stored data when ava
 
 ### Step 1: Write the failing test
 
-Add to `tests/curation.test.ts`:
+Add to `tests/curation.test.ts`. Wire into the existing test structure — use `makeBiLayer`/`withTempSqliteFile`/`seedKnowledgeBase` from `tests/support/runtime.ts`, and resolve services via `yield*`. Use one of the fixture Bluesky URIs (e.g., `solarUri` from `smokeFixtureUris`):
 
 ```ts
-it.effect("curates Bluesky post with stored payload without re-fetching", () =>
-  Effect.gen(function* () {
-    // Pre-store a payload at "candidate" stage (simulating import with captured embed)
-    // EmbedKind is "link" (not "external") — see src/domain/embed.ts:22
-    // LinkEmbed uses `uri` (not `url`) — see src/domain/embed.ts:53
-    yield* payloadService.capturePayload({
-      postUri: testBlueskyUri,
+it.live("curates Bluesky post with stored payload without re-fetching", () =>
+  Effect.promise(() =>
+    withTempSqliteFile(async (filename) => {
+      const layer = makeBiLayer({ filename });
+      await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+      await Effect.runPromise(
+        Effect.gen(function* () {
+          const payloadService = yield* CandidatePayloadService;
+          const curationService = yield* CurationService;
+          const curationRepo = yield* CurationRepo;
+
+          // Flag the post first so curatePost can find it
+          yield* curationRepo.upsertFlag({
+            postUri: solarUri as any,
+            status: "flagged",
+            signalScore: 50 as any,
+            predicatesApplied: ["energy-focused-expert"],
+            flaggedAt: Date.now(),
+            curatedAt: null,
+            curatedBy: null,
+            reviewNote: null
+          });
+
+          // Pre-store a payload at "candidate" stage (simulating import with captured embed)
+          // EmbedKind is "link" (not "external") — see src/domain/embed.ts:22
+          // LinkEmbed uses `uri` (not `url`) — see src/domain/embed.ts:53
+          yield* payloadService.capturePayload({
+            postUri: solarUri as any,
       captureStage: "candidate",
       embedType: "link",
       embedPayload: { kind: "link", uri: "https://example.com", title: "Test", description: null, thumb: null }
     });
 
     // curatePost should succeed WITHOUT calling BlueskyClient.getPostThread
+    // The test layer has no real Bluesky backend, so if it tries to fetch, it will throw
     const result = yield* curationService.curatePost(
-      { postUri: testBlueskyUri, action: "curate" },
+      { postUri: solarUri as any, action: "curate" },
       "test-operator"
     );
     expect(result.newStatus).toBe("curated");
-    // Verify: no BlueskyApiError thrown (which would happen if it tried to fetch
-    // and the test has no real Bluesky backend)
-  })
+  }).pipe(Effect.provide(layer))
+      );
+    })
+  )
 );
 ```
 
