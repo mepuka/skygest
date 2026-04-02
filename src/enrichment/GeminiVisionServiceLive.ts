@@ -2,9 +2,10 @@
  * GeminiVisionServiceLive — live implementation of GeminiVisionService
  * backed by @google/genai SDK (Gemini 2.5 Flash).
  *
- * Two-pass pattern:
+ * Three-pass pattern:
  * 1. classifyImage — lightweight classification with small JSON schema
  * 2. extractChartData — full asset analysis extraction with detailed schema
+ * 3. extractImageSummary — lightweight extraction (metadata + provenance only)
  *
  * Uses structured output (responseMimeType + responseJsonSchema) to get
  * typed JSON responses directly from Gemini.
@@ -39,7 +40,8 @@ import {
 } from "./GeminiVisionService";
 import {
   VISION_CLASSIFICATION_PROMPT,
-  VISION_EXTRACTION_PROMPT
+  VISION_EXTRACTION_PROMPT,
+  VISION_LIGHTWEIGHT_EXTRACTION_PROMPT
 } from "./prompts";
 
 // ---------------------------------------------------------------------------
@@ -144,6 +146,77 @@ const GeminiExtractionResponseDecoder = Schema.Union([
 ]);
 
 type GeminiExtractionCandidate = Schema.Schema.Type<typeof GeminiExtractionDecoder>;
+
+// ---------------------------------------------------------------------------
+// Lightweight extraction schemas (metadata + provenance only)
+//
+// Used for compound/dashboard images where full axis/series extraction would
+// fail or produce noise. Same contract/decoder split as the full schemas.
+// ---------------------------------------------------------------------------
+
+/** Strict schema sent to Gemini for lightweight extraction. */
+const GeminiLightweightExtractionContract = Schema.Struct({
+  mediaType: MediaType,
+  chartTypes: Schema.Array(ChartType),
+  altText: Schema.NullOr(Schema.String),
+  title: Schema.NullOr(Schema.String),
+  keyFindings: Schema.Array(Schema.String),
+  sourceLines: Schema.Array(VisionSourceLineAttribution),
+  visibleUrls: Schema.Array(Schema.String),
+  organizationMentions: Schema.Array(VisionOrganizationMention),
+  logoText: Schema.Array(Schema.String)
+});
+
+/** Lenient decoder for lightweight Gemini responses. */
+const GeminiLightweightExtractionDecoder = Schema.Struct({
+  mediaType: Schema.optionalKey(LenientMediaType),
+  chartTypes: Schema.Array(LenientChartType).pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  ),
+  altText: Schema.NullOr(Schema.String).pipe(
+    Schema.withDecodingDefaultKey(() => null)
+  ),
+  title: Schema.NullOr(Schema.String).pipe(
+    Schema.withDecodingDefaultKey(() => null)
+  ),
+  chartTitle: Schema.NullOr(Schema.String).pipe(
+    Schema.withDecodingDefaultKey(() => null)
+  ),
+  keyFindings: Schema.Array(Schema.String).pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  ),
+  sourceLines: Schema.Array(VisionSourceLineAttribution).pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  ),
+  visibleUrls: Schema.Array(Schema.String).pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  ),
+  organizationMentions: Schema.Array(VisionOrganizationMention).pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  ),
+  logoText: Schema.Array(Schema.String).pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  ),
+  // Absent chart-detail fields — default to null/empty so
+  // normalizeExtractionResponse works unchanged.
+  xAxis: Schema.NullOr(ChartAxis).pipe(
+    Schema.withDecodingDefaultKey(() => null)
+  ),
+  yAxis: Schema.NullOr(ChartAxis).pipe(
+    Schema.withDecodingDefaultKey(() => null)
+  ),
+  series: Schema.Array(ChartSeries).pipe(
+    Schema.withDecodingDefaultKey(() => [] as const)
+  ),
+  temporalCoverage: Schema.NullOr(TemporalCoverage).pipe(
+    Schema.withDecodingDefaultKey(() => null)
+  )
+});
+
+const GeminiLightweightExtractionResponseDecoder = Schema.Union([
+  GeminiLightweightExtractionDecoder,
+  Schema.Array(GeminiLightweightExtractionDecoder)
+]);
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -281,6 +354,7 @@ const makeJsonSchema = (schema: Schema.Top): JsonSchema.JsonSchema => {
 
 const CLASSIFICATION_JSON_SCHEMA = makeJsonSchema(ImageClassification);
 const EXTRACTION_JSON_SCHEMA = makeJsonSchema(GeminiExtractionContract);
+const LIGHTWEIGHT_EXTRACTION_JSON_SCHEMA = makeJsonSchema(GeminiLightweightExtractionContract);
 
 // ---------------------------------------------------------------------------
 // Layer
@@ -444,13 +518,81 @@ export const GeminiVisionServiceLive = Layer.effect(
     );
 
     // -----------------------------------------------------------------------
+    // extractImageSummary (lightweight: metadata + provenance only)
+    // -----------------------------------------------------------------------
+
+    const extractImageSummary = Effect.fn("GeminiVision.extractImageSummary")(
+      function* (imageUri: string, mimeType: string) {
+        const response = yield* Effect.tryPromise({
+          try: () =>
+            ai.models.generateContent({
+              model,
+              contents: createUserContent([
+                createPartFromUri(imageUri, mimeType),
+                VISION_LIGHTWEIGHT_EXTRACTION_PROMPT
+              ]),
+              config: {
+                responseMimeType: "application/json",
+                responseJsonSchema: LIGHTWEIGHT_EXTRACTION_JSON_SCHEMA
+              }
+            }),
+          catch: (cause) =>
+            new GeminiApiError({
+              message: cause instanceof Error
+                ? cause.message
+                : "Gemini generateContent failed during lightweight extraction",
+              ...(extractErrorStatus(cause) !== undefined ? { status: extractErrorStatus(cause)! } : {})
+            })
+        });
+
+        const rawText = response.text;
+        if (!rawText) {
+          return yield* new GeminiParseError({
+            message: "Gemini lightweight extraction returned empty response"
+          });
+        }
+
+        const geminiResult = yield* Schema.decodeUnknownEffect(
+          Schema.fromJsonString(GeminiLightweightExtractionResponseDecoder)
+        )(rawText).pipe(
+          Effect.mapError((error) =>
+            new GeminiParseError({
+              message: `Lightweight extraction parse/validation failed: ${formatSchemaParseError(error)}`,
+              rawOutput: rawText
+            })
+          )
+        );
+
+        const normalizedResult = normalizeExtractionResponse(geminiResult);
+
+        const now = yield* Clock.currentTimeMillis;
+        const enrichment = yield* Schema.decodeUnknownEffect(VisionAssetAnalysisSchema)({
+          ...normalizedResult,
+          altTextProvenance: "synthetic" as const,
+          modelId: model,
+          processedAt: now
+        }).pipe(
+          Effect.mapError((error) =>
+            new GeminiParseError({
+              message: `Vision asset analysis validation failed (lightweight): ${formatSchemaParseError(error)}`,
+              rawOutput: rawText
+            })
+          )
+        );
+
+        return enrichment;
+      }
+    );
+
+    // -----------------------------------------------------------------------
     // Service
     // -----------------------------------------------------------------------
 
     return {
       uploadImage,
       classifyImage,
-      extractChartData
+      extractChartData,
+      extractImageSummary
     };
   })
 );

@@ -93,6 +93,8 @@ describe("VisionEnrichmentExecutor", () => {
                 }),
               classifyImage: () =>
                 Effect.die("classification is not used in SKY-40"),
+              extractImageSummary: () =>
+                Effect.die("extractImageSummary is not used in SKY-40"),
               extractChartData: (_imageUri, _mimeType) =>
                 Effect.sync(() => {
                   analysisIndex += 1;
@@ -197,6 +199,8 @@ describe("VisionEnrichmentExecutor", () => {
             Layer.succeed(GeminiVisionService, {
               uploadImage: () => Effect.die("uploadImage should not run"),
               classifyImage: () => Effect.die("classifyImage should not run"),
+              extractImageSummary: () =>
+                Effect.die("extractImageSummary should not run"),
               extractChartData: () =>
                 Effect.die("extractChartData should not run")
             })
