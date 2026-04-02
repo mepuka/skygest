@@ -539,6 +539,33 @@ describe("GeminiVisionService", () => {
         }).pipe(runWith)
     );
 
+    it.effect("Gemini JSON schema preserves mediaType enum constraint", () =>
+      Effect.gen(function* () {
+        // The EXTRACTION_JSON_SCHEMA is derived from GeminiExtractionContract
+        // (not the lenient decoder), so the mediaType enum must be preserved.
+        // Access it indirectly by checking what generateContent receives.
+        mockGenerateContent.mockReset();
+        mockGenerateContent.mockResolvedValueOnce({ text: validExtractionJson });
+
+        const svc = yield* GeminiVisionService;
+        yield* svc.extractChartData("https://gemini.files/abc", "image/png");
+
+        const call = mockGenerateContent.mock.calls[0];
+        const jsonSchema = call?.[0]?.config?.responseJsonSchema;
+        // The schema may nest under a .schema key (Effect's toJsonSchemaDocument format)
+        const schema = jsonSchema?.schema ?? jsonSchema;
+        // mediaType should have enum constraint, not just { type: "string" }
+        expect(schema?.properties?.mediaType?.enum).toBeDefined();
+        expect(schema?.properties?.mediaType?.enum).toContain("chart");
+        expect(schema?.properties?.mediaType?.enum).toContain("photo");
+        expect(schema?.properties?.mediaType?.enum).not.toContain("image");
+        // chartTypes, altText, title should be in required
+        expect(schema?.required).toContain("chartTypes");
+        expect(schema?.required).toContain("altText");
+        expect(schema?.required).toContain("title");
+      }).pipe(runWith)
+    );
+
     it.effect("normalizes 'image' mediaType to 'photo'", () =>
       Effect.gen(function* () {
         mockGenerateContent.mockReset();
