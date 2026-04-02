@@ -21,12 +21,17 @@
 ## Implementation Notes (from architecture review)
 
 - **`ExpertSource` needs `"bluesky-import"`** — The current `ExpertSource` schema in `src/domain/bi.ts` only has `"manual"`, `"starter_pack"`, `"list"`, `"network"`, `"twitter-import"`. Task 4 adds `"bluesky-import"` for provenance tracking.
+- **Expert `domain` is a product domain** — The `domain` field on `ImportExpertInput` is a product domain like `"energy"`, NOT a hostname. Both the Twitter normalizer (`TwitterNormalizer.ts:164`) and test fixtures (`import-endpoint.test.ts:146`) use `domain: "energy"`. The Bluesky normalizer must do the same.
 - **`tierOption` has no default** — The existing `tierOption` in `Cli.ts` is required. The `ingest-url` command defines its own with `Flag.withDefault("energy-focused")` to reduce friction.
 - **`GetPostThreadResponse.thread` is `Schema.Unknown`** — Use `flattenThread` from `src/bluesky/ThreadFlatten.ts` to safely decode the thread, not raw property access. This matches the pattern in `CurationService.ts`.
 - **`StagingOperatorClient` needs no changes** — It passes raw input as JSON body via `jsonBody(input)`. The `operatorOverride` field flows through automatically.
 - **CycleTLS/FetchHttpClient isolation** — The `blueskyCliLayer` uses `FetchHttpClient.layer`, scoped via `Effect.provide(blueskyCliLayer)`. The `scraperLayer` is similarly scoped. Neither leaks into the shared layer. This mirrors the existing pattern in `runTwitterImportTweet`.
-- **`buildTypedEmbed` and `extractEmbedKind`** — Verify these are exported from `src/bluesky/EmbedExtract.ts`. If not, extract them from `CurationService.ts` first.
+- **`buildTypedEmbed` and `extractEmbedKind`** — Both exported from `src/bluesky/EmbedExtract.ts` (lines 16 and 40). Already used by `PostHydrationService.ts`, `CurationService.ts`, and `Router.ts`.
 - **External link card in links array** — When embed is `"external"`, add the card URL to the `links` array so `hasLinks` is correct. The Twitter normalizer already does this for tweet URLs.
+- **`EmbedKind` values** — `"link"`, `"img"`, `"quote"`, `"media"`, `"video"` (see `src/domain/embed.ts:22`). There is NO `"external"` value — `extractEmbedKind` maps external embeds to `"link"`.
+- **`LinkEmbed` shape** — Uses `uri` (not `url`), with `title`, `description`, `thumb` all as `NullOr(String)` (see `src/domain/embed.ts:51-57`).
+- **No `throw` in new code** — Per `CLAUDE.md:31`, use `Option.none()` for pure functions and `Schema.TaggedErrorClass` for Effect errors. No plain `Error` or `throw`.
+- **Enrichment status** — `CuratePostOutput` does not include enrichment fields. The CLI reports import + curation state. Enrichment status can be checked via `get_post_enrichments` MCP tool or `ops stage enrichment-status`.
 
 ---
 
@@ -41,48 +46,38 @@
 ```ts
 // tests/ingest-url-parser.test.ts
 import { describe, expect, it } from "@effect/vitest";
-import { Effect } from "effect";
+import { Option } from "effect";
 import { parsePostUrl } from "../src/domain/ingestUrl";
 
 describe("parsePostUrl", () => {
-  it.effect("parses bsky.app URL", () =>
-    Effect.gen(function* () {
-      const result = parsePostUrl("https://bsky.app/profile/simonevans.bsky.social/post/3abc123");
-      expect(result.platform).toBe("bluesky");
-      expect(result.handle).toBe("simonevans.bsky.social");
-      expect(result.id).toBe("3abc123");
-    })
-  );
+  it("parses bsky.app URL", () => {
+    const result = Option.getOrThrow(parsePostUrl("https://bsky.app/profile/simonevans.bsky.social/post/3abc123"));
+    expect(result.platform).toBe("bluesky");
+    expect(result.handle).toBe("simonevans.bsky.social");
+    expect(result.id).toBe("3abc123");
+  });
 
-  it.effect("parses x.com URL", () =>
-    Effect.gen(function* () {
-      const result = parsePostUrl("https://x.com/DrSimEvans/status/123456789");
-      expect(result.platform).toBe("twitter");
-      expect(result.handle).toBe("DrSimEvans");
-      expect(result.id).toBe("123456789");
-    })
-  );
+  it("parses x.com URL", () => {
+    const result = Option.getOrThrow(parsePostUrl("https://x.com/DrSimEvans/status/123456789"));
+    expect(result.platform).toBe("twitter");
+    expect(result.handle).toBe("DrSimEvans");
+    expect(result.id).toBe("123456789");
+  });
 
-  it.effect("parses twitter.com URL", () =>
-    Effect.gen(function* () {
-      const result = parsePostUrl("https://twitter.com/DrSimEvans/status/123456789");
-      expect(result.platform).toBe("twitter");
-      expect(result.handle).toBe("DrSimEvans");
-      expect(result.id).toBe("123456789");
-    })
-  );
+  it("parses twitter.com URL", () => {
+    const result = Option.getOrThrow(parsePostUrl("https://twitter.com/DrSimEvans/status/123456789"));
+    expect(result.platform).toBe("twitter");
+    expect(result.handle).toBe("DrSimEvans");
+    expect(result.id).toBe("123456789");
+  });
 
-  it.effect("throws for unsupported URL", () =>
-    Effect.gen(function* () {
-      expect(() => parsePostUrl("https://mastodon.social/@user/123")).toThrow(/Unsupported URL/);
-    })
-  );
+  it("returns None for unsupported URL", () => {
+    expect(Option.isNone(parsePostUrl("https://mastodon.social/@user/123"))).toBe(true);
+  });
 
-  it.effect("throws for malformed input", () =>
-    Effect.gen(function* () {
-      expect(() => parsePostUrl("not-a-url")).toThrow(/Unsupported URL/);
-    })
-  );
+  it("returns None for malformed input", () => {
+    expect(Option.isNone(parsePostUrl("not-a-url"))).toBe(true);
+  });
 });
 ```
 
@@ -95,7 +90,16 @@ Expected: FAIL — module not found
 
 ```ts
 // src/domain/ingestUrl.ts
+import { Option, Schema } from "effect";
 import type { Platform } from "./types";
+
+export class UnsupportedUrlError extends Schema.TaggedErrorClass<UnsupportedUrlError>()(
+  "UnsupportedUrlError",
+  {
+    url: Schema.String,
+    message: Schema.String
+  }
+) {}
 
 export type ParsedPostUrl = {
   readonly platform: Platform;
@@ -106,20 +110,24 @@ export type ParsedPostUrl = {
 const BSKY_RE = /^https:\/\/bsky\.app\/profile\/([^/]+)\/post\/([a-zA-Z0-9]+)$/;
 const TWITTER_RE = /^https:\/\/(?:x\.com|twitter\.com)\/([^/]+)\/status\/(\d+)$/;
 
-export const parsePostUrl = (url: string): ParsedPostUrl => {
+const SUPPORTED_FORMATS =
+  `Supported:\n` +
+  `  https://bsky.app/profile/<handle>/post/<rkey>\n` +
+  `  https://x.com/<handle>/status/<id>\n` +
+  `  https://twitter.com/<handle>/status/<id>`;
+
+/** Parse a post URL into platform + handle + id. Returns Option.none for unsupported formats. */
+export const parsePostUrl = (url: string): Option.Option<ParsedPostUrl> => {
   const bsky = BSKY_RE.exec(url);
-  if (bsky) return { platform: "bluesky", handle: bsky[1], id: bsky[2] };
+  if (bsky) return Option.some({ platform: "bluesky" as const, handle: bsky[1], id: bsky[2] });
 
   const twitter = TWITTER_RE.exec(url);
-  if (twitter) return { platform: "twitter", handle: twitter[1], id: twitter[2] };
+  if (twitter) return Option.some({ platform: "twitter" as const, handle: twitter[1], id: twitter[2] });
 
-  throw new Error(
-    `Unsupported URL format. Supported:\n` +
-    `  https://bsky.app/profile/<handle>/post/<rkey>\n` +
-    `  https://x.com/<handle>/status/<id>\n` +
-    `  https://twitter.com/<handle>/status/<id>`
-  );
+  return Option.none();
 };
+
+export { SUPPORTED_FORMATS };
 ```
 
 ### Step 4: Run test to verify it passes
@@ -238,11 +246,13 @@ Add to `tests/curation.test.ts`:
 it.effect("curates Bluesky post with stored payload without re-fetching", () =>
   Effect.gen(function* () {
     // Pre-store a payload at "candidate" stage (simulating import with captured embed)
+    // EmbedKind is "link" (not "external") — see src/domain/embed.ts:22
+    // LinkEmbed uses `uri` (not `url`) — see src/domain/embed.ts:53
     yield* payloadService.capturePayload({
       postUri: testBlueskyUri,
       captureStage: "candidate",
-      embedType: "external",
-      embedPayload: { kind: "link", url: "https://example.com", title: "Test" }
+      embedType: "link",
+      embedPayload: { kind: "link", uri: "https://example.com", title: "Test", description: null, thumb: null }
     });
 
     // curatePost should succeed WITHOUT calling BlueskyClient.getPostThread
@@ -346,7 +356,7 @@ Without this, the import endpoint will reject the payload with a schema validati
 ```ts
 // tests/bluesky-normalizer.test.ts
 import { describe, expect, it } from "@effect/vitest";
-import { Effect } from "effect";
+import { Option } from "effect";
 import { normalizeBlueskyThread } from "../src/ops/BlueskyNormalizer";
 
 // Minimal thread fixture matching GetPostThreadResponse shape
@@ -387,35 +397,35 @@ const threadFixture = {
 };
 
 describe("normalizeBlueskyThread", () => {
-  it.effect("extracts post data from thread", () =>
-    Effect.gen(function* () {
-      const result = normalizeBlueskyThread(threadFixture as any);
-      expect(result.post.uri).toBe("at://did:plc:abc123/app.bsky.feed.post/3xyz");
-      expect(result.post.did).toBe("did:plc:abc123");
-      expect(result.post.text).toBe("UK grid carbon intensity hit a new low");
-      expect(result.post.hashtags).toEqual(["energy"]);
-      expect(result.post.links.length).toBe(1);
-      expect(result.post.links[0].url).toBe("https://carbonintensity.org.uk");
-    })
-  );
+  it("extracts post data from thread", () => {
+    const result = Option.getOrThrow(normalizeBlueskyThread(threadFixture as any));
+    expect(result.post.uri).toBe("at://did:plc:abc123/app.bsky.feed.post/3xyz");
+    expect(result.post.did).toBe("did:plc:abc123");
+    expect(result.post.text).toBe("UK grid carbon intensity hit a new low");
+    expect(result.post.hashtags).toEqual(["energy"]);
+    // Includes facet link + external card link (deduped)
+    expect(result.post.links.length).toBeGreaterThanOrEqual(1);
+    expect(result.post.links[0].url).toBe("https://carbonintensity.org.uk");
+  });
 
-  it.effect("extracts expert data from author", () =>
-    Effect.gen(function* () {
-      const result = normalizeBlueskyThread(threadFixture as any);
-      expect(result.expert.did).toBe("did:plc:abc123");
-      expect(result.expert.handle).toBe("simonevans.bsky.social");
-      expect(result.expert.source).toBe("bluesky-import");
-    })
-  );
+  it("extracts expert data from author", () => {
+    const result = Option.getOrThrow(normalizeBlueskyThread(threadFixture as any));
+    expect(result.expert.did).toBe("did:plc:abc123");
+    expect(result.expert.handle).toBe("simonevans.bsky.social");
+    expect(result.expert.domain).toBe("energy");
+    expect(result.expert.source).toBe("bluesky-import");
+  });
 
-  it.effect("captures embed payload", () =>
-    Effect.gen(function* () {
-      const result = normalizeBlueskyThread(threadFixture as any);
-      expect(result.post.embedType).toBe("link");
-      expect(result.post.embedPayload).toBeDefined();
-      expect((result.post.embedPayload as any).kind).toBe("link");
-    })
-  );
+  it("captures embed payload", () => {
+    const result = Option.getOrThrow(normalizeBlueskyThread(threadFixture as any));
+    expect(result.post.embedType).toBe("link");
+    expect(result.post.embedPayload).toBeDefined();
+    expect((result.post.embedPayload as any).kind).toBe("link");
+  });
+
+  it("returns None for missing focus post", () => {
+    expect(Option.isNone(normalizeBlueskyThread({ thread: null } as any))).toBe(true);
+  });
 });
 ```
 
@@ -428,6 +438,7 @@ Expected: FAIL — module not found
 
 ```ts
 // src/ops/BlueskyNormalizer.ts
+import { Option } from "effect";
 import type { GetPostThreadResponse } from "../bluesky/ThreadTypes";
 import type { ImportPostInput, ImportExpertInput } from "../domain/api";
 import type { PostUri, Did } from "../domain/types";
@@ -438,17 +449,18 @@ import { buildTypedEmbed, extractEmbedKind } from "../bluesky/EmbedExtract";
  * Normalize a Bluesky thread response into import-ready shapes.
  * Uses flattenThread to safely decode the Schema.Unknown thread,
  * matching the pattern in CurationService.ts.
+ * Returns Option.none() if the thread is missing the focus post.
  */
 export const normalizeBlueskyThread = (
   thread: GetPostThreadResponse,
   tierDefault: string = "energy-focused"
-): { post: ImportPostInput; expert: ImportExpertInput } => {
+): Option.Option<{ post: ImportPostInput; expert: ImportExpertInput }> => {
   // flattenThread safely decodes the Schema.Unknown thread field
   const flat = flattenThread(thread.thread);
   const focusPost = flat?.focus?.post;
 
   if (!focusPost) {
-    throw new Error("Thread response missing focus post");
+    return Option.none();
   }
 
   // focusPost.author is typed as ThreadProfileBasic (did, handle?, displayName?, avatar?)
@@ -498,7 +510,7 @@ export const normalizeBlueskyThread = (
   const embedType = extractEmbedKind(focusPost.embed as any);
   const embedPayload = buildTypedEmbed(focusPost.embed);
 
-  return {
+  return Option.some({
     post: {
       uri: focusPost.uri as PostUri,
       did: author.did as Did,
@@ -512,13 +524,13 @@ export const normalizeBlueskyThread = (
     expert: {
       did: author.did as Did,
       handle: author.handle ?? "unknown",
-      domain: author.handle?.split(".").slice(1).join(".") ?? "bsky.social",
+      domain: "energy",  // product domain, not hostname — matches TwitterNormalizer
       source: "bluesky-import" as const,
       tier: tierDefault as any,
       displayName: author.displayName,
       avatar: author.avatar
     } as ImportExpertInput
-  };
+  });
 };
 ```
 
@@ -583,8 +595,9 @@ const ingestTierOption = Flag.choice("tier", expertTiers).pipe(
 ### Step 2: Add the ingest-url runner
 
 ```ts
-import { parsePostUrl } from "../domain/ingestUrl";
+import { parsePostUrl, SUPPORTED_FORMATS } from "../domain/ingestUrl";
 import { normalizeBlueskyThread } from "./BlueskyNormalizer";
+// Also add Option to the existing effect import: import { Console, Effect, Layer, Option, ... } from "effect";
 
 const runIngestUrl = (options: {
   readonly url: string;
@@ -598,7 +611,12 @@ const runIngestUrl = (options: {
     const baseUrl = yield* parseBaseUrl(options.baseUrl);
     const note = Option.getOrUndefined(options.note);
 
-    const parsed = parsePostUrl(options.url);
+    const parsedOpt = parsePostUrl(options.url);
+    if (Option.isNone(parsedOpt)) {
+      yield* Console.log(`Unsupported URL format: ${options.url}\n${SUPPORTED_FORMATS}`);
+      return;
+    }
+    const parsed = parsedOpt.value;
     yield* Console.log(`Ingesting ${parsed.platform} post: ${options.url}`);
 
     let importInput: any;
@@ -634,13 +652,19 @@ const runIngestUrl = (options: {
       };
     } else {
       // Fetch via Bluesky public API
-      const { post, expert } = yield* Effect.gen(function* () {
+      const normalized = yield* Effect.gen(function* () {
         const bsky = yield* BlueskyClient;
         const resolved = yield* bsky.resolveDidOrHandle(parsed.handle);
         const atUri = `at://${resolved.did}/app.bsky.feed.post/${parsed.id}`;
         const thread = yield* bsky.getPostThread(atUri, { depth: 0, parentHeight: 0 });
         return normalizeBlueskyThread(thread, options.tier);
       }).pipe(Effect.provide(blueskyCliLayer));
+
+      if (Option.isNone(normalized)) {
+        yield* Console.log("Could not extract post from Bluesky thread");
+        return;
+      }
+      const { post, expert } = normalized.value;
 
       importInput = {
         experts: [expert],
@@ -673,7 +697,10 @@ const runIngestUrl = (options: {
         : `Already curated (no change)`
     );
 
-    yield* Console.log(`Done. Post URI: ${postUri}`);
+    yield* Console.log(
+      `Done. URI: ${postUri}\n` +
+      `Enrichment queued automatically by curation. Check status via get_post_enrichments or ops stage enrichment-status.`
+    );
   });
 ```
 

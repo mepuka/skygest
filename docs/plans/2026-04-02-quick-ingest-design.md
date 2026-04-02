@@ -37,7 +37,7 @@ bun src/scripts/ops.ts -- ingest-url "https://bsky.app/profile/drsimevans.bsky.s
 3. **Normalize** -- Convert to `ImportPostInput` + `ImportExpertInput`. Capture embed payload at this stage so `curatePost` doesn't need to re-fetch the thread.
 4. **Import** -- Call `StagingOperatorClient.importPosts()` with `operatorOverride: true`. This imports the post even if topic matching yields zero matches.
 5. **Curate** -- Call `StagingOperatorClient.curatePost(action: "curate")`. Enrichment starts automatically inside `curatePost`.
-6. **Report** -- Print whether post was newly imported or already existed, curation state change, and enrichment status.
+6. **Report** -- Print whether post was newly imported or already existed, and curation state change. Enrichment is queued automatically inside `curatePost` but its status is not returned in `CuratePostOutput` -- use `get_post_enrichments` MCP tool or `ops stage enrichment-status` to check.
 
 **Options:**
 - `--tier <tier>` -- Expert tier if new (default: `energy-focused`). Existing experts keep their current tier via `mergeImportedExpertRecord`.
