@@ -457,7 +457,7 @@ const AdminHandlers = Layer.mergeAll(
             hashtags: post.hashtags ?? []
           });
 
-          if (topics.length === 0) {
+          if (topics.length === 0 && !payload.operatorOverride) {
             skipped += 1;
             continue;
           }
