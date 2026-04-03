@@ -435,6 +435,21 @@ const migration17: D1Migration = {
   ]
 };
 
+const migration18: D1Migration = {
+  id: 18,
+  name: "mcp_sessions",
+  statements: [
+    `CREATE TABLE IF NOT EXISTS mcp_sessions (
+      session_id TEXT PRIMARY KEY,
+      initialize_payload_json TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_mcp_sessions_updated_at
+      ON mcp_sessions(updated_at DESC)`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -452,5 +467,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration14,
   migration15,
   migration16,
-  migration17
+  migration17,
+  migration18
 ];

@@ -1,9 +1,15 @@
-import { McpServer } from "effect/unstable/ai";
+import { McpSchema, McpServer } from "effect/unstable/ai";
 import * as HttpLayerRouter from "effect/unstable/http/HttpRouter";
-import { ServiceMap, Effect, Layer } from "effect";
+import { ServiceMap, Effect, Layer, Schema } from "effect";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { makeQueryLayer } from "../edge/Layer";
 import type { EnvBindings } from "../platform/Env";
+import {
+  decodeJsonString,
+  decodeJsonStringWith,
+  encodeJsonString,
+  encodeJsonStringWith
+} from "../platform/Json";
 import { CurationService } from "../services/CurationService";
 import { EditorialService } from "../services/EditorialService";
 import { EnrichmentTriggerClient } from "../services/EnrichmentTriggerClient";
@@ -120,68 +126,204 @@ type McpWebHandler = {
   readonly dispose: () => Promise<void>;
 };
 
-/**
- * Detect Effect 4's MCP session-miss error in a JSON-RPC response.
- *
- * Effect's McpServer calls `Effect.die(new Error("Mcp-Session-Id does not exist"))`
- * when a non-initialize request arrives without a valid session. The HTTP adapter
- * converts this into an HTTP 200 with a JSON-RPC error containing a Die defect.
- * We detect this specific error structure and convert to HTTP 404 per MCP spec
- * so clients re-initialize.
- *
- * The detection parses the response JSON and checks the `error.data` array for
- * a Die defect with the session-miss message — avoiding false positives from
- * substring matching against tool descriptions or other response content.
- */
-const SESSION_MISS_MESSAGE = "Mcp-Session-Id does not exist";
+export type McpInitializePayload = typeof McpSchema.Initialize.payloadSchema.Type;
 
-const isSessionMissError = (parsed: unknown): boolean => {
-  if (typeof parsed !== "object" || parsed === null) return false;
-  const obj = parsed as Record<string, unknown>;
-  if (!obj.error || typeof obj.error !== "object") return false;
-  const err = obj.error as Record<string, unknown>;
-  if (!Array.isArray(err.data)) return false;
-  return err.data.some(
-    (entry: unknown) =>
-      typeof entry === "object" && entry !== null &&
-      (entry as Record<string, unknown>)._tag === "Die" &&
-      typeof (entry as Record<string, unknown>).defect === "object" &&
-      ((entry as Record<string, unknown>).defect as Record<string, unknown>)?.message === SESSION_MISS_MESSAGE
-  );
+export type PersistedMcpSession = {
+  readonly initializePayload: McpInitializePayload;
 };
 
-const sessionMissTo404 = async (response: Response): Promise<Response> => {
-  const body = await response.text();
+export type McpSessionStore<Env extends object> = {
+  readonly load: (env: Env, sessionId: string) => Promise<PersistedMcpSession | null>;
+  readonly save: (
+    env: Env,
+    sessionId: string,
+    session: PersistedMcpSession
+  ) => Promise<void>;
+};
+
+export type MakeCachedMcpHandlerOptions<Env extends object> = {
+  readonly defaultInitializePayload?: McpInitializePayload;
+  readonly makeWebHandler?: (
+    env: Env,
+    profile: McpCapabilityProfile
+  ) => McpWebHandler;
+  readonly sessionStore?: McpSessionStore<Env>;
+};
+
+const DefaultWarmSessionPayload: McpInitializePayload = {
+  protocolVersion: "2025-06-18",
+  capabilities: {},
+  clientInfo: { name: "skygest-warm-proxy", version: "0.1.0" }
+};
+
+const PersistedMcpSessionRowSchema = Schema.Struct({
+  initializePayloadJson: Schema.String
+});
+
+const decodeInitializePayload = Schema.decodeUnknownSync(
+  McpSchema.Initialize.payloadSchema
+);
+const decodePersistedMcpSessionRow = Schema.decodeUnknownSync(
+  PersistedMcpSessionRowSchema
+);
+const encodeInitializePayloadJson = encodeJsonStringWith(
+  McpSchema.Initialize.payloadSchema
+);
+const decodeInitializePayloadJson = decodeJsonStringWith(
+  McpSchema.Initialize.payloadSchema
+);
+
+const readJsonRpcBody = async (
+  request: Request
+): Promise<Record<string, unknown> | null> => {
   try {
-    const parsed = JSON.parse(body);
-    if (isSessionMissError(parsed)) {
-      return new Response(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          error: { code: -32000, message: "Session expired. Please re-initialize." },
-          id: null
-        }),
-        { status: 404, headers: { "content-type": "application/json" } }
-      );
-    }
+    const body = decodeJsonString(await request.text());
+    return typeof body === "object" && body !== null
+      ? body as Record<string, unknown>
+      : null;
   } catch {
-    // Not valid JSON — pass through as-is
+    return null;
   }
-  // Re-attach the consumed body to the original response
-  return new Response(body, {
-    status: response.status,
-    headers: response.headers
+};
+
+/**
+ * Build a new Request with the `mcp-session-id` header replaced.
+ * Uses body passthrough to avoid consuming the original stream.
+ */
+const substituteSessionHeader = (request: Request, sessionId: string): Request => {
+  const headers = new Headers(request.headers);
+  headers.set("mcp-session-id", sessionId);
+  const body = request.body;
+
+  return new Request(request.url, {
+    method: request.method,
+    headers,
+    ...(body === null ? {} : { body, duplex: "half" as const })
   });
+};
+
+/**
+ * Create an MCP session by replaying an initialize + notifications/initialized
+ * handshake. Returns the new session ID, or null if the handshake fails.
+ */
+const createSession = async (
+  webHandler: McpWebHandler,
+  url: string,
+  context: ServiceMap.ServiceMap<OperatorIdentity>,
+  initializePayload: McpInitializePayload
+): Promise<string | null> => {
+  const initReq = new Request(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: encodeJsonString({
+      jsonrpc: "2.0",
+      method: "initialize",
+      id: 0,
+      params: initializePayload
+    })
+  });
+
+  const initResp = await webHandler.handler(initReq, context);
+  if (initResp.status !== 200) return null;
+
+  const sessionId = initResp.headers.get("mcp-session-id");
+  if (!sessionId) return null;
+
+  // Complete the handshake with notifications/initialized
+  const notifyReq = new Request(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "mcp-session-id": sessionId
+    },
+    body: encodeJsonString({
+      jsonrpc: "2.0",
+      method: "notifications/initialized"
+    })
+  });
+  await webHandler.handler(notifyReq, context);
+
+  return sessionId;
+};
+
+/**
+ * Build a 404 response indicating the session could not be recovered.
+ */
+const sessionExpiredResponse = (): Response =>
+  new Response(
+    encodeJsonString({
+      jsonrpc: "2.0",
+      error: { code: -32000, message: "Session expired. Please re-initialize." },
+      id: null
+    }),
+    { status: 404, headers: { "content-type": "application/json" } }
+  );
+
+const extractInitializePayload = async (
+  request: Request
+): Promise<McpInitializePayload | null> => {
+  const body = await readJsonRpcBody(request);
+  if (body?.method !== "initialize") {
+    return null;
+  }
+
+  try {
+    return decodeInitializePayload(body.params);
+  } catch {
+    return null;
+  }
+};
+
+const loadPersistedSession = async <Env extends object>(
+  sessionStore: McpSessionStore<Env> | undefined,
+  env: Env,
+  sessionId: string
+): Promise<PersistedMcpSession | null> => {
+  if (!sessionStore) {
+    return null;
+  }
+
+  try {
+    return await sessionStore.load(env, sessionId);
+  } catch {
+    return null;
+  }
+};
+
+const savePersistedSession = async <Env extends object>(
+  sessionStore: McpSessionStore<Env> | undefined,
+  env: Env,
+  sessionId: string,
+  session: PersistedMcpSession
+): Promise<void> => {
+  if (!sessionStore) {
+    return;
+  }
+
+  try {
+    await sessionStore.save(env, sessionId, session);
+  } catch {
+    // Degrade to in-memory routing if persistence is unavailable.
+  }
 };
 
 /** @internal Exported for integration testing of session handling */
 export const makeCachedMcpHandler = <Env extends object>(
   buildLayer: (env: Env) => QueryLayer,
-  envKey: (env: Env) => string = () => "default"
+  envKey: (env: Env) => string = () => "default",
+  options: MakeCachedMcpHandlerOptions<Env> = {}
 ) => {
+  const buildWebHandler = options.makeWebHandler ?? ((env: Env, profile: McpCapabilityProfile) =>
+    HttpLayerRouter.toWebHandler(
+      makeMcpLayer(buildLayer(env), profile)
+    ) as unknown as McpWebHandler);
+  const defaultInitializePayload =
+    options.defaultInitializePayload ?? DefaultWarmSessionPayload;
   const cache = new Map<string, {
     readonly envKey: string;
     readonly webHandler: McpWebHandler;
+    readonly clientSessionIds: Map<string, string>;
+    defaultWarmSessionId: string | null;
   }>();
 
   return async (request: Request, env: Env, identity: AccessIdentity): Promise<Response> => {
@@ -197,13 +339,85 @@ export const makeCachedMcpHandler = <Env extends object>(
 
       entry = {
         envKey: currentEnvKey,
-        webHandler: HttpLayerRouter.toWebHandler(makeMcpLayer(buildLayer(env), profile)) as unknown as McpWebHandler
+        webHandler: buildWebHandler(env, profile),
+        clientSessionIds: new Map(),
+        defaultWarmSessionId: null
       };
       cache.set(cacheKey, entry);
     }
 
-    const response = await entry.webHandler.handler(request, operatorIdentityContext(identity));
-    return sessionMissTo404(response);
+    const context = operatorIdentityContext(identity);
+    const initializePayload = await extractInitializePayload(request.clone());
+
+    // Path 1: Client-initiated initialize — forward directly and persist the
+    // exact initialize payload so the session can be rebuilt after isolate loss.
+    if (initializePayload !== null) {
+      const response = await entry.webHandler.handler(request, context);
+      const sessionId = response.headers.get("mcp-session-id");
+      if (sessionId) {
+        entry.clientSessionIds.set(sessionId, sessionId);
+        await savePersistedSession(options.sessionStore, env, sessionId, {
+          initializePayload
+        });
+      }
+      return response;
+    }
+
+    const externalSessionId = request.headers.get("mcp-session-id");
+
+    // Path 2: Client session request — recover the exact client session when
+    // necessary and keep it isolated from other clients in the same profile.
+    if (externalSessionId) {
+      let activeSessionId =
+        entry.clientSessionIds.get(externalSessionId) ?? null;
+
+      if (!activeSessionId) {
+        const persisted = await loadPersistedSession(
+          options.sessionStore,
+          env,
+          externalSessionId
+        );
+        if (!persisted) {
+          return sessionExpiredResponse();
+        }
+
+        activeSessionId = await createSession(
+          entry.webHandler,
+          request.url,
+          context,
+          persisted.initializePayload
+        );
+        if (!activeSessionId) {
+          return sessionExpiredResponse();
+        }
+
+        entry.clientSessionIds.set(externalSessionId, activeSessionId);
+      }
+
+      return entry.webHandler.handler(
+        substituteSessionHeader(request, activeSessionId),
+        context
+      );
+    }
+
+    // Path 3: Sessionless request — use a shared default session for callers
+    // that never initialized and therefore have no client-specific state.
+    if (entry.defaultWarmSessionId === null) {
+      entry.defaultWarmSessionId = await createSession(
+        entry.webHandler,
+        request.url,
+        context,
+        defaultInitializePayload
+      );
+      if (entry.defaultWarmSessionId === null) {
+        return sessionExpiredResponse();
+      }
+    }
+
+    return entry.webHandler.handler(
+      substituteSessionHeader(request, entry.defaultWarmSessionId),
+      context
+    );
   };
 };
 
@@ -226,9 +440,76 @@ const makeQueryLayerWithTrigger = (env: EnvBindings): QueryLayer => {
   return base;
 };
 
+const loadPersistedMcpSession = async (
+  env: EnvBindings,
+  sessionId: string
+): Promise<PersistedMcpSession | null> => {
+  try {
+    const row = await env.DB
+      .prepare(
+        `SELECT initialize_payload_json as initializePayloadJson
+         FROM mcp_sessions
+         WHERE session_id = ?
+         LIMIT 1`
+      )
+      .bind(sessionId)
+      .first<Record<string, unknown>>();
+
+    if (!row) {
+      return null;
+    }
+
+    const decodedRow = decodePersistedMcpSessionRow(row);
+    return {
+      initializePayload: decodeInitializePayloadJson(
+        decodedRow.initializePayloadJson
+      )
+    };
+  } catch {
+    return null;
+  }
+};
+
+const savePersistedMcpSession = async (
+  env: EnvBindings,
+  sessionId: string,
+  session: PersistedMcpSession
+): Promise<void> => {
+  try {
+    const now = Date.now();
+    await env.DB
+      .prepare(
+        `INSERT INTO mcp_sessions (
+           session_id,
+           initialize_payload_json,
+           created_at,
+           updated_at
+         ) VALUES (?, ?, ?, ?)
+         ON CONFLICT(session_id) DO UPDATE SET
+           initialize_payload_json = excluded.initialize_payload_json,
+           updated_at = excluded.updated_at`
+      )
+      .bind(
+        sessionId,
+        encodeInitializePayloadJson(session.initializePayload),
+        now,
+        now
+      )
+      .run();
+  } catch {
+    // Degrade gracefully if the persistence table is unavailable during rollout.
+  }
+};
+
+const d1McpSessionStore: McpSessionStore<EnvBindings> = {
+  load: loadPersistedMcpSession,
+  save: savePersistedMcpSession
+};
+
 const handleCachedMcpRequest = makeCachedMcpHandler(
   makeQueryLayerWithTrigger,
-  (env) => env.OPERATOR_SECRET ?? "default"
+  (env) => env.OPERATOR_SECRET ?? "default",
+  { sessionStore: d1McpSessionStore }
 );
 
 export const handleMcpRequest = (
