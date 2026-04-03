@@ -242,4 +242,62 @@ describe("MCP session proxy (makeCachedMcpHandler)", () => {
       })
     )
   );
+
+  it.live("real client initialize replaces synthetic warm session", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const handler = makeCachedMcpHandler(
+          (env: { marker: string }) => makeBiLayer({ filename }),
+          (env) => env.marker
+        );
+        await Effect.runPromise(
+          seedKnowledgeBase().pipe(Effect.provide(makeBiLayer({ filename })))
+        );
+        const env = { marker: "env1" };
+
+        // First request triggers synthetic warm session
+        const coldResp = await handler(makeToolsListRequest(undefined), env, workflowIdentity);
+        expect(coldResp.status).toBe(200);
+
+        // Client sends a real initialize — should replace synthetic warm session
+        const initResp = await handler(makeInitRequest("real-client"), env, workflowIdentity);
+        expect(initResp.status).toBe(200);
+        const realSessionId = initResp.headers.get("mcp-session-id")!;
+        await handler(makeInitializedNotify(realSessionId), env, workflowIdentity);
+
+        // All session variants should work through the new warm session
+        const resp1 = await handler(makeToolsListRequest(realSessionId), env, workflowIdentity);
+        expect(resp1.status).toBe(200);
+
+        const resp2 = await handler(makeToolsListRequest("totally-different-id"), env, workflowIdentity);
+        expect(resp2.status).toBe(200);
+
+        const resp3 = await handler(makeToolsListRequest(undefined), env, workflowIdentity);
+        expect(resp3.status).toBe(200);
+      })
+    )
+  );
+
+  it.live("completes promptly when warm session creation fails", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const handler = makeCachedMcpHandler(
+          (env: { marker: string }) => makeBiLayer({ filename }),
+          (env) => env.marker
+        );
+        // Intentionally skip seedKnowledgeBase — proves handler doesn't hang
+        const env = { marker: "env1" };
+        const start = Date.now();
+        const response = await handler(
+          makeToolsListRequest("stale-session"),
+          env,
+          workflowIdentity
+        );
+        const elapsed = Date.now() - start;
+
+        expect(elapsed).toBeLessThan(5000);
+        expect([200, 404]).toContain(response.status);
+      })
+    )
+  );
 });
