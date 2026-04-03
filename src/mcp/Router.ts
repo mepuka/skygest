@@ -121,58 +121,93 @@ type McpWebHandler = {
 };
 
 /**
- * Detect Effect 4's MCP session-miss error in a JSON-RPC response.
- *
- * Effect's McpServer calls `Effect.die(new Error("Mcp-Session-Id does not exist"))`
- * when a non-initialize request arrives without a valid session. The HTTP adapter
- * converts this into an HTTP 200 with a JSON-RPC error containing a Die defect.
- * We detect this specific error structure and convert to HTTP 404 per MCP spec
- * so clients re-initialize.
- *
- * The detection parses the response JSON and checks the `error.data` array for
- * a Die defect with the session-miss message — avoiding false positives from
- * substring matching against tool descriptions or other response content.
+ * Peek at a cloned request body to determine if this is an MCP "initialize" request.
  */
-const SESSION_MISS_MESSAGE = "Mcp-Session-Id does not exist";
-
-const isSessionMissError = (parsed: unknown): boolean => {
-  if (typeof parsed !== "object" || parsed === null) return false;
-  const obj = parsed as Record<string, unknown>;
-  if (!obj.error || typeof obj.error !== "object") return false;
-  const err = obj.error as Record<string, unknown>;
-  if (!Array.isArray(err.data)) return false;
-  return err.data.some(
-    (entry: unknown) =>
-      typeof entry === "object" && entry !== null &&
-      (entry as Record<string, unknown>)._tag === "Die" &&
-      typeof (entry as Record<string, unknown>).defect === "object" &&
-      ((entry as Record<string, unknown>).defect as Record<string, unknown>)?.message === SESSION_MISS_MESSAGE
-  );
+const isInitializeRequest = async (request: Request): Promise<boolean> => {
+  const clone = request.clone();
+  try {
+    const body = await clone.json() as Record<string, unknown>;
+    return body.method === "initialize";
+  } catch {
+    return false;
+  }
 };
 
-const sessionMissTo404 = async (response: Response): Promise<Response> => {
-  const body = await response.text();
-  try {
-    const parsed = JSON.parse(body);
-    if (isSessionMissError(parsed)) {
-      return new Response(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          error: { code: -32000, message: "Session expired. Please re-initialize." },
-          id: null
-        }),
-        { status: 404, headers: { "content-type": "application/json" } }
-      );
-    }
-  } catch {
-    // Not valid JSON — pass through as-is
-  }
-  // Re-attach the consumed body to the original response
-  return new Response(body, {
-    status: response.status,
-    headers: response.headers
+/**
+ * Build a new Request with the `mcp-session-id` header replaced.
+ * Uses body passthrough to avoid consuming the original stream.
+ */
+const substituteSessionHeader = (request: Request, sessionId: string): Request => {
+  const headers = new Headers(request.headers);
+  headers.set("mcp-session-id", sessionId);
+
+  return new Request(request.url, {
+    method: request.method,
+    headers,
+    body: request.body,
+    duplex: "half"
   });
 };
+
+/**
+ * Create a warm MCP session by sending a synthetic initialize + notifications/initialized
+ * handshake. Returns the new session ID, or null if the handshake fails.
+ */
+const createWarmSession = async (
+  webHandler: McpWebHandler,
+  url: string,
+  context: ServiceMap.ServiceMap<OperatorIdentity>
+): Promise<string | null> => {
+  const initReq = new Request(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      method: "initialize",
+      id: 0,
+      params: {
+        protocolVersion: "2025-06-18",
+        capabilities: {},
+        clientInfo: { name: "skygest-warm-proxy", version: "0.1.0" }
+      }
+    })
+  });
+
+  const initResp = await webHandler.handler(initReq, context);
+  if (initResp.status !== 200) return null;
+
+  const sessionId = initResp.headers.get("mcp-session-id");
+  if (!sessionId) return null;
+
+  // Complete the handshake with notifications/initialized
+  const notifyReq = new Request(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "mcp-session-id": sessionId
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      method: "notifications/initialized"
+    })
+  });
+  await webHandler.handler(notifyReq, context);
+
+  return sessionId;
+};
+
+/**
+ * Build a 404 response indicating the session could not be recovered.
+ */
+const sessionExpiredResponse = (): Response =>
+  new Response(
+    JSON.stringify({
+      jsonrpc: "2.0",
+      error: { code: -32000, message: "Session expired. Please re-initialize." },
+      id: null
+    }),
+    { status: 404, headers: { "content-type": "application/json" } }
+  );
 
 /** @internal Exported for integration testing of session handling */
 export const makeCachedMcpHandler = <Env extends object>(
@@ -182,6 +217,7 @@ export const makeCachedMcpHandler = <Env extends object>(
   const cache = new Map<string, {
     readonly envKey: string;
     readonly webHandler: McpWebHandler;
+    warmSessionId: string | null;
   }>();
 
   return async (request: Request, env: Env, identity: AccessIdentity): Promise<Response> => {
@@ -197,13 +233,50 @@ export const makeCachedMcpHandler = <Env extends object>(
 
       entry = {
         envKey: currentEnvKey,
-        webHandler: HttpLayerRouter.toWebHandler(makeMcpLayer(buildLayer(env), profile)) as unknown as McpWebHandler
+        webHandler: HttpLayerRouter.toWebHandler(makeMcpLayer(buildLayer(env), profile)) as unknown as McpWebHandler,
+        warmSessionId: null
       };
       cache.set(cacheKey, entry);
     }
 
-    const response = await entry.webHandler.handler(request, operatorIdentityContext(identity));
-    return sessionMissTo404(response);
+    const context = operatorIdentityContext(identity);
+
+    // Path 1: Client-initiated initialize — forward directly, capture session ID
+    if (await isInitializeRequest(request.clone())) {
+      const response = await entry.webHandler.handler(request, context);
+      const sid = response.headers.get("mcp-session-id");
+      if (sid) {
+        entry.warmSessionId = sid;
+      }
+      return response;
+    }
+
+    // Path 2: We already have a warm session — substitute header and forward
+    if (entry.warmSessionId) {
+      return entry.webHandler.handler(
+        substituteSessionHeader(request, entry.warmSessionId),
+        context
+      );
+    }
+
+    // Path 3: No warm session yet — create one on-demand, then replay the request
+    // Clone the request BEFORE any body consumption so we can replay it
+    const replay = request.clone();
+
+    const warmSid = await createWarmSession(
+      entry.webHandler,
+      request.url,
+      context
+    );
+    if (!warmSid) {
+      return sessionExpiredResponse();
+    }
+    entry.warmSessionId = warmSid;
+
+    return entry.webHandler.handler(
+      substituteSessionHeader(replay, warmSid),
+      context
+    );
   };
 };
 

@@ -46,8 +46,8 @@ const makeInitializedNotify = (sessionId: string) =>
 const makeToolsListRequest = (sessionId?: string, id: number = 10) =>
   makeJsonRpcRequest("tools/list", {}, id, sessionId);
 
-describe("MCP stateless session handling (makeCachedMcpHandler)", () => {
-  it.live("returns 404 when no session exists (cold start)", () =>
+describe("MCP session proxy (makeCachedMcpHandler)", () => {
+  it.live("creates warm session on cold start (no prior initialize)", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
@@ -66,9 +66,9 @@ describe("MCP stateless session handling (makeCachedMcpHandler)", () => {
           workflowIdentity
         );
 
-        expect(response.status).toBe(404);
-        const body = await response.json() as { error: { message: string } };
-        expect(body.error.message).toContain("re-initialize");
+        expect(response.status).toBe(200);
+        const body = await response.json() as { result: { tools: unknown[] } };
+        expect(body.result.tools.length).toBeGreaterThan(0);
       })
     )
   );
@@ -118,7 +118,7 @@ describe("MCP stateless session handling (makeCachedMcpHandler)", () => {
     )
   );
 
-  it.live("returns 404 for stale session ID (simulating isolate recycle)", () =>
+  it.live("proxies stale session ID through warm session (isolate recycle)", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
@@ -131,19 +131,21 @@ describe("MCP stateless session handling (makeCachedMcpHandler)", () => {
         );
 
         const env = { marker: "env1" };
-        // Stale session ID from a previous isolate
+        // Stale session ID from a previous isolate — proxy creates warm session
         const response = await handler(
           makeToolsListRequest("stale-uuid-from-previous-isolate"),
           env,
           workflowIdentity
         );
 
-        expect(response.status).toBe(404);
+        expect(response.status).toBe(200);
+        const body = await response.json() as { result: { tools: unknown[] } };
+        expect(body.result.tools.length).toBeGreaterThan(0);
       })
     )
   );
 
-  it.live("returns 404 after handler rebuild (env change)", () =>
+  it.live("proxies through new warm session after handler rebuild (env change)", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
@@ -165,19 +167,15 @@ describe("MCP stateless session handling (makeCachedMcpHandler)", () => {
         const okResp = await handler(makeToolsListRequest(sessionId), env1, workflowIdentity);
         expect(okResp.status).toBe(200);
 
-        // New env object — handler rebuilds, sessions lost
+        // New env object — handler rebuilds, proxy creates warm session transparently
         const env2 = { marker: "env2" };
         const coldResp = await handler(makeToolsListRequest(sessionId), env2, workflowIdentity);
-        expect(coldResp.status).toBe(404);
-
-        // Re-initialize with new env works
-        const reInitResp = await handler(makeInitRequest("test"), env2, workflowIdentity);
-        expect(reInitResp.status).toBe(200);
+        expect(coldResp.status).toBe(200);
       })
     )
   );
 
-  it.live("maintains separate sessions per capability profile", () =>
+  it.live("maintains separate warm sessions per capability profile", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
@@ -200,20 +198,47 @@ describe("MCP stateless session handling (makeCachedMcpHandler)", () => {
         const workflowResp = await handler(makeToolsListRequest(workflowSession), env, workflowIdentity);
         expect(workflowResp.status).toBe(200);
 
-        // Read-only profile has NO session — should 404
+        // Read-only profile has no explicit session — proxy creates warm session
         const readOnlyResp = await handler(makeToolsListRequest(undefined), env, readOnlyIdentity);
-        expect(readOnlyResp.status).toBe(404);
+        expect(readOnlyResp.status).toBe(200);
 
-        // Initialize read-only profile separately
-        const readOnlyInit = await handler(makeInitRequest("readonly-client"), env, readOnlyIdentity);
-        const readOnlySession = readOnlyInit.headers.get("mcp-session-id")!;
-        await handler(makeInitializedNotify(readOnlySession), env, readOnlyIdentity);
+        // Verify profile isolation: workflow sees curate_post, read-only does not
+        const workflowTools = await handler(makeToolsListRequest(workflowSession), env, workflowIdentity);
+        const workflowBody = await workflowTools.json() as { result: { tools: Array<{ name: string }> } };
+        const workflowToolNames = workflowBody.result.tools.map(t => t.name);
+        expect(workflowToolNames).toContain("curate_post");
 
-        // Both profiles work independently
-        const workflowResp2 = await handler(makeToolsListRequest(workflowSession), env, workflowIdentity);
-        const readOnlyResp2 = await handler(makeToolsListRequest(readOnlySession), env, readOnlyIdentity);
-        expect(workflowResp2.status).toBe(200);
-        expect(readOnlyResp2.status).toBe(200);
+        const readOnlyTools = await handler(makeToolsListRequest(undefined), env, readOnlyIdentity);
+        const readOnlyBody = await readOnlyTools.json() as { result: { tools: Array<{ name: string }> } };
+        const readOnlyToolNames = readOnlyBody.result.tools.map(t => t.name);
+        expect(readOnlyToolNames).not.toContain("curate_post");
+      })
+    )
+  );
+
+  it.live("transparently proxies stale session through warm session after isolate recycle", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const handler = makeCachedMcpHandler(
+          (env: { marker: string }) => makeBiLayer({ filename }),
+          (env) => env.marker
+        );
+        await Effect.runPromise(
+          seedKnowledgeBase().pipe(Effect.provide(makeBiLayer({ filename })))
+        );
+        const env1 = { marker: "env1" };
+        const initResp = await handler(makeInitRequest("real-client"), env1, workflowIdentity);
+        expect(initResp.status).toBe(200);
+        const sessionId = initResp.headers.get("mcp-session-id")!;
+        await handler(makeInitializedNotify(sessionId), env1, workflowIdentity);
+        const okResp = await handler(makeToolsListRequest(sessionId), env1, workflowIdentity);
+        expect(okResp.status).toBe(200);
+        // Simulate isolate eviction
+        const env2 = { marker: "env2" };
+        const recoveredResp = await handler(makeToolsListRequest(sessionId), env2, workflowIdentity);
+        expect(recoveredResp.status).toBe(200);
+        const followUp = await handler(makeToolsListRequest(sessionId), env2, workflowIdentity);
+        expect(followUp.status).toBe(200);
       })
     )
   );
