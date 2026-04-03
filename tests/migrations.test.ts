@@ -22,6 +22,7 @@ describe("phase-one migrations", () => {
             'post_enrichment_runs',
             'ingest_run_items',
             'ingest_runs',
+            'mcp_sessions',
             'posts',
             'post_curation',
             'post_enrichments',
@@ -47,6 +48,7 @@ describe("phase-one migrations", () => {
         "ingest_run_items",
         "ingest_runs",
         "links",
+        "mcp_sessions",
         "post_curation",
         "post_enrichment_runs",
         "post_enrichments",
@@ -73,7 +75,8 @@ describe("phase-one migrations", () => {
         { id: 14, name: "post_enrichments" },
         { id: 15, name: "post_enrichment_runs" },
         { id: 16, name: "posts_embed_type" },
-        { id: 17, name: "fts_search_metadata" }
+        { id: 17, name: "fts_search_metadata" },
+        { id: 18, name: "mcp_sessions" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );

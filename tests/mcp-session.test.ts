@@ -1,8 +1,11 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "@effect/vitest";
-import { makeCachedMcpHandler } from "../src/mcp/Router";
-import type { AccessIdentity } from "../src/auth/AuthService";
-import { runMigrations } from "../src/db/migrate";
+import {
+  makeCachedMcpHandler,
+  type McpInitializePayload,
+  type McpSessionStore
+} from "../src/mcp/Router";
+import { encodeJsonString } from "../src/platform/Json";
 import {
   makeBiLayer,
   seedKnowledgeBase,
@@ -13,6 +16,16 @@ import {
 
 const MCP_URL = "https://test.local/mcp";
 
+type TestEnv = {
+  readonly marker: string;
+};
+
+const makeInitializePayload = (clientName: string): McpInitializePayload => ({
+  protocolVersion: "2025-06-18",
+  capabilities: {},
+  clientInfo: { name: clientName, version: "1.0" }
+});
+
 const makeJsonRpcRequest = (
   method: string,
   params?: unknown,
@@ -20,7 +33,9 @@ const makeJsonRpcRequest = (
   sessionId?: string
 ) => {
   const headers: Record<string, string> = { "content-type": "application/json" };
-  if (sessionId) headers["mcp-session-id"] = sessionId;
+  if (sessionId) {
+    headers["mcp-session-id"] = sessionId;
+  }
 
   const body: Record<string, unknown> = { jsonrpc: "2.0", method };
   if (params !== undefined) body.params = params;
@@ -34,11 +49,7 @@ const makeJsonRpcRequest = (
 };
 
 const makeInitRequest = (clientName: string, id: number = 1) =>
-  makeJsonRpcRequest("initialize", {
-    protocolVersion: "2025-06-18",
-    capabilities: {},
-    clientInfo: { name: clientName, version: "1.0" }
-  }, id);
+  makeJsonRpcRequest("initialize", makeInitializePayload(clientName), id);
 
 const makeInitializedNotify = (sessionId: string) =>
   makeJsonRpcRequest("notifications/initialized", undefined, undefined, sessionId);
@@ -46,12 +57,124 @@ const makeInitializedNotify = (sessionId: string) =>
 const makeToolsListRequest = (sessionId?: string, id: number = 10) =>
   makeJsonRpcRequest("tools/list", {}, id, sessionId);
 
-describe("MCP session proxy (makeCachedMcpHandler)", () => {
-  it.live("creates warm session on cold start (no prior initialize)", () =>
+const makeMemorySessionStore = <Env extends object>() => {
+  const store = new Map<string, { initializePayload: McpInitializePayload }>();
+  const sessionStore: McpSessionStore<Env> = {
+    load: async (_env, sessionId) => store.get(sessionId) ?? null,
+    save: async (_env, sessionId, session) => {
+      store.set(sessionId, session);
+    }
+  };
+
+  return { store, sessionStore };
+};
+
+const unusedBuildLayer = () =>
+  null as unknown as ReturnType<typeof makeBiLayer>;
+
+const makeProxyAwareWebHandler = (mode: "healthy" | "broken-init" = "healthy") =>
+  (env: TestEnv) => {
+    const sessions = new Map<string, McpInitializePayload>();
+    let nextSessionId = 1;
+
+    return {
+      handler: async (request: Request) => {
+        const body = await request.json() as Record<string, unknown>;
+        const method = typeof body.method === "string" ? body.method : null;
+
+        if (method === "initialize") {
+          if (mode === "broken-init") {
+            return new Response(
+              encodeJsonString({
+                jsonrpc: "2.0",
+                id: body.id ?? null,
+                result: { ok: true }
+              }),
+              {
+                status: 200,
+                headers: { "content-type": "application/json" }
+              }
+            );
+          }
+
+          const payload = body.params as McpInitializePayload;
+          const sessionId = `${env.marker}-backend-${nextSessionId++}`;
+          sessions.set(sessionId, payload);
+
+          return new Response(
+            encodeJsonString({
+              jsonrpc: "2.0",
+              id: body.id ?? null,
+              result: { ok: true }
+            }),
+            {
+              status: 200,
+              headers: {
+                "content-type": "application/json",
+                "mcp-session-id": sessionId
+              }
+            }
+          );
+        }
+
+        if (method === "notifications/initialized") {
+          return new Response("", { status: 200 });
+        }
+
+        const sessionId = request.headers.get("mcp-session-id");
+        const payload = sessionId === null ? null : sessions.get(sessionId) ?? null;
+        if (payload === null) {
+          return new Response(
+            encodeJsonString({
+              jsonrpc: "2.0",
+              id: body.id ?? null,
+              error: { code: -32000, message: "missing session" }
+            }),
+            {
+              status: 404,
+              headers: { "content-type": "application/json" }
+            }
+          );
+        }
+
+        return new Response(
+          encodeJsonString({
+            jsonrpc: "2.0",
+            id: body.id ?? null,
+            result: {
+              backendSessionId: sessionId,
+              clientName: payload.clientInfo.name
+            }
+          }),
+          {
+            status: 200,
+            headers: { "content-type": "application/json" }
+          }
+        );
+      },
+      dispose: async () => {}
+    };
+  };
+
+const readToolNames = async (response: Response) => {
+  const body = await response.json() as { result: { tools: Array<{ name: string }> } };
+  return body.result.tools.map((tool) => tool.name);
+};
+
+const readProxyResult = async (response: Response) =>
+  await response.json() as {
+    result: {
+      backendSessionId: string;
+      clientName: string;
+    };
+  };
+
+describe("MCP session proxy (real server)", () => {
+  it.live("creates a shared warm session on cold start for callers without a session", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
-          (env: { marker: string }) => makeBiLayer({ filename }),
+          (_env: TestEnv) => makeBiLayer({ filename }),
           (env) => env.marker
         );
 
@@ -59,25 +182,23 @@ describe("MCP session proxy (makeCachedMcpHandler)", () => {
           seedKnowledgeBase().pipe(Effect.provide(makeBiLayer({ filename })))
         );
 
-        const env = { marker: "env1" };
         const response = await handler(
           makeToolsListRequest(undefined),
-          env,
+          { marker: "env1" },
           workflowIdentity
         );
 
         expect(response.status).toBe(200);
-        const body = await response.json() as { result: { tools: unknown[] } };
-        expect(body.result.tools.length).toBeGreaterThan(0);
+        expect((await readToolNames(response)).length).toBeGreaterThan(0);
       })
     )
   );
 
-  it.live("serves tool calls after client initializes", () =>
+  it.live("serves tool calls after the client initializes", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
-          (env: { marker: string }) => makeBiLayer({ filename }),
+          (_env: TestEnv) => makeBiLayer({ filename }),
           (env) => env.marker
         );
 
@@ -86,8 +207,6 @@ describe("MCP session proxy (makeCachedMcpHandler)", () => {
         );
 
         const env = { marker: "env1" };
-
-        // Initialize
         const initResp = await handler(
           makeInitRequest("test-client"),
           env,
@@ -98,31 +217,28 @@ describe("MCP session proxy (makeCachedMcpHandler)", () => {
         const sessionId = initResp.headers.get("mcp-session-id");
         expect(sessionId).toBeTruthy();
 
-        // Send initialized notification
         await handler(
           makeInitializedNotify(sessionId!),
           env,
           workflowIdentity
         );
 
-        // Tool call with session ID should work
         const toolResp = await handler(
           makeToolsListRequest(sessionId!),
           env,
           workflowIdentity
         );
         expect(toolResp.status).toBe(200);
-        const toolBody = await toolResp.json() as { result: { tools: unknown[] } };
-        expect(toolBody.result.tools.length).toBeGreaterThan(0);
+        expect((await readToolNames(toolResp)).length).toBeGreaterThan(0);
       })
     )
   );
 
-  it.live("proxies stale session ID through warm session (isolate recycle)", () =>
+  it.live("returns 404 for a stale session when no persisted initialize payload exists", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
-          (env: { marker: string }) => makeBiLayer({ filename }),
+          (_env: TestEnv) => makeBiLayer({ filename }),
           (env) => env.marker
         );
 
@@ -130,27 +246,25 @@ describe("MCP session proxy (makeCachedMcpHandler)", () => {
           seedKnowledgeBase().pipe(Effect.provide(makeBiLayer({ filename })))
         );
 
-        const env = { marker: "env1" };
-        // Stale session ID from a previous isolate — proxy creates warm session
         const response = await handler(
           makeToolsListRequest("stale-uuid-from-previous-isolate"),
-          env,
+          { marker: "env1" },
           workflowIdentity
         );
 
-        expect(response.status).toBe(200);
-        const body = await response.json() as { result: { tools: unknown[] } };
-        expect(body.result.tools.length).toBeGreaterThan(0);
+        expect(response.status).toBe(404);
       })
     )
   );
 
-  it.live("proxies through new warm session after handler rebuild (env change)", () =>
+  it.live("recovers a persisted client session after the handler rebuilds", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
+        const { sessionStore } = makeMemorySessionStore<TestEnv>();
         const handler = makeCachedMcpHandler(
-          (env: { marker: string }) => makeBiLayer({ filename }),
-          (env) => env.marker
+          (_env: TestEnv) => makeBiLayer({ filename }),
+          (env) => env.marker,
+          { sessionStore }
         );
 
         await Effect.runPromise(
@@ -158,28 +272,31 @@ describe("MCP session proxy (makeCachedMcpHandler)", () => {
         );
 
         const env1 = { marker: "env1" };
+        const initResp = await handler(makeInitRequest("real-client"), env1, workflowIdentity);
+        expect(initResp.status).toBe(200);
 
-        // Initialize and verify working
-        const initResp = await handler(makeInitRequest("test"), env1, workflowIdentity);
         const sessionId = initResp.headers.get("mcp-session-id")!;
         await handler(makeInitializedNotify(sessionId), env1, workflowIdentity);
 
         const okResp = await handler(makeToolsListRequest(sessionId), env1, workflowIdentity);
         expect(okResp.status).toBe(200);
 
-        // New env object — handler rebuilds, proxy creates warm session transparently
         const env2 = { marker: "env2" };
-        const coldResp = await handler(makeToolsListRequest(sessionId), env2, workflowIdentity);
-        expect(coldResp.status).toBe(200);
+        const recoveredResp = await handler(
+          makeToolsListRequest(sessionId),
+          env2,
+          workflowIdentity
+        );
+        expect(recoveredResp.status).toBe(200);
       })
     )
   );
 
-  it.live("maintains separate warm sessions per capability profile", () =>
+  it.live("keeps anonymous warm sessions separate per capability profile", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
-          (env: { marker: string }) => makeBiLayer({ filename }),
+          (_env: TestEnv) => makeBiLayer({ filename }),
           (env) => env.marker
         );
 
@@ -188,116 +305,132 @@ describe("MCP session proxy (makeCachedMcpHandler)", () => {
         );
 
         const env = { marker: "env1" };
+        const workflowResp = await handler(
+          makeToolsListRequest(undefined),
+          env,
+          workflowIdentity
+        );
+        const readOnlyResp = await handler(
+          makeToolsListRequest(undefined),
+          env,
+          readOnlyIdentity
+        );
 
-        // Initialize as workflow-write profile
-        const initResp = await handler(makeInitRequest("workflow-client"), env, workflowIdentity);
-        const workflowSession = initResp.headers.get("mcp-session-id")!;
-        await handler(makeInitializedNotify(workflowSession), env, workflowIdentity);
-
-        // Workflow profile works
-        const workflowResp = await handler(makeToolsListRequest(workflowSession), env, workflowIdentity);
         expect(workflowResp.status).toBe(200);
-
-        // Read-only profile has no explicit session — proxy creates warm session
-        const readOnlyResp = await handler(makeToolsListRequest(undefined), env, readOnlyIdentity);
         expect(readOnlyResp.status).toBe(200);
 
-        // Verify profile isolation: workflow sees curate_post, read-only does not
-        const workflowTools = await handler(makeToolsListRequest(workflowSession), env, workflowIdentity);
-        const workflowBody = await workflowTools.json() as { result: { tools: Array<{ name: string }> } };
-        const workflowToolNames = workflowBody.result.tools.map(t => t.name);
+        const workflowToolNames = await readToolNames(workflowResp);
+        const readOnlyToolNames = await readToolNames(readOnlyResp);
         expect(workflowToolNames).toContain("curate_post");
-
-        const readOnlyTools = await handler(makeToolsListRequest(undefined), env, readOnlyIdentity);
-        const readOnlyBody = await readOnlyTools.json() as { result: { tools: Array<{ name: string }> } };
-        const readOnlyToolNames = readOnlyBody.result.tools.map(t => t.name);
         expect(readOnlyToolNames).not.toContain("curate_post");
       })
     )
   );
+});
 
-  it.live("transparently proxies stale session through warm session after isolate recycle", () =>
-    Effect.promise(() =>
-      withTempSqliteFile(async (filename) => {
-        const handler = makeCachedMcpHandler(
-          (env: { marker: string }) => makeBiLayer({ filename }),
-          (env) => env.marker
-        );
-        await Effect.runPromise(
-          seedKnowledgeBase().pipe(Effect.provide(makeBiLayer({ filename })))
-        );
-        const env1 = { marker: "env1" };
-        const initResp = await handler(makeInitRequest("real-client"), env1, workflowIdentity);
-        expect(initResp.status).toBe(200);
-        const sessionId = initResp.headers.get("mcp-session-id")!;
-        await handler(makeInitializedNotify(sessionId), env1, workflowIdentity);
-        const okResp = await handler(makeToolsListRequest(sessionId), env1, workflowIdentity);
-        expect(okResp.status).toBe(200);
-        // Simulate isolate eviction
-        const env2 = { marker: "env2" };
-        const recoveredResp = await handler(makeToolsListRequest(sessionId), env2, workflowIdentity);
-        expect(recoveredResp.status).toBe(200);
-        const followUp = await handler(makeToolsListRequest(sessionId), env2, workflowIdentity);
-        expect(followUp.status).toBe(200);
-      })
-    )
-  );
+describe("MCP session proxy semantics", () => {
+  it("keeps initialized clients isolated from later initializes", async () => {
+    const handler = makeCachedMcpHandler(
+      unusedBuildLayer,
+      (env: TestEnv) => env.marker,
+      { makeWebHandler: makeProxyAwareWebHandler() }
+    );
 
-  it.live("real client initialize replaces synthetic warm session", () =>
-    Effect.promise(() =>
-      withTempSqliteFile(async (filename) => {
-        const handler = makeCachedMcpHandler(
-          (env: { marker: string }) => makeBiLayer({ filename }),
-          (env) => env.marker
-        );
-        await Effect.runPromise(
-          seedKnowledgeBase().pipe(Effect.provide(makeBiLayer({ filename })))
-        );
-        const env = { marker: "env1" };
+    const env = { marker: "env1" };
+    const clientAInit = await handler(makeInitRequest("client-a"), env, workflowIdentity);
+    const clientBInit = await handler(makeInitRequest("client-b"), env, workflowIdentity);
+    const clientASession = clientAInit.headers.get("mcp-session-id")!;
+    const clientBSession = clientBInit.headers.get("mcp-session-id")!;
 
-        // First request triggers synthetic warm session
-        const coldResp = await handler(makeToolsListRequest(undefined), env, workflowIdentity);
-        expect(coldResp.status).toBe(200);
+    const clientAResult = await readProxyResult(
+      await handler(makeToolsListRequest(clientASession), env, workflowIdentity)
+    );
+    const clientBResult = await readProxyResult(
+      await handler(makeToolsListRequest(clientBSession), env, workflowIdentity)
+    );
 
-        // Client sends a real initialize — should replace synthetic warm session
-        const initResp = await handler(makeInitRequest("real-client"), env, workflowIdentity);
-        expect(initResp.status).toBe(200);
-        const realSessionId = initResp.headers.get("mcp-session-id")!;
-        await handler(makeInitializedNotify(realSessionId), env, workflowIdentity);
+    expect(clientAResult.result.clientName).toBe("client-a");
+    expect(clientBResult.result.clientName).toBe("client-b");
+  });
 
-        // All session variants should work through the new warm session
-        const resp1 = await handler(makeToolsListRequest(realSessionId), env, workflowIdentity);
-        expect(resp1.status).toBe(200);
+  it("does not let a real initialize replace the anonymous warm session", async () => {
+    const handler = makeCachedMcpHandler(
+      unusedBuildLayer,
+      (env: TestEnv) => env.marker,
+      { makeWebHandler: makeProxyAwareWebHandler() }
+    );
 
-        const resp2 = await handler(makeToolsListRequest("totally-different-id"), env, workflowIdentity);
-        expect(resp2.status).toBe(200);
+    const env = { marker: "env1" };
 
-        const resp3 = await handler(makeToolsListRequest(undefined), env, workflowIdentity);
-        expect(resp3.status).toBe(200);
-      })
-    )
-  );
+    const anonymousBefore = await readProxyResult(
+      await handler(makeToolsListRequest(undefined), env, workflowIdentity)
+    );
+    expect(anonymousBefore.result.clientName).toBe("skygest-warm-proxy");
 
-  it.live("completes promptly when warm session creation fails", () =>
-    Effect.promise(() =>
-      withTempSqliteFile(async (filename) => {
-        const handler = makeCachedMcpHandler(
-          (env: { marker: string }) => makeBiLayer({ filename }),
-          (env) => env.marker
-        );
-        // Intentionally skip seedKnowledgeBase — proves handler doesn't hang
-        const env = { marker: "env1" };
-        const start = Date.now();
-        const response = await handler(
-          makeToolsListRequest("stale-session"),
-          env,
-          workflowIdentity
-        );
-        const elapsed = Date.now() - start;
+    const initResp = await handler(makeInitRequest("real-client"), env, workflowIdentity);
+    const realSessionId = initResp.headers.get("mcp-session-id")!;
 
-        expect(elapsed).toBeLessThan(5000);
-        expect([200, 404]).toContain(response.status);
-      })
-    )
-  );
+    const anonymousAfter = await readProxyResult(
+      await handler(makeToolsListRequest(undefined), env, workflowIdentity)
+    );
+    const realClient = await readProxyResult(
+      await handler(makeToolsListRequest(realSessionId), env, workflowIdentity)
+    );
+
+    expect(anonymousAfter.result.clientName).toBe("skygest-warm-proxy");
+    expect(realClient.result.clientName).toBe("real-client");
+  });
+
+  it("rebuilds the exact client session after handler restart", async () => {
+    const { sessionStore } = makeMemorySessionStore<TestEnv>();
+    const handler = makeCachedMcpHandler(
+      unusedBuildLayer,
+      (env: TestEnv) => env.marker,
+      {
+        makeWebHandler: makeProxyAwareWebHandler(),
+        sessionStore
+      }
+    );
+
+    const env1 = { marker: "env1" };
+    const initResp = await handler(makeInitRequest("persisted-client"), env1, workflowIdentity);
+    const externalSessionId = initResp.headers.get("mcp-session-id")!;
+
+    const recovered = await readProxyResult(
+      await handler(
+        makeToolsListRequest(externalSessionId),
+        { marker: "env2" },
+        workflowIdentity
+      )
+    );
+
+    expect(recovered.result.clientName).toBe("persisted-client");
+    expect(recovered.result.backendSessionId.startsWith("env2-backend-")).toBe(true);
+  });
+
+  it("returns 404 when persisted session recovery cannot create a backend session", async () => {
+    const { sessionStore } = makeMemorySessionStore<TestEnv>();
+    await sessionStore.save(
+      { marker: "env1" },
+      "stale-session",
+      { initializePayload: makeInitializePayload("broken-client") }
+    );
+
+    const handler = makeCachedMcpHandler(
+      unusedBuildLayer,
+      (env: TestEnv) => env.marker,
+      {
+        makeWebHandler: makeProxyAwareWebHandler("broken-init"),
+        sessionStore
+      }
+    );
+
+    const response = await handler(
+      makeToolsListRequest("stale-session"),
+      { marker: "env1" },
+      workflowIdentity
+    );
+
+    expect(response.status).toBe(404);
+  });
 });
