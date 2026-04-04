@@ -14,12 +14,14 @@
 
 import * as Doc from "../platform/Doc";
 import type {
+  AdminExpertResult,
   KnowledgePostResult,
   KnowledgeLinkResult,
   ExpertListItem,
   OntologyListTopic,
   ExpandedTopicsOutput,
-  ExplainPostTopicsOutput
+  ExplainPostTopicsOutput,
+  SetExpertActiveResult
 } from "../domain/bi.ts";
 import type { EditorialPickOutput } from "../domain/editorial.ts";
 import type {
@@ -221,6 +223,20 @@ export const formatExperts = (items: ReadonlyArray<ExpertListItem>): string => {
 
   return render(Doc.vsep(rows));
 };
+
+export const formatAddExpertResult = (expert: AdminExpertResult): string =>
+  [
+    `Expert registered: ${personLabel(expert.handle, expert.displayName, expert.did)}`,
+    `DID: ${expert.did}`,
+    `Domain: ${expert.domain} · Tier: ${expert.tier} · Source: ${expert.source} · Active: ${expert.active ? "yes" : "no"}`,
+    `Shard: ${expert.shard}`
+  ].join("\n");
+
+export const formatSetExpertActiveResult = (result: SetExpertActiveResult): string =>
+  [
+    `Expert ${result.did} is now ${result.active ? "active" : "inactive"}.`,
+    `Shard: ${result.shard}`
+  ].join("\n");
 
 /**
  * Format a list of ontology topics for MCP display.

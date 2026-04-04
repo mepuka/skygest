@@ -14,6 +14,7 @@ import { callTool, listTools, listPrompts, type McpToolCall } from "../../src/mc
 import { handleMcpRequestWithLayer, createPersistentMcpHandler } from "../../src/mcp/Router";
 import { AppConfig, type AppConfigShape } from "../../src/platform/Config";
 import { EditorialService } from "../../src/services/EditorialService";
+import { ExpertRegistryService } from "../../src/services/ExpertRegistryService";
 import { OntologyCatalog } from "../../src/services/OntologyCatalog";
 import { PostImportService } from "../../src/services/PostImportService";
 import { PostHydrationService } from "../../src/services/PostHydrationService";
@@ -51,10 +52,22 @@ export const workflowWriteIdentity: AccessIdentity = {
   scopes: ["mcp:read", "curation:write", "editorial:write"]
 };
 
+export const expertsWriteIdentity: AccessIdentity = {
+  subject: "test-expert-writer",
+  email: "experts@test.com",
+  scopes: ["mcp:read", "experts:write"]
+};
+
 export const opsReadIdentity: AccessIdentity = {
   subject: "test-ops-reader",
   email: "ops@test.com",
   scopes: ["mcp:read", "ops:read"]
+};
+
+export const opsExpertsWriteIdentity: AccessIdentity = {
+  subject: "test-ops-expert-writer",
+  email: "ops-experts@test.com",
+  scopes: ["mcp:read", "experts:write", "ops:read"]
 };
 
 export const opsCurationWriteIdentity: AccessIdentity = {
@@ -175,6 +188,11 @@ export const makeBiLayer = (options?: {
       )
     )
   );
+  const registryLayer = ExpertRegistryService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(configLayer, expertsLayer, blueskyLayer, ontologyLayer)
+    )
+  );
 
   const enrichmentReadServiceLayer = PostEnrichmentReadService.layer.pipe(
     Layer.provideMerge(
@@ -195,7 +213,8 @@ export const makeBiLayer = (options?: {
     blueskyLayer,
     enrichmentReadServiceLayer,
     pipelineStatusServiceLayer,
-    postImportServiceLayer
+    postImportServiceLayer,
+    registryLayer
   );
 };
 

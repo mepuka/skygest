@@ -11,6 +11,7 @@ import {
   stripUndefined
 } from "../platform/Json";
 import {
+  AddExpertInput,
   ExplainPostTopicsInput,
   ExpandTopicsInput,
   GetPostLinksInput,
@@ -21,7 +22,8 @@ import {
   ListTopicsInput,
   ListExpertsInput,
   McpToolQueryError,
-  SearchPostsInput
+  SearchPostsInput,
+  SetExpertActiveInput
 } from "../domain/bi";
 import { ListEditorialPicksInput, SubmitEditorialPickMcpInput } from "../domain/editorial";
 import {
@@ -40,8 +42,9 @@ import {
   ListEnrichmentIssuesInput
 } from "../domain/enrichment";
 import { GetPipelineStatusInput } from "../domain/pipeline";
-import type { PostUri } from "../domain/types";
+import { Did, type PostUri } from "../domain/types";
 import {
+  AddExpertMcpOutput,
   BulkCurateMcpOutput,
   BulkStartEnrichmentMcpOutput,
   KnowledgePostsMcpOutput,
@@ -55,6 +58,7 @@ import {
   ExplainPostTopicsMcpOutput,
   EditorialPicksMcpOutput,
   PostThreadMcpOutput,
+  SetExpertActiveMcpOutput,
   ThreadDocumentMcpOutput,
   CurationCandidatesMcpOutput,
   CuratePostMcpOutput,
@@ -65,6 +69,7 @@ import {
   ImportPostsMcpOutput
 } from "./OutputSchemas.ts";
 import {
+  formatAddExpertResult,
   formatBulkCurateResult,
   formatBulkStartEnrichmentResult,
   formatCurationCandidateCounts,
@@ -75,6 +80,7 @@ import {
   formatPosts,
   formatLinks,
   formatExperts,
+  formatSetExpertActiveResult,
   formatTopics,
   formatTopic,
   formatExpandedTopics,
@@ -90,6 +96,7 @@ import {
 import { EditorialService } from "../services/EditorialService";
 import { CurationService } from "../services/CurationService";
 import { CurationRepo } from "../services/CurationRepo";
+import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
@@ -127,6 +134,13 @@ const GetPostLinksMcpInput = Schema.Struct({
   since: GetPostLinksInput.fields.since,
   until: GetPostLinksInput.fields.until,
   limit: GetPostLinksInput.fields.limit
+});
+
+const AddExpertMcpInput = AddExpertInput;
+
+const SetExpertActiveMcpInput = Schema.Struct({
+  did: Did,
+  active: SetExpertActiveInput.fields.active
 });
 
 const StartEnrichmentMcpInput = Schema.Struct({
@@ -226,6 +240,30 @@ export const ListExpertsTool = Tool.make("list_experts", {
 })
   .annotate(Tool.Title, "List Experts")
   .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
+
+export const AddExpertTool = Tool.make("add_expert", {
+  description: "Register a tracked expert by Bluesky handle or DID using the same path as POST /admin/experts. Resolves the live Bluesky profile, stores the expert record, and updates an existing expert if the DID already exists. Use import_posts for normalized imported experts such as Twitter export batches.",
+  parameters: AddExpertMcpInput,
+  success: AddExpertMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Add Expert")
+  .annotate(Tool.Readonly, false)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, true);
+
+export const SetExpertActiveTool = Tool.make("set_expert_active", {
+  description: "Activate or deactivate an existing tracked expert by DID. This preserves historical posts while pausing or resuming future ingest for that expert.",
+  parameters: SetExpertActiveMcpInput,
+  success: SetExpertActiveMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Set Expert Active")
+  .annotate(Tool.Readonly, false)
   .annotate(Tool.Destructive, false)
   .annotate(Tool.Idempotent, true)
   .annotate(Tool.OpenWorld, false);
@@ -453,6 +491,7 @@ export const ImportPostsTool = Tool.make("import_posts", {
 type CapabilityToolkitOptions = {
   readonly opsRead?: boolean;
   readonly opsRefresh?: boolean;
+  readonly expertsWrite?: boolean;
   readonly curationWrite?: boolean;
   readonly editorialWrite?: boolean;
 };
@@ -477,6 +516,7 @@ const ReadOnlyTools = [
 
 const OpsReadTools = [GetPipelineStatusTool] as const;
 const OpsRefreshTools = [ImportPostsTool] as const;
+const ExpertsWriteTools = [AddExpertTool, SetExpertActiveTool] as const;
 const CurationWriteTools = [
   CuratePostTool,
   BulkCurateTool,
@@ -490,67 +530,12 @@ const makeCapabilityToolkit = (options: CapabilityToolkitOptions) =>
     ...ReadOnlyTools,
     ...(options.opsRead ? OpsReadTools : ([] as const)),
     ...(options.opsRefresh ? OpsRefreshTools : ([] as const)),
+    ...(options.expertsWrite ? ExpertsWriteTools : ([] as const)),
     ...(options.curationWrite ? CurationWriteTools : ([] as const)),
     ...(options.editorialWrite ? EditorialWriteTools : ([] as const))
   );
 
 export const ReadOnlyMcpToolkit = makeCapabilityToolkit({});
-export const OpsReadMcpToolkit = makeCapabilityToolkit({ opsRead: true });
-export const OpsRefreshMcpToolkit = makeCapabilityToolkit({ opsRefresh: true });
-export const OpsReadRefreshMcpToolkit = makeCapabilityToolkit({
-  opsRead: true,
-  opsRefresh: true
-});
-export const CurationWriteMcpToolkit = makeCapabilityToolkit({ curationWrite: true });
-export const OpsCurationWriteMcpToolkit = makeCapabilityToolkit({
-  opsRead: true,
-  curationWrite: true
-});
-export const CurationWriteRefreshMcpToolkit = makeCapabilityToolkit({
-  opsRefresh: true,
-  curationWrite: true
-});
-export const OpsCurationWriteRefreshMcpToolkit = makeCapabilityToolkit({
-  opsRead: true,
-  opsRefresh: true,
-  curationWrite: true
-});
-export const EditorialWriteMcpToolkit = makeCapabilityToolkit({ editorialWrite: true });
-export const OpsEditorialWriteMcpToolkit = makeCapabilityToolkit({
-  opsRead: true,
-  editorialWrite: true
-});
-export const EditorialWriteRefreshMcpToolkit = makeCapabilityToolkit({
-  opsRefresh: true,
-  editorialWrite: true
-});
-export const OpsEditorialWriteRefreshMcpToolkit = makeCapabilityToolkit({
-  opsRead: true,
-  opsRefresh: true,
-  editorialWrite: true
-});
-export const WorkflowWriteMcpToolkit = makeCapabilityToolkit({
-  curationWrite: true,
-  editorialWrite: true
-});
-export const OpsWorkflowWriteMcpToolkit = makeCapabilityToolkit({
-  opsRead: true,
-  curationWrite: true,
-  editorialWrite: true
-});
-export const WorkflowWriteRefreshMcpToolkit = makeCapabilityToolkit({
-  opsRefresh: true,
-  curationWrite: true,
-  editorialWrite: true
-});
-export const OpsWorkflowWriteRefreshMcpToolkit = makeCapabilityToolkit({
-  opsRead: true,
-  opsRefresh: true,
-  curationWrite: true,
-  editorialWrite: true
-});
-
-// Keep legacy export for backward compatibility in tests
 export const KnowledgeMcpToolkit = ReadOnlyMcpToolkit;
 
 // ---------------------------------------------------------------------------
@@ -578,6 +563,7 @@ const extractCreatedAt = (record: unknown, fallbackIndexedAt: string): string =>
 type KnowledgeQueryServiceI = (typeof KnowledgeQueryService)["Service"];
 type EditorialServiceI = (typeof EditorialService)["Service"];
 type CurationServiceI = (typeof CurationService)["Service"];
+type ExpertRegistryServiceI = (typeof ExpertRegistryService)["Service"];
 type BlueskyClientI = (typeof BlueskyClient)["Service"];
 type PostEnrichmentReadServiceI = (typeof PostEnrichmentReadService)["Service"];
 type PipelineStatusServiceI = (typeof PipelineStatusService)["Service"];
@@ -729,6 +715,37 @@ const makeGetPipelineStatusHandler = (
       })),
       Effect.mapError(toQueryError("get_pipeline_status"))
     )
+});
+
+const makeExpertWriteHandlers = (
+  expertRegistryService: ExpertRegistryServiceI
+) => ({
+  add_expert: (input: typeof AddExpertMcpInput.Type) =>
+    Effect.gen(function* () {
+      const actor = yield* OperatorIdentity;
+      const result = yield* expertRegistryService.addExpert(actor, input);
+      return {
+        ...result,
+        _display: formatAddExpertResult(result)
+      };
+    }).pipe(
+      Effect.mapError(passThroughMcpToolError("add_expert"))
+    ) as any,
+  set_expert_active: (input: typeof SetExpertActiveMcpInput.Type) =>
+    Effect.gen(function* () {
+      const actor = yield* OperatorIdentity;
+      const result = yield* expertRegistryService.setExpertActive(
+        actor,
+        input.did,
+        { active: input.active }
+      );
+      return {
+        ...result,
+        _display: formatSetExpertActiveResult(result)
+      };
+    }).pipe(
+      Effect.mapError(passThroughMcpToolError("set_expert_active"))
+    ) as any
 });
 
 // ---------------------------------------------------------------------------
@@ -1260,10 +1277,12 @@ const makeBulkStartEnrichmentHandler = () => ({
 // ---------------------------------------------------------------------------
 
 const makeWriteHandlers = (
+  expertRegistryService: ExpertRegistryServiceI,
   curationService: CurationServiceI,
   editorialService: EditorialServiceI,
   options: CapabilityToolkitOptions
 ) => ({
+  ...(options.expertsWrite ? makeExpertWriteHandlers(expertRegistryService) : {}),
   ...(options.curationWrite
     ? {
         ...makeCuratePostHandler(curationService),
@@ -1286,6 +1305,7 @@ const makeCapabilityHandlers = <
       const queryService = yield* KnowledgeQueryService;
       const editorialService = yield* EditorialService;
       const curationService = yield* CurationService;
+      const expertRegistryService = yield* ExpertRegistryService;
       const bskyClient = yield* BlueskyClient;
       const enrichmentReadService = yield* PostEnrichmentReadService;
       const pipelineStatusService = yield* PipelineStatusService;
@@ -1301,162 +1321,58 @@ const makeCapabilityHandlers = <
         ),
         ...(options.opsRead ? makeGetPipelineStatusHandler(pipelineStatusService) : {}),
         ...(options.opsRefresh ? makeImportPostsHandler(postImportService) : {}),
-        ...makeWriteHandlers(curationService, editorialService, options)
+        ...makeWriteHandlers(
+          expertRegistryService,
+          curationService,
+          editorialService,
+          options
+        )
       });
     })
   );
 
 export const ReadOnlyMcpHandlers = makeCapabilityHandlers(ReadOnlyMcpToolkit, {});
-export const OpsReadMcpHandlers = makeCapabilityHandlers(OpsReadMcpToolkit, {
-  opsRead: true
-});
-export const OpsRefreshMcpHandlers = makeCapabilityHandlers(OpsRefreshMcpToolkit, {
-  opsRefresh: true
-});
-export const OpsReadRefreshMcpHandlers = makeCapabilityHandlers(OpsReadRefreshMcpToolkit, {
-  opsRead: true,
-  opsRefresh: true
-});
-export const CurationWriteMcpHandlers = makeCapabilityHandlers(CurationWriteMcpToolkit, {
-  curationWrite: true
-});
-export const OpsCurationWriteMcpHandlers = makeCapabilityHandlers(
-  OpsCurationWriteMcpToolkit,
-  {
-    opsRead: true,
-    curationWrite: true
-  }
-);
-export const CurationWriteRefreshMcpHandlers = makeCapabilityHandlers(
-  CurationWriteRefreshMcpToolkit,
-  {
-    opsRefresh: true,
-    curationWrite: true
-  }
-);
-export const OpsCurationWriteRefreshMcpHandlers = makeCapabilityHandlers(
-  OpsCurationWriteRefreshMcpToolkit,
-  {
-    opsRead: true,
-    opsRefresh: true,
-    curationWrite: true
-  }
-);
-export const EditorialWriteMcpHandlers = makeCapabilityHandlers(EditorialWriteMcpToolkit, {
-  editorialWrite: true
-});
-export const OpsEditorialWriteMcpHandlers = makeCapabilityHandlers(
-  OpsEditorialWriteMcpToolkit,
-  {
-    opsRead: true,
-    editorialWrite: true
-  }
-);
-export const EditorialWriteRefreshMcpHandlers = makeCapabilityHandlers(
-  EditorialWriteRefreshMcpToolkit,
-  {
-    opsRefresh: true,
-    editorialWrite: true
-  }
-);
-export const OpsEditorialWriteRefreshMcpHandlers = makeCapabilityHandlers(
-  OpsEditorialWriteRefreshMcpToolkit,
-  {
-    opsRead: true,
-    opsRefresh: true,
-    editorialWrite: true
-  }
-);
-export const WorkflowWriteMcpHandlers = makeCapabilityHandlers(WorkflowWriteMcpToolkit, {
-  curationWrite: true,
-  editorialWrite: true
-});
-export const OpsWorkflowWriteMcpHandlers = makeCapabilityHandlers(
-  OpsWorkflowWriteMcpToolkit,
-  {
-    opsRead: true,
-    curationWrite: true,
-    editorialWrite: true
-  }
-);
-export const WorkflowWriteRefreshMcpHandlers = makeCapabilityHandlers(
-  WorkflowWriteRefreshMcpToolkit,
-  {
-    opsRefresh: true,
-    curationWrite: true,
-    editorialWrite: true
-  }
-);
-export const OpsWorkflowWriteRefreshMcpHandlers = makeCapabilityHandlers(
-  OpsWorkflowWriteRefreshMcpToolkit,
-  {
-    opsRead: true,
-    opsRefresh: true,
-    curationWrite: true,
-    editorialWrite: true
-  }
-);
-
-// Keep legacy export for backward compatibility
 export const KnowledgeMcpHandlers = ReadOnlyMcpHandlers;
 
 // ---------------------------------------------------------------------------
 // Toolkit selection by profile
 // ---------------------------------------------------------------------------
 
-const ToolkitByProfile = {
-  "read-only": { toolkit: ReadOnlyMcpToolkit, handlers: ReadOnlyMcpHandlers },
-  "ops-read": { toolkit: OpsReadMcpToolkit, handlers: OpsReadMcpHandlers },
-  "ops-refresh": { toolkit: OpsRefreshMcpToolkit, handlers: OpsRefreshMcpHandlers },
-  "ops-read-refresh": {
-    toolkit: OpsReadRefreshMcpToolkit,
-    handlers: OpsReadRefreshMcpHandlers
-  },
-  "curation-write": { toolkit: CurationWriteMcpToolkit, handlers: CurationWriteMcpHandlers },
-  "ops-curation-write": {
-    toolkit: OpsCurationWriteMcpToolkit,
-    handlers: OpsCurationWriteMcpHandlers
-  },
-  "curation-write-refresh": {
-    toolkit: CurationWriteRefreshMcpToolkit,
-    handlers: CurationWriteRefreshMcpHandlers
-  },
-  "ops-curation-write-refresh": {
-    toolkit: OpsCurationWriteRefreshMcpToolkit,
-    handlers: OpsCurationWriteRefreshMcpHandlers
-  },
-  "editorial-write": {
-    toolkit: EditorialWriteMcpToolkit,
-    handlers: EditorialWriteMcpHandlers
-  },
-  "ops-editorial-write": {
-    toolkit: OpsEditorialWriteMcpToolkit,
-    handlers: OpsEditorialWriteMcpHandlers
-  },
-  "editorial-write-refresh": {
-    toolkit: EditorialWriteRefreshMcpToolkit,
-    handlers: EditorialWriteRefreshMcpHandlers
-  },
-  "ops-editorial-write-refresh": {
-    toolkit: OpsEditorialWriteRefreshMcpToolkit,
-    handlers: OpsEditorialWriteRefreshMcpHandlers
-  },
-  "workflow-write": { toolkit: WorkflowWriteMcpToolkit, handlers: WorkflowWriteMcpHandlers },
-  "ops-workflow-write": {
-    toolkit: OpsWorkflowWriteMcpToolkit,
-    handlers: OpsWorkflowWriteMcpHandlers
-  },
-  "workflow-write-refresh": {
-    toolkit: WorkflowWriteRefreshMcpToolkit,
-    handlers: WorkflowWriteRefreshMcpHandlers
-  },
-  "ops-workflow-write-refresh": {
-    toolkit: OpsWorkflowWriteRefreshMcpToolkit,
-    handlers: OpsWorkflowWriteRefreshMcpHandlers
-  }
-} satisfies Record<McpCapabilityProfile, {
+const capabilityOptionsForProfile = (
+  profile: McpCapabilityProfile
+): CapabilityToolkitOptions => {
+  const hasOpsRead = profile.startsWith("ops-") && profile !== "ops-refresh";
+  const hasOpsRefresh =
+    profile === "ops-refresh" ||
+    profile === "ops-read-refresh" ||
+    profile.endsWith("-refresh");
+  const expertsWrite = profile.includes("experts-");
+  const workflowWrite = profile.includes("workflow-write");
+
+  return {
+    opsRead: hasOpsRead,
+    opsRefresh: hasOpsRefresh,
+    expertsWrite,
+    curationWrite: workflowWrite || profile.includes("curation-write"),
+    editorialWrite: workflowWrite || profile.includes("editorial-write")
+  };
+};
+
+const capabilityPartsCache = new Map<McpCapabilityProfile, {
   readonly toolkit: ReturnType<typeof makeCapabilityToolkit>;
   readonly handlers: ReturnType<typeof makeCapabilityHandlers>;
-}>;
+}>();
 
-export const toolkitForProfile = (profile: McpCapabilityProfile) => ToolkitByProfile[profile];
+export const toolkitForProfile = (profile: McpCapabilityProfile) => {
+  const cached = capabilityPartsCache.get(profile);
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  const options = capabilityOptionsForProfile(profile);
+  const toolkit = makeCapabilityToolkit(options);
+  const handlers = makeCapabilityHandlers(toolkit, options);
+  const parts = { toolkit, handlers };
+  capabilityPartsCache.set(profile, parts);
+  return parts;
+};
