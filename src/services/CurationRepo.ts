@@ -4,7 +4,9 @@ import type { DbError } from "../domain/errors";
 import type {
   CurationRecord,
   CurationStatus,
-  CurationCandidateOutput,
+  CurationCandidateCountOutput,
+  CurationCandidateExportPageOutput,
+  CurationCandidatePageOutput,
   ListCurationCandidatesInput
 } from "../domain/curation";
 import type { KnowledgePost } from "../domain/bi";
@@ -34,7 +36,15 @@ export class CurationRepo extends ServiceMap.Service<
 
     readonly listCandidates: (
       input: ListCurationCandidatesInput
-    ) => Effect.Effect<ReadonlyArray<CurationCandidateOutput>, SqlError | DbError>;
+    ) => Effect.Effect<CurationCandidatePageOutput, SqlError | DbError>;
+
+    readonly exportCandidates: (
+      input: ListCurationCandidatesInput
+    ) => Effect.Effect<CurationCandidateExportPageOutput, SqlError | DbError>;
+
+    readonly countCandidates: (
+      input: ListCurationCandidatesInput
+    ) => Effect.Effect<CurationCandidateCountOutput, SqlError | DbError>;
 
     readonly postExists: (
       postUri: string

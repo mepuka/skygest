@@ -185,8 +185,30 @@ const makeHarness = (options: {
     }),
     Layer.succeed(CurationService, {
       flagBatch: () => Effect.succeed(0),
-      listCandidates: () => Effect.succeed([]),
-      curatePost: () => Effect.succeed(null as any)
+      listCandidates: () => Effect.succeed({
+        items: [],
+        total: 0,
+        nextCursor: null
+      }),
+      exportCandidates: () => Effect.succeed({
+        items: [],
+        total: 0,
+        nextCursor: null
+      }),
+      countCandidates: () => Effect.succeed({
+        total: 0,
+        byPlatform: {
+          bluesky: 0,
+          twitter: 0
+        }
+      }),
+      curatePost: () => Effect.succeed(null as any),
+      bulkCurate: () => Effect.succeed({
+        curated: 0,
+        rejected: 0,
+        skipped: 0,
+        errors: []
+      })
     })
   );
 

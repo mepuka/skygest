@@ -19,6 +19,8 @@ import { makeBiLayer, seedKnowledgeBase, sampleDid } from "./support/runtime";
 import { runMigrations } from "../src/db/migrate";
 import { formatEnrichments, formatCurationCandidates } from "../src/mcp/Fmt";
 
+const asPostUri = Schema.decodeUnknownSync(GetPostEnrichmentsInput.fields.postUri);
+
 describe("enrichment read model domain schemas", () => {
   it("decodes EnrichmentReadiness literals", () => {
     const decode = Schema.decodeUnknownSync(EnrichmentReadiness);
@@ -203,7 +205,7 @@ describe("PostEnrichmentReadService", () => {
       yield* seedKnowledgeBase();
       const service = yield* PostEnrichmentReadService;
       const result = yield* service.getPost(
-        `at://${sampleDid}/app.bsky.feed.post/post-solar`
+        asPostUri(`at://${sampleDid}/app.bsky.feed.post/post-solar`)
       );
       expect(result.readiness).toBe("none");
       expect(result.enrichments).toHaveLength(0);
@@ -216,7 +218,7 @@ describe("PostEnrichmentReadService", () => {
       yield* runMigrations;
       const service = yield* PostEnrichmentReadService;
       const result = yield* service.getPost(
-        "at://did:plc:nonexistent/app.bsky.feed.post/fake"
+        asPostUri("at://did:plc:nonexistent/app.bsky.feed.post/fake")
       );
       expect(result.readiness).toBe("none");
       expect(result.enrichments).toHaveLength(0);
@@ -228,7 +230,7 @@ describe("PostEnrichmentReadService", () => {
       yield* seedKnowledgeBase();
       const service = yield* PostEnrichmentReadService;
       const result = yield* service.getPost(
-        `at://${sampleDid}/app.bsky.feed.post/post-solar`
+        asPostUri(`at://${sampleDid}/app.bsky.feed.post/post-solar`)
       );
       expect(result.readiness).toBe("none");
       expect(result.latestRuns).toHaveLength(0);

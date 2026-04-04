@@ -322,7 +322,9 @@ describe("MCP session proxy (real server)", () => {
         const workflowToolNames = await readToolNames(workflowResp);
         const readOnlyToolNames = await readToolNames(readOnlyResp);
         expect(workflowToolNames).toContain("curate_post");
+        expect(workflowToolNames).toContain("bulk_curate");
         expect(readOnlyToolNames).not.toContain("curate_post");
+        expect(readOnlyToolNames).not.toContain("bulk_curate");
       })
     )
   );

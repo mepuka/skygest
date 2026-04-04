@@ -23,6 +23,7 @@ import {
   type MarkEnrichmentRunPhase,
   type ResetEnrichmentRunForRetry
 } from "../../domain/enrichmentRun";
+import type { PostUri } from "../../domain/types";
 import { EnrichmentRunsRepo } from "../EnrichmentRunsRepo";
 import { decodeWithDbError } from "./schemaDecode";
 
@@ -354,7 +355,7 @@ export const EnrichmentRunsRepoD1 = {
         )
       );
 
-    const listLatestByPostUri = (postUri: string) =>
+    const listLatestByPostUri = (postUri: PostUri) =>
       sql<any>`
         SELECT ${selectColumns}
         FROM post_enrichment_runs r

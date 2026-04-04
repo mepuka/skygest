@@ -1,6 +1,7 @@
 import { ServiceMap, Effect } from "effect";
 import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
+import type { PostUri } from "../domain/types";
 import type {
   CompleteEnrichmentRun,
   CreateQueuedEnrichmentRun,
@@ -46,7 +47,7 @@ export class EnrichmentRunsRepo extends ServiceMap.Service<
       input: ResetEnrichmentRunForRetry
     ) => Effect.Effect<boolean, SqlError | DbError>;
     readonly listLatestByPostUri: (
-      postUri: string
+      postUri: PostUri
     ) => Effect.Effect<ReadonlyArray<EnrichmentRunRecord>, SqlError | DbError>;
   }
 >()("@skygest/EnrichmentRunsRepo") {}

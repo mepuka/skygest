@@ -19,8 +19,14 @@ import {
   ThreadDocumentOutput
 } from "../domain/bi.ts";
 import { EditorialPicksOutput, SubmitEditorialPickOutput } from "../domain/editorial.ts";
-import { CurationCandidatesOutput, CuratePostOutput } from "../domain/curation.ts";
-import { GetPostEnrichmentsOutput, EnrichmentKind } from "../domain/enrichment.ts";
+import { BulkCurateOutput, CurationCandidatesOutput, CuratePostOutput } from "../domain/curation.ts";
+import {
+  BulkStartEnrichmentOutput,
+  GetPostEnrichmentsOutput,
+  EnrichmentKind,
+  ListEnrichmentGapsOutput,
+  ListEnrichmentIssuesOutput
+} from "../domain/enrichment.ts";
 import { PostUri } from "../domain/types.ts";
 
 const displayFields = { _display: Schema.String } as const;
@@ -55,17 +61,31 @@ export type PostThreadMcpOutput = typeof PostThreadMcpOutput.Type;
 export const ThreadDocumentMcpOutput = ThreadDocumentOutput;
 export type ThreadDocumentMcpOutput = typeof ThreadDocumentMcpOutput.Type;
 
-export const CurationCandidatesMcpOutput = CurationCandidatesOutput.pipe(Schema.fieldsAssign(displayFields));
+const CurationCandidatesTransportOutput = Schema.Struct({
+  ...CurationCandidatesOutput.fields,
+  nextCursor: Schema.NullOr(Schema.String)
+});
+
+export const CurationCandidatesMcpOutput = CurationCandidatesTransportOutput.pipe(Schema.fieldsAssign(displayFields));
 export type CurationCandidatesMcpOutput = typeof CurationCandidatesMcpOutput.Type;
 
 export const CuratePostMcpOutput = CuratePostOutput.pipe(Schema.fieldsAssign(displayFields));
 export type CuratePostMcpOutput = typeof CuratePostMcpOutput.Type;
+
+export const BulkCurateMcpOutput = BulkCurateOutput.pipe(Schema.fieldsAssign(displayFields));
+export type BulkCurateMcpOutput = typeof BulkCurateMcpOutput.Type;
 
 export const SubmitEditorialPickMcpOutput = SubmitEditorialPickOutput.pipe(Schema.fieldsAssign(displayFields));
 export type SubmitEditorialPickMcpOutput = typeof SubmitEditorialPickMcpOutput.Type;
 
 export const PostEnrichmentsMcpOutput = GetPostEnrichmentsOutput.pipe(Schema.fieldsAssign(displayFields));
 export type PostEnrichmentsMcpOutput = typeof PostEnrichmentsMcpOutput.Type;
+
+export const EnrichmentGapsMcpOutput = ListEnrichmentGapsOutput.pipe(Schema.fieldsAssign(displayFields));
+export type EnrichmentGapsMcpOutput = typeof EnrichmentGapsMcpOutput.Type;
+
+export const EnrichmentIssuesMcpOutput = ListEnrichmentIssuesOutput.pipe(Schema.fieldsAssign(displayFields));
+export type EnrichmentIssuesMcpOutput = typeof EnrichmentIssuesMcpOutput.Type;
 
 export const StartEnrichmentMcpOutput = Schema.Struct({
   postUri: PostUri,
@@ -74,3 +94,6 @@ export const StartEnrichmentMcpOutput = Schema.Struct({
   runId: Schema.String
 }).pipe(Schema.fieldsAssign(displayFields));
 export type StartEnrichmentMcpOutput = typeof StartEnrichmentMcpOutput.Type;
+
+export const BulkStartEnrichmentMcpOutput = BulkStartEnrichmentOutput.pipe(Schema.fieldsAssign(displayFields));
+export type BulkStartEnrichmentMcpOutput = typeof BulkStartEnrichmentMcpOutput.Type;

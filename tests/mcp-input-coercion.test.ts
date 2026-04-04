@@ -3,6 +3,7 @@ import { Schema } from "effect";
 import { SearchPostsInput, GetRecentPostsInput, GetPostLinksInput, ListExpertsInput, GetPostThreadInput, GetThreadDocumentInput } from "../src/domain/bi";
 import { ListEditorialPicksInput } from "../src/domain/editorial";
 import { ListCurationCandidatesInput } from "../src/domain/curation";
+import { ListEnrichmentGapsInput } from "../src/domain/enrichment";
 
 const decodeSync = <S extends Schema.Decoder<unknown>>(schema: S) =>
   (input: unknown): S["Type"] => Schema.decodeUnknownSync(schema)(input);
@@ -55,6 +56,15 @@ describe("MCP input schemas accept string-encoded numbers", () => {
     expect(result.limit).toBe(20);
     expect(result.since).toBe(1774000000000);
     expect(result.minScore).toBe(75);
+  });
+
+  it("ListEnrichmentGapsInput accepts limit and since as strings", () => {
+    const result = decodeSync(ListEnrichmentGapsInput)({
+      limit: "25",
+      since: "1774000000000"
+    });
+    expect(result.limit).toBe(25);
+    expect(result.since).toBe(1774000000000);
   });
 
   it("GetPostThreadInput accepts depth and parentHeight as strings", () => {

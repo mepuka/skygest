@@ -1,27 +1,51 @@
 import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import { Tool, Toolkit } from "effect/unstable/ai";
-import { Effect, Layer, Option, Schema } from "effect";
-import { stripUndefined } from "../platform/Json";
+import { Duration, Effect, Layer, Option, Result, Schedule, Schema } from "effect";
+import {
+  decodeJsonStringEitherWith,
+  encodeJsonStringWith,
+  formatSchemaParseError,
+  stringifyUnknown,
+  stripUndefined
+} from "../platform/Json";
 import {
   ExplainPostTopicsInput,
   ExpandTopicsInput,
-  GetTopicInput,
-  ListTopicsInput,
   GetPostLinksInput,
-  GetRecentPostsInput,
   GetPostThreadInput,
+  GetRecentPostsInput,
+  GetTopicInput,
   GetThreadDocumentInput,
+  ListTopicsInput,
   ListExpertsInput,
   McpToolQueryError,
   SearchPostsInput
 } from "../domain/bi";
 import { ListEditorialPicksInput, SubmitEditorialPickMcpInput } from "../domain/editorial";
-import { ListCurationCandidatesInput, CuratePostInput } from "../domain/curation";
-import { GetPostEnrichmentsInput, EnrichmentKind } from "../domain/enrichment";
 import {
+  BULK_CURATE_MAX_DECISIONS,
+  BulkCurateInput,
+  CuratePostInput,
+  CurationCandidateCursor,
+  ListCurationCandidatesInput
+} from "../domain/curation";
+import {
+  BULK_START_ENRICHMENT_MAX_POSTS,
+  BulkStartEnrichmentInput,
+  GapEnrichmentType,
+  GetPostEnrichmentsInput,
+  ListEnrichmentGapsInput,
+  ListEnrichmentIssuesInput
+} from "../domain/enrichment";
+import type { PostUri } from "../domain/types";
+import {
+  BulkCurateMcpOutput,
+  BulkStartEnrichmentMcpOutput,
   KnowledgePostsMcpOutput,
   KnowledgeLinksMcpOutput,
+  EnrichmentGapsMcpOutput,
+  EnrichmentIssuesMcpOutput,
   ExpertListMcpOutput,
   OntologyTopicsMcpOutput,
   OntologyTopicMcpOutput,
@@ -37,6 +61,13 @@ import {
   StartEnrichmentMcpOutput
 } from "./OutputSchemas.ts";
 import {
+  formatBulkCurateResult,
+  formatBulkStartEnrichmentResult,
+  formatCurationCandidateCounts,
+  formatCurationCandidateExportPage,
+  formatCurationCandidatePage,
+  formatEnrichmentGaps,
+  formatEnrichmentIssues,
   formatPosts,
   formatLinks,
   formatExperts,
@@ -45,7 +76,6 @@ import {
   formatExpandedTopics,
   formatExplainedPostTopics,
   formatEditorialPicks,
-  formatCurationCandidates,
   formatCuratePostResult,
   formatSubmitPickResult,
   formatEnrichments,
@@ -57,13 +87,19 @@ import { CurationRepo } from "../services/CurationRepo";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
-import { EnrichmentTriggerClient } from "../services/EnrichmentTriggerClient";
+import {
+  EnrichmentTriggerClient
+} from "../services/EnrichmentTriggerClient";
 import { CandidatePayloadService } from "../services/CandidatePayloadService";
 import { extractEmbedKind, buildTypedEmbed } from "../bluesky/EmbedExtract";
 import { flattenThread } from "../bluesky/ThreadFlatten.ts";
 import { printThread } from "../bluesky/ThreadPrinter.ts";
 import { OperatorIdentity } from "../http/Identity";
 import type { McpCapabilityProfile } from "./RequestAuth";
+import {
+  hasVisualEmbedPayload,
+  inferPrimaryEnrichmentType
+} from "../enrichment/EmbedSignals";
 
 // ---------------------------------------------------------------------------
 // MCP-specific input schemas — strip cursor fields that LLMs cannot construct
@@ -87,17 +123,54 @@ const GetPostLinksMcpInput = Schema.Struct({
 
 const StartEnrichmentMcpInput = Schema.Struct({
   postUri: GetPostEnrichmentsInput.fields.postUri,
-  enrichmentType: Schema.optionalKey(EnrichmentKind.annotate({
-    description: "Enrichment type: 'vision' for charts/screenshots, 'source-attribution' for links. If omitted, auto-detected from embed type."
+  enrichmentType: Schema.optionalKey(GapEnrichmentType.annotate({
+    description: "Enrichment type: 'vision' for charts/screenshots or 'source-attribution' for links. If omitted, auto-detected from the stored embed."
+  }))
+});
+const BulkStartEnrichmentMcpInput = BulkStartEnrichmentInput;
+
+const ListCurationCandidatesMcpInput = Schema.Struct({
+  status: ListCurationCandidatesInput.fields.status,
+  minScore: ListCurationCandidatesInput.fields.minScore,
+  topic: ListCurationCandidatesInput.fields.topic,
+  platform: ListCurationCandidatesInput.fields.platform,
+  since: ListCurationCandidatesInput.fields.since,
+  limit: ListCurationCandidatesInput.fields.limit,
+  cursor: Schema.optionalKey(Schema.String.annotate({
+    description: "Opaque pagination cursor returned by a previous list_curation_candidates call."
+  })),
+  export: Schema.optionalKey(Schema.Boolean.annotate({
+    description: "Return compact export rows optimized for bulk classification."
+  })),
+  count: Schema.optionalKey(Schema.Boolean.annotate({
+    description: "Return only aggregate candidate counts by platform."
   }))
 });
 
-const toQueryError = (tool: string) => (error: { message: string }) =>
+const decodeCurationCandidateCursor = decodeJsonStringEitherWith(CurationCandidateCursor);
+const encodeCurationCandidateCursor = encodeJsonStringWith(CurationCandidateCursor);
+const ENRICHMENT_TRIGGER_RETRY_SCHEDULE = Schedule.exponential(Duration.millis(250)).pipe(
+  Schedule.jittered,
+  Schedule.both(Schedule.recurs(2))
+);
+
+const toQueryError = (tool: string) => (error: unknown) =>
   new McpToolQueryError({
     tool,
-    message: error.message,
+    message: stringifyUnknown(error),
     error
   });
+
+const isMcpToolQueryError = (error: unknown): error is McpToolQueryError =>
+  typeof error === "object" &&
+  error !== null &&
+  "_tag" in error &&
+  error._tag === "McpToolQueryError";
+
+const passThroughMcpToolError = (tool: string) => (error: unknown) =>
+  isMcpToolQueryError(error)
+    ? error
+    : toQueryError(tool)(error);
 
 export const SearchPostsTool = Tool.make("search_posts", {
   description: "Search expert posts using SQLite full-text search. Matches post text, expert handles, and stored topic-match terms. Full handle strings like solar-desk.bsky.social are treated as exact handle phrases. Supports quoted phrases, OR / NOT boolean logic, and prefix search with *. Supports topic and time range filters. Use this for keyword, handle, and topic-term discovery; use get_recent_posts for chronological browsing.",
@@ -232,8 +305,8 @@ export const GetThreadDocumentTool = Tool.make("get_thread_document", {
   .annotate(Tool.OpenWorld, true);
 
 export const ListCurationCandidatesTool = Tool.make("list_curation_candidates", {
-  description: "List posts flagged by curation predicates for editorial review. Shows signal score, matched predicates, and post details. Use to find high-signal posts that may warrant enrichment.",
-  parameters: ListCurationCandidatesInput,
+  description: "List posts flagged by curation predicates for review. Supports platform filtering, aggregate count mode, compact export mode for sub-agent classification, and opaque pagination cursors.",
+  parameters: ListCurationCandidatesMcpInput,
   success: CurationCandidatesMcpOutput,
   failure: McpToolQueryError
 })
@@ -255,6 +328,30 @@ export const GetPostEnrichmentsTool = Tool.make("get_post_enrichments", {
   .annotate(Tool.Idempotent, true)
   .annotate(Tool.OpenWorld, false);
 
+export const ListEnrichmentGapsTool = Tool.make("list_enrichment_gaps", {
+  description: "List curated posts that are currently safe to queue for enrichment. Supports platform, enrichment-type, and since filtering. Returns separate vision and source-attribution buckets, plus total counts per bucket.",
+  parameters: ListEnrichmentGapsInput,
+  success: EnrichmentGapsMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "List Enrichment Gaps")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
+
+export const ListEnrichmentIssuesTool = Tool.make("list_enrichment_issues", {
+  description: "List failed or needs-review enrichment runs. Returns the post URI, enrichment type, run ID, latest progress timestamp, and any stored error envelope.",
+  parameters: ListEnrichmentIssuesInput,
+  success: EnrichmentIssuesMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "List Enrichment Issues")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
+
 export const StartEnrichmentTool = Tool.make("start_enrichment", {
   description: "Trigger enrichment for a curated post. Queues vision analysis (for charts/screenshots) or source attribution (for links). Use get_post_enrichments to poll readiness after triggering. The post must have been curated first via curate_post.",
   parameters: StartEnrichmentMcpInput,
@@ -267,13 +364,37 @@ export const StartEnrichmentTool = Tool.make("start_enrichment", {
   .annotate(Tool.Idempotent, true)
   .annotate(Tool.OpenWorld, true);
 
+export const BulkStartEnrichmentTool = Tool.make("bulk_start_enrichment", {
+  description: "Queue enrichment for many curated posts in one call. Accepts explicit posts or the direct output of list_enrichment_gaps. Retries transient 503 failures and treats already-queued conflicts as skipped.",
+  parameters: BulkStartEnrichmentMcpInput,
+  success: BulkStartEnrichmentMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Bulk Start Enrichment")
+  .annotate(Tool.Readonly, false)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, true);
+
 export const CuratePostTool = Tool.make("curate_post", {
-  description: "Curate or reject a post. Curating captures embed data for enrichment. For Bluesky posts, fetches live data. For Twitter posts, uses stored import data. Call start_enrichment separately to queue enrichment processing. Rejecting dismisses the post. Idempotent.",
+  description: "Curate or reject a post. Curating captures embed data for enrichment. For Bluesky posts, fetches live data. For Twitter posts, uses stored import data. When enrichment launching is available, curating also queues the appropriate enrichment automatically. Rejecting dismisses the post. Idempotent.",
   parameters: CuratePostInput,
   success: CuratePostMcpOutput,
   failure: McpToolQueryError
 })
   .annotate(Tool.Title, "Curate Post")
+  .annotate(Tool.Readonly, false)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, true);
+
+export const BulkCurateTool = Tool.make("bulk_curate", {
+  description: "Apply many curate or reject decisions in one call. Reuses curate_post behavior for each post, including payload capture and automatic enrichment queueing when available. Returns counts plus per-post errors. Large Bluesky-heavy batches may take longer because uncached posts require live fetches.",
+  parameters: BulkCurateInput,
+  success: BulkCurateMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Bulk Curate")
   .annotate(Tool.Readonly, false)
   .annotate(Tool.Destructive, false)
   .annotate(Tool.Idempotent, true)
@@ -308,7 +429,9 @@ export const ReadOnlyMcpToolkit = Toolkit.make(
   GetPostThreadTool,
   GetThreadDocumentTool,
   ListCurationCandidatesTool,
-  GetPostEnrichmentsTool
+  GetPostEnrichmentsTool,
+  ListEnrichmentGapsTool,
+  ListEnrichmentIssuesTool
 );
 
 export const CurationWriteMcpToolkit = Toolkit.make(
@@ -325,8 +448,12 @@ export const CurationWriteMcpToolkit = Toolkit.make(
   GetThreadDocumentTool,
   ListCurationCandidatesTool,
   GetPostEnrichmentsTool,
+  ListEnrichmentGapsTool,
+  ListEnrichmentIssuesTool,
   CuratePostTool,
-  StartEnrichmentTool
+  BulkCurateTool,
+  StartEnrichmentTool,
+  BulkStartEnrichmentTool
 );
 
 export const EditorialWriteMcpToolkit = Toolkit.make(
@@ -343,6 +470,8 @@ export const EditorialWriteMcpToolkit = Toolkit.make(
   GetThreadDocumentTool,
   ListCurationCandidatesTool,
   GetPostEnrichmentsTool,
+  ListEnrichmentGapsTool,
+  ListEnrichmentIssuesTool,
   SubmitEditorialPickTool
 );
 
@@ -360,9 +489,13 @@ export const WorkflowWriteMcpToolkit = Toolkit.make(
   GetThreadDocumentTool,
   ListCurationCandidatesTool,
   GetPostEnrichmentsTool,
+  ListEnrichmentGapsTool,
+  ListEnrichmentIssuesTool,
   CuratePostTool,
+  BulkCurateTool,
   SubmitEditorialPickTool,
-  StartEnrichmentTool
+  StartEnrichmentTool,
+  BulkStartEnrichmentTool
 );
 
 // Keep legacy export for backward compatibility in tests
@@ -371,25 +504,6 @@ export const KnowledgeMcpToolkit = ReadOnlyMcpToolkit;
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
-
-/** Check whether an embed payload contains visual assets (img/video).
- *  Recurses into `media` embeds to check nested media — a media embed
- *  with only a link card is NOT visual. Mirrors CurationService logic. */
-const hasVisualEmbedPayload = (embedPayload: unknown): boolean => {
-  if (embedPayload === null || embedPayload === undefined || typeof embedPayload !== "object") {
-    return false;
-  }
-  const ep = embedPayload as Record<string, unknown>;
-  switch (ep.kind) {
-    case "img":
-    case "video":
-      return true;
-    case "media":
-      return ep.media !== null && hasVisualEmbedPayload(ep.media);
-    default:
-      return false;
-  }
-};
 
 const extractText = (record: unknown): string => {
   if (typeof record === "object" && record !== null && "text" in record) {
@@ -414,6 +528,141 @@ type EditorialServiceI = (typeof EditorialService)["Service"];
 type CurationServiceI = (typeof CurationService)["Service"];
 type BlueskyClientI = (typeof BlueskyClient)["Service"];
 type PostEnrichmentReadServiceI = (typeof PostEnrichmentReadService)["Service"];
+type EnrichmentTriggerClientI = (typeof EnrichmentTriggerClient)["Service"];
+
+const invalidMcpInputError = (
+  tool: string,
+  message: string,
+  error: unknown
+) =>
+  new McpToolQueryError({
+    tool,
+    message,
+    error
+  });
+
+const decodeListCurationCursor = (
+  tool: string,
+  cursor: string | undefined
+) =>
+  Effect.gen(function* () {
+    if (cursor === undefined) {
+      return undefined;
+    }
+
+    const result = decodeCurationCandidateCursor(cursor);
+    if (Result.isSuccess(result)) {
+      return result.success;
+    }
+
+    return yield* invalidMcpInputError(
+      tool,
+      `Invalid curation cursor: ${formatSchemaParseError(result.failure)}`,
+      result.failure
+    );
+  });
+
+const validateBulkCurateInput = (input: typeof BulkCurateInput.Type) =>
+  Effect.gen(function* () {
+    if (input.decisions.length === 0) {
+      return yield* invalidMcpInputError(
+        "bulk_curate",
+        "Provide at least one curation decision.",
+        new Error("empty decisions")
+      );
+    }
+
+    if (input.decisions.length > BULK_CURATE_MAX_DECISIONS) {
+      return yield* invalidMcpInputError(
+        "bulk_curate",
+        `Too many curation decisions. Maximum: ${BULK_CURATE_MAX_DECISIONS}.`,
+        new Error("too many decisions")
+      );
+    }
+
+    const seen = new Set<string>();
+    for (const decision of input.decisions) {
+      if (seen.has(decision.postUri)) {
+        return yield* invalidMcpInputError(
+          "bulk_curate",
+          `Duplicate postUri in batch: ${decision.postUri}`,
+          new Error("duplicate postUri")
+        );
+      }
+
+      seen.add(decision.postUri);
+    }
+  });
+
+const validateBulkStartEnrichmentInput = (
+  input: typeof BulkStartEnrichmentMcpInput.Type
+) =>
+  Effect.gen(function* () {
+    const normalizedPosts = [
+      ...(input.posts ?? []),
+      ...(input.gaps?.vision.postUris.map((postUri) => ({
+        postUri,
+        enrichmentType: "vision" as const
+      })) ?? []),
+      ...(input.gaps?.sourceAttribution.postUris.map((postUri) => ({
+        postUri,
+        enrichmentType: "source-attribution" as const
+      })) ?? [])
+    ];
+
+    if (normalizedPosts.length === 0) {
+      return yield* invalidMcpInputError(
+        "bulk_start_enrichment",
+        "Provide at least one post or a non-empty gaps payload.",
+        new Error("empty posts")
+      );
+    }
+
+    if (normalizedPosts.length > BULK_START_ENRICHMENT_MAX_POSTS) {
+      return yield* invalidMcpInputError(
+        "bulk_start_enrichment",
+        `Too many enrichment requests. Maximum: ${BULK_START_ENRICHMENT_MAX_POSTS}.`,
+        new Error("too many posts")
+      );
+    }
+
+    const seen = new Set<string>();
+    for (const post of normalizedPosts) {
+      if (seen.has(post.postUri)) {
+        return yield* invalidMcpInputError(
+          "bulk_start_enrichment",
+          `Duplicate postUri in batch: ${post.postUri}`,
+          new Error("duplicate postUri")
+        );
+      }
+
+      seen.add(post.postUri);
+    }
+
+    return normalizedPosts;
+  });
+
+const startEnrichmentViaTrigger = (
+  trigger: EnrichmentTriggerClientI,
+  tool: string,
+  input: {
+    readonly postUri: PostUri;
+    readonly enrichmentType: GapEnrichmentType;
+  }
+) =>
+  trigger.start(input).pipe(
+    Effect.retry({
+      schedule: ENRICHMENT_TRIGGER_RETRY_SCHEDULE,
+      while: (error) => error.status === 503
+    }),
+    Effect.mapError((error) =>
+      new McpToolQueryError({
+        tool,
+        message: error.message,
+        error
+      })
+    )
+  );
 
 // ---------------------------------------------------------------------------
 // Shared read-only handler implementations
@@ -547,15 +796,7 @@ const makeReadOnlyHandlers = (
           _display: printThread(flat, {}).body
         } as unknown as PostThreadMcpOutput);
       }),
-      Effect.mapError((error) =>
-        "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
-          ? error as McpToolQueryError
-          : new McpToolQueryError({
-              tool: "get_post_thread",
-              message: error instanceof Error ? error.message : String(error),
-              error
-            })
-      )
+      Effect.mapError(passThroughMcpToolError("get_post_thread"))
     ),
   get_thread_document: (input: typeof GetThreadDocumentInput.Type) =>
     bskyClient.getPostThread(input.postUri, {
@@ -580,31 +821,98 @@ const makeReadOnlyHandlers = (
 
         return Effect.succeed(doc);
       }),
-      Effect.mapError((error) =>
-        "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
-          ? error as McpToolQueryError
-          : new McpToolQueryError({
-              tool: "get_thread_document",
-              message: error instanceof Error ? error.message : String(error),
-              error
-            })
-      )
+      Effect.mapError(passThroughMcpToolError("get_thread_document"))
     ),
-  list_curation_candidates: (input: typeof ListCurationCandidatesInput.Type) =>
-    curationService.listCandidates(input).pipe(
-      Effect.flatMap((items) =>
-        Effect.forEach(items, (item) =>
+  list_curation_candidates: (input: typeof ListCurationCandidatesMcpInput.Type) =>
+    Effect.gen(function* () {
+      if (input.export === true && input.count === true) {
+        return yield* invalidMcpInputError(
+          "list_curation_candidates",
+          "Choose either export mode or count mode, not both.",
+          new Error("conflicting list modes")
+        );
+      }
+
+      const normalizedBaseInput = stripUndefined({
+        status: input.status,
+        minScore: input.minScore,
+        topic: input.topic,
+        platform: input.platform,
+        since: input.since,
+        limit: input.limit
+      });
+
+      if (input.count === true) {
+        const counts = yield* curationService.countCandidates(normalizedBaseInput);
+        return {
+          mode: "count" as const,
+          total: counts.total,
+          nextCursor: null,
+          byPlatform: counts.byPlatform,
+          items: [],
+          exportItems: [],
+          _display: formatCurationCandidateCounts(counts)
+        };
+      }
+
+      const cursor = yield* decodeListCurationCursor(
+        "list_curation_candidates",
+        input.cursor
+      );
+      const normalizedInput = stripUndefined({
+        ...normalizedBaseInput,
+        cursor
+      });
+
+      if (input.export === true) {
+        const page = yield* curationService.exportCandidates(normalizedInput);
+        const nextCursor = page.nextCursor === null
+          ? null
+          : encodeCurationCandidateCursor(page.nextCursor);
+
+        return {
+          mode: "export" as const,
+          total: page.total,
+          nextCursor,
+          byPlatform: null,
+          items: [],
+          exportItems: page.items,
+          _display: formatCurationCandidateExportPage({
+            items: page.items,
+            total: page.total,
+            nextCursor
+          })
+        };
+      }
+
+      const page = yield* curationService.listCandidates(normalizedInput);
+      const items = yield* Effect.forEach(
+        page.items,
+        (item) =>
           enrichmentReadService.getPost(item.uri).pipe(
             Effect.map((e) => ({ ...item, enrichmentReadiness: e.readiness }))
           ),
-          { concurrency: "unbounded" }
-        )
-      ),
-      Effect.map((items) => ({
+        { concurrency: "unbounded" }
+      );
+      const nextCursor = page.nextCursor === null
+        ? null
+        : encodeCurationCandidateCursor(page.nextCursor);
+
+      return {
+        mode: "full" as const,
+        total: page.total,
+        nextCursor,
+        byPlatform: null,
         items,
-        _display: formatCurationCandidates(items)
-      })),
-      Effect.mapError(toQueryError("list_curation_candidates"))
+        exportItems: [],
+        _display: formatCurationCandidatePage({
+          items,
+          total: page.total,
+          nextCursor
+        })
+      };
+    }).pipe(
+      Effect.mapError(passThroughMcpToolError("list_curation_candidates"))
     ),
   get_post_enrichments: (input: typeof GetPostEnrichmentsInput.Type) =>
     enrichmentReadService.getPost(input.postUri).pipe(
@@ -613,6 +921,22 @@ const makeReadOnlyHandlers = (
         _display: formatEnrichments(result)
       })),
       Effect.mapError(toQueryError("get_post_enrichments"))
+    ),
+  list_enrichment_gaps: (input: typeof ListEnrichmentGapsInput.Type) =>
+    enrichmentReadService.listGaps(input).pipe(
+      Effect.map((result) => ({
+        ...result,
+        _display: formatEnrichmentGaps(result)
+      })),
+      Effect.mapError(toQueryError("list_enrichment_gaps"))
+    ),
+  list_enrichment_issues: (input: typeof ListEnrichmentIssuesInput.Type) =>
+    enrichmentReadService.listIssues(input).pipe(
+      Effect.map((result) => ({
+        ...result,
+        _display: formatEnrichmentIssues(result)
+      })),
+      Effect.mapError(toQueryError("list_enrichment_issues"))
     )
 });
 
@@ -638,6 +962,25 @@ const makeCuratePostHandler = (curationService: CurationServiceI) => ({
         _display: formatCuratePostResult(result)
       })),
       Effect.mapError(toQueryError("curate_post"))
+    ) as any
+});
+
+const makeBulkCurateHandler = (curationService: CurationServiceI) => ({
+  bulk_curate: (input: typeof BulkCurateInput.Type) =>
+    Effect.gen(function* () {
+      yield* validateBulkCurateInput(input);
+      const identity = yield* OperatorIdentity;
+      const result = yield* curationService.bulkCurate(
+        input,
+        identity.email ?? identity.subject ?? "mcp-operator"
+      );
+
+      return {
+        ...result,
+        _display: formatBulkCurateResult(result)
+      };
+    }).pipe(
+      Effect.mapError(passThroughMcpToolError("bulk_curate"))
     ) as any
 });
 
@@ -694,11 +1037,7 @@ const makeSubmitPickHandler = (editorialService: EditorialServiceI) => ({
         _display: formatSubmitPickResult(result)
       };
     }).pipe(
-      Effect.mapError((e) =>
-        "_tag" in e && (e as any)._tag === "McpToolQueryError"
-          ? (e as McpToolQueryError)
-          : toQueryError("submit_editorial_pick")(e as any)
-      )
+      Effect.mapError(passThroughMcpToolError("submit_editorial_pick"))
     ) as any
 });
 
@@ -735,25 +1074,13 @@ const makeStartEnrichmentHandler = () => ({
 
       let enrichmentType = input.enrichmentType;
       if (enrichmentType === undefined) {
-        // Detect from embed payload, not just embedType string.
-        // A "media" embed may contain only a link card (no visual assets).
-        enrichmentType = hasVisualEmbedPayload(payload.embedPayload)
-          ? "vision" as const
-          : "source-attribution" as const;
+        enrichmentType = inferPrimaryEnrichmentType(payload.embedPayload);
       }
 
-      const result = yield* trigger.start({
+      const result = yield* startEnrichmentViaTrigger(trigger, "start_enrichment", {
         postUri: input.postUri,
         enrichmentType
-      }).pipe(
-        Effect.mapError((e) =>
-          new McpToolQueryError({
-            tool: "start_enrichment",
-            message: e.message,
-            error: e
-          })
-        )
-      );
+      });
 
       return {
         postUri: input.postUri,
@@ -768,11 +1095,81 @@ const makeStartEnrichmentHandler = () => ({
         })
       };
     }).pipe(
-      Effect.mapError((e) =>
-        "_tag" in (e as any) && (e as any)._tag === "McpToolQueryError"
-          ? (e as McpToolQueryError)
-          : toQueryError("start_enrichment")(e as any)
-      )
+      Effect.mapError(passThroughMcpToolError("start_enrichment"))
+    ) as any
+});
+
+const makeBulkStartEnrichmentHandler = () => ({
+  bulk_start_enrichment: (input: typeof BulkStartEnrichmentMcpInput.Type) =>
+    Effect.gen(function* () {
+      const triggerOption = yield* Effect.serviceOption(EnrichmentTriggerClient);
+      if (Option.isNone(triggerOption)) {
+        return yield* new McpToolQueryError({
+          tool: "bulk_start_enrichment",
+          message: "Enrichment trigger is not available in this deployment. Use the admin enrichment endpoint on the ingest worker.",
+          error: new Error("EnrichmentTriggerClient not available")
+        });
+      }
+
+      const trigger = triggerOption.value;
+      const payloadService = yield* CandidatePayloadService;
+      const posts = yield* validateBulkStartEnrichmentInput(input);
+      const outcomes = yield* Effect.forEach(
+        posts,
+        ({ postUri, enrichmentType }) =>
+          Effect.gen(function* () {
+            const payload = yield* payloadService.getPayload(postUri);
+            if (payload === null || payload.captureStage !== "picked") {
+              return {
+                postUri,
+                status: "failed" as const,
+                error: "Post must be curated before starting enrichment. Call curate_post first."
+              };
+            }
+
+            const resolvedEnrichmentType =
+              enrichmentType ?? inferPrimaryEnrichmentType(payload.embedPayload);
+
+            return yield* trigger.start({
+              postUri,
+              enrichmentType: resolvedEnrichmentType
+            }).pipe(
+              Effect.retry({
+                schedule: ENRICHMENT_TRIGGER_RETRY_SCHEDULE,
+                while: (error) => error.status === 503
+              }),
+              Effect.match({
+                onSuccess: () => ({
+                  postUri,
+                  status: "queued" as const,
+                  error: null
+                }),
+                onFailure: (error) => ({
+                  postUri,
+                  status: error.status === 409 ? "skipped" as const : "failed" as const,
+                  error: error.status === 409 ? null : error.message
+                })
+              })
+            );
+          }),
+        { concurrency: 10 }
+      );
+
+      const result = {
+        queued: outcomes.filter((item) => item.status === "queued").length,
+        skipped: outcomes.filter((item) => item.status === "skipped").length,
+        failed: outcomes.filter((item) => item.status === "failed").length,
+        errors: outcomes.flatMap((item) =>
+          item.error === null ? [] : [{ postUri: item.postUri, error: item.error }]
+        )
+      };
+
+      return {
+        ...result,
+        _display: formatBulkStartEnrichmentResult(result)
+      };
+    }).pipe(
+      Effect.mapError(passThroughMcpToolError("bulk_start_enrichment"))
     ) as any
 });
 
@@ -805,7 +1202,9 @@ export const CurationWriteMcpHandlers = CurationWriteMcpToolkit.toLayer(
     return CurationWriteMcpToolkit.of({
       ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
       ...makeCuratePostHandler(curationService),
-      ...makeStartEnrichmentHandler()
+      ...makeBulkCurateHandler(curationService),
+      ...makeStartEnrichmentHandler(),
+      ...makeBulkStartEnrichmentHandler()
     });
   })
 );
@@ -836,8 +1235,10 @@ export const WorkflowWriteMcpHandlers = WorkflowWriteMcpToolkit.toLayer(
     return WorkflowWriteMcpToolkit.of({
       ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
       ...makeCuratePostHandler(curationService),
+      ...makeBulkCurateHandler(curationService),
       ...makeSubmitPickHandler(editorialService),
-      ...makeStartEnrichmentHandler()
+      ...makeStartEnrichmentHandler(),
+      ...makeBulkStartEnrichmentHandler()
     });
   })
 );

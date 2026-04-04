@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { PostUri } from "./types";
+import { NonNegativeInt, PlatformSchema, PostUri } from "./types";
 import { FlexibleNumber, KnowledgePostResult } from "./bi";
 import { EnrichmentReadiness } from "./enrichment";
 
@@ -28,11 +28,26 @@ export const CurationRecord = Schema.Struct({
 });
 export type CurationRecord = Schema.Schema.Type<typeof CurationRecord>;
 
+export const CurationPlatform = PlatformSchema;
+export type CurationPlatform = Schema.Schema.Type<typeof CurationPlatform>;
+
+export const CurationPlatformFilter = Schema.Union([PlatformSchema, Schema.Literal("all")]);
+export type CurationPlatformFilter = Schema.Schema.Type<typeof CurationPlatformFilter>;
+
+export const CurationCandidateCursor = Schema.Struct({
+  signalScore: CurationSignalScore,
+  flaggedAt: Schema.Number,
+  postUri: PostUri
+});
+export type CurationCandidateCursor = Schema.Schema.Type<typeof CurationCandidateCursor>;
+
 export const ListCurationCandidatesInput = Schema.Struct({
   status: Schema.optionalKey(CurationStatus.annotate({ description: "Filter by curation status (default: flagged)" })),
   minScore: Schema.optionalKey(Schema.Union([CurationSignalScore, Schema.NumberFromString.pipe(Schema.decodeTo(CurationSignalScore))]).annotate({ description: "Minimum signal score (0-100) to include" })),
   topic: Schema.optionalKey(Schema.String.annotate({ description: "Topic slug to filter by" })),
+  platform: Schema.optionalKey(CurationPlatformFilter.annotate({ description: "Filter by platform: bluesky, twitter, or all (default all)" })),
   since: Schema.optionalKey(FlexibleNumber.annotate({ description: "Filter posts flagged after this Unix epoch timestamp (milliseconds)" })),
+  cursor: Schema.optionalKey(CurationCandidateCursor),
   limit: Schema.optionalKey(FlexibleNumber.annotate({ description: "Maximum number of results to return" }))
 });
 export type ListCurationCandidatesInput = Schema.Schema.Type<typeof ListCurationCandidatesInput>;
@@ -44,6 +59,9 @@ export const CuratePostInput = Schema.Struct({
 });
 export type CuratePostInput = Schema.Schema.Type<typeof CuratePostInput>;
 
+export const BulkCurateDecision = CuratePostInput;
+export type BulkCurateDecision = Schema.Schema.Type<typeof BulkCurateDecision>;
+
 export const CurationCandidateOutput = Schema.Struct({
   ...KnowledgePostResult.fields,
   signalScore: CurationSignalScore,
@@ -54,8 +72,55 @@ export const CurationCandidateOutput = Schema.Struct({
 });
 export type CurationCandidateOutput = typeof CurationCandidateOutput.Type;
 
+export const CurationCandidateExportItem = Schema.Struct({
+  uri: KnowledgePostResult.fields.uri,
+  handle: KnowledgePostResult.fields.handle,
+  text: KnowledgePostResult.fields.text,
+  createdAt: KnowledgePostResult.fields.createdAt,
+  topics: KnowledgePostResult.fields.topics,
+  embedType: KnowledgePostResult.fields.embedType,
+  tier: KnowledgePostResult.fields.tier,
+  platform: CurationPlatform,
+  signalScore: CurationSignalScore
+});
+export type CurationCandidateExportItem = Schema.Schema.Type<typeof CurationCandidateExportItem>;
+
+export const CurationCandidatePageOutput = Schema.Struct({
+  items: Schema.Array(CurationCandidateOutput),
+  total: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  nextCursor: Schema.NullOr(CurationCandidateCursor)
+});
+export type CurationCandidatePageOutput = Schema.Schema.Type<typeof CurationCandidatePageOutput>;
+
+export const CurationCandidateExportPageOutput = Schema.Struct({
+  items: Schema.Array(CurationCandidateExportItem),
+  total: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  nextCursor: Schema.NullOr(CurationCandidateCursor)
+});
+export type CurationCandidateExportPageOutput = Schema.Schema.Type<typeof CurationCandidateExportPageOutput>;
+
+export const CurationCandidatePlatformCounts = Schema.Struct({
+  bluesky: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  twitter: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
+});
+export type CurationCandidatePlatformCounts = Schema.Schema.Type<typeof CurationCandidatePlatformCounts>;
+
+export const CurationCandidateCountOutput = Schema.Struct({
+  total: NonNegativeInt,
+  byPlatform: CurationCandidatePlatformCounts
+});
+export type CurationCandidateCountOutput = Schema.Schema.Type<typeof CurationCandidateCountOutput>;
+
+export const CurationCandidatesMode = Schema.Literals(["full", "export", "count"]);
+export type CurationCandidatesMode = Schema.Schema.Type<typeof CurationCandidatesMode>;
+
 export const CurationCandidatesOutput = Schema.Struct({
-  items: Schema.Array(CurationCandidateOutput)
+  mode: CurationCandidatesMode,
+  total: NonNegativeInt,
+  nextCursor: Schema.NullOr(CurationCandidateCursor),
+  byPlatform: Schema.NullOr(CurationCandidatePlatformCounts),
+  items: Schema.Array(CurationCandidateOutput),
+  exportItems: Schema.Array(CurationCandidateExportItem)
 });
 export type CurationCandidatesOutput = Schema.Schema.Type<typeof CurationCandidatesOutput>;
 
@@ -67,9 +132,40 @@ export const CuratePostOutput = Schema.Struct({
 });
 export type CuratePostOutput = Schema.Schema.Type<typeof CuratePostOutput>;
 
+export const BulkCurateInput = Schema.Struct({
+  decisions: Schema.Array(BulkCurateDecision).annotate({
+    description: "Batch of curate or reject decisions. Recommended maximum 1000 items per call."
+  })
+});
+export type BulkCurateInput = Schema.Schema.Type<typeof BulkCurateInput>;
+
+export const BULK_CURATE_MAX_DECISIONS = 1000;
+
+export const BulkCurateError = Schema.Struct({
+  postUri: PostUri,
+  error: Schema.String
+});
+export type BulkCurateError = Schema.Schema.Type<typeof BulkCurateError>;
+
+export const BulkCurateOutput = Schema.Struct({
+  curated: NonNegativeInt,
+  rejected: NonNegativeInt,
+  skipped: NonNegativeInt,
+  errors: Schema.Array(BulkCurateError)
+});
+export type BulkCurateOutput = Schema.Schema.Type<typeof BulkCurateOutput>;
+
 export class CurationPostNotFoundError extends Schema.TaggedErrorClass<CurationPostNotFoundError>()(
   "CurationPostNotFoundError",
   {
     postUri: PostUri
+  }
+) {}
+
+export class CurationBatchLimitError extends Schema.TaggedErrorClass<CurationBatchLimitError>()(
+  "CurationBatchLimitError",
+  {
+    maximum: NonNegativeInt,
+    actual: NonNegativeInt
   }
 ) {}

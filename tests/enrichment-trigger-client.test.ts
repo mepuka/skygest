@@ -1,6 +1,9 @@
-import { Effect } from "effect";
+import { Effect, Schema } from "effect";
 import { describe, expect, it } from "@effect/vitest";
+import { PostUri } from "../src/domain/types";
 import { EnrichmentTriggerClient } from "../src/services/EnrichmentTriggerClient";
+
+const asPostUri = Schema.decodeUnknownSync(PostUri);
 
 describe("EnrichmentTriggerClient", () => {
   it.effect("start returns queued response on success", () => {
@@ -28,7 +31,7 @@ describe("EnrichmentTriggerClient", () => {
     return Effect.gen(function* () {
       const client = yield* EnrichmentTriggerClient;
       const result = yield* client.start({
-        postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
+        postUri: asPostUri("at://did:plc:abc/app.bsky.feed.post/xyz"),
         enrichmentType: "source-attribution"
       });
       expect(result.status).toBe("queued");
@@ -60,7 +63,7 @@ describe("EnrichmentTriggerClient", () => {
       const client = yield* EnrichmentTriggerClient;
       const result = yield* client
         .start({
-          postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
+          postUri: asPostUri("at://did:plc:abc/app.bsky.feed.post/xyz"),
           enrichmentType: "vision"
         })
         .pipe(Effect.result);
@@ -92,7 +95,7 @@ describe("EnrichmentTriggerClient", () => {
     return Effect.gen(function* () {
       const client = yield* EnrichmentTriggerClient;
       yield* client.start({
-        postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
+        postUri: asPostUri("at://did:plc:abc/app.bsky.feed.post/xyz"),
         enrichmentType: "vision"
       });
       expect(capturedRequest).not.toBeNull();
