@@ -17,6 +17,26 @@ const makeJsonRpcRequest = (method: string, params?: Record<string, unknown>) =>
 // ---------------------------------------------------------------------------
 
 describe("classifyMcpRequest", () => {
+  it("tools/call with add_expert requires experts:write", async () => {
+    const req = makeJsonRpcRequest("tools/call", { name: "add_expert" });
+    const result = await classifyMcpRequest(req);
+    expect(result).toEqual({
+      method: "tools/call",
+      toolOrPromptName: "add_expert",
+      requiredScopes: ["experts:write"],
+    });
+  });
+
+  it("tools/call with set_expert_active requires experts:write", async () => {
+    const req = makeJsonRpcRequest("tools/call", { name: "set_expert_active" });
+    const result = await classifyMcpRequest(req);
+    expect(result).toEqual({
+      method: "tools/call",
+      toolOrPromptName: "set_expert_active",
+      requiredScopes: ["experts:write"],
+    });
+  });
+
   it("tools/call with import_posts requires ops:refresh", async () => {
     const req = makeJsonRpcRequest("tools/call", { name: "import_posts" });
     const result = await classifyMcpRequest(req);
@@ -157,6 +177,12 @@ describe("profileForIdentity", () => {
     ).toBe("ops-refresh");
   });
 
+  it("mcp:read + experts:write yields experts-write", () => {
+    expect(
+      profileForIdentity({ scopes: ["mcp:read", "experts:write"] }),
+    ).toBe("experts-write");
+  });
+
   it("both curation:write and editorial:write yields workflow-write", () => {
     expect(
       profileForIdentity({
@@ -169,6 +195,18 @@ describe("profileForIdentity", () => {
     expect(
       profileForIdentity({ scopes: ["mcp:read", "ops:read"] }),
     ).toBe("ops-read");
+  });
+
+  it("mcp:read + experts:write + ops:read yields ops-experts-write", () => {
+    expect(
+      profileForIdentity({ scopes: ["mcp:read", "experts:write", "ops:read"] }),
+    ).toBe("ops-experts-write");
+  });
+
+  it("mcp:read + experts:write + ops:refresh yields experts-write-refresh", () => {
+    expect(
+      profileForIdentity({ scopes: ["mcp:read", "experts:write", "ops:refresh"] }),
+    ).toBe("experts-write-refresh");
   });
 
   it("only mcp:read yields read-only", () => {
@@ -229,6 +267,21 @@ describe("profileForIdentity", () => {
         ],
       }),
     ).toBe("ops-workflow-write-refresh");
+  });
+
+  it("workflow + experts + ops scopes yields ops-experts-workflow-write-refresh", () => {
+    expect(
+      profileForIdentity({
+        scopes: [
+          "mcp:read",
+          "experts:write",
+          "curation:write",
+          "editorial:write",
+          "ops:read",
+          "ops:refresh"
+        ],
+      }),
+    ).toBe("ops-experts-workflow-write-refresh");
   });
 
   it("empty scopes yields read-only", () => {

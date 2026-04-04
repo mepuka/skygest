@@ -11,18 +11,10 @@ export type McpCapabilityProfile =
   | "ops-read"
   | "ops-refresh"
   | "ops-read-refresh"
-  | "curation-write"
-  | "ops-curation-write"
-  | "curation-write-refresh"
-  | "ops-curation-write-refresh"
-  | "editorial-write"
-  | "ops-editorial-write"
-  | "editorial-write-refresh"
-  | "ops-editorial-write-refresh"
-  | "workflow-write"
-  | "ops-workflow-write"
-  | "workflow-write-refresh"
-  | "ops-workflow-write-refresh";
+  | NonReadOnlyBaseCapabilityProfile
+  | `ops-${NonReadOnlyBaseCapabilityProfile}`
+  | `${NonReadOnlyBaseCapabilityProfile}-refresh`
+  | `ops-${NonReadOnlyBaseCapabilityProfile}-refresh`;
 
 /**
  * Classification of an incoming MCP JSON-RPC request.
@@ -41,6 +33,8 @@ export type McpRequestClassification = {
 const TOOL_SCOPES: Record<string, ReadonlyArray<string>> = {
   get_pipeline_status: ["ops:read"],
   import_posts: ["ops:refresh"],
+  add_expert: ["experts:write"],
+  set_expert_active: ["experts:write"],
   curate_post: ["curation:write"],
   bulk_curate: ["curation:write"],
   submit_editorial_pick: ["editorial:write"],
@@ -120,66 +114,80 @@ export const classifyMcpRequest = async (
 
 type BaseCapabilityProfile =
   | "read-only"
+  | "experts-write"
   | "curation-write"
+  | "experts-curation-write"
   | "editorial-write"
-  | "workflow-write";
+  | "experts-editorial-write"
+  | "workflow-write"
+  | "experts-workflow-write";
+
+type NonReadOnlyBaseCapabilityProfile = Exclude<
+  BaseCapabilityProfile,
+  "read-only"
+>;
 
 const applyOpsScopes = (
   base: BaseCapabilityProfile,
   hasOpsRead: boolean,
   hasOpsRefresh: boolean
 ): McpCapabilityProfile => {
-  switch (base) {
-    case "read-only":
-      if (hasOpsRead && hasOpsRefresh) return "ops-read-refresh";
-      if (hasOpsRead) return "ops-read";
-      if (hasOpsRefresh) return "ops-refresh";
-      return "read-only";
-    case "curation-write":
-      if (hasOpsRead && hasOpsRefresh) return "ops-curation-write-refresh";
-      if (hasOpsRead) return "ops-curation-write";
-      if (hasOpsRefresh) return "curation-write-refresh";
-      return "curation-write";
-    case "editorial-write":
-      if (hasOpsRead && hasOpsRefresh) return "ops-editorial-write-refresh";
-      if (hasOpsRead) return "ops-editorial-write";
-      if (hasOpsRefresh) return "editorial-write-refresh";
-      return "editorial-write";
-    case "workflow-write":
-      if (hasOpsRead && hasOpsRefresh) return "ops-workflow-write-refresh";
-      if (hasOpsRead) return "ops-workflow-write";
-      if (hasOpsRefresh) return "workflow-write-refresh";
-      return "workflow-write";
+  if (base === "read-only") {
+    if (hasOpsRead && hasOpsRefresh) return "ops-read-refresh";
+    if (hasOpsRead) return "ops-read";
+    if (hasOpsRefresh) return "ops-refresh";
+    return "read-only";
   }
+
+  const withRefresh = hasOpsRefresh ? `${base}-refresh` : base;
+  return (hasOpsRead ? `ops-${withRefresh}` : withRefresh) as McpCapabilityProfile;
 };
 
 /**
  * Determine which capability profile an identity qualifies for based on
  * its scopes.
  *
+ * - `experts:write` adds expert-management tools to the matching profile
  * - `ops:read` adds the pipeline-status tool to the matching profile
  * - `ops:refresh` adds the import_posts tool to the matching profile
- * - Both `curation:write` AND `editorial:write` -> `"workflow-write"`
- * - Only `curation:write`                       -> `"curation-write"`
- * - Only `editorial:write`                      -> `"editorial-write"`
- * - Neither                                     -> `"read-only"`
+ * - Both `curation:write` AND `editorial:write` -> `"workflow-write"` base
+ * - Only `curation:write`                       -> `"curation-write"` base
+ * - Only `editorial:write`                      -> `"editorial-write"` base
+ * - Only `experts:write`                        -> `"experts-write"` base
+ * - Neither                                     -> `"read-only"` base
  */
 export const profileForIdentity = (
   identity: { readonly scopes: ReadonlyArray<string> },
 ): McpCapabilityProfile => {
+  const hasExpertsWrite = identity.scopes.includes("experts:write");
   const hasCuration = identity.scopes.includes("curation:write");
   const hasEditorial = identity.scopes.includes("editorial:write");
   const hasOpsRead = identity.scopes.includes("ops:read");
   const hasOpsRefresh = identity.scopes.includes("ops:refresh");
 
   if (hasCuration && hasEditorial) {
-    return applyOpsScopes("workflow-write", hasOpsRead, hasOpsRefresh);
+    return applyOpsScopes(
+      hasExpertsWrite ? "experts-workflow-write" : "workflow-write",
+      hasOpsRead,
+      hasOpsRefresh
+    );
   }
   if (hasCuration) {
-    return applyOpsScopes("curation-write", hasOpsRead, hasOpsRefresh);
+    return applyOpsScopes(
+      hasExpertsWrite ? "experts-curation-write" : "curation-write",
+      hasOpsRead,
+      hasOpsRefresh
+    );
   }
   if (hasEditorial) {
-    return applyOpsScopes("editorial-write", hasOpsRead, hasOpsRefresh);
+    return applyOpsScopes(
+      hasExpertsWrite ? "experts-editorial-write" : "editorial-write",
+      hasOpsRead,
+      hasOpsRefresh
+    );
+  }
+  if (hasExpertsWrite) {
+    return applyOpsScopes("experts-write", hasOpsRead, hasOpsRefresh);
   }
   return applyOpsScopes("read-only", hasOpsRead, hasOpsRefresh);
 };

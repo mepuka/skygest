@@ -1,12 +1,16 @@
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { describe, expect, it } from "@effect/vitest";
+import { parseAvatarUrl } from "../src/bluesky/BskyCdn";
+import { BlueskyClient } from "../src/bluesky/BlueskyClient";
 import { runMigrations } from "../src/db/migrate";
+import { Did } from "../src/domain/types";
 import { decodeCallToolResultWith } from "../src/mcp/Client";
 import { BULK_CURATE_MAX_DECISIONS } from "../src/domain/curation";
 import { BULK_START_ENRICHMENT_MAX_POSTS } from "../src/domain/enrichment";
 import { createPersistentMcpHandler } from "../src/mcp/Router";
 import {
+  AddExpertMcpOutput,
   BulkCurateMcpOutput,
   BulkStartEnrichmentMcpOutput,
   CurationCandidatesMcpOutput,
@@ -17,15 +21,18 @@ import {
   OntologyTopicsMcpOutput,
   EditorialPicksMcpOutput,
   PipelineStatusMcpOutput,
-  ImportPostsMcpOutput
+  ImportPostsMcpOutput,
+  SetExpertActiveMcpOutput
 } from "../src/mcp/OutputSchemas";
 import { EnrichmentTriggerClient } from "../src/services/EnrichmentTriggerClient";
 import { smokeFixtureUris } from "../src/staging/SmokeFixture";
 import {
   createMcpClient,
+  expertsWriteIdentity,
   makeBiLayer,
   opsCurationWriteIdentity,
   opsEditorialWriteIdentity,
+  opsExpertsWriteIdentity,
   opsReadIdentity,
   opsRefreshIdentity,
   readOnlyIdentity,
@@ -47,6 +54,43 @@ const decodeTopicsResponse = decodeCallToolResultWith(OntologyTopicsMcpOutput);
 const decodeEditorialPicksResponse = decodeCallToolResultWith(EditorialPicksMcpOutput);
 const decodePipelineStatusResponse = decodeCallToolResultWith(PipelineStatusMcpOutput);
 const decodeImportPostsResponse = decodeCallToolResultWith(ImportPostsMcpOutput);
+const decodeAddExpertResponse = decodeCallToolResultWith(AddExpertMcpOutput);
+const decodeSetExpertActiveResponse = decodeCallToolResultWith(SetExpertActiveMcpOutput);
+const decodeDid = Schema.decodeUnknownSync(Did);
+
+const expertRegistryDid = decodeDid("did:plc:mcp-expert-1");
+const expertRegistryHandle = "gridwatch.bsky.social";
+const expertRegistryDisplayName = "Grid Watch";
+const expertRegistryAvatar = parseAvatarUrl(
+  "https://cdn.bsky.app/img/avatar/plain/did:plc:mcp-expert-1/avatar@jpeg"
+);
+
+const makeExpertRegistryBlueskyLayer = () =>
+  Layer.succeed(BlueskyClient, {
+    resolveDidOrHandle: (input: string) =>
+      Effect.succeed({
+        did: expertRegistryDid,
+        handle: input.startsWith("did:") ? expertRegistryHandle : input
+      }),
+    getProfile: () =>
+      Effect.succeed({
+        did: expertRegistryDid,
+        handle: expertRegistryHandle,
+        displayName: expertRegistryDisplayName,
+        description: "Energy market analyst",
+        avatar: expertRegistryAvatar
+      }),
+    getFollows: () =>
+      Effect.die("unexpected getFollows"),
+    resolveRepoService: () =>
+      Effect.die("unexpected resolveRepoService"),
+    listRecordsAtService: () =>
+      Effect.die("unexpected listRecordsAtService"),
+    getPostThread: () =>
+      Effect.die("unexpected getPostThread"),
+    getPosts: () =>
+      Effect.die("unexpected getPosts")
+  } as any);
 
 const initializePersistentPromptSession = async (
   layer: ReturnType<typeof makeBiLayer>
@@ -454,6 +498,36 @@ describe("MCP prompts by profile", () => {
 });
 
 describe("MCP tool visibility by profile", () => {
+  it.live("experts-write profile includes expert tools but not operator or workflow tools", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const seedLayer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(
+          makeBiLayer({ filename }),
+          expertsWriteIdentity
+        );
+
+        try {
+          const tools = await client.listTools();
+          const names = tools.tools.map((t) => t.name);
+          expect(names).toContain("add_expert");
+          expect(names).toContain("set_expert_active");
+          expect(names).not.toContain("get_pipeline_status");
+          expect(names).not.toContain("import_posts");
+          expect(names).not.toContain("curate_post");
+          expect(names).not.toContain("bulk_curate");
+          expect(names).not.toContain("start_enrichment");
+          expect(names).not.toContain("bulk_start_enrichment");
+          expect(names).not.toContain("submit_editorial_pick");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
   it.live("workflow-write profile includes write tools but not operator tools", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
@@ -470,6 +544,8 @@ describe("MCP tool visibility by profile", () => {
           const names = tools.tools.map((t) => t.name);
           expect(names).not.toContain("get_pipeline_status");
           expect(names).not.toContain("import_posts");
+          expect(names).not.toContain("add_expert");
+          expect(names).not.toContain("set_expert_active");
           expect(names).toContain("start_enrichment");
           expect(names).toContain("bulk_start_enrichment");
           expect(names).toContain("curate_post");
@@ -498,6 +574,8 @@ describe("MCP tool visibility by profile", () => {
           const names = tools.tools.map((t) => t.name);
           expect(names).toContain("get_pipeline_status");
           expect(names).toContain("import_posts");
+          expect(names).toContain("add_expert");
+          expect(names).toContain("set_expert_active");
           expect(names).toContain("start_enrichment");
           expect(names).toContain("bulk_start_enrichment");
           expect(names).toContain("curate_post");
@@ -526,6 +604,8 @@ describe("MCP tool visibility by profile", () => {
           const names = tools.tools.map((t) => t.name);
           expect(names).toContain("get_pipeline_status");
           expect(names).not.toContain("import_posts");
+          expect(names).not.toContain("add_expert");
+          expect(names).not.toContain("set_expert_active");
           expect(names).toContain("curate_post");
           expect(names).toContain("bulk_curate");
           expect(names).toContain("start_enrichment");
@@ -554,6 +634,8 @@ describe("MCP tool visibility by profile", () => {
           const names = tools.tools.map((t) => t.name);
           expect(names).toContain("get_pipeline_status");
           expect(names).not.toContain("import_posts");
+          expect(names).not.toContain("add_expert");
+          expect(names).not.toContain("set_expert_active");
           expect(names).toContain("submit_editorial_pick");
           expect(names).not.toContain("curate_post");
           expect(names).not.toContain("bulk_curate");
@@ -584,6 +666,8 @@ describe("MCP tool visibility by profile", () => {
           expect(names).toContain("list_enrichment_issues");
           expect(names).not.toContain("get_pipeline_status");
           expect(names).not.toContain("import_posts");
+          expect(names).not.toContain("add_expert");
+          expect(names).not.toContain("set_expert_active");
           expect(names).not.toContain("start_enrichment");
           expect(names).not.toContain("bulk_start_enrichment");
           expect(names).not.toContain("curate_post");
@@ -611,6 +695,8 @@ describe("MCP tool visibility by profile", () => {
           const names = tools.tools.map((t) => t.name);
           expect(names).toContain("get_pipeline_status");
           expect(names).not.toContain("import_posts");
+          expect(names).not.toContain("add_expert");
+          expect(names).not.toContain("set_expert_active");
           expect(names).not.toContain("start_enrichment");
           expect(names).not.toContain("bulk_start_enrichment");
           expect(names).not.toContain("curate_post");
@@ -639,11 +725,43 @@ describe("MCP tool visibility by profile", () => {
           const names = tools.tools.map((t) => t.name);
           expect(names).not.toContain("get_pipeline_status");
           expect(names).toContain("import_posts");
+          expect(names).not.toContain("add_expert");
+          expect(names).not.toContain("set_expert_active");
           expect(names).not.toContain("curate_post");
           expect(names).not.toContain("bulk_curate");
           expect(names).not.toContain("submit_editorial_pick");
           expect(names).not.toContain("start_enrichment");
           expect(names).not.toContain("bulk_start_enrichment");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("ops-experts-write profile combines expert tools with pipeline status only", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const seedLayer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(
+          makeBiLayer({ filename }),
+          opsExpertsWriteIdentity
+        );
+
+        try {
+          const tools = await client.listTools();
+          const names = tools.tools.map((t) => t.name);
+          expect(names).toContain("get_pipeline_status");
+          expect(names).toContain("add_expert");
+          expect(names).toContain("set_expert_active");
+          expect(names).not.toContain("import_posts");
+          expect(names).not.toContain("curate_post");
+          expect(names).not.toContain("bulk_curate");
+          expect(names).not.toContain("start_enrichment");
+          expect(names).not.toContain("bulk_start_enrichment");
+          expect(names).not.toContain("submit_editorial_pick");
         } finally {
           await close();
         }
@@ -1083,6 +1201,241 @@ describe("MCP import_posts", () => {
           );
 
           expect(storedPosts).toBe(1);
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+});
+
+describe("MCP expert registry tools", () => {
+  it.live("adds a Bluesky-backed expert through the registry service", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeExpertRegistryBlueskyLayer()
+        });
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer, expertsWriteIdentity);
+
+        try {
+          const result = await client.callTool({
+            name: "add_expert",
+            arguments: {
+              didOrHandle: expertRegistryHandle,
+              domain: "energy",
+              active: true
+            }
+          });
+          expect(result.isError).toBe(false);
+
+          const expert = decodeAddExpertResponse(result);
+          expect(expert.did).toBe(expertRegistryDid);
+          expect(expert.handle).toBe(expertRegistryHandle);
+          expect(expert.displayName).toBe(expertRegistryDisplayName);
+          expect(expert.avatar).toBe(expertRegistryAvatar);
+          expect(expert.domain).toBe("energy");
+          expect(expert.source).toBe("manual");
+          expect(expert.active).toBe(true);
+          expect(expert._display).toContain("Expert registered:");
+
+          const storedExpert = await Effect.runPromise(
+            Effect.gen(function* () {
+              const sql = yield* SqlClient.SqlClient;
+              const rows = yield* sql<{
+                did: string;
+                handle: string | null;
+                display_name: string | null;
+                avatar: string | null;
+                source: string;
+                active: number;
+              }>`
+                SELECT did, handle, display_name, avatar, source, active
+                FROM experts
+                WHERE did = ${expertRegistryDid}
+              `;
+              return rows[0] ?? null;
+            }).pipe(Effect.provide(layer))
+          );
+
+          expect(storedExpert).toEqual({
+            did: expertRegistryDid,
+            handle: expertRegistryHandle,
+            display_name: expertRegistryDisplayName,
+            avatar: expertRegistryAvatar,
+            source: "manual",
+            active: 1
+          });
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("toggles an expert active state through MCP", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeExpertRegistryBlueskyLayer()
+        });
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer, expertsWriteIdentity);
+
+        try {
+          const addResult = await client.callTool({
+            name: "add_expert",
+            arguments: {
+              didOrHandle: expertRegistryHandle,
+              domain: "energy",
+              active: true
+            }
+          });
+          const added = decodeAddExpertResponse(addResult);
+
+          const setInactiveResult = await client.callTool({
+            name: "set_expert_active",
+            arguments: {
+              did: added.did,
+              active: false
+            }
+          });
+          expect(setInactiveResult.isError).toBe(false);
+
+          const updated = decodeSetExpertActiveResponse(setInactiveResult);
+          expect(updated.did).toBe(expertRegistryDid);
+          expect(updated.active).toBe(false);
+          expect(updated._display).toContain("is now inactive");
+
+          const activeFlag = await Effect.runPromise(
+            Effect.gen(function* () {
+              const sql = yield* SqlClient.SqlClient;
+              const rows = yield* sql<{ active: number }>`
+                SELECT active
+                FROM experts
+                WHERE did = ${expertRegistryDid}
+              `;
+              return Number(rows[0]?.active ?? -1);
+            }).pipe(Effect.provide(layer))
+          );
+
+          expect(activeFlag).toBe(0);
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("add_expert is idempotent — second call upserts without error", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeExpertRegistryBlueskyLayer()
+        });
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer, expertsWriteIdentity);
+
+        try {
+          const first = await client.callTool({
+            name: "add_expert",
+            arguments: {
+              didOrHandle: expertRegistryHandle,
+              domain: "energy",
+              active: true
+            }
+          });
+          expect(first.isError).toBe(false);
+
+          const second = await client.callTool({
+            name: "add_expert",
+            arguments: {
+              didOrHandle: expertRegistryHandle,
+              domain: "energy",
+              active: true
+            }
+          });
+          expect(second.isError).toBe(false);
+
+          const expert = decodeAddExpertResponse(second);
+          expect(expert.did).toBe(expertRegistryDid);
+          expect(expert.handle).toBe(expertRegistryHandle);
+
+          const storedCount = await Effect.runPromise(
+            Effect.gen(function* () {
+              const sql = yield* SqlClient.SqlClient;
+              const rows = yield* sql<{ cnt: number }>`
+                SELECT COUNT(*) as cnt FROM experts WHERE did = ${expertRegistryDid}
+              `;
+              return Number(rows[0]?.cnt ?? 0);
+            }).pipe(Effect.provide(layer))
+          );
+
+          expect(storedCount).toBe(1);
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("set_expert_active on non-existent DID returns isError", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeExpertRegistryBlueskyLayer()
+        });
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer, expertsWriteIdentity);
+
+        try {
+          const result = await client.callTool({
+            name: "set_expert_active",
+            arguments: {
+              did: "did:plc:nonexistent999",
+              active: false
+            }
+          });
+          expect(result.isError).toBe(true);
+          expect(getTextContent(result)).toContain("McpToolQueryError");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("add_expert rejects non-Bluesky DID with guidance to use import_posts", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeExpertRegistryBlueskyLayer()
+        });
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer, expertsWriteIdentity);
+
+        try {
+          const result = await client.callTool({
+            name: "add_expert",
+            arguments: {
+              didOrHandle: "did:x:12345",
+              domain: "energy",
+              active: true
+            }
+          });
+          expect(result.isError).toBe(true);
+          expect(getTextContent(result)).toContain("import_posts");
         } finally {
           await close();
         }

@@ -164,6 +164,11 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
       )
     )
   );
+  const registryLayer = ExpertRegistryService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(configLayer, expertsLayer, blueskyLayer, ontologyLayer)
+    )
+  );
   const queryLayer = Layer.mergeAll(
     queryRepositoriesLayer,
     configLayer,
@@ -174,6 +179,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     enrichmentReadServiceLayer,
     pipelineStatusServiceLayer,
     postImportServiceLayer,
+    registryLayer,
     KnowledgeQueryService.layer.pipe(
       Layer.provideMerge(Layer.mergeAll(queryRepositoriesLayer, configLayer))
     ),
@@ -182,11 +188,6 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   );
   const authLayer = AuthService.layer.pipe(
     Layer.provideMerge(Layer.mergeAll(baseLayer, configLayer))
-  );
-  const registryLayer = ExpertRegistryService.layer.pipe(
-    Layer.provideMerge(
-      Layer.mergeAll(configLayer, expertsLayer, blueskyLayer, ontologyLayer)
-    )
   );
   const stagingOpsLayer = StagingOpsService.layer.pipe(
     Layer.provideMerge(

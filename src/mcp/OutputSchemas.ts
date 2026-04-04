@@ -11,13 +11,15 @@ import { ImportPostsOutput } from "../domain/api.ts";
 import {
   KnowledgePostsOutput,
   KnowledgeLinksOutput,
+  AdminExpertResult,
   ExpertListOutput,
   OntologyTopicsOutput,
   OntologyTopicOutput,
   ExpandedTopicsOutput,
   ExplainPostTopicsOutput,
   PostThreadOutput,
-  ThreadDocumentOutput
+  ThreadDocumentOutput,
+  SetExpertActiveResult
 } from "../domain/bi.ts";
 import { EditorialPicksOutput, SubmitEditorialPickOutput } from "../domain/editorial.ts";
 import { BulkCurateOutput, CurationCandidatesOutput, CuratePostOutput } from "../domain/curation.ts";
@@ -41,6 +43,12 @@ export type KnowledgeLinksMcpOutput = typeof KnowledgeLinksMcpOutput.Type;
 
 export const ExpertListMcpOutput = ExpertListOutput.pipe(Schema.fieldsAssign(displayFields));
 export type ExpertListMcpOutput = typeof ExpertListMcpOutput.Type;
+
+export const AddExpertMcpOutput = AdminExpertResult.pipe(Schema.fieldsAssign(displayFields));
+export type AddExpertMcpOutput = typeof AddExpertMcpOutput.Type;
+
+export const SetExpertActiveMcpOutput = SetExpertActiveResult.pipe(Schema.fieldsAssign(displayFields));
+export type SetExpertActiveMcpOutput = typeof SetExpertActiveMcpOutput.Type;
 
 export const OntologyTopicsMcpOutput = OntologyTopicsOutput.pipe(Schema.fieldsAssign(displayFields));
 export type OntologyTopicsMcpOutput = typeof OntologyTopicsMcpOutput.Type;
