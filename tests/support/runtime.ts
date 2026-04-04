@@ -24,9 +24,11 @@ import { CurationRepoD1 } from "../../src/services/d1/CurationRepoD1";
 import { EditorialRepoD1 } from "../../src/services/d1/EditorialRepoD1";
 import { ExpertsRepoD1 } from "../../src/services/d1/ExpertsRepoD1";
 import { KnowledgeRepoD1 } from "../../src/services/d1/KnowledgeRepoD1";
+import { PipelineStatusRepoD1 } from "../../src/services/d1/PipelineStatusRepoD1";
 import { PostEnrichmentReadRepoD1 } from "../../src/services/d1/PostEnrichmentReadRepoD1";
 import { PublicationsRepoD1 } from "../../src/services/d1/PublicationsRepoD1";
 import { ProviderRegistry } from "../../src/services/ProviderRegistry";
+import { PipelineStatusService } from "../../src/services/PipelineStatusService";
 import { makeSmokeFixtureBatch } from "../../src/staging/SmokeFixture";
 import type { AccessIdentity } from "../../src/auth/AuthService";
 
@@ -40,6 +42,12 @@ export const workflowIdentity: AccessIdentity = {
   subject: "test-operator",
   email: "op@test.com",
   scopes: ["mcp:read", "curation:write", "editorial:write", "experts:read", "experts:write", "ops:read", "ops:refresh", "editorial:read"]
+};
+
+export const opsReadIdentity: AccessIdentity = {
+  subject: "test-ops-reader",
+  email: "ops@test.com",
+  scopes: ["mcp:read", "ops:read"]
 };
 
 export const testConfig = (
@@ -78,6 +86,9 @@ export const makeBiLayer = (options?: {
     Layer.provideMerge(sqliteLayer)
   );
   const postEnrichmentReadRepoLayer = PostEnrichmentReadRepoD1.layer.pipe(
+    Layer.provideMerge(sqliteLayer)
+  );
+  const pipelineStatusRepoLayer = PipelineStatusRepoD1.layer.pipe(
     Layer.provideMerge(sqliteLayer)
   );
   const curationRepoLayer = CurationRepoD1.layer.pipe(
@@ -133,6 +144,9 @@ export const makeBiLayer = (options?: {
       Layer.mergeAll(candidatePayloadServiceLayer, postEnrichmentReadRepoLayer)
     )
   );
+  const pipelineStatusServiceLayer = PipelineStatusService.layer.pipe(
+    Layer.provideMerge(pipelineStatusRepoLayer)
+  );
 
   return Layer.mergeAll(
     baseLayer,
@@ -142,7 +156,8 @@ export const makeBiLayer = (options?: {
     candidatePayloadServiceLayer,
     curationServiceLayer,
     blueskyLayer,
-    enrichmentReadServiceLayer
+    enrichmentReadServiceLayer,
+    pipelineStatusServiceLayer
   );
 };
 

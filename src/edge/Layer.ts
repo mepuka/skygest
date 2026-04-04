@@ -33,10 +33,12 @@ import { ExpertsRepoD1 } from "../services/d1/ExpertsRepoD1";
 import { IngestRunItemsRepoD1 } from "../services/d1/IngestRunItemsRepoD1";
 import { IngestRunsRepoD1 } from "../services/d1/IngestRunsRepoD1";
 import { KnowledgeRepoD1 } from "../services/d1/KnowledgeRepoD1";
+import { PipelineStatusRepoD1 } from "../services/d1/PipelineStatusRepoD1";
 import { PostEnrichmentReadRepoD1 } from "../services/d1/PostEnrichmentReadRepoD1";
 import { PublicationsRepoD1 } from "../services/d1/PublicationsRepoD1";
 import { ProviderRegistry } from "../services/ProviderRegistry";
 import { EnrichmentWorkflowLauncher } from "../enrichment/EnrichmentWorkflowLauncher";
+import { PipelineStatusService } from "../services/PipelineStatusService";
 import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
 
 const makeBaseLayer = (env: EnvBindings) =>
@@ -62,6 +64,9 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     Layer.provideMerge(candidatePayloadRepoLayer)
   );
   const postEnrichmentReadRepoLayer = PostEnrichmentReadRepoD1.layer.pipe(
+    Layer.provideMerge(baseLayer)
+  );
+  const pipelineStatusRepoLayer = PipelineStatusRepoD1.layer.pipe(
     Layer.provideMerge(baseLayer)
   );
   const enrichmentRunsLayer = env.ENRICHMENT_RUN_WORKFLOW == null
@@ -101,6 +106,9 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
             )
           )
         );
+  const pipelineStatusServiceLayer = PipelineStatusService.layer.pipe(
+    Layer.provideMerge(pipelineStatusRepoLayer)
+  );
   const curationRepoLayer = CurationRepoD1.layer.pipe(
     Layer.provideMerge(baseLayer)
   );
@@ -151,6 +159,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     postHydrationLayer,
     candidatePayloadServiceLayer,
     enrichmentReadServiceLayer,
+    pipelineStatusServiceLayer,
     KnowledgeQueryService.layer.pipe(
       Layer.provideMerge(Layer.mergeAll(queryRepositoriesLayer, configLayer))
     ),
@@ -196,6 +205,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         editorialServiceLayer,
         candidatePayloadServiceLayer,
         enrichmentReadServiceLayer,
+        pipelineStatusServiceLayer,
         curationServiceLayer
       )
     : Layer.mergeAll(
@@ -214,6 +224,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         editorialServiceLayer,
         candidatePayloadServiceLayer,
         enrichmentReadServiceLayer,
+        pipelineStatusServiceLayer,
         curationServiceLayer,
         enrichmentLauncherLayer
       );
@@ -230,6 +241,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     candidatePayloadServiceLayer,
     postEnrichmentReadRepoLayer,
     enrichmentReadServiceLayer,
+    pipelineStatusRepoLayer,
+    pipelineStatusServiceLayer,
     curationRepoLayer,
     curationServiceLayer,
     queryLayer,

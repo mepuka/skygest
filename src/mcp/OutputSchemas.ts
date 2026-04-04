@@ -27,6 +27,7 @@ import {
   ListEnrichmentGapsOutput,
   ListEnrichmentIssuesOutput
 } from "../domain/enrichment.ts";
+import { PipelineStatusOutput } from "../domain/pipeline.ts";
 import { PostUri } from "../domain/types.ts";
 
 const displayFields = { _display: Schema.String } as const;
@@ -86,6 +87,9 @@ export type EnrichmentGapsMcpOutput = typeof EnrichmentGapsMcpOutput.Type;
 
 export const EnrichmentIssuesMcpOutput = ListEnrichmentIssuesOutput.pipe(Schema.fieldsAssign(displayFields));
 export type EnrichmentIssuesMcpOutput = typeof EnrichmentIssuesMcpOutput.Type;
+
+export const PipelineStatusMcpOutput = PipelineStatusOutput.pipe(Schema.fieldsAssign(displayFields));
+export type PipelineStatusMcpOutput = typeof PipelineStatusMcpOutput.Type;
 
 export const StartEnrichmentMcpOutput = Schema.Struct({
   postUri: PostUri,

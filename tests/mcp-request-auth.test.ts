@@ -57,6 +57,16 @@ describe("classifyMcpRequest", () => {
     });
   });
 
+  it("tools/call with get_pipeline_status requires ops:read", async () => {
+    const req = makeJsonRpcRequest("tools/call", { name: "get_pipeline_status" });
+    const result = await classifyMcpRequest(req);
+    expect(result).toEqual({
+      method: "tools/call",
+      toolOrPromptName: "get_pipeline_status",
+      requiredScopes: ["ops:read"],
+    });
+  });
+
   it("tools/call with search_posts requires no extra scopes", async () => {
     const req = makeJsonRpcRequest("tools/call", { name: "search_posts" });
     const result = await classifyMcpRequest(req);
@@ -139,6 +149,12 @@ describe("profileForIdentity", () => {
     ).toBe("workflow-write");
   });
 
+  it("mcp:read + ops:read yields ops-read", () => {
+    expect(
+      profileForIdentity({ scopes: ["mcp:read", "ops:read"] }),
+    ).toBe("ops-read");
+  });
+
   it("only mcp:read yields read-only", () => {
     expect(
       profileForIdentity({ scopes: ["mcp:read"] }),
@@ -155,6 +171,14 @@ describe("profileForIdentity", () => {
     expect(
       profileForIdentity({ scopes: ["mcp:read", "editorial:write"] }),
     ).toBe("editorial-write");
+  });
+
+  it("mcp:read + curation:write + editorial:write + ops:read yields ops-workflow-write", () => {
+    expect(
+      profileForIdentity({
+        scopes: ["mcp:read", "curation:write", "editorial:write", "ops:read"],
+      }),
+    ).toBe("ops-workflow-write");
   });
 
   it("empty scopes yields read-only", () => {

@@ -14,6 +14,7 @@ import { CurationService } from "../services/CurationService";
 import { EditorialService } from "../services/EditorialService";
 import { EnrichmentTriggerClient } from "../services/EnrichmentTriggerClient";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
+import { PipelineStatusService } from "../services/PipelineStatusService";
 import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
 import { GLOSSARY_CONTENT } from "./glossary";
 import { ReadOnlyPromptsLayer, WorkflowPromptsLayer } from "./prompts";
@@ -21,12 +22,20 @@ import { toolkitWithDisplayText } from "./registerToolkitWithDisplayText.ts";
 import {
   ReadOnlyMcpToolkit,
   ReadOnlyMcpHandlers,
+  OpsReadMcpToolkit,
+  OpsReadMcpHandlers,
   CurationWriteMcpToolkit,
   CurationWriteMcpHandlers,
+  OpsCurationWriteMcpToolkit,
+  OpsCurationWriteMcpHandlers,
   EditorialWriteMcpToolkit,
   EditorialWriteMcpHandlers,
+  OpsEditorialWriteMcpToolkit,
+  OpsEditorialWriteMcpHandlers,
   WorkflowWriteMcpToolkit,
-  WorkflowWriteMcpHandlers
+  WorkflowWriteMcpHandlers,
+  OpsWorkflowWriteMcpToolkit,
+  OpsWorkflowWriteMcpHandlers
 } from "./Toolkit";
 import { profileForIdentity, type McpCapabilityProfile } from "./RequestAuth";
 import type { AccessIdentity } from "../auth/AuthService";
@@ -41,7 +50,7 @@ const GlossaryResource = McpServer.resource({
   content: Effect.succeed(GLOSSARY_CONTENT)
 });
 
-type QueryLayer = Layer.Layer<KnowledgeQueryService | EditorialService | CurationService | BlueskyClient | PostEnrichmentReadService, any, never>;
+type QueryLayer = Layer.Layer<KnowledgeQueryService | EditorialService | CurationService | BlueskyClient | PostEnrichmentReadService | PipelineStatusService, any, never>;
 
 const mcpServerLayer = McpServer.layerHttp({
   name: "skygest-bi-mcp",
@@ -59,22 +68,38 @@ const makeMcpLayer = (
         return toolkitWithDisplayText(ReadOnlyMcpToolkit).pipe(
           Layer.provideMerge(ReadOnlyMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
         );
+      case "ops-read":
+        return toolkitWithDisplayText(OpsReadMcpToolkit).pipe(
+          Layer.provideMerge(OpsReadMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
+        );
       case "curation-write":
         return toolkitWithDisplayText(CurationWriteMcpToolkit).pipe(
           Layer.provideMerge(CurationWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
+        );
+      case "ops-curation-write":
+        return toolkitWithDisplayText(OpsCurationWriteMcpToolkit).pipe(
+          Layer.provideMerge(OpsCurationWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
         );
       case "editorial-write":
         return toolkitWithDisplayText(EditorialWriteMcpToolkit).pipe(
           Layer.provideMerge(EditorialWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
         );
+      case "ops-editorial-write":
+        return toolkitWithDisplayText(OpsEditorialWriteMcpToolkit).pipe(
+          Layer.provideMerge(OpsEditorialWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
+        );
       case "workflow-write":
         return toolkitWithDisplayText(WorkflowWriteMcpToolkit).pipe(
           Layer.provideMerge(WorkflowWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
         );
+      case "ops-workflow-write":
+        return toolkitWithDisplayText(OpsWorkflowWriteMcpToolkit).pipe(
+          Layer.provideMerge(OpsWorkflowWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
+        );
     }
   })();
 
-  const promptsLayer = (profile === "workflow-write"
+  const promptsLayer = (profile === "workflow-write" || profile === "ops-workflow-write"
     ? WorkflowPromptsLayer
     : ReadOnlyPromptsLayer) as Layer.Layer<never, never, never>;
 

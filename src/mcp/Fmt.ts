@@ -34,6 +34,10 @@ import type {
   ListEnrichmentGapsOutput,
   ListEnrichmentIssuesOutput
 } from "../domain/enrichment.ts";
+import type {
+  PipelineStatusDetail,
+  PipelineStatusOutput
+} from "../domain/pipeline.ts";
 
 // ---------------------------------------------------------------------------
 // Internal helpers (not exported)
@@ -735,6 +739,39 @@ export const formatEnrichmentIssues = (
       .filter((line): line is string => line !== null)
       .join("\n");
   }).join("\n");
+};
+
+export const formatPipelineStatus = (
+  output: PipelineStatusOutput,
+  detail: PipelineStatusDetail = "summary"
+): string => {
+  const lines = [
+    `Experts: ${output.experts.total} total | bluesky ${output.experts.bluesky} | twitter ${output.experts.twitter}`,
+    `Expert tiers: energy-focused ${output.experts.byTier.energyFocused} | general-outlet ${output.experts.byTier.generalOutlet} | independent ${output.experts.byTier.independent}`,
+    `Posts: ${output.posts.total} active | bluesky ${output.posts.bluesky} | twitter ${output.posts.twitter}`,
+    `Curation: curated ${output.curation.curated} | rejected ${output.curation.rejected} | flagged ${output.curation.flagged}`,
+    `Stored enrichments: ${output.enrichments.stored.total} total | vision ${output.enrichments.stored.vision} | source-attribution ${output.enrichments.stored.sourceAttribution}`,
+    `Enrichment runs: queued ${output.enrichments.runs.queued} | running ${output.enrichments.runs.running} | complete ${output.enrichments.runs.complete} | failed ${output.enrichments.runs.failed} | needs-review ${output.enrichments.runs.needsReview}`
+  ];
+
+  if (output.lastSweep === null) {
+    return detail === "full"
+      ? `${lines.join("\n")}\nLast sweep: none recorded.`
+      : lines.join("\n");
+  }
+
+  if (detail === "summary") {
+    return `${lines.join("\n")}\nLast sweep: ${output.lastSweep.runId} on ${formatTimestamp(output.lastSweep.completedAt)} | posts stored ${output.lastSweep.postsStored} | failures ${output.lastSweep.failures}`;
+  }
+
+  return [
+    ...lines,
+    `Last sweep: ${output.lastSweep.runId}`,
+    `  Completed: ${formatTimestamp(output.lastSweep.completedAt)}`,
+    `  Status: ${output.lastSweep.status}`,
+    `  Posts stored: ${output.lastSweep.postsStored}`,
+    `  Failures: ${output.lastSweep.failures}`
+  ].join("\n");
 };
 
 export const formatBulkStartEnrichmentResult = (
