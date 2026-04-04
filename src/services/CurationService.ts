@@ -14,7 +14,11 @@ import type {
   CuratePostInput,
   CurationRecord
 } from "../domain/curation";
-import { CurationPostNotFoundError } from "../domain/curation";
+import {
+  CurationBatchLimitError,
+  CurationPostNotFoundError,
+  BULK_CURATE_MAX_DECISIONS
+} from "../domain/curation";
 import type { KnowledgePost } from "../domain/bi";
 import {
   defaultSchemaVersionForEnrichmentKind,
@@ -65,7 +69,7 @@ export class CurationService extends ServiceMap.Service<
     readonly bulkCurate: (
       input: BulkCurateInput,
       curator: string
-    ) => Effect.Effect<BulkCurateOutput>;
+    ) => Effect.Effect<BulkCurateOutput, CurationBatchLimitError>;
   }
 >()("@skygest/CurationService") {
   static readonly layer = Layer.effect(CurationService, Effect.gen(function* () {
@@ -101,6 +105,27 @@ export class CurationService extends ServiceMap.Service<
         triggeredBy: "pick",
         requestedBy: curator
       });
+    });
+
+    const queuePickedEnrichmentSafely = Effect.fn(
+      "CurationService.queuePickedEnrichmentSafely"
+    )(function* (
+      postUri: PostUri,
+      embedPayload: Parameters<typeof inferPrimaryEnrichmentType>[0],
+      curator: string
+    ) {
+      return yield* queuePickedEnrichment(postUri, embedPayload, curator).pipe(
+        Effect.tapError((error) =>
+          Effect.logWarning("Failed to queue enrichment after curation").pipe(
+            Effect.annotateLogs({
+              postUri,
+              curator,
+              error: error instanceof Error ? error.message : String(error)
+            })
+          )
+        ),
+        Effect.catch(() => Effect.succeed(false))
+      );
     });
 
     // ---------------------------------------------------------------------------
@@ -246,8 +271,11 @@ export class CurationService extends ServiceMap.Service<
           yield* curationRepo.updateStatus(input.postUri, "curated", curator, input.note ?? null, now);
 
           if (existingPayload !== null) {
-            yield* queuePickedEnrichment(input.postUri, existingPayload.embedPayload, curator)
-              .pipe(Effect.catch(() => Effect.succeed(false)));
+            yield* queuePickedEnrichmentSafely(
+              input.postUri,
+              existingPayload.embedPayload,
+              curator
+            );
           }
 
           return { postUri: input.postUri, action: input.action, previousStatus, newStatus: "curated" as const };
@@ -283,8 +311,11 @@ export class CurationService extends ServiceMap.Service<
 
           yield* curationRepo.updateStatus(input.postUri, "curated", curator, input.note ?? null, now);
 
-          yield* queuePickedEnrichment(input.postUri, existingPayload.embedPayload, curator)
-            .pipe(Effect.catch(() => Effect.succeed(false)));
+          yield* queuePickedEnrichmentSafely(
+            input.postUri,
+            existingPayload.embedPayload,
+            curator
+          );
 
           return { postUri: input.postUri, action: input.action, previousStatus, newStatus: "curated" as const };
         }
@@ -336,12 +367,10 @@ export class CurationService extends ServiceMap.Service<
           now
         );
 
-        yield* queuePickedEnrichment(
+        yield* queuePickedEnrichmentSafely(
           input.postUri,
           embedPayload,
           curator
-        ).pipe(
-          Effect.catch(() => Effect.succeed(false))
         );
 
         return {
@@ -355,6 +384,13 @@ export class CurationService extends ServiceMap.Service<
 
     const bulkCurate = Effect.fn("CurationService.bulkCurate")(
       function* (input: BulkCurateInput, curator: string) {
+        if (input.decisions.length > BULK_CURATE_MAX_DECISIONS) {
+          return yield* new CurationBatchLimitError({
+            maximum: BULK_CURATE_MAX_DECISIONS as any,
+            actual: input.decisions.length as any
+          });
+        }
+
         const results = yield* Effect.forEach(
           input.decisions,
           (decision) =>

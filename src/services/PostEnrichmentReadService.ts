@@ -29,6 +29,8 @@ import { decodeWithDbError } from "./d1/schemaDecode";
 
 const DEFAULT_GAP_LIMIT = 100;
 const MAX_GAP_LIMIT = 500;
+const DEFAULT_GAP_SCAN_ROWS = 400;
+const MAX_GAP_SCAN_ROWS = 2000;
 const DEFAULT_ISSUES_LIMIT = 20;
 const MAX_ISSUES_LIMIT = 100;
 
@@ -99,6 +101,12 @@ export class PostEnrichmentReadService extends ServiceMap.Service<
       const clampGapLimit = (limit: number | undefined) =>
         Math.max(1, Math.min(limit ?? DEFAULT_GAP_LIMIT, MAX_GAP_LIMIT));
 
+      const clampGapScanLimit = (limit: number) =>
+        Math.min(
+          MAX_GAP_SCAN_ROWS,
+          Math.max(DEFAULT_GAP_SCAN_ROWS, limit * 4)
+        );
+
       const clampIssuesLimit = (limit: number | undefined) =>
         Math.max(1, Math.min(limit ?? DEFAULT_ISSUES_LIMIT, MAX_ISSUES_LIMIT));
 
@@ -124,7 +132,10 @@ export class PostEnrichmentReadService extends ServiceMap.Service<
           )
         );
 
-      const listGapCandidates = (input: ListEnrichmentGapsInput) =>
+      const listGapCandidates = (
+        input: ListEnrichmentGapsInput,
+        scanLimit: number
+      ) =>
         sql<any>`
           SELECT
             p.uri as postUri,
@@ -170,6 +181,7 @@ export class PostEnrichmentReadService extends ServiceMap.Service<
               OR (${input.platform ?? null} = 'twitter' AND p.uri LIKE 'x://%')
             )
           ORDER BY COALESCE(pc.curated_at, pc.flagged_at) DESC, p.uri ASC
+          LIMIT ${scanLimit}
         `.pipe(
           Effect.flatMap((rows) =>
             decodeWithDbError(
@@ -226,7 +238,8 @@ export class PostEnrichmentReadService extends ServiceMap.Service<
       const listGaps = Effect.fn("PostEnrichmentReadService.listGaps")(
         function* (input: ListEnrichmentGapsInput) {
           const limit = clampGapLimit(input.limit);
-          const rows = yield* listGapCandidates(input);
+          const scanLimit = clampGapScanLimit(limit);
+          const rows = yield* listGapCandidates(input, scanLimit);
 
           const visionMatches: Array<GetPostEnrichmentsOutput["postUri"]> = [];
           const sourceMatches: Array<GetPostEnrichmentsOutput["postUri"]> = [];

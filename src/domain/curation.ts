@@ -1,11 +1,7 @@
 import { Schema } from "effect";
-import { PostUri } from "./types";
+import { NonNegativeInt, PlatformSchema, PostUri } from "./types";
 import { FlexibleNumber, KnowledgePostResult } from "./bi";
 import { EnrichmentReadiness } from "./enrichment";
-
-const NonNegativeInt = Schema.Int.pipe(
-  Schema.check(Schema.isGreaterThanOrEqualTo(0))
-);
 
 export const CurationStatus = Schema.Literals(["flagged", "curated", "rejected"]);
 export type CurationStatus = Schema.Schema.Type<typeof CurationStatus>;
@@ -32,10 +28,10 @@ export const CurationRecord = Schema.Struct({
 });
 export type CurationRecord = Schema.Schema.Type<typeof CurationRecord>;
 
-export const CurationPlatform = Schema.Literals(["bluesky", "twitter"]);
+export const CurationPlatform = PlatformSchema;
 export type CurationPlatform = Schema.Schema.Type<typeof CurationPlatform>;
 
-export const CurationPlatformFilter = Schema.Literals(["bluesky", "twitter", "all"]);
+export const CurationPlatformFilter = Schema.Union([PlatformSchema, Schema.Literal("all")]);
 export type CurationPlatformFilter = Schema.Schema.Type<typeof CurationPlatformFilter>;
 
 export const CurationCandidateCursor = Schema.Struct({
@@ -121,7 +117,7 @@ export type CurationCandidatesMode = Schema.Schema.Type<typeof CurationCandidate
 export const CurationCandidatesOutput = Schema.Struct({
   mode: CurationCandidatesMode,
   total: NonNegativeInt,
-  nextCursor: Schema.NullOr(Schema.String),
+  nextCursor: Schema.NullOr(CurationCandidateCursor),
   byPlatform: Schema.NullOr(CurationCandidatePlatformCounts),
   items: Schema.Array(CurationCandidateOutput),
   exportItems: Schema.Array(CurationCandidateExportItem)
@@ -143,6 +139,8 @@ export const BulkCurateInput = Schema.Struct({
 });
 export type BulkCurateInput = Schema.Schema.Type<typeof BulkCurateInput>;
 
+export const BULK_CURATE_MAX_DECISIONS = 1000;
+
 export const BulkCurateError = Schema.Struct({
   postUri: PostUri,
   error: Schema.String
@@ -161,5 +159,13 @@ export class CurationPostNotFoundError extends Schema.TaggedErrorClass<CurationP
   "CurationPostNotFoundError",
   {
     postUri: PostUri
+  }
+) {}
+
+export class CurationBatchLimitError extends Schema.TaggedErrorClass<CurationBatchLimitError>()(
+  "CurationBatchLimitError",
+  {
+    maximum: NonNegativeInt,
+    actual: NonNegativeInt
   }
 ) {}

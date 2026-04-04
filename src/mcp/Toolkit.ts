@@ -6,6 +6,7 @@ import {
   decodeJsonStringEitherWith,
   encodeJsonStringWith,
   formatSchemaParseError,
+  stringifyUnknown,
   stripUndefined
 } from "../platform/Json";
 import {
@@ -23,12 +24,14 @@ import {
 } from "../domain/bi";
 import { ListEditorialPicksInput, SubmitEditorialPickMcpInput } from "../domain/editorial";
 import {
+  BULK_CURATE_MAX_DECISIONS,
   BulkCurateInput,
   CuratePostInput,
   CurationCandidateCursor,
   ListCurationCandidatesInput
 } from "../domain/curation";
 import {
+  BULK_START_ENRICHMENT_MAX_POSTS,
   BulkStartEnrichmentInput,
   GapEnrichmentType,
   GetPostEnrichmentsInput,
@@ -85,8 +88,7 @@ import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
 import {
-  EnrichmentTriggerClient,
-  EnrichmentTriggerError
+  EnrichmentTriggerClient
 } from "../services/EnrichmentTriggerClient";
 import { CandidatePayloadService } from "../services/CandidatePayloadService";
 import { extractEmbedKind, buildTypedEmbed } from "../bluesky/EmbedExtract";
@@ -147,19 +149,28 @@ const ListCurationCandidatesMcpInput = Schema.Struct({
 
 const decodeCurationCandidateCursor = decodeJsonStringEitherWith(CurationCandidateCursor);
 const encodeCurationCandidateCursor = encodeJsonStringWith(CurationCandidateCursor);
-const BULK_CURATE_MAX_DECISIONS = 1000;
-const BULK_START_ENRICHMENT_MAX_POSTS = 500;
 const ENRICHMENT_TRIGGER_RETRY_SCHEDULE = Schedule.exponential(Duration.millis(250)).pipe(
   Schedule.jittered,
   Schedule.both(Schedule.recurs(2))
 );
 
-const toQueryError = (tool: string) => (error: { message: string }) =>
+const toQueryError = (tool: string) => (error: unknown) =>
   new McpToolQueryError({
     tool,
-    message: error.message,
+    message: stringifyUnknown(error),
     error
   });
+
+const isMcpToolQueryError = (error: unknown): error is McpToolQueryError =>
+  typeof error === "object" &&
+  error !== null &&
+  "_tag" in error &&
+  error._tag === "McpToolQueryError";
+
+const passThroughMcpToolError = (tool: string) => (error: unknown) =>
+  isMcpToolQueryError(error)
+    ? error
+    : toQueryError(tool)(error);
 
 export const SearchPostsTool = Tool.make("search_posts", {
   description: "Search expert posts using SQLite full-text search. Matches post text, expert handles, and stored topic-match terms. Full handle strings like solar-desk.bsky.social are treated as exact handle phrases. Supports quoted phrases, OR / NOT boolean logic, and prefix search with *. Supports topic and time range filters. Use this for keyword, handle, and topic-term discovery; use get_recent_posts for chronological browsing.",
@@ -534,25 +545,27 @@ const decodeListCurationCursor = (
   tool: string,
   cursor: string | undefined
 ) =>
-  cursor === undefined
-    ? Effect.sync(() => undefined)
-    : Effect.sync(() => {
-        const result = decodeCurationCandidateCursor(cursor);
-        if (Result.isSuccess(result)) {
-          return result.success;
-        }
+  Effect.gen(function* () {
+    if (cursor === undefined) {
+      return undefined;
+    }
 
-        throw invalidMcpInputError(
-          tool,
-          `Invalid curation cursor: ${formatSchemaParseError(result.failure)}`,
-          result.failure
-        );
-      });
+    const result = decodeCurationCandidateCursor(cursor);
+    if (Result.isSuccess(result)) {
+      return result.success;
+    }
+
+    return yield* invalidMcpInputError(
+      tool,
+      `Invalid curation cursor: ${formatSchemaParseError(result.failure)}`,
+      result.failure
+    );
+  });
 
 const validateBulkCurateInput = (input: typeof BulkCurateInput.Type) =>
-  Effect.sync(() => {
+  Effect.gen(function* () {
     if (input.decisions.length === 0) {
-      throw invalidMcpInputError(
+      return yield* invalidMcpInputError(
         "bulk_curate",
         "Provide at least one curation decision.",
         new Error("empty decisions")
@@ -560,7 +573,7 @@ const validateBulkCurateInput = (input: typeof BulkCurateInput.Type) =>
     }
 
     if (input.decisions.length > BULK_CURATE_MAX_DECISIONS) {
-      throw invalidMcpInputError(
+      return yield* invalidMcpInputError(
         "bulk_curate",
         `Too many curation decisions. Maximum: ${BULK_CURATE_MAX_DECISIONS}.`,
         new Error("too many decisions")
@@ -570,7 +583,7 @@ const validateBulkCurateInput = (input: typeof BulkCurateInput.Type) =>
     const seen = new Set<string>();
     for (const decision of input.decisions) {
       if (seen.has(decision.postUri)) {
-        throw invalidMcpInputError(
+        return yield* invalidMcpInputError(
           "bulk_curate",
           `Duplicate postUri in batch: ${decision.postUri}`,
           new Error("duplicate postUri")
@@ -584,7 +597,7 @@ const validateBulkCurateInput = (input: typeof BulkCurateInput.Type) =>
 const validateBulkStartEnrichmentInput = (
   input: typeof BulkStartEnrichmentMcpInput.Type
 ) =>
-  Effect.sync(() => {
+  Effect.gen(function* () {
     const normalizedPosts = [
       ...(input.posts ?? []),
       ...(input.gaps?.vision.postUris.map((postUri) => ({
@@ -598,7 +611,7 @@ const validateBulkStartEnrichmentInput = (
     ];
 
     if (normalizedPosts.length === 0) {
-      throw invalidMcpInputError(
+      return yield* invalidMcpInputError(
         "bulk_start_enrichment",
         "Provide at least one post or a non-empty gaps payload.",
         new Error("empty posts")
@@ -606,7 +619,7 @@ const validateBulkStartEnrichmentInput = (
     }
 
     if (normalizedPosts.length > BULK_START_ENRICHMENT_MAX_POSTS) {
-      throw invalidMcpInputError(
+      return yield* invalidMcpInputError(
         "bulk_start_enrichment",
         `Too many enrichment requests. Maximum: ${BULK_START_ENRICHMENT_MAX_POSTS}.`,
         new Error("too many posts")
@@ -616,7 +629,7 @@ const validateBulkStartEnrichmentInput = (
     const seen = new Set<string>();
     for (const post of normalizedPosts) {
       if (seen.has(post.postUri)) {
-        throw invalidMcpInputError(
+        return yield* invalidMcpInputError(
           "bulk_start_enrichment",
           `Duplicate postUri in batch: ${post.postUri}`,
           new Error("duplicate postUri")
@@ -783,15 +796,7 @@ const makeReadOnlyHandlers = (
           _display: printThread(flat, {}).body
         } as unknown as PostThreadMcpOutput);
       }),
-      Effect.mapError((error) =>
-        "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
-          ? error as McpToolQueryError
-          : new McpToolQueryError({
-              tool: "get_post_thread",
-              message: error instanceof Error ? error.message : String(error),
-              error
-            })
-      )
+      Effect.mapError(passThroughMcpToolError("get_post_thread"))
     ),
   get_thread_document: (input: typeof GetThreadDocumentInput.Type) =>
     bskyClient.getPostThread(input.postUri, {
@@ -816,15 +821,7 @@ const makeReadOnlyHandlers = (
 
         return Effect.succeed(doc);
       }),
-      Effect.mapError((error) =>
-        "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
-          ? error as McpToolQueryError
-          : new McpToolQueryError({
-              tool: "get_thread_document",
-              message: error instanceof Error ? error.message : String(error),
-              error
-            })
-      )
+      Effect.mapError(passThroughMcpToolError("get_thread_document"))
     ),
   list_curation_candidates: (input: typeof ListCurationCandidatesMcpInput.Type) =>
     Effect.gen(function* () {
@@ -915,11 +912,7 @@ const makeReadOnlyHandlers = (
         })
       };
     }).pipe(
-      Effect.mapError((error) =>
-        "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
-          ? error as McpToolQueryError
-          : toQueryError("list_curation_candidates")(error as any)
-      )
+      Effect.mapError(passThroughMcpToolError("list_curation_candidates"))
     ),
   get_post_enrichments: (input: typeof GetPostEnrichmentsInput.Type) =>
     enrichmentReadService.getPost(input.postUri).pipe(
@@ -987,11 +980,7 @@ const makeBulkCurateHandler = (curationService: CurationServiceI) => ({
         _display: formatBulkCurateResult(result)
       };
     }).pipe(
-      Effect.mapError((error) =>
-        "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
-          ? error as McpToolQueryError
-          : toQueryError("bulk_curate")(error as any)
-      )
+      Effect.mapError(passThroughMcpToolError("bulk_curate"))
     ) as any
 });
 
@@ -1048,11 +1037,7 @@ const makeSubmitPickHandler = (editorialService: EditorialServiceI) => ({
         _display: formatSubmitPickResult(result)
       };
     }).pipe(
-      Effect.mapError((e) =>
-        "_tag" in e && (e as any)._tag === "McpToolQueryError"
-          ? (e as McpToolQueryError)
-          : toQueryError("submit_editorial_pick")(e as any)
-      )
+      Effect.mapError(passThroughMcpToolError("submit_editorial_pick"))
     ) as any
 });
 
@@ -1110,11 +1095,7 @@ const makeStartEnrichmentHandler = () => ({
         })
       };
     }).pipe(
-      Effect.mapError((e) =>
-        "_tag" in (e as any) && (e as any)._tag === "McpToolQueryError"
-          ? (e as McpToolQueryError)
-          : toQueryError("start_enrichment")(e as any)
-      )
+      Effect.mapError(passThroughMcpToolError("start_enrichment"))
     ) as any
 });
 
@@ -1188,11 +1169,7 @@ const makeBulkStartEnrichmentHandler = () => ({
         _display: formatBulkStartEnrichmentResult(result)
       };
     }).pipe(
-      Effect.mapError((error) =>
-        "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
-          ? (error as McpToolQueryError)
-          : toQueryError("bulk_start_enrichment")(error as any)
-      )
+      Effect.mapError(passThroughMcpToolError("bulk_start_enrichment"))
     ) as any
 });
 

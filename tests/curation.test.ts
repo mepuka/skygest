@@ -1,6 +1,7 @@
 import { Effect, Layer } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { describe, expect, it } from "@effect/vitest";
+import { BULK_CURATE_MAX_DECISIONS } from "../src/domain/curation";
 import {
   makeBiLayer,
   makeSqliteLayer,
@@ -415,6 +416,37 @@ describe("CurationService.bulkCurate", () => {
             const rejected = yield* curationRepo.getByPostUri(windUri);
             expect(curated?.status).toBe("curated");
             expect(rejected?.status).toBe("rejected");
+          }).pipe(Effect.provide(layer))
+        );
+      })
+    )
+  );
+
+  it.live("enforces the service batch limit for direct callers", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            const curationService = yield* CurationService;
+            const error = yield* curationService.bulkCurate(
+              {
+                decisions: Array.from(
+                  { length: BULK_CURATE_MAX_DECISIONS + 1 },
+                  (_, index) => ({
+                    postUri: `at://did:plc:service-bulk-curate/app.bsky.feed.post/post-${index}` as any,
+                    action: "reject" as const
+                  })
+                )
+              },
+              "test-operator"
+            ).pipe(Effect.flip);
+
+            expect(error._tag).toBe("CurationBatchLimitError");
+            expect(error.maximum).toBe(BULK_CURATE_MAX_DECISIONS);
+            expect(error.actual).toBe(BULK_CURATE_MAX_DECISIONS + 1);
           }).pipe(Effect.provide(layer))
         );
       })

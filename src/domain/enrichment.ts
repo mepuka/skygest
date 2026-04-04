@@ -8,7 +8,7 @@
  */
 
 import { Schema, SchemaGetter } from "effect";
-import { PostUri } from "./types";
+import { NonNegativeInt, PlatformSchema, PostUri } from "./types";
 import { EnrichmentErrorEnvelope } from "./errors";
 import {
   MediaType,
@@ -353,14 +353,10 @@ export const GetPostEnrichmentsOutput = Schema.Struct({
 });
 export type GetPostEnrichmentsOutput = Schema.Schema.Type<typeof GetPostEnrichmentsOutput>;
 
-const NonNegativeInt = Schema.Int.pipe(
-  Schema.check(Schema.isGreaterThanOrEqualTo(0))
-);
-
 export const GapEnrichmentType = Schema.Literals(["vision", "source-attribution"]);
 export type GapEnrichmentType = Schema.Schema.Type<typeof GapEnrichmentType>;
 
-export const EnrichmentGapPlatform = Schema.Literals(["bluesky", "twitter"]);
+export const EnrichmentGapPlatform = PlatformSchema;
 export type EnrichmentGapPlatform = Schema.Schema.Type<typeof EnrichmentGapPlatform>;
 
 export const ListEnrichmentGapsInput = Schema.Struct({
@@ -436,6 +432,8 @@ export const BulkStartEnrichmentInput = Schema.Struct({
   }))
 });
 export type BulkStartEnrichmentInput = Schema.Schema.Type<typeof BulkStartEnrichmentInput>;
+
+export const BULK_START_ENRICHMENT_MAX_POSTS = 500;
 
 export const BulkStartEnrichmentError = Schema.Struct({
   postUri: PostUri,

@@ -2,6 +2,8 @@ import { Effect, Layer } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { describe, expect, it } from "@effect/vitest";
 import { decodeCallToolResultWith } from "../src/mcp/Client";
+import { BULK_CURATE_MAX_DECISIONS } from "../src/domain/curation";
+import { BULK_START_ENRICHMENT_MAX_POSTS } from "../src/domain/enrichment";
 import { createPersistentMcpHandler } from "../src/mcp/Router";
 import {
   BulkCurateMcpOutput,
@@ -101,6 +103,24 @@ const initializePersistentPromptSession = async (
     },
     close: () => webHandler.dispose()
   };
+};
+
+const getTextContent = (result: {
+  readonly content: ReadonlyArray<{
+    readonly type: string;
+    readonly text?: string;
+  }>;
+}) => {
+  const textContent = result.content.find(
+    (content): content is { type: "text"; text: string } =>
+      content.type === "text" && typeof content.text === "string"
+  );
+
+  if (textContent === undefined) {
+    throw new Error("missing text content");
+  }
+
+  return textContent.text;
 };
 
 describe("read-only MCP server", () => {
@@ -571,6 +591,37 @@ describe("MCP list_curation_candidates", () => {
       })
     )
   );
+
+  it.live("rejects invalid cursors and conflicting list modes", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer);
+
+        try {
+          const invalidCursor = await client.callTool({
+            name: "list_curation_candidates",
+            arguments: { cursor: "not-json" }
+          });
+          expect(invalidCursor.isError).toBe(true);
+          expect(getTextContent(invalidCursor)).toContain("Invalid curation cursor");
+
+          const conflictingModes = await client.callTool({
+            name: "list_curation_candidates",
+            arguments: { export: true, count: true }
+          });
+          expect(conflictingModes.isError).toBe(true);
+          expect(getTextContent(conflictingModes)).toContain(
+            "Choose either export mode or count mode"
+          );
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
 });
 
 describe("MCP bulk_curate", () => {
@@ -647,6 +698,114 @@ describe("MCP bulk_curate", () => {
           expect(summary.errors).toHaveLength(1);
           expect(summary.errors[0]?.postUri).toBe("at://did:plc:missing/app.bsky.feed.post/nope");
           expect(summary._display).toContain("Bulk curation completed.");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("rejects empty, duplicate, and oversized batches before execution", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer, workflowIdentity);
+
+        try {
+          const empty = await client.callTool({
+            name: "bulk_curate",
+            arguments: { decisions: [] }
+          });
+          expect(empty.isError).toBe(true);
+          expect(getTextContent(empty)).toContain("Provide at least one curation decision.");
+
+          const duplicate = await client.callTool({
+            name: "bulk_curate",
+            arguments: {
+              decisions: [
+                { postUri: solarUri, action: "curate" },
+                { postUri: solarUri, action: "reject" }
+              ]
+            }
+          });
+          expect(duplicate.isError).toBe(true);
+          expect(getTextContent(duplicate)).toContain("Duplicate postUri in batch");
+
+          const tooMany = await client.callTool({
+            name: "bulk_curate",
+            arguments: {
+              decisions: Array.from(
+                { length: BULK_CURATE_MAX_DECISIONS + 1 },
+                (_, index) => ({
+                  postUri: `at://did:plc:bulk-curate/app.bsky.feed.post/post-${index}`,
+                  action: "reject" as const
+                })
+              )
+            }
+          });
+          expect(tooMany.isError).toBe(true);
+          expect(getTextContent(tooMany)).toContain(
+            `Maximum: ${BULK_CURATE_MAX_DECISIONS}.`
+          );
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("counts idempotent curate decisions as skipped", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          config: { curationMinSignalScore: 100 }
+        });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const now = Date.now();
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+
+            yield* sql`
+              INSERT INTO post_curation
+                (post_uri, status, signal_score, predicates_applied, flagged_at, curated_at, curated_by, review_note)
+              VALUES
+                (${solarUri}, 'curated', ${60}, ${JSON.stringify(["already-curated"])}, ${now + 1}, ${now + 1}, 'tester', NULL),
+                (${windUri}, 'flagged', ${55}, ${JSON.stringify(["multi-topic"])}, ${now}, NULL, NULL, NULL)
+              ON CONFLICT(post_uri) DO UPDATE SET
+                status = excluded.status,
+                signal_score = excluded.signal_score,
+                predicates_applied = excluded.predicates_applied,
+                flagged_at = excluded.flagged_at,
+                curated_at = excluded.curated_at,
+                curated_by = excluded.curated_by
+            `;
+          }).pipe(Effect.provide(layer))
+        );
+
+        const { client, close } = await createMcpClient(layer, workflowIdentity);
+
+        try {
+          const result = await client.callTool({
+            name: "bulk_curate",
+            arguments: {
+              decisions: [
+                { postUri: solarUri, action: "curate" },
+                { postUri: windUri, action: "reject", note: "off topic" }
+              ]
+            }
+          });
+
+          expect(result.isError).toBe(false);
+          const summary = decodeBulkCurateResponse(result);
+          expect(summary.curated).toBe(0);
+          expect(summary.rejected).toBe(1);
+          expect(summary.skipped).toBe(1);
+          expect(summary.errors).toEqual([]);
         } finally {
           await close();
         }
@@ -788,6 +947,141 @@ describe("MCP list_enrichment_gaps", () => {
       })
     )
   );
+
+  it.live("supports enrichment-type filtering and excludes posts with active runs", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const visualUri = "x://tweet/enrichment-gap-visual-1";
+        const now = Date.now();
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+
+            yield* sql`
+              INSERT INTO posts (
+                uri,
+                did,
+                cid,
+                text,
+                created_at,
+                indexed_at,
+                has_links,
+                status,
+                ingest_id,
+                embed_type
+              ) VALUES
+                (${twitterUri}, ${sampleDid}, ${"cid-twitter-enrichment-gap-2"}, ${"Imported Twitter link candidate"}, ${now - 500}, ${now - 500}, ${1}, ${"active"}, ${"ingest-twitter-enrichment-gap-2"}, ${"link"}),
+                (${visualUri}, ${sampleDid}, ${"cid-twitter-enrichment-gap-visual-1"}, ${"Imported Twitter chart candidate"}, ${now - 400}, ${now - 400}, ${0}, ${"active"}, ${"ingest-twitter-enrichment-gap-visual-1"}, ${"img"})
+            `;
+
+            yield* sql`
+              INSERT INTO post_curation
+                (post_uri, status, signal_score, predicates_applied, flagged_at, curated_at, curated_by, review_note)
+              VALUES
+                (${solarUri}, 'curated', ${90}, ${JSON.stringify(["has-media"])}, ${now - 30}, ${now - 30}, 'tester', NULL),
+                (${windUri}, 'curated', ${80}, ${JSON.stringify(["has-links"])}, ${now - 20}, ${now - 20}, 'tester', NULL),
+                (${twitterUri}, 'curated', ${70}, ${JSON.stringify(["imported"])}, ${now - 10}, ${now - 10}, 'tester', NULL),
+                (${visualUri}, 'curated', ${75}, ${JSON.stringify(["imported-media"])}, ${now - 5}, ${now - 5}, 'tester', NULL)
+              ON CONFLICT(post_uri) DO UPDATE SET
+                status = excluded.status,
+                signal_score = excluded.signal_score,
+                predicates_applied = excluded.predicates_applied,
+                flagged_at = excluded.flagged_at,
+                curated_at = excluded.curated_at,
+                curated_by = excluded.curated_by
+            `;
+
+            yield* sql`
+              INSERT INTO post_payloads (post_uri, capture_stage, embed_type, embed_payload_json, captured_at, updated_at)
+              VALUES
+                (${solarUri}, 'picked', 'img', ${JSON.stringify({ kind: "img", images: [{ alt: "Chart", fullsize: "https://example.com/chart.jpg", thumb: "https://example.com/chart-thumb.jpg" }] })}, ${now}, ${now}),
+                (${windUri}, 'picked', 'link', ${JSON.stringify({ kind: "link", uri: "https://example.com/wind", title: "Wind article", description: null, thumb: null })}, ${now}, ${now}),
+                (${twitterUri}, 'picked', 'link', ${JSON.stringify({ kind: "link", uri: "https://example.com/twitter-link", title: "Twitter article", description: null, thumb: null })}, ${now}, ${now}),
+                (${visualUri}, 'picked', 'img', ${JSON.stringify({ kind: "img", images: [{ alt: "Imported chart", fullsize: "https://example.com/imported-chart.jpg", thumb: "https://example.com/imported-chart-thumb.jpg" }] })}, ${now}, ${now})
+              ON CONFLICT(post_uri) DO UPDATE SET
+                capture_stage = excluded.capture_stage,
+                embed_type = excluded.embed_type,
+                embed_payload_json = excluded.embed_payload_json,
+                updated_at = excluded.updated_at
+            `;
+
+            yield* sql`
+              INSERT INTO post_enrichment_runs (
+                id,
+                workflow_instance_id,
+                post_uri,
+                enrichment_type,
+                schema_version,
+                triggered_by,
+                requested_by,
+                status,
+                phase,
+                attempt_count,
+                model_lane,
+                prompt_version,
+                input_fingerprint,
+                started_at,
+                finished_at,
+                last_progress_at,
+                result_written_at,
+                error
+              ) VALUES (
+                ${`run-active-${now}`},
+                ${`workflow-active-${now}`},
+                ${solarUri},
+                'vision',
+                'v2',
+                'admin',
+                'tester',
+                'queued',
+                'queued',
+                0,
+                NULL,
+                NULL,
+                NULL,
+                ${now - 100},
+                NULL,
+                ${now - 100},
+                NULL,
+                NULL
+              )
+            `;
+          }).pipe(Effect.provide(layer))
+        );
+
+        const { client, close } = await createMcpClient(layer);
+
+        try {
+          const allResult = await client.callTool({
+            name: "list_enrichment_gaps",
+            arguments: {}
+          });
+          const allGaps = decodeEnrichmentGapsResponse(allResult);
+          expect(allGaps.vision.count).toBe(1);
+          expect(allGaps.vision.postUris).toEqual([visualUri]);
+          expect([...allGaps.sourceAttribution.postUris].sort()).toEqual(
+            [twitterUri, windUri].sort()
+          );
+          expect(allGaps.vision.postUris).not.toContain(solarUri);
+
+          const visionOnlyResult = await client.callTool({
+            name: "list_enrichment_gaps",
+            arguments: { enrichmentType: "vision" }
+          });
+          const visionOnly = decodeEnrichmentGapsResponse(visionOnlyResult);
+          expect(visionOnly.vision.count).toBe(1);
+          expect(visionOnly.vision.postUris).toEqual([visualUri]);
+          expect(visionOnly.sourceAttribution.count).toBe(0);
+          expect(visionOnly.sourceAttribution.postUris).toEqual([]);
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
 });
 
 describe("MCP list_enrichment_issues", () => {
@@ -886,6 +1180,96 @@ describe("MCP bulk_start_enrichment", () => {
   const windUri = fixtureUris[1]!;
   const linkUri = "x://tweet/bulk-enrichment-1";
   const missingUri = "at://did:plc:missing/app.bsky.feed.post/nope";
+
+  it.live("returns error when the enrichment trigger client is not available", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer, workflowIdentity);
+
+        try {
+          const result = await client.callTool({
+            name: "bulk_start_enrichment",
+            arguments: {
+              posts: [{ postUri: solarUri }]
+            }
+          });
+          expect(result.isError).toBe(true);
+          expect(getTextContent(result)).toContain("not available");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("rejects empty, duplicate, and oversized batches before triggering", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const mockFetcher = {
+          fetch: async () =>
+            new Response(
+              JSON.stringify({ message: "unexpected trigger call" }),
+              { status: 500, headers: { "content-type": "application/json" } }
+            )
+        } as unknown as Fetcher;
+        const layer = Layer.mergeAll(
+          makeBiLayer({ filename }),
+          EnrichmentTriggerClient.layerFromFetcher(mockFetcher, "test-secret")
+        );
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(
+          layer,
+          workflowIdentity
+        );
+
+        try {
+          const empty = await client.callTool({
+            name: "bulk_start_enrichment",
+            arguments: { posts: [] }
+          });
+          expect(empty.isError).toBe(true);
+          expect(getTextContent(empty)).toContain(
+            "Provide at least one post or a non-empty gaps payload."
+          );
+
+          const duplicate = await client.callTool({
+            name: "bulk_start_enrichment",
+            arguments: {
+              posts: [{ postUri: solarUri }],
+              gaps: {
+                vision: { count: 1, postUris: [solarUri] },
+                sourceAttribution: { count: 0, postUris: [] }
+              }
+            }
+          });
+          expect(duplicate.isError).toBe(true);
+          expect(getTextContent(duplicate)).toContain("Duplicate postUri in batch");
+
+          const tooMany = await client.callTool({
+            name: "bulk_start_enrichment",
+            arguments: {
+              posts: Array.from(
+                { length: BULK_START_ENRICHMENT_MAX_POSTS + 1 },
+                (_, index) => ({
+                  postUri: `at://did:plc:bulk-enrichment/app.bsky.feed.post/post-${index}`
+                })
+              )
+            }
+          });
+          expect(tooMany.isError).toBe(true);
+          expect(getTextContent(tooMany)).toContain(
+            `Maximum: ${BULK_START_ENRICHMENT_MAX_POSTS}.`
+          );
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
 
   it.live("queues batches, skips existing runs, retries 503s, and reports failures", () =>
     Effect.promise(() =>

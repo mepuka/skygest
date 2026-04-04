@@ -32,7 +32,13 @@ export const PostUri = Schema.String.pipe(
 ).annotate({ description: "Post URI — at:// (Bluesky) or x:// (Twitter)" });
 export type PostUri = Schema.Schema.Type<typeof PostUri>;
 
-export type Platform = "bluesky" | "twitter";
+export const PlatformSchema = Schema.Literals(["bluesky", "twitter"]);
+export type Platform = Schema.Schema.Type<typeof PlatformSchema>;
+
+export const NonNegativeInt = Schema.Int.pipe(
+  Schema.check(Schema.isGreaterThanOrEqualTo(0))
+);
+export type NonNegativeInt = Schema.Schema.Type<typeof NonNegativeInt>;
 
 /** Safe widening — every AtUri matches PostUri's pattern (at:// ⊂ at://|x://) */
 export const atUriToPostUri = (uri: AtUri): PostUri => uri as unknown as PostUri;

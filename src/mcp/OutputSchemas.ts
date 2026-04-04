@@ -61,7 +61,12 @@ export type PostThreadMcpOutput = typeof PostThreadMcpOutput.Type;
 export const ThreadDocumentMcpOutput = ThreadDocumentOutput;
 export type ThreadDocumentMcpOutput = typeof ThreadDocumentMcpOutput.Type;
 
-export const CurationCandidatesMcpOutput = CurationCandidatesOutput.pipe(Schema.fieldsAssign(displayFields));
+const CurationCandidatesTransportOutput = Schema.Struct({
+  ...CurationCandidatesOutput.fields,
+  nextCursor: Schema.NullOr(Schema.String)
+});
+
+export const CurationCandidatesMcpOutput = CurationCandidatesTransportOutput.pipe(Schema.fieldsAssign(displayFields));
 export type CurationCandidatesMcpOutput = typeof CurationCandidatesMcpOutput.Type;
 
 export const CuratePostMcpOutput = CuratePostOutput.pipe(Schema.fieldsAssign(displayFields));
