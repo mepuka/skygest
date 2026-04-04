@@ -70,14 +70,28 @@ describe("toIngestErrorEnvelope domain error classification", () => {
     expect(envelope.message).toBe("database operation failed");
   });
 
-  it("SqlError (duck-typed) => non-retryable", () => {
+  it("SqlError (duck-typed) => non-retryable, preserves message", () => {
     const envelope = toIngestErrorEnvelope({
       _tag: "SqlError",
       message: "D1 execution failed"
     });
     expect(envelope.tag).toBe("SqlError");
     expect(envelope.retryable).toBe(false);
-    expect(envelope.message).toBe("database operation failed");
+    expect(envelope.message).toBe("D1 execution failed");
+  });
+
+  it("SqlError with reason extracts detail from cause chain", () => {
+    const envelope = toIngestErrorEnvelope({
+      _tag: "SqlError",
+      message: "Failed to execute statement",
+      reason: {
+        _tag: "UnknownError",
+        message: "D1_ERROR: SQLITE_BUSY",
+        cause: new Error("database is locked")
+      }
+    });
+    expect(envelope.tag).toBe("SqlError");
+    expect(envelope.detail).toBe("D1_ERROR: SQLITE_BUSY");
   });
 
   it("BlueskyApiError with 429 => retryable", () => {
