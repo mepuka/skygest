@@ -209,7 +209,8 @@ export const IngestErrorEnvelope = Schema.Struct({
   status: Schema.optionalKey(Schema.Number),
   did: Schema.optionalKey(Did),
   runId: Schema.optionalKey(Schema.String),
-  operation: Schema.optionalKey(Schema.String)
+  operation: Schema.optionalKey(Schema.String),
+  detail: Schema.optionalKey(Schema.String)
 });
 export type IngestErrorEnvelope = Schema.Schema.Type<typeof IngestErrorEnvelope>;
 
@@ -229,7 +230,8 @@ export const EnrichmentErrorEnvelope = Schema.Struct({
   retryable: Schema.Boolean,
   status: Schema.optionalKey(Schema.Number),
   runId: Schema.optionalKey(Schema.String),
-  operation: Schema.optionalKey(Schema.String)
+  operation: Schema.optionalKey(Schema.String),
+  detail: Schema.optionalKey(Schema.String)
 });
 export type EnrichmentErrorEnvelope = Schema.Schema.Type<
   typeof EnrichmentErrorEnvelope
@@ -266,6 +268,20 @@ const getNumberField = (value: unknown, key: string) =>
 
 const isRetryableStatus = (status: number | undefined) =>
   status === 429 || (status !== undefined && status >= 500 && status < 600);
+
+const extractSqlErrorDetail = (error: unknown): string | undefined => {
+  if (!isObject(error)) return undefined;
+  const msg = getStringField(error, "message");
+  const reason = isObject((error as any).reason) ? (error as any).reason : undefined;
+  if (reason) {
+    const reasonMsg = getStringField(reason, "message");
+    const causeMsg = reason.cause instanceof Error ? reason.cause.message : undefined;
+    return reasonMsg ?? causeMsg ?? msg;
+  }
+  const cause = (error as any).cause;
+  if (cause instanceof Error) return cause.message;
+  return msg;
+};
 
 export const legacyIngestErrorEnvelope = (message: string): IngestErrorEnvelope => ({
   tag: "LegacyError",
@@ -335,11 +351,12 @@ export const sanitizeIngestErrorEnvelope = (
         message: "missing worker binding"
       };
     case "DbError":
-    case "SqlError":
       return {
         ...envelope,
         message: "database operation failed"
       };
+    case "SqlError":
+      return envelope;
     default:
       return {
         ...envelope,
@@ -555,10 +572,12 @@ export const toIngestErrorEnvelope = (
   }
 
   if (isTagged(error, "SqlError")) {
+    const detail = extractSqlErrorDetail(error);
     return withOverrides({
       tag: "SqlError",
       message: getStringField(error, "message") ?? "database operation failed",
-      retryable: false
+      retryable: false,
+      ...(detail ? { detail } : {})
     });
   }
 
@@ -833,10 +852,12 @@ export const toEnrichmentErrorEnvelope = (
   }
 
   if (isTagged(error, "SqlError")) {
+    const detail = extractSqlErrorDetail(error);
     return withOverrides({
       tag: "SqlError",
       message: getStringField(error, "message") ?? "database operation failed",
-      retryable: false
+      retryable: false,
+      ...(detail ? { detail } : {})
     });
   }
 
