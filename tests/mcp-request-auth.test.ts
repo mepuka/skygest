@@ -27,6 +27,16 @@ describe("classifyMcpRequest", () => {
     });
   });
 
+  it("tools/call with bulk_curate requires curation:write", async () => {
+    const req = makeJsonRpcRequest("tools/call", { name: "bulk_curate" });
+    const result = await classifyMcpRequest(req);
+    expect(result).toEqual({
+      method: "tools/call",
+      toolOrPromptName: "bulk_curate",
+      requiredScopes: ["curation:write"],
+    });
+  });
+
   it("tools/call with submit_editorial_pick requires editorial:write", async () => {
     const req = makeJsonRpcRequest("tools/call", { name: "submit_editorial_pick" });
     const result = await classifyMcpRequest(req);

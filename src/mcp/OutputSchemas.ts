@@ -19,7 +19,7 @@ import {
   ThreadDocumentOutput
 } from "../domain/bi.ts";
 import { EditorialPicksOutput, SubmitEditorialPickOutput } from "../domain/editorial.ts";
-import { CurationCandidatesOutput, CuratePostOutput } from "../domain/curation.ts";
+import { BulkCurateOutput, CurationCandidatesOutput, CuratePostOutput } from "../domain/curation.ts";
 import { GetPostEnrichmentsOutput, EnrichmentKind } from "../domain/enrichment.ts";
 import { PostUri } from "../domain/types.ts";
 
@@ -60,6 +60,9 @@ export type CurationCandidatesMcpOutput = typeof CurationCandidatesMcpOutput.Typ
 
 export const CuratePostMcpOutput = CuratePostOutput.pipe(Schema.fieldsAssign(displayFields));
 export type CuratePostMcpOutput = typeof CuratePostMcpOutput.Type;
+
+export const BulkCurateMcpOutput = BulkCurateOutput.pipe(Schema.fieldsAssign(displayFields));
+export type BulkCurateMcpOutput = typeof BulkCurateMcpOutput.Type;
 
 export const SubmitEditorialPickMcpOutput = SubmitEditorialPickOutput.pipe(Schema.fieldsAssign(displayFields));
 export type SubmitEditorialPickMcpOutput = typeof SubmitEditorialPickMcpOutput.Type;

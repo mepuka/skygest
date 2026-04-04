@@ -4,7 +4,11 @@ import type { DbError } from "../domain/errors";
 import { BlueskyApiError } from "../domain/errors";
 import type { PostUri } from "../domain/types";
 import type {
-  CurationCandidateOutput,
+  BulkCurateInput,
+  BulkCurateOutput,
+  CurationCandidateCountOutput,
+  CurationCandidateExportPageOutput,
+  CurationCandidatePageOutput,
   CuratePostOutput,
   ListCurationCandidatesInput,
   CuratePostInput,
@@ -43,12 +47,25 @@ export class CurationService extends ServiceMap.Service<
 
     readonly listCandidates: (
       input: ListCurationCandidatesInput
-    ) => Effect.Effect<ReadonlyArray<CurationCandidateOutput>, SqlError | DbError>;
+    ) => Effect.Effect<CurationCandidatePageOutput, SqlError | DbError>;
+
+    readonly exportCandidates: (
+      input: ListCurationCandidatesInput
+    ) => Effect.Effect<CurationCandidateExportPageOutput, SqlError | DbError>;
+
+    readonly countCandidates: (
+      input: ListCurationCandidatesInput
+    ) => Effect.Effect<CurationCandidateCountOutput, SqlError | DbError>;
 
     readonly curatePost: (
       input: CuratePostInput,
       curator: string
     ) => Effect.Effect<CuratePostOutput, SqlError | DbError | CurationPostNotFoundError | BlueskyApiError>;
+
+    readonly bulkCurate: (
+      input: BulkCurateInput,
+      curator: string
+    ) => Effect.Effect<BulkCurateOutput>;
   }
 >()("@skygest/CurationService") {
   static readonly layer = Layer.effect(CurationService, Effect.gen(function* () {
@@ -59,8 +76,8 @@ export class CurationService extends ServiceMap.Service<
     const bskyClient = yield* BlueskyClient;
     const config = yield* AppConfig;
 
-const clampCurationLimit = (limit: number | undefined) =>
-  clampLimit(limit, config.mcpLimitDefault, config.mcpLimitMax);
+    const clampCurationLimit = (limit: number | undefined) =>
+      clampLimit(limit, config.mcpLimitDefault, config.mcpLimitMax);
 
     const hasVisualAssets = (embedPayload: EmbedPayload | null): boolean => {
       if (embedPayload === null) {
@@ -167,6 +184,21 @@ const clampCurationLimit = (limit: number | undefined) =>
           ...input,
           limit: clampCurationLimit(input.limit)
         });
+      }
+    );
+
+    const exportCandidates = Effect.fn("CurationService.exportCandidates")(
+      function* (input: ListCurationCandidatesInput) {
+        return yield* curationRepo.exportCandidates({
+          ...input,
+          limit: clampCurationLimit(input.limit)
+        });
+      }
+    );
+
+    const countCandidates = Effect.fn("CurationService.countCandidates")(
+      function* (input: ListCurationCandidatesInput) {
+        return yield* curationRepo.countCandidates(input);
       }
     );
 
@@ -335,10 +367,63 @@ const clampCurationLimit = (limit: number | undefined) =>
       }
     );
 
+    const bulkCurate = Effect.fn("CurationService.bulkCurate")(
+      function* (input: BulkCurateInput, curator: string) {
+        const results = yield* Effect.forEach(
+          input.decisions,
+          (decision) =>
+            curatePost(decision, curator).pipe(
+              Effect.match({
+                onFailure: (error) => ({
+                  postUri: decision.postUri,
+                  error: error.message
+                }),
+                onSuccess: (result) => result
+              })
+            ),
+          { concurrency: 8 }
+        );
+
+        let curated = 0;
+        let rejected = 0;
+        let skipped = 0;
+        const errors: Array<BulkCurateOutput["errors"][number]> = [];
+
+        for (const result of results) {
+          if ("error" in result) {
+            errors.push(result);
+            continue;
+          }
+
+          if (result.previousStatus === result.newStatus) {
+            skipped += 1;
+            continue;
+          }
+
+          if (result.newStatus === "curated") {
+            curated += 1;
+            continue;
+          }
+
+          rejected += 1;
+        }
+
+        return {
+          curated,
+          rejected,
+          skipped,
+          errors
+        };
+      }
+    );
+
     return {
       flagBatch,
       listCandidates,
-      curatePost
+      exportCandidates,
+      countCandidates,
+      curatePost,
+      bulkCurate
     };
   }));
 }

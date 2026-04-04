@@ -4,6 +4,8 @@ import { describe, expect, it } from "@effect/vitest";
 import { decodeCallToolResultWith } from "../src/mcp/Client";
 import { createPersistentMcpHandler } from "../src/mcp/Router";
 import {
+  BulkCurateMcpOutput,
+  CurationCandidatesMcpOutput,
   KnowledgePostsMcpOutput,
   ExpertListMcpOutput,
   OntologyTopicsMcpOutput,
@@ -21,6 +23,8 @@ import {
 } from "./support/runtime";
 
 const decodeSearchResponse = decodeCallToolResultWith(KnowledgePostsMcpOutput);
+const decodeCurationCandidatesResponse = decodeCallToolResultWith(CurationCandidatesMcpOutput);
+const decodeBulkCurateResponse = decodeCallToolResultWith(BulkCurateMcpOutput);
 const decodeExpertsResponse = decodeCallToolResultWith(ExpertListMcpOutput);
 const decodeTopicsResponse = decodeCallToolResultWith(OntologyTopicsMcpOutput);
 const decodeEditorialPicksResponse = decodeCallToolResultWith(EditorialPicksMcpOutput);
@@ -427,6 +431,7 @@ describe("MCP tool visibility by profile", () => {
           const names = tools.tools.map((t) => t.name);
           expect(names).toContain("start_enrichment");
           expect(names).toContain("curate_post");
+          expect(names).toContain("bulk_curate");
           expect(names).toContain("submit_editorial_pick");
         } finally {
           await close();
@@ -451,6 +456,184 @@ describe("MCP tool visibility by profile", () => {
           const names = tools.tools.map((t) => t.name);
           expect(names).not.toContain("start_enrichment");
           expect(names).not.toContain("curate_post");
+          expect(names).not.toContain("bulk_curate");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+});
+
+describe("MCP list_curation_candidates", () => {
+  const fixtureUris = smokeFixtureUris(sampleDid);
+  const solarUri = fixtureUris[0]!;
+  const windUri = fixtureUris[1]!;
+
+  it.live("supports count mode and export pagination", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          config: { curationMinSignalScore: 100 }
+        });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const now = Date.now();
+            const twitterUri = "x://tweet/mcp-1";
+
+            yield* sql`
+              INSERT INTO posts (
+                uri,
+                did,
+                cid,
+                text,
+                created_at,
+                indexed_at,
+                has_links,
+                status,
+                ingest_id,
+                embed_type
+              ) VALUES (
+                ${twitterUri},
+                ${sampleDid},
+                ${"cid-twitter-mcp-1"},
+                ${"Imported Twitter export candidate"},
+                ${now - 1000},
+                ${now - 1000},
+                ${0},
+                ${"active"},
+                ${"ingest-twitter-mcp-1"},
+                ${null}
+              )
+            `;
+
+            yield* sql`
+              INSERT INTO post_curation
+                (post_uri, status, signal_score, predicates_applied, flagged_at, curated_at, curated_by, review_note)
+              VALUES
+                (${solarUri}, 'flagged', ${95}, ${JSON.stringify(["has-links"])}, ${now + 3}, NULL, NULL, NULL),
+                (${windUri}, 'flagged', ${85}, ${JSON.stringify(["multi-topic"])}, ${now + 2}, NULL, NULL, NULL),
+                (${twitterUri}, 'flagged', ${75}, ${JSON.stringify(["manual-import"])}, ${now + 1}, NULL, NULL, NULL)
+              ON CONFLICT(post_uri) DO UPDATE SET
+                status = excluded.status,
+                signal_score = excluded.signal_score,
+                predicates_applied = excluded.predicates_applied,
+                flagged_at = excluded.flagged_at
+            `;
+          }).pipe(Effect.provide(layer))
+        );
+
+        const { client, close } = await createMcpClient(makeBiLayer({ filename }));
+
+        try {
+          const countsResult = await client.callTool({
+            name: "list_curation_candidates",
+            arguments: { count: true }
+          });
+          const counts = decodeCurationCandidatesResponse(countsResult);
+          expect(counts.mode).toBe("count");
+          expect(counts.total).toBe(3);
+          expect(counts.byPlatform).toEqual({ bluesky: 2, twitter: 1 });
+          expect(counts.items).toEqual([]);
+          expect(counts.exportItems).toEqual([]);
+
+          const exportResult = await client.callTool({
+            name: "list_curation_candidates",
+            arguments: { export: true, limit: 2 }
+          });
+          const exportPage = decodeCurationCandidatesResponse(exportResult);
+          expect(exportPage.mode).toBe("export");
+          expect(exportPage.total).toBe(3);
+          expect(exportPage.exportItems).toHaveLength(2);
+          expect(exportPage.items).toEqual([]);
+          expect(exportPage.nextCursor).not.toBeNull();
+          expect(exportPage._display).toContain("Showing 2 of 3 curation candidates.");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+});
+
+describe("MCP bulk_curate", () => {
+  const solarUri = `at://${sampleDid}/app.bsky.feed.post/post-solar`;
+  const windUri = `at://${sampleDid}/app.bsky.feed.post/post-wind`;
+
+  it.live("returns batch counts and per-post errors", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          config: { curationMinSignalScore: 100 }
+        });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const now = Date.now();
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+            const embedPayloadJson = JSON.stringify({
+              kind: "link",
+              uri: "https://example.com/article",
+              title: "Stored payload",
+              description: null,
+              thumb: null
+            });
+
+            yield* sql`
+              INSERT INTO post_curation
+                (post_uri, status, signal_score, predicates_applied, flagged_at, curated_at, curated_by, review_note)
+              VALUES
+                (${solarUri}, 'flagged', ${60}, ${JSON.stringify(["has-links"])}, ${now + 1}, NULL, NULL, NULL),
+                (${windUri}, 'flagged', ${55}, ${JSON.stringify(["multi-topic"])}, ${now}, NULL, NULL, NULL)
+              ON CONFLICT(post_uri) DO UPDATE SET
+                status = excluded.status,
+                signal_score = excluded.signal_score,
+                predicates_applied = excluded.predicates_applied,
+                flagged_at = excluded.flagged_at
+            `;
+            yield* sql`
+              INSERT INTO post_payloads (post_uri, capture_stage, embed_type, embed_payload_json, captured_at, updated_at)
+              VALUES (${solarUri}, 'candidate', 'link', ${embedPayloadJson}, ${now}, ${now})
+              ON CONFLICT(post_uri) DO UPDATE SET
+                capture_stage = excluded.capture_stage,
+                embed_type = excluded.embed_type,
+                embed_payload_json = excluded.embed_payload_json,
+                updated_at = excluded.updated_at
+            `;
+          }).pipe(Effect.provide(layer))
+        );
+
+        const { client, close } = await createMcpClient(
+          makeBiLayer({ filename }),
+          workflowIdentity
+        );
+
+        try {
+          const result = await client.callTool({
+            name: "bulk_curate",
+            arguments: {
+              decisions: [
+                { postUri: solarUri, action: "curate" },
+                { postUri: windUri, action: "reject", note: "off topic" },
+                { postUri: "at://did:plc:missing/app.bsky.feed.post/nope", action: "reject" }
+              ]
+            }
+          });
+          expect(result.isError).toBe(false);
+
+          const summary = decodeBulkCurateResponse(result);
+          expect(summary.curated).toBe(1);
+          expect(summary.rejected).toBe(1);
+          expect(summary.skipped).toBe(0);
+          expect(summary.errors).toHaveLength(1);
+          expect(summary.errors[0]?.postUri).toBe("at://did:plc:missing/app.bsky.feed.post/nope");
+          expect(summary._display).toContain("Bulk curation completed.");
         } finally {
           await close();
         }

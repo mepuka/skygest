@@ -18,6 +18,7 @@ import { smokeFixtureUris } from "../src/staging/SmokeFixture";
 
 const fixtureUris = smokeFixtureUris(sampleDid);
 const solarUri = fixtureUris[0]!;
+const windUri = fixtureUris[1]!;
 
 describe("CurationRepo", () => {
   it.live("upsertFlag inserts a flagged record", () =>
@@ -121,15 +122,122 @@ describe("CurationRepo", () => {
               reviewNote: null
             });
 
-            const candidates = yield* repo.listCandidates({});
-            expect(candidates.length).toBeGreaterThan(0);
+            const page = yield* repo.listCandidates({});
+            expect(page.items.length).toBeGreaterThan(0);
+            expect(page.total).toBeGreaterThan(0);
 
-            const c = candidates.find((x) => x.uri === solarUri);
+            const c = page.items.find((x) => x.uri === solarUri);
             expect(c).toBeDefined();
             expect(c!.signalScore).toBe(65);
             expect(c!.curationStatus).toBe("flagged");
             expect(c!.predicatesApplied).toContain("energy-focused-expert");
             expect(c!.topics.length).toBeGreaterThan(0);
+          }).pipe(Effect.provide(layer))
+        );
+      })
+    )
+  );
+
+  it.live("supports platform filters, counts, and cursor pagination", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          config: { curationMinSignalScore: 100 }
+        });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            const repo = yield* CurationRepo;
+            const sql = yield* SqlClient.SqlClient;
+            const now = Date.now();
+            const twitterUri = "x://tweet/test-1";
+
+            yield* sql`
+              INSERT INTO posts (
+                uri,
+                did,
+                cid,
+                text,
+                created_at,
+                indexed_at,
+                has_links,
+                status,
+                ingest_id,
+                embed_type
+              ) VALUES (
+                ${twitterUri},
+                ${sampleDid},
+                ${"cid-twitter-1"},
+                ${"Imported Twitter market update"},
+                ${now - 1000},
+                ${now - 1000},
+                ${0},
+                ${"active"},
+                ${"ingest-twitter-1"},
+                ${null}
+              )
+            `;
+
+            yield* repo.upsertFlag({
+              postUri: solarUri as any,
+              status: "flagged",
+              signalScore: 95 as any,
+              predicatesApplied: ["has-links"],
+              flaggedAt: now + 3,
+              curatedAt: null,
+              curatedBy: null,
+              reviewNote: null
+            });
+            yield* repo.upsertFlag({
+              postUri: windUri as any,
+              status: "flagged",
+              signalScore: 85 as any,
+              predicatesApplied: ["multi-topic"],
+              flaggedAt: now + 2,
+              curatedAt: null,
+              curatedBy: null,
+              reviewNote: null
+            });
+            yield* repo.upsertFlag({
+              postUri: twitterUri as any,
+              status: "flagged",
+              signalScore: 75 as any,
+              predicatesApplied: ["manual-import"],
+              flaggedAt: now + 1,
+              curatedAt: null,
+              curatedBy: null,
+              reviewNote: null
+            });
+
+            const counts = yield* repo.countCandidates({});
+            expect(counts.total).toBe(3);
+            expect(counts.byPlatform.bluesky).toBe(2);
+            expect(counts.byPlatform.twitter).toBe(1);
+
+            const firstPage = yield* repo.listCandidates({ limit: 2, platform: "all" });
+            expect(firstPage.total).toBe(3);
+            expect(firstPage.items.map((item) => item.uri)).toEqual([solarUri, windUri]);
+            expect(firstPage.nextCursor).not.toBeNull();
+
+            const secondPage = yield* repo.listCandidates({
+              limit: 2,
+              platform: "all",
+              cursor: firstPage.nextCursor!
+            });
+            expect(secondPage.total).toBe(3);
+            expect(secondPage.items).toHaveLength(1);
+            expect(secondPage.items[0]?.uri).toBe(twitterUri);
+
+            const twitterOnly = yield* repo.listCandidates({ platform: "twitter" });
+            expect(twitterOnly.total).toBe(1);
+            expect(twitterOnly.items).toHaveLength(1);
+            expect(twitterOnly.items[0]?.uri).toBe(twitterUri);
+
+            const exportPage = yield* repo.exportCandidates({ platform: "twitter" });
+            expect(exportPage.total).toBe(1);
+            expect(exportPage.items[0]?.platform).toBe("twitter");
           }).pipe(Effect.provide(layer))
         );
       })
@@ -153,7 +261,7 @@ describe("CurationService.flagBatch", () => {
             // called flagBatch via the FilterWorker hook.
             // Check that some posts were flagged.
             const candidates = yield* repo.listCandidates({});
-            expect(candidates.length).toBeGreaterThan(0);
+            expect(candidates.items.length).toBeGreaterThan(0);
           }).pipe(Effect.provide(layer))
         );
       })
@@ -171,7 +279,7 @@ describe("CurationService.flagBatch", () => {
           Effect.gen(function* () {
             const repo = yield* CurationRepo;
             const candidates = yield* repo.listCandidates({});
-            expect(candidates).toHaveLength(0);
+            expect(candidates.items).toHaveLength(0);
           }).pipe(Effect.provide(layer))
         );
       })
@@ -228,6 +336,85 @@ describe("CurationService.curatePost skip-fetch", () => {
               "test-operator"
             );
             expect(result.newStatus).toBe("curated");
+          }).pipe(Effect.provide(layer))
+        );
+      })
+    )
+  );
+});
+
+describe("CurationService.bulkCurate", () => {
+  it.live("applies mixed curate and reject decisions with per-post error reporting", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          config: { curationMinSignalScore: 100 },
+          blueskyClient: failingBlueskyClient
+        });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            const payloadService = yield* CandidatePayloadService;
+            const curationService = yield* CurationService;
+            const curationRepo = yield* CurationRepo;
+
+            yield* curationRepo.upsertFlag({
+              postUri: solarUri as any,
+              status: "flagged",
+              signalScore: 60 as any,
+              predicatesApplied: ["has-links"],
+              flaggedAt: Date.now(),
+              curatedAt: null,
+              curatedBy: null,
+              reviewNote: null
+            });
+            yield* curationRepo.upsertFlag({
+              postUri: windUri as any,
+              status: "flagged",
+              signalScore: 55 as any,
+              predicatesApplied: ["multi-topic"],
+              flaggedAt: Date.now(),
+              curatedAt: null,
+              curatedBy: null,
+              reviewNote: null
+            });
+
+            yield* payloadService.capturePayload({
+              postUri: solarUri as any,
+              captureStage: "candidate",
+              embedType: "link",
+              embedPayload: {
+                kind: "link",
+                uri: "https://example.com/article",
+                title: "Stored payload",
+                description: null,
+                thumb: null
+              }
+            });
+
+            const result = yield* curationService.bulkCurate(
+              {
+                decisions: [
+                  { postUri: solarUri as any, action: "curate" },
+                  { postUri: windUri as any, action: "reject", note: "off topic" },
+                  { postUri: "at://did:plc:missing/app.bsky.feed.post/nope" as any, action: "reject" }
+                ]
+              },
+              "test-operator"
+            );
+
+            expect(result.curated).toBe(1);
+            expect(result.rejected).toBe(1);
+            expect(result.skipped).toBe(0);
+            expect(result.errors).toHaveLength(1);
+            expect(result.errors[0]?.postUri).toBe("at://did:plc:missing/app.bsky.feed.post/nope");
+
+            const curated = yield* curationRepo.getByPostUri(solarUri);
+            const rejected = yield* curationRepo.getByPostUri(windUri);
+            expect(curated?.status).toBe("curated");
+            expect(rejected?.status).toBe("rejected");
           }).pipe(Effect.provide(layer))
         );
       })

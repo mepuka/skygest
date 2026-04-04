@@ -1,25 +1,36 @@
 import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import { Tool, Toolkit } from "effect/unstable/ai";
-import { Effect, Layer, Option, Schema } from "effect";
-import { stripUndefined } from "../platform/Json";
+import { Effect, Layer, Option, Result, Schema } from "effect";
+import {
+  decodeJsonStringEitherWith,
+  encodeJsonStringWith,
+  formatSchemaParseError,
+  stripUndefined
+} from "../platform/Json";
 import {
   ExplainPostTopicsInput,
   ExpandTopicsInput,
-  GetTopicInput,
-  ListTopicsInput,
   GetPostLinksInput,
-  GetRecentPostsInput,
   GetPostThreadInput,
+  GetRecentPostsInput,
+  GetTopicInput,
   GetThreadDocumentInput,
+  ListTopicsInput,
   ListExpertsInput,
   McpToolQueryError,
   SearchPostsInput
 } from "../domain/bi";
 import { ListEditorialPicksInput, SubmitEditorialPickMcpInput } from "../domain/editorial";
-import { ListCurationCandidatesInput, CuratePostInput } from "../domain/curation";
+import {
+  BulkCurateInput,
+  CuratePostInput,
+  CurationCandidateCursor,
+  ListCurationCandidatesInput
+} from "../domain/curation";
 import { GetPostEnrichmentsInput, EnrichmentKind } from "../domain/enrichment";
 import {
+  BulkCurateMcpOutput,
   KnowledgePostsMcpOutput,
   KnowledgeLinksMcpOutput,
   ExpertListMcpOutput,
@@ -37,6 +48,10 @@ import {
   StartEnrichmentMcpOutput
 } from "./OutputSchemas.ts";
 import {
+  formatBulkCurateResult,
+  formatCurationCandidateCounts,
+  formatCurationCandidateExportPage,
+  formatCurationCandidatePage,
   formatPosts,
   formatLinks,
   formatExperts,
@@ -45,7 +60,6 @@ import {
   formatExpandedTopics,
   formatExplainedPostTopics,
   formatEditorialPicks,
-  formatCurationCandidates,
   formatCuratePostResult,
   formatSubmitPickResult,
   formatEnrichments,
@@ -91,6 +105,28 @@ const StartEnrichmentMcpInput = Schema.Struct({
     description: "Enrichment type: 'vision' for charts/screenshots, 'source-attribution' for links. If omitted, auto-detected from embed type."
   }))
 });
+
+const ListCurationCandidatesMcpInput = Schema.Struct({
+  status: ListCurationCandidatesInput.fields.status,
+  minScore: ListCurationCandidatesInput.fields.minScore,
+  topic: ListCurationCandidatesInput.fields.topic,
+  platform: ListCurationCandidatesInput.fields.platform,
+  since: ListCurationCandidatesInput.fields.since,
+  limit: ListCurationCandidatesInput.fields.limit,
+  cursor: Schema.optionalKey(Schema.String.annotate({
+    description: "Opaque pagination cursor returned by a previous list_curation_candidates call."
+  })),
+  export: Schema.optionalKey(Schema.Boolean.annotate({
+    description: "Return compact export rows optimized for bulk classification."
+  })),
+  count: Schema.optionalKey(Schema.Boolean.annotate({
+    description: "Return only aggregate candidate counts by platform."
+  }))
+});
+
+const decodeCurationCandidateCursor = decodeJsonStringEitherWith(CurationCandidateCursor);
+const encodeCurationCandidateCursor = encodeJsonStringWith(CurationCandidateCursor);
+const BULK_CURATE_MAX_DECISIONS = 1000;
 
 const toQueryError = (tool: string) => (error: { message: string }) =>
   new McpToolQueryError({
@@ -232,8 +268,8 @@ export const GetThreadDocumentTool = Tool.make("get_thread_document", {
   .annotate(Tool.OpenWorld, true);
 
 export const ListCurationCandidatesTool = Tool.make("list_curation_candidates", {
-  description: "List posts flagged by curation predicates for editorial review. Shows signal score, matched predicates, and post details. Use to find high-signal posts that may warrant enrichment.",
-  parameters: ListCurationCandidatesInput,
+  description: "List posts flagged by curation predicates for review. Supports platform filtering, aggregate count mode, compact export mode for sub-agent classification, and opaque pagination cursors.",
+  parameters: ListCurationCandidatesMcpInput,
   success: CurationCandidatesMcpOutput,
   failure: McpToolQueryError
 })
@@ -268,12 +304,24 @@ export const StartEnrichmentTool = Tool.make("start_enrichment", {
   .annotate(Tool.OpenWorld, true);
 
 export const CuratePostTool = Tool.make("curate_post", {
-  description: "Curate or reject a post. Curating captures embed data for enrichment. For Bluesky posts, fetches live data. For Twitter posts, uses stored import data. Call start_enrichment separately to queue enrichment processing. Rejecting dismisses the post. Idempotent.",
+  description: "Curate or reject a post. Curating captures embed data for enrichment. For Bluesky posts, fetches live data. For Twitter posts, uses stored import data. When enrichment launching is available, curating also queues the appropriate enrichment automatically. Rejecting dismisses the post. Idempotent.",
   parameters: CuratePostInput,
   success: CuratePostMcpOutput,
   failure: McpToolQueryError
 })
   .annotate(Tool.Title, "Curate Post")
+  .annotate(Tool.Readonly, false)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, true);
+
+export const BulkCurateTool = Tool.make("bulk_curate", {
+  description: "Apply many curate or reject decisions in one call. Reuses curate_post behavior for each post, including payload capture and automatic enrichment queueing when available. Returns counts plus per-post errors.",
+  parameters: BulkCurateInput,
+  success: BulkCurateMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Bulk Curate")
   .annotate(Tool.Readonly, false)
   .annotate(Tool.Destructive, false)
   .annotate(Tool.Idempotent, true)
@@ -326,6 +374,7 @@ export const CurationWriteMcpToolkit = Toolkit.make(
   ListCurationCandidatesTool,
   GetPostEnrichmentsTool,
   CuratePostTool,
+  BulkCurateTool,
   StartEnrichmentTool
 );
 
@@ -361,6 +410,7 @@ export const WorkflowWriteMcpToolkit = Toolkit.make(
   ListCurationCandidatesTool,
   GetPostEnrichmentsTool,
   CuratePostTool,
+  BulkCurateTool,
   SubmitEditorialPickTool,
   StartEnrichmentTool
 );
@@ -414,6 +464,68 @@ type EditorialServiceI = (typeof EditorialService)["Service"];
 type CurationServiceI = (typeof CurationService)["Service"];
 type BlueskyClientI = (typeof BlueskyClient)["Service"];
 type PostEnrichmentReadServiceI = (typeof PostEnrichmentReadService)["Service"];
+
+const invalidMcpInputError = (
+  tool: string,
+  message: string,
+  error: unknown
+) =>
+  new McpToolQueryError({
+    tool,
+    message,
+    error
+  });
+
+const decodeListCurationCursor = (
+  tool: string,
+  cursor: string | undefined
+) =>
+  cursor === undefined
+    ? Effect.sync(() => undefined)
+    : Effect.sync(() => {
+        const result = decodeCurationCandidateCursor(cursor);
+        if (Result.isSuccess(result)) {
+          return result.success;
+        }
+
+        throw invalidMcpInputError(
+          tool,
+          `Invalid curation cursor: ${formatSchemaParseError(result.failure)}`,
+          result.failure
+        );
+      });
+
+const validateBulkCurateInput = (input: typeof BulkCurateInput.Type) =>
+  Effect.sync(() => {
+    if (input.decisions.length === 0) {
+      throw invalidMcpInputError(
+        "bulk_curate",
+        "Provide at least one curation decision.",
+        new Error("empty decisions")
+      );
+    }
+
+    if (input.decisions.length > BULK_CURATE_MAX_DECISIONS) {
+      throw invalidMcpInputError(
+        "bulk_curate",
+        `Too many curation decisions. Maximum: ${BULK_CURATE_MAX_DECISIONS}.`,
+        new Error("too many decisions")
+      );
+    }
+
+    const seen = new Set<string>();
+    for (const decision of input.decisions) {
+      if (seen.has(decision.postUri)) {
+        throw invalidMcpInputError(
+          "bulk_curate",
+          `Duplicate postUri in batch: ${decision.postUri}`,
+          new Error("duplicate postUri")
+        );
+      }
+
+      seen.add(decision.postUri);
+    }
+  });
 
 // ---------------------------------------------------------------------------
 // Shared read-only handler implementations
@@ -590,21 +702,100 @@ const makeReadOnlyHandlers = (
             })
       )
     ),
-  list_curation_candidates: (input: typeof ListCurationCandidatesInput.Type) =>
-    curationService.listCandidates(input).pipe(
-      Effect.flatMap((items) =>
-        Effect.forEach(items, (item) =>
+  list_curation_candidates: (input: typeof ListCurationCandidatesMcpInput.Type) =>
+    Effect.gen(function* () {
+      if (input.export === true && input.count === true) {
+        return yield* invalidMcpInputError(
+          "list_curation_candidates",
+          "Choose either export mode or count mode, not both.",
+          new Error("conflicting list modes")
+        );
+      }
+
+      const normalizedBaseInput = stripUndefined({
+        status: input.status,
+        minScore: input.minScore,
+        topic: input.topic,
+        platform: input.platform,
+        since: input.since,
+        limit: input.limit
+      });
+
+      if (input.count === true) {
+        const counts = yield* curationService.countCandidates(normalizedBaseInput);
+        return {
+          mode: "count" as const,
+          total: counts.total,
+          nextCursor: null,
+          byPlatform: counts.byPlatform,
+          items: [],
+          exportItems: [],
+          _display: formatCurationCandidateCounts(counts)
+        };
+      }
+
+      const cursor = yield* decodeListCurationCursor(
+        "list_curation_candidates",
+        input.cursor
+      );
+      const normalizedInput = stripUndefined({
+        ...normalizedBaseInput,
+        cursor
+      });
+
+      if (input.export === true) {
+        const page = yield* curationService.exportCandidates(normalizedInput);
+        const nextCursor = page.nextCursor === null
+          ? null
+          : encodeCurationCandidateCursor(page.nextCursor);
+
+        return {
+          mode: "export" as const,
+          total: page.total,
+          nextCursor,
+          byPlatform: null,
+          items: [],
+          exportItems: page.items,
+          _display: formatCurationCandidateExportPage({
+            items: page.items,
+            total: page.total,
+            nextCursor
+          })
+        };
+      }
+
+      const page = yield* curationService.listCandidates(normalizedInput);
+      const items = yield* Effect.forEach(
+        page.items,
+        (item) =>
           enrichmentReadService.getPost(item.uri).pipe(
             Effect.map((e) => ({ ...item, enrichmentReadiness: e.readiness }))
           ),
-          { concurrency: "unbounded" }
-        )
-      ),
-      Effect.map((items) => ({
+        { concurrency: "unbounded" }
+      );
+      const nextCursor = page.nextCursor === null
+        ? null
+        : encodeCurationCandidateCursor(page.nextCursor);
+
+      return {
+        mode: "full" as const,
+        total: page.total,
+        nextCursor,
+        byPlatform: null,
         items,
-        _display: formatCurationCandidates(items)
-      })),
-      Effect.mapError(toQueryError("list_curation_candidates"))
+        exportItems: [],
+        _display: formatCurationCandidatePage({
+          items,
+          total: page.total,
+          nextCursor
+        })
+      };
+    }).pipe(
+      Effect.mapError((error) =>
+        "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
+          ? error as McpToolQueryError
+          : toQueryError("list_curation_candidates")(error as any)
+      )
     ),
   get_post_enrichments: (input: typeof GetPostEnrichmentsInput.Type) =>
     enrichmentReadService.getPost(input.postUri).pipe(
@@ -638,6 +829,29 @@ const makeCuratePostHandler = (curationService: CurationServiceI) => ({
         _display: formatCuratePostResult(result)
       })),
       Effect.mapError(toQueryError("curate_post"))
+    ) as any
+});
+
+const makeBulkCurateHandler = (curationService: CurationServiceI) => ({
+  bulk_curate: (input: typeof BulkCurateInput.Type) =>
+    Effect.gen(function* () {
+      yield* validateBulkCurateInput(input);
+      const identity = yield* OperatorIdentity;
+      const result = yield* curationService.bulkCurate(
+        input,
+        identity.email ?? identity.subject ?? "mcp-operator"
+      );
+
+      return {
+        ...result,
+        _display: formatBulkCurateResult(result)
+      };
+    }).pipe(
+      Effect.mapError((error) =>
+        "_tag" in (error as any) && (error as any)._tag === "McpToolQueryError"
+          ? error as McpToolQueryError
+          : toQueryError("bulk_curate")(error as any)
+      )
     ) as any
 });
 
@@ -805,6 +1019,7 @@ export const CurationWriteMcpHandlers = CurationWriteMcpToolkit.toLayer(
     return CurationWriteMcpToolkit.of({
       ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
       ...makeCuratePostHandler(curationService),
+      ...makeBulkCurateHandler(curationService),
       ...makeStartEnrichmentHandler()
     });
   })
@@ -836,6 +1051,7 @@ export const WorkflowWriteMcpHandlers = WorkflowWriteMcpToolkit.toLayer(
     return WorkflowWriteMcpToolkit.of({
       ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
       ...makeCuratePostHandler(curationService),
+      ...makeBulkCurateHandler(curationService),
       ...makeSubmitPickHandler(editorialService),
       ...makeStartEnrichmentHandler()
     });

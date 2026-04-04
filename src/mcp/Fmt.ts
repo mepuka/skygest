@@ -22,7 +22,12 @@ import type {
   ExplainPostTopicsOutput
 } from "../domain/bi.ts";
 import type { EditorialPickOutput } from "../domain/editorial.ts";
-import type { CurationCandidateOutput } from "../domain/curation.ts";
+import type {
+  BulkCurateOutput,
+  CurationCandidateCountOutput,
+  CurationCandidateExportItem,
+  CurationCandidateOutput
+} from "../domain/curation.ts";
 import type { GetPostEnrichmentsOutput } from "../domain/enrichment.ts";
 
 // ---------------------------------------------------------------------------
@@ -572,6 +577,101 @@ export const formatCurationCandidates = (items: ReadonlyArray<CurationCandidateO
   });
 
   return render(Doc.vsep(rows));
+};
+
+const prependCurationPageHeader = (
+  body: string,
+  total: number,
+  shown: number,
+  nextCursor: string | null
+) => {
+  const lines = [
+    `Showing ${shown} of ${total} curation candidates.`,
+  ];
+
+  if (nextCursor !== null) {
+    lines.push(`Next cursor: ${nextCursor}`);
+  }
+
+  if (body.length === 0) {
+    return lines.join("\n");
+  }
+
+  return `${lines.join("\n")}\n\n${body}`;
+};
+
+export const formatCurationCandidatePage = (page: {
+  items: ReadonlyArray<CurationCandidateOutput>;
+  total: number;
+  nextCursor: string | null;
+}): string =>
+  page.items.length === 0
+    ? `No curation candidates found. Total matching: ${page.total}.`
+    : prependCurationPageHeader(
+        formatCurationCandidates(page.items),
+        page.total,
+        page.items.length,
+        page.nextCursor
+      );
+
+export const formatCurationCandidateExportPage = (page: {
+  items: ReadonlyArray<CurationCandidateExportItem>;
+  total: number;
+  nextCursor: string | null;
+}): string => {
+  if (page.items.length === 0) {
+    return `No curation candidates found. Total matching: ${page.total}.`;
+  }
+
+  const rows = page.items.map((item, index) => {
+    const handle = item.handle ? `@${item.handle}` : "(no handle)";
+    const header = `[X${index + 1}] ${item.platform} | ${handle} | ${item.tier} | ${formatTimestamp(item.createdAt)} | score:${item.signalScore}`;
+    const text = `     ${truncate(collapse(item.text), 220)}`;
+    const uri = `     URI: ${item.uri}`;
+    const topics = item.topics.length > 0
+      ? `     Topics: ${item.topics.join(", ")}`
+      : null;
+    const embedType = item.embedType !== null
+      ? `     Embed: ${item.embedType}`
+      : null;
+
+    return [header, text, uri, topics, embedType].filter((line): line is string => line !== null).join("\n");
+  }).join("\n");
+
+  return prependCurationPageHeader(
+    rows,
+    page.total,
+    page.items.length,
+    page.nextCursor
+  );
+};
+
+export const formatCurationCandidateCounts = (
+  counts: CurationCandidateCountOutput
+): string =>
+  [
+    `Matching curation candidates: ${counts.total}`,
+    `By platform: bluesky ${counts.byPlatform.bluesky} | twitter ${counts.byPlatform.twitter}`
+  ].join("\n");
+
+export const formatBulkCurateResult = (result: BulkCurateOutput): string => {
+  const lines = [
+    "Bulk curation completed.",
+    `Curated: ${result.curated}`,
+    `Rejected: ${result.rejected}`,
+    `Skipped: ${result.skipped}`,
+    `Errors: ${result.errors.length}`
+  ];
+
+  for (const error of result.errors.slice(0, 20)) {
+    lines.push(`  ${error.postUri}: ${error.error}`);
+  }
+
+  if (result.errors.length > 20) {
+    lines.push(`  ... ${result.errors.length - 20} more errors`);
+  }
+
+  return lines.join("\n");
 };
 
 /**
