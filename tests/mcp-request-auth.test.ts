@@ -17,6 +17,16 @@ const makeJsonRpcRequest = (method: string, params?: Record<string, unknown>) =>
 // ---------------------------------------------------------------------------
 
 describe("classifyMcpRequest", () => {
+  it("tools/call with import_posts requires ops:refresh", async () => {
+    const req = makeJsonRpcRequest("tools/call", { name: "import_posts" });
+    const result = await classifyMcpRequest(req);
+    expect(result).toEqual({
+      method: "tools/call",
+      toolOrPromptName: "import_posts",
+      requiredScopes: ["ops:refresh"],
+    });
+  });
+
   it("tools/call with curate_post requires curation:write", async () => {
     const req = makeJsonRpcRequest("tools/call", { name: "curate_post" });
     const result = await classifyMcpRequest(req);
@@ -141,6 +151,12 @@ describe("classifyMcpRequest", () => {
 // ---------------------------------------------------------------------------
 
 describe("profileForIdentity", () => {
+  it("mcp:read + ops:refresh yields ops-refresh", () => {
+    expect(
+      profileForIdentity({ scopes: ["mcp:read", "ops:refresh"] }),
+    ).toBe("ops-refresh");
+  });
+
   it("both curation:write and editorial:write yields workflow-write", () => {
     expect(
       profileForIdentity({
@@ -191,6 +207,28 @@ describe("profileForIdentity", () => {
         scopes: ["mcp:read", "curation:write", "editorial:write", "ops:read"],
       }),
     ).toBe("ops-workflow-write");
+  });
+
+  it("workflow scopes + ops:refresh yields workflow-write-refresh", () => {
+    expect(
+      profileForIdentity({
+        scopes: ["mcp:read", "curation:write", "editorial:write", "ops:refresh"],
+      }),
+    ).toBe("workflow-write-refresh");
+  });
+
+  it("workflow scopes + ops:read + ops:refresh yields ops-workflow-write-refresh", () => {
+    expect(
+      profileForIdentity({
+        scopes: [
+          "mcp:read",
+          "curation:write",
+          "editorial:write",
+          "ops:read",
+          "ops:refresh"
+        ],
+      }),
+    ).toBe("ops-workflow-write-refresh");
   });
 
   it("empty scopes yields read-only", () => {

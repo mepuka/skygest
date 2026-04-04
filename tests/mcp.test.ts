@@ -16,7 +16,8 @@ import {
   ExpertListMcpOutput,
   OntologyTopicsMcpOutput,
   EditorialPicksMcpOutput,
-  PipelineStatusMcpOutput
+  PipelineStatusMcpOutput,
+  ImportPostsMcpOutput
 } from "../src/mcp/OutputSchemas";
 import { EnrichmentTriggerClient } from "../src/services/EnrichmentTriggerClient";
 import { smokeFixtureUris } from "../src/staging/SmokeFixture";
@@ -26,6 +27,7 @@ import {
   opsCurationWriteIdentity,
   opsEditorialWriteIdentity,
   opsReadIdentity,
+  opsRefreshIdentity,
   readOnlyIdentity,
   workflowIdentity,
   workflowWriteIdentity,
@@ -44,6 +46,7 @@ const decodeExpertsResponse = decodeCallToolResultWith(ExpertListMcpOutput);
 const decodeTopicsResponse = decodeCallToolResultWith(OntologyTopicsMcpOutput);
 const decodeEditorialPicksResponse = decodeCallToolResultWith(EditorialPicksMcpOutput);
 const decodePipelineStatusResponse = decodeCallToolResultWith(PipelineStatusMcpOutput);
+const decodeImportPostsResponse = decodeCallToolResultWith(ImportPostsMcpOutput);
 
 const initializePersistentPromptSession = async (
   layer: ReturnType<typeof makeBiLayer>
@@ -408,7 +411,7 @@ describe("MCP prompts by profile", () => {
     )
   );
 
-  it.live("workflow-write profile exposes 4 prompts including curate-session", () =>
+  it.live("workflow-write-refresh profile exposes 4 prompts including curate-session", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const layer = makeBiLayer({ filename });
@@ -451,7 +454,7 @@ describe("MCP prompts by profile", () => {
 });
 
 describe("MCP tool visibility by profile", () => {
-  it.live("workflow-write profile includes write tools but not pipeline status", () =>
+  it.live("workflow-write profile includes write tools but not operator tools", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const seedLayer = makeBiLayer({ filename });
@@ -466,6 +469,7 @@ describe("MCP tool visibility by profile", () => {
           const tools = await client.listTools();
           const names = tools.tools.map((t) => t.name);
           expect(names).not.toContain("get_pipeline_status");
+          expect(names).not.toContain("import_posts");
           expect(names).toContain("start_enrichment");
           expect(names).toContain("bulk_start_enrichment");
           expect(names).toContain("curate_post");
@@ -478,7 +482,7 @@ describe("MCP tool visibility by profile", () => {
     )
   );
 
-  it.live("ops-workflow profile includes pipeline status and write tools", () =>
+  it.live("ops-workflow profile includes operator and write tools", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const seedLayer = makeBiLayer({ filename });
@@ -493,6 +497,7 @@ describe("MCP tool visibility by profile", () => {
           const tools = await client.listTools();
           const names = tools.tools.map((t) => t.name);
           expect(names).toContain("get_pipeline_status");
+          expect(names).toContain("import_posts");
           expect(names).toContain("start_enrichment");
           expect(names).toContain("bulk_start_enrichment");
           expect(names).toContain("curate_post");
@@ -520,6 +525,7 @@ describe("MCP tool visibility by profile", () => {
           const tools = await client.listTools();
           const names = tools.tools.map((t) => t.name);
           expect(names).toContain("get_pipeline_status");
+          expect(names).not.toContain("import_posts");
           expect(names).toContain("curate_post");
           expect(names).toContain("bulk_curate");
           expect(names).toContain("start_enrichment");
@@ -547,6 +553,7 @@ describe("MCP tool visibility by profile", () => {
           const tools = await client.listTools();
           const names = tools.tools.map((t) => t.name);
           expect(names).toContain("get_pipeline_status");
+          expect(names).not.toContain("import_posts");
           expect(names).toContain("submit_editorial_pick");
           expect(names).not.toContain("curate_post");
           expect(names).not.toContain("bulk_curate");
@@ -576,6 +583,7 @@ describe("MCP tool visibility by profile", () => {
           expect(names).toContain("list_enrichment_gaps");
           expect(names).toContain("list_enrichment_issues");
           expect(names).not.toContain("get_pipeline_status");
+          expect(names).not.toContain("import_posts");
           expect(names).not.toContain("start_enrichment");
           expect(names).not.toContain("bulk_start_enrichment");
           expect(names).not.toContain("curate_post");
@@ -587,7 +595,7 @@ describe("MCP tool visibility by profile", () => {
     )
   );
 
-  it.live("ops-read profile includes get_pipeline_status but not write tools", () =>
+  it.live("ops-read profile includes get_pipeline_status but not import_posts or write tools", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const seedLayer = makeBiLayer({ filename });
@@ -602,11 +610,40 @@ describe("MCP tool visibility by profile", () => {
           const tools = await client.listTools();
           const names = tools.tools.map((t) => t.name);
           expect(names).toContain("get_pipeline_status");
+          expect(names).not.toContain("import_posts");
           expect(names).not.toContain("start_enrichment");
           expect(names).not.toContain("bulk_start_enrichment");
           expect(names).not.toContain("curate_post");
           expect(names).not.toContain("bulk_curate");
           expect(names).not.toContain("submit_editorial_pick");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("ops-refresh profile includes import_posts but not pipeline status or write tools", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const seedLayer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(
+          makeBiLayer({ filename }),
+          opsRefreshIdentity
+        );
+
+        try {
+          const tools = await client.listTools();
+          const names = tools.tools.map((t) => t.name);
+          expect(names).not.toContain("get_pipeline_status");
+          expect(names).toContain("import_posts");
+          expect(names).not.toContain("curate_post");
+          expect(names).not.toContain("bulk_curate");
+          expect(names).not.toContain("submit_editorial_pick");
+          expect(names).not.toContain("start_enrichment");
+          expect(names).not.toContain("bulk_start_enrichment");
         } finally {
           await close();
         }
@@ -981,6 +1018,71 @@ describe("MCP get_pipeline_status", () => {
           expect(snapshot.posts.total).toBe(1);
           expect(snapshot.lastSweep).toBeNull();
           expect(snapshot._display).toContain("Last sweep: none recorded.");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+});
+
+describe("MCP import_posts", () => {
+  it.live("imports posts through the shared import pipeline", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer, opsRefreshIdentity);
+
+        try {
+          const result = await client.callTool({
+            name: "import_posts",
+            arguments: {
+              experts: [{
+                did: "did:x:import-operator-1",
+                handle: "importer",
+                domain: "energy",
+                source: "twitter-import",
+                tier: "energy-focused"
+              }],
+              posts: [
+                {
+                  uri: "x://importer/status/1001",
+                  did: "did:x:import-operator-1",
+                  text: "Solar installations are accelerating across the power grid.",
+                  createdAt: 1_700_000_000_000,
+                  links: []
+                },
+                {
+                  uri: "x://importer/status/1002",
+                  did: "did:x:import-operator-1",
+                  text: "Lunch was great today.",
+                  createdAt: 1_700_000_000_001,
+                  links: []
+                }
+              ]
+            }
+          });
+          const summary = decodeImportPostsResponse(result);
+
+          expect(summary.imported).toBe(1);
+          expect(summary.skipped).toBe(1);
+          expect(summary._display).toContain("Imported: 1");
+
+          const storedPosts = await Effect.runPromise(
+            Effect.gen(function* () {
+              const sql = yield* SqlClient.SqlClient;
+              const rows = yield* sql<{ total: number }>`
+                SELECT COUNT(*) as total
+                FROM posts
+                WHERE uri = ${"x://importer/status/1001"}
+              `;
+              return Number(rows[0]?.total ?? 0);
+            }).pipe(Effect.provide(layer))
+          );
+
+          expect(storedPosts).toBe(1);
         } finally {
           await close();
         }

@@ -20,6 +20,7 @@ import { CandidatePayloadRepoD1 } from "../src/services/d1/CandidatePayloadRepoD
 import { CurationService } from "../src/services/CurationService";
 import { BlueskyClient } from "../src/bluesky/BlueskyClient";
 import { ExpertRegistryService } from "../src/services/ExpertRegistryService";
+import { PostImportService } from "../src/services/PostImportService";
 import { ProviderRegistry } from "../src/services/ProviderRegistry";
 import {
   makeSqliteLayer,
@@ -100,6 +101,18 @@ const makeImportTestLayer = (options: {
       )
     )
   );
+  const postImportServiceLayer = PostImportService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        configLayer,
+        ontologyLayer,
+        expertsLayer,
+        knowledgeLayer,
+        candidatePayloadServiceLayer,
+        curationServiceLayer
+      )
+    )
+  );
 
   const baseLayer = Layer.mergeAll(
     sqliteLayer,
@@ -114,6 +127,7 @@ const makeImportTestLayer = (options: {
     candidatePayloadRepoLayer,
     candidatePayloadServiceLayer,
     curationServiceLayer,
+    postImportServiceLayer,
     stubBlueskyClient
   );
 
