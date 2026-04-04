@@ -8,6 +8,7 @@
  */
 
 import { Schema, SchemaGetter } from "effect";
+import { FlexibleNumber } from "./bi";
 import { NonNegativeInt, PlatformSchema, PostUri } from "./types";
 import { EnrichmentErrorEnvelope } from "./errors";
 import {
@@ -365,6 +366,9 @@ export const ListEnrichmentGapsInput = Schema.Struct({
   })),
   enrichmentType: Schema.optionalKey(GapEnrichmentType.annotate({
     description: "Filter to only one enrichment type."
+  })),
+  since: Schema.optionalKey(FlexibleNumber.annotate({
+    description: "Only include posts curated after this Unix epoch timestamp (milliseconds)."
   })),
   limit: Schema.optionalKey(Schema.Union([
     NonNegativeInt,

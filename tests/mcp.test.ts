@@ -502,6 +502,7 @@ describe("MCP list_curation_candidates", () => {
   const fixtureUris = smokeFixtureUris(sampleDid);
   const solarUri = fixtureUris[0]!;
   const windUri = fixtureUris[1]!;
+  const twitterUri = "x://tweet/mcp-1";
 
   it.live("supports count mode and export pagination", () =>
     Effect.promise(() =>
@@ -516,7 +517,6 @@ describe("MCP list_curation_candidates", () => {
           Effect.gen(function* () {
             const sql = yield* SqlClient.SqlClient;
             const now = Date.now();
-            const twitterUri = "x://tweet/mcp-1";
 
             yield* sql`
               INSERT INTO posts (
@@ -585,6 +585,19 @@ describe("MCP list_curation_candidates", () => {
           expect(exportPage.items).toEqual([]);
           expect(exportPage.nextCursor).not.toBeNull();
           expect(exportPage._display).toContain("Showing 2 of 3 curation candidates.");
+
+          const secondPageResult = await client.callTool({
+            name: "list_curation_candidates",
+            arguments: {
+              export: true,
+              limit: 2,
+              cursor: exportPage.nextCursor
+            }
+          });
+          const secondPage = decodeCurationCandidatesResponse(secondPageResult);
+          expect(secondPage.exportItems).toHaveLength(1);
+          expect(secondPage.exportItems[0]?.uri).toBe(twitterUri);
+          expect(secondPage.nextCursor).toBeNull();
         } finally {
           await close();
         }
@@ -1076,6 +1089,40 @@ describe("MCP list_enrichment_gaps", () => {
           expect(visionOnly.vision.postUris).toEqual([visualUri]);
           expect(visionOnly.sourceAttribution.count).toBe(0);
           expect(visionOnly.sourceAttribution.postUris).toEqual([]);
+
+          const recentResult = await client.callTool({
+            name: "list_enrichment_gaps",
+            arguments: { since: now - 8 }
+          });
+          const recentGaps = decodeEnrichmentGapsResponse(recentResult);
+          expect(recentGaps.vision.count).toBe(1);
+          expect(recentGaps.vision.postUris).toEqual([visualUri]);
+          expect(recentGaps.sourceAttribution.count).toBe(0);
+          expect(recentGaps.sourceAttribution.postUris).toEqual([]);
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("returns empty buckets when no curated posts are ready for enrichment", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer);
+
+        try {
+          const result = await client.callTool({
+            name: "list_enrichment_gaps",
+            arguments: {}
+          });
+          const gaps = decodeEnrichmentGapsResponse(result);
+          expect(gaps.vision).toEqual({ count: 0, postUris: [] });
+          expect(gaps.sourceAttribution).toEqual({ count: 0, postUris: [] });
+          expect(gaps._display).toContain("No enrichment gaps found.");
         } finally {
           await close();
         }
@@ -1166,6 +1213,29 @@ describe("MCP list_enrichment_issues", () => {
           expect(failedIssues.items[0]?.postUri).toBe(solarUri);
           expect(failedIssues.items[0]?.error?.tag).toBe("EnrichmentWorkflowLaunchError");
           expect(failedIssues.items[0]?.error?.message).toBe("Vision pipeline failed");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("returns an empty result when there are no failed or reviewable runs", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer);
+
+        try {
+          const result = await client.callTool({
+            name: "list_enrichment_issues",
+            arguments: {}
+          });
+          const issues = decodeEnrichmentIssuesResponse(result);
+          expect(issues.items).toEqual([]);
+          expect(issues._display).toContain("No enrichment issues found.");
         } finally {
           await close();
         }
@@ -1426,6 +1496,138 @@ describe("MCP bulk_start_enrichment", () => {
           expect(attempts.get(windUri)).toBe(1);
           expect(attempts.get(linkUri)).toBe(3);
           expect(attempts.has(missingUri)).toBe(false);
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+});
+
+describe("MCP workflow integration", () => {
+  const fixtureUris = smokeFixtureUris(sampleDid);
+  const solarUri = fixtureUris[0]!;
+  const windUri = fixtureUris[1]!;
+
+  it.live("supports the review-export-curate-gap-enrich workflow in one session", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const attempts = new Map<string, number>();
+        const mockFetcher = {
+          fetch: async (input: RequestInfo | URL) => {
+            const request = input as Request;
+            const body = await request.json() as {
+              postUri: string;
+              enrichmentType: string;
+            };
+            attempts.set(body.postUri, (attempts.get(body.postUri) ?? 0) + 1);
+
+            return new Response(
+              JSON.stringify({
+                runId: `run-${body.enrichmentType}-${body.postUri.split("/").pop()}`,
+                workflowInstanceId: `run-${body.enrichmentType}-${body.postUri.split("/").pop()}`,
+                status: "queued"
+              }),
+              { status: 202, headers: { "content-type": "application/json" } }
+            );
+          }
+        } as unknown as Fetcher;
+
+        const layer = Layer.mergeAll(
+          makeBiLayer({
+            filename,
+            config: { curationMinSignalScore: 100 }
+          }),
+          EnrichmentTriggerClient.layerFromFetcher(mockFetcher, "test-secret")
+        );
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const now = Date.now();
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            const sql = yield* SqlClient.SqlClient;
+
+            yield* sql`
+              INSERT INTO post_curation
+                (post_uri, status, signal_score, predicates_applied, flagged_at, curated_at, curated_by, review_note)
+              VALUES
+                (${solarUri}, 'flagged', ${92}, ${JSON.stringify(["has-media"])}, ${now + 1}, NULL, NULL, NULL),
+                (${windUri}, 'flagged', ${81}, ${JSON.stringify(["has-links"])}, ${now}, NULL, NULL, NULL)
+              ON CONFLICT(post_uri) DO UPDATE SET
+                status = excluded.status,
+                signal_score = excluded.signal_score,
+                predicates_applied = excluded.predicates_applied,
+                flagged_at = excluded.flagged_at,
+                curated_at = NULL,
+                curated_by = NULL
+            `;
+
+            yield* sql`
+              INSERT INTO post_payloads (post_uri, capture_stage, embed_type, embed_payload_json, captured_at, updated_at)
+              VALUES
+                (${solarUri}, 'candidate', 'img', ${JSON.stringify({ kind: "img", images: [{ alt: "Chart", fullsize: "https://example.com/chart.jpg", thumb: "https://example.com/chart-thumb.jpg" }] })}, ${now}, ${now}),
+                (${windUri}, 'candidate', 'link', ${JSON.stringify({ kind: "link", uri: "https://example.com/wind", title: "Wind article", description: null, thumb: null })}, ${now}, ${now})
+              ON CONFLICT(post_uri) DO UPDATE SET
+                capture_stage = excluded.capture_stage,
+                embed_type = excluded.embed_type,
+                embed_payload_json = excluded.embed_payload_json,
+                updated_at = excluded.updated_at
+            `;
+          }).pipe(Effect.provide(layer))
+        );
+
+        const { client, close } = await createMcpClient(layer, workflowIdentity);
+
+        try {
+          const exportResult = await client.callTool({
+            name: "list_curation_candidates",
+            arguments: { export: true, limit: 10 }
+          });
+          const exportPage = decodeCurationCandidatesResponse(exportResult);
+          expect(exportPage.exportItems.map((item) => item.uri)).toEqual([
+            solarUri,
+            windUri
+          ]);
+
+          const curateResult = await client.callTool({
+            name: "bulk_curate",
+            arguments: {
+              decisions: exportPage.exportItems.map((item) => ({
+                postUri: item.uri,
+                action: "curate" as const
+              }))
+            }
+          });
+          const curateSummary = decodeBulkCurateResponse(curateResult);
+          expect(curateSummary.curated).toBe(2);
+          expect(curateSummary.rejected).toBe(0);
+          expect(curateSummary.skipped).toBe(0);
+          expect(curateSummary.errors).toEqual([]);
+
+          const gapsResult = await client.callTool({
+            name: "list_enrichment_gaps",
+            arguments: {}
+          });
+          const gaps = decodeEnrichmentGapsResponse(gapsResult);
+          expect(gaps.vision.postUris).toEqual([solarUri]);
+          expect(gaps.sourceAttribution.postUris).toEqual([windUri]);
+
+          const bulkResult = await client.callTool({
+            name: "bulk_start_enrichment",
+            arguments: {
+              gaps: {
+                vision: gaps.vision,
+                sourceAttribution: gaps.sourceAttribution
+              }
+            }
+          });
+          const bulkSummary = decodeBulkStartEnrichmentResponse(bulkResult);
+          expect(bulkSummary.queued).toBe(2);
+          expect(bulkSummary.skipped).toBe(0);
+          expect(bulkSummary.failed).toBe(0);
+          expect(bulkSummary.errors).toEqual([]);
+          expect(attempts.get(solarUri)).toBe(1);
+          expect(attempts.get(windUri)).toBe(1);
         } finally {
           await close();
         }

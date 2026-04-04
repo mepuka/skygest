@@ -24,6 +24,7 @@ import { CurationRepoD1 } from "../../src/services/d1/CurationRepoD1";
 import { EditorialRepoD1 } from "../../src/services/d1/EditorialRepoD1";
 import { ExpertsRepoD1 } from "../../src/services/d1/ExpertsRepoD1";
 import { KnowledgeRepoD1 } from "../../src/services/d1/KnowledgeRepoD1";
+import { PostEnrichmentReadRepoD1 } from "../../src/services/d1/PostEnrichmentReadRepoD1";
 import { PublicationsRepoD1 } from "../../src/services/d1/PublicationsRepoD1";
 import { ProviderRegistry } from "../../src/services/ProviderRegistry";
 import { makeSmokeFixtureBatch } from "../../src/staging/SmokeFixture";
@@ -76,6 +77,9 @@ export const makeBiLayer = (options?: {
   const candidatePayloadRepoLayer = CandidatePayloadRepoD1.layer.pipe(
     Layer.provideMerge(sqliteLayer)
   );
+  const postEnrichmentReadRepoLayer = PostEnrichmentReadRepoD1.layer.pipe(
+    Layer.provideMerge(sqliteLayer)
+  );
   const curationRepoLayer = CurationRepoD1.layer.pipe(
     Layer.provideMerge(sqliteLayer)
   );
@@ -125,7 +129,9 @@ export const makeBiLayer = (options?: {
   );
 
   const enrichmentReadServiceLayer = PostEnrichmentReadService.layer.pipe(
-    Layer.provideMerge(candidatePayloadServiceLayer)
+    Layer.provideMerge(
+      Layer.mergeAll(candidatePayloadServiceLayer, postEnrichmentReadRepoLayer)
+    )
   );
 
   return Layer.mergeAll(

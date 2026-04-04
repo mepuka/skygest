@@ -15,10 +15,12 @@ import {
 } from "../../domain/curation";
 import { emptyKnowledgePostHydration, ThreadEmbedType } from "../../domain/bi";
 import { platformFromUri } from "../../domain/types";
+import { decodeJsonColumnWithDbError } from "./jsonColumns";
 import { decodeWithDbError } from "./schemaDecode";
 import { topicFilterExists } from "./queryFragments";
 
 const isDefined = <A>(value: A | null): value is A => value !== null;
+const StringArraySchema = Schema.Array(Schema.String);
 
 // ---------------------------------------------------------------------------
 // Raw row schemas (DB types — no branded types)
@@ -36,11 +38,6 @@ const CurationRowSchema = Schema.Struct({
 });
 const CurationRowsSchema = Schema.Array(CurationRowSchema);
 type CurationRow = Schema.Schema.Type<typeof CurationRowSchema>;
-
-const toCurationRecord = (row: CurationRow) => ({
-  ...row,
-  predicatesApplied: JSON.parse(row.predicatesApplied) as string[]
-});
 
 const CandidateRowSchema = Schema.Struct({
   uri: Schema.String,
@@ -73,24 +70,52 @@ const PostEmbedTypeRowsSchema = Schema.Array(
   })
 );
 
-const toCandidateOutput = (row: CandidateRow) => ({
-  uri: row.uri,
-  did: row.did,
-  handle: row.handle,
-  avatar: row.avatar,
-  tier: row.tier,
-  text: row.text,
-  createdAt: row.createdAt,
-  topics: row.topicsCsv === null || row.topicsCsv.length === 0
-    ? []
-    : row.topicsCsv.split(",").filter((topic) => topic.length > 0),
-  ...emptyKnowledgePostHydration(),
-  embedType: row.embedType,
-  signalScore: row.signalScore,
-  curationStatus: row.curationStatus,
-  predicatesApplied: JSON.parse(row.predicatesApplied) as string[],
-  flaggedAt: row.flaggedAt
-});
+const decodePredicatesApplied = (value: string, field: string) =>
+  decodeJsonColumnWithDbError(value, field).pipe(
+    Effect.flatMap((decoded) =>
+      decodeWithDbError(
+        StringArraySchema,
+        decoded ?? [],
+        `Failed to normalize ${field}`
+      )
+    )
+  );
+
+const toCurationRecord = (row: CurationRow) =>
+  decodePredicatesApplied(
+    row.predicatesApplied,
+    `curation predicates for ${row.postUri}`
+  ).pipe(
+    Effect.map((predicatesApplied) => ({
+      ...row,
+      predicatesApplied
+    }))
+  );
+
+const toCandidateOutput = (row: CandidateRow) =>
+  decodePredicatesApplied(
+    row.predicatesApplied,
+    `candidate predicates for ${row.uri}`
+  ).pipe(
+    Effect.map((predicatesApplied) => ({
+      uri: row.uri,
+      did: row.did,
+      handle: row.handle,
+      avatar: row.avatar,
+      tier: row.tier,
+      text: row.text,
+      createdAt: row.createdAt,
+      topics: row.topicsCsv === null || row.topicsCsv.length === 0
+        ? []
+        : row.topicsCsv.split(",").filter((topic) => topic.length > 0),
+      ...emptyKnowledgePostHydration(),
+      embedType: row.embedType,
+      signalScore: row.signalScore,
+      curationStatus: row.curationStatus,
+      predicatesApplied,
+      flaggedAt: row.flaggedAt
+    }))
+  );
 
 const toCandidateExportItem = (row: CandidateRow) => ({
   uri: row.uri,
@@ -279,7 +304,9 @@ export const CurationRepoD1 = {
             `Failed to decode curation row for ${postUri}`
           )
         ),
-        Effect.map((rows) => rows.map(toCurationRecord)),
+        Effect.flatMap((rows) =>
+          Effect.forEach(rows, toCurationRecord)
+        ),
         Effect.flatMap((rows) =>
           decodeWithDbError(
             Schema.Array(CurationRecordSchema),
@@ -386,10 +413,9 @@ export const CurationRepoD1 = {
         counts: countCandidates(input),
         page: fetchCandidateRows(input)
       }).pipe(
-        Effect.map(({ counts, page }) => {
+        Effect.flatMap(({ counts, page }) => {
           const hasMore = page.rows.length > page.pageLimit;
           const pageRows = hasMore ? page.rows.slice(0, page.pageLimit) : page.rows;
-          const items = pageRows.map(toCandidateOutput);
           const nextCursor = hasMore
             ? {
                 signalScore: pageRows[pageRows.length - 1]!.signalScore as any,
@@ -398,11 +424,13 @@ export const CurationRepoD1 = {
               }
             : null;
 
-          return {
-            items,
-            total: counts.total,
-            nextCursor
-          };
+          return Effect.forEach(pageRows, toCandidateOutput).pipe(
+            Effect.map((items) => ({
+              items,
+              total: counts.total,
+              nextCursor
+            }))
+          );
         }),
         Effect.flatMap(decodeCandidatePage)
       );

@@ -329,7 +329,7 @@ export const GetPostEnrichmentsTool = Tool.make("get_post_enrichments", {
   .annotate(Tool.OpenWorld, false);
 
 export const ListEnrichmentGapsTool = Tool.make("list_enrichment_gaps", {
-  description: "List curated posts that are currently safe to queue for enrichment. Returns separate vision and source-attribution buckets, plus total counts per bucket.",
+  description: "List curated posts that are currently safe to queue for enrichment. Supports platform, enrichment-type, and since filtering. Returns separate vision and source-attribution buckets, plus total counts per bucket.",
   parameters: ListEnrichmentGapsInput,
   success: EnrichmentGapsMcpOutput,
   failure: McpToolQueryError
@@ -389,7 +389,7 @@ export const CuratePostTool = Tool.make("curate_post", {
   .annotate(Tool.OpenWorld, true);
 
 export const BulkCurateTool = Tool.make("bulk_curate", {
-  description: "Apply many curate or reject decisions in one call. Reuses curate_post behavior for each post, including payload capture and automatic enrichment queueing when available. Returns counts plus per-post errors.",
+  description: "Apply many curate or reject decisions in one call. Reuses curate_post behavior for each post, including payload capture and automatic enrichment queueing when available. Returns counts plus per-post errors. Large Bluesky-heavy batches may take longer because uncached posts require live fetches.",
   parameters: BulkCurateInput,
   success: BulkCurateMcpOutput,
   failure: McpToolQueryError

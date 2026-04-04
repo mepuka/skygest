@@ -641,7 +641,7 @@ export const formatCurationCandidateExportPage = (page: {
       : null;
 
     return [header, text, uri, topics, embedType].filter((line): line is string => line !== null).join("\n");
-  }).join("\n");
+  }).join("\n\n");
 
   return prependCurationPageHeader(
     rows,
