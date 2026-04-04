@@ -722,6 +722,14 @@ const makeExpertWriteHandlers = (
 ) => ({
   add_expert: (input: typeof AddExpertMcpInput.Type) =>
     Effect.gen(function* () {
+      const v = input.didOrHandle;
+      if (v.startsWith("did:x:") || v.startsWith("did:web:")) {
+        return yield* new McpToolQueryError({
+          tool: "add_expert",
+          message: `Non-Bluesky DID "${v}" cannot be registered via add_expert. Use import_posts for non-Bluesky experts.`,
+          error: undefined
+        });
+      }
       const actor = yield* OperatorIdentity;
       const result = yield* expertRegistryService.addExpert(actor, input);
       return {

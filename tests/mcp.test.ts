@@ -1331,6 +1331,117 @@ describe("MCP expert registry tools", () => {
       })
     )
   );
+
+  it.live("add_expert is idempotent — second call upserts without error", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeExpertRegistryBlueskyLayer()
+        });
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer, expertsWriteIdentity);
+
+        try {
+          const first = await client.callTool({
+            name: "add_expert",
+            arguments: {
+              didOrHandle: expertRegistryHandle,
+              domain: "energy",
+              active: true
+            }
+          });
+          expect(first.isError).toBe(false);
+
+          const second = await client.callTool({
+            name: "add_expert",
+            arguments: {
+              didOrHandle: expertRegistryHandle,
+              domain: "energy",
+              active: true
+            }
+          });
+          expect(second.isError).toBe(false);
+
+          const expert = decodeAddExpertResponse(second);
+          expect(expert.did).toBe(expertRegistryDid);
+          expect(expert.handle).toBe(expertRegistryHandle);
+
+          const storedCount = await Effect.runPromise(
+            Effect.gen(function* () {
+              const sql = yield* SqlClient.SqlClient;
+              const rows = yield* sql<{ cnt: number }>`
+                SELECT COUNT(*) as cnt FROM experts WHERE did = ${expertRegistryDid}
+              `;
+              return Number(rows[0]?.cnt ?? 0);
+            }).pipe(Effect.provide(layer))
+          );
+
+          expect(storedCount).toBe(1);
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("set_expert_active on non-existent DID returns isError", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeExpertRegistryBlueskyLayer()
+        });
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer, expertsWriteIdentity);
+
+        try {
+          const result = await client.callTool({
+            name: "set_expert_active",
+            arguments: {
+              did: "did:plc:nonexistent999",
+              active: false
+            }
+          });
+          expect(result.isError).toBe(true);
+          expect(getTextContent(result)).toContain("McpToolQueryError");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("add_expert rejects non-Bluesky DID with guidance to use import_posts", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({
+          filename,
+          blueskyClient: makeExpertRegistryBlueskyLayer()
+        });
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer, expertsWriteIdentity);
+
+        try {
+          const result = await client.callTool({
+            name: "add_expert",
+            arguments: {
+              didOrHandle: "did:x:12345",
+              domain: "energy",
+              active: true
+            }
+          });
+          expect(result.isError).toBe(true);
+          expect(getTextContent(result)).toContain("import_posts");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
 });
 
 describe("MCP list_curation_candidates", () => {
