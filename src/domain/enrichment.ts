@@ -9,6 +9,7 @@
 
 import { Schema, SchemaGetter } from "effect";
 import { PostUri } from "./types";
+import { EnrichmentErrorEnvelope } from "./errors";
 import {
   MediaType,
   ChartType,
@@ -351,3 +352,101 @@ export const GetPostEnrichmentsOutput = Schema.Struct({
   latestRuns: Schema.Array(PostEnrichmentRunSummary)
 });
 export type GetPostEnrichmentsOutput = Schema.Schema.Type<typeof GetPostEnrichmentsOutput>;
+
+const NonNegativeInt = Schema.Int.pipe(
+  Schema.check(Schema.isGreaterThanOrEqualTo(0))
+);
+
+export const GapEnrichmentType = Schema.Literals(["vision", "source-attribution"]);
+export type GapEnrichmentType = Schema.Schema.Type<typeof GapEnrichmentType>;
+
+export const EnrichmentGapPlatform = Schema.Literals(["bluesky", "twitter"]);
+export type EnrichmentGapPlatform = Schema.Schema.Type<typeof EnrichmentGapPlatform>;
+
+export const ListEnrichmentGapsInput = Schema.Struct({
+  platform: Schema.optionalKey(EnrichmentGapPlatform.annotate({
+    description: "Filter by platform."
+  })),
+  enrichmentType: Schema.optionalKey(GapEnrichmentType.annotate({
+    description: "Filter to only one enrichment type."
+  })),
+  limit: Schema.optionalKey(Schema.Union([
+    NonNegativeInt,
+    Schema.NumberFromString.pipe(Schema.decodeTo(NonNegativeInt))
+  ]).annotate({
+    description: "Maximum number of post URIs to return per enrichment type bucket."
+  }))
+});
+export type ListEnrichmentGapsInput = Schema.Schema.Type<typeof ListEnrichmentGapsInput>;
+
+export const EnrichmentGapBucket = Schema.Struct({
+  count: NonNegativeInt,
+  postUris: Schema.Array(PostUri)
+});
+export type EnrichmentGapBucket = Schema.Schema.Type<typeof EnrichmentGapBucket>;
+
+export const ListEnrichmentGapsOutput = Schema.Struct({
+  vision: EnrichmentGapBucket,
+  sourceAttribution: EnrichmentGapBucket
+});
+export type ListEnrichmentGapsOutput = Schema.Schema.Type<typeof ListEnrichmentGapsOutput>;
+
+export const ListEnrichmentIssuesInput = Schema.Struct({
+  status: Schema.optionalKey(Schema.Literals(["failed", "needs-review"]).annotate({
+    description: "Filter by run status."
+  })),
+  limit: Schema.optionalKey(Schema.Union([
+    NonNegativeInt,
+    Schema.NumberFromString.pipe(Schema.decodeTo(NonNegativeInt))
+  ]).annotate({
+    description: "Maximum number of issue rows to return."
+  }))
+});
+export type ListEnrichmentIssuesInput = Schema.Schema.Type<typeof ListEnrichmentIssuesInput>;
+
+export const EnrichmentIssueItem = Schema.Struct({
+  runId: Schema.String,
+  postUri: PostUri,
+  enrichmentType: EnrichmentKind,
+  status: Schema.Literals(["failed", "needs-review"]),
+  error: Schema.NullOr(EnrichmentErrorEnvelope),
+  lastProgressAt: Schema.NullOr(Schema.Number)
+});
+export type EnrichmentIssueItem = Schema.Schema.Type<typeof EnrichmentIssueItem>;
+
+export const ListEnrichmentIssuesOutput = Schema.Struct({
+  items: Schema.Array(EnrichmentIssueItem)
+});
+export type ListEnrichmentIssuesOutput = Schema.Schema.Type<typeof ListEnrichmentIssuesOutput>;
+
+export const BulkStartEnrichmentPost = Schema.Struct({
+  postUri: PostUri,
+  enrichmentType: Schema.optionalKey(GapEnrichmentType.annotate({
+    description: "If omitted, auto-detect from the stored embed."
+  }))
+});
+export type BulkStartEnrichmentPost = Schema.Schema.Type<typeof BulkStartEnrichmentPost>;
+
+export const BulkStartEnrichmentInput = Schema.Struct({
+  posts: Schema.optionalKey(Schema.Array(BulkStartEnrichmentPost).annotate({
+    description: "Explicit posts to queue for enrichment. Recommended maximum 500 items."
+  })),
+  gaps: Schema.optionalKey(ListEnrichmentGapsOutput.annotate({
+    description: "Optional direct output from list_enrichment_gaps."
+  }))
+});
+export type BulkStartEnrichmentInput = Schema.Schema.Type<typeof BulkStartEnrichmentInput>;
+
+export const BulkStartEnrichmentError = Schema.Struct({
+  postUri: PostUri,
+  error: Schema.String
+});
+export type BulkStartEnrichmentError = Schema.Schema.Type<typeof BulkStartEnrichmentError>;
+
+export const BulkStartEnrichmentOutput = Schema.Struct({
+  queued: NonNegativeInt,
+  skipped: NonNegativeInt,
+  failed: NonNegativeInt,
+  errors: Schema.Array(BulkStartEnrichmentError)
+});
+export type BulkStartEnrichmentOutput = Schema.Schema.Type<typeof BulkStartEnrichmentOutput>;

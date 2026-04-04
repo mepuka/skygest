@@ -1,6 +1,6 @@
 import { ServiceMap, Effect, Layer, Schema } from "effect";
-import type { AtUri } from "../domain/types";
-import type { EnrichmentKind } from "../domain/enrichment";
+import { PostUri } from "../domain/types";
+import type { EnrichmentKind, GapEnrichmentType } from "../domain/enrichment";
 import { defaultSchemaVersionForEnrichmentKind } from "../domain/enrichment";
 
 // ---------------------------------------------------------------------------
@@ -12,7 +12,7 @@ export class EnrichmentTriggerError extends Schema.TaggedErrorClass<EnrichmentTr
   {
     message: Schema.String,
     status: Schema.Number,
-    postUri: Schema.String
+    postUri: PostUri
   }
 ) {}
 
@@ -36,8 +36,8 @@ export class EnrichmentTriggerClient extends ServiceMap.Service<
   {
     readonly start: (
       input: {
-        readonly postUri: string;
-        readonly enrichmentType: string;
+        readonly postUri: Schema.Schema.Type<typeof PostUri>;
+        readonly enrichmentType: GapEnrichmentType;
         readonly schemaVersion?: string;
       }
     ) => Effect.Effect<StartEnrichmentResult, EnrichmentTriggerError>;

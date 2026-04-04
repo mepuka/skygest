@@ -47,6 +47,16 @@ describe("classifyMcpRequest", () => {
     });
   });
 
+  it("tools/call with bulk_start_enrichment requires curation:write", async () => {
+    const req = makeJsonRpcRequest("tools/call", { name: "bulk_start_enrichment" });
+    const result = await classifyMcpRequest(req);
+    expect(result).toEqual({
+      method: "tools/call",
+      toolOrPromptName: "bulk_start_enrichment",
+      requiredScopes: ["curation:write"],
+    });
+  });
+
   it("tools/call with search_posts requires no extra scopes", async () => {
     const req = makeJsonRpcRequest("tools/call", { name: "search_posts" });
     const result = await classifyMcpRequest(req);

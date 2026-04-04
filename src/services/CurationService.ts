@@ -20,7 +20,6 @@ import {
   defaultSchemaVersionForEnrichmentKind,
   type EnrichmentKind
 } from "../domain/enrichment";
-import type { EmbedPayload } from "../domain/embed";
 import { AppConfig } from "../platform/Config";
 import { clampLimit } from "../platform/Limit";
 import { CurationRepo } from "./CurationRepo";
@@ -30,6 +29,7 @@ import { CandidatePayloadService } from "./CandidatePayloadService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { extractEmbedKind, buildTypedEmbed } from "../bluesky/EmbedExtract";
 import { flattenThread } from "../bluesky/ThreadFlatten";
+import { inferPrimaryEnrichmentType } from "../enrichment/EmbedSignals";
 import {
   evaluateSignal,
   shouldFlag,
@@ -79,34 +79,20 @@ export class CurationService extends ServiceMap.Service<
     const clampCurationLimit = (limit: number | undefined) =>
       clampLimit(limit, config.mcpLimitDefault, config.mcpLimitMax);
 
-    const hasVisualAssets = (embedPayload: EmbedPayload | null): boolean => {
-      if (embedPayload === null) {
-        return false;
-      }
-
-      switch (embedPayload.kind) {
-        case "img":
-        case "video":
-          return true;
-        case "media":
-          return embedPayload.media !== null && hasVisualAssets(embedPayload.media);
-        default:
-          return false;
-      }
-    };
-
     const queuePickedEnrichment = Effect.fn(
       "CurationService.queuePickedEnrichment"
-    )(function* (postUri: PostUri, embedPayload: EmbedPayload | null, curator: string) {
+    )(function* (
+      postUri: PostUri,
+      embedPayload: Parameters<typeof inferPrimaryEnrichmentType>[0],
+      curator: string
+    ) {
       const maybeLauncher = yield* Effect.serviceOption(EnrichmentWorkflowLauncher);
 
       if (Option.isNone(maybeLauncher)) {
         return false;
       }
 
-      const enrichmentType: EnrichmentKind = hasVisualAssets(embedPayload)
-        ? "vision"
-        : "source-attribution";
+      const enrichmentType: EnrichmentKind = inferPrimaryEnrichmentType(embedPayload);
 
       return yield* maybeLauncher.value.startIfAbsent({
         postUri,

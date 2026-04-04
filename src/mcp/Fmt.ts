@@ -28,7 +28,12 @@ import type {
   CurationCandidateExportItem,
   CurationCandidateOutput
 } from "../domain/curation.ts";
-import type { GetPostEnrichmentsOutput } from "../domain/enrichment.ts";
+import type {
+  BulkStartEnrichmentOutput,
+  GetPostEnrichmentsOutput,
+  ListEnrichmentGapsOutput,
+  ListEnrichmentIssuesOutput
+} from "../domain/enrichment.ts";
 
 // ---------------------------------------------------------------------------
 // Internal helpers (not exported)
@@ -661,6 +666,85 @@ export const formatBulkCurateResult = (result: BulkCurateOutput): string => {
     `Rejected: ${result.rejected}`,
     `Skipped: ${result.skipped}`,
     `Errors: ${result.errors.length}`
+  ];
+
+  for (const error of result.errors.slice(0, 20)) {
+    lines.push(`  ${error.postUri}: ${error.error}`);
+  }
+
+  if (result.errors.length > 20) {
+    lines.push(`  ... ${result.errors.length - 20} more errors`);
+  }
+
+  return lines.join("\n");
+};
+
+export const formatEnrichmentGaps = (
+  output: ListEnrichmentGapsOutput
+): string => {
+  const lines = [
+    `Vision gaps: ${output.vision.count}`,
+    `Source-attribution gaps: ${output.sourceAttribution.count}`
+  ];
+
+  if (output.vision.postUris.length > 0) {
+    lines.push("");
+    lines.push("Vision:");
+    for (const postUri of output.vision.postUris) {
+      lines.push(`  ${postUri}`);
+    }
+  }
+
+  if (output.sourceAttribution.postUris.length > 0) {
+    lines.push("");
+    lines.push("Source attribution:");
+    for (const postUri of output.sourceAttribution.postUris) {
+      lines.push(`  ${postUri}`);
+    }
+  }
+
+  if (
+    output.vision.postUris.length === 0 &&
+    output.sourceAttribution.postUris.length === 0
+  ) {
+    lines.push("");
+    lines.push("No enrichment gaps found.");
+  }
+
+  return lines.join("\n");
+};
+
+export const formatEnrichmentIssues = (
+  output: ListEnrichmentIssuesOutput
+): string => {
+  if (output.items.length === 0) {
+    return "No enrichment issues found.";
+  }
+
+  return output.items.map((item, index) => {
+    const header = `[I${index + 1}] ${item.status} | ${item.enrichmentType} | ${item.postUri}`;
+    const runLine = `     Run: ${item.runId}`;
+    const progressLine = item.lastProgressAt === null
+      ? null
+      : `     Last progress: ${formatTimestamp(item.lastProgressAt)}`;
+    const errorLine = item.error === null
+      ? null
+      : `     Error: ${item.error.tag}: ${truncate(collapse(item.error.message), 160)}`;
+
+    return [header, runLine, progressLine, errorLine]
+      .filter((line): line is string => line !== null)
+      .join("\n");
+  }).join("\n");
+};
+
+export const formatBulkStartEnrichmentResult = (
+  result: BulkStartEnrichmentOutput
+): string => {
+  const lines = [
+    "Bulk enrichment trigger completed.",
+    `Queued: ${result.queued}`,
+    `Skipped: ${result.skipped}`,
+    `Failed: ${result.failed}`
   ];
 
   for (const error of result.errors.slice(0, 20)) {

@@ -31,6 +31,7 @@ const TOOL_SCOPES: Record<string, ReadonlyArray<string>> = {
   bulk_curate: ["curation:write"],
   submit_editorial_pick: ["editorial:write"],
   start_enrichment: ["curation:write"],
+  bulk_start_enrichment: ["curation:write"],
 };
 
 const PROMPT_SCOPES: Record<string, ReadonlyArray<string>> = {
