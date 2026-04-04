@@ -15,6 +15,7 @@ import { handleMcpRequestWithLayer, createPersistentMcpHandler } from "../../src
 import { AppConfig, type AppConfigShape } from "../../src/platform/Config";
 import { EditorialService } from "../../src/services/EditorialService";
 import { OntologyCatalog } from "../../src/services/OntologyCatalog";
+import { PostImportService } from "../../src/services/PostImportService";
 import { PostHydrationService } from "../../src/services/PostHydrationService";
 import { KnowledgeQueryService } from "../../src/services/KnowledgeQueryService";
 import { CurationService } from "../../src/services/CurationService";
@@ -66,6 +67,12 @@ export const opsEditorialWriteIdentity: AccessIdentity = {
   subject: "test-ops-editor",
   email: "ops-editorial@test.com",
   scopes: ["mcp:read", "editorial:write", "ops:read"]
+};
+
+export const opsRefreshIdentity: AccessIdentity = {
+  subject: "test-import-operator",
+  email: "ops-import@test.com",
+  scopes: ["mcp:read", "ops:refresh"]
 };
 
 export const testConfig = (
@@ -156,6 +163,18 @@ export const makeBiLayer = (options?: {
       )
     )
   );
+  const postImportServiceLayer = PostImportService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        configLayer,
+        ontologyLayer,
+        expertsLayer,
+        knowledgeLayer,
+        candidatePayloadServiceLayer,
+        curationServiceLayer
+      )
+    )
+  );
 
   const enrichmentReadServiceLayer = PostEnrichmentReadService.layer.pipe(
     Layer.provideMerge(
@@ -175,7 +194,8 @@ export const makeBiLayer = (options?: {
     curationServiceLayer,
     blueskyLayer,
     enrichmentReadServiceLayer,
-    pipelineStatusServiceLayer
+    pipelineStatusServiceLayer,
+    postImportServiceLayer
   );
 };
 

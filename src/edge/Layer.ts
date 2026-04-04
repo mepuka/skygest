@@ -23,6 +23,7 @@ import { PostHydrationService } from "../services/PostHydrationService";
 import { CurationRepoD1 } from "../services/d1/CurationRepoD1";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { OntologyCatalog } from "../services/OntologyCatalog";
+import { PostImportService } from "../services/PostImportService";
 import { StagingOpsService } from "../services/StagingOpsService";
 import { CandidatePayloadRepoD1 } from "../services/d1/CandidatePayloadRepoD1";
 import { EnrichmentRunsRepoD1 } from "../services/d1/EnrichmentRunsRepoD1";
@@ -151,6 +152,18 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
           )
     )
   );
+  const postImportServiceLayer = PostImportService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        configLayer,
+        ontologyLayer,
+        expertsLayer,
+        knowledgeLayer,
+        candidatePayloadServiceLayer,
+        curationServiceLayer
+      )
+    )
+  );
   const queryLayer = Layer.mergeAll(
     queryRepositoriesLayer,
     configLayer,
@@ -160,6 +173,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     candidatePayloadServiceLayer,
     enrichmentReadServiceLayer,
     pipelineStatusServiceLayer,
+    postImportServiceLayer,
     KnowledgeQueryService.layer.pipe(
       Layer.provideMerge(Layer.mergeAll(queryRepositoriesLayer, configLayer))
     ),
@@ -206,7 +220,9 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         candidatePayloadServiceLayer,
         enrichmentReadServiceLayer,
         pipelineStatusServiceLayer,
-        curationServiceLayer
+        curationServiceLayer,
+        pipelineStatusServiceLayer,
+        postImportServiceLayer
       )
     : Layer.mergeAll(
         baseLayer,
@@ -226,6 +242,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         enrichmentReadServiceLayer,
         pipelineStatusServiceLayer,
         curationServiceLayer,
+        postImportServiceLayer,
         enrichmentLauncherLayer
       );
 
@@ -243,6 +260,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     enrichmentReadServiceLayer,
     pipelineStatusRepoLayer,
     pipelineStatusServiceLayer,
+    postImportServiceLayer,
     curationRepoLayer,
     curationServiceLayer,
     queryLayer,

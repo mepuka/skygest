@@ -7,6 +7,7 @@
  */
 
 import { Schema } from "effect";
+import { ImportPostsOutput } from "../domain/api.ts";
 import {
   KnowledgePostsOutput,
   KnowledgeLinksOutput,
@@ -90,6 +91,9 @@ export type EnrichmentIssuesMcpOutput = typeof EnrichmentIssuesMcpOutput.Type;
 
 export const PipelineStatusMcpOutput = PipelineStatusOutput.pipe(Schema.fieldsAssign(displayFields));
 export type PipelineStatusMcpOutput = typeof PipelineStatusMcpOutput.Type;
+
+export const ImportPostsMcpOutput = ImportPostsOutput.pipe(Schema.fieldsAssign(displayFields));
+export type ImportPostsMcpOutput = typeof ImportPostsMcpOutput.Type;
 
 export const StartEnrichmentMcpOutput = Schema.Struct({
   postUri: PostUri,

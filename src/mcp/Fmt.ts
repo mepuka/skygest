@@ -34,6 +34,7 @@ import type {
   ListEnrichmentGapsOutput,
   ListEnrichmentIssuesOutput
 } from "../domain/enrichment.ts";
+import type { ImportPostsOutput } from "../domain/api.ts";
 import type {
   PipelineStatusDetail,
   PipelineStatusOutput
@@ -557,6 +558,14 @@ export const formatSubmitPickResult = (result: { postUri: string; created: boole
   result.created
     ? `Editorial pick created: ${result.postUri}`
     : `Editorial pick updated: ${result.postUri}`;
+
+export const formatImportPosts = (result: ImportPostsOutput): string =>
+  [
+    "Post import completed.",
+    `Imported: ${result.imported}`,
+    `Flagged: ${result.flagged}`,
+    `Skipped: ${result.skipped}`
+  ].join("\n");
 
 export const formatCurationCandidates = (items: ReadonlyArray<CurationCandidateOutput>): string => {
   if (items.length === 0) return "No curation candidates found.";

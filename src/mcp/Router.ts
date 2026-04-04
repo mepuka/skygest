@@ -15,6 +15,7 @@ import { EditorialService } from "../services/EditorialService";
 import { EnrichmentTriggerClient } from "../services/EnrichmentTriggerClient";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { PipelineStatusService } from "../services/PipelineStatusService";
+import { PostImportService } from "../services/PostImportService";
 import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
 import { GLOSSARY_CONTENT } from "./glossary";
 import { ReadOnlyPromptsLayer, WorkflowPromptsLayer } from "./prompts";
@@ -33,7 +34,17 @@ const GlossaryResource = McpServer.resource({
   content: Effect.succeed(GLOSSARY_CONTENT)
 });
 
-type QueryLayer = Layer.Layer<KnowledgeQueryService | EditorialService | CurationService | BlueskyClient | PostEnrichmentReadService | PipelineStatusService, any, never>;
+type QueryLayer = Layer.Layer<
+  KnowledgeQueryService |
+  EditorialService |
+  CurationService |
+  BlueskyClient |
+  PostEnrichmentReadService |
+  PipelineStatusService |
+  PostImportService,
+  any,
+  never
+>;
 
 const mcpServerLayer = McpServer.layerHttp({
   name: "skygest-bi-mcp",
@@ -50,7 +61,7 @@ const makeMcpLayer = (
     Layer.provideMerge(handlers.pipe(Layer.provideMerge(queryLayer)))
   );
 
-  const promptsLayer = (profile === "workflow-write" || profile === "ops-workflow-write"
+  const promptsLayer = (profile.includes("workflow-write")
     ? WorkflowPromptsLayer
     : ReadOnlyPromptsLayer) as Layer.Layer<never, never, never>;
 
