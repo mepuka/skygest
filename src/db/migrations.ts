@@ -450,6 +450,20 @@ const migration18: D1Migration = {
   ]
 };
 
+const migration19: D1Migration = {
+  id: 19,
+  name: "pipeline_status_indexes",
+  statements: [
+    `CREATE INDEX IF NOT EXISTS idx_posts_status
+      ON posts(status)`,
+    `CREATE INDEX IF NOT EXISTS idx_ingest_runs_head_sweep_finished_at
+      ON ingest_runs(finished_at DESC, id DESC)
+      WHERE kind = 'head-sweep'
+        AND finished_at IS NOT NULL
+        AND status IN ('complete', 'failed')`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -468,5 +482,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration15,
   migration16,
   migration17,
-  migration18
+  migration18,
+  migration19
 ];

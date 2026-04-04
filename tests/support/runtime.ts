@@ -44,10 +44,28 @@ export const workflowIdentity: AccessIdentity = {
   scopes: ["mcp:read", "curation:write", "editorial:write", "experts:read", "experts:write", "ops:read", "ops:refresh", "editorial:read"]
 };
 
+export const workflowWriteIdentity: AccessIdentity = {
+  subject: "test-workflow-writer",
+  email: "workflow@test.com",
+  scopes: ["mcp:read", "curation:write", "editorial:write"]
+};
+
 export const opsReadIdentity: AccessIdentity = {
   subject: "test-ops-reader",
   email: "ops@test.com",
   scopes: ["mcp:read", "ops:read"]
+};
+
+export const opsCurationWriteIdentity: AccessIdentity = {
+  subject: "test-ops-curator",
+  email: "ops-curation@test.com",
+  scopes: ["mcp:read", "curation:write", "ops:read"]
+};
+
+export const opsEditorialWriteIdentity: AccessIdentity = {
+  subject: "test-ops-editor",
+  email: "ops-editorial@test.com",
+  scopes: ["mcp:read", "editorial:write", "ops:read"]
 };
 
 export const testConfig = (

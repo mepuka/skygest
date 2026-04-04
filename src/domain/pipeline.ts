@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { FlexibleNumber } from "./bi";
-import { NonNegativeInt } from "./types";
+import { NonNegativeInt, PlatformCounts } from "./types";
 
 export const PipelineStatusDetail = Schema.Literals(["summary", "full"]);
 export type PipelineStatusDetail = Schema.Schema.Type<typeof PipelineStatusDetail>;
@@ -12,15 +12,12 @@ export const GetPipelineStatusInput = Schema.Struct({
     Schema.withDecodingDefaultKey(() => "summary" as const)
   )),
   since: Schema.optionalKey(FlexibleNumber.annotate({
-    description: "Optional lower bound for the latest sweep timestamp check. If provided, lastSweep is omitted when the most recent finished head sweep is older than this Unix epoch timestamp (milliseconds)."
+    description: "Optional freshness filter for lastSweep only. When provided, the latest finished head sweep is included only if its completedAt timestamp is on or after this Unix epoch timestamp (milliseconds)."
   }))
 });
 export type GetPipelineStatusInput = Schema.Schema.Type<typeof GetPipelineStatusInput>;
 
-export const PipelinePlatformCounts = Schema.Struct({
-  bluesky: NonNegativeInt,
-  twitter: NonNegativeInt
-});
+export const PipelinePlatformCounts = PlatformCounts;
 export type PipelinePlatformCounts = Schema.Schema.Type<typeof PipelinePlatformCounts>;
 
 export const PipelineExpertTierCounts = Schema.Struct({
@@ -46,14 +43,16 @@ export type PipelinePostCounts = Schema.Schema.Type<typeof PipelinePostCounts>;
 export const PipelineCurationCounts = Schema.Struct({
   curated: NonNegativeInt,
   rejected: NonNegativeInt,
-  flagged: NonNegativeInt
+  flagged: NonNegativeInt,
+  uncurated: NonNegativeInt
 });
 export type PipelineCurationCounts = Schema.Schema.Type<typeof PipelineCurationCounts>;
 
 export const PipelineStoredEnrichmentCounts = Schema.Struct({
   total: NonNegativeInt,
   vision: NonNegativeInt,
-  sourceAttribution: NonNegativeInt
+  sourceAttribution: NonNegativeInt,
+  grounding: NonNegativeInt
 });
 export type PipelineStoredEnrichmentCounts = Schema.Schema.Type<typeof PipelineStoredEnrichmentCounts>;
 
@@ -76,12 +75,13 @@ export const PipelineLastSweep = Schema.Struct({
   runId: Schema.String,
   completedAt: Schema.Number,
   postsStored: NonNegativeInt,
-  failures: NonNegativeInt,
+  expertsFailed: NonNegativeInt,
   status: Schema.Literals(["complete", "failed"])
 });
 export type PipelineLastSweep = Schema.Schema.Type<typeof PipelineLastSweep>;
 
 export const PipelineStatusOutput = Schema.Struct({
+  asOf: NonNegativeInt,
   experts: PipelineExpertCounts,
   posts: PipelinePostCounts,
   curation: PipelineCurationCounts,

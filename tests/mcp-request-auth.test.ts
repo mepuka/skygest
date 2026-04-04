@@ -167,10 +167,22 @@ describe("profileForIdentity", () => {
     ).toBe("curation-write");
   });
 
+  it("mcp:read + curation:write + ops:read yields ops-curation-write", () => {
+    expect(
+      profileForIdentity({ scopes: ["mcp:read", "curation:write", "ops:read"] }),
+    ).toBe("ops-curation-write");
+  });
+
   it("mcp:read + editorial:write yields editorial-write", () => {
     expect(
       profileForIdentity({ scopes: ["mcp:read", "editorial:write"] }),
     ).toBe("editorial-write");
+  });
+
+  it("mcp:read + editorial:write + ops:read yields ops-editorial-write", () => {
+    expect(
+      profileForIdentity({ scopes: ["mcp:read", "editorial:write", "ops:read"] }),
+    ).toBe("ops-editorial-write");
   });
 
   it("mcp:read + curation:write + editorial:write + ops:read yields ops-workflow-write", () => {

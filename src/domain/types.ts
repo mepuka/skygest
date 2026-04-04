@@ -40,6 +40,12 @@ export const NonNegativeInt = Schema.Int.pipe(
 );
 export type NonNegativeInt = Schema.Schema.Type<typeof NonNegativeInt>;
 
+export const PlatformCounts = Schema.Struct({
+  bluesky: NonNegativeInt,
+  twitter: NonNegativeInt
+});
+export type PlatformCounts = Schema.Schema.Type<typeof PlatformCounts>;
+
 /** Safe widening — every AtUri matches PostUri's pattern (at:// ⊂ at://|x://) */
 export const atUriToPostUri = (uri: AtUri): PostUri => uri as unknown as PostUri;
 

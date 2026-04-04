@@ -19,24 +19,7 @@ import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService
 import { GLOSSARY_CONTENT } from "./glossary";
 import { ReadOnlyPromptsLayer, WorkflowPromptsLayer } from "./prompts";
 import { toolkitWithDisplayText } from "./registerToolkitWithDisplayText.ts";
-import {
-  ReadOnlyMcpToolkit,
-  ReadOnlyMcpHandlers,
-  OpsReadMcpToolkit,
-  OpsReadMcpHandlers,
-  CurationWriteMcpToolkit,
-  CurationWriteMcpHandlers,
-  OpsCurationWriteMcpToolkit,
-  OpsCurationWriteMcpHandlers,
-  EditorialWriteMcpToolkit,
-  EditorialWriteMcpHandlers,
-  OpsEditorialWriteMcpToolkit,
-  OpsEditorialWriteMcpHandlers,
-  WorkflowWriteMcpToolkit,
-  WorkflowWriteMcpHandlers,
-  OpsWorkflowWriteMcpToolkit,
-  OpsWorkflowWriteMcpHandlers
-} from "./Toolkit";
+import { toolkitForProfile } from "./Toolkit";
 import { profileForIdentity, type McpCapabilityProfile } from "./RequestAuth";
 import type { AccessIdentity } from "../auth/AuthService";
 import { OperatorIdentity, operatorIdentityContext } from "../http/Identity";
@@ -62,42 +45,10 @@ const makeMcpLayer = (
   queryLayer: QueryLayer,
   profile: McpCapabilityProfile
 ) => {
-  const toolkitAndHandlers = (() => {
-    switch (profile) {
-      case "read-only":
-        return toolkitWithDisplayText(ReadOnlyMcpToolkit).pipe(
-          Layer.provideMerge(ReadOnlyMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
-        );
-      case "ops-read":
-        return toolkitWithDisplayText(OpsReadMcpToolkit).pipe(
-          Layer.provideMerge(OpsReadMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
-        );
-      case "curation-write":
-        return toolkitWithDisplayText(CurationWriteMcpToolkit).pipe(
-          Layer.provideMerge(CurationWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
-        );
-      case "ops-curation-write":
-        return toolkitWithDisplayText(OpsCurationWriteMcpToolkit).pipe(
-          Layer.provideMerge(OpsCurationWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
-        );
-      case "editorial-write":
-        return toolkitWithDisplayText(EditorialWriteMcpToolkit).pipe(
-          Layer.provideMerge(EditorialWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
-        );
-      case "ops-editorial-write":
-        return toolkitWithDisplayText(OpsEditorialWriteMcpToolkit).pipe(
-          Layer.provideMerge(OpsEditorialWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
-        );
-      case "workflow-write":
-        return toolkitWithDisplayText(WorkflowWriteMcpToolkit).pipe(
-          Layer.provideMerge(WorkflowWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
-        );
-      case "ops-workflow-write":
-        return toolkitWithDisplayText(OpsWorkflowWriteMcpToolkit).pipe(
-          Layer.provideMerge(OpsWorkflowWriteMcpHandlers.pipe(Layer.provideMerge(queryLayer)))
-        );
-    }
-  })();
+  const { toolkit, handlers } = toolkitForProfile(profile);
+  const toolkitAndHandlers = toolkitWithDisplayText(toolkit).pipe(
+    Layer.provideMerge(handlers.pipe(Layer.provideMerge(queryLayer)))
+  );
 
   const promptsLayer = (profile === "workflow-write" || profile === "ops-workflow-write"
     ? WorkflowPromptsLayer

@@ -7,102 +7,108 @@ import {
 import { PipelineStatusRepo } from "../PipelineStatusRepo";
 import { decodeWithDbError } from "./schemaDecode";
 
-const CountRowSchema = Schema.Struct({
-  total: Schema.Number,
-  bluesky: Schema.Number,
-  twitter: Schema.Number,
-  energyFocused: Schema.Number,
-  generalOutlet: Schema.Number,
-  independent: Schema.Number
-});
-const CountRowsSchema = Schema.Array(CountRowSchema);
-
-const PostCountRowSchema = Schema.Struct({
-  total: Schema.Number,
-  bluesky: Schema.Number,
-  twitter: Schema.Number
-});
-const PostCountRowsSchema = Schema.Array(PostCountRowSchema);
-
-const CurationCountRowSchema = Schema.Struct({
+const SnapshotCountsRowSchema = Schema.Struct({
+  expertTotal: Schema.Number,
+  expertBluesky: Schema.Number,
+  expertTwitter: Schema.Number,
+  expertEnergyFocused: Schema.Number,
+  expertGeneralOutlet: Schema.Number,
+  expertIndependent: Schema.Number,
+  postTotal: Schema.Number,
+  postBluesky: Schema.Number,
+  postTwitter: Schema.Number,
   curated: Schema.Number,
   rejected: Schema.Number,
-  flagged: Schema.Number
-});
-const CurationCountRowsSchema = Schema.Array(CurationCountRowSchema);
-
-const StoredEnrichmentCountRowSchema = Schema.Struct({
-  total: Schema.Number,
+  flagged: Schema.Number,
+  uncurated: Schema.Number,
+  enrichmentTotal: Schema.Number,
   vision: Schema.Number,
-  sourceAttribution: Schema.Number
+  sourceAttribution: Schema.Number,
+  grounding: Schema.Number,
+  runComplete: Schema.Number,
+  runQueued: Schema.Number,
+  runRunning: Schema.Number,
+  runFailed: Schema.Number,
+  runNeedsReview: Schema.Number
 });
-const StoredEnrichmentCountRowsSchema = Schema.Array(StoredEnrichmentCountRowSchema);
+const SnapshotCountsRowsSchema = Schema.Array(SnapshotCountsRowSchema);
 
-const RunCountRowSchema = Schema.Struct({
-  complete: Schema.Number,
-  queued: Schema.Number,
-  running: Schema.Number,
-  failed: Schema.Number,
-  needsReview: Schema.Number
-});
-const RunCountRowsSchema = Schema.Array(RunCountRowSchema);
+const zeroSnapshotCounts: Schema.Schema.Type<typeof SnapshotCountsRowSchema> = {
+  expertTotal: 0,
+  expertBluesky: 0,
+  expertTwitter: 0,
+  expertEnergyFocused: 0,
+  expertGeneralOutlet: 0,
+  expertIndependent: 0,
+  postTotal: 0,
+  postBluesky: 0,
+  postTwitter: 0,
+  curated: 0,
+  rejected: 0,
+  flagged: 0,
+  uncurated: 0,
+  enrichmentTotal: 0,
+  vision: 0,
+  sourceAttribution: 0,
+  grounding: 0,
+  runComplete: 0,
+  runQueued: 0,
+  runRunning: 0,
+  runFailed: 0,
+  runNeedsReview: 0
+};
 
 const LastSweepRowSchema = Schema.Struct({
   runId: Schema.String,
   completedAt: Schema.Number,
   postsStored: Schema.Number,
-  failures: Schema.Number,
+  expertsFailed: Schema.Number,
   status: Schema.Literals(["complete", "failed"])
 });
 const LastSweepRowsSchema = Schema.Array(LastSweepRowSchema);
 
 const toStatus = ({
-  expertCounts,
-  postCounts,
-  curationCounts,
-  storedCounts,
-  runCounts,
+  snapshotCounts,
   lastSweep
 }: {
-  readonly expertCounts: Schema.Schema.Type<typeof CountRowSchema>;
-  readonly postCounts: Schema.Schema.Type<typeof PostCountRowSchema>;
-  readonly curationCounts: Schema.Schema.Type<typeof CurationCountRowSchema>;
-  readonly storedCounts: Schema.Schema.Type<typeof StoredEnrichmentCountRowSchema>;
-  readonly runCounts: Schema.Schema.Type<typeof RunCountRowSchema>;
+  readonly snapshotCounts: Schema.Schema.Type<typeof SnapshotCountsRowSchema>;
   readonly lastSweep: Schema.Schema.Type<typeof LastSweepRowSchema> | null;
 }): PipelineStatusOutputType => ({
+  asOf: Date.now(),
   experts: {
-    total: expertCounts.total,
-    bluesky: expertCounts.bluesky,
-    twitter: expertCounts.twitter,
+    total: snapshotCounts.expertTotal,
+    bluesky: snapshotCounts.expertBluesky,
+    twitter: snapshotCounts.expertTwitter,
     byTier: {
-      energyFocused: expertCounts.energyFocused,
-      generalOutlet: expertCounts.generalOutlet,
-      independent: expertCounts.independent
+      energyFocused: snapshotCounts.expertEnergyFocused,
+      generalOutlet: snapshotCounts.expertGeneralOutlet,
+      independent: snapshotCounts.expertIndependent
     }
   },
   posts: {
-    total: postCounts.total,
-    bluesky: postCounts.bluesky,
-    twitter: postCounts.twitter
+    total: snapshotCounts.postTotal,
+    bluesky: snapshotCounts.postBluesky,
+    twitter: snapshotCounts.postTwitter
   },
   curation: {
-    curated: curationCounts.curated,
-    rejected: curationCounts.rejected,
-    flagged: curationCounts.flagged
+    curated: snapshotCounts.curated,
+    rejected: snapshotCounts.rejected,
+    flagged: snapshotCounts.flagged,
+    uncurated: snapshotCounts.uncurated
   },
   enrichments: {
     stored: {
-      total: storedCounts.total,
-      vision: storedCounts.vision,
-      sourceAttribution: storedCounts.sourceAttribution
+      total: snapshotCounts.enrichmentTotal,
+      vision: snapshotCounts.vision,
+      sourceAttribution: snapshotCounts.sourceAttribution,
+      grounding: snapshotCounts.grounding
     },
     runs: {
-      complete: runCounts.complete,
-      queued: runCounts.queued,
-      running: runCounts.running,
-      failed: runCounts.failed,
-      needsReview: runCounts.needsReview
+      complete: snapshotCounts.runComplete,
+      queued: snapshotCounts.runQueued,
+      running: snapshotCounts.runRunning,
+      failed: snapshotCounts.runFailed,
+      needsReview: snapshotCounts.runNeedsReview
     }
   },
   lastSweep
@@ -114,123 +120,97 @@ export const PipelineStatusRepoD1 = {
 
     const getStatus = () =>
       Effect.all({
-        expertCounts: sql<any>`
+        snapshotCounts: sql<any>`
+          WITH
+            active_experts AS (
+              SELECT
+                did,
+                COALESCE(tier, 'independent') as tier
+              FROM experts
+              WHERE active = 1
+            ),
+            active_posts AS (
+              SELECT
+                uri,
+                did
+              FROM posts
+              WHERE status = 'active'
+            ),
+            active_curation AS (
+              SELECT
+                pc.post_uri as postUri,
+                pc.status as status
+              FROM post_curation pc
+              JOIN active_posts ap ON ap.uri = pc.post_uri
+            )
           SELECT
-            COUNT(*) as total,
-            COUNT(CASE WHEN source = 'twitter-import' THEN 1 END) as twitter,
-            COUNT(CASE WHEN source != 'twitter-import' THEN 1 END) as bluesky,
-            COUNT(CASE WHEN COALESCE(tier, 'independent') = 'energy-focused' THEN 1 END) as energyFocused,
-            COUNT(CASE WHEN COALESCE(tier, 'independent') = 'general-outlet' THEN 1 END) as generalOutlet,
-            COUNT(CASE WHEN COALESCE(tier, 'independent') = 'independent' THEN 1 END) as independent
-          FROM experts
+            (SELECT COUNT(*) FROM active_experts) as expertTotal,
+            (SELECT COUNT(*) FROM active_experts WHERE did LIKE 'did:plc:%') as expertBluesky,
+            (SELECT COUNT(*) FROM active_experts WHERE did LIKE 'did:x:%') as expertTwitter,
+            (SELECT COUNT(*) FROM active_experts WHERE tier = 'energy-focused') as expertEnergyFocused,
+            (SELECT COUNT(*) FROM active_experts WHERE tier = 'general-outlet') as expertGeneralOutlet,
+            (SELECT COUNT(*) FROM active_experts WHERE tier = 'independent') as expertIndependent,
+            (SELECT COUNT(*) FROM active_posts) as postTotal,
+            (SELECT COUNT(*) FROM active_posts WHERE did LIKE 'did:plc:%') as postBluesky,
+            (SELECT COUNT(*) FROM active_posts WHERE did LIKE 'did:x:%') as postTwitter,
+            (SELECT COUNT(*) FROM active_curation WHERE status = 'curated') as curated,
+            (SELECT COUNT(*) FROM active_curation WHERE status = 'rejected') as rejected,
+            (SELECT COUNT(*) FROM active_curation WHERE status = 'flagged') as flagged,
+            (
+              SELECT COUNT(*)
+              FROM active_posts ap
+              LEFT JOIN active_curation ac ON ac.postUri = ap.uri
+              WHERE ac.postUri IS NULL
+            ) as uncurated,
+            (SELECT COUNT(*) FROM post_enrichments) as enrichmentTotal,
+            (SELECT COUNT(*) FROM post_enrichments WHERE enrichment_type = 'vision') as vision,
+            (
+              SELECT COUNT(*)
+              FROM post_enrichments
+              WHERE enrichment_type = 'source-attribution'
+            ) as sourceAttribution,
+            (SELECT COUNT(*) FROM post_enrichments WHERE enrichment_type = 'grounding') as grounding,
+            (
+              SELECT COUNT(*)
+              FROM post_enrichment_runs
+              WHERE status = 'complete'
+            ) as runComplete,
+            (
+              SELECT COUNT(*)
+              FROM post_enrichment_runs
+              WHERE status = 'queued'
+            ) as runQueued,
+            (
+              SELECT COUNT(*)
+              FROM post_enrichment_runs
+              WHERE status = 'running'
+            ) as runRunning,
+            (
+              SELECT COUNT(*)
+              FROM post_enrichment_runs
+              WHERE status = 'failed'
+            ) as runFailed,
+            (
+              SELECT COUNT(*)
+              FROM post_enrichment_runs
+              WHERE status = 'needs-review'
+            ) as runNeedsReview
         `.pipe(
           Effect.flatMap((rows) =>
             decodeWithDbError(
-              CountRowsSchema,
+              SnapshotCountsRowsSchema,
               rows,
-              "Failed to decode pipeline expert counts"
+              "Failed to decode pipeline snapshot counts"
             )
           ),
-          Effect.map((rows) => rows[0] ?? {
-            total: 0,
-            bluesky: 0,
-            twitter: 0,
-            energyFocused: 0,
-            generalOutlet: 0,
-            independent: 0
-          })
-        ),
-        postCounts: sql<any>`
-          SELECT
-            COUNT(*) as total,
-            COUNT(CASE WHEN uri LIKE 'at://%' THEN 1 END) as bluesky,
-            COUNT(CASE WHEN uri LIKE 'x://%' THEN 1 END) as twitter
-          FROM posts
-          WHERE status = 'active'
-        `.pipe(
-          Effect.flatMap((rows) =>
-            decodeWithDbError(
-              PostCountRowsSchema,
-              rows,
-              "Failed to decode pipeline post counts"
-            )
-          ),
-          Effect.map((rows) => rows[0] ?? {
-            total: 0,
-            bluesky: 0,
-            twitter: 0
-          })
-        ),
-        curationCounts: sql<any>`
-          SELECT
-            COUNT(CASE WHEN status = 'curated' THEN 1 END) as curated,
-            COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected,
-            COUNT(CASE WHEN status = 'flagged' THEN 1 END) as flagged
-          FROM post_curation
-        `.pipe(
-          Effect.flatMap((rows) =>
-            decodeWithDbError(
-              CurationCountRowsSchema,
-              rows,
-              "Failed to decode pipeline curation counts"
-            )
-          ),
-          Effect.map((rows) => rows[0] ?? {
-            curated: 0,
-            rejected: 0,
-            flagged: 0
-          })
-        ),
-        storedCounts: sql<any>`
-          SELECT
-            COUNT(*) as total,
-            COUNT(CASE WHEN enrichment_type = 'vision' THEN 1 END) as vision,
-            COUNT(CASE WHEN enrichment_type = 'source-attribution' THEN 1 END) as sourceAttribution
-          FROM post_enrichments
-        `.pipe(
-          Effect.flatMap((rows) =>
-            decodeWithDbError(
-              StoredEnrichmentCountRowsSchema,
-              rows,
-              "Failed to decode pipeline stored enrichment counts"
-            )
-          ),
-          Effect.map((rows) => rows[0] ?? {
-            total: 0,
-            vision: 0,
-            sourceAttribution: 0
-          })
-        ),
-        runCounts: sql<any>`
-          SELECT
-            COUNT(CASE WHEN status = 'complete' THEN 1 END) as complete,
-            COUNT(CASE WHEN status = 'queued' THEN 1 END) as queued,
-            COUNT(CASE WHEN status = 'running' THEN 1 END) as running,
-            COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed,
-            COUNT(CASE WHEN status = 'needs-review' THEN 1 END) as needsReview
-          FROM post_enrichment_runs
-        `.pipe(
-          Effect.flatMap((rows) =>
-            decodeWithDbError(
-              RunCountRowsSchema,
-              rows,
-              "Failed to decode pipeline enrichment run counts"
-            )
-          ),
-          Effect.map((rows) => rows[0] ?? {
-            complete: 0,
-            queued: 0,
-            running: 0,
-            failed: 0,
-            needsReview: 0
-          })
+          Effect.map((rows) => rows[0] ?? zeroSnapshotCounts)
         ),
         lastSweep: sql<any>`
           SELECT
             id as runId,
             finished_at as completedAt,
             posts_stored as postsStored,
-            experts_failed as failures,
+            experts_failed as expertsFailed,
             status as status
           FROM ingest_runs
           WHERE kind = 'head-sweep'

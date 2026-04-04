@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { NonNegativeInt, PlatformSchema, PostUri } from "./types";
+import { NonNegativeInt, PlatformCounts, PlatformSchema, PostUri } from "./types";
 import { FlexibleNumber, KnowledgePostResult } from "./bi";
 import { EnrichmentReadiness } from "./enrichment";
 
@@ -99,10 +99,7 @@ export const CurationCandidateExportPageOutput = Schema.Struct({
 });
 export type CurationCandidateExportPageOutput = Schema.Schema.Type<typeof CurationCandidateExportPageOutput>;
 
-export const CurationCandidatePlatformCounts = Schema.Struct({
-  bluesky: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
-  twitter: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
-});
+export const CurationCandidatePlatformCounts = PlatformCounts;
 export type CurationCandidatePlatformCounts = Schema.Schema.Type<typeof CurationCandidatePlatformCounts>;
 
 export const CurationCandidateCountOutput = Schema.Struct({

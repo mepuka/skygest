@@ -23,9 +23,12 @@ import { smokeFixtureUris } from "../src/staging/SmokeFixture";
 import {
   createMcpClient,
   makeBiLayer,
+  opsCurationWriteIdentity,
+  opsEditorialWriteIdentity,
   opsReadIdentity,
   readOnlyIdentity,
   workflowIdentity,
+  workflowWriteIdentity,
   sampleDid,
   seedKnowledgeBase,
   withTempSqliteFile
@@ -448,6 +451,33 @@ describe("MCP prompts by profile", () => {
 });
 
 describe("MCP tool visibility by profile", () => {
+  it.live("workflow-write profile includes write tools but not pipeline status", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const seedLayer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(
+          makeBiLayer({ filename }),
+          workflowWriteIdentity
+        );
+
+        try {
+          const tools = await client.listTools();
+          const names = tools.tools.map((t) => t.name);
+          expect(names).not.toContain("get_pipeline_status");
+          expect(names).toContain("start_enrichment");
+          expect(names).toContain("bulk_start_enrichment");
+          expect(names).toContain("curate_post");
+          expect(names).toContain("bulk_curate");
+          expect(names).toContain("submit_editorial_pick");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
   it.live("ops-workflow profile includes pipeline status and write tools", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
@@ -468,6 +498,60 @@ describe("MCP tool visibility by profile", () => {
           expect(names).toContain("curate_post");
           expect(names).toContain("bulk_curate");
           expect(names).toContain("submit_editorial_pick");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("ops-curation-write profile includes pipeline status and curation tools only", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const seedLayer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(
+          makeBiLayer({ filename }),
+          opsCurationWriteIdentity
+        );
+
+        try {
+          const tools = await client.listTools();
+          const names = tools.tools.map((t) => t.name);
+          expect(names).toContain("get_pipeline_status");
+          expect(names).toContain("curate_post");
+          expect(names).toContain("bulk_curate");
+          expect(names).toContain("start_enrichment");
+          expect(names).toContain("bulk_start_enrichment");
+          expect(names).not.toContain("submit_editorial_pick");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("ops-editorial-write profile includes pipeline status and editorial tools only", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const seedLayer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(
+          makeBiLayer({ filename }),
+          opsEditorialWriteIdentity
+        );
+
+        try {
+          const tools = await client.listTools();
+          const names = tools.tools.map((t) => t.name);
+          expect(names).toContain("get_pipeline_status");
+          expect(names).toContain("submit_editorial_pick");
+          expect(names).not.toContain("curate_post");
+          expect(names).not.toContain("bulk_curate");
+          expect(names).not.toContain("start_enrichment");
+          expect(names).not.toContain("bulk_start_enrichment");
         } finally {
           await close();
         }
@@ -532,16 +616,295 @@ describe("MCP tool visibility by profile", () => {
 });
 
 describe("MCP get_pipeline_status", () => {
-  it.live("returns an operator snapshot with counts and latest sweep details", () =>
+  const seedPipelineStatusFixture = (now: number) =>
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient;
+
+      yield* sql`
+        INSERT INTO experts (
+          did,
+          handle,
+          display_name,
+          description,
+          avatar,
+          domain,
+          source,
+          source_ref,
+          shard,
+          active,
+          tier,
+          added_at,
+          last_synced_at
+        ) VALUES
+          (${sampleDid}, ${"solar.bsky.social"}, ${"Solar"}, NULL, NULL, ${"energy"}, ${"manual"}, NULL, 0, 1, ${"energy-focused"}, ${now - 1000}, NULL),
+          (${`did:x:manual-twitter`}, ${"gridwatch"}, ${"Grid Watch"}, NULL, NULL, ${"energy"}, ${"manual"}, NULL, 0, 1, ${"general-outlet"}, ${now - 900}, NULL),
+          (${`did:plc:independent-1`}, ${"indie.bsky.social"}, ${"Indie"}, NULL, NULL, ${"energy"}, ${"bluesky-import"}, NULL, 0, 1, ${"independent"}, ${now - 800}, NULL),
+          (${`did:plc:inactive-1`}, ${"inactive.bsky.social"}, ${"Inactive"}, NULL, NULL, ${"energy"}, ${"bluesky-import"}, NULL, 0, 0, ${"general-outlet"}, ${now - 700}, NULL)
+      `;
+
+      yield* sql`
+        INSERT INTO posts (
+          uri,
+          did,
+          cid,
+          text,
+          created_at,
+          indexed_at,
+          has_links,
+          status,
+          ingest_id,
+          embed_type
+        ) VALUES
+          (${`at://${sampleDid}/app.bsky.feed.post/status-1`}, ${sampleDid}, ${"cid-status-1"}, ${"Bluesky active curated post"}, ${now - 700}, ${now - 700}, 0, ${"active"}, ${"ingest-status-1"}, NULL),
+          (${`x://tweet/status-2`}, ${`did:x:manual-twitter`}, ${"cid-status-2"}, ${"Twitter active rejected post"}, ${now - 600}, ${now - 600}, 1, ${"active"}, ${"ingest-status-2"}, ${"link"}),
+          (${`at://did:plc:independent-1/app.bsky.feed.post/status-3`}, ${`did:plc:independent-1`}, ${"cid-status-3"}, ${"Bluesky active flagged post"}, ${now - 500}, ${now - 500}, 0, ${"active"}, ${"ingest-status-3"}, NULL),
+          (${`at://${sampleDid}/app.bsky.feed.post/status-4`}, ${sampleDid}, ${"cid-status-4"}, ${"Bluesky active uncurated post"}, ${now - 400}, ${now - 400}, 0, ${"active"}, ${"ingest-status-4"}, NULL),
+          (${`at://did:plc:inactive-1/app.bsky.feed.post/status-5`}, ${`did:plc:inactive-1`}, ${"cid-status-5"}, ${"Deleted post"}, ${now - 300}, ${now - 300}, 0, ${"deleted"}, ${"ingest-status-5"}, NULL)
+      `;
+
+      yield* sql`
+        INSERT INTO post_curation
+          (post_uri, status, signal_score, predicates_applied, flagged_at, curated_at, curated_by, review_note)
+        VALUES
+          (${`at://${sampleDid}/app.bsky.feed.post/status-1`}, ${"curated"}, 91, ${JSON.stringify(["has-media"])}, ${now - 700}, ${now - 690}, ${"tester"}, NULL),
+          (${`x://tweet/status-2`}, ${"rejected"}, 55, ${JSON.stringify(["off-topic"])}, ${now - 600}, NULL, NULL, ${"off topic"}),
+          (${`at://did:plc:independent-1/app.bsky.feed.post/status-3`}, ${"flagged"}, 48, ${JSON.stringify(["manual-review"])}, ${now - 500}, NULL, NULL, NULL),
+          (${`at://did:plc:inactive-1/app.bsky.feed.post/status-5`}, ${"flagged"}, 22, ${JSON.stringify(["stale"])}, ${now - 300}, NULL, NULL, NULL)
+      `;
+
+      yield* sql`
+        INSERT INTO post_payloads (
+          post_uri,
+          capture_stage,
+          embed_type,
+          embed_payload_json,
+          captured_at,
+          updated_at
+        ) VALUES
+          (${`at://${sampleDid}/app.bsky.feed.post/status-1`}, ${"picked"}, ${"img"}, ${JSON.stringify({ kind: "img", images: [] })}, ${now - 450}, ${now - 450}),
+          (${`x://tweet/status-2`}, ${"picked"}, ${"link"}, ${JSON.stringify({ kind: "link", uri: "https://example.com/twitter-link", title: "Grid Watch", description: null, thumb: null })}, ${now - 350}, ${now - 350}),
+          (${`at://did:plc:independent-1/app.bsky.feed.post/status-3`}, ${"picked"}, ${"quote"}, ${JSON.stringify({ kind: "quote", uri: `at://${sampleDid}/app.bsky.feed.post/source`, author: "solar.bsky.social", text: "Quoted claim" })}, ${now - 250}, ${now - 250})
+      `;
+
+      yield* sql`
+        INSERT INTO post_enrichments (
+          post_uri,
+          enrichment_type,
+          enrichment_payload_json,
+          updated_at,
+          enriched_at
+        ) VALUES
+          (${`at://${sampleDid}/app.bsky.feed.post/status-1`}, ${"vision"}, ${"{}"}, ${now - 400}, ${now - 400}),
+          (${`x://tweet/status-2`}, ${"source-attribution"}, ${"{}"}, ${now - 300}, ${now - 300}),
+          (${`at://did:plc:independent-1/app.bsky.feed.post/status-3`}, ${"grounding"}, ${"{}"}, ${now - 200}, ${now - 200})
+      `;
+
+      yield* sql`
+        INSERT INTO post_enrichment_runs (
+          id,
+          workflow_instance_id,
+          post_uri,
+          enrichment_type,
+          schema_version,
+          triggered_by,
+          requested_by,
+          status,
+          phase,
+          attempt_count,
+          model_lane,
+          prompt_version,
+          input_fingerprint,
+          started_at,
+          finished_at,
+          last_progress_at,
+          result_written_at,
+          error
+        ) VALUES
+          (${`run-queued-${now}`}, ${`wf-queued-${now}`}, ${`at://${sampleDid}/app.bsky.feed.post/status-1`}, ${"vision"}, ${"v2"}, ${"admin"}, ${"ops@test.com"}, ${"queued"}, ${"queued"}, 0, NULL, NULL, NULL, ${now - 250}, NULL, ${now - 250}, NULL, NULL),
+          (${`run-running-${now}`}, ${`wf-running-${now}`}, ${`x://tweet/status-2`}, ${"source-attribution"}, ${"v2"}, ${"admin"}, ${"ops@test.com"}, ${"running"}, ${"executing"}, 0, NULL, NULL, NULL, ${now - 240}, NULL, ${now - 200}, NULL, NULL),
+          (${`run-complete-${now}`}, ${`wf-complete-${now}`}, ${`at://did:plc:independent-1/app.bsky.feed.post/status-3`}, ${"vision"}, ${"v2"}, ${"admin"}, ${"ops@test.com"}, ${"complete"}, ${"complete"}, 1, NULL, NULL, NULL, ${now - 230}, ${now - 220}, ${now - 220}, ${now - 220}, NULL),
+          (${`run-failed-${now}`}, ${`wf-failed-${now}`}, ${`at://${sampleDid}/app.bsky.feed.post/status-1`}, ${"source-attribution"}, ${"v2"}, ${"admin"}, ${"ops@test.com"}, ${"failed"}, ${"failed"}, 1, NULL, NULL, NULL, ${now - 210}, ${now - 205}, ${now - 205}, NULL, NULL),
+          (${`run-review-${now}`}, ${`wf-review-${now}`}, ${`x://tweet/status-2`}, ${"vision"}, ${"v2"}, ${"admin"}, ${"ops@test.com"}, ${"needs-review"}, ${"needs-review"}, 1, NULL, NULL, NULL, ${now - 204}, ${now - 203}, ${now - 203}, NULL, NULL)
+      `;
+
+      yield* sql`
+        INSERT INTO ingest_runs (
+          id,
+          workflow_instance_id,
+          kind,
+          triggered_by,
+          requested_by,
+          status,
+          phase,
+          started_at,
+          finished_at,
+          last_progress_at,
+          total_experts,
+          experts_succeeded,
+          experts_failed,
+          pages_fetched,
+          posts_seen,
+          posts_stored,
+          posts_deleted,
+          error
+        ) VALUES
+          (${`head-old-${now}`}, ${`head-old-${now}`}, ${"head-sweep"}, ${"admin"}, ${"ops@test.com"}, ${"complete"}, ${"complete"}, ${now - 2000}, ${now - 1900}, ${now - 1900}, 2, 2, 0, 10, 10, 4, 0, NULL),
+          (${`head-running-${now}`}, ${`head-running-${now}`}, ${"head-sweep"}, ${"admin"}, ${"ops@test.com"}, ${"running"}, ${"running"}, ${now - 1600}, NULL, ${now - 1500}, 3, 0, 0, 3, 3, 0, 0, NULL),
+          (${`head-latest-${now}`}, ${`head-latest-${now}`}, ${"head-sweep"}, ${"admin"}, ${"ops@test.com"}, ${"failed"}, ${"failed"}, ${now - 1500}, ${now - 1400}, ${now - 1400}, 3, 2, 1, 12, 12, 5, 0, NULL)
+      `;
+    });
+
+  it.live("returns an operator snapshot with active counts and latest sweep details", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const layer = makeBiLayer({ filename });
         await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
 
         const now = Date.now();
+        await Effect.runPromise(seedPipelineStatusFixture(now).pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer, opsReadIdentity);
+
+        try {
+          const requestedAt = Date.now();
+          const summaryResult = await client.callTool({
+            name: "get_pipeline_status",
+            arguments: {}
+          });
+          const summary = decodePipelineStatusResponse(summaryResult);
+
+          expect(summary.asOf).toBeGreaterThanOrEqual(requestedAt);
+          expect(summary.experts).toEqual({
+            total: 3,
+            bluesky: 2,
+            twitter: 1,
+            byTier: {
+              energyFocused: 1,
+              generalOutlet: 1,
+              independent: 1
+            }
+          });
+          expect(summary.posts).toEqual({
+            total: 4,
+            bluesky: 3,
+            twitter: 1
+          });
+          expect(summary.curation).toEqual({
+            curated: 1,
+            rejected: 1,
+            flagged: 1,
+            uncurated: 1
+          });
+          expect(summary.enrichments.stored).toEqual({
+            total: 3,
+            vision: 1,
+            sourceAttribution: 1,
+            grounding: 1
+          });
+          expect(summary.enrichments.runs).toEqual({
+            queued: 1,
+            running: 1,
+            complete: 1,
+            failed: 1,
+            needsReview: 1
+          });
+          expect(summary.lastSweep).toEqual({
+            runId: `head-latest-${now}`,
+            completedAt: now - 1400,
+            postsStored: 5,
+            expertsFailed: 1,
+            status: "failed"
+          });
+          expect(summary._display).toContain("As of:");
+          expect(summary._display).toContain("Experts: 3 active");
+          expect(summary._display).toContain("uncurated 1");
+          expect(summary._display).toContain("grounding 1");
+          expect(summary._display).toContain(`Last sweep: head-latest-${now}`);
+          expect(summary._display).toContain("experts failed 1");
+
+          const fullResult = await client.callTool({
+            name: "get_pipeline_status",
+            arguments: {
+              detail: "full",
+              since: now - 1500
+            }
+          });
+          const full = decodePipelineStatusResponse(fullResult);
+          expect(full.lastSweep?.runId).toBe(`head-latest-${now}`);
+          expect(full._display).toContain("Completed:");
+          expect(full._display).toContain("Status: failed");
+          expect(full._display).toContain("Experts failed: 1");
+
+          const staleSweepResult = await client.callTool({
+            name: "get_pipeline_status",
+            arguments: {
+              since: now - 1000
+            }
+          });
+          const staleSweep = decodePipelineStatusResponse(staleSweepResult);
+          expect(staleSweep.lastSweep).toBeNull();
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("returns zeros and no sweep for an empty database", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(layer, opsReadIdentity);
+
+        try {
+          const result = await client.callTool({
+            name: "get_pipeline_status",
+            arguments: { detail: "full" }
+          });
+          const snapshot = decodePipelineStatusResponse(result);
+
+          expect(snapshot.experts.total).toBe(0);
+          expect(snapshot.posts.total).toBe(0);
+          expect(snapshot.curation).toEqual({
+            curated: 0,
+            rejected: 0,
+            flagged: 0,
+            uncurated: 0
+          });
+          expect(snapshot.enrichments.stored).toEqual({
+            total: 0,
+            vision: 0,
+            sourceAttribution: 0,
+            grounding: 0
+          });
+          expect(snapshot.enrichments.runs).toEqual({
+            queued: 0,
+            running: 0,
+            complete: 0,
+            failed: 0,
+            needsReview: 0
+          });
+          expect(snapshot.lastSweep).toBeNull();
+          expect(snapshot._display).toContain("Last sweep: none recorded.");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("omits lastSweep when only unfinished or non-head runs exist", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
         await Effect.runPromise(
           Effect.gen(function* () {
             const sql = yield* SqlClient.SqlClient;
+            const now = Date.now();
 
             yield* sql`
               INSERT INTO experts (
@@ -559,9 +922,7 @@ describe("MCP get_pipeline_status", () => {
                 added_at,
                 last_synced_at
               ) VALUES
-                (${sampleDid}, ${"solar.bsky.social"}, ${"Solar"}, NULL, NULL, ${"energy"}, ${"manual"}, NULL, 0, 1, ${"energy-focused"}, ${now - 1000}, NULL),
-                (${`did:x:operator-1`}, ${"gridwatch"}, ${"Grid Watch"}, NULL, NULL, ${"energy"}, ${"twitter-import"}, NULL, 0, 1, ${"general-outlet"}, ${now - 900}, NULL),
-                (${`did:plc:independent-1`}, ${"indie.bsky.social"}, ${"Indie"}, NULL, NULL, ${"energy"}, ${"bluesky-import"}, NULL, 0, 1, ${"independent"}, ${now - 800}, NULL)
+                (${sampleDid}, ${"solar.bsky.social"}, ${"Solar"}, NULL, NULL, ${"energy"}, ${"manual"}, NULL, 0, 1, ${"energy-focused"}, ${now - 1000}, NULL)
             `;
 
             yield* sql`
@@ -577,72 +938,7 @@ describe("MCP get_pipeline_status", () => {
                 ingest_id,
                 embed_type
               ) VALUES
-                (${`at://${sampleDid}/app.bsky.feed.post/status-1`}, ${sampleDid}, ${"cid-status-1"}, ${"Bluesky active post"}, ${now - 700}, ${now - 700}, 0, ${"active"}, ${"ingest-status-1"}, NULL),
-                (${`x://tweet/status-2`}, ${`did:x:operator-1`}, ${"cid-status-2"}, ${"Twitter active post"}, ${now - 600}, ${now - 600}, 1, ${"active"}, ${"ingest-status-2"}, ${"link"}),
-                (${`at://did:plc:independent-1/app.bsky.feed.post/status-3`}, ${`did:plc:independent-1`}, ${"cid-status-3"}, ${"Inactive post"}, ${now - 500}, ${now - 500}, 0, ${"deleted"}, ${"ingest-status-3"}, NULL)
-            `;
-
-            yield* sql`
-              INSERT INTO post_curation
-                (post_uri, status, signal_score, predicates_applied, flagged_at, curated_at, curated_by, review_note)
-              VALUES
-                (${`at://${sampleDid}/app.bsky.feed.post/status-1`}, ${"curated"}, 91, ${JSON.stringify(["has-media"])}, ${now - 700}, ${now - 690}, ${"tester"}, NULL),
-                (${`x://tweet/status-2`}, ${"rejected"}, 55, ${JSON.stringify(["off-topic"])}, ${now - 600}, NULL, NULL, ${"off topic"}),
-                (${`at://did:plc:independent-1/app.bsky.feed.post/status-3`}, ${"flagged"}, 48, ${JSON.stringify(["manual-review"])}, ${now - 500}, NULL, NULL, NULL)
-            `;
-
-            yield* sql`
-              INSERT INTO post_payloads (
-                post_uri,
-                capture_stage,
-                embed_type,
-                embed_payload_json,
-                captured_at,
-                updated_at
-              ) VALUES
-                (${`at://${sampleDid}/app.bsky.feed.post/status-1`}, ${"picked"}, ${"img"}, ${JSON.stringify({ kind: "img", images: [] })}, ${now - 450}, ${now - 450}),
-                (${`x://tweet/status-2`}, ${"picked"}, ${"link"}, ${JSON.stringify({ kind: "link", uri: "https://example.com/twitter-link", title: "Grid Watch", description: null, thumb: null })}, ${now - 350}, ${now - 350}),
-                (${`at://did:plc:independent-1/app.bsky.feed.post/status-3`}, ${"picked"}, ${"img"}, ${JSON.stringify({ kind: "img", images: [] })}, ${now - 250}, ${now - 250})
-            `;
-
-            yield* sql`
-              INSERT INTO post_enrichments (
-                post_uri,
-                enrichment_type,
-                enrichment_payload_json,
-                updated_at,
-                enriched_at
-              ) VALUES
-                (${`at://${sampleDid}/app.bsky.feed.post/status-1`}, ${"vision"}, ${"{}"}, ${now - 400}, ${now - 400}),
-                (${`x://tweet/status-2`}, ${"source-attribution"}, ${"{}"}, ${now - 300}, ${now - 300})
-            `;
-
-            yield* sql`
-              INSERT INTO post_enrichment_runs (
-                id,
-                workflow_instance_id,
-                post_uri,
-                enrichment_type,
-                schema_version,
-                triggered_by,
-                requested_by,
-                status,
-                phase,
-                attempt_count,
-                model_lane,
-                prompt_version,
-                input_fingerprint,
-                started_at,
-                finished_at,
-                last_progress_at,
-                result_written_at,
-                error
-              ) VALUES
-                (${`run-queued-${now}`}, ${`wf-queued-${now}`}, ${`at://${sampleDid}/app.bsky.feed.post/status-1`}, ${"vision"}, ${"v2"}, ${"admin"}, ${"ops@test.com"}, ${"queued"}, ${"queued"}, 0, NULL, NULL, NULL, ${now - 250}, NULL, ${now - 250}, NULL, NULL),
-                (${`run-running-${now}`}, ${`wf-running-${now}`}, ${`x://tweet/status-2`}, ${"source-attribution"}, ${"v2"}, ${"admin"}, ${"ops@test.com"}, ${"running"}, ${"executing"}, 0, NULL, NULL, NULL, ${now - 240}, NULL, ${now - 200}, NULL, NULL),
-                (${`run-complete-${now}`}, ${`wf-complete-${now}`}, ${`at://did:plc:independent-1/app.bsky.feed.post/status-3`}, ${"vision"}, ${"v2"}, ${"admin"}, ${"ops@test.com"}, ${"complete"}, ${"complete"}, 1, NULL, NULL, NULL, ${now - 230}, ${now - 220}, ${now - 220}, ${now - 220}, NULL),
-                (${`run-failed-${now}`}, ${`wf-failed-${now}`}, ${`at://${sampleDid}/app.bsky.feed.post/status-1`}, ${"source-attribution"}, ${"v2"}, ${"admin"}, ${"ops@test.com"}, ${"failed"}, ${"failed"}, 1, NULL, NULL, NULL, ${now - 210}, ${now - 205}, ${now - 205}, NULL, NULL),
-                (${`run-review-${now}`}, ${`wf-review-${now}`}, ${`x://tweet/status-2`}, ${"vision"}, ${"v2"}, ${"admin"}, ${"ops@test.com"}, ${"needs-review"}, ${"needs-review"}, 1, NULL, NULL, NULL, ${now - 204}, ${now - 203}, ${now - 203}, NULL, NULL)
+                (${`at://${sampleDid}/app.bsky.feed.post/status-only`}, ${sampleDid}, ${"cid-status-only"}, ${"Active post"}, ${now - 900}, ${now - 900}, 0, ${"active"}, ${"ingest-status-only"}, NULL)
             `;
 
             yield* sql`
@@ -666,8 +962,8 @@ describe("MCP get_pipeline_status", () => {
                 posts_deleted,
                 error
               ) VALUES
-                (${`head-old-${now}`}, ${`head-old-${now}`}, ${"head-sweep"}, ${"admin"}, ${"ops@test.com"}, ${"complete"}, ${"complete"}, ${now - 2000}, ${now - 1900}, ${now - 1900}, 2, 2, 0, 10, 10, 4, 0, NULL),
-                (${`head-latest-${now}`}, ${`head-latest-${now}`}, ${"head-sweep"}, ${"admin"}, ${"ops@test.com"}, ${"failed"}, ${"failed"}, ${now - 1500}, ${now - 1400}, ${now - 1400}, 3, 2, 1, 12, 12, 5, 0, NULL)
+                (${`head-running-${now}`}, ${`head-running-${now}`}, ${"head-sweep"}, ${"admin"}, ${"ops@test.com"}, ${"running"}, ${"running"}, ${now - 500}, NULL, ${now - 400}, 1, 0, 0, 0, 0, 0, 0, NULL),
+                (${`backfill-complete-${now}`}, ${`backfill-complete-${now}`}, ${"expert-refresh"}, ${"admin"}, ${"ops@test.com"}, ${"complete"}, ${"complete"}, ${now - 700}, ${now - 600}, ${now - 600}, 1, 1, 0, 0, 0, 0, 0, NULL)
             `;
           }).pipe(Effect.provide(layer))
         );
@@ -675,73 +971,16 @@ describe("MCP get_pipeline_status", () => {
         const { client, close } = await createMcpClient(layer, opsReadIdentity);
 
         try {
-          const summaryResult = await client.callTool({
+          const result = await client.callTool({
             name: "get_pipeline_status",
-            arguments: {}
+            arguments: { detail: "full" }
           });
-          const summary = decodePipelineStatusResponse(summaryResult);
+          const snapshot = decodePipelineStatusResponse(result);
 
-          expect(summary.experts).toEqual({
-            total: 3,
-            bluesky: 2,
-            twitter: 1,
-            byTier: {
-              energyFocused: 1,
-              generalOutlet: 1,
-              independent: 1
-            }
-          });
-          expect(summary.posts).toEqual({
-            total: 2,
-            bluesky: 1,
-            twitter: 1
-          });
-          expect(summary.curation).toEqual({
-            curated: 1,
-            rejected: 1,
-            flagged: 1
-          });
-          expect(summary.enrichments.stored).toEqual({
-            total: 2,
-            vision: 1,
-            sourceAttribution: 1
-          });
-          expect(summary.enrichments.runs).toEqual({
-            queued: 1,
-            running: 1,
-            complete: 1,
-            failed: 1,
-            needsReview: 1
-          });
-          expect(summary.lastSweep).toEqual({
-            runId: `head-latest-${now}`,
-            completedAt: now - 1400,
-            postsStored: 5,
-            failures: 1,
-            status: "failed"
-          });
-          expect(summary._display).toContain("Experts: 3 total");
-          expect(summary._display).toContain(`Last sweep: head-latest-${now}`);
-
-          const fullResult = await client.callTool({
-            name: "get_pipeline_status",
-            arguments: {
-              detail: "full",
-              since: now - 1500
-            }
-          });
-          const full = decodePipelineStatusResponse(fullResult);
-          expect(full.lastSweep?.runId).toBe(`head-latest-${now}`);
-          expect(full._display).toContain("Status: failed");
-
-          const staleSweepResult = await client.callTool({
-            name: "get_pipeline_status",
-            arguments: {
-              since: now - 1000
-            }
-          });
-          const staleSweep = decodePipelineStatusResponse(staleSweepResult);
-          expect(staleSweep.lastSweep).toBeNull();
+          expect(snapshot.experts.total).toBe(1);
+          expect(snapshot.posts.total).toBe(1);
+          expect(snapshot.lastSweep).toBeNull();
+          expect(snapshot._display).toContain("Last sweep: none recorded.");
         } finally {
           await close();
         }

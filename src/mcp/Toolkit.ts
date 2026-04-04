@@ -358,7 +358,7 @@ export const ListEnrichmentIssuesTool = Tool.make("list_enrichment_issues", {
   .annotate(Tool.OpenWorld, false);
 
 export const GetPipelineStatusTool = Tool.make("get_pipeline_status", {
-  description: "Get an operator snapshot of the ingestion, curation, and enrichment pipeline. Returns aggregate counts for experts, active posts, curation status, enrichment storage, enrichment runs, and the latest finished head sweep.",
+  description: "Get an operator snapshot of the ingestion, curation, and enrichment pipeline. Returns aggregate counts for active experts, active posts, curation status, enrichment storage, enrichment runs, and the latest finished head sweep.",
   parameters: GetPipelineStatusMcpInput,
   success: PipelineStatusMcpOutput,
   failure: McpToolQueryError
@@ -433,7 +433,13 @@ export const SubmitEditorialPickTool = Tool.make("submit_editorial_pick", {
 // Capability-scoped toolkit variants
 // ---------------------------------------------------------------------------
 
-export const ReadOnlyMcpToolkit = Toolkit.make(
+type CapabilityToolkitOptions = {
+  readonly opsRead?: boolean;
+  readonly curationWrite?: boolean;
+  readonly editorialWrite?: boolean;
+};
+
+const ReadOnlyTools = [
   SearchPostsTool,
   GetRecentPostsTool,
   GetPostLinksTool,
@@ -449,157 +455,46 @@ export const ReadOnlyMcpToolkit = Toolkit.make(
   GetPostEnrichmentsTool,
   ListEnrichmentGapsTool,
   ListEnrichmentIssuesTool
-);
+ ] as const;
 
-export const OpsReadMcpToolkit = Toolkit.make(
-  SearchPostsTool,
-  GetRecentPostsTool,
-  GetPostLinksTool,
-  ListExpertsTool,
-  ListTopicsTool,
-  GetTopicTool,
-  ExpandTopicsTool,
-  ExplainPostTopicsTool,
-  ListEditorialPicksTool,
-  GetPostThreadTool,
-  GetThreadDocumentTool,
-  ListCurationCandidatesTool,
-  GetPostEnrichmentsTool,
-  ListEnrichmentGapsTool,
-  ListEnrichmentIssuesTool,
-  GetPipelineStatusTool
-);
-
-export const CurationWriteMcpToolkit = Toolkit.make(
-  SearchPostsTool,
-  GetRecentPostsTool,
-  GetPostLinksTool,
-  ListExpertsTool,
-  ListTopicsTool,
-  GetTopicTool,
-  ExpandTopicsTool,
-  ExplainPostTopicsTool,
-  ListEditorialPicksTool,
-  GetPostThreadTool,
-  GetThreadDocumentTool,
-  ListCurationCandidatesTool,
-  GetPostEnrichmentsTool,
-  ListEnrichmentGapsTool,
-  ListEnrichmentIssuesTool,
+const OpsReadTools = [GetPipelineStatusTool] as const;
+const CurationWriteTools = [
   CuratePostTool,
   BulkCurateTool,
   StartEnrichmentTool,
   BulkStartEnrichmentTool
-);
+] as const;
+const EditorialWriteTools = [SubmitEditorialPickTool] as const;
 
-export const OpsCurationWriteMcpToolkit = Toolkit.make(
-  SearchPostsTool,
-  GetRecentPostsTool,
-  GetPostLinksTool,
-  ListExpertsTool,
-  ListTopicsTool,
-  GetTopicTool,
-  ExpandTopicsTool,
-  ExplainPostTopicsTool,
-  ListEditorialPicksTool,
-  GetPostThreadTool,
-  GetThreadDocumentTool,
-  ListCurationCandidatesTool,
-  GetPostEnrichmentsTool,
-  ListEnrichmentGapsTool,
-  ListEnrichmentIssuesTool,
-  GetPipelineStatusTool,
-  CuratePostTool,
-  BulkCurateTool,
-  StartEnrichmentTool,
-  BulkStartEnrichmentTool
-);
+const makeCapabilityToolkit = (options: CapabilityToolkitOptions) =>
+  Toolkit.make(
+    ...ReadOnlyTools,
+    ...(options.opsRead ? OpsReadTools : ([] as const)),
+    ...(options.curationWrite ? CurationWriteTools : ([] as const)),
+    ...(options.editorialWrite ? EditorialWriteTools : ([] as const))
+  );
 
-export const EditorialWriteMcpToolkit = Toolkit.make(
-  SearchPostsTool,
-  GetRecentPostsTool,
-  GetPostLinksTool,
-  ListExpertsTool,
-  ListTopicsTool,
-  GetTopicTool,
-  ExpandTopicsTool,
-  ExplainPostTopicsTool,
-  ListEditorialPicksTool,
-  GetPostThreadTool,
-  GetThreadDocumentTool,
-  ListCurationCandidatesTool,
-  GetPostEnrichmentsTool,
-  ListEnrichmentGapsTool,
-  ListEnrichmentIssuesTool,
-  SubmitEditorialPickTool
-);
-
-export const OpsEditorialWriteMcpToolkit = Toolkit.make(
-  SearchPostsTool,
-  GetRecentPostsTool,
-  GetPostLinksTool,
-  ListExpertsTool,
-  ListTopicsTool,
-  GetTopicTool,
-  ExpandTopicsTool,
-  ExplainPostTopicsTool,
-  ListEditorialPicksTool,
-  GetPostThreadTool,
-  GetThreadDocumentTool,
-  ListCurationCandidatesTool,
-  GetPostEnrichmentsTool,
-  ListEnrichmentGapsTool,
-  ListEnrichmentIssuesTool,
-  GetPipelineStatusTool,
-  SubmitEditorialPickTool
-);
-
-export const WorkflowWriteMcpToolkit = Toolkit.make(
-  SearchPostsTool,
-  GetRecentPostsTool,
-  GetPostLinksTool,
-  ListExpertsTool,
-  ListTopicsTool,
-  GetTopicTool,
-  ExpandTopicsTool,
-  ExplainPostTopicsTool,
-  ListEditorialPicksTool,
-  GetPostThreadTool,
-  GetThreadDocumentTool,
-  ListCurationCandidatesTool,
-  GetPostEnrichmentsTool,
-  ListEnrichmentGapsTool,
-  ListEnrichmentIssuesTool,
-  CuratePostTool,
-  BulkCurateTool,
-  SubmitEditorialPickTool,
-  StartEnrichmentTool,
-  BulkStartEnrichmentTool
-);
-
-export const OpsWorkflowWriteMcpToolkit = Toolkit.make(
-  SearchPostsTool,
-  GetRecentPostsTool,
-  GetPostLinksTool,
-  ListExpertsTool,
-  ListTopicsTool,
-  GetTopicTool,
-  ExpandTopicsTool,
-  ExplainPostTopicsTool,
-  ListEditorialPicksTool,
-  GetPostThreadTool,
-  GetThreadDocumentTool,
-  ListCurationCandidatesTool,
-  GetPostEnrichmentsTool,
-  ListEnrichmentGapsTool,
-  ListEnrichmentIssuesTool,
-  GetPipelineStatusTool,
-  CuratePostTool,
-  BulkCurateTool,
-  SubmitEditorialPickTool,
-  StartEnrichmentTool,
-  BulkStartEnrichmentTool
-);
+export const ReadOnlyMcpToolkit = makeCapabilityToolkit({});
+export const OpsReadMcpToolkit = makeCapabilityToolkit({ opsRead: true });
+export const CurationWriteMcpToolkit = makeCapabilityToolkit({ curationWrite: true });
+export const OpsCurationWriteMcpToolkit = makeCapabilityToolkit({
+  opsRead: true,
+  curationWrite: true
+});
+export const EditorialWriteMcpToolkit = makeCapabilityToolkit({ editorialWrite: true });
+export const OpsEditorialWriteMcpToolkit = makeCapabilityToolkit({
+  opsRead: true,
+  editorialWrite: true
+});
+export const WorkflowWriteMcpToolkit = makeCapabilityToolkit({
+  curationWrite: true,
+  editorialWrite: true
+});
+export const OpsWorkflowWriteMcpToolkit = makeCapabilityToolkit({
+  opsRead: true,
+  curationWrite: true,
+  editorialWrite: true
+});
 
 // Keep legacy export for backward compatibility in tests
 export const KnowledgeMcpToolkit = ReadOnlyMcpToolkit;
@@ -1294,145 +1189,72 @@ const makeBulkStartEnrichmentHandler = () => ({
 // Handler layers — one per toolkit variant
 // ---------------------------------------------------------------------------
 
-export const ReadOnlyMcpHandlers = ReadOnlyMcpToolkit.toLayer(
-  Effect.gen(function* () {
-    const queryService = yield* KnowledgeQueryService;
-    const editorialService = yield* EditorialService;
-    const curationService = yield* CurationService;
-    const bskyClient = yield* BlueskyClient;
-    const enrichmentReadService = yield* PostEnrichmentReadService;
+const makeWriteHandlers = (
+  curationService: CurationServiceI,
+  editorialService: EditorialServiceI,
+  options: CapabilityToolkitOptions
+) => ({
+  ...(options.curationWrite
+    ? {
+        ...makeCuratePostHandler(curationService),
+        ...makeBulkCurateHandler(curationService),
+        ...makeStartEnrichmentHandler(),
+        ...makeBulkStartEnrichmentHandler()
+      }
+    : {}),
+  ...(options.editorialWrite ? makeSubmitPickHandler(editorialService) : {})
+});
 
-    return ReadOnlyMcpToolkit.of(
-      makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService)
-    );
-  })
-);
+const makeCapabilityHandlers = <
+  TToolkit extends ReturnType<typeof makeCapabilityToolkit>
+>(
+  toolkit: TToolkit,
+  options: CapabilityToolkitOptions
+) =>
+  toolkit.toLayer(
+    Effect.gen(function* () {
+      const queryService = yield* KnowledgeQueryService;
+      const editorialService = yield* EditorialService;
+      const curationService = yield* CurationService;
+      const bskyClient = yield* BlueskyClient;
+      const enrichmentReadService = yield* PostEnrichmentReadService;
+      const pipelineStatusService = yield* PipelineStatusService;
 
-export const OpsReadMcpHandlers = OpsReadMcpToolkit.toLayer(
-  Effect.gen(function* () {
-    const queryService = yield* KnowledgeQueryService;
-    const editorialService = yield* EditorialService;
-    const curationService = yield* CurationService;
-    const bskyClient = yield* BlueskyClient;
-    const enrichmentReadService = yield* PostEnrichmentReadService;
-    const pipelineStatusService = yield* PipelineStatusService;
+      return toolkit.of({
+        ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
+        ...(options.opsRead ? makeGetPipelineStatusHandler(pipelineStatusService) : {}),
+        ...makeWriteHandlers(curationService, editorialService, options)
+      });
+    })
+  );
 
-    return OpsReadMcpToolkit.of({
-      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
-      ...makeGetPipelineStatusHandler(pipelineStatusService)
-    });
-  })
-);
-
-export const CurationWriteMcpHandlers = CurationWriteMcpToolkit.toLayer(
-  Effect.gen(function* () {
-    const queryService = yield* KnowledgeQueryService;
-    const editorialService = yield* EditorialService;
-    const curationService = yield* CurationService;
-    const bskyClient = yield* BlueskyClient;
-    const enrichmentReadService = yield* PostEnrichmentReadService;
-
-    return CurationWriteMcpToolkit.of({
-      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
-      ...makeCuratePostHandler(curationService),
-      ...makeBulkCurateHandler(curationService),
-      ...makeStartEnrichmentHandler(),
-      ...makeBulkStartEnrichmentHandler()
-    });
-  })
-);
-
-export const OpsCurationWriteMcpHandlers = OpsCurationWriteMcpToolkit.toLayer(
-  Effect.gen(function* () {
-    const queryService = yield* KnowledgeQueryService;
-    const editorialService = yield* EditorialService;
-    const curationService = yield* CurationService;
-    const bskyClient = yield* BlueskyClient;
-    const enrichmentReadService = yield* PostEnrichmentReadService;
-    const pipelineStatusService = yield* PipelineStatusService;
-
-    return OpsCurationWriteMcpToolkit.of({
-      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
-      ...makeGetPipelineStatusHandler(pipelineStatusService),
-      ...makeCuratePostHandler(curationService),
-      ...makeBulkCurateHandler(curationService),
-      ...makeStartEnrichmentHandler(),
-      ...makeBulkStartEnrichmentHandler()
-    });
-  })
-);
-
-export const EditorialWriteMcpHandlers = EditorialWriteMcpToolkit.toLayer(
-  Effect.gen(function* () {
-    const queryService = yield* KnowledgeQueryService;
-    const editorialService = yield* EditorialService;
-    const curationService = yield* CurationService;
-    const bskyClient = yield* BlueskyClient;
-    const enrichmentReadService = yield* PostEnrichmentReadService;
-
-    return EditorialWriteMcpToolkit.of({
-      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
-      ...makeSubmitPickHandler(editorialService)
-    });
-  })
-);
-
-export const OpsEditorialWriteMcpHandlers = OpsEditorialWriteMcpToolkit.toLayer(
-  Effect.gen(function* () {
-    const queryService = yield* KnowledgeQueryService;
-    const editorialService = yield* EditorialService;
-    const curationService = yield* CurationService;
-    const bskyClient = yield* BlueskyClient;
-    const enrichmentReadService = yield* PostEnrichmentReadService;
-    const pipelineStatusService = yield* PipelineStatusService;
-
-    return OpsEditorialWriteMcpToolkit.of({
-      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
-      ...makeGetPipelineStatusHandler(pipelineStatusService),
-      ...makeSubmitPickHandler(editorialService)
-    });
-  })
-);
-
-export const WorkflowWriteMcpHandlers = WorkflowWriteMcpToolkit.toLayer(
-  Effect.gen(function* () {
-    const queryService = yield* KnowledgeQueryService;
-    const editorialService = yield* EditorialService;
-    const curationService = yield* CurationService;
-    const bskyClient = yield* BlueskyClient;
-    const enrichmentReadService = yield* PostEnrichmentReadService;
-
-    return WorkflowWriteMcpToolkit.of({
-      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
-      ...makeCuratePostHandler(curationService),
-      ...makeBulkCurateHandler(curationService),
-      ...makeSubmitPickHandler(editorialService),
-      ...makeStartEnrichmentHandler(),
-      ...makeBulkStartEnrichmentHandler()
-    });
-  })
-);
-
-export const OpsWorkflowWriteMcpHandlers = OpsWorkflowWriteMcpToolkit.toLayer(
-  Effect.gen(function* () {
-    const queryService = yield* KnowledgeQueryService;
-    const editorialService = yield* EditorialService;
-    const curationService = yield* CurationService;
-    const bskyClient = yield* BlueskyClient;
-    const enrichmentReadService = yield* PostEnrichmentReadService;
-    const pipelineStatusService = yield* PipelineStatusService;
-
-    return OpsWorkflowWriteMcpToolkit.of({
-      ...makeReadOnlyHandlers(queryService, editorialService, curationService, bskyClient, enrichmentReadService),
-      ...makeGetPipelineStatusHandler(pipelineStatusService),
-      ...makeCuratePostHandler(curationService),
-      ...makeBulkCurateHandler(curationService),
-      ...makeSubmitPickHandler(editorialService),
-      ...makeStartEnrichmentHandler(),
-      ...makeBulkStartEnrichmentHandler()
-    });
-  })
-);
+export const ReadOnlyMcpHandlers = makeCapabilityHandlers(ReadOnlyMcpToolkit, {});
+export const OpsReadMcpHandlers = makeCapabilityHandlers(OpsReadMcpToolkit, {
+  opsRead: true
+});
+export const CurationWriteMcpHandlers = makeCapabilityHandlers(CurationWriteMcpToolkit, {
+  curationWrite: true
+});
+export const OpsCurationWriteMcpHandlers = makeCapabilityHandlers(OpsCurationWriteMcpToolkit, {
+  opsRead: true,
+  curationWrite: true
+});
+export const EditorialWriteMcpHandlers = makeCapabilityHandlers(EditorialWriteMcpToolkit, {
+  editorialWrite: true
+});
+export const OpsEditorialWriteMcpHandlers = makeCapabilityHandlers(OpsEditorialWriteMcpToolkit, {
+  opsRead: true,
+  editorialWrite: true
+});
+export const WorkflowWriteMcpHandlers = makeCapabilityHandlers(WorkflowWriteMcpToolkit, {
+  curationWrite: true,
+  editorialWrite: true
+});
+export const OpsWorkflowWriteMcpHandlers = makeCapabilityHandlers(OpsWorkflowWriteMcpToolkit, {
+  opsRead: true,
+  curationWrite: true,
+  editorialWrite: true
+});
 
 // Keep legacy export for backward compatibility
 export const KnowledgeMcpHandlers = ReadOnlyMcpHandlers;
@@ -1441,23 +1263,30 @@ export const KnowledgeMcpHandlers = ReadOnlyMcpHandlers;
 // Toolkit selection by profile
 // ---------------------------------------------------------------------------
 
-export const toolkitForProfile = (profile: McpCapabilityProfile) => {
-  switch (profile) {
-    case "read-only":
-      return { toolkit: ReadOnlyMcpToolkit, handlers: ReadOnlyMcpHandlers };
-    case "ops-read":
-      return { toolkit: OpsReadMcpToolkit, handlers: OpsReadMcpHandlers };
-    case "curation-write":
-      return { toolkit: CurationWriteMcpToolkit, handlers: CurationWriteMcpHandlers };
-    case "ops-curation-write":
-      return { toolkit: OpsCurationWriteMcpToolkit, handlers: OpsCurationWriteMcpHandlers };
-    case "editorial-write":
-      return { toolkit: EditorialWriteMcpToolkit, handlers: EditorialWriteMcpHandlers };
-    case "ops-editorial-write":
-      return { toolkit: OpsEditorialWriteMcpToolkit, handlers: OpsEditorialWriteMcpHandlers };
-    case "workflow-write":
-      return { toolkit: WorkflowWriteMcpToolkit, handlers: WorkflowWriteMcpHandlers };
-    case "ops-workflow-write":
-      return { toolkit: OpsWorkflowWriteMcpToolkit, handlers: OpsWorkflowWriteMcpHandlers };
+const ToolkitByProfile = {
+  "read-only": { toolkit: ReadOnlyMcpToolkit, handlers: ReadOnlyMcpHandlers },
+  "ops-read": { toolkit: OpsReadMcpToolkit, handlers: OpsReadMcpHandlers },
+  "curation-write": { toolkit: CurationWriteMcpToolkit, handlers: CurationWriteMcpHandlers },
+  "ops-curation-write": {
+    toolkit: OpsCurationWriteMcpToolkit,
+    handlers: OpsCurationWriteMcpHandlers
+  },
+  "editorial-write": {
+    toolkit: EditorialWriteMcpToolkit,
+    handlers: EditorialWriteMcpHandlers
+  },
+  "ops-editorial-write": {
+    toolkit: OpsEditorialWriteMcpToolkit,
+    handlers: OpsEditorialWriteMcpHandlers
+  },
+  "workflow-write": { toolkit: WorkflowWriteMcpToolkit, handlers: WorkflowWriteMcpHandlers },
+  "ops-workflow-write": {
+    toolkit: OpsWorkflowWriteMcpToolkit,
+    handlers: OpsWorkflowWriteMcpHandlers
   }
-};
+} satisfies Record<McpCapabilityProfile, {
+  readonly toolkit: ReturnType<typeof makeCapabilityToolkit>;
+  readonly handlers: ReturnType<typeof makeCapabilityHandlers>;
+}>;
+
+export const toolkitForProfile = (profile: McpCapabilityProfile) => ToolkitByProfile[profile];
