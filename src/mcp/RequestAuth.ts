@@ -8,9 +8,13 @@
  */
 export type McpCapabilityProfile =
   | "read-only"
+  | "ops-read"
   | "curation-write"
+  | "ops-curation-write"
   | "editorial-write"
-  | "workflow-write";
+  | "ops-editorial-write"
+  | "workflow-write"
+  | "ops-workflow-write";
 
 /**
  * Classification of an incoming MCP JSON-RPC request.
@@ -27,6 +31,7 @@ export type McpRequestClassification = {
 // ---------------------------------------------------------------------------
 
 const TOOL_SCOPES: Record<string, ReadonlyArray<string>> = {
+  get_pipeline_status: ["ops:read"],
   curate_post: ["curation:write"],
   bulk_curate: ["curation:write"],
   submit_editorial_pick: ["editorial:write"],
@@ -108,9 +113,11 @@ export const classifyMcpRequest = async (
  * Determine which capability profile an identity qualifies for based on
  * its scopes.
  *
+ * - `ops:read` extends the matching profile with the pipeline-status tool
  * - Both `curation:write` AND `editorial:write` -> `"workflow-write"`
  * - Only `curation:write`                       -> `"curation-write"`
  * - Only `editorial:write`                      -> `"editorial-write"`
+ * - Only `ops:read`                             -> `"ops-read"`
  * - Neither                                     -> `"read-only"`
  */
 export const profileForIdentity = (
@@ -118,9 +125,17 @@ export const profileForIdentity = (
 ): McpCapabilityProfile => {
   const hasCuration = identity.scopes.includes("curation:write");
   const hasEditorial = identity.scopes.includes("editorial:write");
+  const hasOpsRead = identity.scopes.includes("ops:read");
 
-  if (hasCuration && hasEditorial) return "workflow-write";
-  if (hasCuration) return "curation-write";
-  if (hasEditorial) return "editorial-write";
+  if (hasCuration && hasEditorial) {
+    return hasOpsRead ? "ops-workflow-write" : "workflow-write";
+  }
+  if (hasCuration) {
+    return hasOpsRead ? "ops-curation-write" : "curation-write";
+  }
+  if (hasEditorial) {
+    return hasOpsRead ? "ops-editorial-write" : "editorial-write";
+  }
+  if (hasOpsRead) return "ops-read";
   return "read-only";
 };

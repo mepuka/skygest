@@ -34,6 +34,10 @@ import type {
   ListEnrichmentGapsOutput,
   ListEnrichmentIssuesOutput
 } from "../domain/enrichment.ts";
+import type {
+  PipelineStatusDetail,
+  PipelineStatusOutput
+} from "../domain/pipeline.ts";
 
 // ---------------------------------------------------------------------------
 // Internal helpers (not exported)
@@ -65,6 +69,16 @@ const formatTimestamp = (epochMs: number): string => {
   return `${y}-${m}-${day}`;
 };
 
+const formatTimestampWithTime = (epochMs: number): string => {
+  const d = new Date(epochMs);
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const hours = String(d.getUTCHours()).padStart(2, "0");
+  const minutes = String(d.getUTCMinutes()).padStart(2, "0");
+  return `${y}-${m}-${day} ${hours}:${minutes} UTC`;
+};
+
 /**
  * Format a relative time string like "3h ago", "2d ago", "5mo ago".
  * Uses the provided `now` to keep output deterministic in tests.
@@ -85,6 +99,9 @@ const relativeTime = (isoDate: string, now: Date): string => {
   const years = Math.floor(months / 12);
   return `${years}y ago`;
 };
+
+const relativeTimeFromEpoch = (epochMs: number, now: Date): string =>
+  relativeTime(new Date(epochMs).toISOString(), now);
 
 /**
  * Build a human label for an expert / person.
@@ -735,6 +752,45 @@ export const formatEnrichmentIssues = (
       .filter((line): line is string => line !== null)
       .join("\n");
   }).join("\n");
+};
+
+export const formatPipelineStatus = (
+  output: PipelineStatusOutput,
+  detail: PipelineStatusDetail = "summary"
+): string => {
+  const snapshotTime = new Date(output.asOf);
+  const lines = [
+    `As of: ${formatTimestampWithTime(output.asOf)}`,
+    `Experts: ${output.experts.total} active | bluesky ${output.experts.bluesky} | twitter ${output.experts.twitter}`,
+    `Expert tiers: energy-focused ${output.experts.byTier.energyFocused} | general-outlet ${output.experts.byTier.generalOutlet} | independent ${output.experts.byTier.independent}`,
+    `Posts: ${output.posts.total} active | bluesky ${output.posts.bluesky} | twitter ${output.posts.twitter}`,
+    `Curation: curated ${output.curation.curated} | rejected ${output.curation.rejected} | flagged ${output.curation.flagged} | uncurated ${output.curation.uncurated}`,
+    "",
+    `Stored enrichments: ${output.enrichments.stored.total} total | vision ${output.enrichments.stored.vision} | source-attribution ${output.enrichments.stored.sourceAttribution} | grounding ${output.enrichments.stored.grounding}`,
+    `Enrichment runs: queued ${output.enrichments.runs.queued} | running ${output.enrichments.runs.running} | complete ${output.enrichments.runs.complete} | failed ${output.enrichments.runs.failed} | needs-review ${output.enrichments.runs.needsReview}`
+  ];
+
+  if (output.lastSweep === null) {
+    return [...lines, "", "Last sweep: none recorded."].join("\n");
+  }
+
+  if (detail === "summary") {
+    return [
+      ...lines,
+      "",
+      `Last sweep: ${output.lastSweep.runId} at ${formatTimestampWithTime(output.lastSweep.completedAt)} (${relativeTimeFromEpoch(output.lastSweep.completedAt, snapshotTime)}) | posts stored ${output.lastSweep.postsStored} | experts failed ${output.lastSweep.expertsFailed} | status ${output.lastSweep.status}`
+    ].join("\n");
+  }
+
+  return [
+    ...lines,
+    "",
+    `Last sweep: ${output.lastSweep.runId}`,
+    `  Completed: ${formatTimestampWithTime(output.lastSweep.completedAt)} (${relativeTimeFromEpoch(output.lastSweep.completedAt, snapshotTime)})`,
+    `  Status: ${output.lastSweep.status}`,
+    `  Posts stored: ${output.lastSweep.postsStored}`,
+    `  Experts failed: ${output.lastSweep.expertsFailed}`
+  ].join("\n");
 };
 
 export const formatBulkStartEnrichmentResult = (

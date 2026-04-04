@@ -76,7 +76,8 @@ describe("phase-one migrations", () => {
         { id: 15, name: "post_enrichment_runs" },
         { id: 16, name: "posts_embed_type" },
         { id: 17, name: "fts_search_metadata" },
-        { id: 18, name: "mcp_sessions" }
+        { id: 18, name: "mcp_sessions" },
+        { id: 19, name: "pipeline_status_indexes" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );
@@ -105,6 +106,12 @@ describe("phase-one migrations", () => {
       const ingestRunsIndexes = yield* sql<{ name: string; isUnique: number }>`
         SELECT name as name, "unique" as isUnique
         FROM pragma_index_list('ingest_runs')
+        WHERE origin = 'c'
+        ORDER BY name ASC
+      `;
+      const postsIndexes = yield* sql<{ name: string; isUnique: number }>`
+        SELECT name as name, "unique" as isUnique
+        FROM pragma_index_list('posts')
         WHERE origin = 'c'
         ORDER BY name ASC
       `;
@@ -153,10 +160,17 @@ describe("phase-one migrations", () => {
       ]);
       expect(ingestLeasesTables).toEqual([]);
       expect(ingestRunsIndexes).toEqual([
+        { name: "idx_ingest_runs_head_sweep_finished_at", isUnique: 0 },
         { name: "idx_ingest_runs_kind_started_at", isUnique: 0 },
         { name: "idx_ingest_runs_phase_last_progress_at", isUnique: 0 },
         { name: "idx_ingest_runs_status_started_at", isUnique: 0 },
         { name: "idx_ingest_runs_workflow_instance_id", isUnique: 1 }
+      ]);
+      expect(postsIndexes).toEqual([
+        { name: "idx_posts_created_at", isUnique: 0 },
+        { name: "idx_posts_did_created_at", isUnique: 0 },
+        { name: "idx_posts_has_links_created_at", isUnique: 0 },
+        { name: "idx_posts_status", isUnique: 0 }
       ]);
       expect(ingestRunItemsIndexes).toEqual([
         { name: "idx_ingest_run_items_did_status_finished_at", isUnique: 0 },
