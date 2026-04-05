@@ -409,6 +409,173 @@ describe("phase-one migrations", () => {
     }).pipe(Effect.provide(makeSqliteLayer()))
   );
 
+  it.effect("targets podcast foreign keys at publication ids and keeps only the useful topic index", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      const sql = yield* SqlClient.SqlClient;
+
+      const episodeForeignKeys = yield* sql<{
+        tableName: string;
+        fromColumn: string;
+        toColumn: string;
+      }>`
+        ${sql.unsafe(
+          "SELECT \"table\" as tableName, \"from\" as fromColumn, \"to\" as toColumn FROM pragma_foreign_key_list('podcast_episodes')"
+        )}
+      `;
+      const topicIndexes = yield* sql<{ name: string; isUnique: number }>`
+        SELECT name as name, "unique" as isUnique
+        FROM pragma_index_list('podcast_segment_topics')
+        WHERE origin = 'c'
+        ORDER BY name ASC
+      `;
+
+      expect(episodeForeignKeys).toEqual([
+        {
+          tableName: "publications",
+          fromColumn: "show_slug",
+          toColumn: "publication_id"
+        }
+      ]);
+      expect(topicIndexes).toEqual([
+        {
+          name: "idx_podcast_segment_topics_topic_slug_segment_id",
+          isUnique: 0
+        }
+      ]);
+    }).pipe(Effect.provide(makeSqliteLayer()))
+  );
+
+  it.effect("cascades podcast segment rows when an episode is deleted with foreign keys enabled", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      const sql = yield* SqlClient.SqlClient;
+
+      yield* sql`${sql.unsafe("PRAGMA foreign_keys = ON")}`.pipe(Effect.asVoid);
+      yield* sql`
+        INSERT INTO publications (
+          publication_id,
+          medium,
+          hostname,
+          show_slug,
+          feed_url,
+          apple_id,
+          spotify_id,
+          tier,
+          source,
+          first_seen_at,
+          last_seen_at
+        )
+        VALUES (
+          'catalyst-with-shayle-kann',
+          'podcast',
+          NULL,
+          'catalyst-with-shayle-kann',
+          'https://example.com/catalyst.rss',
+          NULL,
+          NULL,
+          'energy-focused',
+          'seed',
+          100,
+          100
+        )
+      `.pipe(Effect.asVoid);
+      yield* sql`
+        INSERT INTO podcast_episodes (
+          episode_id,
+          show_slug,
+          title,
+          published_at,
+          audio_url,
+          duration_seconds,
+          speaker_dids,
+          chapter_markers,
+          transcript_r2_key,
+          lifecycle_state,
+          created_at,
+          updated_at
+        )
+        VALUES (
+          'catalyst-2026-04-04',
+          'catalyst-with-shayle-kann',
+          'Catalyst',
+          100,
+          'https://example.com/catalyst.mp3',
+          1800,
+          '[]',
+          NULL,
+          'transcripts/catalyst-with-shayle-kann/catalyst-2026-04-04.json',
+          'segmented',
+          100,
+          100
+        )
+      `.pipe(Effect.asVoid);
+      yield* sql`
+        INSERT INTO podcast_segments (
+          segment_id,
+          episode_id,
+          segment_index,
+          primary_speaker_did,
+          speaker_dids,
+          start_timestamp_ms,
+          end_timestamp_ms,
+          text,
+          created_at
+        )
+        VALUES (
+          'segment-0',
+          'catalyst-2026-04-04',
+          0,
+          'did:plc:test-host',
+          '["did:plc:test-host"]',
+          0,
+          1000,
+          'hello world',
+          100
+        )
+      `.pipe(Effect.asVoid);
+      yield* sql`
+        INSERT INTO podcast_segment_topics (
+          segment_id,
+          topic_slug,
+          matched_term,
+          match_signal,
+          match_value,
+          match_score,
+          ontology_version,
+          matcher_version
+        )
+        VALUES (
+          'segment-0',
+          'storage',
+          'storage',
+          'term',
+          'storage',
+          0.9,
+          'test',
+          'test'
+        )
+      `.pipe(Effect.asVoid);
+
+      yield* sql`
+        DELETE FROM podcast_episodes
+        WHERE episode_id = 'catalyst-2026-04-04'
+      `.pipe(Effect.asVoid);
+
+      const [segmentCount] = yield* sql<{ count: number }>`
+        SELECT COUNT(*) as count
+        FROM podcast_segments
+      `;
+      const [topicCount] = yield* sql<{ count: number }>`
+        SELECT COUNT(*) as count
+        FROM podcast_segment_topics
+      `;
+
+      expect(segmentCount?.count).toBe(0);
+      expect(topicCount?.count).toBe(0);
+    }).pipe(Effect.provide(makeSqliteLayer()))
+  );
+
   it.effect("enforces the publication identity check constraints", () =>
     Effect.gen(function* () {
       yield* runMigrations;

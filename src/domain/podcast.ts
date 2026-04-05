@@ -76,7 +76,7 @@ export const PodcastEpisodeRecord = Schema.Struct({
   durationSeconds: Schema.NullOr(NonNegativeInt),
   speakerDids: Schema.Array(Did),
   chapterMarkers: Schema.NullOr(Schema.Array(PodcastChapterMarker)),
-  transcriptR2Key: Schema.NullOr(Schema.String),
+  transcriptR2Key: Schema.NullOr(TranscriptR2Key),
   lifecycleState: PodcastEpisodeLifecycleState,
   createdAt: NonNegativeInt,
   updatedAt: NonNegativeInt

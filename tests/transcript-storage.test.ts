@@ -3,90 +3,16 @@ import { Effect, Layer, Schema } from "effect";
 import { PodcastTranscript as PodcastTranscriptSchema } from "../src/domain/podcast";
 import { TranscriptR2Key } from "../src/domain/types";
 import { CloudflareEnv, type EnvBindings } from "../src/platform/Env";
-import { TranscriptStorageService } from "../src/services/TranscriptStorageService";
+import {
+  buildTranscriptR2Key,
+  TranscriptStorageService
+} from "../src/services/TranscriptStorageService";
+import { createFakeR2Bucket, makeStoredObject } from "./support/fakeR2";
 
-type StoredObject = {
-  readonly body: string;
-  readonly httpMetadata: R2HTTPMetadata;
-  readonly customMetadata: Record<string, string>;
-  readonly uploaded: Date;
-};
-
-const makeStoredObject = (
-  body: string,
-  metadata?: Partial<Pick<StoredObject, "httpMetadata" | "customMetadata" | "uploaded">>
-): StoredObject => ({
-  body,
-  httpMetadata: metadata?.httpMetadata ?? {},
-  customMetadata: metadata?.customMetadata ?? {},
-  uploaded: metadata?.uploaded ?? new Date()
-});
-
-const createFakeR2Bucket = () => {
-  const objects = new Map<string, StoredObject>();
-
-  const normalizeHttpMetadata = (
-    value: Headers | R2HTTPMetadata | undefined
-  ): R2HTTPMetadata =>
-    value == null || value instanceof Headers ? {} : value;
-
-  const toMetadataObject = (key: string, object: StoredObject) =>
-    ({
-      key,
-      version: "v1",
-      size: object.body.length,
-      etag: "etag",
-      httpEtag: '"etag"',
-      uploaded: object.uploaded,
-      httpMetadata: object.httpMetadata,
-      customMetadata: object.customMetadata,
-      storageClass: "Standard",
-      checksums: {}
-    }) as R2Object;
-
-  const bucket = {
-    put: async (
-      key: string,
-      value: string,
-      options?: R2PutOptions
-    ) => {
-      const object = makeStoredObject(value, {
-        httpMetadata: normalizeHttpMetadata(options?.httpMetadata),
-        ...(options?.customMetadata === undefined
-          ? {}
-          : { customMetadata: options.customMetadata })
-      });
-      objects.set(key, object);
-      return toMetadataObject(key, object);
-    },
-    get: async (key: string) => {
-      const object = objects.get(key);
-      if (object === undefined) {
-        return null;
-      }
-
-      return {
-        ...toMetadataObject(key, object),
-        body: new Response(object.body).body,
-        text: async () => object.body,
-        json: async () => JSON.parse(object.body),
-        arrayBuffer: async () => new TextEncoder().encode(object.body).buffer
-      } as R2ObjectBody;
-    },
-    head: async (key: string) => {
-      const object = objects.get(key);
-      return object === undefined ? null : toMetadataObject(key, object);
-    }
-  } as R2Bucket;
-
-  return {
-    bucket,
-    objects
-  };
-};
-
-const makeTranscriptLayer = () => {
-  const fakeBucket = createFakeR2Bucket();
+const makeTranscriptLayer = (
+  bucketOptions?: Parameters<typeof createFakeR2Bucket>[0]
+) => {
+  const fakeBucket = createFakeR2Bucket(bucketOptions);
   const env = {
     DB: {} as D1Database,
     TRANSCRIPTS_BUCKET: fakeBucket.bucket
@@ -225,10 +151,13 @@ describe("TranscriptStorageService", () => {
     return Effect.gen(function* () {
       const storage = yield* TranscriptStorageService;
       const exists = yield* storage.exists(key);
-      const stored = yield* storage.get(key);
+      const stored = yield* storage.getOptional(key);
+      const missing = yield* storage.get(key).pipe(Effect.flip);
 
       expect(exists).toBe(false);
       expect(stored).toBeNull();
+      expect(missing._tag).toBe("TranscriptNotFoundError");
+      expect(missing.key).toBe(key);
     }).pipe(Effect.provide(layer));
   });
 
@@ -263,6 +192,21 @@ describe("TranscriptStorageService", () => {
       expect(error.message).toContain("invalid transcript showSlug");
     }).pipe(Effect.provide(layer));
   });
+
+  it.effect("exports a reusable transcript key builder", () =>
+    Effect.gen(function* () {
+      const key = yield* buildTranscriptR2Key(
+        "catalyst-with-shayle-kann" as any,
+        "catalyst-2026-04-04" as any
+      );
+      const failure = yield* buildTranscriptR2Key(
+        "catalyst-with-shayle-kann" as any,
+        "../bad-episode" as any
+      ).pipe(Effect.flip);
+
+      expect(key).toBe("transcripts/catalyst-with-shayle-kann/catalyst-2026-04-04.json");
+      expect(failure.operation).toBe("buildKey");
+    }));
 
   it.effect("fails get when the stored transcript payload does not match the schema", () => {
     const { layer, objects } = makeTranscriptLayer();
@@ -302,9 +246,51 @@ describe("TranscriptStorageService", () => {
       const storage = yield* TranscriptStorageService;
       const error = yield* storage.get(key).pipe(Effect.flip);
 
+      expect(error._tag).toBe("TranscriptStorageError");
+      if (error._tag !== "TranscriptStorageError") {
+        throw new Error("expected TranscriptStorageError");
+      }
       expect(error.operation).toBe("decode");
       expect(error.key).toBe(key);
       expect(error.message).toContain("speaker");
+    }).pipe(Effect.provide(layer));
+  });
+
+  it.effect("fails when the R2 bucket throws during read", () => {
+    const { layer, objects } = makeTranscriptLayer({ failGet: true });
+    const key = Schema.decodeUnknownSync(TranscriptR2Key)(
+      "transcripts/catalyst-with-shayle-kann/catalyst-2026-04-04.json"
+    );
+
+    objects.set(
+      key,
+      makeStoredObject(
+        JSON.stringify({
+          format: "skygest-transcript-v1",
+          showSlug: "catalyst-with-shayle-kann",
+          episodeId: "catalyst-2026-04-04",
+          transcriptR2Key: key,
+          durationMs: 1_000,
+          speakers: [{ id: "S0", resolvedDid: null, name: "Host" }],
+          segments: [
+            {
+              startMs: 0,
+              endMs: 1_000,
+              speakerId: "S0",
+              text: "Stored transcript."
+            }
+          ]
+        })
+      )
+    );
+
+    return Effect.gen(function* () {
+      const storage = yield* TranscriptStorageService;
+      const error = yield* storage.getOptional(key).pipe(Effect.flip);
+
+      expect(error.operation).toBe("get");
+      expect(error.key).toBe(key);
+      expect(error.message).toContain("forced get failure");
     }).pipe(Effect.provide(layer));
   });
 });

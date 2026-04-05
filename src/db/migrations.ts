@@ -643,7 +643,7 @@ const migration21: D1Migration = {
       updated_at INTEGER NOT NULL,
       CHECK (duration_seconds IS NULL OR duration_seconds >= 0),
       CHECK (updated_at >= created_at),
-      FOREIGN KEY (show_slug) REFERENCES publications(show_slug)
+      FOREIGN KEY (show_slug) REFERENCES publications(publication_id)
     )`,
     `CREATE INDEX IF NOT EXISTS idx_podcast_episodes_show_slug_published_at
       ON podcast_episodes(show_slug, published_at DESC)`,
@@ -682,9 +682,7 @@ const migration21: D1Migration = {
       FOREIGN KEY (segment_id) REFERENCES podcast_segments(segment_id) ON DELETE CASCADE
     )`,
     `CREATE INDEX IF NOT EXISTS idx_podcast_segment_topics_topic_slug_segment_id
-      ON podcast_segment_topics(topic_slug, segment_id)`,
-    `CREATE INDEX IF NOT EXISTS idx_podcast_segment_topics_segment_id_topic_slug
-      ON podcast_segment_topics(segment_id, topic_slug)`
+      ON podcast_segment_topics(topic_slug, segment_id)`
   ]
 };
 

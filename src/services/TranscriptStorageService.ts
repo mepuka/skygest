@@ -3,7 +3,10 @@ import {
   type PodcastTranscript,
   PodcastTranscript as PodcastTranscriptSchema
 } from "../domain/podcast";
-import { TranscriptStorageError } from "../domain/errors";
+import {
+  TranscriptNotFoundError,
+  TranscriptStorageError
+} from "../domain/errors";
 import {
   type PodcastEpisodeId as PodcastEpisodeIdType,
   type PublicationId as PublicationIdType,
@@ -55,7 +58,6 @@ const validateKeySegment = (
 ): Effect.Effect<string, TranscriptStorageError> => {
   if (
     value.length === 0 ||
-    value.startsWith("/") ||
     value.includes("/") ||
     value.includes("\\") ||
     value.includes("..")
@@ -71,7 +73,7 @@ const validateKeySegment = (
   return Effect.succeed(value);
 };
 
-const makeTranscriptR2Key = (
+export const buildTranscriptR2Key = (
   showSlug: PublicationIdType,
   episodeId: PodcastEpisodeIdType
 ): Effect.Effect<TranscriptR2KeyType, TranscriptStorageError> =>
@@ -106,7 +108,7 @@ const decodeTranscriptJson = (text: string, key: TranscriptR2KeyType) =>
 
 const validateStoredKey = (
   key: TranscriptR2KeyType,
-  operation: "validateGetKey" | "validateExistsKey"
+  operation: "validateGetKey" | "validateExistsKey" | "validateDeleteKey"
 ) =>
   decodeTranscriptR2Key(key).pipe(
     Effect.mapError((cause) => schemaStorageError(operation, cause))
@@ -133,7 +135,16 @@ export class TranscriptStorageService extends ServiceMap.Service<
     >;
     readonly get: (
       key: TranscriptR2KeyType
+    ) => Effect.Effect<
+      PodcastTranscript,
+      TranscriptStorageError | TranscriptNotFoundError
+    >;
+    readonly getOptional: (
+      key: TranscriptR2KeyType
     ) => Effect.Effect<PodcastTranscript | null, TranscriptStorageError>;
+    readonly delete: (
+      key: TranscriptR2KeyType
+    ) => Effect.Effect<void, TranscriptStorageError>;
     readonly exists: (
       key: TranscriptR2KeyType
     ) => Effect.Effect<boolean, TranscriptStorageError>;
@@ -157,7 +168,7 @@ export class TranscriptStorageService extends ServiceMap.Service<
             (cause) => schemaStorageError("validateUpload", cause)
           )
         );
-        const key = yield* makeTranscriptR2Key(
+        const key = yield* buildTranscriptR2Key(
           validatedTranscript.showSlug,
           validatedTranscript.episodeId
         );
@@ -185,7 +196,7 @@ export class TranscriptStorageService extends ServiceMap.Service<
         return key;
       });
 
-      const get = Effect.fn("TranscriptStorageService.get")(function* (
+      const getOptional = Effect.fn("TranscriptStorageService.getOptional")(function* (
         key: TranscriptR2KeyType
       ) {
         const validatedKey = yield* validateStoredKey(key, "validateGetKey");
@@ -205,6 +216,31 @@ export class TranscriptStorageService extends ServiceMap.Service<
         return yield* decodeTranscriptJson(text, validatedKey);
       });
 
+      const get = Effect.fn("TranscriptStorageService.get")(function* (
+        key: TranscriptR2KeyType
+      ) {
+        const validatedKey = yield* validateStoredKey(key, "validateGetKey");
+        const transcript = yield* getOptional(validatedKey);
+
+        if (transcript === null) {
+          return yield* new TranscriptNotFoundError({ key: validatedKey });
+        }
+
+        return transcript;
+      });
+
+      const remove = Effect.fn("TranscriptStorageService.delete")(function* (
+        key: TranscriptR2KeyType
+      ) {
+        const validatedKey = yield* validateStoredKey(key, "validateDeleteKey");
+
+        yield* tryBucket(
+          "delete",
+          () => bucket.delete(validatedKey),
+          validatedKey
+        );
+      });
+
       const exists = Effect.fn("TranscriptStorageService.exists")(function* (
         key: TranscriptR2KeyType
       ) {
@@ -222,6 +258,8 @@ export class TranscriptStorageService extends ServiceMap.Service<
       return TranscriptStorageService.of({
         upload,
         get,
+        getOptional,
+        delete: remove,
         exists
       });
     })

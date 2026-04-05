@@ -10,6 +10,7 @@ import { processBatch } from "../src/filter/FilterWorker";
 import { ExpertsRepo } from "../src/services/ExpertsRepo";
 import { KnowledgeRepo } from "../src/services/KnowledgeRepo";
 import { PublicationsRepo } from "../src/services/PublicationsRepo";
+import { buildTranscriptR2Key } from "../src/services/TranscriptStorageService";
 import { makeBiLayer, makeSampleBatch, sampleDid, seedKnowledgeBase, seedManifest } from "./support/runtime";
 
 describe("repository layers", () => {
@@ -328,6 +329,14 @@ describe("repository layers", () => {
       const decodePodcastBundle = Schema.decodeUnknownSync(
         PodcastEpisodeBundleSchema
       );
+      const initialTranscriptKey = yield* buildTranscriptR2Key(
+        "catalyst-with-shayle-kann" as any,
+        "catalyst-2026-04-04" as any
+      );
+      const updatedTranscriptKey = yield* buildTranscriptR2Key(
+        "catalyst-with-shayle-kann" as any,
+        "catalyst-2026-04-04-v2" as any
+      );
       const initialBundle = decodePodcastBundle({
         episode: {
           episodeId: "catalyst-2026-04-04",
@@ -341,7 +350,7 @@ describe("repository layers", () => {
             startTimestampMs: 0,
             title: "Intro"
           }],
-          transcriptR2Key: "podcasts/catalyst-2026-04-04/transcript.json",
+          transcriptR2Key: initialTranscriptKey,
           lifecycleState: "segmented",
           createdAt: 1_710_100_000_000,
           updatedAt: 1_710_100_000_000
@@ -406,7 +415,7 @@ describe("repository layers", () => {
             startTimestampMs: 0,
             title: "Updated intro"
           }],
-          transcriptR2Key: "podcasts/catalyst-2026-04-04/transcript-v2.json",
+          transcriptR2Key: updatedTranscriptKey,
           lifecycleState: "pushed",
           createdAt: 1_710_100_000_000,
           updatedAt: 1_710_100_000_500
@@ -473,7 +482,7 @@ describe("repository layers", () => {
             startTimestampMs: 0,
             title: "Updated intro"
           }],
-          transcriptR2Key: "podcasts/catalyst-2026-04-04/transcript-v2.json",
+          transcriptR2Key: updatedTranscriptKey,
           lifecycleState: "pushed",
           createdAt: 1_710_100_000_000,
           updatedAt: 1_710_100_000_500
@@ -492,7 +501,7 @@ describe("repository layers", () => {
             startTimestampMs: 0,
             title: "Updated intro"
           }],
-          transcriptR2Key: "podcasts/catalyst-2026-04-04/transcript-v2.json",
+          transcriptR2Key: updatedTranscriptKey,
           lifecycleState: "pushed",
           createdAt: 1_710_100_000_000,
           updatedAt: 1_710_100_000_500
@@ -522,6 +531,68 @@ describe("repository layers", () => {
           }
         ]
       });
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
+  it.effect("returns null when a podcast episode bundle is missing", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+
+      const podcastRepo = yield* PodcastRepo;
+      const missing = yield* podcastRepo.getEpisodeBundle(
+        "missing-episode" as any
+      );
+
+      expect(missing).toBeNull();
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
+  it.effect("stores podcast episodes even when they currently have no segments", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+
+      const publications = yield* PublicationsRepo;
+      yield* publications.seedCurated({
+        ontologyVersion: "test",
+        snapshotVersion: "test-seed",
+        publications: [{
+          medium: "podcast" as const,
+          hostname: null,
+          showSlug: "the-carbon-copy",
+          feedUrl: "https://example.com/the-carbon-copy.rss",
+          appleId: null,
+          spotifyId: null,
+          tier: "energy-focused" as const
+        }]
+      }, 1_710_000_000_000);
+
+      const podcastRepo = yield* PodcastRepo;
+      const transcriptKey = yield* buildTranscriptR2Key(
+        "the-carbon-copy" as any,
+        "carbon-copy-2026-04-06" as any
+      );
+      const bundle = Schema.decodeUnknownSync(PodcastEpisodeBundleSchema)({
+        episode: {
+          episodeId: "carbon-copy-2026-04-06",
+          showSlug: "the-carbon-copy",
+          title: "The Carbon Copy: Pipeline outlook",
+          publishedAt: 1_710_200_000_000,
+          audioUrl: "https://example.com/carbon-copy-2026-04-06.mp3",
+          durationSeconds: 900,
+          speakerDids: [sampleDid],
+          chapterMarkers: null,
+          transcriptR2Key: transcriptKey,
+          lifecycleState: "transcribed",
+          createdAt: 1_710_200_000_000,
+          updatedAt: 1_710_200_000_000
+        },
+        segments: []
+      });
+
+      yield* podcastRepo.upsertEpisodeBundle(bundle);
+
+      const stored = yield* podcastRepo.getEpisodeBundle(bundle.episode.episodeId);
+      expect(stored).toEqual(bundle);
     }).pipe(Effect.provide(makeBiLayer()))
   );
 

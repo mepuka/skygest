@@ -202,6 +202,22 @@ export class TranscriptStorageError extends Schema.TaggedErrorClass<TranscriptSt
   }
 ) {}
 
+export class TranscriptNotFoundError extends Schema.TaggedErrorClass<TranscriptNotFoundError>()(
+  "TranscriptNotFoundError",
+  {
+    key: TranscriptR2Key
+  }
+) {}
+
+export class PodcastStorageCoordinationError extends Schema.TaggedErrorClass<PodcastStorageCoordinationError>()(
+  "PodcastStorageCoordinationError",
+  {
+    operation: Schema.String,
+    message: Schema.String,
+    transcriptKey: Schema.optionalKey(TranscriptR2Key)
+  }
+) {}
+
 export class EnrichmentDependencyPendingError extends Schema.TaggedErrorClass<EnrichmentDependencyPendingError>()(
   "EnrichmentDependencyPendingError",
   {

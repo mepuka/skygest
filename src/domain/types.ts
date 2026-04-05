@@ -70,7 +70,32 @@ export const PodcastSegmentId = Schema.NonEmptyString.pipe(
 });
 export type PodcastSegmentId = Schema.Schema.Type<typeof PodcastSegmentId>;
 
+const validateTranscriptR2Key = (value: string) => {
+  if (
+    !value.startsWith("transcripts/") ||
+    !value.endsWith(".json") ||
+    value.includes("\\") ||
+    value.includes("..")
+  ) {
+    return "Transcript R2 keys must use the transcripts/<showSlug>/<episodeId>.json shape";
+  }
+
+  const [, showSlug, filename, ...rest] = value.split("/");
+  if (
+    showSlug == null ||
+    showSlug.length === 0 ||
+    filename == null ||
+    filename.length === 0 ||
+    rest.length > 0
+  ) {
+    return "Transcript R2 keys must include exactly one show slug and one episode filename";
+  }
+
+  return undefined;
+};
+
 export const TranscriptR2Key = Schema.NonEmptyString.pipe(
+  Schema.check(Schema.makeFilter(validateTranscriptR2Key)),
   Schema.brand("TranscriptR2Key")
 ).annotate({
   description: "R2 object key for a stored podcast transcript"
