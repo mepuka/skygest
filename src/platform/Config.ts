@@ -1,25 +1,11 @@
-import { Array, Config, ConfigProvider, ServiceMap, Effect, Layer, Redacted, Result } from "effect";
+import { Array, Config, ConfigProvider, ServiceMap, Effect, Layer, Result } from "effect";
 import { CloudflareEnv } from "./Env";
+import { WorkerDeployKeys, WorkerKeys, EnrichmentKeys } from "./ConfigShapes";
+import { validateKeys } from "./ConfigValidation";
 
-const RawConfigSchema = Config.all({
-  publicApi: Config.withDefault(
-    Config.string("PUBLIC_BSKY_API"),
-    "https://public.api.bsky.app"
-  ),
-  ingestShardCount: Config.withDefault(Config.int("INGEST_SHARD_COUNT"), 1),
-  defaultDomain: Config.withDefault(Config.string("DEFAULT_DOMAIN"), "energy"),
-  mcpLimitDefault: Config.withDefault(Config.int("MCP_LIMIT_DEFAULT"), 20),
-  mcpLimitMax: Config.withDefault(Config.int("MCP_LIMIT_MAX"), 100),
-  operatorSecret: Config.withDefault(
-    Config.redacted("OPERATOR_SECRET"),
-    Redacted.make("")
-  ),
-  enableStagingOps: Config.withDefault(Config.boolean("ENABLE_STAGING_OPS"), false),
-  editorialDefaultExpiryHours: Config.withDefault(Config.int("EDITORIAL_DEFAULT_EXPIRY_HOURS"), 24),
-  curationMinSignalScore: Config.withDefault(Config.int("CURATION_MIN_SIGNAL_SCORE"), 30)
-});
+const WorkerConfig = Config.all(WorkerKeys);
 
-export type AppConfigShape = Config.Success<typeof RawConfigSchema>;
+export type AppConfigShape = Config.Success<typeof WorkerConfig>;
 
 export class AppConfig extends ServiceMap.Service<
   AppConfig,
@@ -47,9 +33,15 @@ export class AppConfig extends ServiceMap.Service<
             : Result.succeed([key, String(value)] as const)
       );
       const provider = ConfigProvider.fromUnknown(Object.fromEntries(entries));
-      const config = yield* RawConfigSchema.parse(provider);
+      const config = yield* WorkerConfig.parse(provider);
 
       return config satisfies AppConfigShape;
     })
   );
+
+  /** Validate all worker + enrichment config keys at once.
+   *  Uses WorkerDeployKeys which requires non-empty OPERATOR_SECRET
+   *  (unlike WorkerKeys which defaults to "" for local dev). */
+  static validate = (provider: ConfigProvider.ConfigProvider) =>
+    validateKeys({ ...WorkerDeployKeys, ...EnrichmentKeys }, provider);
 }
