@@ -18,7 +18,13 @@ import { decodeWithDbError } from "./schemaDecode";
 const isDefined = <A>(value: A | null): value is A => value !== null;
 
 const PublicationListRowSchema = Schema.Struct({
-  hostname: Schema.String,
+  publicationId: Schema.String,
+  medium: Schema.String,
+  hostname: Schema.NullOr(Schema.String),
+  showSlug: Schema.NullOr(Schema.String),
+  feedUrl: Schema.NullOr(Schema.String),
+  appleId: Schema.NullOr(Schema.String),
+  spotifyId: Schema.NullOr(Schema.String),
   tier: Schema.String,
   source: Schema.String,
   postCount: Schema.Number,
@@ -39,23 +45,86 @@ export const PublicationsRepoD1 = {
         Effect.flatMap((validated) =>
           Effect.forEach(
             validated.publications,
-            (pub) =>
-              sql`
-                INSERT INTO publications (
-                  hostname, tier, source, first_seen_at, last_seen_at
-                ) VALUES (
-                  ${pub.hostname},
-                  ${pub.tier},
-                  'seed',
-                  ${observedAt},
-                  ${observedAt}
-                )
-                ON CONFLICT(hostname) DO UPDATE SET
-                  tier = excluded.tier,
-                  source = 'seed',
-                  last_seen_at = excluded.last_seen_at,
-                  first_seen_at = MIN(publications.first_seen_at, excluded.first_seen_at)
-              `.pipe(Effect.asVoid),
+            (pub) => {
+              const publicationId = pub.hostname ?? pub.showSlug!;
+
+              return pub.medium === "text"
+                ? sql`
+                    INSERT INTO publications (
+                      publication_id,
+                      medium,
+                      hostname,
+                      show_slug,
+                      feed_url,
+                      apple_id,
+                      spotify_id,
+                      tier,
+                      source,
+                      first_seen_at,
+                      last_seen_at
+                    ) VALUES (
+                      ${publicationId},
+                      ${pub.medium},
+                      ${pub.hostname},
+                      NULL,
+                      NULL,
+                      NULL,
+                      NULL,
+                      ${pub.tier},
+                      'seed',
+                      ${observedAt},
+                      ${observedAt}
+                    )
+                    ON CONFLICT(hostname) DO UPDATE SET
+                      publication_id = excluded.publication_id,
+                      medium = excluded.medium,
+                      tier = excluded.tier,
+                      source = 'seed',
+                      show_slug = NULL,
+                      feed_url = NULL,
+                      apple_id = NULL,
+                      spotify_id = NULL,
+                      last_seen_at = excluded.last_seen_at,
+                      first_seen_at = MIN(publications.first_seen_at, excluded.first_seen_at)
+                  `.pipe(Effect.asVoid)
+                : sql`
+                    INSERT INTO publications (
+                      publication_id,
+                      medium,
+                      hostname,
+                      show_slug,
+                      feed_url,
+                      apple_id,
+                      spotify_id,
+                      tier,
+                      source,
+                      first_seen_at,
+                      last_seen_at
+                    ) VALUES (
+                      ${publicationId},
+                      ${pub.medium},
+                      NULL,
+                      ${pub.showSlug},
+                      ${pub.feedUrl},
+                      ${pub.appleId},
+                      ${pub.spotifyId},
+                      ${pub.tier},
+                      'seed',
+                      ${observedAt},
+                      ${observedAt}
+                    )
+                    ON CONFLICT(show_slug) DO UPDATE SET
+                      publication_id = excluded.publication_id,
+                      medium = excluded.medium,
+                      tier = excluded.tier,
+                      source = 'seed',
+                      feed_url = excluded.feed_url,
+                      apple_id = excluded.apple_id,
+                      spotify_id = excluded.spotify_id,
+                      last_seen_at = excluded.last_seen_at,
+                      first_seen_at = MIN(publications.first_seen_at, excluded.first_seen_at)
+                  `.pipe(Effect.asVoid);
+            },
             { discard: true }
           ).pipe(
             Effect.map(() => ({
@@ -93,16 +162,31 @@ export const PublicationsRepoD1 = {
 
           return sql<any>`
             SELECT
+              p.publication_id as publicationId,
+              p.medium as medium,
               p.hostname as hostname,
+              p.show_slug as showSlug,
+              p.feed_url as feedUrl,
+              p.apple_id as appleId,
+              p.spotify_id as spotifyId,
               p.tier as tier,
               p.source as source,
               COUNT(DISTINCT l.post_uri) as postCount,
               MAX(l.extracted_at) as latestPostAt
             FROM publications p
-            LEFT JOIN links l ON l.domain = p.hostname
+            LEFT JOIN links l ON p.hostname IS NOT NULL AND l.domain = p.hostname
             WHERE ${whereClause}
-            GROUP BY p.hostname, p.tier, p.source
-            ORDER BY postCount DESC, p.hostname ASC
+            GROUP BY
+              p.publication_id,
+              p.medium,
+              p.hostname,
+              p.show_slug,
+              p.feed_url,
+              p.apple_id,
+              p.spotify_id,
+              p.tier,
+              p.source
+            ORDER BY postCount DESC, COALESCE(p.hostname, p.show_slug, p.publication_id) ASC
             LIMIT ${limit}
           `.pipe(
             Effect.flatMap((rows) =>
@@ -137,9 +221,25 @@ export const PublicationsRepoD1 = {
         (hostname) =>
           sql`
             INSERT INTO publications (
-              hostname, tier, source, first_seen_at, last_seen_at
+              publication_id,
+              medium,
+              hostname,
+              show_slug,
+              feed_url,
+              apple_id,
+              spotify_id,
+              tier,
+              source,
+              first_seen_at,
+              last_seen_at
             ) VALUES (
               ${hostname},
+              'text',
+              ${hostname},
+              NULL,
+              NULL,
+              NULL,
+              NULL,
               'unknown',
               'discovered',
               ${observedAt},
@@ -157,7 +257,13 @@ export const PublicationsRepoD1 = {
     };
 
     const PublicationRecordRowSchema = Schema.Struct({
-      hostname: Schema.String,
+      publicationId: Schema.String,
+      medium: Schema.String,
+      hostname: Schema.NullOr(Schema.String),
+      showSlug: Schema.NullOr(Schema.String),
+      feedUrl: Schema.NullOr(Schema.String),
+      appleId: Schema.NullOr(Schema.String),
+      spotifyId: Schema.NullOr(Schema.String),
       tier: Schema.String,
       source: Schema.String,
       firstSeenAt: Schema.Number,
@@ -177,7 +283,13 @@ export const PublicationsRepoD1 = {
         const placeholders = chunk.map((h) => sql`${h}`);
         return sql<any>`
           SELECT
+            publication_id as publicationId,
+            medium as medium,
             hostname as hostname,
+            show_slug as showSlug,
+            feed_url as feedUrl,
+            apple_id as appleId,
+            spotify_id as spotifyId,
             tier as tier,
             source as source,
             first_seen_at as firstSeenAt,
@@ -205,11 +317,58 @@ export const PublicationsRepoD1 = {
       );
     };
 
+    const getByShowSlugs = (showSlugs: ReadonlyArray<string>) => {
+      if (showSlugs.length === 0) return Effect.succeed([] as any[]);
+
+      const chunks: string[][] = [];
+      for (let i = 0; i < showSlugs.length; i += 50) {
+        chunks.push(showSlugs.slice(i, i + 50) as string[]);
+      }
+
+      return Effect.forEach(chunks, (chunk) => {
+        const placeholders = chunk.map((showSlug) => sql`${showSlug}`);
+        return sql<any>`
+          SELECT
+            publication_id as publicationId,
+            medium as medium,
+            hostname as hostname,
+            show_slug as showSlug,
+            feed_url as feedUrl,
+            apple_id as appleId,
+            spotify_id as spotifyId,
+            tier as tier,
+            source as source,
+            first_seen_at as firstSeenAt,
+            last_seen_at as lastSeenAt
+          FROM publications
+          WHERE show_slug IN (${sql.join(", ", false)(placeholders)})
+        `.pipe(
+          Effect.flatMap((rows) =>
+            decodeWithDbError(
+              PublicationRecordRowsSchema,
+              rows,
+              "Failed to decode podcast publication rows for batch lookup"
+            )
+          ),
+          Effect.flatMap((rows) =>
+            decodeWithDbError(
+              Schema.Array(PublicationRecordSchema),
+              rows,
+              "Failed to normalize podcast publication rows for batch lookup"
+            )
+          )
+        );
+      }).pipe(
+        Effect.map((chunks) => chunks.flat())
+      );
+    };
+
     return {
       seedCurated,
       list,
       ensureDomains,
-      getByHostnames
+      getByHostnames,
+      getByShowSlugs
     };
   }))
 };

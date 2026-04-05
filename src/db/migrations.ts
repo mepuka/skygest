@@ -464,6 +464,74 @@ const migration19: D1Migration = {
   ]
 };
 
+const migration20: D1Migration = {
+  id: 20,
+  name: "publication_registry_identity",
+  statements: [
+    `ALTER TABLE publications RENAME TO publications_legacy`,
+    `CREATE TABLE IF NOT EXISTS publications (
+      publication_id TEXT PRIMARY KEY,
+      medium TEXT NOT NULL DEFAULT 'text' CHECK (medium IN ('text', 'podcast')),
+      hostname TEXT UNIQUE,
+      show_slug TEXT UNIQUE,
+      feed_url TEXT,
+      apple_id TEXT,
+      spotify_id TEXT,
+      tier TEXT NOT NULL,
+      source TEXT NOT NULL,
+      first_seen_at INTEGER NOT NULL,
+      last_seen_at INTEGER NOT NULL,
+      CHECK (
+        (medium = 'text' AND hostname IS NOT NULL AND show_slug IS NULL) OR
+        (medium = 'podcast' AND hostname IS NULL AND show_slug IS NOT NULL)
+      ),
+      CHECK (feed_url IS NULL OR medium = 'podcast'),
+      CHECK (apple_id IS NULL OR medium = 'podcast'),
+      CHECK (spotify_id IS NULL OR medium = 'podcast')
+    )`,
+    `INSERT INTO publications (
+      publication_id,
+      medium,
+      hostname,
+      show_slug,
+      feed_url,
+      apple_id,
+      spotify_id,
+      tier,
+      source,
+      first_seen_at,
+      last_seen_at
+    )
+      SELECT
+        hostname as publication_id,
+        'text' as medium,
+        hostname,
+        NULL as show_slug,
+        NULL as feed_url,
+        NULL as apple_id,
+        NULL as spotify_id,
+        tier,
+        source,
+        first_seen_at,
+        last_seen_at
+      FROM publications_legacy`,
+    `DROP TABLE publications_legacy`,
+    `CREATE INDEX IF NOT EXISTS idx_publications_tier_last_seen_at
+      ON publications(tier, last_seen_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_publications_medium_tier_last_seen_at
+      ON publications(medium, tier, last_seen_at DESC)`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_publications_feed_url
+      ON publications(feed_url)
+      WHERE feed_url IS NOT NULL`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_publications_apple_id
+      ON publications(apple_id)
+      WHERE apple_id IS NOT NULL`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_publications_spotify_id
+      ON publications(spotify_id)
+      WHERE spotify_id IS NOT NULL`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -483,5 +551,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration16,
   migration17,
   migration18,
-  migration19
+  migration19,
+  migration20
 ];

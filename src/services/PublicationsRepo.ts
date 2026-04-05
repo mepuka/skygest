@@ -27,5 +27,8 @@ export class PublicationsRepo extends ServiceMap.Service<
     readonly getByHostnames: (
       hostnames: ReadonlyArray<string>
     ) => Effect.Effect<ReadonlyArray<PublicationRecord>, SqlError | DbError>;
+    readonly getByShowSlugs: (
+      showSlugs: ReadonlyArray<string>
+    ) => Effect.Effect<ReadonlyArray<PublicationRecord>, SqlError | DbError>;
   }
 >()("@skygest/PublicationsRepo") {}

@@ -7,6 +7,7 @@ import { KnowledgePost, RankedKnowledgePostResult } from "../src/domain/bi";
 import { processBatch } from "../src/filter/FilterWorker";
 import { ExpertsRepo } from "../src/services/ExpertsRepo";
 import { KnowledgeRepo } from "../src/services/KnowledgeRepo";
+import { PublicationsRepo } from "../src/services/PublicationsRepo";
 import { makeBiLayer, makeSampleBatch, sampleDid, seedKnowledgeBase, seedManifest } from "./support/runtime";
 
 describe("repository layers", () => {
@@ -135,6 +136,108 @@ describe("repository layers", () => {
 
       // Bootstrapped experts have null avatars
       expect(stored?.avatar).toBeNull();
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
+  it.effect("seeds and reads both text publications and podcast shows", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+
+      const publications = yield* PublicationsRepo;
+      const manifest = {
+        ontologyVersion: "test",
+        snapshotVersion: "test-seed",
+        publications: [
+          {
+            medium: "text" as const,
+            hostname: "reuters.com",
+            showSlug: null,
+            feedUrl: null,
+            appleId: null,
+            spotifyId: null,
+            tier: "general-outlet" as const
+          },
+          {
+            medium: "podcast" as const,
+            hostname: null,
+            showSlug: "catalyst-with-shayle-kann",
+            feedUrl: "https://example.com/catalyst.rss",
+            appleId: "123456789",
+            spotifyId: "show-abc",
+            tier: "energy-focused" as const
+          }
+        ]
+      };
+
+      const result = yield* publications.seedCurated(manifest, 1_710_000_000_000);
+      const listed = yield* publications.list({});
+      const byHostname = yield* publications.getByHostnames(["reuters.com"]);
+      const byShowSlug = yield* publications.getByShowSlugs([
+        "catalyst-with-shayle-kann"
+      ]);
+
+      expect(result).toEqual({
+        seeded: 2,
+        snapshotVersion: "test-seed"
+      });
+      expect(listed).toEqual([
+        {
+          publicationId: "catalyst-with-shayle-kann",
+          medium: "podcast",
+          hostname: null,
+          showSlug: "catalyst-with-shayle-kann",
+          feedUrl: "https://example.com/catalyst.rss",
+          appleId: "123456789",
+          spotifyId: "show-abc",
+          tier: "energy-focused",
+          source: "seed",
+          postCount: 0,
+          latestPostAt: null
+        },
+        {
+          publicationId: "reuters.com",
+          medium: "text",
+          hostname: "reuters.com",
+          showSlug: null,
+          feedUrl: null,
+          appleId: null,
+          spotifyId: null,
+          tier: "general-outlet",
+          source: "seed",
+          postCount: 0,
+          latestPostAt: null
+        }
+      ]);
+      expect(byHostname).toEqual([
+        {
+          publicationId: "reuters.com",
+          medium: "text",
+          hostname: "reuters.com",
+          showSlug: null,
+          feedUrl: null,
+          appleId: null,
+          spotifyId: null,
+          tier: "general-outlet",
+          source: "seed",
+          firstSeenAt: 1_710_000_000_000,
+          lastSeenAt: 1_710_000_000_000
+        }
+      ]);
+      expect(byShowSlug).toEqual([
+        {
+          publicationId: "catalyst-with-shayle-kann",
+          medium: "podcast",
+          hostname: null,
+          showSlug: "catalyst-with-shayle-kann",
+          feedUrl: "https://example.com/catalyst.rss",
+          appleId: "123456789",
+          spotifyId: "show-abc",
+          tier: "energy-focused",
+          source: "seed",
+          firstSeenAt: 1_710_000_000_000,
+          lastSeenAt: 1_710_000_000_000
+        }
+      ]);
     }).pipe(Effect.provide(makeBiLayer()))
   );
 

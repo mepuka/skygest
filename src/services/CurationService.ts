@@ -152,7 +152,11 @@ export class CurationService extends ServiceMap.Service<
         )];
         const publications = yield* publicationsRepo.getByHostnames(allDomains);
         const publicationTiers: ReadonlyMap<string, string> = new Map(
-          publications.map((p) => [p.hostname, p.tier])
+          publications.flatMap((publication) =>
+            publication.hostname === null
+              ? []
+              : [[publication.hostname, publication.tier] as const]
+          )
         );
 
         // Evaluate predicates
