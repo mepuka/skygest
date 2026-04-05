@@ -19,6 +19,11 @@
 - TwitterKeys uses `nonEmptyString` pattern; file existence validated at cookie load time (can't use `node:fs` in shared ConfigShapes without risking CF worker imports)
 - ImportClient kept as thin standalone (StagingOperatorClient imports `../mcp/Client` pulling deep CF-adjacent deps); uses same domain schemas so contract is shared
 
+**Review round 2 fixes (2026-04-05):**
+- P1: Replace fake CuratePostOutput in catchAll with console.error + continue (computed-string `as const` doesn't compile)
+- P2: Wrap inline validateKeys in Effect.catch that prints summary before failing (matches validate-config.ts pattern)
+- P2: URL import reads profile from focal tweet author, not the pasted URL handle (handles renames)
+
 ---
 
 ## Task 1: Add TwitterKeys to ConfigShapes.ts
@@ -448,7 +453,14 @@ if (!url) {
 const main = Effect.gen(function* () {
   // 1. Validate config (operator keys + twitter keys together)
   const provider = ConfigProvider.fromEnv();
-  const config = yield* validateKeys({ ...OperatorKeys, ...TwitterKeys }, provider);
+  const config = yield* validateKeys({ ...OperatorKeys, ...TwitterKeys }, provider).pipe(
+    Effect.catchTag("ConfigValidationError", (error) =>
+      Effect.gen(function* () {
+        console.error(error.summary);
+        return yield* Effect.fail(error);
+      })
+    )
+  );
 
   // 2. Parse URL
   const parsed = parsePostUrl(url!);
@@ -457,33 +469,39 @@ const main = Effect.gen(function* () {
     console.error("Expected: https://x.com/<handle>/status/<id>");
     return yield* Effect.fail(new Error("Unsupported URL"));
   }
-  const { handle, id } = parsed.value;
-  console.log(`Fetching tweet ${id} by @${handle}...`);
+  const { id } = parsed.value;
+  console.log(`Fetching tweet ${id}...`);
 
-  // 3. Scrape tweet detail + profile (isolated scraper scope)
-  const { detail, profile } = yield* Effect.gen(function* () {
+  // 3. Scrape tweet detail, then look up author from the focal tweet itself
+  //    (not the URL handle — handles can be renamed)
+  const { focalTweet, profile } = yield* Effect.gen(function* () {
     yield* restoreCookies(config.twitterCookiePath);
     const tweets = yield* TwitterTweets;
     const pub = yield* TwitterPublic;
+
     const detail = yield* tweets.getTweet(id);
-    const profile = yield* pub.getProfile(handle);
-    return { detail, profile };
+    const focal = detail.tweets.find((t) => t.id === detail.focalTweetId);
+    if (!focal) return { focalTweet: null as null, profile: null as null };
+
+    // Look up profile using the author from the tweet, not the URL
+    const authorHandle = focal.username ?? focal.userId ?? "";
+    const profile = yield* pub.getProfile(authorHandle);
+    return { focalTweet: focal, profile };
   }).pipe(Effect.provide(scraperLayer));
 
-  // 4. Normalize
-  const focalTweet = detail.tweets.find((t) => t.id === detail.focalTweetId);
   if (!focalTweet) {
     console.error("Could not find focal tweet in detail response");
     return yield* Effect.fail(new Error("No focal tweet"));
   }
 
+  // 4. Normalize
   const normalizedPost = normalizeTweetDetail(focalTweet);
   if (!normalizedPost) {
     console.error("Normalization failed (missing userId)");
     return yield* Effect.fail(new Error("Normalization failed"));
   }
 
-  const normalizedExpert = normalizeProfile(profile, tier);
+  const normalizedExpert = normalizeProfile(profile!, tier);
   if (!normalizedExpert) {
     console.error("Profile normalization failed (missing userId)");
     return yield* Effect.fail(new Error("Profile normalization failed"));
@@ -568,7 +586,14 @@ const shouldCurate = args.includes("--curate");
 const main = Effect.gen(function* () {
   // 1. Validate config
   const provider = ConfigProvider.fromEnv();
-  const config = yield* validateKeys({ ...OperatorKeys, ...TwitterKeys }, provider);
+  const config = yield* validateKeys({ ...OperatorKeys, ...TwitterKeys }, provider).pipe(
+    Effect.catchTag("ConfigValidationError", (error) =>
+      Effect.gen(function* () {
+        console.error(error.summary);
+        return yield* Effect.fail(error);
+      })
+    )
+  );
 
   console.log(`Fetching up to ${limit} bookmarks...`);
 
@@ -625,15 +650,15 @@ const main = Effect.gen(function* () {
   // 5. Auto-curate if requested
   if (shouldCurate && result.imported > 0) {
     for (const post of posts) {
-      const curation = yield* curatePost(config.baseUrl, config.operatorSecret, {
+      yield* curatePost(config.baseUrl, config.operatorSecret, {
         postUri: post.uri,
         action: "curate"
       }).pipe(
-        Effect.catchAll((e) =>
-          Effect.succeed({ postUri: post.uri, action: "curate" as const, previousStatus: null, newStatus: `failed: ${e.message}` as const })
-        )
+        Effect.match({
+          onSuccess: (c) => console.log(`  Curated ${post.uri}: ${c.previousStatus} → ${c.newStatus}`),
+          onFailure: (e) => console.error(`  Curate failed ${post.uri}: ${e.message}`)
+        })
       );
-      console.log(`  Curated ${post.uri}: ${curation.newStatus}`);
     }
   }
 });
@@ -705,7 +730,14 @@ if (!handle) {
 const main = Effect.gen(function* () {
   // 1. Validate config
   const provider = ConfigProvider.fromEnv();
-  const config = yield* validateKeys({ ...OperatorKeys, ...TwitterKeys }, provider);
+  const config = yield* validateKeys({ ...OperatorKeys, ...TwitterKeys }, provider).pipe(
+    Effect.catchTag("ConfigValidationError", (error) =>
+      Effect.gen(function* () {
+        console.error(error.summary);
+        return yield* Effect.fail(error);
+      })
+    )
+  );
 
   console.log(`Fetching timeline for @${handle} (limit: ${limit})...`);
 
@@ -824,7 +856,14 @@ if (!query) {
 const main = Effect.gen(function* () {
   // 1. Validate config
   const provider = ConfigProvider.fromEnv();
-  const config = yield* validateKeys({ ...OperatorKeys, ...TwitterKeys }, provider);
+  const config = yield* validateKeys({ ...OperatorKeys, ...TwitterKeys }, provider).pipe(
+    Effect.catchTag("ConfigValidationError", (error) =>
+      Effect.gen(function* () {
+        console.error(error.summary);
+        return yield* Effect.fail(error);
+      })
+    )
+  );
 
   console.log(`Searching: "${query}" (mode: ${mode}, limit: ${limit})...`);
 
@@ -880,15 +919,15 @@ const main = Effect.gen(function* () {
   // 5. Auto-curate if requested
   if (shouldCurate && result.imported > 0) {
     for (const post of posts) {
-      const curation = yield* curatePost(config.baseUrl, config.operatorSecret, {
+      yield* curatePost(config.baseUrl, config.operatorSecret, {
         postUri: post.uri,
         action: "curate"
       }).pipe(
-        Effect.catchAll((e) =>
-          Effect.succeed({ postUri: post.uri, action: "curate" as const, previousStatus: null, newStatus: `failed: ${e.message}` as const })
-        )
+        Effect.match({
+          onSuccess: (c) => console.log(`  Curated ${post.uri}: ${c.previousStatus} → ${c.newStatus}`),
+          onFailure: (e) => console.error(`  Curate failed ${post.uri}: ${e.message}`)
+        })
       );
-      console.log(`  Curated ${post.uri}: ${curation.newStatus}`);
     }
   }
 });
