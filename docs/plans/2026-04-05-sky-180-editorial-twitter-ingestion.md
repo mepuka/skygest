@@ -4,11 +4,20 @@
 
 **Goal:** Give the editorial workspace (`skygest-editorial`) full local Twitter ingestion capabilities — import from URL, bookmarks, timeline, and search — using the `@pooks/twitter-scraper` library and posting normalized results to staging via the operator API.
 
-**Architecture:** Each script follows a three-phase pattern: (1) validate config (operator secret + cookie path), (2) scrape tweets using the scraper's `authenticatedLayer` in an isolated Effect scope (CycleTLS conflicts with FetchHttpClient), (3) normalize via the shared `TwitterNormalizer` and POST to staging's `/admin/import/posts`. The scraper layer is provided per-command, never globally. Config validation uses the SKY-182 `validateKeys` infrastructure with a new `TwitterKeys` shape added to `ConfigShapes.ts`.
+**Architecture:** Each script follows a three-phase pattern: (1) validate config (operator secret + cookie path) inline, (2) scrape tweets using the scraper's `authenticatedLayer` in an isolated Effect scope with in-program cookie restoration (CycleTLS conflicts with FetchHttpClient), (3) normalize via the shared `TwitterNormalizer` and POST to staging's `/admin/import/posts`. The scraper layer is provided per-command, never globally. Config validation uses the SKY-182 `validateKeys` infrastructure with a new `TwitterKeys` shape added to `ConfigShapes.ts`. The general-purpose `validate-config.ts` is NOT modified — twitter scripts validate their own keys so non-Twitter editors are never blocked.
 
-**Tech Stack:** Effect 4, `@pooks/twitter-scraper` (linked), Bun, `@skygest/domain/*` and `@skygest/platform/*` path mappings from `skygest-cloudflare`.
+**Tech Stack:** Effect 4, `@pooks/twitter-scraper` (`file:` dependency), Bun, `@skygest/domain/*`, `@skygest/platform/*`, and `@skygest/ops/*` path mappings from `skygest-cloudflare`.
 
-**Repos:** Changes span both `skygest-cloudflare` (config shapes, path mappings) and `skygest-editorial` (scripts, layers, docs).
+**Repos:** Changes span both `skygest-cloudflare` (config shapes) and `skygest-editorial` (scripts, layers, docs).
+
+**Review fixes applied (2026-04-05):**
+- P1: Scraper layer rewritten — cookie restoration happens in-program via `CookieManager` after `authenticatedLayer()` is provided, matching [scraper.ts:133-147](../../../better_twitter_scraper/src/scraper.ts) documented pattern
+- P1: All tier defaults changed from `"t3"` to `"independent"` per [bi.ts:29](../../src/domain/bi.ts)
+- P1: Curate response logging changed from `.status` to `.newStatus` per [curation.ts:124-130](../../src/domain/curation.ts)
+- P1: `validate-config.ts` left unchanged — twitter scripts validate their own keys inline so morning curation works without Twitter setup
+- P2: Scraper dependency uses `"file:../better_twitter_scraper"` in package.json; commit includes bun.lock
+- TwitterKeys uses `nonEmptyString` pattern; file existence validated at cookie load time (can't use `node:fs` in shared ConfigShapes without risking CF worker imports)
+- ImportClient kept as thin standalone (StagingOperatorClient imports `../mcp/Client` pulling deep CF-adjacent deps); uses same domain schemas so contract is shared
 
 ---
 
@@ -27,18 +36,37 @@ In `skygest-cloudflare/src/platform/ConfigShapes.ts`, add after the `EnrichmentK
 ```typescript
 // ── Twitter / editorial ingestion keys ────────────────────────────────
 
+/** Non-empty string config that rejects empty/whitespace-only values. */
+const nonEmptyString = (name: string) =>
+  Config.string(name).pipe(
+    Config.mapOrFail((value) =>
+      value.trim().length > 0
+        ? Effect.succeed(value)
+        : Effect.fail(
+            new Config.ConfigError(
+              new ConfigProvider.SourceError({
+                message: `${name} must not be empty`
+              })
+            )
+          )
+    )
+  );
+
 export const TwitterKeys = {
-  twitterCookiePath: Config.string("TWITTER_COOKIE_PATH")
+  twitterCookiePath: nonEmptyString("TWITTER_COOKIE_PATH")
 } as const;
 ```
 
-No default — a missing cookie path should be a validation error in editorial. The path points to the JSON file containing serialized auth cookies (e.g., `../better_twitter_scraper/tests/live-auth-cookies.local.json`).
+No default — a missing cookie path should be a validation error in twitter scripts. The path points to the JSON file containing serialized auth cookies (e.g., `../better_twitter_scraper/tests/live-auth-cookies.local.json`). File existence is validated at cookie load time in the scraper layer, not here (can't use `node:fs` in shared ConfigShapes without risking CF worker imports).
 
 **Step 2: Write the failing test**
 
-In `skygest-cloudflare/tests/platform/ConfigShapes.test.ts`, add a test group for `TwitterKeys`:
+In `skygest-cloudflare/tests/platform/ConfigShapes.test.ts`, add imports for `Result` and `TwitterKeys`, then add a test group:
 
 ```typescript
+import { TwitterKeys } from "../../src/platform/ConfigShapes";
+// (Result should already be imported — if not, add it)
+
 describe("TwitterKeys", () => {
   it("resolves when TWITTER_COOKIE_PATH is set", () =>
     Effect.gen(function* () {
@@ -52,6 +80,17 @@ describe("TwitterKeys", () => {
   it("fails when TWITTER_COOKIE_PATH is missing", () =>
     Effect.gen(function* () {
       const provider = ConfigProvider.fromUnknown({});
+      const result = yield* Effect.result(
+        TwitterKeys.twitterCookiePath.parse(provider)
+      );
+      expect(Result.isFailure(result)).toBe(true);
+    }).pipe(Effect.runPromise));
+
+  it("fails when TWITTER_COOKIE_PATH is empty", () =>
+    Effect.gen(function* () {
+      const provider = ConfigProvider.fromUnknown({
+        TWITTER_COOKIE_PATH: "   "
+      });
       const result = yield* Effect.result(
         TwitterKeys.twitterCookiePath.parse(provider)
       );
@@ -82,13 +121,12 @@ git commit -m "feat(config): add TwitterKeys shape for editorial cookie path (SK
 
 ## Task 2: Add ops path mapping + scraper dependency to editorial
 
-Give the editorial repo access to the `TwitterNormalizer` (via path mapping) and the `@pooks/twitter-scraper` package (via `bun link`).
+Give the editorial repo access to the `TwitterNormalizer` (via path mapping) and the `@pooks/twitter-scraper` package (via `file:` dependency).
 
 **Files:**
 - Modify: `skygest-editorial/tsconfig.json`
 - Modify: `skygest-editorial/package.json`
 - Modify: `skygest-editorial/.env.example`
-- Modify: `skygest-editorial/.gitignore` (if not already ignoring cookies)
 
 **Step 1: Add `@skygest/ops/*` path mapping**
 
@@ -107,14 +145,25 @@ The full paths block becomes:
 }
 ```
 
-**Step 2: Link the scraper package**
+**Step 2: Add scraper as file dependency**
+
+In `skygest-editorial/package.json`, add to `dependencies`:
+
+```json
+"dependencies": {
+  "effect": "4.0.0-beta.43",
+  "@pooks/twitter-scraper": "file:../better_twitter_scraper"
+}
+```
+
+Then install:
 
 ```bash
 cd /Users/pooks/Dev/skygest-editorial
-bun link @pooks/twitter-scraper
+bun install
 ```
 
-This creates a symlink in `node_modules/@pooks/twitter-scraper` → `../better_twitter_scraper`. Verify with:
+Verify the symlink:
 
 ```bash
 ls -la node_modules/@pooks/twitter-scraper
@@ -129,7 +178,7 @@ Add the twitter cookie path to `skygest-editorial/.env.example`:
 SKYGEST_STAGING_BASE_URL=https://skygest-bi-agent-staging.kokokessy.workers.dev
 SKYGEST_OPERATOR_SECRET=your-operator-secret-here
 
-# Twitter ingestion
+# Twitter ingestion (only needed for twitter import scripts)
 TWITTER_COOKIE_PATH=../better_twitter_scraper/tests/live-auth-cookies.local.json
 ```
 
@@ -144,21 +193,23 @@ TWITTER_COOKIE_PATH=../better_twitter_scraper/tests/live-auth-cookies.local.json
 **Step 5: Verify typecheck**
 
 Run: `cd /Users/pooks/Dev/skygest-editorial && bun run typecheck`
-Expected: PASS (no new TS errors)
+Expected: Compiles (existing warnings may appear from current validate-config.ts — that's pre-existing).
 
 **Step 6: Commit**
 
 ```bash
 cd /Users/pooks/Dev/skygest-editorial
-git add tsconfig.json package.json .env.example
-git commit -m "feat: add ops path mapping and twitter scraper dependency (SKY-180)"
+git add tsconfig.json package.json bun.lock .env.example
+git commit -m "feat: add ops path mapping and twitter scraper file dependency (SKY-180)"
 ```
 
 ---
 
 ## Task 3: Build editorial ScraperLayer
 
-Create the authenticated scraper layer for editorial scripts. Uses `TwitterScraper.authenticatedLayer()` (provides ALL services: TwitterPublic, TwitterTweets, TwitterSearch, TwitterLists) with cookie restoration from the config-validated path.
+Create the authenticated scraper layer for editorial scripts. Uses `TwitterScraper.authenticatedLayer()` which provides ALL services: TwitterPublic, TwitterTweets (incl. bookmarks), TwitterSearch, TwitterLists, plus CookieManager.
+
+Cookie restoration is an in-program effect, NOT a wrapping layer. This matches the [documented scraper usage pattern](../../../better_twitter_scraper/src/scraper.ts:133-147) where cookies are restored inside `Effect.gen` after the layer is provided.
 
 **Files:**
 - Create: `skygest-editorial/src/twitter/ScraperLayer.ts`
@@ -167,50 +218,59 @@ Create the authenticated scraper layer for editorial scripts. Uses `TwitterScrap
 
 ```typescript
 /**
- * Authenticated Twitter scraper layer for editorial scripts.
+ * Authenticated Twitter scraper layer + cookie restoration for editorial scripts.
  *
  * Uses TwitterScraper.authenticatedLayer() which provides all services:
- * TwitterPublic, TwitterTweets (incl. bookmarks), TwitterSearch, TwitterLists.
+ * TwitterPublic, TwitterTweets (incl. bookmarks), TwitterSearch, TwitterLists,
+ * plus CookieManager.
+ *
+ * Cookie restoration happens in-program via restoreCookies(), NOT as a
+ * wrapping layer. authenticatedLayer() creates CookieManager.liveLayer
+ * internally — the cookies must be restored AFTER the layer is provided.
  *
  * IMPORTANT: This layer provides HttpClient via CycleTLS, which conflicts
  * with FetchHttpClient used for staging API calls. Provide this layer ONLY
  * within scraper Effect blocks, not globally.
  */
-import { Effect, Layer } from "effect";
-import {
-  CookieManager,
-  TwitterScraper,
-  UserAuth
-} from "@pooks/twitter-scraper";
+import { Effect } from "effect";
+import { CookieManager, TwitterScraper } from "@pooks/twitter-scraper";
 
 /**
- * Build the authenticated scraper layer with cookies loaded from disk.
- *
- * @param cookiePath - Absolute or relative path to the serialized cookie JSON file
+ * Pre-built authenticated scraper layer.
+ * Provides: TwitterPublic, TwitterTweets, TwitterSearch, TwitterLists,
+ * CookieManager, UserAuth, GuestAuth, and all supporting services.
  */
-export const makeScraperLayer = (cookiePath: string) => {
-  const restoreCookies = Layer.effectDiscard(
-    Effect.gen(function* () {
-      const cookies = yield* CookieManager;
-      const text = yield* Effect.tryPromise(() => Bun.file(cookiePath).text());
-      const raw = JSON.parse(text) as ReadonlyArray<{
-        name: string;
-        value: string;
-      }>;
-      yield* cookies.restoreSerializedCookies(raw);
-    })
-  );
+export const scraperLayer = TwitterScraper.authenticatedLayer();
 
-  return TwitterScraper.authenticatedLayer().pipe(
-    Layer.provideMerge(restoreCookies)
-  );
-};
+/**
+ * Restore serialized auth cookies from a JSON file on disk.
+ * Must be called inside an Effect.gen block AFTER scraperLayer is provided.
+ *
+ * Usage:
+ * ```ts
+ * yield* Effect.gen(function* () {
+ *   yield* restoreCookies(cookiePath);
+ *   const tweets = yield* TwitterTweets;
+ *   // ... use services
+ * }).pipe(Effect.provide(scraperLayer));
+ * ```
+ */
+export const restoreCookies = (cookiePath: string) =>
+  Effect.gen(function* () {
+    const cookies = yield* CookieManager;
+    const text = yield* Effect.tryPromise(() => Bun.file(cookiePath).text());
+    const raw = JSON.parse(text) as ReadonlyArray<{
+      name: string;
+      value: string;
+    }>;
+    yield* cookies.restoreSerializedCookies(raw);
+  });
 ```
 
 **Step 2: Verify typecheck**
 
 Run: `cd /Users/pooks/Dev/skygest-editorial && bun run typecheck`
-Expected: PASS
+Expected: Compiles.
 
 **Step 3: Commit**
 
@@ -224,7 +284,9 @@ git commit -m "feat: add authenticated scraper layer for editorial (SKY-180)"
 
 ## Task 4: Build editorial ImportClient
 
-Create a thin Effect service for POSTing normalized tweets to staging. Only needs `importPosts` and `curatePost` — much simpler than the full `StagingOperatorClient`.
+Create a thin pair of standalone functions for POSTing normalized tweets to staging. Only needs `importPosts` and `curatePost` — much simpler than the full `StagingOperatorClient` (which imports `../mcp/Client` and pulls deep CF-adjacent deps).
+
+Uses the same domain schemas (`ImportPostsInput`, `ImportPostsOutput`, `CuratePostInput`, `CuratePostOutput`) so the API contract is shared — no drift risk on the wire format.
 
 **Files:**
 - Create: `skygest-editorial/src/twitter/ImportClient.ts`
@@ -233,9 +295,15 @@ Create a thin Effect service for POSTing normalized tweets to staging. Only need
 
 ```typescript
 /**
- * Thin HTTP client for posting normalized tweets to the staging import API.
+ * Thin HTTP functions for posting normalized tweets to the staging import API.
  *
  * Uses FetchHttpClient (not CycleTLS) — safe to use outside scraper scope.
+ *
+ * NOTE: These functions overlap with StagingOperatorClient.importPosts and
+ * StagingOperatorClient.curatePost in skygest-cloudflare. We duplicate the
+ * HTTP plumbing here (~60 lines) rather than importing StagingOperatorClient
+ * because that service depends on ../mcp/Client and other CF-adjacent modules.
+ * Both use the same domain schemas, so the wire contract is shared.
  */
 import { Effect, Redacted, Schema } from "effect";
 import {
@@ -320,7 +388,7 @@ export const curatePost = (
 **Step 2: Verify typecheck**
 
 Run: `cd /Users/pooks/Dev/skygest-editorial && bun run typecheck`
-Expected: PASS
+Expected: Compiles.
 
 **Step 3: Commit**
 
@@ -332,65 +400,7 @@ git commit -m "feat: add import client for staging API (SKY-180)"
 
 ---
 
-## Task 5: Update validate-config.ts for Twitter keys
-
-Extend the existing config validation script to check both operator keys and twitter keys.
-
-**Files:**
-- Modify: `skygest-editorial/scripts/validate-config.ts`
-
-**Step 1: Update validate-config.ts**
-
-Replace the full file:
-
-```typescript
-import { Effect, ConfigProvider } from "effect";
-import { OperatorKeys, TwitterKeys } from "@skygest/platform/ConfigShapes";
-import { validateKeys, ConfigValidationError } from "@skygest/platform/ConfigValidation";
-
-/** All keys required for editorial twitter workflows. */
-const EditorialKeys = {
-  ...OperatorKeys,
-  ...TwitterKeys
-} as const;
-
-const main = Effect.gen(function* () {
-  const provider = ConfigProvider.fromEnv();
-
-  const config = yield* validateKeys(EditorialKeys, provider).pipe(
-    Effect.catch((error: ConfigValidationError) =>
-      Effect.gen(function* () {
-        console.error(error.summary);
-        return yield* Effect.fail(error);
-      })
-    )
-  );
-
-  console.log("Config validation passed:");
-  console.log("  SKYGEST_STAGING_BASE_URL:", config.baseUrl.href);
-  console.log("  SKYGEST_OPERATOR_SECRET: [set]");
-  console.log("  TWITTER_COOKIE_PATH:", config.twitterCookiePath);
-});
-
-Effect.runPromise(main).catch(() => process.exit(1));
-```
-
-**Step 2: Run validation**
-
-Run: `cd /Users/pooks/Dev/skygest-editorial && bun scripts/validate-config.ts`
-Expected: PASS if `.env` has all three vars, or clear error summary showing which are missing.
-
-**Step 3: Commit**
-
-```bash
-cd /Users/pooks/Dev/skygest-editorial
-git add scripts/validate-config.ts
-git commit -m "feat: validate twitter cookie path in config check (SKY-180)"
-```
-
----
-
-## Task 6: Build twitter-import-url.ts script
+## Task 5: Build twitter-import-url.ts script
 
 The most important script — paste a tweet URL, scrape it, normalize, import to staging, auto-curate.
 
@@ -408,14 +418,16 @@ The most important script — paste a tweet URL, scrape it, normalize, import to
  *
  * Fetches the tweet detail, normalizes it, imports to staging.
  * With --curate, also auto-curates the post with operatorOverride.
+ *
+ * Tier must be one of: energy-focused, general-outlet, independent (default).
  */
-import { Effect, ConfigProvider, Option, Redacted, Stream } from "effect";
+import { Effect, ConfigProvider, Option } from "effect";
 import { TwitterPublic, TwitterTweets } from "@pooks/twitter-scraper";
 import { OperatorKeys, TwitterKeys } from "@skygest/platform/ConfigShapes";
 import { validateKeys } from "@skygest/platform/ConfigValidation";
 import { parsePostUrl } from "@skygest/domain/ingestUrl";
 import { normalizeTweetDetail, normalizeProfile } from "@skygest/ops/TwitterNormalizer";
-import { makeScraperLayer } from "../src/twitter/ScraperLayer";
+import { scraperLayer, restoreCookies } from "../src/twitter/ScraperLayer";
 import { importPosts, curatePost } from "../src/twitter/ImportClient";
 import type { ExpertTier } from "@skygest/domain/bi";
 
@@ -423,17 +435,18 @@ const args = process.argv.slice(2);
 const url = args.find((a) => !a.startsWith("--"));
 const shouldCurate = args.includes("--curate");
 const tierIdx = args.indexOf("--tier");
-const tier: ExpertTier = (tierIdx >= 0 ? args[tierIdx + 1] as ExpertTier : "t3") ?? "t3";
+const tier: ExpertTier = (tierIdx >= 0 ? args[tierIdx + 1] as ExpertTier : "independent") ?? "independent";
 
 if (!url) {
   console.error("Usage: bun scripts/twitter-import-url.ts <url> [--curate] [--tier <tier>]");
   console.error("  Supported: https://x.com/<handle>/status/<id>");
   console.error("             https://twitter.com/<handle>/status/<id>");
+  console.error("  Tiers: energy-focused, general-outlet, independent (default)");
   process.exit(1);
 }
 
 const main = Effect.gen(function* () {
-  // 1. Validate config
+  // 1. Validate config (operator keys + twitter keys together)
   const provider = ConfigProvider.fromEnv();
   const config = yield* validateKeys({ ...OperatorKeys, ...TwitterKeys }, provider);
 
@@ -448,9 +461,8 @@ const main = Effect.gen(function* () {
   console.log(`Fetching tweet ${id} by @${handle}...`);
 
   // 3. Scrape tweet detail + profile (isolated scraper scope)
-  const scraperLayer = makeScraperLayer(config.twitterCookiePath);
-
   const { detail, profile } = yield* Effect.gen(function* () {
+    yield* restoreCookies(config.twitterCookiePath);
     const tweets = yield* TwitterTweets;
     const pub = yield* TwitterPublic;
     const detail = yield* tweets.getTweet(id);
@@ -494,7 +506,7 @@ const main = Effect.gen(function* () {
       postUri: normalizedPost.uri,
       action: "curate"
     });
-    console.log(`Curated: ${curation.status}`);
+    console.log(`Curated: ${curation.previousStatus} → ${curation.newStatus}`);
   }
 });
 
@@ -507,7 +519,7 @@ Effect.runPromise(main).catch((e) => {
 **Step 2: Test manually**
 
 Run: `cd /Users/pooks/Dev/skygest-editorial && bun scripts/twitter-import-url.ts https://x.com/BlakeShaworthy/status/1234567890 --curate`
-Expected: Fetches tweet, normalizes, imports, curates. Output shows import counts.
+Expected: Fetches tweet, normalizes, imports, curates. Output shows import counts and status transition.
 
 **Step 3: Commit**
 
@@ -519,7 +531,7 @@ git commit -m "feat: add twitter-import-url script (SKY-180)"
 
 ---
 
-## Task 7: Build twitter-import-bookmarks.ts script
+## Task 6: Build twitter-import-bookmarks.ts script
 
 Pull the authenticated user's bookmarks and batch-import them.
 
@@ -538,12 +550,12 @@ Pull the authenticated user's bookmarks and batch-import them.
  * Fetches the authenticated user's bookmarked tweets, normalizes them,
  * and imports to staging. Default limit: 50.
  */
-import { Effect, ConfigProvider, Redacted, Stream, Chunk } from "effect";
-import { TwitterTweets, TwitterPublic } from "@pooks/twitter-scraper";
+import { Effect, ConfigProvider, Stream, Chunk } from "effect";
+import { TwitterTweets } from "@pooks/twitter-scraper";
 import { OperatorKeys, TwitterKeys } from "@skygest/platform/ConfigShapes";
 import { validateKeys } from "@skygest/platform/ConfigValidation";
-import { normalizeTweet, normalizeProfile } from "@skygest/ops/TwitterNormalizer";
-import { makeScraperLayer } from "../src/twitter/ScraperLayer";
+import { normalizeTweet } from "@skygest/ops/TwitterNormalizer";
+import { scraperLayer, restoreCookies } from "../src/twitter/ScraperLayer";
 import { importPosts, curatePost } from "../src/twitter/ImportClient";
 import type { NormalizedPost } from "@skygest/ops/TwitterNormalizer";
 import type { ImportExpertInput } from "@skygest/domain/api";
@@ -560,10 +572,9 @@ const main = Effect.gen(function* () {
 
   console.log(`Fetching up to ${limit} bookmarks...`);
 
-  // 2. Scrape bookmarks (isolated scraper scope)
-  const scraperLayer = makeScraperLayer(config.twitterCookiePath);
-
+  // 2. Scrape bookmarks (isolated scraper scope — restore cookies first)
   const tweets = yield* Effect.gen(function* () {
+    yield* restoreCookies(config.twitterCookiePath);
     const tweetsService = yield* TwitterTweets;
     return yield* Stream.runCollect(
       tweetsService.getBookmarks({ limit })
@@ -596,7 +607,7 @@ const main = Effect.gen(function* () {
         handle: tweet.username ?? tweet.userId ?? "unknown",
         domain: "energy",
         source: "twitter-import" as const,
-        tier: "t3"
+        tier: "independent"
       });
     }
   }
@@ -617,8 +628,12 @@ const main = Effect.gen(function* () {
       const curation = yield* curatePost(config.baseUrl, config.operatorSecret, {
         postUri: post.uri,
         action: "curate"
-      }).pipe(Effect.catchAll((e) => Effect.succeed({ status: `failed: ${e.message}` })));
-      console.log(`  Curated ${post.uri}: ${curation.status}`);
+      }).pipe(
+        Effect.catchAll((e) =>
+          Effect.succeed({ postUri: post.uri, action: "curate" as const, previousStatus: null, newStatus: `failed: ${e.message}` as const })
+        )
+      );
+      console.log(`  Curated ${post.uri}: ${curation.newStatus}`);
     }
   }
 });
@@ -644,7 +659,7 @@ git commit -m "feat: add twitter-import-bookmarks script (SKY-180)"
 
 ---
 
-## Task 8: Build twitter-import-timeline.ts script
+## Task 7: Build twitter-import-timeline.ts script
 
 Import recent tweets from a specific expert's timeline.
 
@@ -661,13 +676,14 @@ Import recent tweets from a specific expert's timeline.
  * Usage: bun scripts/twitter-import-timeline.ts <handle> [--limit <n>] [--since <date>] [--tier <tier>]
  *
  * Fetches the expert's profile and recent tweets, normalizes, imports.
+ * Tier must be one of: energy-focused, general-outlet, independent (default).
  */
-import { Effect, ConfigProvider, Redacted, Stream, Chunk } from "effect";
+import { Effect, ConfigProvider, Stream, Chunk } from "effect";
 import { TwitterPublic } from "@pooks/twitter-scraper";
 import { OperatorKeys, TwitterKeys } from "@skygest/platform/ConfigShapes";
 import { validateKeys } from "@skygest/platform/ConfigValidation";
 import { normalizeTweet, normalizeProfile } from "@skygest/ops/TwitterNormalizer";
-import { makeScraperLayer } from "../src/twitter/ScraperLayer";
+import { scraperLayer, restoreCookies } from "../src/twitter/ScraperLayer";
 import { importPosts } from "../src/twitter/ImportClient";
 import type { ExpertTier } from "@skygest/domain/bi";
 
@@ -678,10 +694,11 @@ const limit = limitIdx >= 0 ? parseInt(args[limitIdx + 1]!, 10) : 20;
 const sinceIdx = args.indexOf("--since");
 const sinceDate = sinceIdx >= 0 ? new Date(args[sinceIdx + 1]!).getTime() : undefined;
 const tierIdx = args.indexOf("--tier");
-const tier: ExpertTier = (tierIdx >= 0 ? args[tierIdx + 1] as ExpertTier : "t3") ?? "t3";
+const tier: ExpertTier = (tierIdx >= 0 ? args[tierIdx + 1] as ExpertTier : "independent") ?? "independent";
 
 if (!handle) {
   console.error("Usage: bun scripts/twitter-import-timeline.ts <handle> [--limit <n>] [--since <date>] [--tier <tier>]");
+  console.error("  Tiers: energy-focused, general-outlet, independent (default)");
   process.exit(1);
 }
 
@@ -692,10 +709,9 @@ const main = Effect.gen(function* () {
 
   console.log(`Fetching timeline for @${handle} (limit: ${limit})...`);
 
-  // 2. Scrape profile + tweets (isolated scraper scope)
-  const scraperLayer = makeScraperLayer(config.twitterCookiePath);
-
+  // 2. Scrape profile + tweets (isolated scraper scope — restore cookies first)
   const { profile, tweets } = yield* Effect.gen(function* () {
+    yield* restoreCookies(config.twitterCookiePath);
     const pub = yield* TwitterPublic;
     const profile = yield* pub.getProfile(handle!);
     const tweets = yield* Stream.runCollect(
@@ -764,7 +780,7 @@ git commit -m "feat: add twitter-import-timeline script (SKY-180)"
 
 ---
 
-## Task 9: Build twitter-search.ts script
+## Task 8: Build twitter-search.ts script
 
 Search tweets by keyword and import matching results.
 
@@ -787,7 +803,7 @@ import { TwitterSearch } from "@pooks/twitter-scraper";
 import { OperatorKeys, TwitterKeys } from "@skygest/platform/ConfigShapes";
 import { validateKeys } from "@skygest/platform/ConfigValidation";
 import { normalizeTweet } from "@skygest/ops/TwitterNormalizer";
-import { makeScraperLayer } from "../src/twitter/ScraperLayer";
+import { scraperLayer, restoreCookies } from "../src/twitter/ScraperLayer";
 import { importPosts, curatePost } from "../src/twitter/ImportClient";
 import type { NormalizedPost } from "@skygest/ops/TwitterNormalizer";
 import type { ImportExpertInput } from "@skygest/domain/api";
@@ -812,10 +828,9 @@ const main = Effect.gen(function* () {
 
   console.log(`Searching: "${query}" (mode: ${mode}, limit: ${limit})...`);
 
-  // 2. Search (isolated scraper scope)
-  const scraperLayer = makeScraperLayer(config.twitterCookiePath);
-
+  // 2. Search (isolated scraper scope — restore cookies first)
   const tweets = yield* Effect.gen(function* () {
+    yield* restoreCookies(config.twitterCookiePath);
     const search = yield* TwitterSearch;
     return yield* Stream.runCollect(
       search.searchTweets(query!, { limit, mode })
@@ -847,7 +862,7 @@ const main = Effect.gen(function* () {
         handle: tweet.username ?? tweet.userId ?? "unknown",
         domain: "energy",
         source: "twitter-import" as const,
-        tier: "t3"
+        tier: "independent"
       });
     }
   }
@@ -868,8 +883,12 @@ const main = Effect.gen(function* () {
       const curation = yield* curatePost(config.baseUrl, config.operatorSecret, {
         postUri: post.uri,
         action: "curate"
-      }).pipe(Effect.catchAll((e) => Effect.succeed({ status: `failed: ${e.message}` })));
-      console.log(`  Curated ${post.uri}: ${curation.status}`);
+      }).pipe(
+        Effect.catchAll((e) =>
+          Effect.succeed({ postUri: post.uri, action: "curate" as const, previousStatus: null, newStatus: `failed: ${e.message}` as const })
+        )
+      );
+      console.log(`  Curated ${post.uri}: ${curation.newStatus}`);
     }
   }
 });
@@ -895,9 +914,9 @@ git commit -m "feat: add twitter-search script (SKY-180)"
 
 ---
 
-## Task 10: Update CLAUDE.md and morning-curation skill
+## Task 9: Update CLAUDE.md and morning-curation skill
 
-Document the twitter ingestion capabilities in the editorial workspace context.
+Document the twitter ingestion capabilities in the editorial workspace context. The morning-curation skill gets a note about twitter import but does NOT require twitter setup — it's opt-in.
 
 **Files:**
 - Modify: `skygest-editorial/CLAUDE.md`
@@ -905,9 +924,10 @@ Document the twitter ingestion capabilities in the editorial workspace context.
 
 **Step 1: Add Twitter scripts section to CLAUDE.md**
 
-After the "Where things live" section in `CLAUDE.md`, add:
+After the "Where things live" section (line 44) in `CLAUDE.md`, add:
 
 ```markdown
+
 ## Twitter ingestion (local)
 
 Bluesky posts arrive via cloud ingestion (Cloudflare Worker polling). Twitter posts are ingested locally via scraper scripts, then imported to staging via the operator API.
@@ -918,19 +938,19 @@ Scripts (all in `scripts/`):
 - `bun scripts/twitter-import-timeline.ts <handle> [--limit <n>] [--since <date>]` — import an expert's recent tweets
 - `bun scripts/twitter-search.ts <query> [--limit <n>] [--mode <top|latest>] [--curate]` — search and import
 
-All scripts validate config first (`SKYGEST_OPERATOR_SECRET`, `SKYGEST_STAGING_BASE_URL`, `TWITTER_COOKIE_PATH`). If cookies are stale, re-extract from Chrome and update the cookie file.
+These scripts require `TWITTER_COOKIE_PATH` in `.env` (see `.env.example`). They validate this alongside operator credentials before running. The general `validate-config.ts` and morning curation workflow do NOT require Twitter setup.
 
 Imported tweets use `x://` URIs (e.g., `x://12345/status/67890`). They appear in `list_curation_candidates` alongside Bluesky posts and can be curated, enriched, and picked via the same MCP tools. Thread expansion (`get_post_thread`) is Bluesky-only — Twitter posts are evaluated on their standalone content + enrichment.
+
+If cookies are stale, re-extract from Chrome and update the cookie file at the path in `TWITTER_COOKIE_PATH`.
 ```
 
 **Step 2: Add twitter awareness to morning-curation skill**
 
-In `skygest-editorial/.claude/skills/morning-curation/SKILL.md`, add a note after step 1:
-
-After the line `1. **Pull candidates** — call `list_curation_candidates`...`, add:
+In `skygest-editorial/.claude/skills/morning-curation/SKILL.md`, after step 1 ("Pull candidates"), add a sub-bullet:
 
 ```markdown
-   - If the editor mentions bookmarks, recent tweets, or a specific tweet URL, run the appropriate twitter import script first (`bun scripts/twitter-import-url.ts`, `bun scripts/twitter-import-bookmarks.ts`, etc.) before pulling candidates. This ensures fresh Twitter content is available for curation.
+   - If the editor mentions bookmarks, recent tweets, or a specific tweet URL, offer to run the appropriate twitter import script first (`bun scripts/twitter-import-url.ts`, `bun scripts/twitter-import-bookmarks.ts`, etc.) before pulling candidates. This is optional — morning curation works without Twitter setup.
 ```
 
 **Step 3: Commit**
@@ -943,31 +963,10 @@ git commit -m "docs: document twitter ingestion in CLAUDE.md and curation skill 
 
 ---
 
-## Task 11: Update morning-curation.sh to validate twitter config
-
-The shell entry point should validate twitter config alongside operator config.
-
-**Files:**
-- Modify: `skygest-editorial/scripts/morning-curation.sh`
-
-**Step 1: No code change needed**
-
-The `morning-curation.sh` already calls `bun scripts/validate-config.ts` (line 15), and we updated that script in Task 5 to validate `TwitterKeys` alongside `OperatorKeys`. The shell script automatically gets twitter validation for free.
-
-Verify by running:
-
-Run: `cd /Users/pooks/Dev/skygest-editorial && ./scripts/morning-curation.sh`
-Expected: "Config validation passed" showing all three keys (base URL, operator secret, cookie path).
-
-**Step 2: Commit (skip if no changes)**
-
-No commit needed — validation was already wired in Task 5.
-
----
-
 ## Out of scope (documented for future tickets)
 
-- **Twitter cookie freshness validation** — `TwitterKeys` currently only checks the path exists as a string. A future enhancement could read the file, parse cookie expiry dates, and fail if cookies are stale. Extension point: add a `Config.mapOrFail` in `TwitterKeys` that reads and validates the file.
-- **Twitter thread expansion in MCP** — `get_post_thread` / `get_thread_document` are Bluesky-only. Wiring the scraper's `getTweet` detail + `getReplyTree`/`getSelfThread` projections into an MCP tool would require running the scraper server-side, which is blocked by CycleTLS not running on CF Workers.
-- **SKY-142** — Fresh checkout requiring linked scraper. The editorial dependency on `@pooks/twitter-scraper` inherits this issue. A future fix should make the scraper a proper npm package or use lazy loading.
+- **Twitter cookie freshness validation** — `TwitterKeys` currently checks the path is non-empty but not that the file exists, contains valid JSON, or has unexpired cookies. Extension point: add a validation script that parses cookie expiry dates.
+- **Twitter thread expansion in MCP** — `get_post_thread` / `get_thread_document` are Bluesky-only. Wiring the scraper's `getTweet` detail + `getReplyTree`/`getSelfThread` projections into an MCP tool would require running the scraper server-side, blocked by CycleTLS not running on CF Workers.
+- **SKY-142** — Fresh checkout requiring linked scraper. The editorial `file:` dependency inherits this coupling. A future fix should make the scraper a proper npm package.
 - **Operator secret naming unification** — `OPERATOR_SECRET` (worker) vs `SKYGEST_OPERATOR_SECRET` (editorial). Not addressed here.
+- **StagingOperatorClient consolidation** — The editorial ImportClient duplicates ~60 lines of HTTP plumbing. If the MCP dependency in StagingOperatorClient is ever factored out, editorial could import it directly via the `@skygest/ops/*` mapping.
