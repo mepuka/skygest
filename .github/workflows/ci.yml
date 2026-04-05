@@ -48,7 +48,22 @@ jobs:
       - name: Build web assets
         run: bun run build:web:prod
 
-      - name: Deploy to staging
+      - name: Deploy agent to staging
         run: bunx wrangler deploy --config wrangler.agent.toml --env staging
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Deploy ingest to staging
+        run: bunx wrangler deploy --config wrangler.toml --env staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Apply D1 migrations
+        run: |
+          curl -sf --retry 3 --retry-delay 5 \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $OPERATOR_SECRET" \
+            https://skygest-bi-agent-staging.kokokessy.workers.dev/admin/ops/migrate
+        env:
+          OPERATOR_SECRET: ${{ secrets.OPERATOR_SECRET }}
