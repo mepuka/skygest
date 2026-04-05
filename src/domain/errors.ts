@@ -1,6 +1,6 @@
 import { Result, Schema } from "effect";
 import { CandidatePayloadStage } from "./candidatePayload";
-import { Did, PostUri } from "./types";
+import { Did, PostUri, TranscriptR2Key } from "./types";
 import {
   decodeJsonStringEitherWith,
   encodeJsonStringWith
@@ -190,6 +190,15 @@ export class EnrichmentAssetFetchError extends Schema.TaggedErrorClass<Enrichmen
     message: Schema.String,
     status: Schema.optionalKey(Schema.Number),
     operation: Schema.String
+  }
+) {}
+
+export class TranscriptStorageError extends Schema.TaggedErrorClass<TranscriptStorageError>()(
+  "TranscriptStorageError",
+  {
+    operation: Schema.String,
+    message: Schema.String,
+    key: Schema.optionalKey(TranscriptR2Key)
   }
 ) {}
 

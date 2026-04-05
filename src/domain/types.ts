@@ -70,6 +70,13 @@ export const PodcastSegmentId = Schema.NonEmptyString.pipe(
 });
 export type PodcastSegmentId = Schema.Schema.Type<typeof PodcastSegmentId>;
 
+export const TranscriptR2Key = Schema.NonEmptyString.pipe(
+  Schema.brand("TranscriptR2Key")
+).annotate({
+  description: "R2 object key for a stored podcast transcript"
+});
+export type TranscriptR2Key = Schema.Schema.Type<typeof TranscriptR2Key>;
+
 export const PlatformSchema = Schema.Literals(["bluesky", "twitter"]);
 export type Platform = Schema.Schema.Type<typeof PlatformSchema>;
 

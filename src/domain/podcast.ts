@@ -6,7 +6,8 @@ import {
   NonNegativeInt,
   PodcastEpisodeId,
   PodcastSegmentId,
-  PublicationId
+  PublicationId,
+  TranscriptR2Key
 } from "./types";
 
 export const PodcastEpisodeLifecycleState = Schema.Literals([
@@ -135,3 +136,78 @@ export const PodcastEpisodeBundle = Schema.Struct({
   Schema.check(Schema.makeFilter(validatePodcastEpisodeBundle))
 );
 export type PodcastEpisodeBundle = Schema.Schema.Type<typeof PodcastEpisodeBundle>;
+
+const TranscriptSpeakerId = Schema.String.pipe(
+  Schema.check(Schema.isMinLength(1)),
+  Schema.brand("TranscriptSpeakerId")
+);
+export type TranscriptSpeakerId = Schema.Schema.Type<typeof TranscriptSpeakerId>;
+
+const validateTranscriptSegment = (value: {
+  readonly startMs: number;
+  readonly endMs: number;
+}) =>
+  value.endMs > value.startMs
+    ? undefined
+    : "podcast transcript segment endMs must be greater than startMs";
+
+export const PodcastTranscriptSpeaker = Schema.Struct({
+  id: TranscriptSpeakerId,
+  resolvedDid: Schema.NullOr(Did),
+  name: Schema.String.pipe(Schema.check(Schema.isMinLength(1)))
+});
+export type PodcastTranscriptSpeaker = Schema.Schema.Type<
+  typeof PodcastTranscriptSpeaker
+>;
+
+export const PodcastTranscriptSegment = Schema.Struct({
+  startMs: NonNegativeInt,
+  endMs: NonNegativeInt,
+  speakerId: TranscriptSpeakerId,
+  text: Schema.String.pipe(Schema.check(Schema.isMinLength(1)))
+}).pipe(
+  Schema.check(Schema.makeFilter(validateTranscriptSegment))
+);
+export type PodcastTranscriptSegment = Schema.Schema.Type<
+  typeof PodcastTranscriptSegment
+>;
+
+const validatePodcastTranscript = (value: {
+  readonly durationMs: number;
+  readonly speakers: ReadonlyArray<PodcastTranscriptSpeaker>;
+  readonly segments: ReadonlyArray<PodcastTranscriptSegment>;
+}) => {
+  const speakerIds = value.speakers.map((speaker) => speaker.id);
+  if (new Set(speakerIds).size !== speakerIds.length) {
+    return "podcast transcript speakers must not repeat speaker ids";
+  }
+
+  if (!value.segments.every((segment) => speakerIds.includes(segment.speakerId))) {
+    return "podcast transcript segments must reference known speaker ids";
+  }
+
+  if (!value.segments.every((segment) => segment.endMs <= value.durationMs)) {
+    return "podcast transcript segments must end before durationMs";
+  }
+
+  for (let index = 1; index < value.segments.length; index++) {
+    if (value.segments[index - 1]!.startMs > value.segments[index]!.startMs) {
+      return "podcast transcript segments must be ordered by startMs";
+    }
+  }
+
+  return undefined;
+};
+
+export const PodcastTranscript = Schema.Struct({
+  format: Schema.Literal("skygest-transcript-v1"),
+  showSlug: PublicationId,
+  episodeId: PodcastEpisodeId,
+  transcriptR2Key: Schema.optionalKey(TranscriptR2Key),
+  durationMs: NonNegativeInt,
+  speakers: Schema.Array(PodcastTranscriptSpeaker),
+  segments: Schema.Array(PodcastTranscriptSegment)
+}).pipe(
+  Schema.check(Schema.makeFilter(validatePodcastTranscript))
+);
+export type PodcastTranscript = Schema.Schema.Type<typeof PodcastTranscript>;
