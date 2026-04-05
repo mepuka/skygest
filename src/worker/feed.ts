@@ -1,6 +1,8 @@
+import { ConfigProvider, Effect } from "effect";
 import { handleAdminRequest } from "../admin/Router";
 import { handleApiRequest } from "../api/Router";
 import { handleMcpRequest } from "../mcp/Router";
+import { AppConfig } from "../platform/Config";
 import type { AgentWorkerEnvBindings } from "../platform/Env";
 import {
   authorizeOperator,
@@ -30,7 +32,23 @@ export const fetch = async (request: Request, env: AgentWorkerEnvBindings) => {
   const url = new URL(request.url);
 
   if (url.pathname === "/health") {
-    return new Response("ok");
+    const provider = ConfigProvider.fromUnknown(
+      Object.fromEntries(
+        Object.entries(env).filter(
+          (entry): entry is [string, string] => typeof entry[1] === "string"
+        )
+      )
+    );
+    const result = await Effect.runPromise(
+      Effect.result(AppConfig.validate(provider))
+    );
+    if (result._tag === "Success") {
+      return new Response("ok");
+    }
+    return new Response(
+      JSON.stringify({ status: "unhealthy", error: result.failure.summary }),
+      { status: 503, headers: { "Content-Type": "application/json" } }
+    );
   }
 
   if (url.pathname.startsWith("/api/")) {

@@ -3,6 +3,7 @@ import { Effect, ConfigProvider } from "effect";
 import {
   OperatorKeys,
   WorkerKeys,
+  WorkerDeployKeys,
   EnrichmentKeys
 } from "../../src/platform/ConfigShapes";
 
@@ -78,6 +79,40 @@ describe("ConfigShapes", () => {
         const provider = ConfigProvider.fromUnknown({});
         const result = yield* WorkerKeys.mcpLimitDefault.parse(provider);
         expect(result).toBe(20);
+      })
+    );
+  });
+
+  describe("WorkerDeployKeys", () => {
+    it.effect("operatorSecret fails when missing (unlike WorkerKeys)", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({});
+        // WorkerKeys allows empty default
+        const workerResult = yield* WorkerKeys.operatorSecret.parse(provider);
+        expect(workerResult).toBeDefined();
+        // WorkerDeployKeys requires non-empty
+        const deployResult = yield* Effect.result(
+          WorkerDeployKeys.operatorSecret.parse(provider)
+        );
+        expect(deployResult._tag).toBe("Failure");
+      })
+    );
+
+    it.effect("operatorSecret fails when empty string", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({ OPERATOR_SECRET: "" });
+        const result = yield* Effect.result(
+          WorkerDeployKeys.operatorSecret.parse(provider)
+        );
+        expect(result._tag).toBe("Failure");
+      })
+    );
+
+    it.effect("operatorSecret succeeds when non-empty", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({ OPERATOR_SECRET: "real-secret" });
+        const result = yield* WorkerDeployKeys.operatorSecret.parse(provider);
+        expect(result).toBeDefined();
       })
     );
   });

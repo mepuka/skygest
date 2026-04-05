@@ -62,6 +62,16 @@ export const WorkerKeys = {
   )
 } as const;
 
+// ── Worker deployment validation keys ───────────────────────────────────
+// WorkerKeys.operatorSecret defaults to "" for backward compat in local
+// dev and AppConfig.layer. For deployment validation (/health), use this
+// stricter set that requires a non-empty OPERATOR_SECRET.
+
+export const WorkerDeployKeys = {
+  ...WorkerKeys,
+  operatorSecret: nonEmptyRedacted("OPERATOR_SECRET")
+} as const;
+
 // ── Enrichment keys ────────────────────────────────────────────────────
 
 export const EnrichmentKeys = {

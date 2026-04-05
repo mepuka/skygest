@@ -1,6 +1,6 @@
 import { Array, Config, ConfigProvider, ServiceMap, Effect, Layer, Result } from "effect";
 import { CloudflareEnv } from "./Env";
-import { WorkerKeys, EnrichmentKeys } from "./ConfigShapes";
+import { WorkerDeployKeys, WorkerKeys, EnrichmentKeys } from "./ConfigShapes";
 import { validateKeys } from "./ConfigValidation";
 
 const WorkerConfig = Config.all(WorkerKeys);
@@ -40,7 +40,8 @@ export class AppConfig extends ServiceMap.Service<
   );
 
   /** Validate all worker + enrichment config keys at once.
-   *  Use at startup or /health endpoints for diagnostic output. */
+   *  Uses WorkerDeployKeys which requires non-empty OPERATOR_SECRET
+   *  (unlike WorkerKeys which defaults to "" for local dev). */
   static validate = (provider: ConfigProvider.ConfigProvider) =>
-    validateKeys({ ...WorkerKeys, ...EnrichmentKeys }, provider);
+    validateKeys({ ...WorkerDeployKeys, ...EnrichmentKeys }, provider);
 }

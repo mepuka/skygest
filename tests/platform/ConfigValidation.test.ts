@@ -4,7 +4,8 @@ import {
   validateKeys,
   ConfigValidationError
 } from "../../src/platform/ConfigValidation";
-import { OperatorKeys, EnrichmentKeys } from "../../src/platform/ConfigShapes";
+import { OperatorKeys, EnrichmentKeys, WorkerDeployKeys } from "../../src/platform/ConfigShapes";
+import { AppConfig } from "../../src/platform/Config";
 
 describe("ConfigValidation", () => {
   it.effect("reports all missing keys at once — not fail-fast", () =>
@@ -57,6 +58,36 @@ describe("ConfigValidation", () => {
           expect(error.successes).toContain("visionModel");
         }
       }
+    })
+  );
+
+  it.effect("AppConfig.validate catches missing OPERATOR_SECRET", () =>
+    Effect.gen(function* () {
+      // Only provide GOOGLE_API_KEY — OPERATOR_SECRET missing
+      const provider = ConfigProvider.fromUnknown({
+        GOOGLE_API_KEY: "test-key"
+      });
+      const result = yield* Effect.result(AppConfig.validate(provider));
+      expect(result._tag).toBe("Failure");
+      if (Result.isFailure(result)) {
+        const error = result.failure;
+        if (error instanceof ConfigValidationError) {
+          const failedKeys = error.failures.map((f) => f.key);
+          expect(failedKeys).toContain("operatorSecret");
+        }
+      }
+    })
+  );
+
+  it.effect("AppConfig.validate succeeds with all required keys", () =>
+    Effect.gen(function* () {
+      const provider = ConfigProvider.fromUnknown({
+        OPERATOR_SECRET: "real-secret",
+        GOOGLE_API_KEY: "test-key"
+      });
+      const result = yield* AppConfig.validate(provider);
+      expect(result.operatorSecret).toBeDefined();
+      expect(result.googleApiKey).toBeDefined();
     })
   );
 
