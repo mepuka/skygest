@@ -11,6 +11,28 @@ import {
   toAuthErrorResponse
 } from "./operatorAuth";
 
+/**
+ * Effect's McpServer.layerHttp returns 200 with empty body for JSON-RPC
+ * notifications. The MCP spec requires 202 Accepted with no body. This
+ * breaks rmcp-based clients (Codex CLI, Goose). Convert the response to
+ * be spec-compliant. See: SKY-177
+ */
+const patchMcpNotificationResponse = async (
+  response: Response
+): Promise<Response> => {
+  if (response.status !== 200) return response;
+
+  const cl = response.headers.get("content-length");
+  if (cl !== null && cl !== "0") return response;
+
+  const body = await response.text();
+  if (body.length > 0) {
+    return new Response(body, { status: 200, headers: response.headers });
+  }
+
+  return new Response(null, { status: 202, headers: response.headers });
+};
+
 export const fetch = async (request: Request, env: AgentWorkerEnvBindings) => {
   const url = new URL(request.url);
 
@@ -30,7 +52,8 @@ export const fetch = async (request: Request, env: AgentWorkerEnvBindings) => {
       await logDeniedOperatorRequest(request, error);
       return toAuthErrorResponse(error);
     }
-    return handleMcpRequest(request, env, identity);
+    const response = await handleMcpRequest(request, env, identity);
+    return patchMcpNotificationResponse(response);
   }
 
   if (url.pathname.startsWith("/admin/ingest/")) {
