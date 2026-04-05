@@ -1,26 +1,15 @@
 import { Schema } from "effect";
 import type { KnowledgePost } from "./bi";
-import { Did, PostUri } from "./types";
+import { Did, PodcastSegmentUri, PostUri } from "./types";
 
 const PODCAST_SEGMENT_URI_PREFIX = "podcast-segment://";
-
-const isPodcastSegmentUriString = (value: string) =>
-  value.startsWith(PODCAST_SEGMENT_URI_PREFIX) &&
-  value.length > PODCAST_SEGMENT_URI_PREFIX.length &&
-  !/\s/u.test(value);
 
 const isContentIdString = (value: string) =>
   value.startsWith("at://") ||
   value.startsWith("x://") ||
-  isPodcastSegmentUriString(value);
-
-export const PodcastSegmentUri = Schema.String.pipe(
-  Schema.check(Schema.makeFilter(isPodcastSegmentUriString)),
-  Schema.brand("PodcastSegmentUri")
-).annotate({
-  description: "Podcast segment URI, e.g. podcast-segment://catalyst-canary-media/2026-04-04/segment-3"
-});
-export type PodcastSegmentUri = Schema.Schema.Type<typeof PodcastSegmentUri>;
+  (value.startsWith(PODCAST_SEGMENT_URI_PREFIX) &&
+    value.length > PODCAST_SEGMENT_URI_PREFIX.length &&
+    !/\s/u.test(value));
 
 export const ContentType = Schema.Literals(["post", "podcast-segment"]);
 export type ContentType = Schema.Schema.Type<typeof ContentType>;
@@ -65,7 +54,6 @@ export type PostContentItemSource = Pick<
   "uri" | "did" | "text" | "createdAt"
 >;
 
-export const isPodcastSegmentUri = Schema.is(PodcastSegmentUri);
 export const isContentId = Schema.is(ContentId);
 export const isContentItem = Schema.is(ContentItem);
 
@@ -75,7 +63,7 @@ export const isPostContentId = (value: string): value is ContentId =>
 export const isPodcastSegmentContentId = (
   value: ContentId
 ): value is ContentId =>
-  isPodcastSegmentUriString(value);
+  value.startsWith("podcast-segment://");
 
 /** Safe widening — every PostUri matches ContentId's accepted patterns. */
 export const postUriToContentId = (uri: PostUri): ContentId =>
@@ -85,11 +73,6 @@ export const postUriToContentId = (uri: PostUri): ContentId =>
 export const podcastSegmentUriToContentId = (
   uri: PodcastSegmentUri
 ): ContentId => uri as unknown as ContentId;
-
-export const podcastSegmentUriFromId = (segmentId: string): PodcastSegmentUri =>
-  Schema.decodeUnknownSync(PodcastSegmentUri)(
-    `${PODCAST_SEGMENT_URI_PREFIX}${segmentId}`
-  );
 
 export const contentTypeFromContentId = (contentId: ContentId): ContentType =>
   isPodcastSegmentContentId(contentId) ? "podcast-segment" : "post";

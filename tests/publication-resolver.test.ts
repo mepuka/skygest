@@ -93,6 +93,18 @@ describe("resolvePublicationEntry", () => {
   });
 });
 
+describe("buildPublicationIndex", () => {
+  it("skips entries without hostnames", () => {
+    const mixedIndex = buildPublicationIndex([
+      { hostname: "reuters.com" },
+      { hostname: null }
+    ]);
+
+    expect(mixedIndex.size).toBe(1);
+    expect(mixedIndex.get("reuters.com")).toEqual({ hostname: "reuters.com" });
+  });
+});
+
 describe("publicationDisplayLabel", () => {
   it("returns a friendly label for mapped publications", () => {
     expect(publicationDisplayLabel("reuters.com")).toBe("Reuters");

@@ -63,6 +63,7 @@ export const buildPublicationIndex = <A extends PublicationLike>(
 ): ReadonlyMap<string, A> => {
   const map = new Map<string, A>();
   for (const item of items) {
+    // Podcast shows do not participate in hostname-based resolution.
     if (item.hostname === null) {
       continue;
     }

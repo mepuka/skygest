@@ -2,7 +2,9 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "@effect/vitest";
 
 type PublicationSeedEntry = {
-  readonly hostname: string;
+  readonly hostname: string | null;
+  readonly showSlug?: string | null;
+  readonly medium?: "text" | "podcast";
   readonly tier: string;
 };
 
@@ -15,7 +17,9 @@ const publicationsSeed = JSON.parse(
 ) as PublicationSeedManifest;
 
 const seededHostnames = new Set(
-  publicationsSeed.publications.map((entry) => entry.hostname)
+  publicationsSeed.publications.flatMap((entry) =>
+    entry.hostname === null ? [] : [entry.hostname]
+  )
 );
 
 describe("checked-in publications seed quality", () => {

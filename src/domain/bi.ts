@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { AtUri, Did, HttpsUrl, PostUri } from "./types";
+import { AtUri, Did, HttpsUrl, PostUri, PublicationId } from "./types";
 import { EmbedKind, EmbedPayload } from "./embed";
 
 const isFiniteNumber = (value: number) => Number.isFinite(value);
@@ -547,41 +547,67 @@ const PublicationFeedUrl = Schema.NullOr(Schema.String).pipe(
 );
 
 const PublicationExternalId = Schema.NullOr(
-  Schema.String.pipe(Schema.check(Schema.isMinLength(1)))
+  Schema.NonEmptyString
 ).pipe(
   Schema.withDecodingDefaultKey(() => null)
 );
 
-const hasValidPublicationIdentity = (value: {
+const validatePublicationIdentity = (value: {
   readonly medium: PublicationMedium;
   readonly hostname: string | null;
   readonly showSlug: string | null;
   readonly feedUrl: string | null;
   readonly appleId: string | null;
   readonly spotifyId: string | null;
-}) =>
-  (value.medium === "text" &&
-    value.hostname !== null &&
-    value.showSlug === null &&
-    value.feedUrl === null &&
-    value.appleId === null &&
-    value.spotifyId === null) ||
-  (value.medium === "podcast" &&
-    value.hostname === null &&
-    value.showSlug !== null);
+}) => {
+  if (value.medium === "text") {
+    if (value.hostname === null) {
+      return "text publications require a hostname";
+    }
+    if (value.showSlug !== null) {
+      return "text publications cannot define a show slug";
+    }
+    if (
+      value.feedUrl !== null ||
+      value.appleId !== null ||
+      value.spotifyId !== null
+    ) {
+      return "text publications cannot define podcast metadata";
+    }
+    return undefined;
+  }
 
-export const PublicationSeed = Schema.Struct({
-  medium: PublicationMedium.pipe(
-    Schema.withDecodingDefaultKey(() => "text" as const)
-  ),
+  if (value.hostname !== null) {
+    return "podcast publications cannot define a hostname";
+  }
+  if (value.showSlug === null) {
+    return "podcast publications require a show slug";
+  }
+
+  return undefined;
+};
+
+const PublicationIdentityFields = {
+  medium: PublicationMedium,
   hostname: PublicationHostname,
   showSlug: PublicationShowSlug,
   feedUrl: PublicationFeedUrl,
   appleId: PublicationExternalId,
-  spotifyId: PublicationExternalId,
+  spotifyId: PublicationExternalId
+} as const;
+
+const PublicationSeedIdentityFields = {
+  ...PublicationIdentityFields,
+  medium: PublicationMedium.pipe(
+    Schema.withDecodingDefaultKey(() => "text" as const)
+  )
+} as const;
+
+export const PublicationSeed = Schema.Struct({
+  ...PublicationSeedIdentityFields,
   tier: PublicationTier
 }).pipe(
-  Schema.check(Schema.makeFilter(hasValidPublicationIdentity))
+  Schema.check(Schema.makeFilter(validatePublicationIdentity))
 );
 export type PublicationSeed = Schema.Schema.Type<typeof PublicationSeed>;
 
@@ -593,36 +619,26 @@ export const PublicationSeedManifest = Schema.Struct({
 export type PublicationSeedManifest = Schema.Schema.Type<typeof PublicationSeedManifest>;
 
 export const PublicationRecord = Schema.Struct({
-  publicationId: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
-  medium: PublicationMedium,
-  hostname: Schema.NullOr(Schema.String),
-  showSlug: Schema.NullOr(Schema.String),
-  feedUrl: Schema.NullOr(Schema.String),
-  appleId: Schema.NullOr(Schema.String),
-  spotifyId: Schema.NullOr(Schema.String),
+  publicationId: PublicationId,
+  ...PublicationIdentityFields,
   tier: PublicationTier,
   source: PublicationSource,
   firstSeenAt: Schema.Number,
   lastSeenAt: Schema.Number
 }).pipe(
-  Schema.check(Schema.makeFilter(hasValidPublicationIdentity))
+  Schema.check(Schema.makeFilter(validatePublicationIdentity))
 );
 export type PublicationRecord = Schema.Schema.Type<typeof PublicationRecord>;
 
 export const PublicationListItem = Schema.Struct({
-  publicationId: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
-  medium: PublicationMedium,
-  hostname: Schema.NullOr(Schema.String),
-  showSlug: Schema.NullOr(Schema.String),
-  feedUrl: Schema.NullOr(Schema.String),
-  appleId: Schema.NullOr(Schema.String),
-  spotifyId: Schema.NullOr(Schema.String),
+  publicationId: PublicationId,
+  ...PublicationIdentityFields,
   tier: PublicationTier,
   source: PublicationSource,
   postCount: Schema.Number,
   latestPostAt: Schema.NullOr(Schema.Number)
 }).pipe(
-  Schema.check(Schema.makeFilter(hasValidPublicationIdentity))
+  Schema.check(Schema.makeFilter(validatePublicationIdentity))
 );
 export type PublicationListItem = Schema.Schema.Type<typeof PublicationListItem>;
 

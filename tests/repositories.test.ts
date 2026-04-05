@@ -241,6 +241,68 @@ describe("repository layers", () => {
     }).pipe(Effect.provide(makeBiLayer()))
   );
 
+  it.effect("upserts podcast publications idempotently by show slug", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+
+      const publications = yield* PublicationsRepo;
+      const initialManifest = {
+        ontologyVersion: "test",
+        snapshotVersion: "seed-1",
+        publications: [{
+          medium: "podcast" as const,
+          hostname: null,
+          showSlug: "the-carbon-copy",
+          feedUrl: "https://example.com/carbon-copy-v1.rss",
+          appleId: "apple-1",
+          spotifyId: "spotify-1",
+          tier: "energy-focused" as const
+        }]
+      };
+      const updatedManifest = {
+        ontologyVersion: "test",
+        snapshotVersion: "seed-2",
+        publications: [{
+          medium: "podcast" as const,
+          hostname: null,
+          showSlug: "the-carbon-copy",
+          feedUrl: "https://example.com/carbon-copy-v2.rss",
+          appleId: "apple-2",
+          spotifyId: "spotify-1",
+          tier: "energy-focused" as const
+        }]
+      };
+
+      yield* publications.seedCurated(initialManifest, 1_710_000_000_000);
+      yield* publications.seedCurated(updatedManifest, 1_710_000_000_500);
+
+      const sql = yield* SqlClient.SqlClient;
+      const [countRow] = yield* sql<{ count: number }>`
+        SELECT COUNT(*) as count
+        FROM publications
+        WHERE show_slug = 'the-carbon-copy'
+      `;
+      const rows = yield* publications.getByShowSlugs(["the-carbon-copy"]);
+
+      expect(countRow?.count).toBe(1);
+      expect(rows).toEqual([
+        {
+          publicationId: "the-carbon-copy",
+          medium: "podcast",
+          hostname: null,
+          showSlug: "the-carbon-copy",
+          feedUrl: "https://example.com/carbon-copy-v2.rss",
+          appleId: "apple-2",
+          spotifyId: "spotify-1",
+          tier: "energy-focused",
+          source: "seed",
+          firstSeenAt: 1_710_000_000_000,
+          lastSeenAt: 1_710_000_000_500
+        }
+      ]);
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
   it.effect("link imageUrl round-trips through KnowledgeRepo", () =>
     Effect.gen(function* () {
       yield* seedKnowledgeBase();

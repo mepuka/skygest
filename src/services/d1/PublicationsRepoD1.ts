@@ -3,6 +3,8 @@ import { SqlClient } from "effect/unstable/sql";
 import { PublicationsRepo } from "../PublicationsRepo";
 import type {
   ListPublicationsInput,
+  PublicationRecord,
+  PublicationSeed,
   PublicationSeedManifest,
   SeedPublicationsResult
 } from "../../domain/bi";
@@ -16,6 +18,27 @@ import {
 import { decodeWithDbError } from "./schemaDecode";
 
 const isDefined = <A>(value: A | null): value is A => value !== null;
+
+const emptyPublicationRecords: ReadonlyArray<PublicationRecord> = [];
+
+const chunkValues = <A>(values: ReadonlyArray<A>, size: number) => {
+  const chunks: Array<ReadonlyArray<A>> = [];
+  for (let i = 0; i < values.length; i += size) {
+    chunks.push(values.slice(i, i + size));
+  }
+  return chunks;
+};
+
+const publicationIdFromSeed = (publication: PublicationSeed) => {
+  if (publication.medium === "text" && publication.hostname !== null) {
+    return publication.hostname;
+  }
+  if (publication.medium === "podcast" && publication.showSlug !== null) {
+    return publication.showSlug;
+  }
+
+  return null;
+};
 
 const PublicationListRowSchema = Schema.Struct({
   publicationId: Schema.String,
@@ -46,7 +69,13 @@ export const PublicationsRepoD1 = {
           Effect.forEach(
             validated.publications,
             (pub) => {
-              const publicationId = pub.hostname ?? pub.showSlug!;
+              const publicationId = publicationIdFromSeed(pub);
+
+              if (publicationId === null) {
+                return Effect.die(
+                  new Error("publication seed identity invariant violated after validation")
+                );
+              }
 
               return pub.medium === "text"
                 ? sql`
@@ -272,12 +301,9 @@ export const PublicationsRepoD1 = {
     const PublicationRecordRowsSchema = Schema.Array(PublicationRecordRowSchema);
 
     const getByHostnames = (hostnames: ReadonlyArray<string>) => {
-      if (hostnames.length === 0) return Effect.succeed([] as any[]);
+      if (hostnames.length === 0) return Effect.succeed(emptyPublicationRecords);
 
-      const chunks: string[][] = [];
-      for (let i = 0; i < hostnames.length; i += 50) {
-        chunks.push(hostnames.slice(i, i + 50) as string[]);
-      }
+      const chunks = chunkValues(hostnames, 50);
 
       return Effect.forEach(chunks, (chunk) => {
         const placeholders = chunk.map((h) => sql`${h}`);
@@ -318,12 +344,9 @@ export const PublicationsRepoD1 = {
     };
 
     const getByShowSlugs = (showSlugs: ReadonlyArray<string>) => {
-      if (showSlugs.length === 0) return Effect.succeed([] as any[]);
+      if (showSlugs.length === 0) return Effect.succeed(emptyPublicationRecords);
 
-      const chunks: string[][] = [];
-      for (let i = 0; i < showSlugs.length; i += 50) {
-        chunks.push(showSlugs.slice(i, i + 50) as string[]);
-      }
+      const chunks = chunkValues(showSlugs, 50);
 
       return Effect.forEach(chunks, (chunk) => {
         const placeholders = chunk.map((showSlug) => sql`${showSlug}`);
