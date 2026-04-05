@@ -1,10 +1,13 @@
 import { describe, expect, it } from "@effect/vitest";
 import {
   buildPublicationIndex,
+  buildPodcastShowIndex,
   extractRootDomain,
   publicationDisplayLabel,
+  resolvePodcastShowEntry,
   resolvePublicationEntry,
   type PublicationLike,
+  type PodcastShowLike,
 } from "../src/source/publicationResolver";
 import { brandShortenerMap } from "../src/source/brandShorteners";
 
@@ -21,6 +24,13 @@ const entries: ReadonlyArray<PublicationLike> = [
 ];
 
 const index = buildPublicationIndex(entries);
+
+const podcastEntries: ReadonlyArray<PodcastShowLike> = [
+  { showSlug: "catalyst-with-shayle-kann" },
+  { showSlug: "the-carbon-copy" }
+];
+
+const podcastIndex = buildPodcastShowIndex(podcastEntries);
 
 describe("extractRootDomain", () => {
   it("returns a bare domain unchanged", () => {
@@ -83,6 +93,18 @@ describe("resolvePublicationEntry", () => {
   });
 });
 
+describe("buildPublicationIndex", () => {
+  it("skips entries without hostnames", () => {
+    const mixedIndex = buildPublicationIndex([
+      { hostname: "reuters.com" },
+      { hostname: null }
+    ]);
+
+    expect(mixedIndex.size).toBe(1);
+    expect(mixedIndex.get("reuters.com")).toEqual({ hostname: "reuters.com" });
+  });
+});
+
 describe("publicationDisplayLabel", () => {
   it("returns a friendly label for mapped publications", () => {
     expect(publicationDisplayLabel("reuters.com")).toBe("Reuters");
@@ -100,5 +122,28 @@ describe("publicationDisplayLabel", () => {
     ]) {
       expect(publicationDisplayLabel(hostname), `${hostname} should not display as a publication`).toBeNull();
     }
+  });
+});
+
+describe("resolvePodcastShowEntry", () => {
+  it("matches a show slug exactly", () => {
+    const result = resolvePodcastShowEntry(
+      "catalyst-with-shayle-kann",
+      podcastIndex
+    );
+    expect(result).toEqual({ showSlug: "catalyst-with-shayle-kann" });
+  });
+
+  it("normalizes casing and surrounding whitespace", () => {
+    const result = resolvePodcastShowEntry(
+      "  The-Carbon-Copy  ",
+      podcastIndex
+    );
+    expect(result).toEqual({ showSlug: "the-carbon-copy" });
+  });
+
+  it("returns null for unknown show slugs", () => {
+    const result = resolvePodcastShowEntry("unknown-show", podcastIndex);
+    expect(result).toBeNull();
   });
 });

@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { AtUri, Did, HttpsUrl, PostUri } from "./types";
+import { AtUri, Did, HttpsUrl, PostUri, PublicationId } from "./types";
 import { EmbedKind, EmbedPayload } from "./embed";
 
 const isFiniteNumber = (value: number) => Number.isFinite(value);
@@ -529,10 +529,86 @@ export type PublicationTier = Schema.Schema.Type<typeof PublicationTier>;
 export const PublicationSource = Schema.Literals(["seed", "discovered"]);
 export type PublicationSource = Schema.Schema.Type<typeof PublicationSource>;
 
+export const PublicationMedium = Schema.Literals(["text", "podcast"]);
+export type PublicationMedium = Schema.Schema.Type<typeof PublicationMedium>;
+
+const PublicationHostname = Schema.NullOr(Schema.String).pipe(
+  Schema.withDecodingDefaultKey(() => null)
+);
+
+const PublicationShowSlug = Schema.NullOr(
+  Schema.String.pipe(Schema.check(Schema.isMinLength(1)))
+).pipe(
+  Schema.withDecodingDefaultKey(() => null)
+);
+
+const PublicationFeedUrl = Schema.NullOr(Schema.String).pipe(
+  Schema.withDecodingDefaultKey(() => null)
+);
+
+const PublicationExternalId = Schema.NullOr(
+  Schema.NonEmptyString
+).pipe(
+  Schema.withDecodingDefaultKey(() => null)
+);
+
+const validatePublicationIdentity = (value: {
+  readonly medium: PublicationMedium;
+  readonly hostname: string | null;
+  readonly showSlug: string | null;
+  readonly feedUrl: string | null;
+  readonly appleId: string | null;
+  readonly spotifyId: string | null;
+}) => {
+  if (value.medium === "text") {
+    if (value.hostname === null) {
+      return "text publications require a hostname";
+    }
+    if (value.showSlug !== null) {
+      return "text publications cannot define a show slug";
+    }
+    if (
+      value.feedUrl !== null ||
+      value.appleId !== null ||
+      value.spotifyId !== null
+    ) {
+      return "text publications cannot define podcast metadata";
+    }
+    return undefined;
+  }
+
+  if (value.hostname !== null) {
+    return "podcast publications cannot define a hostname";
+  }
+  if (value.showSlug === null) {
+    return "podcast publications require a show slug";
+  }
+
+  return undefined;
+};
+
+const PublicationIdentityFields = {
+  medium: PublicationMedium,
+  hostname: PublicationHostname,
+  showSlug: PublicationShowSlug,
+  feedUrl: PublicationFeedUrl,
+  appleId: PublicationExternalId,
+  spotifyId: PublicationExternalId
+} as const;
+
+const PublicationSeedIdentityFields = {
+  ...PublicationIdentityFields,
+  medium: PublicationMedium.pipe(
+    Schema.withDecodingDefaultKey(() => "text" as const)
+  )
+} as const;
+
 export const PublicationSeed = Schema.Struct({
-  hostname: Schema.String,
+  ...PublicationSeedIdentityFields,
   tier: PublicationTier
-});
+}).pipe(
+  Schema.check(Schema.makeFilter(validatePublicationIdentity))
+);
 export type PublicationSeed = Schema.Schema.Type<typeof PublicationSeed>;
 
 export const PublicationSeedManifest = Schema.Struct({
@@ -543,21 +619,27 @@ export const PublicationSeedManifest = Schema.Struct({
 export type PublicationSeedManifest = Schema.Schema.Type<typeof PublicationSeedManifest>;
 
 export const PublicationRecord = Schema.Struct({
-  hostname: Schema.String,
+  publicationId: PublicationId,
+  ...PublicationIdentityFields,
   tier: PublicationTier,
   source: PublicationSource,
   firstSeenAt: Schema.Number,
   lastSeenAt: Schema.Number
-});
+}).pipe(
+  Schema.check(Schema.makeFilter(validatePublicationIdentity))
+);
 export type PublicationRecord = Schema.Schema.Type<typeof PublicationRecord>;
 
 export const PublicationListItem = Schema.Struct({
-  hostname: Schema.String,
+  publicationId: PublicationId,
+  ...PublicationIdentityFields,
   tier: PublicationTier,
   source: PublicationSource,
   postCount: Schema.Number,
   latestPostAt: Schema.NullOr(Schema.Number)
-});
+}).pipe(
+  Schema.check(Schema.makeFilter(validatePublicationIdentity))
+);
 export type PublicationListItem = Schema.Schema.Type<typeof PublicationListItem>;
 
 export const ListPublicationsInput = Schema.Struct({

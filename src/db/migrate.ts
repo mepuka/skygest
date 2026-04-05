@@ -37,11 +37,15 @@ export const runMigrations: Effect.Effect<void, SqlError, SqlClient.SqlClient> =
         ? Effect.void
         : Effect.gen(function* () {
           const appliedAt = yield* Effect.sync(() => Date.now());
-          yield* Effect.forEach(
-            migration.statements,
-            (statement) => executeStatement(sql, statement),
-            { discard: true }
-          );
+          if (migration.run !== undefined) {
+            yield* migration.run(sql);
+          } else {
+            yield* Effect.forEach(
+              migration.statements ?? [],
+              (statement) => executeStatement(sql, statement),
+              { discard: true }
+            );
+          }
           yield* sql`
             INSERT INTO _migrations (id, name, applied_at)
             VALUES (${migration.id}, ${migration.name}, ${appliedAt})

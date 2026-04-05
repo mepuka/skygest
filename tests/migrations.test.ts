@@ -77,7 +77,8 @@ describe("phase-one migrations", () => {
         { id: 16, name: "posts_embed_type" },
         { id: 17, name: "fts_search_metadata" },
         { id: 18, name: "mcp_sessions" },
-        { id: 19, name: "pipeline_status_indexes" }
+        { id: 19, name: "pipeline_status_indexes" },
+        { id: 20, name: "publication_registry_identity" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );
@@ -177,6 +178,267 @@ describe("phase-one migrations", () => {
         { name: "idx_ingest_run_items_run_dispatch", isUnique: 0 },
         { name: "idx_ingest_run_items_run_status_progress", isUnique: 0 }
       ]);
+    }).pipe(Effect.provide(makeSqliteLayer()))
+  );
+
+  it.effect("upgrades publications to the new identity shape and backfills existing rows", () =>
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient;
+
+      yield* sql`
+        CREATE TABLE IF NOT EXISTS _migrations (
+          id INTEGER PRIMARY KEY,
+          name TEXT NOT NULL,
+          applied_at INTEGER NOT NULL
+        )
+      `.pipe(Effect.asVoid);
+
+      for (let id = 1; id <= 19; id++) {
+        yield* sql`
+          INSERT INTO _migrations (id, name, applied_at)
+          VALUES (${id}, ${`migration-${String(id)}`}, ${1_710_000_000_000 + id})
+        `.pipe(Effect.asVoid);
+      }
+
+      yield* sql`
+        CREATE TABLE publications (
+          hostname TEXT PRIMARY KEY,
+          tier TEXT NOT NULL,
+          source TEXT NOT NULL,
+          first_seen_at INTEGER NOT NULL,
+          last_seen_at INTEGER NOT NULL
+        )
+      `.pipe(Effect.asVoid);
+
+      yield* sql`
+        INSERT INTO publications (hostname, tier, source, first_seen_at, last_seen_at)
+        VALUES ('reuters.com', 'general-outlet', 'seed', 100, 200)
+      `.pipe(Effect.asVoid);
+
+      yield* runMigrations;
+
+      const publicationColumns = yield* sql<{ name: string }>`
+        SELECT name as name
+        FROM pragma_table_info('publications')
+        ORDER BY cid ASC
+      `;
+      const publications = yield* sql<{
+        publicationId: string;
+        medium: string;
+        hostname: string | null;
+        showSlug: string | null;
+        feedUrl: string | null;
+        appleId: string | null;
+        spotifyId: string | null;
+        tier: string;
+        source: string;
+        firstSeenAt: number;
+        lastSeenAt: number;
+      }>`
+        SELECT
+          publication_id as publicationId,
+          medium as medium,
+          hostname as hostname,
+          show_slug as showSlug,
+          feed_url as feedUrl,
+          apple_id as appleId,
+          spotify_id as spotifyId,
+          tier as tier,
+          source as source,
+          first_seen_at as firstSeenAt,
+          last_seen_at as lastSeenAt
+        FROM publications
+      `;
+      const publicationIndexes = yield* sql<{ name: string; isUnique: number }>`
+        SELECT name as name, "unique" as isUnique
+        FROM pragma_index_list('publications')
+        ORDER BY name ASC
+      `;
+
+      expect(publicationColumns.map((row) => row.name)).toEqual([
+        "publication_id",
+        "medium",
+        "hostname",
+        "show_slug",
+        "feed_url",
+        "apple_id",
+        "spotify_id",
+        "tier",
+        "source",
+        "first_seen_at",
+        "last_seen_at"
+      ]);
+      expect(publications).toEqual([
+        {
+          publicationId: "reuters.com",
+          medium: "text",
+          hostname: "reuters.com",
+          showSlug: null,
+          feedUrl: null,
+          appleId: null,
+          spotifyId: null,
+          tier: "general-outlet",
+          source: "seed",
+          firstSeenAt: 100,
+          lastSeenAt: 200
+        }
+      ]);
+      expect(publicationIndexes).toEqual([
+        { name: "idx_publications_apple_id", isUnique: 1 },
+        { name: "idx_publications_feed_url", isUnique: 1 },
+        { name: "idx_publications_medium_tier_last_seen_at", isUnique: 0 },
+        { name: "idx_publications_spotify_id", isUnique: 1 },
+        { name: "idx_publications_tier_last_seen_at", isUnique: 0 },
+        { name: "sqlite_autoindex_publications_1", isUnique: 1 },
+        { name: "sqlite_autoindex_publications_2", isUnique: 1 },
+        { name: "sqlite_autoindex_publications_3", isUnique: 1 }
+      ]);
+    }).pipe(Effect.provide(makeSqliteLayer()))
+  );
+
+  it.effect("resumes publication migration safely after a partial run with podcast rows present", () =>
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient;
+
+      yield* sql`
+        CREATE TABLE IF NOT EXISTS _migrations (
+          id INTEGER PRIMARY KEY,
+          name TEXT NOT NULL,
+          applied_at INTEGER NOT NULL
+        )
+      `.pipe(Effect.asVoid);
+
+      for (let id = 1; id <= 19; id++) {
+        yield* sql`
+          INSERT INTO _migrations (id, name, applied_at)
+          VALUES (${id}, ${`migration-${String(id)}`}, ${1_710_000_000_000 + id})
+        `.pipe(Effect.asVoid);
+      }
+
+      yield* sql`
+        CREATE TABLE publications_legacy (
+          hostname TEXT PRIMARY KEY,
+          tier TEXT NOT NULL,
+          source TEXT NOT NULL,
+          first_seen_at INTEGER NOT NULL,
+          last_seen_at INTEGER NOT NULL
+        )
+      `.pipe(Effect.asVoid);
+      yield* sql`
+        INSERT INTO publications_legacy (hostname, tier, source, first_seen_at, last_seen_at)
+        VALUES ('reuters.com', 'general-outlet', 'seed', 100, 200)
+      `.pipe(Effect.asVoid);
+
+      yield* sql`
+        CREATE TABLE publications (
+          publication_id TEXT PRIMARY KEY,
+          medium TEXT NOT NULL DEFAULT 'text' CHECK (medium IN ('text', 'podcast')),
+          hostname TEXT UNIQUE,
+          show_slug TEXT UNIQUE,
+          feed_url TEXT,
+          apple_id TEXT,
+          spotify_id TEXT,
+          tier TEXT NOT NULL,
+          source TEXT NOT NULL,
+          first_seen_at INTEGER NOT NULL,
+          last_seen_at INTEGER NOT NULL,
+          CHECK (
+            (medium = 'text' AND hostname IS NOT NULL AND show_slug IS NULL) OR
+            (medium = 'podcast' AND hostname IS NULL AND show_slug IS NOT NULL)
+          ),
+          CHECK (feed_url IS NULL OR medium = 'podcast'),
+          CHECK (apple_id IS NULL OR medium = 'podcast'),
+          CHECK (spotify_id IS NULL OR medium = 'podcast')
+        )
+      `.pipe(Effect.asVoid);
+      yield* sql`
+        INSERT INTO publications (
+          publication_id,
+          medium,
+          hostname,
+          show_slug,
+          feed_url,
+          apple_id,
+          spotify_id,
+          tier,
+          source,
+          first_seen_at,
+          last_seen_at
+        )
+        VALUES (
+          'catalyst-with-shayle-kann',
+          'podcast',
+          NULL,
+          'catalyst-with-shayle-kann',
+          'https://example.com/catalyst.rss',
+          NULL,
+          NULL,
+          'energy-focused',
+          'seed',
+          300,
+          400
+        )
+      `.pipe(Effect.asVoid);
+
+      yield* runMigrations;
+
+      const publications = yield* sql<{ publicationId: string; medium: string }>`
+        SELECT publication_id as publicationId, medium as medium
+        FROM publications
+        ORDER BY publication_id ASC
+      `;
+      const legacyTables = yield* sql<{ name: string }>`
+        SELECT name as name
+        FROM sqlite_master
+        WHERE type = 'table'
+          AND name = 'publications_legacy'
+      `;
+
+      expect(publications).toEqual([
+        { publicationId: "catalyst-with-shayle-kann", medium: "podcast" },
+        { publicationId: "reuters.com", medium: "text" }
+      ]);
+      expect(legacyTables).toEqual([]);
+    }).pipe(Effect.provide(makeSqliteLayer()))
+  );
+
+  it.effect("enforces the publication identity check constraints", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      const sql = yield* SqlClient.SqlClient;
+
+      const exit = yield* Effect.exit(
+        sql`
+          INSERT INTO publications (
+            publication_id,
+            medium,
+            hostname,
+            show_slug,
+            feed_url,
+            apple_id,
+            spotify_id,
+            tier,
+            source,
+            first_seen_at,
+            last_seen_at
+          )
+          VALUES (
+            'broken-podcast',
+            'podcast',
+            'example.com',
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            'unknown',
+            'seed',
+            1,
+            1
+          )
+        `.pipe(Effect.asVoid)
+      );
+
+      expect(exit._tag).toBe("Failure");
     }).pipe(Effect.provide(makeSqliteLayer()))
   );
 });

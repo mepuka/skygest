@@ -422,7 +422,19 @@ export class StagingOperatorClient extends ServiceMap.Service<
             }),
             PublicationListOutput,
             "list-publications"
-          ).pipe(Effect.map((output) => output.items)),
+          ).pipe(
+            Effect.map((output) =>
+              output.items.flatMap((item) =>
+                item.hostname === null
+                  ? []
+                  : [{
+                      hostname: item.hostname,
+                      tier: item.tier,
+                      postCount: item.postCount
+                    } as const]
+              )
+            )
+          ),
         searchPostsMcp: (baseUrl, secret, query) =>
           callMcpTool(
             baseUrl,

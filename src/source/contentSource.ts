@@ -77,14 +77,16 @@ export const choosePrimaryContentSource = (
     const card = input.linkCards[0]!;
     const domain = parseDomain(card.uri);
     const publication = publicationContext === undefined
-      ? null
+        ? null
       : (() => {
           const entry = resolvePublicationEntry(
             domain,
             publicationContext.publicationIndex,
             publicationContext.brandShortenerMap
           );
-          return entry === null ? null : publicationDisplayLabel(entry.hostname);
+          return entry === null || entry.hostname === null
+            ? null
+            : publicationDisplayLabel(entry.hostname);
         })();
     return {
       url: card.uri,
@@ -100,14 +102,16 @@ export const choosePrimaryContentSource = (
     const link = input.links[0]!;
     const domain = link.domain ?? parseDomain(link.url);
     const publication = publicationContext === undefined
-      ? null
+        ? null
       : (() => {
           const entry = resolvePublicationEntry(
             domain,
             publicationContext.publicationIndex,
             publicationContext.brandShortenerMap
           );
-          return entry === null ? null : publicationDisplayLabel(entry.hostname);
+          return entry === null || entry.hostname === null
+            ? null
+            : publicationDisplayLabel(entry.hostname);
         })();
     return {
       url: link.url,

@@ -22,8 +22,10 @@ describe("brand shortener catalog", () => {
 
   it("every resolvedDomain exists in the publication seed", () => {
     const seededHostnames = new Set(
-      publicationsSeedManifest.publications.map((p) =>
-        normalizeDomain(p.hostname)
+      publicationsSeedManifest.publications.flatMap((publication) =>
+        publication.hostname === null
+          ? []
+          : [normalizeDomain(publication.hostname)]
       )
     );
 

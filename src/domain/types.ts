@@ -32,6 +32,30 @@ export const PostUri = Schema.String.pipe(
 ).annotate({ description: "Post URI — at:// (Bluesky) or x:// (Twitter)" });
 export type PostUri = Schema.Schema.Type<typeof PostUri>;
 
+const PODCAST_SEGMENT_URI_PREFIX = "podcast-segment://";
+
+const validatePodcastSegmentUri = (value: string) =>
+  value.startsWith(PODCAST_SEGMENT_URI_PREFIX) &&
+  value.length > PODCAST_SEGMENT_URI_PREFIX.length &&
+  !/\s/u.test(value)
+    ? undefined
+    : "expected a podcast segment URI like podcast-segment://show/episode/segment";
+
+export const PodcastSegmentUri = Schema.String.pipe(
+  Schema.check(Schema.makeFilter(validatePodcastSegmentUri)),
+  Schema.brand("PodcastSegmentUri")
+).annotate({
+  description: "Podcast segment URI, e.g. podcast-segment://catalyst-canary-media/2026-04-04/segment-3"
+});
+export type PodcastSegmentUri = Schema.Schema.Type<typeof PodcastSegmentUri>;
+
+export const PublicationId = Schema.NonEmptyString.pipe(
+  Schema.brand("PublicationId")
+).annotate({
+  description: "Stable publication identifier — hostname for text publications or show slug for podcast publications"
+});
+export type PublicationId = Schema.Schema.Type<typeof PublicationId>;
+
 export const PlatformSchema = Schema.Literals(["bluesky", "twitter"]);
 export type Platform = Schema.Schema.Type<typeof PlatformSchema>;
 
@@ -48,6 +72,17 @@ export type PlatformCounts = Schema.Schema.Type<typeof PlatformCounts>;
 
 /** Safe widening — every AtUri matches PostUri's pattern (at:// ⊂ at://|x://) */
 export const atUriToPostUri = (uri: AtUri): PostUri => uri as unknown as PostUri;
+
+/** Safe widening — every hostname/show slug chosen as a publication key is a PublicationId. */
+export const stringToPublicationId = (value: string): PublicationId =>
+  value as unknown as PublicationId;
+
+export const podcastSegmentUriFromId = (
+  segmentId: string
+) =>
+  Schema.decodeUnknownEffect(PodcastSegmentUri)(
+    `${PODCAST_SEGMENT_URI_PREFIX}${segmentId}`
+  );
 
 export const platformFromUri = (uri: PostUri): Platform =>
   (uri as string).startsWith("at://") ? "bluesky" : "twitter";

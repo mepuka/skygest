@@ -1,8 +1,162 @@
+import { Effect } from "effect";
+import { SqlClient } from "effect/unstable/sql";
+import { SqlError } from "effect/unstable/sql/SqlError";
+
 export type D1Migration = {
   readonly id: number;
   readonly name: string;
-  readonly statements: ReadonlyArray<string>;
+  readonly statements?: ReadonlyArray<string>;
+  readonly run?: (
+    sql: SqlClient.SqlClient
+  ) => Effect.Effect<void, SqlError, never>;
 };
+
+const executeUnsafeStatement = (
+  sql: SqlClient.SqlClient,
+  statement: string
+) => sql`${sql.unsafe(statement)}`.pipe(Effect.asVoid);
+
+const tableExists = (
+  sql: SqlClient.SqlClient,
+  tableName: string
+) =>
+  sql<{ name: string }>`
+    SELECT name as name
+    FROM sqlite_master
+    WHERE type = 'table'
+      AND name = ${tableName}
+  `.pipe(
+    Effect.map((rows) => rows.length > 0)
+  );
+
+const columnExists = (
+  sql: SqlClient.SqlClient,
+  tableName: string,
+  columnName: string
+) =>
+  sql<{ name: string }>`
+    ${sql.unsafe(
+      `SELECT name as name
+       FROM pragma_table_info('${tableName}')
+       WHERE name = '${columnName}'`
+    )}
+  `.pipe(
+    Effect.map((rows) => rows.length > 0)
+  );
+
+const publicationRegistryIdentityTableStatement = `CREATE TABLE IF NOT EXISTS publications (
+  publication_id TEXT PRIMARY KEY,
+  medium TEXT NOT NULL DEFAULT 'text' CHECK (medium IN ('text', 'podcast')),
+  hostname TEXT UNIQUE,
+  show_slug TEXT UNIQUE,
+  feed_url TEXT,
+  apple_id TEXT,
+  spotify_id TEXT,
+  tier TEXT NOT NULL,
+  source TEXT NOT NULL,
+  first_seen_at INTEGER NOT NULL,
+  last_seen_at INTEGER NOT NULL,
+  CHECK (
+    (medium = 'text' AND hostname IS NOT NULL AND show_slug IS NULL) OR
+    (medium = 'podcast' AND hostname IS NULL AND show_slug IS NOT NULL)
+  ),
+  CHECK (feed_url IS NULL OR medium = 'podcast'),
+  CHECK (apple_id IS NULL OR medium = 'podcast'),
+  CHECK (spotify_id IS NULL OR medium = 'podcast')
+)`;
+
+const publicationRegistryIdentityIndexStatements = [
+  `CREATE INDEX IF NOT EXISTS idx_publications_tier_last_seen_at
+    ON publications(tier, last_seen_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_publications_medium_tier_last_seen_at
+    ON publications(medium, tier, last_seen_at DESC)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_publications_feed_url
+    ON publications(feed_url)
+    WHERE feed_url IS NOT NULL`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_publications_apple_id
+    ON publications(apple_id)
+    WHERE apple_id IS NOT NULL`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_publications_spotify_id
+    ON publications(spotify_id)
+    WHERE spotify_id IS NOT NULL`
+] as const;
+
+const ensurePublicationRegistryIdentityIndexes = (
+  sql: SqlClient.SqlClient
+) =>
+  Effect.forEach(
+    publicationRegistryIdentityIndexStatements,
+    (statement) => executeUnsafeStatement(sql, statement),
+    { discard: true }
+  );
+
+const runPublicationRegistryIdentityMigration = (
+  sql: SqlClient.SqlClient
+) =>
+  Effect.gen(function* () {
+    const hasPublications = yield* tableExists(sql, "publications");
+    let hasLegacyPublications = yield* tableExists(sql, "publications_legacy");
+    const hasPublicationId = hasPublications
+      ? yield* columnExists(sql, "publications", "publication_id")
+      : false;
+
+    if (hasPublications && hasPublicationId && !hasLegacyPublications) {
+      return yield* ensurePublicationRegistryIdentityIndexes(sql);
+    }
+
+    if (hasPublications && !hasPublicationId && !hasLegacyPublications) {
+      yield* executeUnsafeStatement(
+        sql,
+        `ALTER TABLE publications RENAME TO publications_legacy`
+      );
+      hasLegacyPublications = true;
+    }
+
+    yield* executeUnsafeStatement(
+      sql,
+      publicationRegistryIdentityTableStatement
+    );
+
+    if (hasLegacyPublications) {
+      yield* executeUnsafeStatement(
+        sql,
+        `INSERT INTO publications (
+          publication_id,
+          medium,
+          hostname,
+          show_slug,
+          feed_url,
+          apple_id,
+          spotify_id,
+          tier,
+          source,
+          first_seen_at,
+          last_seen_at
+        )
+        SELECT
+          legacy.hostname as publication_id,
+          'text' as medium,
+          legacy.hostname,
+          NULL as show_slug,
+          NULL as feed_url,
+          NULL as apple_id,
+          NULL as spotify_id,
+          legacy.tier,
+          legacy.source,
+          legacy.first_seen_at,
+          legacy.last_seen_at
+        FROM publications_legacy legacy
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM publications current
+          WHERE current.publication_id = legacy.hostname
+        )`
+      );
+      yield* executeUnsafeStatement(sql, `DROP TABLE publications_legacy`);
+    }
+
+    yield* ensurePublicationRegistryIdentityIndexes(sql);
+  });
 
 const migration1: D1Migration = {
   id: 1,
@@ -464,6 +618,12 @@ const migration19: D1Migration = {
   ]
 };
 
+const migration20: D1Migration = {
+  id: 20,
+  name: "publication_registry_identity",
+  run: runPublicationRegistryIdentityMigration
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -483,5 +643,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration16,
   migration17,
   migration18,
-  migration19
+  migration19,
+  migration20
 ];

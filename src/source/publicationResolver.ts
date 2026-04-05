@@ -1,7 +1,11 @@
 import { normalizeDomain } from "../domain/normalize";
 
 export type PublicationLike = {
-  readonly hostname: string;
+  readonly hostname: string | null;
+};
+
+export type PodcastShowLike = {
+  readonly showSlug: string | null;
 };
 
 const HIDDEN_PUBLICATION_LABEL_HOSTNAMES = new Set([
@@ -59,7 +63,27 @@ export const buildPublicationIndex = <A extends PublicationLike>(
 ): ReadonlyMap<string, A> => {
   const map = new Map<string, A>();
   for (const item of items) {
+    // Podcast shows do not participate in hostname-based resolution.
+    if (item.hostname === null) {
+      continue;
+    }
     map.set(normalizeDomain(item.hostname), item);
+  }
+  return map;
+};
+
+const normalizeShowSlug = (showSlug: string) =>
+  showSlug.trim().toLowerCase();
+
+export const buildPodcastShowIndex = <A extends PodcastShowLike>(
+  items: ReadonlyArray<A>
+): ReadonlyMap<string, A> => {
+  const map = new Map<string, A>();
+  for (const item of items) {
+    if (item.showSlug === null) {
+      continue;
+    }
+    map.set(normalizeShowSlug(item.showSlug), item);
   }
   return map;
 };
@@ -87,4 +111,13 @@ export const resolvePublicationEntry = <A extends PublicationLike>(
   }
 
   return null;
+};
+
+export const resolvePodcastShowEntry = <A extends PodcastShowLike>(
+  showSlug: string | null,
+  index: ReadonlyMap<string, A>
+): A | null => {
+  if (showSlug === null) return null;
+
+  return index.get(normalizeShowSlug(showSlug)) ?? null;
 };

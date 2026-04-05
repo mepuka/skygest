@@ -241,9 +241,16 @@ const insertDiscoveredPublications = (sql: SqlClient.SqlClient, post: KnowledgeP
     (hostname) =>
       sql`
         INSERT OR IGNORE INTO publications (
-          hostname, tier, source, first_seen_at, last_seen_at
+          publication_id, medium, hostname, show_slug, feed_url, apple_id, spotify_id,
+          tier, source, first_seen_at, last_seen_at
         ) VALUES (
           ${hostname},
+          'text',
+          ${hostname},
+          NULL,
+          NULL,
+          NULL,
+          NULL,
           'unknown',
           'discovered',
           ${post.indexedAt},
@@ -397,8 +404,8 @@ const makeUpsertStatements = (
       const publicationsInsert = makeBulkInsertStatement(
         db,
         "publications",
-        ["hostname", "tier", "source", "first_seen_at", "last_seen_at"],
-        uniqueDomains.map((domain) => [domain, "unknown", "discovered", post.indexedAt, post.indexedAt])
+        ["publication_id", "medium", "hostname", "show_slug", "feed_url", "apple_id", "spotify_id", "tier", "source", "first_seen_at", "last_seen_at"],
+        uniqueDomains.map((domain) => [domain, "text", domain, null, null, null, null, "unknown", "discovered", post.indexedAt, post.indexedAt])
       );
       return publicationsInsert === null ? [] : [publicationsInsert];
     })(),
