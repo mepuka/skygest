@@ -4,10 +4,13 @@ import { describe, expect, it } from "@effect/vitest";
 import { bootstrapExperts } from "../src/bootstrap/ExpertSeeds";
 import { runMigrations } from "../src/db/migrate";
 import { KnowledgePost, RankedKnowledgePostResult } from "../src/domain/bi";
+import { PodcastEpisodeBundle as PodcastEpisodeBundleSchema } from "../src/domain/podcast";
+import { PodcastRepo } from "../src/services/PodcastRepo";
 import { processBatch } from "../src/filter/FilterWorker";
 import { ExpertsRepo } from "../src/services/ExpertsRepo";
 import { KnowledgeRepo } from "../src/services/KnowledgeRepo";
 import { PublicationsRepo } from "../src/services/PublicationsRepo";
+import { buildTranscriptR2Key } from "../src/services/TranscriptStorageService";
 import { makeBiLayer, makeSampleBatch, sampleDid, seedKnowledgeBase, seedManifest } from "./support/runtime";
 
 describe("repository layers", () => {
@@ -300,6 +303,296 @@ describe("repository layers", () => {
           lastSeenAt: 1_710_000_000_500
         }
       ]);
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
+  it.effect("round-trips podcast episodes, segments, and topic matches through PodcastRepo", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+
+      const publications = yield* PublicationsRepo;
+      yield* publications.seedCurated({
+        ontologyVersion: "test",
+        snapshotVersion: "test-seed",
+        publications: [{
+          medium: "podcast" as const,
+          hostname: null,
+          showSlug: "catalyst-with-shayle-kann",
+          feedUrl: "https://example.com/catalyst.rss",
+          appleId: null,
+          spotifyId: null,
+          tier: "energy-focused" as const
+        }]
+      }, 1_710_000_000_000);
+
+      const podcastRepo = yield* PodcastRepo;
+      const decodePodcastBundle = Schema.decodeUnknownSync(
+        PodcastEpisodeBundleSchema
+      );
+      const initialTranscriptKey = yield* buildTranscriptR2Key(
+        "catalyst-with-shayle-kann" as any,
+        "catalyst-2026-04-04" as any
+      );
+      const updatedTranscriptKey = yield* buildTranscriptR2Key(
+        "catalyst-with-shayle-kann" as any,
+        "catalyst-2026-04-04-v2" as any
+      );
+      const initialBundle = decodePodcastBundle({
+        episode: {
+          episodeId: "catalyst-2026-04-04",
+          showSlug: "catalyst-with-shayle-kann",
+          title: "Catalyst: Grid storage and transmission",
+          publishedAt: 1_710_100_000_000,
+          audioUrl: "https://example.com/catalyst-2026-04-04.mp3",
+          durationSeconds: 1_800,
+          speakerDids: [sampleDid],
+          chapterMarkers: [{
+            startTimestampMs: 0,
+            title: "Intro"
+          }],
+          transcriptR2Key: initialTranscriptKey,
+          lifecycleState: "segmented",
+          createdAt: 1_710_100_000_000,
+          updatedAt: 1_710_100_000_000
+        },
+        segments: [
+          {
+            segmentId: "catalyst-2026-04-04-segment-0",
+            episodeId: "catalyst-2026-04-04",
+            segmentIndex: 0,
+            primarySpeakerDid: sampleDid,
+            speakerDids: [sampleDid],
+            startTimestampMs: 0,
+            endTimestampMs: 60_000,
+            text: "Battery storage is accelerating because project economics improved.",
+            createdAt: 1_710_100_000_000,
+            topicMatches: [
+              {
+                topicSlug: "storage",
+                matchedTerm: "battery storage",
+                matchSignal: "term",
+                matchValue: "battery storage",
+                matchScore: 0.9,
+                ontologyVersion: "test-v1",
+                matcherVersion: "test-v1"
+              }
+            ]
+          },
+          {
+            segmentId: "catalyst-2026-04-04-segment-1",
+            episodeId: "catalyst-2026-04-04",
+            segmentIndex: 1,
+            primarySpeakerDid: sampleDid,
+            speakerDids: [sampleDid],
+            startTimestampMs: 60_000,
+            endTimestampMs: 120_000,
+            text: "Transmission constraints still slow interconnection.",
+            createdAt: 1_710_100_000_100,
+            topicMatches: [
+              {
+                topicSlug: "transmission",
+                matchedTerm: "interconnection",
+                matchSignal: "term",
+                matchValue: "interconnection",
+                matchScore: 0.8,
+                ontologyVersion: "test-v1",
+                matcherVersion: "test-v1"
+              }
+            ]
+          }
+        ]
+      });
+      const updatedBundle = decodePodcastBundle({
+        episode: {
+          episodeId: "catalyst-2026-04-04",
+          showSlug: "catalyst-with-shayle-kann",
+          title: "Catalyst: Grid storage and transmission (updated)",
+          publishedAt: 1_710_100_000_000,
+          audioUrl: "https://example.com/catalyst-2026-04-04.mp3",
+          durationSeconds: 1_820,
+          speakerDids: [sampleDid],
+          chapterMarkers: [{
+            startTimestampMs: 0,
+            title: "Updated intro"
+          }],
+          transcriptR2Key: updatedTranscriptKey,
+          lifecycleState: "pushed",
+          createdAt: 1_710_100_000_000,
+          updatedAt: 1_710_100_000_500
+        },
+        segments: [
+          {
+            segmentId: "catalyst-2026-04-04-segment-0",
+            episodeId: "catalyst-2026-04-04",
+            segmentIndex: 0,
+            primarySpeakerDid: sampleDid,
+            speakerDids: [sampleDid],
+            startTimestampMs: 0,
+            endTimestampMs: 90_000,
+            text: "Battery storage and grid flexibility are now central investment themes.",
+            createdAt: 1_710_100_000_500,
+            topicMatches: [
+              {
+                topicSlug: "storage",
+                matchedTerm: "grid flexibility",
+                matchSignal: "term",
+                matchValue: "grid flexibility",
+                matchScore: 0.95,
+                ontologyVersion: "test-v2",
+                matcherVersion: "test-v2"
+              }
+            ]
+          }
+        ]
+      });
+
+      yield* podcastRepo.upsertEpisodeBundle(initialBundle);
+      yield* podcastRepo.upsertEpisodeBundle(updatedBundle);
+
+      const stored = yield* podcastRepo.getEpisodeBundle(
+        initialBundle.episode.episodeId
+      );
+      const showEpisodes = yield* podcastRepo.listEpisodesByShowSlug(
+        initialBundle.episode.showSlug
+      );
+      const sql = yield* SqlClient.SqlClient;
+      const [segmentCount] = yield* sql<{ count: number }>`
+        SELECT COUNT(*) as count
+        FROM podcast_segments
+        WHERE episode_id = 'catalyst-2026-04-04'
+      `;
+      const [topicCount] = yield* sql<{ count: number }>`
+        SELECT COUNT(*) as count
+        FROM podcast_segment_topics
+        WHERE segment_id = 'catalyst-2026-04-04-segment-0'
+      `;
+
+      expect(segmentCount?.count).toBe(1);
+      expect(topicCount?.count).toBe(1);
+      expect(showEpisodes).toEqual([
+        {
+          episodeId: "catalyst-2026-04-04",
+          showSlug: "catalyst-with-shayle-kann",
+          title: "Catalyst: Grid storage and transmission (updated)",
+          publishedAt: 1_710_100_000_000,
+          audioUrl: "https://example.com/catalyst-2026-04-04.mp3",
+          durationSeconds: 1_820,
+          speakerDids: [sampleDid],
+          chapterMarkers: [{
+            startTimestampMs: 0,
+            title: "Updated intro"
+          }],
+          transcriptR2Key: updatedTranscriptKey,
+          lifecycleState: "pushed",
+          createdAt: 1_710_100_000_000,
+          updatedAt: 1_710_100_000_500
+        }
+      ]);
+      expect(stored).toEqual({
+        episode: {
+          episodeId: "catalyst-2026-04-04",
+          showSlug: "catalyst-with-shayle-kann",
+          title: "Catalyst: Grid storage and transmission (updated)",
+          publishedAt: 1_710_100_000_000,
+          audioUrl: "https://example.com/catalyst-2026-04-04.mp3",
+          durationSeconds: 1_820,
+          speakerDids: [sampleDid],
+          chapterMarkers: [{
+            startTimestampMs: 0,
+            title: "Updated intro"
+          }],
+          transcriptR2Key: updatedTranscriptKey,
+          lifecycleState: "pushed",
+          createdAt: 1_710_100_000_000,
+          updatedAt: 1_710_100_000_500
+        },
+        segments: [
+          {
+            segmentId: "catalyst-2026-04-04-segment-0",
+            episodeId: "catalyst-2026-04-04",
+            segmentIndex: 0,
+            primarySpeakerDid: sampleDid,
+            speakerDids: [sampleDid],
+            startTimestampMs: 0,
+            endTimestampMs: 90_000,
+            text: "Battery storage and grid flexibility are now central investment themes.",
+            createdAt: 1_710_100_000_500,
+            topicMatches: [
+              {
+                topicSlug: "storage",
+                matchedTerm: "grid flexibility",
+                matchSignal: "term",
+                matchValue: "grid flexibility",
+                matchScore: 0.95,
+                ontologyVersion: "test-v2",
+                matcherVersion: "test-v2"
+              }
+            ]
+          }
+        ]
+      });
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
+  it.effect("returns null when a podcast episode bundle is missing", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+
+      const podcastRepo = yield* PodcastRepo;
+      const missing = yield* podcastRepo.getEpisodeBundle(
+        "missing-episode" as any
+      );
+
+      expect(missing).toBeNull();
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
+  it.effect("stores podcast episodes even when they currently have no segments", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+
+      const publications = yield* PublicationsRepo;
+      yield* publications.seedCurated({
+        ontologyVersion: "test",
+        snapshotVersion: "test-seed",
+        publications: [{
+          medium: "podcast" as const,
+          hostname: null,
+          showSlug: "the-carbon-copy",
+          feedUrl: "https://example.com/the-carbon-copy.rss",
+          appleId: null,
+          spotifyId: null,
+          tier: "energy-focused" as const
+        }]
+      }, 1_710_000_000_000);
+
+      const podcastRepo = yield* PodcastRepo;
+      const transcriptKey = yield* buildTranscriptR2Key(
+        "the-carbon-copy" as any,
+        "carbon-copy-2026-04-06" as any
+      );
+      const bundle = Schema.decodeUnknownSync(PodcastEpisodeBundleSchema)({
+        episode: {
+          episodeId: "carbon-copy-2026-04-06",
+          showSlug: "the-carbon-copy",
+          title: "The Carbon Copy: Pipeline outlook",
+          publishedAt: 1_710_200_000_000,
+          audioUrl: "https://example.com/carbon-copy-2026-04-06.mp3",
+          durationSeconds: 900,
+          speakerDids: [sampleDid],
+          chapterMarkers: null,
+          transcriptR2Key: transcriptKey,
+          lifecycleState: "transcribed",
+          createdAt: 1_710_200_000_000,
+          updatedAt: 1_710_200_000_000
+        },
+        segments: []
+      });
+
+      yield* podcastRepo.upsertEpisodeBundle(bundle);
+
+      const stored = yield* podcastRepo.getEpisodeBundle(bundle.episode.episodeId);
+      expect(stored).toEqual(bundle);
     }).pipe(Effect.provide(makeBiLayer()))
   );
 

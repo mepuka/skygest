@@ -29,6 +29,7 @@ import { KnowledgeRepoD1 } from "../../src/services/d1/KnowledgeRepoD1";
 import { PipelineStatusRepoD1 } from "../../src/services/d1/PipelineStatusRepoD1";
 import { PostEnrichmentReadRepoD1 } from "../../src/services/d1/PostEnrichmentReadRepoD1";
 import { PublicationsRepoD1 } from "../../src/services/d1/PublicationsRepoD1";
+import { PodcastRepoD1 } from "../../src/services/d1/PodcastRepoD1";
 import { ProviderRegistry } from "../../src/services/ProviderRegistry";
 import { PipelineStatusService } from "../../src/services/PipelineStatusService";
 import { makeSmokeFixtureBatch } from "../../src/staging/SmokeFixture";
@@ -120,6 +121,7 @@ export const makeBiLayer = (options?: {
   const knowledgeLayer = KnowledgeRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
 
   const publicationsLayer = PublicationsRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
+  const podcastLayer = PodcastRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
   const candidatePayloadRepoLayer = CandidatePayloadRepoD1.layer.pipe(
     Layer.provideMerge(sqliteLayer)
   );
@@ -143,6 +145,7 @@ export const makeBiLayer = (options?: {
     expertsLayer,
     knowledgeLayer,
     publicationsLayer,
+    podcastLayer,
     candidatePayloadRepoLayer,
     curationRepoLayer,
     editorialRepoLayer

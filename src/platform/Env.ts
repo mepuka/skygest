@@ -22,6 +22,7 @@ export interface EnvBindings {
   readonly ENRICHMENT_RUN_WORKFLOW?: Workflow<EnrichmentRunParams>;
   readonly EXPERT_POLL_COORDINATOR?: DurableObjectNamespace;
   readonly ONTOLOGY_KV?: KVNamespace;
+  readonly TRANSCRIPTS_BUCKET?: R2Bucket;
   readonly DB: D1Database;
 }
 

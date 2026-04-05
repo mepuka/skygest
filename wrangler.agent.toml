@@ -31,6 +31,10 @@ database_id = "b33d6089-883e-4f62-bcfd-3b30153e51e9"
 binding = "ONTOLOGY_KV"
 id = "f9888501c4ad473db8ff49ecf069f9ed"
 
+[[r2_buckets]]
+binding = "TRANSCRIPTS_BUCKET"
+bucket_name = "skygest-transcripts"
+
 [env.staging]
 name = "skygest-bi-agent-staging"
 
@@ -64,6 +68,10 @@ database_id = "29a612d3-67c9-429d-93af-6e976681e7c8"
 [[env.staging.kv_namespaces]]
 binding = "ONTOLOGY_KV"
 id = "f9888501c4ad473db8ff49ecf069f9ed"
+
+[[env.staging.r2_buckets]]
+binding = "TRANSCRIPTS_BUCKET"
+bucket_name = "skygest-transcripts-staging"
 
 [[migrations]]
 tag = "v1"
