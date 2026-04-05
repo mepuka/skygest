@@ -1,10 +1,11 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, ConfigProvider } from "effect";
+import { Effect, ConfigProvider, Result } from "effect";
 import {
   OperatorKeys,
   WorkerKeys,
   WorkerDeployKeys,
-  EnrichmentKeys
+  EnrichmentKeys,
+  TwitterKeys
 } from "../../src/platform/ConfigShapes";
 
 describe("ConfigShapes", () => {
@@ -135,5 +136,36 @@ describe("ConfigShapes", () => {
         expect(result).toBe("gemini-2.5-flash");
       })
     );
+  });
+
+  describe("TwitterKeys", () => {
+    it("resolves when TWITTER_COOKIE_PATH is set", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({
+          TWITTER_COOKIE_PATH: "/path/to/cookies.json"
+        });
+        const result = yield* TwitterKeys.twitterCookiePath.parse(provider);
+        expect(result).toBe("/path/to/cookies.json");
+      }).pipe(Effect.runPromise));
+
+    it("fails when TWITTER_COOKIE_PATH is missing", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({});
+        const result = yield* Effect.result(
+          TwitterKeys.twitterCookiePath.parse(provider)
+        );
+        expect(Result.isFailure(result)).toBe(true);
+      }).pipe(Effect.runPromise));
+
+    it("fails when TWITTER_COOKIE_PATH is empty", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({
+          TWITTER_COOKIE_PATH: "   "
+        });
+        const result = yield* Effect.result(
+          TwitterKeys.twitterCookiePath.parse(provider)
+        );
+        expect(Result.isFailure(result)).toBe(true);
+      }).pipe(Effect.runPromise));
   });
 });
