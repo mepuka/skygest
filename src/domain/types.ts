@@ -56,6 +56,20 @@ export const PublicationId = Schema.NonEmptyString.pipe(
 });
 export type PublicationId = Schema.Schema.Type<typeof PublicationId>;
 
+export const PodcastEpisodeId = Schema.NonEmptyString.pipe(
+  Schema.brand("PodcastEpisodeId")
+).annotate({
+  description: "Stable podcast episode identifier"
+});
+export type PodcastEpisodeId = Schema.Schema.Type<typeof PodcastEpisodeId>;
+
+export const PodcastSegmentId = Schema.NonEmptyString.pipe(
+  Schema.brand("PodcastSegmentId")
+).annotate({
+  description: "Stable podcast segment identifier"
+});
+export type PodcastSegmentId = Schema.Schema.Type<typeof PodcastSegmentId>;
+
 export const PlatformSchema = Schema.Literals(["bluesky", "twitter"]);
 export type Platform = Schema.Schema.Type<typeof PlatformSchema>;
 

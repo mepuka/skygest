@@ -23,6 +23,9 @@ describe("phase-one migrations", () => {
             'ingest_run_items',
             'ingest_runs',
             'mcp_sessions',
+            'podcast_episodes',
+            'podcast_segment_topics',
+            'podcast_segments',
             'posts',
             'post_curation',
             'post_enrichments',
@@ -49,6 +52,9 @@ describe("phase-one migrations", () => {
         "ingest_runs",
         "links",
         "mcp_sessions",
+        "podcast_episodes",
+        "podcast_segment_topics",
+        "podcast_segments",
         "post_curation",
         "post_enrichment_runs",
         "post_enrichments",
@@ -78,7 +84,8 @@ describe("phase-one migrations", () => {
         { id: 17, name: "fts_search_metadata" },
         { id: 18, name: "mcp_sessions" },
         { id: 19, name: "pipeline_status_indexes" },
-        { id: 20, name: "publication_registry_identity" }
+        { id: 20, name: "publication_registry_identity" },
+        { id: 21, name: "podcast_schema" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );
@@ -439,6 +446,119 @@ describe("phase-one migrations", () => {
       );
 
       expect(exit._tag).toBe("Failure");
+    }).pipe(Effect.provide(makeSqliteLayer()))
+  );
+
+  it.effect("creates podcast tables and enforces segment timing constraints", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      const sql = yield* SqlClient.SqlClient;
+
+      yield* sql`
+        INSERT INTO publications (
+          publication_id,
+          medium,
+          hostname,
+          show_slug,
+          feed_url,
+          apple_id,
+          spotify_id,
+          tier,
+          source,
+          first_seen_at,
+          last_seen_at
+        )
+        VALUES (
+          'catalyst-with-shayle-kann',
+          'podcast',
+          NULL,
+          'catalyst-with-shayle-kann',
+          'https://example.com/catalyst.rss',
+          NULL,
+          NULL,
+          'energy-focused',
+          'seed',
+          1,
+          1
+        )
+      `.pipe(Effect.asVoid);
+
+      yield* sql`
+        INSERT INTO podcast_episodes (
+          episode_id,
+          show_slug,
+          title,
+          published_at,
+          audio_url,
+          duration_seconds,
+          speaker_dids,
+          chapter_markers,
+          transcript_r2_key,
+          lifecycle_state,
+          created_at,
+          updated_at
+        )
+        VALUES (
+          'catalyst-2026-04-04',
+          'catalyst-with-shayle-kann',
+          'Catalyst sample',
+          100,
+          'https://example.com/catalyst.mp3',
+          1800,
+          '["did:plc:host","did:plc:guest"]',
+          NULL,
+          NULL,
+          'segmented',
+          100,
+          100
+        )
+      `.pipe(Effect.asVoid);
+
+      const invalidSegmentExit = yield* Effect.exit(
+        sql`
+          INSERT INTO podcast_segments (
+            segment_id,
+            episode_id,
+            segment_index,
+            primary_speaker_did,
+            speaker_dids,
+            start_timestamp_ms,
+            end_timestamp_ms,
+            text,
+            created_at
+          )
+          VALUES (
+            'catalyst-2026-04-04-segment-1',
+            'catalyst-2026-04-04',
+            0,
+            'did:plc:host',
+            '["did:plc:host"]',
+            5_000,
+            4_000,
+            'Broken segment',
+            100
+          )
+        `.pipe(Effect.asVoid)
+      );
+
+      const tables = yield* sql<{ name: string }>`
+        SELECT name as name
+        FROM sqlite_master
+        WHERE type = 'table'
+          AND name IN (
+            'podcast_episodes',
+            'podcast_segments',
+            'podcast_segment_topics'
+          )
+        ORDER BY name ASC
+      `;
+
+      expect(tables.map((row) => row.name)).toEqual([
+        "podcast_episodes",
+        "podcast_segment_topics",
+        "podcast_segments"
+      ]);
+      expect(invalidSegmentExit._tag).toBe("Failure");
     }).pipe(Effect.provide(makeSqliteLayer()))
   );
 });

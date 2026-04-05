@@ -624,6 +624,70 @@ const migration20: D1Migration = {
   run: runPublicationRegistryIdentityMigration
 };
 
+const migration21: D1Migration = {
+  id: 21,
+  name: "podcast_schema",
+  statements: [
+    `CREATE TABLE IF NOT EXISTS podcast_episodes (
+      episode_id TEXT PRIMARY KEY,
+      show_slug TEXT NOT NULL,
+      title TEXT NOT NULL,
+      published_at INTEGER NOT NULL,
+      audio_url TEXT,
+      duration_seconds INTEGER,
+      speaker_dids TEXT NOT NULL,
+      chapter_markers TEXT,
+      transcript_r2_key TEXT,
+      lifecycle_state TEXT NOT NULL CHECK (lifecycle_state IN ('fetched', 'transcribed', 'segmented', 'pushed')),
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      CHECK (duration_seconds IS NULL OR duration_seconds >= 0),
+      CHECK (updated_at >= created_at),
+      FOREIGN KEY (show_slug) REFERENCES publications(show_slug)
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_podcast_episodes_show_slug_published_at
+      ON podcast_episodes(show_slug, published_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_podcast_episodes_lifecycle_state_published_at
+      ON podcast_episodes(lifecycle_state, published_at DESC)`,
+    `CREATE TABLE IF NOT EXISTS podcast_segments (
+      segment_id TEXT PRIMARY KEY,
+      episode_id TEXT NOT NULL,
+      segment_index INTEGER NOT NULL,
+      primary_speaker_did TEXT NOT NULL,
+      speaker_dids TEXT NOT NULL,
+      start_timestamp_ms INTEGER NOT NULL,
+      end_timestamp_ms INTEGER NOT NULL,
+      text TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      UNIQUE (episode_id, segment_index),
+      CHECK (segment_index >= 0),
+      CHECK (start_timestamp_ms >= 0),
+      CHECK (end_timestamp_ms > start_timestamp_ms),
+      FOREIGN KEY (episode_id) REFERENCES podcast_episodes(episode_id) ON DELETE CASCADE
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_podcast_segments_episode_id_segment_index
+      ON podcast_segments(episode_id, segment_index ASC)`,
+    `CREATE INDEX IF NOT EXISTS idx_podcast_segments_primary_speaker_created_at
+      ON podcast_segments(primary_speaker_did, created_at DESC)`,
+    `CREATE TABLE IF NOT EXISTS podcast_segment_topics (
+      segment_id TEXT NOT NULL,
+      topic_slug TEXT NOT NULL,
+      matched_term TEXT,
+      match_signal TEXT NOT NULL DEFAULT 'term',
+      match_value TEXT,
+      match_score REAL,
+      ontology_version TEXT NOT NULL,
+      matcher_version TEXT NOT NULL,
+      PRIMARY KEY (segment_id, topic_slug),
+      FOREIGN KEY (segment_id) REFERENCES podcast_segments(segment_id) ON DELETE CASCADE
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_podcast_segment_topics_topic_slug_segment_id
+      ON podcast_segment_topics(topic_slug, segment_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_podcast_segment_topics_segment_id_topic_slug
+      ON podcast_segment_topics(segment_id, topic_slug)`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -644,5 +708,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration17,
   migration18,
   migration19,
-  migration20
+  migration20,
+  migration21
 ];
