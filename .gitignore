@@ -51,3 +51,7 @@ memory
 eval/vision/runs/
 eval/source-attribution/runs/
 analysis/threads.db
+
+# Twitter auth cookies (contain session secrets)
+twitter-cookies*.json
+*.local.json
