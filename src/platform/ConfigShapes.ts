@@ -72,6 +72,28 @@ export const WorkerDeployKeys = {
   operatorSecret: nonEmptyRedacted("OPERATOR_SECRET")
 } as const;
 
+// ── Twitter / editorial ingestion keys ────────────────────────────────
+
+/** Non-empty string config that rejects empty/whitespace-only values. */
+const nonEmptyString = (name: string) =>
+  Config.string(name).pipe(
+    Config.mapOrFail((value) =>
+      value.trim().length > 0
+        ? Effect.succeed(value)
+        : Effect.fail(
+            new Config.ConfigError(
+              new ConfigProvider.SourceError({
+                message: `${name} must not be empty`
+              })
+            )
+          )
+    )
+  );
+
+export const TwitterKeys = {
+  twitterCookiePath: nonEmptyString("TWITTER_COOKIE_PATH")
+} as const;
+
 // ── Enrichment keys ────────────────────────────────────────────────────
 
 export const EnrichmentKeys = {

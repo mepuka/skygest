@@ -4,7 +4,8 @@ import {
   OperatorKeys,
   WorkerKeys,
   WorkerDeployKeys,
-  EnrichmentKeys
+  EnrichmentKeys,
+  TwitterKeys
 } from "../../src/platform/ConfigShapes";
 
 describe("ConfigShapes", () => {
@@ -133,6 +134,40 @@ describe("ConfigShapes", () => {
         const provider = ConfigProvider.fromUnknown({});
         const result = yield* EnrichmentKeys.visionModel.parse(provider);
         expect(result).toBe("gemini-2.5-flash");
+      })
+    );
+  });
+
+  describe("TwitterKeys", () => {
+    it.effect("twitterCookiePath resolves from env", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({
+          TWITTER_COOKIE_PATH: "/path/to/cookies.json"
+        });
+        const result = yield* TwitterKeys.twitterCookiePath.parse(provider);
+        expect(result).toBe("/path/to/cookies.json");
+      })
+    );
+
+    it.effect("twitterCookiePath fails when missing", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({});
+        const result = yield* Effect.result(
+          TwitterKeys.twitterCookiePath.parse(provider)
+        );
+        expect(result._tag).toBe("Failure");
+      })
+    );
+
+    it.effect("twitterCookiePath fails when empty string", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({
+          TWITTER_COOKIE_PATH: "   "
+        });
+        const result = yield* Effect.result(
+          TwitterKeys.twitterCookiePath.parse(provider)
+        );
+        expect(result._tag).toBe("Failure");
       })
     );
   });
