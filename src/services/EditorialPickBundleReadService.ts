@@ -1,6 +1,6 @@
-import { Clock, Effect, Layer, ServiceMap } from "effect";
+import { Clock, DateTime, Effect, Layer, Option, Schema, ServiceMap } from "effect";
 import { SqlError } from "effect/unstable/sql/SqlError";
-import type { DbError } from "../domain/errors";
+import { DbError } from "../domain/errors";
 import {
   EditorialPickNotFoundError,
   EditorialPickNotReadyError,
@@ -17,9 +17,28 @@ import type {
   VisionPostEnrichmentResult
 } from "../domain/enrichment";
 import type { ProviderId } from "../domain/source";
-import type { PostUri } from "../domain/types";
+import {
+  IsoTimestamp as IsoTimestampSchema,
+  PostUri,
+  type IsoTimestamp
+} from "../domain/types";
+import { stringifyUnknown } from "../platform/Json";
 
-const toIsoString = (value: number): string => new Date(value).toISOString();
+const decodeIsoTimestamp = Schema.decodeUnknownEffect(IsoTimestampSchema);
+
+const toIsoTimestamp = (
+  field: string,
+  value: number
+): Effect.Effect<IsoTimestamp, DbError> =>
+  Effect.fromOption(DateTime.make(value)).pipe(
+    Effect.map(DateTime.formatIso),
+    Effect.flatMap(decodeIsoTimestamp),
+    Effect.mapError((cause) =>
+      new DbError({
+        message: `Failed to normalize ${field} timestamp: ${stringifyUnknown(cause)}`
+      })
+    )
+  );
 
 const getSourceProviders = (
   sourceAttribution: SourceAttributionPostEnrichmentResult | undefined
@@ -51,6 +70,16 @@ const getSourceProviders = (
 
   return ordered;
 };
+
+const getResolvedExpert = (
+  expert: { readonly displayName: string | null; readonly handle: string | null } | null
+): string | undefined =>
+  Option.fromNullishOr(expert).pipe(
+    Option.flatMap((resolved) =>
+      Option.fromNullishOr(resolved.displayName ?? resolved.handle)
+    ),
+    Option.getOrUndefined
+  );
 
 export class EditorialPickBundleReadService extends ServiceMap.Service<
   EditorialPickBundleReadService,
@@ -89,13 +118,19 @@ export class EditorialPickBundleReadService extends ServiceMap.Service<
             return yield* new EditorialPostNotFoundError({ postUri });
           }
 
-          const payload = yield* payloadService.getPayload(postUri);
-          const enrichment = yield* enrichmentReadService.getPost(postUri);
+          const { payload, enrichment, expert } = yield* Effect.all(
+            {
+              payload: payloadService.getPayload(postUri),
+              enrichment: enrichmentReadService.getPost(postUri),
+              expert: expertsRepo.getByDid(post.author)
+            },
+            { concurrency: "unbounded" }
+          );
 
-          if (
-            payload?.embedPayload !== null &&
-            enrichment.readiness !== "complete"
-          ) {
+          const hasEnrichableContent =
+            payload !== null && payload.embedPayload !== null;
+
+          if (hasEnrichableContent && enrichment.readiness !== "complete") {
             return yield* new EditorialPickNotReadyError({
               postUri,
               readiness: enrichment.readiness
@@ -113,24 +148,38 @@ export class EditorialPickBundleReadService extends ServiceMap.Service<
             (item): item is GroundingPostEnrichmentResult =>
               item.kind === "grounding"
           );
-          const expert = yield* expertsRepo.getByDid(post.author);
+          const capturedAt = yield* toIsoTimestamp(
+            "editorial pick bundle captured_at",
+            payload?.capturedAt ?? post.createdAt
+          );
+          const pickedAt = yield* toIsoTimestamp(
+            "editorial pick bundle picked_at",
+            pick.pickedAt
+          );
+          const expiresAt = pick.expiresAt === null
+            ? undefined
+            : yield* toIsoTimestamp(
+              "editorial pick bundle expires_at",
+              pick.expiresAt
+            );
+          const resolvedExpert = getResolvedExpert(expert);
 
           return {
             post_uri: postUri,
             post: {
               author: post.author,
               text: post.text,
-              captured_at: toIsoString(payload?.capturedAt ?? post.createdAt)
+              // Candidate payload capture time wins when present; otherwise fall
+              // back to the original post creation timestamp.
+              captured_at: capturedAt
             },
             editorial_pick: {
               score: pick.score,
               curator: pick.curator,
-              picked_at: toIsoString(pick.pickedAt),
+              picked_at: pickedAt,
               reason: pick.reason,
               ...(pick.category === null ? {} : { category: pick.category }),
-              ...(pick.expiresAt === null
-                ? {}
-                : { expires_at: toIsoString(pick.expiresAt) })
+              ...(expiresAt === undefined ? {} : { expires_at: expiresAt })
             },
             enrichments: {
               readiness: enrichment.readiness,
@@ -139,10 +188,12 @@ export class EditorialPickBundleReadService extends ServiceMap.Service<
                 ? {}
                 : { source_attribution: sourceAttribution.payload }),
               ...(grounding === undefined ? {} : { grounding: grounding.payload }),
+              // Entity extraction is not wired into this read surface yet; keep
+              // the field stable as an explicit empty list for downstream callers.
               entities: []
             },
             source_providers: getSourceProviders(sourceAttribution),
-            ...(expert === null ? {} : { resolved_expert: expert.did })
+            ...(resolvedExpert === undefined ? {} : { resolved_expert: resolvedExpert })
           } satisfies EditorialPickBundle;
         }
       );

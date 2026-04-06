@@ -3,6 +3,7 @@ import { describe, expect, it } from "@effect/vitest";
 import {
   makeBiLayer,
   makeSqliteLayer,
+  markEditorialFixturePostDeleted,
   seedKnowledgeBase,
   seedEditorialPickBundleFixture,
   testConfig,
@@ -680,6 +681,9 @@ describe("admin editorial endpoints", () => {
           };
           readonly enrichments: {
             readonly readiness: string;
+            readonly vision?: {
+              readonly kind: string;
+            };
             readonly source_attribution?: {
               readonly provider: {
                 readonly providerId: string;
@@ -696,9 +700,114 @@ describe("admin editorial endpoints", () => {
         expect(body.editorial_pick.score).toBe(85);
         expect(body.editorial_pick.curator).toBe("test-curator");
         expect(body.enrichments.readiness).toBe("complete");
+        expect(body.enrichments.vision).toBeUndefined();
         expect(body.enrichments.source_attribution?.provider?.providerId).toBe("ercot");
         expect(body.source_providers).toEqual(["ercot"]);
-        expect(body.resolved_expert).toBe(sampleDid);
+        expect(body.resolved_expert).toBe("Skygest Seed Primary");
+      })
+    )
+  );
+
+  it.live("get pick bundle returns full enrichments when vision data is present", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeAdminEditorialLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await seedEditorialPickBundleFixture(layer, solarUri, {
+          withVisionEnrichment: true
+        });
+
+        const response = await handleAdminRequestWithLayer(
+          new Request(
+            `https://skygest.local/admin/editorial/picks/${encodeURIComponent(solarUri)}/bundle`
+          ),
+          operatorIdentity,
+          layer
+        );
+
+        const body = await expectJsonResponse<{
+          readonly enrichments: {
+            readonly readiness: string;
+            readonly vision?: {
+              readonly kind: string;
+              readonly summary: {
+                readonly text: string;
+              };
+            };
+            readonly source_attribution?: {
+              readonly provider: {
+                readonly providerId: string;
+              } | null;
+            };
+          };
+        }>(response);
+
+        expect(body.enrichments.readiness).toBe("complete");
+        expect(body.enrichments.vision?.kind).toBe("vision");
+        expect(body.enrichments.vision?.summary.text).toContain("ERCOT load");
+        expect(body.enrichments.source_attribution?.provider?.providerId).toBe("ercot");
+      })
+    )
+  );
+
+  it.live("get pick bundle allows plain-text picks with no enrichable payload", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeAdminEditorialLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await seedEditorialPickBundleFixture(layer, solarUri, {
+          withPayload: false,
+          withEnrichment: false
+        });
+
+        const response = await handleAdminRequestWithLayer(
+          new Request(
+            `https://skygest.local/admin/editorial/picks/${encodeURIComponent(solarUri)}/bundle`
+          ),
+          operatorIdentity,
+          layer
+        );
+
+        const body = await expectJsonResponse<{
+          readonly enrichments: {
+            readonly readiness: string;
+            readonly vision?: unknown;
+            readonly source_attribution?: unknown;
+          };
+          readonly source_providers: ReadonlyArray<string>;
+        }>(response);
+
+        expect(body.enrichments.readiness).toBe("none");
+        expect(body.enrichments.vision).toBeUndefined();
+        expect(body.enrichments.source_attribution).toBeUndefined();
+        expect(body.source_providers).toEqual([]);
+      })
+    )
+  );
+
+  it.live("get pick bundle returns 404 when the pick exists but the source post is missing", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeAdminEditorialLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await seedEditorialPickBundleFixture(layer, solarUri);
+        await markEditorialFixturePostDeleted(layer, solarUri);
+
+        const response = await handleAdminRequestWithLayer(
+          new Request(
+            `https://skygest.local/admin/editorial/picks/${encodeURIComponent(solarUri)}/bundle`
+          ),
+          operatorIdentity,
+          layer
+        );
+
+        const body = await expectJsonResponse<{
+          readonly error: string;
+          readonly message: string;
+        }>(response, 404);
+
+        expect(body.error).toBe("NotFound");
+        expect(body.message).toBe(`post not found: ${solarUri}`);
       })
     )
   );

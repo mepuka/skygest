@@ -1,13 +1,11 @@
 import { Schema } from "effect";
 import { ProviderId } from "../source";
-import { Did } from "../types";
+import { Did, IsoTimestamp } from "../types";
 
 // Narrative frontmatter mirrors markdown keys, so this domain slice intentionally
 // keeps snake_case field names rather than the repo's usual camelCase shape.
 
 const DATE_STAMP_PATTERN = /^\d{4}-\d{2}-\d{2}$/u;
-const ISO_TIMESTAMP_WITH_TIMEZONE_PATTERN =
-  /^\d{4}-\d{2}-\d{2}T.+(?:Z|[+-]\d{2}:\d{2})$/u;
 
 const validateTrimmedNarrativeText = (value: string) => {
   if (value.trim().length === 0) {
@@ -28,16 +26,6 @@ const validateDateStamp = (value: string) => {
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value
     ? undefined
     : "expected a real calendar date in YYYY-MM-DD format";
-};
-
-const validateIsoTimestamp = (value: string) => {
-  if (!ISO_TIMESTAMP_WITH_TIMEZONE_PATTERN.test(value)) {
-    return "expected an ISO 8601 timestamp with timezone";
-  }
-
-  return !Number.isNaN(Date.parse(value))
-    ? undefined
-    : "expected a parseable ISO 8601 timestamp";
 };
 
 const validateRelativeDocumentStem = (value: string) => {
@@ -87,11 +75,6 @@ export const DateStamp = Schema.String.pipe(
   Schema.check(Schema.makeFilter(validateDateStamp))
 );
 export type DateStamp = Schema.Schema.Type<typeof DateStamp>;
-
-export const IsoTimestamp = Schema.String.pipe(
-  Schema.check(Schema.makeFilter(validateIsoTimestamp))
-);
-export type IsoTimestamp = Schema.Schema.Type<typeof IsoTimestamp>;
 
 export const RelativeDocumentStem = Schema.String.pipe(
   Schema.check(Schema.makeFilter(validateRelativeDocumentStem))

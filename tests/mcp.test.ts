@@ -37,6 +37,7 @@ import {
   opsReadIdentity,
   opsRefreshIdentity,
   readOnlyIdentity,
+  markEditorialFixturePostDeleted,
   seedEditorialPickBundleFixture,
   workflowIdentity,
   workflowWriteIdentity,
@@ -464,11 +465,41 @@ describe("MCP get_editorial_pick_bundle", () => {
           expect(bundle.editorial_pick.score).toBe(85);
           expect(bundle.editorial_pick.curator).toBe("test-curator");
           expect(bundle.enrichments.readiness).toBe("complete");
+          expect(bundle.enrichments.vision).toBeUndefined();
           expect(bundle.enrichments.source_attribution?.provider?.providerId).toBe("ercot");
           expect(bundle.source_providers).toEqual(["ercot"]);
-          expect(bundle.resolved_expert).toBe(sampleDid);
+          expect(bundle.resolved_expert).toBe("Skygest Seed Primary");
           expect(bundle._display).toContain(`Pick: ${solarUri}`);
           expect(getTextContent(result)).toContain("Readiness: complete");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("returns full enrichments when vision data is present", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await seedEditorialPickBundleFixture(layer, solarUri, {
+          withVisionEnrichment: true
+        });
+
+        const { client, close } = await createMcpClient(makeBiLayer({ filename }));
+
+        try {
+          const result = await client.callTool({
+            name: "get_editorial_pick_bundle",
+            arguments: { postUri: solarUri }
+          });
+          const bundle = decodeEditorialPickBundleResponse(result);
+
+          expect(bundle.enrichments.readiness).toBe("complete");
+          expect(bundle.enrichments.vision?.kind).toBe("vision");
+          expect(bundle.enrichments.vision?.summary.text).toContain("ERCOT load");
+          expect(bundle.enrichments.source_attribution?.provider?.providerId).toBe("ercot");
         } finally {
           await close();
         }
@@ -492,6 +523,31 @@ describe("MCP get_editorial_pick_bundle", () => {
 
           expect(result.isError).toBe(true);
           expect(getTextContent(result)).toContain("not a committed editorial pick");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("rejects a pick whose backing post row is no longer active", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await seedEditorialPickBundleFixture(layer, solarUri);
+        await markEditorialFixturePostDeleted(layer, solarUri);
+
+        const { client, close } = await createMcpClient(makeBiLayer({ filename }));
+
+        try {
+          const result = await client.callTool({
+            name: "get_editorial_pick_bundle",
+            arguments: { postUri: solarUri }
+          });
+
+          expect(result.isError).toBe(true);
+          expect(getTextContent(result)).toContain(`post not found: ${solarUri}`);
         } finally {
           await close();
         }

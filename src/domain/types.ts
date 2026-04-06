@@ -46,7 +46,8 @@ const validateIsoTimestamp = (value: string) => {
 };
 
 export const IsoTimestamp = Schema.String.pipe(
-  Schema.check(Schema.makeFilter(validateIsoTimestamp))
+  Schema.check(Schema.makeFilter(validateIsoTimestamp)),
+  Schema.brand("IsoTimestamp")
 );
 export type IsoTimestamp = Schema.Schema.Type<typeof IsoTimestamp>;
 

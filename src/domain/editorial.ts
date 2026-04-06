@@ -156,7 +156,7 @@ export const EditorialPickBundle = Schema.Struct({
   editorial_pick: EditorialPickBundleEditorialPick,
   enrichments: EditorialPickBundleEnrichments,
   source_providers: Schema.Array(ProviderId),
-  resolved_expert: Schema.optionalKey(Did)
+  resolved_expert: Schema.optionalKey(Schema.String)
 });
 export type EditorialPickBundle = Schema.Schema.Type<typeof EditorialPickBundle>;
 

@@ -3,6 +3,7 @@ import { rmSync } from "node:fs";
 import { join } from "node:path";
 import { SqliteClient } from "@effect/sql-sqlite-node";
 import { Effect, Layer, Redacted, Schema } from "effect";
+import { SqlClient } from "effect/unstable/sql";
 import { energySeedDid, energySeedManifest } from "../../src/bootstrap/CheckedInExpertSeeds";
 import { bootstrapExperts } from "../../src/bootstrap/ExpertSeeds";
 import { BlueskyClient, layer as BlueskyClientLayer } from "../../src/bluesky/BlueskyClient";
@@ -285,11 +286,63 @@ export const makeSourceAttributionEnrichmentPayload = () => ({
   processedAt: 20
 });
 
+export const makeVisionEnrichmentPayload = () => ({
+  kind: "vision" as const,
+  summary: {
+    text: "Bar chart of ERCOT load by month.",
+    mediaTypes: ["chart"] as const,
+    chartTypes: ["bar-chart"] as const,
+    titles: ["ERCOT load"],
+    keyFindings: [
+      {
+        text: "Load rises through summer.",
+        assetKeys: ["embed:0:https://cdn.bsky.app/full-1.jpg"]
+      }
+    ]
+  },
+  assets: [
+    {
+      assetKey: "embed:0:https://cdn.bsky.app/full-1.jpg",
+      assetType: "image" as const,
+      source: "embed" as const,
+      index: 0,
+      originalAltText: null,
+      extractionRoute: "full" as const,
+      analysis: {
+        mediaType: "chart" as const,
+        chartTypes: ["bar-chart"] as const,
+        altText: "Bar chart of ERCOT load by month.",
+        altTextProvenance: "synthetic" as const,
+        xAxis: { label: "Month", unit: null },
+        yAxis: { label: "Load", unit: "GW" },
+        series: [{ legendLabel: "Load", unit: "GW" }],
+        sourceLines: [{ sourceText: "Source: ERCOT", datasetName: null }],
+        temporalCoverage: {
+          startDate: "2024-01",
+          endDate: "2024-12"
+        },
+        keyFindings: ["Load rises through summer."],
+        visibleUrls: [],
+        organizationMentions: [],
+        logoText: [],
+        title: "ERCOT load",
+        modelId: "gemini-2.5-flash",
+        processedAt: 10
+      }
+    }
+  ],
+  modelId: "gemini-2.5-flash",
+  promptVersion: "v2.0.0",
+  processedAt: 10
+});
+
 export const seedEditorialPickBundleFixture = (
   layer: Layer.Layer<any, any, never>,
   postUri: PostUri,
   options?: {
     readonly withEnrichment?: boolean;
+    readonly withVisionEnrichment?: boolean;
+    readonly withPayload?: boolean;
     readonly score?: number;
     readonly reason?: string;
   }
@@ -302,14 +355,16 @@ export const seedEditorialPickBundleFixture = (
       yield* payloads.capturePayload({
         postUri,
         captureStage: "candidate",
-        embedType: "link",
-        embedPayload: {
-          kind: "link",
-          uri: "https://example.com/grid-report",
-          title: "Grid report",
-          description: "Useful context",
-          thumb: null
-        }
+        embedType: options?.withPayload === false ? null : "link",
+        embedPayload: options?.withPayload === false
+          ? null
+          : {
+            kind: "link",
+            uri: "https://example.com/grid-report",
+            title: "Grid report",
+            description: "Useful context",
+            thumb: null
+          }
       });
 
       yield* payloads.markPicked(postUri);
@@ -322,6 +377,14 @@ export const seedEditorialPickBundleFixture = (
         });
       }
 
+      if (options?.withVisionEnrichment === true) {
+        yield* payloads.saveEnrichment({
+          postUri,
+          enrichmentType: "vision",
+          enrichmentPayload: makeVisionEnrichmentPayload()
+        });
+      }
+
       return yield* editorial.submitPick(
         {
           postUri,
@@ -331,6 +394,21 @@ export const seedEditorialPickBundleFixture = (
         },
         "test-curator"
       );
+    }).pipe(Effect.provide(layer))
+  );
+
+export const markEditorialFixturePostDeleted = (
+  layer: Layer.Layer<any, any, never>,
+  postUri: PostUri
+) =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient;
+      yield* sql`
+        UPDATE posts
+        SET status = ${"deleted"}
+        WHERE uri = ${postUri}
+      `.pipe(Effect.asVoid);
     }).pipe(Effect.provide(layer))
   );
 

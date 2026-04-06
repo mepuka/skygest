@@ -1,11 +1,10 @@
 import { Schema } from "effect";
 import { ProviderId } from "../source";
-import { Did, PostUri } from "../types";
+import { Did, IsoTimestamp, PostUri } from "../types";
 import { EditorialScore } from "../editorial";
 import {
   DateStamp,
   DiscourseLevel,
-  IsoTimestamp,
   NonEmptyNarrativeText
 } from "./story";
 

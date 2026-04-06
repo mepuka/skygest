@@ -886,6 +886,15 @@ const makeReadOnlyHandlers = (
           })
         )
       ),
+      Effect.catchTag("EditorialPostNotFoundError", (error) =>
+        Effect.fail(
+          new McpToolQueryError({
+            tool: "get_editorial_pick_bundle",
+            message: `post not found: ${error.postUri}`,
+            error
+          })
+        )
+      ),
       Effect.mapError(passThroughMcpToolError("get_editorial_pick_bundle"))
     ),
   get_post_thread: (input: typeof GetPostThreadInput.Type) =>
