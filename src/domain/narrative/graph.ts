@@ -10,9 +10,7 @@ const GraphFilePath = NonEmptyNarrativeText;
 
 const GraphEdgeMetadata = Schema.Record(Schema.String, Schema.Unknown);
 
-export const NarrativeNode = Schema.Struct({
-  // [derived] node discriminator for the parser graph
-  _tag: Schema.Literal("narrative"),
+export const NarrativeNode = Schema.TaggedStruct("narrative", {
   // [derived] file path for the narrative markdown document
   path: GraphFilePath,
   // [derived] stable node id derived by the parser
@@ -26,9 +24,7 @@ export const NarrativeNode = Schema.Struct({
 });
 export type NarrativeNode = Schema.Schema.Type<typeof NarrativeNode>;
 
-export const StoryNode = Schema.Struct({
-  // [derived] node discriminator for the parser graph
-  _tag: Schema.Literal("story"),
+export const StoryNode = Schema.TaggedStruct("story", {
   // [derived] file path for the story markdown document
   path: GraphFilePath,
   // [derived] stable node id derived by the parser
@@ -42,11 +38,11 @@ export const StoryNode = Schema.Struct({
 });
 export type StoryNode = Schema.Schema.Type<typeof StoryNode>;
 
-export const PostAnnotationNode = Schema.Struct({
-  // [derived] node discriminator for the parser graph
-  _tag: Schema.Literal("post_annotation"),
+export const PostAnnotationNode = Schema.TaggedStruct("post_annotation", {
   // [derived] file path for the annotation markdown document
   path: GraphFilePath,
+  // [derived] stable node id derived by the parser
+  id: GraphNodeId,
   // [editorial/hydratable/cache] parsed annotation frontmatter
   frontmatter: PostAnnotationFrontmatter,
   // [editorial] markdown body content
@@ -56,9 +52,7 @@ export type PostAnnotationNode = Schema.Schema.Type<
   typeof PostAnnotationNode
 >;
 
-export const ArgumentPatternNode = Schema.Struct({
-  // [derived] node discriminator for the parser graph
-  _tag: Schema.Literal("argument_pattern"),
+export const ArgumentPatternNode = Schema.TaggedStruct("argument_pattern", {
   // [derived] file path for the argument-pattern markdown document
   path: GraphFilePath,
   // [derived] stable node id derived by the parser
@@ -72,9 +66,7 @@ export type ArgumentPatternNode = Schema.Schema.Type<
   typeof ArgumentPatternNode
 >;
 
-export const EditionNode = Schema.Struct({
-  // [derived] node discriminator for the parser graph
-  _tag: Schema.Literal("edition"),
+export const EditionNode = Schema.TaggedStruct("edition", {
   // [derived] file path for the edition markdown document
   path: GraphFilePath,
   // [derived] stable node id derived by the parser

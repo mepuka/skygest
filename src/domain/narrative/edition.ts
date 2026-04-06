@@ -38,15 +38,7 @@ export const EditionStoryRef = Schema.Struct({
 });
 export type EditionStoryRef = Schema.Schema.Type<typeof EditionStoryRef>;
 
-const EditionStories = Schema.Array(EditionStoryRef).pipe(
-  Schema.check(
-    Schema.makeFilter((items: ReadonlyArray<EditionStoryRef>) =>
-      items.length > 0
-        ? undefined
-        : "stories must contain at least 1 item"
-    )
-  )
-);
+const EditionStories = Schema.NonEmptyArray(EditionStoryRef);
 
 const EditionFrontmatterBase = Schema.Struct({
   // [editorial] edition title

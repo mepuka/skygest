@@ -88,6 +88,23 @@ describe("StoryFrontmatter", () => {
       .toEqual(validStoryFrontmatter);
   });
 
+  it("accepts the headline length boundaries", () => {
+    expect(
+      Schema.decodeUnknownSync(StoryFrontmatter)({
+        ...validStoryFrontmatter,
+        headline: "1234567890"
+      }).headline
+    ).toBe("1234567890");
+
+    const maxHeadline = "x".repeat(160);
+    expect(
+      Schema.decodeUnknownSync(StoryFrontmatter)({
+        ...validStoryFrontmatter,
+        headline: maxHeadline
+      }).headline
+    ).toBe(maxHeadline);
+  });
+
   it("rejects missing required fields", () => {
     const { question: _question, ...withoutQuestion } = validStoryFrontmatter;
     expect(() => Schema.decodeUnknownSync(StoryFrontmatter)(withoutQuestion))
@@ -108,6 +125,58 @@ describe("StoryFrontmatter", () => {
       Schema.decodeUnknownSync(StoryFrontmatter)({
         ...validStoryFrontmatter,
         narrative_arcs: []
+      })
+    ).toThrow();
+  });
+
+  it("rejects duplicate narrative arcs", () => {
+    expect(() =>
+      Schema.decodeUnknownSync(StoryFrontmatter)({
+        ...validStoryFrontmatter,
+        narrative_arcs: ["grid-transition", "grid-transition"]
+      })
+    ).toThrow();
+  });
+
+  it("rejects duplicate post annotations", () => {
+    expect(() =>
+      Schema.decodeUnknownSync(StoryFrontmatter)({
+        ...validStoryFrontmatter,
+        posts: [
+          {
+            annotation: "2026-04-06/ember-814gw",
+            role: "lead"
+          },
+          {
+            annotation: "2026-04-06/ember-814gw",
+            role: "supporting"
+          }
+        ]
+      })
+    ).toThrow();
+  });
+
+  it("rejects headlines outside the allowed length window", () => {
+    expect(() =>
+      Schema.decodeUnknownSync(StoryFrontmatter)({
+        ...validStoryFrontmatter,
+        headline: "too short"
+      })
+    ).toThrow();
+
+    expect(() =>
+      Schema.decodeUnknownSync(StoryFrontmatter)({
+        ...validStoryFrontmatter,
+        headline: "x".repeat(161)
+      })
+    ).toThrow();
+  });
+
+  it("rejects invalid calendar dates", () => {
+    expect(() =>
+      Schema.decodeUnknownSync(StoryFrontmatter)({
+        ...validStoryFrontmatter,
+        curation_date: "2026-02-30"
       })
     ).toThrow();
   });
@@ -140,6 +209,15 @@ describe("NarrativeFrontmatter", () => {
       Schema.decodeUnknownSync(NarrativeFrontmatter)({
         ...validNarrativeFrontmatter,
         status: "paused"
+      })
+    ).toThrow();
+  });
+
+  it("rejects whitespace-only narrative text", () => {
+    expect(() =>
+      Schema.decodeUnknownSync(NarrativeFrontmatter)({
+        ...validNarrativeFrontmatter,
+        title: "   "
       })
     ).toThrow();
   });
@@ -220,6 +298,27 @@ describe("GraphNode and GraphEdge", () => {
     };
 
     expect(Schema.decodeUnknownSync(GraphNode)(node)).toEqual(node);
+  });
+
+  it("requires ids on post annotation nodes", () => {
+    const node = {
+      _tag: "post_annotation" as const,
+      path: "post-annotations/2026-04-06/ember-814gw.md",
+      id: "2026-04-06/ember-814gw",
+      frontmatter: validPostAnnotationFrontmatter,
+      body: "A short annotation body."
+    };
+
+    expect(Schema.decodeUnknownSync(GraphNode)(node)).toEqual(node);
+
+    expect(() =>
+      Schema.decodeUnknownSync(GraphNode)({
+        _tag: "post_annotation",
+        path: "post-annotations/2026-04-06/ember-814gw.md",
+        frontmatter: validPostAnnotationFrontmatter,
+        body: "A short annotation body."
+      })
+    ).toThrow();
   });
 
   it("rejects unknown edge types", () => {

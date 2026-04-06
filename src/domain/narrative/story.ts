@@ -2,9 +2,22 @@ import { Schema } from "effect";
 import { ProviderId } from "../source";
 import { Did } from "../types";
 
+// Narrative frontmatter mirrors markdown keys, so this domain slice intentionally
+// keeps snake_case field names rather than the repo's usual camelCase shape.
+
 const DATE_STAMP_PATTERN = /^\d{4}-\d{2}-\d{2}$/u;
 const ISO_TIMESTAMP_WITH_TIMEZONE_PATTERN =
   /^\d{4}-\d{2}-\d{2}T.+(?:Z|[+-]\d{2}:\d{2})$/u;
+
+const validateTrimmedNarrativeText = (value: string) => {
+  if (value.trim().length === 0) {
+    return "expected non-empty text";
+  }
+
+  return value === value.trim()
+    ? undefined
+    : "expected text without leading or trailing whitespace";
+};
 
 const validateDateStamp = (value: string) => {
   if (!DATE_STAMP_PATTERN.test(value)) {
@@ -56,8 +69,15 @@ const validateUniqueStoryPosts = (value: {
     : "story posts must not repeat annotation references";
 };
 
+const validateUniqueNarrativeArcs = (value: {
+  readonly narrative_arcs: ReadonlyArray<string>;
+}) =>
+  new Set(value.narrative_arcs).size === value.narrative_arcs.length
+    ? undefined
+    : "narrative_arcs must not repeat values";
+
 export const NonEmptyNarrativeText = Schema.String.pipe(
-  Schema.check(Schema.isMinLength(1))
+  Schema.check(Schema.makeFilter(validateTrimmedNarrativeText))
 );
 export type NonEmptyNarrativeText = Schema.Schema.Type<
   typeof NonEmptyNarrativeText
@@ -109,30 +129,14 @@ export const StoryPostRef = Schema.Struct({
 export type StoryPostRef = Schema.Schema.Type<typeof StoryPostRef>;
 
 const StoryHeadline = Schema.String.pipe(
-  Schema.check(Schema.isMinLength(10)),
-  Schema.check(Schema.isMaxLength(160))
+  Schema.check(Schema.isLengthBetween(10, 160)),
+  Schema.check(Schema.makeFilter(validateTrimmedNarrativeText))
 );
 
 const NarrativeArcRef = NonEmptyNarrativeText;
 const ArgumentPatternRef = NonEmptyNarrativeText;
-const StoryNarrativeArcs = Schema.Array(NarrativeArcRef).pipe(
-  Schema.check(
-    Schema.makeFilter((items: ReadonlyArray<NonEmptyNarrativeText>) =>
-      items.length > 0
-        ? undefined
-        : "narrative_arcs must contain at least 1 item"
-    )
-  )
-);
-const StoryPosts = Schema.Array(StoryPostRef).pipe(
-  Schema.check(
-    Schema.makeFilter((items: ReadonlyArray<StoryPostRef>) =>
-      items.length > 0
-        ? undefined
-        : "posts must contain at least 1 item"
-    )
-  )
-);
+const StoryNarrativeArcs = Schema.NonEmptyArray(NarrativeArcRef);
+const StoryPosts = Schema.NonEmptyArray(StoryPostRef);
 
 const StoryFrontmatterBase = Schema.Struct({
   // [editorial] working headline for the story
@@ -171,6 +175,7 @@ const StoryFrontmatterBase = Schema.Struct({
 });
 
 export const StoryFrontmatter = StoryFrontmatterBase.pipe(
+  Schema.check(Schema.makeFilter(validateUniqueNarrativeArcs)),
   Schema.check(Schema.makeFilter(validateUniqueStoryPosts))
 );
 export type StoryFrontmatter = Schema.Schema.Type<typeof StoryFrontmatter>;
