@@ -3,7 +3,9 @@ import { describe, expect, it } from "@effect/vitest";
 import {
   makeBiLayer,
   makeSqliteLayer,
+  markEditorialFixturePostDeleted,
   seedKnowledgeBase,
+  seedEditorialPickBundleFixture,
   testConfig,
   withTempSqliteFile,
   sampleDid
@@ -31,6 +33,9 @@ import { CurationService } from "../src/services/CurationService";
 import { CandidatePayloadService } from "../src/services/CandidatePayloadService";
 import { CandidatePayloadRepoD1 } from "../src/services/d1/CandidatePayloadRepoD1";
 import { CurationRepoD1 } from "../src/services/d1/CurationRepoD1";
+import { EditorialPickBundleReadService } from "../src/services/EditorialPickBundleReadService";
+import { PostEnrichmentReadService } from "../src/services/PostEnrichmentReadService";
+import { PostEnrichmentReadRepoD1 } from "../src/services/d1/PostEnrichmentReadRepoD1";
 import { StagingOpsService } from "../src/services/StagingOpsService";
 import { CuratedPostsPageOutput } from "../src/domain/api";
 import { encodeJsonString } from "../src/platform/Json";
@@ -152,8 +157,26 @@ const makeAdminEditorialLayer = (options: {
   const candidatePayloadRepoLayer = CandidatePayloadRepoD1.layer.pipe(
     Layer.provideMerge(sqliteLayer)
   );
+  const postEnrichmentReadRepoLayer = PostEnrichmentReadRepoD1.layer.pipe(
+    Layer.provideMerge(sqliteLayer)
+  );
   const candidatePayloadServiceLayer = CandidatePayloadService.layer.pipe(
     Layer.provideMerge(candidatePayloadRepoLayer)
+  );
+  const enrichmentReadServiceLayer = PostEnrichmentReadService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(candidatePayloadServiceLayer, postEnrichmentReadRepoLayer)
+    )
+  );
+  const editorialPickBundleReadServiceLayer = EditorialPickBundleReadService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        editorialRepoLayer,
+        candidatePayloadServiceLayer,
+        enrichmentReadServiceLayer,
+        expertsLayer
+      )
+    )
   );
   const curationRepoLayer = CurationRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
   const curationServiceLayer = CurationService.layer.pipe(
@@ -205,6 +228,9 @@ const makeAdminEditorialLayer = (options: {
     editorialServiceLayer,
     candidatePayloadRepoLayer,
     candidatePayloadServiceLayer,
+    postEnrichmentReadRepoLayer,
+    enrichmentReadServiceLayer,
+    editorialPickBundleReadServiceLayer,
     curationRepoLayer,
     curationServiceLayer,
     mockBlueskyClient,
@@ -624,6 +650,217 @@ describe("admin editorial endpoints", () => {
         expect(pick).toBeDefined();
         expect(pick!.score).toBe(85);
         expect(pick!.reason).toBe("Solar analysis");
+      })
+    )
+  );
+
+  it.live("get pick bundle returns the bundled pick and enrichments", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeAdminEditorialLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await seedEditorialPickBundleFixture(layer, solarUri);
+
+        const response = await handleAdminRequestWithLayer(
+          new Request(
+            `https://skygest.local/admin/editorial/picks/${encodeURIComponent(solarUri)}/bundle`
+          ),
+          operatorIdentity,
+          layer
+        );
+
+        const body = await expectJsonResponse<{
+          readonly post_uri: string;
+          readonly post: {
+            readonly author: string;
+            readonly captured_at: string;
+          };
+          readonly editorial_pick: {
+            readonly score: number;
+            readonly curator: string;
+          };
+          readonly enrichments: {
+            readonly readiness: string;
+            readonly vision?: {
+              readonly kind: string;
+            };
+            readonly source_attribution?: {
+              readonly provider: {
+                readonly providerId: string;
+              } | null;
+            };
+          };
+          readonly source_providers: ReadonlyArray<string>;
+          readonly resolved_expert?: string;
+        }>(response);
+
+        expect(body.post_uri).toBe(solarUri);
+        expect(body.post.author).toBe(sampleDid);
+        expect(body.post.captured_at).toMatch(/Z$/);
+        expect(body.editorial_pick.score).toBe(85);
+        expect(body.editorial_pick.curator).toBe("test-curator");
+        expect(body.enrichments.readiness).toBe("complete");
+        expect(body.enrichments.vision).toBeUndefined();
+        expect(body.enrichments.source_attribution?.provider?.providerId).toBe("ercot");
+        expect(body.source_providers).toEqual(["ercot"]);
+        expect(body.resolved_expert).toBe("Skygest Seed Primary");
+      })
+    )
+  );
+
+  it.live("get pick bundle returns full enrichments when vision data is present", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeAdminEditorialLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await seedEditorialPickBundleFixture(layer, solarUri, {
+          withVisionEnrichment: true
+        });
+
+        const response = await handleAdminRequestWithLayer(
+          new Request(
+            `https://skygest.local/admin/editorial/picks/${encodeURIComponent(solarUri)}/bundle`
+          ),
+          operatorIdentity,
+          layer
+        );
+
+        const body = await expectJsonResponse<{
+          readonly enrichments: {
+            readonly readiness: string;
+            readonly vision?: {
+              readonly kind: string;
+              readonly summary: {
+                readonly text: string;
+              };
+            };
+            readonly source_attribution?: {
+              readonly provider: {
+                readonly providerId: string;
+              } | null;
+            };
+          };
+        }>(response);
+
+        expect(body.enrichments.readiness).toBe("complete");
+        expect(body.enrichments.vision?.kind).toBe("vision");
+        expect(body.enrichments.vision?.summary.text).toContain("ERCOT load");
+        expect(body.enrichments.source_attribution?.provider?.providerId).toBe("ercot");
+      })
+    )
+  );
+
+  it.live("get pick bundle allows plain-text picks with no enrichable payload", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeAdminEditorialLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await seedEditorialPickBundleFixture(layer, solarUri, {
+          withPayload: false,
+          withEnrichment: false
+        });
+
+        const response = await handleAdminRequestWithLayer(
+          new Request(
+            `https://skygest.local/admin/editorial/picks/${encodeURIComponent(solarUri)}/bundle`
+          ),
+          operatorIdentity,
+          layer
+        );
+
+        const body = await expectJsonResponse<{
+          readonly enrichments: {
+            readonly readiness: string;
+            readonly vision?: unknown;
+            readonly source_attribution?: unknown;
+          };
+          readonly source_providers: ReadonlyArray<string>;
+        }>(response);
+
+        expect(body.enrichments.readiness).toBe("none");
+        expect(body.enrichments.vision).toBeUndefined();
+        expect(body.enrichments.source_attribution).toBeUndefined();
+        expect(body.source_providers).toEqual([]);
+      })
+    )
+  );
+
+  it.live("get pick bundle returns 404 when the pick exists but the source post is missing", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeAdminEditorialLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await seedEditorialPickBundleFixture(layer, solarUri);
+        await markEditorialFixturePostDeleted(layer, solarUri);
+
+        const response = await handleAdminRequestWithLayer(
+          new Request(
+            `https://skygest.local/admin/editorial/picks/${encodeURIComponent(solarUri)}/bundle`
+          ),
+          operatorIdentity,
+          layer
+        );
+
+        const body = await expectJsonResponse<{
+          readonly error: string;
+          readonly message: string;
+        }>(response, 404);
+
+        expect(body.error).toBe("NotFound");
+        expect(body.message).toBe(`post not found: ${solarUri}`);
+      })
+    )
+  );
+
+  it.live("get pick bundle returns 404 for a URI that is not a committed pick", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeAdminEditorialLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const response = await handleAdminRequestWithLayer(
+          new Request(
+            `https://skygest.local/admin/editorial/picks/${encodeURIComponent(solarUri)}/bundle`
+          ),
+          operatorIdentity,
+          layer
+        );
+
+        const body = await expectJsonResponse<{
+          readonly error: string;
+          readonly message: string;
+        }>(response, 404);
+
+        expect(body.error).toBe("NotFound");
+        expect(body.message).toContain("not a committed editorial pick");
+      })
+    )
+  );
+
+  it.live("get pick bundle returns 409 when enrichment is not complete", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeAdminEditorialLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await seedEditorialPickBundleFixture(layer, solarUri, {
+          withEnrichment: false
+        });
+
+        const response = await handleAdminRequestWithLayer(
+          new Request(
+            `https://skygest.local/admin/editorial/picks/${encodeURIComponent(solarUri)}/bundle`
+          ),
+          operatorIdentity,
+          layer
+        );
+
+        const body = await expectJsonResponse<{
+          readonly error: string;
+          readonly message: string;
+        }>(response, 409);
+
+        expect(body.error).toBe("Conflict");
+        expect(body.message).toContain("enrichment is not complete");
       })
     )
   );

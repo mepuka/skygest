@@ -3,12 +3,14 @@ import { SqlClient } from "effect/unstable/sql";
 import { EditorialRepo } from "../EditorialRepo";
 import type {
   EditorialPickRecord,
+  EditorialPickSourcePost,
   CuratedPostResult,
   GetCuratedFeedInput,
   ListEditorialPicksInput
 } from "../../domain/editorial";
 import {
   EditorialPickRecord as EditorialPickRecordSchema,
+  EditorialPickSourcePost as EditorialPickSourcePostSchema,
   CuratedPostResult as CuratedPostResultSchema,
   ListEditorialPicksInput as ListEditorialPicksInputSchema,
   GetCuratedFeedInput as GetCuratedFeedInputSchema
@@ -34,6 +36,15 @@ const EditorialPickRowSchema = Schema.Struct({
   expiresAt: Schema.NullOr(Schema.Number)
 });
 const EditorialPickRowsSchema = Schema.Array(EditorialPickRowSchema);
+
+const EditorialPickSourcePostRowSchema = Schema.Struct({
+  author: Schema.String,
+  text: Schema.String,
+  createdAt: Schema.Number
+});
+const EditorialPickSourcePostRowsSchema = Schema.Array(
+  EditorialPickSourcePostRowSchema
+);
 
 const CuratedPostRowSchema = Schema.Struct({
   uri: Schema.String,
@@ -188,6 +199,68 @@ export const EditorialRepoD1 = {
         })
       );
 
+    const getActivePick = (postUri: string, now: number) =>
+      sql<any>`
+        SELECT
+          post_uri as postUri,
+          score,
+          reason,
+          category,
+          curator,
+          status,
+          picked_at as pickedAt,
+          expires_at as expiresAt
+        FROM editorial_picks
+        WHERE post_uri = ${postUri}
+          AND status = 'active'
+          AND (expires_at IS NULL OR expires_at > ${now})
+        LIMIT 1
+      `.pipe(
+        Effect.flatMap((rows) =>
+          decodeWithDbError(
+            EditorialPickRowsSchema,
+            rows,
+            `Failed to decode editorial pick row for ${postUri}`
+          )
+        ),
+        Effect.flatMap((rows) =>
+          decodeWithDbError(
+            Schema.Array(EditorialPickRecordSchema),
+            rows,
+            `Failed to normalize editorial pick row for ${postUri}`
+          )
+        ),
+        Effect.map((rows) => rows[0] ?? null)
+      );
+
+    const getActivePost = (postUri: string) =>
+      sql<any>`
+        SELECT
+          did as author,
+          text,
+          created_at as createdAt
+        FROM posts
+        WHERE uri = ${postUri}
+          AND status = 'active'
+        LIMIT 1
+      `.pipe(
+        Effect.flatMap((rows) =>
+          decodeWithDbError(
+            EditorialPickSourcePostRowsSchema,
+            rows,
+            `Failed to decode editorial source post row for ${postUri}`
+          )
+        ),
+        Effect.flatMap((rows) =>
+          decodeWithDbError(
+            Schema.Array(EditorialPickSourcePostSchema),
+            rows,
+            `Failed to normalize editorial source post row for ${postUri}`
+          )
+        ),
+        Effect.map((rows) => rows[0] ?? null)
+      );
+
     // ---------------------------------------------------------------------------
     // postExists
     // ---------------------------------------------------------------------------
@@ -299,6 +372,8 @@ export const EditorialRepoD1 = {
       upsertPick,
       retractPick,
       listPicks,
+      getActivePick,
+      getActivePost,
       postExists,
       getCuratedFeed,
       expireStale

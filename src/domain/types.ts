@@ -32,6 +32,25 @@ export const PostUri = Schema.String.pipe(
 ).annotate({ description: "Post URI — at:// (Bluesky) or x:// (Twitter)" });
 export type PostUri = Schema.Schema.Type<typeof PostUri>;
 
+const ISO_TIMESTAMP_WITH_TIMEZONE_PATTERN =
+  /^\d{4}-\d{2}-\d{2}T.+(?:Z|[+-]\d{2}:\d{2})$/u;
+
+const validateIsoTimestamp = (value: string) => {
+  if (!ISO_TIMESTAMP_WITH_TIMEZONE_PATTERN.test(value)) {
+    return "expected an ISO 8601 timestamp with timezone";
+  }
+
+  return !Number.isNaN(Date.parse(value))
+    ? undefined
+    : "expected a parseable ISO 8601 timestamp";
+};
+
+export const IsoTimestamp = Schema.String.pipe(
+  Schema.check(Schema.makeFilter(validateIsoTimestamp)),
+  Schema.brand("IsoTimestamp")
+);
+export type IsoTimestamp = Schema.Schema.Type<typeof IsoTimestamp>;
+
 const PODCAST_SEGMENT_URI_PREFIX = "podcast-segment://";
 
 const validatePodcastSegmentUri = (value: string) =>

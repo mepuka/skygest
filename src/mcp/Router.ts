@@ -11,6 +11,7 @@ import {
   encodeJsonStringWith
 } from "../platform/Json";
 import { CurationService } from "../services/CurationService";
+import { EditorialPickBundleReadService } from "../services/EditorialPickBundleReadService";
 import { EditorialService } from "../services/EditorialService";
 import { EnrichmentTriggerClient } from "../services/EnrichmentTriggerClient";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
@@ -38,6 +39,7 @@ const GlossaryResource = McpServer.resource({
 type QueryLayer = Layer.Layer<
   KnowledgeQueryService |
   EditorialService |
+  EditorialPickBundleReadService |
   CurationService |
   ExpertRegistryService |
   BlueskyClient |

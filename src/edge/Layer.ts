@@ -28,6 +28,7 @@ import { StagingOpsService } from "../services/StagingOpsService";
 import { CandidatePayloadRepoD1 } from "../services/d1/CandidatePayloadRepoD1";
 import { EnrichmentRunsRepoD1 } from "../services/d1/EnrichmentRunsRepoD1";
 import { ExpertSyncStateRepoD1 } from "../services/d1/ExpertSyncStateRepoD1";
+import { EditorialPickBundleReadService } from "../services/EditorialPickBundleReadService";
 import { EditorialService } from "../services/EditorialService";
 import { EditorialRepoD1 } from "../services/d1/EditorialRepoD1";
 import { ExpertsRepoD1 } from "../services/d1/ExpertsRepoD1";
@@ -124,6 +125,16 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const editorialServiceLayer = EditorialService.layer.pipe(
     Layer.provideMerge(Layer.mergeAll(editorialRepoLayer, configLayer, ontologyLayer))
   );
+  const editorialPickBundleReadServiceLayer = EditorialPickBundleReadService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        editorialRepoLayer,
+        candidatePayloadServiceLayer,
+        enrichmentReadServiceLayer,
+        expertsLayer
+      )
+    )
+  );
   const blueskyLayer = BlueskyClientLayer.pipe(
     Layer.provideMerge(configLayer)
   );
@@ -184,6 +195,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
       Layer.provideMerge(Layer.mergeAll(queryRepositoriesLayer, configLayer))
     ),
     editorialServiceLayer,
+    editorialPickBundleReadServiceLayer,
     curationServiceLayer
   );
   const authLayer = AuthService.layer.pipe(
@@ -218,6 +230,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         registryLayer,
         stagingOpsLayer,
         editorialServiceLayer,
+        editorialPickBundleReadServiceLayer,
         candidatePayloadServiceLayer,
         enrichmentReadServiceLayer,
         pipelineStatusServiceLayer,
@@ -239,6 +252,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         registryLayer,
         stagingOpsLayer,
         editorialServiceLayer,
+        editorialPickBundleReadServiceLayer,
         candidatePayloadServiceLayer,
         enrichmentReadServiceLayer,
         pipelineStatusServiceLayer,

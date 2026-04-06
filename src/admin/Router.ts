@@ -9,11 +9,13 @@ import {
   AdminRequestSchemas,
   AdminResponseSchemas,
   ApiErrorSchemas,
+  conflictError,
   notFoundError
 } from "../domain/api";
 import { CurationService } from "../services/CurationService";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { EditorialService } from "../services/EditorialService";
+import { EditorialPickBundleReadService } from "../services/EditorialPickBundleReadService";
 import { StagingOpsService } from "../services/StagingOpsService";
 import { PostImportService } from "../services/PostImportService";
 import { AppConfig } from "../platform/Config";
@@ -134,6 +136,14 @@ const AdminApi = HttpApi.make("admin")
           error: ApiErrorSchemas
         })
       )
+      .add(
+        HttpApiEndpoint.get("getPickBundle", "/admin/editorial/picks/:uri/bundle", {
+          disableCodecs: true,
+          params: AdminRequestSchemas.editorialPickBundlePath,
+          success: AdminResponseSchemas.editorialPickBundle,
+          error: ApiErrorSchemas
+        })
+      )
   )
   .add(
     HttpApiGroup.make("import")
@@ -165,6 +175,25 @@ const withAdminErrors = <A, R>(
         const postUri = getStringField(error, "postUri");
         return notFoundError(
           postUri === undefined ? "post not found" : `post not found: ${postUri}`
+        );
+      }
+
+      if (isTaggedError(error, "EditorialPickNotFoundError")) {
+        const postUri = getStringField(error, "postUri");
+        return notFoundError(
+          postUri === undefined
+            ? "this URI is not a committed editorial pick; promote it via submit_editorial_pick first."
+            : `this URI is not a committed editorial pick; promote it via submit_editorial_pick first: ${postUri}`
+        );
+      }
+
+      if (isTaggedError(error, "EditorialPickNotReadyError")) {
+        const postUri = getStringField(error, "postUri");
+        const readiness = getStringField(error, "readiness");
+        return conflictError(
+          postUri === undefined || readiness === undefined
+            ? "post enrichment is not complete; use get_post_enrichments to poll until readiness is complete."
+            : `post enrichment is not complete for ${postUri} (readiness: ${readiness}); use get_post_enrichments to poll until readiness is complete.`
         );
       }
 
@@ -360,6 +389,12 @@ const AdminHandlers = Layer.mergeAll(
           const editorial = yield* EditorialService;
           const items = yield* editorial.listPicks(urlParams);
           return { items };
+        }))
+      )
+      .handle("getPickBundle", ({ params: path }) =>
+        withAdminErrors("/admin/editorial/picks/:uri/bundle", Effect.gen(function* () {
+          const bundles = yield* EditorialPickBundleReadService;
+          return yield* bundles.getBundle(path.uri);
         }))
       )
   ),

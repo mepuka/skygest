@@ -21,7 +21,11 @@ import {
   ThreadDocumentOutput,
   SetExpertActiveResult
 } from "../domain/bi.ts";
-import { EditorialPicksOutput, SubmitEditorialPickOutput } from "../domain/editorial.ts";
+import {
+  EditorialPickBundle,
+  EditorialPicksOutput,
+  SubmitEditorialPickOutput
+} from "../domain/editorial.ts";
 import { BulkCurateOutput, CurationCandidatesOutput, CuratePostOutput } from "../domain/curation.ts";
 import {
   BulkStartEnrichmentOutput,
@@ -64,6 +68,11 @@ export type ExplainPostTopicsMcpOutput = typeof ExplainPostTopicsMcpOutput.Type;
 
 export const EditorialPicksMcpOutput = EditorialPicksOutput.pipe(Schema.fieldsAssign(displayFields));
 export type EditorialPicksMcpOutput = typeof EditorialPicksMcpOutput.Type;
+
+export const EditorialPickBundleMcpOutput = EditorialPickBundle.pipe(
+  Schema.fieldsAssign(displayFields)
+);
+export type EditorialPickBundleMcpOutput = typeof EditorialPickBundleMcpOutput.Type;
 
 export const PostThreadMcpOutput = PostThreadOutput.pipe(Schema.fieldsAssign(displayFields));
 export type PostThreadMcpOutput = typeof PostThreadMcpOutput.Type;
