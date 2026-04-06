@@ -466,7 +466,7 @@ describe("MCP prompts by profile", () => {
         try {
           const prompts = await client.listPrompts();
           const names = prompts.prompts.map((p) => p.name).sort();
-          expect(names).toEqual(["assess-expert", "curate-digest", "curate-session", "explore-topic"]);
+          expect(names).toEqual(["assemble-stories", "assess-expert", "curate-digest", "curate-session", "explore-topic"]);
         } finally {
           await close();
         }

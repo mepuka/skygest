@@ -111,4 +111,31 @@ Use \`_display\` for reading results at a glance. Reference items by their ident
 
 ## Decision Audit
 
-All pipeline transitions are logged with actor and timestamp for audit trail reconstruction.`;
+All pipeline transitions are logged with actor and timestamp for audit trail reconstruction.
+
+## Editorial Concepts
+
+**Expert-Data-Argument Link** — The core unit of editorial value. Which expert chose which data to make which argument at which discourse level. A post is valuable when this link is strong: the expert is making a specific argument using specific data. A chart alone is not the product; an expert name alone is not the product. It is the expert's choice to use this specific data to make this specific argument.
+
+**Discourse Level** — A five-level hierarchy describing where an expert's argument operates. A single data point ripples upward through all levels:
+- Technical: can the technology do what is claimed?
+- Economic: do the unit economics work?
+- Policy: is the regulatory/market framework supportive?
+- Political: what political forces shape the discourse?
+- Strategic: what is the right long-term pathway?
+
+**Story Mode** — The lifecycle stage of a story cluster:
+- Breaking (0-6h): speed + attribution
+- Developing (6-48h): facts + expert interpretation
+- Analysis (48h+): depth, authoritative data, consensus/dissent
+- Recurring (periodic): known data release drops with chart analysis
+
+**Question-Based Clustering** — Stories are clustered by the implicit question being debated, not by topic overlap. "Can new nuclear be built affordably?" is a story; "Nuclear news roundup" is not. Story headlines name the question and the tension.
+
+**Expert Credibility** — Three dimensions orthogonal to domain tier:
+- Analytical honesty: derives conclusions from data, not ideology
+- Track record: directionally correct over time, updates positions
+- Rigorous data treatment: cites primary sources, contextualizes data, notes limitations
+
+**Narrative Arc** — A long-running thematic question tracked across multiple story clusters over weeks or months. Stories belong to narrative arcs; arcs provide context for future curation.`;
+
