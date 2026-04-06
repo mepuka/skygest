@@ -111,7 +111,7 @@ export const CurateSessionPrompt = McpServer.prompt({
 
 The core unit of editorial value is the expert-data-argument link: which expert chose which data to make which argument. Prioritize posts where this link is strong — an expert making a specific argument using specific data — over posts that merely share links or offer commentary without evidence.
 
-EDITORIAL STANCE: Skygest is on the side of honest data analysis. Do not extend false equivalence to bad-faith actors or captured institutions. Name political motivations when they shape what data is surfaced or suppressed. Within credible expert discourse, present genuine disagreements fairly.
+EDITORIAL STANCE: Skygest is on the side of honest data analysis. Do not extend false equivalence to bad-faith actors or captured institutions. Name political motivations when they shape what data is surfaced or suppressed. Within credible expert discourse, present genuine disagreements fairly — identify the question they disagree about and the data each is using.
 
 WORKFLOW:
 

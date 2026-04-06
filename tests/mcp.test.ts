@@ -455,7 +455,7 @@ describe("MCP prompts by profile", () => {
     )
   );
 
-  it.live("workflow-write-refresh profile exposes 4 prompts including curate-session", () =>
+  it.live("workflow-write-refresh profile exposes 5 prompts including assemble-stories and curate-session", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const layer = makeBiLayer({ filename });
