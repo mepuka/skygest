@@ -25,7 +25,11 @@ import {
   SearchPostsInput,
   SetExpertActiveInput
 } from "../domain/bi";
-import { ListEditorialPicksInput, SubmitEditorialPickMcpInput } from "../domain/editorial";
+import {
+  GetEditorialPickBundleInput,
+  ListEditorialPicksInput,
+  SubmitEditorialPickMcpInput
+} from "../domain/editorial";
 import {
   BULK_CURATE_MAX_DECISIONS,
   BulkCurateInput,
@@ -56,6 +60,7 @@ import {
   OntologyTopicMcpOutput,
   ExpandedTopicsMcpOutput,
   ExplainPostTopicsMcpOutput,
+  EditorialPickBundleMcpOutput,
   EditorialPicksMcpOutput,
   PostThreadMcpOutput,
   SetExpertActiveMcpOutput,
@@ -85,6 +90,7 @@ import {
   formatTopic,
   formatExpandedTopics,
   formatExplainedPostTopics,
+  formatEditorialPickBundle,
   formatEditorialPicks,
   formatCuratePostResult,
   formatSubmitPickResult,
@@ -105,6 +111,7 @@ import {
 } from "../services/EnrichmentTriggerClient";
 import { PipelineStatusService } from "../services/PipelineStatusService";
 import { PostImportService } from "../services/PostImportService";
+import { EditorialPickBundleReadService } from "../services/EditorialPickBundleReadService";
 import { CandidatePayloadService } from "../services/CandidatePayloadService";
 import { extractEmbedKind, buildTypedEmbed } from "../bluesky/EmbedExtract";
 import { flattenThread } from "../bluesky/ThreadFlatten.ts";
@@ -328,6 +335,18 @@ export const ListEditorialPicksTool = Tool.make("list_editorial_picks", {
   .annotate(Tool.Idempotent, true)
   .annotate(Tool.OpenWorld, false);
 
+export const GetEditorialPickBundleTool = Tool.make("get_editorial_pick_bundle", {
+  description: "Fetch the full promotion bundle for an active editorial pick. Returns the source post, pick metadata, enrichment readiness and payloads, provider rollup, and best-effort expert resolution.",
+  parameters: GetEditorialPickBundleInput,
+  success: EditorialPickBundleMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Get Editorial Pick Bundle")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
+
 export const GetPostThreadTool = Tool.make("get_post_thread", {
   description: "Get the thread context for a Bluesky post. Returns ancestor posts (conversation history), the focus post, and replies. Includes engagement metrics (likes, reposts, reply counts). Calls the live Bluesky API.",
   parameters: GetPostThreadInput,
@@ -506,6 +525,7 @@ const ReadOnlyTools = [
   ExpandTopicsTool,
   ExplainPostTopicsTool,
   ListEditorialPicksTool,
+  GetEditorialPickBundleTool,
   GetPostThreadTool,
   GetThreadDocumentTool,
   ListCurationCandidatesTool,
@@ -566,6 +586,7 @@ type CurationServiceI = (typeof CurationService)["Service"];
 type ExpertRegistryServiceI = (typeof ExpertRegistryService)["Service"];
 type BlueskyClientI = (typeof BlueskyClient)["Service"];
 type PostEnrichmentReadServiceI = (typeof PostEnrichmentReadService)["Service"];
+type EditorialPickBundleReadServiceI = (typeof EditorialPickBundleReadService)["Service"];
 type PipelineStatusServiceI = (typeof PipelineStatusService)["Service"];
 type PostImportServiceI = (typeof PostImportService)["Service"];
 type EnrichmentTriggerClientI = (typeof EnrichmentTriggerClient)["Service"];
@@ -765,7 +786,8 @@ const makeReadOnlyHandlers = (
   editorialService: EditorialServiceI,
   curationService: CurationServiceI,
   bskyClient: BlueskyClientI,
-  enrichmentReadService: PostEnrichmentReadServiceI
+  enrichmentReadService: PostEnrichmentReadServiceI,
+  editorialPickBundleReadService: EditorialPickBundleReadServiceI
 ) => ({
   search_posts: (input: typeof SearchPostsInput.Type) =>
     queryService.searchPosts(input).pipe(
@@ -839,6 +861,32 @@ const makeReadOnlyHandlers = (
         _display: formatEditorialPicks(items)
       })),
       Effect.mapError(toQueryError("list_editorial_picks"))
+    ),
+  get_editorial_pick_bundle: (input: typeof GetEditorialPickBundleInput.Type) =>
+    editorialPickBundleReadService.getBundle(input.postUri).pipe(
+      Effect.map((result) => ({
+        ...result,
+        _display: formatEditorialPickBundle(result)
+      })),
+      Effect.catchTag("EditorialPickNotFoundError", (error) =>
+        Effect.fail(
+          new McpToolQueryError({
+            tool: "get_editorial_pick_bundle",
+            message: `This URI is not a committed editorial pick. Promote it via submit_editorial_pick first: ${error.postUri}`,
+            error
+          })
+        )
+      ),
+      Effect.catchTag("EditorialPickNotReadyError", (error) =>
+        Effect.fail(
+          new McpToolQueryError({
+            tool: "get_editorial_pick_bundle",
+            message: `Post enrichment is not complete (readiness: ${error.readiness}). Use get_post_enrichments and wait until readiness is "complete".`,
+            error
+          })
+        )
+      ),
+      Effect.mapError(passThroughMcpToolError("get_editorial_pick_bundle"))
     ),
   get_post_thread: (input: typeof GetPostThreadInput.Type) =>
     bskyClient.getPostThread(input.postUri, {
@@ -1316,6 +1364,7 @@ const makeCapabilityHandlers = <
       const expertRegistryService = yield* ExpertRegistryService;
       const bskyClient = yield* BlueskyClient;
       const enrichmentReadService = yield* PostEnrichmentReadService;
+      const editorialPickBundleReadService = yield* EditorialPickBundleReadService;
       const pipelineStatusService = yield* PipelineStatusService;
       const postImportService = yield* PostImportService;
 
@@ -1325,7 +1374,8 @@ const makeCapabilityHandlers = <
           editorialService,
           curationService,
           bskyClient,
-          enrichmentReadService
+          enrichmentReadService,
+          editorialPickBundleReadService
         ),
         ...(options.opsRead ? makeGetPipelineStatusHandler(pipelineStatusService) : {}),
         ...(options.opsRefresh ? makeImportPostsHandler(postImportService) : {}),

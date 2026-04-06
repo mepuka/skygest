@@ -99,6 +99,8 @@ Use \`_display\` for reading results at a glance. Reference items by their ident
 
 **get_post_enrichments** — Inspect enrichment state and readiness for a post. Returns validated enrichment payloads and run summaries. Use to verify a candidate is Reviewable before accepting as a brief.
 
+**get_editorial_pick_bundle** — Fetch the promotion bundle for an active editorial pick. Returns the picked post, pick metadata, enrichment payloads, provider rollup, and best-effort expert resolution. Use this as the read seam before materializing a narrative/story file.
+
 ## Write Tools
 
 **import_posts** — Import normalized experts and posts through the same pipeline as the admin import endpoint. Stores experts and posts, captures embed payloads when present, and flags imported posts for curation review. Requires ops:refresh scope.
@@ -138,4 +140,3 @@ All pipeline transitions are logged with actor and timestamp for audit trail rec
 - Rigorous data treatment: cites primary sources, contextualizes data, notes limitations
 
 **Narrative Arc** — A long-running thematic question tracked across multiple story clusters over weeks or months. Stories belong to narrative arcs; arcs provide context for future curation.`;
-

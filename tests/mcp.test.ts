@@ -4,7 +4,7 @@ import { describe, expect, it } from "@effect/vitest";
 import { parseAvatarUrl } from "../src/bluesky/BskyCdn";
 import { BlueskyClient } from "../src/bluesky/BlueskyClient";
 import { runMigrations } from "../src/db/migrate";
-import { Did } from "../src/domain/types";
+import { Did, type PostUri } from "../src/domain/types";
 import { decodeCallToolResultWith } from "../src/mcp/Client";
 import { BULK_CURATE_MAX_DECISIONS } from "../src/domain/curation";
 import { BULK_START_ENRICHMENT_MAX_POSTS } from "../src/domain/enrichment";
@@ -19,6 +19,7 @@ import {
   KnowledgePostsMcpOutput,
   ExpertListMcpOutput,
   OntologyTopicsMcpOutput,
+  EditorialPickBundleMcpOutput,
   EditorialPicksMcpOutput,
   PipelineStatusMcpOutput,
   ImportPostsMcpOutput,
@@ -36,6 +37,7 @@ import {
   opsReadIdentity,
   opsRefreshIdentity,
   readOnlyIdentity,
+  seedEditorialPickBundleFixture,
   workflowIdentity,
   workflowWriteIdentity,
   sampleDid,
@@ -51,6 +53,7 @@ const decodeEnrichmentGapsResponse = decodeCallToolResultWith(EnrichmentGapsMcpO
 const decodeEnrichmentIssuesResponse = decodeCallToolResultWith(EnrichmentIssuesMcpOutput);
 const decodeExpertsResponse = decodeCallToolResultWith(ExpertListMcpOutput);
 const decodeTopicsResponse = decodeCallToolResultWith(OntologyTopicsMcpOutput);
+const decodeEditorialPickBundleResponse = decodeCallToolResultWith(EditorialPickBundleMcpOutput);
 const decodeEditorialPicksResponse = decodeCallToolResultWith(EditorialPicksMcpOutput);
 const decodePipelineStatusResponse = decodeCallToolResultWith(PipelineStatusMcpOutput);
 const decodeImportPostsResponse = decodeCallToolResultWith(ImportPostsMcpOutput);
@@ -191,6 +194,7 @@ describe("read-only MCP server", () => {
           expect(tools.tools.map((tool) => tool.name).sort()).toEqual([
             "expand_topics",
             "explain_post_topics",
+            "get_editorial_pick_bundle",
             "get_post_enrichments",
             "get_post_links",
             "get_post_thread",
@@ -345,7 +349,7 @@ describe("MCP display formatting", () => {
 
 describe("MCP list_editorial_picks", () => {
   const fixtureUris = smokeFixtureUris(sampleDid);
-  const solarUri = fixtureUris[0];
+  const solarUri = fixtureUris[0] as PostUri;
 
   it.live("returns submitted picks via MCP tool", () =>
     Effect.promise(() =>
@@ -427,6 +431,93 @@ describe("MCP list_editorial_picks", () => {
           });
           const allPicks = decodeEditorialPicksResponse(all);
           expect(allPicks.items).toHaveLength(2);
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+});
+
+describe("MCP get_editorial_pick_bundle", () => {
+  const fixtureUris = smokeFixtureUris(sampleDid);
+  const solarUri = fixtureUris[0] as PostUri;
+
+  it.live("returns the structured pick bundle and display text", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await seedEditorialPickBundleFixture(layer, solarUri);
+
+        const { client, close } = await createMcpClient(makeBiLayer({ filename }));
+
+        try {
+          const result = await client.callTool({
+            name: "get_editorial_pick_bundle",
+            arguments: { postUri: solarUri }
+          });
+          const bundle = decodeEditorialPickBundleResponse(result);
+
+          expect(bundle.post_uri).toBe(solarUri);
+          expect(bundle.post.author).toBe(sampleDid);
+          expect(bundle.editorial_pick.score).toBe(85);
+          expect(bundle.editorial_pick.curator).toBe("test-curator");
+          expect(bundle.enrichments.readiness).toBe("complete");
+          expect(bundle.enrichments.source_attribution?.provider?.providerId).toBe("ercot");
+          expect(bundle.source_providers).toEqual(["ercot"]);
+          expect(bundle.resolved_expert).toBe(sampleDid);
+          expect(bundle._display).toContain(`Pick: ${solarUri}`);
+          expect(getTextContent(result)).toContain("Readiness: complete");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("rejects a URI that is not a committed editorial pick", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const { client, close } = await createMcpClient(makeBiLayer({ filename }));
+
+        try {
+          const result = await client.callTool({
+            name: "get_editorial_pick_bundle",
+            arguments: { postUri: solarUri }
+          });
+
+          expect(result.isError).toBe(true);
+          expect(getTextContent(result)).toContain("not a committed editorial pick");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("rejects a committed pick whose enrichment is still incomplete", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+        await seedEditorialPickBundleFixture(layer, solarUri, {
+          withEnrichment: false
+        });
+
+        const { client, close } = await createMcpClient(makeBiLayer({ filename }));
+
+        try {
+          const result = await client.callTool({
+            name: "get_editorial_pick_bundle",
+            arguments: { postUri: solarUri }
+          });
+
+          expect(result.isError).toBe(true);
+          expect(getTextContent(result)).toContain("enrichment is not complete");
         } finally {
           await close();
         }

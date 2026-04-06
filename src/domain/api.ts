@@ -48,6 +48,7 @@ import {
 import { EmbedKind, EmbedPayload } from "./embed";
 import { EnrichmentKind, PostEnrichmentsOutput } from "./enrichment";
 import {
+  EditorialPickBundle,
   EditorialScore,
   SubmitEditorialPickInput,
   RemoveEditorialPickInput,
@@ -737,6 +738,7 @@ export const AdminRequestSchemas = {
   submitEditorialPick: SubmitEditorialPickInput,
   retractEditorialPick: RemoveEditorialPickInput,
   listEditorialPicks: ListEditorialPicksUrlParams,
+  editorialPickBundlePath: PostUriEnrichmentsPath,
   importPosts: ImportPostsInput
 } as const;
 
@@ -753,6 +755,7 @@ export const AdminResponseSchemas = {
   submitEditorialPick: SubmitEditorialPickOutput,
   retractEditorialPick: RemoveEditorialPickOutput,
   listEditorialPicks: EditorialPicksOutput,
+  editorialPickBundle: EditorialPickBundle,
   importPosts: ImportPostsOutput,
   stats: StagingStats
 } as const;

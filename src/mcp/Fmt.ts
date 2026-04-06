@@ -23,7 +23,10 @@ import type {
   ExplainPostTopicsOutput,
   SetExpertActiveResult
 } from "../domain/bi.ts";
-import type { EditorialPickOutput } from "../domain/editorial.ts";
+import type {
+  EditorialPickBundle,
+  EditorialPickOutput
+} from "../domain/editorial.ts";
 import type {
   BulkCurateOutput,
   CurationCandidateCountOutput,
@@ -903,6 +906,43 @@ export const formatEnrichments = (
       lines.push(`  ${r.enrichmentType}: ${r.status} (${r.phase})${progress}`);
     }
   }
+
+  return lines.join("\n");
+};
+
+export const formatEditorialPickBundle = (
+  output: EditorialPickBundle
+): string => {
+  const lines = [
+    `Pick: ${output.post_uri}`,
+    `Author: ${output.post.author}`,
+    `Score: ${output.editorial_pick.score} | Curator: ${output.editorial_pick.curator}`,
+    `Picked at: ${output.editorial_pick.picked_at}`,
+    `Readiness: ${output.enrichments.readiness}`,
+    `Reason: ${truncate(collapse(output.editorial_pick.reason), 200)}`,
+    `Text: ${truncate(collapse(output.post.text), 200)}`,
+    `Captured at: ${output.post.captured_at}`
+  ];
+
+  if (output.editorial_pick.category !== undefined) {
+    lines.push(`Category: ${output.editorial_pick.category}`);
+  }
+
+  if (output.editorial_pick.expires_at !== undefined) {
+    lines.push(`Expires at: ${output.editorial_pick.expires_at}`);
+  }
+
+  if (output.source_providers.length > 0) {
+    lines.push(`Providers: ${output.source_providers.join(", ")}`);
+  }
+
+  if (output.resolved_expert !== undefined) {
+    lines.push(`Resolved expert: ${output.resolved_expert}`);
+  }
+
+  lines.push(
+    `Enrichment lanes: vision=${output.enrichments.vision !== undefined ? "yes" : "no"} | source-attribution=${output.enrichments.source_attribution !== undefined ? "yes" : "no"} | grounding=${output.enrichments.grounding !== undefined ? "yes" : "no"}`
+  );
 
   return lines.join("\n");
 };

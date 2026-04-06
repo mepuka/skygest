@@ -8,11 +8,13 @@ import { bootstrapExperts } from "../../src/bootstrap/ExpertSeeds";
 import { BlueskyClient, layer as BlueskyClientLayer } from "../../src/bluesky/BlueskyClient";
 import { runMigrations } from "../../src/db/migrate";
 import { CandidatePayloadService } from "../../src/services/CandidatePayloadService";
-import { RawEventBatch } from "../../src/domain/types";
+import { EditorialScore } from "../../src/domain/editorial";
+import { PostUri, RawEventBatch } from "../../src/domain/types";
 import { processBatch } from "../../src/filter/FilterWorker";
 import { callTool, listTools, listPrompts, type McpToolCall } from "../../src/mcp/Client";
 import { handleMcpRequestWithLayer, createPersistentMcpHandler } from "../../src/mcp/Router";
 import { AppConfig, type AppConfigShape } from "../../src/platform/Config";
+import { EditorialPickBundleReadService } from "../../src/services/EditorialPickBundleReadService";
 import { EditorialService } from "../../src/services/EditorialService";
 import { ExpertRegistryService } from "../../src/services/ExpertRegistryService";
 import { OntologyCatalog } from "../../src/services/OntologyCatalog";
@@ -202,6 +204,16 @@ export const makeBiLayer = (options?: {
       Layer.mergeAll(candidatePayloadServiceLayer, postEnrichmentReadRepoLayer)
     )
   );
+  const editorialPickBundleReadServiceLayer = EditorialPickBundleReadService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        editorialRepoLayer,
+        candidatePayloadServiceLayer,
+        enrichmentReadServiceLayer,
+        expertsLayer
+      )
+    )
+  );
   const pipelineStatusServiceLayer = PipelineStatusService.layer.pipe(
     Layer.provideMerge(pipelineStatusRepoLayer)
   );
@@ -211,6 +223,7 @@ export const makeBiLayer = (options?: {
     postHydrationLayer,
     KnowledgeQueryService.layer.pipe(Layer.provideMerge(baseLayer)),
     editorialServiceLayer,
+    editorialPickBundleReadServiceLayer,
     candidatePayloadServiceLayer,
     curationServiceLayer,
     blueskyLayer,
@@ -249,6 +262,77 @@ export const seedKnowledgeBase = () =>
     yield* bootstrapExperts(seedManifest, 1, 1_710_000_000_000);
     yield* processBatch(makeSampleBatch());
   });
+
+export const makeSourceAttributionEnrichmentPayload = () => ({
+  kind: "source-attribution" as const,
+  provider: {
+    providerId: "ercot",
+    providerLabel: "ERCOT",
+    sourceFamily: "Load"
+  },
+  contentSource: {
+    url: "https://example.com/grid-report",
+    title: "Grid report",
+    domain: "example.com",
+    publication: "Example"
+  },
+  resolution: "matched" as const,
+  providerCandidates: [],
+  socialProvenance: {
+    did: sampleDid,
+    handle: "seed.example.com"
+  },
+  processedAt: 20
+});
+
+export const seedEditorialPickBundleFixture = (
+  layer: Layer.Layer<any, any, never>,
+  postUri: PostUri,
+  options?: {
+    readonly withEnrichment?: boolean;
+    readonly score?: number;
+    readonly reason?: string;
+  }
+) =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      const payloads = yield* CandidatePayloadService;
+      const editorial = yield* EditorialService;
+
+      yield* payloads.capturePayload({
+        postUri,
+        captureStage: "candidate",
+        embedType: "link",
+        embedPayload: {
+          kind: "link",
+          uri: "https://example.com/grid-report",
+          title: "Grid report",
+          description: "Useful context",
+          thumb: null
+        }
+      });
+
+      yield* payloads.markPicked(postUri);
+
+      if (options?.withEnrichment !== false) {
+        yield* payloads.saveEnrichment({
+          postUri,
+          enrichmentType: "source-attribution",
+          enrichmentPayload: makeSourceAttributionEnrichmentPayload()
+        });
+      }
+
+      return yield* editorial.submitPick(
+        {
+          postUri,
+          score: Schema.decodeUnknownSync(EditorialScore)(options?.score ?? 85),
+          reason: options?.reason ?? "Important solar analysis",
+          category: "analysis"
+        },
+        "test-curator"
+      );
+    }).pipe(Effect.provide(layer))
+  );
 
 export const withTempSqliteFile = <A>(
   f: (filename: string) => Promise<A>

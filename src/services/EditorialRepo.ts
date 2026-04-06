@@ -3,6 +3,7 @@ import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type {
   EditorialPickRecord,
+  EditorialPickSourcePost,
   CuratedPostResult,
   GetCuratedFeedInput,
   ListEditorialPicksInput
@@ -27,6 +28,17 @@ export class EditorialRepo extends ServiceMap.Service<
       input: ListEditorialPicksInput,
       now: number
     ) => Effect.Effect<ReadonlyArray<EditorialPickRecord>, SqlError | DbError>;
+
+    /** Look up one active, non-expired pick by post URI. */
+    readonly getActivePick: (
+      postUri: string,
+      now: number
+    ) => Effect.Effect<EditorialPickRecord | null, SqlError | DbError>;
+
+    /** Look up the active post row needed for editorial bundle reads. */
+    readonly getActivePost: (
+      postUri: string
+    ) => Effect.Effect<EditorialPickSourcePost | null, SqlError | DbError>;
 
     /**
      * Curated feed: JOIN editorial_picks → posts → experts, with topic

@@ -1,6 +1,14 @@
 import { Schema } from "effect";
-import { PostUri } from "./types";
+import { Did, IsoTimestamp, PostUri } from "./types";
 import { FlexibleNumber, KnowledgePostResult } from "./bi";
+import {
+  EnrichmentReadiness,
+  GetPostEnrichmentsOutput,
+  GroundingEnrichment,
+  SourceAttributionEnrichment,
+  VisionEnrichment
+} from "./enrichment";
+import { ProviderId } from "./source";
 
 export const EditorialScore = Schema.Number.pipe(
   Schema.check(Schema.isGreaterThanOrEqualTo(0)),
@@ -92,6 +100,66 @@ export const EditorialPicksOutput = Schema.Struct({
 });
 export type EditorialPicksOutput = Schema.Schema.Type<typeof EditorialPicksOutput>;
 
+export const GetEditorialPickBundleInput = Schema.Struct({
+  postUri: PostUri.annotate({
+    description: "Post URI (at:// or x://) of an active editorial pick"
+  })
+});
+export type GetEditorialPickBundleInput = Schema.Schema.Type<
+  typeof GetEditorialPickBundleInput
+>;
+
+export const EditorialPickSourcePost = Schema.Struct({
+  author: Did,
+  text: Schema.String,
+  createdAt: Schema.Number
+});
+export type EditorialPickSourcePost = Schema.Schema.Type<
+  typeof EditorialPickSourcePost
+>;
+
+export const EditorialPickBundlePost = Schema.Struct({
+  author: Did,
+  text: Schema.String,
+  captured_at: IsoTimestamp
+});
+export type EditorialPickBundlePost = Schema.Schema.Type<
+  typeof EditorialPickBundlePost
+>;
+
+export const EditorialPickBundleEditorialPick = Schema.Struct({
+  score: EditorialScore,
+  curator: Schema.String,
+  picked_at: IsoTimestamp,
+  reason: Schema.String,
+  category: Schema.optionalKey(EditorialPickCategory),
+  expires_at: Schema.optionalKey(IsoTimestamp)
+});
+export type EditorialPickBundleEditorialPick = Schema.Schema.Type<
+  typeof EditorialPickBundleEditorialPick
+>;
+
+export const EditorialPickBundleEnrichments = Schema.Struct({
+  readiness: EnrichmentReadiness,
+  vision: Schema.optionalKey(VisionEnrichment),
+  source_attribution: Schema.optionalKey(SourceAttributionEnrichment),
+  grounding: Schema.optionalKey(GroundingEnrichment),
+  entities: Schema.Array(Schema.String)
+});
+export type EditorialPickBundleEnrichments = Schema.Schema.Type<
+  typeof EditorialPickBundleEnrichments
+>;
+
+export const EditorialPickBundle = Schema.Struct({
+  post_uri: PostUri,
+  post: EditorialPickBundlePost,
+  editorial_pick: EditorialPickBundleEditorialPick,
+  enrichments: EditorialPickBundleEnrichments,
+  source_providers: Schema.Array(ProviderId),
+  resolved_expert: Schema.optionalKey(Did)
+});
+export type EditorialPickBundle = Schema.Schema.Type<typeof EditorialPickBundle>;
+
 export const CuratedPostResult = Schema.Struct({
   ...KnowledgePostResult.fields,
   editorialScore: EditorialScore,
@@ -104,5 +172,20 @@ export class EditorialPostNotFoundError extends Schema.TaggedErrorClass<Editoria
   "EditorialPostNotFoundError",
   {
     postUri: PostUri
+  }
+) {}
+
+export class EditorialPickNotFoundError extends Schema.TaggedErrorClass<EditorialPickNotFoundError>()(
+  "EditorialPickNotFoundError",
+  {
+    postUri: PostUri
+  }
+) {}
+
+export class EditorialPickNotReadyError extends Schema.TaggedErrorClass<EditorialPickNotReadyError>()(
+  "EditorialPickNotReadyError",
+  {
+    postUri: PostUri,
+    readiness: GetPostEnrichmentsOutput.fields.readiness
   }
 ) {}
