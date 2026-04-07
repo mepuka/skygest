@@ -250,7 +250,7 @@ Stop here and present the clustering proposal. Wait for the editor to confirm, m
 
    FRONTMATTER:
    - id, headline, question, status (draft), created, topics, entities
-   - mode, discourse_level, narrative_arc, trigger
+   - mode, narrative_arc, trigger
    - posts array with uri, role (lead/supporting/data/reaction), editorial_score
 
    SUMMARY: 2-3 sentences. Lead with the data, then frame the disagreement or development.

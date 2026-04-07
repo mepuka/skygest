@@ -4,7 +4,6 @@ import { Did, IsoTimestamp, PostUri } from "../types";
 import { EditorialScore } from "../editorial";
 import {
   DateStamp,
-  DiscourseLevel,
   NonEmptyNarrativeText
 } from "./story";
 
@@ -40,8 +39,6 @@ export const PostAnnotationFrontmatter = Schema.Struct({
 
   // [editorial] optional argument-pattern assignment
   argument_pattern: Schema.optionalKey(NonEmptyNarrativeText),
-  // [editorial] optional discourse-level classification
-  discourse_level: Schema.optionalKey(DiscourseLevel),
   // [editorial] optional editor note attached to the annotation
   editor_note: Schema.optionalKey(NonEmptyNarrativeText)
 });

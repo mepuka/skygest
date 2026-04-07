@@ -13,7 +13,6 @@ import {
 const validStoryFrontmatter = {
   headline: "Texas solar additions are changing utility buildout assumptions",
   question: "Why are deployment milestones shifting power-sector strategy?",
-  discourse_level: "strategic" as const,
   narrative_arcs: ["grid-transition", "solar-scale-up"],
   argument_pattern: "deployment-milestone",
   trigger: "A new capacity milestone changed the framing.",
@@ -55,7 +54,6 @@ const validPostAnnotationFrontmatter = {
   data_refs: [],
   entities: [],
   argument_pattern: "deployment-milestone",
-  discourse_level: "strategic" as const,
   editor_note: "Strong datapoint with a clean sourcing chain."
 };
 
@@ -109,15 +107,6 @@ describe("StoryFrontmatter", () => {
     const { question: _question, ...withoutQuestion } = validStoryFrontmatter;
     expect(() => Schema.decodeUnknownSync(StoryFrontmatter)(withoutQuestion))
       .toThrow();
-  });
-
-  it("rejects invalid discourse levels", () => {
-    expect(() =>
-      Schema.decodeUnknownSync(StoryFrontmatter)({
-        ...validStoryFrontmatter,
-        discourse_level: "culture"
-      })
-    ).toThrow();
   });
 
   it("rejects empty narrative arcs", () => {
