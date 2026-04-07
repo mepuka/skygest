@@ -34,6 +34,7 @@ src/ingest/     → Bluesky ingest pipeline (Workflows + Durable Objects)
 4. **Schema.TaggedErrorClass for all errors.** Define in `src/domain/errors.ts`. No plain `Error` or `throw`.
 5. **No duplicate helpers.** Search `src/platform/` and `src/services/d1/` before writing any utility function.
 6. **Services follow one pattern:** `ServiceMap.Service` + `Layer.effect` + `Effect.gen` + `yield*` for dependency injection.
+7. **Use Effect platform APIs for IO.** Use `FileSystem`, `Path`, `HttpClient`, `DateTime` from Effect — never `node:fs`, `node:path`, `node:crypto`, or other Node built-ins in `src/`. The worker bundle must contain zero Node imports. Node imports are acceptable only in `scripts/` (local Bun tooling) and `tests/` (test infrastructure). For timestamps prefer `DateTime.make` / `DateTime.formatIso` over `new Date()`.
 
 ## Domain-First Schemas (see skill: domain-modeling)
 
