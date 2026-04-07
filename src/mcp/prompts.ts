@@ -177,23 +177,16 @@ const AssembleStoriesOptionalFields = {
 export const AssembleStoriesPrompt = McpServer.prompt({
   name: "assemble-stories",
   description:
-    "Cluster editorial picks into story briefs using question-based grouping with discourse level analysis. Two-stage process: analysis (clustering proposal) then assembly (story brief writing) with an editor checkpoint between stages.",
+    "Cluster editorial picks into story briefs using question-based grouping. Two-stage process: analysis (clustering proposal) then assembly (story brief writing) with an editor checkpoint between stages.",
   parameters: AssembleStoriesOptionalFields,
   content: ({ hours }) => {
     const h = hours || "48";
     return Effect.succeed(
       `You are assembling story briefs from editorial picks in the Skygest energy knowledge base. Your goal: cluster recent picks into stories organized by the implicit question being debated, then write structured briefs with expert-data-argument links.
 
-The core unit of editorial value is the expert-data-argument link: which expert chose which data to make which argument at which discourse level. Story briefs make this link legible to readers.
+The core unit of editorial value is the expert-data-argument link: which expert chose which data to make which argument. Story briefs make this link legible to readers.
 
 EDITORIAL STANCE: Skygest is on the side of honest data analysis. Lead with what the data shows, then the discourse around it. Always attribute: name the source, name the expert, name the provider. Do not extend false equivalence to bad-faith actors. When experts disagree, identify the question they disagree about and the data each is using. When in doubt, show the chart.
-
-DISCOURSE LEVELS: A single post operates at multiple levels simultaneously. A data point at the bottom ripples upward.
-- Technical: can the technology do what is claimed?
-- Economic: do the unit economics work?
-- Policy: is the regulatory/market framework supportive?
-- Political: what political forces shape the discourse?
-- Strategic: what is the right long-term pathway?
 
 STORY MODES:
 - Breaking (0-6h): speed + attribution — what happened, who reported, what data
@@ -219,23 +212,19 @@ STORY MODES:
    - Topic overlap: same ontology topics suggest the same domain (but not necessarily the same question)
    - Temporal proximity: posts within hours of each other may respond to the same trigger event
 
-4. MAP DISCOURSE LEVELS
-   For each proposed cluster, identify the primary discourse level (technical, economic, policy, political, strategic) and note where evidence ripples across levels.
-
-5. DETECT TRIGGER EVENTS
+4. DETECT TRIGGER EVENTS
    Identify data releases, policy announcements, corporate events, or market events that explain why this discourse is happening now. Not every story has an explicit trigger.
 
-6. NOTE GEOGRAPHIC CONTEXT
+5. NOTE GEOGRAPHIC CONTEXT
    Geography in energy discourse operates at three levels:
    - Inherent: data inseparable from its region (ERCOT generation mix, CAISO curtailment)
    - Narrative-scoping: claims meaningful only within a boundary (LNG exports for producers vs. importers)
    - Geopolitical: the event itself is geographic (trade disruptions, regional policy)
 
-7. PRESENT CLUSTERING PROPOSAL
+6. PRESENT CLUSTERING PROPOSAL
    For each proposed story cluster, output:
    - Headline (names the question and tension)
    - Assigned picks with URIs
-   - Primary discourse level
    - Trigger event (if identified)
    - Suggested story mode (breaking, developing, analysis, recurring)
    - Geographic scope (if relevant)
@@ -245,12 +234,12 @@ Stop here and present the clustering proposal. Wait for the editor to confirm, m
 
 == STAGE 2: ASSEMBLY ==
 
-8. WRITE STORY BRIEFS
+7. WRITE STORY BRIEFS
    For each confirmed cluster, produce a story brief with these sections:
 
    FRONTMATTER:
    - id, headline, question, status (draft), created, topics, entities
-   - mode, discourse_level, narrative_arc, trigger
+   - mode, narrative_arc, trigger
    - posts array with uri, role (lead/supporting/data/reaction), editorial_score
 
    SUMMARY: 2-3 sentences. Lead with the data, then frame the disagreement or development.
@@ -263,7 +252,7 @@ Stop here and present the clustering proposal. Wait for the editor to confirm, m
 
    DATA SOURCES REFERENCED: Providers and publications cited, building reader familiarity over time.
 
-9. REPORT
+8. REPORT
    Summarize: total picks processed, stories assembled, picks not clustered (with reason). For each story, state the central question in one sentence.`
     );
   }

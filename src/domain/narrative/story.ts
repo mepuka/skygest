@@ -83,15 +83,6 @@ export type RelativeDocumentStem = Schema.Schema.Type<
   typeof RelativeDocumentStem
 >;
 
-export const DiscourseLevel = Schema.Literals([
-  "technical",
-  "economic",
-  "policy",
-  "political",
-  "strategic"
-]);
-export type DiscourseLevel = Schema.Schema.Type<typeof DiscourseLevel>;
-
 export const StoryStatus = Schema.Literals(["draft", "assembled", "published"]);
 export type StoryStatus = Schema.Schema.Type<typeof StoryStatus>;
 
@@ -126,8 +117,6 @@ const StoryFrontmatterBase = Schema.Struct({
   headline: StoryHeadline,
   // [editorial] core question this story is answering
   question: NonEmptyNarrativeText,
-  // [editorial] dominant discourse register for the story
-  discourse_level: DiscourseLevel,
   // [editorial] primary narrative arc references
   narrative_arcs: StoryNarrativeArcs,
   // [editorial] argument-pattern slug or reference
