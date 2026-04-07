@@ -117,14 +117,7 @@ All pipeline transitions are logged with actor and timestamp for audit trail rec
 
 ## Editorial Concepts
 
-**Expert-Data-Argument Link** — The core unit of editorial value. Which expert chose which data to make which argument at which discourse level. A post is valuable when this link is strong: the expert is making a specific argument using specific data. A chart alone is not the product; an expert name alone is not the product. It is the expert's choice to use this specific data to make this specific argument.
-
-**Discourse Level** — A five-level hierarchy describing where an expert's argument operates. A single data point ripples upward through all levels:
-- Technical: can the technology do what is claimed?
-- Economic: do the unit economics work?
-- Policy: is the regulatory/market framework supportive?
-- Political: what political forces shape the discourse?
-- Strategic: what is the right long-term pathway?
+**Expert-Data-Argument Link** — The core unit of editorial value. Which expert chose which data to make which argument. A post is valuable when this link is strong: the expert is making a specific argument using specific data. A chart alone is not the product; an expert name alone is not the product. It is the expert's choice to use this specific data to make this specific argument.
 
 **Story Mode** — The lifecycle stage of a story cluster:
 - Breaking (0-6h): speed + attribution
