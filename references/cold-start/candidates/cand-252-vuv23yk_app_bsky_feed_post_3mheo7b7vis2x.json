@@ -4,11 +4,11 @@
   "sourceRef": {
     "contentId": "at://did:plc:pb73vbvwit4phtn7hvuv23yk/app.bsky.feed.post/3mheo7b7vis2x"
   },
-  "resolutionState": "partially_resolved",
+  "resolutionState": "resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQC6CKPFX43G49A89P",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VR87XT3ZTJY7TG7A3G",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VR60ZG4HF593MM2WFH",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
   "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBSF4QWT3MAJ76KXC0",
   "rawLabel": "70% (53 of 76) of all days and 26 straight in 2026 on the California ISO have ex",

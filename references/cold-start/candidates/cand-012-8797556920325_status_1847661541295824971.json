@@ -4,7 +4,7 @@
   "sourceRef": {
     "contentId": "x://1123808797556920325/status/1847661541295824971"
   },
-  "resolutionState": "partially_resolved",
+  "resolutionState": "resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHCC3BMQX00JTTGNMH",
@@ -14,5 +14,6 @@
   "rawDims": {
     "geography": "us-california",
     "category": "technology"
-  }
+  },
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBSF4QWT3MAJ76KXC0"
 }

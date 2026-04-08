@@ -12,5 +12,6 @@
   "rawLabel": "about.bnef.com/insights/cle...",
   "rawDims": {
     "category": "other"
-  }
+  },
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNZYEBK4ZT9J9PH733"
 }

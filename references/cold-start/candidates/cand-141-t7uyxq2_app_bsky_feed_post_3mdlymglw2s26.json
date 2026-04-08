@@ -11,7 +11,7 @@
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH4ZJK16FMMWK9NXBP",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
   "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XA1FY6T4MMQ075S84B",
-  "rawLabel": "According to the Energy Information Administration, 🇺🇸 US electricity is expec",
+  "rawLabel": "According to the Energy Information Administration, \ud83c\uddfa\ud83c\uddf8 US electricity is expec",
   "rawDims": {
     "geography": "us",
     "category": "generation"

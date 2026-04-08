@@ -4,11 +4,11 @@
   "sourceRef": {
     "contentId": "x://982294921/status/1858532968622395875"
   },
-  "resolutionState": "partially_resolved",
+  "resolutionState": "resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VKM9Y0BVGQNTC3GC8X",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VKKGKKTY2K6T91JMQG",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VK41NWPP3NDN3BTRSP",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VK98CFX4EHEK3R3AJF",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
   "rawLabel": "A steep rise:  @IEA forecasts that by 2030 46% of global electricity generation",
   "rawDims": {

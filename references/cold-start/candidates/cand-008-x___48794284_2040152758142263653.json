@@ -4,11 +4,11 @@
   "sourceRef": {
     "contentId": "x://48794284/2040152758142263653"
   },
-  "resolutionState": "partially_resolved",
+  "resolutionState": "resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHCC3BMQX00JTTGNMH",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH4ZJK16FMMWK9NXBP",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VJ626BQSJJ7JETCR44",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VJB0QE6WEN9HJD5G5A",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
   "rawLabel": "Via PV Mag: Rooftop solar now accounts for one fifth of Puerto Rico's generation",
   "rawDims": {

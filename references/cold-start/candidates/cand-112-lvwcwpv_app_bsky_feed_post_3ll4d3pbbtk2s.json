@@ -9,8 +9,8 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VJG7ZT9YNYHW2WQ81F",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VJZXYC8NNK89QP9879",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
-  "rawLabel": "“The sharp increase in the world’s electricity use last year was driven by recor",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+  "rawLabel": "\u201cThe sharp increase in the world\u2019s electricity use last year was driven by recor",
   "rawDims": {
     "geography": "us-ca",
     "category": "generation"

@@ -10,7 +10,6 @@
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VN88FSP5QD5M4Z6EGW",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VNBTKYXXQN623KFTFG",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XCD9GTJ99N6J4AYRK6",
   "rawLabel": "The energy security fallout: from fossil fuel fragility to electric independence",
   "rawDims": {
     "geography": "global",

@@ -10,7 +10,7 @@
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VKXWZSBCEDYCCRRPC0",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VK4JC6T0E1SXBN1PH4",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
-  "rawLabel": "Germany’s latest projections show energy transition slowdown as emissions gap wi",
+  "rawLabel": "Germany\u2019s latest projections show energy transition slowdown as emissions gap wi",
   "rawDims": {
     "geography": "eu",
     "category": "emissions"

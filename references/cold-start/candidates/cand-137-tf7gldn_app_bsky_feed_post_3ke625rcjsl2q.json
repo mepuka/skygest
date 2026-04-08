@@ -9,10 +9,11 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQC6CKPFX43G49A89P",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
   "rawLabel": "California looks to Idaho for wind power. #energysky\nwww.rtoinsider.com/61530-ca",
   "rawDims": {
     "geography": "us-ca",
     "category": "grid-ops"
-  }
+  },
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XB3PMYMCCD25ZYD6BK"
 }

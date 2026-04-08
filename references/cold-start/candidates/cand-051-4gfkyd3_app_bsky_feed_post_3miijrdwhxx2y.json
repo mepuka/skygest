@@ -7,8 +7,8 @@
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VJABSQMB8M5DS8B776",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VJF05MC4FPDJ65N4EG",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VKGGYQMJWZPJZ7M3AE",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VK83ZSW5TBNQ9CF7GY",
   "rawLabel": "Brent tops 105, Europe warned  Brent crude topped $105 as the IEA warned Europe",
   "rawDims": {
     "geography": "eu",

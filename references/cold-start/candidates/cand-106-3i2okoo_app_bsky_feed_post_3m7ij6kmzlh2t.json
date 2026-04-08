@@ -14,5 +14,6 @@
   "rawDims": {
     "geography": "us-ca",
     "category": "capacity"
-  }
+  },
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBN5CJ6XA9MTF6SE4K"
 }

@@ -4,11 +4,11 @@
   "sourceRef": {
     "contentId": "at://did:plc:66lbtw2porscqpmair6mir37/app.bsky.feed.post/3mhidt3enbc2r"
   },
-  "resolutionState": "partially_resolved",
+  "resolutionState": "resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VS0EXWRWTGW5MR8KYW",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VSRNXS4QM0ZHCT2JDQ",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VS96Y656CRRCNA52Y6",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VSFMYH43DA38XDWK26",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
   "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XB46SZ4MTCEXR6W4PW",
   "rawLabel": "The big talking point that emerged DURING the blackout, led in particular by Blo",

@@ -10,7 +10,7 @@
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VN88FSP5QD5M4Z6EGW",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VNBTKYXXQN623KFTFG",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
-  "rawLabel": "“Reframing Energy for the Age of Electricity: The orthodox approach to energy ac",
+  "rawLabel": "\u201cReframing Energy for the Age of Electricity: The orthodox approach to energy ac",
   "rawDims": {
     "geography": "us-ca",
     "category": "generation"

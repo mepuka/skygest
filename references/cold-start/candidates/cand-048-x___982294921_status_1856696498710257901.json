@@ -9,7 +9,6 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VJG7ZT9YNYHW2WQ81F",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VJZXYC8NNK89QP9879",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
   "rawLabel": "Key fact: clean energy technologies are vastly more efficient than fossil fuels",
   "rawDims": {
     "geography": "us",

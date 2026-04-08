@@ -9,9 +9,10 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VE7EKX7ASBD577HN9S",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VPXM7P1ME16YJ6FVHP",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VPPXFFSWNZZEQZYG3E",
-  "rawLabel": "Catching up on reading for ‘25. @mliebreich.bsky.social overview of AI, energy,",
+  "rawLabel": "Catching up on reading for \u201825. @mliebreich.bsky.social overview of AI, energy,",
   "rawDims": {
     "geography": "us",
     "category": "other"
-  }
+  },
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNZYEBK4ZT9J9PH733"
 }

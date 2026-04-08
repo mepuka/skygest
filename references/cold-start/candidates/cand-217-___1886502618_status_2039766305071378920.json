@@ -9,8 +9,7 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF3G335NSS1773RWDH",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VR93RKRK0PV4CNP67M",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VR9SK0NYHRY32WS601",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XB46SZ4MTCEXR6W4PW",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMARTRPG4KZMWMZ82Y",
   "rawLabel": "TVA, nuke experts, out with an updated set of power plant cost estimates. Nuclea",
   "rawDims": {
     "geography": "eu",

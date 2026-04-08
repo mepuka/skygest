@@ -4,13 +4,12 @@
   "sourceRef": {
     "contentId": "x://704707652383670272/status/1863417749390643240"
   },
-  "resolutionState": "resolved",
+  "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQJN53T6M83MN1XJFC",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQ0X85PSM8SRCMP4W7",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XAFT5GE6XA6Y95H6PB",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMCMT7RPEX24A69ZBQ",
   "rawLabel": "Texas has installed more solar in the last eight months than 39 states have *eve",
   "rawDims": {
     "geography": "us-tx",

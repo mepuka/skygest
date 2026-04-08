@@ -9,8 +9,6 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQJN53T6M83MN1XJFC",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQ0X85PSM8SRCMP4W7",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XAFT5GE6XA6Y95H6PB",
   "rawLabel": "ERCOT staff said this summer was 6th hottest on record for Texas &amp; that's *b",
   "rawDims": {
     "geography": "us-tx",

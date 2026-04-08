@@ -9,7 +9,7 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VKJPBR5RVRCKTNQMFE",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VKKVTP8S8590C0FYTC",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
   "rawLabel": "Globally, coal's growth rate is declining, but coal demand still grew by 1.1% in",
   "rawDims": {
     "geography": "us-ca",

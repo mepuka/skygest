@@ -9,7 +9,7 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHCC3BMQX00JTTGNMH",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH4ZJK16FMMWK9NXBP",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMARTRPG4KZMWMZ82Y",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
   "rawLabel": "From just a couple of percentage points to nearly 1/5 of electricity generation.",
   "rawDims": {
     "geography": "us",

@@ -9,7 +9,6 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VKM9Y0BVGQNTC3GC8X",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VKKGKKTY2K6T91JMQG",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
   "rawLabel": "Isn't it strange that the exponential growth of solar and wind always become lin",
   "rawDims": {
     "geography": "global",

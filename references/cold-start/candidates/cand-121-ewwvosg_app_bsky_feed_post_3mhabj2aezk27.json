@@ -4,13 +4,9 @@
   "sourceRef": {
     "contentId": "at://did:plc:t4qjao6o2xfwavfc5ewwvosg/app.bsky.feed.post/3mhabj2aezk27"
   },
-  "resolutionState": "partially_resolved",
+  "resolutionState": "source_only",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VJG7ZT9YNYHW2WQ81F",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VJZXYC8NNK89QP9879",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBR1C9VXN2327ZS9P7",
   "rawLabel": "Is it? \n\nBy how much in the last 4 years?\n\nNorway is a cold country 50% of it's ",
   "rawDims": {
     "geography": "us-ca",

@@ -4,15 +4,16 @@
   "sourceRef": {
     "contentId": "x://283723554/status/2021287974529532095"
   },
-  "resolutionState": "partially_resolved",
+  "resolutionState": "resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VJG7ZT9YNYHW2WQ81F",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VJZXYC8NNK89QP9879",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMARTRPG4KZMWMZ82Y",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VK41NWPP3NDN3BTRSP",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VK98CFX4EHEK3R3AJF",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
   "rawLabel": "Renewables &amp; nuclear are 50% of global electricity by 2030, up from 42% in 2",
   "rawDims": {
     "geography": "global",
     "category": "generation"
-  }
+  },
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBN5CJ6XA9MTF6SE4K"
 }
