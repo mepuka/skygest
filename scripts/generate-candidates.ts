@@ -178,7 +178,8 @@ function clusterToVariable(cluster: string): string | undefined {
   // Battery
   if (cluster.includes("battery")) {
     if (cluster.includes("price")) return "battery-pack-price";
-    return "installed-battery-storage-capacity";
+    if (cluster.includes("capacity")) return "installed-battery-storage-capacity";
+    return "battery-discharge";
   }
   // Nuclear
   if (cluster.includes("nuclear")) return "installed-nuclear-capacity";
@@ -244,7 +245,7 @@ function clusterToSeries(cluster: string, geo: string): string | undefined {
   if (varSlug === "installed-solar-pv-capacity") {
     if (geo === "global" || cluster.includes("global")) return "global-solar-pv-capacity-annual";
   }
-  if (varSlug === "installed-battery-storage-capacity") {
+  if (varSlug === "battery-discharge") {
     if (geo === "us-ca" || cluster.includes("caiso")) return "us-ca-battery-discharge-daily";
   }
   if (varSlug === "co2-emissions-from-energy") {
@@ -369,12 +370,49 @@ for (let i = 0; i < posts.length; i++) {
   const serSlug = clusterToSeries(cluster, geo);
   const seriesId = serSlug ? serIds[serSlug] : undefined;
 
-  // Determine resolution state — only "resolved" for direct publisher matches
-  // Intermediary posts (enerdata, rtoinsider, spglobal, energystoragenews) are
-  // partially_resolved at best because the cluster→dataset mapping is heuristic
+  // Determine resolution state — requires:
+  // 1. Direct publisher (not intermediary)
+  // 2. All four links present (variable, series, distribution, dataset)
+  // 3. Cluster key is not a broad catch-all
+  // 4. rawLabel text contains at least one keyword that plausibly relates to the
+  //    mapped variable — a lightweight sanity check against misclassified clusters
   const isDirect = DIRECT_PUBLISHERS.has(pub);
+  const isBroadCluster = cluster.includes("-other") ||
+    cluster === "generic" ||
+    /^[a-z]+-(?:gas|nuclear|other|us)$/.test(cluster);
+
+  // Lightweight text sanity check: does rawLabel contain a keyword from the variable?
+  const labelLower = (post.text_snippet || "").toLowerCase();
+  const VAR_KEYWORDS: Record<string, string[]> = {
+    "solar-electricity-generation": ["solar", "pv", "photovoltaic"],
+    "wind-electricity-generation": ["wind", "turbine"],
+    "coal-electricity-generation": ["coal"],
+    "electricity-generation": ["generation", "electricity", "power", "energy", "gwh", "twh", "mwh"],
+    "installed-renewable-capacity": ["capacity", "gw", "mw", "installed", "renewable"],
+    "installed-solar-pv-capacity": ["solar", "pv", "capacity"],
+    "installed-wind-capacity": ["wind", "capacity"],
+    "installed-offshore-wind-capacity": ["offshore", "wind"],
+    "installed-battery-storage-capacity": ["battery", "storage", "capacity"],
+    "battery-discharge": ["battery", "discharge", "storage"],
+    "installed-nuclear-capacity": ["nuclear", "reactor"],
+    "installed-electrolyzer-capacity": ["electrolyzer", "hydrogen"],
+    "clean-electricity-share": ["clean", "share", "renewable", "%"],
+    "wholesale-electricity-price": ["price", "wholesale", "spot", "kwh", "mwh"],
+    "battery-pack-price": ["battery", "price", "kwh", "pack"],
+    "offshore-wind-capital-cost": ["offshore", "cost", "capex"],
+    "co2-emissions-from-energy": ["co2", "emission", "carbon"],
+    "energy-transition-investment": ["investment", "transition", "billion", "$"],
+    "clean-energy-investment": ["investment", "clean", "billion", "$"],
+    "data-center-power-demand": ["data center", "ai", "demand"],
+    "electricity-demand": ["demand", "load", "consumption"],
+    "interconnection-queue-backlog": ["interconnection", "queue", "backlog"],
+    "heat-pump-installations": ["heat pump"],
+  };
+  const keywords = varSlug ? VAR_KEYWORDS[varSlug] || [] : [];
+  const labelMatchesVar = keywords.length === 0 || keywords.some(kw => labelLower.includes(kw));
+
   let resolutionState: string;
-  if (isDirect && variableId && seriesId && distId) {
+  if (isDirect && !isBroadCluster && labelMatchesVar && variableId && seriesId && distId) {
     resolutionState = "resolved";
     resolved++;
   } else if (variableId || datasetId) {

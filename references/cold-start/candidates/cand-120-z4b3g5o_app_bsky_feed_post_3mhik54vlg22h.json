@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQEZG4W24GDEWRD97W1DVCX",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2G4R5K87ZGARR7PJ86",
   "sourceRef": {
     "contentId": "at://did:plc:meebc75altsav3pgyz4b3g5o/app.bsky.feed.post/3mhik54vlg22h"
   },
@@ -11,7 +11,7 @@
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VJZXYC8NNK89QP9879",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
   "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBR1C9VXN2327ZS9P7",
-  "rawLabel": "\u201dEncouraging a shift from private cars to public transport, alongside measures s",
+  "rawLabel": "”Encouraging a shift from private cars to public transport, alongside measures s",
   "rawDims": {
     "geography": "us-ca",
     "category": "price"

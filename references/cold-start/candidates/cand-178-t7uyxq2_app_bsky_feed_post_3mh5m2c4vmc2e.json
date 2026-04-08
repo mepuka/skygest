@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQEZG504SSKTTSX34VJYW4X",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2PK48QYMKJA0D939JE",
   "sourceRef": {
     "contentId": "at://did:plc:a4py7lzj6xarzriaht7uyxq2/app.bsky.feed.post/3mh5m2c4vmc2e"
   },
@@ -9,7 +9,7 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VE7EKX7ASBD577HN9S",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VPB7N9XFY1WSWNKM1R",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VPFVS18VDAMQJSZ8W8",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMM5YKEQCPBX960YXC",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WM9HP0NBCS5J38GJYT",
   "rawLabel": "🔋 Batteries are rapidly replacing gas plants on major power grids in the US and",
   "rawDims": {
     "geography": "us-california",

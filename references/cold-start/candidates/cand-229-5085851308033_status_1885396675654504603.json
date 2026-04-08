@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQEZG54AD1N9ENE5M8X4RN9",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2T4W1REZZ9615PDPG5",
   "sourceRef": {
     "contentId": "x://1136075085851308033/status/1885396675654504603"
   },
@@ -9,7 +9,7 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHCC3BMQX00JTTGNMH",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH4ZJK16FMMWK9NXBP",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMM5YKEQCPBX960YXC",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WM9HP0NBCS5J38GJYT",
   "rawLabel": "NextEra: Renewables + Storage are the most economic and quickest way to meet loa",
   "rawDims": {
     "geography": "us",

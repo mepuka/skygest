@@ -1,10 +1,10 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQEZG4MDTWWD5932XK72Y59",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS25M160G5JW8QFCPYWE",
   "sourceRef": {
     "contentId": "x://704707652383670272/status/1844470776482988353"
   },
-  "resolutionState": "resolved",
+  "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQJN53T6M83MN1XJFC",
