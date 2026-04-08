@@ -272,7 +272,11 @@ export type GetPostLinksQueryInput = Schema.Schema.Type<typeof GetPostLinksQuery
 export const ListExpertsInput = Schema.Struct({
   domain: Schema.optionalKey(Schema.String.annotate({ description: "Knowledge domain, e.g. 'energy'" })),
   active: Schema.optionalKey(Schema.Boolean.annotate({ description: "Filter by active status" })),
-  limit: Schema.optionalKey(FlexibleNumber.annotate({ description: "Maximum number of results to return" }))
+  limit: Schema.optionalKey(FlexibleNumber.annotate({ description: "Maximum number of results to return" })),
+  offset: Schema.optionalKey(FlexibleNumber.pipe(
+    Schema.check(Schema.isInt()),
+    Schema.check(Schema.isGreaterThanOrEqualTo(0))
+  ).annotate({ description: "Zero-based offset for pagination" }))
 });
 export type ListExpertsInput = Schema.Schema.Type<typeof ListExpertsInput>;
 

@@ -1,6 +1,7 @@
 import { ServiceMap, Effect, Layer } from "effect";
 import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
+import type { ExpertListPageOutput } from "../domain/api";
 import type { AccessIdentity } from "../auth/AuthService";
 import { computeShard } from "../bootstrap/ExpertSeeds";
 import {
@@ -63,6 +64,9 @@ export class ExpertRegistryService extends ServiceMap.Service<
     readonly listExperts: (
       input: ListExpertsInput
     ) => Effect.Effect<ReadonlyArray<ExpertListItem>, SqlError | DbError>;
+    readonly listExpertsPage: (
+      input: ListExpertsInput
+    ) => Effect.Effect<ExpertListPageOutput, SqlError | DbError>;
     readonly refreshExpertProfile: (
       did: Did
     ) => Effect.Effect<ExpertRecord, ProfileLookupError | SqlError | DbError>;
@@ -236,17 +240,34 @@ export class ExpertRegistryService extends ServiceMap.Service<
       const listExperts = Effect.fn("ExpertRegistryService.listExperts")(function* (
         input: ListExpertsInput
       ) {
-        return yield* expertsRepo.list(
+        const { items } = yield* expertsRepo.list(
           input.domain ?? null,
           input.active ?? null,
-          clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax)
+          clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax),
+          0
         );
+        return items;
+      });
+
+      const listExpertsPage = Effect.fn("ExpertRegistryService.listExpertsPage")(function* (
+        input: ListExpertsInput
+      ) {
+        const limit = clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax);
+        const offset = input.offset ?? 0;
+        const { items, total } = yield* expertsRepo.list(
+          input.domain ?? null,
+          input.active ?? null,
+          limit,
+          offset
+        );
+        return { items, page: { offset, limit, total } };
       });
 
       return {
         addExpert,
         setExpertActive,
         listExperts,
+        listExpertsPage,
         refreshExpertProfile
       };
     })

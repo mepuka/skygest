@@ -6,7 +6,7 @@ import {
   BootstrapExpertsResult,
   ExpandTopicsInput,
   ExpandedTopicsOutput,
-  ExpertListOutput,
+  ExpertListItem,
   ExpertSource,
   ExpertTier,
   ExplainPostTopicsOutput,
@@ -286,6 +286,12 @@ const StringFromUriComponent = Schema.String.pipe(
 );
 
 const OptionalNumberFromString = Schema.optionalKey(Schema.NumberFromString);
+const OptionalNonNegativeIntFromString = Schema.optionalKey(
+  Schema.NumberFromString.pipe(
+    Schema.check(Schema.isInt()),
+    Schema.check(Schema.isGreaterThanOrEqualTo(0))
+  )
+);
 const OptionalBooleanFromString = Schema.optionalKey(BooleanFromString);
 const OptionalString = Schema.optionalKey(Schema.String);
 const DecodedDid = StringFromUriComponent.pipe(Schema.decodeTo(Did));
@@ -463,7 +469,8 @@ export type GetPostLinksPageQueryInput = Schema.Schema.Type<typeof GetPostLinksP
 export const ListExpertsUrlParams = Schema.Struct({
   domain: OptionalString,
   active: OptionalBooleanFromString,
-  limit: OptionalNumberFromString
+  limit: OptionalNonNegativeIntFromString,
+  offset: OptionalNonNegativeIntFromString
 });
 export type ListExpertsUrlParams = Schema.Schema.Type<typeof ListExpertsUrlParams>;
 
@@ -524,6 +531,19 @@ export const KnowledgeLinksPageOutput = Schema.Struct({
   page: ApiPage
 });
 export type KnowledgeLinksPageOutput = Schema.Schema.Type<typeof KnowledgeLinksPageOutput>;
+
+export const OffsetPage = Schema.Struct({
+  offset: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  limit: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  total: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
+});
+export type OffsetPage = Schema.Schema.Type<typeof OffsetPage>;
+
+export const ExpertListPageOutput = Schema.Struct({
+  items: Schema.Array(ExpertListItem),
+  page: OffsetPage
+});
+export type ExpertListPageOutput = Schema.Schema.Type<typeof ExpertListPageOutput>;
 
 export const PublicTopicOutput = Schema.Struct({
   item: OntologyListTopic
@@ -623,7 +643,7 @@ export const PublicReadRequestSchemas = {
 export const PublicReadResponseSchemas = {
   postsPage: KnowledgePostsPageOutput,
   linksPage: KnowledgeLinksPageOutput,
-  experts: ExpertListOutput,
+  experts: ExpertListPageOutput,
   publications: PublicationListOutput,
   topics: OntologyTopicsOutput,
   topic: PublicTopicOutput,
@@ -744,7 +764,7 @@ export const AdminRequestSchemas = {
 
 export const AdminResponseSchemas = {
   addExpert: AdminExpertResult,
-  listExperts: ExpertListOutput,
+  listExperts: ExpertListPageOutput,
   setExpertActive: SetExpertActiveResult,
   curatePost: CuratePostOutput,
   migrate: Schema.Struct({ ok: Schema.Literal(true) }),

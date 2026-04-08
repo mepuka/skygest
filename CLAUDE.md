@@ -62,6 +62,8 @@ import { describe, expect, it } from "@effect/vitest";
 <!-- effect-solutions:start -->
 ## Effect Reference
 
+Whenever you are designing or um implementing anything of note in uh effect, you should look into the effect reference repo and review this relevant source code to find patterns, right? Find the most appropriate APIs, um you know, explore the different modules um and determine what is the idiomatic effect way to implement this, right? That's a question you should always be asking during your design and planning phases in order to create, right? For all major elements of a program and of this code base, there is almost always an effect solution, right, that will give you a better result and a will cleanly integrate natively into this code base and into the you know you know to the rest of the coding patterns 
+
 Run `effect-solutions list` to see guides. Run `effect-solutions show <topic>...` for patterns.
 Search `.reference/effect/` for Effect 4 library source (effect-smol repo, tagged at `effect@4.0.0-beta.43`).
 Key source paths: `.reference/effect/packages/effect/src/` for core, `unstable/` subdirectories for platform/ai/sql/cli modules.

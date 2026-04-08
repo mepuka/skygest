@@ -3,6 +3,7 @@ import { stripUndefined } from "../platform/Json";
 import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type {
+  ExpertListPageOutput,
   GetPostLinksPageInput,
   GetRecentPostsPageInput,
   PostLinksPageResult,
@@ -63,6 +64,9 @@ export class KnowledgeQueryService extends ServiceMap.Service<
     readonly listExperts: (
       input: ListExpertsInput
     ) => Effect.Effect<ReadonlyArray<ExpertListItem>, SqlError | DbError>;
+    readonly listExpertsPage: (
+      input: ListExpertsInput
+    ) => Effect.Effect<ExpertListPageOutput, SqlError | DbError>;
     readonly listTopics: (
       input: ListTopicsInput
     ) => Effect.Effect<ReadonlyArray<OntologyListTopic>>;
@@ -207,11 +211,25 @@ export class KnowledgeQueryService extends ServiceMap.Service<
       });
 
       const listExperts = Effect.fn("KnowledgeQueryService.listExperts")(function* (input: ListExpertsInput) {
-        return yield* expertsRepo.list(
+        const { items } = yield* expertsRepo.list(
           input.domain ?? null,
           input.active ?? null,
-          clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax)
+          clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax),
+          0
         );
+        return items;
+      });
+
+      const listExpertsPage = Effect.fn("KnowledgeQueryService.listExpertsPage")(function* (input: ListExpertsInput) {
+        const limit = clampLimit(input.limit, config.mcpLimitDefault, config.mcpLimitMax);
+        const offset = input.offset ?? 0;
+        const { items, total } = yield* expertsRepo.list(
+          input.domain ?? null,
+          input.active ?? null,
+          limit,
+          offset
+        );
+        return { items, page: { offset, limit, total } };
       });
 
       const listTopics = Effect.fn("KnowledgeQueryService.listTopics")(function* (input: ListTopicsInput) {
@@ -279,6 +297,7 @@ export class KnowledgeQueryService extends ServiceMap.Service<
         getPostLinks,
         getPostLinksPage,
         listExperts,
+        listExpertsPage,
         listTopics,
         getTopic,
         expandTopics,
