@@ -1,0 +1,556 @@
+{
+  "_meta": {
+    "script": "probe-ror.ts",
+    "source": "https://api.ror.org/v2/organizations",
+    "fetchedAt": "2026-04-08T23:57:01.505Z",
+    "ticket": "SKY-216",
+    "note": "Only includes results where org name matches query. Rejected results listed with reasons."
+  },
+  "summary": {
+    "totalQueried": 39,
+    "exactMatch": 16,
+    "rejected": 23,
+    "existing": {
+      "total": 15,
+      "verified": 6,
+      "rorMismatch": 4,
+      "wikidataMismatch": 5
+    },
+    "needed": {
+      "total": 24,
+      "matched": 10,
+      "withRor": 10,
+      "withWikidata": 10,
+      "withWebsite": 10
+    }
+  },
+  "verified": [
+    {
+      "slug": "eia",
+      "query": "Energy Information Administration",
+      "status": "existing",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/01h04ms65",
+      "name": "U.S. Energy Information Administration",
+      "aliases": [
+        "United States Energy Information Administration"
+      ],
+      "acronyms": [
+        "EIA"
+      ],
+      "website": "http://www.eia.gov/",
+      "wikidataId": "Q1133499",
+      "isniId": "0000 0001 1942 3343",
+      "fundrefId": "100006162",
+      "types": [
+        "funder",
+        "government"
+      ],
+      "country": "United States",
+      "currentRor": "https://ror.org/026v3a610",
+      "currentWikidata": "Q1349935",
+      "rorMatchesExisting": false,
+      "wikidataMatchesExisting": false
+    },
+    {
+      "slug": "iea",
+      "query": "International Energy Agency",
+      "status": "existing",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/020frhs78",
+      "name": "Agence internationale de l'énergie",
+      "aliases": [],
+      "acronyms": [
+        "IEA"
+      ],
+      "website": "http://www.iea.org/",
+      "wikidataId": "Q826700",
+      "isniId": "0000 0001 2106 0676",
+      "fundrefId": "501100015271",
+      "types": [
+        "funder",
+        "government"
+      ],
+      "country": "France",
+      "currentRor": "https://ror.org/005fmfm13",
+      "currentWikidata": "Q192350",
+      "rorMatchesExisting": false,
+      "wikidataMatchesExisting": false
+    },
+    {
+      "slug": "ferc",
+      "query": "Federal Energy Regulatory Commission",
+      "status": "existing",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/05v7gv656",
+      "name": "Federal Energy Regulatory Commission",
+      "aliases": [],
+      "acronyms": [
+        "FERC"
+      ],
+      "website": "http://www.ferc.gov/",
+      "wikidataId": "Q3067862",
+      "isniId": null,
+      "fundrefId": null,
+      "types": [
+        "government"
+      ],
+      "country": "United States",
+      "currentRor": "https://ror.org/05zcbgd14",
+      "currentWikidata": "Q1400970",
+      "rorMatchesExisting": false,
+      "wikidataMatchesExisting": false
+    },
+    {
+      "slug": "nrel",
+      "query": "National Renewable Energy Laboratory",
+      "status": "existing",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/036266993",
+      "name": "National Laboratory of the Rockies",
+      "aliases": [
+        "National Renewable Energy Laboratory",
+        "Office of Energy Efficiency and Renewable Energy National Renewable Energy Laboratory",
+        "United States Department of Energy Office of Energy Efficiency and Renewable Energy National Renewable Energy Laboratory"
+      ],
+      "acronyms": [
+        "NLR",
+        "NREL"
+      ],
+      "website": "https://www.nlr.gov",
+      "wikidataId": "Q1856153",
+      "isniId": "0000 0001 2199 3636",
+      "fundrefId": "100006233",
+      "types": [
+        "facility",
+        "funder"
+      ],
+      "country": "United States",
+      "currentRor": "https://ror.org/036266993",
+      "currentWikidata": "Q1579895",
+      "rorMatchesExisting": true,
+      "wikidataMatchesExisting": false
+    },
+    {
+      "slug": "irena",
+      "query": "International Renewable Energy Agency",
+      "status": "existing",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/01dej0523",
+      "name": "International Renewable Energy Agency",
+      "aliases": [
+        "IRENA"
+      ],
+      "acronyms": [],
+      "website": "http://www.irena.org",
+      "wikidataId": "Q392739",
+      "isniId": "0000 0001 2034 7069",
+      "fundrefId": null,
+      "types": [
+        "government"
+      ],
+      "country": "United Arab Emirates",
+      "currentRor": "https://ror.org/01grfn956",
+      "currentWikidata": "Q901361",
+      "rorMatchesExisting": false,
+      "wikidataMatchesExisting": false
+    },
+    {
+      "slug": "lbnl",
+      "query": "Lawrence Berkeley National Laboratory",
+      "status": "existing",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/02jbv0t02",
+      "name": "Lawrence Berkeley National Laboratory",
+      "aliases": [
+        "Berkeley Lab",
+        "United States Department of Energy Office of Science Lawrence Berkeley National Laboratory"
+      ],
+      "acronyms": [
+        "LBL",
+        "LBNL"
+      ],
+      "website": "https://www.lbl.gov/",
+      "wikidataId": "Q1133630",
+      "isniId": "0000 0001 2231 4551",
+      "fundrefId": "100006235",
+      "types": [
+        "facility",
+        "funder"
+      ],
+      "country": "United States",
+      "currentRor": "https://ror.org/02jbv0t02",
+      "currentWikidata": "Q1133630",
+      "rorMatchesExisting": true,
+      "wikidataMatchesExisting": true
+    },
+    {
+      "slug": "epa",
+      "query": "Environmental Protection Agency",
+      "status": "needed",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/03tns0030",
+      "name": "Environmental Protection Agency",
+      "aliases": [
+        "U.S. EPA",
+        "United States Environmental Protection Agency"
+      ],
+      "acronyms": [
+        "EPA"
+      ],
+      "website": "https://www.epa.gov",
+      "wikidataId": "Q460173",
+      "isniId": "0000 0001 2146 2763",
+      "fundrefId": "100000139",
+      "types": [
+        "funder",
+        "government"
+      ],
+      "country": "United States",
+      "rorMatchesExisting": null,
+      "wikidataMatchesExisting": null
+    },
+    {
+      "slug": "eurostat",
+      "query": "Eurostat",
+      "status": "needed",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/033d3q980",
+      "name": "Eurostat",
+      "aliases": [],
+      "acronyms": [],
+      "website": "http://ec.europa.eu/eurostat",
+      "wikidataId": "Q217659",
+      "isniId": "0000 0004 5904 2213",
+      "fundrefId": "501100000804",
+      "types": [
+        "funder",
+        "government"
+      ],
+      "country": "Luxembourg",
+      "rorMatchesExisting": null,
+      "wikidataMatchesExisting": null
+    },
+    {
+      "slug": "bnetza",
+      "query": "Bundesnetzagentur",
+      "status": "needed",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/032v09t14",
+      "name": "Federal Network Agency",
+      "aliases": [],
+      "acronyms": [
+        "BNetzA"
+      ],
+      "website": "http://www.bundesnetzagentur.de/cln_1422/EN/Home/home_node.html;jsessionid=393387B539149BDF399C5A1DD9C1E476",
+      "wikidataId": "Q269138",
+      "isniId": null,
+      "fundrefId": null,
+      "types": [
+        "other"
+      ],
+      "country": "Germany",
+      "rorMatchesExisting": null,
+      "wikidataMatchesExisting": null
+    },
+    {
+      "slug": "ree",
+      "query": "Red Electrica de Espana",
+      "status": "needed",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/024pjcr93",
+      "name": "Red Electrica de Espana (Spain)",
+      "aliases": [],
+      "acronyms": [
+        "REE"
+      ],
+      "website": "http://www.ree.es/en",
+      "wikidataId": "Q1551220",
+      "isniId": "0000 0004 0587 9237",
+      "fundrefId": null,
+      "types": [
+        "company"
+      ],
+      "country": "Spain",
+      "rorMatchesExisting": null,
+      "wikidataMatchesExisting": null
+    },
+    {
+      "slug": "meti",
+      "query": "Ministry of Economy Trade and Industry Japan",
+      "status": "needed",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/055tm7f07",
+      "name": "Ministry of Economy, Trade and Industry",
+      "aliases": [
+        "Keizai-sangyō-shō"
+      ],
+      "acronyms": [
+        "METI"
+      ],
+      "website": "http://www.meti.go.jp/english/",
+      "wikidataId": "Q1197264",
+      "isniId": "0000 0000 9936 4488",
+      "fundrefId": "501100003050",
+      "types": [
+        "funder",
+        "government"
+      ],
+      "country": "Japan",
+      "rorMatchesExisting": null,
+      "wikidataMatchesExisting": null
+    },
+    {
+      "slug": "world-bank",
+      "query": "World Bank",
+      "status": "needed",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/00ae7jd04",
+      "name": "World Bank",
+      "aliases": [],
+      "acronyms": [],
+      "website": "http://www.worldbank.org/",
+      "wikidataId": "Q7164",
+      "isniId": "0000 0004 0482 9086",
+      "fundrefId": "100004421",
+      "types": [
+        "funder",
+        "other"
+      ],
+      "country": "United States",
+      "rorMatchesExisting": null,
+      "wikidataMatchesExisting": null
+    },
+    {
+      "slug": "imf",
+      "query": "International Monetary Fund",
+      "status": "needed",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/05m4rmw09",
+      "name": "International Monetary Fund",
+      "aliases": [],
+      "acronyms": [
+        "IMF"
+      ],
+      "website": "http://www.imf.org/external/index.htm",
+      "wikidataId": "Q7804",
+      "isniId": "0000 0004 0481 1396",
+      "fundrefId": "100004414",
+      "types": [
+        "funder",
+        "other"
+      ],
+      "country": "United States",
+      "rorMatchesExisting": null,
+      "wikidataMatchesExisting": null
+    },
+    {
+      "slug": "iiasa",
+      "query": "International Institute for Applied Systems Analysis",
+      "status": "needed",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/02wfhk785",
+      "name": "International Institute for Applied Systems Analysis",
+      "aliases": [
+        "Internationales Institut Fuer Angewandte Systemanalyse"
+      ],
+      "acronyms": [
+        "IIASA"
+      ],
+      "website": "https://iiasa.ac.at",
+      "wikidataId": "Q212102",
+      "isniId": "0000 0001 1955 9478",
+      "fundrefId": "501100011859",
+      "types": [
+        "funder",
+        "nonprofit"
+      ],
+      "country": "Austria",
+      "rorMatchesExisting": null,
+      "wikidataMatchesExisting": null
+    },
+    {
+      "slug": "doe",
+      "query": "United States Department of Energy",
+      "status": "needed",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/01bj3aw27",
+      "name": "United States Department of Energy",
+      "aliases": [
+        "U.S. Department of Energy"
+      ],
+      "acronyms": [
+        "DOE"
+      ],
+      "website": "https://www.energy.gov",
+      "wikidataId": "Q217810",
+      "isniId": "0000 0001 2342 3717",
+      "fundrefId": "100000015",
+      "types": [
+        "funder",
+        "government"
+      ],
+      "country": "United States",
+      "rorMatchesExisting": null,
+      "wikidataMatchesExisting": null
+    },
+    {
+      "slug": "beis",
+      "query": "Department for Energy Security and Net Zero",
+      "status": "needed",
+      "found": true,
+      "confidence": "exact",
+      "rorId": "https://ror.org/01s5a4v70",
+      "name": "Department for Energy Security and Net Zero",
+      "aliases": [
+        "Department for Energy Security & Net Zero"
+      ],
+      "acronyms": [
+        "DESNZ"
+      ],
+      "website": "https://www.gov.uk/government/organisations/department-for-energy-security-and-net-zero",
+      "wikidataId": "Q116825523",
+      "isniId": null,
+      "fundrefId": "100031277",
+      "types": [
+        "funder",
+        "government"
+      ],
+      "country": "United Kingdom",
+      "rorMatchesExisting": null,
+      "wikidataMatchesExisting": null
+    }
+  ],
+  "rejected": [
+    {
+      "slug": "ember",
+      "query": "Ember Climate",
+      "reason": "top result \"Laboratoire d’hydrologie, climat et changements climatiques\" did not match query \"Ember Climate\""
+    },
+    {
+      "slug": "unfccc",
+      "query": "United Nations Framework Convention on Climate Change",
+      "reason": "top result \"Committee on Climate Change\" did not match query \"United Nations Framework Convention on Climate Change\""
+    },
+    {
+      "slug": "ercot",
+      "query": "Electric Reliability Council of Texas",
+      "reason": "top result \"Electric Infrastructure Security Council\" did not match query \"Electric Reliability Council of Texas\""
+    },
+    {
+      "slug": "caiso",
+      "query": "California Independent System Operator",
+      "reason": "top result \"Independent Electricity System Operator\" did not match query \"California Independent System Operator\""
+    },
+    {
+      "slug": "pjm",
+      "query": "PJM Interconnection",
+      "reason": "top result \"Global Energy Interconnection Research Institute North America\" did not match query \"PJM Interconnection\""
+    },
+    {
+      "slug": "spp",
+      "query": "Southwest Power Pool",
+      "reason": "top result \"Green Pool (Australia)\" did not match query \"Southwest Power Pool\""
+    },
+    {
+      "slug": "bnef",
+      "query": "BloombergNEF",
+      "reason": "no results"
+    },
+    {
+      "slug": "entso-e",
+      "query": "ENTSO-E",
+      "reason": "top result \"E+E Elektronik\" did not match query \"ENTSO-E\""
+    },
+    {
+      "slug": "cat",
+      "query": "Climate Action Tracker",
+      "reason": "top result \"10:10 Climate Action\" did not match query \"Climate Action Tracker\""
+    },
+    {
+      "slug": "miso",
+      "query": "Midcontinent Independent System Operator",
+      "reason": "top result \"Independent Electricity System Operator\" did not match query \"Midcontinent Independent System Operator\""
+    },
+    {
+      "slug": "nyiso",
+      "query": "New York Independent System Operator",
+      "reason": "top result \"Independent Electricity System Operator\" did not match query \"New York Independent System Operator\""
+    },
+    {
+      "slug": "iso-ne",
+      "query": "ISO New England",
+      "reason": "top result \"Institut für Sozialforschung und Sozialwirtschaft\" did not match query \"ISO New England\""
+    },
+    {
+      "slug": "nerc",
+      "query": "North American Electric Reliability Corporation",
+      "reason": "top result \"American Electric Power (United States)\" did not match query \"North American Electric Reliability Corporation\""
+    },
+    {
+      "slug": "agora",
+      "query": "Agora Energiewende",
+      "reason": "top result \"Agora\" did not match query \"Agora Energiewende\""
+    },
+    {
+      "slug": "rte",
+      "query": "RTE Reseau de Transport d'Electricite",
+      "reason": "top result \"Realtime Embedded (Sweden)\" did not match query \"RTE Reseau de Transport d'Electricite\""
+    },
+    {
+      "slug": "terna",
+      "query": "Terna",
+      "reason": "top result \"Terna (Italy)\" did not match query \"Terna\""
+    },
+    {
+      "slug": "aemo",
+      "query": "Australian Energy Market Operator",
+      "reason": "top result \"Independent Electricity System Operator\" did not match query \"Australian Energy Market Operator\""
+    },
+    {
+      "slug": "cea",
+      "query": "Central Electricity Authority India",
+      "reason": "top result \"Central Electricity Generating Board\" did not match query \"Central Electricity Authority India\""
+    },
+    {
+      "slug": "climate-trace",
+      "query": "Climate TRACE",
+      "reason": "top result \"Sherlog Trace (Czechia)\" did not match query \"Climate TRACE\""
+    },
+    {
+      "slug": "gcp",
+      "query": "Global Carbon Project",
+      "reason": "top result \"Global Autism Project\" did not match query \"Global Carbon Project\""
+    },
+    {
+      "slug": "gridstatus",
+      "query": "GridStatus",
+      "reason": "no results"
+    },
+    {
+      "slug": "gem",
+      "query": "Global Energy Monitor",
+      "reason": "top result \"GOE-IP (Norway)\" did not match query \"Global Energy Monitor\""
+    },
+    {
+      "slug": "owid",
+      "query": "Our World in Data",
+      "reason": "top result \"World Data System\" did not match query \"Our World in Data\""
+    }
+  ]
+}
