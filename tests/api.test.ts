@@ -5,6 +5,7 @@ import { BlueskyClient } from "../src/bluesky/BlueskyClient";
 import { PostThreadOutput } from "../src/domain/bi";
 import { PostEnrichmentsOutput } from "../src/domain/enrichment";
 import {
+  ExpertListPageOutput,
   KnowledgeLinksPageOutput,
   KnowledgePostsPageOutput
 } from "../src/domain/api";
@@ -23,6 +24,7 @@ import {
 
 const decodePostsPage = Schema.decodeUnknownSync(KnowledgePostsPageOutput);
 const decodeLinksPage = Schema.decodeUnknownSync(KnowledgeLinksPageOutput);
+const decodeExpertsPage = Schema.decodeUnknownSync(ExpertListPageOutput);
 const decodePostThread = Schema.decodeUnknownSync(PostThreadOutput);
 const decodePostEnrichments = Schema.decodeUnknownSync(PostEnrichmentsOutput);
 
@@ -363,6 +365,64 @@ describe("frontend REST API", () => {
         expect(body.items.length).toBeGreaterThan(0);
         // Seeds have null avatars — verify the field exists
         expect(body.items[0]).toHaveProperty("avatar");
+      })
+    )
+  );
+
+  it.live("returns paginated expert list with offset page metadata", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        // Default request — offset defaults to 0
+        const page1 = await expectJsonResponse(
+          await requestApi("/api/experts?limit=2", layer),
+          decodeExpertsPage
+        );
+
+        expect(page1.items).toHaveLength(2);
+        expect(page1.page.offset).toBe(0);
+        expect(page1.page.limit).toBe(2);
+        expect(page1.page.total).toBeGreaterThanOrEqual(5);
+
+        // Second page — different items, same total
+        const page2 = await expectJsonResponse(
+          await requestApi("/api/experts?limit=2&offset=2", layer),
+          decodeExpertsPage
+        );
+
+        expect(page2.items).toHaveLength(2);
+        expect(page2.page.offset).toBe(2);
+        expect(page2.page.total).toBe(page1.page.total);
+        expect(page2.items[0]?.did).not.toBe(page1.items[0]?.did);
+
+        // Offset beyond total — empty items, total still reported
+        const pageEmpty = await expectJsonResponse(
+          await requestApi(`/api/experts?offset=${String(page1.page.total + 100)}`, layer),
+          decodeExpertsPage
+        );
+
+        expect(pageEmpty.items).toHaveLength(0);
+        expect(pageEmpty.page.total).toBe(page1.page.total);
+      })
+    )
+  );
+
+  it.live("rejects fractional and negative limit/offset with 400", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
+
+        const fractionalLimit = await requestApi("/api/experts?limit=1.5", layer);
+        expect(fractionalLimit.status).toBe(400);
+
+        const fractionalOffset = await requestApi("/api/experts?offset=2.7", layer);
+        expect(fractionalOffset.status).toBe(400);
+
+        const negativeOffset = await requestApi("/api/experts?offset=-1", layer);
+        expect(negativeOffset.status).toBe(400);
       })
     )
   );
