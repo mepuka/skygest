@@ -66,12 +66,12 @@ describe("Variable", () => {
   });
 
   it("carries ontology annotations on ast", () => {
-    const annotations = Variable.ast.annotations;
-    expect(annotations[SchemaOrgType]).toBe(
+    const a = Variable.ast.annotations as Record<symbol, unknown>;
+    expect(a[SchemaOrgType]).toBe(
       "https://schema.org/StatisticalVariable"
     );
-    expect(annotations[SdmxConcept]).toBe("Concept");
-    expect(annotations[DesignDecision]).toBe("D1, D2");
+    expect(a[SdmxConcept]).toBe("Concept");
+    expect(a[DesignDecision]).toBe("D1, D2");
   });
 });
 
@@ -101,9 +101,9 @@ describe("Series", () => {
   });
 
   it("carries SDMX annotation on ast", () => {
-    const annotations = Series.ast.annotations;
-    expect(annotations[SdmxConcept]).toBe("SeriesKey");
-    expect(annotations[DesignDecision]).toBe("D1");
+    const a = Series.ast.annotations as Record<symbol, unknown>;
+    expect(a[SdmxConcept]).toBe("SeriesKey");
+    expect(a[DesignDecision]).toBe("D1");
   });
 });
 
@@ -141,9 +141,9 @@ describe("Observation", () => {
   });
 
   it("carries ontology annotations on ast", () => {
-    const annotations = Observation.ast.annotations;
-    expect(annotations[SchemaOrgType]).toBe("https://schema.org/Observation");
-    expect(annotations[SdmxConcept]).toBe("Observation");
-    expect(annotations[DesignDecision]).toBe("D1, D7");
+    const a = Observation.ast.annotations as Record<symbol, unknown>;
+    expect(a[SchemaOrgType]).toBe("https://schema.org/Observation");
+    expect(a[SdmxConcept]).toBe("Observation");
+    expect(a[DesignDecision]).toBe("D1, D7");
   });
 });
