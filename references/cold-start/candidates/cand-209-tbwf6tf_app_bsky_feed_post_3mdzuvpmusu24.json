@@ -1,15 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW40TM9R43GGA7K6AP6N",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG52FTMVTHG4ANK4PC8P",
   "sourceRef": {
     "contentId": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mdzuvpmusu24"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS18A50GAS61YGKY30H",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT2TB7CN7A88K05A1CB",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JT2SDH495BYVHPZS7NR",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P8YAXB8TN5M4G0JE7JA",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFCSDF9WTNRJ2JSMEN",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRV0G2XWPZD8NKXBMT",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VR5541VRGC2KSM60RZ",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
   "rawLabel": "Enlight reaches final milestones on 1.2 GW/4 GWh solar+storage project (US) #Ene",
   "rawDims": {
     "geography": "us",

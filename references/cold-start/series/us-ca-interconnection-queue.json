@@ -1,8 +1,8 @@
 {
   "_tag": "Series",
-  "id": "https://id.skygest.io/series/ser_01KNQCEWG2ZWSS4PJ0CGNV0TEM",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XCBRN3X4QY47DRSK1Z",
   "label": "CAISO interconnection queue",
-  "variableId": "https://id.skygest.io/variable/var_01KNQC4P948DQR7TCN42XNSX3H",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN4BJ0R1FGY9WKF6RY",
   "fixedDims": {
     "place": "US-CA",
     "market": "CAISO",

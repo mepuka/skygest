@@ -1,15 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3J3V3XH4GJ84TP8G50",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG4RKHYWTBEQP1SBB5PD",
   "sourceRef": {
     "contentId": "at://did:plc:7rmejk2hlkw2sfowiatzoo6b/app.bsky.feed.post/3mgu5xda2qs2h"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS19K231RXRX23D1T4Y",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSSP8P606PYYV039QVB",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSS978SP2KKXSTG4P2T",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92G41B7XGC5T21NPWA",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VE7EKX7ASBD577HN9S",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VPXM7P1ME16YJ6FVHP",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VPPXFFSWNZZEQZYG3E",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
   "rawLabel": "Good morning with good news: \"Global wind capacity additions hit an all-time hig",
   "rawDims": {
     "geography": "china",

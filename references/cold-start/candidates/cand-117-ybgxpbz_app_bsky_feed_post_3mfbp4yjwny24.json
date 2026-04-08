@@ -1,14 +1,14 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3P8CVMYAPF5V2Q7G85",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG4VR0Y2HRR27TH0KVJS",
   "sourceRef": {
     "contentId": "at://did:plc:fbvwkj56tyd2ru54rybgxpbz/app.bsky.feed.post/3mfbp4yjwny24"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS18A50GAS61YGKY30H",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSK8H5H69JP4W9K19M1",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSK29BWBSRDYP3TR7C4",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VJABSQMB8M5DS8B776",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VJF05MC4FPDJ65N4EG",
   "rawLabel": "IEA Ministerial Meeting underscores Agency’s central role in tackling global ene",
   "rawDims": {
     "geography": "us-ca",

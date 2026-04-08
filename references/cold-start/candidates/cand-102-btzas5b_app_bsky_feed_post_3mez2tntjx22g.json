@@ -1,15 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3M79CGYHC1W1JXM8MQ",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG4T4QZ0HEM563HS1W5H",
   "sourceRef": {
     "contentId": "at://did:plc:22wv3zkd6wq2lyihgbtzas5b/app.bsky.feed.post/3mez2tntjx22g"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS1KTMHP7W64PFQQ4Q9",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSNRD77P047DM753WDP",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSN04P79M7C4VDY856X",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92FGFP43GXX4QP6RP9",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VKXWZSBCEDYCCRRPC0",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VK4JC6T0E1SXBN1PH4",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
   "rawLabel": "A major tipping point. Wind and solar generated more EU electricity than fossil ",
   "rawDims": {
     "geography": "eu",

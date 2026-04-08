@@ -1,15 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3YTXK8H5KD7YSM5NB3",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG51VP70BH1C8D8QKJX9",
   "sourceRef": {
     "contentId": "at://did:plc:rcu7ybho7gdw3x3cxp64jnue/app.bsky.feed.post/3mhlrna33oc25"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JRYA181KC39N8WXZJB7",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSF81M82M5YA0NXAT3S",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSFCW8PWQVA8V9Z6RY2",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P9176P4VY5824N2JR8X",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHCC3BMQX00JTTGNMH",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH4ZJK16FMMWK9NXBP",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMARTRPG4KZMWMZ82Y",
   "rawLabel": "From just a couple of percentage points to nearly 1/5 of electricity generation.",
   "rawDims": {
     "geography": "us",

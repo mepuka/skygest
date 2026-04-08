@@ -1,15 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3M0RF8F95WJS9JHNDQ",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG4V8P950R4EGE8YH70V",
   "sourceRef": {
     "contentId": "at://did:plc:a4py7lzj6xarzriaht7uyxq2/app.bsky.feed.post/3mechhmouzs2a"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS1KTMHP7W64PFQQ4Q9",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSNRD77P047DM753WDP",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSN04P79M7C4VDY856X",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92FGFP43GXX4QP6RP9",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VKXWZSBCEDYCCRRPC0",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VK4JC6T0E1SXBN1PH4",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
   "rawLabel": "In 2025, #wind 💨 and #solar ☀️ generated more electricity than fossil fuels in ",
   "rawDims": {
     "geography": "eu",

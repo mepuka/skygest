@@ -1,8 +1,8 @@
 {
   "_tag": "Series",
-  "id": "https://id.skygest.io/series/ser_01KNQCEWG2VSMGA3VWPRAGW078",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XBY0GFXYCZCVGPDKQ5",
   "label": "Global solar PV capacity (annual)",
-  "variableId": "https://id.skygest.io/variable/var_01KNQC4P91WQ9AW6B6SGHW430V",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WMCMT7RPEX24A69ZBQ",
   "fixedDims": {
     "place": "GLOBAL",
     "frequency": "annual"

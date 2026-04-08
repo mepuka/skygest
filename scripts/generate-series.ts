@@ -39,7 +39,7 @@ const SERIES: SeriesDef[] = [
   { slug: "us-tx-wind-generation-daily", label: "ERCOT wind generation (daily)", variableSlug: "wind-electricity-generation", place: "US-TX", market: "ERCOT", frequency: "daily" },
 
   // CAISO
-  { slug: "us-ca-battery-discharge-daily", label: "CAISO battery discharge (daily)", variableSlug: "installed-battery-storage-capacity", place: "US-CA", market: "CAISO", frequency: "daily" },
+  { slug: "us-ca-battery-discharge-daily", label: "CAISO battery discharge (daily)", variableSlug: "battery-discharge", place: "US-CA", market: "CAISO", frequency: "daily" },
   { slug: "us-ca-solar-generation-daily", label: "CAISO solar generation (daily)", variableSlug: "solar-electricity-generation", place: "US-CA", market: "CAISO", frequency: "daily" },
   { slug: "us-ca-electricity-price-hourly", label: "CAISO electricity price (hourly)", variableSlug: "wholesale-electricity-price", place: "US-CA", market: "CAISO", frequency: "hourly" },
   { slug: "us-ca-clean-share-daily", label: "CAISO clean electricity share (daily)", variableSlug: "clean-electricity-share", place: "US-CA", market: "CAISO", frequency: "daily" },

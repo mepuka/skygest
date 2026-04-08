@@ -1,6 +1,6 @@
 {
   "_tag": "Variable",
-  "id": "https://id.skygest.io/variable/var_01KNQC4P8YAXB8TN5M4G0JE7JA",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
   "label": "Installed renewable capacity",
   "definition": "Nameplate capacity of grid-connected renewable electricity generators",
   "measuredProperty": "capacity",

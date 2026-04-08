@@ -1,8 +1,8 @@
 {
   "_tag": "Series",
-  "id": "https://id.skygest.io/series/ser_01KNQCEWG2TJWGQKF4H8J2N9JS",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XCD2DKK1WG2KHWVR99",
   "label": "Global clean energy investment (annual)",
-  "variableId": "https://id.skygest.io/variable/var_01KNQC4P93ZNV0XRAZHMPNGT4V",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E",
   "fixedDims": {
     "place": "GLOBAL",
     "frequency": "annual"

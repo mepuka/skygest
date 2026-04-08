@@ -1,6 +1,6 @@
 {
   "_tag": "Variable",
-  "id": "https://id.skygest.io/variable/var_01KNQC4P91WQ9AW6B6SGHW430V",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WMCMT7RPEX24A69ZBQ",
   "label": "Installed solar PV capacity",
   "definition": "Nameplate capacity of grid-connected solar photovoltaic systems",
   "measuredProperty": "capacity",

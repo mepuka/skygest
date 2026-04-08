@@ -31,21 +31,27 @@ function mintId(): string {
 }
 
 // ---------------------------------------------------------------------------
-// Publisher → Agent slug mapping
+// Direct publishers (not intermediaries) — used for resolution confidence
 // ---------------------------------------------------------------------------
-const PUB_TO_AGENT: Record<string, string> = {
-  eia: "eia", iea: "iea", ember: "ember", bnef: "bnef", ferc: "ferc",
-  ercot: "ercot", caiso: "caiso", pjm: "pjm", nrel: "nrel", irena: "irena",
-  "entso-e": "entso-e", unfccc: "unfccc", climate_action_tracker: "cat",
-  spp: "spp",
-  // Intermediaries map to the original publisher where possible
-  enerdata: "iea",      // Enerdata typically cites IEA/IRENA data
-  energystoragenews: "ember", // ESN covers storage, often cites Ember/BNEF
-  rtoinsider: "ferc",   // RTO Insider covers FERC/ISO news
-  spglobal: "caiso",    // S&P Global often covers CAISO/market data
-  miso: "pjm",          // MISO is its own but we don't have a separate agent; PJM as closest grid operator agent
-  nyiso: "pjm",         // Same — closest grid operator
-};
+const DIRECT_PUBLISHERS = new Set([
+  "eia", "iea", "ember", "bnef", "ferc", "ercot", "caiso", "pjm", "nrel",
+  "irena", "entso-e", "unfccc", "climate_action_tracker", "spp",
+]);
+
+// ---------------------------------------------------------------------------
+// Dataset → publisher agent lookup (loaded from generated catalog files)
+// ---------------------------------------------------------------------------
+const datasetPublishers: Record<string, string> = {}; // datasetId → agentId
+for (const [key, id] of Object.entries(entityIds)) {
+  if (!key.startsWith("Dataset:")) continue;
+  const dsSlug = key.replace("Dataset:", "");
+  // Read the dataset file to get its publisherAgentId
+  const dsPath = join(BASE, "catalog", "datasets", `${dsSlug}.json`);
+  try {
+    const ds = JSON.parse(readFileSync(dsPath, "utf-8"));
+    if (ds.publisherAgentId) datasetPublishers[ds.id] = ds.publisherAgentId;
+  } catch { /* skip if file doesn't exist */ }
+}
 
 // ---------------------------------------------------------------------------
 // Cluster key → Dataset slug mapping (best effort)
@@ -348,11 +354,11 @@ for (let i = 0; i < posts.length; i++) {
   const id = mintId();
 
   // Map to entities
-  const agentSlug = PUB_TO_AGENT[pub];
-  const agentId = agentSlug ? eid("Agent", agentSlug) : undefined;
-
   const dsSlug = clusterToDataset(cluster, pub);
   const datasetId = dsSlug ? eid("Dataset", dsSlug) : undefined;
+
+  // Derive agent from the dataset's publisher — not from the post's intermediary publisher
+  const agentId = datasetId ? datasetPublishers[datasetId] : undefined;
 
   const distSlug = dsSlug ? datasetToDistribution(dsSlug) : undefined;
   const distId = distSlug ? eid("Distribution", distSlug) : undefined;
@@ -363,9 +369,12 @@ for (let i = 0; i < posts.length; i++) {
   const serSlug = clusterToSeries(cluster, geo);
   const seriesId = serSlug ? serIds[serSlug] : undefined;
 
-  // Determine resolution state
+  // Determine resolution state — only "resolved" for direct publisher matches
+  // Intermediary posts (enerdata, rtoinsider, spglobal, energystoragenews) are
+  // partially_resolved at best because the cluster→dataset mapping is heuristic
+  const isDirect = DIRECT_PUBLISHERS.has(pub);
   let resolutionState: string;
-  if (variableId && seriesId && distId) {
+  if (isDirect && variableId && seriesId && distId) {
     resolutionState = "resolved";
     resolved++;
   } else if (variableId || datasetId) {

@@ -1,14 +1,14 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3R4922T2Y4M9ZS6DCZ",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG4W9YF7RQJ2G2N6AXSF",
   "sourceRef": {
     "contentId": "at://did:plc:k2tq6bobaibmpq3erbmvbyux/app.bsky.feed.post/3lry2u2x2uc2q"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JSBTPS1NCTDKF03G6HW",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT4NVWC4DV41SV5DRYX",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JT4F55YWNEM3KMKRRWZ",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG8RSQAMF3QX5H8T8F",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VSBZGAGJH1QW8VW8T8",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VSWM4T2CMW6RK7GXDH",
   "rawLabel": "That's not the actual target though. \nIt's \"Holding the increase in the global a",
   "rawDims": {
     "geography": "us-ca",

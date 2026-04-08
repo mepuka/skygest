@@ -1,8 +1,8 @@
 {
   "_tag": "Dataset",
-  "id": "https://id.skygest.io/dataset/ds_01KNQC1JSXRPEZ6XT34QCXNQYN",
+  "id": "https://id.skygest.io/dataset/ds_01KNQEZ5VQFWFMC2WM23G1K793",
   "title": "ERCOT Real-Time Generation Data",
-  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2H9X72G8X9KKPA7K2",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "aliases": [],
   "createdAt": "2026-04-08T00:00:00.000Z",
   "updatedAt": "2026-04-08T00:00:00.000Z",
@@ -17,7 +17,7 @@
     "grid operations"
   ],
   "distributionIds": [
-    "https://id.skygest.io/distribution/dist_01KNQC1JSXYGF1G90KFEPQFSVG",
-    "https://id.skygest.io/distribution/dist_01KNQC1JSXPGFGBSA2M8YK2NJH"
+    "https://id.skygest.io/distribution/dist_01KNQEZ5VQD9WHDXEKWYYVKP23",
+    "https://id.skygest.io/distribution/dist_01KNQEZ5VQBMG2T6ES49QMBT8X"
   ]
 }

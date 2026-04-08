@@ -1,6 +1,6 @@
 {
   "_tag": "Variable",
-  "id": "https://id.skygest.io/variable/var_01KNQC4P9176P4VY5824N2JR8X",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WMARTRPG4KZMWMZ82Y",
   "label": "Installed nuclear capacity",
   "definition": "Nameplate capacity of operational nuclear reactors",
   "measuredProperty": "capacity",

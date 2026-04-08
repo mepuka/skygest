@@ -1,8 +1,8 @@
 {
   "_tag": "Series",
-  "id": "https://id.skygest.io/series/ser_01KNQCEWG3JGZNRAXZZC3BWGWT",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XCD9GTJ99N6J4AYRK6",
   "label": "Global electricity generation (annual)",
-  "variableId": "https://id.skygest.io/variable/var_01KNQC4P92FGFP43GXX4QP6RP9",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
   "fixedDims": {
     "place": "GLOBAL",
     "frequency": "annual"

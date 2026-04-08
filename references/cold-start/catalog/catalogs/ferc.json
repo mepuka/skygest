@@ -1,8 +1,8 @@
 {
   "_tag": "Catalog",
-  "id": "https://id.skygest.io/catalog/cat_01KNQC1JT5H36Z5YYR9XFFVX2M",
+  "id": "https://id.skygest.io/catalog/cat_01KNQEZ5VT9PQAECAEYGP7V7XF",
   "title": "Federal Energy Regulatory Commission Data Catalog",
-  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2TEJRS2SQ255HKXPX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEBCH9EF42WAA5Y7YR",
   "homepage": "https://www.ferc.gov",
   "aliases": [],
   "createdAt": "2026-04-08T00:00:00.000Z",

@@ -1,15 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW42Q8Y1QKSDH7QE6PHH",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG549KGS09YHYZYRSYK2",
   "sourceRef": {
     "contentId": "at://did:plc:q4v7osyjpz57nnj6f7wisdy4/app.bsky.feed.post/3mim24napz22s"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JSCWB6PCEABFAC5YGQ7",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT4NV2HG6V7EKAHQ31P",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JT4SDR58WPMG9J007X7",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92HS0Q1QCJ3BTGHT45",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VTKT58XDTHAZ2MNNEZ",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VT3WVFDASQ4F55QSND",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
   "rawLabel": "Halcyon curated Alert: Interconnection Requests: FERC   Track new interconnectio",
   "rawDims": {
     "geography": "us-spp",

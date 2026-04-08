@@ -1,8 +1,8 @@
 {
   "_tag": "Series",
-  "id": "https://id.skygest.io/series/ser_01KNQCEWG0KGAE3FGMTASTTF6J",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XBR1C9VXN2327ZS9P7",
   "label": "CAISO electricity price (hourly)",
-  "variableId": "https://id.skygest.io/variable/var_01KNQC4P93X9GKZBVBZWJBRGR4",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
   "fixedDims": {
     "place": "US-CA",
     "market": "CAISO",

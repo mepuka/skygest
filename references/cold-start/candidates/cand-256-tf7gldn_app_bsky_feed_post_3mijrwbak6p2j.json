@@ -1,16 +1,16 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW45H3F3TQQ5AKMJMNQ9",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG59P39KDK5TV2RG4RTJ",
   "sourceRef": {
     "contentId": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3mijrwbak6p2j"
   },
   "resolutionState": "resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2M7E98PZHJ6ERXA0C",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT1V7YTB8DGQ2715RB4",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JT1DZMCEMA57W9GD5AC",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P8YAXB8TN5M4G0JE7JA",
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQCEWG2H6CFETN4VANZHH2M",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRA0G6PMJAY725QSPF",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VRKANWZWK2B1VYDRBK",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XC33Y21V4CW5K6FZHB",
   "rawLabel": "Talen Energy’s proposal to buy more than 2.5 GW of generation from Energy Capita",
   "rawDims": {
     "geography": "us-pjm",

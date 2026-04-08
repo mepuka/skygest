@@ -1,15 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW46ZJBBNGRW73X66ASZ",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG5A6HZX1NBK38VK9SKN",
   "sourceRef": {
     "contentId": "x://283723554/status/2021287974529532095"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS18A50GAS61YGKY30H",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSK6KW2T2GY227089W6",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSK0GMMGCJAS3APV1J2",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P9176P4VY5824N2JR8X",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VJG7ZT9YNYHW2WQ81F",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VJZXYC8NNK89QP9879",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMARTRPG4KZMWMZ82Y",
   "rawLabel": "Renewables &amp; nuclear are 50% of global electricity by 2030, up from 42% in 2",
   "rawDims": {
     "geography": "global",

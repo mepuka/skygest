@@ -1,6 +1,6 @@
 {
   "_tag": "Variable",
-  "id": "https://id.skygest.io/variable/var_01KNQC4P93G5BWW81CYQKVSH6R",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
   "label": "Data center power demand",
   "definition": "Peak or average electrical power consumed by data center facilities",
   "measuredProperty": "demand",

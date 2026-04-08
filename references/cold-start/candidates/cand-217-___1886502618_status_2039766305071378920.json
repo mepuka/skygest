@@ -1,16 +1,16 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW40YQ1KZSQXPWT5ZX5A",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG536KEFR40AJYMN2DNB",
   "sourceRef": {
     "contentId": "x://1886502618/status/2039766305071378920"
   },
-  "resolutionState": "resolved",
+  "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS92C2VYG2REFKKG05F",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT1923Z3Q6FAR5RX8FZ",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JT1EE1C0WJ4NRT9Q3EF",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92HS0Q1QCJ3BTGHT45",
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQCEWG11CQ3KPH89M35QPCB",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF3G335NSS1773RWDH",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VR93RKRK0PV4CNP67M",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VR9SK0NYHRY32WS601",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XB46SZ4MTCEXR6W4PW",
   "rawLabel": "TVA, nuke experts, out with an updated set of power plant cost estimates. Nuclea",
   "rawDims": {
     "geography": "eu",

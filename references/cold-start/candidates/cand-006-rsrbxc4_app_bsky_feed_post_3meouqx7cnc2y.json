@@ -1,14 +1,14 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW32HQ8A3D7C9F04YG2G",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG4GEXKAH57HFDPPXRVB",
   "sourceRef": {
     "contentId": "at://did:plc:tzk2m4t5iid4v4nojrsrbxc4/app.bsky.feed.post/3meouqx7cnc2y"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JRYA181KC39N8WXZJB7",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSEEQBRY9XFJ3WZVXEK",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSENWNNY3ECBMQJ2B6G",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHP6M9Z732WJY61H35",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH9V4TF0K64AHSS1FV",
   "rawLabel": "I'm using EIA's Electric Power Monthly Table 6.1.B, which I think is in DC terms",
   "rawDims": {
     "category": "other"

@@ -1,6 +1,6 @@
 {
   "_tag": "Variable",
-  "id": "https://id.skygest.io/variable/var_01KNQC4P91ZA2792HEM43EB7XW",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WMM5YKEQCPBX960YXC",
   "label": "Installed battery storage capacity",
   "definition": "Nameplate power capacity of grid-connected battery energy storage systems",
   "measuredProperty": "capacity",

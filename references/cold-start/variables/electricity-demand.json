@@ -1,6 +1,6 @@
 {
   "_tag": "Variable",
-  "id": "https://id.skygest.io/variable/var_01KNQC4P947K3HCK2EMR3VW4J6",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
   "label": "Electricity demand",
   "definition": "Total electrical energy consumed by end users",
   "measuredProperty": "demand",

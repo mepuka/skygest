@@ -1,8 +1,8 @@
 {
   "_tag": "Series",
-  "id": "https://id.skygest.io/series/ser_01KNQCEWG2KG7AQVAX9WPCZ1XN",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XCB4BBK8RW0V74ST7E",
   "label": "U.S. data center power demand (forecast)",
-  "variableId": "https://id.skygest.io/variable/var_01KNQC4P93G5BWW81CYQKVSH6R",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
   "fixedDims": {
     "place": "US",
     "frequency": "annual",

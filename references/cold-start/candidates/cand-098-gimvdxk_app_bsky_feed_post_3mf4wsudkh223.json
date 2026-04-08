@@ -1,15 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3KYKWEW4YFAXKRGFR1",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG4TWGK0Y5GVT98W4RR0",
   "sourceRef": {
     "contentId": "at://did:plc:7xwdtrwpvrubfodskgimvdxk/app.bsky.feed.post/3mf4wsudkh223"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS1KTMHP7W64PFQQ4Q9",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSPRCPEV5FW8EV3YYBW",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSP82RJS4H0H1N8GXM5",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92FGFP43GXX4QP6RP9",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VN88FSP5QD5M4Z6EGW",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VNBTKYXXQN623KFTFG",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
   "rawLabel": "“Reframing Energy for the Age of Electricity: The orthodox approach to energy ac",
   "rawDims": {
     "geography": "us-ca",

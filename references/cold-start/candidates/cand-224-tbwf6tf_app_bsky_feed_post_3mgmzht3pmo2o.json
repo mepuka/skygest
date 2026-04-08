@@ -1,15 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW41X5H78DRE708NSWCW",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG53W59EX0W98PD5X47D",
   "sourceRef": {
     "contentId": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mgmzht3pmo2o"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS18A50GAS61YGKY30H",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSK6KW2T2GY227089W6",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSK0GMMGCJAS3APV1J2",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P938MVRY83SAPW586V5",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VJG7ZT9YNYHW2WQ81F",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VJZXYC8NNK89QP9879",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
   "rawLabel": "China's 15th five-year plan aims to cut carbon intensity by 17% by 2030 #EnergyS",
   "rawDims": {
     "geography": "cn",

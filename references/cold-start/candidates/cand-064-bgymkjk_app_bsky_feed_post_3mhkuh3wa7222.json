@@ -1,15 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3FS061R23JSTPSYBGY",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG4R5NH6A3KT6WPKDRYH",
   "sourceRef": {
     "contentId": "at://did:plc:2iv3f7svsfxfr5r53bgymkjk/app.bsky.feed.post/3mhkuh3wa7222"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS18A50GAS61YGKY30H",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSNPP0GWJDWG9WKWKJX",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSNE1DHBDKBH15033FG",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P947K3HCK2EMR3VW4J6",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VKJPBR5RVRCKTNQMFE",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VKKVTP8S8590C0FYTC",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
   "rawLabel": "The IEA is calling for people to work from home, drive slower & fly less to tack",
   "rawDims": {
     "geography": "de",

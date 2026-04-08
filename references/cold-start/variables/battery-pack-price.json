@@ -1,6 +1,6 @@
 {
   "_tag": "Variable",
-  "id": "https://id.skygest.io/variable/var_01KNQC4P93C90H44BZDZ4CEFHC",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WN52GGSKRQ0PP5V8V4",
   "label": "Battery pack price",
   "definition": "Volume-weighted average price of lithium-ion battery packs",
   "measuredProperty": "price",

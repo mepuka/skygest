@@ -1,6 +1,6 @@
 {
   "_tag": "Variable",
-  "id": "https://id.skygest.io/variable/var_01KNQC4P92HS0Q1QCJ3BTGHT45",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
   "label": "Solar electricity generation",
   "definition": "Electrical energy produced by solar photovoltaic and concentrated solar power",
   "measuredProperty": "generation",

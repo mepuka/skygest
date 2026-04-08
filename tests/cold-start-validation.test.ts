@@ -75,4 +75,68 @@ describe("Cold-start validation", () => {
     if (missing.length > 0)
       throw new Error(`Missing IDs:\n${missing.map(m => `  ${m.file}: ${m.field} → ${m.id}`).join("\n")}`);
   });
+
+  it("semantic consistency — linked records belong together", async () => {
+    const files = await collectJson(ROOT);
+    const entities: Record<string, any> = {};
+    for (const file of files) {
+      const raw = JSON.parse(await readFile(file, "utf-8"));
+      if (raw.id) entities[raw.id] = { ...raw, _file: relative(ROOT, file) };
+    }
+
+    const errors: string[] = [];
+
+    for (const e of Object.values(entities)) {
+      // Candidate.referencedAgentId must match Dataset.publisherAgentId
+      if (e._tag === "Candidate" && e.referencedAgentId && e.referencedDatasetId) {
+        const ds = entities[e.referencedDatasetId];
+        if (ds?.publisherAgentId && e.referencedAgentId !== ds.publisherAgentId) {
+          errors.push(`${e._file}: referencedAgentId disagrees with dataset publisher (agent=${e.referencedAgentId}, dataset publisher=${ds.publisherAgentId})`);
+        }
+      }
+
+      // Candidate.referencedDistributionId must belong to referencedDatasetId
+      if (e._tag === "Candidate" && e.referencedDistributionId && e.referencedDatasetId) {
+        const dist = entities[e.referencedDistributionId];
+        if (dist && dist.datasetId !== e.referencedDatasetId) {
+          errors.push(`${e._file}: referencedDistributionId belongs to dataset ${dist.datasetId}, not ${e.referencedDatasetId}`);
+        }
+      }
+
+      // Candidate.referencedSeriesId must point to referencedVariableId
+      if (e._tag === "Candidate" && e.referencedSeriesId && e.referencedVariableId) {
+        const ser = entities[e.referencedSeriesId];
+        if (ser && ser.variableId !== e.referencedVariableId) {
+          errors.push(`${e._file}: referencedSeriesId points to variable ${ser.variableId}, not ${e.referencedVariableId}`);
+        }
+      }
+
+      // Distribution.datasetId must point to an existing Dataset
+      if (e._tag === "Distribution" && e.datasetId) {
+        const ds = entities[e.datasetId];
+        if (ds && ds._tag !== "Dataset") {
+          errors.push(`${e._file}: datasetId points to a ${ds._tag}, not a Dataset`);
+        }
+      }
+
+      // Series.variableId must point to an existing Variable
+      if (e._tag === "Series" && e.variableId) {
+        const v = entities[e.variableId];
+        if (v && v._tag !== "Variable") {
+          errors.push(`${e._file}: variableId points to a ${v._tag}, not a Variable`);
+        }
+      }
+
+      // CatalogRecord.catalogId must point to a Catalog
+      if (e._tag === "CatalogRecord" && e.catalogId) {
+        const cat = entities[e.catalogId];
+        if (cat && cat._tag !== "Catalog") {
+          errors.push(`${e._file}: catalogId points to a ${cat._tag}, not a Catalog`);
+        }
+      }
+    }
+
+    if (errors.length > 0)
+      throw new Error(`Semantic consistency errors:\n${errors.join("\n")}`);
+  });
 });

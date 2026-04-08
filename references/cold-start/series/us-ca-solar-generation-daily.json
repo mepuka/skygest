@@ -1,8 +1,8 @@
 {
   "_tag": "Series",
-  "id": "https://id.skygest.io/series/ser_01KNQCEWG0BRN65YGCHEV46TNE",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XBSF4QWT3MAJ76KXC0",
   "label": "CAISO solar generation (daily)",
-  "variableId": "https://id.skygest.io/variable/var_01KNQC4P92HS0Q1QCJ3BTGHT45",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
   "fixedDims": {
     "place": "US-CA",
     "market": "CAISO",

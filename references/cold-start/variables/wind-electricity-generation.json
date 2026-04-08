@@ -1,6 +1,6 @@
 {
   "_tag": "Variable",
-  "id": "https://id.skygest.io/variable/var_01KNQC4P92G41B7XGC5T21NPWA",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
   "label": "Wind electricity generation",
   "definition": "Electrical energy produced by onshore and offshore wind turbines",
   "measuredProperty": "generation",

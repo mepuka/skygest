@@ -1,8 +1,8 @@
 {
   "_tag": "Series",
-  "id": "https://id.skygest.io/series/ser_01KNQCEWG28T5A0V2G11RM6VK0",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XB9N7PWMQ5B3YQ10KW",
   "label": "Global energy transition investment (annual)",
-  "variableId": "https://id.skygest.io/variable/var_01KNQC4P938JSXZF0CQ021BA94",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNZYEBK4ZT9J9PH733",
   "fixedDims": {
     "place": "GLOBAL",
     "frequency": "annual"

@@ -1,8 +1,8 @@
 {
   "_tag": "Series",
-  "id": "https://id.skygest.io/series/ser_01KNQCEWG2H6CFETN4VANZHH2M",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XC33Y21V4CW5K6FZHB",
   "label": "PJM capacity auction results (annual)",
-  "variableId": "https://id.skygest.io/variable/var_01KNQC4P8YAXB8TN5M4G0JE7JA",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
   "fixedDims": {
     "place": "US-PJM",
     "market": "PJM",

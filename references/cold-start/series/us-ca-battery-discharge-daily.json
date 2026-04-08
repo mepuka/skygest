@@ -1,8 +1,8 @@
 {
   "_tag": "Series",
-  "id": "https://id.skygest.io/series/ser_01KNQCEWG07SXHTWEB1361RWTG",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XBDC7D5CKHCNY2QTE7",
   "label": "CAISO battery discharge (daily)",
-  "variableId": "https://id.skygest.io/variable/var_01KNQC4P91ZA2792HEM43EB7XW",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WM9HP0NBCS5J38GJYT",
   "fixedDims": {
     "place": "US-CA",
     "market": "CAISO",

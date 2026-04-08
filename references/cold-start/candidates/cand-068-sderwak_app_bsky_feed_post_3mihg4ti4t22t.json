@@ -1,14 +1,14 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3GTSA4WD0NFK4X1DDZ",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG4RDCEDM1N5WPKCF5QK",
   "sourceRef": {
     "contentId": "at://did:plc:yjqekodgo25hjem4isderwak/app.bsky.feed.post/3mihg4ti4t22t"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS92C2VYG2REFKKG05F",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT1923Z3Q6FAR5RX8FZ",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JT1EE1C0WJ4NRT9Q3EF",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF3G335NSS1773RWDH",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VR93RKRK0PV4CNP67M",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VR9SK0NYHRY32WS601",
   "rawLabel": "Just making sure you're aware of this publication from NREL on \"inertia\" on foss",
   "rawDims": {
     "geography": "us",

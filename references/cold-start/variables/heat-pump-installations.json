@@ -1,6 +1,6 @@
 {
   "_tag": "Variable",
-  "id": "https://id.skygest.io/variable/var_01KNQC4P94P29KGM0GC0EHSW7B",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WP0PD1A7H3TA56PTAG",
   "label": "Heat pump installations",
   "definition": "Cumulative or annual number of heat pump units installed",
   "measuredProperty": "count",

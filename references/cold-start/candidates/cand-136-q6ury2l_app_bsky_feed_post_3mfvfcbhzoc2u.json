@@ -1,15 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3SPTKCNN52WQDXZ3EZ",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG4XX3ZR7JDJZZA6Y41E",
   "sourceRef": {
     "contentId": "at://did:plc:hi4rpckdczbgirgxxq6ury2l/app.bsky.feed.post/3mfvfcbhzoc2u"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2RDP28SCP98Q2XKYT",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSZ4GAA3EPZSXPXTBAY",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSZZ7QHHSFSCS0E3Q1H",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92FGFP43GXX4QP6RP9",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQC6CKPFX43G49A89P",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
   "rawLabel": "CAISO has released a set of guiding principles for upcoming discussions about se",
   "rawDims": {
     "geography": "us-ca",

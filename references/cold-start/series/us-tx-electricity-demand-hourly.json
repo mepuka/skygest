@@ -1,8 +1,8 @@
 {
   "_tag": "Series",
-  "id": "https://id.skygest.io/series/ser_01KNQCEWG0RQJF14JGWDVY53XE",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XBA89H56T1XQ24CXED",
   "label": "ERCOT electricity demand (hourly)",
-  "variableId": "https://id.skygest.io/variable/var_01KNQC4P947K3HCK2EMR3VW4J6",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
   "fixedDims": {
     "place": "US-TX",
     "market": "ERCOT",

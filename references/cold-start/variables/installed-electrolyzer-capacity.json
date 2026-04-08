@@ -1,6 +1,6 @@
 {
   "_tag": "Variable",
-  "id": "https://id.skygest.io/variable/var_01KNQC4P92KAGJVF6608TFJCPP",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WNWKAAZZ5NF377NDYX",
   "label": "Installed electrolyzer capacity",
   "definition": "Nameplate capacity of operational electrolyzers for hydrogen production",
   "measuredProperty": "capacity",

@@ -1,15 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW436P7FX25YE06GCMX8",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG54CD0H7RSHCA9GS0K4",
   "sourceRef": {
     "contentId": "x://521903527/status/1864725529183527040"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2TEJRS2SQ255HKXPX",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSWSXWCVZPDGD6WPF16",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSWPS1JYMAK5AKHGD2T",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P947K3HCK2EMR3VW4J6",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEBCH9EF42WAA5Y7YR",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQ0XTN8VV9MY6QGRD9",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQPT274TFTPKN1B9YK",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
   "rawLabel": "This is wild.    In 2022, utilities expected electricity demand to grow by 23 GW",
   "rawDims": {
     "geography": "de",

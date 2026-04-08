@@ -1,8 +1,8 @@
 {
   "_tag": "Series",
-  "id": "https://id.skygest.io/series/ser_01KNQCEWG185MQ72KZ753HPE6T",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XBE3GHY4ZMD9TJRF02",
   "label": "EU coal generation by country (annual)",
-  "variableId": "https://id.skygest.io/variable/var_01KNQC4P93QPDXRPXJPWBX67N9",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
   "fixedDims": {
     "place": "EU",
     "frequency": "annual",

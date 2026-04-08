@@ -53,7 +53,7 @@ const AGENTS: AgentDef[] = [
   { slug: "nrel", name: "National Renewable Energy Laboratory", alternateNames: ["NREL"], homepage: "https://www.nrel.gov", ror: "https://ror.org/036266993", wikidata: "Q1579895" },
   { slug: "irena", name: "International Renewable Energy Agency", alternateNames: ["IRENA"], homepage: "https://www.irena.org", ror: "https://ror.org/01grfn956", wikidata: "Q901361" },
   // On-demand publishers referenced in selected-for-resolution.json
-  { slug: "entso-e", name: "European Network of Transmission System Operators for Electricity", alternateNames: ["ENTSO-E"], homepage: "https://www.entsoe.eu", wikidata: "Q1376tried" },
+  { slug: "entso-e", name: "European Network of Transmission System Operators for Electricity", alternateNames: ["ENTSO-E"], homepage: "https://www.entsoe.eu", wikidata: "Q938882" },
   { slug: "unfccc", name: "United Nations Framework Convention on Climate Change", alternateNames: ["UNFCCC"], homepage: "https://unfccc.int", ror: "https://ror.org/01mfmr560", wikidata: "Q183011" },
   { slug: "cat", name: "Climate Action Tracker", alternateNames: ["CAT"], homepage: "https://climateactiontracker.org", wikidata: "Q28131250" },
   { slug: "lbnl", name: "Lawrence Berkeley National Laboratory", alternateNames: ["LBNL", "Berkeley Lab"], homepage: "https://www.lbl.gov", ror: "https://ror.org/02jbv0t02", wikidata: "Q1133630" },

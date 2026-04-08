@@ -1,8 +1,8 @@
 {
   "_tag": "Series",
-  "id": "https://id.skygest.io/series/ser_01KNQCEWG01N259BN2ZJMAQER8",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XB3PMYMCCD25ZYD6BK",
   "label": "ERCOT wind generation (daily)",
-  "variableId": "https://id.skygest.io/variable/var_01KNQC4P92G41B7XGC5T21NPWA",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
   "fixedDims": {
     "place": "US-TX",
     "market": "ERCOT",

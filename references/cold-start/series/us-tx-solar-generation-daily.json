@@ -1,8 +1,8 @@
 {
   "_tag": "Series",
-  "id": "https://id.skygest.io/series/ser_01KNQCEWFZH2ZPS7QQNSSQCBVA",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XAFT5GE6XA6Y95H6PB",
   "label": "ERCOT solar generation (daily)",
-  "variableId": "https://id.skygest.io/variable/var_01KNQC4P92HS0Q1QCJ3BTGHT45",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
   "fixedDims": {
     "place": "US-TX",
     "market": "ERCOT",

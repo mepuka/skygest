@@ -1,16 +1,16 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW41VG15KB9YYB281PSM",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG5462DJGAG602CAMZJQ",
   "sourceRef": {
     "contentId": "at://did:plc:2zytqzub4mwqb5m7zvefdrpw/app.bsky.feed.post/3mihcjz7ojs2a"
   },
   "resolutionState": "resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JRYA181KC39N8WXZJB7",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSFE8FEBP4DMJQHAF4W",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSF20MW77ZPQ9YWN2ES",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P938MVRY83SAPW586V5",
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQCEWFZEMGZ7NAHNRXS59F7",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHGV1ZECFSTCKW0B2R",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH6D2AT4HKRTB707PR",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XABVZJXM3Y5TJHFJCP",
   "rawLabel": "Data from Energy Information Administration Table CO2.7, \"Total CO2 emissions es",
   "rawDims": {
     "geography": "us",

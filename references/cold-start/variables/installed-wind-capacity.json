@@ -1,6 +1,6 @@
 {
   "_tag": "Variable",
-  "id": "https://id.skygest.io/variable/var_01KNQC4P91TD4N8J11GMX04Z26",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WMYHSF2J4JJFAY5DWD",
   "label": "Installed wind capacity",
   "definition": "Nameplate capacity of grid-connected wind turbines",
   "measuredProperty": "capacity",

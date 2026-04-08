@@ -1,14 +1,14 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW32T5CZ8SC9G608XWKY",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG4GA2VXXCNETKXP8HYD",
   "sourceRef": {
     "contentId": "at://did:plc:2zytqzub4mwqb5m7zvefdrpw/app.bsky.feed.post/3mg3h2vew5c27"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JRYA181KC39N8WXZJB7",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSEEQBRY9XFJ3WZVXEK",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSENWNNY3ECBMQJ2B6G",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHP6M9Z732WJY61H35",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH9V4TF0K64AHSS1FV",
   "rawLabel": "Raw data source: www.eia.gov/electricity/...",
   "rawDims": {
     "category": "other"

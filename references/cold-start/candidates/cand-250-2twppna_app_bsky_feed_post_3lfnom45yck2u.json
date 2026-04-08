@@ -1,15 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW44PYNQQ1GP9A1S14YB",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG591NYPGYCDE541TPB5",
   "sourceRef": {
     "contentId": "at://did:plc:hplveh3uqygzz57ec2twppna/app.bsky.feed.post/3lfnom45yck2u"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2RDP28SCP98Q2XKYT",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSZ4GAA3EPZSXPXTBAY",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSZZ7QHHSFSCS0E3Q1H",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P8YAXB8TN5M4G0JE7JA",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQC6CKPFX43G49A89P",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
   "rawLabel": "Saudi thinktank KAPSARC projects a 260,000 b/d oil market oversupply for 2025, r",
   "rawDims": {
     "geography": "us-ca",

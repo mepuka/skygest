@@ -1,12 +1,12 @@
 {
   "_tag": "Agent",
-  "id": "https://id.skygest.io/agent/ag_01KNQC1JSBFDEVASV9HVWQW5TT",
+  "id": "https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9",
   "kind": "organization",
   "name": "European Network of Transmission System Operators for Electricity",
   "aliases": [
     {
       "scheme": "wikidata",
-      "value": "Q1376tried",
+      "value": "Q938882",
       "relation": "exactMatch"
     },
     {

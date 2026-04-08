@@ -1,16 +1,16 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQCMW442EF3W5TJ97H0649R",
+  "id": "https://id.skygest.io/candidate/cand_01KNQEZG55YGK6CVJK86METSAQ",
   "sourceRef": {
     "contentId": "x://352704376/status/1866193165264257252"
   },
   "resolutionState": "resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2M7E98PZHJ6ERXA0C",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT1GMPYCSTB9R8GRZ20",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JT15XCHV2DSGTZMHMJM",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P947K3HCK2EMR3VW4J6",
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQCEWG2QAVXXVHA8QTX0D85",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRS8ZDD0YCERY6C64B",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VRSACAXWBH5QJAQ0TK",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XCNTATHE4Z9PNS9VZ7",
   "rawLabel": "Boom! PJM now forecasts more than 30GW of summer peak load growth by the end of",
   "rawDims": {
     "geography": "us-pjm",
