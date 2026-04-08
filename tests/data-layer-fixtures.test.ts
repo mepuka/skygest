@@ -617,7 +617,8 @@ describe("Fixture 9: Duplicate (scheme, value) alias must fail decode", () => {
 // ---------------------------------------------------------------------------
 
 describe("Fixture 10: Annotation presence check", () => {
-  const ann = (schema: { readonly ast: { readonly annotations: object } }) =>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ann = (schema: any) =>
     schema.ast.annotations as Record<symbol, unknown>;
 
   it("Variable carries SchemaOrgType, SdmxConcept, and DesignDecision", () => {
