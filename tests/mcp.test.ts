@@ -389,16 +389,66 @@ describe("MCP display formatting", () => {
             arguments: { postUri: solarUri }
           });
 
+          // structuredContent should include _display as a string
+          const sc = result.structuredContent as Record<string, unknown>;
+          expect(sc).toBeDefined();
+          expect(typeof sc._display).toBe("string");
+          expect((sc._display as string).length).toBeGreaterThan(0);
+
+          // text content should be the display string, NOT raw JSON
           const textContent = result.content.find(
             (c): c is { type: "text"; text: string } => c.type === "text"
           );
           expect(textContent).toBeDefined();
+          expect(textContent!.text).not.toMatch(/^\s*\{/);
 
           const decoded = decodeThreadDocumentResponse(result);
           expect(typeof decoded._display).toBe("string");
           expect(decoded._display).toBe(textContent!.text);
           expect(decoded.body).toContain(solarUri);
           expect(decoded.body).toContain("@");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("thread document returns error for unavailable thread", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const [solarUri] = smokeFixtureUris(sampleDid);
+        const notFoundLayer = Layer.succeed(BlueskyClient, {
+          resolveDidOrHandle: () => Effect.die("unexpected resolveDidOrHandle"),
+          getProfile: () => Effect.die("unexpected getProfile"),
+          getFollows: () => Effect.die("unexpected getFollows"),
+          resolveRepoService: () => Effect.die("unexpected resolveRepoService"),
+          listRecordsAtService: () => Effect.die("unexpected listRecordsAtService"),
+          getPostThread: () => Effect.succeed({
+            thread: { $type: "app.bsky.feed.defs#notFoundPost", uri: solarUri, notFound: true }
+          }),
+          getPosts: () => Effect.die("unexpected getPosts")
+        } as any);
+        const seedLayer = makeBiLayer({
+          filename,
+          blueskyClient: notFoundLayer
+        });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(seedLayer);
+
+        try {
+          const result = await client.callTool({
+            name: "get_thread_document",
+            arguments: { postUri: solarUri }
+          });
+
+          expect(result.isError).toBe(true);
+          const textContent = result.content.find(
+            (c): c is { type: "text"; text: string } => c.type === "text"
+          );
+          expect(textContent).toBeDefined();
+          expect(textContent!.text).toContain("Post not found or thread unavailable");
         } finally {
           await close();
         }

@@ -971,7 +971,7 @@ const makeReadOnlyHandlers = (
         return Effect.succeed({
           ...doc,
           _display: doc.body
-        } as ThreadDocumentMcpOutput);
+        });
       }),
       Effect.mapError(passThroughMcpToolError("get_thread_document"))
     ),

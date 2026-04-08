@@ -138,13 +138,7 @@ export const filterReplies = (
 // ThreadDocument
 // ---------------------------------------------------------------------------
 
-export interface ThreadDocument {
-  readonly title: string;
-  readonly postCount: number;
-  readonly replyCount: number;
-  readonly totalReplies: number;
-  readonly body: string;
-}
+export type ThreadDocument = import("../domain/bi").ThreadDocumentOutput;
 
 // ---------------------------------------------------------------------------
 // Text extraction helpers
