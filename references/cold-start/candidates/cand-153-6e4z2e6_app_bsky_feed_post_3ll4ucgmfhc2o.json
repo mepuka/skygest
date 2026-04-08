@@ -4,12 +4,12 @@
   "sourceRef": {
     "contentId": "at://did:plc:2yfslrb6n7umb4dfr6e4z2e6/app.bsky.feed.post/3ll4ucgmfhc2o"
   },
-  "resolutionState": "partially_resolved",
+  "resolutionState": "resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VKJPBR5RVRCKTNQMFE",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VKKVTP8S8590C0FYTC",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
   "rawLabel": "Globally, coal's growth rate is declining, but coal demand still grew by 1.1% in",
   "rawDims": {
     "geography": "us-ca",

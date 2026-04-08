@@ -4,12 +4,16 @@
   "sourceRef": {
     "contentId": "at://did:plc:2nwxwnckaqlzrtsvyap53cpf/app.bsky.feed.post/3lqtf6e67as2g"
   },
-  "resolutionState": "source_only",
+  "resolutionState": "resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "rawLabel": "One more step in a complex process in California. But significant. \ud83d\udd0c\ud83d\udca1\n@yes-ene",
   "rawDims": {
     "geography": "us-ca",
     "category": "price"
-  }
+  },
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQC6CKPFX43G49A89P",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBR1C9VXN2327ZS9P7"
 }

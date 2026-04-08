@@ -4,15 +4,16 @@
   "sourceRef": {
     "contentId": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3kcyqqv77x42d"
   },
-  "resolutionState": "partially_resolved",
+  "resolutionState": "resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEBCH9EF42WAA5Y7YR",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VPSN0Z528A8T220RCE",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VP1F11MRT2E94P0P3Y",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQC6CKPFX43G49A89P",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
   "rawLabel": "The electrical grid needs a five-fold increase in regional transmission, so the ",
   "rawDims": {
     "geography": "us-ca",
     "category": "price"
-  }
+  },
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBR1C9VXN2327ZS9P7"
 }

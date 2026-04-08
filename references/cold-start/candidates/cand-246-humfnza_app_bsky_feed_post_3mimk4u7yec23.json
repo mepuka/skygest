@@ -4,7 +4,7 @@
   "sourceRef": {
     "contentId": "at://did:plc:hoyoylxkm7ssefi7phumfnza/app.bsky.feed.post/3mimk4u7yec23"
   },
-  "resolutionState": "resolved",
+  "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",

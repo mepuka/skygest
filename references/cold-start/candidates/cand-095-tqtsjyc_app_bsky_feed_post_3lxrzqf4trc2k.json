@@ -4,7 +4,7 @@
   "sourceRef": {
     "contentId": "at://did:plc:tywkpd4s5utvhnucftqtsjyc/app.bsky.feed.post/3lxrzqf4trc2k"
   },
-  "resolutionState": "source_only",
+  "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
   "rawLabel": "Based on data from @ember-energy.org: ember-energy.org/data/electri...",

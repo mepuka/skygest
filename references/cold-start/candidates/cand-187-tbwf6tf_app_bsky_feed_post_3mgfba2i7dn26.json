@@ -4,12 +4,12 @@
   "sourceRef": {
     "contentId": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mgfba2i7dn26"
   },
-  "resolutionState": "partially_resolved",
+  "resolutionState": "resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFCSDF9WTNRJ2JSMEN",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRV0G2XWPZD8NKXBMT",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VR5541VRGC2KSM60RZ",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMM5YKEQCPBX960YXC",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
   "rawLabel": "China commissions world's largest 600 MW / 2.4 GWh CAES station #EnergySky",
   "rawDims": {
     "geography": "cn",

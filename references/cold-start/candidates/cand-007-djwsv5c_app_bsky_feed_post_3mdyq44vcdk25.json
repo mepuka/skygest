@@ -7,8 +7,8 @@
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHCC3BMQX00JTTGNMH",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH4ZJK16FMMWK9NXBP",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHP6M9Z732WJY61H35",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH9V4TF0K64AHSS1FV",
   "rawLabel": "Currently to Sep 2025\nwww.eia.gov/electricity/...\nAnother data set that Trump ad",
   "rawDims": {
     "category": "other"
