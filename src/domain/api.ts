@@ -286,6 +286,12 @@ const StringFromUriComponent = Schema.String.pipe(
 );
 
 const OptionalNumberFromString = Schema.optionalKey(Schema.NumberFromString);
+const OptionalNonNegativeIntFromString = Schema.optionalKey(
+  Schema.NumberFromString.pipe(
+    Schema.check(Schema.isInt()),
+    Schema.check(Schema.isGreaterThanOrEqualTo(0))
+  )
+);
 const OptionalBooleanFromString = Schema.optionalKey(BooleanFromString);
 const OptionalString = Schema.optionalKey(Schema.String);
 const DecodedDid = StringFromUriComponent.pipe(Schema.decodeTo(Did));
@@ -463,8 +469,8 @@ export type GetPostLinksPageQueryInput = Schema.Schema.Type<typeof GetPostLinksP
 export const ListExpertsUrlParams = Schema.Struct({
   domain: OptionalString,
   active: OptionalBooleanFromString,
-  limit: OptionalNumberFromString,
-  offset: OptionalNumberFromString
+  limit: OptionalNonNegativeIntFromString,
+  offset: OptionalNonNegativeIntFromString
 });
 export type ListExpertsUrlParams = Schema.Schema.Type<typeof ListExpertsUrlParams>;
 
