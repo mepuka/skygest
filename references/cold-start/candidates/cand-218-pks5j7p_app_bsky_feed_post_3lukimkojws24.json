@@ -4,12 +4,9 @@
   "sourceRef": {
     "contentId": "at://did:plc:qlfit2m3ksqwaqhuepks5j7p/app.bsky.feed.post/3lukimkojws24"
   },
-  "resolutionState": "partially_resolved",
+  "resolutionState": "source_only",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VE7EKX7ASBD577HN9S",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VPB7N9XFY1WSWNKM1R",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VPFVS18VDAMQJSZ8W8",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
   "rawLabel": "China is building a dam bigger than 3 gorges, that costs more than the internati",
   "rawDims": {
     "geography": "cn",

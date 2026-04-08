@@ -4,12 +4,10 @@
   "sourceRef": {
     "contentId": "x://1207638939277955072/status/2039613827793195024"
   },
-  "resolutionState": "partially_resolved",
+  "resolutionState": "source_only",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VJABSQMB8M5DS8B776",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VJF05MC4FPDJ65N4EG",
-  "rawLabel": "🚨 NEW | Emerging economies skipped fixed-line phone networks entirely. Now the",
+  "rawLabel": "\ud83d\udea8 NEW | Emerging economies skipped fixed-line phone networks entirely. Now the",
   "rawDims": {
     "geography": "us",
     "category": "other"
