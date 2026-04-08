@@ -612,6 +612,199 @@ describe("repository layers", () => {
     }).pipe(Effect.provide(makeBiLayer()))
   );
 
+  it.effect("re-upsert rebuilds search state and replaces old topic/link rows", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      yield* bootstrapExperts(seedManifest, 1, 1_710_000_000_000);
+
+      const repo = yield* KnowledgeRepo;
+      const sql = yield* SqlClient.SqlClient;
+      const uri = `at://${sampleDid}/app.bsky.feed.post/reupsert-1` as any;
+      const now = 1_710_000_000_000;
+
+      const initialPost: KnowledgePost = {
+        uri,
+        did: sampleDid,
+        cid: "cid-reupsert-1",
+        text: "legacy solar analysis",
+        createdAt: now,
+        indexedAt: now,
+        hasLinks: true,
+        status: "active",
+        ingestId: "run-1",
+        embedType: null,
+        topics: [{
+          topicSlug: "solar" as any,
+          matchedTerm: "solar",
+          matchSignal: "term",
+          matchValue: "solar",
+          matchScore: 0.9,
+          ontologyVersion: "test",
+          matcherVersion: "test"
+        }],
+        links: [{
+          url: "https://old.example.com/legacy-report",
+          title: "Legacy report",
+          description: "Legacy solar report",
+          imageUrl: null,
+          domain: "old.example.com",
+          extractedAt: now
+        }]
+      };
+
+      const replacementPost: KnowledgePost = {
+        ...initialPost,
+        cid: "cid-reupsert-2",
+        text: "updated wind analysis",
+        indexedAt: now + 1_000,
+        ingestId: "run-2",
+        topics: [{
+          topicSlug: "wind" as any,
+          matchedTerm: "wind",
+          matchSignal: "term",
+          matchValue: "wind",
+          matchScore: 0.95,
+          ontologyVersion: "test",
+          matcherVersion: "test"
+        }],
+        links: [{
+          url: "https://new.example.com/updated-report",
+          title: "Updated report",
+          description: "Updated wind report",
+          imageUrl: null,
+          domain: "new.example.com",
+          extractedAt: now + 1_000
+        }]
+      };
+
+      yield* repo.upsertPosts([initialPost]);
+      yield* repo.upsertPosts([replacementPost]);
+
+      const topics = yield* sql<{ topicSlug: string; matchedTerm: string }>`
+        SELECT topic_slug as topicSlug, matched_term as matchedTerm
+        FROM post_topics
+        WHERE post_uri = ${uri}
+        ORDER BY topic_slug ASC
+      `;
+      const links = yield* sql<{ url: string; domain: string | null }>`
+        SELECT url as url, domain as domain
+        FROM links
+        WHERE post_uri = ${uri}
+        ORDER BY url ASC
+      `;
+      const publications = yield* sql<{ hostname: string }>`
+        SELECT hostname as hostname
+        FROM publications
+        WHERE hostname IN (${"old.example.com"}, ${"new.example.com"})
+        ORDER BY hostname ASC
+      `;
+      const updatedSearch = yield* repo.searchPosts({ query: "updated", limit: 10 });
+      const legacySearch = yield* repo.searchPosts({ query: "legacy", limit: 10 });
+
+      expect(topics).toEqual([{
+        topicSlug: "wind",
+        matchedTerm: "wind"
+      }]);
+      expect(links).toEqual([{
+        url: "https://new.example.com/updated-report",
+        domain: "new.example.com"
+      }]);
+      expect(publications).toContainEqual({ hostname: "new.example.com" });
+      expect(updatedSearch.map((post) => post.uri)).toContain(uri);
+      expect(legacySearch.map((post) => post.uri)).not.toContain(uri);
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
+  it.effect("markDeleted removes FTS visibility and child rows idempotently", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      yield* bootstrapExperts(seedManifest, 1, 1_710_000_000_000);
+
+      const repo = yield* KnowledgeRepo;
+      const sql = yield* SqlClient.SqlClient;
+      const uri = `at://${sampleDid}/app.bsky.feed.post/delete-1` as any;
+      const now = 1_710_000_000_000;
+
+      yield* repo.upsertPosts([{
+        uri,
+        did: sampleDid,
+        cid: "cid-delete-1",
+        text: "deletable solar analysis",
+        createdAt: now,
+        indexedAt: now,
+        hasLinks: true,
+        status: "active",
+        ingestId: "run-1",
+        embedType: null,
+        topics: [{
+          topicSlug: "solar" as any,
+          matchedTerm: "solar",
+          matchSignal: "term",
+          matchValue: "solar",
+          matchScore: 0.9,
+          ontologyVersion: "test",
+          matcherVersion: "test"
+        }],
+        links: [{
+          url: "https://delete.example.com/report",
+          title: "Delete me",
+          description: "Delete path coverage",
+          imageUrl: null,
+          domain: "delete.example.com",
+          extractedAt: now
+        }]
+      }]);
+
+      yield* repo.markDeleted([{
+        uri,
+        did: sampleDid,
+        cid: "cid-delete-2",
+        createdAt: now,
+        indexedAt: now + 1_000,
+        ingestId: "run-2"
+      }]);
+      yield* repo.markDeleted([{
+        uri,
+        did: sampleDid,
+        cid: "cid-delete-2",
+        createdAt: now,
+        indexedAt: now + 1_000,
+        ingestId: "run-2"
+      }]);
+
+      const [topicCount] = yield* sql<{ count: number }>`
+        SELECT COUNT(*) as count
+        FROM post_topics
+        WHERE post_uri = ${uri}
+      `;
+      const [linkCount] = yield* sql<{ count: number }>`
+        SELECT COUNT(*) as count
+        FROM links
+        WHERE post_uri = ${uri}
+      `;
+      const [ftsCount] = yield* sql<{ count: number }>`
+        SELECT COUNT(*) as count
+        FROM posts_fts
+        WHERE uri = ${uri}
+      `;
+      const [statusRow] = yield* sql<{ status: string; ingestId: string }>`
+        SELECT status as status, ingest_id as ingestId
+        FROM posts
+        WHERE uri = ${uri}
+      `;
+      const deletedSearch = yield* repo.searchPosts({ query: "deletable", limit: 10 });
+
+      expect(topicCount?.count).toBe(0);
+      expect(linkCount?.count).toBe(0);
+      expect(ftsCount?.count).toBe(0);
+      expect(statusRow).toEqual({
+        status: "deleted",
+        ingestId: "run-2"
+      });
+      expect(deletedSearch.map((post) => post.uri)).not.toContain(uri);
+    }).pipe(Effect.provide(makeBiLayer()))
+  );
+
   it.effect("searchPostsPage returns rows that normalize through RankedKnowledgePostResult", () =>
     Effect.gen(function* () {
       yield* seedKnowledgeBase();
@@ -627,7 +820,7 @@ describe("repository layers", () => {
     }).pipe(Effect.provide(makeBiLayer()))
   );
 
-  it.effect("upsertPosts handles >80 posts with mixed existing/new ingestIds", () =>
+  it.effect("upsertPosts handles >80 posts with mixed existing/new ingestIds in the sqlite-backed repo layer", () =>
     Effect.gen(function* () {
       yield* runMigrations;
       yield* bootstrapExperts(seedManifest, 1, 1_710_000_000_000);

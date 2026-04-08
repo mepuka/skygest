@@ -118,6 +118,27 @@ const makeBatchError = (cause: unknown, message: string) =>
 
 type D1BatchBindValue = string | number | null;
 
+const postTopicInsertColumns = [
+  "post_uri",
+  "topic_slug",
+  "matched_term",
+  "match_signal",
+  "match_value",
+  "match_score",
+  "ontology_version",
+  "matcher_version"
+] as const satisfies ReadonlyArray<string>;
+
+const linkInsertColumns = [
+  "post_uri",
+  "url",
+  "title",
+  "description",
+  "image_url",
+  "domain",
+  "extracted_at"
+] as const satisfies ReadonlyArray<string>;
+
 const publicationInsertColumns = [
   "publication_id",
   "medium",
@@ -132,6 +153,30 @@ const publicationInsertColumns = [
   "last_seen_at"
 ] as const satisfies ReadonlyArray<string>;
 
+type PostUpsertMode = "replace-active" | "mark-deleted";
+
+type PostRowWritePlan = {
+  readonly mode: PostUpsertMode;
+  readonly uri: string;
+  readonly did: string;
+  readonly cid: string | null;
+  readonly text: string;
+  readonly createdAt: number;
+  readonly indexedAt: number;
+  readonly hasLinks: number;
+  readonly status: "active" | "deleted";
+  readonly ingestId: string;
+  readonly embedType: string | null;
+};
+
+type KnowledgeRepoWritePlan = {
+  readonly post: PostRowWritePlan;
+  readonly topicRows: ReadonlyArray<ReadonlyArray<D1BatchBindValue>>;
+  readonly linkRows: ReadonlyArray<ReadonlyArray<D1BatchBindValue>>;
+  readonly publicationRows: ReadonlyArray<ReadonlyArray<D1BatchBindValue>>;
+  readonly rebuildFts: boolean;
+};
+
 const toPostResult = (row: PostRow) => ({
   uri: row.uri,
   did: row.did,
@@ -145,6 +190,273 @@ const toPostResult = (row: PostRow) => ({
     : row.topicsCsv.split(",").filter((topic) => topic.length > 0),
   ...emptyKnowledgePostHydration()
 });
+
+const topicInsertRows = (
+  post: KnowledgePost
+): ReadonlyArray<ReadonlyArray<D1BatchBindValue>> =>
+  post.topics.map((topic) => [
+    post.uri,
+    topic.topicSlug,
+    topic.matchedTerm,
+    topic.matchSignal,
+    topic.matchValue,
+    topic.matchScore,
+    topic.ontologyVersion,
+    topic.matcherVersion
+  ]);
+
+const linkInsertRows = (
+  post: KnowledgePost
+): ReadonlyArray<ReadonlyArray<D1BatchBindValue>> =>
+  post.links.map((link) => [
+    post.uri,
+    link.url,
+    link.title,
+    link.description,
+    link.imageUrl,
+    link.domain,
+    link.extractedAt
+  ]);
+
+const makeKnowledgePostWritePlan = (
+  post: KnowledgePost
+): KnowledgeRepoWritePlan => ({
+  post: {
+    mode: "replace-active",
+    uri: post.uri,
+    did: post.did,
+    cid: post.cid,
+    text: post.text,
+    createdAt: post.createdAt,
+    indexedAt: post.indexedAt,
+    hasLinks: post.hasLinks ? 1 : 0,
+    status: post.status,
+    ingestId: post.ingestId,
+    embedType: post.embedType
+  },
+  topicRows: topicInsertRows(post),
+  linkRows: linkInsertRows(post),
+  publicationRows: discoveredPublicationRows(post),
+  rebuildFts: true
+});
+
+const makeDeletedKnowledgePostWritePlan = (
+  post: DeletedKnowledgePost
+): KnowledgeRepoWritePlan => ({
+  post: {
+    mode: "mark-deleted",
+    uri: post.uri,
+    did: post.did,
+    cid: post.cid,
+    text: "",
+    createdAt: post.createdAt,
+    indexedAt: post.indexedAt,
+    hasLinks: 0,
+    status: "deleted",
+    ingestId: post.ingestId,
+    embedType: null
+  },
+  topicRows: [],
+  linkRows: [],
+  publicationRows: [],
+  rebuildFts: false
+});
+
+const prepareDeleteFtsStatement = (db: D1Database, uri: string) =>
+  db.prepare(`
+    DELETE FROM posts_fts
+    WHERE rowid IN (
+      SELECT rowid FROM posts WHERE uri = ?
+    )
+  `).bind(uri);
+
+const executeDeleteFts = (sql: SqlClient.SqlClient, uri: string) =>
+  sql`
+    DELETE FROM posts_fts
+    WHERE rowid IN (
+      SELECT rowid FROM posts WHERE uri = ${uri}
+    )
+  `.pipe(Effect.asVoid);
+
+const preparePostUpsertStatement = (
+  db: D1Database,
+  plan: PostRowWritePlan
+) =>
+  db.prepare(`
+    INSERT INTO posts (
+      uri, did, cid, text, created_at, indexed_at,
+      has_links, status, ingest_id, embed_type
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(uri) DO UPDATE SET
+      did = excluded.did,
+      cid = excluded.cid,
+      ${plan.mode === "replace-active"
+        ? `text = excluded.text,
+      created_at = excluded.created_at,
+      has_links = excluded.has_links,`
+        : ""}
+      indexed_at = excluded.indexed_at,
+      status = excluded.status,
+      ingest_id = excluded.ingest_id,
+      embed_type = excluded.embed_type
+  `).bind(
+    plan.uri,
+    plan.did,
+    plan.cid,
+    plan.text,
+    plan.createdAt,
+    plan.indexedAt,
+    plan.hasLinks,
+    plan.status,
+    plan.ingestId,
+    plan.embedType
+  );
+
+const executePostUpsert = (
+  sql: SqlClient.SqlClient,
+  plan: PostRowWritePlan
+) =>
+  plan.mode === "replace-active"
+    ? sql`
+        INSERT INTO posts (
+          uri, did, cid, text, created_at, indexed_at,
+          has_links, status, ingest_id, embed_type
+        ) VALUES (
+          ${plan.uri},
+          ${plan.did},
+          ${plan.cid},
+          ${plan.text},
+          ${plan.createdAt},
+          ${plan.indexedAt},
+          ${plan.hasLinks},
+          ${plan.status},
+          ${plan.ingestId},
+          ${plan.embedType}
+        )
+        ON CONFLICT(uri) DO UPDATE SET
+          did = excluded.did,
+          cid = excluded.cid,
+          text = excluded.text,
+          created_at = excluded.created_at,
+          indexed_at = excluded.indexed_at,
+          has_links = excluded.has_links,
+          status = excluded.status,
+          ingest_id = excluded.ingest_id,
+          embed_type = excluded.embed_type
+      `.pipe(Effect.asVoid)
+    : sql`
+        INSERT INTO posts (
+          uri, did, cid, text, created_at, indexed_at,
+          has_links, status, ingest_id, embed_type
+        ) VALUES (
+          ${plan.uri},
+          ${plan.did},
+          ${plan.cid},
+          ${plan.text},
+          ${plan.createdAt},
+          ${plan.indexedAt},
+          ${plan.hasLinks},
+          ${plan.status},
+          ${plan.ingestId},
+          ${plan.embedType}
+        )
+        ON CONFLICT(uri) DO UPDATE SET
+          did = excluded.did,
+          cid = excluded.cid,
+          indexed_at = excluded.indexed_at,
+          status = excluded.status,
+          ingest_id = excluded.ingest_id,
+          embed_type = excluded.embed_type
+      `.pipe(Effect.asVoid);
+
+const prepareClearChildStatements = (
+  db: D1Database,
+  uri: string
+): ReadonlyArray<D1PreparedStatement> => [
+  db.prepare("DELETE FROM post_topics WHERE post_uri = ?").bind(uri),
+  db.prepare("DELETE FROM links WHERE post_uri = ?").bind(uri)
+];
+
+const executeClearChildRows = (
+  sql: SqlClient.SqlClient,
+  uri: string
+) =>
+  Effect.gen(function* () {
+    yield* sql`DELETE FROM post_topics WHERE post_uri = ${uri}`.pipe(Effect.asVoid);
+    yield* sql`DELETE FROM links WHERE post_uri = ${uri}`.pipe(Effect.asVoid);
+  });
+
+const insertTopicRows = (
+  sql: SqlClient.SqlClient,
+  rows: ReadonlyArray<ReadonlyArray<D1BatchBindValue>>
+) =>
+  Effect.forEach(
+    rows,
+    ([
+      postUri,
+      topicSlug,
+      matchedTerm,
+      matchSignal,
+      matchValue,
+      matchScore,
+      ontologyVersion,
+      matcherVersion
+    ]) =>
+      sql`
+        INSERT OR IGNORE INTO post_topics (
+          post_uri,
+          topic_slug,
+          matched_term,
+          match_signal,
+          match_value,
+          match_score,
+          ontology_version,
+          matcher_version
+        )
+        VALUES (
+          ${postUri},
+          ${topicSlug},
+          ${matchedTerm},
+          ${matchSignal},
+          ${matchValue},
+          ${matchScore},
+          ${ontologyVersion},
+          ${matcherVersion}
+        )
+      `.pipe(Effect.asVoid),
+    { discard: true }
+  );
+
+const insertLinkRows = (
+  sql: SqlClient.SqlClient,
+  rows: ReadonlyArray<ReadonlyArray<D1BatchBindValue>>
+) =>
+  Effect.forEach(
+    rows,
+    ([
+      postUri,
+      url,
+      title,
+      description,
+      imageUrl,
+      domain,
+      extractedAt
+    ]) =>
+      sql`
+        INSERT OR IGNORE INTO links (
+          post_uri, url, title, description, image_url, domain, extracted_at
+        ) VALUES (
+          ${postUri},
+          ${url},
+          ${title},
+          ${description},
+          ${imageUrl},
+          ${domain},
+          ${extractedAt}
+        )
+      `.pipe(Effect.asVoid),
+    { discard: true }
+  );
 
 const searchCursorCondition = (
   sql: SqlClient.SqlClient,
@@ -186,55 +498,6 @@ const linkCursorCondition = (
         )
       )`;
 
-const insertTopics = (sql: SqlClient.SqlClient, post: KnowledgePost) =>
-  Effect.forEach(
-    post.topics,
-    (topic) =>
-      sql`
-        INSERT OR IGNORE INTO post_topics (
-          post_uri,
-          topic_slug,
-          matched_term,
-          match_signal,
-          match_value,
-          match_score,
-          ontology_version,
-          matcher_version
-        )
-        VALUES (
-          ${post.uri},
-          ${topic.topicSlug},
-          ${topic.matchedTerm},
-          ${topic.matchSignal},
-          ${topic.matchValue},
-          ${topic.matchScore},
-          ${topic.ontologyVersion},
-          ${topic.matcherVersion}
-        )
-      `.pipe(Effect.asVoid),
-    { discard: true }
-  );
-
-const insertLinks = (sql: SqlClient.SqlClient, post: KnowledgePost) =>
-  Effect.forEach(
-    post.links,
-    (link) =>
-      sql`
-        INSERT OR IGNORE INTO links (
-          post_uri, url, title, description, image_url, domain, extracted_at
-        ) VALUES (
-          ${post.uri},
-          ${link.url},
-          ${link.title},
-          ${link.description},
-          ${link.imageUrl},
-          ${link.domain},
-          ${link.extractedAt}
-        )
-      `.pipe(Effect.asVoid),
-    { discard: true }
-  );
-
 const discoveredPublicationHostnames = (post: KnowledgePost): ReadonlyArray<string> => [
   ...new Set(
     post.links
@@ -262,9 +525,10 @@ const discoveredPublicationRows = (
     post.indexedAt
   ]);
 
-const insertDiscoveredPublications = (sql: SqlClient.SqlClient, post: KnowledgePost) => {
-  const rows = discoveredPublicationRows(post);
-
+const insertPublicationRows = (
+  sql: SqlClient.SqlClient,
+  rows: ReadonlyArray<ReadonlyArray<D1BatchBindValue>>
+) => {
   if (rows.length === 0) {
     return Effect.void;
   }
@@ -306,6 +570,51 @@ const insertDiscoveredPublications = (sql: SqlClient.SqlClient, post: KnowledgeP
   );
 };
 
+const insertDiscoveredPublications = (sql: SqlClient.SqlClient, post: KnowledgePost) =>
+  insertPublicationRows(sql, discoveredPublicationRows(post));
+
+const prepareRebuildFtsStatement = (db: D1Database, uri: string) =>
+  db.prepare(`
+    INSERT INTO posts_fts(rowid, uri, text, handle, topic_terms)
+    SELECT
+      p.rowid,
+      p.uri,
+      p.text,
+      COALESCE(e.handle, ''),
+      COALESCE((
+        SELECT group_concat(
+          COALESCE(NULLIF(pt.match_value, ''), NULLIF(pt.matched_term, ''), pt.topic_slug),
+          ' '
+        )
+        FROM post_topics pt
+        WHERE pt.post_uri = p.uri
+      ), '')
+    FROM posts p
+    LEFT JOIN experts e ON e.did = p.did
+    WHERE p.uri = ?
+  `).bind(uri);
+
+const executeRebuildFts = (sql: SqlClient.SqlClient, uri: string) =>
+  sql`
+    INSERT INTO posts_fts(rowid, uri, text, handle, topic_terms)
+    SELECT
+      p.rowid,
+      p.uri,
+      p.text,
+      COALESCE(e.handle, ''),
+      COALESCE((
+        SELECT group_concat(
+          COALESCE(NULLIF(pt.match_value, ''), NULLIF(pt.matched_term, ''), pt.topic_slug),
+          ' '
+        )
+        FROM post_topics pt
+        WHERE pt.post_uri = p.uri
+      ), '')
+    FROM posts p
+    LEFT JOIN experts e ON e.did = p.did
+    WHERE p.uri = ${uri}
+  `.pipe(Effect.asVoid);
+
 const makeBulkInsertStatement = (
   db: D1Database,
   table: string,
@@ -344,166 +653,103 @@ const runAtomicBatch = (
           )
       }).pipe(Effect.asVoid);
 
-const makeUpsertStatements = (
+const makeStatementsFromWritePlan = (
   db: D1Database,
-  post: KnowledgePost
+  plan: KnowledgeRepoWritePlan
 ): ReadonlyArray<D1PreparedStatement> => {
   const topicInsert = makeBulkInsertStatement(
     db,
     "post_topics",
-    [
-      "post_uri",
-      "topic_slug",
-      "matched_term",
-      "match_signal",
-      "match_value",
-      "match_score",
-      "ontology_version",
-      "matcher_version"
-    ],
-    post.topics.map((topic) => [
-      post.uri,
-      topic.topicSlug,
-      topic.matchedTerm,
-      topic.matchSignal,
-      topic.matchValue,
-      topic.matchScore,
-      topic.ontologyVersion,
-      topic.matcherVersion
-    ])
+    postTopicInsertColumns,
+    plan.topicRows
   );
   const linksInsert = makeBulkInsertStatement(
     db,
     "links",
-    [
-      "post_uri",
-      "url",
-      "title",
-      "description",
-      "image_url",
-      "domain",
-      "extracted_at"
-    ],
-    post.links.map((link) => [
-      post.uri,
-      link.url,
-      link.title,
-      link.description,
-      link.imageUrl,
-      link.domain,
-      link.extractedAt
-    ])
+    linkInsertColumns,
+    plan.linkRows
   );
   const publicationsInsert = makeBulkInsertStatement(
     db,
     "publications",
     publicationInsertColumns,
-    discoveredPublicationRows(post)
+    plan.publicationRows
   );
 
   return [
     // 1. Delete old FTS entry before upsert so search stays in sync.
-    db.prepare(`
-      DELETE FROM posts_fts
-      WHERE rowid IN (
-        SELECT rowid FROM posts WHERE uri = ?
-      )
-    `).bind(post.uri),
+    prepareDeleteFtsStatement(db, plan.post.uri),
     // 2. Upsert the post row (changes text in posts table)
-    db.prepare(`
-      INSERT INTO posts (
-        uri, did, cid, text, created_at, indexed_at,
-        has_links, status, ingest_id, embed_type
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(uri) DO UPDATE SET
-        did = excluded.did,
-        cid = excluded.cid,
-        text = excluded.text,
-        created_at = excluded.created_at,
-        indexed_at = excluded.indexed_at,
-        has_links = excluded.has_links,
-        status = excluded.status,
-        ingest_id = excluded.ingest_id,
-        embed_type = excluded.embed_type
-    `).bind(
-      post.uri,
-      post.did,
-      post.cid,
-      post.text,
-      post.createdAt,
-      post.indexedAt,
-      post.hasLinks ? 1 : 0,
-      post.status,
-      post.ingestId,
-      post.embedType
-    ),
+    preparePostUpsertStatement(db, plan.post),
     // 3. Delete/insert topics and links
-    db.prepare("DELETE FROM post_topics WHERE post_uri = ?").bind(post.uri),
-    db.prepare("DELETE FROM links WHERE post_uri = ?").bind(post.uri),
+    ...prepareClearChildStatements(db, plan.post.uri),
     ...(topicInsert === null ? [] : [topicInsert]),
     ...(linksInsert === null ? [] : [linksInsert]),
     ...(publicationsInsert === null ? [] : [publicationsInsert]),
-    // 4. Insert the rebuilt FTS row after text and topic writes succeed.
-    db.prepare(`
-      INSERT INTO posts_fts(rowid, uri, text, handle, topic_terms)
-      SELECT
-        p.rowid,
-        p.uri,
-        p.text,
-        COALESCE(e.handle, ''),
-        COALESCE((
-          SELECT group_concat(
-            COALESCE(NULLIF(pt.match_value, ''), NULLIF(pt.matched_term, ''), pt.topic_slug),
-            ' '
-          )
-          FROM post_topics pt
-          WHERE pt.post_uri = p.uri
-        ), '')
-      FROM posts p
-      LEFT JOIN experts e ON e.did = p.did
-      WHERE p.uri = ?
-    `).bind(post.uri)
+    ...(plan.rebuildFts ? [prepareRebuildFtsStatement(db, plan.post.uri)] : [])
   ];
 };
+
+const makeUpsertStatements = (
+  db: D1Database,
+  post: KnowledgePost
+): ReadonlyArray<D1PreparedStatement> =>
+  makeStatementsFromWritePlan(db, makeKnowledgePostWritePlan(post));
 
 const makeDeleteStatements = (
   db: D1Database,
   post: DeletedKnowledgePost
-): ReadonlyArray<D1PreparedStatement> => [
-  // Delete old FTS entry before upsert — deleted posts should not remain searchable.
-  db.prepare(`
-    DELETE FROM posts_fts
-    WHERE rowid IN (
-      SELECT rowid FROM posts WHERE uri = ?
-    )
-  `).bind(post.uri),
-  db.prepare(`
-    INSERT INTO posts (
-      uri, did, cid, text, created_at, indexed_at,
-      has_links, status, ingest_id, embed_type
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ON CONFLICT(uri) DO UPDATE SET
-      did = excluded.did,
-      cid = excluded.cid,
-      indexed_at = excluded.indexed_at,
-      status = excluded.status,
-      ingest_id = excluded.ingest_id,
-      embed_type = excluded.embed_type
-  `).bind(
-    post.uri,
-    post.did,
-    post.cid,
-    "",
-    post.createdAt,
-    post.indexedAt,
-    0,
-    "deleted",
-    post.ingestId,
-    null
-  ),
-  db.prepare("DELETE FROM post_topics WHERE post_uri = ?").bind(post.uri),
-  db.prepare("DELETE FROM links WHERE post_uri = ?").bind(post.uri)
-];
+): ReadonlyArray<D1PreparedStatement> =>
+  makeStatementsFromWritePlan(db, makeDeletedKnowledgePostWritePlan(post));
+
+const executeWritePlan = (
+  sql: SqlClient.SqlClient,
+  plan: KnowledgeRepoWritePlan
+) =>
+  Effect.gen(function* () {
+    yield* executeDeleteFts(sql, plan.post.uri);
+    yield* executePostUpsert(sql, plan.post);
+    yield* executeClearChildRows(sql, plan.post.uri);
+    yield* insertTopicRows(sql, plan.topicRows);
+    yield* insertLinkRows(sql, plan.linkRows);
+    yield* insertPublicationRows(sql, plan.publicationRows);
+
+    if (plan.rebuildFts) {
+      yield* executeRebuildFts(sql, plan.post.uri);
+    }
+  });
+
+const loadExistingIngestIds = (
+  rawDb: D1Database,
+  posts: ReadonlyArray<{ readonly uri: string }>,
+  chunkSize: number
+) =>
+  Effect.gen(function* () {
+    const existingIngestIds = new Map<string, string | null>();
+    const uriChunks = A.chunksOf(posts, chunkSize);
+
+    yield* Effect.forEach(uriChunks, (chunk) =>
+      Effect.gen(function* () {
+        const uris = chunk.map((post) => post.uri);
+        const placeholders = uris.map(() => "?").join(", ");
+        const rows = yield* Effect.tryPromise({
+          try: () =>
+            rawDb.prepare(
+              `SELECT uri, ingest_id as ingestId FROM posts WHERE uri IN (${placeholders})`
+            ).bind(...uris).all<{ uri: string; ingestId: string | null }>(),
+          catch: (cause) =>
+            makeBatchError(cause, "Failed to batch-check idempotency")
+        });
+
+        for (const row of rows.results) {
+          existingIngestIds.set(row.uri, row.ingestId);
+        }
+      }),
+      { discard: true }
+    );
+
+    return existingIngestIds;
+  });
 
 export const KnowledgeRepoD1 = {
   layer: Layer.effect(KnowledgeRepo, Effect.gen(function* () {
@@ -520,6 +766,7 @@ export const KnowledgeRepoD1 = {
         post,
         `Invalid knowledge post input for ${post.uri}`
       );
+      const writePlan = makeKnowledgePostWritePlan(validated);
 
       const existing = yield* sql<{ ingestId: string | null }>`
         SELECT ingest_id as ingestId
@@ -541,71 +788,7 @@ export const KnowledgeRepoD1 = {
       }
 
       yield* sql.withTransaction(
-        Effect.gen(function* () {
-          // Delete the old FTS row before rewriting post metadata.
-          yield* sql`
-            DELETE FROM posts_fts
-            WHERE rowid IN (
-              SELECT rowid FROM posts WHERE uri = ${validated.uri}
-            )
-          `.pipe(Effect.asVoid);
-
-          yield* sql`
-              INSERT INTO posts (
-                uri, did, cid, text, created_at, indexed_at,
-                has_links, status, ingest_id, embed_type
-              ) VALUES (
-                ${validated.uri},
-                ${validated.did},
-                ${validated.cid},
-                ${validated.text},
-                ${validated.createdAt},
-                ${validated.indexedAt},
-                ${validated.hasLinks ? 1 : 0},
-                ${validated.status},
-                ${validated.ingestId},
-                ${validated.embedType}
-              )
-              ON CONFLICT(uri) DO UPDATE SET
-                did = excluded.did,
-                cid = excluded.cid,
-                text = excluded.text,
-                created_at = excluded.created_at,
-                indexed_at = excluded.indexed_at,
-                has_links = excluded.has_links,
-                status = excluded.status,
-                ingest_id = excluded.ingest_id,
-                embed_type = excluded.embed_type
-            `.pipe(Effect.asVoid);
-
-          yield* sql`DELETE FROM post_topics WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
-          yield* sql`DELETE FROM links WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
-
-          yield* insertTopics(sql, validated);
-          yield* insertLinks(sql, validated);
-          yield* insertDiscoveredPublications(sql, validated);
-
-          // Rebuild the FTS row from post text plus joined metadata.
-          yield* sql`
-            INSERT INTO posts_fts(rowid, uri, text, handle, topic_terms)
-            SELECT
-              p.rowid,
-              p.uri,
-              p.text,
-              COALESCE(e.handle, ''),
-              COALESCE((
-                SELECT group_concat(
-                  COALESCE(NULLIF(pt.match_value, ''), NULLIF(pt.matched_term, ''), pt.topic_slug),
-                  ' '
-                )
-                FROM post_topics pt
-                WHERE pt.post_uri = p.uri
-              ), '')
-            FROM posts p
-            LEFT JOIN experts e ON e.did = p.did
-            WHERE p.uri = ${validated.uri}
-          `.pipe(Effect.asVoid);
-        })
+        executeWritePlan(sql, writePlan)
       );
     });
 
@@ -615,6 +798,7 @@ export const KnowledgeRepoD1 = {
         post,
         `Invalid deleted knowledge post input for ${post.uri}`
       );
+      const writePlan = makeDeletedKnowledgePostWritePlan(validated);
 
       const existing = yield* sql<{ ingestId: string | null }>`
         SELECT ingest_id as ingestId
@@ -637,42 +821,7 @@ export const KnowledgeRepoD1 = {
 
       // No FTS re-insert needed — deleted posts should not be searchable.
       yield* sql.withTransaction(
-        Effect.gen(function* () {
-          yield* sql`
-            DELETE FROM posts_fts
-            WHERE rowid IN (
-              SELECT rowid FROM posts WHERE uri = ${validated.uri}
-            )
-          `.pipe(Effect.asVoid);
-
-          yield* sql`
-              INSERT INTO posts (
-                uri, did, cid, text, created_at, indexed_at,
-                has_links, status, ingest_id, embed_type
-              ) VALUES (
-                ${validated.uri},
-                ${validated.did},
-                ${validated.cid},
-                '',
-                ${validated.createdAt},
-                ${validated.indexedAt},
-                0,
-                'deleted',
-                ${validated.ingestId},
-                ${null}
-              )
-              ON CONFLICT(uri) DO UPDATE SET
-                did = excluded.did,
-                cid = excluded.cid,
-                indexed_at = excluded.indexed_at,
-                status = excluded.status,
-                ingest_id = excluded.ingest_id,
-                embed_type = excluded.embed_type
-            `.pipe(Effect.asVoid);
-
-          yield* sql`DELETE FROM post_topics WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
-          yield* sql`DELETE FROM links WHERE post_uri = ${validated.uri}`.pipe(Effect.asVoid);
-        })
+        executeWritePlan(sql, writePlan)
       );
     });
 
@@ -698,25 +847,10 @@ export const KnowledgeRepoD1 = {
         );
 
         // 2. Batch idempotency check — chunked IN queries (≤80 params each)
-        const existingIngestIds = new Map<string, string | null>();
-        const uriChunks = A.chunksOf(validatedPosts, IDEMPOTENCY_CHUNK_SIZE);
-        yield* Effect.forEach(uriChunks, (chunk) =>
-          Effect.gen(function* () {
-            const uris = chunk.map((p) => p.uri);
-            const placeholders = uris.map(() => "?").join(", ");
-            const rows = yield* Effect.tryPromise({
-              try: () =>
-                rawDb.prepare(
-                  `SELECT uri, ingest_id as ingestId FROM posts WHERE uri IN (${placeholders})`
-                ).bind(...uris).all<{ uri: string; ingestId: string | null }>(),
-              catch: (cause) =>
-                makeBatchError(cause, "Failed to batch-check idempotency")
-            });
-            for (const row of rows.results) {
-              existingIngestIds.set(row.uri, row.ingestId);
-            }
-          }),
-          { discard: true }
+        const existingIngestIds = yield* loadExistingIngestIds(
+          rawDb,
+          validatedPosts,
+          IDEMPOTENCY_CHUNK_SIZE
         );
 
         // 3. Collect upsert statements only for posts that need updating
@@ -742,22 +876,35 @@ export const KnowledgeRepoD1 = {
         return Effect.forEach(posts, markDeletedOne, { discard: true });
       }
 
-      // D1 batch path: validate all posts, then combine delete statements into chunked batches
+      // D1 batch path: validate all posts, idempotency-check them, then batch remaining deletes
       return Effect.gen(function* () {
-        // 1. Validate → collect statements per post
-        const statementSets = yield* Effect.forEach(posts, (post) =>
-          Effect.map(
-            decodeWithDbError(
-              DeletedKnowledgePostSchema,
-              post,
-              `Invalid deleted post input for ${post.uri}`
-            ),
-            (validated) => makeDeleteStatements(rawDb, validated)
+        // 1. Validate all posts up-front
+        const validatedPosts = yield* Effect.forEach(posts, (post) =>
+          decodeWithDbError(
+            DeletedKnowledgePostSchema,
+            post,
+            `Invalid deleted post input for ${post.uri}`
           ),
           { concurrency: 1 }
         );
 
-        // 2. Flatten + chunk + batch
+        // 2. Batch idempotency check — chunked IN queries (≤80 params each)
+        const existingIngestIds = yield* loadExistingIngestIds(
+          rawDb,
+          validatedPosts,
+          IDEMPOTENCY_CHUNK_SIZE
+        );
+
+        // 3. Collect delete statements only for posts that need updating
+        const statementSets = validatedPosts.map((validated) => {
+          if (existingIngestIds.get(validated.uri) === validated.ingestId) {
+            return [] as ReadonlyArray<D1PreparedStatement>;
+          }
+
+          return makeDeleteStatements(rawDb, validated);
+        });
+
+        // 4. Flatten + chunk + batch
         const allStatements = A.flatten(statementSets);
         const chunks = A.chunksOf(allStatements, BATCH_LIMIT);
         yield* Effect.forEach(chunks, (chunk, i) =>
