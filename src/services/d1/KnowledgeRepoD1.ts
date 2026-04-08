@@ -118,6 +118,20 @@ const makeBatchError = (cause: unknown, message: string) =>
 
 type D1BatchBindValue = string | number | null;
 
+const publicationInsertColumns = [
+  "publication_id",
+  "medium",
+  "hostname",
+  "show_slug",
+  "feed_url",
+  "apple_id",
+  "spotify_id",
+  "tier",
+  "source",
+  "first_seen_at",
+  "last_seen_at"
+] as const satisfies ReadonlyArray<string>;
+
 const toPostResult = (row: PostRow) => ({
   uri: row.uri,
   did: row.did,
@@ -221,40 +235,71 @@ const insertLinks = (sql: SqlClient.SqlClient, post: KnowledgePost) =>
     { discard: true }
   );
 
-const insertDiscoveredPublications = (sql: SqlClient.SqlClient, post: KnowledgePost) => {
-  const uniqueDomains = [
-    ...new Set(
-      post.links
-        .map((link) => link.domain)
-        .filter((d): d is string => d !== null && d !== undefined && d.length > 0)
-        .map(normalizeDomain)
-        .filter((d) => d.length > 0)
-    )
-  ];
+const discoveredPublicationHostnames = (post: KnowledgePost): ReadonlyArray<string> => [
+  ...new Set(
+    post.links
+      .map((link) => link.domain)
+      .filter((domain): domain is string => domain !== null && domain !== undefined && domain.length > 0)
+      .map(normalizeDomain)
+      .filter((domain) => domain.length > 0)
+  )
+];
 
-  if (uniqueDomains.length === 0) {
+const discoveredPublicationRows = (
+  post: KnowledgePost
+): ReadonlyArray<ReadonlyArray<D1BatchBindValue>> =>
+  discoveredPublicationHostnames(post).map((hostname) => [
+    hostname,
+    "text",
+    hostname,
+    null,
+    null,
+    null,
+    null,
+    "unknown",
+    "discovered",
+    post.indexedAt,
+    post.indexedAt
+  ]);
+
+const insertDiscoveredPublications = (sql: SqlClient.SqlClient, post: KnowledgePost) => {
+  const rows = discoveredPublicationRows(post);
+
+  if (rows.length === 0) {
     return Effect.void;
   }
 
   return Effect.forEach(
-    uniqueDomains,
-    (hostname) =>
+    rows,
+    ([
+      publicationId,
+      medium,
+      hostname,
+      showSlug,
+      feedUrl,
+      appleId,
+      spotifyId,
+      tier,
+      source,
+      firstSeenAt,
+      lastSeenAt
+    ]) =>
       sql`
         INSERT OR IGNORE INTO publications (
           publication_id, medium, hostname, show_slug, feed_url, apple_id, spotify_id,
           tier, source, first_seen_at, last_seen_at
         ) VALUES (
+          ${publicationId},
+          ${medium},
           ${hostname},
-          'text',
-          ${hostname},
-          NULL,
-          NULL,
-          NULL,
-          NULL,
-          'unknown',
-          'discovered',
-          ${post.indexedAt},
-          ${post.indexedAt}
+          ${showSlug},
+          ${feedUrl},
+          ${appleId},
+          ${spotifyId},
+          ${tier},
+          ${source},
+          ${firstSeenAt},
+          ${lastSeenAt}
         )
       `.pipe(Effect.asVoid),
     { discard: true }
@@ -349,6 +394,12 @@ const makeUpsertStatements = (
       link.extractedAt
     ])
   );
+  const publicationsInsert = makeBulkInsertStatement(
+    db,
+    "publications",
+    publicationInsertColumns,
+    discoveredPublicationRows(post)
+  );
 
   return [
     // 1. Delete old FTS entry before upsert so search stays in sync.
@@ -391,24 +442,7 @@ const makeUpsertStatements = (
     db.prepare("DELETE FROM links WHERE post_uri = ?").bind(post.uri),
     ...(topicInsert === null ? [] : [topicInsert]),
     ...(linksInsert === null ? [] : [linksInsert]),
-    ...(() => {
-      const uniqueDomains = [
-        ...new Set(
-          post.links
-            .map((link) => link.domain)
-            .filter((d): d is string => d !== null && d !== undefined && d.length > 0)
-            .map(normalizeDomain)
-            .filter((d) => d.length > 0)
-        )
-      ];
-      const publicationsInsert = makeBulkInsertStatement(
-        db,
-        "publications",
-        ["publication_id", "medium", "hostname", "show_slug", "feed_url", "apple_id", "spotify_id", "tier", "source", "first_seen_at", "last_seen_at"],
-        uniqueDomains.map((domain) => [domain, "text", domain, null, null, null, null, "unknown", "discovered", post.indexedAt, post.indexedAt])
-      );
-      return publicationsInsert === null ? [] : [publicationsInsert];
-    })(),
+    ...(publicationsInsert === null ? [] : [publicationsInsert]),
     // 4. Insert the rebuilt FTS row after text and topic writes succeed.
     db.prepare(`
       INSERT INTO posts_fts(rowid, uri, text, handle, topic_terms)

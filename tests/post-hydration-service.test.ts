@@ -181,4 +181,21 @@ describe("PostHydrationService", () => {
       expect(yield* Ref.get(calls)).toBe(2);
     })
   );
+
+  it.effect("unexpected hydration defects still surface", () =>
+    Effect.gen(function* () {
+      const uri = "at://did:plc:expert-a/app.bsky.feed.post/broken";
+      const layer = makeHydrationLayer((_uris) =>
+        Effect.die("unexpected hydration defect")
+      );
+
+      const exit = yield* Effect.exit(
+        PostHydrationService.use( (service) =>
+          service.hydratePosts([makePost(uri)])
+        ).pipe(Effect.provide(layer))
+      );
+
+      expect(exit._tag).toBe("Failure");
+    })
+  );
 });

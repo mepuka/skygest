@@ -3,7 +3,7 @@ import * as HttpLayerRouter from "effect/unstable/http/HttpRouter";
 import { ServiceMap, Effect, Layer, Schema } from "effect";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { makeQueryLayer } from "../edge/Layer";
-import type { EnvBindings } from "../platform/Env";
+import type { AgentWorkerEnvBindings, EnvBindings } from "../platform/Env";
 import {
   decodeJsonString,
   decodeJsonStringWith,
@@ -418,17 +418,18 @@ export const makeCachedMcpHandler = <Env extends object>(
  */
 const makeQueryLayerWithTrigger = (env: EnvBindings): QueryLayer => {
   const base = makeQueryLayer(env);
-  const fetcher = (env as unknown as Record<string, unknown>)["INGEST_SERVICE"] as Fetcher | undefined;
   const secret = env.OPERATOR_SECRET;
 
-  if (fetcher && secret) {
-    return Layer.provideMerge(
-      EnrichmentTriggerClient.layerFromFetcher(fetcher, secret),
-      base
-    ) as unknown as QueryLayer;
+  if (!("INGEST_SERVICE" in env) || env.INGEST_SERVICE === undefined || !secret) {
+    return base;
   }
 
-  return base;
+  const agentEnv = env as AgentWorkerEnvBindings;
+
+  return Layer.provideMerge(
+    EnrichmentTriggerClient.layerFromFetcher(agentEnv.INGEST_SERVICE, secret),
+    base
+  ) as QueryLayer;
 };
 
 const loadPersistedMcpSession = async (

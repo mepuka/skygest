@@ -50,6 +50,73 @@ const makeStorage = () => {
 };
 
 describe("ExpertPollCoordinatorDo", () => {
+  it.live("rejects enqueue requests when a different did is already bound", () =>
+    Effect.promise(async () => {
+      currentLayer = Layer.mergeAll(
+        Layer.succeed(ExpertPollExecutor, {
+          runExpert: () => Effect.die("not used"),
+          runDid: () => Effect.die("not used")
+        }),
+        Layer.succeed(IngestRunItemsRepo, {
+          createMany: () => Effect.void,
+          markDispatched: () => Effect.void,
+          markQueued: () => Effect.void,
+          markRunning: () => Effect.void,
+          markProgress: () => Effect.void,
+          markComplete: () => Effect.void,
+          markFailed: () => Effect.void,
+          listByRun: () => Effect.succeed([]),
+          countActiveByRun: () => Effect.succeed(0),
+          countIncompleteByRun: () => Effect.succeed(0),
+          listUndispatchedByRun: () => Effect.succeed([]),
+          listStaleDispatchedByRun: () => Effect.succeed([]),
+          listStaleRunningByRun: () => Effect.succeed([]),
+          summarizeByRun: () =>
+            Effect.succeed({
+              totalExperts: 0,
+              expertsSucceeded: 0,
+              expertsFailed: 0,
+              pagesFetched: 0,
+              postsSeen: 0,
+              postsStored: 0,
+              postsDeleted: 0,
+              error: null
+            })
+        })
+      );
+
+      const { ctx } = makeStorage();
+      const { ExpertPollCoordinatorDo } = await import("../src/ingest/ExpertPollCoordinatorDo");
+      const coordinator = new ExpertPollCoordinatorDo(
+        ctx,
+        {
+          DB: {} as D1Database,
+          INGEST_RUN_WORKFLOW: {} as WorkflowIngestEnvBindings["INGEST_RUN_WORKFLOW"],
+          EXPERT_POLL_COORDINATOR: {} as WorkflowIngestEnvBindings["EXPERT_POLL_COORDINATOR"]
+        }
+      );
+
+      const firstDid = asDid("did:plc:first");
+      const secondDid = asDid("did:plc:second");
+
+      await coordinator.enqueueHead({
+        did: firstDid,
+        runId: "run-1"
+      });
+
+      await expect(
+        coordinator.enqueueHead({
+          did: secondDid,
+          runId: "run-2"
+        })
+      ).rejects.toMatchObject({
+        _tag: "CoordinatorDidMismatchError",
+        expectedDid: firstDid,
+        actualDid: secondDid
+      });
+    })
+  );
+
   it.live("marks run items failed and records the last failure when execution errors", () =>
     Effect.promise(async () => {
       const did = asDid("did:plc:missing-expert");

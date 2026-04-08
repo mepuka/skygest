@@ -12,6 +12,29 @@ import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as ServiceMap from "effect/ServiceMap";
 
+type ToolkitRuntime<Tools extends Record<string, AiTool.Any>> =
+  | AiTool.HandlersFor<Tools>
+  | Exclude<AiTool.HandlerServices<Tools>, McpSchema.McpServerClient>;
+
+type BuiltToolkit<Tools extends Record<string, AiTool.Any>> = Toolkit.WithHandler<Tools>;
+
+type BuiltTool<Tools extends Record<string, AiTool.Any>> =
+  BuiltToolkit<Tools>["tools"][keyof BuiltToolkit<Tools>["tools"]];
+
+type EncodedToolResult = {
+  readonly encodedResult: unknown;
+};
+
+const asBuiltToolkitEffect = <Tools extends Record<string, AiTool.Any>>(
+  toolkit: Toolkit.Toolkit<Tools>
+): Effect.Effect<BuiltToolkit<Tools>, never, ToolkitRuntime<Tools>> =>
+  toolkit as unknown as Effect.Effect<BuiltToolkit<Tools>, never, ToolkitRuntime<Tools>>;
+
+const builtTools = <Tools extends Record<string, AiTool.Any>>(
+  toolkit: BuiltToolkit<Tools>
+): ReadonlyArray<BuiltTool<Tools>> =>
+  Object.values(toolkit.tools) as unknown as ReadonlyArray<BuiltTool<Tools>>;
+
 // ---------------------------------------------------------------------------
 // Display-text aware success text extraction
 // ---------------------------------------------------------------------------
@@ -37,15 +60,13 @@ const registerToolkitWithDisplayText = <
 ): Effect.Effect<
   void,
   never,
-  | McpServer.McpServer
-  | AiTool.HandlersFor<Tools>
-  | Exclude<AiTool.HandlerServices<Tools>, McpSchema.McpServerClient>
+  McpServer.McpServer | ToolkitRuntime<Tools>
 > =>
   Effect.gen(function* () {
     const registry = yield* McpServer.McpServer;
-    const built: Toolkit.WithHandler<Tools> = yield* toolkit as any;
+    const built = yield* asBuiltToolkitEffect(toolkit);
     const services = yield* Effect.services<never>();
-    for (const tool of Object.values(built.tools) as any[]) {
+    for (const tool of builtTools(built)) {
       const annotations = tool.annotations ?? (ServiceMap.empty() as ServiceMap.ServiceMap<never>);
       const toolMeta = ServiceMap.getOrUndefined(annotations, AiTool.Meta);
       const mcpTool = new McpSchema.Tool({
@@ -67,15 +88,15 @@ const registerToolkitWithDisplayText = <
       yield* registry.addTool({
         tool: mcpTool,
         annotations,
-        handle(payload: any) {
-          return built.handle(tool.name as any, payload).pipe(
+        handle(payload: unknown) {
+          return built.handle(tool.name as never, payload as never).pipe(
             Stream.unwrap,
             Stream.run(Sink.last()),
             Effect.flatMap(Effect.fromOption),
-            Effect.provideServices(services as ServiceMap.ServiceMap<any>),
+            Effect.provideServices(services as ServiceMap.ServiceMap<ToolkitRuntime<Tools>>),
             Effect.matchCause({
               // Failure path — identical to stock implementation
-              onFailure: (cause: any) =>
+              onFailure: (cause) =>
                 new McpSchema.CallToolResult({
                   isError: true,
                   structuredContent: undefined,
@@ -85,7 +106,7 @@ const registerToolkitWithDisplayText = <
                   }]
                 }),
               // Success path — uses _display when present
-              onSuccess: (result: any) => {
+              onSuccess: (result: EncodedToolResult) => {
                 const structured =
                   typeof result.encodedResult === "object"
                     ? result.encodedResult
@@ -101,11 +122,11 @@ const registerToolkitWithDisplayText = <
               }
             }),
             Effect.tapCause(Effect.log)
-          ) as any;
+          );
         }
       });
     }
-  }) as any;
+  });
 
 // ---------------------------------------------------------------------------
 // toolkitWithDisplayText — drop-in replacement for McpServer.toolkit
@@ -117,7 +138,6 @@ export const toolkitWithDisplayText = <
 ): Layer.Layer<
   never,
   never,
-  | AiTool.HandlersFor<Tools>
-  | Exclude<AiTool.HandlerServices<Tools>, McpSchema.McpServerClient>
+  McpServer.McpServer | ToolkitRuntime<Tools>
 > =>
-  Layer.effectDiscard(registerToolkitWithDisplayText(toolkit)) as any;
+  Layer.effectDiscard(registerToolkitWithDisplayText(toolkit));

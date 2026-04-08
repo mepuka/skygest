@@ -75,6 +75,23 @@ const ErrorRowsSchema = Schema.Array(
   })
 );
 
+const ingestRunItemSelectColumns = `
+  run_id as runId,
+  did as did,
+  mode as mode,
+  status as status,
+  enqueued_at as enqueuedAt,
+  attempt_count as attemptCount,
+  started_at as startedAt,
+  finished_at as finishedAt,
+  last_progress_at as lastProgressAt,
+  pages_fetched as pagesFetched,
+  posts_seen as postsSeen,
+  posts_stored as postsStored,
+  posts_deleted as postsDeleted,
+  error as error
+`;
+
 const chunkItems = <A>(items: ReadonlyArray<A>, size: number) => {
   const chunks: Array<ReadonlyArray<A>> = [];
 
@@ -84,6 +101,31 @@ const chunkItems = <A>(items: ReadonlyArray<A>, size: number) => {
 
   return chunks;
 };
+
+const decodeIngestRunItemRows = (
+  rows: unknown,
+  decodeMessage: string,
+  normalizeMessage: string
+): Effect.Effect<ReadonlyArray<IngestRunItemRecord>, DbError> =>
+  decodeWithDbError(
+    RawIngestRunItemRowsSchema,
+    rows,
+    decodeMessage
+  ).pipe(
+    Effect.map((rawRows) =>
+      rawRows.map((row) => ({
+        ...row,
+        error: decodeStoredIngestError(row.error)
+      }))
+    ),
+    Effect.flatMap((normalizedRows) =>
+      decodeWithDbError(
+        IngestRunItemRowsSchema,
+        normalizedRows,
+        normalizeMessage
+      )
+    )
+  );
 
 export const IngestRunItemsRepoD1 = {
   layer: Layer.effect(IngestRunItemsRepo, Effect.gen(function* () {
@@ -250,41 +292,15 @@ export const IngestRunItemsRepoD1 = {
     const listByRun = (runId: string) =>
       sql<any>`
         SELECT
-          run_id as runId,
-          did as did,
-          mode as mode,
-          status as status,
-          enqueued_at as enqueuedAt,
-          attempt_count as attemptCount,
-          started_at as startedAt,
-          finished_at as finishedAt,
-          last_progress_at as lastProgressAt,
-          pages_fetched as pagesFetched,
-          posts_seen as postsSeen,
-          posts_stored as postsStored,
-          posts_deleted as postsDeleted,
-          error as error
+          ${sql.unsafe(ingestRunItemSelectColumns)}
         FROM ingest_run_items
         WHERE run_id = ${runId}
         ORDER BY did ASC, mode ASC
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithDbError(
-            RawIngestRunItemRowsSchema,
+          decodeIngestRunItemRows(
             rows,
-            `Failed to decode ingest run items for ${runId}`
-          )
-        ),
-        Effect.map((rows) =>
-          rows.map((row) => ({
-            ...row,
-            error: decodeStoredIngestError(row.error)
-          }))
-        ),
-        Effect.flatMap((rows) =>
-          decodeWithDbError(
-            IngestRunItemRowsSchema,
-            rows,
+            `Failed to decode ingest run items for ${runId}`,
             `Failed to normalize ingest run items for ${runId}`
           )
         )
@@ -310,20 +326,7 @@ export const IngestRunItemsRepoD1 = {
     const listUndispatchedByRun = (runId: string, limit: number) =>
       sql<any>`
         SELECT
-          run_id as runId,
-          did as did,
-          mode as mode,
-          status as status,
-          enqueued_at as enqueuedAt,
-          attempt_count as attemptCount,
-          started_at as startedAt,
-          finished_at as finishedAt,
-          last_progress_at as lastProgressAt,
-          pages_fetched as pagesFetched,
-          posts_seen as postsSeen,
-          posts_stored as postsStored,
-          posts_deleted as postsDeleted,
-          error as error
+          ${sql.unsafe(ingestRunItemSelectColumns)}
         FROM ingest_run_items
         WHERE run_id = ${runId}
           AND status = 'queued'
@@ -331,22 +334,9 @@ export const IngestRunItemsRepoD1 = {
         LIMIT ${limit}
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithDbError(
-            RawIngestRunItemRowsSchema,
+          decodeIngestRunItemRows(
             rows,
-            `Failed to decode undispatched ingest run items for ${runId}`
-          )
-        ),
-        Effect.map((rows) =>
-          rows.map((row) => ({
-            ...row,
-            error: decodeStoredIngestError(row.error)
-          }))
-        ),
-        Effect.flatMap((rows) =>
-          decodeWithDbError(
-            IngestRunItemRowsSchema,
-            rows,
+            `Failed to decode undispatched ingest run items for ${runId}`,
             `Failed to normalize undispatched ingest run items for ${runId}`
           )
         )
@@ -355,20 +345,7 @@ export const IngestRunItemsRepoD1 = {
     const listStaleDispatchedByRun = (runId: string, staleBefore: number) =>
       sql<any>`
         SELECT
-          run_id as runId,
-          did as did,
-          mode as mode,
-          status as status,
-          enqueued_at as enqueuedAt,
-          attempt_count as attemptCount,
-          started_at as startedAt,
-          finished_at as finishedAt,
-          last_progress_at as lastProgressAt,
-          pages_fetched as pagesFetched,
-          posts_seen as postsSeen,
-          posts_stored as postsStored,
-          posts_deleted as postsDeleted,
-          error as error
+          ${sql.unsafe(ingestRunItemSelectColumns)}
         FROM ingest_run_items
         WHERE run_id = ${runId}
           AND status = 'dispatched'
@@ -376,22 +353,9 @@ export const IngestRunItemsRepoD1 = {
         ORDER BY did ASC, mode ASC
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithDbError(
-            RawIngestRunItemRowsSchema,
+          decodeIngestRunItemRows(
             rows,
-            `Failed to decode stale dispatched ingest run items for ${runId}`
-          )
-        ),
-        Effect.map((rows) =>
-          rows.map((row) => ({
-            ...row,
-            error: decodeStoredIngestError(row.error)
-          }))
-        ),
-        Effect.flatMap((rows) =>
-          decodeWithDbError(
-            IngestRunItemRowsSchema,
-            rows,
+            `Failed to decode stale dispatched ingest run items for ${runId}`,
             `Failed to normalize stale dispatched ingest run items for ${runId}`
           )
         )
@@ -400,20 +364,7 @@ export const IngestRunItemsRepoD1 = {
     const listStaleRunningByRun = (runId: string, staleBefore: number) =>
       sql<any>`
         SELECT
-          run_id as runId,
-          did as did,
-          mode as mode,
-          status as status,
-          enqueued_at as enqueuedAt,
-          attempt_count as attemptCount,
-          started_at as startedAt,
-          finished_at as finishedAt,
-          last_progress_at as lastProgressAt,
-          pages_fetched as pagesFetched,
-          posts_seen as postsSeen,
-          posts_stored as postsStored,
-          posts_deleted as postsDeleted,
-          error as error
+          ${sql.unsafe(ingestRunItemSelectColumns)}
         FROM ingest_run_items
         WHERE run_id = ${runId}
           AND status = 'running'
@@ -421,22 +372,9 @@ export const IngestRunItemsRepoD1 = {
         ORDER BY did ASC, mode ASC
       `.pipe(
         Effect.flatMap((rows) =>
-          decodeWithDbError(
-            RawIngestRunItemRowsSchema,
+          decodeIngestRunItemRows(
             rows,
-            `Failed to decode stale running ingest run items for ${runId}`
-          )
-        ),
-        Effect.map((rows) =>
-          rows.map((row) => ({
-            ...row,
-            error: decodeStoredIngestError(row.error)
-          }))
-        ),
-        Effect.flatMap((rows) =>
-          decodeWithDbError(
-            IngestRunItemRowsSchema,
-            rows,
+            `Failed to decode stale running ingest run items for ${runId}`,
             `Failed to normalize stale running ingest run items for ${runId}`
           )
         )

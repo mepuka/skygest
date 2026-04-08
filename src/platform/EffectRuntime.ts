@@ -24,6 +24,17 @@ export const makeManagedRuntime = <R, E>(
   layer: Layer.Layer<R, E, never>
 ) => ManagedRuntime.make(layer);
 
+/**
+ * Workflow / Durable Object entrypoints cannot preserve the full Effect
+ * environment type across their external async boundaries yet. Keep that
+ * environment-erasing cast in one place so the rest of the call sites stay
+ * honest about where the boundary is.
+ */
+export const atRuntimeBoundary = <A, E, R>(
+  effect: Effect.Effect<A, E, R>
+): Effect.Effect<A, E, never> =>
+  effect as Effect.Effect<A, E, never>;
+
 export const withManagedRuntime = async <R, E, A>(
   layer: Layer.Layer<R, E, never>,
   f: (runtime: ManagedRuntime.ManagedRuntime<R, E>) => Promise<A>
@@ -58,7 +69,7 @@ export const runScopedWithLayer = async <A, E, R>(
   withManagedRuntime(layer, (runtime) =>
     runScopedWithRuntime(
       runtime,
-      effect as Effect.Effect<A, E, never>,
+      atRuntimeBoundary(effect),
       options
     )
   );

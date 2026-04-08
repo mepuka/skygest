@@ -1,4 +1,6 @@
-import { Schema } from "effect";
+import { Schema, SchemaIssue } from "effect";
+
+const formatSchemaIssue = SchemaIssue.makeFormatterDefault();
 
 export const encodeJsonString = Schema.encodeUnknownSync(Schema.UnknownFromJsonString);
 export const decodeJsonString = Schema.decodeUnknownSync(Schema.UnknownFromJsonString);
@@ -18,7 +20,7 @@ export const decodeUnknownEitherWith = <S extends Schema.Decoder<unknown>>(schem
   Schema.decodeUnknownResult(schema);
 
 export const formatSchemaParseError = (error: Schema.SchemaError | import("effect/SchemaIssue").Issue) =>
-  "issue" in error ? String(error.issue) : String(error);
+  "issue" in error ? formatSchemaIssue(error.issue) : formatSchemaIssue(error);
 
 /**
  * Strip keys whose value is `undefined` so the object satisfies

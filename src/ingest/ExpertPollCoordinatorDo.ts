@@ -2,11 +2,13 @@ import { DurableObject } from "cloudflare:workers";
 import { Effect, Result, ManagedRuntime, Schema } from "effect";
 import type { Did as DidValue } from "../domain/types";
 import {
+  CoordinatorDidMismatchError,
   IngestSchemaDecodeError,
   toIngestErrorEnvelope
 } from "../domain/errors";
 import type { WorkflowIngestEnvBindings } from "../platform/Env";
 import {
+  atRuntimeBoundary,
   makeManagedRuntime,
   runScopedWithRuntime
 } from "../platform/EffectRuntime";
@@ -65,7 +67,7 @@ export class ExpertPollCoordinatorDo extends DurableObject<WorkflowIngestEnvBind
   ) =>
     runScopedWithRuntime(
       this.getRuntime(),
-      effect as Effect.Effect<A, E, never>,
+      atRuntimeBoundary(effect),
       { operation }
     );
 
@@ -134,7 +136,11 @@ export class ExpertPollCoordinatorDo extends DurableObject<WorkflowIngestEnvBind
     }
 
     if (state.did !== did) {
-      throw new Error(`ExpertPollCoordinatorDo did mismatch: expected ${state.did}, got ${did}`);
+      throw new CoordinatorDidMismatchError({
+        message: `ExpertPollCoordinatorDo did mismatch: expected ${state.did}, got ${did}`,
+        expectedDid: state.did,
+        actualDid: did
+      });
     }
 
     return state;
