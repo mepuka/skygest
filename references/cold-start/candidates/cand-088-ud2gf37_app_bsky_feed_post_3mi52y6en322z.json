@@ -4,12 +4,14 @@
   "sourceRef": {
     "contentId": "at://did:plc:5buzphfdtce4ev3ukud2gf37/app.bsky.feed.post/3mi52y6en322z"
   },
-  "resolutionState": "source_only",
+  "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "rawLabel": "Thanks to Ember for putting the data together here: ember-energy.org/data/china-",
   "rawDims": {
     "geography": "china",
     "category": "other"
-  }
+  },
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQSDAYK3P9HNMKYW5J",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQ774B2VG14CWMTFRS"
 }

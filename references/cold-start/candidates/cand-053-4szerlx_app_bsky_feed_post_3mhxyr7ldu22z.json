@@ -4,11 +4,9 @@
   "sourceRef": {
     "contentId": "at://did:plc:owyl5siz6ibqxwxls4szerlx/app.bsky.feed.post/3mhxyr7ldu22z"
   },
-  "resolutionState": "partially_resolved",
+  "resolutionState": "source_only",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VKGGYQMJWZPJZ7M3AE",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VK83ZSW5TBNQ9CF7GY",
   "rawLabel": "As oil market surplus keeps rising, something\u2019s got to give \u2013 Analysis - IEA www",
   "rawDims": {
     "category": "other"

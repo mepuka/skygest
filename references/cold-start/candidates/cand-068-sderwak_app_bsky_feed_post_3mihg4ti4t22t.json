@@ -6,9 +6,9 @@
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF3G335NSS1773RWDH",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VR93RKRK0PV4CNP67M",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VR9SK0NYHRY32WS601",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VKXWZSBCEDYCCRRPC0",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VK4JC6T0E1SXBN1PH4",
   "rawLabel": "Just making sure you're aware of this publication from NREL on \"inertia\" on foss",
   "rawDims": {
     "geography": "us",

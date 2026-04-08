@@ -4,11 +4,13 @@
   "sourceRef": {
     "contentId": "at://did:plc:2iv3f7svsfxfr5r53bgymkjk/app.bsky.feed.post/3mi2ce72w4c2r"
   },
-  "resolutionState": "source_only",
+  "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
   "rawLabel": "This is how it is commonly tracked and measured. Take it up with the IEA www.iea",
   "rawDims": {
     "category": "other"
-  }
+  },
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VJG7ZT9YNYHW2WQ81F",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VJZXYC8NNK89QP9879"
 }

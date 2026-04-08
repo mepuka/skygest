@@ -4,11 +4,13 @@
   "sourceRef": {
     "contentId": "at://did:plc:qlfit2m3ksqwaqhuepks5j7p/app.bsky.feed.post/3lxfef2knxk2x"
   },
-  "resolutionState": "source_only",
+  "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VE7EKX7ASBD577HN9S",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFCSDF9WTNRJ2JSMEN",
   "rawLabel": "We're going to look back on this nuclear hype cycle in 10 years, with maybe a ha",
   "rawDims": {
     "category": "other"
-  }
+  },
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VSBVTGARC23M7RJ1KG",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VSZYJF6R0KZTC64R0S"
 }

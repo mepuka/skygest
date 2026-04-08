@@ -4,11 +4,11 @@
   "sourceRef": {
     "contentId": "x://526871737/status/1847292711075746254"
   },
-  "resolutionState": "resolved",
+  "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VK41NWPP3NDN3BTRSP",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VK98CFX4EHEK3R3AJF",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQJN53T6M83MN1XJFC",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQ0X85PSM8SRCMP4W7",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
   "rawLabel": "THREAD  My deep dive on @IEA #WEO24  \ud83c\udf04Solar up 4x by 2030, top \u26a1\ufe0f source by 203",
   "rawDims": {

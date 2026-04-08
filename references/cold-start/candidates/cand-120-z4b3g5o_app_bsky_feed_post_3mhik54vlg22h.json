@@ -4,12 +4,14 @@
   "sourceRef": {
     "contentId": "at://did:plc:meebc75altsav3pgyz4b3g5o/app.bsky.feed.post/3mhik54vlg22h"
   },
-  "resolutionState": "source_only",
+  "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
   "rawLabel": "\u201dEncouraging a shift from private cars to public transport, alongside measures s",
   "rawDims": {
     "geography": "us-ca",
     "category": "price"
-  }
+  },
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHP6M9Z732WJY61H35",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH9V4TF0K64AHSS1FV"
 }
