@@ -23,7 +23,8 @@ import {
   EditorialPicksMcpOutput,
   PipelineStatusMcpOutput,
   ImportPostsMcpOutput,
-  SetExpertActiveMcpOutput
+  SetExpertActiveMcpOutput,
+  ThreadDocumentMcpOutput
 } from "../src/mcp/OutputSchemas";
 import { EnrichmentTriggerClient } from "../src/services/EnrichmentTriggerClient";
 import { smokeFixtureUris } from "../src/staging/SmokeFixture";
@@ -60,6 +61,7 @@ const decodePipelineStatusResponse = decodeCallToolResultWith(PipelineStatusMcpO
 const decodeImportPostsResponse = decodeCallToolResultWith(ImportPostsMcpOutput);
 const decodeAddExpertResponse = decodeCallToolResultWith(AddExpertMcpOutput);
 const decodeSetExpertActiveResponse = decodeCallToolResultWith(SetExpertActiveMcpOutput);
+const decodeThreadDocumentResponse = decodeCallToolResultWith(ThreadDocumentMcpOutput);
 const decodeDid = Schema.decodeUnknownSync(Did);
 
 const expertRegistryDid = decodeDid("did:plc:mcp-expert-1");
@@ -95,6 +97,58 @@ const makeExpertRegistryBlueskyLayer = () =>
     getPosts: () =>
       Effect.die("unexpected getPosts")
   } as any);
+
+const makeThreadNode = (
+  uri: string,
+  opts?: {
+    readonly parent?: unknown;
+    readonly replies?: ReadonlyArray<unknown>;
+  }
+) => ({
+  $type: "app.bsky.feed.defs#threadViewPost",
+  post: {
+    uri,
+    cid: `cid-${uri}`,
+    author: {
+      did: sampleDid,
+      handle: "seed.example.com",
+      displayName: "Seed Example"
+    },
+    record: {
+      text: `Thread ${uri}`,
+      createdAt: "2026-03-18T12:00:00.000Z",
+      $type: "app.bsky.feed.post"
+    },
+    replyCount: opts?.replies?.length ?? 0,
+    repostCount: 1,
+    likeCount: 2,
+    quoteCount: 0,
+    indexedAt: "2026-03-18T12:05:00.000Z"
+  },
+  ...(opts?.parent === undefined ? {} : { parent: opts.parent }),
+  ...(opts?.replies === undefined ? {} : { replies: Array.from(opts.replies) })
+});
+
+const makeThreadBlueskyLayer = (focusUri: string) => {
+  const ancestorUri = `at://${sampleDid}/app.bsky.feed.post/thread-parent`;
+  const replyUri = `at://${sampleDid}/app.bsky.feed.post/thread-reply`;
+  const reply = makeThreadNode(replyUri);
+  const ancestor = makeThreadNode(ancestorUri);
+  const focus = makeThreadNode(focusUri, {
+    parent: ancestor,
+    replies: [reply]
+  });
+
+  return Layer.succeed(BlueskyClient, {
+    resolveDidOrHandle: () => Effect.die("unexpected resolveDidOrHandle"),
+    getProfile: () => Effect.die("unexpected getProfile"),
+    getFollows: () => Effect.die("unexpected getFollows"),
+    resolveRepoService: () => Effect.die("unexpected resolveRepoService"),
+    listRecordsAtService: () => Effect.die("unexpected listRecordsAtService"),
+    getPostThread: () => Effect.succeed({ thread: focus }),
+    getPosts: () => Effect.die("unexpected getPosts")
+  } as any);
+};
 
 const initializePersistentPromptSession = async (
   layer: ReturnType<typeof makeBiLayer>
@@ -310,6 +364,41 @@ describe("MCP display formatting", () => {
           const decoded = decodeExpertsResponse(result);
           expect(decoded.items.length).toBeGreaterThan(0);
           expect(typeof decoded._display).toBe("string");
+        } finally {
+          await close();
+        }
+      })
+    )
+  );
+
+  it.live("thread document responses include _display in structuredContent and as text payload", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const [solarUri] = smokeFixtureUris(sampleDid);
+        const seedLayer = makeBiLayer({
+          filename,
+          blueskyClient: makeThreadBlueskyLayer(solarUri)
+        });
+        await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(seedLayer)));
+
+        const { client, close } = await createMcpClient(seedLayer);
+
+        try {
+          const result = await client.callTool({
+            name: "get_thread_document",
+            arguments: { postUri: solarUri }
+          });
+
+          const textContent = result.content.find(
+            (c): c is { type: "text"; text: string } => c.type === "text"
+          );
+          expect(textContent).toBeDefined();
+
+          const decoded = decodeThreadDocumentResponse(result);
+          expect(typeof decoded._display).toBe("string");
+          expect(decoded._display).toBe(textContent!.text);
+          expect(decoded.body).toContain(solarUri);
+          expect(decoded.body).toContain("@");
         } finally {
           await close();
         }

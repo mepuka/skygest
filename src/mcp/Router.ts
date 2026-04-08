@@ -46,9 +46,25 @@ type QueryLayer = Layer.Layer<
   PostEnrichmentReadService |
   PipelineStatusService |
   PostImportService,
-  any,
+  unknown,
   never
 >;
+
+type HttpRouterWebHandler = ReturnType<typeof HttpLayerRouter.toWebHandler>;
+
+type McpWebHandler = {
+  readonly handler: (request: globalThis.Request, context: ServiceMap.ServiceMap<OperatorIdentity>) => Promise<Response>;
+  readonly dispose: HttpRouterWebHandler["dispose"];
+};
+
+const toMcpWebHandler = (handler: HttpRouterWebHandler): McpWebHandler => ({
+  handler: (request, context) =>
+    handler.handler(
+      request,
+      context as Parameters<HttpRouterWebHandler["handler"]>[1]
+    ),
+  dispose: () => handler.dispose()
+});
 
 const mcpServerLayer = McpServer.layerHttp({
   name: "skygest-bi-mcp",
@@ -109,12 +125,6 @@ export const createPersistentMcpHandler = (
     handler: (request: Request) => webHandler.handler(request, context),
     dispose: () => webHandler.dispose()
   };
-};
-
-/** Web handler shape with an explicit context parameter for OperatorIdentity */
-type McpWebHandler = {
-  readonly handler: (request: globalThis.Request, context: ServiceMap.ServiceMap<OperatorIdentity>) => Promise<Response>;
-  readonly dispose: () => Promise<void>;
 };
 
 export type McpInitializePayload = typeof McpSchema.Initialize.payloadSchema.Type;
@@ -305,9 +315,9 @@ export const makeCachedMcpHandler = <Env extends object>(
   options: MakeCachedMcpHandlerOptions<Env> = {}
 ) => {
   const buildWebHandler = options.makeWebHandler ?? ((env: Env, profile: McpCapabilityProfile) =>
-    HttpLayerRouter.toWebHandler(
+    toMcpWebHandler(HttpLayerRouter.toWebHandler(
       makeMcpLayer(buildLayer(env), profile)
-    ) as unknown as McpWebHandler);
+    )));
   const defaultInitializePayload =
     options.defaultInitializePayload ?? DefaultWarmSessionPayload;
   const cache = new Map<string, {
