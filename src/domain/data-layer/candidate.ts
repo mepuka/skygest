@@ -1,6 +1,7 @@
 import { Schema } from "effect";
 import { ContentId } from "../content";
 import { IsoTimestamp } from "../types";
+import { DateLike } from "./base";
 import {
   AgentId,
   CandidateId,
@@ -51,8 +52,8 @@ export type SourceRef = Schema.Schema.Type<typeof SourceRef>;
 // ---------------------------------------------------------------------------
 
 export const AssertedTime = Schema.Struct({
-  start: Schema.optionalKey(Schema.String),
-  end: Schema.optionalKey(Schema.String),
+  start: Schema.optionalKey(DateLike),
+  end: Schema.optionalKey(DateLike),
   label: Schema.optionalKey(Schema.String)
 });
 export type AssertedTime = Schema.Schema.Type<typeof AssertedTime>;

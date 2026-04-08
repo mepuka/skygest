@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { DcatClass, DcatProperty, DesignDecision, SchemaOrgType } from "./annotations";
-import { TimestampedAliasedFields } from "./base";
+import { DateLike, TimestampedAliasedFields, WebUrl } from "./base";
 import {
   AgentId,
   CatalogId,
@@ -48,7 +48,7 @@ export const Agent = Schema.Struct({
     [DcatProperty]: "http://xmlns.com/foaf/0.1/name"
   }),
   alternateNames: Schema.optionalKey(Schema.Array(Schema.String)),
-  homepage: Schema.optionalKey(Schema.String.annotate({
+  homepage: Schema.optionalKey(WebUrl.annotate({
     [DcatProperty]: "http://xmlns.com/foaf/0.1/homepage"
   })),
   parentAgentId: Schema.optionalKey(AgentId),
@@ -76,7 +76,7 @@ export const Catalog = Schema.Struct({
   publisherAgentId: AgentId.annotate({
     [DcatProperty]: "http://purl.org/dc/terms/publisher"
   }),
-  homepage: Schema.optionalKey(Schema.String.annotate({
+  homepage: Schema.optionalKey(WebUrl.annotate({
     [DcatProperty]: "http://xmlns.com/foaf/0.1/homepage"
   })),
   ...TimestampedAliasedFields
@@ -91,6 +91,19 @@ export type Catalog = Schema.Schema.Type<typeof Catalog>;
 // CatalogRecord — NO TimestampedAliasedFields, NO aliases
 // ---------------------------------------------------------------------------
 
+const DATASET_ID_PATTERN = /^https:\/\/id\.skygest\.io\/dataset\/ds_[A-Za-z0-9]{10,}$/;
+const DATA_SERVICE_ID_PATTERN = /^https:\/\/id\.skygest\.io\/data-service\/svc_[A-Za-z0-9]{10,}$/;
+
+const validatePrimaryTopicId = (record: {
+  readonly primaryTopicType: "dataset" | "dataService";
+  readonly primaryTopicId: string;
+}) => {
+  const pattern = record.primaryTopicType === "dataset" ? DATASET_ID_PATTERN : DATA_SERVICE_ID_PATTERN;
+  return pattern.test(record.primaryTopicId)
+    ? undefined
+    : `primaryTopicId must be a valid ${record.primaryTopicType === "dataset" ? "DatasetId" : "DataServiceId"} URI for primaryTopicType "${record.primaryTopicType}"`;
+};
+
 export const CatalogRecord = Schema.Struct({
   _tag: Schema.Literal("CatalogRecord"),
   id: CatalogRecordId,
@@ -98,23 +111,27 @@ export const CatalogRecord = Schema.Struct({
   primaryTopicType: Schema.Literals(["dataset", "dataService"]).annotate({
     [DcatProperty]: "http://xmlns.com/foaf/0.1/primaryTopic"
   }),
-  primaryTopicId: Schema.String,
+  primaryTopicId: Schema.String.annotate({
+    description: "Must match the entity kind indicated by primaryTopicType (DatasetId or DataServiceId)"
+  }),
   sourceRecordId: Schema.optionalKey(Schema.String),
   harvestedFrom: Schema.optionalKey(Schema.String),
-  firstSeen: Schema.optionalKey(Schema.String.annotate({
+  firstSeen: Schema.optionalKey(DateLike.annotate({
     [DcatProperty]: "http://purl.org/dc/terms/issued"
   })),
-  lastSeen: Schema.optionalKey(Schema.String.annotate({
+  lastSeen: Schema.optionalKey(DateLike.annotate({
     [DcatProperty]: "http://purl.org/dc/terms/modified"
   })),
-  sourceModified: Schema.optionalKey(Schema.String),
+  sourceModified: Schema.optionalKey(DateLike),
   isAuthoritative: Schema.optionalKey(Schema.Boolean),
   duplicateOf: Schema.optionalKey(CatalogRecordId)
 }).annotate({
-  description: "Catalog's view of a resource — carries only catalog-tracking dates, not Skygest-managed timestamps (D5)",
+  description: "Catalog's view of a resource — carries only catalog-tracking dates, not Skygest-managed timestamps (D5). primaryTopicId is validated against primaryTopicType.",
   [DcatClass]: "http://www.w3.org/ns/dcat#CatalogRecord",
   [DesignDecision]: "D5"
-});
+}).pipe(
+  Schema.check(Schema.makeFilter(validatePrimaryTopicId))
+);
 export type CatalogRecord = Schema.Schema.Type<typeof CatalogRecord>;
 
 // ---------------------------------------------------------------------------
@@ -133,7 +150,7 @@ export const Dataset = Schema.Struct({
   publisherAgentId: Schema.optionalKey(AgentId.annotate({
     [DcatProperty]: "http://purl.org/dc/terms/publisher"
   })),
-  landingPage: Schema.optionalKey(Schema.String.annotate({
+  landingPage: Schema.optionalKey(WebUrl.annotate({
     [DcatProperty]: "http://www.w3.org/ns/dcat#landingPage"
   })),
   accessRights: Schema.optionalKey(AccessRights),
@@ -180,10 +197,10 @@ export const Distribution = Schema.Struct({
   description: Schema.optionalKey(Schema.String.annotate({
     [DcatProperty]: "http://purl.org/dc/terms/description"
   })),
-  accessURL: Schema.optionalKey(Schema.String.annotate({
+  accessURL: Schema.optionalKey(WebUrl.annotate({
     [DcatProperty]: "http://www.w3.org/ns/dcat#accessURL"
   })),
-  downloadURL: Schema.optionalKey(Schema.String.annotate({
+  downloadURL: Schema.optionalKey(WebUrl.annotate({
     [DcatProperty]: "http://www.w3.org/ns/dcat#downloadURL"
   })),
   mediaType: Schema.optionalKey(Schema.String.annotate({
@@ -230,10 +247,10 @@ export const DataService = Schema.Struct({
   publisherAgentId: Schema.optionalKey(AgentId.annotate({
     [DcatProperty]: "http://purl.org/dc/terms/publisher"
   })),
-  endpointURLs: Schema.Array(Schema.String).annotate({
+  endpointURLs: Schema.Array(WebUrl).annotate({
     [DcatProperty]: "http://www.w3.org/ns/dcat#endpointURL"
   }),
-  endpointDescription: Schema.optionalKey(Schema.String.annotate({
+  endpointDescription: Schema.optionalKey(WebUrl.annotate({
     [DcatProperty]: "http://www.w3.org/ns/dcat#endpointDescription"
   })),
   conformsTo: Schema.optionalKey(Schema.String.annotate({

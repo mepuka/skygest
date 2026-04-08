@@ -7,7 +7,7 @@ const makeEntityId = <B extends string>(
   brand: B
 ) => {
   const pattern = new RegExp(
-    `^https://id\\.skygest\\.io/${entityKind}/${prefix}_[A-Za-z0-9]+$`
+    `^https://id\\.skygest\\.io/${entityKind}/${prefix}_[A-Za-z0-9]{10,}$`
   );
   return Schema.String.pipe(
     Schema.check(Schema.isPattern(pattern)),

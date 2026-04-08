@@ -140,6 +140,28 @@ describe("CatalogRecord", () => {
     expect("createdAt" in decoded).toBe(false);
     expect("updatedAt" in decoded).toBe(false);
   });
+
+  it("rejects mismatched primaryTopicType and primaryTopicId", () => {
+    const input = {
+      _tag: "CatalogRecord" as const,
+      id: CR_ID,
+      catalogId: CATALOG_ID,
+      primaryTopicType: "dataset",
+      primaryTopicId: SVC_ID // DataServiceId, but says "dataset"
+    };
+    expect(() => Schema.decodeUnknownSync(CatalogRecord)(input)).toThrow();
+  });
+
+  it("accepts dataService topic type with DataServiceId", () => {
+    const input = {
+      _tag: "CatalogRecord" as const,
+      id: CR_ID,
+      catalogId: CATALOG_ID,
+      primaryTopicType: "dataService",
+      primaryTopicId: SVC_ID
+    };
+    expect(Schema.decodeUnknownSync(CatalogRecord)(input).primaryTopicType).toBe("dataService");
+  });
 });
 
 describe("Catalog", () => {

@@ -39,4 +39,12 @@ describe("data-layer branded IDs", () => {
     const validVar = "https://id.skygest.io/variable/var_01JR8X2K9ABCDEFGH";
     expect(() => Schema.decodeSync(SeriesId)(validVar)).toThrow();
   });
+
+  it("rejects too-short suffix (e.g., var_x)", () => {
+    expect(() => Schema.decodeSync(VariableId)("https://id.skygest.io/variable/var_x")).toThrow();
+  });
+
+  it("rejects single-char suffix", () => {
+    expect(() => Schema.decodeSync(AgentId)("https://id.skygest.io/agent/ag_A")).toThrow();
+  });
 });

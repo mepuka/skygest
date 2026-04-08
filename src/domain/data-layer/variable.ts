@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { DesignDecision, SchemaOrgType, SdmxConcept } from "./annotations";
-import { TimestampedAliasedFields } from "./base";
+import { DateLike, TimestampedAliasedFields } from "./base";
 import { DistributionId, ObservationId, SeriesId, VariableId } from "./ids";
 
 // ---------------------------------------------------------------------------
@@ -24,9 +24,9 @@ export const UnitFamily = Schema.Literals([
 export type UnitFamily = Schema.Schema.Type<typeof UnitFamily>;
 
 export const TimePeriod = Schema.Struct({
-  start: Schema.String,
-  end: Schema.optionalKey(Schema.String)
-}).annotate({ description: "ISO 8601 time period with required start and optional end" });
+  start: DateLike,
+  end: Schema.optionalKey(DateLike)
+}).annotate({ description: "Time period with required start and optional end (YYYY, YYYY-MM, YYYY-MM-DD, or ISO 8601)" });
 export type TimePeriod = Schema.Schema.Type<typeof TimePeriod>;
 
 export const FixedDims = Schema.Struct({
