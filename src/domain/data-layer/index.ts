@@ -5,3 +5,4 @@ export * from "./catalog";
 export * from "./ids";
 export * from "./variable";
 export * from "./candidate";
+export * from "./schema-org";
