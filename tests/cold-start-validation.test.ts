@@ -9,7 +9,7 @@ import {
 
 const ROOT = join(import.meta.dirname, "..", "references", "cold-start");
 
-const SCHEMAS: Record<string, Schema.Schema<any>> = {
+const SCHEMAS: Record<string, Schema.Decoder<unknown>> = {
   Variable, Series, Observation, Candidate,
   Agent, Catalog, CatalogRecord, Dataset, Distribution, DataService, DatasetSeries,
 };
