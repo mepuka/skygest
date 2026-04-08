@@ -1,0 +1,26 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQC1JSGT4WAM2B7YQ7Q3HG9",
+  "title": "EIA Short-Term Energy Outlook",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQC1JRYA181KC39N8WXZJB7",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Monthly forecast of U.S. and global energy markets",
+  "landingPage": "https://www.eia.gov/outlooks/steo/",
+  "keywords": [
+    "forecast",
+    "short-term",
+    "outlook"
+  ],
+  "themes": [
+    "energy forecast"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQC1JSGP35XBW2384BGQ7A2",
+    "https://id.skygest.io/distribution/dist_01KNQC1JSHJ9KFRDWYVK9TKSVB"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQC1JSE3P473SKA6B5QNWD2"
+  ]
+}

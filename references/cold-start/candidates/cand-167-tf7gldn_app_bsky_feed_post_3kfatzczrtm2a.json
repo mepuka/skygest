@@ -1,0 +1,16 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3V5ZT9BCPZQ8DGDY1Q",
+  "sourceRef": {
+    "contentId": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3kfatzczrtm2a"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2TEJRS2SQ255HKXPX",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSWSXWCVZPDGD6WPF16",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSWPS1JYMAK5AKHGD2T",
+  "rawLabel": "Getting to 100% Clean Energy Will be Hard, Uncomfortable but Doable. #energysky ",
+  "rawDims": {
+    "category": "other"
+  }
+}

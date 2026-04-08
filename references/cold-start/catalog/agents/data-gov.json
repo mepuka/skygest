@@ -1,0 +1,24 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KNQC1JTKBHZKW2S51E3QG51T",
+  "kind": "organization",
+  "name": "Data.gov",
+  "alternateNames": [
+    "U.S. Open Data Portal"
+  ],
+  "homepage": "https://data.gov",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://data.gov",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "wikidata",
+      "value": "Q3557528",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

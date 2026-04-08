@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW43HP6D5JFE8GD8WM4A",
+  "sourceRef": {
+    "contentId": "at://did:plc:a4py7lzj6xarzriaht7uyxq2/app.bsky.feed.post/3mdtzgqz2zk2h"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS19K231RXRX23D1T4Y",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSSP8P606PYYV039QVB",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSS978SP2KKXSTG4P2T",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92HS0Q1QCJ3BTGHT45",
+  "rawLabel": "Global #wind 💨 and #solar ☀️ installations passed 800 GW last year, triple the",
+  "rawDims": {
+    "geography": "global",
+    "category": "capacity"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "_tag": "Variable",
+  "id": "https://id.skygest.io/variable/var_01KNQC4P91WQ9AW6B6SGHW430V",
+  "label": "Installed solar PV capacity",
+  "definition": "Nameplate capacity of grid-connected solar photovoltaic systems",
+  "measuredProperty": "capacity",
+  "domainObject": "solar photovoltaic",
+  "statisticType": "stock",
+  "unitFamily": "power",
+  "aliases": [
+    {
+      "scheme": "oeo",
+      "value": "OEO_00010403",
+      "relation": "closeMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "technologyOrFuel": "solar PV",
+  "aggregation": "end_of_period"
+}

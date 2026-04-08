@@ -1,0 +1,17 @@
+{
+  "_tag": "Series",
+  "id": "https://id.skygest.io/series/ser_01KNQCEWG2QAVXXVHA8QTX0D85",
+  "label": "PJM load forecast",
+  "variableId": "https://id.skygest.io/variable/var_01KNQC4P947K3HCK2EMR3VW4J6",
+  "fixedDims": {
+    "place": "US-PJM",
+    "market": "PJM",
+    "frequency": "annual",
+    "extra": {
+      "type": "forecast"
+    }
+  },
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

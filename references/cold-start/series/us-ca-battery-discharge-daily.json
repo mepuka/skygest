@@ -1,0 +1,14 @@
+{
+  "_tag": "Series",
+  "id": "https://id.skygest.io/series/ser_01KNQCEWG07SXHTWEB1361RWTG",
+  "label": "CAISO battery discharge (daily)",
+  "variableId": "https://id.skygest.io/variable/var_01KNQC4P91ZA2792HEM43EB7XW",
+  "fixedDims": {
+    "place": "US-CA",
+    "market": "CAISO",
+    "frequency": "daily"
+  },
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

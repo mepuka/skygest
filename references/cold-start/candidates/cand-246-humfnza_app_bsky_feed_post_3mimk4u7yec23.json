@@ -1,0 +1,19 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW44H0GMKD22HK7SBG1N",
+  "sourceRef": {
+    "contentId": "at://did:plc:hoyoylxkm7ssefi7phumfnza/app.bsky.feed.post/3mimk4u7yec23"
+  },
+  "resolutionState": "resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2RDP28SCP98Q2XKYT",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSZ4GAA3EPZSXPXTBAY",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSZZ7QHHSFSCS0E3Q1H",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92HS0Q1QCJ3BTGHT45",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQCEWG0BRN65YGCHEV46TNE",
+  "rawLabel": "Here is the answer:  Batteries have increased the value of previously curtailed",
+  "rawDims": {
+    "geography": "us-ca",
+    "category": "curtailment"
+  }
+}

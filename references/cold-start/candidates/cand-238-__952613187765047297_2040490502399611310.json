@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW43BHS4FTJ20FVRFF42",
+  "sourceRef": {
+    "contentId": "x://952613187765047297/2040490502399611310"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2M7E98PZHJ6ERXA0C",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSF81M82M5YA0NXAT3S",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSFCW8PWQVA8V9Z6RY2",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P93X9GKZBVBZWJBRGR4",
+  "rawLabel": "At the start of summer 2000, NYISO issued a warning about the following summer's",
+  "rawDims": {
+    "geography": "us-nyiso",
+    "category": "capacity"
+  }
+}

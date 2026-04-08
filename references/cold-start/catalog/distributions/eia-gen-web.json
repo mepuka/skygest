@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQC1JSKVZ0T06B51CY98N11",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSKMZNBH1ZGTC7E3WDQ",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Electric Power Monthly",
+  "accessURL": "https://www.eia.gov/electricity/monthly/"
+}

@@ -1,0 +1,11 @@
+{
+  "_tag": "DatasetSeries",
+  "id": "https://id.skygest.io/dataset-series/dser_01KNQC1JSC2P4C8CETB2XVPM5F",
+  "title": "IRENA Renewable Capacity Statistics",
+  "description": "Annual capacity statistics published by IRENA",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQC1JSBXSGZYSBCAAQ9V685",
+  "cadence": "annual",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

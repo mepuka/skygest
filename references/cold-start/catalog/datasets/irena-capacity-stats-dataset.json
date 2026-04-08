@@ -1,0 +1,25 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQC1JT2TB7CN7A88K05A1CB",
+  "title": "IRENA Renewable Capacity Statistics",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQC1JSBXSGZYSBCAAQ9V685",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Annual global renewable energy capacity by country and technology",
+  "landingPage": "https://www.irena.org/Publications/2025/Mar/Renewable-capacity-statistics-2025",
+  "keywords": [
+    "capacity",
+    "renewable",
+    "global",
+    "country"
+  ],
+  "themes": [
+    "renewable capacity"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQC1JT2SDH495BYVHPZS7NR",
+    "https://id.skygest.io/distribution/dist_01KNQC1JT3ETCWSPW995J48CTS"
+  ],
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNQC1JSC2P4C8CETB2XVPM5F"
+}

@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQC1JSS978SP2KKXSTG4P2T",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSSP8P606PYYV039QVB",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "ETI report landing page",
+  "accessURL": "https://about.bnef.com/energy-transition-investment/"
+}

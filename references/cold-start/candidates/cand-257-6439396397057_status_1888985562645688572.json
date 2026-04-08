@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW45WX08AQNC65APMA4F",
+  "sourceRef": {
+    "contentId": "x://1558466439396397057/status/1888985562645688572"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2M7E98PZHJ6ERXA0C",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT1V7YTB8DGQ2715RB4",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JT1DZMCEMA57W9GD5AC",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P9176P4VY5824N2JR8X",
+  "rawLabel": "Last week, a ~1 GW nuclear unit tripped outside of Pittsburgh. This is how the t",
+  "rawDims": {
+    "geography": "us-pjm",
+    "category": "capacity"
+  }
+}

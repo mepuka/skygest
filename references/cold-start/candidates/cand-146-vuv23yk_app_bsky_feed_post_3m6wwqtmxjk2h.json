@@ -1,0 +1,17 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3SK9KW8W71S04ARK6B",
+  "sourceRef": {
+    "contentId": "at://did:plc:pb73vbvwit4phtn7hvuv23yk/app.bsky.feed.post/3m6wwqtmxjk2h"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JRYA181KC39N8WXZJB7",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSEEQBRY9XFJ3WZVXEK",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSENWNNY3ECBMQJ2B6G",
+  "rawLabel": "Despite electric heating in TX, TX  burns 3.1x the fossil gas per capita as CA. ",
+  "rawDims": {
+    "geography": "us",
+    "category": "other"
+  }
+}

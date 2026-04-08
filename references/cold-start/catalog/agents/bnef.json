@@ -1,0 +1,25 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KNQC1JS19K231RXRX23D1T4Y",
+  "kind": "organization",
+  "name": "BloombergNEF",
+  "aliases": [
+    {
+      "scheme": "wikidata",
+      "value": "Q66048424",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://about.bnef.com",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "alternateNames": [
+    "BNEF",
+    "Bloomberg New Energy Finance"
+  ],
+  "homepage": "https://about.bnef.com"
+}

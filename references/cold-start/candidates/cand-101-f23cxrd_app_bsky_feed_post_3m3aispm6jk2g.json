@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3MHV9KGP8CXDMHTADV",
+  "sourceRef": {
+    "contentId": "at://did:plc:uvycum23aik6ahfp2f23cxrd/app.bsky.feed.post/3m3aispm6jk2g"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS1KTMHP7W64PFQQ4Q9",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSPRCPEV5FW8EV3YYBW",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSP82RJS4H0H1N8GXM5",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92FGFP43GXX4QP6RP9",
+  "rawLabel": "For the first time, new clean energy generation (solar, wind, nuclear) provided ",
+  "rawDims": {
+    "geography": "us-ca",
+    "category": "generation"
+  }
+}

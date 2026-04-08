@@ -1,0 +1,22 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQC1JSKMZK7647ZY135ND07",
+  "title": "IEA World Energy Investment",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS18A50GAS61YGKY30H",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Annual global energy investment analysis",
+  "landingPage": "https://www.iea.org/reports/world-energy-investment",
+  "keywords": [
+    "investment",
+    "clean energy",
+    "fossil fuels"
+  ],
+  "themes": [
+    "energy investment"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQC1JSK7E6RAKTJ0C8CRHX9"
+  ]
+}

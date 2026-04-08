@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQC1JSJ2XW9PPN6JS3VW5R0",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSJ14FQ8TZYT8BFD39A",
+  "kind": "api-access",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Petroleum data via API",
+  "accessURL": "https://api.eia.gov/v2/petroleum/",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQC1JSE3P473SKA6B5QNWD2"
+}

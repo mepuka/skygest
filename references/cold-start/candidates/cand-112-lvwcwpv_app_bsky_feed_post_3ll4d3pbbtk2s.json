@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3PTAYB49JCC6B45N5B",
+  "sourceRef": {
+    "contentId": "at://did:plc:urgu2p44tx4fhfocdlvwcwpv/app.bsky.feed.post/3ll4d3pbbtk2s"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS18A50GAS61YGKY30H",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSK6KW2T2GY227089W6",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSK0GMMGCJAS3APV1J2",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92FGFP43GXX4QP6RP9",
+  "rawLabel": "“The sharp increase in the world’s electricity use last year was driven by recor",
+  "rawDims": {
+    "geography": "us-ca",
+    "category": "generation"
+  }
+}

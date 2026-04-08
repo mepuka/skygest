@@ -1,0 +1,19 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3484WSMFZNVHGGRP52",
+  "sourceRef": {
+    "contentId": "at://did:plc:wcpapruceqef3d52qfclel3d/app.bsky.feed.post/3mhj3psxz3s25"
+  },
+  "resolutionState": "resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JSBFDEVASV9HVWQW5TT",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT3E9PD0BN5MMS6RJY8",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JT3KDCTYPTKYCBSA2R6",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92HS0Q1QCJ3BTGHT45",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQCEWG11CQ3KPH89M35QPCB",
+  "rawLabel": "The final report on the Iberia Peninsula (Spain and Portugal) blackout is out.",
+  "rawDims": {
+    "geography": "eu",
+    "category": "technology"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "_tag": "Series",
+  "id": "https://id.skygest.io/series/ser_01KNQCEWG26590P7RJ3KZ5VDD2",
+  "label": "U.S. interconnection queue (annual)",
+  "variableId": "https://id.skygest.io/variable/var_01KNQC4P948DQR7TCN42XNSX3H",
+  "fixedDims": {
+    "place": "US",
+    "frequency": "annual"
+  },
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

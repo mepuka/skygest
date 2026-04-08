@@ -1,0 +1,10 @@
+{
+  "_tag": "Catalog",
+  "id": "https://id.skygest.io/catalog/cat_01KNQC1JT56PTRRCH6HJF6BGMZ",
+  "title": "U.S. Energy Information Administration Data Catalog",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQC1JRYA181KC39N8WXZJB7",
+  "homepage": "https://www.eia.gov",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

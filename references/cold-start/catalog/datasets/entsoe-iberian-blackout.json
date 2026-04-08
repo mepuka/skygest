@@ -1,0 +1,23 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQC1JT33BFAEW5EH5K2NDPV",
+  "title": "ENTSO-E Iberian Blackout Report 2025",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQC1JSBFDEVASV9HVWQW5TT",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Investigation report on the April 2025 Iberian Peninsula blackout",
+  "landingPage": "https://www.entsoe.eu/news/2025/04/",
+  "keywords": [
+    "blackout",
+    "Iberian",
+    "grid failure"
+  ],
+  "themes": [
+    "grid reliability"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQC1JT33CAMSC4YQZYS9HGZ",
+    "https://id.skygest.io/distribution/dist_01KNQC1JT33MNX52QFEFMZAAX6"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQC1JT1V7YTB8DGQ2715RB4",
+  "title": "PJM Capacity Auction Results",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2M7E98PZHJ6ERXA0C",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Results of PJM's Reliability Pricing Model capacity auctions",
+  "landingPage": "https://www.pjm.com/markets-and-operations/rpm",
+  "keywords": [
+    "capacity",
+    "auction",
+    "RPM"
+  ],
+  "themes": [
+    "capacity markets"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQC1JT1DZMCEMA57W9GD5AC",
+    "https://id.skygest.io/distribution/dist_01KNQC1JT13XSYARCTJ3BT62R9"
+  ]
+}

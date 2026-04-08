@@ -1,0 +1,16 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3GC0FQV8419RM0C47K",
+  "sourceRef": {
+    "contentId": "at://did:plc:yoeonndfygr7ilq5scih6rtx/app.bsky.feed.post/3mirr73dl422h"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS92C2VYG2REFKKG05F",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT1923Z3Q6FAR5RX8FZ",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JT1EE1C0WJ4NRT9Q3EF",
+  "rawLabel": "This document from NREL provides details.  docs.nrel.gov/docs/fy23ost...",
+  "rawDims": {
+    "category": "other"
+  }
+}

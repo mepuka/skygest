@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW456AX6EF4JTR35VZZ4",
+  "sourceRef": {
+    "contentId": "x://1085245460825149443/status/2020289847617802674"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2H9X72G8X9KKPA7K2",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSZN1A0A6C496W7AXET",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSZ39A9556F55SCYT8B",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P91ZA2792HEM43EB7XW",
+  "rawLabel": "In 2025, the average battery energy storage system in ERCOT earned revenues that",
+  "rawDims": {
+    "geography": "us-tx",
+    "category": "grid-ops"
+  }
+}

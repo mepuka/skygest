@@ -1,0 +1,29 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KNQC1JSBXSGZYSBCAAQ9V685",
+  "kind": "organization",
+  "name": "International Renewable Energy Agency",
+  "aliases": [
+    {
+      "scheme": "ror",
+      "value": "https://ror.org/01grfn956",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "wikidata",
+      "value": "Q901361",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.irena.org",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "alternateNames": [
+    "IRENA"
+  ],
+  "homepage": "https://www.irena.org"
+}

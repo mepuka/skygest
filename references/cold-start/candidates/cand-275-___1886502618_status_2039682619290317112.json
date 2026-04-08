@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW4BJZHZW143MAJY7J36",
+  "sourceRef": {
+    "contentId": "x://1886502618/status/2039682619290317112"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JSCWB6PCEABFAC5YGQ7",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT4NV2HG6V7EKAHQ31P",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JT4SDR58WPMG9J007X7",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92G41B7XGC5T21NPWA",
+  "rawLabel": "A tale of two grids. SPP classic at 63% wind. SPP West getting 5% this morning f",
+  "rawDims": {
+    "geography": "us-spp",
+    "category": "technology"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQC1JSPRCPEV5FW8EV3YYBW",
+  "title": "Ember Data Explorer",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS1KTMHP7W64PFQQ4Q9",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Interactive tool for exploring electricity generation data by country",
+  "landingPage": "https://ember-climate.org/data/data-tools/data-explorer/",
+  "keywords": [
+    "explorer",
+    "country data",
+    "generation mix"
+  ],
+  "themes": [
+    "electricity data"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQC1JSP82RJS4H0H1N8GXM5",
+    "https://id.skygest.io/distribution/dist_01KNQC1JSPSXFNJ4Q9TDEJD044"
+  ]
+}

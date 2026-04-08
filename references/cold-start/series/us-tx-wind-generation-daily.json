@@ -1,0 +1,14 @@
+{
+  "_tag": "Series",
+  "id": "https://id.skygest.io/series/ser_01KNQCEWG01N259BN2ZJMAQER8",
+  "label": "ERCOT wind generation (daily)",
+  "variableId": "https://id.skygest.io/variable/var_01KNQC4P92G41B7XGC5T21NPWA",
+  "fixedDims": {
+    "place": "US-TX",
+    "market": "ERCOT",
+    "frequency": "daily"
+  },
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

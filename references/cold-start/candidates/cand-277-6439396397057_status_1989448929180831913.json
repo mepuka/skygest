@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW4CD12PGFKNTM8BFD15",
+  "sourceRef": {
+    "contentId": "x://1558466439396397057/status/1989448929180831913"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2M7E98PZHJ6ERXA0C",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSF81M82M5YA0NXAT3S",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSFCW8PWQVA8V9Z6RY2",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P9176P4VY5824N2JR8X",
+  "rawLabel": "A nuclear unit came offline yesterday in MISO.  What started as a normal, unplan",
+  "rawDims": {
+    "geography": "us-miso",
+    "category": "capacity"
+  }
+}

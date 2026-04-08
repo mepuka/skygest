@@ -1,0 +1,13 @@
+{
+  "_tag": "Series",
+  "id": "https://id.skygest.io/series/ser_01KNQCEWG1QKX95XXTXTSQ3ESK",
+  "label": "South Africa clean electricity share (monthly)",
+  "variableId": "https://id.skygest.io/variable/var_01KNQC4P93T6EYBT28D44ADQ7N",
+  "fixedDims": {
+    "place": "ZA",
+    "frequency": "monthly"
+  },
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQC1JT0GDNP8KT6GERNF89H",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT0ECWQ0KZWFWP7KAE6",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Battery discharge data",
+  "accessURL": "https://www.caiso.com/TodaysOutlook/Pages/default.aspx"
+}

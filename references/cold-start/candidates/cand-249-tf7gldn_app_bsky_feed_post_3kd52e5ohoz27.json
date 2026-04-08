@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW44XGYMS203X2ECN2RH",
+  "sourceRef": {
+    "contentId": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3kd52e5ohoz27"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2RDP28SCP98Q2XKYT",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSZ4GAA3EPZSXPXTBAY",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSZZ7QHHSFSCS0E3Q1H",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92FGFP43GXX4QP6RP9",
+  "rawLabel": "In California, increasing amounts of solar and wind power are outpacing transmis",
+  "rawDims": {
+    "geography": "us-ca",
+    "category": "generation"
+  }
+}

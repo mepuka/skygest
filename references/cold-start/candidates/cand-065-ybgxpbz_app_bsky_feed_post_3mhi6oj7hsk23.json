@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3F6NP5XZA4RCE4CGKF",
+  "sourceRef": {
+    "contentId": "at://did:plc:fbvwkj56tyd2ru54rybgxpbz/app.bsky.feed.post/3mhi6oj7hsk23"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS18A50GAS61YGKY30H",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSNPP0GWJDWG9WKWKJX",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSNE1DHBDKBH15033FG",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P947K3HCK2EMR3VW4J6",
+  "rawLabel": "Sheltering From Oil Shocks  IEA details 10 demand-side options open to household",
+  "rawDims": {
+    "geography": "de",
+    "category": "other"
+  }
+}

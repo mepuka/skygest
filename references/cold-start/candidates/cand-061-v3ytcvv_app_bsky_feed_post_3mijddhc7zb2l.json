@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3F5H8VJE7ESAW5AD4B",
+  "sourceRef": {
+    "contentId": "at://did:plc:b4zju3u4hqlwc662av3ytcvv/app.bsky.feed.post/3mijddhc7zb2l"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS18A50GAS61YGKY30H",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSM6JY36DHZRFXS8HW7",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSMYK1F7TBDS517ZAZP",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92HS0Q1QCJ3BTGHT45",
+  "rawLabel": "The IEA estimates that global energy storage capacity will have to increase by 1",
+  "rawDims": {
+    "geography": "global",
+    "category": "forecast"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQC1JT4W9ED7NAR6SKW14QN",
+  "title": "LBNL Interconnection Queue Analysis",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQC1JSBNXMVSE9P10GTYZKV",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Annual analysis of U.S. electricity interconnection queues",
+  "landingPage": "https://emp.lbl.gov/queues",
+  "keywords": [
+    "interconnection",
+    "queue",
+    "backlog"
+  ],
+  "themes": [
+    "grid interconnection"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQC1JT480HNZTT4GAHYVCKS",
+    "https://id.skygest.io/distribution/dist_01KNQC1JT4YA1D9KEB5HFM8DSY"
+  ]
+}

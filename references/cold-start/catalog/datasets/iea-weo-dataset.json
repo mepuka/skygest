@@ -1,0 +1,23 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQC1JSK5ADC6956C5WVWS40",
+  "title": "IEA World Energy Outlook",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS18A50GAS61YGKY30H",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Flagship annual publication with global energy scenarios",
+  "landingPage": "https://www.iea.org/reports/world-energy-outlook-2025",
+  "keywords": [
+    "outlook",
+    "scenarios",
+    "projections"
+  ],
+  "themes": [
+    "energy forecast"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQC1JSK56SJTZF068YZN8J2"
+  ],
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNQC1JSD88ZAMAKAY1TFMA09"
+}

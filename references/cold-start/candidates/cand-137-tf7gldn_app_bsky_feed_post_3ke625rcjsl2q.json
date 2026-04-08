@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3SXV05R9G0EPAEQ2ED",
+  "sourceRef": {
+    "contentId": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3ke625rcjsl2q"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2RDP28SCP98Q2XKYT",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSZ4GAA3EPZSXPXTBAY",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSZZ7QHHSFSCS0E3Q1H",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92FGFP43GXX4QP6RP9",
+  "rawLabel": "California looks to Idaho for wind power. #energysky\nwww.rtoinsider.com/61530-ca",
+  "rawDims": {
+    "geography": "us-ca",
+    "category": "grid-ops"
+  }
+}

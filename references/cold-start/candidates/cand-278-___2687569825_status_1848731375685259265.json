@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW4CDAX3F8VV5A9YFE2E",
+  "sourceRef": {
+    "contentId": "x://2687569825/status/1848731375685259265"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2M7E98PZHJ6ERXA0C",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSF81M82M5YA0NXAT3S",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSFCW8PWQVA8V9Z6RY2",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92FGFP43GXX4QP6RP9",
+  "rawLabel": "Data centers will directly cause a massive build-out of new fossil fuel power pl",
+  "rawDims": {
+    "geography": "us-miso",
+    "category": "emissions"
+  }
+}

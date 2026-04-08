@@ -1,0 +1,17 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW409A164QTJPBZ1RWJ0",
+  "sourceRef": {
+    "contentId": "at://did:plc:ekdieozvwcal3j5rv4usxswc/app.bsky.feed.post/3mbkdasrq3s2e"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSJ14FQ8TZYT8BFD39A",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSJ67SGJ67K335F5N3T",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P93X9GKZBVBZWJBRGR4",
+  "rawLabel": "Though not large in global terms, this provides crucial supplies to US refinerie",
+  "rawDims": {
+    "geography": "us",
+    "category": "price"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KNQC1JSBNXMVSE9P10GTYZKV",
+  "kind": "organization",
+  "name": "Lawrence Berkeley National Laboratory",
+  "aliases": [
+    {
+      "scheme": "ror",
+      "value": "https://ror.org/02jbv0t02",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "wikidata",
+      "value": "Q1133630",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.lbl.gov",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "alternateNames": [
+    "LBNL",
+    "Berkeley Lab"
+  ],
+  "homepage": "https://www.lbl.gov"
+}

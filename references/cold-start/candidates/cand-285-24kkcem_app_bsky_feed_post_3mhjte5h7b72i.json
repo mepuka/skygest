@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW4D5KW6X4YP9FP837JY",
+  "sourceRef": {
+    "contentId": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mhjte5h7b72i"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS1KTMHP7W64PFQQ4Q9",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSR51WJ5W3Z1QK8G5DD",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSR6K4EZVNP7Q8HSRKH",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P8YAXB8TN5M4G0JE7JA",
+  "rawLabel": "Indian solar PV manufacturer Saatvik Green enters energy storage business with 2",
+  "rawDims": {
+    "geography": "in",
+    "category": "capacity"
+  }
+}

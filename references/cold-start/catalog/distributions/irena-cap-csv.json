@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQC1JT3ETCWSPW995J48CTS",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT2TB7CN7A88K05A1CB",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Capacity data download",
+  "downloadURL": "https://www.irena.org/Statistics/Download-Data",
+  "format": "CSV"
+}

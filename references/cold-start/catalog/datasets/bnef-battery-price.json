@@ -1,0 +1,22 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQC1JSS2SD9J3JMS09WK1FD",
+  "title": "BloombergNEF Battery Price Survey",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS19K231RXRX23D1T4Y",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Annual lithium-ion battery price survey",
+  "landingPage": "https://about.bnef.com/blog/lithium-ion-battery-pack-prices/",
+  "keywords": [
+    "battery",
+    "lithium-ion",
+    "price"
+  ],
+  "themes": [
+    "battery costs"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQC1JSS8EEP37KYVR9Q1KRP"
+  ]
+}

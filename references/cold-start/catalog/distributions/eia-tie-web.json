@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQC1JSENWNNY3ECBMQJ2B6G",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSEEQBRY9XFJ3WZVXEK",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Today in Energy web archive",
+  "accessURL": "https://www.eia.gov/todayinenergy/"
+}

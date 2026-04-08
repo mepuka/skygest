@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3Q1K7FBNFKAKHDF5VS",
+  "sourceRef": {
+    "contentId": "at://did:plc:rcu7ybho7gdw3x3cxp64jnue/app.bsky.feed.post/3mgi2klno7224"
+  },
+  "resolutionState": "resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JSBXSGZYSBCAAQ9V685",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT2TB7CN7A88K05A1CB",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JT2SDH495BYVHPZS7NR",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P8YAXB8TN5M4G0JE7JA",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQCEWG1CYP9Q9NR7W6MXQVX",
+  "rawLabel": "“When solar PV plants are deployed on disturbed or degraded land, for example, t",
+  "rawDims": {
+    "category": "capacity"
+  }
+}

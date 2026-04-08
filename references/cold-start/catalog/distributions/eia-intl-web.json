@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQC1JSJVMH519V93N48542R",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSJDQD45JG60D87QZ2G",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "International data portal",
+  "accessURL": "https://www.eia.gov/international/data/world"
+}

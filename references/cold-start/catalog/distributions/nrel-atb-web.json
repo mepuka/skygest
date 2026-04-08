@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQC1JT1EE1C0WJ4NRT9Q3EF",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT1923Z3Q6FAR5RX8FZ",
+  "kind": "interactive-web-app",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "ATB interactive data",
+  "accessURL": "https://atb.nrel.gov/"
+}

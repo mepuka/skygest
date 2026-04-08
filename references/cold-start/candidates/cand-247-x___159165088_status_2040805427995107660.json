@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW44TWEMRCDDJXRR6HAF",
+  "sourceRef": {
+    "contentId": "x://159165088/status/2040805427995107660"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JSBFDEVASV9HVWQW5TT",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT3E9PD0BN5MMS6RJY8",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JT3KDCTYPTKYCBSA2R6",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92G41B7XGC5T21NPWA",
+  "rawLabel": "Curtailment on wind in Germany is absolutely crazy today.  At 14:00 day-ahead fo",
+  "rawDims": {
+    "geography": "eu",
+    "category": "capacity"
+  }
+}

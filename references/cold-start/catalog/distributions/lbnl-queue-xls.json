@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQC1JT4YA1D9KEB5HFM8DSY",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT4W9ED7NAR6SKW14QN",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Queue data spreadsheet",
+  "downloadURL": "https://emp.lbl.gov/queues",
+  "format": "XLSX"
+}

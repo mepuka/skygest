@@ -1,0 +1,14 @@
+{
+  "_tag": "Series",
+  "id": "https://id.skygest.io/series/ser_01KNQCEWG1VZYY7SGWVXZ93NX7",
+  "label": "CAISO clean electricity share (daily)",
+  "variableId": "https://id.skygest.io/variable/var_01KNQC4P93T6EYBT28D44ADQ7N",
+  "fixedDims": {
+    "place": "US-CA",
+    "market": "CAISO",
+    "frequency": "daily"
+  },
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

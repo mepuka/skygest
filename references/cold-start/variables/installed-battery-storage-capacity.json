@@ -1,0 +1,15 @@
+{
+  "_tag": "Variable",
+  "id": "https://id.skygest.io/variable/var_01KNQC4P91ZA2792HEM43EB7XW",
+  "label": "Installed battery storage capacity",
+  "definition": "Nameplate power capacity of grid-connected battery energy storage systems",
+  "measuredProperty": "capacity",
+  "domainObject": "battery storage",
+  "statisticType": "stock",
+  "unitFamily": "power",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "technologyOrFuel": "battery",
+  "aggregation": "end_of_period"
+}

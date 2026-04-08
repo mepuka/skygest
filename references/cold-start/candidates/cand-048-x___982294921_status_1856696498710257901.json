@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3B4R5KRBZ8NSD1C0YX",
+  "sourceRef": {
+    "contentId": "x://982294921/status/1856696498710257901"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS18A50GAS61YGKY30H",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSK6KW2T2GY227089W6",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSK0GMMGCJAS3APV1J2",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92FGFP43GXX4QP6RP9",
+  "rawLabel": "Key fact: clean energy technologies are vastly more efficient than fossil fuels",
+  "rawDims": {
+    "geography": "us",
+    "category": "policy"
+  }
+}

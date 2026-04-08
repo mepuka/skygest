@@ -1,0 +1,13 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3T1PZ4CQ4Q0FXPAQ8W",
+  "sourceRef": {
+    "contentId": "x://1558466439396397057/status/1991229557257511297"
+  },
+  "resolutionState": "source_only",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "rawLabel": "Check out our new real-time feed of expert commentary on energy markets and the ",
+  "rawDims": {
+    "category": "other"
+  }
+}

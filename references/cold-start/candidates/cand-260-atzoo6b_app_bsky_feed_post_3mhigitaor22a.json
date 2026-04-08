@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW45H12FS0Y27MFB2FMK",
+  "sourceRef": {
+    "contentId": "at://did:plc:7rmejk2hlkw2sfowiatzoo6b/app.bsky.feed.post/3mhigitaor22a"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS18A50GAS61YGKY30H",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSKD6F5B7KDMXGNE292",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSK7CK3JNG259YDSC2M",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P947K3HCK2EMR3VW4J6",
+  "rawLabel": "Good morning with good news: In 2025, EV sales in China reached over 50% for fir",
+  "rawDims": {
+    "geography": "china",
+    "category": "forecast"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQC1JSPSXFNJ4Q9TDEJD044",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSPRCPEV5FW8EV3YYBW",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Country data download",
+  "downloadURL": "https://ember-climate.org/data-catalogue/yearly-electricity-data/",
+  "format": "CSV"
+}

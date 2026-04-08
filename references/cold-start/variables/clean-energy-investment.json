@@ -1,0 +1,14 @@
+{
+  "_tag": "Variable",
+  "id": "https://id.skygest.io/variable/var_01KNQC4P93ZNV0XRAZHMPNGT4V",
+  "label": "Clean energy investment",
+  "definition": "Capital invested in clean energy supply including renewables, nuclear, and grids",
+  "measuredProperty": "investment",
+  "domainObject": "clean energy",
+  "statisticType": "flow",
+  "unitFamily": "currency",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "aggregation": "sum"
+}

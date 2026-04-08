@@ -1,0 +1,19 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW42JD6DV51KJ26SGNX2",
+  "sourceRef": {
+    "contentId": "at://did:plc:ofs5gs5weifdlyitenhqr6gn/app.bsky.feed.post/3mdejubzwns23"
+  },
+  "resolutionState": "resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS19K231RXRX23D1T4Y",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JST6N5JFZWC1A4FCX4W",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JST0Q5F5RMDF8SV1GFF",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92FGFP43GXX4QP6RP9",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQCEWG3JGZNRAXZZC3BWGWT",
+  "rawLabel": "BloombergNEF Finds Global Energy Transition Investment Reached Record $2.3T in 2",
+  "rawDims": {
+    "geography": "global",
+    "category": "investment"
+  }
+}

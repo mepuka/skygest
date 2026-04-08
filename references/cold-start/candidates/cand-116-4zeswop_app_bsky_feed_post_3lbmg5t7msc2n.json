@@ -1,0 +1,17 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3P8J0DXM5TZTZYVZX8",
+  "sourceRef": {
+    "contentId": "at://did:plc:ppavi77mhpt7smqco4zeswop/app.bsky.feed.post/3lbmg5t7msc2n"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS18A50GAS61YGKY30H",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSK8H5H69JP4W9K19M1",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSK29BWBSRDYP3TR7C4",
+  "rawLabel": "Our latest Energy Snapshot newsletter went out this week, looking at the growing",
+  "rawDims": {
+    "geography": "us-ca",
+    "category": "other"
+  }
+}

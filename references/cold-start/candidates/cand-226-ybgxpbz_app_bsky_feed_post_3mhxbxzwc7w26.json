@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW41JBYYHX6R98PGKH73",
+  "sourceRef": {
+    "contentId": "at://did:plc:fbvwkj56tyd2ru54rybgxpbz/app.bsky.feed.post/3mhxbxzwc7w26"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JSB99CSDKHT7X160MH2",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JT429CEVRSA8KZ8P100",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JT40VHK06RYW59BA8A6",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P938MVRY83SAPW586V5",
+  "rawLabel": "India already on track to meet new 2035 target by - or before - 2030  Climate Ac",
+  "rawDims": {
+    "geography": "india",
+    "category": "emissions"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQC1JSHDGH9CWA5WHE3W82T",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSH3DKBXM6GMQ84K115",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "AEO web portal",
+  "accessURL": "https://www.eia.gov/outlooks/aeo/"
+}

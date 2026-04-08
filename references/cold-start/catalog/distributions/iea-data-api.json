@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQC1JSK6WN6JSWG4D7E95A2",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSK6KW2T2GY227089W6",
+  "kind": "api-access",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "IEA data API",
+  "accessURL": "https://api.iea.org/",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQC1JSE0VM5XCQFQRN39T0J"
+}

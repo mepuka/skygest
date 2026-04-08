@@ -1,0 +1,19 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW358G0MFEJ5GHTRGRVF",
+  "sourceRef": {
+    "contentId": "x://704707652383670272/status/2020185875087335622"
+  },
+  "resolutionState": "resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2H9X72G8X9KKPA7K2",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSXG7ZRW8A7JQY3DZ9F",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSX53RC46AY64SQDYQ6",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92HS0Q1QCJ3BTGHT45",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQCEWFZH2ZPS7QQNSSQCBVA",
+  "rawLabel": "Another solar record in Texas / ERCOT today as solar provided more than 60% of T",
+  "rawDims": {
+    "geography": "us-tx",
+    "category": "price"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQC1JT1923Z3Q6FAR5RX8FZ",
+  "title": "NREL Annual Technology Baseline",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS92C2VYG2REFKKG05F",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Cost and performance projections for electricity generation technologies",
+  "landingPage": "https://atb.nrel.gov/",
+  "keywords": [
+    "technology costs",
+    "LCOE",
+    "projections"
+  ],
+  "themes": [
+    "technology costs"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQC1JT1EE1C0WJ4NRT9Q3EF",
+    "https://id.skygest.io/distribution/dist_01KNQC1JT1KPE2KBC0SPAP0ZT5"
+  ]
+}

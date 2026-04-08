@@ -1,0 +1,17 @@
+{
+  "_tag": "Series",
+  "id": "https://id.skygest.io/series/ser_01KNQCEWG2H6CFETN4VANZHH2M",
+  "label": "PJM capacity auction results (annual)",
+  "variableId": "https://id.skygest.io/variable/var_01KNQC4P8YAXB8TN5M4G0JE7JA",
+  "fixedDims": {
+    "place": "US-PJM",
+    "market": "PJM",
+    "frequency": "annual",
+    "extra": {
+      "type": "auction"
+    }
+  },
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

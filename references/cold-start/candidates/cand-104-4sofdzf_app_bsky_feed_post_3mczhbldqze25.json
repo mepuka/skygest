@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3NSCEHC53GMVB2M7VJ",
+  "sourceRef": {
+    "contentId": "at://did:plc:dabqc2c73f6wm3sdq4sofdzf/app.bsky.feed.post/3mczhbldqze25"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS1KTMHP7W64PFQQ4Q9",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSNRD77P047DM753WDP",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSN04P79M7C4VDY856X",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P92FGFP43GXX4QP6RP9",
+  "rawLabel": "Read more about the progress of the EU’s electricity transition in our latest Eu",
+  "rawDims": {
+    "geography": "eu",
+    "category": "generation"
+  }
+}

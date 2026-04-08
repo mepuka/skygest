@@ -1,0 +1,13 @@
+{
+  "_tag": "Series",
+  "id": "https://id.skygest.io/series/ser_01KNQCEWG194CVVE438N2W1EZ6",
+  "label": "Turkey wholesale electricity price",
+  "variableId": "https://id.skygest.io/variable/var_01KNQC4P93X9GKZBVBZWJBRGR4",
+  "fixedDims": {
+    "place": "TR",
+    "frequency": "monthly"
+  },
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

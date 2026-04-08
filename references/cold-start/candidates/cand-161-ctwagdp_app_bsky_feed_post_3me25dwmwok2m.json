@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3TJNN6CWMA7FGPATQ5",
+  "sourceRef": {
+    "contentId": "at://did:plc:noyuynnb77oywrafrctwagdp/app.bsky.feed.post/3me25dwmwok2m"
+  },
+  "resolutionState": "resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2TEJRS2SQ255HKXPX",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSF81M82M5YA0NXAT3S",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSFCW8PWQVA8V9Z6RY2",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P93X9GKZBVBZWJBRGR4",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQCEWG2W15D4X22WRGCD1E5",
+  "rawLabel": "ERAS lets utilities cut the interconnection line—fast-tracking billions in gas p",
+  "rawDims": {
+    "category": "price"
+  }
+}

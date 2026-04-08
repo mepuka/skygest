@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW3TDRY56M0QW7ANYD58",
+  "sourceRef": {
+    "contentId": "at://did:plc:z5un653ppzei6g4wrehghjde/app.bsky.feed.post/3lbbhkufkbd2y"
+  },
+  "resolutionState": "resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2TEJRS2SQ255HKXPX",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSF81M82M5YA0NXAT3S",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSFCW8PWQVA8V9Z6RY2",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P93X9GKZBVBZWJBRGR4",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQCEWG2W15D4X22WRGCD1E5",
+  "rawLabel": "For those who missed this great news last week, MA stepped up with legislation t",
+  "rawDims": {
+    "category": "price"
+  }
+}

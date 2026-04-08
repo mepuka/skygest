@@ -1,0 +1,19 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQCMW35WRSWMCXCAX6FKZWJ",
+  "sourceRef": {
+    "contentId": "x://172619854/2039765054745194922"
+  },
+  "resolutionState": "resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQC1JS2H9X72G8X9KKPA7K2",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQC1JSXRPEZ6XT34QCXNQYN",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQC1JSXYGF1G90KFEPQFSVG",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQC4P947K3HCK2EMR3VW4J6",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQCEWG0RQJF14JGWDVY53XE",
+  "rawLabel": "A lot happening on co-location and non-firm load IX in RTOs in recent weeks to c",
+  "rawDims": {
+    "geography": "us-tx",
+    "category": "demand"
+  }
+}
