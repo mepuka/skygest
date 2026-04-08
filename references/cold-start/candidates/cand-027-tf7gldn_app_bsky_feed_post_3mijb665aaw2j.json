@@ -1,0 +1,19 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS24S3KJJP4RJ2PEJFXE",
+  "sourceRef": {
+    "contentId": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3mijb665aaw2j"
+  },
+  "resolutionState": "resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQFWFMC2WM23G1K793",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQD9WHDXEKWYYVKP23",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+  "rawLabel": "A slew of \u201cpent-up\u201d interconnection requests from large load customers submitted",
+  "rawDims": {
+    "geography": "us-tx",
+    "category": "capacity"
+  },
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBA89H56T1XQ24CXED"
+}

@@ -1,0 +1,15 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS39D8VCGWFY32VH89YT",
+  "sourceRef": {
+    "contentId": "at://did:plc:qlfit2m3ksqwaqhuepks5j7p/app.bsky.feed.post/3lyg6z44ksc2d"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VE7EKX7ASBD577HN9S",
+  "rawLabel": "I've been burned on peak coal before\n\nBut if a research arm of the China's large",
+  "rawDims": {
+    "geography": "de",
+    "category": "demand"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQEZ5VQJHFZXXS4RXSH7KF4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VPSN0Z528A8T220RCE",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "EIU PDF report",
+  "downloadURL": "https://www.ferc.gov/media/energy-infrastructure-update",
+  "mediaType": "application/pdf",
+  "format": "PDF"
+}

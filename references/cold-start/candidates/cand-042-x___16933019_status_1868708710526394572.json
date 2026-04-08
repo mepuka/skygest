@@ -1,0 +1,15 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS25W9SFRNDRXA2RMTKA",
+  "sourceRef": {
+    "contentId": "x://16933019/status/1868708710526394572"
+  },
+  "resolutionState": "source_only",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
+  "rawLabel": "Truly great presentation by @RockyMtnInst showing (among others):  Cleantech gro",
+  "rawDims": {
+    "geography": "china",
+    "category": "forecast"
+  }
+}

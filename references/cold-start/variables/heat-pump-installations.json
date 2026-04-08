@@ -1,0 +1,14 @@
+{
+  "_tag": "Variable",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WP0PD1A7H3TA56PTAG",
+  "label": "Heat pump installations",
+  "definition": "Cumulative or annual number of heat pump units installed",
+  "measuredProperty": "count",
+  "domainObject": "heat pump",
+  "statisticType": "stock",
+  "unitFamily": "dimensionless",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "technologyOrFuel": "heat pump"
+}

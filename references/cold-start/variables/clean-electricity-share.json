@@ -1,0 +1,13 @@
+{
+  "_tag": "Variable",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+  "label": "Clean electricity share",
+  "definition": "Proportion of electricity generation from non-fossil sources",
+  "measuredProperty": "share",
+  "domainObject": "electricity",
+  "statisticType": "share",
+  "unitFamily": "dimensionless",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

@@ -1,0 +1,29 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KNQEZ5VF3G335NSS1773RWDH",
+  "kind": "organization",
+  "name": "National Renewable Energy Laboratory",
+  "aliases": [
+    {
+      "scheme": "ror",
+      "value": "https://ror.org/036266993",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "wikidata",
+      "value": "Q1579895",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.nrel.gov",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "alternateNames": [
+    "NREL"
+  ],
+  "homepage": "https://www.nrel.gov"
+}

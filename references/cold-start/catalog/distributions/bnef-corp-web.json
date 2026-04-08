@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQEZ5VP6RTTA4XZHE85PNYN",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VP3DJPX8G8C3C1MJNK",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Corporate clean energy buying",
+  "accessURL": "https://about.bnef.com/"
+}

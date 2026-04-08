@@ -1,0 +1,19 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS25XHQPR56ENTV02WJQ",
+  "sourceRef": {
+    "contentId": "x://1929556975223963648/status/2040841016752656553"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VKGDC7PBMGDRAP1D4X",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VKEE2SJSN8DEVC2E9Q",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
+  "rawLabel": "The renewable upside may still be underestimated Why exponential adoption is mak",
+  "rawDims": {
+    "geography": "us",
+    "category": "price"
+  },
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBN5CJ6XA9MTF6SE4K"
+}

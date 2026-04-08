@@ -1,0 +1,17 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS25M160G5JW8QFCPYWE",
+  "sourceRef": {
+    "contentId": "x://704707652383670272/status/1844470776482988353"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQSDAYK3P9HNMKYW5J",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQ774B2VG14CWMTFRS",
+  "rawLabel": "ERCOT staff said this summer was 6th hottest on record for Texas &amp; that's *b",
+  "rawDims": {
+    "geography": "us-tx",
+    "category": "technology"
+  }
+}

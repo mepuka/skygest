@@ -1,0 +1,19 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS24T363WCH2XJ8HNNZJ",
+  "sourceRef": {
+    "contentId": "x://704707652383670272/status/1895895616536158257"
+  },
+  "resolutionState": "resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQJN53T6M83MN1XJFC",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQ0X85PSM8SRCMP4W7",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XAFT5GE6XA6Y95H6PB",
+  "rawLabel": "Two new solar records in ERCOT today: 24,818 megawatts of solar production equal",
+  "rawDims": {
+    "geography": "us-tx",
+    "category": "generation"
+  }
+}

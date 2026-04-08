@@ -1,0 +1,22 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQEZ5VKGGYQMJWZPJZ7M3AE",
+  "title": "IEA Oil Market Report",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Monthly analysis of global oil markets",
+  "landingPage": "https://www.iea.org/reports/oil-market-report",
+  "keywords": [
+    "oil",
+    "petroleum",
+    "OPEC"
+  ],
+  "themes": [
+    "oil markets"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQEZ5VK83ZSW5TBNQ9CF7GY"
+  ]
+}

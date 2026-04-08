@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS33ZD8DJVG52N56BT15",
+  "sourceRef": {
+    "contentId": "x://1521502626323574785/status/1864694900727665125"
+  },
+  "resolutionState": "resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEBCH9EF42WAA5Y7YR",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VPSN0Z528A8T220RCE",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VP1F11MRT2E94P0P3Y",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+  "rawLabel": "Can anyone really comprehend what 128 GW of new demand in 5 years actually looks",
+  "rawDims": {
+    "geography": "global",
+    "category": "capacity"
+  }
+}

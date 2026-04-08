@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2YQXYY3RTBM8DKG1CM",
+  "sourceRef": {
+    "contentId": "at://did:plc:fjv4ly3ho3xmbpfkvtlpiey6/app.bsky.feed.post/3li3daqld3k2n"
+  },
+  "resolutionState": "resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQC6CKPFX43G49A89P",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+  "rawLabel": "The US power system could accommodate as much as 100 GW of additional load witho",
+  "rawDims": {
+    "geography": "us-ca",
+    "category": "capacity"
+  }
+}

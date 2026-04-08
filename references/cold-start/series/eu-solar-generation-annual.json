@@ -1,0 +1,16 @@
+{
+  "_tag": "Series",
+  "id": "https://id.skygest.io/series/ser_01KNQEZ5XB46SZ4MTCEXR6W4PW",
+  "label": "EU solar generation by country (annual)",
+  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+  "fixedDims": {
+    "place": "EU",
+    "frequency": "annual",
+    "extra": {
+      "granularity": "country"
+    }
+  },
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQEZ5VHWYXRT1ZHCZT9PE0H",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHCC3BMQX00JTTGNMH",
+  "kind": "api-access",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Electricity data via API",
+  "accessURL": "https://api.eia.gov/v2/electricity/",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+}

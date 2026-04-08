@@ -1,0 +1,23 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQEZ5VMZ4MT11MRN6A30BV2",
+  "title": "Ember Global Electricity Review",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Annual global electricity generation and emissions review",
+  "landingPage": "https://ember-climate.org/insights/research/global-electricity-review-2025/",
+  "keywords": [
+    "global",
+    "electricity",
+    "emissions"
+  ],
+  "themes": [
+    "global electricity"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQEZ5VMXY5HHC02V7FCM89W"
+  ],
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNQEZ5VHMTM3ENZC9ZNBB6H5"
+}

@@ -1,0 +1,14 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS26C6GE3XSCHQ4MWX26",
+  "sourceRef": {
+    "contentId": "x://1155017848256942080/2040252501572673791"
+  },
+  "resolutionState": "source_only",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
+  "rawLabel": "Jane is absolutely right here. Everyone debates the small (often important) nuan",
+  "rawDims": {
+    "category": "other"
+  }
+}

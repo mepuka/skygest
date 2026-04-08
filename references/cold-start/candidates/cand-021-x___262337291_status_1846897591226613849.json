@@ -1,0 +1,15 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS1ZPKVBDD2G0DHNH8RD",
+  "sourceRef": {
+    "contentId": "x://262337291/status/1846897591226613849"
+  },
+  "resolutionState": "source_only",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "rawLabel": "Finally, DOE published its residential energy costs.  Natural gas remains the lo",
+  "rawDims": {
+    "geography": "us",
+    "category": "price"
+  }
+}

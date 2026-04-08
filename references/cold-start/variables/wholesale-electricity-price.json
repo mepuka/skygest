@@ -1,0 +1,14 @@
+{
+  "_tag": "Variable",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
+  "label": "Wholesale electricity price",
+  "definition": "Day-ahead or spot market price for bulk electricity",
+  "measuredProperty": "price",
+  "domainObject": "electricity",
+  "statisticType": "price",
+  "unitFamily": "currency_per_energy",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "aggregation": "average"
+}

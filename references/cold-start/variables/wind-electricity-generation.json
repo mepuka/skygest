@@ -1,0 +1,15 @@
+{
+  "_tag": "Variable",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+  "label": "Wind electricity generation",
+  "definition": "Electrical energy produced by onshore and offshore wind turbines",
+  "measuredProperty": "generation",
+  "domainObject": "electricity",
+  "statisticType": "flow",
+  "unitFamily": "energy",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "technologyOrFuel": "wind",
+  "aggregation": "sum"
+}

@@ -1,0 +1,15 @@
+{
+  "_tag": "Variable",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WMARTRPG4KZMWMZ82Y",
+  "label": "Installed nuclear capacity",
+  "definition": "Nameplate capacity of operational nuclear reactors",
+  "measuredProperty": "capacity",
+  "domainObject": "nuclear reactor",
+  "statisticType": "stock",
+  "unitFamily": "power",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "technologyOrFuel": "nuclear",
+  "aggregation": "end_of_period"
+}

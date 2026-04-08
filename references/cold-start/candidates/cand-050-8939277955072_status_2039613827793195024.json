@@ -1,0 +1,15 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS26YEMRMNWQ25GHN2JM",
+  "sourceRef": {
+    "contentId": "x://1207638939277955072/status/2039613827793195024"
+  },
+  "resolutionState": "source_only",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
+  "rawLabel": "\ud83d\udea8 NEW | Emerging economies skipped fixed-line phone networks entirely. Now the",
+  "rawDims": {
+    "geography": "us",
+    "category": "other"
+  }
+}

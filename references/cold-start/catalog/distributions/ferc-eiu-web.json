@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQEZ5VP1F11MRT2E94P0P3Y",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VPSN0Z528A8T220RCE",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Energy Infrastructure Update",
+  "accessURL": "https://www.ferc.gov/media/energy-infrastructure-update"
+}

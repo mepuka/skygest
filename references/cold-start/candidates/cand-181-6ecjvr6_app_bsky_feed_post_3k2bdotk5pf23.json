@@ -1,0 +1,18 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2PZ2MTTDJ7A32BEGG9",
+  "sourceRef": {
+    "contentId": "at://did:plc:ysqrfdc73lac6unle6ecjvr6/app.bsky.feed.post/3k2bdotk5pf23"
+  },
+  "resolutionState": "resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRVHH80RX2GMCC0YTT",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VRRVV6QAX34ZRNXS8E",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
+  "rawLabel": "The California ISO reports that it now has 5,600 MW of battery storage capacity ",
+  "rawDims": {
+    "geography": "us-ca",
+    "category": "capacity"
+  }
+}

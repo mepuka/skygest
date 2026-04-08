@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQEZ5VHM2QQ15XGJ4FT4ZBX",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHCC948KABFB2VQA15",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "STEO web portal",
+  "accessURL": "https://www.eia.gov/outlooks/steo/"
+}

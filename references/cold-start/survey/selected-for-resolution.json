@@ -1,0 +1,4952 @@
+[
+  {
+    "uri": "at://did:plc:tbezmmltvdtjthfeaftfoop6/app.bsky.feed.post/3min36btdl22n",
+    "handle": "kendrawrites.com",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "eia-other",
+    "text_snippet": "www.eia.gov/todayinenerg...",
+    "selection_reason": "multi-expert-cluster-eia-other"
+  },
+  {
+    "uri": "at://did:plc:t7pirqu7zlopcxoyqfpzfhvy/app.bsky.feed.post/3mhgausirmk22",
+    "handle": "cityatlas.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "eia-other",
+    "text_snippet": "Unhinged: www.eia.gov/todayinenerg...",
+    "selection_reason": "multi-expert-cluster-eia-other"
+  },
+  {
+    "uri": "at://did:plc:j2kmiyhld5btzozgzwy3lc2m/app.bsky.feed.post/3mgqujbig2k2y",
+    "handle": "sky.skymarchini.net",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "eia-other",
+    "text_snippet": "it's at 414m www.eia.gov/dnav/pet/his...",
+    "selection_reason": "multi-expert-cluster-eia-other"
+  },
+  {
+    "uri": "at://did:plc:nwszuegdifzrm2vmeujv5yee/app.bsky.feed.post/3mgmqkfeacc2b",
+    "handle": "wblau.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "eia-other",
+    "text_snippet": "and here is the missing ‚of‘, plus the source of the chart:\nwww.eia.gov/internat",
+    "selection_reason": "multi-expert-cluster-eia-other"
+  },
+  {
+    "uri": "at://did:plc:2zytqzub4mwqb5m7zvefdrpw/app.bsky.feed.post/3mg3h2vew5c27",
+    "handle": "kevinjkircher.com",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "eia-other",
+    "text_snippet": "Raw data source: www.eia.gov/electricity/...",
+    "selection_reason": "multi-expert-cluster-eia-other"
+  },
+  {
+    "uri": "at://did:plc:l27n5qiumclemimi7oglbpbh/app.bsky.feed.post/3mfabe6zuu22x",
+    "handle": "dangearino.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "eia-other",
+    "text_snippet": "Here's the source data:\nwww.eia.gov/electricity/...\nwww.eia.gov/electricity/...",
+    "selection_reason": "multi-expert-cluster-eia-other"
+  },
+  {
+    "uri": "at://did:plc:tzk2m4t5iid4v4nojrsrbxc4/app.bsky.feed.post/3meouqx7cnc2y",
+    "handle": "bistline.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "eia-other",
+    "text_snippet": "I'm using EIA's Electric Power Monthly Table 6.1.B, which I think is in DC terms",
+    "selection_reason": "multi-expert-cluster-eia-other"
+  },
+  {
+    "uri": "at://did:plc:siy6dvqvtlkl4tbytdjwsv5c/app.bsky.feed.post/3mdyq44vcdk25",
+    "handle": "profraywills.futuresmart.com.au",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "eia-other",
+    "text_snippet": "Currently to Sep 2025\nwww.eia.gov/electricity/...\nAnother data set that Trump ad",
+    "selection_reason": "multi-expert-cluster-eia-other"
+  },
+  {
+    "uri": "x://48794284/2040152758142263653",
+    "handle": "RenewableSearch",
+    "categories": [
+      "technology"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "us",
+    "difficulty": "medium",
+    "cluster_key": "eia-solar",
+    "text_snippet": "Via PV Mag: Rooftop solar now accounts for one fifth of Puerto Rico's generation",
+    "selection_reason": "multi-expert-cluster-eia-solar"
+  },
+  {
+    "uri": "x://1385041843914567681/status/2020915964766978339",
+    "handle": "QuincyEdmundLee",
+    "categories": [
+      "capacity",
+      "generation",
+      "investment",
+      "demand",
+      "grid-ops"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "160 GW",
+      "22%"
+    ],
+    "publisher": "eia",
+    "geography": "us",
+    "difficulty": "medium",
+    "cluster_key": "eia-solar",
+    "text_snippet": "Utilities are installing Solar and BESS fast  Grid operators have about 160 GW o",
+    "selection_reason": "multi-expert-cluster-eia-solar"
+  },
+  {
+    "uri": "x://521903527/status/1866516610174886517",
+    "handle": "curious_founder",
+    "categories": [
+      "generation",
+      "emissions",
+      "demand",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "20%",
+      "7%",
+      "1%",
+      "10%"
+    ],
+    "publisher": "eia",
+    "geography": "us-texas",
+    "difficulty": "medium",
+    "cluster_key": "eia-solar",
+    "text_snippet": "In the last 5 years, electricity consumption in Texas has risen by 20%.   Over t",
+    "selection_reason": "multi-expert-cluster-eia-solar"
+  },
+  {
+    "uri": "x://521903527/status/1852389181902705062",
+    "handle": "curious_founder",
+    "categories": [
+      "policy"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "66%"
+    ],
+    "publisher": "eia",
+    "geography": "us",
+    "difficulty": "medium",
+    "cluster_key": "eia-solar",
+    "text_snippet": "I analyzed the ~1,150 clean energy projects that have been built in the last two",
+    "selection_reason": "multi-expert-cluster-eia-solar"
+  },
+  {
+    "uri": "x://1123808797556920325/status/1847661541295824971",
+    "handle": "JessePeltan",
+    "categories": [
+      "technology"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "us-california",
+    "difficulty": "medium",
+    "cluster_key": "eia-solar",
+    "text_snippet": "Funny how the wind and solar haters only talk about California. https://t.co/umJ",
+    "selection_reason": "multi-expert-cluster-eia-solar"
+  },
+  {
+    "uri": "at://did:plc:a4py7lzj6xarzriaht7uyxq2/app.bsky.feed.post/3mi4lhr5ma22f",
+    "handle": "0lsi.bsky.social",
+    "categories": [
+      "generation",
+      "policy"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "17%"
+    ],
+    "publisher": "eia",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "eia-solar",
+    "text_snippet": "#Wind and #solar energy are growing fast in the 🇺🇸 US⚡🌞They now make up about",
+    "selection_reason": "multi-expert-cluster-eia-solar"
+  },
+  {
+    "uri": "at://did:plc:dw4r3ezs6vu7wkfqo2lczddn/app.bsky.feed.post/3mijodrf6us2g",
+    "handle": "justingerdes.bsky.social",
+    "categories": [
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "20%",
+      "81%"
+    ],
+    "publisher": "eia",
+    "geography": "us",
+    "difficulty": "medium",
+    "cluster_key": "eia-solar-2025",
+    "text_snippet": "EIA: \"Rooftop solar generating capacity in Puerto Rico totaled 1,456 megawatts a",
+    "selection_reason": "multi-expert-cluster-eia-solar-2025"
+  },
+  {
+    "uri": "at://did:plc:56ah3ymaxw4tccjl5vjq6fos/app.bsky.feed.post/3mig3j5oaa222",
+    "handle": "hoergen.bsky.social",
+    "categories": [
+      "generation",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "000 GWh",
+      "17%"
+    ],
+    "publisher": "eia",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "eia-solar-2025",
+    "text_snippet": "Combined generation from wind and utility-scale solar reached a record 17% of th",
+    "selection_reason": "multi-expert-cluster-eia-solar-2025"
+  },
+  {
+    "uri": "at://did:plc:3uqlk6hebu6vurixcx6s26s5/app.bsky.feed.post/3mhuox6vjek2v",
+    "handle": "cleanpowerdave.bsky.social",
+    "categories": [
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "us-california",
+    "difficulty": "medium",
+    "cluster_key": "eia-solar-2025",
+    "text_snippet": "Battery is such a game-changer, and nowhere is that more obvious than in Califor",
+    "selection_reason": "multi-expert-cluster-eia-solar-2025"
+  },
+  {
+    "uri": "x://2420677668/status/2036724946500513901",
+    "handle": "CleanPowerDave",
+    "categories": [
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "us-california",
+    "difficulty": "medium",
+    "cluster_key": "eia-solar-2025",
+    "text_snippet": "Battery is such a game-changer, and nowhere is that more obvious than in Califor",
+    "selection_reason": "multi-expert-cluster-eia-solar-2025"
+  },
+  {
+    "uri": "at://did:plc:7rmejk2hlkw2sfowiatzoo6b/app.bsky.feed.post/3mhsi3wdl422z",
+    "handle": "jrfhanger.bsky.social",
+    "categories": [
+      "generation",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "19%",
+      "17%",
+      "2%",
+      "34%",
+      "11%"
+    ],
+    "publisher": "eia",
+    "geography": "us",
+    "difficulty": "medium",
+    "cluster_key": "eia-solar-2025",
+    "text_snippet": "Good morning with good news: Utility-scale solar, small solar & wind generated a",
+    "selection_reason": "multi-expert-cluster-eia-solar-2025"
+  },
+  {
+    "uri": "x://1385041843914567681/status/2020561034050724270",
+    "handle": "QuincyEdmundLee",
+    "categories": [
+      "capacity",
+      "grid-ops",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "32.5 GW",
+      "18.2 GW",
+      "50.7 GW",
+      "81%"
+    ],
+    "publisher": "eia",
+    "geography": "us-texas",
+    "difficulty": "medium",
+    "cluster_key": "eia-solar-2025",
+    "text_snippet": "Solar and battery storage combined drove 81% of new U.S. grid capacity in 2025.",
+    "selection_reason": "multi-expert-cluster-eia-solar-2025"
+  },
+  {
+    "uri": "x://899453209801928704/status/2015471359208403362",
+    "handle": "PaulSaladino7",
+    "categories": [
+      "grid-ops"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "43%",
+      "25%",
+      "2%"
+    ],
+    "publisher": "eia",
+    "geography": "unspecified",
+    "difficulty": "medium",
+    "cluster_key": "eia-gas",
+    "text_snippet": "RT @MsLizBowman: The demand for natural gas has grown 43%, but infrastructure ha",
+    "selection_reason": "multi-expert-cluster-eia-gas"
+  },
+  {
+    "uri": "x://262337291/status/1846897591226613849",
+    "handle": "RichardMeyerDC",
+    "categories": [
+      "price",
+      "investment"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "us",
+    "difficulty": "medium",
+    "cluster_key": "eia-gas",
+    "text_snippet": "Finally, DOE published its residential energy costs.  Natural gas remains the lo",
+    "selection_reason": "multi-expert-cluster-eia-gas"
+  },
+  {
+    "uri": "at://did:plc:z2nyz6y3vh53qzhjyhgjipln/app.bsky.feed.post/3ldxpnxmq2c2c",
+    "handle": "mlavelle.bsky.social",
+    "categories": [
+      "capacity"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "global",
+    "difficulty": "easy",
+    "cluster_key": "eia-gas",
+    "text_snippet": "Petroleum products and LNG (liquefied natural gas) make up about half the commod",
+    "selection_reason": "multi-expert-cluster-eia-gas"
+  },
+  {
+    "uri": "at://did:plc:wcpapruceqef3d52qfclel3d/app.bsky.feed.post/3mhj3psxz3s25",
+    "handle": "aukehoekstra.bsky.social",
+    "categories": [
+      "technology"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "entso-e",
+    "geography": "eu",
+    "difficulty": "easy",
+    "cluster_key": "entso-e-solar",
+    "text_snippet": "The final report on the Iberia Peninsula (Spain and Portugal) blackout is out.",
+    "selection_reason": "multi-expert-cluster-entso-e-solar"
+  },
+  {
+    "uri": "at://did:plc:66lbtw2porscqpmair6mir37/app.bsky.feed.post/3mhidt3enbc2r",
+    "handle": "ketanjoshi.co",
+    "categories": [
+      "grid-ops"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "entso-e",
+    "geography": "eu",
+    "difficulty": "medium",
+    "cluster_key": "entso-e-solar",
+    "text_snippet": "The big talking point that emerged DURING the blackout, led in particular by Blo",
+    "selection_reason": "multi-expert-cluster-entso-e-solar"
+  },
+  {
+    "uri": "x://2420677668/status/1882435731400044583",
+    "handle": "CleanPowerDave",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "90MW",
+      "120MWh"
+    ],
+    "publisher": "entso-e",
+    "geography": "unspecified",
+    "difficulty": "medium",
+    "cluster_key": "entso-e-solar",
+    "text_snippet": "Worried on solar canniballisation?   It doesn't take a lot of battery to maintai",
+    "selection_reason": "multi-expert-cluster-entso-e-solar"
+  },
+  {
+    "uri": "x://172619854/2039765054745194922",
+    "handle": "aniruddh_mohan",
+    "categories": [
+      "demand"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ercot",
+    "geography": "us-ercot",
+    "difficulty": "medium",
+    "cluster_key": "ercot-demand",
+    "text_snippet": "A lot happening on co-location and non-firm load IX in RTOs in recent weeks to c",
+    "selection_reason": "multi-expert-cluster-ercot-demand"
+  },
+  {
+    "uri": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3mijb665aaw2j",
+    "handle": "rtoinsider.bsky.social",
+    "categories": [
+      "capacity",
+      "demand",
+      "grid-ops"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "410 GW",
+      "54t"
+    ],
+    "publisher": "ercot",
+    "geography": "us-ercot",
+    "difficulty": "medium",
+    "cluster_key": "ercot-demand",
+    "text_snippet": "A slew of “pent-up” interconnection requests from large load customers submitted",
+    "selection_reason": "multi-expert-cluster-ercot-demand"
+  },
+  {
+    "uri": "x://1136075085851308033/status/2020580621580447815",
+    "handle": "ShanuMathew93",
+    "categories": [
+      "capacity",
+      "demand",
+      "grid-ops"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "8 GW",
+      "80%"
+    ],
+    "publisher": "ercot",
+    "geography": "us-ercot",
+    "difficulty": "medium",
+    "cluster_key": "ercot-demand",
+    "text_snippet": "As my friend @mosessutton89 points out and shared this slide from an ERCOT deck.",
+    "selection_reason": "multi-expert-cluster-ercot-demand"
+  },
+  {
+    "uri": "x://704707652383670272/status/1892288364843569203",
+    "handle": "douglewinenergy",
+    "categories": [
+      "capacity",
+      "demand",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "84GW"
+    ],
+    "publisher": "ercot",
+    "geography": "us-ercot",
+    "difficulty": "medium",
+    "cluster_key": "ercot-demand",
+    "text_snippet": "Winter Peak demand record (non-Uri) just set in ERCOT at 11:30 a.m. Very rare th",
+    "selection_reason": "multi-expert-cluster-ercot-demand"
+  },
+  {
+    "uri": "x://704707652383670272/status/2020185875087335622",
+    "handle": "douglewinenergy",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "$1",
+      "60%"
+    ],
+    "publisher": "ercot",
+    "geography": "us-ercot",
+    "difficulty": "medium",
+    "cluster_key": "ercot-solar",
+    "text_snippet": "Another solar record in Texas / ERCOT today as solar provided more than 60% of T",
+    "selection_reason": "multi-expert-cluster-ercot-solar"
+  },
+  {
+    "uri": "x://704707652383670272/status/1895895616536158257",
+    "handle": "douglewinenergy",
+    "categories": [
+      "generation",
+      "grid-ops"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "54%",
+      "100%"
+    ],
+    "publisher": "ercot",
+    "geography": "us-ercot",
+    "difficulty": "medium",
+    "cluster_key": "ercot-solar",
+    "text_snippet": "Two new solar records in ERCOT today: 24,818 megawatts of solar production equal",
+    "selection_reason": "multi-expert-cluster-ercot-solar"
+  },
+  {
+    "uri": "x://704707652383670272/status/1863417749390643240",
+    "handle": "douglewinenergy",
+    "categories": [
+      "technology"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ercot",
+    "geography": "us-ercot",
+    "difficulty": "medium",
+    "cluster_key": "ercot-solar",
+    "text_snippet": "Texas has installed more solar in the last eight months than 39 states have *eve",
+    "selection_reason": "multi-expert-cluster-ercot-solar"
+  },
+  {
+    "uri": "x://777116516357726208/status/1849728904283525552",
+    "handle": "nicolasfulghum",
+    "categories": [
+      "grid-ops"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ercot",
+    "geography": "us-ercot",
+    "difficulty": "medium",
+    "cluster_key": "ercot-solar",
+    "text_snippet": "It's genuinely difficult to find a renewables system that shows more complementa",
+    "selection_reason": "multi-expert-cluster-ercot-solar"
+  },
+  {
+    "uri": "x://1123808797556920325/status/1848475812405686355",
+    "handle": "JessePeltan",
+    "categories": [
+      "capacity",
+      "price",
+      "grid-ops"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "65 GW",
+      "30 GW",
+      "34 GW",
+      "86 GW"
+    ],
+    "publisher": "ercot",
+    "geography": "us-ercot",
+    "difficulty": "medium",
+    "cluster_key": "ercot-solar",
+    "text_snippet": "Why is Texas building 65 GW of solar and 30 GW of batteries when we need constan",
+    "selection_reason": "multi-expert-cluster-ercot-solar"
+  },
+  {
+    "uri": "x://704707652383670272/status/1844470776482988353",
+    "handle": "douglewinenergy",
+    "categories": [
+      "technology"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ercot",
+    "geography": "us-ercot",
+    "difficulty": "medium",
+    "cluster_key": "ercot-solar",
+    "text_snippet": "ERCOT staff said this summer was 6th hottest on record for Texas &amp; that's *b",
+    "selection_reason": "multi-expert-cluster-ercot-solar"
+  },
+  {
+    "uri": "x://1929556975223963648/status/2040841016752656553",
+    "handle": "World_Data_A",
+    "categories": [
+      "price",
+      "investment",
+      "grid-ops",
+      "policy",
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "us",
+    "difficulty": "medium",
+    "cluster_key": "iea-solar",
+    "text_snippet": "The renewable upside may still be underestimated Why exponential adoption is mak",
+    "selection_reason": "multi-expert-cluster-iea-solar"
+  },
+  {
+    "uri": "at://did:plc:rcu7ybho7gdw3x3cxp64jnue/app.bsky.feed.post/3mikpqdyxws2h",
+    "handle": "robertferry.bsky.social",
+    "categories": [
+      "generation",
+      "investment"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "60%"
+    ],
+    "publisher": "iea",
+    "geography": "china",
+    "difficulty": "easy",
+    "cluster_key": "iea-solar",
+    "text_snippet": "Wafer production require heat at high and precise temperatures. Much of that wor",
+    "selection_reason": "multi-expert-cluster-iea-solar"
+  },
+  {
+    "uri": "at://did:plc:dabqc2c73f6wm3sdq4sofdzf/app.bsky.feed.post/3miiqfzhvpe2m",
+    "handle": "ember-energy.org",
+    "categories": [
+      "emissions"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "unspecified",
+    "difficulty": "medium",
+    "cluster_key": "iea-solar",
+    "text_snippet": "And it's already underway. Around half of climate-vulnerable nations have leapfr",
+    "selection_reason": "multi-expert-cluster-iea-solar"
+  },
+  {
+    "uri": "at://did:plc:dabqc2c73f6wm3sdq4sofdzf/app.bsky.feed.post/3miiqfsx4dd26",
+    "handle": "ember-energy.org",
+    "categories": [
+      "technology"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "unspecified",
+    "difficulty": "medium",
+    "cluster_key": "iea-solar",
+    "text_snippet": "#Electrotech changes the equation entirely. Solar and batteries are modular, dec",
+    "selection_reason": "multi-expert-cluster-iea-solar"
+  },
+  {
+    "uri": "at://did:plc:dabqc2c73f6wm3sdq4sofdzf/app.bsky.feed.post/3mi2bphokcj2s",
+    "handle": "ember-energy.org",
+    "categories": [
+      "price",
+      "grid-ops"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "us",
+    "difficulty": "medium",
+    "cluster_key": "iea-solar",
+    "text_snippet": "South Asia’s rapid solar expansion is already cutting fossil imports, lowering e",
+    "selection_reason": "multi-expert-cluster-iea-solar"
+  },
+  {
+    "uri": "x://982294921/status/1887868781419978925",
+    "handle": "janrosenow",
+    "categories": [
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "global",
+    "difficulty": "medium",
+    "cluster_key": "iea-solar",
+    "text_snippet": "NEW RESEARCH: IEA WEO energy scenarios have significantly underestimated solar P",
+    "selection_reason": "multi-expert-cluster-iea-solar"
+  },
+  {
+    "uri": "x://16933019/status/1868708710526394572",
+    "handle": "AukeHoekstra",
+    "categories": [
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "china",
+    "difficulty": "medium",
+    "cluster_key": "iea-solar",
+    "text_snippet": "Truly great presentation by @RockyMtnInst showing (among others):  Cleantech gro",
+    "selection_reason": "multi-expert-cluster-iea-solar"
+  },
+  {
+    "uri": "x://982294921/status/1863579289116922223",
+    "handle": "janrosenow",
+    "categories": [
+      "technology"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "global",
+    "difficulty": "medium",
+    "cluster_key": "iea-solar",
+    "text_snippet": "The renewable energy transition is dominated by solar.  Look at the @IEA modelli",
+    "selection_reason": "multi-expert-cluster-iea-solar"
+  },
+  {
+    "uri": "x://16933019/status/1851654866147455282",
+    "handle": "AukeHoekstra",
+    "categories": [
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "global",
+    "difficulty": "medium",
+    "cluster_key": "iea-solar",
+    "text_snippet": "Isn't it strange that the exponential growth of solar and wind always become lin",
+    "selection_reason": "multi-expert-cluster-iea-solar"
+  },
+  {
+    "uri": "x://2420677668/status/1843884326393647320",
+    "handle": "CleanPowerDave",
+    "categories": [
+      "grid-ops"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "global",
+    "difficulty": "medium",
+    "cluster_key": "iea-solar",
+    "text_snippet": "If you think solar+wind has changed the global electricity system in the last 6",
+    "selection_reason": "multi-expert-cluster-iea-solar"
+  },
+  {
+    "uri": "at://did:plc:yoeonndfygr7ilq5scih6rtx/app.bsky.feed.post/3mir6h7xctk23",
+    "handle": "earthsciinfo.bsky.social",
+    "categories": [
+      "generation",
+      "investment"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "90%"
+    ],
+    "publisher": "iea",
+    "geography": "global",
+    "difficulty": "easy",
+    "cluster_key": "iea-gas",
+    "text_snippet": "Due to declining output from existing fields, 90% of the investment in oil and g",
+    "selection_reason": "multi-expert-cluster-iea-gas"
+  },
+  {
+    "uri": "at://did:plc:dabqc2c73f6wm3sdq4sofdzf/app.bsky.feed.post/3mhpvsbjcqv24",
+    "handle": "ember-energy.org",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "eu",
+    "difficulty": "medium",
+    "cluster_key": "iea-gas",
+    "text_snippet": "The EU relies on fossil fuel imports for over half of its energy, leaving it exp",
+    "selection_reason": "multi-expert-cluster-iea-gas"
+  },
+  {
+    "uri": "x://982294921/status/1856696498710257901",
+    "handle": "janrosenow",
+    "categories": [
+      "policy"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "us",
+    "difficulty": "medium",
+    "cluster_key": "iea-gas",
+    "text_snippet": "Key fact: clean energy technologies are vastly more efficient than fossil fuels",
+    "selection_reason": "multi-expert-cluster-iea-gas"
+  },
+  {
+    "uri": "x://1155017848256942080/2040252501572673791",
+    "handle": "Dr_A_Stein",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "iea-other",
+    "text_snippet": "Jane is absolutely right here. Everyone debates the small (often important) nuan",
+    "selection_reason": "multi-expert-cluster-iea-other"
+  },
+  {
+    "uri": "x://1207638939277955072/status/2039613827793195024",
+    "handle": "ember_energy",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "iea-other",
+    "text_snippet": "🚨 NEW | Emerging economies skipped fixed-line phone networks entirely. Now the",
+    "selection_reason": "multi-expert-cluster-iea-other"
+  },
+  {
+    "uri": "at://did:plc:g7bwmiaavgfbt5ic54gfkyd3/app.bsky.feed.post/3miijrdwhxx2y",
+    "handle": "lightnews.app",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "$105 "
+    ],
+    "publisher": "iea",
+    "geography": "eu",
+    "difficulty": "easy",
+    "cluster_key": "iea-other",
+    "text_snippet": "Brent tops 105, Europe warned  Brent crude topped $105 as the IEA warned Europe",
+    "selection_reason": "multi-expert-cluster-iea-other"
+  },
+  {
+    "uri": "at://did:plc:2iv3f7svsfxfr5r53bgymkjk/app.bsky.feed.post/3mi2ce72w4c2r",
+    "handle": "janrosenow.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "iea-other",
+    "text_snippet": "This is how it is commonly tracked and measured. Take it up with the IEA www.iea",
+    "selection_reason": "multi-expert-cluster-iea-other"
+  },
+  {
+    "uri": "at://did:plc:owyl5siz6ibqxwxls4szerlx/app.bsky.feed.post/3mhxyr7ldu22z",
+    "handle": "larryneufeldsk.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "iea-other",
+    "text_snippet": "As oil market surplus keeps rising, something’s got to give – Analysis - IEA www",
+    "selection_reason": "multi-expert-cluster-iea-other"
+  },
+  {
+    "uri": "at://did:plc:vy53gbbbkckp63xtc7bjtk7u/app.bsky.feed.post/3mhiqiuvuoc2h",
+    "handle": "cosaingalway.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "iea-other",
+    "text_snippet": "👇\n\nwww.iea.org/energy-syste...",
+    "selection_reason": "multi-expert-cluster-iea-other"
+  },
+  {
+    "uri": "at://did:plc:767ycrlfjmddxgnxsylkfbrd/app.bsky.feed.post/3mgs3pt25vs2h",
+    "handle": "roryjohnston.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "iea-other",
+    "text_snippet": "Full press release: www.iea.org/news/iea-mem...",
+    "selection_reason": "multi-expert-cluster-iea-other"
+  },
+  {
+    "uri": "at://did:plc:yoeonndfygr7ilq5scih6rtx/app.bsky.feed.post/3mfpg5jzi7c26",
+    "handle": "earthsciinfo.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "iea-other",
+    "text_snippet": "This is a good read. And it is worth pointing out that the rate of the transitio",
+    "selection_reason": "multi-expert-cluster-iea-other"
+  },
+  {
+    "uri": "at://did:plc:nzkbykakdkibt7buz5wmjz77/app.bsky.feed.post/3m7ps3y4u6k2h",
+    "handle": "evanlgeorge.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "iea-other",
+    "text_snippet": "The electricity sector is now the largest energy employer, surpassing fossil fue",
+    "selection_reason": "multi-expert-cluster-iea-other"
+  },
+  {
+    "uri": "at://did:plc:4qai5tsnexrlttkeyi6vup3e/app.bsky.feed.post/3lmxfuev5qs2q",
+    "handle": "kbrigham.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "iea-other",
+    "text_snippet": "report here: www.iea.org/reports/ener...",
+    "selection_reason": "multi-expert-cluster-iea-other"
+  },
+  {
+    "uri": "at://did:plc:ewkx4da6xjsw3y2agunx5wau/app.bsky.feed.post/3lb7urg77qs2k",
+    "handle": "hanseric.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "iea-other",
+    "text_snippet": "A very interesting new report from International Energy Agency on minerals recyc",
+    "selection_reason": "multi-expert-cluster-iea-other"
+  },
+  {
+    "uri": "at://did:plc:h6r3u733k25ugab3cwfaudrs/app.bsky.feed.post/3krvfofrs3h2p",
+    "handle": "felixheilmann.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "iea-other",
+    "text_snippet": "www.iea.org/reports/adva...",
+    "selection_reason": "multi-expert-cluster-iea-other"
+  },
+  {
+    "uri": "at://did:plc:b4zju3u4hqlwc662av3ytcvv/app.bsky.feed.post/3mijddhc7zb2l",
+    "handle": "green-economy.bsky.social",
+    "categories": [
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "global",
+    "difficulty": "medium",
+    "cluster_key": "iea-solar-2030",
+    "text_snippet": "The IEA estimates that global energy storage capacity will have to increase by 1",
+    "selection_reason": "multi-expert-cluster-iea-solar-2030"
+  },
+  {
+    "uri": "x://982294921/status/1858532968622395875",
+    "handle": "janrosenow",
+    "categories": [
+      "generation",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "46%",
+      "30%"
+    ],
+    "publisher": "iea",
+    "geography": "global",
+    "difficulty": "medium",
+    "cluster_key": "iea-solar-2030",
+    "text_snippet": "A steep rise:  @IEA forecasts that by 2030 46% of global electricity generation",
+    "selection_reason": "multi-expert-cluster-iea-solar-2030"
+  },
+  {
+    "uri": "x://526871737/status/1847292711075746254",
+    "handle": "DrSimEvans",
+    "categories": [
+      "policy",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "44%"
+    ],
+    "publisher": "iea",
+    "geography": "global",
+    "difficulty": "medium",
+    "cluster_key": "iea-solar-2030",
+    "text_snippet": "THREAD  My deep dive on @IEA #WEO24  🌄Solar up 4x by 2030, top ⚡️ source by 203",
+    "selection_reason": "multi-expert-cluster-iea-solar-2030"
+  },
+  {
+    "uri": "at://did:plc:2iv3f7svsfxfr5r53bgymkjk/app.bsky.feed.post/3mhkuh3wa7222",
+    "handle": "janrosenow.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "global",
+    "difficulty": "medium",
+    "cluster_key": "iea-demand",
+    "text_snippet": "The IEA is calling for people to work from home, drive slower & fly less to tack",
+    "selection_reason": "multi-expert-cluster-iea-demand"
+  },
+  {
+    "uri": "at://did:plc:fbvwkj56tyd2ru54rybgxpbz/app.bsky.feed.post/3mhi6oj7hsk23",
+    "handle": "cleanenergywire.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "global",
+    "difficulty": "easy",
+    "cluster_key": "iea-demand",
+    "text_snippet": "Sheltering From Oil Shocks  IEA details 10 demand-side options open to household",
+    "selection_reason": "multi-expert-cluster-iea-demand"
+  },
+  {
+    "uri": "x://917421961/status/1847201903861473490",
+    "handle": "Peters_Glen",
+    "categories": [
+      "emissions",
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "global",
+    "difficulty": "medium",
+    "cluster_key": "iea-demand",
+    "text_snippet": "I hope this analysis by the IEA helps shift the obsession away from data centers",
+    "selection_reason": "multi-expert-cluster-iea-demand"
+  },
+  {
+    "uri": "at://did:plc:nwszuegdifzrm2vmeujv5yee/app.bsky.feed.post/3mfvzpiphtc2o",
+    "handle": "wblau.bsky.social",
+    "categories": [
+      "demand"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "iea-demand",
+    "text_snippet": "Source IEA: www.iea.org/reports/ener...",
+    "selection_reason": "multi-expert-cluster-iea-demand"
+  },
+  {
+    "uri": "at://did:plc:yjqekodgo25hjem4isderwak/app.bsky.feed.post/3mihg4ti4t22t",
+    "handle": "kevinleecaster.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "nrel",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "nrel-other",
+    "text_snippet": "Just making sure you're aware of this publication from NREL on \"inertia\" on foss",
+    "selection_reason": "multi-expert-cluster-nrel-other"
+  },
+  {
+    "uri": "at://did:plc:yoeonndfygr7ilq5scih6rtx/app.bsky.feed.post/3mirr73dl422h",
+    "handle": "earthsciinfo.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "nrel",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "nrel-other",
+    "text_snippet": "This document from NREL provides details.  docs.nrel.gov/docs/fy23ost...",
+    "selection_reason": "multi-expert-cluster-nrel-other"
+  },
+  {
+    "uri": "at://did:plc:wcpapruceqef3d52qfclel3d/app.bsky.feed.post/3mhjefuu7r525",
+    "handle": "aukehoekstra.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "nrel",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "nrel-other",
+    "text_snippet": "but if some react quickly, others slowly, and if all follow agreed rules, the ta",
+    "selection_reason": "multi-expert-cluster-nrel-other"
+  },
+  {
+    "uri": "at://did:plc:6ml4nxrk45cy23jay5hc2npp/app.bsky.feed.post/3migxqe3xjk2p",
+    "handle": "justinmikulka.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "bnef",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "bnef-other",
+    "text_snippet": "about.bnef.com/insights/cle...",
+    "selection_reason": "multi-expert-cluster-bnef-other"
+  },
+  {
+    "uri": "at://did:plc:k26ycdzevq5xtayks6k74xp5/app.bsky.feed.post/3lv2qlmjses2f",
+    "handle": "nathanielbullard.com",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "bnef",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "bnef-other",
+    "text_snippet": "I've been reading everything that @mliebreich.bsky.social writes for nearly two",
+    "selection_reason": "multi-expert-cluster-bnef-other"
+  },
+  {
+    "uri": "at://did:plc:vjvo3uwinkfdrls7owpqx7bj/app.bsky.feed.post/3leevw7mmds27",
+    "handle": "jsfreed.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "bnef",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "bnef-other",
+    "text_snippet": "Catching up on reading for ‘25. @mliebreich.bsky.social overview of AI, energy,",
+    "selection_reason": "multi-expert-cluster-bnef-other"
+  },
+  {
+    "uri": "at://did:plc:qlfit2m3ksqwaqhuepks5j7p/app.bsky.feed.post/3lxfef2knxk2x",
+    "handle": "guayjg.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "bnef",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "bnef-other",
+    "text_snippet": "We're going to look back on this nuclear hype cycle in 10 years, with maybe a ha",
+    "selection_reason": "multi-expert-cluster-bnef-other"
+  },
+  {
+    "uri": "at://did:plc:hoyoylxkm7ssefi7phumfnza/app.bsky.feed.post/3mgvnjjlvp22z",
+    "handle": "commercialsolarguy.com",
+    "categories": [
+      "capacity",
+      "investment",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "169 GW",
+      "126 GW",
+      "43 GW",
+      "29.3 GW",
+      "8.1 GW",
+      "38%",
+      "99%",
+      "93%"
+    ],
+    "publisher": "bnef",
+    "geography": "eu",
+    "difficulty": "easy",
+    "cluster_key": "bnef-wind-2025",
+    "text_snippet": "‘Wind additions 169 GW globally in 2025…up 38% vs 2024…126 GW deployed in China,",
+    "selection_reason": "multi-expert-cluster-bnef-wind-2025"
+  },
+  {
+    "uri": "at://did:plc:7rmejk2hlkw2sfowiatzoo6b/app.bsky.feed.post/3mgu5xda2qs2h",
+    "handle": "jrfhanger.bsky.social",
+    "categories": [
+      "capacity",
+      "investment",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "169 GW",
+      "38%",
+      "17%"
+    ],
+    "publisher": "bnef",
+    "geography": "china",
+    "difficulty": "easy",
+    "cluster_key": "bnef-wind-2025",
+    "text_snippet": "Good morning with good news: \"Global wind capacity additions hit an all-time hig",
+    "selection_reason": "multi-expert-cluster-bnef-wind-2025"
+  },
+  {
+    "uri": "at://did:plc:3uqlk6hebu6vurixcx6s26s5/app.bsky.feed.post/3mgpfo4b53s2f",
+    "handle": "cleanpowerdave.bsky.social",
+    "categories": [
+      "capacity",
+      "investment",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "169 GW",
+      "126GW",
+      "37GW",
+      "38%",
+      "95%",
+      "5%",
+      "47%",
+      "17%"
+    ],
+    "publisher": "bnef",
+    "geography": "china",
+    "difficulty": "easy",
+    "cluster_key": "bnef-wind-2025",
+    "text_snippet": "IS WIND STRUGGLING?  Not at all. Global deployment rose by +38% last year💪  - 1",
+    "selection_reason": "multi-expert-cluster-bnef-wind-2025"
+  },
+  {
+    "uri": "at://did:plc:pb73vbvwit4phtn7hvuv23yk/app.bsky.feed.post/3me3kfoddpk2h",
+    "handle": "mzjacobson.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ferc",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "ferc-other",
+    "text_snippet": "\"New generation in service\"  cms.ferc.gov/media/energy...",
+    "selection_reason": "multi-expert-cluster-ferc-other"
+  },
+  {
+    "uri": "at://did:plc:4pgppw7o5ong4npeciaozjoq/app.bsky.feed.post/3lng65cuqfs2z",
+    "handle": "aripeskoe.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ferc",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "ferc-other",
+    "text_snippet": "Officially official - cms.ferc.gov/news-events/...",
+    "selection_reason": "multi-expert-cluster-ferc-other"
+  },
+  {
+    "uri": "at://did:plc:64drjustsrvsrcl2a2n2jnyf/app.bsky.feed.post/3mdipgyb53k2s",
+    "handle": "colinreports.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ferc",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "ferc-other",
+    "text_snippet": "Ah cool — yes, I’d missed that but I see they filed a whole raft of documents. L",
+    "selection_reason": "multi-expert-cluster-ferc-other"
+  },
+  {
+    "uri": "at://did:plc:5tf65pf4gdrfvsp7s2ve6in4/app.bsky.feed.post/3lweqvnijyk25",
+    "handle": "yes-energy.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ferc",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "ferc-other",
+    "text_snippet": "President Donald Trump made it official Aug. 13, naming David Rosner as the new ",
+    "selection_reason": "multi-expert-cluster-ferc-other"
+  },
+  {
+    "uri": "at://did:plc:yoeonndfygr7ilq5scih6rtx/app.bsky.feed.post/3mir7nqnrx223",
+    "handle": "earthsciinfo.bsky.social",
+    "categories": [
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "41%"
+    ],
+    "publisher": "ember",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "ember-gas",
+    "text_snippet": "Now is the time to invest in renewables and transition from fossil fuels. The wo",
+    "selection_reason": "multi-expert-cluster-ember-gas"
+  },
+  {
+    "uri": "at://did:plc:twjze4qqf6fgxz33ct52wlnl/app.bsky.feed.post/3mieqimpsn22e",
+    "handle": "volts.wtf",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "global",
+    "difficulty": "easy",
+    "cluster_key": "ember-gas",
+    "text_snippet": "Yes, the obvious solution to fossil fuel wars is obvious: \"The fragility of glob",
+    "selection_reason": "multi-expert-cluster-ember-gas"
+  },
+  {
+    "uri": "at://did:plc:owyl5siz6ibqxwxls4szerlx/app.bsky.feed.post/3mhxxtr56dc2m",
+    "handle": "larryneufeldsk.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "global",
+    "difficulty": "easy",
+    "cluster_key": "ember-gas",
+    "text_snippet": "The fragility of global fossil fuel supply underscores why scaling renewables an",
+    "selection_reason": "multi-expert-cluster-ember-gas"
+  },
+  {
+    "uri": "at://did:plc:7xwdtrwpvrubfodskgimvdxk/app.bsky.feed.post/3mhfver2f7s23",
+    "handle": "robmajteles.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "global",
+    "difficulty": "easy",
+    "cluster_key": "ember-gas",
+    "text_snippet": "“The fragility of global fossil fuel supply underscores why scaling renewables a",
+    "selection_reason": "multi-expert-cluster-ember-gas"
+  },
+  {
+    "uri": "at://did:plc:4w3fg4ea3losti3dn534pfyn/app.bsky.feed.post/3mhdqc5dt7k2m",
+    "handle": "sparcmotion.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "ember-gas",
+    "text_snippet": "I was obvious from the beginning, now there's real data that proves EVs help mit",
+    "selection_reason": "multi-expert-cluster-ember-gas"
+  },
+  {
+    "uri": "at://did:plc:fbvwkj56tyd2ru54rybgxpbz/app.bsky.feed.post/3mhdazmk2bg2t",
+    "handle": "cleanenergywire.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "global",
+    "difficulty": "easy",
+    "cluster_key": "ember-gas",
+    "text_snippet": "The energy security fallout: from fossil fuel fragility to electric independence",
+    "selection_reason": "multi-expert-cluster-ember-gas"
+  },
+  {
+    "uri": "at://did:plc:5buzphfdtce4ev3ukud2gf37/app.bsky.feed.post/3mi52y6en322z",
+    "handle": "laurimyllyvirta.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "china",
+    "difficulty": "easy",
+    "cluster_key": "ember-other",
+    "text_snippet": "Thanks to Ember for putting the data together here: ember-energy.org/data/china-",
+    "selection_reason": "multi-expert-cluster-ember-other"
+  },
+  {
+    "uri": "at://did:plc:3gczycymg3cd7u5ovmtyu7xi/app.bsky.feed.post/3mi4rv35f3c2n",
+    "handle": "climatenews.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "ember-other",
+    "text_snippet": "Here is some detailed statistics of Pakistan, showing how intelligent people can",
+    "selection_reason": "multi-expert-cluster-ember-other"
+  },
+  {
+    "uri": "at://did:plc:3gczycymg3cd7u5ovmtyu7xi/app.bsky.feed.post/3mi4rryof2c2n",
+    "handle": "climatenews.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "ember-other",
+    "text_snippet": "ember-energy.org/data/electri...",
+    "selection_reason": "multi-expert-cluster-ember-other"
+  },
+  {
+    "uri": "at://did:plc:7rmejk2hlkw2sfowiatzoo6b/app.bsky.feed.post/3mfoocge3xs2n",
+    "handle": "jrfhanger.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "ember-other",
+    "text_snippet": "Here is the link to the Ember data: ember-energy.org/data/electri... #energysky",
+    "selection_reason": "multi-expert-cluster-ember-other"
+  },
+  {
+    "uri": "at://did:plc:6ml4nxrk45cy23jay5hc2npp/app.bsky.feed.post/3mfc5zonklk2u",
+    "handle": "justinmikulka.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "ember-other",
+    "text_snippet": "The people and companies in Mexico who will pay for this might want to consider ",
+    "selection_reason": "multi-expert-cluster-ember-other"
+  },
+  {
+    "uri": "at://did:plc:dabqc2c73f6wm3sdq4sofdzf/app.bsky.feed.post/3me6dgey4kf2v",
+    "handle": "ember-energy.org",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "ember-other",
+    "text_snippet": "Read the full story:",
+    "selection_reason": "multi-expert-cluster-ember-other"
+  },
+  {
+    "uri": "at://did:plc:3uqlk6hebu6vurixcx6s26s5/app.bsky.feed.post/3m4fjcb762k2j",
+    "handle": "cleanpowerdave.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "ember-other",
+    "text_snippet": "FULL REPORT HERE: ember-energy.org/latest-insig...",
+    "selection_reason": "multi-expert-cluster-ember-other"
+  },
+  {
+    "uri": "at://did:plc:tywkpd4s5utvhnucftqtsjyc/app.bsky.feed.post/3lxrzqf4trc2k",
+    "handle": "hannahritchie.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "ember-other",
+    "text_snippet": "Based on data from @ember-energy.org: ember-energy.org/data/electri...",
+    "selection_reason": "multi-expert-cluster-ember-other"
+  },
+  {
+    "uri": "at://did:plc:7rmejk2hlkw2sfowiatzoo6b/app.bsky.feed.post/3lcxtnqmyec2o",
+    "handle": "jrfhanger.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "ember-other",
+    "text_snippet": "Mostly hydro. It's from Ember's data explorer: ember-energy.org/data/electri...",
+    "selection_reason": "multi-expert-cluster-ember-other"
+  },
+  {
+    "uri": "at://did:plc:73i46c3pkh6b6tsuurbhgmwp/app.bsky.feed.post/3lfzmolfr2s2a",
+    "handle": "timlatimer.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "ember-other",
+    "text_snippet": "When environment impacts are viewed objectively and quantitatively, EGS compares",
+    "selection_reason": "multi-expert-cluster-ember-other"
+  },
+  {
+    "uri": "at://did:plc:7xwdtrwpvrubfodskgimvdxk/app.bsky.feed.post/3mf4wsudkh223",
+    "handle": "robmajteles.bsky.social",
+    "categories": [
+      "generation"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "ember-generation-us-ca",
+    "text_snippet": "“Reframing Energy for the Age of Electricity: The orthodox approach to energy ac",
+    "selection_reason": "multi-expert-cluster-ember-generation-us-ca"
+  },
+  {
+    "uri": "at://did:plc:7rmejk2hlkw2sfowiatzoo6b/app.bsky.feed.post/3mck3f2edu22z",
+    "handle": "jrfhanger.bsky.social",
+    "categories": [
+      "generation",
+      "demand"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "83 TWh",
+      "135 TWh"
+    ],
+    "publisher": "ember",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "ember-generation-us-ca",
+    "text_snippet": "US solar generation rose by 83 TWh (+27%) in 2025!\n\nIt provided 61% of the 135 T",
+    "selection_reason": "multi-expert-cluster-ember-generation-us-ca"
+  },
+  {
+    "uri": "at://did:plc:afwyjr6qfcjfwq5fdqnnyldi/app.bsky.feed.post/3mb7wnkreyl24",
+    "handle": "oncleanair.bsky.social",
+    "categories": [
+      "generation"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "ember-generation-us-ca",
+    "text_snippet": "As #2025 comes to a close, the global direction is clear: renewables are now the",
+    "selection_reason": "multi-expert-cluster-ember-generation-us-ca"
+  },
+  {
+    "uri": "at://did:plc:uvycum23aik6ahfp2f23cxrd/app.bsky.feed.post/3m3aispm6jk2g",
+    "handle": "jigarshahdc.bsky.social",
+    "categories": [
+      "generation",
+      "demand"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "369Twh"
+    ],
+    "publisher": "ember",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "ember-generation-us-ca",
+    "text_snippet": "For the first time, new clean energy generation (solar, wind, nuclear) provided ",
+    "selection_reason": "multi-expert-cluster-ember-generation-us-ca"
+  },
+  {
+    "uri": "at://did:plc:22wv3zkd6wq2lyihgbtzas5b/app.bsky.feed.post/3mez2tntjx22g",
+    "handle": "peterheadcbe.bsky.social",
+    "categories": [
+      "generation"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "EU",
+    "difficulty": "easy",
+    "cluster_key": "ember-generation-eu",
+    "text_snippet": "A major tipping point. Wind and solar generated more EU electricity than fossil ",
+    "selection_reason": "multi-expert-cluster-ember-generation-eu"
+  },
+  {
+    "uri": "at://did:plc:a4py7lzj6xarzriaht7uyxq2/app.bsky.feed.post/3mechhmouzs2a",
+    "handle": "0lsi.bsky.social",
+    "categories": [
+      "generation"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "EU",
+    "difficulty": "easy",
+    "cluster_key": "ember-generation-eu",
+    "text_snippet": "In 2025, #wind 💨 and #solar ☀️ generated more electricity than fossil fuels in ",
+    "selection_reason": "multi-expert-cluster-ember-generation-eu"
+  },
+  {
+    "uri": "at://did:plc:dabqc2c73f6wm3sdq4sofdzf/app.bsky.feed.post/3mczhbldqze25",
+    "handle": "ember-energy.org",
+    "categories": [
+      "generation"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "EU",
+    "difficulty": "easy",
+    "cluster_key": "ember-generation-eu",
+    "text_snippet": "Read more about the progress of the EU’s electricity transition in our latest Eu",
+    "selection_reason": "multi-expert-cluster-ember-generation-eu"
+  },
+  {
+    "uri": "at://did:plc:dabqc2c73f6wm3sdq4sofdzf/app.bsky.feed.post/3me3nvsrspu2z",
+    "handle": "ember-energy.org",
+    "categories": [
+      "capacity",
+      "curtailment"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "ember-capacity-us-ca",
+    "text_snippet": "As India breaks record solar capacity additions, boosting flexibility can preven",
+    "selection_reason": "multi-expert-cluster-ember-capacity-us-ca"
+  },
+  {
+    "uri": "at://did:plc:zk73rhzraoy2jnqdz3i2okoo/app.bsky.feed.post/3m7ij6kmzlh2t",
+    "handle": "rachellsarnoff.bsky.social",
+    "categories": [
+      "capacity",
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "ember-capacity-us-ca",
+    "text_snippet": "A projected surge in global renewables capacity has experts predicting a triplin",
+    "selection_reason": "multi-expert-cluster-ember-capacity-us-ca"
+  },
+  {
+    "uri": "at://did:plc:3uqlk6hebu6vurixcx6s26s5/app.bsky.feed.post/3m637zr57rc2j",
+    "handle": "cleanpowerdave.bsky.social",
+    "categories": [
+      "capacity"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "ember-capacity-us-ca",
+    "text_snippet": "The solar panel and cell+wafer capacity is derived by Ember from the $value of e",
+    "selection_reason": "multi-expert-cluster-ember-capacity-us-ca"
+  },
+  {
+    "uri": "at://did:plc:uekpyeqvmwsjc5t5y74qx4xe/app.bsky.feed.post/3man5bh6dj226",
+    "handle": "dvschroeder.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "ember-other-us-ca",
+    "text_snippet": "You can get reasonable estimates by extrapolating from here: ember-energy.org/da",
+    "selection_reason": "multi-expert-cluster-ember-other-us-ca"
+  },
+  {
+    "uri": "at://did:plc:dabqc2c73f6wm3sdq4sofdzf/app.bsky.feed.post/3ma6fr4dimg2p",
+    "handle": "ember-energy.org",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "ember-other-us-ca",
+    "text_snippet": "2025 marks another year of record clean energy additions, electrification and de",
+    "selection_reason": "multi-expert-cluster-ember-other-us-ca"
+  },
+  {
+    "uri": "at://did:plc:zk73rhzraoy2jnqdz3i2okoo/app.bsky.feed.post/3m7bbotuksm2r",
+    "handle": "rachellsarnoff.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "ember-other-us-ca",
+    "text_snippet": "⚡ Electrification is accelerating across transport, heat, and industry, demonstr",
+    "selection_reason": "multi-expert-cluster-ember-other-us-ca"
+  },
+  {
+    "uri": "at://did:plc:nzkbykakdkibt7buz5wmjz77/app.bsky.feed.post/3m2sbukand22x",
+    "handle": "evanlgeorge.bsky.social",
+    "categories": [
+      "generation"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "iea-generation-us-ca",
+    "text_snippet": "Sometimes, you get a glimpse of the future in a flash. That happened this Tuesda",
+    "selection_reason": "multi-expert-cluster-iea-generation-us-ca"
+  },
+  {
+    "uri": "at://did:plc:urgu2p44tx4fhfocdlvwcwpv/app.bsky.feed.post/3ll4d3pbbtk2s",
+    "handle": "alisheridan.bsky.social",
+    "categories": [
+      "generation",
+      "demand"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "iea-generation-us-ca",
+    "text_snippet": "“The sharp increase in the world’s electricity use last year was driven by recor",
+    "selection_reason": "multi-expert-cluster-iea-generation-us-ca"
+  },
+  {
+    "uri": "at://did:plc:puzyhfvkombbfh3nj7a3pnjx/app.bsky.feed.post/3kjqfomhylc2y",
+    "handle": "ethanhowl.bsky.social",
+    "categories": [
+      "generation",
+      "emissions",
+      "demand"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "iea-generation-us-ca",
+    "text_snippet": "With growing US renewables and declining coal generation, the IEA expects US pow",
+    "selection_reason": "multi-expert-cluster-iea-generation-us-ca"
+  },
+  {
+    "uri": "at://did:plc:ppavi77mhpt7smqco4zeswop/app.bsky.feed.post/3mhnhtw57lj2o",
+    "handle": "iea.org",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "iea-other-us-ca",
+    "text_snippet": "The IEA is closely monitoring the situation in the Middle East – including the i",
+    "selection_reason": "multi-expert-cluster-iea-other-us-ca"
+  },
+  {
+    "uri": "at://did:plc:ppavi77mhpt7smqco4zeswop/app.bsky.feed.post/3lcsduafl2k2g",
+    "handle": "iea.org",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "iea-other-us-ca",
+    "text_snippet": "Last week in Paris, 300 participants from the tech industry, the energy sector &",
+    "selection_reason": "multi-expert-cluster-iea-other-us-ca"
+  },
+  {
+    "uri": "at://did:plc:ppavi77mhpt7smqco4zeswop/app.bsky.feed.post/3lbmg5t7msc2n",
+    "handle": "iea.org",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "iea-other-us-ca",
+    "text_snippet": "Our latest Energy Snapshot newsletter went out this week, looking at the growing",
+    "selection_reason": "multi-expert-cluster-iea-other-us-ca"
+  },
+  {
+    "uri": "at://did:plc:fbvwkj56tyd2ru54rybgxpbz/app.bsky.feed.post/3mfbp4yjwny24",
+    "handle": "cleanenergywire.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "iea-other-us-ca",
+    "text_snippet": "IEA Ministerial Meeting underscores Agency’s central role in tackling global ene",
+    "selection_reason": "multi-expert-cluster-iea-other-us-ca"
+  },
+  {
+    "uri": "at://did:plc:tywkpd4s5utvhnucftqtsjyc/app.bsky.feed.post/3m5hk2xfgos2l",
+    "handle": "hannahritchie.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "540 GW"
+    ],
+    "publisher": "iea",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "iea-other-us-ca",
+    "text_snippet": "I took the historical data from here: www.iea.org/data-and-sta...\n\nNotes say it ",
+    "selection_reason": "multi-expert-cluster-iea-other-us-ca"
+  },
+  {
+    "uri": "at://did:plc:gkblzvva3k5h2aiu3kdtfa24/app.bsky.feed.post/3mhjegtmyhc2r",
+    "handle": "sustainable2050.bsky.social",
+    "categories": [
+      "price",
+      "demand"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "iea-price-us-ca",
+    "text_snippet": "Zoals het IEA zegt: \n\"Encouraging a shift from private cars to public transport,",
+    "selection_reason": "multi-expert-cluster-iea-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:meebc75altsav3pgyz4b3g5o/app.bsky.feed.post/3mhik54vlg22h",
+    "handle": "aarnegranlund.bsky.social",
+    "categories": [
+      "price",
+      "emissions",
+      "demand"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "iea-price-us-ca",
+    "text_snippet": "”Encouraging a shift from private cars to public transport, alongside measures s",
+    "selection_reason": "multi-expert-cluster-iea-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:t4qjao6o2xfwavfc5ewwvosg/app.bsky.feed.post/3mhabj2aezk27",
+    "handle": "pqpolitics.bsky.social",
+    "categories": [
+      "price",
+      "investment"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "iea-price-us-ca",
+    "text_snippet": "Is it? \n\nBy how much in the last 4 years?\n\nNorway is a cold country 50% of it's ",
+    "selection_reason": "multi-expert-cluster-iea-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:smcajkfn2ljo2b2h7pj6huot/app.bsky.feed.post/3miljsikzic22",
+    "handle": "drpauldorfman.bsky.social",
+    "categories": [
+      "capacity"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "irena",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "irena-capacity",
+    "text_snippet": "#Renewables 2026\nwww.irena.org/-/media/File...",
+    "selection_reason": "multi-expert-cluster-irena-capacity"
+  },
+  {
+    "uri": "at://did:plc:fbvwkj56tyd2ru54rybgxpbz/app.bsky.feed.post/3miimvnrmqc2g",
+    "handle": "cleanenergywire.bsky.social",
+    "categories": [
+      "capacity"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "700 GW"
+    ],
+    "publisher": "irena",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "irena-capacity",
+    "text_snippet": "IRENA: Near-700 GW surge in 2025 proves renewable energy resilience",
+    "selection_reason": "multi-expert-cluster-irena-capacity"
+  },
+  {
+    "uri": "at://did:plc:rcu7ybho7gdw3x3cxp64jnue/app.bsky.feed.post/3mgi2klno7224",
+    "handle": "robertferry.bsky.social",
+    "categories": [
+      "capacity"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "irena",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "irena-capacity",
+    "text_snippet": "“When solar PV plants are deployed on disturbed or degraded land, for example, t",
+    "selection_reason": "multi-expert-cluster-irena-capacity"
+  },
+  {
+    "uri": "at://did:plc:5t3gg4aaeqrnuzgxihbmbru5/app.bsky.feed.post/3l244btmndr2p",
+    "handle": "stephenjarvis.bsky.social",
+    "categories": [
+      "capacity",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "15GW"
+    ],
+    "publisher": "irena",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "irena-capacity",
+    "text_snippet": "Floating offshore wind has not been getting enough attention. It's true that so ",
+    "selection_reason": "multi-expert-cluster-irena-capacity"
+  },
+  {
+    "uri": "at://did:plc:75d5js6amejyb2zwkb5oof7p/app.bsky.feed.post/3mh6jaleccr2x",
+    "handle": "myzerocarbon.org",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "unfccc",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "unfccc-other-us-ca",
+    "text_snippet": ".\nAction for Climate Empowerment | UNFCCC\n\nFind out more: unfccc.int/topics/educ",
+    "selection_reason": "multi-expert-cluster-unfccc-other-us-ca"
+  },
+  {
+    "uri": "at://did:plc:nwszuegdifzrm2vmeujv5yee/app.bsky.feed.post/3mbrz5ozf4c2m",
+    "handle": "wblau.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "unfccc",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "unfccc-other-us-ca",
+    "text_snippet": "To my friends in climate communication and climate journalism, this is a great o",
+    "selection_reason": "multi-expert-cluster-unfccc-other-us-ca"
+  },
+  {
+    "uri": "at://did:plc:kl3loc27o7pkbq3fdo2rpla7/app.bsky.feed.post/3m5toshex722k",
+    "handle": "mollylempriere.carbonbrief.org",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "unfccc",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "unfccc-other-us-ca",
+    "text_snippet": "References to critical minerals remain (a win for civil society orgs who have be",
+    "selection_reason": "multi-expert-cluster-unfccc-other-us-ca"
+  },
+  {
+    "uri": "at://did:plc:k2tq6bobaibmpq3erbmvbyux/app.bsky.feed.post/3lry2u2x2uc2q",
+    "handle": "joerirogelj.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "unfccc",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "unfccc-other-us-ca",
+    "text_snippet": "That's not the actual target though. \nIt's \"Holding the increase in the global a",
+    "selection_reason": "multi-expert-cluster-unfccc-other-us-ca"
+  },
+  {
+    "uri": "at://did:plc:75d5js6amejyb2zwkb5oof7p/app.bsky.feed.post/3mfzn2we72j27",
+    "handle": "myzerocarbon.org",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "unfccc",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "unfccc-other",
+    "text_snippet": ".\nClimate Data Hub unlocks access to climate information to boost data-driven ac",
+    "selection_reason": "multi-expert-cluster-unfccc-other"
+  },
+  {
+    "uri": "at://did:plc:k2tq6bobaibmpq3erbmvbyux/app.bsky.feed.post/3m6a55kou5s2h",
+    "handle": "joerirogelj.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "unfccc",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "unfccc-other",
+    "text_snippet": "New text @cop30brazil.bsky.social provides a glimpse of where #COP30 might land.",
+    "selection_reason": "multi-expert-cluster-unfccc-other"
+  },
+  {
+    "uri": "at://did:plc:3zhdeyok4trlrd3cijz7p4e6/app.bsky.feed.post/3ly2es42fx22q",
+    "handle": "beyondfossilfuels.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "unfccc",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "unfccc-other",
+    "text_snippet": "Against a backdrop of summer heatwaves and storms, the UN is urging countries to",
+    "selection_reason": "multi-expert-cluster-unfccc-other"
+  },
+  {
+    "uri": "at://did:plc:73y4zoy23feszuzpmh35wqrj/app.bsky.feed.post/3lhwhr7vibk2k",
+    "handle": "oliviarudgard.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "unfccc",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "unfccc-other",
+    "text_snippet": "Try this: unfccc.int/most-request...",
+    "selection_reason": "multi-expert-cluster-unfccc-other"
+  },
+  {
+    "uri": "at://did:plc:gps4qwkggxgp7op7pm4bfeuz/app.bsky.feed.post/3mgoczsqko22a",
+    "handle": "johnsmillie42.bsky.social",
+    "categories": [
+      "grid-ops"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "caiso",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "caiso-grid-ops-us-ca",
+    "text_snippet": "www.caiso.com/iso-today",
+    "selection_reason": "multi-expert-cluster-caiso-grid-ops-us-ca"
+  },
+  {
+    "uri": "at://did:plc:aaliphcev6x7cpfgtto4sefd/app.bsky.feed.post/3ldfctzrg222a",
+    "handle": "ricoconnell.bsky.social",
+    "categories": [
+      "grid-ops"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "caiso",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "caiso-grid-ops-us-ca",
+    "text_snippet": "This is how you make progress on the transition - many small changes to market o",
+    "selection_reason": "multi-expert-cluster-caiso-grid-ops-us-ca"
+  },
+  {
+    "uri": "at://did:plc:hi4rpckdczbgirgxxq6ury2l/app.bsky.feed.post/3mfvfcbhzoc2u",
+    "handle": "terrawatts2010.bsky.social",
+    "categories": [
+      "grid-ops"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "caiso",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "caiso-grid-ops-us-ca",
+    "text_snippet": "CAISO has released a set of guiding principles for upcoming discussions about se",
+    "selection_reason": "multi-expert-cluster-caiso-grid-ops-us-ca"
+  },
+  {
+    "uri": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3ke625rcjsl2q",
+    "handle": "rtoinsider.bsky.social",
+    "categories": [
+      "grid-ops"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "caiso",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "caiso-grid-ops-us-ca",
+    "text_snippet": "California looks to Idaho for wind power. #energysky\nwww.rtoinsider.com/61530-ca",
+    "selection_reason": "multi-expert-cluster-caiso-grid-ops-us-ca"
+  },
+  {
+    "uri": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3kdnb7kvpuj22",
+    "handle": "rtoinsider.bsky.social",
+    "categories": [
+      "grid-ops"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "caiso",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "caiso-grid-ops-us-ca",
+    "text_snippet": "What's the proper definition for having adequate resources to prevent problems w",
+    "selection_reason": "multi-expert-cluster-caiso-grid-ops-us-ca"
+  },
+  {
+    "uri": "at://did:plc:6ml4nxrk45cy23jay5hc2npp/app.bsky.feed.post/3mgwtdcgm3c2m",
+    "handle": "justinmikulka.bsky.social",
+    "categories": [
+      "generation",
+      "price",
+      "demand"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "US",
+    "difficulty": "easy",
+    "cluster_key": "eia-generation-us",
+    "text_snippet": "In its February update the EIA said they expected natural gas prices to go down ",
+    "selection_reason": "multi-expert-cluster-eia-generation-us"
+  },
+  {
+    "uri": "at://did:plc:7rmejk2hlkw2sfowiatzoo6b/app.bsky.feed.post/3mg3cvastyk2s",
+    "handle": "jrfhanger.bsky.social",
+    "categories": [
+      "generation"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "US",
+    "difficulty": "easy",
+    "cluster_key": "eia-generation-us",
+    "text_snippet": "Renewables are vital to US economy and security. \n\nRenewables and nuclear keep m",
+    "selection_reason": "multi-expert-cluster-eia-generation-us"
+  },
+  {
+    "uri": "at://did:plc:a4py7lzj6xarzriaht7uyxq2/app.bsky.feed.post/3mdlymglw2s26",
+    "handle": "0lsi.bsky.social",
+    "categories": [
+      "generation",
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "US",
+    "difficulty": "easy",
+    "cluster_key": "eia-generation-us",
+    "text_snippet": "According to the Energy Information Administration, 🇺🇸 US electricity is expec",
+    "selection_reason": "multi-expert-cluster-eia-generation-us"
+  },
+  {
+    "uri": "at://did:plc:uekpyeqvmwsjc5t5y74qx4xe/app.bsky.feed.post/3mfueoxys522j",
+    "handle": "dvschroeder.bsky.social",
+    "categories": [
+      "capacity",
+      "generation",
+      "demand"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "53 MW",
+      "28 MW",
+      "31 MW"
+    ],
+    "publisher": "eia",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "eia-capacity-us-ca",
+    "text_snippet": "Here's the link: www.eia.gov/electricity/...\n\n(You have to download the spreadsh",
+    "selection_reason": "multi-expert-cluster-eia-capacity-us-ca"
+  },
+  {
+    "uri": "at://did:plc:pb73vbvwit4phtn7hvuv23yk/app.bsky.feed.post/3mehfkvi6j22k",
+    "handle": "mzjacobson.bsky.social",
+    "categories": [
+      "capacity",
+      "generation",
+      "grid-ops"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "21.58 GW",
+      "57,054 GWh"
+    ],
+    "publisher": "eia",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "eia-capacity-us-ca",
+    "text_snippet": "CA solar is almost as reliable as coal:\n\n2025 avg capacity factor of all 21.58 G",
+    "selection_reason": "multi-expert-cluster-eia-capacity-us-ca"
+  },
+  {
+    "uri": "at://did:plc:xlope3oo4etb3hq5l3adqznx/app.bsky.feed.post/3mdx4m7eu6c2f",
+    "handle": "robbieandrew.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "40,000 MW"
+    ],
+    "publisher": "eia",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "eia-capacity-us-ca",
+    "text_snippet": "Interesting.\n\"We estimate the engines that once powered the retired [military] a",
+    "selection_reason": "multi-expert-cluster-eia-capacity-us-ca"
+  },
+  {
+    "uri": "at://did:plc:uekpyeqvmwsjc5t5y74qx4xe/app.bsky.feed.post/3mdexj72k522d",
+    "handle": "dvschroeder.bsky.social",
+    "categories": [
+      "capacity",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "28 MW"
+    ],
+    "publisher": "eia",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "eia-capacity-us-ca",
+    "text_snippet": "No revisions to the EIA listings for the Fervo Cape Station project this month. ",
+    "selection_reason": "multi-expert-cluster-eia-capacity-us-ca"
+  },
+  {
+    "uri": "at://did:plc:pb73vbvwit4phtn7hvuv23yk/app.bsky.feed.post/3m6wwqtmxjk2h",
+    "handle": "mzjacobson.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "us-caiso",
+    "difficulty": "easy",
+    "cluster_key": "eia-us",
+    "text_snippet": "Despite electric heating in TX, TX  burns 3.1x the fossil gas per capita as CA. ",
+    "selection_reason": "multi-expert-cluster-eia-us"
+  },
+  {
+    "uri": "at://did:plc:7kjk27cxb7s2h3xc5s5yojor/app.bsky.feed.post/3m4ep7zmydk2r",
+    "handle": "severinborenstein.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "us-ercot",
+    "difficulty": "easy",
+    "cluster_key": "eia-us",
+    "text_snippet": "Not sure how this got past the administration's communication controls, but EIA ",
+    "selection_reason": "multi-expert-cluster-eia-us"
+  },
+  {
+    "uri": "at://did:plc:xfycvygit2cyxd2oqlku47su/app.bsky.feed.post/3ldh6jfcpq227",
+    "handle": "michael-thomas.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "eia-us",
+    "text_snippet": "The only reliable data that breaks down heat pump vs. resistance is RECs surveys",
+    "selection_reason": "multi-expert-cluster-eia-us"
+  },
+  {
+    "uri": "at://did:plc:puzyhfvkombbfh3nj7a3pnjx/app.bsky.feed.post/3lbibqw5eq22r",
+    "handle": "ethanhowl.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": null,
+    "geography": "unspecified",
+    "difficulty": "hard",
+    "cluster_key": "generic",
+    "text_snippet": "FERC today upheld its transmission planning/cost allocation rule, but gave state",
+    "selection_reason": "multi-expert-cluster-generic"
+  },
+  {
+    "uri": "at://did:plc:gcrjiywvef24odon553s5q2b/app.bsky.feed.post/3lawq2cb2io2n",
+    "handle": "energylawjeff.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": null,
+    "geography": "unspecified",
+    "difficulty": "hard",
+    "cluster_key": "generic",
+    "text_snippet": "For you transmission planning + cost allocation freaks on #energysky, FERC appea",
+    "selection_reason": "multi-expert-cluster-generic"
+  },
+  {
+    "uri": "x://1558466439396397057/status/1991229557257511297",
+    "handle": "grid_status",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": null,
+    "geography": "unspecified",
+    "difficulty": "hard",
+    "cluster_key": "generic",
+    "text_snippet": "Check out our new real-time feed of expert commentary on energy markets and the ",
+    "selection_reason": "multi-expert-cluster-generic"
+  },
+  {
+    "uri": "at://did:plc:6ml4nxrk45cy23jay5hc2npp/app.bsky.feed.post/3mgumavzpbc2j",
+    "handle": "justinmikulka.bsky.social",
+    "categories": [
+      "demand",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "930,000 bpd",
+      "880,000 bpd",
+      "660,000 bpd"
+    ],
+    "publisher": "iea",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "iea-demand-us-ca",
+    "text_snippet": "IEA global oil demand growth forecasts: \n\nJan:  930,000 bpd\nFeb:  880,000 bpd\nMa",
+    "selection_reason": "multi-expert-cluster-iea-demand-us-ca"
+  },
+  {
+    "uri": "at://did:plc:2yfslrb6n7umb4dfr6e4z2e6/app.bsky.feed.post/3ll4ucgmfhc2o",
+    "handle": "taykuy.bsky.social",
+    "categories": [
+      "demand"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "iea-demand-us-ca",
+    "text_snippet": "Globally, coal's growth rate is declining, but coal demand still grew by 1.1% in",
+    "selection_reason": "multi-expert-cluster-iea-demand-us-ca"
+  },
+  {
+    "uri": "at://did:plc:fjv4ly3ho3xmbpfkvtlpiey6/app.bsky.feed.post/3li3doha4t22l",
+    "handle": "abbiebennett.bsky.social",
+    "categories": [
+      "demand"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "iea",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "iea-demand-us-ca",
+    "text_snippet": "Nuclear power will see a significant resurgence in 2025 as energy demands grow g",
+    "selection_reason": "multi-expert-cluster-iea-demand-us-ca"
+  },
+  {
+    "uri": "at://did:plc:zgh42tgpzddqoi3awnsetwau/app.bsky.feed.post/3mgajaxbhks2g",
+    "handle": "kostyack.bsky.social",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "rtoinsider",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "rtoinsider-price-us-ca",
+    "text_snippet": "The American Consumer Institute, group infamous for taking corporate donations t",
+    "selection_reason": "multi-expert-cluster-rtoinsider-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:5tf65pf4gdrfvsp7s2ve6in4/app.bsky.feed.post/3lyv6om4xj22g",
+    "handle": "yes-energy.bsky.social",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "rtoinsider",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "rtoinsider-price-us-ca",
+    "text_snippet": "While the new bill still gives California an out from participating in the RO, i",
+    "selection_reason": "multi-expert-cluster-rtoinsider-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:2nwxwnckaqlzrtsvyap53cpf/app.bsky.feed.post/3lqtf6e67as2g",
+    "handle": "kensands.bsky.social",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "rtoinsider",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "rtoinsider-price-us-ca",
+    "text_snippet": "One more step in a complex process in California. But significant. 🔌💡\n@yes-ene",
+    "selection_reason": "multi-expert-cluster-rtoinsider-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3kd5ag3ill522",
+    "handle": "rtoinsider.bsky.social",
+    "categories": [
+      "price",
+      "investment",
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "rtoinsider",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "rtoinsider-price-us-ca",
+    "text_snippet": "Big news in offshore wind. Orsted has canceled two big projects off the New Jers",
+    "selection_reason": "multi-expert-cluster-rtoinsider-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3kcyqqv77x42d",
+    "handle": "rtoinsider.bsky.social",
+    "categories": [
+      "price",
+      "investment",
+      "grid-ops",
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "rtoinsider",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "rtoinsider-price-us-ca",
+    "text_snippet": "The electrical grid needs a five-fold increase in regional transmission, so the ",
+    "selection_reason": "multi-expert-cluster-rtoinsider-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3kbydcnmor62p",
+    "handle": "rtoinsider.bsky.social",
+    "categories": [
+      "price",
+      "investment"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "rtoinsider",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "rtoinsider-price-us-ca",
+    "text_snippet": "Car dealers in New Jersey say consumers aren't ready for electric vehicles. Cost",
+    "selection_reason": "multi-expert-cluster-rtoinsider-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:noyuynnb77oywrafrctwagdp/app.bsky.feed.post/3me25dwmwok2m",
+    "handle": "simonmahan.bsky.social",
+    "categories": [
+      "price",
+      "investment",
+      "grid-ops",
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "rtoinsider",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "rtoinsider-price",
+    "text_snippet": "ERAS lets utilities cut the interconnection line—fast-tracking billions in gas p",
+    "selection_reason": "multi-expert-cluster-rtoinsider-price"
+  },
+  {
+    "uri": "at://did:plc:2nwxwnckaqlzrtsvyap53cpf/app.bsky.feed.post/3lx3cwtiddk2h",
+    "handle": "kensands.bsky.social",
+    "categories": [
+      "price",
+      "investment"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "rtoinsider",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "rtoinsider-price",
+    "text_snippet": "States will do anything to get tech company data centers.\n\nA 4-1 vote from Louis",
+    "selection_reason": "multi-expert-cluster-rtoinsider-price"
+  },
+  {
+    "uri": "at://did:plc:z5un653ppzei6g4wrehghjde/app.bsky.feed.post/3lbbhkufkbd2y",
+    "handle": "honeill.bsky.social",
+    "categories": [
+      "price",
+      "policy"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "rtoinsider",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "rtoinsider-price",
+    "text_snippet": "For those who missed this great news last week, MA stepped up with legislation t",
+    "selection_reason": "multi-expert-cluster-rtoinsider-price"
+  },
+  {
+    "uri": "at://did:plc:5tf65pf4gdrfvsp7s2ve6in4/app.bsky.feed.post/3mbz33erar22n",
+    "handle": "yes-energy.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "rtoinsider",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "rtoinsider-other",
+    "text_snippet": "With data center developments already taking up much of the grid's headspace, IC",
+    "selection_reason": "multi-expert-cluster-rtoinsider-other"
+  },
+  {
+    "uri": "at://did:plc:5tf65pf4gdrfvsp7s2ve6in4/app.bsky.feed.post/3m3sdlwnb6k2l",
+    "handle": "yes-energy.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "rtoinsider",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "rtoinsider-other",
+    "text_snippet": "The Western Resource Adequacy Program is facing participant uncertainty ahead of",
+    "selection_reason": "multi-expert-cluster-rtoinsider-other"
+  },
+  {
+    "uri": "at://did:plc:2nwxwnckaqlzrtsvyap53cpf/app.bsky.feed.post/3lpuvrgap7225",
+    "handle": "kensands.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "rtoinsider",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "rtoinsider-other",
+    "text_snippet": "Friday news dump #1.\nDOE/Trump admin using this method to keep coal plant open s",
+    "selection_reason": "multi-expert-cluster-rtoinsider-other"
+  },
+  {
+    "uri": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3kfatzczrtm2a",
+    "handle": "rtoinsider.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "rtoinsider",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "rtoinsider-other",
+    "text_snippet": "Getting to 100% Clean Energy Will be Hard, Uncomfortable but Doable. #energysky ",
+    "selection_reason": "multi-expert-cluster-rtoinsider-other"
+  },
+  {
+    "uri": "at://did:plc:crdyqyinej4zretgkh4eh3ns/app.bsky.feed.post/3mfznpksvhk2j",
+    "handle": "michaelsderby.bsky.social",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "spglobal",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "spglobal-price-us-ca",
+    "text_snippet": "Trump trade policy threatens financial health of iconic instrument maker: “Fende",
+    "selection_reason": "multi-expert-cluster-spglobal-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:fjv4ly3ho3xmbpfkvtlpiey6/app.bsky.feed.post/3m3xmhnxtpk2c",
+    "handle": "abbiebennett.bsky.social",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "spglobal",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "spglobal-price-us-ca",
+    "text_snippet": "SC utility Santee Cooper took initial steps to select Brookfield Asset Managemen",
+    "selection_reason": "multi-expert-cluster-spglobal-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:ehnv6xi4qb5nhffmroalveeo/app.bsky.feed.post/3lzr5vb6yrk2d",
+    "handle": "projectdrawdown.bsky.social",
+    "categories": [
+      "price",
+      "emissions",
+      "policy"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "spglobal",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "spglobal-price-us-ca",
+    "text_snippet": "When it comes to achieving net-zero, the ease of permitting and lower cost mean ",
+    "selection_reason": "multi-expert-cluster-spglobal-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:fjv4ly3ho3xmbpfkvtlpiey6/app.bsky.feed.post/3lpoxlyqwjc2h",
+    "handle": "abbiebennett.bsky.social",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "spglobal",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "spglobal-price-us-ca",
+    "text_snippet": "The House Ways and Means Committee's budget reconciliation bill puts tax credits",
+    "selection_reason": "multi-expert-cluster-spglobal-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:fjv4ly3ho3xmbpfkvtlpiey6/app.bsky.feed.post/3lkejv65cds2i",
+    "handle": "abbiebennett.bsky.social",
+    "categories": [
+      "price",
+      "policy"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "spglobal",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "spglobal-price-us-ca",
+    "text_snippet": "Meanwhile, SC lawmakers are again taking up sweeping energy legislation after an",
+    "selection_reason": "multi-expert-cluster-spglobal-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:fjv4ly3ho3xmbpfkvtlpiey6/app.bsky.feed.post/3lkejs2uxrc2i",
+    "handle": "abbiebennett.bsky.social",
+    "categories": [
+      "price",
+      "emissions",
+      "policy",
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "spglobal",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "spglobal-price-us-ca",
+    "text_snippet": "NC lawmakers are quickly advancing a bill to overhaul 2021 energy legislation, i",
+    "selection_reason": "multi-expert-cluster-spglobal-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:fjv4ly3ho3xmbpfkvtlpiey6/app.bsky.feed.post/3li3din4sj22l",
+    "handle": "abbiebennett.bsky.social",
+    "categories": [
+      "price",
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "spglobal",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "spglobal-price-us-ca",
+    "text_snippet": "ICYMI: Tennessee Gov. Bill Lee proposed $72M for nuclear initiatives and is advo",
+    "selection_reason": "multi-expert-cluster-spglobal-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:fjv4ly3ho3xmbpfkvtlpiey6/app.bsky.feed.post/3lc2k2jzc6k2q",
+    "handle": "abbiebennett.bsky.social",
+    "categories": [
+      "price",
+      "grid-ops"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "spglobal",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "spglobal-price-us-ca",
+    "text_snippet": "costs.\n\nhttps://www.spglobal.com/marketintelligence/en/news-insights/latest-news",
+    "selection_reason": "multi-expert-cluster-spglobal-price-us-ca"
+  },
+  {
+    "uri": "at://did:plc:7rmejk2hlkw2sfowiatzoo6b/app.bsky.feed.post/3mihaqgumz22f",
+    "handle": "jrfhanger.bsky.social",
+    "categories": [
+      "capacity",
+      "generation",
+      "grid-ops",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1.3 GW",
+      "17 GW",
+      "44%",
+      "20%"
+    ],
+    "publisher": "caiso",
+    "geography": "us-caiso",
+    "difficulty": "easy",
+    "cluster_key": "caiso-solar-2020",
+    "text_snippet": "Batteries & solar make gas biggest loser!  CAISO batteries charged heavily with",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:pb73vbvwit4phtn7hvuv23yk/app.bsky.feed.post/3mih5qax4222e",
+    "handle": "mzjacobson.bsky.social",
+    "categories": [
+      "capacity",
+      "generation",
+      "grid-ops",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "5.76 GW",
+      "88.43%",
+      "15.8%",
+      "72.7%",
+      "85.5%",
+      "17.6%",
+      "2.59%",
+      "65.3%",
+      "13.9%"
+    ],
+    "publisher": "ferc",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "ferc-solar-2025",
+    "text_snippet": "WindWaterSolar still winning despite Trump  88.43% of all new US grid electricit",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:a4py7lzj6xarzriaht7uyxq2/app.bsky.feed.post/3mh5m2c4vmc2e",
+    "handle": "0lsi.bsky.social",
+    "categories": [
+      "capacity",
+      "generation",
+      "investment",
+      "demand",
+      "grid-ops",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "17 GW",
+      "4.9 GWh"
+    ],
+    "publisher": "bnef",
+    "geography": "us-california",
+    "difficulty": "easy",
+    "cluster_key": "bnef-battery-2025",
+    "text_snippet": "🔋 Batteries are rapidly replacing gas plants on major power grids in the US and",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:dabqc2c73f6wm3sdq4sofdzf/app.bsky.feed.post/3mhi5pw3k4j2f",
+    "handle": "ember-energy.org",
+    "categories": [
+      "capacity",
+      "investment"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "93%",
+      "92%"
+    ],
+    "publisher": "ember",
+    "geography": "global",
+    "difficulty": "easy",
+    "cluster_key": "ember-solar",
+    "text_snippet": "Dive into this data with Ember’s newly launched Monthly Capacity Data tool! 📊",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mihbu5cn2e2x",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "capacity"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1,332MW",
+      "332MW"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-capacity",
+    "text_snippet": "Michigan approves 1,332MW of BESS with 332MW supporting Oracle data centre #ener",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:ysqrfdc73lac6unle6ecjvr6/app.bsky.feed.post/3k2bdotk5pf23",
+    "handle": "kavya.bsky.social",
+    "categories": [
+      "capacity",
+      "grid-ops"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "5,600 MW",
+      "500 MW"
+    ],
+    "publisher": "caiso",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "caiso-capacity-us-ca",
+    "text_snippet": "The California ISO reports that it now has 5,600 MW of battery storage capacity ",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:hi4rpckdczbgirgxxq6ury2l/app.bsky.feed.post/3mgqotmuf5k2v",
+    "handle": "terrawatts2010.bsky.social",
+    "categories": [
+      "capacity",
+      "generation",
+      "grid-ops"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "200 GW",
+      "35%"
+    ],
+    "publisher": "enerdata",
+    "geography": "china",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-china",
+    "text_snippet": "These new lines will enable around 200 GWh/year of renewable power to be connect",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mgpd45ftdp2s",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "300 MW",
+      "150 MW",
+      "540 MW"
+    ],
+    "publisher": "enerdata",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity",
+    "text_snippet": "Tunisia launches tender for 300?MW solar + 150?MW/540?MWh BESS #EnergySky",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mgp62pjsxe22",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "2 GW",
+      "585 MW"
+    ],
+    "publisher": "enerdata",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity",
+    "text_snippet": "ACEN plans to add 2 GWh BESS at 585 MW solar park in Zambales (Philippines) #Ene",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mgmlvup2rn2r",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "100 MW",
+      "400 MW"
+    ],
+    "publisher": "enerdata",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-us",
+    "text_snippet": "Avantus advances 100 MW Kitt solar project and 400 MWh BESS in Arizona (US) #Ene",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mgfemhxgif2v",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1.5 GW",
+      "3 GW"
+    ],
+    "publisher": "enerdata",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity",
+    "text_snippet": "PPC and Metlen plan up to 1.5 GW/3 GWh of BESS in Romania, Bulgaria and Italy #E",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mgfba2i7dn26",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "600 MW",
+      "2.4 GW"
+    ],
+    "publisher": "enerdata",
+    "geography": "china",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-china",
+    "text_snippet": "China commissions world's largest 600 MW / 2.4 GWh CAES station #EnergySky",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mgf46smcpv23",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "500 MW",
+      "000 MW"
+    ],
+    "publisher": "enerdata",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity",
+    "text_snippet": "CEEC secures contract for 500 MW/1,000 MWh Nefertiti BESS project in Egypt #Ener",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mgcxiajpc22o",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "761 MW",
+      "1 GW"
+    ],
+    "publisher": "enerdata",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity",
+    "text_snippet": "Austria?s Enery Secures financing for 761 MWp/1 GWh BESS project in Romania #Ene",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mgcj7aekm325",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1.1 GW",
+      "3.6 GW"
+    ],
+    "publisher": "enerdata",
+    "geography": "australia",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-australia",
+    "text_snippet": "1.1 GW of solar and 3.6 GWh of BESS projects progress in Australia #EnergySky",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mg7x2psdok25",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "789 MW",
+      "6 GW",
+      "50%"
+    ],
+    "publisher": "enerdata",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity",
+    "text_snippet": "TotalEnergies sells 50% stake in 789 MW / 1,6 GWh German BESS portfolio #EnergyS",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mfqwvunhql2e",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "6.7 GW",
+      "2.5 GW"
+    ],
+    "publisher": "enerdata",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-2026",
+    "text_snippet": "Uzbekistan plans 6.7 GW of new capacity, including 2.5 GW thermal, by 2026 #Ener",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mfoqgixxi42f",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1.1 GW",
+      "100 MW",
+      "200 MW"
+    ],
+    "publisher": "enerdata",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity",
+    "text_snippet": "Scatec starts its 1.1 GW solar + 100 MW/200 MWh BESS project in Egypt #EnergySky",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mfoit63clz23",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1.2 GW",
+      "5 GW"
+    ],
+    "publisher": "enerdata",
+    "geography": "eu-spain",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-eu-2027",
+    "text_snippet": "FRV plans 1.2 GW/5 GWh of ready-to-build BESS in Spain by 2027 #EnergySky",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mfm7wq6sxn26",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "200 MW",
+      "800 MW"
+    ],
+    "publisher": "enerdata",
+    "geography": "eu",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-eu",
+    "text_snippet": "Zenobe signs agreement for 200 MW/800 MWh BESS projects in Scotland (UK) #Energy",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mfjm44zcfr2v",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "260 MW",
+      "619 MW"
+    ],
+    "publisher": "enerdata",
+    "geography": "australia",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-australia",
+    "text_snippet": "Quinbrook's 260 MW/619 MWh Supernode Stage 1 goes live in Australia #EnergySky",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mfjc24jg272r",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "450 MW",
+      "3.6 GW"
+    ],
+    "publisher": "enerdata",
+    "geography": "australia",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-australia",
+    "text_snippet": "Australia greenlights a 450 MW/3.6 GWh Solar+BESS project in Queensland #EnergyS",
+    "selection_reason": "category-diversity-capacity"
+  },
+  {
+    "uri": "at://did:plc:rcu7ybho7gdw3x3cxp64jnue/app.bsky.feed.post/3mhlrna33oc25",
+    "handle": "robertferry.bsky.social",
+    "categories": [
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "17%",
+      "71%"
+    ],
+    "publisher": "eia",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "eia-nuclear",
+    "text_snippet": "From just a couple of percentage points to nearly 1/5 of electricity generation.",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:zk73rhzraoy2jnqdz3i2okoo/app.bsky.feed.post/3mgb6ktyigg2j",
+    "handle": "rachellsarnoff.bsky.social",
+    "categories": [
+      "generation",
+      "emissions",
+      "demand",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "27%",
+      "61%"
+    ],
+    "publisher": "ember",
+    "geography": "us-texas",
+    "difficulty": "easy",
+    "cluster_key": "ember-solar-2025",
+    "text_snippet": "🌅 In the U.S. solar generation rose by 27% to meet 61% of electricity demand gr",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3miju7bvetm2j",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "generation",
+      "price"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "100MW",
+      "200MWh"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "FR",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-generation-fr",
+    "text_snippet": "Harmony starts building third 100MW/200MWh French BESS #energysky -- via Energy ",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3micrurukyo27",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "generation",
+      "price",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "2.6GWh",
+      "230MWh"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-generation",
+    "text_snippet": "Chile: Grenergy places 2.6GWh BESS order with BYD, Engie energises 230MWh projec",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mi5r4l35eg2x",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "generation",
+      "price"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "80MW",
+      "220MWh"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-generation",
+    "text_snippet": "Akuo building 80MW/220MWh Portugal BESS for 2027 completion #energysky -- via En",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mfc7pryjpi2s",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "2.72 GW",
+      "2 GW"
+    ],
+    "publisher": "enerdata",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity",
+    "text_snippet": "Egypt approves 2.72 GW solar projects + 2 GWh battery storage #EnergySky",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mf7dm447ne25",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "334 MW",
+      "501 MW"
+    ],
+    "publisher": "enerdata",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity",
+    "text_snippet": "ACWA Power starts operations at its 334 MW/501 MWh BESS in Uzbekistan #EnergySky",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mf7aypf4632q",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "210 MW",
+      "827 MW"
+    ],
+    "publisher": "enerdata",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity",
+    "text_snippet": "Saudi company plans 210 MW solar and 827 MWh BESS project in Syria #EnergySky",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mf2b2nq5ct26",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "300 MW",
+      "600 MW"
+    ],
+    "publisher": "enerdata",
+    "geography": "australia",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-australia",
+    "text_snippet": "Stanwell starts a 300 MW/600 MWh BESS at a coal-fired power plant (Australia) #E",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3meqhgiqzzr2q",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "300 MW",
+      "660 MW"
+    ],
+    "publisher": "enerdata",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity",
+    "text_snippet": "Solar + BESS project reaches FID on in South Africa (300 MW /660 MWh) #EnergySky",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3meilxoprkf2f",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "500 MW",
+      "2.4 GW"
+    ],
+    "publisher": "enerdata",
+    "geography": "australia",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-australia",
+    "text_snippet": "Synergy completes 500 MW/2.4 GWh BESS in Western Australia #EnergySky",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mdzuvpmusu24",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1.2 GW",
+      "4 GW"
+    ],
+    "publisher": "enerdata",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-us",
+    "text_snippet": "Enlight reaches final milestones on 1.2 GW/4 GWh solar+storage project (US) #Ene",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mdxjigog5l24",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "400 MW",
+      "1.6 GW"
+    ],
+    "publisher": "enerdata",
+    "geography": "australia",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-australia",
+    "text_snippet": "BW ESS submits plans for 400 MW/1.6 GWh BESS project in Australia #EnergySky",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mduschhw7i2j",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "400 MW",
+      "800 MW"
+    ],
+    "publisher": "enerdata",
+    "geography": "eu-germany",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-eu",
+    "text_snippet": "RWE will build a 400 MW/800 MWh BESS in Lingen (Germany) #EnergySky",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mdiez23a4t2f",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "generation"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "600 MW",
+      "2.4 GW"
+    ],
+    "publisher": "enerdata",
+    "geography": "china",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-china",
+    "text_snippet": "China switches on 600 MW/2.4 GWh compressed-air storage in Jiangsu #EnergySky",
+    "selection_reason": "category-diversity-generation"
+  },
+  {
+    "uri": "at://did:plc:7kjk27cxb7s2h3xc5s5yojor/app.bsky.feed.post/3lxy7eu3ysk2e",
+    "handle": "severinborenstein.bsky.social",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "$0.60",
+      "$0.40 m"
+    ],
+    "publisher": "eia",
+    "geography": "us-caiso",
+    "difficulty": "easy",
+    "cluster_key": "eia-price-us",
+    "text_snippet": "As the operations of Phillips 66's Southern California refinery wind down and th",
+    "selection_reason": "category-diversity-price"
+  },
+  {
+    "uri": "at://did:plc:7kjk27cxb7s2h3xc5s5yojor/app.bsky.feed.post/3kq6hp3roc62e",
+    "handle": "severinborenstein.bsky.social",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "$2/MMBTU",
+      "$1"
+    ],
+    "publisher": "eia",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "eia-price-us",
+    "text_snippet": "Nat gas prices below $2/MMBTU in most US, below $1 in a couple of places, includ",
+    "selection_reason": "category-diversity-price"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mej32t5k5g2z",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "720m",
+      "$720m"
+    ],
+    "publisher": "enerdata",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-price-us-2027",
+    "text_snippet": "New Zealand announces US$720m LNG terminal in Taranaki by 2027 #EnergySky",
+    "selection_reason": "category-diversity-price"
+  },
+  {
+    "uri": "at://did:plc:ekdieozvwcal3j5rv4usxswc/app.bsky.feed.post/3mbkdasrq3s2e",
+    "handle": "loisparshley.bsky.social",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "$3.5 b",
+      "10%"
+    ],
+    "publisher": null,
+    "geography": "us",
+    "difficulty": "medium",
+    "cluster_key": "fossil-price-pct-us-2025",
+    "text_snippet": "Though not large in global terms, this provides crucial supplies to US refinerie",
+    "selection_reason": "category-diversity-price"
+  },
+  {
+    "uri": "x://1886502618/status/2039766305071378920",
+    "handle": "SimonMahan",
+    "categories": [
+      "capacity",
+      "price",
+      "investment",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "14 billion",
+      "110 MW",
+      "4.9b",
+      "285 MW",
+      "$14 billion",
+      "$4.9b"
+    ],
+    "publisher": "nrel",
+    "geography": "eu",
+    "difficulty": "medium",
+    "cluster_key": "nrel-solar-2031",
+    "text_snippet": "TVA, nuke experts, out with an updated set of power plant cost estimates. Nuclea",
+    "selection_reason": "category-diversity-price"
+  },
+  {
+    "uri": "at://did:plc:qlfit2m3ksqwaqhuepks5j7p/app.bsky.feed.post/3lukimkojws24",
+    "handle": "guayjg.bsky.social",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "70GW"
+    ],
+    "publisher": "bnef",
+    "geography": "CN",
+    "difficulty": "easy",
+    "cluster_key": "bnef-price-cn",
+    "text_snippet": "China is building a dam bigger than 3 gorges, that costs more than the internati",
+    "selection_reason": "category-diversity-price"
+  },
+  {
+    "uri": "at://did:plc:7kjk27cxb7s2h3xc5s5yojor/app.bsky.feed.post/3lrri62i5u22r",
+    "handle": "severinborenstein.bsky.social",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "$0.00."
+    ],
+    "publisher": "eia",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "eia-price",
+    "text_snippet": "EIA today reports the spot price of natural gas in the Northwest as $0.00.  www.",
+    "selection_reason": "category-diversity-price"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mdx37vwkgw2z",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "price",
+      "investment"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "$2.2b"
+    ],
+    "publisher": "enerdata",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-price-us-2026",
+    "text_snippet": "India unveils US$2.2bn CCUS investment plan under budget 2026?27 #EnergySky",
+    "selection_reason": "category-diversity-price"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mdnavmzca724",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "price",
+      "investment",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "$42b"
+    ],
+    "publisher": "enerdata",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-price-us-2026",
+    "text_snippet": "Tanzania expects to sign a deal on the US$42bn LNG project in June 2026 #EnergyS",
+    "selection_reason": "category-diversity-price"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mdkvho2nwi2p",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "price",
+      "investment"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "$10b"
+    ],
+    "publisher": "enerdata",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-price-us",
+    "text_snippet": "AES Andes scraps US$10bn green hydrogen project in Chile to focus on renewables ",
+    "selection_reason": "category-diversity-price"
+  },
+  {
+    "uri": "at://did:plc:7kjk27cxb7s2h3xc5s5yojor/app.bsky.feed.post/3m4iot2bolk2v",
+    "handle": "severinborenstein.bsky.social",
+    "categories": [
+      "emissions"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "15%"
+    ],
+    "publisher": "eia",
+    "geography": "us-caiso",
+    "difficulty": "easy",
+    "cluster_key": "eia-emissions-pct-us",
+    "text_snippet": "US ethanol exports on the rise. Very discouraging bc it continues to be sold as ",
+    "selection_reason": "category-diversity-emissions"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mgmzht3pmo2o",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "emissions",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "17%"
+    ],
+    "publisher": "enerdata",
+    "geography": "china",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-emissions-emissions-china-2030",
+    "text_snippet": "China's 15th five-year plan aims to cut carbon intensity by 17% by 2030 #EnergyS",
+    "selection_reason": "category-diversity-emissions"
+  },
+  {
+    "uri": "at://did:plc:2zytqzub4mwqb5m7zvefdrpw/app.bsky.feed.post/3mihcjz7ojs2a",
+    "handle": "kevinjkircher.com",
+    "categories": [
+      "emissions",
+      "demand"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "eia",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "eia-emissions",
+    "text_snippet": "Data from Energy Information Administration Table CO2.7, \"Total CO2 emissions es",
+    "selection_reason": "category-diversity-emissions"
+  },
+  {
+    "uri": "at://did:plc:fbvwkj56tyd2ru54rybgxpbz/app.bsky.feed.post/3mhxbxzwc7w26",
+    "handle": "cleanenergywire.bsky.social",
+    "categories": [
+      "emissions",
+      "policy",
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "climate_action_tracker",
+    "geography": "india",
+    "difficulty": "easy",
+    "cluster_key": "climate_action_tracker-emissions-2035",
+    "text_snippet": "India already on track to meet new 2035 target by - or before - 2030  Climate Ac",
+    "selection_reason": "category-diversity-emissions"
+  },
+  {
+    "uri": "at://did:plc:fbvwkj56tyd2ru54rybgxpbz/app.bsky.feed.post/3mhfmmv6r2y2u",
+    "handle": "cleanenergywire.bsky.social",
+    "categories": [
+      "emissions",
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "unknown",
+    "geography": "eu",
+    "difficulty": "easy",
+    "cluster_key": "eu-emissions",
+    "text_snippet": "Germany’s latest projections show energy transition slowdown as emissions gap wi",
+    "selection_reason": "category-diversity-emissions"
+  },
+  {
+    "uri": "at://did:plc:ofs5gs5weifdlyitenhqr6gn/app.bsky.feed.post/3mdejubzwns23",
+    "handle": "robcarlson.bsky.social",
+    "categories": [
+      "investment",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "2.3T",
+      "$2.3T",
+      "8%"
+    ],
+    "publisher": "bnef",
+    "geography": "global",
+    "difficulty": "easy",
+    "cluster_key": "bnef-gas-2025",
+    "text_snippet": "BloombergNEF Finds Global Energy Transition Investment Reached Record $2.3T in 2",
+    "selection_reason": "category-diversity-investment"
+  },
+  {
+    "uri": "x://1136075085851308033/status/1885396675654504603",
+    "handle": "ShanuMathew93",
+    "categories": [
+      "investment",
+      "demand",
+      "grid-ops",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "150 billion",
+      "120 billion",
+      "$150 billion",
+      "$120 billion"
+    ],
+    "publisher": "eia",
+    "geography": "us",
+    "difficulty": "medium",
+    "cluster_key": "eia-battery",
+    "text_snippet": "NextEra: Renewables + Storage are the most economic and quickest way to meet loa",
+    "selection_reason": "category-diversity-investment"
+  },
+  {
+    "uri": "at://did:plc:q4v7osyjpz57nnj6f7wisdy4/app.bsky.feed.post/3mim24napz22s",
+    "handle": "halcyonai.bsky.social",
+    "categories": [
+      "capacity",
+      "investment"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "365 MW",
+      "$42"
+    ],
+    "publisher": "spp",
+    "geography": "us-spp",
+    "difficulty": "medium",
+    "cluster_key": "spp-solar",
+    "text_snippet": "Halcyon curated Alert: Interconnection Requests: FERC   Track new interconnectio",
+    "selection_reason": "category-diversity-investment"
+  },
+  {
+    "uri": "at://did:plc:a4py7lzj6xarzriaht7uyxq2/app.bsky.feed.post/3mdtzgqz2zk2h",
+    "handle": "0lsi.bsky.social",
+    "categories": [
+      "capacity",
+      "investment",
+      "grid-ops",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "800 GW"
+    ],
+    "publisher": "bnef",
+    "geography": "global",
+    "difficulty": "easy",
+    "cluster_key": "bnef-solar-2021",
+    "text_snippet": "Global #wind 💨 and #solar ☀️ installations passed 800 GW last year, triple the",
+    "selection_reason": "category-diversity-investment"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mifjj5okls25",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "generation",
+      "price",
+      "investment"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "170MWh"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "DE",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-generation-de",
+    "text_snippet": "NGEN building 170MWh Austria BESS; Foresight and EBRD invest in Germany, Lithuan",
+    "selection_reason": "category-diversity-investment"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mienvvrge222",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "generation",
+      "investment"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "3GWh"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-generation-us-ca",
+    "text_snippet": "Hithium signs 3GWh long-duration BESS agreement with APAC investor Brawn Capital",
+    "selection_reason": "category-diversity-investment"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mi5xtdaftz2p",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "generation",
+      "investment"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1GWh"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-generation",
+    "text_snippet": "Sungrow bags 1GWh BESS supply deal with ENEVO Group in Romania #energysky -- via",
+    "selection_reason": "category-diversity-investment"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mhjhf34xj427",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "capacity",
+      "investment"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "204MW"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "AU",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-capacity-au",
+    "text_snippet": "Vena Energy secures AU$200 million revenue share deal for 204MW battery storage ",
+    "selection_reason": "category-diversity-investment"
+  },
+  {
+    "uri": "at://did:plc:fjv4ly3ho3xmbpfkvtlpiey6/app.bsky.feed.post/3lh2y4pmo722w",
+    "handle": "abbiebennett.bsky.social",
+    "categories": [
+      "capacity",
+      "demand"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "54 MW",
+      "58 MW"
+    ],
+    "publisher": "spglobal",
+    "geography": "global",
+    "difficulty": "easy",
+    "cluster_key": "spglobal-capacity-global",
+    "text_snippet": "Georgia Power proposed power uprates totaling 54 MW for units 1 and 2 of its Vog",
+    "selection_reason": "category-diversity-demand"
+  },
+  {
+    "uri": "x://521903527/status/1864725529183527040",
+    "handle": "curious_founder",
+    "categories": [
+      "capacity",
+      "demand",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "23 GW",
+      "39 GW",
+      "128 GW"
+    ],
+    "publisher": "ferc",
+    "geography": "unspecified",
+    "difficulty": "medium",
+    "cluster_key": "ferc-demand-2022",
+    "text_snippet": "This is wild.    In 2022, utilities expected electricity demand to grow by 23 GW",
+    "selection_reason": "category-diversity-demand"
+  },
+  {
+    "uri": "x://952613187765047297/2040490502399611310",
+    "handle": "fredstaffordcs",
+    "categories": [
+      "capacity",
+      "demand",
+      "grid-ops"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "30.2 GW",
+      "10.5 GW"
+    ],
+    "publisher": "nyiso",
+    "geography": "us-nyiso",
+    "difficulty": "medium",
+    "cluster_key": "nyiso-prices",
+    "text_snippet": "At the start of summer 2000, NYISO issued a warning about the following summer's",
+    "selection_reason": "category-diversity-demand"
+  },
+  {
+    "uri": "x://352704376/status/1866193165264257252",
+    "handle": "BPBartholomew",
+    "categories": [
+      "capacity",
+      "demand",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "30GW",
+      "6.7GW",
+      "17.7GW",
+      "31.7GW"
+    ],
+    "publisher": "pjm",
+    "geography": "us-pjm",
+    "difficulty": "medium",
+    "cluster_key": "pjm-demand-2026",
+    "text_snippet": "Boom! PJM now forecasts more than 30GW of summer peak load growth by the end of",
+    "selection_reason": "category-diversity-demand"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mfjnrtwwbm2s",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "demand",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "30%"
+    ],
+    "publisher": "enerdata",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-load-pct-2040",
+    "text_snippet": "Croatia aims to cover 30% of its annual electricity demand with by 2040 #EnergyS",
+    "selection_reason": "category-diversity-demand"
+  },
+  {
+    "uri": "at://did:plc:qf326qqj6z6axummja52dzpq/app.bsky.feed.post/3mifbfevg7s2m",
+    "handle": "charlierichmond.bsky.social",
+    "categories": [
+      "capacity",
+      "demand"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "2.2 GW"
+    ],
+    "publisher": "pjm",
+    "geography": "us-pjm",
+    "difficulty": "easy",
+    "cluster_key": "pjm-demand",
+    "text_snippet": "March 31 - Large load tariffs proliferate | ArcLight to buy 2.2 GW, half in PJM",
+    "selection_reason": "category-diversity-demand"
+  },
+  {
+    "uri": "at://did:plc:uvycum23aik6ahfp2f23cxrd/app.bsky.feed.post/3mia7l4ceec27",
+    "handle": "jigarshahdc.bsky.social",
+    "categories": [
+      "capacity",
+      "generation",
+      "demand",
+      "grid-ops",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "35 GW"
+    ],
+    "publisher": "bnef",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "bnef-nuclear-2035",
+    "text_snippet": "AI is the biggest shock to the grid in decades. BloombergNEF forecasts US data c",
+    "selection_reason": "category-diversity-demand"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mh7ybfmu5v27",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "generation",
+      "price",
+      "demand"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "3.1MWh"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "US",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-generation-us",
+    "text_snippet": "US sodium-ion startup Peak Energy piloting 3.1MWh system at RWE Wisconsin lab #e",
+    "selection_reason": "category-diversity-demand"
+  },
+  {
+    "uri": "at://did:plc:7kjk27cxb7s2h3xc5s5yojor/app.bsky.feed.post/3ln4zru5nks25",
+    "handle": "severinborenstein.bsky.social",
+    "categories": [
+      "capacity",
+      "demand"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1 GW"
+    ],
+    "publisher": "ferc",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "ferc-capacity",
+    "text_snippet": "A different reliability concern due to data centers: system imbalance when a 1 G",
+    "selection_reason": "category-diversity-demand"
+  },
+  {
+    "uri": "at://did:plc:fjv4ly3ho3xmbpfkvtlpiey6/app.bsky.feed.post/3li3daqld3k2n",
+    "handle": "abbiebennett.bsky.social",
+    "categories": [
+      "capacity",
+      "demand",
+      "curtailment",
+      "grid-ops"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "100 GW"
+    ],
+    "publisher": "spglobal",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "spglobal-capacity-us-ca",
+    "text_snippet": "The US power system could accommodate as much as 100 GW of additional load witho",
+    "selection_reason": "category-diversity-demand"
+  },
+  {
+    "uri": "at://did:plc:hoyoylxkm7ssefi7phumfnza/app.bsky.feed.post/3mimk4u7yec23",
+    "handle": "commercialsolarguy.com",
+    "categories": [
+      "curtailment"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "$40"
+    ],
+    "publisher": "caiso",
+    "geography": "us-caiso",
+    "difficulty": "medium",
+    "cluster_key": "caiso-solar",
+    "text_snippet": "Here is the answer:  Batteries have increased the value of previously curtailed",
+    "selection_reason": "category-diversity-curtailment"
+  },
+  {
+    "uri": "x://159165088/status/2040805427995107660",
+    "handle": "JulienFrrr",
+    "categories": [
+      "capacity",
+      "curtailment",
+      "policy",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "33 GW",
+      "9 GW",
+      "5.8 GW",
+      "0.5 GW"
+    ],
+    "publisher": "entso-e",
+    "geography": "eu",
+    "difficulty": "medium",
+    "cluster_key": "entso-e-wind",
+    "text_snippet": "Curtailment on wind in Germany is absolutely crazy today.  At 14:00 day-ahead fo",
+    "selection_reason": "category-diversity-curtailment"
+  },
+  {
+    "uri": "x://172619854/status/2039765054745194922",
+    "handle": "aniruddh_mohan",
+    "categories": [
+      "demand",
+      "curtailment",
+      "grid-ops"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ercot",
+    "geography": "us-ercot",
+    "difficulty": "medium",
+    "cluster_key": "ercot-transmission",
+    "text_snippet": "A lot happening on co-location and non-firm load IX in RTOs in recent weeks to c",
+    "selection_reason": "category-diversity-curtailment"
+  },
+  {
+    "uri": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3kd52e5ohoz27",
+    "handle": "rtoinsider.bsky.social",
+    "categories": [
+      "generation",
+      "demand",
+      "curtailment",
+      "grid-ops"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "caiso",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "caiso-generation-us-ca",
+    "text_snippet": "In California, increasing amounts of solar and wind power are outpacing transmis",
+    "selection_reason": "category-diversity-curtailment"
+  },
+  {
+    "uri": "at://did:plc:hplveh3uqygzz57ec2twppna/app.bsky.feed.post/3lfnom45yck2u",
+    "handle": "hermstheword.bsky.social",
+    "categories": [
+      "capacity",
+      "curtailment",
+      "forecast"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "spglobal",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "spglobal-capacity-us-ca",
+    "text_snippet": "Saudi thinktank KAPSARC projects a 260,000 b/d oil market oversupply for 2025, r",
+    "selection_reason": "category-diversity-curtailment"
+  },
+  {
+    "uri": "at://did:plc:pb73vbvwit4phtn7hvuv23yk/app.bsky.feed.post/3mijpvw5t2k2j",
+    "handle": "mzjacobson.bsky.social",
+    "categories": [
+      "capacity",
+      "grid-ops",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "22.5 GW",
+      "8.4 GW",
+      "15.86 GW",
+      "19 GW",
+      "0.8 GW",
+      "17.1 GW",
+      "100%"
+    ],
+    "publisher": "caiso",
+    "geography": "us-caiso",
+    "difficulty": "medium",
+    "cluster_key": "caiso-solar-2026",
+    "text_snippet": "April 1 was the 67th >100% WindWaterSolar day on the CaliforniaISO grid  The gri",
+    "selection_reason": "category-diversity-grid-ops"
+  },
+  {
+    "uri": "at://did:plc:pb73vbvwit4phtn7hvuv23yk/app.bsky.feed.post/3mheo7b7vis2x",
+    "handle": "mzjacobson.bsky.social",
+    "categories": [
+      "grid-ops",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "70%",
+      "100%",
+      "61%",
+      "329%",
+      "67%"
+    ],
+    "publisher": "caiso",
+    "geography": "us-caiso",
+    "difficulty": "medium",
+    "cluster_key": "caiso-solar-2026",
+    "text_snippet": "70% (53 of 76) of all days and 26 straight in 2026 on the California ISO have ex",
+    "selection_reason": "category-diversity-grid-ops"
+  },
+  {
+    "uri": "x://1085245460825149443/status/2020289847617802674",
+    "handle": "edcporter",
+    "categories": [
+      "grid-ops",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "84%"
+    ],
+    "publisher": "ercot",
+    "geography": "us-ercot",
+    "difficulty": "medium",
+    "cluster_key": "ercot-battery-2025",
+    "text_snippet": "In 2025, the average battery energy storage system in ERCOT earned revenues that",
+    "selection_reason": "category-diversity-grid-ops"
+  },
+  {
+    "uri": "x://704707652383670272/status/1855821954244071857",
+    "handle": "douglewinenergy",
+    "categories": [
+      "generation",
+      "grid-ops"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "8%"
+    ],
+    "publisher": "ercot",
+    "geography": "us-ercot",
+    "difficulty": "medium",
+    "cluster_key": "ercot-battery",
+    "text_snippet": "For the first time ever, batteries met more than 8% of electrical demand in ERCO",
+    "selection_reason": "category-diversity-grid-ops"
+  },
+  {
+    "uri": "x://1521502626323574785/status/1864694900727665125",
+    "handle": "1reluctantcog",
+    "categories": [
+      "capacity",
+      "investment",
+      "grid-ops",
+      "policy",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "128 GW"
+    ],
+    "publisher": "ferc",
+    "geography": "global",
+    "difficulty": "medium",
+    "cluster_key": "ferc-nuclear",
+    "text_snippet": "Can anyone really comprehend what 128 GW of new demand in 5 years actually looks",
+    "selection_reason": "category-diversity-grid-ops"
+  },
+  {
+    "uri": "at://did:plc:xc52wj7pj5dmo7ot5tf7gldn/app.bsky.feed.post/3mijrwbak6p2j",
+    "handle": "rtoinsider.bsky.social",
+    "categories": [
+      "capacity",
+      "investment",
+      "grid-ops"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "2.5 GW"
+    ],
+    "publisher": "pjm",
+    "geography": "us-pjm",
+    "difficulty": "medium",
+    "cluster_key": "pjm-capacity",
+    "text_snippet": "Talen Energy’s proposal to buy more than 2.5 GW of generation from Energy Capita",
+    "selection_reason": "category-diversity-grid-ops"
+  },
+  {
+    "uri": "x://1558466439396397057/status/1888985562645688572",
+    "handle": "grid_status",
+    "categories": [
+      "capacity",
+      "grid-ops"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1 GW"
+    ],
+    "publisher": "pjm",
+    "geography": "us-pjm",
+    "difficulty": "medium",
+    "cluster_key": "pjm-nuclear",
+    "text_snippet": "Last week, a ~1 GW nuclear unit tripped outside of Pittsburgh. This is how the t",
+    "selection_reason": "category-diversity-grid-ops"
+  },
+  {
+    "uri": "at://did:plc:6ml4nxrk45cy23jay5hc2npp/app.bsky.feed.post/3mivnfefds22f",
+    "handle": "justinmikulka.bsky.social",
+    "categories": [
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "$32",
+      "$34"
+    ],
+    "publisher": "ember",
+    "geography": "india",
+    "difficulty": "easy",
+    "cluster_key": "ember-solar-2025",
+    "text_snippet": "India will go solar.  Simple economic decision.   \"Solar-plus-storage auctions i",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "at://did:plc:zgvmuehzj2jlhscwgtbwf6tf/app.bsky.feed.post/3mf2cmasgl62b",
+    "handle": "enerdata.bsky.social",
+    "categories": [
+      "capacity",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "2 GW",
+      "3 GW"
+    ],
+    "publisher": "enerdata",
+    "geography": "unspecified",
+    "difficulty": "easy",
+    "cluster_key": "enerdata-capacity-capacity-2030",
+    "text_snippet": "Singapore reaches 2 GW solar capacity target by 2030 and raises it to 3 GW #Ener",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "at://did:plc:7rmejk2hlkw2sfowiatzoo6b/app.bsky.feed.post/3mhigitaor22a",
+    "handle": "jrfhanger.bsky.social",
+    "categories": [
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "50%",
+      "38%",
+      "21%",
+      "10%"
+    ],
+    "publisher": "iea",
+    "geography": "china",
+    "difficulty": "medium",
+    "cluster_key": "iea-forecast-2025",
+    "text_snippet": "Good morning with good news: In 2025, EV sales in China reached over 50% for fir",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "x://283723554/status/2021287974529532095",
+    "handle": "johnrhanger",
+    "categories": [
+      "generation",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "50%",
+      "42%",
+      "34%",
+      "27%"
+    ],
+    "publisher": "iea",
+    "geography": "global",
+    "difficulty": "medium",
+    "cluster_key": "iea-nuclear-2030",
+    "text_snippet": "Renewables &amp; nuclear are 50% of global electricity by 2030, up from 42% in 2",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "x://1558466439396397057/status/1953820550016434212",
+    "handle": "grid_status",
+    "categories": [
+      "capacity",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "500 MW",
+      "000 MW"
+    ],
+    "publisher": "nyiso",
+    "geography": "us-nyiso",
+    "difficulty": "medium",
+    "cluster_key": "nyiso-solar",
+    "text_snippet": "Wildfire smoke complicated NYISO’s BTM solar forecast this week, overforecasting",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "at://did:plc:7qwkxkh4lz2unhehubhbhpt5/app.bsky.feed.post/3mihm2bonnz2k",
+    "handle": "electrek.co",
+    "categories": [
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "88%"
+    ],
+    "publisher": "ferc",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "ferc-forecast-2025",
+    "text_snippet": "FERC: Renewables made up 88% of new US power generating capacity in 2025",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "at://did:plc:qf326qqj6z6axummja52dzpq/app.bsky.feed.post/3miharblii22b",
+    "handle": "charlierichmond.bsky.social",
+    "categories": [
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "22%"
+    ],
+    "publisher": "ferc",
+    "geography": "us",
+    "difficulty": "easy",
+    "cluster_key": "ferc-solar-2025",
+    "text_snippet": "April 1 - Solar installations fell 22% in 2025: FERC | Electricity prices to kee",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3miwctgeei42w",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "generation",
+      "price",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "496MWh"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "FR",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-generation-fr",
+    "text_snippet": "Neoen enlists Nidec for 496MWh France BESS, launches Japan project #energysky --",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mivxohelsz27",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "generation",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1.5GWh"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "AU",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-generation-au",
+    "text_snippet": "NSW IPC approves 1.5GWh solar-plus-storage project in Australia #energysky -- vi",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mimell2t2n2n",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "capacity",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "200MW"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "unknown",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-capacity",
+    "text_snippet": "Reno planning commission approves permit for 200MW Trego Grid BESS project #ener",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mikmnct5mf2p",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "generation",
+      "price",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "300MWh"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "GB",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-generation-gb",
+    "text_snippet": "UK BESS ROUNDUP: SSE commissions 300MWh unit, Matrix, Drax and Voltaria progress",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mhyvkovp672t",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "generation",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1.2GWh"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "BE",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-generation-be",
+    "text_snippet": "Belgium: IPP Storm raises €330 million, starts building 1.2GWh battery storage p",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mhyo4b7w522j",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "generation",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "500GWh"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "US",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-generation-us",
+    "text_snippet": "US will install 500GWh of new energy storage by 2031, Wood Mackenzie predicts #e",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mhwmkxpkn72x",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "generation",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1GWh"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "US-TX",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-generation-us-tx",
+    "text_snippet": "Arevon starts building 1GWh California BESS; BPP and Energy Vault buy Texas proj",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mhgshn6dcp2i",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "capacity",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1.8GW"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "US-CA",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-capacity-us-ca",
+    "text_snippet": "Battery storage projects win 1.8GW in UK capacity market auctions #energysky -- ",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mhew47gdb42o",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "generation",
+      "forecast"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "3GWh"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "EU",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-generation-eu",
+    "text_snippet": "Italy’s Terna approves 3GWh BESS; project progress elsewhere in Europe #energysk",
+    "selection_reason": "category-diversity-forecast"
+  },
+  {
+    "uri": "x://1886502618/status/2039723579294527581",
+    "handle": "SimonMahan",
+    "categories": [
+      "technology"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "50%",
+      "34%",
+      "20%",
+      "54%"
+    ],
+    "publisher": "spp",
+    "geography": "us-spp",
+    "difficulty": "medium",
+    "cluster_key": "spp-solar",
+    "text_snippet": "This morning, SPP east is 50% wind, 34% gas/coal. SPP west is 20% solar, 20% hyd",
+    "selection_reason": "publisher-diversity-spp"
+  },
+  {
+    "uri": "x://1886502618/status/2039682619290317112",
+    "handle": "SimonMahan",
+    "categories": [
+      "technology"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "63%",
+      "5%",
+      "22%"
+    ],
+    "publisher": "spp",
+    "geography": "us-spp",
+    "difficulty": "medium",
+    "cluster_key": "spp-wind",
+    "text_snippet": "A tale of two grids. SPP classic at 63% wind. SPP West getting 5% this morning f",
+    "selection_reason": "publisher-diversity-spp"
+  },
+  {
+    "uri": "at://did:plc:noyuynnb77oywrafrctwagdp/app.bsky.feed.post/3m6z6m533dc2o",
+    "handle": "simonmahan.bsky.social",
+    "categories": [
+      "price"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "spp",
+    "geography": "US-SPP",
+    "difficulty": "easy",
+    "cluster_key": "spp-price-us-spp",
+    "text_snippet": "www.rtoinsider.com/119251-spp-s...",
+    "selection_reason": "publisher-diversity-spp"
+  },
+  {
+    "uri": "x://1558466439396397057/status/1989448929180831913",
+    "handle": "grid_status",
+    "categories": [
+      "capacity"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "1.25 GW"
+    ],
+    "publisher": "miso",
+    "geography": "us-miso",
+    "difficulty": "medium",
+    "cluster_key": "miso-nuclear",
+    "text_snippet": "A nuclear unit came offline yesterday in MISO.  What started as a normal, unplan",
+    "selection_reason": "publisher-diversity-miso"
+  },
+  {
+    "uri": "x://2687569825/status/1848731375685259265",
+    "handle": "Ben_Inskeep",
+    "categories": [
+      "emissions"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "miso",
+    "geography": "unspecified",
+    "difficulty": "medium",
+    "cluster_key": "miso-gas",
+    "text_snippet": "Data centers will directly cause a massive build-out of new fossil fuel power pl",
+    "selection_reason": "publisher-diversity-miso"
+  },
+  {
+    "uri": "at://did:plc:2nwxwnckaqlzrtsvyap53cpf/app.bsky.feed.post/3mf7s7hyhbs2b",
+    "handle": "kensands.bsky.social",
+    "categories": [
+      "demand",
+      "grid-ops"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "miso",
+    "geography": "US-MISO",
+    "difficulty": "easy",
+    "cluster_key": "miso-demand-us-miso",
+    "text_snippet": "MISO was one step away from load shedding (aka forced blackouts) at the height o",
+    "selection_reason": "publisher-diversity-miso"
+  },
+  {
+    "uri": "at://did:plc:3zhdeyok4trlrd3cijz7p4e6/app.bsky.feed.post/3lzlkh4fqz22j",
+    "handle": "beyondfossilfuels.bsky.social",
+    "categories": [
+      "generation",
+      "price"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "DE",
+    "difficulty": "easy",
+    "cluster_key": "ember-generation-de",
+    "text_snippet": "Next? Describing Germany's energy transition as a \"sick path.” \nIn 2024, it gene",
+    "selection_reason": "geography-diversity-DE"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3milw7w2npd2f",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "energystoragenews",
+    "geography": "DE",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-other-de",
+    "text_snippet": "VIDEO – Energy Storage Summit 2026: Assessing Germany’s unique merchant opportun",
+    "selection_reason": "geography-diversity-DE"
+  },
+  {
+    "uri": "at://did:plc:3zhdeyok4trlrd3cijz7p4e6/app.bsky.feed.post/3m2qvs7tkb22b",
+    "handle": "beyondfossilfuels.bsky.social",
+    "categories": [
+      "price",
+      "investment"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "ES",
+    "difficulty": "easy",
+    "cluster_key": "ember-price-es",
+    "text_snippet": "Spain’s renewable boom offers key lessons for 🇪🇺:\n➕Growing wind & solar cuts g",
+    "selection_reason": "geography-diversity-ES"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3lbfobue46d2j",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "energystoragenews",
+    "geography": "ES",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-other-es",
+    "text_snippet": "NHOA to provide sub-1-hour BESS to Spain’s TSO for grid support in Balearic Isla",
+    "selection_reason": "geography-diversity-ES"
+  },
+  {
+    "uri": "at://did:plc:3zhdeyok4trlrd3cijz7p4e6/app.bsky.feed.post/3m7rx7sb6q22l",
+    "handle": "beyondfossilfuels.bsky.social",
+    "categories": [
+      "generation"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "GB",
+    "difficulty": "easy",
+    "cluster_key": "ember-generation-gb",
+    "text_snippet": "Monday marked 25 years since the UK’s first offshore wind farm, Blyth Offshore W",
+    "selection_reason": "geography-diversity-GB"
+  },
+  {
+    "uri": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mhjte5h7b72i",
+    "handle": "torsolarfred.bsky.social",
+    "categories": [
+      "capacity"
+    ],
+    "has_numeric_claim": true,
+    "numeric_claims": [
+      "20GW"
+    ],
+    "publisher": "energystoragenews",
+    "geography": "IN",
+    "difficulty": "easy",
+    "cluster_key": "energystoragenews-capacity-in",
+    "text_snippet": "Indian solar PV manufacturer Saatvik Green enters energy storage business with 2",
+    "selection_reason": "geography-diversity-IN"
+  },
+  {
+    "uri": "at://did:plc:dabqc2c73f6wm3sdq4sofdzf/app.bsky.feed.post/3mfisx3bhlg2i",
+    "handle": "ember-energy.org",
+    "categories": [
+      "generation"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "IN",
+    "difficulty": "easy",
+    "cluster_key": "ember-generation-in",
+    "text_snippet": "Dive into the detailed progress of India’s 21 states across the three dimensions",
+    "selection_reason": "geography-diversity-IN"
+  },
+  {
+    "uri": "at://did:plc:qlfit2m3ksqwaqhuepks5j7p/app.bsky.feed.post/3lyg6z44ksc2d",
+    "handle": "guayjg.bsky.social",
+    "categories": [
+      "demand"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "bnef",
+    "geography": "CN",
+    "difficulty": "easy",
+    "cluster_key": "bnef-demand-cn",
+    "text_snippet": "I've been burned on peak coal before\n\nBut if a research arm of the China's large",
+    "selection_reason": "geography-diversity-CN"
+  },
+  {
+    "uri": "at://did:plc:3uqlk6hebu6vurixcx6s26s5/app.bsky.feed.post/3mcywazvmik2t",
+    "handle": "cleanpowerdave.bsky.social",
+    "categories": [
+      "other"
+    ],
+    "has_numeric_claim": false,
+    "numeric_claims": [],
+    "publisher": "ember",
+    "geography": "CN",
+    "difficulty": "easy",
+    "cluster_key": "ember-other-cn",
+    "text_snippet": "FULL DATA HERE: ember-energy.org/data/chinas-...",
+    "selection_reason": "geography-diversity-CN"
+  }
+]

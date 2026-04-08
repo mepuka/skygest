@@ -1,0 +1,23 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQEZ5VJ4G7F7NP1DKQ57CQV",
+  "title": "EIA Annual Energy Outlook",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Long-term U.S. energy projections",
+  "landingPage": "https://www.eia.gov/outlooks/aeo/",
+  "keywords": [
+    "projections",
+    "long-term",
+    "outlook"
+  ],
+  "themes": [
+    "energy forecast"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQEZ5VJVRX7QB39DBNETAY5"
+  ],
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNQEZ5VHN46YE2PYD8Z64SJG"
+}

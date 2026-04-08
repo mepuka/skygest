@@ -1,0 +1,19 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KNQFXS24MX82F376C7D16Q40",
+  "sourceRef": {
+    "contentId": "x://1136075085851308033/status/2020580621580447815"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQSDAYK3P9HNMKYW5J",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQ774B2VG14CWMTFRS",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBA89H56T1XQ24CXED",
+  "rawLabel": "As my friend @mosessutton89 points out and shared this slide from an ERCOT deck.",
+  "rawDims": {
+    "geography": "us-tx",
+    "category": "capacity"
+  }
+}

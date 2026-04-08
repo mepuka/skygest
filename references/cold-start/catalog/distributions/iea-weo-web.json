@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQEZ5VK98CFX4EHEK3R3AJF",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VK41NWPP3NDN3BTRSP",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "WEO report landing page",
+  "accessURL": "https://www.iea.org/reports/world-energy-outlook-2025"
+}

@@ -1,0 +1,18 @@
+{
+  "_tag": "DataService",
+  "id": "https://id.skygest.io/data-service/svc_01KNQEZ5VH7SFKBQWANM6TSKMV",
+  "title": "CAISO OASIS",
+  "description": "Open Access Same-time Information System for CAISO market data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "endpointURLs": [
+    "https://oasis.caiso.com/"
+  ],
+  "endpointDescription": "https://www.caiso.com/market/Pages/ReportsBulletins/Default.aspx",
+  "servesDatasetIds": [
+    "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",
+    "https://id.skygest.io/dataset/ds_01KNQEZ5VQQGF56XTPKAKE0XHQ"
+  ],
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

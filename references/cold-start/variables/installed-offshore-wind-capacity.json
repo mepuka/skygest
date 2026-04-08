@@ -1,0 +1,15 @@
+{
+  "_tag": "Variable",
+  "id": "https://id.skygest.io/variable/var_01KNQEZ5WM6DKQ71AGT8CVF53B",
+  "label": "Installed offshore wind capacity",
+  "definition": "Nameplate capacity of grid-connected offshore wind turbines",
+  "measuredProperty": "capacity",
+  "domainObject": "offshore wind turbine",
+  "statisticType": "stock",
+  "unitFamily": "power",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "technologyOrFuel": "offshore wind",
+  "aggregation": "end_of_period"
+}

@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQEZ5VQ774B2VG14CWMTFRS",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQSDAYK3P9HNMKYW5J",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "ERCOT battery data",
+  "accessURL": "https://www.ercot.com/gridinfo/generation"
+}

@@ -1,0 +1,23 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQEZ5VKGDC7PBMGDRAP1D4X",
+  "title": "IEA Renewables Report",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Market analysis and forecast for renewable energy",
+  "landingPage": "https://www.iea.org/reports/renewables",
+  "keywords": [
+    "renewables",
+    "solar",
+    "wind",
+    "forecast"
+  ],
+  "themes": [
+    "renewables"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQEZ5VKEE2SJSN8DEVC2E9Q"
+  ]
+}

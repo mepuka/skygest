@@ -1,0 +1,23 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQEZ5VHGV1ZECFSTCKW0B2R",
+  "title": "EIA State CO2 Emissions",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "State-level energy-related carbon dioxide emissions",
+  "landingPage": "https://www.eia.gov/environment/emissions/state/",
+  "keywords": [
+    "CO2",
+    "emissions",
+    "state"
+  ],
+  "themes": [
+    "emissions"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQEZ5VH6D2AT4HKRTB707PR",
+    "https://id.skygest.io/distribution/dist_01KNQEZ5VHHY6CGDJEYXZ2T8T4"
+  ]
+}
