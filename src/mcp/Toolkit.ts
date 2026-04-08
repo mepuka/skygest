@@ -968,7 +968,10 @@ const makeReadOnlyHandlers = (
           topN: input.topN
         }));
 
-        return Effect.succeed(doc);
+        return Effect.succeed({
+          ...doc,
+          _display: doc.body
+        });
       }),
       Effect.mapError(passThroughMcpToolError("get_thread_document"))
     ),

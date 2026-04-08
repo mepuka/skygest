@@ -25,7 +25,9 @@ type EncodedToolResult = {
   readonly encodedResult: unknown;
 };
 
-const asBuiltToolkitEffect = <Tools extends Record<string, AiTool.Any>>(
+// Effect AI does not expose a typed bridge from Toolkit.Toolkit<Tools>
+// to the built toolkit effect shape, so keep that conversion in one place.
+const unsafeBuildToolkitEffect = <Tools extends Record<string, AiTool.Any>>(
   toolkit: Toolkit.Toolkit<Tools>
 ): Effect.Effect<BuiltToolkit<Tools>, never, ToolkitRuntime<Tools>> =>
   toolkit as unknown as Effect.Effect<BuiltToolkit<Tools>, never, ToolkitRuntime<Tools>>;
@@ -64,8 +66,8 @@ const registerToolkitWithDisplayText = <
 > =>
   Effect.gen(function* () {
     const registry = yield* McpServer.McpServer;
-    const built = yield* asBuiltToolkitEffect(toolkit);
-    const services = yield* Effect.services<never>();
+    const built = yield* unsafeBuildToolkitEffect(toolkit);
+    const services = yield* Effect.services<ToolkitRuntime<Tools>>();
     for (const tool of builtTools(built)) {
       const annotations = tool.annotations ?? (ServiceMap.empty() as ServiceMap.ServiceMap<never>);
       const toolMeta = ServiceMap.getOrUndefined(annotations, AiTool.Meta);
@@ -93,7 +95,7 @@ const registerToolkitWithDisplayText = <
             Stream.unwrap,
             Stream.run(Sink.last()),
             Effect.flatMap(Effect.fromOption),
-            Effect.provideServices(services as ServiceMap.ServiceMap<ToolkitRuntime<Tools>>),
+            Effect.provideServices(services),
             Effect.matchCause({
               // Failure path — identical to stock implementation
               onFailure: (cause) =>

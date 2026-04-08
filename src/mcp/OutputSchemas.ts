@@ -77,7 +77,7 @@ export type EditorialPickBundleMcpOutput = typeof EditorialPickBundleMcpOutput.T
 export const PostThreadMcpOutput = PostThreadOutput.pipe(Schema.fieldsAssign(displayFields));
 export type PostThreadMcpOutput = typeof PostThreadMcpOutput.Type;
 
-export const ThreadDocumentMcpOutput = ThreadDocumentOutput;
+export const ThreadDocumentMcpOutput = ThreadDocumentOutput.pipe(Schema.fieldsAssign(displayFields));
 export type ThreadDocumentMcpOutput = typeof ThreadDocumentMcpOutput.Type;
 
 const CurationCandidatesTransportOutput = Schema.Struct({
