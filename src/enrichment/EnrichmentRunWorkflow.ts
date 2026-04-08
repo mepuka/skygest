@@ -29,7 +29,11 @@ import {
   EnrichmentSchemaDecodeError,
   toEnrichmentErrorEnvelope
 } from "../domain/errors";
-import { makeManagedRuntime, runScopedWithRuntime } from "../platform/EffectRuntime";
+import {
+  atRuntimeBoundary,
+  makeManagedRuntime,
+  runScopedWithRuntime
+} from "../platform/EffectRuntime";
 import type { WorkflowEnrichmentEnvBindings } from "../platform/Env";
 import { CandidatePayloadRepo } from "../services/CandidatePayloadRepo";
 import { EnrichmentRunsRepo } from "../services/EnrichmentRunsRepo";
@@ -75,7 +79,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
   ) =>
     runScopedWithRuntime(
       this.getRuntime(),
-      effect as Effect.Effect<A, E, never>,
+      atRuntimeBoundary(effect),
       { operation }
     );
 

@@ -167,6 +167,15 @@ export class HistoricalRunRepairError extends Schema.TaggedErrorClass<Historical
   }
 ) {}
 
+export class CoordinatorDidMismatchError extends Schema.TaggedErrorClass<CoordinatorDidMismatchError>()(
+  "CoordinatorDidMismatchError",
+  {
+    message: Schema.String,
+    expectedDid: Did,
+    actualDid: Did
+  }
+) {}
+
 export class GeminiApiError extends Schema.TaggedErrorClass<GeminiApiError>()(
   "GeminiApiError",
   {
@@ -569,6 +578,19 @@ export const toIngestErrorEnvelope = (
     });
   }
 
+  if (
+    error instanceof CoordinatorDidMismatchError ||
+    isTagged(error, "CoordinatorDidMismatchError")
+  ) {
+    const actualDid = getStringField(error, "actualDid") ?? overrides.did;
+    return withOverrides({
+      tag: "CoordinatorDidMismatchError",
+      message: getStringField(error, "message") ?? "coordinator did mismatch",
+      retryable: false,
+      ...(actualDid === undefined ? {} : { did: actualDid as Did })
+    });
+  }
+
   if (isTagged(error, "EnvError")) {
     const missing = getStringField(error, "missing");
     return withOverrides({
@@ -644,6 +666,7 @@ export const ingestHttpStatusForEnvelope = (envelope: IngestErrorEnvelope): numb
     case "IngestBoundaryError":
     case "WorkflowRunCompensationError":
     case "HistoricalRunRepairError":
+    case "CoordinatorDidMismatchError":
     case "DbError":
     case "SqlError":
       return 500;

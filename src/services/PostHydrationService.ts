@@ -53,7 +53,7 @@ export class PostHydrationService extends ServiceMap.Service<
       const cache = yield* Cache.make<string, KnowledgePostHydration>({
         capacity: CACHE_CAPACITY,
         timeToLive: CACHE_TTL,
-        lookup: () => Effect.die(new Error("PostHydrationService cache is write-through only"))
+        lookup: () => Effect.die("PostHydrationService cache is write-through only")
       });
 
       const populateChunk = Effect.fn("PostHydrationService.populateChunk")(function* (
@@ -111,7 +111,16 @@ export class PostHydrationService extends ServiceMap.Service<
           chunk(blueskyMisses, GET_POSTS_CHUNK_SIZE),
           (uris) =>
             populateChunk(uris).pipe(
-              Effect.catch(() => Effect.void)
+              Effect.catchTag("BlueskyApiError", (error) =>
+                Effect.logWarning("Post hydration chunk failed; leaving entries uncached").pipe(
+                  Effect.annotateLogs({
+                    status: error.status ?? "unknown",
+                    uriCount: uris.length,
+                    firstUri: uris[0] ?? "unknown"
+                  }),
+                  Effect.asVoid
+                )
+              )
             ),
           {
             concurrency: GET_POSTS_CONCURRENCY,

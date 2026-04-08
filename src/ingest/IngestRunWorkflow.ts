@@ -13,6 +13,7 @@ import {
 } from "../domain/errors";
 import type { WorkflowIngestEnvBindings } from "../platform/Env";
 import {
+  atRuntimeBoundary,
   makeManagedRuntime,
   runScopedWithRuntime
 } from "../platform/EffectRuntime";
@@ -91,7 +92,7 @@ export class IngestRunWorkflow extends WorkflowEntrypoint<
   ) =>
     runScopedWithRuntime(
       this.getRuntime(),
-      effect as Effect.Effect<A, E, never>,
+      atRuntimeBoundary(effect),
       { operation }
     );
 
