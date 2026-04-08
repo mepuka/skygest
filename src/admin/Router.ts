@@ -229,10 +229,8 @@ const AdminHandlers = Layer.mergeAll(
     handlers
       .handle("list", ({ query: urlParams }) =>
         withAdminErrors("/admin/experts", ExpertRegistryService.use( (registry) =>
-          registry.listExperts(urlParams)
-        )).pipe(
-          Effect.map((items) => ({ items }))
-        )
+          registry.listExpertsPage(urlParams)
+        ))
       )
       .handle("add", ({ payload }) =>
         withAdminErrors("/admin/experts", Effect.gen(function* () {

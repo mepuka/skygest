@@ -129,7 +129,7 @@ const makeHarness = (options: {
         }),
       listActive: () => Effect.succeed([expert]),
       listActiveByShard: () => Effect.succeed([]),
-      list: () => Effect.succeed([]),
+      list: () => Effect.succeed({ items: [], total: 0 }),
       getByDids: () => Effect.succeed([])
     }),
     Layer.succeed(KnowledgeRepo, {

@@ -277,10 +277,8 @@ const PublicReadHandlers = Layer.mergeAll(
     handlers
       .handle("list", ({ query: urlParams }) =>
         withReadErrors("/api/experts", KnowledgeQueryService.use( (query) =>
-          query.listExperts(urlParams)
-        )).pipe(
-          Effect.map((items) => ({ items }))
-        )
+          query.listExpertsPage(urlParams)
+        ))
       )
       .handle("posts", ({ params: path, query: urlParams }) =>
         withReadErrors("/api/experts/:did/posts", KnowledgeQueryService.use( (query) =>

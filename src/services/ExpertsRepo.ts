@@ -21,8 +21,9 @@ export class ExpertsRepo extends ServiceMap.Service<
     readonly list: (
       domain: string | null,
       active: boolean | null,
-      limit: number
-    ) => Effect.Effect<ReadonlyArray<ExpertListItem>, SqlError | DbError>;
+      limit: number,
+      offset: number
+    ) => Effect.Effect<{ readonly items: ReadonlyArray<ExpertListItem>; readonly total: number }, SqlError | DbError>;
 
     readonly getByDids: (
       dids: ReadonlyArray<string>

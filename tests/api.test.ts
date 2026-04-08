@@ -946,6 +946,7 @@ describe("frontend REST API", () => {
           getPostLinks: () => Effect.succeed([]),
           getPostLinksPage: () => Effect.succeed({ items: [], nextCursor: null }),
           listExperts: () => Effect.succeed([]),
+          listExpertsPage: () => Effect.succeed({ items: [], page: { offset: 0, limit: 25, total: 0 } }),
           listTopics: () => Effect.succeed([]),
           getTopic: () => Effect.succeed(null),
           expandTopics: () =>

@@ -244,7 +244,7 @@ export const ExpertsRepoD1 = {
         Effect.map((rows) => rows.map((row) => row.did))
       );
 
-    const list = (domain: string | null, active: boolean | null, limit: number) => {
+    const list = (domain: string | null, active: boolean | null, limit: number, offset: number) => {
       const conditions = [
         domain === null ? null : sql`domain = ${domain}`,
         active === null ? null : sql`active = ${active ? 1 : 0}`
@@ -254,7 +254,20 @@ export const ExpertsRepoD1 = {
         ? sql`1 = 1`
         : sql.join(" AND ", false)(conditions);
 
-      return sql<any>`
+      const countQuery = sql<any>`
+        SELECT COUNT(*) as total FROM experts WHERE ${whereClause}
+      `.pipe(
+        Effect.flatMap((rows) =>
+          decodeWithDbError(
+            Schema.Array(Schema.Struct({ total: Schema.Number })),
+            rows,
+            "Failed to decode expert count"
+          )
+        ),
+        Effect.map((rows) => rows[0]?.total ?? 0)
+      );
+
+      const itemsQuery = sql<any>`
         SELECT
           did as did,
           handle as handle,
@@ -268,6 +281,7 @@ export const ExpertsRepoD1 = {
         WHERE ${whereClause}
         ORDER BY added_at DESC, did ASC
         LIMIT ${limit}
+        OFFSET ${offset}
       `.pipe(
         Effect.flatMap((rows) =>
           decodeWithDbError(
@@ -285,6 +299,8 @@ export const ExpertsRepoD1 = {
           )
         )
       );
+
+      return Effect.all({ total: countQuery, items: itemsQuery });
     };
 
     const getByDids = (dids: ReadonlyArray<string>) => {

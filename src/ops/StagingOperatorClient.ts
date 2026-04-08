@@ -7,14 +7,13 @@ import {
 } from "effect/unstable/http";
 import {
   BootstrapExpertsResult,
-  ExpertListOutput,
   LoadSmokeFixtureResult,
   PublicationListOutput,
   RefreshProfilesResult,
   SeedPublicationsResult
 } from "../domain/bi";
 import { CuratePostInput, CuratePostOutput } from "../domain/curation";
-import { ImportPostsInput, ImportPostsOutput, StagingStats } from "../domain/api";
+import { ExpertListPageOutput, ImportPostsInput, ImportPostsOutput, StagingStats } from "../domain/api";
 import {
   IngestQueuedResponse,
   IngestRepairSummary,
@@ -393,7 +392,7 @@ export class StagingOperatorClient extends ServiceMap.Service<
             http.get(new URL("/admin/experts", baseUrl), {
               headers: secretHeader(secret)
             }),
-            ExpertListOutput,
+            ExpertListPageOutput,
             "admin-experts"
           ).pipe(Effect.map((output) => output.items)),
         listExpertsMcp: (baseUrl, secret) =>
