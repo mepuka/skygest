@@ -51,6 +51,34 @@ export const IsoTimestamp = Schema.String.pipe(
 );
 export type IsoTimestamp = Schema.Schema.Type<typeof IsoTimestamp>;
 
+const DATE_LIKE_PATTERN = /^\d{4}(?:-\d{2}(?:-\d{2}(?:T.+)?)?)?$/u;
+
+const validateDateLike = (value: string) =>
+  DATE_LIKE_PATTERN.test(value)
+    ? undefined
+    : "expected a date-like value: YYYY, YYYY-MM, YYYY-MM-DD, or ISO 8601 timestamp";
+
+/** Flexible date string — accepts year, year-month, date, or full timestamp. */
+export const DateLike = Schema.String.pipe(
+  Schema.check(Schema.makeFilter(validateDateLike))
+).annotate({ description: "Date-like value: YYYY, YYYY-MM, YYYY-MM-DD, or ISO 8601 timestamp" });
+export type DateLike = Schema.Schema.Type<typeof DateLike>;
+
+const isWebUrl = (value: string) => {
+  try {
+    const protocol = new URL(value).protocol;
+    return protocol === "https:" || protocol === "http:";
+  } catch {
+    return false;
+  }
+};
+
+/** Web URL — accepts http: and https: (many government data portals use http). */
+export const WebUrl = Schema.String.pipe(
+  Schema.check(Schema.makeFilter(isWebUrl))
+).annotate({ description: "Web URL (http or https)" });
+export type WebUrl = Schema.Schema.Type<typeof WebUrl>;
+
 const PODCAST_SEGMENT_URI_PREFIX = "podcast-segment://";
 
 const validatePodcastSegmentUri = (value: string) =>
