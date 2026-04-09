@@ -1,0 +1,22 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR9ET00CNZSVA3J3T2PDM12",
+  "title": "MISO Regional Resource Assessment",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "landingPage": "https://misoenergy.org",
+  "keywords": [
+    "regional",
+    "resource",
+    "assessment"
+  ],
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR9ET01FKWTRQN4KGG0RF3M"
+  ],
+  "accessRights": "public"
+}

@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR9ESZSWJ895558CG08V1DG",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR9ESZS81M32H6YG74CD5ZK",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Resource Adequacy Update web",
+  "accessURL": "https://ieso.ca"
+}

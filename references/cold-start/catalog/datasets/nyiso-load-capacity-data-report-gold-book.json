@@ -1,0 +1,25 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR9ET032V4ZMH1N9GC3PG89",
+  "title": "NYISO Load & Capacity Data Report (Gold Book)",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "landingPage": "https://nyiso.com",
+  "keywords": [
+    "load",
+    "capacity",
+    "data",
+    "report",
+    "(gold",
+    "book)"
+  ],
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR9ET03RDK4BTCCRHWSP82A"
+  ],
+  "accessRights": "public"
+}

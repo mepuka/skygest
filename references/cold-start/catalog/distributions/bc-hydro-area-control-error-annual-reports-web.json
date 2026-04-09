@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR9ESZ5X4VSDJR2B46BGQ99",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR9ESZ5YWZK4RNXNWNWE6MP",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Area Control Error Annual Reports web",
+  "accessURL": "https://bchydro.com"
+}

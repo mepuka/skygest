@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR9ET03NKAR99EVDBM0Y0XN",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR9ET03X1JCM26E94QE52R3",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Short-Term Assessment of Reliability (STAR) web",
+  "accessURL": "https://nyiso.com"
+}

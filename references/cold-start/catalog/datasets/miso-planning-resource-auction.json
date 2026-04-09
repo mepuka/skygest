@@ -1,0 +1,22 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR9ESZZY96Q86FV7FJPGG6C",
+  "title": "MISO Planning Resource Auction",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "landingPage": "https://misoenergy.org",
+  "keywords": [
+    "planning",
+    "resource",
+    "auction"
+  ],
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR9ESZZ5PMETTMMXYB4N4DK"
+  ],
+  "accessRights": "public"
+}

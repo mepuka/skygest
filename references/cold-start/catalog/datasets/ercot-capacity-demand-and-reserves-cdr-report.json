@@ -1,0 +1,25 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR9ESZJHKQSTA4BNVCWVM6M",
+  "title": "ERCOT Capacity, Demand, and Reserves (CDR) Report",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "landingPage": "https://ercot.com",
+  "keywords": [
+    "capacity,",
+    "demand,",
+    "and",
+    "reserves",
+    "(cdr)",
+    "report"
+  ],
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR9ESZJVPC2EPC3NKFT3Y9C"
+  ],
+  "accessRights": "public"
+}
