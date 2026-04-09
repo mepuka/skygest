@@ -12,7 +12,7 @@
  *
  * SKY-216: Phase 1 — Catalog deepening
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ulid } from "ulid";
 
@@ -20,7 +20,6 @@ const ROOT = join(import.meta.dirname, "..", "..", "references", "cold-start");
 const DATASETS_DIR = join(ROOT, "catalog", "datasets");
 const DISTS_DIR = join(ROOT, "catalog", "distributions");
 const RECORDS_DIR = join(ROOT, "catalog", "catalog-records");
-const SERIES_DIR = join(ROOT, "catalog", "dataset-series");
 const TS = "2026-04-08T00:00:00.000Z";
 
 const entityIds: Record<string, string> = JSON.parse(
@@ -73,6 +72,17 @@ interface DatasetDef {
 // ---------------------------------------------------------------------------
 // Curated DOE data products
 // ---------------------------------------------------------------------------
+const DUPLICATE_DOE_DATASETS = [
+  {
+    datasetSlug: "doe-seds",
+    distributionSlugs: ["doe-seds-web", "doe-seds-api", "doe-seds-download"],
+  },
+  {
+    datasetSlug: "doe-recs",
+    distributionSlugs: ["doe-recs-web", "doe-recs-download"],
+  },
+] as const;
+
 const DOE_DATASETS: DatasetDef[] = [
   // --- NETL ---
   {
@@ -138,21 +148,6 @@ const DOE_DATASETS: DatasetDef[] = [
   },
   {
     publisherSlug: "doe",
-    slug: "doe-seds",
-    title: "State Energy Data System (SEDS)",
-    description: "State-level annual energy production, consumption, prices, and expenditures by source and sector from 1960 to present.",
-    landingPage: "https://www.eia.gov/state/seds/",
-    keywords: ["state energy", "consumption", "production", "prices", "SEDS"],
-    themes: ["energy", "statistics", "state-level"],
-    accessRights: "public",
-    distributions: [
-      { slug: "doe-seds-web", title: "SEDS Data Browser", kind: "interactive-web-app", accessURL: "https://www.eia.gov/state/seds/" },
-      { slug: "doe-seds-api", title: "SEDS via EIA API", kind: "api-access", accessURL: "https://api.eia.gov/v2/seds/" },
-      { slug: "doe-seds-download", title: "SEDS Complete Data Download", kind: "download", accessURL: "https://www.eia.gov/state/seds/seds-data-complete.php", format: "CSV" },
-    ],
-  },
-  {
-    publisherSlug: "doe",
     slug: "doe-cbecs",
     title: "Commercial Buildings Energy Consumption Survey (CBECS)",
     description: "National survey of commercial building characteristics and energy usage patterns, conducted approximately every 4 years.",
@@ -163,20 +158,6 @@ const DOE_DATASETS: DatasetDef[] = [
     distributions: [
       { slug: "doe-cbecs-web", title: "CBECS Survey Data", kind: "interactive-web-app", accessURL: "https://www.eia.gov/consumption/commercial/" },
       { slug: "doe-cbecs-download", title: "CBECS Microdata", kind: "download", accessURL: "https://www.eia.gov/consumption/commercial/data/", format: "CSV" },
-    ],
-  },
-  {
-    publisherSlug: "doe",
-    slug: "doe-recs",
-    title: "Residential Energy Consumption Survey (RECS)",
-    description: "National survey of residential energy characteristics and consumption patterns including heating, cooling, and appliance usage.",
-    landingPage: "https://www.eia.gov/consumption/residential/",
-    keywords: ["residential", "energy consumption", "survey", "RECS", "households"],
-    themes: ["buildings", "energy consumption"],
-    accessRights: "public",
-    distributions: [
-      { slug: "doe-recs-web", title: "RECS Survey Data", kind: "interactive-web-app", accessURL: "https://www.eia.gov/consumption/residential/" },
-      { slug: "doe-recs-download", title: "RECS Microdata", kind: "download", accessURL: "https://www.eia.gov/consumption/residential/data/", format: "CSV" },
     ],
   },
 
@@ -361,6 +342,31 @@ mkdirSync(RECORDS_DIR, { recursive: true });
 let dsCount = 0, distCount = 0, crCount = 0;
 const doeAgentId = agentId("doe");
 const doeCatalogId = catalogId("doe");
+let duplicatesRemoved = 0;
+
+for (const duplicate of DUPLICATE_DOE_DATASETS) {
+  const datasetPath = join(DATASETS_DIR, `${duplicate.datasetSlug}.json`);
+  if (existsSync(datasetPath)) {
+    unlinkSync(datasetPath);
+    delete entityIds[`Dataset:${duplicate.datasetSlug}`];
+    duplicatesRemoved++;
+  }
+
+  const recordPath = join(RECORDS_DIR, `${duplicate.datasetSlug}-cr.json`);
+  if (existsSync(recordPath)) {
+    unlinkSync(recordPath);
+    delete entityIds[`CatalogRecord:${duplicate.datasetSlug}-cr`];
+    duplicatesRemoved++;
+  }
+
+  for (const distSlug of duplicate.distributionSlugs) {
+    const distPath = join(DISTS_DIR, `${distSlug}.json`);
+    if (!existsSync(distPath)) continue;
+    unlinkSync(distPath);
+    delete entityIds[`Distribution:${distSlug}`];
+    duplicatesRemoved++;
+  }
+}
 
 for (const ds of DOE_DATASETS) {
   if (existsSync(join(DATASETS_DIR, `${ds.slug}.json`))) {
@@ -458,3 +464,4 @@ console.log(`\n=== DOE Curated Harvest Results ===`);
 console.log(`Datasets: ${dsCount}`);
 console.log(`Distributions: ${distCount}`);
 console.log(`CatalogRecords: ${crCount}`);
+console.log(`Duplicate DOE/EIA artifacts removed: ${duplicatesRemoved}`);

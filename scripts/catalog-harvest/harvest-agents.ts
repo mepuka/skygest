@@ -19,7 +19,7 @@
  *
  * SKY-216: Phase 1 Track 1 — Catalog backfill
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ulid } from "ulid";
 
@@ -57,13 +57,18 @@ interface AgentSpec {
   homepage?: string;
   rorId?: string;        // from ROR probe (verified exact match)
   wikidataQid?: string;  // from Wikidata probe (verified QID)
-  isExisting: boolean;
 }
 
 // Merge probe data into agent specs
-function buildAgentSpec(slug: string, name: string, alternateNames: string[], isExisting: boolean): AgentSpec {
+function normalizeRorId(rorId?: string): string | undefined {
+  if (!rorId) return undefined;
+  return rorId.startsWith("https://ror.org/") ? rorId : `https://ror.org/${rorId}`;
+}
+
+function buildAgentSpec(slug: string, name: string, alternateNames: string[]): AgentSpec {
   const ror = rorBySlug.get(slug);
   const wd = wdBySlug.get(slug);
+  const resolvedRorId = ror?.rorId ?? wd?.rorId;
 
   return {
     slug,
@@ -71,62 +76,55 @@ function buildAgentSpec(slug: string, name: string, alternateNames: string[], is
     alternateNames: alternateNames.length > 0 ? alternateNames : undefined,
     kind: "organization",
     homepage: wd?.website ?? ror?.website ?? undefined,
-    rorId: ror?.rorId ?? wd?.rorId ? `https://ror.org/${wd?.rorId}` : undefined,
+    rorId: normalizeRorId(resolvedRorId),
     wikidataQid: wd?.qid ?? undefined,
-    isExisting,
   };
 }
 
 // Build the full agent list
 const AGENTS: AgentSpec[] = [
-  // Existing agents (correct their aliases)
-  buildAgentSpec("eia", "U.S. Energy Information Administration", ["EIA"], true),
-  buildAgentSpec("iea", "International Energy Agency", ["IEA"], true),
-  buildAgentSpec("ember", "Ember", ["Ember Climate"], true),
-  buildAgentSpec("bnef", "BloombergNEF", ["BNEF", "Bloomberg New Energy Finance"], true),
-  buildAgentSpec("ferc", "Federal Energy Regulatory Commission", ["FERC"], true),
-  buildAgentSpec("ercot", "Electric Reliability Council of Texas", ["ERCOT"], true),
-  buildAgentSpec("caiso", "California Independent System Operator", ["CAISO", "California ISO"], true),
-  buildAgentSpec("pjm", "PJM Interconnection", ["PJM"], true),
-  buildAgentSpec("nrel", "National Renewable Energy Laboratory", ["NREL"], true),
-  buildAgentSpec("irena", "International Renewable Energy Agency", ["IRENA"], true),
-  buildAgentSpec("entso-e", "European Network of Transmission System Operators for Electricity", ["ENTSO-E"], true),
-  buildAgentSpec("unfccc", "United Nations Framework Convention on Climate Change", ["UNFCCC"], true),
-  buildAgentSpec("cat", "Climate Action Tracker", ["CAT"], true),
-  buildAgentSpec("lbnl", "Lawrence Berkeley National Laboratory", ["LBNL", "Berkeley Lab"], true),
-  buildAgentSpec("spp", "Southwest Power Pool", ["SPP"], true),
+  // Original catalog agents.
+  buildAgentSpec("eia", "U.S. Energy Information Administration", ["EIA"]),
+  buildAgentSpec("iea", "International Energy Agency", ["IEA"]),
+  buildAgentSpec("ember", "Ember", ["Ember Climate"]),
+  buildAgentSpec("bnef", "BloombergNEF", ["BNEF", "Bloomberg New Energy Finance"]),
+  buildAgentSpec("ferc", "Federal Energy Regulatory Commission", ["FERC"]),
+  buildAgentSpec("ercot", "Electric Reliability Council of Texas", ["ERCOT"]),
+  buildAgentSpec("caiso", "California Independent System Operator", ["CAISO", "California ISO"]),
+  buildAgentSpec("pjm", "PJM Interconnection", ["PJM"]),
+  buildAgentSpec("nrel", "National Renewable Energy Laboratory", ["NREL"]),
+  buildAgentSpec("irena", "International Renewable Energy Agency", ["IRENA"]),
+  buildAgentSpec("entso-e", "European Network of Transmission System Operators for Electricity", ["ENTSO-E"]),
+  buildAgentSpec("unfccc", "United Nations Framework Convention on Climate Change", ["UNFCCC"]),
+  buildAgentSpec("cat", "Climate Action Tracker", ["CAT"]),
+  buildAgentSpec("lbnl", "Lawrence Berkeley National Laboratory", ["LBNL", "Berkeley Lab"]),
+  buildAgentSpec("spp", "Southwest Power Pool", ["SPP"]),
 
-  // New agents — grid operators / ISOs
-  buildAgentSpec("miso", "Midcontinent Independent System Operator", ["MISO"], false),
-  buildAgentSpec("nyiso", "New York Independent System Operator", ["NYISO"], false),
-  buildAgentSpec("iso-ne", "ISO New England", ["ISO-NE"], false),
-  buildAgentSpec("nerc", "North American Electric Reliability Corporation", ["NERC"], false),
-  buildAgentSpec("aemo", "Australian Energy Market Operator", ["AEMO"], false),
-  buildAgentSpec("rte", "RTE", ["Réseau de Transport d'Électricité"], false),
-  buildAgentSpec("terna", "Terna S.p.A.", ["Terna"], false),
-
-  // New agents — government agencies
-  buildAgentSpec("epa", "United States Environmental Protection Agency", ["EPA", "US EPA"], false),
-  buildAgentSpec("eurostat", "Eurostat", [], false),
-  buildAgentSpec("bnetza", "Bundesnetzagentur", ["BNetzA", "Federal Network Agency"], false),
-  buildAgentSpec("ree", "Red Eléctrica de España", ["REE", "Redeia"], false),
-  buildAgentSpec("meti", "Ministry of Economy, Trade and Industry", ["METI"], false),
-  buildAgentSpec("doe", "United States Department of Energy", ["DOE", "US DOE"], false),
-  buildAgentSpec("beis", "Department for Energy Security and Net Zero", ["DESNZ"], false),
-  buildAgentSpec("cea", "Central Electricity Authority of India", ["CEA"], false),
-
-  // New agents — international / multilateral
-  buildAgentSpec("world-bank", "World Bank", ["IBRD"], false),
-  buildAgentSpec("imf", "International Monetary Fund", ["IMF"], false),
-  buildAgentSpec("iiasa", "International Institute for Applied Systems Analysis", ["IIASA"], false),
-
-  // New agents — NGOs / independent
-  buildAgentSpec("agora", "Agora Energiewende", ["Agora"], false),
-  buildAgentSpec("climate-trace", "Climate TRACE", [], false),
-  buildAgentSpec("gcp", "Global Carbon Project", ["GCP"], false),
-  buildAgentSpec("gem", "Global Energy Monitor", ["GEM"], false),
-  buildAgentSpec("owid", "Our World in Data", ["OWID"], false),
-  buildAgentSpec("gridstatus", "GridStatus", [], false),
+  // Additional harvested agents. Existing files win over this historical grouping.
+  buildAgentSpec("miso", "Midcontinent Independent System Operator", ["MISO"]),
+  buildAgentSpec("nyiso", "New York Independent System Operator", ["NYISO"]),
+  buildAgentSpec("iso-ne", "ISO New England", ["ISO-NE"]),
+  buildAgentSpec("nerc", "North American Electric Reliability Corporation", ["NERC"]),
+  buildAgentSpec("aemo", "Australian Energy Market Operator", ["AEMO"]),
+  buildAgentSpec("rte", "RTE", ["Réseau de Transport d'Électricité"]),
+  buildAgentSpec("terna", "Terna S.p.A.", ["Terna"]),
+  buildAgentSpec("epa", "United States Environmental Protection Agency", ["EPA", "US EPA"]),
+  buildAgentSpec("eurostat", "Eurostat", []),
+  buildAgentSpec("bnetza", "Bundesnetzagentur", ["BNetzA", "Federal Network Agency"]),
+  buildAgentSpec("ree", "Red Eléctrica de España", ["REE", "Redeia"]),
+  buildAgentSpec("meti", "Ministry of Economy, Trade and Industry", ["METI"]),
+  buildAgentSpec("doe", "United States Department of Energy", ["DOE", "US DOE"]),
+  buildAgentSpec("beis", "Department for Energy Security and Net Zero", ["DESNZ"]),
+  buildAgentSpec("cea", "Central Electricity Authority of India", ["CEA"]),
+  buildAgentSpec("world-bank", "World Bank", ["IBRD"]),
+  buildAgentSpec("imf", "International Monetary Fund", ["IMF"]),
+  buildAgentSpec("iiasa", "International Institute for Applied Systems Analysis", ["IIASA"]),
+  buildAgentSpec("agora", "Agora Energiewende", ["Agora"]),
+  buildAgentSpec("climate-trace", "Climate TRACE", []),
+  buildAgentSpec("gcp", "Global Carbon Project", ["GCP"]),
+  buildAgentSpec("gem", "Global Energy Monitor", ["GEM"]),
+  buildAgentSpec("owid", "Our World in Data", ["OWID"]),
+  buildAgentSpec("gridstatus", "GridStatus", []),
 ];
 
 // ---------------------------------------------------------------------------
@@ -144,8 +142,11 @@ interface AgentEntity {
   homepage?: string;
 }
 
-function buildAliases(spec: AgentSpec): AgentEntity["aliases"] {
-  const aliases: AgentEntity["aliases"] = [];
+function buildAliases(spec: AgentSpec, existing?: AgentEntity): AgentEntity["aliases"] {
+  const aliases: AgentEntity["aliases"] = (existing?.aliases ?? []).filter(
+    (alias) => !["ror", "wikidata", "url"].includes(alias.scheme),
+  );
+  const homepage = spec.homepage ?? existing?.homepage;
 
   if (spec.rorId) {
     aliases.push({ scheme: "ror", value: spec.rorId, relation: "exactMatch" });
@@ -153,8 +154,8 @@ function buildAliases(spec: AgentSpec): AgentEntity["aliases"] {
   if (spec.wikidataQid) {
     aliases.push({ scheme: "wikidata", value: spec.wikidataQid, relation: "exactMatch" });
   }
-  if (spec.homepage) {
-    aliases.push({ scheme: "url", value: spec.homepage, relation: "exactMatch" });
+  if (homepage) {
+    aliases.push({ scheme: "url", value: homepage, relation: "exactMatch" });
   }
 
   return aliases;
@@ -168,63 +169,53 @@ const summary = {
 
 for (const spec of AGENTS) {
   const existingIdKey = `Agent:${spec.slug}`;
-  let agentId: string;
+  const existingPath = join(AGENTS_DIR, `${spec.slug}.json`);
+  const existing = existsSync(existingPath)
+    ? JSON.parse(readFileSync(existingPath, "utf-8")) as AgentEntity
+    : undefined;
+  const persistedId = existing?.id ?? entityIds[existingIdKey];
+  const isExisting = persistedId !== undefined;
+  const agentId = persistedId ?? `https://id.skygest.io/agent/ag_${ulid()}`;
+  entityIds[existingIdKey] = agentId;
 
-  if (spec.isExisting && entityIds[existingIdKey]) {
-    // Preserve existing ID
-    agentId = entityIds[existingIdKey];
-  } else {
-    // Mint new ID
-    agentId = `https://id.skygest.io/agent/ag_${ulid()}`;
-    entityIds[existingIdKey] = agentId;
-  }
+  const homepage = spec.homepage ?? existing?.homepage;
+  const aliases = buildAliases(spec, existing);
 
-  const aliases = buildAliases(spec);
-
-  const entity: AgentEntity = {
+  const baseEntity: AgentEntity = {
     _tag: "Agent",
     id: agentId,
     kind: spec.kind,
     name: spec.name,
     aliases,
-    createdAt: "2026-04-08T00:00:00.000Z", // preserve original date for existing
+    createdAt: existing?.createdAt ?? TS,
     updatedAt: TS,
     ...(spec.alternateNames && spec.alternateNames.length > 0 ? { alternateNames: spec.alternateNames } : {}),
-    ...(spec.homepage ? { homepage: spec.homepage } : {}),
+    ...(homepage ? { homepage } : {}),
   };
 
-  // Check what changed for existing agents
-  if (spec.isExisting) {
-    const existingPath = join(AGENTS_DIR, `${spec.slug}.json`);
-    try {
-      const existing = JSON.parse(readFileSync(existingPath, "utf-8"));
-      const changes: string[] = [];
+  const changes: string[] = [];
+  if (existing) {
+    if (existing.kind !== baseEntity.kind) changes.push("kind");
+    if (existing.name !== baseEntity.name) changes.push("name");
+    if (JSON.stringify(existing.aliases ?? []) !== JSON.stringify(aliases)) changes.push("aliases");
+    if (existing.homepage !== baseEntity.homepage) changes.push("homepage");
+    if (JSON.stringify(existing.alternateNames) !== JSON.stringify(baseEntity.alternateNames)) changes.push("alternateNames");
+  }
 
-      // Compare aliases
-      const oldAliases = JSON.stringify(existing.aliases ?? []);
-      const newAliases = JSON.stringify(aliases);
-      if (oldAliases !== newAliases) changes.push("aliases");
-
-      if (existing.homepage !== entity.homepage) changes.push("homepage");
-      if (JSON.stringify(existing.alternateNames) !== JSON.stringify(entity.alternateNames)) changes.push("alternateNames");
-
-      if (changes.length > 0) {
-        summary.corrected.push({ slug: spec.slug, changes });
-      } else {
-        summary.unchanged.push(spec.slug);
-      }
-    } catch {
-      summary.corrected.push({ slug: spec.slug, changes: ["new file"] });
-    }
+  let entityToWrite = baseEntity;
+  if (existing && changes.length === 0) {
+    entityToWrite = existing;
+    summary.unchanged.push(spec.slug);
+  } else if (isExisting) {
+    if (!existing) changes.push("new file");
+    summary.corrected.push({ slug: spec.slug, changes });
   } else {
     summary.created.push({ slug: spec.slug, id: agentId });
   }
 
-  // Write entity
-  writeFileSync(
-    join(AGENTS_DIR, `${spec.slug}.json`),
-    JSON.stringify(entity, null, 2) + "\n",
-  );
+  if (!existing || JSON.stringify(existing) !== JSON.stringify(entityToWrite)) {
+    writeFileSync(existingPath, JSON.stringify(entityToWrite, null, 2) + "\n");
+  }
 }
 
 // Update entity-ids.json
@@ -237,7 +228,7 @@ writeFileSync(
 const report = {
   _meta: {
     script: "harvest-agents.ts",
-    executedAt: new Date().toISOString(),
+    executedAt: TS,
     ticket: "SKY-216",
   },
   summary: {
