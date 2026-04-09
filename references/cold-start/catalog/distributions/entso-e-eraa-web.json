@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1N2TB4KX44W07RDYGE5A0",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1N2TB4EXD5CCX8DQFX3G1",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "ERAA Portal",
+  "accessURL": "https://www.entsoe.eu/outlooks/eraa/"
+}

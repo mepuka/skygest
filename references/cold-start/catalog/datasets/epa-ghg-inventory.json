@@ -20,5 +20,6 @@
   "themes": [
     "emissions"
   ],
-  "landingPage": "https://www.epa.gov/ghgemissions/inventory-us-greenhouse-gas-emissions-and-sinks"
+  "landingPage": "https://www.epa.gov/ghgemissions/inventory-us-greenhouse-gas-emissions-and-sinks",
+  "accessRights": "public"
 }

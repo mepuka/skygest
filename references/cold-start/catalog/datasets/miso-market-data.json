@@ -23,5 +23,6 @@
     "grid operations",
     "market data"
   ],
-  "landingPage": "https://www.misoenergy.org/markets-and-operations/"
+  "landingPage": "https://www.misoenergy.org/markets-and-operations/",
+  "accessRights": "public"
 }

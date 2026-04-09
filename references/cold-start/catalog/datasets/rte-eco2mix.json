@@ -23,5 +23,6 @@
     "emissions",
     "grid operations"
   ],
-  "landingPage": "https://www.rte-france.com/eco2mix"
+  "landingPage": "https://www.rte-france.com/eco2mix",
+  "accessRights": "public"
 }

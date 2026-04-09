@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR1N2TGP83Z6PTJEQ976FSZ",
+  "title": "TransitionZero Asset-Level Data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNR1N2T704EEAEE2R2HCX7E8",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Open-source asset-level data on fossil fuel power plants, including capacity, age, emissions, and financial exposure.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR1N2TGAGYSTNN0CMGT9JED"
+  ],
+  "keywords": [
+    "asset-level",
+    "power plants",
+    "emissions",
+    "fossil fuel",
+    "open data"
+  ],
+  "themes": [
+    "emissions",
+    "infrastructure",
+    "energy transition"
+  ],
+  "landingPage": "https://www.transitionzero.org/",
+  "accessRights": "public"
+}

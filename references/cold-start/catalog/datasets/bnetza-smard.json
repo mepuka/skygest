@@ -22,5 +22,6 @@
     "electricity",
     "market data"
   ],
-  "landingPage": "https://www.smard.de/en"
+  "landingPage": "https://www.smard.de/en",
+  "accessRights": "public"
 }

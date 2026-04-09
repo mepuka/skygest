@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1SE77R8A09P5D8BC1M110",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1SE77QMPMDM6W0MDQ65SH",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Electric Power Annual Data Tables",
+  "accessURL": "https://www.eia.gov/electricity/annual/",
+  "format": "Excel"
+}

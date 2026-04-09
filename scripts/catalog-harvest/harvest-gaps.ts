@@ -48,7 +48,7 @@ for (const slug of ["bnef", "gridstatus"]) {
   const agent = JSON.parse(readFileSync(path, "utf-8"));
   if (agent.aliases.length === 0 && agent.homepage) {
     agent.aliases.push({ scheme: "url", value: agent.homepage, relation: "exactMatch" });
-    agent.updatedAt = new Date().toISOString().replace(/T.*/, "T00:00:00.000Z");
+    agent.updatedAt = "2026-04-08T00:00:00.000Z";
     writeFileSync(path, JSON.stringify(agent, null, 2) + "\n");
     console.log(`  ${slug}: added URL alias (${agent.homepage})`);
   } else if (agent.aliases.length === 0) {
@@ -56,7 +56,7 @@ for (const slug of ["bnef", "gridstatus"]) {
     const homepage = slug === "gridstatus" ? "https://www.gridstatus.io" : "https://about.bnef.com";
     agent.homepage = homepage;
     agent.aliases.push({ scheme: "url", value: homepage, relation: "exactMatch" });
-    agent.updatedAt = new Date().toISOString().replace(/T.*/, "T00:00:00.000Z");
+    agent.updatedAt = "2026-04-08T00:00:00.000Z";
     writeFileSync(path, JSON.stringify(agent, null, 2) + "\n");
     console.log(`  ${slug}: added homepage + URL alias (${homepage})`);
   }

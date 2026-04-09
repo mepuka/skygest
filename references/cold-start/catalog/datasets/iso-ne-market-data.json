@@ -23,5 +23,6 @@
     "grid operations",
     "market data"
   ],
-  "landingPage": "https://www.iso-ne.com/isoexpress/"
+  "landingPage": "https://www.iso-ne.com/isoexpress/",
+  "accessRights": "public"
 }

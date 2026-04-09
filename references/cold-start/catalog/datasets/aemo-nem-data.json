@@ -22,5 +22,6 @@
     "electricity",
     "grid operations"
   ],
-  "landingPage": "https://aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem"
+  "landingPage": "https://aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
+  "accessRights": "public"
 }

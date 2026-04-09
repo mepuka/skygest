@@ -22,5 +22,6 @@
     "energy",
     "European"
   ],
-  "landingPage": "https://ec.europa.eu/eurostat/web/energy/overview"
+  "landingPage": "https://ec.europa.eu/eurostat/web/energy/overview",
+  "accessRights": "public"
 }

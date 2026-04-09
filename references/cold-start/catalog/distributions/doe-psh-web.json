@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1SE79CA430KK5JQZNXSSY",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1SE79B3G3S5FZGYT28W21",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Pumped Storage Data",
+  "accessURL": "https://www.nrel.gov/water/pumped-storage-hydropower.html"
+}

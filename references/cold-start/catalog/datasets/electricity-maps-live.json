@@ -1,0 +1,28 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR1N2TG7D6CBQ3SWV7MYZBA",
+  "title": "Electricity Maps Live Carbon Intensity",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNR1N2T76EYWRR4SAE5CY22W",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Real-time and historical carbon intensity of electricity generation by zone, covering 200+ regions worldwide.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR1N2TG9E1KBQW9DX41B61N",
+    "https://id.skygest.io/distribution/dist_01KNR1N2TG43JW6FFJN589GDEM"
+  ],
+  "keywords": [
+    "carbon intensity",
+    "real-time",
+    "electricity",
+    "grid",
+    "clean energy"
+  ],
+  "themes": [
+    "emissions",
+    "electricity",
+    "grid operations"
+  ],
+  "landingPage": "https://app.electricitymaps.com/",
+  "accessRights": "public"
+}

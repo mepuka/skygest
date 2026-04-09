@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1Y344RMDFXQNPS5RKWJP4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1Y344MN8G7FAVDNYRYRSF",
+  "kind": "api-access",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Eurostat API (JSON-stat)",
+  "accessURL": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nrg_bal_c"
+}

@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR1N2TFR52TVHRCTRKTFFR9",
+  "title": "Kayrros Asset Observation",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNR1N2T71R4M8SEDPNJC3SKD",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Satellite and geospatial monitoring of energy infrastructure: crude oil storage, LNG terminal utilization, solar/wind farm construction progress.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR1N2TFW51X34BJTJBXT5M4"
+  ],
+  "keywords": [
+    "satellite",
+    "crude storage",
+    "LNG",
+    "geospatial",
+    "infrastructure monitoring"
+  ],
+  "themes": [
+    "satellite",
+    "oil and gas",
+    "infrastructure"
+  ],
+  "landingPage": "https://www.kayrros.com/",
+  "accessRights": "restricted"
+}

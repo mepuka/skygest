@@ -20,5 +20,6 @@
     "electricity",
     "reliability"
   ],
-  "landingPage": "https://www.nerc.com/pa/RAPA/ra/Pages/default.aspx"
+  "landingPage": "https://www.nerc.com/pa/RAPA/ra/Pages/default.aspx",
+  "accessRights": "public"
 }

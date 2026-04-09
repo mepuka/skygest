@@ -21,5 +21,6 @@
     "emissions",
     "electricity"
   ],
-  "landingPage": "https://www.epa.gov/egrid"
+  "landingPage": "https://www.epa.gov/egrid",
+  "accessRights": "public"
 }

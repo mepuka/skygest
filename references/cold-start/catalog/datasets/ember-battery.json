@@ -19,5 +19,6 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KNQEZ5VN0SF3CAST3B8VE9P1"
   ],
-  "license": "CC-BY-4.0"
+  "license": "CC-BY-4.0",
+  "accessRights": "public"
 }

@@ -22,5 +22,6 @@
     "energy",
     "development"
   ],
-  "landingPage": "https://data.worldbank.org/topic/energy-and-mining"
+  "landingPage": "https://data.worldbank.org/topic/energy-and-mining",
+  "accessRights": "public"
 }

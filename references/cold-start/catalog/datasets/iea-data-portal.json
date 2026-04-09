@@ -21,5 +21,6 @@
   ],
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQEZ5VH9T015ESHZ8XPMN60"
-  ]
+  ],
+  "accessRights": "public"
 }

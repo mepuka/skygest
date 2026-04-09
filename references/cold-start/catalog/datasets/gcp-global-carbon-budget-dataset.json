@@ -22,5 +22,7 @@
     "emissions",
     "carbon cycle"
   ],
-  "landingPage": "https://www.globalcarbonproject.org/carbonbudget/"
+  "landingPage": "https://www.globalcarbonproject.org/carbonbudget/",
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNQTFC3W300S8HYR94WPHMTB",
+  "accessRights": "public"
 }

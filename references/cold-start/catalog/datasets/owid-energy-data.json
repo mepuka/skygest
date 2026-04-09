@@ -25,5 +25,6 @@
   "landingPage": "https://ourworldindata.org/energy",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQTFC3WYJYFCT05M0MRYM8P"
-  ]
+  ],
+  "accessRights": "public"
 }

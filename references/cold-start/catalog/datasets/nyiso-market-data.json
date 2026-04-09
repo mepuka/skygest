@@ -22,5 +22,6 @@
     "grid operations",
     "market data"
   ],
-  "landingPage": "https://www.nyiso.com/energy-market-operational-data"
+  "landingPage": "https://www.nyiso.com/energy-market-operational-data",
+  "accessRights": "public"
 }

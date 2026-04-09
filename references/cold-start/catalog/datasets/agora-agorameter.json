@@ -21,5 +21,7 @@
     "electricity",
     "grid operations"
   ],
-  "landingPage": "https://www.agora-energiewende.de/en/publications/agorameter/"
+  "landingPage": "https://www.agora-energiewende.de/en/publications/agorameter/",
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNQTFC3WQP02SWXYKPYJ5DT5",
+  "accessRights": "public"
 }

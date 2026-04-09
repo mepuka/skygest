@@ -22,5 +22,6 @@
     "emissions",
     "satellite"
   ],
-  "landingPage": "https://climatetrace.org/inventory"
+  "landingPage": "https://climatetrace.org/inventory",
+  "accessRights": "public"
 }

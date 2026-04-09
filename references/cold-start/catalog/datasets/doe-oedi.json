@@ -21,5 +21,6 @@
     "energy research",
     "open data"
   ],
-  "landingPage": "https://data.openei.org/"
+  "landingPage": "https://data.openei.org/",
+  "accessRights": "public"
 }

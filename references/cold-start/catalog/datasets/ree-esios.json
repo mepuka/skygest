@@ -23,5 +23,6 @@
     "grid operations",
     "market data"
   ],
-  "landingPage": "https://www.esios.ree.es/en"
+  "landingPage": "https://www.esios.ree.es/en",
+  "accessRights": "public"
 }

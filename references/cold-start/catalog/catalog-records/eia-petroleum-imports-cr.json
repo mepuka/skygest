@@ -3,5 +3,7 @@
   "id": "https://id.skygest.io/catalog-record/cr_01KNQSXEPSY6E8C875J0JM1DRM",
   "catalogId": "https://id.skygest.io/catalog/cat_01KNQEZ5VT3FPCV484JY8W8B5J",
   "primaryTopicType": "dataset",
-  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNQSXEPSRJ3H1JDYS8EVDKNJ"
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNQSXEPSRJ3H1JDYS8EVDKNJ",
+  "firstSeen": "2026-04-08T00:00:00.000Z",
+  "isAuthoritative": true
 }

@@ -20,5 +20,6 @@
     "energy",
     "Japan"
   ],
-  "landingPage": "https://www.enecho.meti.go.jp/en/statistics/"
+  "landingPage": "https://www.enecho.meti.go.jp/en/statistics/",
+  "accessRights": "public"
 }

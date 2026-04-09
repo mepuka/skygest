@@ -20,5 +20,6 @@
     "electricity",
     "India"
   ],
-  "landingPage": "https://cea.nic.in/installed-capacity-report/"
+  "landingPage": "https://cea.nic.in/installed-capacity-report/",
+  "accessRights": "public"
 }

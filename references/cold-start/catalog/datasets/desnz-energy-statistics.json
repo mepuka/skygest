@@ -22,5 +22,6 @@
     "energy",
     "UK"
   ],
-  "landingPage": "https://www.gov.uk/government/collections/digest-of-uk-energy-statistics-dukes"
+  "landingPage": "https://www.gov.uk/government/collections/digest-of-uk-energy-statistics-dukes",
+  "accessRights": "public"
 }

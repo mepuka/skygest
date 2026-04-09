@@ -28,5 +28,6 @@
   "landingPage": "https://www.gridstatus.io/",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
-  ]
+  ],
+  "accessRights": "public"
 }

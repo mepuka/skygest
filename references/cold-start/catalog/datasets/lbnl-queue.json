@@ -19,5 +19,6 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KNQEZ5VSSQ4TJ96RJY19PK0K",
     "https://id.skygest.io/distribution/dist_01KNQEZ5VTV2RYQ3GHXJPN59ZH"
-  ]
+  ],
+  "accessRights": "public"
 }

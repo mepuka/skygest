@@ -22,5 +22,7 @@
     "climate",
     "scenarios"
   ],
-  "landingPage": "https://www.ipcc.ch/assessment-report/ar6/"
+  "landingPage": "https://www.ipcc.ch/assessment-report/ar6/",
+  "accessRights": "public",
+  "license": "https://www.ipcc.ch/copyright/"
 }

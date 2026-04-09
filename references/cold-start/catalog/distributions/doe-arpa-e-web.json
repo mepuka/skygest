@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1SE7B4CJ42JPPTTP5Z0CW",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1SE7BT50QJJ4YWKZJ2MDA",
+  "kind": "interactive-web-app",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "ARPA-E Projects Explorer",
+  "accessURL": "https://arpa-e.energy.gov/technologies/projects"
+}

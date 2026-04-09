@@ -21,5 +21,6 @@
     "electricity",
     "India"
   ],
-  "landingPage": "https://cea.nic.in/monthly-generation-report/"
+  "landingPage": "https://cea.nic.in/monthly-generation-report/",
+  "accessRights": "public"
 }

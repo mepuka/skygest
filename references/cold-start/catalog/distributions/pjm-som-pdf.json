@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1N2TA3Y0SEMHC9FTSV7CT",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1N2T9YJGXQQR31BKHQVK6",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "State of the Market PDF Reports",
+  "accessURL": "https://www.monitoringanalytics.com/reports/PJM_State_of_the_Market/",
+  "format": "PDF"
+}

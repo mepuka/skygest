@@ -20,5 +20,6 @@
     "climate",
     "economics"
   ],
-  "landingPage": "https://climatedata.imf.org/"
+  "landingPage": "https://climatedata.imf.org/",
+  "accessRights": "public"
 }

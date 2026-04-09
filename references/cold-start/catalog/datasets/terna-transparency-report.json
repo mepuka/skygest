@@ -22,5 +22,6 @@
     "electricity",
     "grid operations"
   ],
-  "landingPage": "https://www.terna.it/en/electric-system/transparency-report"
+  "landingPage": "https://www.terna.it/en/electric-system/transparency-report",
+  "accessRights": "public"
 }

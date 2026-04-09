@@ -19,5 +19,6 @@
     "emissions",
     "methodology"
   ],
-  "landingPage": "https://www.ipcc-nggip.iges.or.jp/EFDB/main.php"
+  "landingPage": "https://www.ipcc-nggip.iges.or.jp/EFDB/main.php",
+  "accessRights": "public"
 }

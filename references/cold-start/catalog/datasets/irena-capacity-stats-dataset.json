@@ -21,5 +21,6 @@
     "https://id.skygest.io/distribution/dist_01KNQEZ5VR5541VRGC2KSM60RZ",
     "https://id.skygest.io/distribution/dist_01KNQEZ5VS113A6R8NR5REJA2W"
   ],
-  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNQEZ5VGCNBGB4MBGH1N7PM4"
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNQEZ5VGCNBGB4MBGH1N7PM4",
+  "accessRights": "public"
 }

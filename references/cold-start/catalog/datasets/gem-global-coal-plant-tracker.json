@@ -21,5 +21,7 @@
     "coal",
     "infrastructure"
   ],
-  "landingPage": "https://globalenergymonitor.org/projects/global-coal-plant-tracker/"
+  "landingPage": "https://globalenergymonitor.org/projects/global-coal-plant-tracker/",
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNQTFC3W5JC9EZZBDFFXC577",
+  "accessRights": "public"
 }

@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR1Y3422M1ZTF208ZFRYRHY",
+  "title": "RTE Bilan Prévisionnel (Forecast Report)",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "RTE's annual long-term electricity supply-demand adequacy report for France, including energy balance scenarios, peak demand forecasts, and capacity adequacy assessments.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR1Y342564KTMY61B9ET3F6",
+    "https://id.skygest.io/distribution/dist_01KNR1Y342QD59B1YR7B4B6FMF"
+  ],
+  "keywords": [
+    "forecast",
+    "adequacy",
+    "France",
+    "supply-demand",
+    "scenarios",
+    "RTE"
+  ],
+  "themes": [
+    "electricity",
+    "planning",
+    "scenarios"
+  ],
+  "landingPage": "https://www.rte-france.com/analyses-tendances-et-prospectives/bilan-previsionnel-2050",
+  "accessRights": "public",
+  "license": "https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf"
+}

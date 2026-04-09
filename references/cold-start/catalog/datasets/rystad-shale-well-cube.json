@@ -1,0 +1,26 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR1N2TC5ZDZSYAZF5QVV04D",
+  "title": "Rystad Shale Well Cube",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQXP4PG2E1XFZPGY0W9WPEV",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Well-level production, completion, and cost data for North American shale plays, with type curves and decline analysis.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR1N2TC9XVK9V60W23QVQPM"
+  ],
+  "keywords": [
+    "shale",
+    "well data",
+    "production",
+    "completion",
+    "decline curves"
+  ],
+  "themes": [
+    "oil and gas",
+    "upstream"
+  ],
+  "landingPage": "https://www.rystadenergy.com/energy-themes/oil-gas/shale/",
+  "accessRights": "restricted"
+}

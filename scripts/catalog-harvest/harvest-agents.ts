@@ -26,7 +26,7 @@ import { ulid } from "ulid";
 const ROOT = join(import.meta.dirname, "..", "..", "references", "cold-start");
 const AGENTS_DIR = join(ROOT, "catalog", "agents");
 const REPORTS_DIR = join(ROOT, "reports", "harvest");
-const TS = new Date().toISOString().replace(/T.*/, "T00:00:00.000Z"); // date-only precision
+const TS = "2026-04-08T00:00:00.000Z";
 
 // ---------------------------------------------------------------------------
 // Load probe reports

@@ -24,5 +24,6 @@
   "landingPage": "https://ourworldindata.org/co2-and-greenhouse-gas-emissions",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQTFC3WYJYFCT05M0MRYM8P"
-  ]
+  ],
+  "accessRights": "public"
 }

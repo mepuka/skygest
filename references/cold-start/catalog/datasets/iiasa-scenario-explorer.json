@@ -22,5 +22,6 @@
     "scenarios",
     "climate"
   ],
-  "landingPage": "https://data.ece.iiasa.ac.at/"
+  "landingPage": "https://data.ece.iiasa.ac.at/",
+  "accessRights": "public"
 }
