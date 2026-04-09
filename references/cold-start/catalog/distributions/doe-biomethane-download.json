@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1SE7ASFY1YMHBVYSD20GB",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1SE7AZCGH1HHHHVXK4W3A",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Biomethane Resources Dataset",
+  "accessURL": "https://data.openei.org/",
+  "format": "CSV"
+}

@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQTFC3YAT7XXZEE6C67HEG4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQTFC3YE0TPN7NZA2JZKDMS",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "éCO2mix Data Downloads",
+  "accessURL": "https://www.rte-france.com/eco2mix/telecharger-les-indicateurs",
+  "format": "CSV/Excel"
+}

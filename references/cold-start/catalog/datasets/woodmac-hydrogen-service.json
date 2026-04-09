@@ -1,0 +1,26 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR1N2TDA0Q5JF509J043KCZ",
+  "title": "Wood Mackenzie Future Energy — Hydrogen",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQXP4PD4KHA7GJET9T2NTSS",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Global hydrogen market intelligence: production costs, project pipeline, electrolyser supply chain, and demand forecasts.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR1N2TD5J0JDDEQZD9CBAKS"
+  ],
+  "keywords": [
+    "hydrogen",
+    "green hydrogen",
+    "electrolyser",
+    "production cost",
+    "demand"
+  ],
+  "themes": [
+    "hydrogen",
+    "energy transition"
+  ],
+  "landingPage": "https://www.woodmac.com/market-insights/topics/hydrogen/",
+  "accessRights": "restricted"
+}

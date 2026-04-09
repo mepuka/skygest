@@ -1,0 +1,25 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQXP4PH0CYNFES0TEBE9GC7",
+  "title": "CEA All India Installed Capacity",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K712PGQJ83W8CXYY37D",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Monthly report on installed electricity generation capacity in India by fuel type, sector, and state.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQXP4PH3XCJXZ62GKRF86V9"
+  ],
+  "keywords": [
+    "India",
+    "capacity",
+    "installed",
+    "fuel type"
+  ],
+  "themes": [
+    "electricity",
+    "India"
+  ],
+  "landingPage": "https://cea.nic.in/installed-capacity-report/",
+  "accessRights": "public"
+}

@@ -1,0 +1,29 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KNQS8K71B5DGSVPX092PE6WD",
+  "kind": "organization",
+  "name": "International Monetary Fund",
+  "aliases": [
+    {
+      "scheme": "ror",
+      "value": "https://ror.org/05m4rmw09",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "wikidata",
+      "value": "Q7804",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.imf.org/",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
+  "alternateNames": [
+    "IMF"
+  ],
+  "homepage": "https://www.imf.org/"
+}

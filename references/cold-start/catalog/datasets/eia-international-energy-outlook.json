@@ -1,0 +1,35 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQSXEPR7SKAQSHTBWSW1YQN",
+  "title": "EIA International Energy Outlook",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "IEO",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQSXEPR9XFQQ0VJKWX4PJ27",
+    "https://id.skygest.io/distribution/dist_01KNQSXEPRW4XWEYKN7B69CQM0"
+  ],
+  "description": "Long-term projections of international energy production, consumption, and carbon dioxide emissions.",
+  "landingPage": "https://www.eia.gov/outlooks/ieo/",
+  "keywords": [
+    "international",
+    "outlook",
+    "forecast",
+    "projections"
+  ],
+  "themes": [
+    "international",
+    "forecast"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "accessRights": "public"
+}

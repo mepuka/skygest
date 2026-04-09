@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR1N2TC7X46Z3JAZP69BVZ5",
+  "title": "Wood Mackenzie Lens Upstream",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQXP4PD4KHA7GJET9T2NTSS",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Global upstream oil and gas analytics: asset valuations, company benchmarking, M&A screening, and production forecasts.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR1N2TCMFTK36D1FZBSK6W2"
+  ],
+  "keywords": [
+    "upstream",
+    "oil",
+    "gas",
+    "asset valuation",
+    "M&A",
+    "production"
+  ],
+  "themes": [
+    "oil and gas",
+    "upstream"
+  ],
+  "landingPage": "https://www.woodmac.com/lens/upstream/",
+  "accessRights": "restricted"
+}

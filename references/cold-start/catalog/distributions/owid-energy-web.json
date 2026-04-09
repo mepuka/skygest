@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQTFC41HRD9JH7799PFR70X",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQTFC41FK1N5SSJDEZYSCA0",
+  "kind": "interactive-web-app",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "OWID Energy Explorer",
+  "accessURL": "https://ourworldindata.org/explorers/energy"
+}

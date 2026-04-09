@@ -1,0 +1,26 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR1N2TG4KVTJ2S466RR0W3V",
+  "title": "RMI Utility Transition Hub",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNR1N2T8KD4S5XT2V04BH5DF",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Analysis of US utility clean energy targets, IRP filings, and progress toward decarbonization commitments.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR1N2TGAJG4D939YZQW59TY"
+  ],
+  "keywords": [
+    "utility",
+    "clean energy",
+    "IRP",
+    "decarbonization",
+    "US"
+  ],
+  "themes": [
+    "electricity",
+    "energy transition"
+  ],
+  "landingPage": "https://utilitytransitionhub.rmi.org/",
+  "accessRights": "public"
+}

@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1N2TEGES5RDV5B3MAK23D",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1N2TE4N7F00GQ3FJW2YZC",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "GIEM Product Page",
+  "accessURL": "https://www.spglobal.com/commodityinsights/en/ci/products/global-integrated-energy-model.html"
+}

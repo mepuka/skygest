@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQXP4PJ74RS6MGHQB040634",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQXP4PJSX3K5GS6YS4NBFTK",
+  "kind": "interactive-web-app",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "IMF Fossil Fuel Subsidies Portal",
+  "accessURL": "https://www.imf.org/en/Topics/climate-change/energy-subsidies"
+}

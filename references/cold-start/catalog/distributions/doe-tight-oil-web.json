@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1SE7BHWGW74784PR2954E",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1SE7BPYNGKE8A1E0W0DAH",
+  "kind": "interactive-web-app",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Drilling Productivity Report",
+  "accessURL": "https://www.eia.gov/petroleum/drilling/"
+}

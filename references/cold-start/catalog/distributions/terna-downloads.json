@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQTFC3ZXMNEZKYS3ENKB4WX",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQTFC3ZF6RNB2SNS8928GT4",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Terna Statistical Data",
+  "accessURL": "https://www.terna.it/en/electric-system/statistical-data-forecast/statistical-publications",
+  "format": "Excel"
+}

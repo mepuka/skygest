@@ -1,0 +1,11 @@
+{
+  "_tag": "DatasetSeries",
+  "id": "https://id.skygest.io/dataset-series/dser_01KNR1N2T95F6J8F87Q67QS37R",
+  "title": "Lazard Levelized Cost of Energy Analysis",
+  "description": "Annual analysis of levelized cost of energy across generation technologies",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNR1N2T3VD8AENBQC0WRWA5W",
+  "cadence": "annual",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

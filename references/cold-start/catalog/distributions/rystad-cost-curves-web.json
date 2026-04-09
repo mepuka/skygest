@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1N2TC8DWM36KKR3FWX6V4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1N2TCTWN2RG0AE8NJC829",
+  "kind": "interactive-web-app",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Rystad Supply Cost Platform",
+  "accessURL": "https://www.rystadenergy.com/energy-themes/oil-gas/"
+}

@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1N2TGAGYSTNN0CMGT9JED",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1N2TGP83Z6PTJEQ976FSZ",
+  "kind": "interactive-web-app",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "TransitionZero Platform",
+  "accessURL": "https://www.transitionzero.org/"
+}

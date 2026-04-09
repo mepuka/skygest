@@ -1,0 +1,13 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1Y343ES17P46X7C42Y58Q",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1Y343Q5DNQTATDM5DJT7A",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Installation Registry CSV",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/registre-national-installation-production-stockage-electricite-agrege/exports/csv",
+  "format": "CSV",
+  "mediaType": "text/csv"
+}

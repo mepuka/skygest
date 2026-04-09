@@ -19,5 +19,7 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KNQEZ5VMXY5HHC02V7FCM89W"
   ],
-  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNQEZ5VHMTM3ENZC9ZNBB6H5"
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNQEZ5VHMTM3ENZC9ZNBB6H5",
+  "license": "CC-BY-4.0",
+  "accessRights": "public"
 }

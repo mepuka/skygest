@@ -1,0 +1,13 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQSXEPQ6Z7JYFD16W5B9WQE",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQSXEPQHNVM0AVMA3SQRNK3",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "EIA U.S. Electric System Operating Data (bulk download)",
+  "accessURL": "https://www.eia.gov/opendata/bulk/EBA.zip",
+  "format": "application/zip",
+  "mediaType": "application/zip"
+}

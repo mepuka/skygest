@@ -1,0 +1,29 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR1Y344MN8G7FAVDNYRYRSF",
+  "title": "Eurostat Complete Energy Balances",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K704FC3APP83MJHZ6BP",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Annual and monthly complete energy balances for EU member states: supply, transformation, final consumption by fuel and sector. The definitive EU-wide energy statistics.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR1Y3440VM7TVTYV96P5WHJ",
+    "https://id.skygest.io/distribution/dist_01KNR1Y344RMDFXQNPS5RKWJP4"
+  ],
+  "keywords": [
+    "energy balance",
+    "EU",
+    "supply",
+    "consumption",
+    "transformation",
+    "annual"
+  ],
+  "themes": [
+    "energy",
+    "European",
+    "statistics"
+  ],
+  "landingPage": "https://ec.europa.eu/eurostat/databrowser/view/nrg_bal_c/default/table",
+  "accessRights": "public"
+}

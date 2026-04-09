@@ -1,0 +1,28 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQTFC40MZFJ80BFY383TV2Y",
+  "title": "REE e·sios / ESIOS",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70MDA4DBVV7Y4Z0F1X",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Spanish electricity system indicators including generation, demand, prices, and exchanges.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQTFC40W75T9KGVJV8BH0FD",
+    "https://id.skygest.io/distribution/dist_01KNQTFC40Z6YMR16DTHR1RQ3P"
+  ],
+  "keywords": [
+    "generation",
+    "demand",
+    "prices",
+    "Spain",
+    "indicators"
+  ],
+  "themes": [
+    "electricity",
+    "grid operations",
+    "market data"
+  ],
+  "landingPage": "https://www.esios.ree.es/en",
+  "accessRights": "public"
+}

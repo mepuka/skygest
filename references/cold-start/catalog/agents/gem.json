@@ -1,0 +1,24 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KNQS8K72B28CNVDVTR3E8GFC",
+  "kind": "organization",
+  "name": "Global Energy Monitor",
+  "aliases": [
+    {
+      "scheme": "wikidata",
+      "value": "Q65086937",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://globalenergymonitor.org/",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
+  "alternateNames": [
+    "GEM"
+  ],
+  "homepage": "https://globalenergymonitor.org/"
+}

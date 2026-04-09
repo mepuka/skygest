@@ -5,25 +5,20 @@
   "name": "United Nations Framework Convention on Climate Change",
   "aliases": [
     {
-      "scheme": "ror",
-      "value": "https://ror.org/01mfmr560",
-      "relation": "exactMatch"
-    },
-    {
       "scheme": "wikidata",
-      "value": "Q183011",
+      "value": "Q208645",
       "relation": "exactMatch"
     },
     {
       "scheme": "url",
-      "value": "https://unfccc.int",
+      "value": "http://unfccc.int/",
       "relation": "exactMatch"
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
   "alternateNames": [
     "UNFCCC"
   ],
-  "homepage": "https://unfccc.int"
+  "homepage": "http://unfccc.int/"
 }

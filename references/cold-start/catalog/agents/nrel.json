@@ -11,19 +11,19 @@
     },
     {
       "scheme": "wikidata",
-      "value": "Q1579895",
+      "value": "Q1856153",
       "relation": "exactMatch"
     },
     {
       "scheme": "url",
-      "value": "https://www.nrel.gov",
+      "value": "https://www.nrel.gov/",
       "relation": "exactMatch"
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
   "alternateNames": [
     "NREL"
   ],
-  "homepage": "https://www.nrel.gov"
+  "homepage": "https://www.nrel.gov/"
 }

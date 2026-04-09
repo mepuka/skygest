@@ -1,0 +1,29 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KNQS8K70WTQZKVCGGP86A34D",
+  "kind": "organization",
+  "name": "Terna S.p.A.",
+  "aliases": [
+    {
+      "scheme": "ror",
+      "value": "https://ror.org/013nb7b55",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "wikidata",
+      "value": "Q936325",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "http://www.terna.it/",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
+  "alternateNames": [
+    "Terna"
+  ],
+  "homepage": "http://www.terna.it/"
+}

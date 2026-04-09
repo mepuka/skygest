@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQTFC46T0ATWGBMPMW73KY0",
+  "title": "Eurostat Energy Statistics",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K704FC3APP83MJHZ6BP",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Comprehensive European energy statistics including supply, transformation, consumption by fuel and sector.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQTFC465JKVQXF0QXYNPRSW",
+    "https://id.skygest.io/distribution/dist_01KNQTFC46A5T89MPTQTR80E45"
+  ],
+  "keywords": [
+    "energy",
+    "Europe",
+    "supply",
+    "consumption",
+    "EU"
+  ],
+  "themes": [
+    "energy",
+    "European"
+  ],
+  "landingPage": "https://ec.europa.eu/eurostat/web/energy/overview",
+  "accessRights": "public"
+}

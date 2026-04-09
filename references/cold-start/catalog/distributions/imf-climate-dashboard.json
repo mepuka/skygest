@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQXP4PKFHH68J0TYKBYKXW1",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQXP4PK6VEWBMQJRVV1D410",
+  "kind": "interactive-web-app",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "IMF Climate Data Dashboard",
+  "accessURL": "https://climatedata.imf.org/"
+}

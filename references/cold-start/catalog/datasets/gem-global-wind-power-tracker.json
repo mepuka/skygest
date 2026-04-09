@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQTFC45S08X5FMF3BHTTV5M",
+  "title": "Global Wind Power Tracker",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72B28CNVDVTR3E8GFC",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Database of utility-scale wind power projects worldwide with capacity, status, and location.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQTFC454DQVP2ZPYQ20Y16D"
+  ],
+  "keywords": [
+    "wind",
+    "power plants",
+    "capacity",
+    "tracker",
+    "global"
+  ],
+  "themes": [
+    "wind",
+    "infrastructure"
+  ],
+  "landingPage": "https://globalenergymonitor.org/projects/global-wind-power-tracker/",
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNQTFC3W5JC9EZZBDFFXC577",
+  "accessRights": "public"
+}

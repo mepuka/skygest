@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQTFC3YN0W4AWMXYCSMM7E0",
+  "title": "AEMO National Electricity Market Data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K705WWGTWT09N8JJF9V",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Australian NEM dispatch, pricing, generation, and demand data.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQTFC3Y9QK77R7JNR9DZWTJ",
+    "https://id.skygest.io/distribution/dist_01KNQTFC3YJQXV61WAMHV9890F"
+  ],
+  "keywords": [
+    "NEM",
+    "dispatch",
+    "generation",
+    "demand",
+    "Australia"
+  ],
+  "themes": [
+    "electricity",
+    "grid operations"
+  ],
+  "landingPage": "https://aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
+  "accessRights": "public"
+}

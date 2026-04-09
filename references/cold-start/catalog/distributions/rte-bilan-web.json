@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1Y342564KTMY61B9ET3F6",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1Y3422M1ZTF208ZFRYRHY",
+  "kind": "interactive-web-app",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Bilan Prévisionnel Portal",
+  "accessURL": "https://www.rte-france.com/analyses-tendances-et-prospectives/bilan-previsionnel-2050"
+}

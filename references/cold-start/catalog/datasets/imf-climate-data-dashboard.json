@@ -1,0 +1,25 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQXP4PK6VEWBMQJRVV1D410",
+  "title": "IMF Climate Change Dashboard",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K71B5DGSVPX092PE6WD",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Climate-related economic indicators including carbon pricing, energy transition metrics, and climate finance data.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQXP4PKFHH68J0TYKBYKXW1"
+  ],
+  "keywords": [
+    "climate",
+    "economic indicators",
+    "carbon pricing",
+    "finance"
+  ],
+  "themes": [
+    "climate",
+    "economics"
+  ],
+  "landingPage": "https://climatedata.imf.org/",
+  "accessRights": "public"
+}

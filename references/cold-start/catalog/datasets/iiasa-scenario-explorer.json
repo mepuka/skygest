@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQTFC48H77KG52S2W57161T",
+  "title": "IIASA Scenario Explorer",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K71G6RD6XRYNVNYB200",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Interactive platform hosting IPCC and other integrated assessment model scenarios (AR6, SSP, NGFS).",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQTFC48WAH0WAC9FF6Y6775",
+    "https://id.skygest.io/distribution/dist_01KNQTFC481NKHEWHHP1GWTNME"
+  ],
+  "keywords": [
+    "scenarios",
+    "IPCC",
+    "IAM",
+    "SSP",
+    "climate pathways"
+  ],
+  "themes": [
+    "scenarios",
+    "climate"
+  ],
+  "landingPage": "https://data.ece.iiasa.ac.at/",
+  "accessRights": "public"
+}

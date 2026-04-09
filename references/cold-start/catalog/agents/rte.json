@@ -1,0 +1,24 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "kind": "organization",
+  "name": "RTE",
+  "aliases": [
+    {
+      "scheme": "wikidata",
+      "value": "Q2178795",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.rte-france.com",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
+  "alternateNames": [
+    "Réseau de Transport d'Électricité"
+  ],
+  "homepage": "https://www.rte-france.com"
+}

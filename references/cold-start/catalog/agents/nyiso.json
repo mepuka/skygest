@@ -1,0 +1,24 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
+  "kind": "organization",
+  "name": "New York Independent System Operator",
+  "aliases": [
+    {
+      "scheme": "wikidata",
+      "value": "Q134973495",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.nyiso.com/",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
+  "alternateNames": [
+    "NYISO"
+  ],
+  "homepage": "https://www.nyiso.com/"
+}

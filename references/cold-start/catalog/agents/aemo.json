@@ -1,0 +1,24 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KNQS8K705WWGTWT09N8JJF9V",
+  "kind": "organization",
+  "name": "Australian Energy Market Operator",
+  "aliases": [
+    {
+      "scheme": "wikidata",
+      "value": "Q4034595",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "http://www.aemo.com.au/",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
+  "alternateNames": [
+    "AEMO"
+  ],
+  "homepage": "http://www.aemo.com.au/"
+}

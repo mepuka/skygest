@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1SE7AGERQKQYA8N1H4VPX",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1SE7A5ZVQZ93XJSD3HYXM",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Wave Energy Resource Data",
+  "accessURL": "https://www.nrel.gov/water/wave-energy.html"
+}

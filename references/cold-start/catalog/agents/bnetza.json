@@ -1,0 +1,30 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KNQS8K70AAW01HBF7988TCG2",
+  "kind": "organization",
+  "name": "Bundesnetzagentur",
+  "aliases": [
+    {
+      "scheme": "ror",
+      "value": "https://ror.org/032v09t14",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "wikidata",
+      "value": "Q269138",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.bundesnetzagentur.de/",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
+  "alternateNames": [
+    "BNetzA",
+    "Federal Network Agency"
+  ],
+  "homepage": "https://www.bundesnetzagentur.de/"
+}

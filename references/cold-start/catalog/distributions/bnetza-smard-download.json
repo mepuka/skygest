@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQTFC46YT7YJS776TQMXAJ0",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQTFC46JTYGQW647FE25EBD",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "SMARD Data Downloads",
+  "accessURL": "https://www.smard.de/en/downloadcenter",
+  "format": "CSV"
+}

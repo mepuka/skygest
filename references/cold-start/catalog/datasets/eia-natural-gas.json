@@ -1,0 +1,35 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQSXEPSC14VCKS8CKR883RB",
+  "title": "EIA Natural Gas Data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "NG",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQSXEPS1WA32CJEWRE3X2D3",
+    "https://id.skygest.io/distribution/dist_01KNQSXEPSXJPNQV53YHV50N86"
+  ],
+  "description": "U.S. natural gas production, imports, exploration, pipelines, exports, prices, consumption, and reserves.",
+  "landingPage": "https://www.eia.gov/naturalgas/data.php",
+  "keywords": [
+    "natural gas",
+    "production",
+    "prices",
+    "pipelines",
+    "storage"
+  ],
+  "themes": [
+    "natural gas"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "accessRights": "public"
+}

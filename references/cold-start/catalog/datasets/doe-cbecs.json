@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR1SE780J4FD43B342YP8KF",
+  "title": "Commercial Buildings Energy Consumption Survey (CBECS)",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K71TFTCQS6SERJHC136",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "National survey of commercial building characteristics and energy usage patterns, conducted approximately every 4 years.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR1SE78FZTPBNHXBP5H81NJ",
+    "https://id.skygest.io/distribution/dist_01KNR1SE78B8F8F1Y5QX82G90M"
+  ],
+  "keywords": [
+    "commercial buildings",
+    "energy consumption",
+    "survey",
+    "CBECS",
+    "building stock"
+  ],
+  "themes": [
+    "buildings",
+    "energy consumption"
+  ],
+  "landingPage": "https://www.eia.gov/consumption/commercial/",
+  "accessRights": "public"
+}

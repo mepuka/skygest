@@ -6,24 +6,24 @@
   "aliases": [
     {
       "scheme": "ror",
-      "value": "https://ror.org/05zcbgd14",
+      "value": "https://ror.org/05v7gv656",
       "relation": "exactMatch"
     },
     {
       "scheme": "wikidata",
-      "value": "Q1400970",
+      "value": "Q3067862",
       "relation": "exactMatch"
     },
     {
       "scheme": "url",
-      "value": "https://www.ferc.gov",
+      "value": "https://www.ferc.gov/",
       "relation": "exactMatch"
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
   "alternateNames": [
     "FERC"
   ],
-  "homepage": "https://www.ferc.gov"
+  "homepage": "https://www.ferc.gov/"
 }

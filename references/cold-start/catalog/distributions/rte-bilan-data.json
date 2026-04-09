@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1Y342QD59B1YR7B4B6FMF",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1Y3422M1ZTF208ZFRYRHY",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Bilan Prévisionnel Data (ODRÉ)",
+  "accessURL": "https://odre.opendatasoft.com/explore/dataset/bilan-previsionnel-electrique-2019/",
+  "format": "CSV"
+}

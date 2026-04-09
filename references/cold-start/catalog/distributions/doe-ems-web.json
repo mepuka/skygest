@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1SE79AES9Y0S4HMCA6J2Z",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1SE7973GWE566Q67A9CMR",
+  "kind": "interactive-web-app",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Energy Mapping System",
+  "accessURL": "https://www.eia.gov/state/maps.php"
+}

@@ -1,0 +1,28 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQTFC3YZVAK6AHGS44Q5P07",
+  "title": "ISO New England Market and Operations Data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "ISO-NE real-time and historical data including LMPs, load, generation, and fuel mix.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQTFC3YT9XVZ065XYMK0CXW",
+    "https://id.skygest.io/distribution/dist_01KNQTFC3YCY6W7RJM2P5KTTRS"
+  ],
+  "keywords": [
+    "LMP",
+    "generation",
+    "load",
+    "fuel mix",
+    "New England"
+  ],
+  "themes": [
+    "electricity",
+    "grid operations",
+    "market data"
+  ],
+  "landingPage": "https://www.iso-ne.com/isoexpress/",
+  "accessRights": "public"
+}

@@ -1,0 +1,30 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KNQS8K70EGH7B22WKME1003B",
+  "kind": "organization",
+  "name": "United States Environmental Protection Agency",
+  "aliases": [
+    {
+      "scheme": "ror",
+      "value": "https://ror.org/03tns0030",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "wikidata",
+      "value": "Q460173",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://epa.gov/",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
+  "alternateNames": [
+    "EPA",
+    "US EPA"
+  ],
+  "homepage": "https://epa.gov/"
+}

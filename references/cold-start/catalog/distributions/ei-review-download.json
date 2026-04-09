@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR1N2THGV3ZJJB134DY0VF2",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR1N2THX0H4VRN11CD02A12",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Statistical Review Data Download",
+  "accessURL": "https://www.energyinst.org/statistical-review",
+  "format": "Excel/CSV"
+}

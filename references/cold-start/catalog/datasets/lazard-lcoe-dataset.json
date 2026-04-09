@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR1N2TEV862QNAK1JXW9Q60",
+  "title": "Lazard Levelized Cost of Energy+ (LCOE+)",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNR1N2T3VD8AENBQC0WRWA5W",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Annual analysis comparing the levelized cost of energy for various generation technologies including solar, wind, gas, nuclear, storage, and hydrogen.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR1N2TEHZ135X2CE19J6FT6",
+    "https://id.skygest.io/distribution/dist_01KNR1N2TE4DY2A76PFMV07K8A"
+  ],
+  "keywords": [
+    "LCOE",
+    "levelized cost",
+    "solar",
+    "wind",
+    "nuclear",
+    "battery",
+    "hydrogen"
+  ],
+  "themes": [
+    "economics",
+    "electricity",
+    "energy transition"
+  ],
+  "landingPage": "https://www.lazard.com/research-insights/levelized-cost-of-energyplus/",
+  "accessRights": "public",
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNR1N2T95F6J8F87Q67QS37R"
+}

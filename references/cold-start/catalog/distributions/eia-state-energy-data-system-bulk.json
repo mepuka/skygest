@@ -1,0 +1,13 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQSXEPSC0TAYJDAH5ECQ0ZH",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQSXEPSSC89G53B0QHB9DEG",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "EIA State Energy Data System (SEDS) (bulk download)",
+  "accessURL": "https://www.eia.gov/opendata/bulk/SEDS.zip",
+  "format": "application/zip",
+  "mediaType": "application/zip"
+}
