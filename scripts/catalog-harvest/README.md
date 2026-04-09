@@ -23,6 +23,7 @@ sources. We are not building connectors or live harvesters.
 | `probe-ror.ts` | ROR API v2 (`api.ror.org/v2/organizations`) | Agent alias enrichments (ROR IDs). Strict name validation — rejects false positives. |
 | `probe-wikidata.ts` | Wikidata SPARQL (`query.wikidata.org/sparql`) | Agent QIDs, websites, ROR cross-refs. Covers grid operators ROR misses. |
 | `probe-awesome-energy.ts` | `rebase-energy/awesome-energy-datasets` (`data.json`) | Gap report: overlap vs. new sources |
+| `probe-dcat-endpoints.ts` | DOE, EPA EDG, EIA Atlas DCAT-US data.json endpoints | Field coverage, energy-relevance filter, overlap analysis |
 
 ### Harvest scripts (transform + deduplicate + output entities)
 
@@ -42,6 +43,19 @@ bun scripts/catalog-harvest/probe-awesome-energy.ts
 ```
 
 Reports are written to `references/cold-start/reports/harvest/`.
+
+## Known DCAT Endpoints
+
+Validated endpoint URLs (as of April 2026):
+
+| Source | URL | Format | Notes |
+|--------|-----|--------|-------|
+| DOE | `energy.gov/sites/default/files/2026-03/pdl030226.json` | DCAT-US 3.0 | Redirected from `energy.gov/data.json`. Mostly admin, not research data. |
+| EPA EDG | `edg.epa.gov/data.json` | DCAT-US | 6,666 datasets, 1,863 energy-relevant. The real EPA catalog. |
+| EPA EDG files | `edg.epa.gov/data/public/` | File tree | Organized by EPA office code (OAR, OW, ORD, etc.) |
+| Eurostat | `ec.europa.eu/eurostat/api/dissemination/catalogue/dcat/ESTAT/FULL` | DCAT-AP RDF | Not yet probed. StatDCAT-AP, gold standard. |
+| RTE ODRÉ | ODRÉ platform `/catalog/exports/dcat` | DCAT-AP | Not yet probed. French grid operator. |
+| data.europa.eu | `data.europa.eu/sparql` | SPARQL/RDF | Not yet probed. Pan-EU federated catalog. |
 
 ## Provenance
 
