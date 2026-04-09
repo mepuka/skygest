@@ -20,5 +20,6 @@
     "https://id.skygest.io/distribution/dist_01KNQEZ5VK4JC6T0E1SXBN1PH4",
     "https://id.skygest.io/distribution/dist_01KNQEZ5VMHV2JG6H8V702965D"
   ],
-  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNQEZ5VGG1WYG5DJ1NJW7W00"
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KNQEZ5VGG1WYG5DJ1NJW7W00",
+  "license": "CC-BY-4.0"
 }
