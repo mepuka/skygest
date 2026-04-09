@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQXP4PK9Z2JTB7DVX73R7BS",
+  "title": "Rystad Energy UCube / PCube",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQXP4PG2E1XFZPGY0W9WPEV",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Global upstream and power market analytics platform with asset-level data on oil, gas, and power.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQXP4PK5VHRCGG7998X5MXX"
+  ],
+  "keywords": [
+    "upstream",
+    "power",
+    "asset-level",
+    "oil",
+    "gas",
+    "renewables"
+  ],
+  "themes": [
+    "oil and gas",
+    "power markets"
+  ],
+  "landingPage": "https://www.rystadenergy.com/energy-themes/renewables",
+  "accessRights": "restricted"
+}
