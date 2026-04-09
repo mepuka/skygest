@@ -20,7 +20,8 @@ sources. We are not building connectors or live harvesters.
 | Script | Source | Output |
 |--------|--------|--------|
 | `probe-eia-manifest.ts` | EIA Bulk Download manifest (`eia.gov/opendata/bulk/manifest.txt`) | Field mapping report + raw manifest snapshot |
-| `probe-ror.ts` | ROR API v2 (`api.ror.org/v2/organizations`) | Agent alias enrichments (ROR IDs, Wikidata QIDs) |
+| `probe-ror.ts` | ROR API v2 (`api.ror.org/v2/organizations`) | Agent alias enrichments (ROR IDs). Strict name validation — rejects false positives. |
+| `probe-wikidata.ts` | Wikidata SPARQL (`query.wikidata.org/sparql`) | Agent QIDs, websites, ROR cross-refs. Covers grid operators ROR misses. |
 | `probe-awesome-energy.ts` | `rebase-energy/awesome-energy-datasets` (`data.json`) | Gap report: overlap vs. new sources |
 
 ### Harvest scripts (transform + deduplicate + output entities)
@@ -36,6 +37,7 @@ All scripts run with Bun from the repo root:
 ```sh
 bun scripts/catalog-harvest/probe-eia-manifest.ts
 bun scripts/catalog-harvest/probe-ror.ts
+bun scripts/catalog-harvest/probe-wikidata.ts
 bun scripts/catalog-harvest/probe-awesome-energy.ts
 ```
 
