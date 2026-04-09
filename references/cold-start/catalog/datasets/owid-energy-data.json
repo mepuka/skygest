@@ -1,0 +1,29 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQTFC41FK1N5SSJDEZYSCA0",
+  "title": "Our World in Data — Energy",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72YVH1PX36P720SHYT",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Global energy dataset covering consumption, production, mix, and per-capita metrics for 200+ countries. Sources: Energy Institute, EIA, Ember.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQTFC41KPDWBJZ1756NWW20",
+    "https://id.skygest.io/distribution/dist_01KNQTFC41HRD9JH7799PFR70X"
+  ],
+  "keywords": [
+    "energy",
+    "global",
+    "consumption",
+    "production",
+    "per capita"
+  ],
+  "themes": [
+    "energy",
+    "global"
+  ],
+  "landingPage": "https://ourworldindata.org/energy",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3WYJYFCT05M0MRYM8P"
+  ]
+}

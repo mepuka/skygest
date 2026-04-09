@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQTFC3WF9Y2YSAJJNYY6X58",
+  "title": "MISO Market and Operations Data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Real-time and historical market data including LMPs, generation mix, load, and interchange for the MISO footprint.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQTFC3WBWWVEED150651345",
+    "https://id.skygest.io/distribution/dist_01KNQTFC3W4ZCCS7BD88M2Q5K2"
+  ],
+  "keywords": [
+    "LMP",
+    "generation",
+    "load",
+    "interchange",
+    "real-time"
+  ],
+  "themes": [
+    "electricity",
+    "grid operations",
+    "market data"
+  ],
+  "landingPage": "https://www.misoenergy.org/markets-and-operations/"
+}

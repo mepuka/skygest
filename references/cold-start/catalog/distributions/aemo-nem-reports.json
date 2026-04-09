@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQTFC3YJQXV61WAMHV9890F",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQTFC3YN0W4AWMXYCSMM7E0",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "AEMO Data Downloads",
+  "accessURL": "https://nemweb.com.au/",
+  "format": "CSV"
+}

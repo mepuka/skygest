@@ -1,0 +1,26 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQTFC3ZF6RNB2SNS8928GT4",
+  "title": "Terna Transparency Report",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70WTQZKVCGGP86A34D",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Italian electricity system data including generation, demand, exchanges, and installed capacity.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQTFC3ZB1ZHXN5F3N1PJJF3",
+    "https://id.skygest.io/distribution/dist_01KNQTFC3ZXMNEZKYS3ENKB4WX"
+  ],
+  "keywords": [
+    "generation",
+    "demand",
+    "capacity",
+    "Italy",
+    "transparency"
+  ],
+  "themes": [
+    "electricity",
+    "grid operations"
+  ],
+  "landingPage": "https://www.terna.it/en/electric-system/transparency-report"
+}

@@ -1,0 +1,25 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQTFC44F19XZJ9CAWP38AE8",
+  "title": "Global Solar Power Tracker",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72B28CNVDVTR3E8GFC",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Database of utility-scale solar power projects worldwide with capacity, status, and location.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQTFC44FHA3ZYD5EBVCB8W2"
+  ],
+  "keywords": [
+    "solar",
+    "power plants",
+    "capacity",
+    "tracker",
+    "global"
+  ],
+  "themes": [
+    "solar",
+    "infrastructure"
+  ],
+  "landingPage": "https://globalenergymonitor.org/projects/global-solar-power-tracker/"
+}

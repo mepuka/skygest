@@ -1,0 +1,26 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQTFC44CFAE779QG7ZXC08T",
+  "title": "Global Carbon Budget",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72DJB19FDCXYHTXZH3",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "description": "Annual dataset quantifying global CO2 emissions from fossil fuels, land-use change, and the ocean and land carbon sinks.",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQTFC44K48S6SWZBA9TDCP9"
+  ],
+  "keywords": [
+    "carbon budget",
+    "CO2",
+    "emissions",
+    "fossil fuels",
+    "land use",
+    "carbon sinks"
+  ],
+  "themes": [
+    "emissions",
+    "carbon cycle"
+  ],
+  "landingPage": "https://www.globalcarbonproject.org/carbonbudget/"
+}
