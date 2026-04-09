@@ -1,0 +1,23 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR9ESZM21DCF34CBW6EN37D",
+  "title": "FERC State of the Markets Report",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEBCH9EF42WAA5Y7YR",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "landingPage": "https://ferc.gov",
+  "keywords": [
+    "state",
+    "the",
+    "markets",
+    "report"
+  ],
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR9ESZM1ZX0RWNKQ8Y36E2P"
+  ],
+  "accessRights": "public"
+}

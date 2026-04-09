@@ -1,0 +1,23 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR9ESZ513VRM9KY6XK9V0CC",
+  "title": "BC Hydro Balancing Authority Load Data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRK76J96NAHA5XS037",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "landingPage": "https://bchydro.com",
+  "keywords": [
+    "balancing",
+    "authority",
+    "load",
+    "data"
+  ],
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR9ESZ5BM6QK6SXSNR1SG4A"
+  ],
+  "accessRights": "public"
+}

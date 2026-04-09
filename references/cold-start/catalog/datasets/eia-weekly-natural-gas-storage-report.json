@@ -1,0 +1,28 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR9ESZJ5SC8D20MNC1M0M4J",
+  "title": "EIA Weekly Natural Gas Storage Report",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "landingPage": "https://eia.gov",
+  "keywords": [
+    "weekly",
+    "natural",
+    "gas",
+    "storage",
+    "report"
+  ],
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR9ESZJC1N5PH7N7H8T7S37",
+    "https://id.skygest.io/distribution/dist_01KNR9ESZJGJEHF8295B54ASKW"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ]
+}

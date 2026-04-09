@@ -13,12 +13,18 @@
       "scheme": "url",
       "value": "https://www.pjm.com/",
       "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://services.pjm.com",
+      "relation": "exactMatch"
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "updatedAt": "2026-04-09T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
   "alternateNames": [
-    "PJM"
+    "PJM",
+    "PJM Interconnection, L.L.C."
   ],
   "homepage": "https://www.pjm.com/"
 }

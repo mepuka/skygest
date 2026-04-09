@@ -1,0 +1,26 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR9ESZ7HNW2C8VE62GKN1SA",
+  "title": "California ISO Daily Renewable Report",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "landingPage": "https://caiso.com",
+  "keywords": [
+    "daily",
+    "renewable",
+    "report"
+  ],
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR9ESZ7FNFFM8RC0QZ5RKHQ",
+    "https://id.skygest.io/distribution/dist_01KNR9ESZ83CYP21ZGY3HZC6SC"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VH7SFKBQWANM6TSKMV"
+  ]
+}

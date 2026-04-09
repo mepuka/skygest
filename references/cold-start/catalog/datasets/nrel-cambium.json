@@ -1,0 +1,20 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR9ET01T2V7MG784MZAQ17D",
+  "title": "NREL Cambium",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF3G335NSS1773RWDH",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "landingPage": "https://nrel.gov",
+  "keywords": [
+    "cambium"
+  ],
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR9ET01QVW1BTT9KXED5GAW"
+  ],
+  "accessRights": "public"
+}

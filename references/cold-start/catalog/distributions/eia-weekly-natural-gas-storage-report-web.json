@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR9ESZJC1N5PH7N7H8T7S37",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR9ESZJ5SC8D20MNC1M0M4J",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Weekly Natural Gas Storage Report web",
+  "accessURL": "https://eia.gov"
+}

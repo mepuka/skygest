@@ -21,9 +21,11 @@
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "updatedAt": "2026-04-09T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
   "alternateNames": [
-    "EIA"
+    "EIA",
+    "US Energy Information Administration",
+    "Energy Information Administration"
   ],
   "homepage": "https://www.eia.gov/"
 }

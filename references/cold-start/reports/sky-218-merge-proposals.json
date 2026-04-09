@@ -1,0 +1,1011 @@
+{
+  "ticket": "SKY-218",
+  "generatedAt": "2026-04-08T00:00:00.000Z",
+  "proposals": [
+    {
+      "id": "aeso:create-agent:aeso",
+      "provider": "aeso",
+      "action": "create-agent",
+      "slug": "aeso",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "name": "Alberta Electric System Operator",
+        "alternateNames": [
+          "AESO"
+        ],
+        "domains": [
+          "aeso.ca"
+        ],
+        "duplicateCandidates": []
+      }
+    },
+    {
+      "id": "aeso:create-catalog:aeso",
+      "provider": "aeso",
+      "action": "create-catalog",
+      "slug": "aeso",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "title": "Alberta Electric System Operator Data Catalog",
+        "homepage": "https://aeso.ca"
+      }
+    },
+    {
+      "id": "aeso:create-dataset:aeso-annual-market-statistics",
+      "provider": "aeso",
+      "action": "create-dataset",
+      "slug": "aeso-annual-market-statistics",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "aeso",
+        "sourceFamily": "Annual Market Statistics",
+        "title": "AESO Annual Market Statistics",
+        "primaryDomain": "aeso.ca",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "aeso:create-dataset:aeso-current-supply-and-demand",
+      "provider": "aeso",
+      "action": "create-dataset",
+      "slug": "aeso-current-supply-and-demand",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "aeso",
+        "sourceFamily": "Current Supply and Demand",
+        "title": "AESO Current Supply and Demand",
+        "primaryDomain": "aeso.ca",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "aeso:create-dataset:aeso-long-term-adequacy-metrics",
+      "provider": "aeso",
+      "action": "create-dataset",
+      "slug": "aeso-long-term-adequacy-metrics",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "aeso",
+        "sourceFamily": "Long-Term Adequacy Metrics",
+        "title": "AESO Long-Term Adequacy Metrics",
+        "primaryDomain": "aeso.ca",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "bc-hydro:create-agent:bc-hydro",
+      "provider": "bc-hydro",
+      "action": "create-agent",
+      "slug": "bc-hydro",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "name": "British Columbia Hydro and Power Authority",
+        "alternateNames": [
+          "BC Hydro"
+        ],
+        "domains": [
+          "bchydro.com"
+        ],
+        "duplicateCandidates": []
+      }
+    },
+    {
+      "id": "bc-hydro:create-catalog:bc-hydro",
+      "provider": "bc-hydro",
+      "action": "create-catalog",
+      "slug": "bc-hydro",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "title": "British Columbia Hydro and Power Authority Data Catalog",
+        "homepage": "https://bchydro.com"
+      }
+    },
+    {
+      "id": "bc-hydro:create-dataset:bc-hydro-area-control-error-annual-reports",
+      "provider": "bc-hydro",
+      "action": "create-dataset",
+      "slug": "bc-hydro-area-control-error-annual-reports",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "bc-hydro",
+        "sourceFamily": "Area Control Error Annual Reports",
+        "title": "BC Hydro Area Control Error Annual Reports",
+        "primaryDomain": "bchydro.com",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "bc-hydro:create-dataset:bc-hydro-balancing-authority-load-data",
+      "provider": "bc-hydro",
+      "action": "create-dataset",
+      "slug": "bc-hydro-balancing-authority-load-data",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "bc-hydro",
+        "sourceFamily": "Balancing Authority Load Data",
+        "title": "BC Hydro Balancing Authority Load Data",
+        "primaryDomain": "bchydro.com",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "bc-hydro:create-dataset:bc-hydro-integrated-resource-plan",
+      "provider": "bc-hydro",
+      "action": "create-dataset",
+      "slug": "bc-hydro-integrated-resource-plan",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "bc-hydro",
+        "sourceFamily": "Integrated Resource Plan",
+        "title": "BC Hydro Integrated Resource Plan",
+        "primaryDomain": "bchydro.com",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "caiso:create-dataset:california-iso-curtailed-and-non-operational-generators",
+      "provider": "caiso",
+      "action": "create-dataset",
+      "slug": "california-iso-curtailed-and-non-operational-generators",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "caiso",
+        "sourceFamily": "Curtailed and non-operational generators",
+        "title": "California ISO Curtailed and non-operational generators",
+        "primaryDomain": "caiso.com",
+        "dataServiceSlug": "caiso-oasis"
+      }
+    },
+    {
+      "id": "caiso:create-dataset:california-iso-daily-renewable-report",
+      "provider": "caiso",
+      "action": "create-dataset",
+      "slug": "california-iso-daily-renewable-report",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "caiso",
+        "sourceFamily": "Daily Renewable Report",
+        "title": "California ISO Daily Renewable Report",
+        "primaryDomain": "caiso.com",
+        "dataServiceSlug": "caiso-oasis"
+      }
+    },
+    {
+      "id": "caiso:create-dataset:california-iso-monthly-renewables-performance-report",
+      "provider": "caiso",
+      "action": "create-dataset",
+      "slug": "california-iso-monthly-renewables-performance-report",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "caiso",
+        "sourceFamily": "Monthly Renewables Performance Report",
+        "title": "California ISO Monthly Renewables Performance Report",
+        "primaryDomain": "caiso.com",
+        "dataServiceSlug": "caiso-oasis"
+      }
+    },
+    {
+      "id": "caiso:enrich-agent:caiso",
+      "provider": "caiso",
+      "action": "enrich-agent",
+      "slug": "caiso",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "addAlternateNames": [
+          "California Independent System Operator Corporation"
+        ],
+        "addUrlAliases": [
+          "oasis.caiso.com"
+        ]
+      }
+    },
+    {
+      "id": "eia:create-dataset:eia-electric-power-monthly",
+      "provider": "eia",
+      "action": "create-dataset",
+      "slug": "eia-electric-power-monthly",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "eia",
+        "sourceFamily": "Electric Power Monthly",
+        "title": "EIA Electric Power Monthly",
+        "primaryDomain": "eia.gov",
+        "dataServiceSlug": "eia-api"
+      }
+    },
+    {
+      "id": "eia:create-dataset:eia-weekly-natural-gas-storage-report",
+      "provider": "eia",
+      "action": "create-dataset",
+      "slug": "eia-weekly-natural-gas-storage-report",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "eia",
+        "sourceFamily": "Weekly Natural Gas Storage Report",
+        "title": "EIA Weekly Natural Gas Storage Report",
+        "primaryDomain": "eia.gov",
+        "dataServiceSlug": "eia-api"
+      }
+    },
+    {
+      "id": "eia:enrich-agent:eia",
+      "provider": "eia",
+      "action": "enrich-agent",
+      "slug": "eia",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "addAlternateNames": [
+          "US Energy Information Administration",
+          "Energy Information Administration"
+        ],
+        "addUrlAliases": []
+      }
+    },
+    {
+      "id": "eia:skip-existing-dataset:eia-natural-gas",
+      "provider": "eia",
+      "action": "skip-existing-dataset",
+      "slug": "eia-natural-gas",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "sourceFamily": "Natural Gas Monthly",
+        "existingDataset": "eia-natural-gas",
+        "reason": "Already represented by the existing natural-gas dataset."
+      }
+    },
+    {
+      "id": "eia:skip-existing-dataset:eia-steo",
+      "provider": "eia",
+      "action": "skip-existing-dataset",
+      "slug": "eia-steo",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "sourceFamily": "Short-Term Energy Outlook",
+        "existingDataset": "eia-steo",
+        "reason": "Already represented by the existing short-term outlook dataset."
+      }
+    },
+    {
+      "id": "entso-e:create-data-service:entsoe-transparency-api",
+      "provider": "entso-e",
+      "action": "create-data-service",
+      "slug": "entsoe-transparency-api",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "publisherSlug": "entso-e",
+        "title": "ENTSO-E Transparency Platform API",
+        "description": "Programmatic access point for ENTSO-E Transparency Platform data",
+        "endpointURLs": [
+          "https://webportal.tp.entsoe.eu/"
+        ],
+        "endpointDescription": "https://transparency.entsoe.eu/",
+        "conformsTo": "ENTSO-E Transparency Platform"
+      }
+    },
+    {
+      "id": "entso-e:enrich-agent:entso-e",
+      "provider": "entso-e",
+      "action": "enrich-agent",
+      "slug": "entso-e",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "addAlternateNames": [
+          "ENTSOE"
+        ],
+        "addUrlAliases": [
+          "webportal.tp.entsoe.eu"
+        ]
+      }
+    },
+    {
+      "id": "entso-e:reject-source-family:entso-e-annual-report",
+      "provider": "entso-e",
+      "action": "reject-source-family",
+      "slug": "entso-e-annual-report",
+      "confidence": "low",
+      "approved": true,
+      "detail": {
+        "sourceFamily": "Annual Report",
+        "reason": "Treat as a general publication rather than a dataset in this catalog pass."
+      }
+    },
+    {
+      "id": "entso-e:skip-existing-dataset:entso-e-adequacy-assessment",
+      "provider": "entso-e",
+      "action": "skip-existing-dataset",
+      "slug": "entso-e-adequacy-assessment",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "sourceFamily": "European Resource Adequacy Assessment",
+        "existingDataset": "entso-e-adequacy-assessment",
+        "reason": "Already represented by the existing adequacy assessment dataset."
+      }
+    },
+    {
+      "id": "entso-e:skip-existing-dataset:entsoe-transparency",
+      "provider": "entso-e",
+      "action": "skip-existing-dataset",
+      "slug": "entsoe-transparency",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "sourceFamily": "Transparency Platform",
+        "existingDataset": "entsoe-transparency",
+        "reason": "Already represented by the existing Transparency Platform dataset."
+      }
+    },
+    {
+      "id": "entso-e:wire-existing-dataset-service:entsoe-transparency",
+      "provider": "entso-e",
+      "action": "wire-existing-dataset-service",
+      "slug": "entsoe-transparency",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "datasetTitle": "ENTSO-E Transparency Platform",
+        "dataServiceSlug": "entsoe-transparency-api"
+      }
+    },
+    {
+      "id": "ercot:create-dataset:ercot-capacity-demand-and-reserves-cdr-report",
+      "provider": "ercot",
+      "action": "create-dataset",
+      "slug": "ercot-capacity-demand-and-reserves-cdr-report",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "ercot",
+        "sourceFamily": "Capacity, Demand, and Reserves (CDR) Report",
+        "title": "ERCOT Capacity, Demand, and Reserves (CDR) Report",
+        "primaryDomain": "ercot.com",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "ercot:create-dataset:ercot-hourly-load-data-archives",
+      "provider": "ercot",
+      "action": "create-dataset",
+      "slug": "ercot-hourly-load-data-archives",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "ercot",
+        "sourceFamily": "Hourly Load Data Archives",
+        "title": "ERCOT Hourly Load Data Archives",
+        "primaryDomain": "ercot.com",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "ercot:create-dataset:ercot-monthly-outlook-for-resource-adequacy-mora",
+      "provider": "ercot",
+      "action": "create-dataset",
+      "slug": "ercot-monthly-outlook-for-resource-adequacy-mora",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "ercot",
+        "sourceFamily": "Monthly Outlook for Resource Adequacy (MORA)",
+        "title": "ERCOT Monthly Outlook for Resource Adequacy (MORA)",
+        "primaryDomain": "ercot.com",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "ferc:create-dataset:ferc-state-of-the-markets-report",
+      "provider": "ferc",
+      "action": "create-dataset",
+      "slug": "ferc-state-of-the-markets-report",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "ferc",
+        "sourceFamily": "State of the Markets Report",
+        "title": "FERC State of the Markets Report",
+        "primaryDomain": "ferc.gov",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "ferc:create-dataset:ferc-summer-energy-market-and-electric-reliability-assessment",
+      "provider": "ferc",
+      "action": "create-dataset",
+      "slug": "ferc-summer-energy-market-and-electric-reliability-assessment",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "ferc",
+        "sourceFamily": "Summer Energy Market and Electric Reliability Assessment",
+        "title": "FERC Summer Energy Market and Electric Reliability Assessment",
+        "primaryDomain": "ferc.gov",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "ferc:create-dataset:ferc-winter-energy-market-and-reliability-assessment",
+      "provider": "ferc",
+      "action": "create-dataset",
+      "slug": "ferc-winter-energy-market-and-reliability-assessment",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "ferc",
+        "sourceFamily": "Winter Energy Market and Reliability Assessment",
+        "title": "FERC Winter Energy Market and Reliability Assessment",
+        "primaryDomain": "ferc.gov",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "ferc:reject-source-family:ferc-energy-primer",
+      "provider": "ferc",
+      "action": "reject-source-family",
+      "slug": "ferc-energy-primer",
+      "confidence": "low",
+      "approved": true,
+      "detail": {
+        "sourceFamily": "Energy Primer",
+        "reason": "Treat as an educational document rather than a dataset in this catalog pass."
+      }
+    },
+    {
+      "id": "iea:create-dataset:iea-global-energy-review",
+      "provider": "iea",
+      "action": "create-dataset",
+      "slug": "iea-global-energy-review",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "iea",
+        "sourceFamily": "Global Energy Review",
+        "title": "IEA Global Energy Review",
+        "primaryDomain": "iea.org",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "iea:skip-existing-dataset:iea-demand",
+      "provider": "iea",
+      "action": "skip-existing-dataset",
+      "slug": "iea-demand",
+      "confidence": "low",
+      "approved": true,
+      "detail": {
+        "sourceFamily": "Electricity",
+        "existingDataset": "iea-demand",
+        "reason": "Closest existing match is the electricity-demand dataset backed by the current IEA electricity report."
+      }
+    },
+    {
+      "id": "iea:skip-existing-dataset:iea-renewables",
+      "provider": "iea",
+      "action": "skip-existing-dataset",
+      "slug": "iea-renewables",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "sourceFamily": "Renewables",
+        "existingDataset": "iea-renewables",
+        "reason": "Already represented by the existing renewables dataset."
+      }
+    },
+    {
+      "id": "iea:skip-existing-dataset:iea-weo-dataset",
+      "provider": "iea",
+      "action": "skip-existing-dataset",
+      "slug": "iea-weo-dataset",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "sourceFamily": "World Energy Outlook",
+        "existingDataset": "iea-weo-dataset",
+        "reason": "Already represented by the existing World Energy Outlook dataset."
+      }
+    },
+    {
+      "id": "ieso:create-agent:ieso",
+      "provider": "ieso",
+      "action": "create-agent",
+      "slug": "ieso",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "name": "Independent Electricity System Operator",
+        "alternateNames": [
+          "IESO"
+        ],
+        "domains": [
+          "ieso.ca"
+        ],
+        "duplicateCandidates": []
+      }
+    },
+    {
+      "id": "ieso:create-catalog:ieso",
+      "provider": "ieso",
+      "action": "create-catalog",
+      "slug": "ieso",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "title": "Independent Electricity System Operator Data Catalog",
+        "homepage": "https://ieso.ca"
+      }
+    },
+    {
+      "id": "ieso:create-dataset:ieso-annual-planning-outlook",
+      "provider": "ieso",
+      "action": "create-dataset",
+      "slug": "ieso-annual-planning-outlook",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "ieso",
+        "sourceFamily": "Annual Planning Outlook",
+        "title": "IESO Annual Planning Outlook",
+        "primaryDomain": "ieso.ca",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "ieso:create-dataset:ieso-power-data",
+      "provider": "ieso",
+      "action": "create-dataset",
+      "slug": "ieso-power-data",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "ieso",
+        "sourceFamily": "Power Data",
+        "title": "IESO Power Data",
+        "primaryDomain": "ieso.ca",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "ieso:create-dataset:ieso-reliability-outlook",
+      "provider": "ieso",
+      "action": "create-dataset",
+      "slug": "ieso-reliability-outlook",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "ieso",
+        "sourceFamily": "Reliability Outlook",
+        "title": "IESO Reliability Outlook",
+        "primaryDomain": "ieso.ca",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "ieso:create-dataset:ieso-resource-adequacy-update",
+      "provider": "ieso",
+      "action": "create-dataset",
+      "slug": "ieso-resource-adequacy-update",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "ieso",
+        "sourceFamily": "Resource Adequacy Update",
+        "title": "IESO Resource Adequacy Update",
+        "primaryDomain": "ieso.ca",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "iso-new-england:create-dataset:iso-new-england-annual-markets-report",
+      "provider": "iso-new-england",
+      "action": "create-dataset",
+      "slug": "iso-new-england-annual-markets-report",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "iso-ne",
+        "sourceFamily": "Annual Markets Report",
+        "title": "ISO New England Annual Markets Report",
+        "primaryDomain": "iso-ne.com",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "iso-new-england:create-dataset:iso-new-england-dispatch-fuel-mix-report",
+      "provider": "iso-new-england",
+      "action": "create-dataset",
+      "slug": "iso-new-england-dispatch-fuel-mix-report",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "iso-ne",
+        "sourceFamily": "Dispatch Fuel Mix Report",
+        "title": "ISO New England Dispatch Fuel Mix Report",
+        "primaryDomain": "iso-ne.com",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "iso-new-england:create-dataset:iso-new-england-quarterly-markets-report",
+      "provider": "iso-new-england",
+      "action": "create-dataset",
+      "slug": "iso-new-england-quarterly-markets-report",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "iso-ne",
+        "sourceFamily": "Quarterly Markets Report",
+        "title": "ISO New England Quarterly Markets Report",
+        "primaryDomain": "iso-ne.com",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "iso-new-england:create-dataset:iso-new-england-regional-electricity-outlook",
+      "provider": "iso-new-england",
+      "action": "create-dataset",
+      "slug": "iso-new-england-regional-electricity-outlook",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "iso-ne",
+        "sourceFamily": "Regional Electricity Outlook",
+        "title": "ISO New England Regional Electricity Outlook",
+        "primaryDomain": "iso-ne.com",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "iso-new-england:enrich-agent:iso-ne",
+      "provider": "iso-new-england",
+      "action": "enrich-agent",
+      "slug": "iso-ne",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "addAlternateNames": [
+          "ISONE"
+        ],
+        "addUrlAliases": []
+      }
+    },
+    {
+      "id": "miso:create-dataset:miso-planning-resource-auction",
+      "provider": "miso",
+      "action": "create-dataset",
+      "slug": "miso-planning-resource-auction",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "miso",
+        "sourceFamily": "Planning Resource Auction",
+        "title": "MISO Planning Resource Auction",
+        "primaryDomain": "misoenergy.org",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "miso:create-dataset:miso-regional-resource-assessment",
+      "provider": "miso",
+      "action": "create-dataset",
+      "slug": "miso-regional-resource-assessment",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "miso",
+        "sourceFamily": "Regional Resource Assessment",
+        "title": "MISO Regional Resource Assessment",
+        "primaryDomain": "misoenergy.org",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "miso:create-dataset:miso-resource-adequacy",
+      "provider": "miso",
+      "action": "create-dataset",
+      "slug": "miso-resource-adequacy",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "miso",
+        "sourceFamily": "Resource Adequacy",
+        "title": "MISO Resource Adequacy",
+        "primaryDomain": "misoenergy.org",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "miso:skip-existing-dataset:miso-market-data",
+      "provider": "miso",
+      "action": "skip-existing-dataset",
+      "slug": "miso-market-data",
+      "confidence": "low",
+      "approved": true,
+      "detail": {
+        "sourceFamily": "Market Reports",
+        "existingDataset": "miso-market-data",
+        "reason": "Broad market-data dataset already covers this family."
+      }
+    },
+    {
+      "id": "nrel:create-dataset:nrel-cambium",
+      "provider": "nrel",
+      "action": "create-dataset",
+      "slug": "nrel-cambium",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "nrel",
+        "sourceFamily": "Cambium",
+        "title": "NREL Cambium",
+        "primaryDomain": "nrel.gov",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "nrel:create-dataset:nrel-scenario-viewer",
+      "provider": "nrel",
+      "action": "create-dataset",
+      "slug": "nrel-scenario-viewer",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "nrel",
+        "sourceFamily": "Scenario Viewer",
+        "title": "NREL Scenario Viewer",
+        "primaryDomain": "nrel.gov",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "nrel:create-dataset:nrel-standard-scenarios",
+      "provider": "nrel",
+      "action": "create-dataset",
+      "slug": "nrel-standard-scenarios",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "nrel",
+        "sourceFamily": "Standard Scenarios",
+        "title": "NREL Standard Scenarios",
+        "primaryDomain": "nrel.gov",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "nrel:enrich-agent:nrel",
+      "provider": "nrel",
+      "action": "enrich-agent",
+      "slug": "nrel",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "addAlternateNames": [],
+        "addUrlAliases": [
+          "atb.nrel.gov",
+          "scenarioviewer.nrel.gov"
+        ]
+      }
+    },
+    {
+      "id": "nrel:skip-existing-dataset:nrel-atb",
+      "provider": "nrel",
+      "action": "skip-existing-dataset",
+      "slug": "nrel-atb",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "sourceFamily": "Annual Technology Baseline",
+        "existingDataset": "nrel-atb",
+        "reason": "Already represented by the existing ATB dataset."
+      }
+    },
+    {
+      "id": "nyiso:create-dataset:nyiso-comprehensive-reliability-plan-crp",
+      "provider": "nyiso",
+      "action": "create-dataset",
+      "slug": "nyiso-comprehensive-reliability-plan-crp",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "nyiso",
+        "sourceFamily": "Comprehensive Reliability Plan (CRP)",
+        "title": "NYISO Comprehensive Reliability Plan (CRP)",
+        "primaryDomain": "nyiso.com",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "nyiso:create-dataset:nyiso-load-capacity-data-report-gold-book",
+      "provider": "nyiso",
+      "action": "create-dataset",
+      "slug": "nyiso-load-capacity-data-report-gold-book",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "nyiso",
+        "sourceFamily": "Load & Capacity Data Report (Gold Book)",
+        "title": "NYISO Load & Capacity Data Report (Gold Book)",
+        "primaryDomain": "nyiso.com",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "nyiso:create-dataset:nyiso-reliability-needs-assessment-rna",
+      "provider": "nyiso",
+      "action": "create-dataset",
+      "slug": "nyiso-reliability-needs-assessment-rna",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "nyiso",
+        "sourceFamily": "Reliability Needs Assessment (RNA)",
+        "title": "NYISO Reliability Needs Assessment (RNA)",
+        "primaryDomain": "nyiso.com",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "nyiso:create-dataset:nyiso-short-term-assessment-of-reliability-star",
+      "provider": "nyiso",
+      "action": "create-dataset",
+      "slug": "nyiso-short-term-assessment-of-reliability-star",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "nyiso",
+        "sourceFamily": "Short-Term Assessment of Reliability (STAR)",
+        "title": "NYISO Short-Term Assessment of Reliability (STAR)",
+        "primaryDomain": "nyiso.com",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "nyiso:enrich-agent:nyiso",
+      "provider": "nyiso",
+      "action": "enrich-agent",
+      "slug": "nyiso",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "addAlternateNames": [
+          "New York ISO"
+        ],
+        "addUrlAliases": []
+      }
+    },
+    {
+      "id": "pjm:enrich-agent:pjm",
+      "provider": "pjm",
+      "action": "enrich-agent",
+      "slug": "pjm",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "addAlternateNames": [
+          "PJM Interconnection, L.L.C."
+        ],
+        "addUrlAliases": [
+          "services.pjm.com"
+        ]
+      }
+    },
+    {
+      "id": "pjm:reject-source-family:pjm-annual-report",
+      "provider": "pjm",
+      "action": "reject-source-family",
+      "slug": "pjm-annual-report",
+      "confidence": "low",
+      "approved": true,
+      "detail": {
+        "sourceFamily": "Annual Report",
+        "reason": "Treat as a general corporate report rather than a dataset in this catalog pass."
+      }
+    },
+    {
+      "id": "pjm:skip-existing-dataset:pjm-load-forecast",
+      "provider": "pjm",
+      "action": "skip-existing-dataset",
+      "slug": "pjm-load-forecast",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "sourceFamily": "Load Forecast Report",
+        "existingDataset": "pjm-load-forecast",
+        "reason": "Already represented by the existing load-forecast dataset."
+      }
+    },
+    {
+      "id": "pjm:skip-existing-dataset:pjm-state-of-market",
+      "provider": "pjm",
+      "action": "skip-existing-dataset",
+      "slug": "pjm-state-of-market",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "sourceFamily": "Annual Markets Report",
+        "existingDataset": "pjm-state-of-market",
+        "reason": "Already represented by the state-of-market dataset."
+      }
+    },
+    {
+      "id": "spp:create-dataset:southwest-power-pool-annual-resource-real-time-availability",
+      "provider": "spp",
+      "action": "create-dataset",
+      "slug": "southwest-power-pool-annual-resource-real-time-availability",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "spp",
+        "sourceFamily": "Annual Resource Real-time Availability",
+        "title": "Southwest Power Pool Annual Resource Real-time Availability",
+        "primaryDomain": "spp.org",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "spp:create-dataset:southwest-power-pool-annual-state-of-the-market-report",
+      "provider": "spp",
+      "action": "create-dataset",
+      "slug": "southwest-power-pool-annual-state-of-the-market-report",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "spp",
+        "sourceFamily": "Annual State of the Market Report",
+        "title": "Southwest Power Pool Annual State of the Market Report",
+        "primaryDomain": "spp.org",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "spp:create-dataset:southwest-power-pool-quarterly-state-of-the-market-report",
+      "provider": "spp",
+      "action": "create-dataset",
+      "slug": "southwest-power-pool-quarterly-state-of-the-market-report",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "spp",
+        "sourceFamily": "Quarterly State of the Market Report",
+        "title": "Southwest Power Pool Quarterly State of the Market Report",
+        "primaryDomain": "spp.org",
+        "dataServiceSlug": null
+      }
+    },
+    {
+      "id": "spp:create-dataset:southwest-power-pool-resource-adequacy-report",
+      "provider": "spp",
+      "action": "create-dataset",
+      "slug": "southwest-power-pool-resource-adequacy-report",
+      "confidence": "high",
+      "approved": true,
+      "detail": {
+        "providerSlug": "spp",
+        "sourceFamily": "Resource Adequacy Report",
+        "title": "Southwest Power Pool Resource Adequacy Report",
+        "primaryDomain": "spp.org",
+        "dataServiceSlug": null
+      }
+    }
+  ]
+}

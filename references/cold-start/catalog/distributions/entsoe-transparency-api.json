@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR9ESYXJ4XS9XND0Y5VVW14",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VS0EXWRWTGW5MR8KYW",
+  "kind": "api-access",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "ENTSO-E Transparency Platform via API",
+  "accessURL": "https://webportal.tp.entsoe.eu/",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNR9ESYWP9AFA7MJYPW5GE8C"
+}

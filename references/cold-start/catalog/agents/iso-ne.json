@@ -16,9 +16,10 @@
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "updatedAt": "2026-04-09T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
   "alternateNames": [
-    "ISO-NE"
+    "ISO-NE",
+    "ISONE"
   ],
   "homepage": "https://www.iso-ne.com/"
 }

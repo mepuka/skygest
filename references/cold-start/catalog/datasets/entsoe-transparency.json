@@ -17,7 +17,11 @@
     "electricity markets"
   ],
   "distributionIds": [
-    "https://id.skygest.io/distribution/dist_01KNQEZ5VSRNXS4QM0ZHCT2JDQ"
+    "https://id.skygest.io/distribution/dist_01KNQEZ5VSRNXS4QM0ZHCT2JDQ",
+    "https://id.skygest.io/distribution/dist_01KNR9ESYXJ4XS9XND0Y5VVW14"
   ],
-  "accessRights": "public"
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNR9ESYWP9AFA7MJYPW5GE8C"
+  ]
 }

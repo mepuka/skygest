@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR9ESZMH9JGBC50GBJYAM2C",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR9ESZMX00FSJCDCT04CWX3",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Summer Energy Market and Electric Reliability Assessment web",
+  "accessURL": "https://ferc.gov"
+}
