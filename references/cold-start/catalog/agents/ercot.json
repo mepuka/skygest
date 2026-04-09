@@ -6,19 +6,19 @@
   "aliases": [
     {
       "scheme": "wikidata",
-      "value": "Q5356944",
+      "value": "Q5357475",
       "relation": "exactMatch"
     },
     {
       "scheme": "url",
-      "value": "https://www.ercot.com",
+      "value": "http://www.ercot.com",
       "relation": "exactMatch"
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
   "alternateNames": [
     "ERCOT"
   ],
-  "homepage": "https://www.ercot.com"
+  "homepage": "http://www.ercot.com"
 }

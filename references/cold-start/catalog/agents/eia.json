@@ -6,24 +6,24 @@
   "aliases": [
     {
       "scheme": "ror",
-      "value": "https://ror.org/026v3a610",
+      "value": "https://ror.org/01h04ms65",
       "relation": "exactMatch"
     },
     {
       "scheme": "wikidata",
-      "value": "Q1349935",
+      "value": "Q1133499",
       "relation": "exactMatch"
     },
     {
       "scheme": "url",
-      "value": "https://www.eia.gov",
+      "value": "https://www.eia.gov/",
       "relation": "exactMatch"
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
   "alternateNames": [
     "EIA"
   ],
-  "homepage": "https://www.eia.gov"
+  "homepage": "https://www.eia.gov/"
 }

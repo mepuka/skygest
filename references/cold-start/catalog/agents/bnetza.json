@@ -1,29 +1,30 @@
 {
   "_tag": "Agent",
-  "id": "https://id.skygest.io/agent/ag_01KNQEZ5VEBCH9EF42WAA5Y7YR",
+  "id": "https://id.skygest.io/agent/ag_01KNQS8K70AAW01HBF7988TCG2",
   "kind": "organization",
-  "name": "Federal Energy Regulatory Commission",
+  "name": "Bundesnetzagentur",
   "aliases": [
     {
       "scheme": "ror",
-      "value": "https://ror.org/05v7gv656",
+      "value": "https://ror.org/032v09t14",
       "relation": "exactMatch"
     },
     {
       "scheme": "wikidata",
-      "value": "Q3067862",
+      "value": "Q269138",
       "relation": "exactMatch"
     },
     {
       "scheme": "url",
-      "value": "https://www.ferc.gov/",
+      "value": "https://www.bundesnetzagentur.de/",
       "relation": "exactMatch"
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
   "updatedAt": "2026-04-09T00:00:00.000Z",
   "alternateNames": [
-    "FERC"
+    "BNetzA",
+    "Federal Network Agency"
   ],
-  "homepage": "https://www.ferc.gov/"
+  "homepage": "https://www.bundesnetzagentur.de/"
 }

@@ -1,0 +1,29 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KNQS8K71VTVSNC4H6Z7KPFX2",
+  "kind": "organization",
+  "name": "Department for Energy Security and Net Zero",
+  "aliases": [
+    {
+      "scheme": "ror",
+      "value": "https://ror.org/01s5a4v70",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "wikidata",
+      "value": "Q116825523",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.gov.uk/government/organisations/department-for-energy-security-and-net-zero",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
+  "alternateNames": [
+    "DESNZ"
+  ],
+  "homepage": "https://www.gov.uk/government/organisations/department-for-energy-security-and-net-zero"
+}

@@ -1,25 +1,24 @@
 {
   "_tag": "Agent",
-  "id": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "id": "https://id.skygest.io/agent/ag_01KNQS8K71Q9C8MN73GDPYZ4Q0",
   "kind": "organization",
-  "name": "California Independent System Operator",
+  "name": "Agora Energiewende",
   "aliases": [
     {
       "scheme": "wikidata",
-      "value": "Q16850559",
+      "value": "Q26882678",
       "relation": "exactMatch"
     },
     {
       "scheme": "url",
-      "value": "https://www.caiso.com/",
+      "value": "https://www.agora-energiewende.de",
       "relation": "exactMatch"
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
   "updatedAt": "2026-04-09T00:00:00.000Z",
   "alternateNames": [
-    "CAISO",
-    "California ISO"
+    "Agora"
   ],
-  "homepage": "https://www.caiso.com/"
+  "homepage": "https://www.agora-energiewende.de"
 }

@@ -16,15 +16,15 @@
     },
     {
       "scheme": "url",
-      "value": "https://www.lbl.gov",
+      "value": "https://www.lbl.gov/",
       "relation": "exactMatch"
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
   "alternateNames": [
     "LBNL",
     "Berkeley Lab"
   ],
-  "homepage": "https://www.lbl.gov"
+  "homepage": "https://www.lbl.gov/"
 }

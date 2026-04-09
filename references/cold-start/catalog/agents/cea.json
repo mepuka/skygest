@@ -1,25 +1,24 @@
 {
   "_tag": "Agent",
-  "id": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "id": "https://id.skygest.io/agent/ag_01KNQS8K712PGQJ83W8CXYY37D",
   "kind": "organization",
-  "name": "California Independent System Operator",
+  "name": "Central Electricity Authority of India",
   "aliases": [
     {
       "scheme": "wikidata",
-      "value": "Q16850559",
+      "value": "Q5061026",
       "relation": "exactMatch"
     },
     {
       "scheme": "url",
-      "value": "https://www.caiso.com/",
+      "value": "http://cea.nic.in",
       "relation": "exactMatch"
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
   "updatedAt": "2026-04-09T00:00:00.000Z",
   "alternateNames": [
-    "CAISO",
-    "California ISO"
+    "CEA"
   ],
-  "homepage": "https://www.caiso.com/"
+  "homepage": "http://cea.nic.in"
 }

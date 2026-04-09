@@ -6,24 +6,24 @@
   "aliases": [
     {
       "scheme": "ror",
-      "value": "https://ror.org/005fmfm13",
+      "value": "https://ror.org/020frhs78",
       "relation": "exactMatch"
     },
     {
       "scheme": "wikidata",
-      "value": "Q192350",
+      "value": "Q826700",
       "relation": "exactMatch"
     },
     {
       "scheme": "url",
-      "value": "https://www.iea.org",
+      "value": "https://www.iea.org/",
       "relation": "exactMatch"
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
   "alternateNames": [
     "IEA"
   ],
-  "homepage": "https://www.iea.org"
+  "homepage": "https://www.iea.org/"
 }

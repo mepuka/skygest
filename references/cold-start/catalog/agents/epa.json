@@ -1,29 +1,30 @@
 {
   "_tag": "Agent",
-  "id": "https://id.skygest.io/agent/ag_01KNQEZ5VEBCH9EF42WAA5Y7YR",
+  "id": "https://id.skygest.io/agent/ag_01KNQS8K70EGH7B22WKME1003B",
   "kind": "organization",
-  "name": "Federal Energy Regulatory Commission",
+  "name": "United States Environmental Protection Agency",
   "aliases": [
     {
       "scheme": "ror",
-      "value": "https://ror.org/05v7gv656",
+      "value": "https://ror.org/03tns0030",
       "relation": "exactMatch"
     },
     {
       "scheme": "wikidata",
-      "value": "Q3067862",
+      "value": "Q460173",
       "relation": "exactMatch"
     },
     {
       "scheme": "url",
-      "value": "https://www.ferc.gov/",
+      "value": "https://epa.gov/",
       "relation": "exactMatch"
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
   "updatedAt": "2026-04-09T00:00:00.000Z",
   "alternateNames": [
-    "FERC"
+    "EPA",
+    "US EPA"
   ],
-  "homepage": "https://www.ferc.gov/"
+  "homepage": "https://epa.gov/"
 }
