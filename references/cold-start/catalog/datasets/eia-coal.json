@@ -1,0 +1,35 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQSXEPPXRC56GM4SED9D0KX",
+  "title": "EIA Coal Data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "COAL",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQSXEPPB887NVV5RPAC84TQ",
+    "https://id.skygest.io/distribution/dist_01KNQSXEPP91VH20XHAGTXNNKG"
+  ],
+  "description": "National, state, and mine-level coal production statistics, including imports, exports, receipts, and quality data.",
+  "landingPage": "https://www.eia.gov/coal/data.php",
+  "keywords": [
+    "coal",
+    "production",
+    "mining",
+    "imports",
+    "exports"
+  ],
+  "themes": [
+    "coal",
+    "fossil fuels"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ]
+}

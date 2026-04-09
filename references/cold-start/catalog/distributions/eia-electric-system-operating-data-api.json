@@ -1,0 +1,12 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQSXEPQE7D85JBAFH47Y9MS",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQSXEPQHNVM0AVMA3SQRNK3",
+  "kind": "api-access",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "EIA U.S. Electric System Operating Data via API",
+  "accessURL": "https://api.eia.gov/v2/eba/",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+}

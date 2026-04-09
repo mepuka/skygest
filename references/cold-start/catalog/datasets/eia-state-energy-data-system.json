@@ -1,0 +1,35 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNQSXEPSSC89G53B0QHB9DEG",
+  "title": "EIA State Energy Data System (SEDS)",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "SEDS",
+      "relation": "exactMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQSXEPSC0TAYJDAH5ECQ0ZH",
+    "https://id.skygest.io/distribution/dist_01KNQSXEPSRPBGRZFM4PMDDQ5M"
+  ],
+  "description": "Comprehensive state-level energy production and consumption estimates using survey data and statistical models.",
+  "landingPage": "https://www.eia.gov/state/seds/",
+  "keywords": [
+    "state",
+    "energy",
+    "production",
+    "consumption",
+    "SEDS"
+  ],
+  "themes": [
+    "state energy",
+    "comprehensive"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ]
+}

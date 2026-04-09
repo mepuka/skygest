@@ -1,0 +1,13 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNQSXEPSF3TA4CZ5YRT6HX56",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQSXEPSRJ3H1JDYS8EVDKNJ",
+  "kind": "download",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "EIA Petroleum Imports (bulk download)",
+  "accessURL": "https://www.eia.gov/opendata/bulk/PET_IMPORTS.zip",
+  "format": "application/zip",
+  "mediaType": "application/zip"
+}
