@@ -1,0 +1,25 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR9ESZMP1TWV93NESD1M4NW",
+  "title": "FERC Winter Energy Market and Reliability Assessment",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEBCH9EF42WAA5Y7YR",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "landingPage": "https://ferc.gov",
+  "keywords": [
+    "winter",
+    "energy",
+    "market",
+    "and",
+    "reliability",
+    "assessment"
+  ],
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR9ESZMDFC4C9SB2S3SRC2K"
+  ],
+  "accessRights": "public"
+}

@@ -1,0 +1,24 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR9ET06K0PMR5J7QJXQAGB3",
+  "title": "Southwest Power Pool Quarterly State of the Market Report",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "landingPage": "https://spp.org",
+  "keywords": [
+    "quarterly",
+    "state",
+    "the",
+    "market",
+    "report"
+  ],
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR9ET06ZNEJ5SP217HFMJZK"
+  ],
+  "accessRights": "public"
+}

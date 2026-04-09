@@ -1,0 +1,21 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR9ESZRK088M0F81XC8SCGE",
+  "title": "IESO Power Data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "landingPage": "https://ieso.ca",
+  "keywords": [
+    "power",
+    "data"
+  ],
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR9ESZRD9BAMC54RGAHDNCC"
+  ],
+  "accessRights": "public"
+}

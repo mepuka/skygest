@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNR9ESZFCM368FY8ZKDYWZCR",
+  "title": "California ISO Monthly Renewables Performance Report",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "landingPage": "https://caiso.com",
+  "keywords": [
+    "monthly",
+    "renewables",
+    "performance",
+    "report"
+  ],
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNR9ESZGVMRERTRT4MV55ETS",
+    "https://id.skygest.io/distribution/dist_01KNR9ESZG1MHRE26GCNT2FY1W"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VH7SFKBQWANM6TSKMV"
+  ]
+}

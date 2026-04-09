@@ -13,12 +13,18 @@
       "scheme": "url",
       "value": "https://www.entsoe.eu/",
       "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://webportal.tp.entsoe.eu",
+      "relation": "exactMatch"
     }
   ],
   "createdAt": "2026-04-08T00:00:00.000Z",
   "updatedAt": "2026-04-09T00:00:00.000Z",
   "alternateNames": [
-    "ENTSO-E"
+    "ENTSO-E",
+    "ENTSOE"
   ],
   "homepage": "https://www.entsoe.eu/"
 }

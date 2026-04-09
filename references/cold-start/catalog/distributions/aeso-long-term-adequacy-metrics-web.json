@@ -1,0 +1,11 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNR9ESZ4GRD3Q8KWZ1FZNM7A",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNR9ESZ48ATGS73JXDMXFNBX",
+  "kind": "landing-page",
+  "aliases": [],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "title": "Long-Term Adequacy Metrics web",
+  "accessURL": "https://aeso.ca"
+}
