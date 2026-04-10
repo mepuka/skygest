@@ -992,18 +992,51 @@ const EIA_LICENSE_URL = "https://www.eia.gov/about/copyrights_reuse.php";
 export const slugifyRoute = (route: string): string =>
   `eia-${route.replace(/\//gu, "-")}`;
 
-const datasetIdFromUlid = (): string =>
-  `https://id.skygest.io/dataset/ds_${ulid()}`;
-const distIdFromUlid = (): string =>
-  `https://id.skygest.io/distribution/dist_${ulid()}`;
-const crIdFromUlid = (): string =>
-  `https://id.skygest.io/catalog-record/cr_${ulid()}`;
+/**
+ * Factory for the Skygest entity id URI shape. Keeping the shape in one
+ * place means there's only one place to update if we ever switch ULID
+ * libraries or change the id host/prefix convention.
+ */
+const mintEntityId = (entityKind: string, prefix: string): string =>
+  `https://id.skygest.io/${entityKind}/${prefix}_${ulid()}`;
+
+const datasetIdFromUlid = (): string => mintEntityId("dataset", "ds");
+const distIdFromUlid = (): string => mintEntityId("distribution", "dist");
+const crIdFromUlid = (): string => mintEntityId("catalog-record", "cr");
 
 /**
- * Union two alias arrays by `(scheme, value)`. Existing aliases take
- * precedence over fresh ones when a key collides, which lets us preserve
- * curated `uri`/`relation` metadata while still appending anything new.
- * Pure synchronous transformation over already-fetched data.
+ * Copy the listed optional keys from `source` to `target` when the value
+ * is set (not `undefined`). Deduplicates the repetitive
+ * `if (existing?.X !== undefined) base.X = existing.X;` pattern in the
+ * candidate builders below.
+ *
+ * Only for the pure-preservation case ("if existing, take it; else
+ * don't include"). Fields with custom merge logic (e.g. `themes`,
+ * `keywords`) must not use this helper.
+ *
+ * The `for ... of` is permitted here because this is a non-Effect-typed
+ * pure synchronous function over a small known-length array.
+ */
+const preserveOptionalKeys = <T extends object, K extends keyof T>(
+  target: Record<string, unknown>,
+  source: T | null | undefined,
+  keys: ReadonlyArray<K>
+): void => {
+  if (source === null || source === undefined) return;
+  for (const key of keys) {
+    const value = source[key];
+    if (value !== undefined) {
+      target[key as string] = value;
+    }
+  }
+};
+
+/**
+ * Union two alias arrays, deduping by `(scheme, value)`. Existing
+ * aliases win on collision — this preserves any curator-applied
+ * relation weakening (e.g. exactMatch downgraded to closeMatch when
+ * a methodology variant was discovered) and any `uri` field set on
+ * the existing alias against being overwritten by a fresh import.
  */
 export const unionAliases = (
   existing: ReadonlyArray<ExternalIdentifier>,
@@ -1046,6 +1079,13 @@ export const buildContextFromIndex = (
     // The EIA catalog/dataService are already filtered to the EIA agent's
     // publisherAgentId during index load, so we can resolve the agent by
     // that id without re-running the homepage-alias lookup.
+    //
+    // Locate the EIA agent by id, walking agentsByName because the index
+    // only exposes that map. There's a latent name-collision edge case in
+    // loadCatalogIndex (Task 6) — if two agents share a name, only the
+    // last-loaded one is findable through agentsByName. The cold-start
+    // registry has unique agent names today, so this is safe; if that
+    // invariant breaks, loadCatalogIndex should expose agentsById too.
     const catalogPublisherId = idx.catalog.publisherAgentId;
     const eiaAgent =
       Array.from(idx.agentsByName.values()).find(
@@ -1092,14 +1132,16 @@ export const buildDatasetCandidate = (
   ];
   const aliases = unionAliases(existing?.aliases ?? [], freshAliases);
 
-  // Keywords: UNION(existing, facet ids, defaultFrequency). defaultFrequency
+  // Keywords: UNION(existing, facet ids, defaultFrequency), sorted for
+  // deterministic on-disk ordering (matters when Task 9 serializes the
+  // merged record — stable sort means stable file diffs). defaultFrequency
   // belongs in keywords per the spec, not in aliases.
   const facetIds = (leaf.response.facets ?? []).map((f) => f.id);
   const freqKw =
     leaf.response.defaultFrequency != null ? [leaf.response.defaultFrequency] : [];
   const mergedKeywords = Array.from(
     new Set<string>([...(existing?.keywords ?? []), ...facetIds, ...freqKw])
-  );
+  ).sort();
 
   // Themes: preserve curated list if non-empty, else fall back to the
   // parent route segments (the structural derivation).
@@ -1108,16 +1150,11 @@ export const buildDatasetCandidate = (
       ? existing.themes
       : leaf.parents;
 
-  // Temporal: preserve curated value; only synthesize from start/end
-  // period when neither existing record nor API response has it.
-  const mergedTemporal =
-    existing?.temporal ??
-    (leaf.response.startPeriod != null && leaf.response.endPeriod != null
-      ? `${leaf.response.startPeriod}/${leaf.response.endPeriod}`
-      : undefined);
-
-  const title = leaf.response.name ?? leaf.response.id;
-  const description = existing?.description ?? leaf.response.description ?? undefined;
+  // Title: prefer API v2 (canonical), but fall back to existing curated
+  // title when the API returns `name === null`. Only use the raw route id
+  // as a last resort — otherwise a merge would overwrite a curated title
+  // like "Retail Sales of Electricity" with the raw slug "retail-sales".
+  const title = leaf.response.name ?? existing?.title ?? leaf.response.id;
 
   const base: Record<string, unknown> = {
     _tag: "Dataset",
@@ -1134,10 +1171,26 @@ export const buildDatasetCandidate = (
     dataServiceIds: [ctx.eiaDataService.id],
     distributionIds: [] // re-stitched after distribution candidates are built
   };
+
+  // description has a fresh-value fallback (API description) when no
+  // existing record exists, so it can't use preserveOptionalKeys directly.
+  const description =
+    existing?.description ?? leaf.response.description ?? undefined;
   if (description !== undefined) base.description = description;
-  if (existing?.landingPage !== undefined) base.landingPage = existing.landingPage;
+
+  // Pure-preservation fields: keep existing value if set, otherwise leave
+  // the key off entirely. No fresh-value merge logic, so the helper
+  // applies cleanly.
+  preserveOptionalKeys(base, existing, ["landingPage", "inSeries"] as const);
+
+  // Temporal: preserve curated value; only synthesize from start/end
+  // period when neither existing record nor API response has it.
+  const mergedTemporal =
+    existing?.temporal ??
+    (leaf.response.startPeriod != null && leaf.response.endPeriod != null
+      ? `${leaf.response.startPeriod}/${leaf.response.endPeriod}`
+      : undefined);
   if (mergedTemporal !== undefined) base.temporal = mergedTemporal;
-  if (existing?.inSeries !== undefined) base.inSeries = existing.inSeries;
 
   return base as unknown as Dataset;
 };
@@ -1172,23 +1225,22 @@ export const buildDistributionCandidates = (
       existingApi?.createdAt ?? (ctx.nowIso as Distribution["createdAt"]),
     updatedAt: ctx.nowIso as Distribution["updatedAt"]
   };
-  if (existingApi?.title !== undefined) apiBase.title = existingApi.title;
-  if (existingApi?.description !== undefined)
-    apiBase.description = existingApi.description;
-  if (existingApi?.format !== undefined) apiBase.format = existingApi.format;
-  if (existingApi?.mediaType !== undefined)
-    apiBase.mediaType = existingApi.mediaType;
-  if (existingApi?.downloadURL !== undefined)
-    apiBase.downloadURL = existingApi.downloadURL;
-  if (existingApi?.byteSize !== undefined)
-    apiBase.byteSize = existingApi.byteSize;
-  if (existingApi?.checksum !== undefined)
-    apiBase.checksum = existingApi.checksum;
-  if (existingApi?.accessRights !== undefined)
-    apiBase.accessRights = existingApi.accessRights;
-  if (existingApi?.license !== undefined) apiBase.license = existingApi.license;
-  if (existingApi?.accessServiceId !== undefined)
-    apiBase.accessServiceId = existingApi.accessServiceId;
+  // Pure-preservation pass over every optional Distribution key. If a
+  // new optional field is added to the Distribution schema and should be
+  // preserved, add it here — do NOT drop any key without confirming it
+  // has a different merge rule.
+  preserveOptionalKeys(apiBase, existingApi, [
+    "title",
+    "description",
+    "format",
+    "mediaType",
+    "downloadURL",
+    "byteSize",
+    "checksum",
+    "accessRights",
+    "license",
+    "accessServiceId"
+  ] as const);
 
   const apiAccess = apiBase as unknown as Distribution;
 

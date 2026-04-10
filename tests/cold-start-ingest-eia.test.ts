@@ -893,39 +893,36 @@ const BUILDER_DIST_ID = `https://id.skygest.io/distribution/dist_${BUILDER_DIST_
 const BUILDER_DS_ID = `https://id.skygest.io/data-service/svc_${BUILDER_DS_ULID}`;
 
 // Tiny factory that builds an in-memory BuildContext without reading from
-// disk. The casts mirror what loadCatalogIndex returns after Schema.decode —
-// they're safe because the body shapes match the domain schemas exactly.
+// disk. Re-uses the validAgentBody / validCatalogBody / validDataServiceBody
+// fixture helpers so there's a single source of truth for the body shapes.
+// The outer `as unknown as Agent` casts mirror what loadCatalogIndex returns
+// after Schema.decode — they're safe because the fixture bodies match the
+// domain schemas exactly.
 const makeBuilderCtx = (now: string): BuildContext => {
-  const agent = {
-    _tag: "Agent",
-    id: BUILDER_AGENT_ID as unknown as Agent["id"],
-    kind: "organization",
-    name: "U.S. Energy Information Administration",
-    aliases: [],
-    createdAt: FIXTURE_NOW as unknown as Agent["createdAt"],
-    updatedAt: FIXTURE_NOW as unknown as Agent["updatedAt"]
-  } as unknown as Agent;
-  const catalog = {
-    _tag: "Catalog",
-    id: BUILDER_CATALOG_ID as unknown as Catalog["id"],
-    title: "EIA Open Data Catalog",
-    publisherAgentId: agent.id,
-    aliases: [],
-    createdAt: FIXTURE_NOW as unknown as Catalog["createdAt"],
-    updatedAt: FIXTURE_NOW as unknown as Catalog["updatedAt"]
-  } as unknown as Catalog;
-  const dataService = {
-    _tag: "DataService",
-    id: BUILDER_DS_ID as unknown as DataService["id"],
-    title: "EIA API v2",
-    publisherAgentId: agent.id,
-    endpointURLs: ["https://api.eia.gov/v2/"],
-    servesDatasetIds: [],
-    aliases: [],
-    createdAt: FIXTURE_NOW as unknown as DataService["createdAt"],
-    updatedAt: FIXTURE_NOW as unknown as DataService["updatedAt"]
-  } as unknown as DataService;
-  return { nowIso: now, eiaAgent: agent, eiaCatalog: catalog, eiaDataService: dataService };
+  const agent = validAgentBody(
+    "U.S. Energy Information Administration",
+    BUILDER_AGENT_ULID,
+    []
+  ) as unknown as Agent;
+  const catalog = validCatalogBody(
+    "EIA Open Data Catalog",
+    BUILDER_CATALOG_ULID,
+    agent.id as unknown as string,
+    []
+  ) as unknown as Catalog;
+  const dataService = validDataServiceBody(
+    "EIA API v2",
+    BUILDER_DS_ULID,
+    agent.id as unknown as string,
+    [],
+    []
+  ) as unknown as DataService;
+  return {
+    nowIso: now,
+    eiaAgent: agent,
+    eiaCatalog: catalog,
+    eiaDataService: dataService
+  };
 };
 
 // An empty catalog index — suitable for fresh-build tests that don't need
@@ -1048,9 +1045,9 @@ describe("buildDatasetCandidate", () => {
     );
     // themes derived from parents when no existing themes
     expect(ds.themes).toEqual(["electricity"]);
-    // keywords = facet ids + defaultFrequency (in any order, deduped)
-    expect(ds.keywords).toEqual(expect.arrayContaining(["stateid", "sectorid", "monthly"]));
-    expect(ds.keywords).toHaveLength(3);
+    // keywords = facet ids + defaultFrequency, sorted deterministically
+    // for stable Task 9 file diffs.
+    expect(ds.keywords).toEqual(["monthly", "sectorid", "stateid"]);
     // defaultFrequency goes into keywords, NOT aliases
     expect(ds.aliases).toHaveLength(1);
     expect(ds.aliases[0]).toEqual({
@@ -1127,20 +1124,54 @@ describe("buildDatasetCandidate", () => {
     expect(ds.license).toBe("https://custom-license.example.org/");
     // temporal preserved
     expect(ds.temporal).toBe("1990-01/2020-12");
-    // keywords UNION: existing + facet ids + defaultFrequency
-    expect(ds.keywords).toEqual(
-      expect.arrayContaining([
-        "curated-keyword",
-        "stateid",
-        "sectorid",
-        "monthly"
-      ])
-    );
-    expect(ds.keywords).toHaveLength(4);
+    // keywords UNION: existing + facet ids + defaultFrequency, sorted
+    // deterministically for stable Task 9 file diffs.
+    expect(ds.keywords).toEqual([
+      "curated-keyword",
+      "monthly",
+      "sectorid",
+      "stateid"
+    ]);
     // aliases: unioned; eia-route dedup preserved, doi preserved
     expect(ds.aliases).toHaveLength(2);
     const schemes = ds.aliases.map((a) => a.scheme).sort();
     expect(schemes).toEqual(["doi", "eia-route"]);
+  });
+
+  it("preserves existing curated title when API v2 response.name is null", () => {
+    // Regression guard: the API occasionally returns `name: null` on
+    // leaf routes. Falling back directly to `response.id` would clobber
+    // a curated title like "Retail Sales of Electricity" with the raw
+    // slug "retail-sales". The fallback order is:
+    //   API name -> existing title -> API id (last resort)
+    const ctx = makeBuilderCtx("2026-05-01T00:00:00.000Z");
+    const leafWithNullName = {
+      path: "electricity/retail-sales",
+      parents: ["electricity"],
+      response: {
+        id: "retail-sales",
+        name: null, // <- the case we're guarding against
+        facets: [],
+        defaultFrequency: null
+      } as unknown as EiaApiResponse["response"]
+    };
+    const existing = {
+      _tag: "Dataset",
+      id: BUILDER_DATASET_ID as unknown as Dataset["id"],
+      title: "Retail Sales of Electricity",
+      publisherAgentId: ctx.eiaAgent.id,
+      accessRights: "public",
+      aliases: [],
+      createdAt: FIXTURE_NOW as unknown as Dataset["createdAt"],
+      updatedAt: FIXTURE_NOW as unknown as Dataset["updatedAt"]
+    } as unknown as Dataset;
+
+    const ds = buildDatasetCandidate(leafWithNullName, ctx, existing);
+    expect(ds.title).toBe("Retail Sales of Electricity");
+    // And sanity: a fresh build with null name still falls through to
+    // the raw route id, since there's no existing title to fall back to.
+    const fresh = buildDatasetCandidate(leafWithNullName, ctx, null);
+    expect(fresh.title).toBe("retail-sales");
   });
 
   it("falls back to parent route segments for themes when existing themes are empty", () => {
@@ -1252,8 +1283,21 @@ describe("buildDistributionCandidates", () => {
     } as unknown as Distribution;
 
     const ctx = makeBuilderCtx(FIXTURE_NOW);
-    const idx = emptyIndex();
-    (idx.allDistributions as Array<Distribution>) = [existingLanding, existingDownload];
+    // Build the index as a fresh literal rather than casting through
+    // the readonly `allDistributions` field of emptyIndex() — mutation
+    // through a readonly cast obscures intent and makes it easy to
+    // accidentally write to shared fixture state.
+    const idx: Parameters<typeof buildDistributionCandidates>[3] = {
+      datasetsByRoute: new Map(),
+      distributionsByDatasetIdKind: new Map(),
+      catalogRecordsByCatalogAndPrimaryTopic: new Map(),
+      agentsByName: new Map(),
+      catalog: null,
+      dataService: null,
+      allDatasets: [],
+      allDistributions: [existingLanding, existingDownload],
+      allCatalogRecords: []
+    };
 
     const dists = buildDistributionCandidates(leaf, datasetId, ctx, idx);
     expect(dists).toHaveLength(3);
@@ -1407,6 +1451,17 @@ describe("buildCandidateNodes", () => {
     if (svcNode._tag === "data-service" && datasetNode._tag === "dataset") {
       expect(svcNode.data.servesDatasetIds).toContain(datasetNode.data.id);
     }
+
+    // Integration: the candidate set must be a legal IngestGraph input.
+    // This ties Task 5.5 (buildIngestGraph) + Task 6 (loadCatalogIndex)
+    // + Task 7 (builders) together and catches any accidental cycle,
+    // orphaned edge, or wiring bug introduced by the builders.
+    const graph = buildIngestGraph(nodes);
+    expect(Graph.isAcyclic(graph)).toBe(true);
+    const topo = Array.from(Graph.values(Graph.topo(graph)));
+    expect(topo.length).toBe(nodes.length);
+    // Agent has no inbound edges, so it must emerge first from topo sort.
+    expect(topo[0]?._tag).toBe("agent");
   });
 
   it("marks merged=true on a dataset whose route is already in the catalog index", () => {
