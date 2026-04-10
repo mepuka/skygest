@@ -378,13 +378,13 @@ const fullWalkCacheRequest = new EiaFullWalkCacheRequest();
  * Returns a MutableHashMap<route, EiaApiResponse>; iterating it inside an
  * Effect.sync block produces a snapshot suitable for caching to disk.
  */
-export const walkRoutes = <R>(
-  fetch: (
-    route: string
-  ) => Effect.Effect<EiaApiResponse, EiaApiFetchError | EiaApiDecodeError, R>,
-  startRoute = ""
-) =>
-  Effect.gen(function* () {
+export const walkRoutes = Effect.fn("EiaIngest.walkRoutes")(
+  function* <R>(
+    fetch: (
+      route: string
+    ) => Effect.Effect<EiaApiResponse, EiaApiFetchError | EiaApiDecodeError, R>,
+    startRoute = ""
+  ) {
     const queue = MutableRef.make<ReadonlyArray<string>>([startRoute]);
     const seen = MutableHashMap.empty<string, true>();
     const results = MutableHashMap.empty<string, EiaApiResponse>();
@@ -415,7 +415,8 @@ export const walkRoutes = <R>(
     });
 
     return results;
-  }).pipe(Effect.withSpan("EiaIngest.walkRoutes"));
+  }
+);
 
 const snapshotToWalkData = (snapshot: WalkCache): Map<string, EiaApiResponse> =>
   new Map(Object.entries(snapshot.routes));
@@ -432,13 +433,13 @@ const warnHiddenWalkCacheIssue = (message: string, cause: unknown) =>
     message: stringifyUnknown(cause)
   });
 
-const buildWalkSnapshot = <R>(
-  fetch: (
-    route: string
-  ) => Effect.Effect<EiaApiResponse, EiaApiFetchError | EiaApiDecodeError, R>,
-  startRoute = ""
-) =>
-  Effect.gen(function* () {
+const buildWalkSnapshot = Effect.fn("EiaIngest.buildWalkSnapshot")(
+  function* <R>(
+    fetch: (
+      route: string
+    ) => Effect.Effect<EiaApiResponse, EiaApiFetchError | EiaApiDecodeError, R>,
+    startRoute = ""
+  ) {
     const results = yield* walkRoutes(fetch, startRoute);
     const fetchedAt = DateTime.formatIso(yield* DateTime.now);
 
@@ -454,7 +455,8 @@ const buildWalkSnapshot = <R>(
       fetchedAt,
       routes
     } satisfies WalkCache;
-  }).pipe(Effect.withSpan("EiaIngest.buildWalkSnapshot"));
+  }
+);
 
 const writeWalkSnapshotArtifact = (rootDir: string, snapshot: WalkCache) =>
   Effect.gen(function* () {
@@ -503,15 +505,15 @@ interface GetWalkDataWithOptions<R> {
   ) => Effect.Effect<EiaApiResponse, EiaApiFetchError | EiaApiDecodeError, R>;
 }
 
-const runFreshWalk = <R>(
-  config: WalkDataConfig,
-  options: GetWalkDataWithOptions<R>,
-  behavior: {
-    readonly writeArtifact: boolean;
-    readonly hiddenStore?: Persistence.PersistenceStore;
-  }
-) =>
-  Effect.gen(function* () {
+const runFreshWalk = Effect.fn("EiaIngest.runFreshWalk")(
+  function* <R>(
+    config: WalkDataConfig,
+    options: GetWalkDataWithOptions<R>,
+    behavior: {
+      readonly writeArtifact: boolean;
+      readonly hiddenStore?: Persistence.PersistenceStore;
+    }
+  ) {
     const startRoute = Option.getOrElse(config.onlyRoute, () => "");
     const snapshot = yield* buildWalkSnapshot(options.fetch, startRoute);
 
@@ -524,7 +526,8 @@ const runFreshWalk = <R>(
 
     yield* logWalkedSnapshot(snapshot, false);
     return snapshotToWalkData(snapshot);
-  }).pipe(Effect.withSpan("EiaIngest.runFreshWalk"));
+  }
+);
 
 /**
  * Cache-aware test seam for walk loading. Full-root runs use provided
@@ -532,11 +535,11 @@ const runFreshWalk = <R>(
  * walks bypass hidden cache reads/writes. The readable JSON artifact is
  * always refreshed for full-root runs, even when `--no-cache` is set.
  */
-export const getWalkDataWith = <R>(
-  config: WalkDataConfig,
-  options: GetWalkDataWithOptions<R>
-) =>
-  Effect.gen(function* () {
+export const getWalkDataWith = Effect.fn("EiaIngest.getWalkDataWith")(
+  function* <R>(
+    config: WalkDataConfig,
+    options: GetWalkDataWithOptions<R>
+  ) {
     const startRoute = Option.getOrElse(config.onlyRoute, () => "");
     const scoped = startRoute !== "";
 
@@ -616,10 +619,11 @@ export const getWalkDataWith = <R>(
         });
       })
     );
-  }).pipe(Effect.withSpan("EiaIngest.getWalkDataWith"));
+  }
+);
 
-export const getWalkData = (config: ScriptConfigShape, apiKey: string) =>
-  Effect.gen(function* () {
+export const getWalkData = Effect.fn("EiaIngest.getWalkData")(
+  function* (config: ScriptConfigShape, apiKey: string) {
     const fetcher = yield* makeRateLimitedFetcher(
       config.minIntervalMs,
       config.maxRetries
@@ -653,7 +657,8 @@ export const getWalkData = (config: ScriptConfigShape, apiKey: string) =>
         )
       )
     );
-  }).pipe(Effect.withSpan("EiaIngest.getWalkData"));
+  }
+);
 
 // ---------------------------------------------------------------------------
 // IngestGraph — typed Graph.DirectedGraph<IngestNode, IngestEdge>
