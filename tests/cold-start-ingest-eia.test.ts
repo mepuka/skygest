@@ -473,39 +473,57 @@ describe("buildIngestGraph", () => {
 // toolchain rules.
 const bunFsLayer = Layer.mergeAll(BunFileSystem.layer, BunPath.layer);
 
+interface FixtureEntity {
+  readonly slug: string;
+  readonly body: unknown;
+}
+
+interface FixtureSpec {
+  readonly datasets?: ReadonlyArray<FixtureEntity>;
+  readonly distributions?: ReadonlyArray<FixtureEntity>;
+  readonly catalogRecords?: ReadonlyArray<FixtureEntity>;
+  readonly dataServices?: ReadonlyArray<FixtureEntity>;
+  readonly catalogs?: ReadonlyArray<FixtureEntity>;
+  readonly agents?: ReadonlyArray<FixtureEntity>;
+}
+
+// Map each FixtureSpec key onto the on-disk subdirectory loadCatalogIndex
+// walks. Kept as a single table so we never drift between "what the test
+// can seed" and "what the loader reads".
+const FIXTURE_SUBDIRS: ReadonlyArray<
+  readonly [keyof FixtureSpec, string]
+> = [
+  ["datasets", "datasets"],
+  ["distributions", "distributions"],
+  ["catalogRecords", "catalog-records"],
+  ["dataServices", "data-services"],
+  ["catalogs", "catalogs"],
+  ["agents", "agents"]
+];
+
 /**
  * Creates a temp fixture with the six catalog subdirectories and writes
  * any provided entity JSON blobs under the matching directory. Returns the
  * root directory path; caller is responsible for cleanup.
  */
-const makeTmpFixture = async (entities: {
-  readonly datasets?: ReadonlyArray<{
-    readonly slug: string;
-    readonly body: unknown;
-  }>;
-}): Promise<string> => {
+const makeTmpFixture = async (entities: FixtureSpec): Promise<string> => {
   const tmp = await fsp.mkdtemp(
     nodePath.join(os.tmpdir(), "cold-start-index-")
   );
   const catalogDir = nodePath.join(tmp, "catalog");
   // All six subdirs must exist — loadCatalogIndex reads every one and
   // surfaces ENOENT as EiaIngestFsError.
-  for (const sub of [
-    "datasets",
-    "distributions",
-    "catalog-records",
-    "data-services",
-    "catalogs",
-    "agents"
-  ]) {
+  for (const [, sub] of FIXTURE_SUBDIRS) {
     await fsp.mkdir(nodePath.join(catalogDir, sub), { recursive: true });
   }
-  for (const ds of entities.datasets ?? []) {
-    await fsp.writeFile(
-      nodePath.join(catalogDir, "datasets", `${ds.slug}.json`),
-      `${JSON.stringify(ds.body, null, 2)}\n`,
-      "utf-8"
-    );
+  for (const [key, sub] of FIXTURE_SUBDIRS) {
+    for (const entity of entities[key] ?? []) {
+      await fsp.writeFile(
+        nodePath.join(catalogDir, sub, `${entity.slug}.json`),
+        `${JSON.stringify(entity.body, null, 2)}\n`,
+        "utf-8"
+      );
+    }
   }
   return tmp;
 };
@@ -513,24 +531,104 @@ const makeTmpFixture = async (entities: {
 const cleanup = (tmp: string): Promise<void> =>
   fsp.rm(tmp, { recursive: true, force: true });
 
-// A Dataset body that decodes cleanly through Schema.decodeUnknown(Dataset).
+// Bodies below decode cleanly through Schema.decodeUnknown(<entity>).
 // IDs match the branded URI patterns enforced in src/domain/data-layer/ids.ts.
+const FIXTURE_NOW = "2026-04-10T00:00:00.000Z";
+
+type FixtureAlias = {
+  readonly scheme: string;
+  readonly value: string;
+  readonly relation: string;
+};
+
 const validDatasetBody = (
   title: string,
   ulid: string,
-  aliases: ReadonlyArray<{
-    readonly scheme: string;
-    readonly value: string;
-    readonly relation: string;
-  }>
+  aliases: ReadonlyArray<FixtureAlias>,
+  publisherAgentId: string = "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB"
 ) => ({
   _tag: "Dataset",
   id: `https://id.skygest.io/dataset/ds_${ulid}`,
   title,
-  publisherAgentId: "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  publisherAgentId,
   accessRights: "public",
-  createdAt: "2026-04-10T00:00:00.000Z",
-  updatedAt: "2026-04-10T00:00:00.000Z",
+  createdAt: FIXTURE_NOW,
+  updatedAt: FIXTURE_NOW,
+  aliases
+});
+
+const validAgentBody = (
+  name: string,
+  ulid: string,
+  aliases: ReadonlyArray<FixtureAlias>
+) => ({
+  _tag: "Agent",
+  id: `https://id.skygest.io/agent/ag_${ulid}`,
+  kind: "organization",
+  name,
+  createdAt: FIXTURE_NOW,
+  updatedAt: FIXTURE_NOW,
+  aliases
+});
+
+const validCatalogBody = (
+  title: string,
+  ulid: string,
+  publisherAgentId: string,
+  aliases: ReadonlyArray<FixtureAlias>
+) => ({
+  _tag: "Catalog",
+  id: `https://id.skygest.io/catalog/cat_${ulid}`,
+  title,
+  publisherAgentId,
+  createdAt: FIXTURE_NOW,
+  updatedAt: FIXTURE_NOW,
+  aliases
+});
+
+const validDistributionBody = (
+  ulid: string,
+  datasetId: string,
+  aliases: ReadonlyArray<FixtureAlias>
+) => ({
+  _tag: "Distribution",
+  id: `https://id.skygest.io/distribution/dist_${ulid}`,
+  datasetId,
+  kind: "api-access",
+  createdAt: FIXTURE_NOW,
+  updatedAt: FIXTURE_NOW,
+  aliases
+});
+
+// CatalogRecord has NO aliases and NO createdAt/updatedAt — it does not
+// carry TimestampedAliasedFields (see src/domain/data-layer/catalog.ts).
+const validCatalogRecordBody = (
+  ulid: string,
+  catalogId: string,
+  primaryTopicId: string
+) => ({
+  _tag: "CatalogRecord",
+  id: `https://id.skygest.io/catalog-record/cr_${ulid}`,
+  catalogId,
+  primaryTopicType: "dataset",
+  primaryTopicId
+});
+
+const validDataServiceBody = (
+  title: string,
+  ulid: string,
+  publisherAgentId: string,
+  servesDatasetIds: ReadonlyArray<string>,
+  aliases: ReadonlyArray<FixtureAlias>
+) => ({
+  _tag: "DataService",
+  id: `https://id.skygest.io/data-service/svc_${ulid}`,
+  title,
+  publisherAgentId,
+  endpointURLs: ["https://api.eia.gov/v2/"],
+  servesDatasetIds,
+  createdAt: FIXTURE_NOW,
+  updatedAt: FIXTURE_NOW,
   aliases
 });
 
@@ -640,6 +738,129 @@ describe("loadCatalogIndex", () => {
         expect(error.kind).toBe("Dataset");
         expect(error.slug).toBe("broken");
       }
+    }).pipe(Effect.provide(bunFsLayer))
+  );
+
+  it.effect("indexes all six entity kinds end-to-end", () =>
+    Effect.gen(function* () {
+      // Distinct 26-char ULID-shaped tails per entity so every ID is unique
+      // and matches the ^[A-Za-z0-9]{10,}$ pattern enforced by ids.ts.
+      const agentUlid = "01KNQEZ5V57VJJJFYV6HWM03VB";
+      const catalogUlid = "01KNQEZ5V57VJJJFYV6HWM03VC";
+      const datasetUlid = "01KNQSXEPQHNVM0AVMA3SQRNK3";
+      const distributionUlid = "01KNQSXEPQE7D85JBAFH47Y9MS";
+      const catalogRecordUlid = "01KNQSXEPQHNVM0AVMA3SQRNK4";
+      const dataServiceUlid = "01KNQEZ5VHS74DM94ABW2ZM93Y";
+
+      const agentId = `https://id.skygest.io/agent/ag_${agentUlid}`;
+      const catalogId = `https://id.skygest.io/catalog/cat_${catalogUlid}`;
+      const datasetId = `https://id.skygest.io/dataset/ds_${datasetUlid}`;
+      const route = "electricity/retail-sales";
+
+      const tmp = yield* Effect.promise(() =>
+        makeTmpFixture({
+          agents: [
+            {
+              slug: "eia",
+              body: validAgentBody("U.S. Energy Information Administration", agentUlid, [
+                // URL-alias lookup drives EIA-agent resolution in
+                // loadCatalogIndex — keep this in sync with
+                // EIA_AGENT_HOMEPAGE in the script.
+                {
+                  scheme: "url",
+                  value: "https://www.eia.gov/",
+                  relation: "exactMatch"
+                }
+              ])
+            }
+          ],
+          catalogs: [
+            {
+              slug: "eia",
+              body: validCatalogBody("EIA Open Data Catalog", catalogUlid, agentId, [])
+            }
+          ],
+          datasets: [
+            {
+              slug: "eia-electricity-retail-sales",
+              body: validDatasetBody(
+                "Retail Sales of Electricity",
+                datasetUlid,
+                [
+                  { scheme: "eia-route", value: route, relation: "exactMatch" }
+                ],
+                agentId
+              )
+            }
+          ],
+          distributions: [
+            {
+              slug: "eia-electricity-retail-sales-api",
+              body: validDistributionBody(distributionUlid, datasetId, [])
+            }
+          ],
+          catalogRecords: [
+            {
+              slug: "eia-electricity-retail-sales-cr",
+              body: validCatalogRecordBody(catalogRecordUlid, catalogId, datasetId)
+            }
+          ],
+          dataServices: [
+            {
+              slug: "eia-api",
+              body: validDataServiceBody(
+                "EIA API v2",
+                dataServiceUlid,
+                agentId,
+                [datasetId],
+                []
+              )
+            }
+          ]
+        })
+      );
+
+      const result = yield* loadCatalogIndex(tmp).pipe(
+        Effect.ensuring(Effect.promise(() => cleanup(tmp)))
+      );
+
+      // Every kind round-trips through the loader at count 1.
+      expect(result.allDatasets.length).toBe(1);
+      expect(result.allDistributions.length).toBe(1);
+      expect(result.allCatalogRecords.length).toBe(1);
+
+      // Route lookup (the Task 7 merge key for Datasets).
+      const ds = result.datasetsByRoute.get(route);
+      expect(ds).toBeDefined();
+      expect(ds!.title).toBe("Retail Sales of Electricity");
+
+      // Compound distribution key: `${datasetId}::${kind}`.
+      const dist = result.distributionsByDatasetIdKind.get(
+        `${datasetId}::api-access`
+      );
+      expect(dist).toBeDefined();
+
+      // Compound CR key: `${catalogId}::${primaryTopicId}`.
+      const cr = result.catalogRecordsByCatalogAndPrimaryTopic.get(
+        `${catalogId}::${datasetId}`
+      );
+      expect(cr).toBeDefined();
+
+      // Agent-by-name lookup.
+      const agent = result.agentsByName.get(
+        "U.S. Energy Information Administration"
+      );
+      expect(agent).toBeDefined();
+      expect(agent!.id).toBe(agentId);
+
+      // EIA-published Catalog and DataService resolved via the URL-alias
+      // agent lookup plus publisherAgentId filter.
+      expect(result.catalog).not.toBeNull();
+      expect(result.catalog!.id).toBe(catalogId);
+      expect(result.dataService).not.toBeNull();
+      expect(result.dataService!.id).toBe(
+        `https://id.skygest.io/data-service/svc_${dataServiceUlid}`
+      );
     }).pipe(Effect.provide(bunFsLayer))
   );
 });

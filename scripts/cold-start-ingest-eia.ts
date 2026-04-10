@@ -703,10 +703,12 @@ export const buildIngestGraph = (
 //                        same dataset; only CRs from the EIA catalog are
 //                        ever merged downstream. Compound key ensures the
 //                        Data.gov duplicate CR is read-only.
-//   Agent              → name (strings are stable; EIA agent merge is a
-//                        name lookup).
-//   Catalog/DataService → publisherAgentId === EIA agent id (at most one
-//                        each in the registry).
+//   Agent (general)    → name (lookup table for any agent that needs it).
+//   Agent (EIA)        → URL-alias lookup (`{scheme: "url", value:
+//                        EIA_AGENT_HOMEPAGE}`) with a `homepage`-field
+//                        fallback. The dedicated `catalog`/`dataService`
+//                        fields are filtered by this resolved EIA agent's
+//                        publisherAgentId.
 
 export interface CatalogIndex {
   readonly datasetsByRoute: Map<string, Dataset>;
@@ -722,23 +724,37 @@ export interface CatalogIndex {
 
 const EIA_AGENT_HOMEPAGE = "https://www.eia.gov/";
 
+/**
+ * Concurrency cap for filesystem reads during catalog-index loading.
+ * Matches the `FILESYSTEM_CONCURRENCY = 10` convention used elsewhere in
+ * the codebase (see skygest-editorial's BuildGraph.ts); keeps parallel
+ * `readFileString` calls bounded so we don't saturate the fd table on
+ * large cold-start registries.
+ */
+const INDEX_LOAD_CONCURRENCY = 10;
+
+/** API v2 route paths always contain at least one "/". Legacy bulk-manifest
+ *  codes (EBA, ELEC, NG, ...) live on the `eia-bulk-id` scheme post-Task 0.5
+ *  but this guard is the second line of defence. */
+const isApiV2RouteValue = (value: string): boolean => value.includes("/");
+
 const decodeFileAs = <S extends Schema.Decoder<unknown>>(
   schema: S,
   kind: string,
   slug: string
 ) =>
-  (text: string): Effect.Effect<S["Type"], EiaIngestSchemaError> => {
-    const result = decodeJsonStringEitherWith(schema)(text);
-    return Result.isFailure(result)
-      ? Effect.fail(
-          new EiaIngestSchemaError({
-            kind,
-            slug,
-            message: formatSchemaParseError(result.failure)
-          })
-        )
-      : Effect.succeed(result.success as S["Type"]);
-  };
+  (text: string): Effect.Effect<S["Type"], EiaIngestSchemaError> =>
+    Effect.gen(function* () {
+      const result = decodeJsonStringEitherWith(schema)(text);
+      if (Result.isFailure(result)) {
+        return yield* new EiaIngestSchemaError({
+          kind,
+          slug,
+          message: formatSchemaParseError(result.failure)
+        });
+      }
+      return result.success;
+    });
 
 const loadEntitiesFromDir = <S extends Schema.Decoder<unknown>>(
   fs_: FileSystem.FileSystem,
@@ -785,7 +801,7 @@ const loadEntitiesFromDir = <S extends Schema.Decoder<unknown>>(
           );
           return yield* decodeFileAs(schema, kind, slug)(text);
         }),
-      { concurrency: 10 }
+      { concurrency: INDEX_LOAD_CONCURRENCY }
     );
   });
 
@@ -860,7 +876,7 @@ export const loadCatalogIndex = (
         // bulk-manifest codes live on eia-bulk-id (Task 0.5) and are
         // intentionally invisible here.
         const route = ds.aliases.find(
-          (a) => a.scheme === "eia-route" && a.value.includes("/")
+          (a) => a.scheme === "eia-route" && isApiV2RouteValue(a.value)
         )?.value;
         if (route !== undefined) datasetsByRoute.set(route, ds);
       }
