@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNWVQMFJGEBB25Z5KBA8EVW5",
+  "title": "Energy Charts Total Power",
+  "description": "Returns the total net electricity production (including industrial self supply) for a given country for each production type.\n    \n\n\n    \n\nCurrently only available for Germany.\n    \n\n\n    \n\nResponse schema:\n    \n\n ```json\n{\n  \"unix_seconds\": list[int],\n  \"production_types\": [\n    {\n        \"name\": str,\n        \"data\": list[float]\n    }\n  ],\n  \"deprecated\": bool\n}\n```",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNWVQMFHEZD7KVN03TEAVA1Q",
+  "accessRights": "public",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "keywords": [
+    "total_power"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNWVQMFJNZ8H0NZM83S7V7N3"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNWVQMFH6QYQC1EQ63T1JNN3"
+  ],
+  "createdAt": "2026-04-10T23:30:44.590Z",
+  "updatedAt": "2026-04-10T23:31:05.948Z",
+  "aliases": [
+    {
+      "scheme": "energy-charts-endpoint",
+      "value": "total_power",
+      "relation": "exactMatch"
+    }
+  ]
+}

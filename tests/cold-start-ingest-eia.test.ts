@@ -1500,20 +1500,30 @@ const makeBuilderCtx = (now: string): BuildContext => {
 
 // An empty catalog index — suitable for fresh-build tests that don't need
 // any lookups to resolve against existing records.
-const emptyIndex = (): Parameters<typeof buildDistributionCandidates>[3] => ({
-  datasetsByRoute: new Map(),
-  datasetFileSlugById: new Map(),
-  distributionsByDatasetIdKind: new Map(),
-  distributionFileSlugById: new Map(),
-  catalogRecordsByCatalogAndPrimaryTopic: new Map(),
-  catalogRecordFileSlugById: new Map(),
-  agentsByName: new Map(),
-  catalog: null,
-  dataService: null,
-  allDatasets: [],
-  allDistributions: [],
-  allCatalogRecords: []
-});
+const emptyIndex = (): Parameters<typeof buildDistributionCandidates>[3] => {
+  const datasetsByMergeKey = new Map();
+  return {
+    datasetsByRoute: datasetsByMergeKey,
+    datasetsByMergeKey,
+    datasetFileSlugById: new Map(),
+    distributionsByDatasetIdKind: new Map(),
+    distributionFileSlugById: new Map(),
+    catalogRecordsByCatalogAndPrimaryTopic: new Map(),
+    catalogRecordFileSlugById: new Map(),
+    agentsById: new Map(),
+    agentsByName: new Map(),
+    catalogsById: new Map(),
+    dataServicesById: new Map(),
+    catalog: null,
+    dataService: null,
+    allDatasets: [],
+    allDistributions: [],
+    allCatalogRecords: [],
+    allCatalogs: [],
+    allDataServices: [],
+    allAgents: []
+  };
+};
 
 describe("slugifyRoute", () => {
   it("turns an API v2 route path into an eia- prefixed slug", () => {
@@ -1863,19 +1873,27 @@ describe("buildDistributionCandidates", () => {
     // the readonly `allDistributions` field of emptyIndex() — mutation
     // through a readonly cast obscures intent and makes it easy to
     // accidentally write to shared fixture state.
+    const datasetsByMergeKey = new Map();
     const idx: Parameters<typeof buildDistributionCandidates>[3] = {
-      datasetsByRoute: new Map(),
+      datasetsByRoute: datasetsByMergeKey,
+      datasetsByMergeKey,
       datasetFileSlugById: new Map(),
       distributionsByDatasetIdKind: new Map(),
       distributionFileSlugById: new Map(),
       catalogRecordsByCatalogAndPrimaryTopic: new Map(),
       catalogRecordFileSlugById: new Map(),
+      agentsById: new Map(),
       agentsByName: new Map(),
+      catalogsById: new Map(),
+      dataServicesById: new Map(),
       catalog: null,
       dataService: null,
       allDatasets: [],
       allDistributions: [existingLanding, existingDownload],
-      allCatalogRecords: []
+      allCatalogRecords: [],
+      allCatalogs: [],
+      allDataServices: [],
+      allAgents: []
     };
 
     const dists = buildDistributionCandidates(leaf, datasetId, ctx, idx);

@@ -55,7 +55,27 @@ import {
   type ExternalIdentifier
 } from "../src/domain/data-layer";
 import {
-  decodeJsonStringEitherWith,
+  assertNodeOwnsWriteTargetWith,
+  buildIngestGraph,
+  type CatalogIndex as HarnessCatalogIndex,
+  encodeNodeData as encodeHarnessNodeData,
+  entityFilePathForNode as entityFilePathForHarnessNode,
+  EntityIdLedger as HarnessEntityIdLedger,
+  ledgerKeyForNode as harnessLedgerKeyForNode,
+  loadCatalogIndexWith,
+  loadLedgerWith,
+  saveLedgerWith,
+  stableSlug,
+  unionAliases,
+  validateCandidatesWith,
+  validateNodeWith,
+  writeEntityFileWith,
+  type EntityIdLedger as HarnessEntityIdLedgerShape,
+  type IngestEdge,
+  type IngestGraph,
+  type IngestNode
+} from "../src/ingest/dcat-harness";
+import {
   decodeJsonStringWith,
   encodeJsonStringPrettyWith,
   formatSchemaParseError,
@@ -68,6 +88,12 @@ import {
   runScriptMain,
   scriptPlatformLayer
 } from "../src/platform/ScriptRuntime";
+
+export { buildIngestGraph, stableSlug };
+export { unionAliases };
+export type { IngestEdge, IngestGraph, IngestNode };
+export const EntityIdLedger = HarnessEntityIdLedger;
+export type EntityIdLedger = HarnessEntityIdLedgerShape;
 
 // ---------------------------------------------------------------------------
 // Tagged errors
@@ -684,179 +710,6 @@ export const getWalkData = Effect.fn("EiaIngest.getWalkData")(
 // Topological emission: Agent → {Catalog, Dataset} → {Distribution,
 // CatalogRecord, DataService}.
 
-export type IngestNode =
-  | { readonly _tag: "agent"; readonly slug: string; readonly data: Agent }
-  | { readonly _tag: "catalog"; readonly slug: string; readonly data: Catalog }
-  | {
-      readonly _tag: "data-service";
-      readonly slug: string;
-      readonly data: DataService;
-    }
-  | {
-      readonly _tag: "dataset";
-      readonly slug: string;
-      readonly data: Dataset;
-      readonly merged: boolean;
-    }
-  | {
-      readonly _tag: "distribution";
-      readonly slug: string;
-      readonly data: Distribution;
-    }
-  | {
-      readonly _tag: "catalog-record";
-      readonly slug: string;
-      readonly data: CatalogRecord;
-    };
-
-export type IngestEdge =
-  | "publishes" //          agent → {catalog, dataset, data-service}
-  | "contains-record" //    catalog → catalog-record
-  | "has-distribution" //   dataset → distribution
-  | "primary-topic-of" //   dataset → catalog-record
-  | "served-by"; //         dataset → data-service
-
-export type IngestGraph = Graph.DirectedGraph<IngestNode, IngestEdge>;
-
-const nodeKey = (node: IngestNode): string => `${node._tag}::${node.data.id}`;
-
-/**
- * Pure builder. Takes an array of *already-validated* IngestNodes (Phase A
- * has run) and assembles the dependency-direction graph. The mutate
- * callback is the only place plain JS `for` loops are permitted — it is
- * synchronous and not Effect-typed by design (matches the canonical pattern
- * in skygest-editorial/src/narrative/BuildGraph.ts:950-1018).
- */
-export const buildIngestGraph = (
-  validatedNodes: ReadonlyArray<IngestNode>
-): IngestGraph =>
-  Graph.directed<IngestNode, IngestEdge>((mutable) => {
-    const indexById = new Map<string, number>();
-
-    // Pass 1: add every node, recording its assigned index by composite key.
-    for (const node of validatedNodes) {
-      indexById.set(nodeKey(node), Graph.addNode(mutable, node));
-    }
-
-    // Partition nodes by tag for the edge-wiring passes below.
-    const agentNodes: Array<Extract<IngestNode, { _tag: "agent" }>> = [];
-    const catalogNodes: Array<Extract<IngestNode, { _tag: "catalog" }>> = [];
-    const dataServiceNodes: Array<
-      Extract<IngestNode, { _tag: "data-service" }>
-    > = [];
-    const datasetNodes: Array<Extract<IngestNode, { _tag: "dataset" }>> = [];
-    const distNodes: Array<Extract<IngestNode, { _tag: "distribution" }>> = [];
-    const crNodes: Array<Extract<IngestNode, { _tag: "catalog-record" }>> = [];
-
-    for (const node of validatedNodes) {
-      switch (node._tag) {
-        case "agent":
-          agentNodes.push(node);
-          break;
-        case "catalog":
-          catalogNodes.push(node);
-          break;
-        case "data-service":
-          dataServiceNodes.push(node);
-          break;
-        case "dataset":
-          datasetNodes.push(node);
-          break;
-        case "distribution":
-          distNodes.push(node);
-          break;
-        case "catalog-record":
-          crNodes.push(node);
-          break;
-      }
-    }
-
-    // Pass 2: agent → {catalog, dataset, data-service} via "publishes"
-    for (const agent of agentNodes) {
-      const agentIdx = indexById.get(nodeKey(agent))!;
-      for (const catalog of catalogNodes) {
-        if (catalog.data.publisherAgentId === agent.data.id) {
-          Graph.addEdge(
-            mutable,
-            agentIdx,
-            indexById.get(nodeKey(catalog))!,
-            "publishes"
-          );
-        }
-      }
-      for (const ds of datasetNodes) {
-        if (ds.data.publisherAgentId === agent.data.id) {
-          Graph.addEdge(
-            mutable,
-            agentIdx,
-            indexById.get(nodeKey(ds))!,
-            "publishes"
-          );
-        }
-      }
-      for (const svc of dataServiceNodes) {
-        if (svc.data.publisherAgentId === agent.data.id) {
-          Graph.addEdge(
-            mutable,
-            agentIdx,
-            indexById.get(nodeKey(svc))!,
-            "publishes"
-          );
-        }
-      }
-    }
-
-    // Pass 3: catalog → catalog-record via "contains-record"
-    for (const catalog of catalogNodes) {
-      const catIdx = indexById.get(nodeKey(catalog))!;
-      for (const cr of crNodes) {
-        if (cr.data.catalogId === catalog.data.id) {
-          Graph.addEdge(
-            mutable,
-            catIdx,
-            indexById.get(nodeKey(cr))!,
-            "contains-record"
-          );
-        }
-      }
-    }
-
-    // Pass 4: dataset → {distribution, catalog-record, data-service}
-    for (const ds of datasetNodes) {
-      const dsIdx = indexById.get(nodeKey(ds))!;
-      for (const dist of distNodes) {
-        if (dist.data.datasetId === ds.data.id) {
-          Graph.addEdge(
-            mutable,
-            dsIdx,
-            indexById.get(nodeKey(dist))!,
-            "has-distribution"
-          );
-        }
-      }
-      for (const cr of crNodes) {
-        if (cr.data.primaryTopicId === ds.data.id) {
-          Graph.addEdge(
-            mutable,
-            dsIdx,
-            indexById.get(nodeKey(cr))!,
-            "primary-topic-of"
-          );
-        }
-      }
-      for (const svc of dataServiceNodes) {
-        if (svc.data.servesDatasetIds.includes(ds.data.id)) {
-          Graph.addEdge(
-            mutable,
-            dsIdx,
-            indexById.get(nodeKey(svc))!,
-            "served-by"
-          );
-        }
-      }
-    }
-  });
-
 // ---------------------------------------------------------------------------
 // Existing-entity catalog index (Task 6)
 // ---------------------------------------------------------------------------
@@ -887,19 +740,10 @@ export const buildIngestGraph = (
 //                        fields are filtered by this resolved EIA agent's
 //                        publisherAgentId.
 
-export interface CatalogIndex {
-  readonly datasetsByRoute: Map<string, Dataset>;
-  readonly datasetFileSlugById: Map<Dataset["id"], string>;
-  readonly distributionsByDatasetIdKind: Map<string, Distribution>;
-  readonly distributionFileSlugById: Map<Distribution["id"], string>;
-  readonly catalogRecordsByCatalogAndPrimaryTopic: Map<string, CatalogRecord>;
-  readonly catalogRecordFileSlugById: Map<CatalogRecord["id"], string>;
-  readonly agentsByName: Map<string, Agent>;
+export interface CatalogIndex extends HarnessCatalogIndex {
+  readonly datasetsByRoute: HarnessCatalogIndex["datasetsByMergeKey"];
   readonly catalog: Catalog | null;
   readonly dataService: DataService | null;
-  readonly allDatasets: ReadonlyArray<Dataset>;
-  readonly allDistributions: ReadonlyArray<Distribution>;
-  readonly allCatalogRecords: ReadonlyArray<CatalogRecord>;
 }
 
 const EIA_AGENT_HOMEPAGE = "https://www.eia.gov/";
@@ -925,15 +769,6 @@ const REPORT_PROVENANCE_NOTES: ReadonlyArray<string> = [
   "Legacy bulk-manifest codes (EBA, ELEC, ...) were migrated from `eia-route` to `eia-bulk-id` in Task 0.5 prior to this run."
 ];
 
-/**
- * Concurrency cap for filesystem reads during catalog-index loading.
- * Matches the `FILESYSTEM_CONCURRENCY = 10` convention used elsewhere in
- * the codebase (see skygest-editorial's BuildGraph.ts); keeps parallel
- * `readFileString` calls bounded so we don't saturate the fd table on
- * large cold-start registries.
- */
-const INDEX_LOAD_CONCURRENCY = 10;
-
 /** API v2 route paths may be single-segment (`steo`), multi-segment
  *  (`electricity/retail-sales`), contain digits (`aeo/2014`), or have
  *  mixed case within a segment (`petroleum/move/railNA`). Legacy
@@ -949,83 +784,55 @@ const LEGACY_BULK_CODE_RE = /^[A-Z][A-Z0-9_]*$/;
 export const isApiV2RouteValue = (value: string): boolean =>
   value.length > 0 && !LEGACY_BULK_CODE_RE.test(value);
 
-const decodeFileAs = <S extends Schema.Decoder<unknown>>(
-  schema: S,
-  kind: string,
-  slug: string
-) =>
-  (text: string): Effect.Effect<S["Type"], EiaIngestSchemaError> =>
-    Effect.gen(function* () {
-      const result = decodeJsonStringEitherWith(schema)(text);
-      if (Result.isFailure(result)) {
-        return yield* new EiaIngestSchemaError({
-          kind,
-          slug,
-          message: formatSchemaParseError(result.failure)
-        });
-      }
-      return result.success;
-    });
+const resolveAgentById = (
+  idx: HarnessCatalogIndex,
+  agentId: Agent["id"]
+): Agent | null =>
+  idx.agentsById.get(agentId) ??
+  Array.from(idx.agentsByName.values()).find((agent) => agent.id === agentId) ??
+  idx.allAgents.find((agent) => agent.id === agentId) ??
+  null;
 
-interface LoadedEntity<T> {
-  readonly slug: string;
-  readonly data: T;
-}
+const resolveEiaRoots = (idx: HarnessCatalogIndex | CatalogIndex) => {
+  const sharedEiaAgent =
+    idx.allAgents.find((agent) =>
+      agent.aliases.some(
+        (alias) =>
+          alias.scheme === AliasSchemeValues.url &&
+          alias.value === EIA_AGENT_HOMEPAGE
+      )
+    ) ??
+    idx.allAgents.find((agent) => agent.homepage === EIA_AGENT_HOMEPAGE) ??
+    null;
+  const sharedCatalog =
+    sharedEiaAgent === null
+      ? null
+      : (idx.allCatalogs.find(
+          (candidate) => candidate.publisherAgentId === sharedEiaAgent.id
+        ) ?? null);
+  const sharedDataService =
+    sharedEiaAgent === null
+      ? null
+      : (idx.allDataServices.find(
+          (candidate) => candidate.publisherAgentId === sharedEiaAgent.id
+        ) ?? null);
 
-const loadEntitiesFromDir = <S extends Schema.Decoder<unknown>>(
-  fs_: FileSystem.FileSystem,
-  rootDir: string,
-  subDir: string,
-  schema: S,
-  kind: string
-): Effect.Effect<
-  ReadonlyArray<LoadedEntity<S["Type"]>>,
-  EiaIngestFsError | EiaIngestSchemaError,
-  Path.Path
-> =>
-  Effect.gen(function* () {
-    const path_ = yield* Path.Path;
-    const dir = path_.resolve(rootDir, "catalog", subDir);
+  const compatibilityCatalog = "catalog" in idx ? idx.catalog : null;
+  const compatibilityDataService = "dataService" in idx ? idx.dataService : null;
+  const catalog = compatibilityCatalog ?? sharedCatalog;
+  const dataService = compatibilityDataService ?? sharedDataService;
+  const eiaAgent =
+    catalog === null
+      ? sharedEiaAgent
+      : resolveAgentById(idx, catalog.publisherAgentId);
 
-    const files = yield* fs_.readDirectory(dir).pipe(
-      Effect.mapError(
-        (cause) =>
-          new EiaIngestFsError({
-            operation: "readDirectory",
-            path: dir,
-            message: stringifyUnknown(cause)
-          })
-      ),
-      Effect.map((entries) => entries.filter((f) => f.endsWith(".json")))
-    );
+  return { eiaAgent, catalog, dataService } as const;
+};
 
-    return yield* Effect.forEach(
-      files,
-      (file) =>
-        Effect.gen(function* () {
-          const slug = file.replace(/\.json$/u, "");
-          const filePath = path_.resolve(dir, file);
-          const text = yield* fs_.readFileString(filePath).pipe(
-            Effect.mapError(
-              (cause) =>
-                new EiaIngestFsError({
-                  operation: "readFileString",
-                  path: filePath,
-                  message: stringifyUnknown(cause)
-                })
-            )
-          );
-          const data = yield* decodeFileAs(schema, kind, slug)(text);
-          return { slug, data } satisfies LoadedEntity<S["Type"]>;
-        }),
-      { concurrency: INDEX_LOAD_CONCURRENCY }
-    );
-  });
-
-const stableSlug = (
-  existingSlug: string | undefined,
-  computeFresh: () => string
-): string => existingSlug ?? computeFresh();
+const eiaSkipReason = (
+  reason: "missingMergeAlias" | "unmergeableAlias"
+): "missingApiRouteAlias" | "legacyBulkAlias" =>
+  reason === "missingMergeAlias" ? "missingApiRouteAlias" : "legacyBulkAlias";
 
 /**
  * Loads the on-disk cold-start catalog into alias-keyed lookup maps.
@@ -1036,179 +843,37 @@ const stableSlug = (
  */
 export const loadCatalogIndex = Effect.fn("EiaIngest.loadCatalogIndex")(
   function* (rootDir: string) {
-    const fs_ = yield* FileSystem.FileSystem;
-
-    const [
-      datasets,
-      distributions,
-      catalogRecords,
-      dataServices,
-      catalogs,
-      agents
-    ] = yield* Effect.all(
-      [
-        loadEntitiesFromDir(fs_, rootDir, "datasets", Dataset, "Dataset"),
-        loadEntitiesFromDir(
-          fs_,
-          rootDir,
-          "distributions",
-          Distribution,
-          "Distribution"
-        ),
-        loadEntitiesFromDir(
-          fs_,
-          rootDir,
-          "catalog-records",
-          CatalogRecord,
-          "CatalogRecord"
-        ),
-        loadEntitiesFromDir(
-          fs_,
-          rootDir,
-          "data-services",
-          DataService,
-          "DataService"
-        ),
-        loadEntitiesFromDir(fs_, rootDir, "catalogs", Catalog, "Catalog"),
-        loadEntitiesFromDir(fs_, rootDir, "agents", Agent, "Agent")
-      ],
-      { concurrency: "unbounded" }
-    );
-
-    // Pure synchronous index-building over already-fetched data. `for ... of`
-    // is permitted inside `Effect.sync` (matches the Graph.directed mutate
-    // callback pattern used in buildIngestGraph above).
-    const { index, skippedDatasets } = yield* Effect.sync(() => {
-      const datasetsByRoute = new Map<string, Dataset>();
-      const datasetFileSlugById = new Map<Dataset["id"], string>();
-      const distributionsByDatasetIdKind = new Map<string, Distribution>();
-      const distributionFileSlugById = new Map<Distribution["id"], string>();
-      const agentsByName = new Map<string, Agent>();
-      const catalogRecordsByCatalogAndPrimaryTopic = new Map<
-        string,
-        CatalogRecord
-      >();
-      const catalogRecordFileSlugById = new Map<CatalogRecord["id"], string>();
-
-      const datasetEntities = datasets.map(({ data }) => data);
-      const distributionEntities = distributions.map(({ data }) => data);
-      const catalogRecordEntities = catalogRecords.map(({ data }) => data);
-      const dataServiceEntities = dataServices.map(({ data }) => data);
-      const catalogEntities = catalogs.map(({ data }) => data);
-      const agentEntities = agents.map(({ data }) => data);
-      const skippedDatasets: Array<{
-        readonly slug: string;
-        readonly datasetId: Dataset["id"];
-        readonly reason: "legacyBulkAlias" | "missingApiRouteAlias";
-        readonly routeAlias: string | null;
-      }> = [];
-
-      for (const { slug, data: ds } of datasets) {
-        datasetFileSlugById.set(ds.id, slug);
-        const routeAlias =
-          ds.aliases.find((a) => a.scheme === AliasSchemeValues.eiaRoute)
-            ?.value ?? null;
-        // Only entries that look like API v2 paths are indexed — legacy
-        // bulk-manifest codes live on eia-bulk-id (Task 0.5) and are
-        // intentionally invisible here.
-        const route = ds.aliases.find(
-          (a) =>
-            a.scheme === AliasSchemeValues.eiaRoute &&
-            isApiV2RouteValue(a.value)
-        )?.value;
-        if (route !== undefined) {
-          datasetsByRoute.set(route, ds);
-        } else if (slug.startsWith("eia-")) {
-          skippedDatasets.push({
-            slug,
-            datasetId: ds.id,
-            reason:
-              routeAlias === null ? "missingApiRouteAlias" : "legacyBulkAlias",
-            routeAlias
-          });
-        }
-      }
-
-      for (const { slug, data: dist } of distributions) {
-        distributionFileSlugById.set(dist.id, slug);
-        distributionsByDatasetIdKind.set(
-          `${dist.datasetId}::${dist.kind}`,
-          dist
-        );
-      }
-
-      for (const ag of agentEntities) {
-        agentsByName.set(ag.name, ag);
-      }
-
-      for (const { slug, data: cr } of catalogRecords) {
-        catalogRecordFileSlugById.set(cr.id, slug);
-        catalogRecordsByCatalogAndPrimaryTopic.set(
-          `${cr.catalogId}::${cr.primaryTopicId}`,
-          cr
-        );
-      }
-
-      // EIA publisher agent: matched by homepage URL alias or homepage
-      // field (either carries https://www.eia.gov/ in the registry today).
-      const eiaAgent =
-        agentEntities.find((a) =>
-          a.aliases.some(
-            (al) =>
-              al.scheme === AliasSchemeValues.url &&
-              al.value === EIA_AGENT_HOMEPAGE
-          )
-        ) ??
-        agentEntities.find((a) => a.homepage === EIA_AGENT_HOMEPAGE) ??
-        null;
-
-      const catalog =
-        eiaAgent !== null
-          ? (catalogEntities.find((c) => c.publisherAgentId === eiaAgent.id) ??
-            null)
-          : null;
-      const dataService =
-        eiaAgent !== null
-          ? (dataServiceEntities.find(
-              (s) => s.publisherAgentId === eiaAgent.id
-            ) ??
-            null)
-          : null;
-
-      return {
-        index: {
-          datasetsByRoute,
-          datasetFileSlugById,
-          distributionsByDatasetIdKind,
-          distributionFileSlugById,
-          catalogRecordsByCatalogAndPrimaryTopic,
-          catalogRecordFileSlugById,
-          agentsByName,
-          catalog,
-          dataService,
-          allDatasets: datasetEntities,
-          allDistributions: distributionEntities,
-          allCatalogRecords: catalogRecordEntities
-        } satisfies CatalogIndex,
-        skippedDatasets
-      };
+    const { index, skippedDatasets } = yield* loadCatalogIndexWith({
+      rootDir,
+      mergeAliasScheme: AliasSchemeValues.eiaRoute,
+      isMergeableDatasetAlias: (alias) => isApiV2RouteValue(alias.value),
+      mapFsError: ({ operation, path, message }) =>
+        new EiaIngestFsError({ operation, path, message }),
+      mapSchemaError: ({ kind, slug, message }) =>
+        new EiaIngestSchemaError({ kind, slug, message })
     });
 
     yield* Effect.forEach(
-      skippedDatasets,
+      skippedDatasets.filter((dataset) => dataset.slug.startsWith("eia-")),
       (dataset) =>
         Logging.logWarning("eia dataset skipped from route index", {
           slug: dataset.slug,
           datasetId: dataset.datasetId,
-          reason: dataset.reason,
-          ...(dataset.routeAlias === null
+          reason: eiaSkipReason(dataset.reason),
+          ...(dataset.mergeAliasValue === null
             ? {}
-            : { routeAlias: dataset.routeAlias })
+            : { routeAlias: dataset.mergeAliasValue })
         }),
       { discard: true }
     );
 
-    return index;
+    const { catalog, dataService } = resolveEiaRoots(index);
+    return {
+      ...index,
+      datasetsByRoute: index.datasetsByMergeKey,
+      catalog,
+      dataService
+    } satisfies CatalogIndex;
   }
 );
 
@@ -1312,35 +977,6 @@ const preserveOptionalKeys = <T extends object, K extends keyof T>(
 };
 
 /**
- * Union two alias arrays, deduping by `(scheme, value)`. Existing
- * aliases win on collision — this preserves any curator-applied
- * relation weakening (e.g. exactMatch downgraded to closeMatch when
- * a methodology variant was discovered) and any `uri` field set on
- * the existing alias against being overwritten by a fresh import.
- */
-export const unionAliases = (
-  existing: ReadonlyArray<ExternalIdentifier>,
-  fresh: ReadonlyArray<ExternalIdentifier>
-): ReadonlyArray<ExternalIdentifier> => {
-  const seen = new Set<string>();
-  const out: Array<ExternalIdentifier> = [];
-  // Existing aliases first so a later fresh duplicate is silently dropped.
-  for (const alias of existing) {
-    const key = `${alias.scheme}::${alias.value}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(alias);
-  }
-  for (const alias of fresh) {
-    const key = `${alias.scheme}::${alias.value}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(alias);
-  }
-  return out;
-};
-
-/**
  * Resolve the EIA agent/catalog/dataService triple from a loaded catalog
  * index. Fails loudly when any piece is missing — the ingest pipeline has
  * no sensible way to mint candidates without all three scope records.
@@ -1349,27 +985,13 @@ export const buildContextFromIndex = Effect.fn(
   "EiaIngest.buildContextFromIndex"
 )(
   function* (idx: CatalogIndex, nowIso: string) {
-    if (idx.catalog === null || idx.dataService === null) {
+    const { eiaAgent, catalog, dataService } = resolveEiaRoots(idx);
+    if (catalog === null || dataService === null) {
       return yield* new EiaIngestLedgerError({
         message:
           "EIA Catalog or DataService missing from cold-start registry — run Task 6 loader against a seeded tree"
       });
     }
-    // The EIA catalog/dataService are already filtered to the EIA agent's
-    // publisherAgentId during index load, so we can resolve the agent by
-    // that id without re-running the homepage-alias lookup.
-    //
-    // Locate the EIA agent by id, walking agentsByName because the index
-    // only exposes that map. There's a latent name-collision edge case in
-    // loadCatalogIndex (Task 6) — if two agents share a name, only the
-    // last-loaded one is findable through agentsByName. The cold-start
-    // registry has unique agent names today, so this is safe; if that
-    // invariant breaks, loadCatalogIndex should expose agentsById too.
-    const catalogPublisherId = idx.catalog.publisherAgentId;
-    const eiaAgent =
-      Array.from(idx.agentsByName.values()).find(
-        (a) => a.id === catalogPublisherId
-      ) ?? null;
     if (eiaAgent === null) {
       return yield* new EiaIngestLedgerError({
         message:
@@ -1379,8 +1001,8 @@ export const buildContextFromIndex = Effect.fn(
     return {
       nowIso,
       eiaAgent,
-      eiaCatalog: idx.catalog,
-      eiaDataService: idx.dataService
+      eiaCatalog: catalog,
+      eiaDataService: dataService
     } satisfies BuildContext;
   }
 );
@@ -1742,61 +1364,19 @@ export const buildCandidateNodes = (
 
 export const validateNode = Effect.fn("EiaIngest.validateNode")(
   function* (node: IngestNode) {
-    const mapErr = (error: Schema.SchemaError) =>
+    const mapErr = (candidate: IngestNode, error: Schema.SchemaError) =>
       new EiaIngestSchemaError({
-        kind: node._tag,
-        slug: node.slug,
+        kind: candidate._tag,
+        slug: candidate.slug,
         message: formatSchemaParseError(error)
       });
-    switch (node._tag) {
-      case "agent": {
-        const decoded = yield* Schema.decodeUnknownEffect(Agent)(node.data).pipe(
-          Effect.mapError(mapErr)
-        );
-        return { ...node, data: decoded };
-      }
-      case "catalog": {
-        const decoded = yield* Schema.decodeUnknownEffect(Catalog)(node.data).pipe(
-          Effect.mapError(mapErr)
-        );
-        return { ...node, data: decoded };
-      }
-      case "data-service": {
-        const decoded = yield* Schema.decodeUnknownEffect(DataService)(node.data).pipe(
-          Effect.mapError(mapErr)
-        );
-        return { ...node, data: decoded };
-      }
-      case "dataset": {
-        const decoded = yield* Schema.decodeUnknownEffect(Dataset)(node.data).pipe(
-          Effect.mapError(mapErr)
-        );
-        return { ...node, data: decoded };
-      }
-      case "distribution": {
-        const decoded = yield* Schema.decodeUnknownEffect(Distribution)(node.data).pipe(
-          Effect.mapError(mapErr)
-        );
-        return { ...node, data: decoded };
-      }
-      case "catalog-record": {
-        const decoded = yield* Schema.decodeUnknownEffect(CatalogRecord)(
-          node.data
-        ).pipe(Effect.mapError(mapErr));
-        return { ...node, data: decoded };
-      }
-    }
+    return yield* validateNodeWith(node, mapErr);
   }
 );
 
 export const validateCandidates = Effect.fn("EiaIngest.validateCandidates")(
   function* (candidates: ReadonlyArray<IngestNode>) {
-    const [failures, successes] = yield* Effect.partition(
-      candidates,
-      (candidate) => validateNode(candidate),
-      { concurrency: "unbounded" }
-    );
-    return { failures, successes };
+    return yield* validateCandidatesWith(candidates, validateNode);
   }
 );
 
@@ -1819,119 +1399,24 @@ export const validateCandidates = Effect.fn("EiaIngest.validateCandidates")(
 
 export const writeEntityFile = Effect.fn("EiaIngest.writeEntityFile")(
   function* (filePath: string, content: string) {
-    const fs_ = yield* FileSystem.FileSystem;
-    const path_ = yield* Path.Path;
-    const dir = path_.dirname(filePath);
-    const now = yield* Clock.currentTimeMillis;
-    const tmp = `${filePath}.tmp-${String(now)}`;
-    yield* fs_.makeDirectory(dir, { recursive: true }).pipe(
-      Effect.mapError(
-        (cause) =>
-          new EiaIngestFsError({
-            operation: "makeDirectory",
-            path: dir,
-            message: stringifyUnknown(cause)
-          })
-      )
-    );
-    yield* fs_.writeFileString(tmp, content).pipe(
-      Effect.mapError(
-        (cause) =>
-          new EiaIngestFsError({
-            operation: "writeFileString",
-            path: tmp,
-            message: stringifyUnknown(cause)
-          })
-      )
-    );
-    yield* fs_.rename(tmp, filePath).pipe(
-      Effect.mapError(
-        (cause) =>
-          new EiaIngestFsError({
-            operation: "rename",
-            path: filePath,
-            message: stringifyUnknown(cause)
-          })
-      ),
-      // If the rename fails (disk full, cross-device link, permission
-      // flip) the temp stub is still on disk. Remove it on the error
-      // path so repeated failed runs don't accumulate `.tmp-<ms>`
-      // litter next to the target file. `Effect.ignore` swallows any
-      // cleanup failure so the original rename error is preserved.
-      Effect.tapError(() => fs_.remove(tmp).pipe(Effect.ignore))
+    yield* writeEntityFileWith(filePath, content, (input) =>
+      new EiaIngestFsError(input)
     );
   }
 );
 
-export const EntityIdLedger = Schema.Record(Schema.String, Schema.String);
-export type EntityIdLedger = Schema.Schema.Type<typeof EntityIdLedger>;
-
-const encodeEntityIdLedger = encodeJsonStringPrettyWith(EntityIdLedger);
-const decodeEntityIdLedger = decodeJsonStringEitherWith(EntityIdLedger);
-
-/**
- * Structural match for the Effect platform's "file not found" error.
- * PlatformError is a tagged wrapper around either BadArgument or
- * SystemError; SystemError carries a nested `_tag` discriminator with
- * `"NotFound"` as its ENOENT analogue (see
- * .reference/effect/packages/effect/src/PlatformError.ts:47-64).
- * We fall back to a string-match on the stringified cause so that a
- * platform update that reshuffles the error class hierarchy still
- * degrades to a safe "treat as missing file" rather than aborting.
- */
-const isNotFoundPlatformError = (cause: unknown): boolean => {
-  if (
-    typeof cause === "object" &&
-    cause !== null &&
-    "_tag" in cause &&
-    (cause as { readonly _tag: unknown })._tag === "PlatformError" &&
-    "reason" in cause
-  ) {
-    const reason = (cause as { readonly reason: unknown }).reason;
-    if (
-      typeof reason === "object" &&
-      reason !== null &&
-      "_tag" in reason &&
-      (reason as { readonly _tag: unknown })._tag === "NotFound"
-    ) {
-      return true;
-    }
-  }
-  const msg = stringifyUnknown(cause).toLowerCase();
-  return msg.includes("notfound") || msg.includes("enoent") || msg.includes("no such file");
-};
-
 export const loadLedger = Effect.fn("EiaIngest.loadLedger")(
   function* (rootDir: string) {
-    const fs_ = yield* FileSystem.FileSystem;
-    const path_ = yield* Path.Path;
-    const ledgerPath = path_.resolve(rootDir, ".entity-ids.json");
-
-    const readExit = yield* Effect.exit(fs_.readFileString(ledgerPath));
-    if (readExit._tag === "Failure") {
-      if (isNotFoundPlatformError(readExit.cause)) {
-        return {} satisfies EntityIdLedger;
-      }
-      return yield* new EiaIngestLedgerError({
-        message: `Cannot read ledger at ${ledgerPath}: ${stringifyUnknown(readExit.cause)}`
-      });
-    }
-
-    const decoded = decodeEntityIdLedger(readExit.value);
-    if (Result.isFailure(decoded)) {
-      return yield* new EiaIngestLedgerError({
-        message: `Cannot decode ledger at ${ledgerPath}: ${formatSchemaParseError(decoded.failure)}`
-      });
-    }
-    return decoded.success;
+    return yield* loadLedgerWith(
+      rootDir,
+      (message) => new EiaIngestLedgerError({ message })
+    );
   }
 );
 
 export const saveLedger = Effect.fn("EiaIngest.saveLedger")(
   function* (rootDir: string, ledger: EntityIdLedger) {
-    const path_ = yield* Path.Path;
-    const ledgerPath = path_.resolve(rootDir, ".entity-ids.json");
-    yield* writeEntityFile(ledgerPath, `${encodeEntityIdLedger(ledger)}\n`);
+    yield* saveLedgerWith(rootDir, ledger, writeEntityFile);
   }
 );
 
@@ -1956,164 +1441,16 @@ export const saveLedger = Effect.fn("EiaIngest.saveLedger")(
 // id-minting pipeline: the same "Kind:slug" key you looked up in
 // `buildDatasetCandidate` is the one written back on Phase B completion.
 
-const entityFilePath = (
-  path_: Path.Path,
-  rootDir: string,
-  node: IngestNode
-): string => {
-  switch (node._tag) {
-    case "agent":
-      return path_.resolve(rootDir, "catalog", "agents", `${node.slug}.json`);
-    case "catalog":
-      return path_.resolve(
-        rootDir,
-        "catalog",
-        "catalogs",
-        `${node.slug}.json`
-      );
-    case "data-service":
-      return path_.resolve(
-        rootDir,
-        "catalog",
-        "data-services",
-        `${node.slug}.json`
-      );
-    case "dataset":
-      return path_.resolve(
-        rootDir,
-        "catalog",
-        "datasets",
-        `${node.slug}.json`
-      );
-    case "distribution":
-      return path_.resolve(
-        rootDir,
-        "catalog",
-        "distributions",
-        `${node.slug}.json`
-      );
-    case "catalog-record":
-      return path_.resolve(
-        rootDir,
-        "catalog",
-        "catalog-records",
-        `${node.slug}.json`
-      );
-  }
-};
-
-const encodeAgentPretty = encodeJsonStringPrettyWith(Agent);
-const encodeCatalogPretty = encodeJsonStringPrettyWith(Catalog);
-const encodeDataServicePretty = encodeJsonStringPrettyWith(DataService);
-const encodeDatasetPretty = encodeJsonStringPrettyWith(Dataset);
-const encodeDistributionPretty = encodeJsonStringPrettyWith(Distribution);
-const encodeCatalogRecordPretty = encodeJsonStringPrettyWith(CatalogRecord);
-
-const encodeNodeData = (node: IngestNode): string => {
-  switch (node._tag) {
-    case "agent":
-      return encodeAgentPretty(node.data);
-    case "catalog":
-      return encodeCatalogPretty(node.data);
-    case "data-service":
-      return encodeDataServicePretty(node.data);
-    case "dataset":
-      return encodeDatasetPretty(node.data);
-    case "distribution":
-      return encodeDistributionPretty(node.data);
-    case "catalog-record":
-      return encodeCatalogRecordPretty(node.data);
-  }
-};
-
-const decodeExistingNodeData = (
-  node: IngestNode,
-  content: string
-): Effect.Effect<IngestNode["data"], EiaIngestLedgerError> => {
-  switch (node._tag) {
-    case "agent": {
-      const decoded = decodeJsonStringEitherWith(Agent)(content);
-      if (Result.isFailure(decoded)) {
-        return Effect.fail(new EiaIngestLedgerError({
-          message: `Cannot decode existing agent file for ${node.slug}: ${formatSchemaParseError(decoded.failure)}`
-        }));
-      }
-      return Effect.succeed(decoded.success);
-    }
-    case "catalog": {
-      const decoded = decodeJsonStringEitherWith(Catalog)(content);
-      if (Result.isFailure(decoded)) {
-        return Effect.fail(new EiaIngestLedgerError({
-          message: `Cannot decode existing catalog file for ${node.slug}: ${formatSchemaParseError(decoded.failure)}`
-        }));
-      }
-      return Effect.succeed(decoded.success);
-    }
-    case "data-service": {
-      const decoded = decodeJsonStringEitherWith(DataService)(content);
-      if (Result.isFailure(decoded)) {
-        return Effect.fail(new EiaIngestLedgerError({
-          message: `Cannot decode existing data-service file for ${node.slug}: ${formatSchemaParseError(decoded.failure)}`
-        }));
-      }
-      return Effect.succeed(decoded.success);
-    }
-    case "dataset": {
-      const decoded = decodeJsonStringEitherWith(Dataset)(content);
-      if (Result.isFailure(decoded)) {
-        return Effect.fail(new EiaIngestLedgerError({
-          message: `Cannot decode existing dataset file for ${node.slug}: ${formatSchemaParseError(decoded.failure)}`
-        }));
-      }
-      return Effect.succeed(decoded.success);
-    }
-    case "distribution": {
-      const decoded = decodeJsonStringEitherWith(Distribution)(content);
-      if (Result.isFailure(decoded)) {
-        return Effect.fail(new EiaIngestLedgerError({
-          message: `Cannot decode existing distribution file for ${node.slug}: ${formatSchemaParseError(decoded.failure)}`
-        }));
-      }
-      return Effect.succeed(decoded.success);
-    }
-    case "catalog-record": {
-      const decoded = decodeJsonStringEitherWith(CatalogRecord)(content);
-      if (Result.isFailure(decoded)) {
-        return Effect.fail(new EiaIngestLedgerError({
-          message: `Cannot decode existing catalog-record file for ${node.slug}: ${formatSchemaParseError(decoded.failure)}`
-        }));
-      }
-      return Effect.succeed(decoded.success);
-    }
-  }
-};
-
 export const assertNodeOwnsWriteTarget = Effect.fn(
   "EiaIngest.assertNodeOwnsWriteTarget"
 )(
   function* (path_: Path.Path, rootDir: string, node: IngestNode) {
-    const fs_ = yield* FileSystem.FileSystem;
-    const filePath = entityFilePath(path_, rootDir, node);
-    const readExit = yield* Effect.exit(fs_.readFileString(filePath));
-
-    if (Exit.isFailure(readExit)) {
-      if (isNotFoundPlatformError(readExit.cause)) {
-        return filePath;
-      }
-
-      return yield* new EiaIngestLedgerError({
-        message: `Cannot read existing ${node._tag} file at ${filePath}: ${stringifyUnknown(readExit.cause)}`
-      });
-    }
-
-    const existing = yield* decodeExistingNodeData(node, readExit.value);
-    if (existing.id !== node.data.id) {
-      return yield* new EiaIngestLedgerError({
-        message: `Refusing to overwrite ${filePath}: existing ${node._tag} id ${existing.id} does not match ${node.data.id}`
-      });
-    }
-
-    return filePath;
+    return yield* assertNodeOwnsWriteTargetWith(
+      path_,
+      rootDir,
+      node,
+      (message) => new EiaIngestLedgerError({ message })
+    );
   }
 );
 
@@ -2128,20 +1465,9 @@ const writeNode = (
 > =>
   Effect.gen(function* () {
     const filePath = yield* assertNodeOwnsWriteTarget(path_, rootDir, node);
-    yield* writeEntityFile(filePath, `${encodeNodeData(node)}\n`);
+    yield* writeEntityFile(filePath, `${encodeHarnessNodeData(node)}\n`);
   });
-
-const ledgerKindByTag: Record<IngestNode["_tag"], string> = {
-  agent: "Agent",
-  catalog: "Catalog",
-  "data-service": "DataService",
-  dataset: "Dataset",
-  distribution: "Distribution",
-  "catalog-record": "CatalogRecord"
-};
-
-export const ledgerKeyForNode = (node: IngestNode): string =>
-  `${ledgerKindByTag[node._tag]}:${node.slug}`;
+export const ledgerKeyForNode = harnessLedgerKeyForNode;
 
 // Pure alias for test reuse. `entityFilePath` is internal and takes a
 // Path.Path so tests don't need to wire the service just to hit it.
@@ -2149,13 +1475,13 @@ export const entityFilePathForNode = (
   path_: Path.Path,
   rootDir: string,
   node: IngestNode
-): string => entityFilePath(path_, rootDir, node);
+): string => entityFilePathForHarnessNode(path_, rootDir, node);
 
 // Test hook — round-trips at least one variant of each IngestNode tag
 // through its schema-derived pretty encoder. Also used by the report
 // writer below (which hand-encodes its own schema for the same reason).
 export const encodeIngestNodeData = (node: IngestNode): string =>
-  encodeNodeData(node);
+  encodeHarnessNodeData(node);
 
 export const IngestReport = Schema.Struct({
   fetchedAt: Schema.String,

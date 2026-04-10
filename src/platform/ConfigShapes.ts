@@ -122,6 +122,14 @@ export const EiaIngestKeys = {
   onlyRoute: optionalTrimmedString("EIA_ONLY_ROUTE")
 } as const;
 
+export const EnergyChartsIngestKeys = {
+  ...ColdStartCommonKeys,
+  openApiUrl: Config.withDefault(
+    Config.string("ENERGY_CHARTS_OPENAPI_URL"),
+    "https://api.energy-charts.info/openapi.json"
+  )
+} as const;
+
 // ── Twitter / editorial ingestion keys ────────────────────────────────
 
 /** Non-empty string config that rejects empty/whitespace-only values. */

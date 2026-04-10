@@ -1,0 +1,17 @@
+{
+  "_tag": "Catalog",
+  "id": "https://id.skygest.io/catalog/cat_01KNWVQMFH80RGWXP5N34Z4XFK",
+  "title": "Energy Charts API Catalog",
+  "description": "Catalog of Energy Charts endpoint families published by Fraunhofer ISE",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNWVQMFHEZD7KVN03TEAVA1Q",
+  "homepage": "https://www.energy-charts.info/",
+  "createdAt": "2026-04-10T23:30:44.590Z",
+  "updatedAt": "2026-04-10T23:31:05.948Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.energy-charts.info/",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNWVQMFJ3F0BZ7KQ98PRWW8M",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNWVQMFH80RGWXP5N34Z4XFK",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNWVQMFJT5QQR00V644YT8JD",
+  "harvestedFrom": "https://api.energy-charts.info/openapi.json",
+  "firstSeen": "2026-04-10T23:30:44.590Z",
+  "lastSeen": "2026-04-10T23:31:05.948Z",
+  "isAuthoritative": true
+}
