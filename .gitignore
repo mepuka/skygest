@@ -55,6 +55,12 @@ eval/resolution-stage1/snapshot.jsonl
 eval/resolution-stage1/snapshot.build-report.json
 analysis/threads.db
 
+# Cold-start ingest ephemeral outputs (mermaid diagrams + run reports
+# are regenerated on every ingest run and are not canonical registry
+# state). Authoritative entities live under catalog/ and are tracked.
+references/cold-start/reports/harvest/*.mermaid
+references/cold-start/reports/harvest/*-ingest-report.json
+
 # Twitter auth cookies (contain session secrets)
 twitter-cookies*.json
 *.local.json
