@@ -11,6 +11,20 @@ export const decodeJsonStringEither = Schema.decodeUnknownResult(
 export const encodeJsonStringWith = <S extends Schema.Encoder<unknown>>(schema: S) =>
   (input: S["Type"]) => encodeJsonString(Schema.encodeUnknownSync(schema)(input));
 
+/**
+ * Encode a value through `schema`, then serialize to a pretty-printed JSON
+ * string with 2-space indentation. Use for hand-edited cold-start fixtures
+ * and any other on-disk JSON that humans will diff.
+ */
+export const encodeJsonStringPrettyWith = <S extends Schema.Encoder<unknown>>(schema: S) =>
+  (input: S["Type"]) => {
+    const encoded = Schema.encodeUnknownSync(schema)(input);
+    // Schema's UnknownFromJsonString minifies; for pretty output we need
+    // JSON.stringify directly. The encoded value has already been validated
+    // by `schema`, so this only handles serialization, not parsing.
+    return JSON.stringify(encoded, null, 2);
+  };
+
 export const decodeJsonStringWith = <S extends Schema.Decoder<unknown>>(schema: S) =>
   Schema.decodeUnknownSync(Schema.fromJsonString(schema as Schema.Top & S) as Schema.Decoder<unknown>) as
     (input: unknown, options?: import("effect/SchemaAST").ParseOptions) => S["Type"];
