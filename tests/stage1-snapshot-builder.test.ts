@@ -25,6 +25,7 @@ import {
 } from "./support/runtime";
 
 const solarUri = `at://${sampleDid}/app.bsky.feed.post/post-solar` as PostUri;
+const twitterUri = "x://twitter.example/post/123" as PostUri;
 const decodeBuildReportJson = decodeJsonStringWith(Stage1EvalSnapshotBuildReport);
 
 const withTempDirectory = async <A>(f: (dir: string) => Promise<A>) => {
@@ -125,7 +126,7 @@ describe("Stage1EvalSnapshotBuilder", () => {
     )
   );
 
-  it.live("writes successful rows and reports diagnostics separately when some posts are incomplete", () =>
+  it.live("builds rows for mixed Bluesky and Twitter manifests while reporting non-blocking diagnostics separately", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) =>
         withTempDirectory(async (dir) => {
@@ -147,7 +148,7 @@ describe("Stage1EvalSnapshotBuilder", () => {
                 includesLanes: ["url-exact-match"]
               },
               {
-                uri: "x://twitter.example/post/123",
+                uri: twitterUri,
                 handle: "tweet-user",
                 publisher: "twitter",
                 includesLanes: ["provider-agent"]
@@ -163,6 +164,53 @@ describe("Stage1EvalSnapshotBuilder", () => {
               yield* sql`DELETE FROM links WHERE post_uri = ${solarUri}`.pipe(
                 Effect.asVoid
               );
+              const now = Date.now();
+
+              yield* sql`
+                INSERT INTO posts (
+                  uri,
+                  did,
+                  cid,
+                  text,
+                  created_at,
+                  indexed_at,
+                  has_links,
+                  status,
+                  ingest_id,
+                  embed_type
+                ) VALUES (
+                  ${twitterUri},
+                  ${sampleDid},
+                  ${"cid-twitter-stage1"},
+                  ${"Imported Twitter grid update"},
+                  ${now - 1000},
+                  ${now - 1000},
+                  ${1},
+                  ${"active"},
+                  ${"ingest-twitter-stage1"},
+                  ${"link"}
+                )
+              `;
+
+              yield* sql`
+                INSERT INTO links (
+                  post_uri,
+                  url,
+                  title,
+                  description,
+                  image_url,
+                  domain,
+                  extracted_at
+                ) VALUES (
+                  ${twitterUri},
+                  ${"https://example.com/twitter-grid-update"},
+                  ${"Twitter grid update"},
+                  ${"Imported market context"},
+                  ${null},
+                  ${"example.com"},
+                  ${now - 900}
+                )
+              `;
 
               const payloads = yield* CandidatePayloadService;
               yield* payloads.capturePayload({
@@ -188,6 +236,29 @@ describe("Stage1EvalSnapshotBuilder", () => {
                 enrichmentType: "source-attribution",
                 enrichmentPayload: makeSourceAttributionEnrichmentPayload()
               });
+              yield* payloads.capturePayload({
+                postUri: twitterUri,
+                captureStage: "candidate",
+                embedType: "link",
+                embedPayload: {
+                  kind: "link",
+                  uri: "https://example.com/twitter-grid-update",
+                  title: "Twitter grid update",
+                  description: "Imported market context",
+                  thumb: null
+                }
+              });
+              yield* payloads.markPicked(twitterUri);
+              yield* payloads.saveEnrichment({
+                postUri: twitterUri,
+                enrichmentType: "vision",
+                enrichmentPayload: makeVisionEnrichmentPayload()
+              });
+              yield* payloads.saveEnrichment({
+                postUri: twitterUri,
+                enrichmentType: "source-attribution",
+                enrichmentPayload: makeSourceAttributionEnrichmentPayload()
+              });
 
               return yield* buildStage1EvalSnapshot({
                 manifestPath,
@@ -197,24 +268,24 @@ describe("Stage1EvalSnapshotBuilder", () => {
             }).pipe(Effect.provide(layer))
           );
 
-          expect(result.rowCount).toBe(1);
-          expect(result.diagnosticCount).toBe(2);
-          expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(
-            expect.arrayContaining([
-              "missing-links",
-              "unsupported-post-source"
-            ])
-          );
+          expect(result.rowCount).toBe(2);
+          expect(result.diagnosticCount).toBe(1);
+          expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+            "missing-links"
+          ]);
 
           const raw = await fs.readFile(outputPath, "utf-8");
           const rows = await Effect.runPromise(loadSnapshotFromString(raw));
-          expect(rows).toHaveLength(1);
+          expect(rows).toHaveLength(2);
+          expect(rows.map((row) => row.postUri)).toEqual([solarUri, twitterUri]);
           expect(rows[0]?.postContext.links).toEqual([]);
+          expect(rows[1]?.postContext.links).toHaveLength(1);
+          expect(rows[1]?.postContext.linkCards).toHaveLength(1);
 
           const report = decodeBuildReportJson(
             await fs.readFile(reportPath, "utf-8")
           );
-          expect(report.diagnostics).toHaveLength(2);
+          expect(report.diagnostics).toHaveLength(1);
         })
       )
     )

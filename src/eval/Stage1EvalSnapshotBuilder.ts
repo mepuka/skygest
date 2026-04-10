@@ -54,8 +54,6 @@ const buildSlug = (entry: ResolverGoldSetEntry, index: number) => {
   return `${String(index + 1).padStart(3, "0")}-${safeSeed || "post"}`;
 };
 
-const isTwitterUri = (postUri: string) => postUri.startsWith("x://");
-
 const selectLatestVisionEnrichment = (
   enrichments: ReadonlyArray<PostEnrichmentResult>
 ): VisionEnrichment | null => {
@@ -151,17 +149,6 @@ type BuiltSnapshotRows = {
   readonly diagnostics: ReadonlyArray<Stage1EvalSnapshotBuildDiagnostic>;
 };
 
-const unsupportedPostSourceDiagnostic = (
-  slug: string,
-  postUri: ResolverGoldSetEntry["uri"]
-): Stage1EvalSnapshotBuildDiagnostic => ({
-  _tag: "UnsupportedPostSourceDiagnostic",
-  code: "unsupported-post-source",
-  slug,
-  postUri,
-  source: "twitter"
-});
-
 const missingStoredPostDiagnostic = (
   slug: string,
   postUri: ResolverGoldSetEntry["uri"]
@@ -241,13 +228,6 @@ const buildSnapshotRow = Effect.fn(
     const enrichmentReadService = yield* PostEnrichmentReadService;
 
     const slug = buildSlug(entry, index);
-
-    if (isTwitterUri(entry.uri)) {
-      return {
-        row: null,
-        diagnostics: [unsupportedPostSourceDiagnostic(slug, entry.uri)]
-      };
-    }
 
     const post = yield* knowledgeRepo.getPostByUri(entry.uri);
     if (post === null) {
