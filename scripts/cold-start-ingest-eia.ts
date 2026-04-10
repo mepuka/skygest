@@ -18,6 +18,7 @@ import {
   Cache,
   Clock,
   Config,
+  DateTime,
   Duration,
   Effect,
   FileSystem,
@@ -735,10 +736,20 @@ const EIA_AGENT_HOMEPAGE = "https://www.eia.gov/";
  */
 const INDEX_LOAD_CONCURRENCY = 10;
 
-/** API v2 route paths always contain at least one "/". Legacy bulk-manifest
- *  codes (EBA, ELEC, NG, ...) live on the `eia-bulk-id` scheme post-Task 0.5
- *  but this guard is the second line of defence. */
-const isApiV2RouteValue = (value: string): boolean => value.includes("/");
+/** API v2 route paths may be single-segment (`steo`), multi-segment
+ *  (`electricity/retail-sales`), contain digits (`aeo/2014`), or have
+ *  mixed case within a segment (`petroleum/move/railNA`). Legacy
+ *  bulk-manifest codes (EBA, ELEC, NG, COAL, ...) are all-uppercase
+ *  identifiers matching `^[A-Z][A-Z0-9_]*$` — they live on the
+ *  `eia-bulk-id` scheme post-Task 0.5, but this guard is the second line
+ *  of defence. An earlier "must contain /" heuristic (committed in
+ *  Task 6) caused single-segment routes like `steo` to be re-minted on
+ *  every ingest run, breaking idempotency — Task 10's end-to-end live
+ *  run surfaced the bug. The current check accepts any value that is
+ *  NOT an all-uppercase bulk-code identifier. */
+const LEGACY_BULK_CODE_RE = /^[A-Z][A-Z0-9_]*$/;
+const isApiV2RouteValue = (value: string): boolean =>
+  value.length > 0 && !LEGACY_BULK_CODE_RE.test(value);
 
 const decodeFileAs = <S extends Schema.Decoder<unknown>>(
   schema: S,
@@ -1663,18 +1674,314 @@ export const saveLedger = (
   });
 
 // ---------------------------------------------------------------------------
-// Stub main
+// Phase B helpers: per-node disk layout + ledger keying + report shape (Task 10)
 // ---------------------------------------------------------------------------
+//
+// `entityFilePath` deterministically routes each validated IngestNode to its
+// subdirectory under `<rootDir>/catalog/` so the topological Phase B writer
+// doesn't need any runtime mapping. `Path.Path` is passed explicitly (rather
+// than fetched via `yield*`) to keep the function pure and cheap to call in
+// a tight loop — main resolves the service once and threads it through.
+//
+// `encodeNodeData` dispatches on the node tag so each variant is encoded
+// through its own schema and the result is pretty-printed (2-space indent)
+// to keep on-disk diffs human-reviewable. We deliberately never call
+// `JSON.stringify` or `encodeJsonString` (the minified encoder) on entity
+// data here — see src/platform/Json.ts for the helper contract.
+//
+// `ledgerKeyForNode` mirrors the key scheme used by the Task 7 builders
+// (`BuildContext.entityId`) so the ledger is the exact inverse map of the
+// id-minting pipeline: the same "Kind:slug" key you looked up in
+// `buildDatasetCandidate` is the one written back on Phase B completion.
+
+const entityFilePath = (
+  path_: Path.Path,
+  rootDir: string,
+  node: IngestNode
+): string => {
+  switch (node._tag) {
+    case "agent":
+      return path_.resolve(rootDir, "catalog", "agents", `${node.slug}.json`);
+    case "catalog":
+      return path_.resolve(
+        rootDir,
+        "catalog",
+        "catalogs",
+        `${node.slug}.json`
+      );
+    case "data-service":
+      return path_.resolve(
+        rootDir,
+        "catalog",
+        "data-services",
+        `${node.slug}.json`
+      );
+    case "dataset":
+      return path_.resolve(
+        rootDir,
+        "catalog",
+        "datasets",
+        `${node.slug}.json`
+      );
+    case "distribution":
+      return path_.resolve(
+        rootDir,
+        "catalog",
+        "distributions",
+        `${node.slug}.json`
+      );
+    case "catalog-record":
+      return path_.resolve(
+        rootDir,
+        "catalog",
+        "catalog-records",
+        `${node.slug}.json`
+      );
+  }
+};
+
+const encodeAgentPretty = encodeJsonStringPrettyWith(Agent);
+const encodeCatalogPretty = encodeJsonStringPrettyWith(Catalog);
+const encodeDataServicePretty = encodeJsonStringPrettyWith(DataService);
+const encodeDatasetPretty = encodeJsonStringPrettyWith(Dataset);
+const encodeDistributionPretty = encodeJsonStringPrettyWith(Distribution);
+const encodeCatalogRecordPretty = encodeJsonStringPrettyWith(CatalogRecord);
+
+const encodeNodeData = (node: IngestNode): string => {
+  switch (node._tag) {
+    case "agent":
+      return encodeAgentPretty(node.data);
+    case "catalog":
+      return encodeCatalogPretty(node.data);
+    case "data-service":
+      return encodeDataServicePretty(node.data);
+    case "dataset":
+      return encodeDatasetPretty(node.data);
+    case "distribution":
+      return encodeDistributionPretty(node.data);
+    case "catalog-record":
+      return encodeCatalogRecordPretty(node.data);
+  }
+};
+
+const writeNode = (
+  path_: Path.Path,
+  rootDir: string,
+  node: IngestNode
+): Effect.Effect<void, EiaIngestFsError, FileSystem.FileSystem | Path.Path> =>
+  writeEntityFile(
+    entityFilePath(path_, rootDir, node),
+    `${encodeNodeData(node)}\n`
+  );
+
+const ledgerKindByTag: Record<IngestNode["_tag"], string> = {
+  agent: "Agent",
+  catalog: "Catalog",
+  "data-service": "DataService",
+  dataset: "Dataset",
+  distribution: "Distribution",
+  "catalog-record": "CatalogRecord"
+};
+
+export const ledgerKeyForNode = (node: IngestNode): string =>
+  `${ledgerKindByTag[node._tag]}:${node.slug}`;
+
+// Pure alias for test reuse. `entityFilePath` is internal and takes a
+// Path.Path so tests don't need to wire the service just to hit it.
+export const entityFilePathForNode = (
+  path_: Path.Path,
+  rootDir: string,
+  node: IngestNode
+): string => entityFilePath(path_, rootDir, node);
+
+// Test hook — round-trips at least one variant of each IngestNode tag
+// through its schema-derived pretty encoder. Also used by the report
+// writer below (which hand-encodes its own schema for the same reason).
+export const encodeIngestNodeData = (node: IngestNode): string =>
+  encodeNodeData(node);
+
+export const IngestReport = Schema.Struct({
+  fetchedAt: Schema.String,
+  routesWalked: Schema.Number,
+  nodeCount: Schema.Number,
+  edgeCount: Schema.Number,
+  datasets: Schema.Struct({
+    created: Schema.Array(Schema.String),
+    merged: Schema.Array(Schema.String)
+  }),
+  distributions: Schema.Struct({ count: Schema.Number }),
+  catalogRecords: Schema.Struct({ count: Schema.Number }),
+  mermaidPath: Schema.String,
+  notes: Schema.Array(Schema.String)
+});
+export type IngestReport = Schema.Schema.Type<typeof IngestReport>;
+
+const encodeIngestReportPretty = encodeJsonStringPrettyWith(IngestReport);
+
+// ---------------------------------------------------------------------------
+// End-to-end orchestration (Task 10)
+// ---------------------------------------------------------------------------
+//
+// Five stages, strict order, disk untouched until Phase A signs off:
+//
+//   Stage 1      — fetch: walk EIA API v2 (from cache or fresh) into a
+//                  Map<route, EiaApiResponse>.
+//   Stage 2a     — build candidates: load the catalog index, resolve the
+//                  BuildContext, and assemble Array<IngestNode>.
+//   Phase A      — validate candidates: Effect.partition through
+//                  validateNode. Any failure logs every error and aborts
+//                  with the first one. DISK STILL UNTOUCHED.
+//   Stage 2b     — build the IngestGraph from the validated successes.
+//                  isAcyclic() asserts the edge directions are right.
+//   Phase B      — write: topological emission via Graph.topo feeds
+//                  Effect.forEach with concurrency 1 so the git diff
+//                  order is stable across runs. Ledger + Mermaid +
+//                  report artifacts are written last.
+//
+// EIA_DRY_RUN=true short-circuits after Stage 2b, before Phase B, so
+// smoke tests exercise the full validation pipeline without touching
+// the on-disk fixture tree.
 
 const main = Effect.gen(function* () {
   const config = yield* ScriptConfig;
   const apiKey = Redacted.value(config.apiKey);
+  const path_ = yield* Path.Path;
+  const nowIso = DateTime.formatIso(yield* DateTime.now);
+
   yield* Effect.log(
     `SKY-254 EIA ingest — root=${config.rootDir} dryRun=${String(config.dryRun)}`
   );
 
+  // ---------- Stage 1: fetch ----------
   const walkData = yield* getWalkData(config, apiKey);
   yield* Effect.log(`walkData has ${String(walkData.size)} entries`);
+
+  // ---------- Stage 2a: build candidates ----------
+  const idx = yield* loadCatalogIndex(config.rootDir);
+  const ctx = yield* buildContextFromIndex(idx, nowIso);
+  const candidates = buildCandidateNodes(walkData, idx, ctx);
+  yield* Effect.log(`Built ${String(candidates.length)} candidate nodes`);
+
+  // ---------- Phase A: validate candidates ----------
+  const { failures, successes } = yield* validateCandidates(candidates);
+  if (failures.length > 0) {
+    yield* Effect.logError(
+      `Phase A validation failed: ${String(failures.length)}/${String(candidates.length)} node(s) failed schema validation`
+    );
+    yield* Effect.forEach(
+      failures,
+      (err) => Effect.logError(`  ${err.kind}/${err.slug}: ${err.message}`),
+      { discard: true }
+    );
+    // failures[0] is a Schema.TaggedErrorClass instance; yielding it aborts
+    // main with the first error after all have been logged.
+    return yield* failures[0]!;
+  }
+  yield* Effect.log(
+    `Phase A complete: ${String(successes.length)}/${String(candidates.length)} nodes valid`
+  );
+
+  // ---------- Stage 2b: build the IngestGraph from validated nodes ----------
+  const graph = buildIngestGraph(successes);
+  if (!Graph.isAcyclic(graph)) {
+    return yield* new EiaIngestLedgerError({
+      message:
+        "IngestGraph contains a cycle — programmer error in buildIngestGraph (edge directions flipped?)"
+    });
+  }
+  yield* Effect.log(
+    `Built IngestGraph: ${String(Graph.nodeCount(graph))} nodes, ${String(Graph.edgeCount(graph))} edges`
+  );
+
+  if (config.dryRun) {
+    yield* Effect.log("DRY RUN: skipping Phase B (no files written)");
+    yield* Effect.log(
+      `Would write ${String(Graph.nodeCount(graph))} files in topological order`
+    );
+    return;
+  }
+
+  // ---------- Phase B: write via topological traversal ----------
+  yield* Effect.log(
+    "Phase B: writing validated graph in topological order..."
+  );
+
+  // Graph.topo returns a NodeWalker; Graph.values yields the node data.
+  // `Array.from` on the iterable materializes the topo order for both the
+  // write pass and the report-building pass below. Concurrency is pinned
+  // to 1 so the sequence of writes — and hence the git diff order — is
+  // stable across runs.
+  const topoOrder = Array.from(Graph.values(Graph.topo(graph)));
+
+  yield* Effect.forEach(
+    topoOrder,
+    (node) => writeNode(path_, config.rootDir, node),
+    { concurrency: 1 }
+  );
+
+  // Append each written node's slug → id to the ledger (Task 9). A fresh
+  // copy is taken so the load/save round-trip is transactional at the
+  // JSON-file level. `ledger` is mutated inside a single Effect.sync over
+  // already-materialized data, which is the only pattern CLAUDE.md allows
+  // for plain JS `for` loops.
+  const loaded = yield* loadLedger(config.rootDir);
+  const ledger: Record<string, string> = { ...loaded };
+  yield* Effect.sync(() => {
+    for (const node of topoOrder) {
+      ledger[ledgerKeyForNode(node)] = node.data.id;
+    }
+  });
+  yield* saveLedger(config.rootDir, ledger);
+
+  // Build the ingest report + mermaid diagram. `datasetNodes` uses a
+  // type-narrowing predicate so `.merged` is visible to TS below.
+  const datasetNodes = topoOrder.filter(
+    (n): n is Extract<IngestNode, { _tag: "dataset" }> => n._tag === "dataset"
+  );
+  const distributionCount = topoOrder.filter(
+    (n) => n._tag === "distribution"
+  ).length;
+  const catalogRecordCount = topoOrder.filter(
+    (n) => n._tag === "catalog-record"
+  ).length;
+
+  const report: IngestReport = {
+    fetchedAt: nowIso,
+    routesWalked: walkData.size,
+    nodeCount: Graph.nodeCount(graph),
+    edgeCount: Graph.edgeCount(graph),
+    datasets: {
+      created: datasetNodes.filter((n) => !n.merged).map((n) => n.slug),
+      merged: datasetNodes.filter((n) => n.merged).map((n) => n.slug)
+    },
+    distributions: { count: distributionCount },
+    catalogRecords: { count: catalogRecordCount },
+    mermaidPath: "reports/harvest/eia-ingest-graph.mermaid",
+    notes: [
+      "Wikidata QID for EIA: Q1133499 (correct). Ticket SKY-254 listed Q466438 in error — that QID belongs to American President Lines and was not added.",
+      "landingPage values for new datasets are intentionally omitted; existing hand-curated topic-page URLs (e.g. eia.gov/electricity/gridmonitor/) are preserved on merge.",
+      "Legacy bulk-manifest codes (EBA, ELEC, ...) were migrated from `eia-route` to `eia-bulk-id` in Task 0.5 prior to this run."
+    ]
+  };
+
+  const mermaid = Graph.toMermaid(graph, {
+    nodeLabel: (node) => `${node._tag}: ${node.slug}`,
+    edgeLabel: (edge) => edge,
+    diagramType: "flowchart",
+    direction: "LR"
+  });
+  yield* writeEntityFile(
+    path_.resolve(config.rootDir, "reports", "harvest", "eia-ingest-graph.mermaid"),
+    `${mermaid}\n`
+  );
+  yield* writeEntityFile(
+    path_.resolve(config.rootDir, "reports", "harvest", "eia-ingest-report.json"),
+    `${encodeIngestReportPretty(report)}\n`
+  );
+
+  yield* Effect.log(
+    `Done. ${String(report.datasets.created.length)} new + ${String(report.datasets.merged.length)} merged datasets`
+  );
 });
 
 // Gate the runtime entry so test imports don't trigger `main` (which would

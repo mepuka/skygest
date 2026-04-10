@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@effect/vitest";
 import * as BunFileSystem from "@effect/platform-bun/BunFileSystem";
 import * as BunPath from "@effect/platform-bun/BunPath";
-import { Effect, Graph, Layer } from "effect";
+import { Effect, Graph, Layer, Path } from "effect";
 import { HttpClient, HttpClientResponse } from "effect/unstable/http";
 import * as fsp from "node:fs/promises";
 import * as os from "node:os";
@@ -25,8 +25,11 @@ import {
   type EiaApiResponse,
   EiaIngestLedgerError,
   EiaIngestSchemaError,
+  encodeIngestNodeData,
+  entityFilePathForNode,
   fetchRoute,
   type IngestNode,
+  ledgerKeyForNode,
   loadCatalogIndex,
   loadLedger,
   saveLedger,
@@ -1838,5 +1841,115 @@ describe("saveLedger", () => {
       yield* Effect.promise(() => cleanup(tmp));
     }).pipe(Effect.provide(bunFsLayer))
   );
+});
+
+// ---------------------------------------------------------------------------
+// Phase B helpers (Task 10)
+// ---------------------------------------------------------------------------
+//
+// Minimal unit coverage for the three Phase B helpers exported from the
+// script: the file-path dispatcher, the ledger-key builder, and the
+// pretty-printing encoder. These back the topological writer in `main` so
+// any regression in them would corrupt the on-disk shape on the next run.
+// We reuse the buildCandidateNodes-derived node set from
+// the buildCandidateNodes suite by constructing a fresh walk + ctx locally.
+
+const makePhaseBNodes = (): ReadonlyArray<IngestNode> => {
+  const ctx = makeBuilderCtx(FIXTURE_NOW);
+  const walk = new Map<string, EiaApiResponse>();
+  walk.set("", {
+    response: {
+      id: "root",
+      name: "EIA API",
+      routes: [{ id: "electricity", name: "Electricity" }]
+    }
+  } as unknown as EiaApiResponse);
+  walk.set("electricity", {
+    response: {
+      id: "electricity",
+      name: "Electricity",
+      routes: [{ id: "retail-sales", name: "Retail Sales" }]
+    }
+  } as unknown as EiaApiResponse);
+  walk.set("electricity/retail-sales", {
+    response: {
+      id: "retail-sales",
+      name: "Retail Sales of Electricity",
+      facets: [{ id: "stateid", description: null }],
+      defaultFrequency: "monthly"
+    }
+  } as unknown as EiaApiResponse);
+  return buildCandidateNodes(walk, emptyIndex(), ctx);
+};
+
+describe("entityFilePathForNode", () => {
+  it.effect("routes each IngestNode tag to the right <rootDir>/catalog subdirectory", () =>
+    Effect.gen(function* () {
+      const path_ = yield* Path.Path;
+      const nodes = makePhaseBNodes();
+      const rootDir = "/tmp/cold-start-test";
+      const byTag = new Map<IngestNode["_tag"], string>();
+      for (const n of nodes) {
+        byTag.set(n._tag, entityFilePathForNode(path_, rootDir, n));
+      }
+      expect(byTag.get("agent")).toBe(
+        path_.resolve(
+          rootDir,
+          "catalog",
+          "agents",
+          `${nodes.find((n) => n._tag === "agent")!.slug}.json`
+        )
+      );
+      expect(byTag.get("catalog")).toContain("/catalog/catalogs/");
+      expect(byTag.get("catalog")!.endsWith(".json")).toBe(true);
+      expect(byTag.get("data-service")).toContain("/catalog/data-services/");
+      expect(byTag.get("dataset")).toContain("/catalog/datasets/");
+      expect(byTag.get("distribution")).toContain("/catalog/distributions/");
+      expect(byTag.get("catalog-record")).toContain(
+        "/catalog/catalog-records/"
+      );
+    }).pipe(Effect.provide(bunFsLayer))
+  );
+});
+
+describe("ledgerKeyForNode", () => {
+  it("prefixes each IngestNode with its canonical kind name", () => {
+    const nodes = makePhaseBNodes();
+    const keys = nodes.map(ledgerKeyForNode).sort();
+    // Exactly one of each kind for the single-leaf candidate set.
+    expect(keys.map((k) => k.split(":")[0])).toEqual([
+      "Agent",
+      "Catalog",
+      "CatalogRecord",
+      "DataService",
+      "Dataset",
+      "Distribution"
+    ]);
+    // Keys are unique — no two nodes collapse to the same ledger slot.
+    expect(new Set(keys).size).toBe(keys.length);
+    // Every key matches "Kind:slug" and the slug half is non-empty.
+    for (const k of keys) {
+      const parts = k.split(":");
+      expect(parts.length).toBe(2);
+      expect(parts[1]!.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("encodeIngestNodeData", () => {
+  it("produces pretty-printed JSON for every IngestNode tag that round-trips through JSON.parse", () => {
+    const nodes = makePhaseBNodes();
+    for (const node of nodes) {
+      const encoded = encodeIngestNodeData(node);
+      // Pretty-printed: 2-space indent, at least one newline.
+      expect(encoded).toContain("\n  ");
+      // Round-trip parse to confirm valid JSON.
+      const parsed: { readonly id?: string; readonly _tag?: string } =
+        JSON.parse(encoded);
+      // Id field must be present on every entity type and match the
+      // in-memory node we just encoded.
+      expect(parsed.id).toBe(node.data.id);
+    }
+  });
 });
 
