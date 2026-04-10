@@ -18,6 +18,9 @@ const makeEntityId = <B extends string>(
   });
 };
 
+const decodeEntityIdSync = <A>(schema: Schema.Decoder<unknown>) =>
+  Schema.decodeUnknownSync(schema) as (input: unknown) => A;
+
 export const VariableId = makeEntityId("variable", "var", "VariableId");
 export type VariableId = Schema.Schema.Type<typeof VariableId>;
 
@@ -35,12 +38,17 @@ export type CatalogId = Schema.Schema.Type<typeof CatalogId>;
 
 export const CatalogRecordId = makeEntityId("catalog-record", "cr", "CatalogRecordId");
 export type CatalogRecordId = Schema.Schema.Type<typeof CatalogRecordId>;
+export const makeCatalogRecordId =
+  decodeEntityIdSync<CatalogRecordId>(CatalogRecordId);
 
 export const DatasetId = makeEntityId("dataset", "ds", "DatasetId");
 export type DatasetId = Schema.Schema.Type<typeof DatasetId>;
+export const makeDatasetId = decodeEntityIdSync<DatasetId>(DatasetId);
 
 export const DistributionId = makeEntityId("distribution", "dist", "DistributionId");
 export type DistributionId = Schema.Schema.Type<typeof DistributionId>;
+export const makeDistributionId =
+  decodeEntityIdSync<DistributionId>(DistributionId);
 
 export const DataServiceId = makeEntityId("data-service", "svc", "DataServiceId");
 export type DataServiceId = Schema.Schema.Type<typeof DataServiceId>;

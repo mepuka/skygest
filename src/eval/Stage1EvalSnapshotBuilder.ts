@@ -141,12 +141,12 @@ const isBlockingDiagnostic = (
   switch (diagnostic._tag) {
     case "MissingStoredPostDiagnostic":
     case "MissingPostTextDiagnostic":
-      return true;
-    case "MissingLinksDiagnostic":
     case "MissingCandidatePayloadDiagnostic":
     case "MissingLinkCardsDiagnostic":
     case "MissingVisionDiagnostic":
     case "MissingSourceAttributionDiagnostic":
+      return true;
+    case "MissingLinksDiagnostic":
       return false;
     default:
       return true;

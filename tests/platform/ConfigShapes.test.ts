@@ -177,6 +177,17 @@ describe("ConfigShapes", () => {
       })
     );
 
+    it.effect("treats a blank EIA_ONLY_ROUTE as absent instead of a full-root override", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({
+          EIA_API_KEY: "eia-secret",
+          EIA_ONLY_ROUTE: "   "
+        });
+        const result = yield* Config.all(EiaIngestKeys).parse(provider);
+        expect(result.onlyRoute._tag).toBe("None");
+      })
+    );
+
     it.effect("rejects an empty EIA API key", () =>
       Effect.gen(function* () {
         const provider = ConfigProvider.fromUnknown({

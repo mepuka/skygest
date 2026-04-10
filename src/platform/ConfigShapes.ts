@@ -90,6 +90,16 @@ const booleanWithLegacyFallback = (
     )
   );
 
+const optionalTrimmedString = (name: string) =>
+  Config.option(Config.string(name)).pipe(
+    Config.map((value) =>
+      Option.flatMap(value, (raw) => {
+        const trimmed = raw.trim();
+        return trimmed.length === 0 ? Option.none() : Option.some(trimmed);
+      })
+    )
+  );
+
 export const ColdStartCommonKeys = {
   rootDir: Config.withDefault(
     Config.string("COLD_START_ROOT"),
@@ -109,7 +119,7 @@ export const EiaIngestKeys = {
   // the shared COLD_START_* names.
   dryRun: booleanWithLegacyFallback("COLD_START_DRY_RUN", "EIA_DRY_RUN"),
   noCache: booleanWithLegacyFallback("COLD_START_NO_CACHE", "EIA_NO_CACHE"),
-  onlyRoute: Config.option(Config.string("EIA_ONLY_ROUTE"))
+  onlyRoute: optionalTrimmedString("EIA_ONLY_ROUTE")
 } as const;
 
 // ── Twitter / editorial ingestion keys ────────────────────────────────

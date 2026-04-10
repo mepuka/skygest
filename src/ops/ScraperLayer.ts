@@ -1,4 +1,4 @@
-import { Effect, Layer, Schema } from "effect";
+import { Effect, FileSystem, Layer, Schema } from "effect";
 import {
   CookieManager,
   GuestAuth,
@@ -30,7 +30,8 @@ const cookieFixturePath = (process.env.TWITTER_SCRAPER_PATH ?? "../better_twitte
 const cookieManagerLayer = Layer.effectDiscard(
   Effect.gen(function* () {
     const cookies = yield* CookieManager;
-    const text = yield* Effect.tryPromise(() => Bun.file(cookieFixturePath).text());
+    const fs = yield* FileSystem.FileSystem;
+    const text = yield* fs.readFileString(cookieFixturePath);
     const raw = decodeSerializedCookies(text);
     yield* cookies.restoreSerializedCookies(raw);
   })

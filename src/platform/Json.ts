@@ -45,10 +45,12 @@ export const formatSchemaParseError = (error: Schema.SchemaError | import("effec
  * fields produce `T | undefined` but the target signature uses `prop?: T`.
  */
 export const stripUndefined = <T extends Record<string, unknown>>(obj: T): { [K in keyof T]: Exclude<T[K], undefined> } => {
-  const result: any = {};
-  for (const key of Object.keys(obj)) {
-    if ((obj as any)[key] !== undefined) {
-      result[key] = (obj as any)[key];
+  const result = {} as { [K in keyof T]: Exclude<T[K], undefined> };
+  for (const [key, value] of Object.entries(obj) as Array<
+    [keyof T, T[keyof T]]
+  >) {
+    if (value !== undefined) {
+      result[key] = value as Exclude<T[typeof key], undefined>;
     }
   }
   return result;

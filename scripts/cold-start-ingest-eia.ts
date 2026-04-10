@@ -43,11 +43,15 @@ import {
 import { ulid } from "ulid";
 import {
   Agent,
+  AliasSchemeValues,
   Catalog,
   CatalogRecord,
   DataService,
   Dataset,
   Distribution,
+  makeCatalogRecordId,
+  makeDatasetId,
+  makeDistributionId,
   type ExternalIdentifier
 } from "../src/domain/data-layer";
 import {
@@ -60,6 +64,10 @@ import {
 import { EiaIngestKeys } from "../src/platform/ConfigShapes";
 import { localPersistenceLayer } from "../src/platform/LocalPersistence";
 import { Logging } from "../src/platform/Logging";
+import {
+  runScriptMain,
+  scriptPlatformLayer
+} from "../src/platform/ScriptRuntime";
 
 // ---------------------------------------------------------------------------
 // Tagged errors
@@ -265,7 +273,7 @@ export const makeRateLimitedFetcher = Effect.fn("EiaIngest.makeRateLimitedFetche
           })
         ),
         Schedule.tapOutput(([delay]) =>
-          logWarningEvent("eia route fetch retried", {
+          Logging.logWarning("eia route fetch retried", {
             route,
             attempt: attempt + 1,
             waitMs: Duration.toMillis(delay),
@@ -348,11 +356,6 @@ const encodeWalkCache = encodeJsonStringPrettyWith(WalkCache);
 const walkArtifactRelativePath = "reports/harvest/eia-api-v2-walk.json";
 const hiddenWalkCacheStoreId = "eia-api-v2-walk";
 
-const logWarningEvent = (
-  event: string,
-  annotations: Record<string, string | number | boolean> = {}
-) => Effect.logWarning(event).pipe(Effect.annotateLogs(annotations));
-
 const routeCount = (snapshot: WalkCache): number =>
   Object.keys(snapshot.routes).length;
 
@@ -428,7 +431,7 @@ const logWalkedSnapshot = (snapshot: WalkCache, fromCache: boolean) =>
   });
 
 const warnHiddenWalkCacheIssue = (message: string, cause: unknown) =>
-  logWarningEvent("eia walk cache issue", {
+  Logging.logWarning("eia walk cache issue", {
     issue: message,
     message: stringifyUnknown(cause)
   });
@@ -564,7 +567,8 @@ export const getWalkDataWith = Effect.fn("EiaIngest.getWalkDataWith")(
 
           yield* clearHiddenWalkCacheBestEffort(store);
           return yield* runFreshWalk(config, options, {
-            writeArtifact: true
+            writeArtifact: true,
+            hiddenStore: store
           });
         })
       );
@@ -607,7 +611,7 @@ export const getWalkDataWith = Effect.fn("EiaIngest.getWalkDataWith")(
             return snapshotToWalkData(cached.value);
           }
 
-          yield* logWarningEvent("eia walk cache issue", {
+          yield* Logging.logWarning("eia walk cache issue", {
             issue: "invalidFailureEntry"
           });
           yield* clearHiddenWalkCacheBestEffort(store);
@@ -1030,14 +1034,8 @@ const stableSlug = (
  * than silently producing an empty index, which would let a stale run
  * mis-report "no existing Datasets" and duplicate-create everything.
  */
-export const loadCatalogIndex = (
-  rootDir: string
-): Effect.Effect<
-  CatalogIndex,
-  EiaIngestFsError | EiaIngestSchemaError,
-  FileSystem.FileSystem | Path.Path
-> =>
-  Effect.gen(function* () {
+export const loadCatalogIndex = Effect.fn("EiaIngest.loadCatalogIndex")(
+  function* (rootDir: string) {
     const fs_ = yield* FileSystem.FileSystem;
 
     const [
@@ -1080,7 +1078,7 @@ export const loadCatalogIndex = (
     // Pure synchronous index-building over already-fetched data. `for ... of`
     // is permitted inside `Effect.sync` (matches the Graph.directed mutate
     // callback pattern used in buildIngestGraph above).
-    return yield* Effect.sync(() => {
+    const { index, skippedDatasets } = yield* Effect.sync(() => {
       const datasetsByRoute = new Map<string, Dataset>();
       const datasetFileSlugById = new Map<Dataset["id"], string>();
       const distributionsByDatasetIdKind = new Map<string, Distribution>();
@@ -1098,16 +1096,37 @@ export const loadCatalogIndex = (
       const dataServiceEntities = dataServices.map(({ data }) => data);
       const catalogEntities = catalogs.map(({ data }) => data);
       const agentEntities = agents.map(({ data }) => data);
+      const skippedDatasets: Array<{
+        readonly slug: string;
+        readonly datasetId: Dataset["id"];
+        readonly reason: "legacyBulkAlias" | "missingApiRouteAlias";
+        readonly routeAlias: string | null;
+      }> = [];
 
       for (const { slug, data: ds } of datasets) {
         datasetFileSlugById.set(ds.id, slug);
+        const routeAlias =
+          ds.aliases.find((a) => a.scheme === AliasSchemeValues.eiaRoute)
+            ?.value ?? null;
         // Only entries that look like API v2 paths are indexed — legacy
         // bulk-manifest codes live on eia-bulk-id (Task 0.5) and are
         // intentionally invisible here.
         const route = ds.aliases.find(
-          (a) => a.scheme === "eia-route" && isApiV2RouteValue(a.value)
+          (a) =>
+            a.scheme === AliasSchemeValues.eiaRoute &&
+            isApiV2RouteValue(a.value)
         )?.value;
-        if (route !== undefined) datasetsByRoute.set(route, ds);
+        if (route !== undefined) {
+          datasetsByRoute.set(route, ds);
+        } else if (slug.startsWith("eia-")) {
+          skippedDatasets.push({
+            slug,
+            datasetId: ds.id,
+            reason:
+              routeAlias === null ? "missingApiRouteAlias" : "legacyBulkAlias",
+            routeAlias
+          });
+        }
       }
 
       for (const { slug, data: dist } of distributions) {
@@ -1135,7 +1154,9 @@ export const loadCatalogIndex = (
       const eiaAgent =
         agentEntities.find((a) =>
           a.aliases.some(
-            (al) => al.scheme === "url" && al.value === EIA_AGENT_HOMEPAGE
+            (al) =>
+              al.scheme === AliasSchemeValues.url &&
+              al.value === EIA_AGENT_HOMEPAGE
           )
         ) ??
         agentEntities.find((a) => a.homepage === EIA_AGENT_HOMEPAGE) ??
@@ -1155,21 +1176,41 @@ export const loadCatalogIndex = (
           : null;
 
       return {
-        datasetsByRoute,
-        datasetFileSlugById,
-        distributionsByDatasetIdKind,
-        distributionFileSlugById,
-        catalogRecordsByCatalogAndPrimaryTopic,
-        catalogRecordFileSlugById,
-        agentsByName,
-        catalog,
-        dataService,
-        allDatasets: datasetEntities,
-        allDistributions: distributionEntities,
-        allCatalogRecords: catalogRecordEntities
-      } satisfies CatalogIndex;
+        index: {
+          datasetsByRoute,
+          datasetFileSlugById,
+          distributionsByDatasetIdKind,
+          distributionFileSlugById,
+          catalogRecordsByCatalogAndPrimaryTopic,
+          catalogRecordFileSlugById,
+          agentsByName,
+          catalog,
+          dataService,
+          allDatasets: datasetEntities,
+          allDistributions: distributionEntities,
+          allCatalogRecords: catalogRecordEntities
+        } satisfies CatalogIndex,
+        skippedDatasets
+      };
     });
-  }).pipe(Effect.withSpan("EiaIngest.loadCatalogIndex"));
+
+    yield* Effect.forEach(
+      skippedDatasets,
+      (dataset) =>
+        Logging.logWarning("eia dataset skipped from route index", {
+          slug: dataset.slug,
+          datasetId: dataset.datasetId,
+          reason: dataset.reason,
+          ...(dataset.routeAlias === null
+            ? {}
+            : { routeAlias: dataset.routeAlias })
+        }),
+      { discard: true }
+    );
+
+    return index;
+  }
+);
 
 // ---------------------------------------------------------------------------
 // Task 7 — Pure record builders
@@ -1237,9 +1278,11 @@ export const slugifyRoute = (route: string): string =>
 const mintEntityId = (entityKind: string, prefix: string): string =>
   `https://id.skygest.io/${entityKind}/${prefix}_${ulid()}`;
 
-const datasetIdFromUlid = (): string => mintEntityId("dataset", "ds");
-const distIdFromUlid = (): string => mintEntityId("distribution", "dist");
-const crIdFromUlid = (): string => mintEntityId("catalog-record", "cr");
+const datasetIdFromUlid = () => makeDatasetId(mintEntityId("dataset", "ds"));
+const distIdFromUlid = () =>
+  makeDistributionId(mintEntityId("distribution", "dist"));
+const crIdFromUlid = () =>
+  makeCatalogRecordId(mintEntityId("catalog-record", "cr"));
 
 /**
  * Copy the listed optional keys from `source` to `target` when the value
@@ -1302,11 +1345,10 @@ export const unionAliases = (
  * index. Fails loudly when any piece is missing — the ingest pipeline has
  * no sensible way to mint candidates without all three scope records.
  */
-export const buildContextFromIndex = (
-  idx: CatalogIndex,
-  nowIso: string
-): Effect.Effect<BuildContext, EiaIngestLedgerError> =>
-  Effect.gen(function* () {
+export const buildContextFromIndex = Effect.fn(
+  "EiaIngest.buildContextFromIndex"
+)(
+  function* (idx: CatalogIndex, nowIso: string) {
     if (idx.catalog === null || idx.dataService === null) {
       return yield* new EiaIngestLedgerError({
         message:
@@ -1340,7 +1382,8 @@ export const buildContextFromIndex = (
       eiaCatalog: idx.catalog,
       eiaDataService: idx.dataService
     } satisfies BuildContext;
-  }).pipe(Effect.withSpan("EiaIngest.buildContextFromIndex"));
+  }
+);
 
 /**
  * Build a Dataset candidate from an EIA leaf-route response. Pure. When
@@ -1353,7 +1396,7 @@ export const buildDatasetCandidate = (
   ctx: BuildContext,
   existing: Dataset | null
 ): Dataset => {
-  const id = existing?.id ?? (datasetIdFromUlid() as Dataset["id"]);
+  const id = existing?.id ?? datasetIdFromUlid();
   const createdAt = existing?.createdAt ?? (ctx.nowIso as Dataset["createdAt"]);
   const updatedAt = ctx.nowIso as Dataset["updatedAt"];
 
@@ -1362,7 +1405,7 @@ export const buildDatasetCandidate = (
   // hand-curated and preserved through unionAliases.
   const freshAliases: ReadonlyArray<ExternalIdentifier> = [
     {
-      scheme: "eia-route",
+      scheme: AliasSchemeValues.eiaRoute,
       value: leaf.path,
       relation: "exactMatch"
     } as ExternalIdentifier
@@ -1453,7 +1496,7 @@ export const buildDistributionCandidates = (
   // merging; only bump `updatedAt`. accessURL is preserved if already set.
   const apiBase: Record<string, unknown> = {
     _tag: "Distribution",
-    id: existingApi?.id ?? (distIdFromUlid() as Distribution["id"]),
+    id: existingApi?.id ?? distIdFromUlid(),
     datasetId,
     kind: "api-access",
     accessURL: existingApi?.accessURL ?? apiAccessUrl,
@@ -1505,7 +1548,7 @@ export const buildCatalogRecord = (
 ): CatalogRecord => {
   const base: Record<string, unknown> = {
     _tag: "CatalogRecord",
-    id: existing?.id ?? (crIdFromUlid() as CatalogRecord["id"]),
+    id: existing?.id ?? crIdFromUlid(),
     catalogId: ctx.eiaCatalog.id,
     primaryTopicType: "dataset",
     primaryTopicId: dataset.id,
@@ -1697,10 +1740,8 @@ export const buildCandidateNodes = (
 // inputs) to construct the IngestGraph so Phase B writes what Phase A
 // validated.
 
-export const validateNode = (
-  node: IngestNode
-): Effect.Effect<IngestNode, EiaIngestSchemaError> =>
-  Effect.gen(function* () {
+export const validateNode = Effect.fn("EiaIngest.validateNode")(
+  function* (node: IngestNode) {
     const mapErr = (error: Schema.SchemaError) =>
       new EiaIngestSchemaError({
         kind: node._tag,
@@ -1745,22 +1786,19 @@ export const validateNode = (
         return { ...node, data: decoded };
       }
     }
-  }).pipe(Effect.withSpan("EiaIngest.validateNode"));
+  }
+);
 
-export const validateCandidates = (
-  candidates: ReadonlyArray<IngestNode>
-): Effect.Effect<{
-  readonly failures: ReadonlyArray<EiaIngestSchemaError>;
-  readonly successes: ReadonlyArray<IngestNode>;
-}> =>
-  Effect.gen(function* () {
+export const validateCandidates = Effect.fn("EiaIngest.validateCandidates")(
+  function* (candidates: ReadonlyArray<IngestNode>) {
     const [failures, successes] = yield* Effect.partition(
       candidates,
       (candidate) => validateNode(candidate),
       { concurrency: "unbounded" }
     );
     return { failures, successes };
-  }).pipe(Effect.withSpan("EiaIngest.validateCandidates"));
+  }
+);
 
 // ---------------------------------------------------------------------------
 // Atomic write helpers + entity-id ledger (Task 9)
@@ -1779,11 +1817,8 @@ export const validateCandidates = (
 // `{}` is returned) from any other read/decode failure, which must
 // abort the run rather than silently re-mint every id on disk trouble.
 
-export const writeEntityFile = (
-  filePath: string,
-  content: string
-): Effect.Effect<void, EiaIngestFsError, FileSystem.FileSystem | Path.Path> =>
-  Effect.gen(function* () {
+export const writeEntityFile = Effect.fn("EiaIngest.writeEntityFile")(
+  function* (filePath: string, content: string) {
     const fs_ = yield* FileSystem.FileSystem;
     const path_ = yield* Path.Path;
     const dir = path_.dirname(filePath);
@@ -1825,7 +1860,8 @@ export const writeEntityFile = (
       // cleanup failure so the original rename error is preserved.
       Effect.tapError(() => fs_.remove(tmp).pipe(Effect.ignore))
     );
-  }).pipe(Effect.withSpan("EiaIngest.writeEntityFile"));
+  }
+);
 
 export const EntityIdLedger = Schema.Record(Schema.String, Schema.String);
 export type EntityIdLedger = Schema.Schema.Type<typeof EntityIdLedger>;
@@ -1865,14 +1901,8 @@ const isNotFoundPlatformError = (cause: unknown): boolean => {
   return msg.includes("notfound") || msg.includes("enoent") || msg.includes("no such file");
 };
 
-export const loadLedger = (
-  rootDir: string
-): Effect.Effect<
-  EntityIdLedger,
-  EiaIngestLedgerError,
-  FileSystem.FileSystem | Path.Path
-> =>
-  Effect.gen(function* () {
+export const loadLedger = Effect.fn("EiaIngest.loadLedger")(
+  function* (rootDir: string) {
     const fs_ = yield* FileSystem.FileSystem;
     const path_ = yield* Path.Path;
     const ledgerPath = path_.resolve(rootDir, ".entity-ids.json");
@@ -1894,21 +1924,16 @@ export const loadLedger = (
       });
     }
     return decoded.success;
-  }).pipe(Effect.withSpan("EiaIngest.loadLedger"));
+  }
+);
 
-export const saveLedger = (
-  rootDir: string,
-  ledger: EntityIdLedger
-): Effect.Effect<
-  void,
-  EiaIngestFsError,
-  FileSystem.FileSystem | Path.Path
-> =>
-  Effect.gen(function* () {
+export const saveLedger = Effect.fn("EiaIngest.saveLedger")(
+  function* (rootDir: string, ledger: EntityIdLedger) {
     const path_ = yield* Path.Path;
     const ledgerPath = path_.resolve(rootDir, ".entity-ids.json");
     yield* writeEntityFile(ledgerPath, `${encodeEntityIdLedger(ledger)}\n`);
-  }).pipe(Effect.withSpan("EiaIngest.saveLedger"));
+  }
+);
 
 // ---------------------------------------------------------------------------
 // Phase B helpers: per-node disk layout + ledger keying + report shape (Task 10)
@@ -2001,15 +2026,110 @@ const encodeNodeData = (node: IngestNode): string => {
   }
 };
 
+const decodeExistingNodeData = (
+  node: IngestNode,
+  content: string
+): Effect.Effect<IngestNode["data"], EiaIngestLedgerError> => {
+  switch (node._tag) {
+    case "agent": {
+      const decoded = decodeJsonStringEitherWith(Agent)(content);
+      if (Result.isFailure(decoded)) {
+        return Effect.fail(new EiaIngestLedgerError({
+          message: `Cannot decode existing agent file for ${node.slug}: ${formatSchemaParseError(decoded.failure)}`
+        }));
+      }
+      return Effect.succeed(decoded.success);
+    }
+    case "catalog": {
+      const decoded = decodeJsonStringEitherWith(Catalog)(content);
+      if (Result.isFailure(decoded)) {
+        return Effect.fail(new EiaIngestLedgerError({
+          message: `Cannot decode existing catalog file for ${node.slug}: ${formatSchemaParseError(decoded.failure)}`
+        }));
+      }
+      return Effect.succeed(decoded.success);
+    }
+    case "data-service": {
+      const decoded = decodeJsonStringEitherWith(DataService)(content);
+      if (Result.isFailure(decoded)) {
+        return Effect.fail(new EiaIngestLedgerError({
+          message: `Cannot decode existing data-service file for ${node.slug}: ${formatSchemaParseError(decoded.failure)}`
+        }));
+      }
+      return Effect.succeed(decoded.success);
+    }
+    case "dataset": {
+      const decoded = decodeJsonStringEitherWith(Dataset)(content);
+      if (Result.isFailure(decoded)) {
+        return Effect.fail(new EiaIngestLedgerError({
+          message: `Cannot decode existing dataset file for ${node.slug}: ${formatSchemaParseError(decoded.failure)}`
+        }));
+      }
+      return Effect.succeed(decoded.success);
+    }
+    case "distribution": {
+      const decoded = decodeJsonStringEitherWith(Distribution)(content);
+      if (Result.isFailure(decoded)) {
+        return Effect.fail(new EiaIngestLedgerError({
+          message: `Cannot decode existing distribution file for ${node.slug}: ${formatSchemaParseError(decoded.failure)}`
+        }));
+      }
+      return Effect.succeed(decoded.success);
+    }
+    case "catalog-record": {
+      const decoded = decodeJsonStringEitherWith(CatalogRecord)(content);
+      if (Result.isFailure(decoded)) {
+        return Effect.fail(new EiaIngestLedgerError({
+          message: `Cannot decode existing catalog-record file for ${node.slug}: ${formatSchemaParseError(decoded.failure)}`
+        }));
+      }
+      return Effect.succeed(decoded.success);
+    }
+  }
+};
+
+export const assertNodeOwnsWriteTarget = Effect.fn(
+  "EiaIngest.assertNodeOwnsWriteTarget"
+)(
+  function* (path_: Path.Path, rootDir: string, node: IngestNode) {
+    const fs_ = yield* FileSystem.FileSystem;
+    const filePath = entityFilePath(path_, rootDir, node);
+    const readExit = yield* Effect.exit(fs_.readFileString(filePath));
+
+    if (Exit.isFailure(readExit)) {
+      if (isNotFoundPlatformError(readExit.cause)) {
+        return filePath;
+      }
+
+      return yield* new EiaIngestLedgerError({
+        message: `Cannot read existing ${node._tag} file at ${filePath}: ${stringifyUnknown(readExit.cause)}`
+      });
+    }
+
+    const existing = yield* decodeExistingNodeData(node, readExit.value);
+    if (existing.id !== node.data.id) {
+      return yield* new EiaIngestLedgerError({
+        message: `Refusing to overwrite ${filePath}: existing ${node._tag} id ${existing.id} does not match ${node.data.id}`
+      });
+    }
+
+    return filePath;
+  }
+);
+
 const writeNode = (
   path_: Path.Path,
   rootDir: string,
   node: IngestNode
-): Effect.Effect<void, EiaIngestFsError, FileSystem.FileSystem | Path.Path> =>
-  writeEntityFile(
-    entityFilePath(path_, rootDir, node),
-    `${encodeNodeData(node)}\n`
-  );
+): Effect.Effect<
+  void,
+  EiaIngestFsError | EiaIngestLedgerError,
+  FileSystem.FileSystem | Path.Path
+> =>
+  Effect.gen(function* () {
+    const filePath = yield* assertNodeOwnsWriteTarget(path_, rootDir, node);
+    yield* writeEntityFile(filePath, `${encodeNodeData(node)}\n`);
+  });
 
 const ledgerKindByTag: Record<IngestNode["_tag"], string> = {
   agent: "Agent",
@@ -2049,11 +2169,65 @@ export const IngestReport = Schema.Struct({
   distributions: Schema.Struct({ count: Schema.Number }),
   catalogRecords: Schema.Struct({ count: Schema.Number }),
   mermaidPath: Schema.String,
-  notes: Schema.Array(Schema.String)
+  notes: Schema.Array(Schema.String),
+  validationFailures: Schema.optionalKey(
+    Schema.Array(
+      Schema.Struct({
+        kind: Schema.String,
+        slug: Schema.String,
+        message: Schema.String
+      })
+    )
+  )
 });
 export type IngestReport = Schema.Schema.Type<typeof IngestReport>;
 
 const encodeIngestReportPretty = encodeJsonStringPrettyWith(IngestReport);
+
+const buildIngestReport = (input: {
+  readonly fetchedAt: string;
+  readonly routesWalked: number;
+  readonly nodeCount: number;
+  readonly edgeCount: number;
+  readonly datasetsCreated: ReadonlyArray<string>;
+  readonly datasetsMerged: ReadonlyArray<string>;
+  readonly distributionCount: number;
+  readonly catalogRecordCount: number;
+  readonly validationFailures?: ReadonlyArray<EiaIngestSchemaError>;
+}): IngestReport => ({
+  fetchedAt: input.fetchedAt,
+  routesWalked: input.routesWalked,
+  nodeCount: input.nodeCount,
+  edgeCount: input.edgeCount,
+  datasets: {
+    created: [...input.datasetsCreated],
+    merged: [...input.datasetsMerged]
+  },
+  distributions: { count: input.distributionCount },
+  catalogRecords: { count: input.catalogRecordCount },
+  mermaidPath: `${HARVEST_REPORT_DIR}/${INGEST_MERMAID_FILE}`,
+  notes: REPORT_PROVENANCE_NOTES,
+  ...(input.validationFailures === undefined ||
+  input.validationFailures.length === 0
+    ? {}
+    : {
+        validationFailures: input.validationFailures.map((failure) => ({
+          kind: failure.kind,
+          slug: failure.slug,
+          message: failure.message
+        }))
+      })
+});
+
+const writeIngestReport = Effect.fn("EiaIngest.writeIngestReport")(
+  function* (path_: Path.Path, rootDir: string, report: IngestReport) {
+    const reportsDir = path_.resolve(rootDir, HARVEST_REPORT_DIR);
+    yield* writeEntityFile(
+      path_.resolve(reportsDir, INGEST_REPORT_FILE),
+      `${encodeIngestReportPretty(report)}\n`
+    );
+  }
+);
 
 const catalogIndexCounts = (idx: CatalogIndex) => ({
   agentCount: idx.agentsByName.size,
@@ -2134,7 +2308,7 @@ const nodeWriteOutcome = (node: IngestNode): "created" | "merged" => {
 // COLD_START_DRY_RUN=true short-circuits after Stage 2b, before Phase B, so
 // smoke tests exercise the full validation pipeline without touching the
 // on-disk fixture tree. Legacy EIA_DRY_RUN=true is still accepted too.
-const main = Effect.gen(function* () {
+const main = Effect.fn("EiaIngest.main")(function* () {
   const startedAt = yield* Clock.currentTimeMillis;
   const config = yield* ScriptConfig;
   const apiKey = Redacted.value(config.apiKey);
@@ -2162,6 +2336,21 @@ const main = Effect.gen(function* () {
     total: candidates.length,
     byKind: candidateCountsByKind(candidates)
   });
+  const candidateDatasetNodes = candidates.filter(
+    (n): n is Extract<IngestNode, { _tag: "dataset" }> => n._tag === "dataset"
+  );
+  const candidateDistributionCount = candidates.filter(
+    (n) => n._tag === "distribution"
+  ).length;
+  const candidateCatalogRecordCount = candidates.filter(
+    (n) => n._tag === "catalog-record"
+  ).length;
+  const candidateDatasetsCreated = candidateDatasetNodes
+    .filter((n) => !n.merged)
+    .map((n) => n.slug);
+  const candidateDatasetsMerged = candidateDatasetNodes
+    .filter((n) => n.merged)
+    .map((n) => n.slug);
 
   // ---------- Phase A: validate candidates ----------
   const { failures, successes } = yield* validateCandidates(candidates);
@@ -2173,8 +2362,23 @@ const main = Effect.gen(function* () {
         Logging.logFailure("eia validation failure", error, {
           kind: error.kind,
           slug: error.slug
-        }),
+      }),
       { discard: true }
+    );
+    yield* writeIngestReport(
+      path_,
+      config.rootDir,
+      buildIngestReport({
+        fetchedAt: nowIso,
+        routesWalked: walkData.size,
+        nodeCount: candidates.length,
+        edgeCount: 0,
+        datasetsCreated: candidateDatasetsCreated,
+        datasetsMerged: candidateDatasetsMerged,
+        distributionCount: candidateDistributionCount,
+        catalogRecordCount: candidateCatalogRecordCount,
+        validationFailures: failures
+      })
     );
   }
   yield* Logging.logSummary("eia validation summary", {
@@ -2279,20 +2483,16 @@ const main = Effect.gen(function* () {
     entries: Object.keys(ledger).length
   });
 
-  const report: IngestReport = {
+  const report = buildIngestReport({
     fetchedAt: nowIso,
     routesWalked: walkData.size,
     nodeCount,
     edgeCount,
-    datasets: {
-      created: datasetsCreated,
-      merged: datasetsMerged
-    },
-    distributions: { count: distributionCount },
-    catalogRecords: { count: catalogRecordCount },
-    mermaidPath: `${HARVEST_REPORT_DIR}/${INGEST_MERMAID_FILE}`,
-    notes: REPORT_PROVENANCE_NOTES
-  };
+    datasetsCreated,
+    datasetsMerged,
+    distributionCount,
+    catalogRecordCount
+  });
 
   const mermaid = Graph.toMermaid(graph, {
     nodeLabel: (node) => `${node._tag}: ${node.slug}`,
@@ -2307,10 +2507,7 @@ const main = Effect.gen(function* () {
     path: `${HARVEST_REPORT_DIR}/${INGEST_MERMAID_FILE}`,
     nodeCount
   });
-  yield* writeEntityFile(
-    path_.resolve(reportsDir, INGEST_REPORT_FILE),
-    `${encodeIngestReportPretty(report)}\n`
-  );
+  yield* writeIngestReport(path_, config.rootDir, report);
 
   const completedAt = yield* Clock.currentTimeMillis;
   yield* Logging.logSummary("eia ingest completed", {
@@ -2324,8 +2521,9 @@ const main = Effect.gen(function* () {
     durationMs: completedAt - startedAt,
     dryRun: false
   });
-}).pipe(
-  Effect.withSpan("EiaIngest.main"),
+});
+
+const mainEffect = main().pipe(
   Effect.tapError((error) => Logging.logFailure("eia ingest failed", error))
 );
 
@@ -2333,11 +2531,8 @@ const main = Effect.gen(function* () {
 // fail with a missing-EIA_API_KEY ConfigError). Bun sets `import.meta.main`
 // to true only when this file is the entry point.
 if (import.meta.main) {
-  const { runScriptMain, scriptPlatformLayer } = await import(
-    "../src/platform/ScriptRuntime"
-  );
   runScriptMain(
     "EiaIngest",
-    main.pipe(Effect.provide(scriptPlatformLayer))
+    mainEffect.pipe(Effect.provide(scriptPlatformLayer))
   );
 }

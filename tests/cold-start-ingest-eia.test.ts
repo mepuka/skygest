@@ -6,8 +6,10 @@ import {
   Effect,
   Graph,
   Layer,
+  Logger,
   Option,
   Path,
+  References,
   Schema
 } from "effect";
 import { TestClock } from "effect/testing";
@@ -31,6 +33,7 @@ import {
   buildDatasetCandidate,
   buildDistributionCandidates,
   buildIngestGraph,
+  assertNodeOwnsWriteTarget,
   type BuildContext,
   EiaApiResponse as EiaApiResponseSchema,
   type EiaApiResponse,
@@ -357,6 +360,29 @@ const makePersistenceLayer = (
     })
   );
 
+const captureLogEvents = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
+  Effect.gen(function* () {
+    const seen: Array<{
+      readonly message: unknown;
+      readonly annotations: Record<string, unknown>;
+    }> = [];
+    const captureLayer = Logger.layer([
+      Logger.make((options) => {
+        seen.push({
+          message: options.message,
+          annotations: options.fiber.getRef(References.CurrentLogAnnotations)
+        });
+      })
+    ]);
+
+    const result = yield* effect.pipe(
+      Effect.provide(captureLayer),
+      Effect.provideService(References.MinimumLogLevel, "All")
+    );
+
+    return { result, seen } as const;
+  });
+
 describe("getWalkDataWith", () => {
   it.effect("stores a fresh full-root walk in file-backed local persistence and then hits hidden cache", () =>
     Effect.gen(function* () {
@@ -596,7 +622,7 @@ describe("getWalkDataWith", () => {
       );
 
       expect(getCalls).toBe(0);
-      expect(setCalls).toBe(0);
+      expect(setCalls).toBe(1);
       expect(removeCalls).toBe(1);
       expect(counts[""]).toBe(1);
 
@@ -1160,6 +1186,44 @@ describe("loadCatalogIndex", () => {
         expect(result.datasetsByRoute.size).toBe(0);
         expect(result.allDatasets.length).toBe(1);
       }).pipe(Effect.provide(bunFsLayer))
+  );
+
+  it.effect("logs a warning when an EIA dataset cannot participate in route-based merges", () =>
+    Effect.gen(function* () {
+      const tmp = yield* Effect.promise(() =>
+        makeTmpFixture({
+          datasets: [
+            {
+              slug: "eia-legacy-bulk",
+              body: validDatasetBody(
+                "LegacyBulk",
+                "01KNQSXEPPXRC56GM4SED9D0KZ",
+                [
+                  {
+                    scheme: "eia-route",
+                    value: "COAL",
+                    relation: "exactMatch"
+                  }
+                ]
+              )
+            }
+          ]
+        })
+      );
+
+      const { seen } = yield* captureLogEvents(
+        loadCatalogIndex(tmp).pipe(
+          Effect.provide(bunFsLayer),
+          Effect.ensuring(Effect.promise(() => cleanup(tmp)))
+        )
+      );
+
+      expect(seen).toHaveLength(1);
+      expect(seen[0]!.message).toEqual(["eia dataset skipped from route index"]);
+      expect(seen[0]!.annotations.slug).toBe("eia-legacy-bulk");
+      expect(seen[0]!.annotations.reason).toBe("legacyBulkAlias");
+      expect(seen[0]!.annotations.routeAlias).toBe("COAL");
+    })
   );
 
   it.effect(
@@ -2376,6 +2440,59 @@ describe("writeEntityFile", () => {
       }).pipe(
         Effect.ensuring(Effect.promise(() => cleanup(tmp)).pipe(Effect.orDie))
       );
+    }).pipe(Effect.provide(bunFsLayer))
+  );
+});
+
+describe("assertNodeOwnsWriteTarget", () => {
+  it.effect("fails before write when a computed slug would overwrite a different dataset id", () =>
+    Effect.gen(function* () {
+      const tmp = yield* Effect.promise(() => makeEmptyTmpDir());
+      yield* Effect.promise(() =>
+        fsp.mkdir(nodePath.join(tmp, "catalog", "datasets"), {
+          recursive: true
+        })
+      );
+      yield* Effect.promise(() =>
+        fsp.writeFile(
+          nodePath.join(
+            tmp,
+            "catalog",
+            "datasets",
+            "eia-electricity-retail-sales.json"
+          ),
+          `${JSON.stringify(
+            validDatasetBody(
+              "Existing file owner",
+              "01KNQSXEPPXRC56GM4SED9D0KX",
+              []
+            ),
+            null,
+            2
+          )}\n`,
+          "utf-8"
+        )
+      );
+
+      const path_ = yield* Path.Path;
+      const candidate: IngestNode = {
+        _tag: "dataset",
+        slug: "eia-electricity-retail-sales",
+        merged: false,
+        data: validDatasetBody(
+          "Different dataset",
+          "01KNQSXEPPXRC56GM4SED9D0KY",
+          []
+        ) as unknown as Dataset
+      };
+
+      const error = yield* assertNodeOwnsWriteTarget(path_, tmp, candidate).pipe(
+        Effect.flip,
+        Effect.ensuring(Effect.promise(() => cleanup(tmp)).pipe(Effect.orDie))
+      );
+
+      expect(error).toBeInstanceOf(EiaIngestLedgerError);
+      expect(error.message).toContain("Refusing to overwrite");
     }).pipe(Effect.provide(bunFsLayer))
   );
 });

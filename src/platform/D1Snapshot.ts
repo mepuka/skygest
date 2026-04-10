@@ -17,8 +17,10 @@
  * Cache hits (mtime younger than `maxAge`) skip the entire pipeline.
  */
 import {
+  Clock,
   Duration,
   Effect,
+  Exit,
   FileSystem,
   Option,
   Path,
@@ -35,10 +37,18 @@ import { stringifyUnknown } from "./Json";
 // Tagged error
 // ---------------------------------------------------------------------------
 
+export const D1SnapshotOperation = Schema.Literals([
+  "wrangler-export",
+  "sqlite-import",
+  "rename",
+  "makeDirectory"
+]);
+export type D1SnapshotOperation = Schema.Schema.Type<typeof D1SnapshotOperation>;
+
 export class D1SnapshotError extends Schema.TaggedErrorClass<D1SnapshotError>()(
   "D1SnapshotError",
   {
-    operation: Schema.String,
+    operation: D1SnapshotOperation,
     dbName: Schema.String,
     message: Schema.String
   }
@@ -63,7 +73,7 @@ export interface D1SnapshotOptions {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-const mapFsError = (operation: string, dbName: string) =>
+const mapFsError = (operation: D1SnapshotOperation, dbName: string) =>
   (error: unknown): D1SnapshotError =>
     new D1SnapshotError({
       operation,
@@ -78,7 +88,7 @@ const mapFsError = (operation: string, dbName: string) =>
  */
 const runCommand = (
   dbName: string,
-  operation: string,
+  operation: D1SnapshotOperation,
   command: ChildProcess.Command
 ): Effect.Effect<string, D1SnapshotError, ChildProcessSpawner.ChildProcessSpawner> =>
   Effect.gen(function* () {
@@ -112,9 +122,10 @@ const runCommand = (
  * `maxAge` of now. Any stat failure, missing mtime, or non-file dirent returns
  * false — the caller should re-export.
  */
-export const isCacheFresh = (
+export const isCacheFreshWithNow = (
   cachePath: string,
-  maxAge: Duration.Input
+  maxAge: Duration.Input,
+  now: number
 ): Effect.Effect<boolean, never, FileSystem.FileSystem> =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
@@ -122,9 +133,17 @@ export const isCacheFresh = (
     if (Option.isNone(info)) return false;
     if (info.value.type !== "File") return false;
     if (Option.isNone(info.value.mtime)) return false;
-    const ageMs = Date.now() - info.value.mtime.value.getTime();
+    const ageMs = now - info.value.mtime.value.getTime();
     return ageMs <= Duration.toMillis(Duration.fromInputUnsafe(maxAge));
   });
+
+export const isCacheFresh = (
+  cachePath: string,
+  maxAge: Duration.Input
+): Effect.Effect<boolean, never, FileSystem.FileSystem | Clock.Clock> =>
+  Clock.currentTimeMillis.pipe(
+    Effect.flatMap((now) => isCacheFreshWithNow(cachePath, maxAge, now))
+  );
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -140,7 +159,7 @@ export const ensureD1Snapshot = (
 ): Effect.Effect<
   string,
   D1SnapshotError,
-  FileSystem.FileSystem | Path.Path | ChildProcessSpawner.ChildProcessSpawner
+  FileSystem.FileSystem | Path.Path | Clock.Clock | ChildProcessSpawner.ChildProcessSpawner
 > =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
@@ -177,36 +196,51 @@ export const ensureD1Snapshot = (
       })
     );
 
-    // Step 1: wrangler d1 export --remote --output <dumpPath>
-    const exportArgs: ReadonlyArray<string> = [
-      "d1",
-      "export",
-      options.dbName,
-      "--remote",
-      "--output",
-      dumpPath,
-      ...(options.extraArgs ?? [])
-    ];
-    yield* runCommand(
-      options.dbName,
-      "wrangler-export",
-      ChildProcess.make("wrangler", exportArgs)
+    const cleanupIntermediateFiles = Effect.all(
+      [
+        fs.remove(dumpPath, { force: true }).pipe(Effect.ignore),
+        fs.remove(tmpSqlitePath, { force: true }).pipe(Effect.ignore)
+      ],
+      { discard: true }
     );
 
-    // Step 2: sqlite3 <tmpSqlite> ".read <dumpPath>"
-    yield* runCommand(
-      options.dbName,
-      "sqlite-import",
-      ChildProcess.make("sqlite3", [tmpSqlitePath, `.read ${dumpPath}`])
+    yield* Effect.acquireUseRelease(
+      Effect.void,
+      () =>
+        Effect.gen(function* () {
+          // Step 1: wrangler d1 export --remote --output <dumpPath>
+          const exportArgs: ReadonlyArray<string> = [
+            "d1",
+            "export",
+            options.dbName,
+            "--remote",
+            "--output",
+            dumpPath,
+            ...(options.extraArgs ?? [])
+          ];
+          yield* runCommand(
+            options.dbName,
+            "wrangler-export",
+            ChildProcess.make("wrangler", exportArgs)
+          );
+
+          // Step 2: sqlite3 <tmpSqlite> ".read <dumpPath>"
+          yield* runCommand(
+            options.dbName,
+            "sqlite-import",
+            ChildProcess.make("sqlite3", [tmpSqlitePath, `.read ${dumpPath}`])
+          );
+
+          // Step 3: atomic rename temp sqlite → final cache path.
+          yield* fs
+            .rename(tmpSqlitePath, cachePath)
+            .pipe(Effect.mapError(mapFsError("rename", options.dbName)));
+        }),
+      (_void, exit) =>
+        Exit.isFailure(exit)
+          ? cleanupIntermediateFiles
+          : fs.remove(dumpPath, { force: true }).pipe(Effect.ignore)
     );
-
-    // Step 3: atomic rename temp sqlite → final cache path.
-    yield* fs
-      .rename(tmpSqlitePath, cachePath)
-      .pipe(Effect.mapError(mapFsError("rename", options.dbName)));
-
-    // Step 4: best-effort delete of the intermediate SQL dump.
-    yield* fs.remove(dumpPath, { force: true }).pipe(Effect.ignore);
 
     yield* Effect.logInfo("d1.snapshot.export.done").pipe(
       Effect.annotateLogs({

@@ -10,6 +10,12 @@ export const aliasSchemes = [
   "iso3166", "url", "other"
  ] as const;
 
+export const AliasSchemeValues = {
+  eiaBulkId: "eia-bulk-id",
+  eiaRoute: "eia-route",
+  url: "url"
+} as const;
+
 export const AliasScheme = Schema.Literals(aliasSchemes).annotate({
   description: "External identifier namespace"
 });

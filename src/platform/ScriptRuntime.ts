@@ -10,11 +10,18 @@ export const scriptPlatformLayer = Layer.mergeAll(
   Logging.layer
 );
 
+export const withScriptMainFailureLogging = <A, E, R>(
+  scriptName: string,
+  effect: Effect.Effect<A, E, R>
+) =>
+  effect.pipe(
+    Effect.tapError((error) =>
+      Logging.logFailure("script.failed", error, { scriptName })
+    )
+  );
+
 export const runScriptMain = <A, E>(
   scriptName: string,
   effect: Effect.Effect<A, E, never>
 ) =>
-  effect.pipe(
-    Effect.tapError((error) => Logging.logFailure("script failed", error, { scriptName })),
-    BunRuntime.runMain
-  );
+  withScriptMainFailureLogging(scriptName, effect).pipe(BunRuntime.runMain);

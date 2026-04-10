@@ -2270,21 +2270,21 @@ EOF
 
 ## Done criteria (the SKY-254 acceptance checklist mapped to tasks)
 
-- [ ] Schema prep: `eia-bulk-id` added to `aliasSchemes`, legacy `eia-route` bulk codes migrated — Tasks 0 + 0.5
-- [ ] `scripts/cold-start-ingest-eia.ts` exists — Tasks 1-11
-- [ ] Fetches EIA API v2 catalog endpoint — Tasks 2, 3, 5
-- [ ] Mints IDs via `cold-start-id.ts` convention (ULID, prefixed) — Task 7, Task 9 ledger
-- [ ] Writes to the 6 catalog subdirectories the script owns — Task 10
-  - [ ] agents/ — Agent touch in Phase B (no Q466438 added)
-  - [ ] catalogs/ — Catalog touch in Phase B (refresh `updatedAt` only)
-  - [ ] datasets/ — Phase B writes (new + merged)
-  - [ ] distributions/ — Phase B writes
-  - [ ] data-services/ — Phase B writes (refresh `servesDatasetIds` union with all leaf Datasets)
-  - [ ] catalog-records/ — Phase B writes EIA-catalog CRs only; CRs from other catalogs are read but never touched
-  - [ ] dataset-series/ — explicitly out of scope (see Goal); files preserved as-is, no inSeries linking
-- [ ] Schema validation runs as part of script (two-phase: Phase A validate-all → Phase B write-all) — Task 8 + Task 10
-- [ ] Wikidata: existing Q1133499 preserved; Q466438 (incorrect) not added; discrepancy noted in build report — Task 10
-- [ ] Re-runnable (no duplicates, only mutable fields update; ledger ENOENT distinct from other read errors) — Tasks 9 + 10
-- [ ] Existing hand-curated `landingPage` values preserved on merge — Task 7
-- [ ] Header documents endpoints used and skipped — top-of-file comment at end of Task 11
-- [ ] Stage 1 eval re-run + delta report — Task 13
+- [x] Schema prep: `eia-bulk-id` added to `aliasSchemes`, legacy `eia-route` bulk codes migrated — Tasks 0 + 0.5
+- [x] `scripts/cold-start-ingest-eia.ts` exists — Tasks 1-11
+- [x] Fetches EIA API v2 catalog endpoint — Tasks 2, 3, 5
+- [x] Mints IDs matching the current cold-start ID format (ULID, prefixed) — Task 7, Task 9 ledger
+- [x] Writes to the 6 catalog subdirectories the script owns — Task 10
+  - [x] agents/ — Agent touch in Phase B (no Q466438 added)
+  - [x] catalogs/ — Catalog touch in Phase B (refresh `updatedAt` only)
+  - [x] datasets/ — Phase B writes (new + merged)
+  - [x] distributions/ — Phase B writes
+  - [x] data-services/ — Phase B writes (refresh `servesDatasetIds` union with all leaf Datasets)
+  - [x] catalog-records/ — Phase B writes EIA-catalog CRs only; CRs from other catalogs are read but never touched
+  - [x] dataset-series/ — explicitly out of scope (see Goal); files preserved as-is, no inSeries linking
+- [x] Schema validation runs as part of script (two-phase: Phase A validate-all → Phase B write-all) — Task 8 + Task 10
+- [x] Wikidata: existing Q1133499 preserved; Q466438 (incorrect) not added; discrepancy noted in build report — Task 10
+- [x] Re-runnable (no duplicates, only mutable fields update; ledger ENOENT distinct from other read errors) — Tasks 9 + 10
+- [x] Existing hand-curated `landingPage` values preserved on merge — Task 7
+- [x] Header documents endpoints used and skipped — top-of-file comment at end of Task 11
+- [x] Stage 1 eval re-run + delta report — Task 13

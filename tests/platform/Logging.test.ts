@@ -64,6 +64,26 @@ describe("Logging", () => {
     })
   );
 
+  it.effect("emits structured warning events", () =>
+    Effect.gen(function* () {
+      const { seen } = yield* captureLogs(
+        Logging.logWarning("eia dataset skipped from route index", {
+          slug: "eia-steo",
+          reason: "missingApiRouteAlias"
+        })
+      );
+
+      expect(seen).toHaveLength(1);
+      expect(seen[0]!.message).toEqual([
+        "eia dataset skipped from route index"
+      ]);
+      expect(annotationValue(seen[0]!, "slug")).toBe("eia-steo");
+      expect(annotationValue(seen[0]!, "reason")).toBe(
+        "missingApiRouteAlias"
+      );
+    })
+  );
+
   it.effect("emits structured failure events", () =>
     Effect.gen(function* () {
       const error = { _tag: "ExampleError", message: "broken" };

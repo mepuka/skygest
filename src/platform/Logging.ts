@@ -34,6 +34,8 @@ export const Logging = {
       effect.pipe(Effect.annotateLogs(annotations)),
   logSummary: (event: string, annotations: LogAnnotations = {}) =>
     Effect.logInfo(event).pipe(Effect.annotateLogs(annotations)),
+  logWarning: (event: string, annotations: LogAnnotations = {}) =>
+    Effect.logWarning(event).pipe(Effect.annotateLogs(annotations)),
   logFailure: (
     event: string,
     error: unknown,
