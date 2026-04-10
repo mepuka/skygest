@@ -21,6 +21,7 @@ import {
   Duration,
   Effect,
   FileSystem,
+  Graph,
   Layer,
   MutableHashMap,
   MutableRef,
@@ -37,6 +38,14 @@ import {
   HttpClient,
   HttpClientResponse
 } from "effect/unstable/http";
+import type {
+  Agent,
+  Catalog,
+  CatalogRecord,
+  DataService,
+  Dataset,
+  Distribution
+} from "../src/domain/data-layer";
 import {
   decodeJsonStringWith,
   encodeJsonStringPrettyWith,
@@ -473,6 +482,199 @@ export const getWalkData = (config: ScriptConfigShape, apiKey: string) =>
     }
     yield* Effect.log(`Walked ${String(Object.keys(snapshot).length)} routes`);
     return new Map(Object.entries(snapshot));
+  });
+
+// ---------------------------------------------------------------------------
+// IngestGraph — typed Graph.DirectedGraph<IngestNode, IngestEdge>
+// ---------------------------------------------------------------------------
+//
+// Edge-direction rule (Effect's Graph.topo is Kahn's algorithm; verified at
+// .reference/effect/packages/effect/src/Graph.ts:3878-3917): edges encode
+// dependencies — `A → B` means *A must be emitted before B*. For our
+// pipeline:
+//
+//   agent → catalog          (Catalog.publisherAgentId → Agent.id)
+//   agent → dataset          (Dataset.publisherAgentId → Agent.id)
+//   agent → data-service     (DataService.publisherAgentId → Agent.id)
+//   catalog → catalog-record (CatalogRecord.catalogId → Catalog.id)
+//   dataset → distribution   (Distribution.datasetId → Dataset.id)
+//   dataset → catalog-record (CatalogRecord.primaryTopicId → Dataset.id)
+//   dataset → data-service   (DataService.servesDatasetIds[] → Dataset.id)
+//
+// Topological emission: Agent → {Catalog, Dataset} → {Distribution,
+// CatalogRecord, DataService}.
+
+export type IngestNode =
+  | { readonly _tag: "agent"; readonly slug: string; readonly data: Agent }
+  | { readonly _tag: "catalog"; readonly slug: string; readonly data: Catalog }
+  | {
+      readonly _tag: "data-service";
+      readonly slug: string;
+      readonly data: DataService;
+    }
+  | {
+      readonly _tag: "dataset";
+      readonly slug: string;
+      readonly data: Dataset;
+      readonly merged: boolean;
+    }
+  | {
+      readonly _tag: "distribution";
+      readonly slug: string;
+      readonly data: Distribution;
+    }
+  | {
+      readonly _tag: "catalog-record";
+      readonly slug: string;
+      readonly data: CatalogRecord;
+    };
+
+export type IngestEdge =
+  | "publishes" //          agent → {catalog, dataset, data-service}
+  | "contains-record" //    catalog → catalog-record
+  | "has-distribution" //   dataset → distribution
+  | "primary-topic-of" //   dataset → catalog-record
+  | "served-by"; //         dataset → data-service
+
+export type IngestGraph = Graph.DirectedGraph<IngestNode, IngestEdge>;
+
+const nodeKey = (node: IngestNode): string => `${node._tag}::${node.data.id}`;
+
+/**
+ * Pure builder. Takes an array of *already-validated* IngestNodes (Phase A
+ * has run) and assembles the dependency-direction graph. The mutate
+ * callback is the only place plain JS `for` loops are permitted — it is
+ * synchronous and not Effect-typed by design (matches the canonical pattern
+ * in skygest-editorial/src/narrative/BuildGraph.ts:950-1018).
+ */
+export const buildIngestGraph = (
+  validatedNodes: ReadonlyArray<IngestNode>
+): IngestGraph =>
+  Graph.directed<IngestNode, IngestEdge>((mutable) => {
+    const indexById = new Map<string, number>();
+
+    // Pass 1: add every node, recording its assigned index by composite key.
+    for (const node of validatedNodes) {
+      indexById.set(nodeKey(node), Graph.addNode(mutable, node));
+    }
+
+    // Partition nodes by tag for the edge-wiring passes below.
+    const agentNodes: Array<Extract<IngestNode, { _tag: "agent" }>> = [];
+    const catalogNodes: Array<Extract<IngestNode, { _tag: "catalog" }>> = [];
+    const dataServiceNodes: Array<
+      Extract<IngestNode, { _tag: "data-service" }>
+    > = [];
+    const datasetNodes: Array<Extract<IngestNode, { _tag: "dataset" }>> = [];
+    const distNodes: Array<Extract<IngestNode, { _tag: "distribution" }>> = [];
+    const crNodes: Array<Extract<IngestNode, { _tag: "catalog-record" }>> = [];
+
+    for (const node of validatedNodes) {
+      switch (node._tag) {
+        case "agent":
+          agentNodes.push(node);
+          break;
+        case "catalog":
+          catalogNodes.push(node);
+          break;
+        case "data-service":
+          dataServiceNodes.push(node);
+          break;
+        case "dataset":
+          datasetNodes.push(node);
+          break;
+        case "distribution":
+          distNodes.push(node);
+          break;
+        case "catalog-record":
+          crNodes.push(node);
+          break;
+      }
+    }
+
+    // Pass 2: agent → {catalog, dataset, data-service} via "publishes"
+    for (const agent of agentNodes) {
+      const agentIdx = indexById.get(nodeKey(agent))!;
+      for (const catalog of catalogNodes) {
+        if (catalog.data.publisherAgentId === agent.data.id) {
+          Graph.addEdge(
+            mutable,
+            agentIdx,
+            indexById.get(nodeKey(catalog))!,
+            "publishes"
+          );
+        }
+      }
+      for (const ds of datasetNodes) {
+        if (ds.data.publisherAgentId === agent.data.id) {
+          Graph.addEdge(
+            mutable,
+            agentIdx,
+            indexById.get(nodeKey(ds))!,
+            "publishes"
+          );
+        }
+      }
+      for (const svc of dataServiceNodes) {
+        if (svc.data.publisherAgentId === agent.data.id) {
+          Graph.addEdge(
+            mutable,
+            agentIdx,
+            indexById.get(nodeKey(svc))!,
+            "publishes"
+          );
+        }
+      }
+    }
+
+    // Pass 3: catalog → catalog-record via "contains-record"
+    for (const catalog of catalogNodes) {
+      const catIdx = indexById.get(nodeKey(catalog))!;
+      for (const cr of crNodes) {
+        if (cr.data.catalogId === catalog.data.id) {
+          Graph.addEdge(
+            mutable,
+            catIdx,
+            indexById.get(nodeKey(cr))!,
+            "contains-record"
+          );
+        }
+      }
+    }
+
+    // Pass 4: dataset → {distribution, catalog-record, data-service}
+    for (const ds of datasetNodes) {
+      const dsIdx = indexById.get(nodeKey(ds))!;
+      for (const dist of distNodes) {
+        if (dist.data.datasetId === ds.data.id) {
+          Graph.addEdge(
+            mutable,
+            dsIdx,
+            indexById.get(nodeKey(dist))!,
+            "has-distribution"
+          );
+        }
+      }
+      for (const cr of crNodes) {
+        if (cr.data.primaryTopicId === ds.data.id) {
+          Graph.addEdge(
+            mutable,
+            dsIdx,
+            indexById.get(nodeKey(cr))!,
+            "primary-topic-of"
+          );
+        }
+      }
+      for (const svc of dataServiceNodes) {
+        if (svc.data.servesDatasetIds.includes(ds.data.id)) {
+          Graph.addEdge(
+            mutable,
+            dsIdx,
+            indexById.get(nodeKey(svc))!,
+            "served-by"
+          );
+        }
+      }
+    }
   });
 
 // ---------------------------------------------------------------------------
