@@ -52,6 +52,7 @@ eval/vision/runs/
 eval/source-attribution/runs/
 eval/resolution-stage1/runs/
 eval/resolution-stage1/snapshot.jsonl
+eval/resolution-stage1/snapshot.build-report.json
 analysis/threads.db
 
 # Twitter auth cookies (contain session secrets)

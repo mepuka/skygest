@@ -11,6 +11,20 @@ export const decodeJsonStringEither = Schema.decodeUnknownResult(
 export const encodeJsonStringWith = <S extends Schema.Encoder<unknown>>(schema: S) =>
   (input: S["Type"]) => encodeJsonString(Schema.encodeUnknownSync(schema)(input));
 
+/**
+ * Encode a value through `schema`, then serialize to a pretty-printed JSON
+ * string with 2-space indentation. Use for hand-edited cold-start fixtures
+ * and any other on-disk JSON that humans will diff.
+ */
+export const encodeJsonStringPrettyWith = <S extends Schema.Encoder<unknown>>(schema: S) =>
+  (input: S["Type"]) => {
+    const encoded = Schema.encodeUnknownSync(schema)(input);
+    // Schema's UnknownFromJsonString minifies; for pretty output we need
+    // JSON.stringify directly. The encoded value has already been validated
+    // by `schema`, so this only handles serialization, not parsing.
+    return JSON.stringify(encoded, null, 2);
+  };
+
 export const decodeJsonStringWith = <S extends Schema.Decoder<unknown>>(schema: S) =>
   Schema.decodeUnknownSync(Schema.fromJsonString(schema as Schema.Top & S) as Schema.Decoder<unknown>) as
     (input: unknown, options?: import("effect/SchemaAST").ParseOptions) => S["Type"];
@@ -31,10 +45,12 @@ export const formatSchemaParseError = (error: Schema.SchemaError | import("effec
  * fields produce `T | undefined` but the target signature uses `prop?: T`.
  */
 export const stripUndefined = <T extends Record<string, unknown>>(obj: T): { [K in keyof T]: Exclude<T[K], undefined> } => {
-  const result: any = {};
-  for (const key of Object.keys(obj)) {
-    if ((obj as any)[key] !== undefined) {
-      result[key] = (obj as any)[key];
+  const result = {} as { [K in keyof T]: Exclude<T[K], undefined> };
+  for (const [key, value] of Object.entries(obj) as Array<
+    [keyof T, T[keyof T]]
+  >) {
+    if (value !== undefined) {
+      result[key] = value as Exclude<T[typeof key], undefined>;
     }
   }
   return result;

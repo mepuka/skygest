@@ -4,11 +4,17 @@ import { DesignDecision, SkosMapping } from "./annotations";
 export const aliasSchemes = [
   "oeo", "ires-siec", "iea-shortname", "ipcc",
   "entsoe-psr", "entsoe-eic",
-  "eia-route", "eia-series",
+  "eia-route", "eia-series", "eia-bulk-id",
   "eurostat-code",
   "ror", "wikidata", "doi",
   "iso3166", "url", "other"
  ] as const;
+
+export const AliasSchemeValues = {
+  eiaBulkId: "eia-bulk-id",
+  eiaRoute: "eia-route",
+  url: "url"
+} as const;
 
 export const AliasScheme = Schema.Literals(aliasSchemes).annotate({
   description: "External identifier namespace"

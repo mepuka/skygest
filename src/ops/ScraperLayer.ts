@@ -1,4 +1,4 @@
-import { Effect, Layer } from "effect";
+import { Effect, FileSystem, Layer, Schema } from "effect";
 import {
   CookieManager,
   GuestAuth,
@@ -9,6 +9,15 @@ import {
   TwitterPublic,
   TwitterTweets
 } from "@pooks/twitter-scraper";
+import { decodeJsonStringWith } from "../platform/Json";
+
+const SerializedCookieArray = Schema.Array(
+  Schema.Struct({
+    name: Schema.String,
+    value: Schema.String
+  })
+);
+const decodeSerializedCookies = decodeJsonStringWith(SerializedCookieArray);
 
 /**
  * Cookie manager layer that loads auth cookies from the scraper's fixture file.
@@ -21,8 +30,9 @@ const cookieFixturePath = (process.env.TWITTER_SCRAPER_PATH ?? "../better_twitte
 const cookieManagerLayer = Layer.effectDiscard(
   Effect.gen(function* () {
     const cookies = yield* CookieManager;
-    const text = yield* Effect.tryPromise(() => Bun.file(cookieFixturePath).text());
-    const raw = JSON.parse(text) as ReadonlyArray<{ name: string; value: string }>;
+    const fs = yield* FileSystem.FileSystem;
+    const text = yield* fs.readFileString(cookieFixturePath);
+    const raw = decodeSerializedCookies(text);
     yield* cookies.restoreSerializedCookies(raw);
   })
 ).pipe(Layer.provideMerge(CookieManager.liveLayer));

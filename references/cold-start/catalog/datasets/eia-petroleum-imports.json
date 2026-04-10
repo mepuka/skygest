@@ -2,22 +2,10 @@
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNQSXEPSRJ3H1JDYS8EVDKNJ",
   "title": "EIA Petroleum Imports",
-  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
-  "aliases": [
-    {
-      "scheme": "eia-route",
-      "value": "PET_IMPORTS",
-      "relation": "exactMatch"
-    }
-  ],
-  "createdAt": "2026-04-08T00:00:00.000Z",
-  "updatedAt": "2026-04-08T00:00:00.000Z",
-  "distributionIds": [
-    "https://id.skygest.io/distribution/dist_01KNQSXEPSF3TA4CZ5YRT6HX56",
-    "https://id.skygest.io/distribution/dist_01KNQSXEPSBS69WG8TSJDHK8PA"
-  ],
   "description": "National, PADD, state, city, port, and refinery petroleum imports data for various grades of crude oil and countries of origin.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
   "landingPage": "https://www.eia.gov/petroleum/imports/browser/",
+  "accessRights": "public",
   "keywords": [
     "petroleum",
     "imports",
@@ -28,8 +16,20 @@
     "petroleum",
     "trade"
   ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNQSXEPSF3TA4CZ5YRT6HX56",
+    "https://id.skygest.io/distribution/dist_01KNQSXEPSBS69WG8TSJDHK8PA"
+  ],
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
   ],
-  "accessRights": "public"
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
+  "aliases": [
+    {
+      "scheme": "eia-bulk-id",
+      "value": "PET_IMPORTS",
+      "relation": "exactMatch"
+    }
+  ]
 }
