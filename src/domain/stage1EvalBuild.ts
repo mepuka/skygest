@@ -112,7 +112,7 @@ export const UnsupportedPostSourceDiagnostic = Schema.TaggedStruct(
   }
 ).annotate({
   description:
-    "The gold set included a post source the current snapshot builder does not support"
+    "Legacy diagnostic preserved so older Stage 1 build reports still decode after Twitter support was added"
 });
 export type UnsupportedPostSourceDiagnostic = Schema.Schema.Type<
   typeof UnsupportedPostSourceDiagnostic
