@@ -2023,6 +2023,220 @@ git commit -m "docs(sky-254): Stage 1 eval delta after EIA ingestion"
 
 ---
 
+---
+
+## Implementation status update — 2026-04-10 (post-first-run)
+
+This section captures the actual state of the implementation after the first end-to-end live run. The plan above remains the canonical task-by-task spec for greenfield clones; this section is the reality patch.
+
+### What landed differently from the plan
+
+1. **Bun platform layers, not local FileSystem.make.** Task 4 originally called for a hand-rolled `FileSystem.make({...})` adapter cloned from `scripts/build-stage1-eval-snapshot.ts`. The actual implementation uses `@effect/platform-bun` (`BunFileSystem.layer`, `BunPath.layer`, `BunRuntime.runMain`). Both work, but the platform-bun approach is the project standard going forward and SKY-257 will create a shared `src/platform/ScriptRuntime.ts` module bundling `BunServices.layer` (which itself bundles FileSystem | Path | Terminal | Stdio | ChildProcessSpawner) + FetchHttpClient.layer + Logging.layer.
+2. **Walk cache uses `Persistable` + `localPersistenceLayer`, not raw FileSystem JSON read/write.** The script imports `Persistable` and `Persistence` from `effect/unstable/persistence` and uses `localPersistenceLayer(hiddenCacheDirectory)` from `src/platform/LocalPersistence.ts` for the TTL-managed cache. The git-tracked artifact at `references/cold-start/reports/harvest/eia-api-v2-walk.json` is still a raw FileSystem write — that's intentional, the artifact is for human-auditable diff review and lives outside the persistence store.
+3. **Verification.** The full pipeline runs end-to-end against the live EIA API. First run took ~minutes (cold cache + 259 routes); subsequent runs complete in **~340ms** thanks to the persistence cache. Output: **232 datasets, 1162 graph edges**. **68/68 tests passing**.
+
+### Two structural issues uncovered by the first live run
+
+The first live run merging against the existing hand-curated EIA registry surfaced two issues that turn out to be **architectural invariants every adapter must enforce** — see `docs/plans/2026-04-10-sky-251-ingest-script-conventions.md` §7a for the full write-up. Both are folded into SKY-257 (harness factoring) as required harness contract additions, and into SKY-254 below as cleanup tasks before commit.
+
+**Issue A — 3 hand-curated EIA datasets have no `eia-route` alias.** `references/cold-start/catalog/datasets/eia-{steo,international,total-energy}.json` had empty or `eia-bulk-id`-only alias arrays. Task 6's catalog index keys datasets by `aliases.find(scheme === "eia-route")?.value`, so the loader can't find them — the first ingest treated them as fresh mints, gave them new ULIDs, and overwrote the curated `landingPage`/`themes`/`keywords`/`description` fields with API-derived (often less rich) values.
+
+**Issue B — 30 hand-curated EIA distribution files use ad-hoc slugs.** Files like `eia-steo-api.json`, `eia-coal-bulk.json` use shorter slugs than the script's `${dataset-slug}-${kind}` formula (which would produce `eia-steo-api-access.json`, etc.). On merge, `buildDistributionCandidates` correctly looks up the existing distribution by `${datasetId}::${kind}` and preserves the `id`, but writes the file under the new computed slug, leaving the old file as a duplicate-id orphan on disk.
+
+### Resolution — Option 1 + Option 2 combined (lossless)
+
+Three options were considered:
+1. **Pre-merge fix-up** — hand-edit the 3 datasets and rename the 30 distribution files to match the formula. Lossless, but leaves the script latent-buggy for the next provider.
+2. **Make the script slug-respecting** — change `buildCandidateNodes` so a merged distribution's `IngestNode.slug` is set to the existing file's slug if found, falling back to the formula for fresh mints. Architecturally correct, fixes Issue B for every future adapter.
+3. **Accept the orphans, commit anyway** — fastest path, but leaves duplicate-id files in the registry.
+
+**Decision: Option 1 + Option 2 combined.** Option 1 alone leaves the script latent-buggy for SKY-258 onward; Option 2 alone can't reach the 3 alias-less datasets (the script has no way to know `eia-steo` should merge with API route `steo` without an explicit alias). Combined, they're lossless and architecturally correct.
+
+---
+
+## Task 13a — Backfill missing `eia-route` aliases on 3 hand-curated datasets
+
+**Files (modified):**
+- `references/cold-start/catalog/datasets/eia-steo.json`
+- `references/cold-start/catalog/datasets/eia-international.json`
+- `references/cold-start/catalog/datasets/eia-total-energy.json`
+
+**Step 1.** For each file, add an entry to the `aliases` array:
+
+```jsonc
+{
+  "scheme": "eia-route",
+  "value": "<api-v2-path>",
+  "relation": "exactMatch"
+}
+```
+
+Where `<api-v2-path>` is:
+- `eia-steo.json` → `"steo"`
+- `eia-international.json` → `"international"`
+- `eia-total-energy.json` → `"total-energy"`
+
+**Step 2.** Re-validate each file through the `Dataset` schema. Run a quick decode check (e.g. via the existing `loadCatalogIndex` test fixture path) to confirm the modified files still parse cleanly.
+
+**Step 3.** Commit as a separate prep commit so the alias backfill is reviewable in isolation:
+
+```bash
+git add references/cold-start/catalog/datasets/eia-steo.json \
+        references/cold-start/catalog/datasets/eia-international.json \
+        references/cold-start/catalog/datasets/eia-total-energy.json
+git commit -m "fix(sky-254): backfill eia-route aliases on hand-curated datasets"
+```
+
+---
+
+## Task 13b — Make `buildCandidateNodes` slug-respecting (Issue B fix)
+
+**Files:**
+- Modify: `scripts/cold-start-ingest-eia.ts` — `buildDistributionCandidates` (and any sibling builders that compute on-disk slugs).
+- Modify: `tests/cold-start-ingest-eia.test.ts` — add a regression test that proves a merged distribution with a non-formulaic slug retains its existing slug.
+
+**Step 1: Failing test.** Construct a fake `CatalogIndex` containing one existing distribution at slug `eia-steo-api` (kind=`api-access`). Call `buildDistributionCandidates` for the same dataset+kind. Assert that the returned candidate's slug is `eia-steo-api`, NOT `eia-steo-api-access`.
+
+**Step 2: Run test, verify failure.**
+
+**Step 3: Implement.** Inside `buildDistributionCandidates`, after the `idx.distributionsByDatasetIdKind.get(\`${datasetId}::${kind}\`)` lookup:
+
+```ts
+const existingDist = idx.distributionsByDatasetIdKind.get(`${datasetId}::${kind}`);
+const distSlug = existingDist !== undefined
+  ? existingDist.slug                          // preserve on-disk identity
+  : `${datasetSlug}-${kind}`;                  // formula only for fresh mints
+```
+
+The `existingDist.slug` value is the file basename without `.json`, derived from the file path during `loadCatalogIndex`. If `Distribution` doesn't currently carry a `slug` field, extend `loadCatalogIndex` to record it as a sidecar map (`distributionFileSlugById: Map<DistributionId, string>`) and consult that map here.
+
+**Step 4: Apply the same pattern to datasets and catalog records.** The dataset builder and CR builder also compute `${dataset-slug}` and `${dataset-slug}-cr` slugs respectively. Both need the same `existing?.slug ?? formula` pattern. Add regression tests for each.
+
+**Step 5: Run tests, verify pass.** All previous tests stay green.
+
+**Step 6: Commit.**
+
+```bash
+git add scripts/cold-start-ingest-eia.ts tests/cold-start-ingest-eia.test.ts
+git commit -m "fix(sky-254): respect existing on-disk slugs when merging entities"
+```
+
+---
+
+## Task 13c — Re-run ingest, verify zero unintended file creations
+
+**Step 1.** With Task 13a + 13b committed and `Persistence` cache invalidated (delete the hidden cache dir or pass `EIA_NO_CACHE=true`), run:
+
+```bash
+bun scripts/cold-start-ingest-eia.ts
+```
+
+Expected log line: `eia ingest completed` with `datasetsCreated: 0` (or close to zero — only genuinely new API v2 leaves should be net-new), no orphan-distribution warnings.
+
+**Step 2.** `git status` after the run. Expected: only **modifications** to existing files (metadata enrichment from API), **no creations** of new files with different slugs than their existing siblings, no deletions.
+
+**Step 3.** `git diff --stat` to confirm net file changes are intentional. Spot-check 2-3 of the previously-orphaned distributions to confirm they now merge cleanly.
+
+**Step 4.** If any unintended file creations remain, investigate root cause before committing — do NOT delete them. They may indicate a third invariant we haven't surfaced yet.
+
+**Step 5.** Once clean, commit the registry deltas:
+
+```bash
+git add references/cold-start/catalog/
+git commit -m "feat(sky-254): apply EIA ingest output to cold-start registry"
+```
+
+---
+
+## Task 13d — Centralized config + observability retrofit (per conventions doc)
+
+This task retrofits the script onto the conventions established in `docs/plans/2026-04-10-sky-251-ingest-script-conventions.md`. The script currently works correctly (68/68 tests, end-to-end verified) but redefines `ScriptConfig` inline, hand-merges Bun layers, and uses interpolated `Effect.log(...)` calls instead of structured `Effect.logInfo + annotateLogs`. None of this is functionally wrong — it just diverges from the project standard.
+
+**Files:**
+- Modify: `src/platform/ConfigShapes.ts` — export `nonEmptyRedacted`/`nonEmptyString` (currently module-private), add `ColdStartCommonKeys` and `EiaIngestKeys`.
+- Create: `src/platform/ScriptRuntime.ts` — `scriptPlatformLayer` + `runScriptMain` (see conventions doc §1).
+- Modify: `scripts/cold-start-ingest-eia.ts` — drop inline `ScriptConfig` declaration in favor of `Config.all(EiaIngestKeys)`; replace runtime footer with `runScriptMain("EiaIngest", main.pipe(Effect.provide(scriptPlatformLayer)))`; wrap units of work in `Effect.fn("EiaIngest.<step>")`; replace each interpolated log call with `Effect.logInfo("<event>").pipe(Effect.annotateLogs({...}))` per the table in conventions doc §4.
+
+**Step 1: Export helpers + add `EiaIngestKeys` to `ConfigShapes.ts`.**
+
+```ts
+// src/platform/ConfigShapes.ts (add)
+export const nonEmptyRedacted = (name: string) =>           // un-private
+  Config.redacted(name).pipe(Config.mapOrFail(...));
+export const nonEmptyString = (name: string) =>             // un-private
+  Config.string(name).pipe(Config.mapOrFail(...));
+
+export const ColdStartCommonKeys = {
+  rootDir: Config.withDefault(Config.string("COLD_START_ROOT"), "references/cold-start"),
+  dryRun: Config.withDefault(Config.boolean("COLD_START_DRY_RUN"), false),
+  noCache: Config.withDefault(Config.boolean("COLD_START_NO_CACHE"), false)
+} as const;
+
+export const EiaIngestKeys = {
+  ...ColdStartCommonKeys,
+  apiKey: nonEmptyRedacted("EIA_API_KEY"),
+  minIntervalMs: Config.withDefault(Config.int("EIA_MIN_INTERVAL_MS"), 250),
+  maxRetries: Config.withDefault(Config.int("EIA_MAX_RETRIES"), 4),
+  cacheTtlDays: Config.withDefault(Config.int("EIA_WALK_CACHE_TTL_DAYS"), 30),
+  onlyRoute: Config.option(Config.string("EIA_ONLY_ROUTE"))
+} as const;
+```
+
+**Step 2: Create `src/platform/ScriptRuntime.ts`.** Copy verbatim from conventions doc §1 (the `scriptPlatformLayer` + `runScriptMain` block).
+
+**Step 3: Replace `ScriptConfig` declaration in the EIA script.**
+
+```ts
+// scripts/cold-start-ingest-eia.ts
+import { EiaIngestKeys } from "../src/platform/ConfigShapes";
+export const ScriptConfig = Config.all(EiaIngestKeys);
+export type ScriptConfigShape = Config.Success<typeof ScriptConfig>;
+```
+
+Delete the inline `Config.all({...})` block (lines ~120-133).
+
+**Step 4: Wrap units of work in `Effect.fn`.** Per the span name table in conventions doc §4:
+
+```ts
+const fetchRoute = Effect.fn("EiaIngest.fetchRoute")(function* (route, apiKey) { ... });
+const getWalkData = Effect.fn("EiaIngest.getWalkData")(function* (config, apiKey) { ... });
+const loadCatalogIndex = Effect.fn("EiaIngest.loadCatalogIndex")(function* (rootDir) { ... });
+const validateCandidates = Effect.fn("EiaIngest.validateCandidates")(function* (candidates) { ... });
+const writeNode = Effect.fn("EiaIngest.writeNode")(function* (node) { ... });
+const main = Effect.fn("EiaIngest.main")(function* () { ... });
+```
+
+**Step 5: Replace interpolated logs with structured events.** Apply the event-name table from conventions doc §4 verbatim. Every previous `Effect.log(\`${count} routes\`)` becomes `Effect.logInfo("eia walk loaded").pipe(Effect.annotateLogs({ routeCount: count }))`. Errors get `errorTag` + `message` annotations via the standard `tapError` pattern.
+
+**Step 6: Replace runtime footer.**
+
+```ts
+import { scriptPlatformLayer, runScriptMain } from "../src/platform/ScriptRuntime";
+
+if (import.meta.main) {
+  runScriptMain("EiaIngest", main.pipe(Effect.provide(scriptPlatformLayer)));
+}
+```
+
+Delete the hand-merged `Layer.mergeAll(BunFileSystem.layer, BunPath.layer, FetchHttpClient.layer)` + `Effect.tapError(stringifyUnknown)` + `BunRuntime.runMain` block at lines ~2143-2152.
+
+**Step 7: Verify byte-identical output.** Run the script. Ingest output (`references/cold-start/catalog/...`) must be byte-identical to the pre-retrofit run. Logs will look different (JSON vs pretty), but the data on disk must match.
+
+**Step 8: Run tests, verify all green.**
+
+```bash
+bunx tsc --noEmit && bun run test
+```
+
+**Step 9: Commit.**
+
+```bash
+git add src/platform/ConfigShapes.ts src/platform/ScriptRuntime.ts scripts/cold-start-ingest-eia.ts
+git commit -m "refactor(sky-254): adopt centralized ScriptRuntime + Logging.layer + ConfigShapes"
+```
+
+---
+
 ## Task 14: PR
 
 **Step 1: Push branch and open PR.**

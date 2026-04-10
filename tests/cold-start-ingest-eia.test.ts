@@ -1,8 +1,18 @@
 import { describe, expect, it } from "@effect/vitest";
 import * as BunFileSystem from "@effect/platform-bun/BunFileSystem";
 import * as BunPath from "@effect/platform-bun/BunPath";
-import { Effect, Graph, Layer, Path } from "effect";
+import {
+  Duration,
+  Effect,
+  Graph,
+  Layer,
+  Option,
+  Path,
+  Schema
+} from "effect";
+import { TestClock } from "effect/testing";
 import { HttpClient, HttpClientResponse } from "effect/unstable/http";
+import { Persistence } from "effect/unstable/persistence";
 import * as fsp from "node:fs/promises";
 import * as os from "node:os";
 import * as nodePath from "node:path";
@@ -22,7 +32,9 @@ import {
   buildDistributionCandidates,
   buildIngestGraph,
   type BuildContext,
+  EiaApiResponse as EiaApiResponseSchema,
   type EiaApiResponse,
+  getWalkDataWith,
   EiaIngestLedgerError,
   EiaIngestSchemaError,
   encodeIngestNodeData,
@@ -41,6 +53,11 @@ import {
   walkRoutes,
   writeEntityFile
 } from "../scripts/cold-start-ingest-eia";
+import {
+  decodeJsonStringWith,
+  encodeJsonStringPrettyWith
+} from "../src/platform/Json";
+import { localPersistenceLayer } from "../src/platform/LocalPersistence";
 
 const jsonResponse = (
   request: Parameters<typeof HttpClientResponse.fromWeb>[0],
@@ -242,6 +259,424 @@ describe("walkRoutes", () => {
 
       yield* walkRoutes(fakeFetcher);
       expect(callCounts["electricity"]).toBe(1);
+    })
+  );
+});
+
+const walkArtifactPath = (rootDir: string): string =>
+  nodePath.join(rootDir, "reports", "harvest", "eia-api-v2-walk.json");
+
+const WalkArtifactSchema = Schema.Struct({
+  fetchedAt: Schema.String,
+  routes: Schema.Record(Schema.String, EiaApiResponseSchema)
+});
+
+const decodeWalkArtifact = decodeJsonStringWith(WalkArtifactSchema);
+const encodeWalkArtifact = encodeJsonStringPrettyWith(WalkArtifactSchema);
+
+const makeWalkDataConfig = (
+  rootDir: string,
+  overrides: Partial<{
+    cacheTtlDays: number;
+    noCache: boolean;
+    onlyRoute: Option.Option<string>;
+  }> = {}
+) => ({
+  rootDir,
+  cacheTtlDays: overrides.cacheTtlDays ?? 30,
+  noCache: overrides.noCache ?? false,
+  onlyRoute: overrides.onlyRoute ?? Option.none()
+});
+
+const makeWalkFixtureResponses = (): Record<string, EiaApiResponse> => ({
+  "": {
+    response: {
+      id: "root",
+      routes: [{ id: "electricity", name: "Electricity" }]
+    }
+  },
+  electricity: {
+    response: {
+      id: "electricity",
+      facets: []
+    }
+  }
+});
+
+const makeCountingFetcher = (
+  responses: Record<string, EiaApiResponse>
+) => {
+  const counts: Record<string, number> = {};
+
+  return {
+    counts,
+    fetch: (route: string) =>
+      Effect.sync(() => {
+        counts[route] = (counts[route] ?? 0) + 1;
+        return responses[route]!;
+      })
+  };
+};
+
+const readWalkArtifactJson = (rootDir: string): Promise<{
+  readonly fetchedAt: string;
+  readonly routes: Record<string, EiaApiResponse>;
+}> =>
+  fsp.readFile(walkArtifactPath(rootDir), "utf-8").then((text) =>
+    decodeWalkArtifact(text)
+  );
+
+const makeTmpDir = (prefix: string): Promise<string> =>
+  fsp.mkdtemp(nodePath.join(os.tmpdir(), prefix));
+
+const scopedTmpDir = (prefix: string) =>
+  Effect.acquireRelease(
+    Effect.promise(() => makeTmpDir(prefix)),
+    (dir) =>
+      Effect.promise(() =>
+        fsp.rm(dir, { recursive: true, force: true })
+      )
+  );
+
+const schemaError = (() => {
+  try {
+    Schema.decodeUnknownSync(Schema.Struct({ ok: Schema.String }))({});
+    throw new Error("Expected schema decode failure");
+  } catch (error) {
+    return error as Schema.SchemaError;
+  }
+})();
+
+const makePersistenceLayer = (
+  store: Persistence.PersistenceStore
+) =>
+  Layer.succeed(
+    Persistence.Persistence,
+    Persistence.Persistence.of({
+      make: () => Effect.succeed(store)
+    })
+  );
+
+describe("getWalkDataWith", () => {
+  it.effect("stores a fresh full-root walk in file-backed local persistence and then hits hidden cache", () =>
+    Effect.gen(function* () {
+      const rootDir = yield* scopedTmpDir("eia-walk-root-");
+      const hiddenCacheDir = yield* scopedTmpDir("eia-walk-hidden-");
+      const { counts, fetch } = makeCountingFetcher(makeWalkFixtureResponses());
+      const config = makeWalkDataConfig(rootDir);
+
+      const layer = Layer.mergeAll(
+        bunFsLayer,
+        localPersistenceLayer(hiddenCacheDir).pipe(Layer.provide(bunFsLayer))
+      );
+
+      const first = yield* getWalkDataWith(config, { fetch }).pipe(
+        Effect.provide(layer)
+      );
+
+      expect(Array.from(first.keys()).sort()).toEqual(["", "electricity"]);
+      expect(counts[""]).toBe(1);
+      expect(counts["electricity"]).toBe(1);
+
+      const artifact = yield* Effect.promise(() => readWalkArtifactJson(rootDir));
+      expect(Object.keys(artifact.routes).sort()).toEqual(["", "electricity"]);
+
+      const hiddenFiles = yield* Effect.promise(() => fsp.readdir(hiddenCacheDir));
+      expect(hiddenFiles.length).toBeGreaterThan(0);
+
+      const second = yield* getWalkDataWith(config, { fetch }).pipe(
+        Effect.provide(layer)
+      );
+
+      expect(Array.from(second.keys()).sort()).toEqual(["", "electricity"]);
+      expect(counts[""]).toBe(1);
+      expect(counts["electricity"]).toBe(1);
+    })
+  );
+
+  it.effect("recreates the readable artifact from hidden cache when the artifact is missing", () =>
+    Effect.gen(function* () {
+      const rootDir = yield* scopedTmpDir("eia-walk-root-");
+      const hiddenCacheDir = yield* scopedTmpDir("eia-walk-hidden-");
+      const { counts, fetch } = makeCountingFetcher(makeWalkFixtureResponses());
+      const config = makeWalkDataConfig(rootDir);
+      const layer = Layer.mergeAll(
+        bunFsLayer,
+        localPersistenceLayer(hiddenCacheDir).pipe(Layer.provide(bunFsLayer))
+      );
+
+      yield* getWalkDataWith(config, { fetch }).pipe(
+        Effect.provide(layer)
+      );
+
+      yield* Effect.promise(() => fsp.rm(walkArtifactPath(rootDir), { force: true }));
+
+      yield* getWalkDataWith(config, { fetch }).pipe(
+        Effect.provide(layer)
+      );
+
+      expect(counts[""]).toBe(1);
+      expect(counts["electricity"]).toBe(1);
+
+      const artifact = yield* Effect.promise(() => readWalkArtifactJson(rootDir));
+      expect(Object.keys(artifact.routes).sort()).toEqual(["", "electricity"]);
+    })
+  );
+
+  it.effect("expires hidden cache entries according to TTL and refetches", () =>
+    Effect.gen(function* () {
+      const rootDir = yield* scopedTmpDir("eia-walk-root-");
+      const { counts, fetch } = makeCountingFetcher(makeWalkFixtureResponses());
+      const config = makeWalkDataConfig(rootDir, { cacheTtlDays: 1 });
+
+      yield* Effect.gen(function* () {
+        yield* getWalkDataWith(config, { fetch });
+        expect(counts[""]).toBe(1);
+
+        yield* TestClock.adjust(Duration.days(2));
+
+        yield* getWalkDataWith(config, { fetch });
+      }).pipe(
+        Effect.provide(Layer.mergeAll(bunFsLayer, Persistence.layerMemory))
+      );
+
+      expect(counts[""]).toBe(2);
+    })
+  );
+
+  it.effect("heals a malformed hidden cache entry by clearing it and refetching", () =>
+    Effect.gen(function* () {
+      const rootDir = yield* scopedTmpDir("eia-walk-root-");
+      const { counts, fetch } = makeCountingFetcher(makeWalkFixtureResponses());
+      let removeCalls = 0;
+      let setCalls = 0;
+
+      const persistenceLayer = makePersistenceLayer({
+        get: () => Effect.fail(schemaError) as any,
+        getMany: () => Effect.die("unused") as any,
+        set: () =>
+          Effect.sync(() => {
+            setCalls += 1;
+          }) as any,
+        setMany: () => Effect.die("unused") as any,
+        remove: () =>
+          Effect.sync(() => {
+            removeCalls += 1;
+          }) as any,
+        clear: Effect.void
+      });
+
+      const result = yield* getWalkDataWith(makeWalkDataConfig(rootDir), { fetch }).pipe(
+        Effect.provide(Layer.mergeAll(bunFsLayer, persistenceLayer))
+      );
+
+      expect(Array.from(result.keys()).sort()).toEqual(["", "electricity"]);
+      expect(counts[""]).toBe(1);
+      expect(removeCalls).toBe(1);
+      expect(setCalls).toBe(1);
+    })
+  );
+
+  it.effect("falls back to a fresh walk when hidden cache reads fail", () =>
+    Effect.gen(function* () {
+      const rootDir = yield* scopedTmpDir("eia-walk-root-");
+      const { counts, fetch } = makeCountingFetcher(makeWalkFixtureResponses());
+      let removeCalls = 0;
+
+      const persistenceLayer = makePersistenceLayer({
+        get: () =>
+          Effect.fail(
+            new Persistence.PersistenceError({
+              message: "hidden cache read failed"
+            })
+          ) as any,
+        getMany: () => Effect.die("unused") as any,
+        set: () => Effect.void as any,
+        setMany: () => Effect.die("unused") as any,
+        remove: () =>
+          Effect.sync(() => {
+            removeCalls += 1;
+          }) as any,
+        clear: Effect.void
+      });
+
+      yield* getWalkDataWith(makeWalkDataConfig(rootDir), { fetch }).pipe(
+        Effect.provide(Layer.mergeAll(bunFsLayer, persistenceLayer))
+      );
+
+      expect(counts[""]).toBe(1);
+      expect(removeCalls).toBe(1);
+    })
+  );
+
+  it.effect("does not fail when hidden cache writes fail", () =>
+    Effect.gen(function* () {
+      const rootDir = yield* scopedTmpDir("eia-walk-root-");
+      const { counts, fetch } = makeCountingFetcher(makeWalkFixtureResponses());
+      let setCalls = 0;
+
+      const persistenceLayer = makePersistenceLayer({
+        get: () => Effect.void as any,
+        getMany: () => Effect.die("unused") as any,
+        set: () =>
+          Effect.sync(() => {
+            setCalls += 1;
+          }).pipe(
+            Effect.flatMap(() =>
+              Effect.fail(
+                new Persistence.PersistenceError({
+                  message: "hidden cache write failed"
+                })
+              )
+            )
+          ) as any,
+        setMany: () => Effect.die("unused") as any,
+        remove: () => Effect.void as any,
+        clear: Effect.void
+      });
+
+      const result = yield* getWalkDataWith(makeWalkDataConfig(rootDir), { fetch }).pipe(
+        Effect.provide(Layer.mergeAll(bunFsLayer, persistenceLayer))
+      );
+
+      expect(Array.from(result.keys()).sort()).toEqual(["", "electricity"]);
+      expect(counts[""]).toBe(1);
+      expect(setCalls).toBe(1);
+    })
+  );
+
+  it.effect("bypasses hidden cache under --no-cache but still refreshes the readable artifact", () =>
+    Effect.gen(function* () {
+      const rootDir = yield* scopedTmpDir("eia-walk-root-");
+      const { counts, fetch } = makeCountingFetcher(makeWalkFixtureResponses());
+      let getCalls = 0;
+      let setCalls = 0;
+      let removeCalls = 0;
+
+      yield* Effect.promise(() =>
+        fsp.mkdir(nodePath.dirname(walkArtifactPath(rootDir)), {
+          recursive: true
+        })
+      );
+      yield* Effect.promise(() =>
+        fsp.writeFile(
+          walkArtifactPath(rootDir),
+          JSON.stringify({
+            fetchedAt: "stale",
+            routes: {}
+          }),
+          "utf-8"
+        )
+      );
+
+      const persistenceLayer = makePersistenceLayer({
+        get: () =>
+          Effect.sync(() => {
+            getCalls += 1;
+            return undefined;
+          }) as any,
+        getMany: () => Effect.die("unused") as any,
+        set: () =>
+          Effect.sync(() => {
+            setCalls += 1;
+          }) as any,
+        setMany: () => Effect.die("unused") as any,
+        remove: () =>
+          Effect.sync(() => {
+            removeCalls += 1;
+          }) as any,
+        clear: Effect.void
+      });
+
+      yield* getWalkDataWith(
+        makeWalkDataConfig(rootDir, { noCache: true }),
+        { fetch }
+      ).pipe(
+        Effect.provide(Layer.mergeAll(bunFsLayer, persistenceLayer))
+      );
+
+      expect(getCalls).toBe(0);
+      expect(setCalls).toBe(0);
+      expect(removeCalls).toBe(1);
+      expect(counts[""]).toBe(1);
+
+      const artifact = yield* Effect.promise(() => readWalkArtifactJson(rootDir));
+      expect(Object.keys(artifact.routes).sort()).toEqual(["", "electricity"]);
+    })
+  );
+
+  it.effect("bypasses hidden cache for scoped walks and leaves the shared artifact untouched", () =>
+    Effect.gen(function* () {
+      const rootDir = yield* scopedTmpDir("eia-walk-root-");
+      const sentinel = `${encodeWalkArtifact({
+        fetchedAt: "keep-me",
+        routes: { stale: { response: { id: "stale" } } }
+      })}\n`;
+      let getCalls = 0;
+      let setCalls = 0;
+      const fetchCalls: Array<string> = [];
+
+      yield* Effect.promise(() =>
+        fsp.mkdir(nodePath.dirname(walkArtifactPath(rootDir)), {
+          recursive: true
+        })
+      );
+      yield* Effect.promise(() =>
+        fsp.writeFile(walkArtifactPath(rootDir), sentinel, "utf-8")
+      );
+
+      const persistenceLayer = makePersistenceLayer({
+        get: () =>
+          Effect.sync(() => {
+            getCalls += 1;
+            return undefined;
+          }) as any,
+        getMany: () => Effect.die("unused") as any,
+        set: () =>
+          Effect.sync(() => {
+            setCalls += 1;
+          }) as any,
+        setMany: () => Effect.die("unused") as any,
+        remove: () => Effect.void as any,
+        clear: Effect.void
+      });
+
+      const fetch = (route: string) =>
+        Effect.sync(() => {
+          fetchCalls.push(route);
+          if (route === "electricity") {
+            return {
+              response: {
+                id: "electricity",
+                routes: [{ id: "retail-sales", name: "Retail Sales" }]
+              }
+            } satisfies EiaApiResponse;
+          }
+          return {
+            response: {
+              id: "retail-sales",
+              facets: []
+            }
+          } satisfies EiaApiResponse;
+        });
+
+      const result = yield* getWalkDataWith(
+        makeWalkDataConfig(rootDir, { onlyRoute: Option.some("electricity") }),
+        { fetch }
+      ).pipe(
+        Effect.provide(Layer.mergeAll(bunFsLayer, persistenceLayer))
+      );
+
+      expect(Array.from(result.keys()).sort()).toEqual([
+        "electricity",
+        "electricity/retail-sales"
+      ]);
+      expect(fetchCalls).toEqual(["electricity", "electricity/retail-sales"]);
+      expect(getCalls).toBe(0);
+      expect(setCalls).toBe(0);
+      expect(
+        yield* Effect.promise(() => fsp.readFile(walkArtifactPath(rootDir), "utf-8"))
+      ).toBe(sentinel);
     })
   );
 });
@@ -907,18 +1342,27 @@ describe("loadCatalogIndex", () => {
       const ds = result.datasetsByRoute.get(route);
       expect(ds).toBeDefined();
       expect(ds!.title).toBe("Retail Sales of Electricity");
+      expect(result.datasetFileSlugById.get(ds!.id)).toBe(
+        "eia-electricity-retail-sales"
+      );
 
       // Compound distribution key: `${datasetId}::${kind}`.
       const dist = result.distributionsByDatasetIdKind.get(
         `${datasetId}::api-access`
       );
       expect(dist).toBeDefined();
+      expect(result.distributionFileSlugById.get(dist!.id)).toBe(
+        "eia-electricity-retail-sales-api"
+      );
 
       // Compound CR key: `${catalogId}::${primaryTopicId}`.
       const cr = result.catalogRecordsByCatalogAndPrimaryTopic.get(
         `${catalogId}::${datasetId}`
       );
       expect(cr).toBeDefined();
+      expect(result.catalogRecordFileSlugById.get(cr!.id)).toBe(
+        "eia-electricity-retail-sales-cr"
+      );
 
       // Agent-by-name lookup.
       const agent = result.agentsByName.get(
@@ -994,8 +1438,11 @@ const makeBuilderCtx = (now: string): BuildContext => {
 // any lookups to resolve against existing records.
 const emptyIndex = (): Parameters<typeof buildDistributionCandidates>[3] => ({
   datasetsByRoute: new Map(),
+  datasetFileSlugById: new Map(),
   distributionsByDatasetIdKind: new Map(),
+  distributionFileSlugById: new Map(),
   catalogRecordsByCatalogAndPrimaryTopic: new Map(),
+  catalogRecordFileSlugById: new Map(),
   agentsByName: new Map(),
   catalog: null,
   dataService: null,
@@ -1354,8 +1801,11 @@ describe("buildDistributionCandidates", () => {
     // accidentally write to shared fixture state.
     const idx: Parameters<typeof buildDistributionCandidates>[3] = {
       datasetsByRoute: new Map(),
+      datasetFileSlugById: new Map(),
       distributionsByDatasetIdKind: new Map(),
+      distributionFileSlugById: new Map(),
       catalogRecordsByCatalogAndPrimaryTopic: new Map(),
+      catalogRecordFileSlugById: new Map(),
       agentsByName: new Map(),
       catalog: null,
       dataService: null,
@@ -1559,6 +2009,89 @@ describe("buildCandidateNodes", () => {
       // Dataset ID reused from existing (not re-minted)
       expect(datasetNode.data.id).toBe(existing.id);
     }
+  });
+
+  it("reuses existing dataset, distribution, and catalog-record slugs when merging", () => {
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const walk = new Map<string, EiaApiResponse>();
+    walk.set("steo", {
+      response: {
+        id: "steo",
+        name: "Short-Term Energy Outlook",
+        facets: [],
+        defaultFrequency: "monthly"
+      }
+    } as unknown as EiaApiResponse);
+
+    const existingDataset = {
+      _tag: "Dataset",
+      id: BUILDER_DATASET_ID as unknown as Dataset["id"],
+      title: "Short-Term Energy Outlook",
+      publisherAgentId: ctx.eiaAgent.id,
+      accessRights: "public",
+      aliases: [
+        {
+          scheme: "eia-route",
+          value: "steo",
+          relation: "exactMatch"
+        }
+      ],
+      createdAt: FIXTURE_NOW as unknown as Dataset["createdAt"],
+      updatedAt: FIXTURE_NOW as unknown as Dataset["updatedAt"]
+    } as unknown as Dataset;
+    const existingDistribution = {
+      _tag: "Distribution",
+      id: BUILDER_DIST_ID as unknown as Distribution["id"],
+      datasetId: existingDataset.id,
+      kind: "api-access",
+      accessURL: "https://api.eia.gov/v2/steo/" as unknown as Distribution["accessURL"],
+      aliases: [],
+      createdAt: FIXTURE_NOW as unknown as Distribution["createdAt"],
+      updatedAt: FIXTURE_NOW as unknown as Distribution["updatedAt"]
+    } as unknown as Distribution;
+    const existingCatalogRecord = {
+      _tag: "CatalogRecord",
+      id: "https://id.skygest.io/catalog-record/cr_01KNQSXEPQHNVM0AVMA3SQRNK4" as unknown as CatalogRecord["id"],
+      catalogId: ctx.eiaCatalog.id,
+      primaryTopicType: "dataset",
+      primaryTopicId: existingDataset.id,
+      firstSeen: FIXTURE_NOW,
+      lastSeen: FIXTURE_NOW,
+      harvestedFrom: "https://api.eia.gov/v2/steo/",
+      isAuthoritative: true
+    } as unknown as CatalogRecord;
+
+    const idx = emptyIndex();
+    idx.datasetsByRoute.set("steo", existingDataset);
+    idx.datasetFileSlugById.set(existingDataset.id, "eia-short-term-outlook");
+    idx.distributionsByDatasetIdKind.set(
+      `${existingDataset.id}::api-access`,
+      existingDistribution
+    );
+    idx.distributionFileSlugById.set(
+      existingDistribution.id,
+      "eia-short-term-outlook-api"
+    );
+    idx.catalogRecordsByCatalogAndPrimaryTopic.set(
+      `${ctx.eiaCatalog.id}::${existingDataset.id}`,
+      existingCatalogRecord
+    );
+    idx.catalogRecordFileSlugById.set(
+      existingCatalogRecord.id,
+      "eia-short-term-outlook-record"
+    );
+    (idx.allDatasets as Array<Dataset>) = [existingDataset];
+    (idx.allDistributions as Array<Distribution>) = [existingDistribution];
+    (idx.allCatalogRecords as Array<CatalogRecord>) = [existingCatalogRecord];
+
+    const nodes = buildCandidateNodes(walk, idx, ctx);
+    const datasetNode = nodes.find((n) => n._tag === "dataset");
+    const distributionNode = nodes.find((n) => n._tag === "distribution");
+    const catalogRecordNode = nodes.find((n) => n._tag === "catalog-record");
+
+    expect(datasetNode?.slug).toBe("eia-short-term-outlook");
+    expect(distributionNode?.slug).toBe("eia-short-term-outlook-api");
+    expect(catalogRecordNode?.slug).toBe("eia-short-term-outlook-record");
   });
 });
 
@@ -2037,4 +2570,3 @@ describe("isApiV2RouteValue", () => {
     });
   }
 });
-

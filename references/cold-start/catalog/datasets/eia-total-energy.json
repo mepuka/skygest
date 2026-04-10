@@ -27,6 +27,11 @@
   "updatedAt": "2026-04-08T00:00:00.000Z",
   "aliases": [
     {
+      "scheme": "eia-route",
+      "value": "total-energy",
+      "relation": "exactMatch"
+    },
+    {
       "scheme": "eia-bulk-id",
       "value": "TOTAL",
       "relation": "exactMatch"

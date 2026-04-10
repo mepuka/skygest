@@ -11,9 +11,6 @@
  * See docs/plans/2026-04-10-sky-254-eia-dcat-ingestion.md for the full plan.
  */
 
-import * as BunFileSystem from "@effect/platform-bun/BunFileSystem";
-import * as BunPath from "@effect/platform-bun/BunPath";
-import * as BunRuntime from "@effect/platform-bun/BunRuntime";
 import {
   Cache,
   Clock,
@@ -21,9 +18,9 @@ import {
   DateTime,
   Duration,
   Effect,
+  Exit,
   FileSystem,
   Graph,
-  Layer,
   MutableHashMap,
   MutableRef,
   Option,
@@ -36,10 +33,13 @@ import {
   SynchronizedRef
 } from "effect";
 import {
-  FetchHttpClient,
   HttpClient,
   HttpClientResponse
 } from "effect/unstable/http";
+import {
+  Persistable,
+  Persistence
+} from "effect/unstable/persistence";
 import { ulid } from "ulid";
 import {
   Agent,
@@ -57,6 +57,8 @@ import {
   formatSchemaParseError,
   stringifyUnknown
 } from "../src/platform/Json";
+import { EiaIngestKeys } from "../src/platform/ConfigShapes";
+import { localPersistenceLayer } from "../src/platform/LocalPersistence";
 
 // ---------------------------------------------------------------------------
 // Tagged errors
@@ -106,24 +108,10 @@ export class EiaIngestLedgerError extends Schema.TaggedErrorClass<EiaIngestLedge
 // Script config
 // ---------------------------------------------------------------------------
 
-// dryRun / noCache default to false here; onlyRoute defaults to "no scope"
-// (Option.none) by being absent. Task 11's CLI flags override these via
-// a custom ConfigProvider so main can reference config.dryRun /
-// config.noCache / config.onlyRoute uniformly across both env-driven and
-// flag-driven invocations.
-export const ScriptConfig = Config.all({
-  apiKey: Config.redacted("EIA_API_KEY"),
-  rootDir: Config.withDefault(
-    Config.string("COLD_START_ROOT"),
-    "references/cold-start"
-  ),
-  minIntervalMs: Config.withDefault(Config.int("EIA_MIN_INTERVAL_MS"), 250),
-  maxRetries: Config.withDefault(Config.int("EIA_MAX_RETRIES"), 4),
-  cacheTtlDays: Config.withDefault(Config.int("EIA_WALK_CACHE_TTL_DAYS"), 30),
-  dryRun: Config.withDefault(Config.boolean("EIA_DRY_RUN"), false),
-  noCache: Config.withDefault(Config.boolean("EIA_NO_CACHE"), false),
-  onlyRoute: Config.option(Config.string("EIA_ONLY_ROUTE"))
-});
+// Shared cold-start flags use COLD_START_* names. EIA_DRY_RUN and
+// EIA_NO_CACHE still work as legacy fallbacks while the cluster scripts
+// converge on the common convention.
+export const ScriptConfig = Config.all(EiaIngestKeys);
 export type ScriptConfigShape = Config.Success<typeof ScriptConfig>;
 
 // ---------------------------------------------------------------------------
@@ -308,8 +296,19 @@ const WalkCache = Schema.Struct({
 });
 type WalkCache = Schema.Schema.Type<typeof WalkCache>;
 
-const decodeWalkCache = decodeJsonStringWith(WalkCache);
 const encodeWalkCache = encodeJsonStringPrettyWith(WalkCache);
+const walkArtifactRelativePath = "reports/harvest/eia-api-v2-walk.json";
+const hiddenWalkCacheStoreId = "eia-api-v2-walk";
+
+class EiaFullWalkCacheRequest extends Persistable.Class()(
+  "EiaFullWalkCacheRequest",
+  {
+    primaryKey: () => "full-root",
+    success: WalkCache
+  }
+) {}
+
+const fullWalkCacheRequest = new EiaFullWalkCacheRequest();
 
 /**
  * Lazy walk of the EIA API v2 route tree. Uses Effect.whileLoop over a
@@ -359,120 +358,26 @@ export const walkRoutes = <R>(
     return results;
   });
 
-const walkCacheRelativePath = "reports/harvest/eia-api-v2-walk.json";
+const snapshotToWalkData = (snapshot: WalkCache): Map<string, EiaApiResponse> =>
+  new Map(Object.entries(snapshot.routes));
 
-const readWalkCache = (rootDir: string, ttlDays: number) =>
+const logWalkedSnapshot = (snapshot: WalkCache) =>
+  Effect.log(`Walked ${String(Object.keys(snapshot.routes).length)} routes`);
+
+const warnHiddenWalkCacheIssue = (message: string, cause: unknown) =>
+  Effect.logWarning(`${message}: ${stringifyUnknown(cause)}`);
+
+const buildWalkSnapshot = <R>(
+  fetch: (
+    route: string
+  ) => Effect.Effect<EiaApiResponse, EiaApiFetchError | EiaApiDecodeError, R>,
+  startRoute = ""
+) =>
   Effect.gen(function* () {
-    const fs_ = yield* FileSystem.FileSystem;
-    const path_ = yield* Path.Path;
-    const cachePath = path_.resolve(rootDir, walkCacheRelativePath);
+    const results = yield* walkRoutes(fetch, startRoute);
+    const fetchedAt = DateTime.formatIso(yield* DateTime.now);
 
-    const exists = yield* Effect.exit(fs_.access(cachePath));
-    if (exists._tag === "Failure") return null;
-
-    const text = yield* fs_.readFileString(cachePath).pipe(
-      Effect.mapError(
-        (cause) =>
-          new EiaIngestFsError({
-            operation: "readFileString",
-            path: cachePath,
-            message: stringifyUnknown(cause)
-          })
-      )
-    );
-
-    const decoded = yield* Effect.try({
-      try: () => decodeWalkCache(text),
-      catch: (cause) =>
-        new EiaIngestFsError({
-          operation: "decode-walk-cache",
-          path: cachePath,
-          message: stringifyUnknown(cause)
-        })
-    });
-
-    const ageMs = Date.now() - new Date(decoded.fetchedAt).getTime();
-    if (ageMs > ttlDays * 86_400_000) {
-      yield* Effect.log(
-        `Walk cache at ${cachePath} is older than ${String(ttlDays)} days; ignoring.`
-      );
-      return null;
-    }
-    return decoded;
-  });
-
-const writeWalkCache = (rootDir: string, cache: WalkCache) =>
-  Effect.gen(function* () {
-    const fs_ = yield* FileSystem.FileSystem;
-    const path_ = yield* Path.Path;
-    const cachePath = path_.resolve(rootDir, walkCacheRelativePath);
-    const cacheDir = path_.dirname(cachePath);
-
-    yield* fs_.makeDirectory(cacheDir, { recursive: true }).pipe(
-      Effect.mapError(
-        (cause) =>
-          new EiaIngestFsError({
-            operation: "makeDirectory",
-            path: cacheDir,
-            message: stringifyUnknown(cause)
-          })
-      )
-    );
-
-    yield* fs_.writeFileString(cachePath, `${encodeWalkCache(cache)}\n`).pipe(
-      Effect.mapError(
-        (cause) =>
-          new EiaIngestFsError({
-            operation: "writeFileString",
-            path: cachePath,
-            message: stringifyUnknown(cause)
-          })
-      )
-    );
-  });
-
-/**
- * Returns the walk data as a `Map<route, EiaApiResponse>`, drawn from the
- * 30-day disk cache when available. `--no-cache` and `--only-route` both
- * bypass the shared cache so a partial walk never overwrites the full-tree
- * snapshot.
- */
-export const getWalkData = (config: ScriptConfigShape, apiKey: string) =>
-  Effect.gen(function* () {
-    const startRoute = Option.getOrElse(config.onlyRoute, () => "");
-    const scoped = startRoute !== "";
-
-    if (!config.noCache && !scoped) {
-      const cached = yield* readWalkCache(config.rootDir, config.cacheTtlDays);
-      if (cached !== null) {
-        yield* Effect.log(`Using cached walk from ${cached.fetchedAt}`);
-        return new Map(Object.entries(cached.routes));
-      }
-    } else if (config.noCache) {
-      yield* Effect.log("Skipping walk cache because --no-cache was set");
-    } else {
-      yield* Effect.log(
-        `Scoped walk for ${startRoute}; shared walk cache disabled`
-      );
-    }
-
-    yield* Effect.log(
-      scoped
-        ? `Walking EIA API v2 fresh from subtree ${startRoute}...`
-        : "Walking EIA API v2 fresh..."
-    );
-    const fetcher = yield* makeRateLimitedFetcher(
-      config.minIntervalMs,
-      config.maxRetries
-    );
-    const results = yield* walkRoutes(
-      (route) => fetcher(route, apiKey),
-      startRoute
-    );
-
-    // MutableHashMap is Iterable<[K, V]> — see effect/src/MutableHashMap.ts:69.
-    // Snapshot to a plain Record for cache persistence.
-    const snapshot = yield* Effect.sync(() => {
+    const routes = yield* Effect.sync(() => {
       const out: Record<string, EiaApiResponse> = {};
       for (const [route, response] of results) {
         out[route] = response;
@@ -480,14 +385,213 @@ export const getWalkData = (config: ScriptConfigShape, apiKey: string) =>
       return out;
     });
 
-    if (!config.noCache && !scoped) {
-      yield* writeWalkCache(config.rootDir, {
-        fetchedAt: new Date().toISOString(),
-        routes: snapshot
+    return {
+      fetchedAt,
+      routes
+    } satisfies WalkCache;
+  });
+
+const writeWalkSnapshotArtifact = (rootDir: string, snapshot: WalkCache) =>
+  Effect.gen(function* () {
+    const path_ = yield* Path.Path;
+    const cachePath = path_.resolve(rootDir, walkArtifactRelativePath);
+    yield* writeEntityFile(cachePath, `${encodeWalkCache(snapshot)}\n`);
+  });
+
+const clearHiddenWalkCacheBestEffort = (
+  store: Persistence.PersistenceStore
+) =>
+  Effect.gen(function* () {
+    const exit = yield* Effect.exit(store.remove(fullWalkCacheRequest));
+    if (Exit.isFailure(exit)) {
+      yield* warnHiddenWalkCacheIssue(
+        "Unable to clear hidden EIA walk cache entry",
+        exit.cause
+      );
+    }
+  });
+
+const writeHiddenWalkCacheBestEffort = (
+  store: Persistence.PersistenceStore,
+  snapshot: WalkCache
+) =>
+  Effect.gen(function* () {
+    const exit = yield* Effect.exit(
+      store.set(fullWalkCacheRequest, Exit.succeed(snapshot))
+    );
+    if (Exit.isFailure(exit)) {
+      yield* warnHiddenWalkCacheIssue(
+        "Unable to write hidden EIA walk cache",
+        exit.cause
+      );
+    }
+  });
+
+type WalkDataConfig = Pick<
+  ScriptConfigShape,
+  "cacheTtlDays" | "noCache" | "onlyRoute" | "rootDir"
+>;
+
+interface GetWalkDataWithOptions<R> {
+  readonly fetch: (
+    route: string
+  ) => Effect.Effect<EiaApiResponse, EiaApiFetchError | EiaApiDecodeError, R>;
+}
+
+const runFreshWalk = <R>(
+  config: WalkDataConfig,
+  options: GetWalkDataWithOptions<R>,
+  behavior: {
+    readonly writeArtifact: boolean;
+    readonly hiddenStore?: Persistence.PersistenceStore;
+  }
+) =>
+  Effect.gen(function* () {
+    const startRoute = Option.getOrElse(config.onlyRoute, () => "");
+    const scoped = startRoute !== "";
+
+    yield* Effect.log(
+      scoped
+        ? `Walking EIA API v2 fresh from subtree ${startRoute}...`
+        : "Walking EIA API v2 fresh..."
+    );
+
+    const snapshot = yield* buildWalkSnapshot(options.fetch, startRoute);
+
+    if (behavior.hiddenStore !== undefined) {
+      yield* writeHiddenWalkCacheBestEffort(behavior.hiddenStore, snapshot);
+    }
+    if (behavior.writeArtifact) {
+      yield* writeWalkSnapshotArtifact(config.rootDir, snapshot);
+    }
+
+    yield* logWalkedSnapshot(snapshot);
+    return snapshotToWalkData(snapshot);
+  });
+
+/**
+ * Cache-aware test seam for walk loading. Full-root runs use provided
+ * Persistence as the hidden cache source of truth. `--no-cache` and scoped
+ * walks bypass hidden cache reads/writes. The readable JSON artifact is
+ * always refreshed for full-root runs, even when `--no-cache` is set.
+ */
+export const getWalkDataWith = <R>(
+  config: WalkDataConfig,
+  options: GetWalkDataWithOptions<R>
+) =>
+  Effect.gen(function* () {
+    const startRoute = Option.getOrElse(config.onlyRoute, () => "");
+    const scoped = startRoute !== "";
+
+    if (config.noCache) {
+      yield* Effect.log("Skipping walk cache because --no-cache was set");
+      if (scoped) {
+        return yield* runFreshWalk(config, options, {
+          writeArtifact: false
+        });
+      }
+
+      return yield* Effect.scoped(
+        Effect.gen(function* () {
+          const persistence = yield* Persistence.Persistence;
+          const store = yield* persistence.make({
+            storeId: hiddenWalkCacheStoreId,
+            timeToLive: () => Duration.days(config.cacheTtlDays)
+          });
+
+          yield* clearHiddenWalkCacheBestEffort(store);
+          return yield* runFreshWalk(config, options, {
+            writeArtifact: true
+          });
+        })
+      );
+    }
+
+    if (scoped) {
+      yield* Effect.log(
+        `Scoped walk for ${startRoute}; shared walk cache disabled`
+      );
+      return yield* runFreshWalk(config, options, {
+        writeArtifact: false
       });
     }
-    yield* Effect.log(`Walked ${String(Object.keys(snapshot).length)} routes`);
-    return new Map(Object.entries(snapshot));
+
+    return yield* Effect.scoped(
+      Effect.gen(function* () {
+        const persistence = yield* Persistence.Persistence;
+        const store = yield* persistence.make({
+          storeId: hiddenWalkCacheStoreId,
+          timeToLive: () => Duration.days(config.cacheTtlDays)
+        });
+
+        const cachedExit = yield* Effect.exit(store.get(fullWalkCacheRequest));
+        const cached =
+          Exit.isFailure(cachedExit)
+            ? yield* warnHiddenWalkCacheIssue(
+                "Hidden EIA walk cache is unreadable; refetching",
+                cachedExit.cause
+              ).pipe(
+                Effect.flatMap(() => clearHiddenWalkCacheBestEffort(store)),
+                Effect.as(undefined)
+              )
+            : cachedExit.value;
+
+        if (cached !== undefined) {
+          if (Exit.isSuccess(cached)) {
+            yield* Effect.log(`Using cached walk from ${cached.value.fetchedAt}`);
+            yield* writeWalkSnapshotArtifact(config.rootDir, cached.value);
+            yield* logWalkedSnapshot(cached.value);
+            return snapshotToWalkData(cached.value);
+          }
+
+          yield* Effect.logWarning(
+            "Hidden EIA walk cache stored an invalid failure entry; refetching"
+          );
+          yield* clearHiddenWalkCacheBestEffort(store);
+        }
+
+        return yield* runFreshWalk(config, options, {
+          writeArtifact: true,
+          hiddenStore: store
+        });
+      })
+    );
+  });
+
+export const getWalkData = (config: ScriptConfigShape, apiKey: string) =>
+  Effect.gen(function* () {
+    const fetcher = yield* makeRateLimitedFetcher(
+      config.minIntervalMs,
+      config.maxRetries
+    );
+    const effect = getWalkDataWith(config, {
+      fetch: (route) => fetcher(route, apiKey)
+    });
+
+    if (Option.isSome(config.onlyRoute)) {
+      return yield* effect.pipe(Effect.provide(Persistence.layerMemory));
+    }
+
+    const path_ = yield* Path.Path;
+    const hiddenCacheDirectory = path_.resolve(
+      import.meta.dirname,
+      "..",
+      ".cache",
+      hiddenWalkCacheStoreId
+    );
+
+    return yield* effect.pipe(
+      Effect.provide(localPersistenceLayer(hiddenCacheDirectory)),
+      Effect.catchTag("PlatformError", () =>
+        Effect.logWarning(
+          "Local EIA walk cache is unavailable; continuing without hidden cache"
+        ).pipe(
+          Effect.flatMap(() =>
+            effect.pipe(Effect.provide(Persistence.layerMemory))
+          )
+        )
+      )
+    );
   });
 
 // ---------------------------------------------------------------------------
@@ -715,8 +819,11 @@ export const buildIngestGraph = (
 
 export interface CatalogIndex {
   readonly datasetsByRoute: Map<string, Dataset>;
+  readonly datasetFileSlugById: Map<Dataset["id"], string>;
   readonly distributionsByDatasetIdKind: Map<string, Distribution>;
+  readonly distributionFileSlugById: Map<Distribution["id"], string>;
   readonly catalogRecordsByCatalogAndPrimaryTopic: Map<string, CatalogRecord>;
+  readonly catalogRecordFileSlugById: Map<CatalogRecord["id"], string>;
   readonly agentsByName: Map<string, Agent>;
   readonly catalog: Catalog | null;
   readonly dataService: DataService | null;
@@ -790,6 +897,11 @@ const decodeFileAs = <S extends Schema.Decoder<unknown>>(
       return result.success;
     });
 
+interface LoadedEntity<T> {
+  readonly slug: string;
+  readonly data: T;
+}
+
 const loadEntitiesFromDir = <S extends Schema.Decoder<unknown>>(
   fs_: FileSystem.FileSystem,
   rootDir: string,
@@ -797,7 +909,7 @@ const loadEntitiesFromDir = <S extends Schema.Decoder<unknown>>(
   schema: S,
   kind: string
 ): Effect.Effect<
-  ReadonlyArray<S["Type"]>,
+  ReadonlyArray<LoadedEntity<S["Type"]>>,
   EiaIngestFsError | EiaIngestSchemaError,
   Path.Path
 > =>
@@ -833,11 +945,17 @@ const loadEntitiesFromDir = <S extends Schema.Decoder<unknown>>(
                 })
             )
           );
-          return yield* decodeFileAs(schema, kind, slug)(text);
+          const data = yield* decodeFileAs(schema, kind, slug)(text);
+          return { slug, data } satisfies LoadedEntity<S["Type"]>;
         }),
       { concurrency: INDEX_LOAD_CONCURRENCY }
     );
   });
+
+const stableSlug = (
+  existingSlug: string | undefined,
+  computeFresh: () => string
+): string => existingSlug ?? computeFresh();
 
 /**
  * Loads the on-disk cold-start catalog into alias-keyed lookup maps.
@@ -898,14 +1016,25 @@ export const loadCatalogIndex = (
     // callback pattern used in buildIngestGraph above).
     return yield* Effect.sync(() => {
       const datasetsByRoute = new Map<string, Dataset>();
+      const datasetFileSlugById = new Map<Dataset["id"], string>();
       const distributionsByDatasetIdKind = new Map<string, Distribution>();
+      const distributionFileSlugById = new Map<Distribution["id"], string>();
       const agentsByName = new Map<string, Agent>();
       const catalogRecordsByCatalogAndPrimaryTopic = new Map<
         string,
         CatalogRecord
       >();
+      const catalogRecordFileSlugById = new Map<CatalogRecord["id"], string>();
 
-      for (const ds of datasets) {
+      const datasetEntities = datasets.map(({ data }) => data);
+      const distributionEntities = distributions.map(({ data }) => data);
+      const catalogRecordEntities = catalogRecords.map(({ data }) => data);
+      const dataServiceEntities = dataServices.map(({ data }) => data);
+      const catalogEntities = catalogs.map(({ data }) => data);
+      const agentEntities = agents.map(({ data }) => data);
+
+      for (const { slug, data: ds } of datasets) {
+        datasetFileSlugById.set(ds.id, slug);
         // Only entries that look like API v2 paths are indexed — legacy
         // bulk-manifest codes live on eia-bulk-id (Task 0.5) and are
         // intentionally invisible here.
@@ -915,18 +1044,20 @@ export const loadCatalogIndex = (
         if (route !== undefined) datasetsByRoute.set(route, ds);
       }
 
-      for (const dist of distributions) {
+      for (const { slug, data: dist } of distributions) {
+        distributionFileSlugById.set(dist.id, slug);
         distributionsByDatasetIdKind.set(
           `${dist.datasetId}::${dist.kind}`,
           dist
         );
       }
 
-      for (const ag of agents) {
+      for (const ag of agentEntities) {
         agentsByName.set(ag.name, ag);
       }
 
-      for (const cr of catalogRecords) {
+      for (const { slug, data: cr } of catalogRecords) {
+        catalogRecordFileSlugById.set(cr.id, slug);
         catalogRecordsByCatalogAndPrimaryTopic.set(
           `${cr.catalogId}::${cr.primaryTopicId}`,
           cr
@@ -936,32 +1067,40 @@ export const loadCatalogIndex = (
       // EIA publisher agent: matched by homepage URL alias or homepage
       // field (either carries https://www.eia.gov/ in the registry today).
       const eiaAgent =
-        agents.find((a) =>
+        agentEntities.find((a) =>
           a.aliases.some(
             (al) => al.scheme === "url" && al.value === EIA_AGENT_HOMEPAGE
           )
-        ) ?? agents.find((a) => a.homepage === EIA_AGENT_HOMEPAGE) ?? null;
+        ) ??
+        agentEntities.find((a) => a.homepage === EIA_AGENT_HOMEPAGE) ??
+        null;
 
       const catalog =
         eiaAgent !== null
-          ? (catalogs.find((c) => c.publisherAgentId === eiaAgent.id) ?? null)
+          ? (catalogEntities.find((c) => c.publisherAgentId === eiaAgent.id) ??
+            null)
           : null;
       const dataService =
         eiaAgent !== null
-          ? (dataServices.find((s) => s.publisherAgentId === eiaAgent.id) ??
+          ? (dataServiceEntities.find(
+              (s) => s.publisherAgentId === eiaAgent.id
+            ) ??
             null)
           : null;
 
       return {
         datasetsByRoute,
+        datasetFileSlugById,
         distributionsByDatasetIdKind,
+        distributionFileSlugById,
         catalogRecordsByCatalogAndPrimaryTopic,
+        catalogRecordFileSlugById,
         agentsByName,
         catalog,
         dataService,
-        allDatasets: datasets,
-        allDistributions: distributions,
-        allCatalogRecords: catalogRecords
+        allDatasets: datasetEntities,
+        allDistributions: distributionEntities,
+        allCatalogRecords: catalogRecordEntities
       } satisfies CatalogIndex;
     });
   });
@@ -1341,10 +1480,11 @@ export const buildCandidateNodes = (
   ctx: BuildContext
 ): ReadonlyArray<IngestNode> => {
   interface LeafCandidate {
-    readonly slug: string;
+    readonly datasetSlug: string;
     readonly existingDataset: Dataset | null;
     readonly datasetCandidate: Dataset;
-    readonly distCandidates: ReadonlyArray<Distribution>;
+    readonly distNodes: ReadonlyArray<Extract<IngestNode, { readonly _tag: "distribution" }>>;
+    readonly crSlug: string;
     readonly crCandidate: CatalogRecord;
   }
 
@@ -1356,7 +1496,6 @@ export const buildCandidateNodes = (
     const childRoutes = resp.response.routes ?? [];
     if (childRoutes.length > 0) continue; // not a leaf — parent categories only
 
-    const slug = slugifyRoute(path);
     const parents = path.split("/").slice(0, -1);
     const existingDataset = idx.datasetsByRoute.get(path) ?? null;
 
@@ -1370,6 +1509,10 @@ export const buildCandidateNodes = (
       datasetCandidate.id,
       ctx,
       idx
+    );
+    const datasetSlug = stableSlug(
+      idx.datasetFileSlugById.get(datasetCandidate.id),
+      () => slugifyRoute(path)
     );
     // Re-stitch the freshly-minted distribution ids back onto the dataset
     // candidate. The initial build leaves distributionIds empty because
@@ -1389,12 +1532,25 @@ export const buildCandidateNodes = (
       existingCr,
       path
     );
+    const distNodes = distCandidates.map((d) => ({
+      _tag: "distribution" as const,
+      slug: stableSlug(
+        idx.distributionFileSlugById.get(d.id),
+        () => `${datasetSlug}-${d.kind}`
+      ),
+      data: d
+    }));
+    const crSlug = stableSlug(
+      idx.catalogRecordFileSlugById.get(crCandidate.id),
+      () => `${datasetSlug}-cr`
+    );
 
     leafCandidates.push({
-      slug,
+      datasetSlug,
       existingDataset,
       datasetCandidate: datasetWithDists,
-      distCandidates,
+      distNodes,
+      crSlug,
       crCandidate
     });
   }
@@ -1430,20 +1586,14 @@ export const buildCandidateNodes = (
 
   const datasetNodes: Array<IngestNode> = leafCandidates.map((l) => ({
     _tag: "dataset" as const,
-    slug: l.slug,
+    slug: l.datasetSlug,
     data: l.datasetCandidate,
     merged: l.existingDataset !== null
   }));
-  const distNodes: Array<IngestNode> = leafCandidates.flatMap((l) =>
-    l.distCandidates.map((d) => ({
-      _tag: "distribution" as const,
-      slug: `${l.slug}-${d.kind}`,
-      data: d
-    }))
-  );
+  const distNodes: Array<IngestNode> = leafCandidates.flatMap((l) => l.distNodes);
   const crNodes: Array<IngestNode> = leafCandidates.map((l) => ({
     _tag: "catalog-record" as const,
-    slug: `${l.slug}-cr`,
+    slug: l.crSlug,
     data: l.crCandidate
   }));
 
@@ -1859,10 +2009,9 @@ const encodeIngestReportPretty = encodeJsonStringPrettyWith(IngestReport);
 //                  order is stable across runs. Ledger + Mermaid +
 //                  report artifacts are written last.
 //
-// EIA_DRY_RUN=true short-circuits after Stage 2b, before Phase B, so
-// smoke tests exercise the full validation pipeline without touching
-// the on-disk fixture tree.
-
+// COLD_START_DRY_RUN=true short-circuits after Stage 2b, before Phase B, so
+// smoke tests exercise the full validation pipeline without touching the
+// on-disk fixture tree. Legacy EIA_DRY_RUN=true is still accepted too.
 const main = Effect.gen(function* () {
   const config = yield* ScriptConfig;
   const apiKey = Redacted.value(config.apiKey);
@@ -2011,15 +2160,11 @@ const main = Effect.gen(function* () {
 // fail with a missing-EIA_API_KEY ConfigError). Bun sets `import.meta.main`
 // to true only when this file is the entry point.
 if (import.meta.main) {
-  main.pipe(
-    Effect.provide(
-      Layer.mergeAll(
-        BunFileSystem.layer,
-        BunPath.layer,
-        FetchHttpClient.layer
-      )
-    ),
-    Effect.tapError((error) => Effect.logError(stringifyUnknown(error))),
-    BunRuntime.runMain
+  const { runScriptMain, scriptPlatformLayer } = await import(
+    "../src/platform/ScriptRuntime"
+  );
+  runScriptMain(
+    "EiaIngest",
+    main.pipe(Effect.provide(scriptPlatformLayer))
   );
 }
