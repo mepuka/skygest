@@ -20,7 +20,7 @@ import {
   EnrichmentOutput,
   type VisionEnrichment
 } from "../domain/enrichment";
-import type { EmbedPayload, LinkEmbed } from "../domain/embed";
+import type { EmbedPayload } from "../domain/embed";
 import type { PostUri } from "../domain/types";
 import { CandidatePayloadRepo } from "../services/CandidatePayloadRepo";
 import { decodeWithDbError } from "../services/d1/schemaDecode";
@@ -28,6 +28,7 @@ import {
   evaluateEnrichmentPlanningDecision,
   type EnrichmentPlanningContext
 } from "./EnrichmentPredicates";
+import { extractPostLinkCards } from "./PostContextSignals";
 
 const PlannerPostRowSchema = Schema.Struct({
   postUri: Schema.String,
@@ -67,17 +68,6 @@ const toAssetKey = (
   stableRef: string | null
 ) => `${source}:${index}:${stableRef ?? "missing-ref"}`;
 
-const toLinkCardContext = (
-  source: "embed" | "media",
-  link: LinkEmbed
-) => ({
-  source,
-  uri: link.uri,
-  title: link.title,
-  description: link.description,
-  thumb: link.thumb
-});
-
 const extractQuoteContext = (embedPayload: EmbedPayload | null) => {
   if (embedPayload === null) {
     return null;
@@ -102,23 +92,6 @@ const extractQuoteContext = (embedPayload: EmbedPayload | null) => {
           };
     default:
       return null;
-  }
-};
-
-const extractLinkCards = (embedPayload: EmbedPayload | null) => {
-  if (embedPayload === null) {
-    return [];
-  }
-
-  switch (embedPayload.kind) {
-    case "link":
-      return [toLinkCardContext("embed", embedPayload)];
-    case "media":
-      return embedPayload.media?.kind === "link"
-        ? [toLinkCardContext("media", embedPayload.media)]
-        : [];
-    default:
-      return [];
   }
 };
 
@@ -356,7 +329,7 @@ export class EnrichmentPlanner extends ServiceMap.Service<
         const postContext = yield* loadPostContext(validated.postUri);
         const assets = extractAssets(payload.embedPayload);
         const quote = extractQuoteContext(payload.embedPayload);
-        const linkCards = extractLinkCards(payload.embedPayload);
+        const linkCards = extractPostLinkCards(payload.embedPayload);
         const existingEnrichments = decodeExistingEnrichments(payload);
         const vision = selectVisionEnrichment(existingEnrichments);
         const planningContext: EnrichmentPlanningContext = {

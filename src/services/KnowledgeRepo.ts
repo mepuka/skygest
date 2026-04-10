@@ -13,10 +13,12 @@ import type {
   KnowledgeLinkResult,
   KnowledgePost,
   KnowledgePostResult,
+  LinkRecord,
   RankedKnowledgePostResult,
   SearchPostsQueryInput,
   StoredTopicMatch
 } from "../domain/bi";
+import type { PostUri } from "../domain/types";
 
 export class KnowledgeRepo extends ServiceMap.Service<
   KnowledgeRepo,
@@ -38,6 +40,12 @@ export class KnowledgeRepo extends ServiceMap.Service<
     readonly getPostLinksPage: (
       input: GetPostLinksPageQueryInput
     ) => Effect.Effect<ReadonlyArray<KnowledgeLinkResult>, SqlError | DbError>;
+    readonly getPostByUri: (
+      postUri: PostUri
+    ) => Effect.Effect<KnowledgePostResult | null, SqlError | DbError>;
+    readonly getLinksByPostUri: (
+      postUri: PostUri
+    ) => Effect.Effect<ReadonlyArray<LinkRecord>, SqlError | DbError>;
     readonly getPostTopicMatches: (
       postUri: string
     ) => Effect.Effect<ReadonlyArray<StoredTopicMatch>, SqlError | DbError>;

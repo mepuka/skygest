@@ -1,5 +1,7 @@
 import { Result, Schema } from "effect";
 import { CandidatePayloadStage } from "./candidatePayload";
+import { DataLayerRegistryDiagnostic } from "./data-layer/registry";
+import { Stage1EvalSnapshotBuildReport } from "./stage1EvalBuild";
 import { Did, PostUri, TranscriptR2Key } from "./types";
 import {
   decodeJsonStringEitherWith,
@@ -83,6 +85,23 @@ export class EnrichmentSchemaDecodeError extends Schema.TaggedErrorClass<Enrichm
   {
     message: Schema.String,
     operation: Schema.optionalKey(Schema.String)
+  }
+) {}
+
+export class DataLayerRegistryLoadError extends Schema.TaggedErrorClass<DataLayerRegistryLoadError>()(
+  "DataLayerRegistryLoadError",
+  {
+    message: Schema.String,
+    root: Schema.String,
+    diagnostic: DataLayerRegistryDiagnostic
+  }
+) {}
+
+export class Stage1EvalSnapshotBuildError extends Schema.TaggedErrorClass<Stage1EvalSnapshotBuildError>()(
+  "Stage1EvalSnapshotBuildError",
+  {
+    message: Schema.String,
+    report: Schema.suspend(() => Stage1EvalSnapshotBuildReport)
   }
 ) {}
 

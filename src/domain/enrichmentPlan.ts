@@ -6,6 +6,7 @@ import {
   EnrichmentOutput,
   VisionEnrichment
 } from "./enrichment";
+import { PostLinkCard, ThreadCoverage } from "./postContext";
 import { Did, PostUri } from "./types";
 
 export const EnrichmentPlannerDecision = Schema.Literals(["execute", "skip"]);
@@ -38,19 +39,13 @@ export const EnrichmentPlannedPostContext = Schema.Struct({
   handle: Schema.NullOr(Schema.String),
   text: Schema.String,
   createdAt: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
-  threadCoverage: Schema.Literal("focus-only")
+  threadCoverage: ThreadCoverage
 });
 export type EnrichmentPlannedPostContext = Schema.Schema.Type<
   typeof EnrichmentPlannedPostContext
 >;
 
-export const EnrichmentPlannedLinkCardContext = Schema.Struct({
-  source: Schema.Literals(["embed", "media"]),
-  uri: Schema.String,
-  title: Schema.NullOr(Schema.String),
-  description: Schema.NullOr(Schema.String),
-  thumb: Schema.NullOr(Schema.String)
-});
+export const EnrichmentPlannedLinkCardContext = PostLinkCard;
 export type EnrichmentPlannedLinkCardContext = Schema.Schema.Type<
   typeof EnrichmentPlannedLinkCardContext
 >;
