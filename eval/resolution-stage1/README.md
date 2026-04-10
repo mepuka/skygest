@@ -15,20 +15,45 @@ The gold set is a curated subset of posts that should already have the stored po
 
 ## Build the snapshot
 
+The default invocation snapshots the remote staging D1 into a local sqlite cache
+and reads from that. No flags required on the first run:
+
 ```bash
-bun scripts/build-stage1-eval-snapshot.ts \
-  --db /path/to/skygest.sqlite
+bun scripts/build-stage1-eval-snapshot.ts
 ```
 
-Optional flags:
+On cache miss the script runs `wrangler d1 export skygest-staging --remote
+--table <t> ...` (limited to the non-FTS tables Stage 1 actually reads),
+imports the dump into `.cache/d1/skygest-staging.sqlite` via `sqlite3 .read`,
+and serves every subsequent run from that file. Cache-hit runs complete in
+under a second. On cache miss expect 60–120 s while the export runs.
 
-- `--manifest` to point at a different gold-set file
-- `--out` to write the snapshot somewhere else
-- `--report-out` to override the diagnostic sidecar path
+### Flags
 
-If `STAGE1_EVAL_SQLITE_PATH` is set, `--db` becomes optional.
+- `--db <path>` — explicit sqlite file, bypasses the snapshot cache entirely
+  (useful for CI fixtures or ad-hoc debugging)
+- `--snapshot-db-name <name>` — wrangler D1 database name when building the
+  snapshot cache (default `skygest-staging`)
+- `--manifest <path>` — override the gold-set manifest location
+- `--out <path>` — override the snapshot jsonl output path
+- `--report-out <path>` — override the diagnostic build report sidecar
 
-The builder now writes all successful rows even if some gold-set posts are incomplete. Any problems are written to the sidecar build report instead of blocking the entire snapshot.
+### Environment overrides
+
+- `STAGE1_EVAL_SQLITE_PATH` — short-circuits to an explicit sqlite path,
+  same as `--db`. Takes precedence over the snapshot cache but is overridden
+  by an explicit `--db` flag.
+- `D1_SNAPSHOT_CACHE_DIR` — where cached sqlite dumps live (default
+  `.cache/d1`). The directory is created on demand and gitignored.
+- `D1_SNAPSHOT_MAX_AGE_HOURS` — maximum age of a cached dump before it is
+  re-exported on the next run (default `24`). Delete the cache file directly
+  to force an immediate refresh.
+
+### Build report
+
+The builder writes all successful rows even if some gold-set posts are
+incomplete. Any problems are written to the sidecar build report instead of
+blocking the entire snapshot.
 
 ## Run the eval
 

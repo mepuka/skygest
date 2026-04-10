@@ -143,3 +143,20 @@ export const EnrichmentKeys = {
     "gemini-2.5-flash"
   )
 } as const;
+
+// ── D1 snapshot cache (script-side) ────────────────────────────────────
+// Consumed by src/platform/D1SnapshotLayer.ts. Scripts run `wrangler d1
+// export --remote` + `sqlite3 .read` and cache the resulting sqlite file
+// under `cacheDir`. `dbName` is NOT in config — scripts pass the wrangler
+// database name directly (staging vs. production vs. sandbox).
+
+export const D1SnapshotKeys = {
+  cacheDir: Config.withDefault(
+    Config.string("D1_SNAPSHOT_CACHE_DIR"),
+    ".cache/d1"
+  ),
+  maxAgeHours: Config.withDefault(
+    Config.int("D1_SNAPSHOT_MAX_AGE_HOURS"),
+    24
+  )
+} as const;
