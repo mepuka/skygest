@@ -40,6 +40,29 @@ const withTempDirectory = async <A>(f: (dir: string) => Promise<A>) => {
 };
 
 describe("Stage1EvalSnapshotBuilder", () => {
+  it("decodes legacy build reports that still contain unsupported-post-source diagnostics", () => {
+    const report = decodeBuildReportJson(`{
+      "manifestPath": "/tmp/gold-set-resolver.json",
+      "outputPath": "/tmp/snapshot.build-report.json",
+      "diagnostics": [
+        {
+          "_tag": "UnsupportedPostSourceDiagnostic",
+          "code": "unsupported-post-source",
+          "slug": "001-twitter-post",
+          "postUri": "x://twitter.example/post/123",
+          "source": "twitter"
+        }
+      ]
+    }`);
+
+    expect(report.diagnostics).toHaveLength(1);
+    expect(report.diagnostics[0]).toMatchObject({
+      _tag: "UnsupportedPostSourceDiagnostic",
+      code: "unsupported-post-source",
+      postUri: twitterUri
+    });
+  });
+
   it.live("builds a non-hollow snapshot row from stored post context and enrichments", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) =>
