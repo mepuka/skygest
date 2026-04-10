@@ -15,6 +15,11 @@ import * as BunFileSystem from "@effect/platform-bun/BunFileSystem";
 import * as BunPath from "@effect/platform-bun/BunPath";
 import * as BunRuntime from "@effect/platform-bun/BunRuntime";
 import { Config, Effect, Layer, Redacted, Schema } from "effect";
+import {
+  FetchHttpClient,
+  HttpClient,
+  HttpClientResponse
+} from "effect/unstable/http";
 import { stringifyUnknown } from "../src/platform/Json";
 
 // ---------------------------------------------------------------------------
@@ -86,6 +91,94 @@ export const ScriptConfig = Config.all({
 export type ScriptConfigShape = Config.Success<typeof ScriptConfig>;
 
 // ---------------------------------------------------------------------------
+// EIA API v2 response schema
+// ---------------------------------------------------------------------------
+
+const EiaRouteRef = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  description: Schema.optionalKey(Schema.String)
+});
+
+const EiaFacetDef = Schema.Struct({
+  id: Schema.String,
+  description: Schema.optionalKey(Schema.String)
+});
+
+const EiaFrequencyDef = Schema.Struct({
+  id: Schema.String,
+  description: Schema.optionalKey(Schema.String),
+  format: Schema.optionalKey(Schema.String)
+});
+
+export const EiaApiResponse = Schema.Struct({
+  response: Schema.Struct({
+    id: Schema.String,
+    name: Schema.optionalKey(Schema.String),
+    description: Schema.optionalKey(Schema.String),
+    routes: Schema.optionalKey(Schema.Array(EiaRouteRef)),
+    facets: Schema.optionalKey(Schema.Array(EiaFacetDef)),
+    frequency: Schema.optionalKey(Schema.Array(EiaFrequencyDef)),
+    defaultFrequency: Schema.optionalKey(Schema.String),
+    startPeriod: Schema.optionalKey(Schema.String),
+    endPeriod: Schema.optionalKey(Schema.String),
+    data: Schema.optionalKey(Schema.Record(Schema.String, Schema.Unknown))
+  })
+});
+export type EiaApiResponse = Schema.Schema.Type<typeof EiaApiResponse>;
+
+// ---------------------------------------------------------------------------
+// fetchRoute — single-shot HTTP GET + schema decode
+// ---------------------------------------------------------------------------
+
+const EIA_API_BASE = "https://api.eia.gov/v2/";
+
+const getResponseStatus = (cause: unknown): number | undefined => {
+  if (typeof cause !== "object" || cause === null) return undefined;
+  const maybe = cause as { readonly response?: { readonly status?: unknown } };
+  if (
+    maybe.response !== undefined &&
+    typeof maybe.response.status === "number"
+  ) {
+    return maybe.response.status;
+  }
+  return undefined;
+};
+
+const isParseError = (cause: unknown): boolean => {
+  if (typeof cause !== "object" || cause === null) return false;
+  const tag = (cause as { readonly _tag?: unknown })._tag;
+  return tag === "ParseError" || tag === "SchemaError";
+};
+
+export const fetchRoute = (route: string, apiKey: string) =>
+  Effect.gen(function* () {
+    const http = yield* HttpClient.HttpClient;
+    const trimmed = route.replace(/^\/+|\/+$/gu, "");
+    const url = `${EIA_API_BASE}${trimmed}${trimmed.length > 0 ? "/" : ""}`;
+    return yield* http
+      .get(url, { urlParams: { api_key: apiKey } })
+      .pipe(
+        Effect.flatMap(HttpClientResponse.filterStatusOk),
+        Effect.flatMap(HttpClientResponse.schemaBodyJson(EiaApiResponse)),
+        Effect.mapError((cause) =>
+          isParseError(cause)
+            ? new EiaApiDecodeError({
+                route,
+                message: stringifyUnknown(cause)
+              })
+            : new EiaApiFetchError({
+                route,
+                message: stringifyUnknown(cause),
+                ...(getResponseStatus(cause) !== undefined
+                  ? { status: getResponseStatus(cause)! }
+                  : {})
+              })
+        )
+      );
+  });
+
+// ---------------------------------------------------------------------------
 // Stub main
 // ---------------------------------------------------------------------------
 
@@ -99,8 +192,19 @@ const main = Effect.gen(function* () {
   );
 });
 
-main.pipe(
-  Effect.provide(Layer.mergeAll(BunFileSystem.layer, BunPath.layer)),
-  Effect.tapError((error) => Effect.logError(stringifyUnknown(error))),
-  BunRuntime.runMain
-);
+// Gate the runtime entry so test imports don't trigger `main` (which would
+// fail with a missing-EIA_API_KEY ConfigError). Bun sets `import.meta.main`
+// to true only when this file is the entry point.
+if (import.meta.main) {
+  main.pipe(
+    Effect.provide(
+      Layer.mergeAll(
+        BunFileSystem.layer,
+        BunPath.layer,
+        FetchHttpClient.layer
+      )
+    ),
+    Effect.tapError((error) => Effect.logError(stringifyUnknown(error))),
+    BunRuntime.runMain
+  );
+}
