@@ -25,6 +25,7 @@ import {
 } from "./support/runtime";
 
 const solarUri = `at://${sampleDid}/app.bsky.feed.post/post-solar` as PostUri;
+const chartUri = `at://${sampleDid}/app.bsky.feed.post/post-chart` as PostUri;
 const twitterUri = "x://twitter.example/post/123" as PostUri;
 const decodeBuildReportJson = decodeJsonStringWith(Stage1EvalSnapshotBuildReport);
 
@@ -144,6 +145,168 @@ describe("Stage1EvalSnapshotBuilder", () => {
               expect(report.diagnostics).toEqual([]);
             }).pipe(Effect.provide(layer))
           );
+        })
+      )
+    )
+  );
+
+  it.live("builds a partial row when candidate payload and enrichments are missing", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) =>
+        withTempDirectory(async (dir) => {
+          const manifestPath = join(dir, "gold-set-resolver.json");
+          const outputPath = join(dir, "snapshot.jsonl");
+          const reportPath = join(dir, "snapshot.build-report.json");
+          const layer = Layer.mergeAll(
+            makeBiLayer({ filename }),
+            localFileSystemLayer
+          );
+
+          await fs.writeFile(
+            manifestPath,
+            JSON.stringify([
+              {
+                uri: solarUri,
+                handle: "seed.example.com",
+                publisher: "example",
+                includesLanes: ["url-exact-match"]
+              }
+            ]),
+            "utf-8"
+          );
+
+          const result = await Effect.runPromise(
+            Effect.gen(function* () {
+              yield* seedKnowledgeBase();
+
+              return yield* buildStage1EvalSnapshot({
+                manifestPath,
+                outputPath,
+                reportPath
+              });
+            }).pipe(Effect.provide(layer))
+          );
+
+          expect(result.rowCount).toBe(1);
+          expect(result.diagnosticCount).toBe(3);
+          expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+            "missing-candidate-payload",
+            "missing-vision",
+            "missing-source-attribution"
+          ]);
+
+          const raw = await fs.readFile(outputPath, "utf-8");
+          const rows = await Effect.runPromise(loadSnapshotFromString(raw));
+          expect(rows).toHaveLength(1);
+          expect(rows[0]?.postUri).toBe(solarUri);
+          expect(rows[0]?.postContext.links.length).toBeGreaterThan(0);
+          expect(rows[0]?.postContext.linkCards).toEqual([]);
+          expect(rows[0]?.vision).toBeNull();
+          expect(rows[0]?.sourceAttribution).toBeNull();
+        })
+      )
+    )
+  );
+
+  it.live("builds a partial row for chart posts when link cards and enrichments are missing", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) =>
+        withTempDirectory(async (dir) => {
+          const manifestPath = join(dir, "gold-set-resolver.json");
+          const outputPath = join(dir, "snapshot.jsonl");
+          const reportPath = join(dir, "snapshot.build-report.json");
+          const layer = Layer.mergeAll(
+            makeBiLayer({ filename }),
+            localFileSystemLayer
+          );
+
+          await fs.writeFile(
+            manifestPath,
+            JSON.stringify([
+              {
+                uri: chartUri,
+                handle: "seed.example.com",
+                publisher: "example",
+                includesLanes: ["dataset-title"]
+              }
+            ]),
+            "utf-8"
+          );
+
+          const result = await Effect.runPromise(
+            Effect.gen(function* () {
+              yield* seedKnowledgeBase();
+              const sql = yield* SqlClient.SqlClient;
+              const payloads = yield* CandidatePayloadService;
+              const now = Date.now();
+
+              yield* sql`
+                INSERT INTO posts (
+                  uri,
+                  did,
+                  cid,
+                  text,
+                  created_at,
+                  indexed_at,
+                  has_links,
+                  status,
+                  ingest_id,
+                  embed_type
+                ) VALUES (
+                  ${chartUri},
+                  ${sampleDid},
+                  ${"cid-chart-stage1"},
+                  ${"Chart post with no link-preview context"},
+                  ${now - 1000},
+                  ${now - 1000},
+                  ${0},
+                  ${"active"},
+                  ${"ingest-chart-stage1"},
+                  ${"img"}
+                )
+              `;
+
+              yield* payloads.capturePayload({
+                postUri: chartUri,
+                captureStage: "candidate",
+                embedType: "img",
+                embedPayload: {
+                  kind: "img",
+                  images: [
+                    {
+                      alt: "Chart",
+                      fullsize: "https://example.com/chart.jpg",
+                      thumb: "https://example.com/chart-thumb.jpg"
+                    }
+                  ]
+                }
+              });
+
+              return yield* buildStage1EvalSnapshot({
+                manifestPath,
+                outputPath,
+                reportPath
+              });
+            }).pipe(Effect.provide(layer))
+          );
+
+          expect(result.rowCount).toBe(1);
+          expect(result.diagnosticCount).toBe(4);
+          expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+            "missing-links",
+            "missing-link-cards",
+            "missing-vision",
+            "missing-source-attribution"
+          ]);
+
+          const raw = await fs.readFile(outputPath, "utf-8");
+          const rows = await Effect.runPromise(loadSnapshotFromString(raw));
+          expect(rows).toHaveLength(1);
+          expect(rows[0]?.postUri).toBe(chartUri);
+          expect(rows[0]?.postContext.links).toEqual([]);
+          expect(rows[0]?.postContext.linkCards).toEqual([]);
+          expect(rows[0]?.vision).toBeNull();
+          expect(rows[0]?.sourceAttribution).toBeNull();
         })
       )
     )

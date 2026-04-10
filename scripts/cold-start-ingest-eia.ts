@@ -59,6 +59,7 @@ import {
 } from "../src/platform/Json";
 import { EiaIngestKeys } from "../src/platform/ConfigShapes";
 import { localPersistenceLayer } from "../src/platform/LocalPersistence";
+import { Logging } from "../src/platform/Logging";
 
 // ---------------------------------------------------------------------------
 // Tagged errors
@@ -181,8 +182,10 @@ const isParseError = (cause: unknown): boolean => {
   return tag === "ParseError" || tag === "SchemaError";
 };
 
-export const fetchRoute = (route: string, apiKey: string) =>
-  Effect.gen(function* () {
+export const fetchRoute = Effect.fn("EiaIngest.fetchRoute")(function* (
+  route: string,
+  apiKey: string
+) {
     const http = yield* HttpClient.HttpClient;
     const trimmed = route.replace(/^\/+|\/+$/gu, "");
     const url = `${EIA_API_BASE}${trimmed}${trimmed.length > 0 ? "/" : ""}`;
@@ -226,11 +229,10 @@ const isRetryableEiaError = (
   return error.status === 429 || (error.status >= 500 && error.status < 600);
 };
 
-export const makeRateLimitedFetcher = (
+export const makeRateLimitedFetcher = Effect.fn("EiaIngest.makeRateLimitedFetcher")(function* (
   minIntervalMs: number,
   maxRetries: number
-) =>
-  Effect.gen(function* () {
+) {
     const hostGates = yield* Cache.make({
       capacity: 8,
       timeToLive: Duration.infinity,
@@ -249,15 +251,40 @@ export const makeRateLimitedFetcher = (
         )
     });
 
-    const retrySchedule = Schedule.exponential(Duration.millis(500)).pipe(
-      Schedule.jittered,
-      Schedule.both(Schedule.recurs(maxRetries))
-    );
+    return (route: string, apiKey: string) => {
+      let attempt = 0;
+      let retryStatus: number | undefined = undefined;
 
-    return (route: string, apiKey: string) =>
-      Effect.gen(function* () {
+      const retrySchedule = Schedule.exponential(Duration.millis(500)).pipe(
+        Schedule.jittered,
+        Schedule.both(Schedule.recurs(maxRetries)),
+        Schedule.tapInput((error: EiaApiFetchError | EiaApiDecodeError) =>
+          Effect.sync(() => {
+            retryStatus =
+              error._tag === "EiaApiFetchError" ? error.status : undefined;
+          })
+        ),
+        Schedule.tapOutput(([delay]) =>
+          logWarningEvent("eia route fetch retried", {
+            route,
+            attempt: attempt + 1,
+            waitMs: Duration.toMillis(delay),
+            ...statusAnnotations(retryStatus)
+          })
+        )
+      );
+
+      return Effect.gen(function* () {
         const gate = yield* Cache.get(hostGates, "api.eia.gov");
-        return yield* gate.semaphore
+        attempt += 1;
+        const startedAt = yield* Clock.currentTimeMillis;
+        yield* Logging.logSummary("eia route fetch attempted", {
+          route,
+          attempt,
+          cacheState: "network"
+        });
+
+        const response = yield* gate.semaphore
           .withPermits(1)(
             Effect.gen(function* () {
               const now = yield* Clock.currentTimeMillis;
@@ -276,14 +303,35 @@ export const makeRateLimitedFetcher = (
                 )
               )
             )
-          )
-          .pipe(
-            Effect.retry({
-              schedule: retrySchedule,
-              while: isRetryableEiaError
-            })
           );
-      });
+
+        const completedAt = yield* Clock.currentTimeMillis;
+        yield* Logging.logSummary("eia route fetch succeeded", {
+          route,
+          attempt,
+          status: 200,
+          durationMs: completedAt - startedAt,
+          subRouteCount: response.response.routes?.length ?? 0,
+          facetCount: response.response.facets?.length ?? 0
+        });
+
+        return response;
+      }).pipe(
+        Effect.retry({
+          schedule: retrySchedule,
+          while: isRetryableEiaError
+        }),
+        Effect.tapError((error) =>
+          Logging.logFailure("eia route fetch failed", error, {
+            route,
+            attempt,
+            ...statusAnnotations(
+              error._tag === "EiaApiFetchError" ? error.status : undefined
+            )
+          })
+        )
+      );
+    };
   });
 
 // ---------------------------------------------------------------------------
@@ -299,6 +347,17 @@ type WalkCache = Schema.Schema.Type<typeof WalkCache>;
 const encodeWalkCache = encodeJsonStringPrettyWith(WalkCache);
 const walkArtifactRelativePath = "reports/harvest/eia-api-v2-walk.json";
 const hiddenWalkCacheStoreId = "eia-api-v2-walk";
+
+const logWarningEvent = (
+  event: string,
+  annotations: Record<string, string | number | boolean> = {}
+) => Effect.logWarning(event).pipe(Effect.annotateLogs(annotations));
+
+const routeCount = (snapshot: WalkCache): number =>
+  Object.keys(snapshot.routes).length;
+
+const statusAnnotations = (status: number | undefined) =>
+  status === undefined ? {} : { status };
 
 class EiaFullWalkCacheRequest extends Persistable.Class()(
   "EiaFullWalkCacheRequest",
@@ -356,16 +415,22 @@ export const walkRoutes = <R>(
     });
 
     return results;
-  });
+  }).pipe(Effect.withSpan("EiaIngest.walkRoutes"));
 
 const snapshotToWalkData = (snapshot: WalkCache): Map<string, EiaApiResponse> =>
   new Map(Object.entries(snapshot.routes));
 
-const logWalkedSnapshot = (snapshot: WalkCache) =>
-  Effect.log(`Walked ${String(Object.keys(snapshot.routes).length)} routes`);
+const logWalkedSnapshot = (snapshot: WalkCache, fromCache: boolean) =>
+  Logging.logSummary("eia walk loaded", {
+    routeCount: routeCount(snapshot),
+    fromCache
+  });
 
 const warnHiddenWalkCacheIssue = (message: string, cause: unknown) =>
-  Effect.logWarning(`${message}: ${stringifyUnknown(cause)}`);
+  logWarningEvent("eia walk cache issue", {
+    issue: message,
+    message: stringifyUnknown(cause)
+  });
 
 const buildWalkSnapshot = <R>(
   fetch: (
@@ -389,7 +454,7 @@ const buildWalkSnapshot = <R>(
       fetchedAt,
       routes
     } satisfies WalkCache;
-  });
+  }).pipe(Effect.withSpan("EiaIngest.buildWalkSnapshot"));
 
 const writeWalkSnapshotArtifact = (rootDir: string, snapshot: WalkCache) =>
   Effect.gen(function* () {
@@ -448,14 +513,6 @@ const runFreshWalk = <R>(
 ) =>
   Effect.gen(function* () {
     const startRoute = Option.getOrElse(config.onlyRoute, () => "");
-    const scoped = startRoute !== "";
-
-    yield* Effect.log(
-      scoped
-        ? `Walking EIA API v2 fresh from subtree ${startRoute}...`
-        : "Walking EIA API v2 fresh..."
-    );
-
     const snapshot = yield* buildWalkSnapshot(options.fetch, startRoute);
 
     if (behavior.hiddenStore !== undefined) {
@@ -465,9 +522,9 @@ const runFreshWalk = <R>(
       yield* writeWalkSnapshotArtifact(config.rootDir, snapshot);
     }
 
-    yield* logWalkedSnapshot(snapshot);
+    yield* logWalkedSnapshot(snapshot, false);
     return snapshotToWalkData(snapshot);
-  });
+  }).pipe(Effect.withSpan("EiaIngest.runFreshWalk"));
 
 /**
  * Cache-aware test seam for walk loading. Full-root runs use provided
@@ -484,7 +541,10 @@ export const getWalkDataWith = <R>(
     const scoped = startRoute !== "";
 
     if (config.noCache) {
-      yield* Effect.log("Skipping walk cache because --no-cache was set");
+      yield* Logging.logSummary("eia walk cache bypassed", {
+        reason: "noCache",
+        scoped
+      });
       if (scoped) {
         return yield* runFreshWalk(config, options, {
           writeArtifact: false
@@ -508,9 +568,10 @@ export const getWalkDataWith = <R>(
     }
 
     if (scoped) {
-      yield* Effect.log(
-        `Scoped walk for ${startRoute}; shared walk cache disabled`
-      );
+      yield* Logging.logSummary("eia walk cache bypassed", {
+        reason: "scopedRoute",
+        route: startRoute
+      });
       return yield* runFreshWalk(config, options, {
         writeArtifact: false
       });
@@ -538,15 +599,14 @@ export const getWalkDataWith = <R>(
 
         if (cached !== undefined) {
           if (Exit.isSuccess(cached)) {
-            yield* Effect.log(`Using cached walk from ${cached.value.fetchedAt}`);
             yield* writeWalkSnapshotArtifact(config.rootDir, cached.value);
-            yield* logWalkedSnapshot(cached.value);
+            yield* logWalkedSnapshot(cached.value, true);
             return snapshotToWalkData(cached.value);
           }
 
-          yield* Effect.logWarning(
-            "Hidden EIA walk cache stored an invalid failure entry; refetching"
-          );
+          yield* logWarningEvent("eia walk cache issue", {
+            issue: "invalidFailureEntry"
+          });
           yield* clearHiddenWalkCacheBestEffort(store);
         }
 
@@ -556,7 +616,7 @@ export const getWalkDataWith = <R>(
         });
       })
     );
-  });
+  }).pipe(Effect.withSpan("EiaIngest.getWalkDataWith"));
 
 export const getWalkData = (config: ScriptConfigShape, apiKey: string) =>
   Effect.gen(function* () {
@@ -582,9 +642,10 @@ export const getWalkData = (config: ScriptConfigShape, apiKey: string) =>
 
     return yield* effect.pipe(
       Effect.provide(localPersistenceLayer(hiddenCacheDirectory)),
-      Effect.catchTag("PlatformError", () =>
-        Effect.logWarning(
-          "Local EIA walk cache is unavailable; continuing without hidden cache"
+      Effect.catchTag("PlatformError", (error) =>
+        warnHiddenWalkCacheIssue(
+          "Local EIA walk cache is unavailable; continuing without hidden cache",
+          error
         ).pipe(
           Effect.flatMap(() =>
             effect.pipe(Effect.provide(Persistence.layerMemory))
@@ -592,7 +653,7 @@ export const getWalkData = (config: ScriptConfigShape, apiKey: string) =>
         )
       )
     );
-  });
+  }).pipe(Effect.withSpan("EiaIngest.getWalkData"));
 
 // ---------------------------------------------------------------------------
 // IngestGraph — typed Graph.DirectedGraph<IngestNode, IngestEdge>
@@ -1103,7 +1164,7 @@ export const loadCatalogIndex = (
         allCatalogRecords: catalogRecordEntities
       } satisfies CatalogIndex;
     });
-  });
+  }).pipe(Effect.withSpan("EiaIngest.loadCatalogIndex"));
 
 // ---------------------------------------------------------------------------
 // Task 7 — Pure record builders
@@ -1274,7 +1335,7 @@ export const buildContextFromIndex = (
       eiaCatalog: idx.catalog,
       eiaDataService: idx.dataService
     } satisfies BuildContext;
-  });
+  }).pipe(Effect.withSpan("EiaIngest.buildContextFromIndex"));
 
 /**
  * Build a Dataset candidate from an EIA leaf-route response. Pure. When
@@ -1679,7 +1740,7 @@ export const validateNode = (
         return { ...node, data: decoded };
       }
     }
-  });
+  }).pipe(Effect.withSpan("EiaIngest.validateNode"));
 
 export const validateCandidates = (
   candidates: ReadonlyArray<IngestNode>
@@ -1694,7 +1755,7 @@ export const validateCandidates = (
       { concurrency: "unbounded" }
     );
     return { failures, successes };
-  });
+  }).pipe(Effect.withSpan("EiaIngest.validateCandidates"));
 
 // ---------------------------------------------------------------------------
 // Atomic write helpers + entity-id ledger (Task 9)
@@ -1759,7 +1820,7 @@ export const writeEntityFile = (
       // cleanup failure so the original rename error is preserved.
       Effect.tapError(() => fs_.remove(tmp).pipe(Effect.ignore))
     );
-  });
+  }).pipe(Effect.withSpan("EiaIngest.writeEntityFile"));
 
 export const EntityIdLedger = Schema.Record(Schema.String, Schema.String);
 export type EntityIdLedger = Schema.Schema.Type<typeof EntityIdLedger>;
@@ -1828,7 +1889,7 @@ export const loadLedger = (
       });
     }
     return decoded.success;
-  });
+  }).pipe(Effect.withSpan("EiaIngest.loadLedger"));
 
 export const saveLedger = (
   rootDir: string,
@@ -1842,7 +1903,7 @@ export const saveLedger = (
     const path_ = yield* Path.Path;
     const ledgerPath = path_.resolve(rootDir, ".entity-ids.json");
     yield* writeEntityFile(ledgerPath, `${encodeEntityIdLedger(ledger)}\n`);
-  });
+  }).pipe(Effect.withSpan("EiaIngest.saveLedger"));
 
 // ---------------------------------------------------------------------------
 // Phase B helpers: per-node disk layout + ledger keying + report shape (Task 10)
@@ -1989,6 +2050,62 @@ export type IngestReport = Schema.Schema.Type<typeof IngestReport>;
 
 const encodeIngestReportPretty = encodeJsonStringPrettyWith(IngestReport);
 
+const catalogIndexCounts = (idx: CatalogIndex) => ({
+  agentCount: idx.agentsByName.size,
+  datasetCount: idx.allDatasets.length,
+  distributionCount: idx.allDistributions.length,
+  catalogRecordCount: idx.allCatalogRecords.length
+});
+
+const candidateCountsByKind = (candidates: ReadonlyArray<IngestNode>) => {
+  const byKind = {
+    agent: 0,
+    catalog: 0,
+    dataService: 0,
+    dataset: 0,
+    distribution: 0,
+    catalogRecord: 0
+  };
+
+  for (const candidate of candidates) {
+    switch (candidate._tag) {
+      case "agent":
+        byKind.agent += 1;
+        break;
+      case "catalog":
+        byKind.catalog += 1;
+        break;
+      case "data-service":
+        byKind.dataService += 1;
+        break;
+      case "dataset":
+        byKind.dataset += 1;
+        break;
+      case "distribution":
+        byKind.distribution += 1;
+        break;
+      case "catalog-record":
+        byKind.catalogRecord += 1;
+        break;
+    }
+  }
+
+  return byKind;
+};
+
+const nodeWriteOutcome = (node: IngestNode): "created" | "merged" => {
+  switch (node._tag) {
+    case "dataset":
+      return node.merged ? "merged" : "created";
+    case "distribution":
+      return node.data.createdAt === node.data.updatedAt ? "created" : "merged";
+    case "catalog-record":
+      return node.data.firstSeen === node.data.lastSeen ? "created" : "merged";
+    default:
+      return "merged";
+  }
+};
+
 // ---------------------------------------------------------------------------
 // End-to-end orchestration (Task 10)
 // ---------------------------------------------------------------------------
@@ -2013,76 +2130,113 @@ const encodeIngestReportPretty = encodeJsonStringPrettyWith(IngestReport);
 // smoke tests exercise the full validation pipeline without touching the
 // on-disk fixture tree. Legacy EIA_DRY_RUN=true is still accepted too.
 const main = Effect.gen(function* () {
+  const startedAt = yield* Clock.currentTimeMillis;
   const config = yield* ScriptConfig;
   const apiKey = Redacted.value(config.apiKey);
   const path_ = yield* Path.Path;
   const nowIso = DateTime.formatIso(yield* DateTime.now);
 
-  yield* Effect.log(
-    `SKY-254 EIA ingest — root=${config.rootDir} dryRun=${String(config.dryRun)}`
-  );
+  yield* Logging.logSummary("eia ingest started", {
+    rootDir: config.rootDir,
+    dryRun: config.dryRun,
+    noCache: config.noCache
+  });
 
   // ---------- Stage 1: fetch ----------
   const walkData = yield* getWalkData(config, apiKey);
-  yield* Effect.log(`walkData has ${String(walkData.size)} entries`);
 
   // ---------- Stage 2a: build candidates ----------
   const idx = yield* loadCatalogIndex(config.rootDir);
+  yield* Logging.logSummary(
+    "eia catalog index loaded",
+    catalogIndexCounts(idx)
+  );
   const ctx = yield* buildContextFromIndex(idx, nowIso);
   const candidates = buildCandidateNodes(walkData, idx, ctx);
-  yield* Effect.log(`Built ${String(candidates.length)} candidate nodes`);
+  yield* Logging.logSummary("eia candidate nodes built", {
+    total: candidates.length,
+    byKind: candidateCountsByKind(candidates)
+  });
 
   // ---------- Phase A: validate candidates ----------
   const { failures, successes } = yield* validateCandidates(candidates);
   const [firstFailure] = failures;
   if (firstFailure !== undefined) {
-    yield* Effect.logError(
-      `Phase A validation failed: ${String(failures.length)}/${String(candidates.length)} node(s) failed schema validation`
-    );
     yield* Effect.forEach(
       failures,
-      (err) => Effect.logError(`  ${err.kind}/${err.slug}: ${err.message}`),
+      (error) =>
+        Logging.logFailure("eia validation failure", error, {
+          kind: error.kind,
+          slug: error.slug
+        }),
       { discard: true }
     );
+  }
+  yield* Logging.logSummary("eia validation summary", {
+    valid: successes.length,
+    failed: failures.length,
+    total: candidates.length
+  });
+  if (firstFailure !== undefined) {
     // firstFailure is a Schema.TaggedErrorClass instance; yielding it aborts
     // main with the first error after all have been logged. Destructuring
     // narrows away `undefined` so we don't need a non-null assertion.
     return yield* firstFailure;
   }
-  yield* Effect.log(
-    `Phase A complete: ${String(successes.length)}/${String(candidates.length)} nodes valid`
-  );
 
   // ---------- Stage 2b: build the IngestGraph from validated nodes ----------
   const graph = buildIngestGraph(successes);
-  if (!Graph.isAcyclic(graph)) {
+  const nodeCount = Graph.nodeCount(graph);
+  const edgeCount = Graph.edgeCount(graph);
+  const acyclic = Graph.isAcyclic(graph);
+  yield* Logging.logSummary("eia graph built", {
+    nodeCount,
+    edgeCount,
+    acyclic
+  });
+  if (!acyclic) {
     return yield* new EiaIngestLedgerError({
       message:
         "IngestGraph contains a cycle — programmer error in buildIngestGraph (edge directions flipped?)"
     });
   }
-  yield* Effect.log(
-    `Built IngestGraph: ${String(Graph.nodeCount(graph))} nodes, ${String(Graph.edgeCount(graph))} edges`
-  );
-
-  if (config.dryRun) {
-    yield* Effect.log("DRY RUN: skipping Phase B (no files written)");
-    yield* Effect.log(
-      `Would write ${String(Graph.nodeCount(graph))} files in topological order`
-    );
-    return;
-  }
-
-  // ---------- Phase B: write via topological traversal ----------
-  yield* Effect.log(
-    "Phase B: writing validated graph in topological order..."
-  );
 
   // Graph.topo returns a NodeWalker; Graph.values yields the node data.
   // `Array.from` on the iterable materializes the topo order for both the
   // write pass and the report-building pass below.
   const topoOrder = Array.from(Graph.values(Graph.topo(graph)));
 
+  // Build the ingest report + mermaid diagram. `datasetNodes` uses a
+  // type-narrowing predicate so `.merged` is visible to TS below.
+  const datasetNodes = topoOrder.filter(
+    (n): n is Extract<IngestNode, { _tag: "dataset" }> => n._tag === "dataset"
+  );
+  const distributionCount = topoOrder.filter(
+    (n) => n._tag === "distribution"
+  ).length;
+  const catalogRecordCount = topoOrder.filter(
+    (n) => n._tag === "catalog-record"
+  ).length;
+  const datasetsCreated = datasetNodes.filter((n) => !n.merged).map((n) => n.slug);
+  const datasetsMerged = datasetNodes.filter((n) => n.merged).map((n) => n.slug);
+
+  if (config.dryRun) {
+    const completedAt = yield* Clock.currentTimeMillis;
+    yield* Logging.logSummary("eia ingest completed", {
+      routesWalked: walkData.size,
+      nodeCount,
+      edgeCount,
+      datasetsCreated: datasetsCreated.length,
+      datasetsMerged: datasetsMerged.length,
+      distributionCount,
+      catalogRecordCount,
+      durationMs: completedAt - startedAt,
+      dryRun: true
+    });
+    return;
+  }
+
+  // ---------- Phase B: write via topological traversal ----------
   // Concurrency 1 keeps Phase B failure attribution and log ordering
   // deterministic. Distinct paths mean the on-disk result is identical
   // regardless of concurrency, but a parallel pass would scramble which
@@ -2090,7 +2244,16 @@ const main = Effect.gen(function* () {
   // sequential write becomes the bottleneck on real ingests.
   yield* Effect.forEach(
     topoOrder,
-    (node) => writeNode(path_, config.rootDir, node),
+    (node) =>
+      writeNode(path_, config.rootDir, node).pipe(
+        Effect.tap(() =>
+          Logging.logSummary("eia node written", {
+            kind: node._tag,
+            slug: node.slug,
+            outcome: nodeWriteOutcome(node)
+          })
+        )
+      ),
     { concurrency: 1 }
   );
 
@@ -2107,27 +2270,18 @@ const main = Effect.gen(function* () {
     }
   });
   yield* saveLedger(config.rootDir, ledger);
-
-  // Build the ingest report + mermaid diagram. `datasetNodes` uses a
-  // type-narrowing predicate so `.merged` is visible to TS below.
-  const datasetNodes = topoOrder.filter(
-    (n): n is Extract<IngestNode, { _tag: "dataset" }> => n._tag === "dataset"
-  );
-  const distributionCount = topoOrder.filter(
-    (n) => n._tag === "distribution"
-  ).length;
-  const catalogRecordCount = topoOrder.filter(
-    (n) => n._tag === "catalog-record"
-  ).length;
+  yield* Logging.logSummary("eia ledger updated", {
+    entries: Object.keys(ledger).length
+  });
 
   const report: IngestReport = {
     fetchedAt: nowIso,
     routesWalked: walkData.size,
-    nodeCount: Graph.nodeCount(graph),
-    edgeCount: Graph.edgeCount(graph),
+    nodeCount,
+    edgeCount,
     datasets: {
-      created: datasetNodes.filter((n) => !n.merged).map((n) => n.slug),
-      merged: datasetNodes.filter((n) => n.merged).map((n) => n.slug)
+      created: datasetsCreated,
+      merged: datasetsMerged
     },
     distributions: { count: distributionCount },
     catalogRecords: { count: catalogRecordCount },
@@ -2142,19 +2296,33 @@ const main = Effect.gen(function* () {
     direction: "LR"
   });
   const reportsDir = path_.resolve(config.rootDir, HARVEST_REPORT_DIR);
-  yield* writeEntityFile(
-    path_.resolve(reportsDir, INGEST_MERMAID_FILE),
-    `${mermaid}\n`
-  );
+  const mermaidPath = path_.resolve(reportsDir, INGEST_MERMAID_FILE);
+  yield* writeEntityFile(mermaidPath, `${mermaid}\n`);
+  yield* Logging.logSummary("eia mermaid emitted", {
+    path: `${HARVEST_REPORT_DIR}/${INGEST_MERMAID_FILE}`,
+    nodeCount
+  });
   yield* writeEntityFile(
     path_.resolve(reportsDir, INGEST_REPORT_FILE),
     `${encodeIngestReportPretty(report)}\n`
   );
 
-  yield* Effect.log(
-    `Done. ${String(report.datasets.created.length)} new + ${String(report.datasets.merged.length)} merged datasets`
-  );
-});
+  const completedAt = yield* Clock.currentTimeMillis;
+  yield* Logging.logSummary("eia ingest completed", {
+    routesWalked: walkData.size,
+    nodeCount,
+    edgeCount,
+    datasetsCreated: datasetsCreated.length,
+    datasetsMerged: datasetsMerged.length,
+    distributionCount,
+    catalogRecordCount,
+    durationMs: completedAt - startedAt,
+    dryRun: false
+  });
+}).pipe(
+  Effect.withSpan("EiaIngest.main"),
+  Effect.tapError((error) => Logging.logFailure("eia ingest failed", error))
+);
 
 // Gate the runtime entry so test imports don't trigger `main` (which would
 // fail with a missing-EIA_API_KEY ConfigError). Bun sets `import.meta.main`

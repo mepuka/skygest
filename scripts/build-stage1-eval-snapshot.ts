@@ -1,6 +1,6 @@
 import { SqliteClient } from "@effect/sql-sqlite-bun";
 import { Command, Flag } from "effect/unstable/cli";
-import { Effect, FileSystem, Layer, Runtime, Schema } from "effect";
+import { Effect, FileSystem, Layer, Option, Runtime, Schema } from "effect";
 import * as fs from "node:fs/promises";
 import { dirname, isAbsolute, resolve } from "node:path";
 import { buildStage1EvalSnapshot } from "../src/eval/Stage1EvalSnapshotBuilder";
@@ -226,7 +226,7 @@ const buildStage1EvalSnapshotCommand = Command.make(
       const manifestPath = toAbsolutePath(manifest);
       const outputPath = toAbsolutePath(out);
       const reportPath = toAbsolutePath(
-        reportOut ?? defaultReportPath(outputPath)
+        Option.getOrElse(reportOut, () => defaultReportPath(outputPath))
       );
 
       yield* ensureParentDirectory(outputPath);

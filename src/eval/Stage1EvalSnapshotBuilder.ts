@@ -137,7 +137,21 @@ const makeBuildError = (input: {
 
 const isBlockingDiagnostic = (
   diagnostic: Stage1EvalSnapshotBuildDiagnostic
-) => diagnostic._tag !== "MissingLinksDiagnostic";
+) => {
+  switch (diagnostic._tag) {
+    case "MissingStoredPostDiagnostic":
+    case "MissingPostTextDiagnostic":
+      return true;
+    case "MissingLinksDiagnostic":
+    case "MissingCandidatePayloadDiagnostic":
+    case "MissingLinkCardsDiagnostic":
+    case "MissingVisionDiagnostic":
+    case "MissingSourceAttributionDiagnostic":
+      return false;
+    default:
+      return true;
+  }
+};
 
 type RowBuildOutcome = {
   readonly row: Stage1EvalSnapshotRow | null;
