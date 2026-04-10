@@ -1,6 +1,8 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, ConfigProvider } from "effect";
+import { Config, ConfigProvider, Effect, Redacted } from "effect";
 import {
+  ColdStartCommonKeys,
+  EiaIngestKeys,
   OperatorKeys,
   WorkerKeys,
   WorkerDeployKeys,
@@ -114,6 +116,76 @@ describe("ConfigShapes", () => {
         const provider = ConfigProvider.fromUnknown({ OPERATOR_SECRET: "real-secret" });
         const result = yield* WorkerDeployKeys.operatorSecret.parse(provider);
         expect(result).toBeDefined();
+      })
+    );
+  });
+
+  describe("ColdStartCommonKeys", () => {
+    it.effect("default shared cold-start settings are stable", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({});
+        const result = yield* Config.all(ColdStartCommonKeys).parse(provider);
+        expect(result.rootDir).toBe("references/cold-start");
+        expect(result.dryRun).toBe(false);
+        expect(result.noCache).toBe(false);
+      })
+    );
+  });
+
+  describe("EiaIngestKeys", () => {
+    it.effect("parses EIA config from the shared cold-start flags", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({
+          EIA_API_KEY: "eia-secret",
+          COLD_START_DRY_RUN: "true",
+          COLD_START_NO_CACHE: "true",
+          EIA_ONLY_ROUTE: "electricity"
+        });
+        const result = yield* Config.all(EiaIngestKeys).parse(provider);
+        expect(Redacted.value(result.apiKey)).toBe("eia-secret");
+        expect(result.dryRun).toBe(true);
+        expect(result.noCache).toBe(true);
+        expect(result.onlyRoute._tag).toBe("Some");
+      })
+    );
+
+    it.effect("falls back to legacy EIA-specific dry-run flags", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({
+          EIA_API_KEY: "eia-secret",
+          EIA_DRY_RUN: "true",
+          EIA_NO_CACHE: "true"
+        });
+        const result = yield* Config.all(EiaIngestKeys).parse(provider);
+        expect(result.dryRun).toBe(true);
+        expect(result.noCache).toBe(true);
+      })
+    );
+
+    it.effect("prefers shared cold-start flags over legacy EIA-specific flags", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({
+          EIA_API_KEY: "eia-secret",
+          COLD_START_DRY_RUN: "false",
+          COLD_START_NO_CACHE: "false",
+          EIA_DRY_RUN: "true",
+          EIA_NO_CACHE: "true"
+        });
+        const result = yield* Config.all(EiaIngestKeys).parse(provider);
+        expect(result.dryRun).toBe(false);
+        expect(result.noCache).toBe(false);
+      })
+    );
+
+    it.effect("rejects an empty EIA API key", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({
+          EIA_API_KEY: "   "
+        });
+        const result = yield* Effect.result(
+          Config.all(EiaIngestKeys).parse(provider)
+        );
+        expect(result._tag).toBe("Failure");
       })
     );
   });
