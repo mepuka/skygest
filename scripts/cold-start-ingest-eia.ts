@@ -20,7 +20,12 @@ import {
   Config,
   Duration,
   Effect,
+  FileSystem,
   Layer,
+  MutableHashMap,
+  MutableRef,
+  Option,
+  Path,
   Redacted,
   Schedule,
   Schema,
@@ -32,7 +37,11 @@ import {
   HttpClient,
   HttpClientResponse
 } from "effect/unstable/http";
-import { stringifyUnknown } from "../src/platform/Json";
+import {
+  decodeJsonStringWith,
+  encodeJsonStringPrettyWith,
+  stringifyUnknown
+} from "../src/platform/Json";
 
 // ---------------------------------------------------------------------------
 // Tagged errors
@@ -106,34 +115,40 @@ export type ScriptConfigShape = Config.Success<typeof ScriptConfig>;
 // EIA API v2 response schema
 // ---------------------------------------------------------------------------
 
+// EIA returns `null` (not an absent field) for missing strings, so optional
+// string fields must accept `string | null | undefined`. Schema.NullOr +
+// optionalKey gives us that shape; downstream code treats null and undefined
+// equivalently via Option-style guards.
+const NullableString = Schema.optionalKey(Schema.NullOr(Schema.String));
+
 const EiaRouteRef = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
-  description: Schema.optionalKey(Schema.String)
+  description: NullableString
 });
 
 const EiaFacetDef = Schema.Struct({
   id: Schema.String,
-  description: Schema.optionalKey(Schema.String)
+  description: NullableString
 });
 
 const EiaFrequencyDef = Schema.Struct({
   id: Schema.String,
-  description: Schema.optionalKey(Schema.String),
-  format: Schema.optionalKey(Schema.String)
+  description: NullableString,
+  format: NullableString
 });
 
 export const EiaApiResponse = Schema.Struct({
   response: Schema.Struct({
     id: Schema.String,
-    name: Schema.optionalKey(Schema.String),
-    description: Schema.optionalKey(Schema.String),
+    name: NullableString,
+    description: NullableString,
     routes: Schema.optionalKey(Schema.Array(EiaRouteRef)),
     facets: Schema.optionalKey(Schema.Array(EiaFacetDef)),
     frequency: Schema.optionalKey(Schema.Array(EiaFrequencyDef)),
-    defaultFrequency: Schema.optionalKey(Schema.String),
-    startPeriod: Schema.optionalKey(Schema.String),
-    endPeriod: Schema.optionalKey(Schema.String),
+    defaultFrequency: NullableString,
+    startPeriod: NullableString,
+    endPeriod: NullableString,
     data: Schema.optionalKey(Schema.Record(Schema.String, Schema.Unknown))
   })
 });
@@ -269,6 +284,198 @@ export const makeRateLimitedFetcher = (
   });
 
 // ---------------------------------------------------------------------------
+// Walk cache schema + lazy whileLoop walk
+// ---------------------------------------------------------------------------
+
+const WalkCache = Schema.Struct({
+  fetchedAt: Schema.String,
+  routes: Schema.Record(Schema.String, EiaApiResponse)
+});
+type WalkCache = Schema.Schema.Type<typeof WalkCache>;
+
+const decodeWalkCache = decodeJsonStringWith(WalkCache);
+const encodeWalkCache = encodeJsonStringPrettyWith(WalkCache);
+
+/**
+ * Lazy walk of the EIA API v2 route tree. Uses Effect.whileLoop over a
+ * MutableRef-backed queue so the body stays Effect-typed (no `for ... of`,
+ * no raw `while`). The `fetch` parameter is parameterized so tests can
+ * stub it without spinning up the full rate-limited fetcher.
+ *
+ * Returns a MutableHashMap<route, EiaApiResponse>; iterating it inside an
+ * Effect.sync block produces a snapshot suitable for caching to disk.
+ */
+export const walkRoutes = <R>(
+  fetch: (
+    route: string
+  ) => Effect.Effect<EiaApiResponse, EiaApiFetchError | EiaApiDecodeError, R>,
+  startRoute = ""
+) =>
+  Effect.gen(function* () {
+    const queue = MutableRef.make<ReadonlyArray<string>>([startRoute]);
+    const seen = MutableHashMap.empty<string, true>();
+    const results = MutableHashMap.empty<string, EiaApiResponse>();
+
+    yield* Effect.whileLoop({
+      while: () => MutableRef.get(queue).length > 0,
+      body: () =>
+        Effect.gen(function* () {
+          const current = MutableRef.get(queue);
+          const next = current[0]!;
+          MutableRef.set(queue, current.slice(1));
+
+          if (MutableHashMap.has(seen, next)) return;
+          MutableHashMap.set(seen, next, true);
+
+          const resp = yield* fetch(next);
+          MutableHashMap.set(results, next, resp);
+
+          const childRoutes = resp.response.routes ?? [];
+          const childPaths = childRoutes.map((c) =>
+            next === "" ? c.id : `${next}/${c.id}`
+          );
+          if (childPaths.length > 0) {
+            MutableRef.set(queue, [...MutableRef.get(queue), ...childPaths]);
+          }
+        }),
+      step: () => {}
+    });
+
+    return results;
+  });
+
+const walkCacheRelativePath = "reports/harvest/eia-api-v2-walk.json";
+
+const readWalkCache = (rootDir: string, ttlDays: number) =>
+  Effect.gen(function* () {
+    const fs_ = yield* FileSystem.FileSystem;
+    const path_ = yield* Path.Path;
+    const cachePath = path_.resolve(rootDir, walkCacheRelativePath);
+
+    const exists = yield* Effect.exit(fs_.access(cachePath));
+    if (exists._tag === "Failure") return null;
+
+    const text = yield* fs_.readFileString(cachePath).pipe(
+      Effect.mapError(
+        (cause) =>
+          new EiaIngestFsError({
+            operation: "readFileString",
+            path: cachePath,
+            message: stringifyUnknown(cause)
+          })
+      )
+    );
+
+    const decoded = yield* Effect.try({
+      try: () => decodeWalkCache(text),
+      catch: (cause) =>
+        new EiaIngestFsError({
+          operation: "decode-walk-cache",
+          path: cachePath,
+          message: stringifyUnknown(cause)
+        })
+    });
+
+    const ageMs = Date.now() - new Date(decoded.fetchedAt).getTime();
+    if (ageMs > ttlDays * 86_400_000) {
+      yield* Effect.log(
+        `Walk cache at ${cachePath} is older than ${String(ttlDays)} days; ignoring.`
+      );
+      return null;
+    }
+    return decoded;
+  });
+
+const writeWalkCache = (rootDir: string, cache: WalkCache) =>
+  Effect.gen(function* () {
+    const fs_ = yield* FileSystem.FileSystem;
+    const path_ = yield* Path.Path;
+    const cachePath = path_.resolve(rootDir, walkCacheRelativePath);
+    const cacheDir = path_.dirname(cachePath);
+
+    yield* fs_.makeDirectory(cacheDir, { recursive: true }).pipe(
+      Effect.mapError(
+        (cause) =>
+          new EiaIngestFsError({
+            operation: "makeDirectory",
+            path: cacheDir,
+            message: stringifyUnknown(cause)
+          })
+      )
+    );
+
+    yield* fs_.writeFileString(cachePath, `${encodeWalkCache(cache)}\n`).pipe(
+      Effect.mapError(
+        (cause) =>
+          new EiaIngestFsError({
+            operation: "writeFileString",
+            path: cachePath,
+            message: stringifyUnknown(cause)
+          })
+      )
+    );
+  });
+
+/**
+ * Returns the walk data as a `Map<route, EiaApiResponse>`, drawn from the
+ * 30-day disk cache when available. `--no-cache` and `--only-route` both
+ * bypass the shared cache so a partial walk never overwrites the full-tree
+ * snapshot.
+ */
+export const getWalkData = (config: ScriptConfigShape, apiKey: string) =>
+  Effect.gen(function* () {
+    const startRoute = Option.getOrElse(config.onlyRoute, () => "");
+    const scoped = startRoute !== "";
+
+    if (!config.noCache && !scoped) {
+      const cached = yield* readWalkCache(config.rootDir, config.cacheTtlDays);
+      if (cached !== null) {
+        yield* Effect.log(`Using cached walk from ${cached.fetchedAt}`);
+        return new Map(Object.entries(cached.routes));
+      }
+    } else if (config.noCache) {
+      yield* Effect.log("Skipping walk cache because --no-cache was set");
+    } else {
+      yield* Effect.log(
+        `Scoped walk for ${startRoute}; shared walk cache disabled`
+      );
+    }
+
+    yield* Effect.log(
+      scoped
+        ? `Walking EIA API v2 fresh from subtree ${startRoute}...`
+        : "Walking EIA API v2 fresh..."
+    );
+    const fetcher = yield* makeRateLimitedFetcher(
+      config.minIntervalMs,
+      config.maxRetries
+    );
+    const results = yield* walkRoutes(
+      (route) => fetcher(route, apiKey),
+      startRoute
+    );
+
+    // MutableHashMap is Iterable<[K, V]> — see effect/src/MutableHashMap.ts:69.
+    // Snapshot to a plain Record for cache persistence.
+    const snapshot = yield* Effect.sync(() => {
+      const out: Record<string, EiaApiResponse> = {};
+      for (const [route, response] of results) {
+        out[route] = response;
+      }
+      return out;
+    });
+
+    if (!config.noCache && !scoped) {
+      yield* writeWalkCache(config.rootDir, {
+        fetchedAt: new Date().toISOString(),
+        routes: snapshot
+      });
+    }
+    yield* Effect.log(`Walked ${String(Object.keys(snapshot).length)} routes`);
+    return new Map(Object.entries(snapshot));
+  });
+
+// ---------------------------------------------------------------------------
 // Stub main
 // ---------------------------------------------------------------------------
 
@@ -276,17 +483,11 @@ const main = Effect.gen(function* () {
   const config = yield* ScriptConfig;
   const apiKey = Redacted.value(config.apiKey);
   yield* Effect.log(
-    `SKY-254 EIA ingest stub — root=${config.rootDir} dryRun=${String(config.dryRun)}`
+    `SKY-254 EIA ingest — root=${config.rootDir} dryRun=${String(config.dryRun)}`
   );
 
-  const fetcher = yield* makeRateLimitedFetcher(
-    config.minIntervalMs,
-    config.maxRetries
-  );
-  const root = yield* fetcher("", apiKey);
-  yield* Effect.log(
-    `Root route returned ${String(root.response.routes?.length ?? 0)} child routes`
-  );
+  const walkData = yield* getWalkData(config, apiKey);
+  yield* Effect.log(`walkData has ${String(walkData.size)} entries`);
 });
 
 // Gate the runtime entry so test imports don't trigger `main` (which would
