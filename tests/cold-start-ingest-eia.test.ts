@@ -1546,6 +1546,102 @@ describe("validateNode", () => {
       }
     })
   );
+
+  // Happy-path coverage for the four remaining IngestNode variants so a
+  // future switch refactor cannot silently drop a branch.
+  const CATALOG_ULID = "01KNQEZ5V57VJJJFYV6HWM03VC";
+  const CATALOG_ID = `https://id.skygest.io/catalog/cat_${CATALOG_ULID}`;
+  const DATA_SERVICE_ULID = "01KNQEZ5V57VJJJFYV6HWM03VD";
+  const DATA_SERVICE_ID = `https://id.skygest.io/data-service/svc_${DATA_SERVICE_ULID}`;
+  const DISTRIBUTION_ULID = "01KNQEZ5V57VJJJFYV6HWM03VE";
+  const DISTRIBUTION_ID = `https://id.skygest.io/distribution/dist_${DISTRIBUTION_ULID}`;
+  const CATALOG_RECORD_ULID = "01KNQEZ5V57VJJJFYV6HWM03VF";
+  const CATALOG_RECORD_ID = `https://id.skygest.io/catalog-record/cr_${CATALOG_RECORD_ULID}`;
+  const DATASET_ULID_FOR_CR = "01KNQSXEPPXRC56GM4SED9D0KX";
+  const DATASET_ID_FOR_CR = `https://id.skygest.io/dataset/ds_${DATASET_ULID_FOR_CR}`;
+
+  it.effect("accepts a valid Catalog and round-trips through the schema", () =>
+    Effect.gen(function* () {
+      const node: IngestNode = {
+        _tag: "catalog",
+        slug: "eia-open-data",
+        data: validCatalogBody(
+          "EIA Open Data Catalog",
+          CATALOG_ULID,
+          BUILDER_AGENT_ID,
+          []
+        ) as unknown as Catalog
+      };
+      const result = yield* validateNode(node);
+      expect(result._tag).toBe("catalog");
+      expect(result.slug).toBe("eia-open-data");
+      if (result._tag === "catalog") {
+        expect(result.data.id).toBe(CATALOG_ID);
+      }
+    })
+  );
+
+  it.effect("accepts a valid DataService and round-trips through the schema", () =>
+    Effect.gen(function* () {
+      const node: IngestNode = {
+        _tag: "data-service",
+        slug: "eia-api-v2",
+        data: validDataServiceBody(
+          "EIA Open Data API v2",
+          DATA_SERVICE_ULID,
+          BUILDER_AGENT_ID,
+          [],
+          []
+        ) as unknown as DataService
+      };
+      const result = yield* validateNode(node);
+      expect(result._tag).toBe("data-service");
+      expect(result.slug).toBe("eia-api-v2");
+      if (result._tag === "data-service") {
+        expect(result.data.id).toBe(DATA_SERVICE_ID);
+      }
+    })
+  );
+
+  it.effect("accepts a valid Distribution and round-trips through the schema", () =>
+    Effect.gen(function* () {
+      const node: IngestNode = {
+        _tag: "distribution",
+        slug: "eia-retail-sales-api",
+        data: validDistributionBody(
+          DISTRIBUTION_ULID,
+          DATASET_ID_FOR_CR,
+          []
+        ) as unknown as Distribution
+      };
+      const result = yield* validateNode(node);
+      expect(result._tag).toBe("distribution");
+      expect(result.slug).toBe("eia-retail-sales-api");
+      if (result._tag === "distribution") {
+        expect(result.data.id).toBe(DISTRIBUTION_ID);
+      }
+    })
+  );
+
+  it.effect("accepts a valid CatalogRecord and round-trips through the schema", () =>
+    Effect.gen(function* () {
+      const node: IngestNode = {
+        _tag: "catalog-record",
+        slug: "eia-retail-sales-record",
+        data: validCatalogRecordBody(
+          CATALOG_RECORD_ULID,
+          CATALOG_ID,
+          DATASET_ID_FOR_CR
+        ) as unknown as CatalogRecord
+      };
+      const result = yield* validateNode(node);
+      expect(result._tag).toBe("catalog-record");
+      expect(result.slug).toBe("eia-retail-sales-record");
+      if (result._tag === "catalog-record") {
+        expect(result.data.id).toBe(CATALOG_RECORD_ID);
+      }
+    })
+  );
 });
 
 describe("validateCandidates", () => {
@@ -1605,6 +1701,46 @@ describe("validateCandidates", () => {
       }
     })
   );
+
+  it.effect("returns empty failures and successes for empty input", () =>
+    Effect.gen(function* () {
+      const { failures, successes } = yield* validateCandidates([]);
+      expect(failures).toEqual([]);
+      expect(successes).toEqual([]);
+    })
+  );
+
+  it.effect("collects every failure when all candidates are invalid", () =>
+    Effect.gen(function* () {
+      const badA: IngestNode = {
+        _tag: "dataset",
+        slug: "eia-bogus-a",
+        merged: false,
+        data: {
+          ...validDatasetBody("Bogus A", "01KNQSXEPPXRC56GM4SED9D0KX", []),
+          id: "not-a-uri"
+        } as unknown as Dataset
+      };
+      const badB: IngestNode = {
+        _tag: "dataset",
+        slug: "eia-bogus-b",
+        merged: false,
+        data: {
+          ...validDatasetBody("Bogus B", "01KNQSXEPPXRC56GM4SED9D0KY", []),
+          id: "also-not-a-uri"
+        } as unknown as Dataset
+      };
+      const { failures, successes } = yield* validateCandidates([badA, badB]);
+      expect(failures).toHaveLength(2);
+      expect(successes).toHaveLength(0);
+      const slugs = failures.map((f) => f.slug).sort();
+      expect(slugs).toEqual(["eia-bogus-a", "eia-bogus-b"]);
+      for (const failure of failures) {
+        expect(failure).toBeInstanceOf(EiaIngestSchemaError);
+        expect(failure.kind).toBe("dataset");
+      }
+    })
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -1618,29 +1754,35 @@ describe("writeEntityFile", () => {
   it.effect("persists file contents and removes the temp stub", () =>
     Effect.gen(function* () {
       const tmp = yield* Effect.promise(() => makeEmptyTmpDir());
-      const target = nodePath.join(tmp, "hello.json");
-      yield* writeEntityFile(target, `{"ok":true}\n`);
-      const contents = yield* Effect.promise(() =>
-        fsp.readFile(target, "utf-8")
+      yield* Effect.gen(function* () {
+        const target = nodePath.join(tmp, "hello.json");
+        yield* writeEntityFile(target, `{"ok":true}\n`);
+        const contents = yield* Effect.promise(() =>
+          fsp.readFile(target, "utf-8")
+        );
+        expect(contents).toBe(`{"ok":true}\n`);
+        const entries = yield* Effect.promise(() => fsp.readdir(tmp));
+        const stubs = entries.filter((e) => e.includes(".tmp-"));
+        expect(stubs).toEqual([]);
+      }).pipe(
+        Effect.ensuring(Effect.promise(() => cleanup(tmp)).pipe(Effect.orDie))
       );
-      expect(contents).toBe(`{"ok":true}\n`);
-      const entries = yield* Effect.promise(() => fsp.readdir(tmp));
-      const stubs = entries.filter((e) => e.includes(".tmp-"));
-      expect(stubs).toEqual([]);
-      yield* Effect.promise(() => cleanup(tmp));
     }).pipe(Effect.provide(bunFsLayer))
   );
 
   it.effect("creates parent directories recursively", () =>
     Effect.gen(function* () {
       const tmp = yield* Effect.promise(() => makeEmptyTmpDir());
-      const target = nodePath.join(tmp, "a", "b", "c", "nested.json");
-      yield* writeEntityFile(target, `"nested"\n`);
-      const contents = yield* Effect.promise(() =>
-        fsp.readFile(target, "utf-8")
+      yield* Effect.gen(function* () {
+        const target = nodePath.join(tmp, "a", "b", "c", "nested.json");
+        yield* writeEntityFile(target, `"nested"\n`);
+        const contents = yield* Effect.promise(() =>
+          fsp.readFile(target, "utf-8")
+        );
+        expect(contents).toBe(`"nested"\n`);
+      }).pipe(
+        Effect.ensuring(Effect.promise(() => cleanup(tmp)).pipe(Effect.orDie))
       );
-      expect(contents).toBe(`"nested"\n`);
-      yield* Effect.promise(() => cleanup(tmp));
     }).pipe(Effect.provide(bunFsLayer))
   );
 });

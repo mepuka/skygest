@@ -1453,48 +1453,48 @@ export const validateNode = (
   node: IngestNode
 ): Effect.Effect<IngestNode, EiaIngestSchemaError> =>
   Effect.gen(function* () {
-    const mapErr = (issue: unknown) =>
+    const mapErr = (error: Schema.SchemaError) =>
       new EiaIngestSchemaError({
         kind: node._tag,
         slug: node.slug,
-        message: formatSchemaParseError(issue as Parameters<typeof formatSchemaParseError>[0])
+        message: formatSchemaParseError(error)
       });
     switch (node._tag) {
       case "agent": {
         const decoded = yield* Schema.decodeUnknownEffect(Agent)(node.data).pipe(
           Effect.mapError(mapErr)
         );
-        return { ...node, data: decoded } as IngestNode;
+        return { ...node, data: decoded };
       }
       case "catalog": {
         const decoded = yield* Schema.decodeUnknownEffect(Catalog)(node.data).pipe(
           Effect.mapError(mapErr)
         );
-        return { ...node, data: decoded } as IngestNode;
+        return { ...node, data: decoded };
       }
       case "data-service": {
         const decoded = yield* Schema.decodeUnknownEffect(DataService)(node.data).pipe(
           Effect.mapError(mapErr)
         );
-        return { ...node, data: decoded } as IngestNode;
+        return { ...node, data: decoded };
       }
       case "dataset": {
         const decoded = yield* Schema.decodeUnknownEffect(Dataset)(node.data).pipe(
           Effect.mapError(mapErr)
         );
-        return { ...node, data: decoded, merged: node.merged } as IngestNode;
+        return { ...node, data: decoded };
       }
       case "distribution": {
         const decoded = yield* Schema.decodeUnknownEffect(Distribution)(node.data).pipe(
           Effect.mapError(mapErr)
         );
-        return { ...node, data: decoded } as IngestNode;
+        return { ...node, data: decoded };
       }
       case "catalog-record": {
         const decoded = yield* Schema.decodeUnknownEffect(CatalogRecord)(
           node.data
         ).pipe(Effect.mapError(mapErr));
-        return { ...node, data: decoded } as IngestNode;
+        return { ...node, data: decoded };
       }
     }
   });
@@ -1569,7 +1569,13 @@ export const writeEntityFile = (
             path: filePath,
             message: stringifyUnknown(cause)
           })
-      )
+      ),
+      // If the rename fails (disk full, cross-device link, permission
+      // flip) the temp stub is still on disk. Remove it on the error
+      // path so repeated failed runs don't accumulate `.tmp-<ms>`
+      // litter next to the target file. `Effect.ignore` swallows any
+      // cleanup failure so the original rename error is preserved.
+      Effect.tapError(() => fs_.remove(tmp).pipe(Effect.ignore))
     );
   });
 
