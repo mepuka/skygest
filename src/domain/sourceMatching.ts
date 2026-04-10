@@ -1,6 +1,7 @@
 import { Schema } from "effect";
 import { LinkRecord } from "./bi";
 import { Did } from "./types";
+import { PostLinkCard } from "./postContext";
 import {
   ContentSourceReference,
   ProviderId,
@@ -204,15 +205,7 @@ export const SourceAttributionMatcherInput = Schema.Struct({
       extractedAt: LinkRecord.fields.extractedAt
     })
   ),
-  linkCards: Schema.Array(
-    Schema.Struct({
-      source: Schema.Literals(["embed", "media"]),
-      uri: Schema.String,
-      title: Schema.NullOr(Schema.String),
-      description: Schema.NullOr(Schema.String),
-      thumb: Schema.NullOr(Schema.String)
-    })
-  ),
+  linkCards: Schema.Array(PostLinkCard),
   vision: Schema.NullOr(SourceAttributionVisionInput)
 });
 export type SourceAttributionMatcherInput = Schema.Schema.Type<

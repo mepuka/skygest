@@ -162,6 +162,8 @@ const makeHarness = (options: {
         ),
       getPostLinks: () => Effect.succeed([]),
       getPostLinksPage: () => Effect.succeed([]),
+      getPostByUri: () => Effect.succeed(null),
+      getLinksByPostUri: () => Effect.succeed([]),
       getPostTopicMatches: () => Effect.succeed([]),
       searchPostsPage: () => Effect.succeed([]),
       optimizeFts: () => Effect.void

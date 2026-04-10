@@ -1,19 +1,25 @@
 import { Schema } from "effect";
 import { DesignDecision, SkosMapping } from "./annotations";
 
-export const AliasScheme = Schema.Literals([
+export const aliasSchemes = [
   "oeo", "ires-siec", "iea-shortname", "ipcc",
   "entsoe-psr", "entsoe-eic",
   "eia-route", "eia-series",
   "eurostat-code",
   "ror", "wikidata", "doi",
   "iso3166", "url", "other"
-]).annotate({ description: "External identifier namespace" });
+ ] as const;
+
+export const AliasScheme = Schema.Literals(aliasSchemes).annotate({
+  description: "External identifier namespace"
+});
 export type AliasScheme = Schema.Schema.Type<typeof AliasScheme>;
 
-export const AliasRelation = Schema.Literals([
+export const aliasRelations = [
   "exactMatch", "closeMatch", "broadMatch", "narrowMatch", "methodologyVariant"
-]).annotate({
+ ] as const;
+
+export const AliasRelation = Schema.Literals(aliasRelations).annotate({
   description: "SKOS-aligned mapping relation strength. First four from W3C SKOS; methodologyVariant is Skygest's extension for gross-vs-net / sectoral-vs-reference / location-vs-market relations.",
   [SkosMapping]: "http://www.w3.org/2004/02/skos/core#mappingRelation",
   [DesignDecision]: "D4"

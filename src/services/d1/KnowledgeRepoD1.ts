@@ -34,6 +34,7 @@ import {
   GetRecentPostsQueryInput as GetRecentPostsQueryInputSchema,
   KnowledgePost as KnowledgePostSchema,
   KnowledgePostResult as KnowledgePostResultSchema,
+  LinkRecord as LinkRecordSchema,
   RankedKnowledgePostResult as RankedKnowledgePostResultSchema,
   KnowledgeLinkResult as KnowledgeLinkResultSchema,
   SearchPostsQueryInput as SearchPostsQueryInputSchema,
@@ -1191,6 +1192,68 @@ export const KnowledgeRepoD1 = {
         Effect.flatMap(executePostLinksQuery)
       );
 
+    const getPostByUri = (postUri: string) =>
+      sql<any>`
+        SELECT
+          p.uri as uri,
+          p.did as did,
+          e.handle as handle,
+          e.avatar as avatar,
+          COALESCE(e.tier, 'independent') as tier,
+          p.text as text,
+          p.created_at as createdAt,
+          group_concat(DISTINCT pt.topic_slug) as topicsCsv
+        FROM posts p
+        LEFT JOIN experts e ON e.did = p.did
+        LEFT JOIN post_topics pt ON pt.post_uri = p.uri
+        WHERE p.uri = ${postUri}
+          AND p.status = 'active'
+        GROUP BY p.uri, p.did, e.handle, e.avatar, e.tier, p.text, p.created_at
+        LIMIT 1
+      `.pipe(
+        Effect.flatMap((rows) =>
+          decodeWithDbError(
+            PostRowsSchema,
+            rows,
+            `Failed to decode stored post row for ${postUri}`
+          )
+        ),
+        Effect.flatMap((rows) => {
+          const row = rows[0];
+          return row === undefined
+            ? Effect.succeed(null)
+            : decodeWithDbError(
+                KnowledgePostResultSchema,
+                toPostResult(row),
+                `Failed to normalize stored post row for ${postUri}`
+              );
+        })
+      );
+
+    const getLinksByPostUri = (postUri: string) =>
+      sql<any>`
+        SELECT
+          l.url as url,
+          l.title as title,
+          l.description as description,
+          l.image_url as imageUrl,
+          l.domain as domain,
+          l.extracted_at as extractedAt
+        FROM links l
+        JOIN posts p ON p.uri = l.post_uri
+        WHERE l.post_uri = ${postUri}
+          AND p.status = 'active'
+        ORDER BY l.extracted_at DESC, l.url ASC
+      `.pipe(
+        Effect.flatMap((rows) =>
+          decodeWithDbError(
+            Schema.Array(LinkRecordSchema),
+            rows,
+            `Failed to decode stored links for ${postUri}`
+          )
+        )
+      );
+
     const getPostTopicMatches = (postUri: string) =>
       sql<any>`
         SELECT
@@ -1228,6 +1291,8 @@ export const KnowledgeRepoD1 = {
       getRecentPostsPage,
       getPostLinks,
       getPostLinksPage,
+      getPostByUri,
+      getLinksByPostUri,
       getPostTopicMatches,
       optimizeFts
     };

@@ -4,6 +4,9 @@ const formatSchemaIssue = SchemaIssue.makeFormatterDefault();
 
 export const encodeJsonString = Schema.encodeUnknownSync(Schema.UnknownFromJsonString);
 export const decodeJsonString = Schema.decodeUnknownSync(Schema.UnknownFromJsonString);
+export const decodeJsonStringEither = Schema.decodeUnknownResult(
+  Schema.UnknownFromJsonString
+);
 
 export const encodeJsonStringWith = <S extends Schema.Encoder<unknown>>(schema: S) =>
   (input: S["Type"]) => encodeJsonString(Schema.encodeUnknownSync(schema)(input));

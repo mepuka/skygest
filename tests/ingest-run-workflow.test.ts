@@ -269,6 +269,8 @@ describe("IngestRunWorkflow", () => {
         getRecentPostsPage: () => Effect.succeed([]),
         getPostLinks: () => Effect.succeed([]),
         getPostLinksPage: () => Effect.succeed([]),
+        getPostByUri: () => Effect.succeed(null),
+        getLinksByPostUri: () => Effect.succeed([]),
         getPostTopicMatches: () => Effect.succeed([]),
         optimizeFts: () => Effect.void
       });
@@ -449,6 +451,8 @@ describe("IngestRunWorkflow", () => {
         getRecentPostsPage: () => Effect.succeed([]),
         getPostLinks: () => Effect.succeed([]),
         getPostLinksPage: () => Effect.succeed([]),
+        getPostByUri: () => Effect.succeed(null),
+        getLinksByPostUri: () => Effect.succeed([]),
         getPostTopicMatches: () => Effect.succeed([]),
         optimizeFts: () => Effect.fail(new SqlError({ reason: new SqlUnknownError({ cause: new Error("test"), message: "optimize failed" }) }))
       });
