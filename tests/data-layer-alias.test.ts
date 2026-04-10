@@ -34,6 +34,11 @@ describe("ExternalIdentifier", () => {
     const input = { scheme: "eia-series", value: "ELEC.GEN.ALL-99.A", relation: "methodologyVariant" };
     expect(Schema.decodeUnknownSync(ExternalIdentifier)(input).relation).toBe("methodologyVariant");
   });
+
+  it("accepts the eia-bulk-id scheme (legacy bulk-manifest top-level codes)", () => {
+    const input = { scheme: "eia-bulk-id", value: "EBA", relation: "exactMatch" };
+    expect(Schema.decodeUnknownSync(ExternalIdentifier)(input).scheme).toBe("eia-bulk-id");
+  });
 });
 
 describe("Aliases (unique (scheme, value) enforcement)", () => {
