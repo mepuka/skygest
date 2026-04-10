@@ -27,11 +27,13 @@ export const Stage1PostContext = Schema.Struct({
 });
 export type Stage1PostContext = Schema.Schema.Type<typeof Stage1PostContext>;
 
-export const Stage1Input = Schema.Struct({
+export const stage1InputFields = {
   postContext: Stage1PostContext,
   vision: Schema.NullOr(VisionEnrichment),
   sourceAttribution: Schema.NullOr(SourceAttributionEnrichment)
-}).annotate({
+} as const;
+
+export const Stage1Input = Schema.Struct(stage1InputFields).annotate({
   description: "All deterministic inputs consumed by the Stage 1 resolver"
 });
 export type Stage1Input = Schema.Schema.Type<typeof Stage1Input>;

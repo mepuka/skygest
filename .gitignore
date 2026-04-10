@@ -50,6 +50,8 @@ memory
 # Vision eval run outputs
 eval/vision/runs/
 eval/source-attribution/runs/
+eval/resolution-stage1/runs/
+eval/resolution-stage1/snapshot.jsonl
 analysis/threads.db
 
 # Twitter auth cookies (contain session secrets)
