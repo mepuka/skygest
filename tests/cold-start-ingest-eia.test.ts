@@ -29,6 +29,7 @@ import {
   entityFilePathForNode,
   fetchRoute,
   type IngestNode,
+  isApiV2RouteValue,
   ledgerKeyForNode,
   loadCatalogIndex,
   loadLedger,
@@ -690,12 +691,12 @@ describe("loadCatalogIndex", () => {
   );
 
   it.effect(
-    "skips datasets whose eia-route alias is a legacy bulk code (no slash)",
+    "skips datasets whose eia-route alias is an all-uppercase legacy bulk code",
     () =>
       Effect.gen(function* () {
-        // Route aliases without a "/" are legacy bulk-manifest codes;
-        // Task 0.5 migrated most to eia-bulk-id but belt-and-braces
-        // filtering here guards against any stragglers.
+        // Route aliases matching LEGACY_BULK_CODE_RE (^[A-Z][A-Z0-9_]*$) are
+        // bulk-manifest codes; Task 0.5 migrated most to eia-bulk-id but the
+        // loader's predicate still filters them as a second line of defence.
         const tmp = yield* Effect.promise(() =>
           makeTmpFixture({
             datasets: [
@@ -723,6 +724,62 @@ describe("loadCatalogIndex", () => {
 
         expect(result.datasetsByRoute.size).toBe(0);
         expect(result.allDatasets.length).toBe(1);
+      }).pipe(Effect.provide(bunFsLayer))
+  );
+
+  it.effect(
+    "indexes single-segment and mixed-case lowercase routes (post-Task 10 fix)",
+    () =>
+      Effect.gen(function* () {
+        // Without the isApiV2RouteValue regex fix, single-segment routes
+        // like "steo" would be misclassified as legacy bulk codes and
+        // re-minted on every run instead of merged. Mixed-case multi-segment
+        // routes like "petroleum/move/railNA" hit the same path. This is the
+        // positive-side regression that pins the Task 10 bug fix in place.
+        const tmp = yield* Effect.promise(() =>
+          makeTmpFixture({
+            datasets: [
+              {
+                slug: "eia-steo",
+                body: validDatasetBody(
+                  "Short-Term Energy Outlook",
+                  "01KNQSXEPPXRC56GM4SED9D0SX",
+                  [
+                    {
+                      scheme: "eia-route",
+                      value: "steo",
+                      relation: "exactMatch"
+                    }
+                  ]
+                )
+              },
+              {
+                slug: "eia-petroleum-railna",
+                body: validDatasetBody(
+                  "Petroleum Movements (Rail NA)",
+                  "01KNQSXEPPXRC56GM4SED9D0PR",
+                  [
+                    {
+                      scheme: "eia-route",
+                      value: "petroleum/move/railNA",
+                      relation: "exactMatch"
+                    }
+                  ]
+                )
+              }
+            ]
+          })
+        );
+
+        const result = yield* loadCatalogIndex(tmp).pipe(
+          Effect.ensuring(Effect.promise(() => cleanup(tmp)))
+        );
+
+        expect(result.datasetsByRoute.get("steo")).toBeDefined();
+        expect(
+          result.datasetsByRoute.get("petroleum/move/railNA")
+        ).toBeDefined();
+        expect(result.datasetsByRoute.size).toBe(2);
       }).pipe(Effect.provide(bunFsLayer))
   );
 
@@ -1951,5 +2008,33 @@ describe("encodeIngestNodeData", () => {
       expect(parsed.id).toBe(node.data.id);
     }
   });
+});
+
+describe("isApiV2RouteValue", () => {
+  // Table-driven coverage of the LEGACY_BULK_CODE_RE predicate. The
+  // accepted side spans single-segment lowercase routes, hyphenated
+  // multi-segment routes, and mixed-case segments. The rejected side
+  // spans the canonical bulk-manifest codes (all-caps with optional
+  // digits / underscores) plus the empty string.
+  const cases: ReadonlyArray<readonly [input: string, expected: boolean]> = [
+    ["steo", true],
+    ["seds", true],
+    ["international", true],
+    ["electricity/retail-sales", true],
+    ["natural-gas/prod", true],
+    ["petroleum/move/railNA", true],
+    ["crude-oil-imports", true],
+    ["total-energy", true],
+    ["COAL", false],
+    ["EBA", false],
+    ["NUC_STATUS", false],
+    ["PET_IMPORTS", false],
+    ["", false]
+  ];
+  for (const [input, expected] of cases) {
+    it(`${JSON.stringify(input)} → ${String(expected)}`, () => {
+      expect(isApiV2RouteValue(input)).toBe(expected);
+    });
+  }
 });
 

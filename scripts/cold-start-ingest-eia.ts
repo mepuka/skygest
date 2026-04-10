@@ -728,6 +728,27 @@ export interface CatalogIndex {
 const EIA_AGENT_HOMEPAGE = "https://www.eia.gov/";
 
 /**
+ * On-disk locations for the harvest run report + mermaid graph. Hoisted to
+ * module scope so the path that lands in `IngestReport.mermaidPath` and the
+ * one passed to `writeEntityFile` cannot drift independently if the report
+ * directory ever moves.
+ */
+const HARVEST_REPORT_DIR = "reports/harvest";
+const INGEST_MERMAID_FILE = "eia-ingest-graph.mermaid";
+const INGEST_REPORT_FILE = "eia-ingest-report.json";
+
+/**
+ * Load-bearing provenance attached to every IngestReport. Lifted out of
+ * `main` so each note is grep-able from the top of the file rather than
+ * buried inside the orchestration body.
+ */
+const REPORT_PROVENANCE_NOTES: ReadonlyArray<string> = [
+  "Wikidata QID for EIA: Q1133499 (correct). Ticket SKY-254 listed Q466438 in error — that QID belongs to American President Lines and was not added.",
+  "landingPage values for new datasets are intentionally omitted; existing hand-curated topic-page URLs (e.g. eia.gov/electricity/gridmonitor/) are preserved on merge.",
+  "Legacy bulk-manifest codes (EBA, ELEC, ...) were migrated from `eia-route` to `eia-bulk-id` in Task 0.5 prior to this run."
+];
+
+/**
  * Concurrency cap for filesystem reads during catalog-index loading.
  * Matches the `FILESYSTEM_CONCURRENCY = 10` convention used elsewhere in
  * the codebase (see skygest-editorial's BuildGraph.ts); keeps parallel
@@ -748,7 +769,7 @@ const INDEX_LOAD_CONCURRENCY = 10;
  *  run surfaced the bug. The current check accepts any value that is
  *  NOT an all-uppercase bulk-code identifier. */
 const LEGACY_BULK_CODE_RE = /^[A-Z][A-Z0-9_]*$/;
-const isApiV2RouteValue = (value: string): boolean =>
+export const isApiV2RouteValue = (value: string): boolean =>
   value.length > 0 && !LEGACY_BULK_CODE_RE.test(value);
 
 const decodeFileAs = <S extends Schema.Decoder<unknown>>(
@@ -1864,7 +1885,8 @@ const main = Effect.gen(function* () {
 
   // ---------- Phase A: validate candidates ----------
   const { failures, successes } = yield* validateCandidates(candidates);
-  if (failures.length > 0) {
+  const [firstFailure] = failures;
+  if (firstFailure !== undefined) {
     yield* Effect.logError(
       `Phase A validation failed: ${String(failures.length)}/${String(candidates.length)} node(s) failed schema validation`
     );
@@ -1873,9 +1895,10 @@ const main = Effect.gen(function* () {
       (err) => Effect.logError(`  ${err.kind}/${err.slug}: ${err.message}`),
       { discard: true }
     );
-    // failures[0] is a Schema.TaggedErrorClass instance; yielding it aborts
-    // main with the first error after all have been logged.
-    return yield* failures[0]!;
+    // firstFailure is a Schema.TaggedErrorClass instance; yielding it aborts
+    // main with the first error after all have been logged. Destructuring
+    // narrows away `undefined` so we don't need a non-null assertion.
+    return yield* firstFailure;
   }
   yield* Effect.log(
     `Phase A complete: ${String(successes.length)}/${String(candidates.length)} nodes valid`
@@ -1908,11 +1931,14 @@ const main = Effect.gen(function* () {
 
   // Graph.topo returns a NodeWalker; Graph.values yields the node data.
   // `Array.from` on the iterable materializes the topo order for both the
-  // write pass and the report-building pass below. Concurrency is pinned
-  // to 1 so the sequence of writes — and hence the git diff order — is
-  // stable across runs.
+  // write pass and the report-building pass below.
   const topoOrder = Array.from(Graph.values(Graph.topo(graph)));
 
+  // Concurrency 1 keeps Phase B failure attribution and log ordering
+  // deterministic. Distinct paths mean the on-disk result is identical
+  // regardless of concurrency, but a parallel pass would scramble which
+  // node we blame for an EiaIngestFsError. Raise after Task 11 if the
+  // sequential write becomes the bottleneck on real ingests.
   yield* Effect.forEach(
     topoOrder,
     (node) => writeNode(path_, config.rootDir, node),
@@ -1956,12 +1982,8 @@ const main = Effect.gen(function* () {
     },
     distributions: { count: distributionCount },
     catalogRecords: { count: catalogRecordCount },
-    mermaidPath: "reports/harvest/eia-ingest-graph.mermaid",
-    notes: [
-      "Wikidata QID for EIA: Q1133499 (correct). Ticket SKY-254 listed Q466438 in error — that QID belongs to American President Lines and was not added.",
-      "landingPage values for new datasets are intentionally omitted; existing hand-curated topic-page URLs (e.g. eia.gov/electricity/gridmonitor/) are preserved on merge.",
-      "Legacy bulk-manifest codes (EBA, ELEC, ...) were migrated from `eia-route` to `eia-bulk-id` in Task 0.5 prior to this run."
-    ]
+    mermaidPath: `${HARVEST_REPORT_DIR}/${INGEST_MERMAID_FILE}`,
+    notes: REPORT_PROVENANCE_NOTES
   };
 
   const mermaid = Graph.toMermaid(graph, {
@@ -1970,12 +1992,13 @@ const main = Effect.gen(function* () {
     diagramType: "flowchart",
     direction: "LR"
   });
+  const reportsDir = path_.resolve(config.rootDir, HARVEST_REPORT_DIR);
   yield* writeEntityFile(
-    path_.resolve(config.rootDir, "reports", "harvest", "eia-ingest-graph.mermaid"),
+    path_.resolve(reportsDir, INGEST_MERMAID_FILE),
     `${mermaid}\n`
   );
   yield* writeEntityFile(
-    path_.resolve(config.rootDir, "reports", "harvest", "eia-ingest-report.json"),
+    path_.resolve(reportsDir, INGEST_REPORT_FILE),
     `${encodeIngestReportPretty(report)}\n`
   );
 
