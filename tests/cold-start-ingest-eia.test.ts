@@ -15,12 +15,21 @@ import type {
   Distribution
 } from "../src/domain/data-layer";
 import {
+  buildCandidateNodes,
+  buildCatalogRecord,
+  buildContextFromIndex,
+  buildDatasetCandidate,
+  buildDistributionCandidates,
   buildIngestGraph,
+  type BuildContext,
   type EiaApiResponse,
+  EiaIngestLedgerError,
   EiaIngestSchemaError,
   fetchRoute,
   type IngestNode,
   loadCatalogIndex,
+  slugifyRoute,
+  unionAliases,
   walkRoutes
 } from "../scripts/cold-start-ingest-eia";
 
@@ -863,4 +872,572 @@ describe("loadCatalogIndex", () => {
       );
     }).pipe(Effect.provide(bunFsLayer))
   );
+});
+
+// ---------------------------------------------------------------------------
+// Task 7 — Pure record builders
+// ---------------------------------------------------------------------------
+
+// Shared fixture ULIDs for builder tests. Kept at module scope so they're
+// deterministic across assertions that need to match by id.
+const BUILDER_AGENT_ULID = "01KNQEZ5V57VJJJFYV6HWM03VB";
+const BUILDER_CATALOG_ULID = "01KNQEZ5V57VJJJFYV6HWM03VC";
+const BUILDER_DATASET_ULID = "01KNQSXEPQHNVM0AVMA3SQRNK3";
+const BUILDER_DIST_ULID = "01KNQSXEPQE7D85JBAFH47Y9MS";
+const BUILDER_DS_ULID = "01KNQEZ5VHS74DM94ABW2ZM93Y";
+
+const BUILDER_AGENT_ID = `https://id.skygest.io/agent/ag_${BUILDER_AGENT_ULID}`;
+const BUILDER_CATALOG_ID = `https://id.skygest.io/catalog/cat_${BUILDER_CATALOG_ULID}`;
+const BUILDER_DATASET_ID = `https://id.skygest.io/dataset/ds_${BUILDER_DATASET_ULID}`;
+const BUILDER_DIST_ID = `https://id.skygest.io/distribution/dist_${BUILDER_DIST_ULID}`;
+const BUILDER_DS_ID = `https://id.skygest.io/data-service/svc_${BUILDER_DS_ULID}`;
+
+// Tiny factory that builds an in-memory BuildContext without reading from
+// disk. The casts mirror what loadCatalogIndex returns after Schema.decode —
+// they're safe because the body shapes match the domain schemas exactly.
+const makeBuilderCtx = (now: string): BuildContext => {
+  const agent = {
+    _tag: "Agent",
+    id: BUILDER_AGENT_ID as unknown as Agent["id"],
+    kind: "organization",
+    name: "U.S. Energy Information Administration",
+    aliases: [],
+    createdAt: FIXTURE_NOW as unknown as Agent["createdAt"],
+    updatedAt: FIXTURE_NOW as unknown as Agent["updatedAt"]
+  } as unknown as Agent;
+  const catalog = {
+    _tag: "Catalog",
+    id: BUILDER_CATALOG_ID as unknown as Catalog["id"],
+    title: "EIA Open Data Catalog",
+    publisherAgentId: agent.id,
+    aliases: [],
+    createdAt: FIXTURE_NOW as unknown as Catalog["createdAt"],
+    updatedAt: FIXTURE_NOW as unknown as Catalog["updatedAt"]
+  } as unknown as Catalog;
+  const dataService = {
+    _tag: "DataService",
+    id: BUILDER_DS_ID as unknown as DataService["id"],
+    title: "EIA API v2",
+    publisherAgentId: agent.id,
+    endpointURLs: ["https://api.eia.gov/v2/"],
+    servesDatasetIds: [],
+    aliases: [],
+    createdAt: FIXTURE_NOW as unknown as DataService["createdAt"],
+    updatedAt: FIXTURE_NOW as unknown as DataService["updatedAt"]
+  } as unknown as DataService;
+  return { nowIso: now, eiaAgent: agent, eiaCatalog: catalog, eiaDataService: dataService };
+};
+
+// An empty catalog index — suitable for fresh-build tests that don't need
+// any lookups to resolve against existing records.
+const emptyIndex = (): Parameters<typeof buildDistributionCandidates>[3] => ({
+  datasetsByRoute: new Map(),
+  distributionsByDatasetIdKind: new Map(),
+  catalogRecordsByCatalogAndPrimaryTopic: new Map(),
+  agentsByName: new Map(),
+  catalog: null,
+  dataService: null,
+  allDatasets: [],
+  allDistributions: [],
+  allCatalogRecords: []
+});
+
+describe("slugifyRoute", () => {
+  it("turns an API v2 route path into an eia- prefixed slug", () => {
+    expect(slugifyRoute("electricity/retail-sales")).toBe(
+      "eia-electricity-retail-sales"
+    );
+    expect(slugifyRoute("petroleum/pri/spt")).toBe("eia-petroleum-pri-spt");
+  });
+});
+
+describe("unionAliases", () => {
+  it("dedupes by (scheme, value), preserving existing entry on collision", () => {
+    const existing = [
+      { scheme: "eia-route", value: "electricity/retail-sales", relation: "exactMatch" },
+      { scheme: "doi", value: "10.1234/eia", relation: "exactMatch" }
+    ] as ReadonlyArray<Parameters<typeof unionAliases>[0][number]>;
+    const fresh = [
+      // duplicate (scheme, value) — must be dropped in favor of existing
+      { scheme: "eia-route", value: "electricity/retail-sales", relation: "closeMatch" },
+      // new scheme — must be appended
+      { scheme: "wikidata", value: "Q12345", relation: "exactMatch" }
+    ] as ReadonlyArray<Parameters<typeof unionAliases>[0][number]>;
+
+    const result = unionAliases(existing, fresh);
+    expect(result).toHaveLength(3);
+    expect(result[0]).toEqual(existing[0]); // existing wins on collision
+    expect(result[1]).toEqual(existing[1]);
+    expect(result[2]).toEqual(fresh[1]);
+  });
+});
+
+describe("buildContextFromIndex", () => {
+  it.effect("fails with EiaIngestLedgerError when the EIA catalog is missing", () =>
+    Effect.gen(function* () {
+      const idx = emptyIndex();
+      const err = yield* buildContextFromIndex(idx, FIXTURE_NOW).pipe(Effect.flip);
+      expect(err).toBeInstanceOf(EiaIngestLedgerError);
+      expect(err.message).toContain("Catalog or DataService missing");
+    })
+  );
+
+  it.effect("fails with EiaIngestLedgerError when the EIA agent is unresolvable", () =>
+    Effect.gen(function* () {
+      // catalog + dataService present, but the agent referenced by
+      // catalog.publisherAgentId isn't in agentsByName.
+      const ctx = makeBuilderCtx(FIXTURE_NOW);
+      const idx = {
+        ...emptyIndex(),
+        catalog: ctx.eiaCatalog,
+        dataService: ctx.eiaDataService
+      };
+      const err = yield* buildContextFromIndex(idx, FIXTURE_NOW).pipe(Effect.flip);
+      expect(err).toBeInstanceOf(EiaIngestLedgerError);
+      expect(err.message).toContain("Agent missing");
+    })
+  );
+
+  it.effect("resolves the EIA agent via catalog.publisherAgentId", () =>
+    Effect.gen(function* () {
+      const ctx = makeBuilderCtx(FIXTURE_NOW);
+      const agents = new Map<string, Agent>();
+      agents.set(ctx.eiaAgent.name, ctx.eiaAgent);
+      const idx = {
+        ...emptyIndex(),
+        catalog: ctx.eiaCatalog,
+        dataService: ctx.eiaDataService,
+        agentsByName: agents
+      };
+      const result = yield* buildContextFromIndex(idx, FIXTURE_NOW);
+      expect(result.eiaAgent.id).toBe(ctx.eiaAgent.id);
+      expect(result.eiaCatalog.id).toBe(ctx.eiaCatalog.id);
+      expect(result.eiaDataService.id).toBe(ctx.eiaDataService.id);
+      expect(result.nowIso).toBe(FIXTURE_NOW);
+    })
+  );
+});
+
+describe("buildDatasetCandidate", () => {
+  const leaf = {
+    path: "electricity/retail-sales",
+    parents: ["electricity"],
+    response: {
+      id: "retail-sales",
+      name: "Retail Sales of Electricity",
+      description: "Retail sales of electricity by state and sector",
+      facets: [
+        { id: "stateid", description: "State identifier" },
+        { id: "sectorid", description: "Sector identifier" }
+      ],
+      defaultFrequency: "monthly",
+      startPeriod: "2001-01",
+      endPeriod: "2024-12"
+    } as unknown as EiaApiResponse["response"]
+  };
+
+  it("mints a fresh dataset candidate with title, themes, alias, and keywords", () => {
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const ds = buildDatasetCandidate(leaf, ctx, null);
+
+    // title comes from response.name
+    expect(ds.title).toBe("Retail Sales of Electricity");
+    // description falls back to response.description on fresh build
+    expect(ds.description).toBe(
+      "Retail sales of electricity by state and sector"
+    );
+    // themes derived from parents when no existing themes
+    expect(ds.themes).toEqual(["electricity"]);
+    // keywords = facet ids + defaultFrequency (in any order, deduped)
+    expect(ds.keywords).toEqual(expect.arrayContaining(["stateid", "sectorid", "monthly"]));
+    expect(ds.keywords).toHaveLength(3);
+    // defaultFrequency goes into keywords, NOT aliases
+    expect(ds.aliases).toHaveLength(1);
+    expect(ds.aliases[0]).toEqual({
+      scheme: "eia-route",
+      value: "electricity/retail-sales",
+      relation: "exactMatch"
+    });
+    // publisherAgentId and dataServiceIds are structural
+    expect(ds.publisherAgentId).toBe(ctx.eiaAgent.id);
+    expect(ds.dataServiceIds).toEqual([ctx.eiaDataService.id]);
+    // ID matches the branded pattern for datasets
+    expect(ds.id).toMatch(
+      /^https:\/\/id\.skygest\.io\/dataset\/ds_[0-9A-Z]{10,}$/u
+    );
+    // Fresh record: createdAt and updatedAt both equal nowIso
+    expect(ds.createdAt).toBe(FIXTURE_NOW);
+    expect(ds.updatedAt).toBe(FIXTURE_NOW);
+    // Default license + accessRights
+    expect(ds.license).toBe("https://www.eia.gov/about/copyrights_reuse.php");
+    expect(ds.accessRights).toBe("public");
+    // temporal synthesized from startPeriod/endPeriod
+    expect(ds.temporal).toBe("2001-01/2024-12");
+    // landingPage never synthesized on fresh build
+    expect((ds as Dataset).landingPage).toBeUndefined();
+    // distributionIds placeholder (re-stitched later)
+    expect(ds.distributionIds).toEqual([]);
+  });
+
+  it("merges with an existing dataset, preserving id/createdAt/landingPage/curated themes", () => {
+    const ctx = makeBuilderCtx("2026-05-01T00:00:00.000Z");
+    // Existing curated record carries a landing page, bespoke themes, and
+    // a description that shouldn't be clobbered by the terse API one.
+    const existing = {
+      _tag: "Dataset",
+      id: BUILDER_DATASET_ID as unknown as Dataset["id"],
+      title: "Old title",
+      description: "Curated, human-written description",
+      publisherAgentId: ctx.eiaAgent.id,
+      landingPage: "https://www.eia.gov/electricity/data.php" as unknown as Dataset["landingPage"],
+      accessRights: "public",
+      license: "https://custom-license.example.org/",
+      keywords: ["curated-keyword"],
+      themes: ["energy-markets", "retail"],
+      temporal: "1990-01/2020-12",
+      aliases: [
+        {
+          scheme: "eia-route",
+          value: "electricity/retail-sales",
+          relation: "exactMatch"
+        },
+        { scheme: "doi", value: "10.1234/foo", relation: "exactMatch" }
+      ],
+      dataServiceIds: [ctx.eiaDataService.id],
+      distributionIds: [],
+      createdAt: "2025-01-01T00:00:00.000Z" as unknown as Dataset["createdAt"],
+      updatedAt: "2025-01-01T00:00:00.000Z" as unknown as Dataset["updatedAt"]
+    } as unknown as Dataset;
+
+    const ds = buildDatasetCandidate(leaf, ctx, existing);
+
+    // ID + createdAt preserved; updatedAt bumped.
+    expect(ds.id).toBe(existing.id);
+    expect(ds.createdAt).toBe(existing.createdAt);
+    expect(ds.updatedAt).toBe("2026-05-01T00:00:00.000Z");
+    // title overwritten from API (canonical structural source)
+    expect(ds.title).toBe("Retail Sales of Electricity");
+    // description preserved (API v2 descriptions are terse)
+    expect(ds.description).toBe("Curated, human-written description");
+    // landingPage preserved — never synthesized
+    expect(ds.landingPage).toBe("https://www.eia.gov/electricity/data.php");
+    // curated themes preserved when non-empty; not overwritten by parents
+    expect(ds.themes).toEqual(["energy-markets", "retail"]);
+    // license preserved
+    expect(ds.license).toBe("https://custom-license.example.org/");
+    // temporal preserved
+    expect(ds.temporal).toBe("1990-01/2020-12");
+    // keywords UNION: existing + facet ids + defaultFrequency
+    expect(ds.keywords).toEqual(
+      expect.arrayContaining([
+        "curated-keyword",
+        "stateid",
+        "sectorid",
+        "monthly"
+      ])
+    );
+    expect(ds.keywords).toHaveLength(4);
+    // aliases: unioned; eia-route dedup preserved, doi preserved
+    expect(ds.aliases).toHaveLength(2);
+    const schemes = ds.aliases.map((a) => a.scheme).sort();
+    expect(schemes).toEqual(["doi", "eia-route"]);
+  });
+
+  it("falls back to parent route segments for themes when existing themes are empty", () => {
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const existing = {
+      _tag: "Dataset",
+      id: BUILDER_DATASET_ID as unknown as Dataset["id"],
+      title: "Old",
+      publisherAgentId: ctx.eiaAgent.id,
+      accessRights: "public",
+      themes: [], // explicitly empty — builder must fall back to parents
+      aliases: [],
+      createdAt: FIXTURE_NOW as unknown as Dataset["createdAt"],
+      updatedAt: FIXTURE_NOW as unknown as Dataset["updatedAt"]
+    } as unknown as Dataset;
+    const ds = buildDatasetCandidate(leaf, ctx, existing);
+    expect(ds.themes).toEqual(["electricity"]);
+  });
+});
+
+describe("buildDistributionCandidates", () => {
+  const leaf = {
+    path: "electricity/retail-sales",
+    parents: ["electricity"],
+    response: {
+      id: "retail-sales",
+      name: "Retail Sales of Electricity"
+    } as unknown as EiaApiResponse["response"]
+  };
+
+  it("mints a fresh api-access distribution with the correct accessURL + kind", () => {
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const dists = buildDistributionCandidates(
+      leaf,
+      BUILDER_DATASET_ID as unknown as Dataset["id"],
+      ctx,
+      emptyIndex()
+    );
+    expect(dists).toHaveLength(1);
+    const [api] = dists;
+    expect(api!.kind).toBe("api-access");
+    expect(api!.accessURL).toBe(
+      "https://api.eia.gov/v2/electricity/retail-sales/"
+    );
+    expect(api!.datasetId).toBe(BUILDER_DATASET_ID);
+    expect(api!.id).toMatch(
+      /^https:\/\/id\.skygest\.io\/distribution\/dist_[0-9A-Z]{10,}$/u
+    );
+    expect(api!.createdAt).toBe(FIXTURE_NOW);
+    expect(api!.updatedAt).toBe(FIXTURE_NOW);
+  });
+
+  it("merges with an existing api-access distribution, preserving id/accessURL/format/mediaType/title", () => {
+    const datasetId = BUILDER_DATASET_ID as unknown as Dataset["id"];
+    const existingApi = {
+      _tag: "Distribution",
+      id: BUILDER_DIST_ID as unknown as Distribution["id"],
+      datasetId,
+      kind: "api-access",
+      title: "EIA v2 API — Retail Sales",
+      accessURL: "https://custom.example.org/v2/retail/" as unknown as Distribution["accessURL"],
+      format: "application/json",
+      mediaType: "application/json",
+      aliases: [],
+      createdAt: "2025-01-01T00:00:00.000Z" as unknown as Distribution["createdAt"],
+      updatedAt: "2025-01-01T00:00:00.000Z" as unknown as Distribution["updatedAt"]
+    } as unknown as Distribution;
+
+    const ctx = makeBuilderCtx("2026-05-01T00:00:00.000Z");
+    const idx = emptyIndex();
+    idx.distributionsByDatasetIdKind.set(`${datasetId}::api-access`, existingApi);
+    (idx.allDistributions as Array<Distribution>) = [existingApi];
+
+    const dists = buildDistributionCandidates(leaf, datasetId, ctx, idx);
+    expect(dists).toHaveLength(1);
+    const [api] = dists;
+    expect(api!.id).toBe(existingApi.id);
+    // accessURL preserved (existing is authoritative)
+    expect(api!.accessURL).toBe("https://custom.example.org/v2/retail/");
+    expect(api!.format).toBe("application/json");
+    expect(api!.mediaType).toBe("application/json");
+    expect(api!.title).toBe("EIA v2 API — Retail Sales");
+    // createdAt preserved; updatedAt bumped
+    expect(api!.createdAt).toBe("2025-01-01T00:00:00.000Z");
+    expect(api!.updatedAt).toBe("2026-05-01T00:00:00.000Z");
+  });
+
+  it("preserves curated landing-page/download distributions alongside the minted api-access", () => {
+    const datasetId = BUILDER_DATASET_ID as unknown as Dataset["id"];
+    const existingLanding = {
+      _tag: "Distribution",
+      id: "https://id.skygest.io/distribution/dist_LANDING000000000000000001" as unknown as Distribution["id"],
+      datasetId,
+      kind: "landing-page",
+      accessURL: "https://www.eia.gov/electricity/data.php" as unknown as Distribution["accessURL"],
+      aliases: [],
+      createdAt: FIXTURE_NOW as unknown as Distribution["createdAt"],
+      updatedAt: FIXTURE_NOW as unknown as Distribution["updatedAt"]
+    } as unknown as Distribution;
+    const existingDownload = {
+      _tag: "Distribution",
+      id: "https://id.skygest.io/distribution/dist_DOWNLOAD00000000000000001" as unknown as Distribution["id"],
+      datasetId,
+      kind: "download",
+      downloadURL: "https://www.eia.gov/bulk/retail-sales.zip" as unknown as Distribution["downloadURL"],
+      aliases: [],
+      createdAt: FIXTURE_NOW as unknown as Distribution["createdAt"],
+      updatedAt: FIXTURE_NOW as unknown as Distribution["updatedAt"]
+    } as unknown as Distribution;
+
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const idx = emptyIndex();
+    (idx.allDistributions as Array<Distribution>) = [existingLanding, existingDownload];
+
+    const dists = buildDistributionCandidates(leaf, datasetId, ctx, idx);
+    expect(dists).toHaveLength(3);
+    const kinds = dists.map((d) => d.kind).sort();
+    expect(kinds).toEqual(["api-access", "download", "landing-page"]);
+    // Preserved distributions are the exact same objects (no mutation)
+    expect(dists.find((d) => d.kind === "landing-page")).toBe(existingLanding);
+    expect(dists.find((d) => d.kind === "download")).toBe(existingDownload);
+  });
+});
+
+describe("buildCatalogRecord", () => {
+  it("mints a fresh CatalogRecord bound to the EIA catalog + dataset", () => {
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const dataset = {
+      _tag: "Dataset",
+      id: BUILDER_DATASET_ID as unknown as Dataset["id"],
+      title: "Retail Sales",
+      publisherAgentId: ctx.eiaAgent.id,
+      accessRights: "public",
+      aliases: [],
+      createdAt: FIXTURE_NOW as unknown as Dataset["createdAt"],
+      updatedAt: FIXTURE_NOW as unknown as Dataset["updatedAt"]
+    } as unknown as Dataset;
+
+    const cr = buildCatalogRecord(dataset, ctx, null, "electricity/retail-sales");
+    expect(cr.catalogId).toBe(ctx.eiaCatalog.id);
+    expect(cr.primaryTopicType).toBe("dataset");
+    expect(cr.primaryTopicId).toBe(dataset.id);
+    expect(cr.firstSeen).toBe(FIXTURE_NOW);
+    expect(cr.lastSeen).toBe(FIXTURE_NOW);
+    expect(cr.harvestedFrom).toBe(
+      "https://api.eia.gov/v2/electricity/retail-sales/"
+    );
+    expect(cr.isAuthoritative).toBe(true);
+    expect(cr.id).toMatch(
+      /^https:\/\/id\.skygest\.io\/catalog-record\/cr_[0-9A-Z]{10,}$/u
+    );
+  });
+
+  it("preserves existing id/firstSeen/harvestedFrom/sourceRecordId on merge, only bumps lastSeen", () => {
+    const ctx = makeBuilderCtx("2026-05-01T00:00:00.000Z");
+    const dataset = {
+      _tag: "Dataset",
+      id: BUILDER_DATASET_ID as unknown as Dataset["id"],
+      title: "Retail Sales",
+      publisherAgentId: ctx.eiaAgent.id,
+      accessRights: "public",
+      aliases: [],
+      createdAt: FIXTURE_NOW as unknown as Dataset["createdAt"],
+      updatedAt: FIXTURE_NOW as unknown as Dataset["updatedAt"]
+    } as unknown as Dataset;
+    const existing = {
+      _tag: "CatalogRecord",
+      id: "https://id.skygest.io/catalog-record/cr_EXISTING0000000000000001" as unknown as CatalogRecord["id"],
+      catalogId: ctx.eiaCatalog.id,
+      primaryTopicType: "dataset",
+      primaryTopicId: dataset.id,
+      firstSeen: "2024-01-01T00:00:00.000Z",
+      lastSeen: "2024-06-01T00:00:00.000Z",
+      sourceRecordId: "EIA-RETAIL-SALES",
+      harvestedFrom: "https://www.eia.gov/legacy/catalog.xml",
+      isAuthoritative: true
+    } as unknown as CatalogRecord;
+
+    const cr = buildCatalogRecord(dataset, ctx, existing, "electricity/retail-sales");
+    expect(cr.id).toBe(existing.id);
+    expect(cr.firstSeen).toBe("2024-01-01T00:00:00.000Z");
+    expect(cr.lastSeen).toBe("2026-05-01T00:00:00.000Z"); // bumped
+    expect(cr.sourceRecordId).toBe("EIA-RETAIL-SALES"); // preserved
+    expect(cr.harvestedFrom).toBe("https://www.eia.gov/legacy/catalog.xml"); // preserved
+  });
+});
+
+describe("buildCandidateNodes", () => {
+  // Minimal walkData: 1 root, 1 parent (electricity), 1 leaf
+  // (electricity/retail-sales). Only the leaf produces Dataset /
+  // Distribution / CatalogRecord candidates.
+  const makeWalk = (): ReadonlyMap<string, EiaApiResponse> => {
+    const walk = new Map<string, EiaApiResponse>();
+    walk.set("", {
+      response: {
+        id: "root",
+        name: "EIA API",
+        routes: [{ id: "electricity", name: "Electricity" }]
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("electricity", {
+      response: {
+        id: "electricity",
+        name: "Electricity",
+        routes: [{ id: "retail-sales", name: "Retail Sales" }]
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("electricity/retail-sales", {
+      response: {
+        id: "retail-sales",
+        name: "Retail Sales of Electricity",
+        facets: [{ id: "stateid", description: null }],
+        defaultFrequency: "monthly"
+      }
+    } as unknown as EiaApiResponse);
+    return walk;
+  };
+
+  it("produces a 6-node candidate set for one leaf (agent + catalog + data-service + dataset + api distribution + cr)", () => {
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const nodes = buildCandidateNodes(makeWalk(), emptyIndex(), ctx);
+
+    expect(nodes).toHaveLength(6);
+    const tags = nodes.map((n) => n._tag).sort();
+    expect(tags).toEqual([
+      "agent",
+      "catalog",
+      "catalog-record",
+      "data-service",
+      "dataset",
+      "distribution"
+    ]);
+
+    // Dataset node is merged=false on fresh build.
+    const datasetNode = nodes.find((n) => n._tag === "dataset")!;
+    expect(datasetNode._tag).toBe("dataset");
+    if (datasetNode._tag === "dataset") {
+      expect(datasetNode.merged).toBe(false);
+      expect(datasetNode.data.title).toBe("Retail Sales of Electricity");
+      expect(datasetNode.slug).toBe("eia-electricity-retail-sales");
+      // distributionIds wired to the minted api-access distribution
+      expect(datasetNode.data.distributionIds).toHaveLength(1);
+    }
+
+    // Distribution kind is api-access with the right accessURL.
+    const distNode = nodes.find((n) => n._tag === "distribution")!;
+    if (distNode._tag === "distribution") {
+      expect(distNode.data.kind).toBe("api-access");
+      expect(distNode.data.accessURL).toBe(
+        "https://api.eia.gov/v2/electricity/retail-sales/"
+      );
+      expect(distNode.slug).toBe("eia-electricity-retail-sales-api-access");
+    }
+
+    // CatalogRecord node is bound to the EIA catalog and the minted dataset.
+    const crNode = nodes.find((n) => n._tag === "catalog-record")!;
+    if (crNode._tag === "catalog-record") {
+      expect(crNode.data.catalogId).toBe(ctx.eiaCatalog.id);
+      expect(crNode.data.primaryTopicType).toBe("dataset");
+    }
+
+    // DataService node's servesDatasetIds includes the minted dataset.
+    const svcNode = nodes.find((n) => n._tag === "data-service")!;
+    if (svcNode._tag === "data-service" && datasetNode._tag === "dataset") {
+      expect(svcNode.data.servesDatasetIds).toContain(datasetNode.data.id);
+    }
+  });
+
+  it("marks merged=true on a dataset whose route is already in the catalog index", () => {
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const existing = {
+      _tag: "Dataset",
+      id: BUILDER_DATASET_ID as unknown as Dataset["id"],
+      title: "Old title",
+      publisherAgentId: ctx.eiaAgent.id,
+      accessRights: "public",
+      aliases: [
+        {
+          scheme: "eia-route",
+          value: "electricity/retail-sales",
+          relation: "exactMatch"
+        }
+      ],
+      createdAt: FIXTURE_NOW as unknown as Dataset["createdAt"],
+      updatedAt: FIXTURE_NOW as unknown as Dataset["updatedAt"]
+    } as unknown as Dataset;
+
+    const idx = emptyIndex();
+    idx.datasetsByRoute.set("electricity/retail-sales", existing);
+    (idx.allDatasets as Array<Dataset>) = [existing];
+
+    const nodes = buildCandidateNodes(makeWalk(), idx, ctx);
+    const datasetNode = nodes.find((n) => n._tag === "dataset")!;
+    if (datasetNode._tag === "dataset") {
+      expect(datasetNode.merged).toBe(true);
+      // Dataset ID reused from existing (not re-minted)
+      expect(datasetNode.data.id).toBe(existing.id);
+    }
+  });
 });

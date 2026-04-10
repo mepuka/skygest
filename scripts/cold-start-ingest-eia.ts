@@ -39,13 +39,15 @@ import {
   HttpClient,
   HttpClientResponse
 } from "effect/unstable/http";
+import { ulid } from "ulid";
 import {
   Agent,
   Catalog,
   CatalogRecord,
   DataService,
   Dataset,
-  Distribution
+  Distribution,
+  type ExternalIdentifier
 } from "../src/domain/data-layer";
 import {
   decodeJsonStringEitherWith,
@@ -931,6 +933,445 @@ export const loadCatalogIndex = (
       } satisfies CatalogIndex;
     });
   });
+
+// ---------------------------------------------------------------------------
+// Task 7 — Pure record builders
+// ---------------------------------------------------------------------------
+//
+// These are pure synchronous transformations from EIA API v2 walk data +
+// the already-loaded catalog index into unvalidated candidate records
+// ready for Phase A validation in Task 8. Validation happens later; the
+// builders intentionally cast their return values through `unknown` to the
+// branded Dataset/Distribution/CatalogRecord types. Every cast is narrow
+// and load-bearing — the branded URI + alias shapes are structurally
+// correct, and Task 8's Schema.decodeUnknownEffect call will do the real
+// brand enforcement.
+//
+// Merge contract (see Task 7 spec for the full rationale):
+//   - title:              always overwrite (API v2 is canonical)
+//   - description:        preserve existing (API v2 descriptions are terse)
+//   - publisherAgentId:   always overwrite (structural)
+//   - dataServiceIds:     always overwrite (structural)
+//   - landingPage:        preserve existing; never synthesize
+//   - accessRights:       preserve existing
+//   - license:            preserve existing; default to EIA copyright page
+//   - temporal:           preserve existing (API v2 dates are coarser)
+//   - keywords:           UNION(existing, facet ids, defaultFrequency)
+//   - themes:             preserve existing if non-empty, else parents
+//   - inSeries:           preserve existing (curated link)
+//   - aliases:            union by (scheme, value); only ever mint eia-route
+//   - distributionIds:    re-stitched after distributions are minted
+//
+// Distribution merge contract:
+//   - api-access is always present: mint or merge. Preserve existing
+//     accessURL, format, mediaType, title, createdAt.
+//   - landing-page / download / archive / documentation distributions
+//     are never synthesized here — they are hand-curated. If an existing
+//     distribution of one of those kinds is already linked to the
+//     dataset, preserve it unchanged in the result set.
+
+interface LeafRoute {
+  readonly path: string;
+  readonly parents: ReadonlyArray<string>;
+  readonly response: EiaApiResponse["response"];
+}
+
+export interface BuildContext {
+  readonly nowIso: string;
+  readonly eiaAgent: Agent;
+  readonly eiaCatalog: Catalog;
+  readonly eiaDataService: DataService;
+}
+
+// EIA's public reuse policy URL. Applied as a default license for minted
+// candidates when the existing record doesn't carry one.
+const EIA_LICENSE_URL = "https://www.eia.gov/about/copyrights_reuse.php";
+
+/** Turn an API v2 route path into a dataset slug ("electricity/retail-sales"
+ *  → "eia-electricity-retail-sales"). Used for filenames and node slugs. */
+export const slugifyRoute = (route: string): string =>
+  `eia-${route.replace(/\//gu, "-")}`;
+
+const datasetIdFromUlid = (): string =>
+  `https://id.skygest.io/dataset/ds_${ulid()}`;
+const distIdFromUlid = (): string =>
+  `https://id.skygest.io/distribution/dist_${ulid()}`;
+const crIdFromUlid = (): string =>
+  `https://id.skygest.io/catalog-record/cr_${ulid()}`;
+
+/**
+ * Union two alias arrays by `(scheme, value)`. Existing aliases take
+ * precedence over fresh ones when a key collides, which lets us preserve
+ * curated `uri`/`relation` metadata while still appending anything new.
+ * Pure synchronous transformation over already-fetched data.
+ */
+export const unionAliases = (
+  existing: ReadonlyArray<ExternalIdentifier>,
+  fresh: ReadonlyArray<ExternalIdentifier>
+): ReadonlyArray<ExternalIdentifier> => {
+  const seen = new Set<string>();
+  const out: Array<ExternalIdentifier> = [];
+  // Existing aliases first so a later fresh duplicate is silently dropped.
+  for (const alias of existing) {
+    const key = `${alias.scheme}::${alias.value}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(alias);
+  }
+  for (const alias of fresh) {
+    const key = `${alias.scheme}::${alias.value}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(alias);
+  }
+  return out;
+};
+
+/**
+ * Resolve the EIA agent/catalog/dataService triple from a loaded catalog
+ * index. Fails loudly when any piece is missing — the ingest pipeline has
+ * no sensible way to mint candidates without all three scope records.
+ */
+export const buildContextFromIndex = (
+  idx: CatalogIndex,
+  nowIso: string
+): Effect.Effect<BuildContext, EiaIngestLedgerError> =>
+  Effect.gen(function* () {
+    if (idx.catalog === null || idx.dataService === null) {
+      return yield* new EiaIngestLedgerError({
+        message:
+          "EIA Catalog or DataService missing from cold-start registry — run Task 6 loader against a seeded tree"
+      });
+    }
+    // The EIA catalog/dataService are already filtered to the EIA agent's
+    // publisherAgentId during index load, so we can resolve the agent by
+    // that id without re-running the homepage-alias lookup.
+    const catalogPublisherId = idx.catalog.publisherAgentId;
+    const eiaAgent =
+      Array.from(idx.agentsByName.values()).find(
+        (a) => a.id === catalogPublisherId
+      ) ?? null;
+    if (eiaAgent === null) {
+      return yield* new EiaIngestLedgerError({
+        message:
+          "EIA Agent missing from registry — catalog.publisherAgentId did not resolve to any loaded agent"
+      });
+    }
+    return {
+      nowIso,
+      eiaAgent,
+      eiaCatalog: idx.catalog,
+      eiaDataService: idx.dataService
+    } satisfies BuildContext;
+  });
+
+/**
+ * Build a Dataset candidate from an EIA leaf-route response. Pure. When
+ * `existing` is non-null, merges according to the Task 7 contract above.
+ * The returned object is cast through `unknown` because branded IDs and
+ * alias literals are validated later in Task 8.
+ */
+export const buildDatasetCandidate = (
+  leaf: LeafRoute,
+  ctx: BuildContext,
+  existing: Dataset | null
+): Dataset => {
+  const id = existing?.id ?? (datasetIdFromUlid() as Dataset["id"]);
+  const createdAt = existing?.createdAt ?? (ctx.nowIso as Dataset["createdAt"]);
+  const updatedAt = ctx.nowIso as Dataset["updatedAt"];
+
+  // The only alias ingestion ever mints is the API v2 route. Every other
+  // scheme (eia-bulk-id, eia-series, ror, wikidata, doi, ...) is
+  // hand-curated and preserved through unionAliases.
+  const freshAliases: ReadonlyArray<ExternalIdentifier> = [
+    {
+      scheme: "eia-route",
+      value: leaf.path,
+      relation: "exactMatch"
+    } as ExternalIdentifier
+  ];
+  const aliases = unionAliases(existing?.aliases ?? [], freshAliases);
+
+  // Keywords: UNION(existing, facet ids, defaultFrequency). defaultFrequency
+  // belongs in keywords per the spec, not in aliases.
+  const facetIds = (leaf.response.facets ?? []).map((f) => f.id);
+  const freqKw =
+    leaf.response.defaultFrequency != null ? [leaf.response.defaultFrequency] : [];
+  const mergedKeywords = Array.from(
+    new Set<string>([...(existing?.keywords ?? []), ...facetIds, ...freqKw])
+  );
+
+  // Themes: preserve curated list if non-empty, else fall back to the
+  // parent route segments (the structural derivation).
+  const mergedThemes =
+    existing?.themes !== undefined && existing.themes.length > 0
+      ? existing.themes
+      : leaf.parents;
+
+  // Temporal: preserve curated value; only synthesize from start/end
+  // period when neither existing record nor API response has it.
+  const mergedTemporal =
+    existing?.temporal ??
+    (leaf.response.startPeriod != null && leaf.response.endPeriod != null
+      ? `${leaf.response.startPeriod}/${leaf.response.endPeriod}`
+      : undefined);
+
+  const title = leaf.response.name ?? leaf.response.id;
+  const description = existing?.description ?? leaf.response.description ?? undefined;
+
+  const base: Record<string, unknown> = {
+    _tag: "Dataset",
+    id,
+    title,
+    publisherAgentId: ctx.eiaAgent.id,
+    accessRights: existing?.accessRights ?? "public",
+    license: existing?.license ?? EIA_LICENSE_URL,
+    keywords: mergedKeywords,
+    themes: mergedThemes,
+    aliases,
+    createdAt,
+    updatedAt,
+    dataServiceIds: [ctx.eiaDataService.id],
+    distributionIds: [] // re-stitched after distribution candidates are built
+  };
+  if (description !== undefined) base.description = description;
+  if (existing?.landingPage !== undefined) base.landingPage = existing.landingPage;
+  if (mergedTemporal !== undefined) base.temporal = mergedTemporal;
+  if (existing?.inSeries !== undefined) base.inSeries = existing.inSeries;
+
+  return base as unknown as Dataset;
+};
+
+/**
+ * Build Distribution candidates for a leaf. Always produces (at minimum)
+ * an `api-access` distribution whose accessURL is the EIA v2 URL for the
+ * leaf. Preserves every other hand-curated distribution attached to the
+ * same dataset (landing-page, download, archive, documentation, ...).
+ */
+export const buildDistributionCandidates = (
+  leaf: LeafRoute,
+  datasetId: Dataset["id"],
+  ctx: BuildContext,
+  idx: CatalogIndex
+): ReadonlyArray<Distribution> => {
+  const apiAccessUrl = `${EIA_API_BASE}${leaf.path}/`;
+  const existingApi = idx.distributionsByDatasetIdKind.get(
+    `${datasetId}::api-access`
+  );
+
+  // Build the api-access distribution. Preserve every curated field when
+  // merging; only bump `updatedAt`. accessURL is preserved if already set.
+  const apiBase: Record<string, unknown> = {
+    _tag: "Distribution",
+    id: existingApi?.id ?? (distIdFromUlid() as Distribution["id"]),
+    datasetId,
+    kind: "api-access",
+    accessURL: existingApi?.accessURL ?? apiAccessUrl,
+    aliases: existingApi?.aliases ?? [],
+    createdAt:
+      existingApi?.createdAt ?? (ctx.nowIso as Distribution["createdAt"]),
+    updatedAt: ctx.nowIso as Distribution["updatedAt"]
+  };
+  if (existingApi?.title !== undefined) apiBase.title = existingApi.title;
+  if (existingApi?.description !== undefined)
+    apiBase.description = existingApi.description;
+  if (existingApi?.format !== undefined) apiBase.format = existingApi.format;
+  if (existingApi?.mediaType !== undefined)
+    apiBase.mediaType = existingApi.mediaType;
+  if (existingApi?.downloadURL !== undefined)
+    apiBase.downloadURL = existingApi.downloadURL;
+  if (existingApi?.byteSize !== undefined)
+    apiBase.byteSize = existingApi.byteSize;
+  if (existingApi?.checksum !== undefined)
+    apiBase.checksum = existingApi.checksum;
+  if (existingApi?.accessRights !== undefined)
+    apiBase.accessRights = existingApi.accessRights;
+  if (existingApi?.license !== undefined) apiBase.license = existingApi.license;
+  if (existingApi?.accessServiceId !== undefined)
+    apiBase.accessServiceId = existingApi.accessServiceId;
+
+  const apiAccess = apiBase as unknown as Distribution;
+
+  // Preserve all non-api-access distributions for the same dataset. These
+  // are hand-curated (landing-page, download, archive, documentation);
+  // ingestion never synthesizes them.
+  const preserved = idx.allDistributions.filter(
+    (d) => d.datasetId === datasetId && d.kind !== "api-access"
+  );
+
+  return [apiAccess, ...preserved];
+};
+
+/**
+ * Build a CatalogRecord candidate for a dataset. CatalogRecord has no
+ * `aliases`/`createdAt`/`updatedAt` — it carries `firstSeen`/`lastSeen`
+ * catalog-tracking dates instead. Preserves existing firstSeen /
+ * sourceRecordId / harvestedFrom / isAuthoritative / duplicateOf.
+ */
+export const buildCatalogRecord = (
+  dataset: Dataset,
+  ctx: BuildContext,
+  existing: CatalogRecord | null,
+  leafPath: string
+): CatalogRecord => {
+  const base: Record<string, unknown> = {
+    _tag: "CatalogRecord",
+    id: existing?.id ?? (crIdFromUlid() as CatalogRecord["id"]),
+    catalogId: ctx.eiaCatalog.id,
+    primaryTopicType: "dataset",
+    primaryTopicId: dataset.id,
+    firstSeen: existing?.firstSeen ?? ctx.nowIso,
+    lastSeen: ctx.nowIso,
+    harvestedFrom: existing?.harvestedFrom ?? `${EIA_API_BASE}${leafPath}/`,
+    isAuthoritative: existing?.isAuthoritative ?? true
+  };
+  if (existing?.sourceRecordId !== undefined)
+    base.sourceRecordId = existing.sourceRecordId;
+  if (existing?.sourceModified !== undefined)
+    base.sourceModified = existing.sourceModified;
+  if (existing?.duplicateOf !== undefined) base.duplicateOf = existing.duplicateOf;
+  return base as unknown as CatalogRecord;
+};
+
+/**
+ * Walk the EIA response map, pick out the leaves, and produce an array of
+ * IngestNode candidates ready for Phase A validation.
+ *
+ * NOT Effect-typed — this is a pure synchronous transformation over
+ * already-fetched data, equivalent to the `Effect.sync` block exception
+ * in CLAUDE.md's rules. Follows the same pattern as the Graph.directed
+ * mutate callback in buildIngestGraph above.
+ *
+ * Emission shape:
+ *   - 1 Agent (the EIA agent, with bumped updatedAt)
+ *   - 1 Catalog (EIA catalog, bumped updatedAt)
+ *   - 1 DataService (EIA API v2, bumped updatedAt, servesDatasetIds
+ *     unioned with every dataset id we're about to mint/merge)
+ *   - N Dataset nodes (one per leaf route)
+ *   - M Distribution nodes (api-access + preserved curated)
+ *   - N CatalogRecord nodes (one per dataset)
+ */
+export const buildCandidateNodes = (
+  walkData: ReadonlyMap<string, EiaApiResponse>,
+  idx: CatalogIndex,
+  ctx: BuildContext
+): ReadonlyArray<IngestNode> => {
+  interface LeafCandidate {
+    readonly slug: string;
+    readonly existingDataset: Dataset | null;
+    readonly datasetCandidate: Dataset;
+    readonly distCandidates: ReadonlyArray<Distribution>;
+    readonly crCandidate: CatalogRecord;
+  }
+
+  // Pure sync loop over already-fetched walk data. `for ... of` is
+  // permitted here by the same CLAUDE.md carve-out used in loadCatalogIndex.
+  const leafCandidates: Array<LeafCandidate> = [];
+  for (const [path, resp] of walkData) {
+    if (path === "") continue; // skip the root (no dataset)
+    const childRoutes = resp.response.routes ?? [];
+    if (childRoutes.length > 0) continue; // not a leaf — parent categories only
+
+    const slug = slugifyRoute(path);
+    const parents = path.split("/").slice(0, -1);
+    const existingDataset = idx.datasetsByRoute.get(path) ?? null;
+
+    const datasetCandidate = buildDatasetCandidate(
+      { path, parents, response: resp.response },
+      ctx,
+      existingDataset
+    );
+    const distCandidates = buildDistributionCandidates(
+      { path, parents, response: resp.response },
+      datasetCandidate.id,
+      ctx,
+      idx
+    );
+    // Re-stitch the freshly-minted distribution ids back onto the dataset
+    // candidate. The initial build leaves distributionIds empty because
+    // distributions are minted afterwards.
+    const datasetWithDists = {
+      ...datasetCandidate,
+      distributionIds: distCandidates.map((d) => d.id)
+    } as Dataset;
+
+    const existingCr =
+      idx.catalogRecordsByCatalogAndPrimaryTopic.get(
+        `${ctx.eiaCatalog.id}::${datasetWithDists.id}`
+      ) ?? null;
+    const crCandidate = buildCatalogRecord(
+      datasetWithDists,
+      ctx,
+      existingCr,
+      path
+    );
+
+    leafCandidates.push({
+      slug,
+      existingDataset,
+      datasetCandidate: datasetWithDists,
+      distCandidates,
+      crCandidate
+    });
+  }
+
+  // Top-level scope nodes. The DataService node carries the union of its
+  // existing servesDatasetIds with every Dataset id we just minted/merged.
+  const allDatasetIds = Array.from(
+    new Set<Dataset["id"]>([
+      ...ctx.eiaDataService.servesDatasetIds,
+      ...leafCandidates.map((l) => l.datasetCandidate.id)
+    ])
+  );
+
+  const agentNode: IngestNode = {
+    _tag: "agent",
+    slug: "eia",
+    data: { ...ctx.eiaAgent, updatedAt: ctx.nowIso as Agent["updatedAt"] }
+  };
+  const catalogNode: IngestNode = {
+    _tag: "catalog",
+    slug: "eia",
+    data: { ...ctx.eiaCatalog, updatedAt: ctx.nowIso as Catalog["updatedAt"] }
+  };
+  const dataServiceNode: IngestNode = {
+    _tag: "data-service",
+    slug: "eia-api",
+    data: {
+      ...ctx.eiaDataService,
+      servesDatasetIds: allDatasetIds,
+      updatedAt: ctx.nowIso as DataService["updatedAt"]
+    }
+  };
+
+  const datasetNodes: Array<IngestNode> = leafCandidates.map((l) => ({
+    _tag: "dataset" as const,
+    slug: l.slug,
+    data: l.datasetCandidate,
+    merged: l.existingDataset !== null
+  }));
+  const distNodes: Array<IngestNode> = leafCandidates.flatMap((l) =>
+    l.distCandidates.map((d) => ({
+      _tag: "distribution" as const,
+      slug: `${l.slug}-${d.kind}`,
+      data: d
+    }))
+  );
+  const crNodes: Array<IngestNode> = leafCandidates.map((l) => ({
+    _tag: "catalog-record" as const,
+    slug: `${l.slug}-cr`,
+    data: l.crCandidate
+  }));
+
+  return [
+    agentNode,
+    catalogNode,
+    dataServiceNode,
+    ...datasetNodes,
+    ...distNodes,
+    ...crNodes
+  ];
+};
 
 // ---------------------------------------------------------------------------
 // Stub main
