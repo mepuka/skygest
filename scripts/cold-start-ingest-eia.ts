@@ -14,7 +14,19 @@
 import * as BunFileSystem from "@effect/platform-bun/BunFileSystem";
 import * as BunPath from "@effect/platform-bun/BunPath";
 import * as BunRuntime from "@effect/platform-bun/BunRuntime";
-import { Config, Effect, Layer, Redacted, Schema } from "effect";
+import {
+  Cache,
+  Clock,
+  Config,
+  Duration,
+  Effect,
+  Layer,
+  Redacted,
+  Schedule,
+  Schema,
+  Semaphore,
+  SynchronizedRef
+} from "effect";
 import {
   FetchHttpClient,
   HttpClient,
@@ -179,16 +191,101 @@ export const fetchRoute = (route: string, apiKey: string) =>
   });
 
 // ---------------------------------------------------------------------------
+// Per-host rate limiter + retry (cloned from BlueskyClient.ts:170-232)
+// ---------------------------------------------------------------------------
+
+interface HostGate {
+  readonly semaphore: Semaphore.Semaphore;
+  readonly lastCompletedAt: SynchronizedRef.SynchronizedRef<number>;
+}
+
+const isRetryableEiaError = (
+  error: EiaApiFetchError | EiaApiDecodeError
+): boolean => {
+  if (error._tag !== "EiaApiFetchError") return false;
+  // Retry on transport failures (no status) and on 429 / 5xx.
+  if (error.status === undefined) return true;
+  return error.status === 429 || (error.status >= 500 && error.status < 600);
+};
+
+export const makeRateLimitedFetcher = (
+  minIntervalMs: number,
+  maxRetries: number
+) =>
+  Effect.gen(function* () {
+    const hostGates = yield* Cache.make({
+      capacity: 8,
+      timeToLive: Duration.infinity,
+      lookup: (_host: string) =>
+        Effect.all([
+          Semaphore.make(1),
+          SynchronizedRef.make(-minIntervalMs)
+        ]).pipe(
+          Effect.map(
+            ([semaphore, lastCompletedAt]) =>
+              ({
+                semaphore,
+                lastCompletedAt
+              }) satisfies HostGate
+          )
+        )
+    });
+
+    const retrySchedule = Schedule.exponential(Duration.millis(500)).pipe(
+      Schedule.jittered,
+      Schedule.both(Schedule.recurs(maxRetries))
+    );
+
+    return (route: string, apiKey: string) =>
+      Effect.gen(function* () {
+        const gate = yield* Cache.get(hostGates, "api.eia.gov");
+        return yield* gate.semaphore
+          .withPermits(1)(
+            Effect.gen(function* () {
+              const now = yield* Clock.currentTimeMillis;
+              const last = yield* SynchronizedRef.get(gate.lastCompletedAt);
+              const waitMs = Math.max(0, minIntervalMs - (now - last));
+              if (waitMs > 0) {
+                yield* Effect.sleep(Duration.millis(waitMs));
+              }
+              return yield* fetchRoute(route, apiKey);
+            }).pipe(
+              Effect.ensuring(
+                Clock.currentTimeMillis.pipe(
+                  Effect.flatMap((t) =>
+                    SynchronizedRef.set(gate.lastCompletedAt, t)
+                  )
+                )
+              )
+            )
+          )
+          .pipe(
+            Effect.retry({
+              schedule: retrySchedule,
+              while: isRetryableEiaError
+            })
+          );
+      });
+  });
+
+// ---------------------------------------------------------------------------
 // Stub main
 // ---------------------------------------------------------------------------
 
 const main = Effect.gen(function* () {
   const config = yield* ScriptConfig;
-  // Touch apiKey via Redacted.value so we get a useful "missing key" error
-  // immediately rather than later inside the rate-limited fetcher.
-  const _apiKey = Redacted.value(config.apiKey);
+  const apiKey = Redacted.value(config.apiKey);
   yield* Effect.log(
     `SKY-254 EIA ingest stub — root=${config.rootDir} dryRun=${String(config.dryRun)}`
+  );
+
+  const fetcher = yield* makeRateLimitedFetcher(
+    config.minIntervalMs,
+    config.maxRetries
+  );
+  const root = yield* fetcher("", apiKey);
+  yield* Effect.log(
+    `Root route returned ${String(root.response.routes?.length ?? 0)} child routes`
   );
 });
 
