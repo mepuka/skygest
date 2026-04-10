@@ -28,6 +28,7 @@ import {
   Option,
   Path,
   Redacted,
+  Result,
   Schedule,
   Schema,
   Semaphore,
@@ -38,7 +39,7 @@ import {
   HttpClient,
   HttpClientResponse
 } from "effect/unstable/http";
-import type {
+import {
   Agent,
   Catalog,
   CatalogRecord,
@@ -47,8 +48,10 @@ import type {
   Distribution
 } from "../src/domain/data-layer";
 import {
+  decodeJsonStringEitherWith,
   decodeJsonStringWith,
   encodeJsonStringPrettyWith,
+  formatSchemaParseError,
   stringifyUnknown
 } from "../src/platform/Json";
 
@@ -675,6 +678,242 @@ export const buildIngestGraph = (
         }
       }
     }
+  });
+
+// ---------------------------------------------------------------------------
+// Existing-entity catalog index (Task 6)
+// ---------------------------------------------------------------------------
+//
+// Walks `<rootDir>/catalog/{datasets,distributions,catalog-records,
+// data-services,catalogs,agents}/` once at ingest start, decodes each JSON
+// file through the matching domain Schema, and builds lookup maps keyed
+// by alias scheme (not internal ID) so Task 7's candidate builders can
+// merge against existing entries deterministically.
+//
+// Merge keys:
+//   Dataset            → eia-route alias with a "/" in the value. Legacy
+//                        bulk-manifest codes live on eia-bulk-id and are
+//                        intentionally invisible to this index (Task 0.5
+//                        migrated them off eia-route).
+//   Distribution       → `${dist.datasetId}::${dist.kind}` (the script
+//                        always writes one api-access + one landing-page
+//                        per dataset, so this compound key is total).
+//   CatalogRecord      → `${cr.catalogId}::${cr.primaryTopicId}`. Multiple
+//                        catalogs (EIA, Data.gov) can publish CRs for the
+//                        same dataset; only CRs from the EIA catalog are
+//                        ever merged downstream. Compound key ensures the
+//                        Data.gov duplicate CR is read-only.
+//   Agent              → name (strings are stable; EIA agent merge is a
+//                        name lookup).
+//   Catalog/DataService → publisherAgentId === EIA agent id (at most one
+//                        each in the registry).
+
+export interface CatalogIndex {
+  readonly datasetsByRoute: Map<string, Dataset>;
+  readonly distributionsByDatasetIdKind: Map<string, Distribution>;
+  readonly catalogRecordsByCatalogAndPrimaryTopic: Map<string, CatalogRecord>;
+  readonly agentsByName: Map<string, Agent>;
+  readonly catalog: Catalog | null;
+  readonly dataService: DataService | null;
+  readonly allDatasets: ReadonlyArray<Dataset>;
+  readonly allDistributions: ReadonlyArray<Distribution>;
+  readonly allCatalogRecords: ReadonlyArray<CatalogRecord>;
+}
+
+const EIA_AGENT_HOMEPAGE = "https://www.eia.gov/";
+
+const decodeFileAs = <S extends Schema.Decoder<unknown>>(
+  schema: S,
+  kind: string,
+  slug: string
+) =>
+  (text: string): Effect.Effect<S["Type"], EiaIngestSchemaError> => {
+    const result = decodeJsonStringEitherWith(schema)(text);
+    return Result.isFailure(result)
+      ? Effect.fail(
+          new EiaIngestSchemaError({
+            kind,
+            slug,
+            message: formatSchemaParseError(result.failure)
+          })
+        )
+      : Effect.succeed(result.success as S["Type"]);
+  };
+
+const loadEntitiesFromDir = <S extends Schema.Decoder<unknown>>(
+  fs_: FileSystem.FileSystem,
+  rootDir: string,
+  subDir: string,
+  schema: S,
+  kind: string
+): Effect.Effect<
+  ReadonlyArray<S["Type"]>,
+  EiaIngestFsError | EiaIngestSchemaError,
+  Path.Path
+> =>
+  Effect.gen(function* () {
+    const path_ = yield* Path.Path;
+    const dir = path_.resolve(rootDir, "catalog", subDir);
+
+    const files = yield* fs_.readDirectory(dir).pipe(
+      Effect.mapError(
+        (cause) =>
+          new EiaIngestFsError({
+            operation: "readDirectory",
+            path: dir,
+            message: stringifyUnknown(cause)
+          })
+      ),
+      Effect.map((entries) => entries.filter((f) => f.endsWith(".json")))
+    );
+
+    return yield* Effect.forEach(
+      files,
+      (file) =>
+        Effect.gen(function* () {
+          const slug = file.replace(/\.json$/u, "");
+          const filePath = path_.resolve(dir, file);
+          const text = yield* fs_.readFileString(filePath).pipe(
+            Effect.mapError(
+              (cause) =>
+                new EiaIngestFsError({
+                  operation: "readFileString",
+                  path: filePath,
+                  message: stringifyUnknown(cause)
+                })
+            )
+          );
+          return yield* decodeFileAs(schema, kind, slug)(text);
+        }),
+      { concurrency: 10 }
+    );
+  });
+
+/**
+ * Loads the on-disk cold-start catalog into alias-keyed lookup maps.
+ * Every one of the six subdirectories must exist — missing directories
+ * surface as `EiaIngestFsError { operation: "readDirectory" }` rather
+ * than silently producing an empty index, which would let a stale run
+ * mis-report "no existing Datasets" and duplicate-create everything.
+ */
+export const loadCatalogIndex = (
+  rootDir: string
+): Effect.Effect<
+  CatalogIndex,
+  EiaIngestFsError | EiaIngestSchemaError,
+  FileSystem.FileSystem | Path.Path
+> =>
+  Effect.gen(function* () {
+    const fs_ = yield* FileSystem.FileSystem;
+
+    const [
+      datasets,
+      distributions,
+      catalogRecords,
+      dataServices,
+      catalogs,
+      agents
+    ] = yield* Effect.all(
+      [
+        loadEntitiesFromDir(fs_, rootDir, "datasets", Dataset, "Dataset"),
+        loadEntitiesFromDir(
+          fs_,
+          rootDir,
+          "distributions",
+          Distribution,
+          "Distribution"
+        ),
+        loadEntitiesFromDir(
+          fs_,
+          rootDir,
+          "catalog-records",
+          CatalogRecord,
+          "CatalogRecord"
+        ),
+        loadEntitiesFromDir(
+          fs_,
+          rootDir,
+          "data-services",
+          DataService,
+          "DataService"
+        ),
+        loadEntitiesFromDir(fs_, rootDir, "catalogs", Catalog, "Catalog"),
+        loadEntitiesFromDir(fs_, rootDir, "agents", Agent, "Agent")
+      ],
+      { concurrency: "unbounded" }
+    );
+
+    // Pure synchronous index-building over already-fetched data. `for ... of`
+    // is permitted inside `Effect.sync` (matches the Graph.directed mutate
+    // callback pattern used in buildIngestGraph above).
+    return yield* Effect.sync(() => {
+      const datasetsByRoute = new Map<string, Dataset>();
+      const distributionsByDatasetIdKind = new Map<string, Distribution>();
+      const agentsByName = new Map<string, Agent>();
+      const catalogRecordsByCatalogAndPrimaryTopic = new Map<
+        string,
+        CatalogRecord
+      >();
+
+      for (const ds of datasets) {
+        // Only entries that look like API v2 paths are indexed — legacy
+        // bulk-manifest codes live on eia-bulk-id (Task 0.5) and are
+        // intentionally invisible here.
+        const route = ds.aliases.find(
+          (a) => a.scheme === "eia-route" && a.value.includes("/")
+        )?.value;
+        if (route !== undefined) datasetsByRoute.set(route, ds);
+      }
+
+      for (const dist of distributions) {
+        distributionsByDatasetIdKind.set(
+          `${dist.datasetId}::${dist.kind}`,
+          dist
+        );
+      }
+
+      for (const ag of agents) {
+        agentsByName.set(ag.name, ag);
+      }
+
+      for (const cr of catalogRecords) {
+        catalogRecordsByCatalogAndPrimaryTopic.set(
+          `${cr.catalogId}::${cr.primaryTopicId}`,
+          cr
+        );
+      }
+
+      // EIA publisher agent: matched by homepage URL alias or homepage
+      // field (either carries https://www.eia.gov/ in the registry today).
+      const eiaAgent =
+        agents.find((a) =>
+          a.aliases.some(
+            (al) => al.scheme === "url" && al.value === EIA_AGENT_HOMEPAGE
+          )
+        ) ?? agents.find((a) => a.homepage === EIA_AGENT_HOMEPAGE) ?? null;
+
+      const catalog =
+        eiaAgent !== null
+          ? (catalogs.find((c) => c.publisherAgentId === eiaAgent.id) ?? null)
+          : null;
+      const dataService =
+        eiaAgent !== null
+          ? (dataServices.find((s) => s.publisherAgentId === eiaAgent.id) ??
+            null)
+          : null;
+
+      return {
+        datasetsByRoute,
+        distributionsByDatasetIdKind,
+        catalogRecordsByCatalogAndPrimaryTopic,
+        agentsByName,
+        catalog,
+        dataService,
+        allDatasets: datasets,
+        allDistributions: distributions,
+        allCatalogRecords: catalogRecords
+      } satisfies CatalogIndex;
+    });
   });
 
 // ---------------------------------------------------------------------------

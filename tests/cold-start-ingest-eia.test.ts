@@ -1,6 +1,11 @@
 import { describe, expect, it } from "@effect/vitest";
+import * as BunFileSystem from "@effect/platform-bun/BunFileSystem";
+import * as BunPath from "@effect/platform-bun/BunPath";
 import { Effect, Graph, Layer } from "effect";
 import { HttpClient, HttpClientResponse } from "effect/unstable/http";
+import * as fsp from "node:fs/promises";
+import * as os from "node:os";
+import * as nodePath from "node:path";
 import type {
   Agent,
   Catalog,
@@ -12,8 +17,10 @@ import type {
 import {
   buildIngestGraph,
   type EiaApiResponse,
+  EiaIngestSchemaError,
   fetchRoute,
   type IngestNode,
+  loadCatalogIndex,
   walkRoutes
 } from "../scripts/cold-start-ingest-eia";
 
@@ -455,4 +462,184 @@ describe("buildIngestGraph", () => {
         positions.get("eia-electricity-retail-sales-cr")!
     ).toBe(true);
   });
+});
+
+// ---------------------------------------------------------------------------
+// loadCatalogIndex
+// ---------------------------------------------------------------------------
+
+// Real Bun/Node FS layer so the loader can hit an actual temp directory.
+// Tests (unlike src/) are allowed to import node:* modules — see CLAUDE.md
+// toolchain rules.
+const bunFsLayer = Layer.mergeAll(BunFileSystem.layer, BunPath.layer);
+
+/**
+ * Creates a temp fixture with the six catalog subdirectories and writes
+ * any provided entity JSON blobs under the matching directory. Returns the
+ * root directory path; caller is responsible for cleanup.
+ */
+const makeTmpFixture = async (entities: {
+  readonly datasets?: ReadonlyArray<{
+    readonly slug: string;
+    readonly body: unknown;
+  }>;
+}): Promise<string> => {
+  const tmp = await fsp.mkdtemp(
+    nodePath.join(os.tmpdir(), "cold-start-index-")
+  );
+  const catalogDir = nodePath.join(tmp, "catalog");
+  // All six subdirs must exist — loadCatalogIndex reads every one and
+  // surfaces ENOENT as EiaIngestFsError.
+  for (const sub of [
+    "datasets",
+    "distributions",
+    "catalog-records",
+    "data-services",
+    "catalogs",
+    "agents"
+  ]) {
+    await fsp.mkdir(nodePath.join(catalogDir, sub), { recursive: true });
+  }
+  for (const ds of entities.datasets ?? []) {
+    await fsp.writeFile(
+      nodePath.join(catalogDir, "datasets", `${ds.slug}.json`),
+      `${JSON.stringify(ds.body, null, 2)}\n`,
+      "utf-8"
+    );
+  }
+  return tmp;
+};
+
+const cleanup = (tmp: string): Promise<void> =>
+  fsp.rm(tmp, { recursive: true, force: true });
+
+// A Dataset body that decodes cleanly through Schema.decodeUnknown(Dataset).
+// IDs match the branded URI patterns enforced in src/domain/data-layer/ids.ts.
+const validDatasetBody = (
+  title: string,
+  ulid: string,
+  aliases: ReadonlyArray<{
+    readonly scheme: string;
+    readonly value: string;
+    readonly relation: string;
+  }>
+) => ({
+  _tag: "Dataset",
+  id: `https://id.skygest.io/dataset/ds_${ulid}`,
+  title,
+  publisherAgentId: "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  accessRights: "public",
+  createdAt: "2026-04-10T00:00:00.000Z",
+  updatedAt: "2026-04-10T00:00:00.000Z",
+  aliases
+});
+
+describe("loadCatalogIndex", () => {
+  it.effect("indexes existing EIA dataset by eia-route alias", () =>
+    Effect.gen(function* () {
+      const tmp = yield* Effect.promise(() =>
+        makeTmpFixture({
+          datasets: [
+            {
+              slug: "eia-test",
+              body: validDatasetBody(
+                "Existing",
+                "01KNQSXEPPXRC56GM4SED9D0KX",
+                [
+                  {
+                    scheme: "eia-route",
+                    value: "electricity/retail-sales",
+                    relation: "exactMatch"
+                  }
+                ]
+              )
+            }
+          ]
+        })
+      );
+
+      const result = yield* loadCatalogIndex(tmp).pipe(
+        Effect.ensuring(Effect.promise(() => cleanup(tmp)))
+      );
+
+      const ds = result.datasetsByRoute.get("electricity/retail-sales");
+      expect(ds).toBeDefined();
+      expect(ds!.title).toBe("Existing");
+      // Sanity-check the rest of the shape
+      expect(result.allDatasets.length).toBe(1);
+      expect(result.allDistributions.length).toBe(0);
+      expect(result.allCatalogRecords.length).toBe(0);
+      expect(result.catalog).toBeNull();
+      expect(result.dataService).toBeNull();
+    }).pipe(Effect.provide(bunFsLayer))
+  );
+
+  it.effect(
+    "skips datasets whose eia-route alias is a legacy bulk code (no slash)",
+    () =>
+      Effect.gen(function* () {
+        // Route aliases without a "/" are legacy bulk-manifest codes;
+        // Task 0.5 migrated most to eia-bulk-id but belt-and-braces
+        // filtering here guards against any stragglers.
+        const tmp = yield* Effect.promise(() =>
+          makeTmpFixture({
+            datasets: [
+              {
+                slug: "eia-legacy-bulk",
+                body: validDatasetBody(
+                  "LegacyBulk",
+                  "01KNQSXEPPXRC56GM4SED9D0KY",
+                  [
+                    {
+                      scheme: "eia-route",
+                      value: "COAL",
+                      relation: "exactMatch"
+                    }
+                  ]
+                )
+              }
+            ]
+          })
+        );
+
+        const result = yield* loadCatalogIndex(tmp).pipe(
+          Effect.ensuring(Effect.promise(() => cleanup(tmp)))
+        );
+
+        expect(result.datasetsByRoute.size).toBe(0);
+        expect(result.allDatasets.length).toBe(1);
+      }).pipe(Effect.provide(bunFsLayer))
+  );
+
+  it.effect("fails with EiaIngestSchemaError on a malformed Dataset JSON", () =>
+    Effect.gen(function* () {
+      const tmp = yield* Effect.promise(() =>
+        makeTmpFixture({
+          datasets: [
+            {
+              slug: "broken",
+              // Missing required `id`, `title`, `createdAt`, `updatedAt`,
+              // `aliases` — any one is enough to fail Schema.decode.
+              body: { _tag: "Dataset" }
+            }
+          ]
+        })
+      );
+
+      // Effect.flip turns the typed failure channel into the success
+      // channel so we can assert on the tagged error directly, without
+      // reaching into Cause internals.
+      const error = yield* loadCatalogIndex(tmp).pipe(
+        Effect.ensuring(Effect.promise(() => cleanup(tmp))),
+        Effect.flip
+      );
+
+      expect(error).toBeInstanceOf(EiaIngestSchemaError);
+      expect(error._tag).toBe("EiaIngestSchemaError");
+      if (error._tag === "EiaIngestSchemaError") {
+        expect(error.kind).toBe("Dataset");
+        expect(error.slug).toBe("broken");
+      }
+    }).pipe(Effect.provide(bunFsLayer))
+  );
 });
