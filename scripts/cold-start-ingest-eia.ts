@@ -1426,6 +1426,237 @@ export const buildCandidateNodes = (
 };
 
 // ---------------------------------------------------------------------------
+// Phase A — validation gate (Task 8)
+// ---------------------------------------------------------------------------
+//
+// Every candidate node is re-decoded through its matching domain schema
+// before it is ever allowed onto the ingest graph. Two design notes:
+//
+//   1. The validation operates on the *candidate array*, not on the graph.
+//      Phase A (validate) → Phase B (write) is gated on an all-clean
+//      partition so that the bytes Phase B writes are byte-identical to
+//      the bytes Phase A blessed.
+//
+//   2. `Effect.partition` runs every candidate in one parallel pass so a
+//      fix-and-rerun cycle catches every Phase A problem at once instead
+//      of failing fast on the first bad node. The tuple order is
+//      `[excluded, satisfying]` = `[failures, successes]` (verified at
+//      .reference/effect/packages/effect/src/Effect.ts:782).
+//
+// `validateNode` returns a NEW IngestNode whose `data` field is the
+// *post-decode* value — Schema decoding may canonicalize or transform
+// values, and the caller must use the returned successes (not the
+// inputs) to construct the IngestGraph so Phase B writes what Phase A
+// validated.
+
+export const validateNode = (
+  node: IngestNode
+): Effect.Effect<IngestNode, EiaIngestSchemaError> =>
+  Effect.gen(function* () {
+    const mapErr = (issue: unknown) =>
+      new EiaIngestSchemaError({
+        kind: node._tag,
+        slug: node.slug,
+        message: formatSchemaParseError(issue as Parameters<typeof formatSchemaParseError>[0])
+      });
+    switch (node._tag) {
+      case "agent": {
+        const decoded = yield* Schema.decodeUnknownEffect(Agent)(node.data).pipe(
+          Effect.mapError(mapErr)
+        );
+        return { ...node, data: decoded } as IngestNode;
+      }
+      case "catalog": {
+        const decoded = yield* Schema.decodeUnknownEffect(Catalog)(node.data).pipe(
+          Effect.mapError(mapErr)
+        );
+        return { ...node, data: decoded } as IngestNode;
+      }
+      case "data-service": {
+        const decoded = yield* Schema.decodeUnknownEffect(DataService)(node.data).pipe(
+          Effect.mapError(mapErr)
+        );
+        return { ...node, data: decoded } as IngestNode;
+      }
+      case "dataset": {
+        const decoded = yield* Schema.decodeUnknownEffect(Dataset)(node.data).pipe(
+          Effect.mapError(mapErr)
+        );
+        return { ...node, data: decoded, merged: node.merged } as IngestNode;
+      }
+      case "distribution": {
+        const decoded = yield* Schema.decodeUnknownEffect(Distribution)(node.data).pipe(
+          Effect.mapError(mapErr)
+        );
+        return { ...node, data: decoded } as IngestNode;
+      }
+      case "catalog-record": {
+        const decoded = yield* Schema.decodeUnknownEffect(CatalogRecord)(
+          node.data
+        ).pipe(Effect.mapError(mapErr));
+        return { ...node, data: decoded } as IngestNode;
+      }
+    }
+  });
+
+export const validateCandidates = (
+  candidates: ReadonlyArray<IngestNode>
+): Effect.Effect<{
+  readonly failures: ReadonlyArray<EiaIngestSchemaError>;
+  readonly successes: ReadonlyArray<IngestNode>;
+}> =>
+  Effect.gen(function* () {
+    const [failures, successes] = yield* Effect.partition(
+      candidates,
+      (candidate) => validateNode(candidate),
+      { concurrency: "unbounded" }
+    );
+    return { failures, successes };
+  });
+
+// ---------------------------------------------------------------------------
+// Atomic write helpers + entity-id ledger (Task 9)
+// ---------------------------------------------------------------------------
+//
+// `writeEntityFile` is the single source of truth for all on-disk writes.
+// It routes every write through a temp-and-rename so a partially-written
+// file never appears at the final path. Parent directories are created
+// recursively on demand.
+//
+// The entity-id ledger (`.entity-ids.json`) maps a stable "kind:slug"
+// key to the minted entity id and is the rerun-safety backbone of the
+// ingest: on the second run, slugs that already have an id skip the
+// ULID mint and the original id is preserved. `loadLedger` deliberately
+// distinguishes the missing-file case (a normal first-run condition,
+// `{}` is returned) from any other read/decode failure, which must
+// abort the run rather than silently re-mint every id on disk trouble.
+
+export const writeEntityFile = (
+  filePath: string,
+  content: string
+): Effect.Effect<void, EiaIngestFsError, FileSystem.FileSystem | Path.Path> =>
+  Effect.gen(function* () {
+    const fs_ = yield* FileSystem.FileSystem;
+    const path_ = yield* Path.Path;
+    const dir = path_.dirname(filePath);
+    const now = yield* Clock.currentTimeMillis;
+    const tmp = `${filePath}.tmp-${String(now)}`;
+    yield* fs_.makeDirectory(dir, { recursive: true }).pipe(
+      Effect.mapError(
+        (cause) =>
+          new EiaIngestFsError({
+            operation: "makeDirectory",
+            path: dir,
+            message: stringifyUnknown(cause)
+          })
+      )
+    );
+    yield* fs_.writeFileString(tmp, content).pipe(
+      Effect.mapError(
+        (cause) =>
+          new EiaIngestFsError({
+            operation: "writeFileString",
+            path: tmp,
+            message: stringifyUnknown(cause)
+          })
+      )
+    );
+    yield* fs_.rename(tmp, filePath).pipe(
+      Effect.mapError(
+        (cause) =>
+          new EiaIngestFsError({
+            operation: "rename",
+            path: filePath,
+            message: stringifyUnknown(cause)
+          })
+      )
+    );
+  });
+
+export const EntityIdLedger = Schema.Record(Schema.String, Schema.String);
+export type EntityIdLedger = Schema.Schema.Type<typeof EntityIdLedger>;
+
+const encodeEntityIdLedger = encodeJsonStringPrettyWith(EntityIdLedger);
+const decodeEntityIdLedger = decodeJsonStringEitherWith(EntityIdLedger);
+
+/**
+ * Structural match for the Effect platform's "file not found" error.
+ * PlatformError is a tagged wrapper around either BadArgument or
+ * SystemError; SystemError carries a nested `_tag` discriminator with
+ * `"NotFound"` as its ENOENT analogue (see
+ * .reference/effect/packages/effect/src/PlatformError.ts:47-64).
+ * We fall back to a string-match on the stringified cause so that a
+ * platform update that reshuffles the error class hierarchy still
+ * degrades to a safe "treat as missing file" rather than aborting.
+ */
+const isNotFoundPlatformError = (cause: unknown): boolean => {
+  if (
+    typeof cause === "object" &&
+    cause !== null &&
+    "_tag" in cause &&
+    (cause as { readonly _tag: unknown })._tag === "PlatformError" &&
+    "reason" in cause
+  ) {
+    const reason = (cause as { readonly reason: unknown }).reason;
+    if (
+      typeof reason === "object" &&
+      reason !== null &&
+      "_tag" in reason &&
+      (reason as { readonly _tag: unknown })._tag === "NotFound"
+    ) {
+      return true;
+    }
+  }
+  const msg = stringifyUnknown(cause).toLowerCase();
+  return msg.includes("notfound") || msg.includes("enoent") || msg.includes("no such file");
+};
+
+export const loadLedger = (
+  rootDir: string
+): Effect.Effect<
+  EntityIdLedger,
+  EiaIngestLedgerError,
+  FileSystem.FileSystem | Path.Path
+> =>
+  Effect.gen(function* () {
+    const fs_ = yield* FileSystem.FileSystem;
+    const path_ = yield* Path.Path;
+    const ledgerPath = path_.resolve(rootDir, ".entity-ids.json");
+
+    const readExit = yield* Effect.exit(fs_.readFileString(ledgerPath));
+    if (readExit._tag === "Failure") {
+      if (isNotFoundPlatformError(readExit.cause)) {
+        return {} satisfies EntityIdLedger;
+      }
+      return yield* new EiaIngestLedgerError({
+        message: `Cannot read ledger at ${ledgerPath}: ${stringifyUnknown(readExit.cause)}`
+      });
+    }
+
+    const decoded = decodeEntityIdLedger(readExit.value);
+    if (Result.isFailure(decoded)) {
+      return yield* new EiaIngestLedgerError({
+        message: `Cannot decode ledger at ${ledgerPath}: ${formatSchemaParseError(decoded.failure)}`
+      });
+    }
+    return decoded.success;
+  });
+
+export const saveLedger = (
+  rootDir: string,
+  ledger: EntityIdLedger
+): Effect.Effect<
+  void,
+  EiaIngestFsError,
+  FileSystem.FileSystem | Path.Path
+> =>
+  Effect.gen(function* () {
+    const path_ = yield* Path.Path;
+    const ledgerPath = path_.resolve(rootDir, ".entity-ids.json");
+    yield* writeEntityFile(ledgerPath, `${encodeEntityIdLedger(ledger)}\n`);
+  });
+
+// ---------------------------------------------------------------------------
 // Stub main
 // ---------------------------------------------------------------------------
 

@@ -28,9 +28,14 @@ import {
   fetchRoute,
   type IngestNode,
   loadCatalogIndex,
+  loadLedger,
+  saveLedger,
   slugifyRoute,
   unionAliases,
-  walkRoutes
+  validateCandidates,
+  validateNode,
+  walkRoutes,
+  writeEntityFile
 } from "../scripts/cold-start-ingest-eia";
 
 const jsonResponse = (
@@ -1496,3 +1501,200 @@ describe("buildCandidateNodes", () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// Task 8 — validateNode + validateCandidates
+// ---------------------------------------------------------------------------
+
+describe("validateNode", () => {
+  it.effect("rejects a Dataset node with an invalid id via EiaIngestSchemaError", () =>
+    Effect.gen(function* () {
+      const bogus: IngestNode = {
+        _tag: "dataset",
+        slug: "eia-bogus",
+        merged: false,
+        // "not-a-uri" does not match the branded DatasetId URI pattern.
+        data: {
+          ...validDatasetBody("Bogus", "01KNQSXEPPXRC56GM4SED9D0KX", []),
+          id: "not-a-uri"
+        } as unknown as Dataset
+      };
+      const err = yield* validateNode(bogus).pipe(Effect.flip);
+      expect(err).toBeInstanceOf(EiaIngestSchemaError);
+      expect(err.kind).toBe("dataset");
+      expect(err.slug).toBe("eia-bogus");
+    })
+  );
+
+  it.effect("accepts a valid Agent and round-trips through the schema", () =>
+    Effect.gen(function* () {
+      const node: IngestNode = {
+        _tag: "agent",
+        slug: "eia",
+        data: validAgentBody(
+          "U.S. Energy Information Administration",
+          BUILDER_AGENT_ULID,
+          [{ scheme: "url", value: "https://www.eia.gov/", relation: "exactMatch" }]
+        ) as unknown as Agent
+      };
+      const result = yield* validateNode(node);
+      expect(result._tag).toBe("agent");
+      expect(result.slug).toBe("eia");
+      if (result._tag === "agent") {
+        expect(result.data.id).toBe(BUILDER_AGENT_ID);
+        expect(result.data.name).toBe("U.S. Energy Information Administration");
+      }
+    })
+  );
+});
+
+describe("validateCandidates", () => {
+  it.effect("partitions failures and successes without aborting on the first bad node", () =>
+    Effect.gen(function* () {
+      const agentA: IngestNode = {
+        _tag: "agent",
+        slug: "eia",
+        data: validAgentBody(
+          "U.S. Energy Information Administration",
+          BUILDER_AGENT_ULID,
+          []
+        ) as unknown as Agent
+      };
+      const agentB: IngestNode = {
+        _tag: "agent",
+        slug: "noaa",
+        data: validAgentBody(
+          "NOAA",
+          "01KNQEZ5V57VJJJFYV6HWM03VZ",
+          []
+        ) as unknown as Agent
+      };
+      const badDataset: IngestNode = {
+        _tag: "dataset",
+        slug: "eia-bogus",
+        merged: false,
+        data: {
+          ...validDatasetBody("Bogus", "01KNQSXEPPXRC56GM4SED9D0KX", []),
+          id: "not-a-uri"
+        } as unknown as Dataset
+      };
+
+      const { failures, successes } = yield* validateCandidates([
+        agentA,
+        badDataset,
+        agentB
+      ]);
+
+      expect(failures).toHaveLength(1);
+      expect(failures[0]).toBeInstanceOf(EiaIngestSchemaError);
+      expect(failures[0]!.kind).toBe("dataset");
+      expect(failures[0]!.slug).toBe("eia-bogus");
+
+      expect(successes).toHaveLength(2);
+      // Both successes are still IngestNodes with the right tag/slug and
+      // carry the post-decode data shape.
+      const successTags = successes.map((n) => n._tag).sort();
+      expect(successTags).toEqual(["agent", "agent"]);
+      const successSlugs = successes.map((n) => n.slug).sort();
+      expect(successSlugs).toEqual(["eia", "noaa"]);
+      // Re-validating the successes must be a no-op (idempotence).
+      for (const node of successes) {
+        const revalidated = yield* validateNode(node);
+        expect(revalidated._tag).toBe(node._tag);
+        expect(revalidated.slug).toBe(node.slug);
+      }
+    })
+  );
+});
+
+// ---------------------------------------------------------------------------
+// Task 9 — atomic write helpers + entity-id ledger
+// ---------------------------------------------------------------------------
+
+const makeEmptyTmpDir = async (): Promise<string> =>
+  fsp.mkdtemp(nodePath.join(os.tmpdir(), "cold-start-ledger-"));
+
+describe("writeEntityFile", () => {
+  it.effect("persists file contents and removes the temp stub", () =>
+    Effect.gen(function* () {
+      const tmp = yield* Effect.promise(() => makeEmptyTmpDir());
+      const target = nodePath.join(tmp, "hello.json");
+      yield* writeEntityFile(target, `{"ok":true}\n`);
+      const contents = yield* Effect.promise(() =>
+        fsp.readFile(target, "utf-8")
+      );
+      expect(contents).toBe(`{"ok":true}\n`);
+      const entries = yield* Effect.promise(() => fsp.readdir(tmp));
+      const stubs = entries.filter((e) => e.includes(".tmp-"));
+      expect(stubs).toEqual([]);
+      yield* Effect.promise(() => cleanup(tmp));
+    }).pipe(Effect.provide(bunFsLayer))
+  );
+
+  it.effect("creates parent directories recursively", () =>
+    Effect.gen(function* () {
+      const tmp = yield* Effect.promise(() => makeEmptyTmpDir());
+      const target = nodePath.join(tmp, "a", "b", "c", "nested.json");
+      yield* writeEntityFile(target, `"nested"\n`);
+      const contents = yield* Effect.promise(() =>
+        fsp.readFile(target, "utf-8")
+      );
+      expect(contents).toBe(`"nested"\n`);
+      yield* Effect.promise(() => cleanup(tmp));
+    }).pipe(Effect.provide(bunFsLayer))
+  );
+});
+
+describe("loadLedger", () => {
+  it.effect("returns {} when .entity-ids.json is missing (first-run)", () =>
+    Effect.gen(function* () {
+      const tmp = yield* Effect.promise(() => makeEmptyTmpDir());
+      const ledger = yield* loadLedger(tmp).pipe(
+        Effect.ensuring(Effect.promise(() => cleanup(tmp)).pipe(Effect.orDie))
+      );
+      expect(ledger).toEqual({});
+    }).pipe(Effect.provide(bunFsLayer))
+  );
+
+  it.effect("fails with EiaIngestLedgerError on malformed JSON", () =>
+    Effect.gen(function* () {
+      const tmp = yield* Effect.promise(() => makeEmptyTmpDir());
+      yield* Effect.promise(() =>
+        fsp.writeFile(
+          nodePath.join(tmp, ".entity-ids.json"),
+          "{not valid json",
+          "utf-8"
+        )
+      );
+      const err = yield* loadLedger(tmp).pipe(
+        Effect.flip,
+        Effect.ensuring(Effect.promise(() => cleanup(tmp)).pipe(Effect.orDie))
+      );
+      expect(err).toBeInstanceOf(EiaIngestLedgerError);
+      expect(err.message).toContain("Cannot");
+    }).pipe(Effect.provide(bunFsLayer))
+  );
+});
+
+describe("saveLedger", () => {
+  it.effect("round-trips through loadLedger and preserves keys/values", () =>
+    Effect.gen(function* () {
+      const tmp = yield* Effect.promise(() => makeEmptyTmpDir());
+      const original = {
+        "Agent:eia": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+        "Dataset:eia-electricity-retail-sales":
+          "https://id.skygest.io/dataset/ds_01KNQSXEPPXRC56GM4SED9D0KX"
+      } as Record<string, string>;
+      yield* saveLedger(tmp, original);
+      // File must be on disk as pretty-printed JSON (diffable).
+      const text = yield* Effect.promise(() =>
+        fsp.readFile(nodePath.join(tmp, ".entity-ids.json"), "utf-8")
+      );
+      expect(text).toContain("\n  \"Agent:eia\"");
+      const loaded = yield* loadLedger(tmp);
+      expect(loaded).toEqual(original);
+      yield* Effect.promise(() => cleanup(tmp));
+    }).pipe(Effect.provide(bunFsLayer))
+  );
+});
+
