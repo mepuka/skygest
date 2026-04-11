@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,13 +27,32 @@ jobs:
         run: bun link @pooks/twitter-scraper
 
       - name: Type check
-        run: bunx tsc --noEmit
+        run: bun run typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Link twitter scraper
+        run: |
+          git clone --depth 1 https://github.com/mepuka/better-twitter-scraper.git ../better_twitter_scraper
+          cd ../better_twitter_scraper && bun install && bun run build && bun link
+
+      - run: bun install --frozen-lockfile
+
+      - name: Resolve twitter scraper link
+        run: bun link @pooks/twitter-scraper
 
       - name: Test
         run: bun run test
 
   deploy-staging:
-    needs: test
+    needs: [typecheck, test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
