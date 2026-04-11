@@ -10,9 +10,9 @@ import {
 import { ResolverClientError } from "../domain/errors";
 import {
   formatSchemaParseError,
-  stringifyUnknown,
-  stripUndefined
+  stringifyUnknown
 } from "../platform/Json";
+import type { RpcResult } from "../platform/Rpc";
 
 export const RESOLVER_REQUEST_ID_HEADER = "x-skygest-request-id";
 
@@ -35,20 +35,28 @@ const decodeResponse = <S extends Schema.Decoder<unknown>>(
     )
   );
 
-const parseJsonBody = async (response: Response) => {
-  try {
-    return await response.json();
-  } catch {
-    return null;
-  }
+type ResolverRpcError = {
+  readonly message: string;
+  readonly status: number;
+  readonly postUri?: ResolvePostRequestValue["postUri"];
+  readonly operation?: string;
 };
 
-const makeHeaders = (operatorSecret: string, requestId?: string) =>
-  stripUndefined({
-    "content-type": "application/json",
-    authorization: `Bearer ${operatorSecret}`,
-    [RESOLVER_REQUEST_ID_HEADER]: requestId
-  });
+type ResolverRpcOptions = {
+  readonly requestId?: string;
+  readonly [RESOLVER_REQUEST_ID_HEADER]?: string;
+};
+
+export type ResolverBinding = {
+  readonly resolvePost: (
+    input: ResolvePostRequestValue,
+    options?: ResolverRpcOptions
+  ) => Promise<RpcResult<unknown, ResolverRpcError>>;
+  readonly resolveBulk: (
+    input: ResolveBulkRequestValue,
+    options?: ResolverRpcOptions
+  ) => Promise<RpcResult<unknown, ResolverRpcError>>;
+};
 
 export class ResolverClient extends ServiceMap.Service<
   ResolverClient,
@@ -63,98 +71,92 @@ export class ResolverClient extends ServiceMap.Service<
     ) => Effect.Effect<ResolveBulkResponseValue, ResolverClientError>;
   }
 >()("@skygest/ResolverClient") {
-  static readonly layerFromFetcher = (fetcher: Fetcher, operatorSecret: string) =>
+  static readonly layerFromBinding = (binding: ResolverBinding) =>
     Layer.succeed(
       ResolverClient,
       ResolverClient.of({
         resolvePost: (input, options) =>
           Effect.tryPromise({
-            try: async () => {
-              const response = await fetcher.fetch(
-                new Request("https://resolver.internal/v1/resolve/post", {
-                  method: "POST",
-                  headers: makeHeaders(operatorSecret, options?.requestId),
-                  body: JSON.stringify(input)
-                })
-              );
-              const body = await parseJsonBody(response);
-              const error = new ResolverClientError({
-                message:
-                  response.ok
-                    ? "invalid resolver response"
-                    : (
-                        (body as Record<string, unknown> | null)?.message as
-                          | string
-                          | undefined
-                      ) ?? `resolver request failed with ${response.status}`,
-                status: response.status,
+            try: () =>
+              binding.resolvePost(input, {
+                ...(options?.requestId === undefined
+                  ? {}
+                  : {
+                      requestId: options.requestId,
+                      [RESOLVER_REQUEST_ID_HEADER]: options.requestId
+                    })
+              }),
+            catch: (cause) =>
+              new ResolverClientError({
+                message: stringifyUnknown(cause),
+                status: 500,
                 postUri: input.postUri,
                 operation: "ResolverClient.resolvePost"
-              });
-
-              if (!response.ok) {
-                throw error;
-              }
-
-              return { body, error };
-            },
-            catch: (cause) =>
-              cause instanceof ResolverClientError
-                ? cause
-                : new ResolverClientError({
-                    message: stringifyUnknown(cause),
-                    status: 500,
-                    postUri: input.postUri,
-                    operation: "ResolverClient.resolvePost"
-                  })
+              })
           }).pipe(
-            Effect.flatMap(({ body, error }) =>
-              decodeResponse(ResolvePostResponse, body, error)
+            Effect.flatMap((result) =>
+              result.ok
+                ? decodeResponse(
+                    ResolvePostResponse,
+                    result.value,
+                    new ResolverClientError({
+                      message: "invalid resolver response",
+                      status: 502,
+                      postUri: input.postUri,
+                      operation: "ResolverClient.resolvePost"
+                    })
+                  )
+                : Effect.fail(
+                    new ResolverClientError({
+                      message: result.error.message,
+                      status: result.error.status,
+                      postUri: result.error.postUri ?? input.postUri,
+                      operation:
+                        result.error.operation ?? "ResolverClient.resolvePost"
+                    })
+                  )
             )
           ),
         resolveBulk: (input, options) =>
           Effect.tryPromise({
-            try: async () => {
-              const response = await fetcher.fetch(
-                new Request("https://resolver.internal/v1/resolve/bulk", {
-                  method: "POST",
-                  headers: makeHeaders(operatorSecret, options?.requestId),
-                  body: JSON.stringify(input)
-                })
-              );
-              const body = await parseJsonBody(response);
-              const firstPostUri = input.posts[0]?.postUri;
-              const error = new ResolverClientError({
-                message:
-                  response.ok
-                    ? "invalid resolver bulk response"
-                    : (
-                        (body as Record<string, unknown> | null)?.message as
-                          | string
-                          | undefined
-                      ) ?? `resolver bulk request failed with ${response.status}`,
-                status: response.status,
-                ...(firstPostUri === undefined ? {} : { postUri: firstPostUri }),
-                operation: "ResolverClient.resolveBulk"
-              });
-
-              if (!response.ok) {
-                throw error;
-              }
-
-              return { body, error };
-            },
+            try: () =>
+              binding.resolveBulk(input, {
+                ...(options?.requestId === undefined
+                  ? {}
+                  : {
+                      requestId: options.requestId,
+                      [RESOLVER_REQUEST_ID_HEADER]: options.requestId
+                    })
+              }),
             catch: (cause) =>
-              cause instanceof ResolverClientError
-                ? cause
-                : new ResolverClientError({
-                    message: stringifyUnknown(cause),
-                    status: 500,
-                    operation: "ResolverClient.resolveBulk"
-                  })
+              new ResolverClientError({
+                message: stringifyUnknown(cause),
+                status: 500,
+                operation: "ResolverClient.resolveBulk"
+              })
           }).pipe(
-            Effect.flatMap(({ body, error }) =>
-              decodeResponse(ResolveBulkResponse, body, error)
+            Effect.flatMap((result) =>
+              result.ok
+                ? decodeResponse(
+                    ResolveBulkResponse,
+                    result.value,
+                    new ResolverClientError({
+                      message: "invalid resolver bulk response",
+                      status: 502,
+                      operation: "ResolverClient.resolveBulk"
+                    })
+                  )
+                : Effect.fail(
+                    new ResolverClientError({
+                      message: result.error.message,
+                      status: result.error.status,
+                      ...(result.error.postUri === undefined
+                        ? {}
+                        : { postUri: result.error.postUri }),
+                      operation:
+                        result.error.operation ?? "ResolverClient.resolveBulk"
+                    })
+                  )
             )
           )
       })

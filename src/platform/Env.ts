@@ -1,4 +1,9 @@
 import { Array, ServiceMap, Effect, Layer, Option, Schema } from "effect";
+import type { EnrichmentRunParams } from "../domain/enrichmentRun";
+import type { IngestRunParams } from "../domain/polling";
+import type { DataRefResolverRunParams } from "../domain/resolution";
+import type { ResolverBinding } from "../resolver/Client";
+import type { EnrichmentTriggerBinding } from "../services/EnrichmentTriggerClient";
 
 export class EnvError extends Schema.TaggedErrorClass<EnvError>()("EnvError", {
   missing: Schema.String
@@ -12,37 +17,72 @@ interface AppConfigEnv {
   readonly CURATION_MIN_SIGNAL_SCORE?: string;
 }
 
-type AllWorkerBindings =
-  & WorkerConfiguration.IngestEnv
-  & WorkerConfiguration.AgentEnv
-  & WorkerConfiguration.ResolverEnv
-  & AppConfigEnv;
+interface SharedRuntimeEnv {
+  readonly DB: D1Database;
+  readonly ONTOLOGY_KV?: KVNamespace;
+  readonly TRANSCRIPTS_BUCKET?: R2Bucket;
+  readonly PUBLIC_BSKY_API?: string;
+  readonly INGEST_SHARD_COUNT?: string;
+  readonly DEFAULT_DOMAIN?: string;
+  readonly MCP_LIMIT_DEFAULT?: string;
+  readonly MCP_LIMIT_MAX?: string;
+  readonly ENABLE_STAGING_OPS?: "true";
+  readonly ENABLE_DATA_REF_RESOLUTION?: "true";
+  readonly GEMINI_VISION_MODEL?: string;
+}
 
-type WithRequiredBindings<K extends keyof AllWorkerBindings> = Simplify<
-  Pick<AllWorkerBindings, "DB" | K> &
-    Partial<Omit<AllWorkerBindings, "DB" | K>>
->;
+type IngestWorkflowBinding = Workflow<IngestRunParams>;
+type EnrichmentWorkflowBinding = Workflow<EnrichmentRunParams>;
+type ResolverWorkflowBinding = Workflow<DataRefResolverRunParams>;
+type ExpertPollCoordinatorNamespace = DurableObjectNamespace;
+type IngestServiceBinding = EnrichmentTriggerBinding & Fetcher;
 
 export type EnvBindings = Simplify<
-  Pick<AllWorkerBindings, "DB"> &
-    Partial<Omit<AllWorkerBindings, "DB">>
+  SharedRuntimeEnv &
+    AppConfigEnv & {
+      readonly INGEST_SERVICE?: IngestServiceBinding;
+      readonly RESOLVER?: ResolverBinding;
+      readonly INGEST_RUN_WORKFLOW?: IngestWorkflowBinding;
+      readonly ENRICHMENT_RUN_WORKFLOW?: EnrichmentWorkflowBinding;
+      readonly RESOLVER_RUN_WORKFLOW?: ResolverWorkflowBinding;
+      readonly EXPERT_POLL_COORDINATOR?: ExpertPollCoordinatorNamespace;
+    }
 >;
 
-export type AgentWorkerEnvBindings = WithRequiredBindings<"INGEST_SERVICE">;
+export type AgentWorkerEnvBindings = Simplify<
+  EnvBindings & {
+    readonly INGEST_SERVICE: IngestServiceBinding;
+  }
+>;
 
 export type WorkflowIngestEnvBindings =
-  & WithRequiredBindings<"INGEST_RUN_WORKFLOW">
-  & Pick<AllWorkerBindings, "EXPERT_POLL_COORDINATOR">;
+  Simplify<
+    EnvBindings & {
+      readonly INGEST_RUN_WORKFLOW: IngestWorkflowBinding;
+      readonly EXPERT_POLL_COORDINATOR: ExpertPollCoordinatorNamespace;
+    }
+  >;
 
 export type WorkflowEnrichmentEnvBindings =
-  WithRequiredBindings<"ENRICHMENT_RUN_WORKFLOW">;
+  Simplify<
+    EnvBindings & {
+      readonly ENRICHMENT_RUN_WORKFLOW: EnrichmentWorkflowBinding;
+    }
+  >;
 
 export type ResolverWorkerEnvBindings =
-  WithRequiredBindings<"RESOLVER_RUN_WORKFLOW">;
+  Simplify<
+    EnvBindings & {
+      readonly RESOLVER_RUN_WORKFLOW: ResolverWorkflowBinding;
+    }
+  >;
 
 export type WorkflowFilterEnvBindings =
-  & WorkflowIngestEnvBindings
-  & WorkflowEnrichmentEnvBindings;
+  Simplify<
+    WorkflowIngestEnvBindings & {
+      readonly ENRICHMENT_RUN_WORKFLOW: EnrichmentWorkflowBinding;
+    }
+  >;
 
 export class WorkflowIngestEnv extends ServiceMap.Service<
   WorkflowIngestEnv,

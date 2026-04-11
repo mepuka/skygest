@@ -102,7 +102,7 @@ export const mapHttpError = (
   );
 };
 
-const toHttpStatus = (error: HttpErrorEnvelope) => {
+export const httpErrorStatus = (error: HttpErrorEnvelope) => {
   switch (error.error) {
     case "BadRequest":
       return 400;
@@ -144,7 +144,7 @@ export const toHttpErrorResponse = (
   return new Response(
     encodeJsonString(envelope),
     {
-      status: toHttpStatus(envelope),
+      status: httpErrorStatus(envelope),
       headers: {
         "content-type": "application/json"
       }

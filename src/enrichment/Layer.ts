@@ -84,10 +84,7 @@ export const makeWorkflowEnrichmentLayer = (
   );
   const resolverClientLayer = env.RESOLVER == null
     ? null
-    : ResolverClient.layerFromFetcher(
-        env.RESOLVER,
-        env.OPERATOR_SECRET!
-      );
+    : ResolverClient.layerFromBinding(env.RESOLVER);
 
   const coreLayer = Layer.mergeAll(
     baseLayer,

@@ -2513,16 +2513,18 @@ describe("MCP bulk_start_enrichment", () => {
   it.live("rejects empty, duplicate, and oversized batches before triggering", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
-        const mockFetcher = {
-          fetch: async () =>
-            new Response(
-              JSON.stringify({ message: "unexpected trigger call" }),
-              { status: 500, headers: { "content-type": "application/json" } }
-            )
-        } as unknown as Fetcher;
+        const mockBinding = {
+          startEnrichment: async () => ({
+            ok: false as const,
+            error: {
+              message: "unexpected trigger call",
+              status: 500
+            }
+          })
+        };
         const layer = Layer.mergeAll(
           makeBiLayer({ filename }),
-          EnrichmentTriggerClient.layerFromFetcher(mockFetcher, "test-secret")
+          EnrichmentTriggerClient.layerFromBinding(mockBinding as never)
         );
         await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
 
@@ -2580,62 +2582,69 @@ describe("MCP bulk_start_enrichment", () => {
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const attempts = new Map<string, number>();
-        const mockFetcher = {
-          fetch: async (input: RequestInfo | URL) => {
-            const request = input as Request;
-            const body = await request.json() as {
-              postUri: string;
-              enrichmentType: string;
-            };
+        const mockBinding = {
+          startEnrichment: async (body: {
+            readonly postUri: string;
+            readonly enrichmentType: string;
+          }) => {
             const nextAttempt = (attempts.get(body.postUri) ?? 0) + 1;
             attempts.set(body.postUri, nextAttempt);
 
             if (body.postUri === solarUri) {
-              return new Response(
-                JSON.stringify({
+              return {
+                ok: true as const,
+                value: {
                   runId: "run-solar",
                   workflowInstanceId: "run-solar",
                   status: "queued"
-                }),
-                { status: 202, headers: { "content-type": "application/json" } }
-              );
+                }
+              };
             }
 
             if (body.postUri === windUri) {
-              return new Response(
-                JSON.stringify({ message: "enrichment run already exists" }),
-                { status: 409, headers: { "content-type": "application/json" } }
-              );
+              return {
+                ok: false as const,
+                error: {
+                  message: "enrichment run already exists",
+                  status: 409
+                }
+              };
             }
 
             if (body.postUri === linkUri && nextAttempt < 3) {
-              return new Response(
-                JSON.stringify({ message: "service unavailable" }),
-                { status: 503, headers: { "content-type": "application/json" } }
-              );
+              return {
+                ok: false as const,
+                error: {
+                  message: "service unavailable",
+                  status: 503
+                }
+              };
             }
 
             if (body.postUri === linkUri) {
-              return new Response(
-                JSON.stringify({
+              return {
+                ok: true as const,
+                value: {
                   runId: "run-link",
                   workflowInstanceId: "run-link",
                   status: "queued"
-                }),
-                { status: 202, headers: { "content-type": "application/json" } }
-              );
+                }
+              };
             }
 
-            return new Response(
-              JSON.stringify({ message: `unexpected postUri ${body.postUri}` }),
-              { status: 500, headers: { "content-type": "application/json" } }
-            );
+            return {
+              ok: false as const,
+              error: {
+                message: `unexpected postUri ${body.postUri}`,
+                status: 500
+              }
+            };
           }
-        } as unknown as Fetcher;
+        };
 
         const layer = Layer.mergeAll(
           makeBiLayer({ filename }),
-          EnrichmentTriggerClient.layerFromFetcher(mockFetcher, "test-secret")
+          EnrichmentTriggerClient.layerFromBinding(mockBinding as never)
         );
         await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
 
@@ -2748,32 +2757,30 @@ describe("MCP workflow integration", () => {
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const attempts = new Map<string, number>();
-        const mockFetcher = {
-          fetch: async (input: RequestInfo | URL) => {
-            const request = input as Request;
-            const body = await request.json() as {
-              postUri: string;
-              enrichmentType: string;
-            };
+        const mockBinding = {
+          startEnrichment: async (body: {
+            readonly postUri: string;
+            readonly enrichmentType: string;
+          }) => {
             attempts.set(body.postUri, (attempts.get(body.postUri) ?? 0) + 1);
 
-            return new Response(
-              JSON.stringify({
+            return {
+              ok: true as const,
+              value: {
                 runId: `run-${body.enrichmentType}-${body.postUri.split("/").pop()}`,
                 workflowInstanceId: `run-${body.enrichmentType}-${body.postUri.split("/").pop()}`,
                 status: "queued"
-              }),
-              { status: 202, headers: { "content-type": "application/json" } }
-            );
+              }
+            };
           }
-        } as unknown as Fetcher;
+        };
 
         const layer = Layer.mergeAll(
           makeBiLayer({
             filename,
             config: { curationMinSignalScore: 100 }
           }),
-          EnrichmentTriggerClient.layerFromFetcher(mockFetcher, "test-secret")
+          EnrichmentTriggerClient.layerFromBinding(mockBinding as never)
         );
         await Effect.runPromise(seedKnowledgeBase().pipe(Effect.provide(layer)));
 

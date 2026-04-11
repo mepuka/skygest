@@ -8,12 +8,18 @@ const asPostUri = Schema.decodeUnknownSync(PostUri);
 
 describe("ResolverClient", () => {
   it.effect("forwards request correlation and decodes the resolver response", () => {
-    let capturedRequest: Request | null = null;
-    const mockFetcher = {
-      fetch: async (input: RequestInfo | URL) => {
-        capturedRequest = input as Request;
-        return new Response(
-          JSON.stringify({
+    let capturedInput: Record<string, unknown> | null = null;
+    let capturedOptions: Record<string, unknown> | undefined;
+    const mockBinding = {
+      resolvePost: async (
+        input: Record<string, unknown>,
+        options?: Record<string, unknown>
+      ) => {
+        capturedInput = input;
+        capturedOptions = options;
+        return {
+          ok: true as const,
+          value: {
             postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
             stage1: {
               matches: [],
@@ -24,18 +30,13 @@ describe("ResolverClient", () => {
               stage1: 2,
               total: 3
             }
-          }),
-          {
-            status: 200,
-            headers: { "content-type": "application/json" }
           }
-        );
+        };
       }
-    } as unknown as Fetcher;
+    };
 
-    const layer = ResolverClient.layerFromFetcher(
-      mockFetcher,
-      "resolver-secret"
+    const layer = ResolverClient.layerFromBinding(
+      mockBinding as never
     );
 
     return Effect.gen(function* () {
@@ -53,59 +54,49 @@ describe("ResolverClient", () => {
       expect(result.resolverVersion).toBe("stage1-resolver@sky-238");
       expect(result.stage1.matches).toEqual([]);
       expect(result.stage3).toBeUndefined();
-      expect(capturedRequest).not.toBeNull();
-      expect(
-        capturedRequest!.headers.get(RESOLVER_REQUEST_ID_HEADER)
-      ).toBe("req-123");
-      expect(capturedRequest!.headers.get("authorization")).toBe(
-        "Bearer resolver-secret"
-      );
-
-      const body = yield* Effect.promise(
-        () => capturedRequest!.json() as Promise<Record<string, unknown>>
-      );
-      expect(body.postUri).toBe("at://did:plc:abc/app.bsky.feed.post/xyz");
-      expect(body.dispatchStage3).toBe(false);
+      expect(capturedOptions).toEqual({
+        requestId: "req-123",
+        [RESOLVER_REQUEST_ID_HEADER]: "req-123"
+      });
+      expect(capturedInput).toEqual({
+        postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
+        dispatchStage3: false
+      });
     }).pipe(Effect.provide(layer));
   });
 
   it.effect("decodes keyed bulk responses", () => {
-    const mockFetcher = {
-      fetch: async () =>
-        new Response(
-          JSON.stringify({
-            results: {
-              "at://did:plc:abc/app.bsky.feed.post/xyz": {
-                postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
-                stage1: {
-                  matches: [],
-                  residuals: []
-                },
-                resolverVersion: "stage1-resolver@sky-238",
-                latencyMs: {
-                  stage1: 2,
-                  total: 3
-                }
-              }
-            },
-            errors: {
-              "at://did:plc:def/app.bsky.feed.post/uvw": {
-                tag: "EnrichmentSchemaDecodeError",
-                message: "invalid input",
-                retryable: false
+    const mockBinding = {
+      resolveBulk: async () => ({
+        ok: true as const,
+        value: {
+          results: {
+            "at://did:plc:abc/app.bsky.feed.post/xyz": {
+              postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
+              stage1: {
+                matches: [],
+                residuals: []
+              },
+              resolverVersion: "stage1-resolver@sky-238",
+              latencyMs: {
+                stage1: 2,
+                total: 3
               }
             }
-          }),
-          {
-            status: 200,
-            headers: { "content-type": "application/json" }
+          },
+          errors: {
+            "at://did:plc:def/app.bsky.feed.post/uvw": {
+              tag: "EnrichmentSchemaDecodeError",
+              message: "invalid input",
+              retryable: false
+            }
           }
-        )
-    } as unknown as Fetcher;
+        }
+      })
+    };
 
-    const layer = ResolverClient.layerFromFetcher(
-      mockFetcher,
-      "resolver-secret"
+    const layer = ResolverClient.layerFromBinding(
+      mockBinding as never
     );
 
     return Effect.gen(function* () {
@@ -129,23 +120,19 @@ describe("ResolverClient", () => {
   });
 
   it.effect("surfaces upstream resolver errors as ResolverClientError", () => {
-    const mockFetcher = {
-      fetch: async () =>
-        new Response(
-          JSON.stringify({
-            error: "BadRequest",
-            message: "resolver said no"
-          }),
-          {
-            status: 400,
-            headers: { "content-type": "application/json" }
-          }
-        )
-    } as unknown as Fetcher;
+    const mockBinding = {
+      resolvePost: async () => ({
+        ok: false as const,
+        error: {
+          message: "resolver said no",
+          status: 400,
+          operation: "ResolverEntrypoint.resolvePost"
+        }
+      })
+    };
 
-    const layer = ResolverClient.layerFromFetcher(
-      mockFetcher,
-      "resolver-secret"
+    const layer = ResolverClient.layerFromBinding(
+      mockBinding as never
     );
 
     return Effect.gen(function* () {
@@ -160,18 +147,18 @@ describe("ResolverClient", () => {
     }).pipe(Effect.provide(layer));
   });
 
-  it.effect("treats malformed JSON success bodies as client errors", () => {
-    const mockFetcher = {
-      fetch: async () =>
-        new Response("not-json", {
-          status: 200,
-          headers: { "content-type": "application/json" }
-        })
-    } as unknown as Fetcher;
+  it.effect("treats malformed RPC success bodies as client errors", () => {
+    const mockBinding = {
+      resolvePost: async () => ({
+        ok: true as const,
+        value: {
+          nope: "not-a-resolver-response"
+        }
+      })
+    };
 
-    const layer = ResolverClient.layerFromFetcher(
-      mockFetcher,
-      "resolver-secret"
+    const layer = ResolverClient.layerFromBinding(
+      mockBinding as never
     );
 
     return Effect.gen(function* () {
@@ -181,7 +168,7 @@ describe("ResolverClient", () => {
       }).pipe(Effect.flip);
 
       expect(error).toBeInstanceOf(ResolverClientError);
-      expect(error.message).toContain("Expected");
+      expect(error.message).toContain("postUri");
     }).pipe(Effect.provide(layer));
   });
 });

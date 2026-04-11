@@ -3,24 +3,28 @@ import { join } from "node:path";
 
 type WorkerSpec = {
   readonly label: "Ingest" | "Agent" | "Resolver";
-  readonly config: string;
+  readonly configs: ReadonlyArray<string>;
   readonly envInterface: string;
 };
 
 const workerSpecs: ReadonlyArray<WorkerSpec> = [
   {
     label: "Ingest",
-    config: "wrangler.toml",
+    configs: ["wrangler.toml", "wrangler.resolver.toml"],
     envInterface: "CloudflareIngestEnv"
   },
   {
     label: "Agent",
-    config: "wrangler.agent.toml",
+    configs: [
+      "wrangler.agent.toml",
+      "wrangler.toml",
+      "wrangler.resolver.toml"
+    ],
     envInterface: "CloudflareAgentEnv"
   },
   {
     label: "Resolver",
-    config: "wrangler.resolver.toml",
+    configs: ["wrangler.resolver.toml"],
     envInterface: "CloudflareResolverEnv"
   }
 ];
@@ -132,14 +136,13 @@ const tempDir = mkdtempSync(join(projectRoot, ".cache", "wrangler-types-"));
 try {
   const generatedSections = workerSpecs.map((spec) => {
     const rawPath = join(tempDir, `${spec.label.toLowerCase()}.d.ts`);
-    const allowedKeys = extractAllowedKeys(spec.config);
+    const allowedKeys = extractAllowedKeys(spec.configs[0]!);
 
     run([
       "bunx",
       "wrangler",
       "types",
-      "--config",
-      spec.config,
+      ...spec.configs.flatMap((config) => ["--config", config]),
       "--env-interface",
       spec.envInterface,
       rawPath

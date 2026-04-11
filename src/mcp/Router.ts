@@ -424,20 +424,19 @@ export const makeCachedMcpHandler = <Env extends object>(
 
 /**
  * Build a query layer that includes the EnrichmentTriggerClient when the env
- * exposes an INGEST_SERVICE fetcher binding (agent worker only).
+ * exposes an INGEST_SERVICE RPC binding (agent worker only).
  */
 const makeQueryLayerWithTrigger = (env: EnvBindings): QueryLayer => {
   const base = makeQueryLayer(env);
-  const secret = env.OPERATOR_SECRET;
 
-  if (!("INGEST_SERVICE" in env) || env.INGEST_SERVICE === undefined || !secret) {
+  if (!("INGEST_SERVICE" in env) || env.INGEST_SERVICE === undefined) {
     return base;
   }
 
   const agentEnv = env as AgentWorkerEnvBindings;
 
   return Layer.provideMerge(
-    EnrichmentTriggerClient.layerFromFetcher(agentEnv.INGEST_SERVICE, secret),
+    EnrichmentTriggerClient.layerFromBinding(agentEnv.INGEST_SERVICE),
     base
   ) as QueryLayer;
 };

@@ -2,6 +2,7 @@ import { ServiceMap, Effect, Layer, Schema } from "effect";
 import { PostUri } from "../domain/types";
 import type { GapEnrichmentType } from "../domain/enrichment";
 import { defaultSchemaVersionForEnrichmentKind } from "../domain/enrichment";
+import type { RpcResult } from "../platform/Rpc";
 
 // ---------------------------------------------------------------------------
 // Error
@@ -27,6 +28,25 @@ const StartEnrichmentResult = Schema.Struct({
 });
 export type StartEnrichmentResult = Schema.Schema.Type<typeof StartEnrichmentResult>;
 
+export type StartEnrichmentRpcInput = {
+  readonly postUri: Schema.Schema.Type<typeof PostUri>;
+  readonly enrichmentType: GapEnrichmentType;
+  readonly schemaVersion: string;
+  readonly requestedBy?: string;
+};
+
+type EnrichmentTriggerRpcError = {
+  readonly message: string;
+  readonly status: number;
+  readonly postUri?: Schema.Schema.Type<typeof PostUri>;
+};
+
+export type EnrichmentTriggerBinding = {
+  readonly startEnrichment: (
+    input: StartEnrichmentRpcInput
+  ) => Promise<RpcResult<unknown, EnrichmentTriggerRpcError>>;
+};
+
 // ---------------------------------------------------------------------------
 // Service
 // ---------------------------------------------------------------------------
@@ -39,62 +59,47 @@ export class EnrichmentTriggerClient extends ServiceMap.Service<
         readonly postUri: Schema.Schema.Type<typeof PostUri>;
         readonly enrichmentType: GapEnrichmentType;
         readonly schemaVersion?: string;
+        readonly requestedBy?: string;
       }
     ) => Effect.Effect<StartEnrichmentResult, EnrichmentTriggerError>;
   }
 >()("@skygest/EnrichmentTriggerClient") {
-  static readonly layerFromFetcher = (fetcher: Fetcher, operatorSecret: string) =>
+  static readonly layerFromBinding = (binding: EnrichmentTriggerBinding) =>
     Layer.succeed(
       EnrichmentTriggerClient,
       EnrichmentTriggerClient.of({
         start: (input) =>
           Effect.tryPromise({
-            try: async () => {
-              const schemaVersion =
-                input.schemaVersion ??
-                defaultSchemaVersionForEnrichmentKind(input.enrichmentType);
-
-              const response = await fetcher.fetch(
-                new Request("https://ingest.internal/admin/enrichment/start", {
-                  method: "POST",
-                  headers: {
-                    "content-type": "application/json",
-                    "authorization": `Bearer ${operatorSecret}`
-                  },
-                  body: JSON.stringify({
-                    postUri: input.postUri,
-                    enrichmentType: input.enrichmentType,
-                    schemaVersion
-                  })
-                })
-              );
-
-              const body = (await response.json()) as Record<string, unknown>;
-
-              if (!response.ok) {
-                throw {
-                  message:
-                    (body.message as string) ??
-                    `enrichment start failed with ${response.status}`,
-                  status: response.status
-                };
-              }
-
-              return body;
-            },
-            catch: (cause) => {
-              const err = cause as Record<string, unknown>;
-              return new EnrichmentTriggerError({
+            try: () =>
+              binding.startEnrichment({
+                postUri: input.postUri,
+                enrichmentType: input.enrichmentType,
+                schemaVersion:
+                  input.schemaVersion ??
+                  defaultSchemaVersionForEnrichmentKind(input.enrichmentType),
+                ...(input.requestedBy === undefined
+                  ? {}
+                  : { requestedBy: input.requestedBy })
+              }),
+            catch: (cause) =>
+              new EnrichmentTriggerError({
                 message:
-                  typeof err.message === "string"
-                    ? err.message
-                    : String(cause),
-                status:
-                  typeof err.status === "number" ? err.status : 500,
+                  cause instanceof Error ? cause.message : String(cause),
+                status: 500,
                 postUri: input.postUri
-              });
-            }
+              })
           }).pipe(
+            Effect.flatMap((result) =>
+              result.ok
+                ? Effect.succeed(result.value)
+                : Effect.fail(
+                    new EnrichmentTriggerError({
+                      message: result.error.message,
+                      status: result.error.status,
+                      postUri: result.error.postUri ?? input.postUri
+                    })
+                  )
+            ),
             Effect.flatMap((body) =>
               Schema.decodeUnknownEffect(StartEnrichmentResult)(body).pipe(
                 Effect.mapError(
