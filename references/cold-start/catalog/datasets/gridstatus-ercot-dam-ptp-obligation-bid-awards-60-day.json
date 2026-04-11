@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4VB0MDNHMC9XPAGJVX",
+  "title": "ERCOT DAM PTP Obligation Bid Awards 60 Day",
+  "description": "Day-ahead, hourly, point-to-point (PTP) obligation bid awards won by Qualified Scheduling Entities (QSEs) in ERCOT. \n\nDAM PTP awards are purchased at the DAM price spread but settled at the real-time price spread, this allows entities to hedge congestion costs in the real-time market. Includes the source and sink settlement points as well as the bid-price pair in each interval.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_dam_ptp_obligation_bid_awards_60_day",
+  "accessRights": "public",
+  "temporal": "2013-01-01T06:00:00+00:00/2026-02-10T05:00:00+00:00",
+  "keywords": [
+    "ercot_dam_ptp_obligation_bid_awards_60_day",
+    "ercot",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4V2ECC26YKW6FTQ2D9",
+    "https://id.skygest.io/distribution/dist_01KNX70F4VAXS4Q42R54CX5510"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_dam_ptp_obligation_bid_awards_60_day",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP3-966-ER",
+      "relation": "closeMatch"
+    }
+  ]
+}

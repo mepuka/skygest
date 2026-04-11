@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5MCQW8GWXZD2W5S97G",
+  "title": "SPP Hourly Load",
+  "description": "⚠️ This dataset is deprecated in favor of [SPP Load Hourly](https://www.gridstatus.io/datasets/spp_load_hourly). That dataset has all the same info as this dataset, but in “long” rather than “wide” format. It also has additional areas and details on conforming vs non-conforming loads.\n\nHourly load data in SPP by Area.\n\nReleased daily around 5pm CT. for the previous day.\n\n💡 The Areas in this dataset are the legacy balancing authorities for the region that SPP serves.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/spp_hourly_load",
+  "accessRights": "public",
+  "temporal": "2011-01-01T06:00:00+00:00/2026-03-24T04:00:00+00:00",
+  "keywords": [
+    "spp_hourly_load",
+    "spp",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5MSTS2Z5BNTM6PE7CJ",
+    "https://id.skygest.io/distribution/dist_01KNX70F5MEDH9HX9PDMADGA52"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "spp_hourly_load",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://portal.spp.org/pages/hourly-load",
+      "relation": "closeMatch"
+    }
+  ]
+}

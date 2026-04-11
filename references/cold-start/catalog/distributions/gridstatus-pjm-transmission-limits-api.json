@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5J1FB11J41KJ99VQ32",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5JK33M296WTMQ9M1HV",
+  "kind": "api-access",
+  "title": "PJM Transmission Limits JSON API",
+  "description": "This dataset contains transmission limits as well as the shadow price in PJM for every actively binding constraint within a five-minute interval.\n\nIncluded in the data is the type of constraint violation (thermal, actual, and reactive interface) as well as the contingency that is being violated. If there are no active constraints within a given interval no data will be available for that interval.\n\n⚠️ PJM does not typically backfill this data series in the event of data drops.\n",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/pjm_transmission_limits/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/pjm_transmission_limits/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

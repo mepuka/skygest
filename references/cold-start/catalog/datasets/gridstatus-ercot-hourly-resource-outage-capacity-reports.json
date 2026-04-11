@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4XP77BXYXPV87C1KY0",
+  "title": "ERCOT Hourly Resource Outage Capacity Reports",
+  "description": "Hourly resource outage capacity reports published by ERCOT. Published every hour for the next 168 hours.\n\n\n\nFor single time series of historical actuals and latest outlook, see `hourly_resource_outage_capacity`.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_hourly_resource_outage_capacity_reports",
+  "accessRights": "public",
+  "temporal": "2013-10-21T17:00:32+00:00/2026-04-11T02:00:47+00:00",
+  "keywords": [
+    "ercot_hourly_resource_outage_capacity_reports",
+    "ercot",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4X25K8X3ZDRQMR42YZ",
+    "https://id.skygest.io/distribution/dist_01KNX70F4XFM64T394H4XKF113"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_hourly_resource_outage_capacity_reports",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP3-233-CD",
+      "relation": "closeMatch"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5AJJT0TY0QHR8B35JA",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5A21K3KDA10J55AQHH",
+  "kind": "download",
+  "title": "ISONE LMP Real Time 5 Min CSV download",
+  "description": "[DEPRECATED IN FAVOR OF THE [PRELIMINARY DATASET](https://www.gridstatus.io/datasets/isone_lmp_real_time_5_min_prelim)] \n\nPreliminary, real-time, 5-minute, LMPs as reported by ISONE. Includes all locations.\n\nThis dataset includes the location types:\n\n- *DRRAZ*\n- *NETWORK NODE*\n- *EXT. NODE*\n- *HUB*\n- *LOAD ZONE*\n- *HUB NODE*",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/isone_lmp_real_time_5_min/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/isone_lmp_real_time_5_min/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

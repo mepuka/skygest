@@ -1,0 +1,40 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4W6XNX7SR73XS58D6H",
+  "title": "ERCOT Estimated Coincident Peak Load (Simple)",
+  "description": "This dataset contains key data series related to coincident peak intervals in ERCOT as well as an estimated coincident peak load value, all in real-time. There are four fifteen-minute coincident peak intervals each year, one in each of the summer months. The estimated value in this dataset utilizes operational load and real-time storage operations in ERCOT. \n\nThe dataseries comprising this dataset are real-time operational data and should not be used in place of settlement data. \n\nThis view only uses the [ERCOT System-Level Load and ESR Charging](https://www.gridstatus.io/datasets/ercot_system_load_charging_4_seconds) dataset and thus only has data beginning June 1, 2025. For a more detailed ERCOT coincident peak view with data going back further in time, see [ERCOT Estimated Coincident Peak Load](https://www.gridstatus.io/datasets/ercot_estimated_coincident_peak_load).",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_estimated_coincident_peak_load_simple",
+  "accessRights": "public",
+  "keywords": [
+    "ercot_estimated_coincident_peak_load_simple",
+    "ercot",
+    "view",
+    "15_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4WWMMVE7V2NZG87EEY",
+    "https://id.skygest.io/distribution/dist_01KNX70F4WN7S723H6JDZWHCRY"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_estimated_coincident_peak_load_simple",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mktinfo/data_agg/4cp",
+      "relation": "closeMatch"
+    }
+  ]
+}

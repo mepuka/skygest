@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZNQWR30CXDEMCJESC",
+  "title": "ERCOT SCED Generation Resource 60 Day",
+  "description": "SCED generation resource data. Published with 60 day delay. Contains offer curves, telemetry, and other data.\n\nWith this data you can construct the actual operations and instructions for each generating unit in ERCOT. As an example, with this data it is possible to understand a unit's typical adherence to schedule and instructions by comparing the output schedule (an input to SCED) against a unit's base points (an output from SCED) and their actual telemetered net output to the grid using the columns `output_schedule`, `base_point`, and `telemetered_net_output`.\n\n⚠️ Beginning with data for 12/5/2025, the active columns in this dataset changed due to ERCOT's implementation of RTC+B. Changes include the retirement of columns, which will be null going forward, and the addition of new columns, which will be null prior to 12/5/2025.\n\n\nNew columns post RTC+B:\n* ramp_rate_up\n* ramp_rate_down\n* as_capability_regup\n* as_capability_regdown\n* as_capability_ecrs\n* as_capability_nonspin\n* as_awards_nonspin\n* as_awards_rrsffr\n* as_awards_rrspfr\n* as_awards_rrsufr\n* as_awards_ecrs\n* as_awards_regup\n* as_awards_regdown\n\nColumns without new data post-RTC+B:\n* as_responsibility_for_rrs\n* as_responsibility_for_rrsffr\n* as_responsibility_for_nonspin\n* as_responsibility_for_regup\n* as_responsibility_for_regdown\n* as_responsibility_for_ecrs\n* hasl\n* lasl",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_sced_gen_resource_60_day",
+  "accessRights": "public",
+  "temporal": "2018-11-02T05:00:13+00:00/2026-02-10T05:55:18+00:00",
+  "keywords": [
+    "ercot_sced_gen_resource_60_day",
+    "ercot",
+    "table",
+    "ERCOT_SCED_RUN"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4ZD6XZH5MYCADFA84R",
+    "https://id.skygest.io/distribution/dist_01KNX70F4ZFHTP7EEJ2TYDBYJE"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_sced_gen_resource_60_day",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP3-965-ER",
+      "relation": "closeMatch"
+    }
+  ]
+}

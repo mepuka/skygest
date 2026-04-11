@@ -130,6 +130,29 @@ export const EnergyChartsIngestKeys = {
   )
 } as const;
 
+export const EmberIngestKeys = {
+  ...ColdStartCommonKeys,
+  apiKey: nonEmptyRedacted("EMBER_ENERGY_API_KEY"),
+  openApiUrl: Config.withDefault(
+    Config.string("EMBER_OPENAPI_URL"),
+    "https://api.ember-energy.org/v1/openapi.json"
+  ),
+  minIntervalMs: Config.withDefault(Config.int("EMBER_MIN_INTERVAL_MS"), 1000)
+} as const;
+
+export const GridStatusIngestKeys = {
+  ...ColdStartCommonKeys,
+  apiKey: nonEmptyRedacted("GRIDSTATUS_API_KEY"),
+  baseUrl: Config.withDefault(
+    Config.string("GRIDSTATUS_BASE_URL"),
+    "https://api.gridstatus.io/v1"
+  ),
+  minIntervalMs: Config.withDefault(
+    Config.int("GRIDSTATUS_MIN_INTERVAL_MS"),
+    200
+  )
+} as const;
+
 // ── Twitter / editorial ingestion keys ────────────────────────────────
 
 /** Non-empty string config that rejects empty/whitespace-only values. */

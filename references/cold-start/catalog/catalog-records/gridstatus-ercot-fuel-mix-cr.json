@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F4X5VG4T1R2K5QF14Q7",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F4WJXBA39SSCR3EZA51",
+  "sourceRecordId": "ercot_fuel_mix",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2023-04-19T22:13:59+00:00",
+  "lastSeen": "2026-04-11T02:46:17+00:00",
+  "sourceModified": "2026-04-11T02:35:00+00:00",
+  "isAuthoritative": true
+}

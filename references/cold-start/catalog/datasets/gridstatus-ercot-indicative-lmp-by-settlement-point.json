@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4X5HY1HB7NZHDMZQS5",
+  "title": "ERCOT Indicative LMP By Settlement Point",
+  "description": "Contains 5-minute indicative LMPs at settlement points in ERCOT. Every 5 minutes ERCOT publishes these values for the following 12 intervals in the Look Ahead SCED-RTD Study Period. Settlement points include Resource Nodes, Hubs, and Load Zones.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_indicative_lmp_by_settlement_point",
+  "accessRights": "public",
+  "temporal": "2022-01-01T06:00:01+00:00/2026-04-11T02:20:03+00:00",
+  "keywords": [
+    "ercot_indicative_lmp_by_settlement_point",
+    "ercot",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4X31NNBRTCK1VRD0R8",
+    "https://id.skygest.io/distribution/dist_01KNX70F4XCSHET9T4S2WQPZ2F"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_indicative_lmp_by_settlement_point",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP6-970-CD",
+      "relation": "closeMatch"
+    }
+  ]
+}

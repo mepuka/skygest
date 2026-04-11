@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5GKN0HRK6TWBSEKX87",
+  "title": "PJM Interface Flows And Limits Day Ahead",
+  "description": "This dataset contains hourly day ahead flows and flow limits for PJM’s internal interfaces. \n\nPublished daily between 12:00pm and 03:15 p.m.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_interface_flows_and_limits_day_ahead",
+  "accessRights": "public",
+  "temporal": "2014-01-01T05:00:00+00:00/2026-04-12T03:00:00+00:00",
+  "keywords": [
+    "pjm_interface_flows_and_limits_day_ahead",
+    "pjm",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5GF5ATZWKFYRG2DVP3",
+    "https://id.skygest.io/distribution/dist_01KNX70F5GFGBEHWP55EMAMZRH"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_interface_flows_and_limits_day_ahead",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/da_interface_flows_and_limits/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

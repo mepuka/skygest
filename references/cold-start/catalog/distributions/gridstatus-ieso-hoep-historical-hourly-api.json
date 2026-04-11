@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F51A6RRPJ687H3E2RHQ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F51QV15NMHCBZGR0KQW",
+  "kind": "api-access",
+  "title": "IESO HOEP Historical Hourly JSON API",
+  "description": "***This report was retired on May 1st, 2025.***\n\n***Under IESO’s Market Renewal Project, Ontario implemented nodal pricing, eliminating the HOEP.***\n\nThe hourly systemwide charge and payment to loads and generators respectively in Ontario. Independent Energy System Operator (IESO) administers this market. Starting in 2018, this data contains Operating Reserve prices as well.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/ieso_hoep_historical_hourly/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ieso_hoep_historical_hourly/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

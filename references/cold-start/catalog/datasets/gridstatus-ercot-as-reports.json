@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4SN65VXP0VCYXWA41G",
+  "title": "ERCOT AS Reports",
+  "description": "**⚠️ This dataset is deprecated and has been replaced by a new dataset with the id [ercot_as_reports_dam](https://www.gridstatus.io/datasets/ercot_as_reports_dam). The schema of the new dataset is slightly different in order to handle any new ancillary service types that ERCOT may add in the future**\n\n---\n\nDAM Ancillary Services Reports in ERCOT with Total Cleared, Total Self-Arranged, and Bid Curves\n\nPublished with a 2 day delay around 3am central.\n\nWith the implementation of RTC+B on 12/5/2025, this dataset was modified by ERCOT to be explicitly related to the day-ahead market (DAM). Previously, all data was implicitly related to the DAM due to the lack of an ancillary services market in the real-time market.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_as_reports",
+  "accessRights": "public",
+  "temporal": "2011-08-27T05:00:00+00:00/2025-12-06T05:00:00+00:00",
+  "keywords": [
+    "ercot_as_reports",
+    "ercot",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4SNE04JA1J8D9ZGPPS",
+    "https://id.skygest.io/distribution/dist_01KNX70F4SF8R50H6KW1ZDT3PW"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_as_reports",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP3-911-ER",
+      "relation": "closeMatch"
+    }
+  ]
+}

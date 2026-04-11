@@ -147,6 +147,9 @@ export const Dataset = Schema.Struct({
   description: Schema.optionalKey(Schema.String.annotate({
     [DcatProperty]: "http://purl.org/dc/terms/description"
   })),
+  creatorAgentId: Schema.optionalKey(AgentId.annotate({
+    [DcatProperty]: "http://purl.org/dc/terms/creator"
+  })),
   publisherAgentId: Schema.optionalKey(AgentId.annotate({
     [DcatProperty]: "http://purl.org/dc/terms/publisher"
   })),

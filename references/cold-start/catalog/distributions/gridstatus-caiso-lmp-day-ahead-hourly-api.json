@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4KBYVQTTRBR07AY2RG",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4KZHBXREY69YG9XA38",
+  "kind": "api-access",
+  "title": "CAISO LMP Day Ahead Hourly JSON API",
+  "description": "Day-ahead hourly locational marginal prices (LMPs) for locations administered by CAISO internally as well as certain external points for which CAISO calculates day-ahead prices. Inclues AP Nodes, Trading Hubs, and Nodes.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/caiso_lmp_day_ahead_hourly/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/caiso_lmp_day_ahead_hourly/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

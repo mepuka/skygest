@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5F1B53WY880N16J8G6",
+  "title": "NYISO Zonal Load Forecast Hourly",
+  "description": "Hourly load forecasts by NYISO for each zone as well as the entire ISO.\n\nZones in NYISO have full names, abbreviations, and letter signifiers. The abbreviated names are used as columns in this dataset. The list of zones is: \n\n* A: West (west)\n* B: Genese (genese)\n* C: Central (centrl)\n* D: North (north)\n* E: Mohawk Valley (mhk_vl)\n* F: Capital (capilt)\n* G: Hudson Valley (hud_vl)\n* H: Millwood (millwd)\n* I: Dunwoodie (dunwod)\n* J: N.Y.C (nyc)\n* K: Long Island (longil)\n\nPublished by 8am ET each day.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/nyiso_zonal_load_forecast_hourly",
+  "accessRights": "public",
+  "temporal": "2000-04-19T17:43:14+00:00/2026-04-10T11:15:02+00:00",
+  "keywords": [
+    "nyiso_zonal_load_forecast_hourly",
+    "nyiso",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5FKE8SJZ5X7TXNXYQX",
+    "https://id.skygest.io/distribution/dist_01KNX70F5FGCN23VFH3F8S3504"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "nyiso_zonal_load_forecast_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.nyiso.com/load-data",
+      "relation": "closeMatch"
+    }
+  ]
+}

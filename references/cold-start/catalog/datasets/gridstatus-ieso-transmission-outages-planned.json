@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F58C4V6J3HHC5T2QSKZ",
+  "title": "IESO Transmission Outages Planned",
+  "description": "Planned transmission outages in IESO going out through the next 24 months.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ieso_transmission_outages_planned",
+  "accessRights": "public",
+  "temporal": "2025-04-29T11:22:40+00:00/2026-04-11T02:02:59+00:00",
+  "keywords": [
+    "ieso_transmission_outages_planned",
+    "ieso",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F58SB2YMG4BAP1BQ7Z8",
+    "https://id.skygest.io/distribution/dist_01KNX70F58T770MV1Y91988Q8H"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ieso_transmission_outages_planned",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://reports-public.ieso.ca/public",
+      "relation": "closeMatch"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5H0H54473QQ2VFDKCZ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5HRA7DBDRS4GBQ5G5V",
+  "kind": "api-access",
+  "title": "PJM Operational Reserves JSON API",
+  "description": "This dataset contains operating reserve values in MWs in PJM for the entire\nRTO and Mid-Atlantic/Dominion region and is updated every 15 seconds.\n\nValues are included for the Primary Reserve Requirement, Total, and\nRequirement from Markets; the Synchronized Reserve Requirement, Total,\nand Requirement from Markets; and the 30-Minute Total and Requirement\nfrom Markets.\n\n⚠️ PJM does not typically backfill this data series in the event of data drops.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/pjm_operational_reserves/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/pjm_operational_reserves/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

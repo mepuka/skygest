@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F5GZ727S3T7JN36FRX7",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F5GYN8XB89QRGPG28EJ",
+  "sourceRecordId": "pjm_as_market_results_real_time_hourly",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2025-10-13T21:16:59+00:00",
+  "lastSeen": "2025-10-13T21:30:55+00:00",
+  "sourceModified": "2022-09-01T03:00:00+00:00",
+  "isAuthoritative": true
+}

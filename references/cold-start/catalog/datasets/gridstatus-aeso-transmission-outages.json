@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4GH1CERYF1VBG2ZHXH",
+  "title": "AESO Transmission Outages",
+  "description": "This dataset contains information on transmission outages across IESO. Contained in this data are transmission owners, scheduled activity, and estimated length of outages.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXP6MWXWMNJ2A93ESKT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/aeso_transmission_outages",
+  "accessRights": "public",
+  "temporal": "2024-02-07T21:23:24+00:00/2026-04-08T20:30:43+00:00",
+  "keywords": [
+    "aeso_transmission_outages",
+    "aeso",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4GCSZ8WNNVJ8FSVJYF",
+    "https://id.skygest.io/distribution/dist_01KNX70F4GMAYDAM4QX16RGQSA"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "aeso_transmission_outages",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "http://ets.aeso.ca/outage_reports/qryOpPlanTransmissionTable_1.html",
+      "relation": "closeMatch"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F4XWTEPGE2S8AMKTPNV",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F4XZJGNRR37RMYT0P9T",
+  "sourceRecordId": "ercot_hourly_wind_report",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2023-07-11T02:41:49+00:00",
+  "lastSeen": "2026-04-11T01:56:30+00:00",
+  "sourceModified": "2026-04-11T01:55:32+00:00",
+  "isAuthoritative": true
+}

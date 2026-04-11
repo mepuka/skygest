@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F57D2400M7KY7PM6EY3",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F57QH2SXAP8Y9AS0QD2",
+  "kind": "api-access",
+  "title": "IESO Load Zonal 5 Min JSON API",
+  "description": "Daily-published five-minute, zonal demand for IESO.\n\nSummed together across an hour these values reach the actual demand. Each interval can be multiplied by 12 to get a 5-minute total demand value.\n\nThere is a known data gap from source for 2025-12-31 in this dataset.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/ieso_load_zonal_5_min/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ieso_load_zonal_5_min/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

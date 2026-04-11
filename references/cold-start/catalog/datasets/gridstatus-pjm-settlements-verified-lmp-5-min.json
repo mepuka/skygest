@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5JJ2BFEEHRYGZ9MD6N",
+  "title": "PJM Settlements Verified LMP 5 Min",
+  "description": "Verified, real-time, five-minute LMPs, including component costs, for the aggregate and zonal pnodes used for settlement in PJM.\n\nResidual aggregate and loadweighted transmission zone prices are PJM estimates.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_settlements_verified_lmp_5_min",
+  "accessRights": "public",
+  "temporal": "2018-04-01T04:00:00+00:00/2026-04-08T03:55:00+00:00",
+  "keywords": [
+    "pjm_settlements_verified_lmp_5_min",
+    "pjm",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5JV2RBARCXAJHAPM66",
+    "https://id.skygest.io/distribution/dist_01KNX70F5J13VT7GJTWM6ASKDP"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_settlements_verified_lmp_5_min",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/rt_fivemin_mnt_lmps/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

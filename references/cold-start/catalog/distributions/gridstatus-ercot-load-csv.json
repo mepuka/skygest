@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4Y7S3A44VAMEEJVRN3",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4YAN0DET85A3DQQHE3",
+  "kind": "download",
+  "title": "ERCOT Load CSV download",
+  "description": "Five-minute load as reported by ERCOT in real-time; contains systemwide demand.\n\nBeginning December 5th, 2025, with the implementation of RTC+B, ERCOT's real-time load reporting no longer includes wholesale storage charging.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/ercot_load/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ercot_load/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

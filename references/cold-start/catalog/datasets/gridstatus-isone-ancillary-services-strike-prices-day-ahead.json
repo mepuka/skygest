@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F58XCXQX7AC0R95GK54",
+  "title": "ISONE Ancillary Services Strike Prices Day Ahead",
+  "description": "Day-ahead strike prices and close-out components for ISO-NE. Includes the forecasted hourly Hub RT percentile values and load forecast.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/isone_ancillary_services_strike_prices_day_ahead",
+  "accessRights": "public",
+  "temporal": "2025-02-28T19:03:01+00:00/2026-04-10T14:30:44+00:00",
+  "keywords": [
+    "isone_ancillary_services_strike_prices_day_ahead",
+    "isone",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F58WBP3GJS09DFV0G9M",
+    "https://id.skygest.io/distribution/dist_01KNX70F58TPW4CSKWHJF578BP"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "isone_ancillary_services_strike_prices_day_ahead",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.iso-ne.com/isoexpress/web/reports/pricing/-/tree/ancillary-daas-strike-prices",
+      "relation": "closeMatch"
+    }
+  ]
+}

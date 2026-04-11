@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F54M5WG1CEV3A9BX23S",
+  "title": "IESO LMP Day Ahead Hourly Virtual Zonal",
+  "description": "Day-ahead, hourly zonal LMPs for IESO used for virtual transactions.\n\nIESO's virtual zones are East, Essa, Niagara, Northeast, Northwest, Ottawa, Southwest, Toronto, and West.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ieso_lmp_day_ahead_hourly_virtual_zonal",
+  "accessRights": "public",
+  "temporal": "2025-05-03T05:00:00+00:00/2026-04-12T04:00:00+00:00",
+  "keywords": [
+    "ieso_lmp_day_ahead_hourly_virtual_zonal",
+    "ieso",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F544CDGF8DRW60SCYAK",
+    "https://id.skygest.io/distribution/dist_01KNX70F54B7SQ8TB87NE472Y8"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ieso_lmp_day_ahead_hourly_virtual_zonal",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://reports-public.ieso.ca/public/DAHourlyZonal/",
+      "relation": "closeMatch"
+    }
+  ]
+}

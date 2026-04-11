@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4GV20E6ATW9RHJEK6Q",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4GEQCFYA8P9BN8JAY1",
+  "kind": "api-access",
+  "title": "AESO Load Forecast JSON API",
+  "description": "Forecasted and calculated total Alberta demand based on all telemetered Control Area Net Generation minus Net Actual Interchange (in MW). Forecasts are released each day around 7AM Mountain Prevailing Time, forecasting the next 13 days. ",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/aeso_load_forecast/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/aeso_load_forecast/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4SD9CH4BWDPBXGGVFF",
+  "title": "EIA Preliminary Monthly Electric Generator Inventory: Retired",
+  "description": "List containing retired generators, as well as unit specific information such as location, capacity, fuel source, and dates of operation, published by the Energy Information Administration (EIA). \n\nThis data is updated on a monthly basis, though is lagged by several weeks for the previous month.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/eia_monthly_generator_inventory_retired",
+  "accessRights": "public",
+  "temporal": "2015-12-01T00:00:00+00:00/2026-02-01T00:00:00+00:00",
+  "keywords": [
+    "eia_monthly_generator_inventory_retired",
+    "eia",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4SF3N7CZ5NY817NA2T",
+    "https://id.skygest.io/distribution/dist_01KNX70F4SBXDGGQH25RG8T6VA"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "eia_monthly_generator_inventory_retired",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.eia.gov/electricity/data/eia860m/",
+      "relation": "closeMatch"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F5E1B0AMWW54C5P92HR",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F5EAJJ4C8WTHJG02XSH",
+  "sourceRecordId": "miso_multiday_operating_margin_regional",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2026-01-29T14:55:54+00:00",
+  "lastSeen": "2026-04-11T02:46:33+00:00",
+  "sourceModified": "2026-04-10T05:00:00+00:00",
+  "isAuthoritative": true
+}

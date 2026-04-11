@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5CWJ0CNY6Y4YVNPF5C",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5CGYQSDP5019J74FRN",
+  "kind": "download",
+  "title": "MISO Binding Constraints Real Time Intraday CSV download",
+  "description": "Active, binding, real-time constraint data from MISO. This dataset should only be used during the current day, for more complete real-time constraint information use [MISO Binding Constraints Real Time 5 Min](https://www.gridstatus.io/datasets/miso_binding_constraints_real_time_5_min), which contains additional information and is published the day following the operating day.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/miso_binding_constraints_real_time_intraday/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/miso_binding_constraints_real_time_intraday/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

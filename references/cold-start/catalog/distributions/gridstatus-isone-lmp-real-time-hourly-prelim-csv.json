@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5A97JAVA8V8QAPW8MT",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5AC74QK85THV5CNTEZ",
+  "kind": "download",
+  "title": "ISONE LMP Real Time Hourly Prelim CSV download",
+  "description": "Preliminary locational marginal prices (LMPs) by hour for the Hub, load zones, and network nodes. Prices are published as soon as is practical after the operating hour has concluded and broken into their various cost components: energy, congestion, and losses. Current data are made available in approximate real-time.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/isone_lmp_real_time_hourly_prelim/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/isone_lmp_real_time_hourly_prelim/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

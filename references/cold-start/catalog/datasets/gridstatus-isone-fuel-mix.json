@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F59TKZV03RKP1G8T2KE",
+  "title": "ISONE Fuel Mix",
+  "description": "Fuel Mix for ISONE resampled to 5 minute intervals",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/isone_fuel_mix",
+  "accessRights": "public",
+  "temporal": "2015-12-01T05:10:00+00:00/2026-04-11T02:45:00+00:00",
+  "keywords": [
+    "isone_fuel_mix",
+    "isone",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F59Z2JCWGXW30AHC4ZH",
+    "https://id.skygest.io/distribution/dist_01KNX70F59NQ85WA46CFF4T3QG"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "isone_fuel_mix",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.iso-ne.com/isoexpress/web/reports/operations/-/tree/gen-fuel-mix",
+      "relation": "closeMatch"
+    }
+  ]
+}

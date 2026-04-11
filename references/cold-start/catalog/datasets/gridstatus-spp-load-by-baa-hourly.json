@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5NTKHWHSN52786G50T",
+  "title": "SPP Load By BAA Hourly",
+  "description": "Hourly Load in SPP by BAA. The SWPW BAA which this dataset makes available became available on 2026-04-01, and thus this dataset does not contain all available historical load data from SPP. If you require load data before 2026, use the `spp_load_hourly` [dataset](https://www.gridstatus.io/datasets/spp_load_hourly).",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/spp_load_by_baa_hourly",
+  "accessRights": "public",
+  "temporal": "2025-01-01T06:00:00+00:00/2026-04-11T02:00:00+00:00",
+  "keywords": [
+    "spp_load_by_baa_hourly",
+    "spp",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5NYHC17CJYAD49F7F0",
+    "https://id.skygest.io/distribution/dist_01KNX70F5NQTZSDP8CKH6AN089"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "spp_load_by_baa_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://portal.spp.org/pages/mtlf-vs-actual",
+      "relation": "closeMatch"
+    }
+  ]
+}

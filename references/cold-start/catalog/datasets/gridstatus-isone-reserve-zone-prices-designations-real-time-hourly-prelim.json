@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5BEH8ZTZ680EH62KMT",
+  "title": "ISONE Reserve Zone Prices Designations Real Time Hourly Prelim",
+  "description": "Preliminary hourly reserve prices, requirements, and designations by zone in ISO-NE. Includes 10-minute and 30-minute reserve requirements. Published in real-time during the course of the operating day.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/isone_reserve_zone_prices_designations_real_time_hourly_prelim",
+  "accessRights": "public",
+  "temporal": "2018-07-30T04:00:00+00:00/2026-04-11T01:00:00+00:00",
+  "keywords": [
+    "isone_reserve_zone_prices_designations_real_time_hourly_prelim",
+    "isone",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5BZ6SZPJ8YQ4J39S2P",
+    "https://id.skygest.io/distribution/dist_01KNX70F5BWTVWGAR8N85G66XM"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "isone_reserve_zone_prices_designations_real_time_hourly_prelim",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.iso-ne.com/isoexpress/web/reports/pricing/-/tree/ancillary-hourly-rzpd",
+      "relation": "closeMatch"
+    }
+  ]
+}

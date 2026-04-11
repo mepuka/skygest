@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5D470991BDAC7DRPW5",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5D37PQW1KQTAH7X1DH",
+  "kind": "download",
+  "title": "MISO LMP DART Ex Post Hourly CSV download",
+  "description": "DART spread in MISO between day-ahead hourly ex-post LMPs and real-time hourly ex-post final LMPs. Both day-ahead and real-time values are at hourly intervals.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/miso_lmp_dart_ex_post_hourly/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/miso_lmp_dart_ex_post_hourly/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

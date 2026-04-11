@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4N9QW2XAVAE8VM77V8",
+  "title": "CAISO New Records Timeline",
+  "description": "Timeline of new records for CAISO",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/caiso_records_timeseries",
+  "accessRights": "public",
+  "temporal": "2018-04-10T14:25:00+00:00/2026-03-25T02:00:00+00:00",
+  "keywords": [
+    "caiso_records_timeseries",
+    "caiso",
+    "materialized_view",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4NCFRQX6G270X7TV4C",
+    "https://id.skygest.io/distribution/dist_01KNX70F4NM4A4H3N796DHW4N0"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "caiso_records_timeseries",
+      "relation": "exactMatch"
+    }
+  ]
+}

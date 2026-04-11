@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F53V7BEDFJ52FJTY9J6",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F53R1RT1TWF828Z9XAZ",
+  "kind": "api-access",
+  "title": "IESO LMP DART 5 Min Intertie JSON API",
+  "description": "DART spread in IESO between day-ahead hourly LMPs and real-time 5-minute LMPs for intertie locations. Hourly day-ahead values are brought to a 5-minute interval across the hour for the purposes of this dataset.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/ieso_lmp_dart_5_min_intertie/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ieso_lmp_dart_5_min_intertie/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F51ZWDC5F3T6TCE6HJ3",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F51PSZ8XMHF2HDN3VTY",
+  "sourceRecordId": "ercot_unplanned_resource_outages",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2024-07-25T16:27:44+00:00",
+  "lastSeen": "2026-04-10T10:02:43+00:00",
+  "sourceModified": "2026-04-10T10:00:46+00:00",
+  "isAuthoritative": true
+}

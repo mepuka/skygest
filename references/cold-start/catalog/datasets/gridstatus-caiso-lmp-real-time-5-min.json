@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4KSXWE3G6586BRQ4PM",
+  "title": "CAISO LMP Real Time 5 Min",
+  "description": "Real-time 5-minute locational marginal prices (LMPs) for locations administered by CAISO internally as well as through the WEIM. Inclues AP Nodes, Trading Hubs, and Nodes.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/caiso_lmp_real_time_5_min",
+  "accessRights": "public",
+  "temporal": "2019-06-17T07:00:00+00:00/2026-04-11T02:45:00+00:00",
+  "keywords": [
+    "caiso_lmp_real_time_5_min",
+    "caiso",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4K7XQ8PBKX6EA55YEF",
+    "https://id.skygest.io/distribution/dist_01KNX70F4K4EAVJVGJMA1855R0"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "caiso_lmp_real_time_5_min",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "http://oasis.caiso.com/mrioasis/logon.do",
+      "relation": "closeMatch"
+    }
+  ]
+}

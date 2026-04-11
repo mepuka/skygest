@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5FGCN23VFH3F8S3504",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5F1B53WY880N16J8G6",
+  "kind": "download",
+  "title": "NYISO Zonal Load Forecast Hourly CSV download",
+  "description": "Hourly load forecasts by NYISO for each zone as well as the entire ISO.\n\nZones in NYISO have full names, abbreviations, and letter signifiers. The abbreviated names are used as columns in this dataset. The list of zones is: \n\n* A: West (west)\n* B: Genese (genese)\n* C: Central (centrl)\n* D: North (north)\n* E: Mohawk Valley (mhk_vl)\n* F: Capital (capilt)\n* G: Hudson Valley (hud_vl)\n* H: Millwood (millwd)\n* I: Dunwoodie (dunwod)\n* J: N.Y.C (nyc)\n* K: Long Island (longil)\n\nPublished by 8am ET each day.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/nyiso_zonal_load_forecast_hourly/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/nyiso_zonal_load_forecast_hourly/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

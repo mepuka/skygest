@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F59KT7B2JNJ8GF2QXWG",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F59Z1GN3RM6TDWDMJ4C",
+  "sourceRecordId": "isone_fcm_reconfiguration_annual",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2025-12-18T20:41:12+00:00",
+  "lastSeen": "2026-04-10T11:06:22+00:00",
+  "sourceModified": "2027-06-01T04:00:00+00:00",
+  "isAuthoritative": true
+}

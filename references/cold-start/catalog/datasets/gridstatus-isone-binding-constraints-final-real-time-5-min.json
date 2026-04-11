@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F58W2CQ91N5J6CTZY03",
+  "title": "ISONE Binding Constraints Final Real Time 5 Min",
+  "description": "Real-time, five-minute final binding constraints in ISO New England published after the market day. \n\nFinal binding constraint data is typically published in the afternoon of the next business day following the market day.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/isone_binding_constraints_final_real_time_5_min",
+  "accessRights": "public",
+  "temporal": "2023-07-01T04:10:00+00:00/2026-04-09T20:55:00+00:00",
+  "keywords": [
+    "isone_binding_constraints_final_real_time_5_min",
+    "isone",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F58QYNE76CC0D3V1FZX",
+    "https://id.skygest.io/distribution/dist_01KNX70F58GV96FXWYDJAZN494"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "isone_binding_constraints_final_real_time_5_min",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.iso-ne.com/isoexpress/web/reports/grid/-/tree/constraint-rt-fivemin-final",
+      "relation": "closeMatch"
+    }
+  ]
+}

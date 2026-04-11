@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5ERXVPC4D7NYSCKDZ0",
+  "title": "NYISO AS Prices Real Time 5 Min",
+  "description": "Real-time five-minute prices for ancillary services products in the NYISO market.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/nyiso_as_prices_real_time_5_min",
+  "accessRights": "public",
+  "temporal": "2016-06-23T04:00:00+00:00/2026-04-11T02:40:00+00:00",
+  "keywords": [
+    "nyiso_as_prices_real_time_5_min",
+    "nyiso",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5EA9W0N91HS6FSGGR2",
+    "https://id.skygest.io/distribution/dist_01KNX70F5E9NT5RQ0EV4282PV2"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "nyiso_as_prices_real_time_5_min",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "http://mis.nyiso.com/public/P-6Blist.htm",
+      "relation": "closeMatch"
+    }
+  ]
+}

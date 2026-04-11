@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4H2G0SXA2K9027SX8Y",
+  "title": "CAISO Branch Shadow Prices DAM Hourly",
+  "description": "Hourly day-ahead constraint pricing in CAISO at each Nomogram and Branch. \n\nCAISO uses Nomograms to: “define a constraint relationship between two power system MW variables.”  See section 3.1.7 of the Market+Operations Business Practice Manual for more information on CAISO’s use of Nomograms. ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/caiso_branch_shadow_prices_dam_hourly",
+  "accessRights": "public",
+  "temporal": "2011-01-05T00:00:00+00:00/2026-04-11T02:00:00+00:00",
+  "keywords": [
+    "caiso_branch_shadow_prices_dam_hourly",
+    "caiso",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4H17NSX90BCSYNS97S",
+    "https://id.skygest.io/distribution/dist_01KNX70F4H77DW5K2QZ3AXBZ8A"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "caiso_branch_shadow_prices_dam_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "http://oasis.caiso.com/mrioasis/logon.do",
+      "relation": "closeMatch"
+    }
+  ]
+}

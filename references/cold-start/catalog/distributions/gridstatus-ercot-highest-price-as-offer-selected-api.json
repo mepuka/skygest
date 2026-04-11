@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4X605FFEWZSNS030CP",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4X761XRDEZ80N8JJWA",
+  "kind": "api-access",
+  "title": "ERCOT Highest Price AS Offer Selected JSON API",
+  "description": "The price and name of the Entity submitting\nthe offer for the highest-priced selected Ancillary Service (AS) Offer in ERCOT for each hour of the operating day.\n\nPublished with a 3 day delay.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/ercot_highest_price_as_offer_selected/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ercot_highest_price_as_offer_selected/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F57QKNFE1CMAPYZV4CD",
+  "title": "IESO Outage Transmission Limits",
+  "description": "Transmission limits for impacted facilities during outages for transmission facilities in IESO. Includes both internal and intertie transmission equipment.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ieso_outage_transmission_limits",
+  "accessRights": "public",
+  "temporal": "2025-04-22T22:07:07+00:00/2026-04-11T02:45:01+00:00",
+  "keywords": [
+    "ieso_outage_transmission_limits",
+    "ieso",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F57HQ4R12NP5E9FHPZ5",
+    "https://id.skygest.io/distribution/dist_01KNX70F57R3JFZPRFMN3N5PZ7"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ieso_outage_transmission_limits",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://reports-public.ieso.ca/public/TxLimitsOutage0to2Days/",
+      "relation": "closeMatch"
+    }
+  ]
+}

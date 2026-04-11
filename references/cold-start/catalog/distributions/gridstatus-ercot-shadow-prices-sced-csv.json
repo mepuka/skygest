@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F50DV2GDMC17C9HYYXQ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F50KC1MXWGG2N8W67WS",
+  "kind": "download",
+  "title": "ERCOT Shadow Prices SCED CSV download",
+  "description": "The report for Shadow Prices of binding/violated constraints in SCED. The report shows the contingency name,\noverloaded element details (element name, from/to station name and kV level), Shadow Price ( price for resolving\none MW of the constraint), Penalty for violating the constraint (MaxShadow Price), overloaded element limit and\nflow (value)pairs that caused such constraint.\n\nData released every 1 hour.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/ercot_shadow_prices_sced/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ercot_shadow_prices_sced/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

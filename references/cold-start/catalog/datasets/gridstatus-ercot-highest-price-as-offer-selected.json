@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4X761XRDEZ80N8JJWA",
+  "title": "ERCOT Highest Price AS Offer Selected",
+  "description": "The price and name of the Entity submitting\nthe offer for the highest-priced selected Ancillary Service (AS) Offer in ERCOT for each hour of the operating day.\n\nPublished with a 3 day delay.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_highest_price_as_offer_selected",
+  "accessRights": "public",
+  "temporal": "2016-12-29T06:00:00+00:00/2025-12-06T04:00:00+00:00",
+  "keywords": [
+    "ercot_highest_price_as_offer_selected",
+    "ercot",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4X605FFEWZSNS030CP",
+    "https://id.skygest.io/distribution/dist_01KNX70F4XX0Z795E7TQ1HCRGA"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_highest_price_as_offer_selected",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP3-915-EX",
+      "relation": "closeMatch"
+    }
+  ]
+}

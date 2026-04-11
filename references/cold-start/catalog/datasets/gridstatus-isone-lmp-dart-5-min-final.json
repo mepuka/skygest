@@ -1,0 +1,35 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F594NH36YR3S8T7HN87",
+  "title": "ISONE LMP DART 5 Min Final",
+  "description": "DART spread in ISONE between day-ahead hourly LMPs and real-time 5-minute final LMPs. Hourly day-ahead values are brought to a 5-minute interval across the hour for the purposes of this dataset.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/isone_lmp_dart_5_min_final",
+  "accessRights": "public",
+  "keywords": [
+    "isone_lmp_dart_5_min_final",
+    "isone",
+    "view",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F59B8XC8HYBXFS9BFKS",
+    "https://id.skygest.io/distribution/dist_01KNX70F59JTT53JXNXJNNT5BQ"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "isone_lmp_dart_5_min_final",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5MNKP9G2T9X7SWT47H",
+  "title": "SPP AS Prices Real Time 5 Min",
+  "description": "Real-time, five-minute Marginal Clearing Prices (MCPs) by Reserve Zone for ancillary services in SPP. \n\nIncludes regulation, ramp, spinning, and supplemental reserves, and uncertainty up products.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/spp_as_prices_real_time_5_min",
+  "accessRights": "public",
+  "temporal": "2014-03-01T06:00:00+00:00/2026-04-11T02:45:00+00:00",
+  "keywords": [
+    "spp_as_prices_real_time_5_min",
+    "spp",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5MY65QPCK9DCNM60QM",
+    "https://id.skygest.io/distribution/dist_01KNX70F5MJEHQQ9RY4X57QQ4T"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "spp_as_prices_real_time_5_min",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://portal.spp.org/pages/rtbm-mcp",
+      "relation": "closeMatch"
+    }
+  ]
+}

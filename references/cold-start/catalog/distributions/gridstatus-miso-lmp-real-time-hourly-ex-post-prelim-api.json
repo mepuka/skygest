@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5DE0CYEBTDAQYD67VS",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5DDVRZ4J87R83Y4CDP",
+  "kind": "api-access",
+  "title": "MISO LMP Real Time Hourly Ex Post Prelim JSON API",
+  "description": "Preliminary, hourly, real-time, Ex Post LMPs from MISO. MISO integrates the real-time Ex Post LMP over all dispatch intervals in a market hour in order to produce the hourly value. MISO's real-time market is ultimately settled on the hourly Ex post LMPs, but this dataset is the Preliminary values which are calculated in real time, directly following the market hour. \n\nSee MISO's *BPM 002 - Energy and Operating Reserves* for additional discussion.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/miso_lmp_real_time_hourly_ex_post_prelim/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/miso_lmp_real_time_hourly_ex_post_prelim/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

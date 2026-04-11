@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5JNPA1R3FNCD51F8W9",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5JTM0P6F3FZNB1J5MA",
+  "kind": "download",
+  "title": "PJM Regulation Market Monthly CSV download",
+  "description": "Hourly regulation capacity requirements in PJM. Mileage ratios and performance data are also included. \n\nThis data is posted monthly on the first Friday of the month, but due to its reliance on settlement data may be delayed based on delays in the settlement process.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/pjm_regulation_market_monthly/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/pjm_regulation_market_monthly/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

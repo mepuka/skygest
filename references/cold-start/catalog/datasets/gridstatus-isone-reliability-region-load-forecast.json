@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5A3STYNZQV2CM9J0Q2",
+  "title": "ISONE Reliability Region Load Forecast",
+  "description": "Hourly Load Forecast for the ISO New England Reliability Regions. \n\nForecasts are currently published by the ISO for hourly intervals for each region simultaneously, roughly every half hour, with a roughly 3 day rolling horizon. Forecast publishing has increased over the last 7 years to its current rate, so older data may have fewer forecasts for each interval. The load column is in MW, and the regional percentage represents each location's share of overall demand in ISO-NE. \n\nThe locations included are ISO-NE's Reliability Regions:\n* .Z.MAINE\n* .Z.NEWHAMPSHIRE\n* .Z.VERMONT\n* .Z.RHODEISLAND\n* .Z.CONNECTICUT\n* .Z.WCMASS\n* .Z.SEMASS\n * .Z.NEMASSBOST\n\nThe three zones with \"MASS\" in the name represent regions within Massachusetts, the highest demand region within New England. Reliability Regions generally overlap with Load Zones in ISO-NE.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/isone_reliability_region_load_forecast",
+  "accessRights": "public",
+  "temporal": "2017-06-29T07:51:10+00:00/2026-04-10T20:34:44+00:00",
+  "keywords": [
+    "isone_reliability_region_load_forecast",
+    "isone",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5ABWCFMH4FCYAMDG6Z",
+    "https://id.skygest.io/distribution/dist_01KNX70F5A8HJ6E47Z0ECHBKH9"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "isone_reliability_region_load_forecast",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://webservices.iso-ne.com/docs/v1.1/rest.reliabilityregionloadforecast.day.day.all.html",
+      "relation": "closeMatch"
+    }
+  ]
+}

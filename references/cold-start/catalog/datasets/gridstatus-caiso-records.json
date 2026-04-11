@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4N7WG1HZ60F1SW6JK2",
+  "title": "CAISO Records",
+  "description": "Top 10 daily records for various metrics in CAISO",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/caiso_records",
+  "accessRights": "public",
+  "temporal": "2018-07-22T06:20:00+00:00/2026-03-25T02:00:00+00:00",
+  "keywords": [
+    "caiso_records",
+    "caiso",
+    "materialized_view",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4NMHHR7JV5PJXZY9WM",
+    "https://id.skygest.io/distribution/dist_01KNX70F4NR5NX1STPQNQEY48X"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "caiso_records",
+      "relation": "exactMatch"
+    }
+  ]
+}

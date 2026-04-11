@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F580GQ69F4NXEQBKX0G",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F582HRNTKCA0AYFSFD3",
+  "kind": "download",
+  "title": "ISONE Binding Constraints Final Real Time 15 Min CSV download",
+  "description": "Final, fifteen-minute preliminary binding constraints in ISO New England published after the market day. \n\nFinal binding constraint data is typically published in the afternoon of the next business day following the market day.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/isone_binding_constraints_final_real_time_15_min/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/isone_binding_constraints_final_real_time_15_min/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

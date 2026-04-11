@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5HQTSPX8N068BGQ3S0",
+  "title": "PJM Load Metered Hourly",
+  "description": "The MWh net energy consumption by each service territory within PJM. Data is further broken up into NERC region, zone, and load areas.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_load_metered_hourly",
+  "accessRights": "public",
+  "temporal": "1993-01-01T05:00:00+00:00/2026-04-09T03:00:00+00:00",
+  "keywords": [
+    "pjm_load_metered_hourly",
+    "pjm",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5H9H9J3HBEB2B608E2",
+    "https://id.skygest.io/distribution/dist_01KNX70F5HCXXQWYFGK1WKENTE"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_load_metered_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/hrl_load_metered/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4W1M0YWM2R85FWMVXJ",
+  "title": "ERCOT DAM System Lambda",
+  "description": "Day Ahead Market System Lambda as reported by ERCOT.\n\nHourly intervals, published once a day around 12:30pm Central for tomorrow.\n",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_dam_system_lambda",
+  "accessRights": "public",
+  "temporal": "2017-01-02T06:00:00+00:00/2026-04-12T04:00:00+00:00",
+  "keywords": [
+    "ercot_dam_system_lambda",
+    "ercot",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4WSQQ0X910CWGBC53Y",
+    "https://id.skygest.io/distribution/dist_01KNX70F4WPAPVKHEDMHVEDW4W"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_dam_system_lambda",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP4-523-CD",
+      "relation": "closeMatch"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5NN2V7JWP9ZS18FW3G",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5NC7S9Q2EG87C4Q1ZX",
+  "kind": "api-access",
+  "title": "SPP VER Curtailments By BAA JSON API",
+  "description": "VER curtailment data in 5 minute intervals for SPP by BAA, SPP East (SPP) and SPP West (SWPW). For SPP East, the data begins on March 30th, 2026, while SWPW begins on April 1st, 2026.\n\nFor SPP-wide and historical VER curtailment data, see the `spp_ver_curtailments` [dataset](https://www.gridstatus.io/datasets/spp_ver_curtailments).\n\n\nThis data is total VER curtailment (not per resource).",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/spp_ver_curtailments_by_baa/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/spp_ver_curtailments_by_baa/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

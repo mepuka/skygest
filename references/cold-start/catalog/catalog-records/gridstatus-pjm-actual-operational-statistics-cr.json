@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F5G3ZEN8ZWWY1P4KM7F",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F5FMSWJA4VX07VDGDV1",
+  "sourceRecordId": "pjm_actual_operational_statistics",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2025-07-18T21:03:33+00:00",
+  "lastSeen": "2026-04-11T02:47:08+00:00",
+  "sourceModified": "2026-04-10T12:00:34+00:00",
+  "isAuthoritative": true
+}

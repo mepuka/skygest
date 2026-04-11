@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5MH4KS840BD9VS3WRB",
+  "title": "SPP LMP Real Time 5 Min",
+  "description": "Real Time 5 Minute LMPs as reported by SPP.\n\nThe location types present are:\n\n- *Settlement Location*\n- *Interface*\n- *Hub*",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/spp_lmp_real_time_5_min",
+  "accessRights": "public",
+  "temporal": "2013-05-29T19:30:00+00:00/2026-04-11T02:45:00+00:00",
+  "keywords": [
+    "spp_lmp_real_time_5_min",
+    "spp",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5MV8WEZAF6WPW3PB8T",
+    "https://id.skygest.io/distribution/dist_01KNX70F5MRDZT1QT2M4PR7KPE"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "spp_lmp_real_time_5_min",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://portal.spp.org/pages/rtbm-lmp-by-location",
+      "relation": "closeMatch"
+    }
+  ]
+}

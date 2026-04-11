@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5FC477AP856Y9XZS40",
+  "title": "NYISO LMP Real Time Hourly",
+  "description": "Real-time LMPs in hourly intervals as reported by NYISO.\n\nIncludes all zone and generator level data. The location types present are:\n\nGenerator\nZone\nNOTE: in NYISO's raw data, a negative congestion component results in a higher LMP value, which is the opposite of other ISOs. Thus, we flip the sign on the congestion component before inserting into our database to be consistent with other ISOs. This means that in our database, LMP = Energy + Congestion + Loss.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/nyiso_lmp_real_time_hourly",
+  "accessRights": "public",
+  "temporal": "1999-11-18T05:00:00+00:00/2026-04-11T02:00:00+00:00",
+  "keywords": [
+    "nyiso_lmp_real_time_hourly",
+    "nyiso",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5F4AK3DA27K5ZFQRH7",
+    "https://id.skygest.io/distribution/dist_01KNX70F5F4SZNRKVNZHEVNGHC"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "nyiso_lmp_real_time_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.nyiso.com/energy-market-operational-data",
+      "relation": "closeMatch"
+    }
+  ]
+}

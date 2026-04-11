@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4TCTMFFJKJ428AGWBM",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4THQH0KNK9GBXJA2M0",
+  "kind": "api-access",
+  "title": "ERCOT Available Seasonal Capacity Forecast JSON API",
+  "description": "Available seasonal capacity forecast in ERCOT.\n\nThe forecasted demand (Load Forecast) and the forecasted available\nseasonal capacity (Available Capacity) for the next 6 days.\n\nThe forecasted available seasonal capacity is comprised of non-renewable generators\nbased on seasonal capacity ratings without regard to the operating plans of these\nunits, minus any known outages or derates of these units, and the forecasted wind\nand solar generation output.\n",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/ercot_available_seasonal_capacity_forecast/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ercot_available_seasonal_capacity_forecast/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

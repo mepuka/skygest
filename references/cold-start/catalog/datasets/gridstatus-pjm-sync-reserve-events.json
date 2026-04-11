@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5J698844TYP67PTY7H",
+  "title": "PJM Synchronized Reserve Events",
+  "description": "This dataset contains the history of declared synchronized reserve events in PJM, including the time, location, and percentage of reserves deployed.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_sync_reserve_events",
+  "accessRights": "public",
+  "temporal": "2002-12-02T18:04:00+00:00/2026-03-05T07:24:00+00:00",
+  "keywords": [
+    "pjm_sync_reserve_events",
+    "pjm",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5JV6E4F646MZEN00R6",
+    "https://id.skygest.io/distribution/dist_01KNX70F5JQ7VKT42N4DBP7P7G"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_sync_reserve_events",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/sync_reserve_events/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

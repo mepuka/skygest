@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4Z6CXHZXRE1KNJS3RG",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4Z6M82B1SSDKZ5V8B0",
+  "kind": "api-access",
+  "title": "ERCOT PRC JSON API",
+  "description": "Physical Responsive Capability (PRC) in ERCOT. New data is published on an irregular frequency, but is generally multiple times per minute.\n\nPRC is the generation and load resources that can quickly respond to sudden changes on the system. Events such as the unexpected trip of a large generator rely on fast response of other resources to fill the gap. The PRC is a measure of those other resources' capability. ",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/ercot_prc/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ercot_prc/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

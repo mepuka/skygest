@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5GNXDKS024GXF8EFPB",
+  "title": "PJM Area Control Error",
+  "description": "Area Control Error (ACE) measures the imbalance between supply and demand. PJM calculates this value in MWs every 15 seconds. Negative ACE values tend to indicate the need for generation to ramp up while positive ACE values tend to point to generation overcommitment. ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_area_control_error",
+  "accessRights": "public",
+  "temporal": "2025-01-09T00:00:01+00:00/2026-04-11T02:40:46+00:00",
+  "keywords": [
+    "pjm_area_control_error",
+    "pjm",
+    "table",
+    "15_SECONDS"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5GKDAAGHFV84X6SJN4",
+    "https://id.skygest.io/distribution/dist_01KNX70F5G1EEB6D914ZM05M86"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_area_control_error",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/area_control_error/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

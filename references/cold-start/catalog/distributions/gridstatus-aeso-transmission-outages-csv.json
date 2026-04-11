@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4GMAYDAM4QX16RGQSA",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4GH1CERYF1VBG2ZHXH",
+  "kind": "download",
+  "title": "AESO Transmission Outages CSV download",
+  "description": "This dataset contains information on transmission outages across IESO. Contained in this data are transmission owners, scheduled activity, and estimated length of outages.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/aeso_transmission_outages/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/aeso_transmission_outages/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5AWPAH39H7CG7XR6PQ",
+  "title": "ISONE LMP Day Ahead Hourly",
+  "description": "Day Ahead Hourly LMPs as reported by ISONE. Includes all locations.\n\nThis dataset includes the location types:\n\n- *DRRAZ*\n- *NETWORK NODE*\n- *EXT. NODE*\n- *HUB*\n- *LOAD ZONE*\n- *HUB NODE*",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/isone_lmp_day_ahead_hourly",
+  "accessRights": "public",
+  "temporal": "2016-01-01T05:00:00+00:00/2026-04-12T03:00:00+00:00",
+  "keywords": [
+    "isone_lmp_day_ahead_hourly",
+    "isone",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5AJSH8S32N60RPDX7E",
+    "https://id.skygest.io/distribution/dist_01KNX70F5AB7PCX6BJVPA5NCZW"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "isone_lmp_day_ahead_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.iso-ne.com/isoexpress/web/reports/pricing/-/tree/lmps-da-hourly",
+      "relation": "closeMatch"
+    }
+  ]
+}

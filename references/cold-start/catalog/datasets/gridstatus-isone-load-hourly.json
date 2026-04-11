@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5AWEW75N8HP90S3H85",
+  "title": "ISONE Load Hourly",
+  "description": "Total hourly ISO-NE systemwide demand in megawatt-hours. Data is made available for an hour approximately 6 minutes after the hour ends. ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/isone_load_hourly",
+  "accessRights": "public",
+  "temporal": "2017-07-01T04:00:00+00:00/2026-04-11T01:00:00+00:00",
+  "keywords": [
+    "isone_load_hourly",
+    "isone",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5APZ12PD36E5MWTRAE",
+    "https://id.skygest.io/distribution/dist_01KNX70F5AVZZVV9ZD5F97V0YY"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "isone_load_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://webservices.iso-ne.com/docs/v1.1/rest.hourlysysload.html",
+      "relation": "closeMatch"
+    }
+  ]
+}

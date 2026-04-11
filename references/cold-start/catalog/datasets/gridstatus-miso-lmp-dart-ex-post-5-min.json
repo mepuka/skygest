@@ -1,0 +1,35 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5DD23FY10WV311HMN9",
+  "title": "MISO LMP DART Ex Post 5 Min",
+  "description": "DART spread in MISO between day-ahead hourly ex-post LMPs and real-time 5-minute ex-post final LMPs. Hourly day-ahead values are brought to a 5-minute interval across the hour for the purposes of this dataset.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/miso_lmp_dart_ex_post_5_min",
+  "accessRights": "public",
+  "keywords": [
+    "miso_lmp_dart_ex_post_5_min",
+    "miso",
+    "view",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5DKRJWQPQ76PMBR82H",
+    "https://id.skygest.io/distribution/dist_01KNX70F5DP5EFWR3NQBPNN2GB"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "miso_lmp_dart_ex_post_5_min",
+      "relation": "exactMatch"
+    }
+  ]
+}

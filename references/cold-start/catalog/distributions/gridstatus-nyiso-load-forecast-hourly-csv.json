@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5FGHTN313QFEJP7Q1B",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5F6E00SKNBPM9WDD6B",
+  "kind": "download",
+  "title": "NYISO Load Forecast Hourly CSV download",
+  "description": "⚠️ This dataset is deprecated in favor of  [nyiso_zonal_load_forecast_hourly](https://www.gridstatus.io/datasets/nyiso_zonal_load_forecast_hourly) which contains this same system wide forecast alongside the zonal load forecasts. \n\nLoad Forecast in 1 hour intervals as reported by NYISO.\n\nPublished by 8am ET each day.\n",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/nyiso_load_forecast_hourly/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/nyiso_load_forecast_hourly/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

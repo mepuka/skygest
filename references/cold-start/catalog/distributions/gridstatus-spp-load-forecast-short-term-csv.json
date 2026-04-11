@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5N26SVF607XJNY0CY5",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5NTCR8KGZJ25Z7Y1B3",
+  "kind": "download",
+  "title": "SPP Load Forecast Short Term CSV download",
+  "description": "5-minute load forecast data for the SPP footprint (system-wide).\n\nNo future forecasts are included. The dataset shows what SPP historically forecasted for each interval.\n\nIncludes data from both SPP East (SPP) and SPP West (SWPW) via the `baa` column.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/spp_load_forecast_short_term/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/spp_load_forecast_short_term/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

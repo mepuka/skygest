@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5EZ94Z39GH1155WBDE",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5EF5Z0SXP47P0KS3S1",
+  "kind": "api-access",
+  "title": "NYISO AS Prices Day Ahead Hourly JSON API",
+  "description": "Day-Ahead hourly prices for ancillary services products in the NYISO market.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/nyiso_as_prices_day_ahead_hourly/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/nyiso_as_prices_day_ahead_hourly/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

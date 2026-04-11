@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5FA8TFT9RD67261ZR3",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5EMA8CZYR6ZQ3QTTMS",
+  "kind": "download",
+  "title": "NYISO Interface Limits And Flows 5 Min CSV download",
+  "description": "Transfer Limits and five-minute flows for both internal NYISO interfaces and external tie flows between NYISO and HQ, IESO, PJM, and ISO-NE. Positive values indicate imports and negative values indicate exports. \n\nInterfaces by neighboring region:\n\n- Hydro-Québec (HQ):\n    - SCH - HQ - NY\n    - SCH - HQ_CEDARS\n    - SCH - HQ_IMPORT_EXPORT\n- PJM\n    - SCH - PJ - NY\n    - SCH - PJM_HTP\n    - SCH - PJM_NEPTUNE\n    - SCH - PJM_VFT\n- ISO-New England\n    - SCH - NE - NY\n    - SCH - NPX_1385\n    - SCH - NPX_CSC\n- IESO\n    - SCH - OH - NY\n- NYISO Internal Interfaces\n    - CENTRAL EAST - VC\n    - DYSINGER EAST\n    - MOSES SOUTH\n    - SPR/DUN-SOUTH\n    - TOTAL EAST\n    - UPNY CONED\n    - WEST CENTRAL",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/nyiso_interface_limits_and_flows_5_min/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/nyiso_interface_limits_and_flows_5_min/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

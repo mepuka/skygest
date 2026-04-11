@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4ZHDEGFVXKKG3T7XJB",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4Z80EGXQ5PCPKSCAB8",
+  "kind": "download",
+  "title": "ERCOT SCED Resource AS Offers 60 Day CSV download",
+  "description": "ERCOT resource offers to provide ancillary services in SCED. This data is posted on a 60-day delay from the market day.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/ercot_sced_resource_as_offers_60_day/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ercot_sced_resource_as_offers_60_day/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

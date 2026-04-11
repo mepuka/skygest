@@ -3,14 +3,19 @@
   "id": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "kind": "organization",
   "name": "GridStatus",
+  "homepage": "https://www.gridstatus.io/",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
   "aliases": [
     {
       "scheme": "url",
       "value": "https://www.gridstatus.io",
       "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.gridstatus.io/",
+      "relation": "exactMatch"
     }
-  ],
-  "createdAt": "2026-04-08T00:00:00.000Z",
-  "updatedAt": "2026-04-09T00:00:00.000Z",
-  "homepage": "https://www.gridstatus.io"
+  ]
 }

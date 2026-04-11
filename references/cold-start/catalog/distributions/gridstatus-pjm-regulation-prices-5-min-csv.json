@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5JQDK80TV0D2GGCVF4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5JPJ2NS2RBNCG7FV1T",
+  "kind": "download",
+  "title": "PJM Regulation Prices 5 Min CSV download",
+  "description": "The dataset contains preliminary five minute quantity, requirement, and prices PJM RTO wide. Regulation resources are compensated for adjusting their consumption or generation in response to grid frequency needs.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/pjm_regulation_prices_5_min/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/pjm_regulation_prices_5_min/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

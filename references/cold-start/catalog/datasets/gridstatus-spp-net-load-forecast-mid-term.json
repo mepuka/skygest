@@ -1,0 +1,35 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5NYVS7SK67FJ8TZJ10",
+  "title": "SPP Net Load Forecast - Mid Term",
+  "description": "This dataset contains forecasted net load levels for the next 24 hours in SPP. This is calculated by combining forecasted wind and solar generation and subtracting that from load forecasts. Net load is a clear metric that helps illustrate how much load is met by thermal and other dispatchable resources, which is particularly valuable as the net load peak has grown increasingly volatile.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/spp_net_load_forecast_mid_term",
+  "accessRights": "public",
+  "keywords": [
+    "spp_net_load_forecast_mid_term",
+    "spp",
+    "view",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5NBH4T2KDY1Q848TYR",
+    "https://id.skygest.io/distribution/dist_01KNX70F5NJC0MWZ18HPZ4CP39"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "spp_net_load_forecast_mid_term",
+      "relation": "exactMatch"
+    }
+  ]
+}

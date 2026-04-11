@@ -1,0 +1,29 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX53R14H1VG8TJA9F6CM3H0",
+  "title": "Ember Electricity Demand Monthly",
+  "description": "Get electricity demand data at a monthly grain.\n    e.g.\n\n`https://api.ember-energy.org/v1/electricity-demand/monthly?entity_code=BRA,DEU,ZAF&start_date=2020-01&end_date=2020-12&api_key=MY_API_KEY`\n    \n\nThe methodology of this dataset can be found on its [dataset page](https://ember-energy.org/data/monthly-electricity-data/)\n    within the 'Methodology - Ember Electricity Data' pdf.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+  "accessRights": "public",
+  "license": "CC-BY-4.0",
+  "keywords": [
+    "electricity-demand",
+    "monthly",
+    "ember-api"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX53R145T70KVPE2ANT4S7P"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNX53R13BMFM6TQ8CKSG2VTV"
+  ],
+  "createdAt": "2026-04-11T02:14:38.945Z",
+  "updatedAt": "2026-04-11T02:14:54.829Z",
+  "aliases": [
+    {
+      "scheme": "ember-route",
+      "value": "electricity-demand/monthly",
+      "relation": "exactMatch"
+    }
+  ]
+}

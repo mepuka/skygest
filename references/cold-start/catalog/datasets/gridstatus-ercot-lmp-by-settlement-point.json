@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4XR3B3G3FMWRTV9QJ6",
+  "title": "ERCOT LMP By Settlement Point",
+  "description": "The Locational Marginal Price (LMP) for each Settlement Point in ERCOT,\nnormally produced by SCED every five minutes.\n\nThe location types present are:\n\n- *Load Zone*\n- *Load Zone DC Tie*\n- *Resource Node*\n- *Trading Hub*",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_lmp_by_settlement_point",
+  "accessRights": "public",
+  "temporal": "2010-11-30T06:00:36+00:00/2026-04-11T02:15:19+00:00",
+  "keywords": [
+    "ercot_lmp_by_settlement_point",
+    "ercot",
+    "table",
+    "ERCOT_SCED_RUN"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4XMET8RJ777STK97H4",
+    "https://id.skygest.io/distribution/dist_01KNX70F4XXPC284418WG43Z56"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_lmp_by_settlement_point",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP6-788-CD",
+      "relation": "closeMatch"
+    }
+  ]
+}

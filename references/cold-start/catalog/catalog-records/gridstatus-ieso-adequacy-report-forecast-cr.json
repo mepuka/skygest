@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F5140TDP5SPTFD1S2YZ",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F516ZRSZ9H3FQTFXPT1",
+  "sourceRecordId": "ieso_adequacy_report_forecast",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2024-12-02T22:52:57+00:00",
+  "lastSeen": "2026-04-11T02:40:51+00:00",
+  "sourceModified": "2026-04-11T02:24:42+00:00",
+  "isAuthoritative": true
+}

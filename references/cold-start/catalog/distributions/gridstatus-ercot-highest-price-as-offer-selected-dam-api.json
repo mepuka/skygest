@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4XRWDMWW51GWX51Z1X",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4XCW3WJ0JPM04XGM3K",
+  "kind": "api-access",
+  "title": "ERCOT Highest Price AS Offer Selected DAM JSON API",
+  "description": "The price and name of the QSE, DME, and resource submitting the offer for the highest-priced selected Ancillary Service (AS) Offer in the day-ahead market in ERCOT for each AS product in each hour of the next operating day.\n\nPublished with a 3 day delay.\n\nImplemented on December 5th, 2025, as part of ERCOT's RTC+B project.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/ercot_highest_price_as_offer_selected_dam/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ercot_highest_price_as_offer_selected_dam/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

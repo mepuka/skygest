@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F51KAZ8FFBKRJ4DBK6S",
+  "title": "IESO In Service Transmission Limits",
+  "description": "MW limits for transmission lines in the context of all in-service conditions. Contains both internal and intertie facility limits.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ieso_in_service_transmission_limits",
+  "accessRights": "public",
+  "temporal": "2025-01-31T05:07:27+00:00/2026-04-10T05:07:00+00:00",
+  "keywords": [
+    "ieso_in_service_transmission_limits",
+    "ieso",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F51MXHZSBQCDBWBN5ZZ",
+    "https://id.skygest.io/distribution/dist_01KNX70F51KBN8XB1JEK2Y0FSP"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ieso_in_service_transmission_limits",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://reports-public.ieso.ca/public/TxLimitsAllInService0to34Days/",
+      "relation": "closeMatch"
+    }
+  ]
+}

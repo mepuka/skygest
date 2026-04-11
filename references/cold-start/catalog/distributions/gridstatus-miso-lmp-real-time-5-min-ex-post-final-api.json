@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5DFW4H7J0FNBTFRVCD",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5DM4YP4K4PPR0R28YB",
+  "kind": "api-access",
+  "title": "MISO LMP Real Time 5 Min Ex Post Final JSON API",
+  "description": "Final Ex Post real-time five-minute LMPs in MISO. These are the LMPs calculated after the publication of Preliminary real-time LMPs by MISO following the approval of each Unit Dispatch System (UDS) case.\n\nThe Final values are not available immediately in real-time, but calculated via an offline process throughout the operating day and into the next day.\n\nSee MISO's *BPM 002 - Energy and Operating Reserves* for additional discussion.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/miso_lmp_real_time_5_min_ex_post_final/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/miso_lmp_real_time_5_min_ex_post_final/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

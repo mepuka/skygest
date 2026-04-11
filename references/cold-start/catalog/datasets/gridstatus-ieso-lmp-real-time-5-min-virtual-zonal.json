@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F54YMYVCC42EFF4NQSA",
+  "title": "IESO LMP Real Time 5 Min Virtual Zonal",
+  "description": "Real-time, five-minute zonal LMPs in IESO used for virtual transactions.\n\nIESO's virtual zones are East, Essa, Niagara, Northeast, Northwest, Ottawa, Southwest, Toronto, and West.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ieso_lmp_real_time_5_min_virtual_zonal",
+  "accessRights": "public",
+  "temporal": "2025-05-01T08:00:00+00:00/2026-04-11T02:45:00+00:00",
+  "keywords": [
+    "ieso_lmp_real_time_5_min_virtual_zonal",
+    "ieso",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F540MYYN2ZPWVQ046YF",
+    "https://id.skygest.io/distribution/dist_01KNX70F54ZPMN4QCY2EW26752"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ieso_lmp_real_time_5_min_virtual_zonal",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://reports-public.ieso.ca/public/RealtimeZonalEnergyPrices/",
+      "relation": "closeMatch"
+    }
+  ]
+}

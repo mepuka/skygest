@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F54P36WR9JMQ00584BS",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F54HD8T4H2C560RXV5Y",
+  "kind": "api-access",
+  "title": "IESO LMP Day Ahead Hourly All JSON API",
+  "description": "Day-ahead hourly LMPs and their component costs for all pricing locations in Ontario, including virtual zones, interties, and the Ontario Zonal Price\n",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/ieso_lmp_day_ahead_hourly_all/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ieso_lmp_day_ahead_hourly_all/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

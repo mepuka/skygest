@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5BKBRRE3TSXP0P6T1Y",
+  "title": "ISONE Reserve Zone Prices Designations Real Time 5 Min Final",
+  "description": "Final five-minute reserve prices, requirements, and designations by zone in ISO-NE. Includes 10-minute and 30-minute reserve requirements. Published and sometimes updated in the days following the operating day.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/isone_reserve_zone_prices_designations_real_time_5_min_final",
+  "accessRights": "public",
+  "temporal": "2018-07-01T04:00:00+00:00/2026-04-10T03:55:00+00:00",
+  "keywords": [
+    "isone_reserve_zone_prices_designations_real_time_5_min_final",
+    "isone",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5B41W2RJRFPR093Q5A",
+    "https://id.skygest.io/distribution/dist_01KNX70F5BW2XNM9P68HNRMY3S"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "isone_reserve_zone_prices_designations_real_time_5_min_final",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.iso-ne.com/isoexpress/web/reports/pricing/-/tree/ancillary-five-minute-final-rr",
+      "relation": "closeMatch"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5HXR4XW4B1QCCSEH9M",
+  "title": "PJM Projected Area Statistics At Peak",
+  "description": "Projected Area Statistics at Peak\n\nThis data is prepared each morning and contains information for the projected peak of the day for zones within the PJM footprint, including peak load, internal scheduled capacity, and unscheduled steam capacity. Data is refreshed on top of the hour from 5 a.m. to 8 a.m.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_projected_area_statistics_at_peak",
+  "accessRights": "public",
+  "temporal": "2011-08-24T12:30:20+00:00/2026-04-10T12:00:34+00:00",
+  "keywords": [
+    "pjm_projected_area_statistics_at_peak",
+    "pjm",
+    "table",
+    "1_DAY_MARKET"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5HJ9A0GHQFK0B1DVHT",
+    "https://id.skygest.io/distribution/dist_01KNX70F5HWQ425CDH5JQ1BX9K"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_projected_area_statistics_at_peak",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/ops_sum_frcst_peak_area/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

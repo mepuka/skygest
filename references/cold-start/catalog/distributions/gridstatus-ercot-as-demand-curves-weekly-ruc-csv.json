@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4S8Y7FJ28D8JW1XPA5",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4SX2Z8R79JGQC3NSWA",
+  "kind": "download",
+  "title": "ERCOT AS Demand Curves Weekly RUC CSV download",
+  "description": "Ancillary Service Demand Curves (ASDCs) for all hours in ERCOT, used in the weekly RUC process. The ASDCs are related to the elimination of the pre-RTC+B ORDC price adders and the new adder price determination process.\n\nImplemented on December 5th, 2025, as part of ERCOT's RTC+B project.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/ercot_as_demand_curves_weekly_ruc/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ercot_as_demand_curves_weekly_ruc/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

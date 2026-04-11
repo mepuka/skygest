@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5CCTWV3G49YA7KQ2NF",
+  "title": "ISONE Zonal Load Real Time Hourly",
+  "description": "Actual Hourly Demand by load zone, published by the ISO.\n\n\nAs exact hourly demand requires some settlement processes by the ISO, this data is typically 3-5 days delayed from the current time. Demand is given in MW.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/isone_zonal_load_real_time_hourly",
+  "accessRights": "public",
+  "temporal": "2017-07-01T04:00:00+00:00/2026-04-08T03:00:00+00:00",
+  "keywords": [
+    "isone_zonal_load_real_time_hourly",
+    "isone",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5CZ834Z6S2T9YPF16S",
+    "https://id.skygest.io/distribution/dist_01KNX70F5C0CB3KRZJHR331CQH"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "isone_zonal_load_real_time_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://webservices.iso-ne.com/docs/v1.1/rest.realtimehourlydemand.html",
+      "relation": "closeMatch"
+    }
+  ]
+}

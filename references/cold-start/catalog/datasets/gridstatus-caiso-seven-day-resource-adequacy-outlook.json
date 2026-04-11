@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4PZYDJZT157YMQJDCA",
+  "title": "CAISO Seven Day Resource Adequacy Outlook",
+  "description": "Seven-day resource adequacy outlook in CAISO. Includes demand forecasts as well as RA (resource adequacy) forecasts and credits, along with reserve requirements.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/caiso_seven_day_resource_adequacy_outlook",
+  "accessRights": "public",
+  "temporal": "2021-08-16T07:00:00+00:00/2026-04-10T07:00:00+00:00",
+  "keywords": [
+    "caiso_seven_day_resource_adequacy_outlook",
+    "caiso",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4P3GTNG0RBGT4JXQGT",
+    "https://id.skygest.io/distribution/dist_01KNX70F4PDFKAQR3KZC5JTVD9"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "caiso_seven_day_resource_adequacy_outlook",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.caiso.com/outlook/current/rtm_forecast_7day.csv",
+      "relation": "closeMatch"
+    }
+  ]
+}

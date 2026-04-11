@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4PFY9KK30SBPJAVRKF",
+  "title": "CAISO Renewables Forecast RTD",
+  "description": "The five-minute Real-Time Dispatch (RTD) renewables forecast published by CAISO. Forecast data is published roughly 2.5 minutes before the forecasted interval.\n\nIncludes data for solar and wind in ZP26, SP15, and NP15.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/caiso_renewables_forecast_rtd",
+  "accessRights": "public",
+  "temporal": "2020-01-01T07:57:30+00:00/2026-04-11T02:47:30+00:00",
+  "keywords": [
+    "caiso_renewables_forecast_rtd",
+    "caiso",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4P40G18MTJ9XGQASA7",
+    "https://id.skygest.io/distribution/dist_01KNX70F4PJDQFD7GB0443K8DW"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "caiso_renewables_forecast_rtd",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "http://oasis.caiso.com/mrioasis/logon.do",
+      "relation": "closeMatch"
+    }
+  ]
+}

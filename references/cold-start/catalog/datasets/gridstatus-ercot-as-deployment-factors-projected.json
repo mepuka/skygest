@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4SQNNH5WGSWCGWR9EB",
+  "title": "ERCOT AS Deployment Factors Projected",
+  "description": "Projected Ancillary Service Deployment Factors (ASDFs) in ERCOT.\n\nASDFs range from 0 to 1 and represent the percentage of a particular ancillary service type that is assumed to be deployed. These values are derived from actual system conditions as well as forecasts, including demand and production from solar and wind.\n\nImplemented on December 5th, 2025, as part of ERCOT's RTC+B project.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_as_deployment_factors_projected",
+  "accessRights": "public",
+  "temporal": "2025-12-06T06:00:00+00:00/2026-04-12T04:00:00+00:00",
+  "keywords": [
+    "ercot_as_deployment_factors_projected",
+    "ercot",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4SGAWG1HEVFH1WBSDF",
+    "https://id.skygest.io/distribution/dist_01KNX70F4SQ89MTDS9VCGAHMPE"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_as_deployment_factors_projected",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP5-526-CD",
+      "relation": "closeMatch"
+    }
+  ]
+}

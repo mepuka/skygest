@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5JF15T93G7RRM7PNN5",
+  "title": "PJM Solar Generation 5 Min",
+  "description": "Five-minute real-time solar generation for the PJM RTO area.\n\n⚠️ PJM does not backfill this data series in the event of data drops.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_solar_generation_5_min",
+  "accessRights": "public",
+  "temporal": "2024-06-13T04:00:00+00:00/2026-04-11T02:45:00+00:00",
+  "keywords": [
+    "pjm_solar_generation_5_min",
+    "pjm",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5JKMC3Y3AT5240W2HA",
+    "https://id.skygest.io/distribution/dist_01KNX70F5JAC2DA0ZACPC3Y7N7"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_solar_generation_5_min",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/five_min_solar_generation/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

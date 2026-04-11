@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5GYN8XB89QRGPG28EJ",
+  "title": "PJM AS Market Results Real Time Hourly",
+  "description": "Real-time hourly ancillary service prices and volumes for PJM. This includes Regulation, Synchronized Reserves, Primary Reserves, and Thirty Minute Reserves, and covers the entire RTO, Mid-Atlantic/Dominion (MAD), and Baltimore/Pepco/Dominion (BPD) locales.\n\nThis data series ends in the autumn of 2022, when PJM implemented Comprehensive Pricing Reform which altered price formation for reserves.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_as_market_results_real_time_hourly",
+  "accessRights": "public",
+  "temporal": "2013-06-14T04:00:00+00:00/2022-09-01T03:00:00+00:00",
+  "keywords": [
+    "pjm_as_market_results_real_time_hourly",
+    "pjm",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5GAMSMB6CQVCG0DS1R",
+    "https://id.skygest.io/distribution/dist_01KNX70F5GQR34VD671M9B8X23"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_as_market_results_real_time_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/reserve_market_results/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4S113N9CS4D6ZWR66T",
+  "title": "ERCOT AS Deployment Factors Hourly RUC",
+  "description": "Ancillary Service Deployment Factors (ASDFs) utilized by the Hourly Reliability Unit Commitment (HRUC) process in ERCOT.\n\nASDFs range from 0 to 1 and represent the percentage of a particular ancillary service type that is assumed to be deployed. These values are derived from actual system conditions as well as forecasts, including demand and production from solar and wind.\n\nImplemented on December 5th, 2025, as part of ERCOT's RTC+B project.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_as_deployment_factors_hourly_ruc",
+  "accessRights": "public",
+  "temporal": "2025-12-05T06:07:23+00:00/2026-04-11T02:03:03+00:00",
+  "keywords": [
+    "ercot_as_deployment_factors_hourly_ruc",
+    "ercot",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4S1TRZSM2QQDWJ9DMT",
+    "https://id.skygest.io/distribution/dist_01KNX70F4SQE0CV042DZKH33ZT"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_as_deployment_factors_hourly_ruc",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP5-528-CD",
+      "relation": "closeMatch"
+    }
+  ]
+}

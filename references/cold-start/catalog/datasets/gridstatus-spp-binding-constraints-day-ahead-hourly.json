@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5M7F82DJ3HF0KRR382",
+  "title": "SPP Binding Constraints Day Ahead Hourly",
+  "description": "Day-ahead binding constraint information in SPP. ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/spp_binding_constraints_day_ahead_hourly",
+  "accessRights": "public",
+  "temporal": "2013-05-31T01:00:00+00:00/2026-04-12T04:00:00+00:00",
+  "keywords": [
+    "spp_binding_constraints_day_ahead_hourly",
+    "spp",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5M92VCAC00XV7P5YA3",
+    "https://id.skygest.io/distribution/dist_01KNX70F5MVN8YWEC2E58VG0WS"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "spp_binding_constraints_day_ahead_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://portal.spp.org/pages/da-binding-constraints",
+      "relation": "closeMatch"
+    }
+  ]
+}

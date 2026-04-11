@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5EMA8CZYR6ZQ3QTTMS",
+  "title": "NYISO Interface Limits And Flows 5 Min",
+  "description": "Transfer Limits and five-minute flows for both internal NYISO interfaces and external tie flows between NYISO and HQ, IESO, PJM, and ISO-NE. Positive values indicate imports and negative values indicate exports. \n\nInterfaces by neighboring region:\n\n- Hydro-Québec (HQ):\n    - SCH - HQ - NY\n    - SCH - HQ_CEDARS\n    - SCH - HQ_IMPORT_EXPORT\n- PJM\n    - SCH - PJ - NY\n    - SCH - PJM_HTP\n    - SCH - PJM_NEPTUNE\n    - SCH - PJM_VFT\n- ISO-New England\n    - SCH - NE - NY\n    - SCH - NPX_1385\n    - SCH - NPX_CSC\n- IESO\n    - SCH - OH - NY\n- NYISO Internal Interfaces\n    - CENTRAL EAST - VC\n    - DYSINGER EAST\n    - MOSES SOUTH\n    - SPR/DUN-SOUTH\n    - TOTAL EAST\n    - UPNY CONED\n    - WEST CENTRAL",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/nyiso_interface_limits_and_flows_5_min",
+  "accessRights": "public",
+  "temporal": "2001-11-28T05:13:17+00:00/2026-04-11T02:50:00+00:00",
+  "keywords": [
+    "nyiso_interface_limits_and_flows_5_min",
+    "nyiso",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5E6MNAT7XD75TB1R6R",
+    "https://id.skygest.io/distribution/dist_01KNX70F5FA8TFT9RD67261ZR3"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "nyiso_interface_limits_and_flows_5_min",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.nyiso.com/power-grid-data",
+      "relation": "closeMatch"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4HWNVE7PAFM3QFM9FV",
+  "title": "All Records Timeseries",
+  "description": "Timeline of new records for various metrics in all ISOs",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/all_records_timeseries",
+  "accessRights": "public",
+  "temporal": "2011-01-01T06:30:00+00:00/2026-03-25T02:00:00+00:00",
+  "keywords": [
+    "all_records_timeseries",
+    "gridstatus",
+    "materialized_view",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4H6K0MS44A95SMKTRW",
+    "https://id.skygest.io/distribution/dist_01KNX70F4HB72SCX4ARARPPWNK"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "all_records_timeseries",
+      "relation": "exactMatch"
+    }
+  ]
+}

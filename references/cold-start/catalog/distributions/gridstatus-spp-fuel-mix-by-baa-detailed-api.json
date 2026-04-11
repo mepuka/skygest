@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5M1CGWWVS67ZDEVH9T",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5M7A1HEPY92351ZH9V",
+  "kind": "api-access",
+  "title": "SPP Fuel Mix By BAA Detailed JSON API",
+  "description": "Fuel Mix with self-scheduled vs market breakdown in 5-minute intervals as reported by SPP. This data is by BAA, SPP East (SPP), and SPP West (SWPW). For SPP East, the data begins on March 30th, 2026, while SWPW begins on April 1st, 2026.\n\nFor SPP-wide and historical detailed fuel mix data, see the `spp_fuel_mix_detailed` [dataset](https://www.gridstatus.io/datasets/spp_fuel_mix_detailed).\n",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/spp_fuel_mix_by_baa_detailed/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/spp_fuel_mix_by_baa_detailed/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

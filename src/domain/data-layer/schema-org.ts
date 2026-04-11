@@ -101,7 +101,8 @@ export const agentToSchemaOrg = (a: Agent): JsonLd => ({
  *
  * Closest 1:1 mapping. Drops: accessRights, themes, distributionIds,
  * dataServiceIds, inSeries, alias relation strengths. landingPage becomes
- * url. keywords preserved as-is.
+ * url. creatorAgentId is emitted as a linked creator reference. keywords
+ * preserved as-is.
  */
 export const datasetToSchemaOrg = (d: Dataset): JsonLd => ({
   "@context": "https://schema.org",
@@ -109,6 +110,7 @@ export const datasetToSchemaOrg = (d: Dataset): JsonLd => ({
   "@id": d.id,
   name: d.title,
   ...(d.description != null && { description: d.description }),
+  ...(d.creatorAgentId != null && { creator: { "@id": d.creatorAgentId } }),
   ...(d.landingPage != null && { url: d.landingPage }),
   ...(d.license != null && { license: d.license }),
   ...(d.keywords != null && d.keywords.length > 0 && { keywords: d.keywords }),

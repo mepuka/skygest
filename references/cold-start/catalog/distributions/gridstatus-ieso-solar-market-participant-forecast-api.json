@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F57R1GJMJZWXN0NB1C2",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F57FZW7KZNDHD3VYWAC",
+  "kind": "api-access",
+  "title": "IESO Solar Market Participant Forecast JSON API",
+  "description": "Hourly market participant solar forecast generation for Ontario and its zones for the next 48 hours.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/ieso_solar_market_participant_forecast/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ieso_solar_market_participant_forecast/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4XHM7PS4XF72GXGKW5",
+  "title": "ERCOT Fuel Mix Instantaneous",
+  "description": "Real-time fuel mix as reported by ERCOT, sampled every five minutes. The resource types in this dataset are *Solar*, *Wind*, *Hydro*, *Power Storage*, *Other*, *Natural Gas*, *Coal and Lignite*, and *Nuclear*.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_fuel_mix_instantaneous",
+  "accessRights": "public",
+  "temporal": "2023-04-13T05:05:00+00:00/2026-04-11T02:39:58+00:00",
+  "keywords": [
+    "ercot_fuel_mix_instantaneous",
+    "ercot",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4XQQBFSQ6CAN5Z63C9",
+    "https://id.skygest.io/distribution/dist_01KNX70F4X0STSJA1BQ9EP1KHZ"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_fuel_mix_instantaneous",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/gridmktinfo/dashboards/fuelmix",
+      "relation": "closeMatch"
+    }
+  ]
+}

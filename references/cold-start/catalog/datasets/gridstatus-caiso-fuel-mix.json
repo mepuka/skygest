@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4JW8YBM6RFAPQ3DHFD",
+  "title": "CAISO Fuel Mix",
+  "description": "Fuel Mix in 5 minute intervals as reported by CAISO.\n\n⚠️ For this data, CAISO reports only 24 hours even on DST days when 25 are reported elsewhere.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/caiso_fuel_mix",
+  "accessRights": "public",
+  "temporal": "2018-04-10T07:00:00+00:00/2026-04-11T02:40:00+00:00",
+  "keywords": [
+    "caiso_fuel_mix",
+    "caiso",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4JJKB6Z4YTDRMT8ZV9",
+    "https://id.skygest.io/distribution/dist_01KNX70F4K4MTQM2PY3PSGGJPZ"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "caiso_fuel_mix",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.caiso.com/todays-outlook/supply",
+      "relation": "closeMatch"
+    }
+  ]
+}

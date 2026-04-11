@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5H3SM71AF7RSWQTMRJ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5HPZWT28FJM87XTKYY",
+  "kind": "download",
+  "title": "PJM Performance Assessment Intervals 5 Min CSV download",
+  "description": "This dataset summarizes the status of Performance Assessment Intervals (PAIs) in PJM. A PAI is a specific time interval during which emergency conditions on the PJM system require operators to call on resources that participate in the capacity market. Resources are evaluated on their performance during these intervals and may receive penalties or bonuses based on how they perform. PAIs are relatively rare, but when one is issued, PJM identifies whether it applies to a specific subzone or the entire RTO.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/pjm_pai_intervals_5_min/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/pjm_pai_intervals_5_min/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

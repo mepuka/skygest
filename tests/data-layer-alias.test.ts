@@ -50,6 +50,28 @@ describe("ExternalIdentifier", () => {
       "energy-charts-endpoint"
     );
   });
+
+  it("accepts the ember-route scheme for Ember endpoint merges", () => {
+    const input = {
+      scheme: "ember-route",
+      value: "electricity-generation/monthly",
+      relation: "exactMatch"
+    };
+    expect(Schema.decodeUnknownSync(ExternalIdentifier)(input).scheme).toBe(
+      "ember-route"
+    );
+  });
+
+  it("accepts the gridstatus-dataset-id scheme for gridstatus dataset merges", () => {
+    const input = {
+      scheme: "gridstatus-dataset-id",
+      value: "pjm_load_forecast",
+      relation: "exactMatch"
+    };
+    expect(Schema.decodeUnknownSync(ExternalIdentifier)(input).scheme).toBe(
+      "gridstatus-dataset-id"
+    );
+  });
 });
 
 describe("Aliases (unique (scheme, value) enforcement)", () => {

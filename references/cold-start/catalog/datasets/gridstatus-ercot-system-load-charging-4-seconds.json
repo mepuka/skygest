@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F502GA3TYSSBMNXCTAX",
+  "title": "ERCOT System-Level Load and ESR Charging",
+  "description": "System demand and storage charging in ERCOT, sampled at 4-second intervals. Published every 5 minutes.\n\nThis dataset is provided by ERCOT to support estimation of coincident peak (4CP) demand by excluding Wholesale Storage Load (WSL), which is not counted per ERCOT 4CP protocol rules.\n\nThe estimated CP load can be derived by subtracting esr_charging_mw from system_demand_mw, offering a real-time proxy for load minus WSL.\n\nThis data ends shortly before midnight on 12/4/2025 as ERCOT retired this feed with the implementation of the RTC+B project.\n",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_system_load_charging_4_seconds",
+  "accessRights": "public",
+  "temporal": "2025-05-30T01:20:00+00:00/2025-12-22T19:44:58+00:00",
+  "keywords": [
+    "ercot_system_load_charging_4_seconds",
+    "ercot",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F507QW6037FTZK0RS2Y",
+    "https://id.skygest.io/distribution/dist_01KNX70F50941PW9ZBNEPXMEJZ"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_system_load_charging_4_seconds",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://apiexplorer.ercot.com/api-details#api=esrapi-apim-api",
+      "relation": "closeMatch"
+    }
+  ]
+}

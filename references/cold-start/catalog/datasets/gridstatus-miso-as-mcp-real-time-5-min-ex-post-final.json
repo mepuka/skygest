@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5CT2232SAK7GRQ1KYQ",
+  "title": "MISO AS MCP Real Time 5 Min Ex Post Final",
+  "description": "Five-minute, real-time marginal clearing prices (MCPs) for ancillary services in MISO. These are the Ex Post final prices.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/miso_as_mcp_real_time_5_min_ex_post_final",
+  "accessRights": "public",
+  "temporal": "2016-01-01T05:00:00+00:00/2026-04-07T05:00:00+00:00",
+  "keywords": [
+    "miso_as_mcp_real_time_5_min_ex_post_final",
+    "miso",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5CT7A9S3QM7H3CVZMV",
+    "https://id.skygest.io/distribution/dist_01KNX70F5CCM9PYM6M8EY9XM9F"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "miso_as_mcp_real_time_5_min_ex_post_final",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://data-exchange.misoenergy.org/api-details#api=pricing-api&operation=get-v1-real-time-date-asm-expost",
+      "relation": "closeMatch"
+    }
+  ]
+}

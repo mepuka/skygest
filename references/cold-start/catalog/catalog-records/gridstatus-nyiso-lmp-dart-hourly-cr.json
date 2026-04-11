@@ -1,0 +1,12 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F5FK3J4Y59SHJZR00P2",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F5F0QS6SRQKJ2K9Z9VE",
+  "sourceRecordId": "nyiso_lmp_dart_hourly",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2025-11-04T00:36:19+00:00",
+  "lastSeen": "2026-04-11T02:47:48.597Z",
+  "isAuthoritative": true
+}

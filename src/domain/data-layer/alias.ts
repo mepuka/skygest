@@ -5,15 +5,18 @@ export const aliasSchemes = [
   "oeo", "ires-siec", "iea-shortname", "ipcc",
   "entsoe-psr", "entsoe-eic",
   "eia-route", "eia-series", "eia-bulk-id", "energy-charts-endpoint",
+  "ember-route", "gridstatus-dataset-id",
   "eurostat-code",
   "ror", "wikidata", "doi",
   "iso3166", "url", "other"
  ] as const;
 
 export const AliasSchemeValues = {
+  emberRoute: "ember-route",
   eiaBulkId: "eia-bulk-id",
   eiaRoute: "eia-route",
   energyChartsEndpoint: "energy-charts-endpoint",
+  gridstatusDatasetId: "gridstatus-dataset-id",
   url: "url"
 } as const;
 

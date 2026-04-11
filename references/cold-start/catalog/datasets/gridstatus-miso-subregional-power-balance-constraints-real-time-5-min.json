@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5EQHQV88JG6R0JYMJ2",
+  "title": "MISO Subregional Power Balance Constraints Real Time 5 Minutes",
+  "description": "Real-time binding sub-regional power balance constraints in MISO. This dataset contains information on the hours in which the North-South interface connecting the Midwest and South regions of MISO is binding.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/miso_subregional_power_balance_constraints_real_time_5_min",
+  "accessRights": "public",
+  "temporal": "2022-01-02T11:35:00+00:00/2026-04-09T11:55:00+00:00",
+  "keywords": [
+    "miso_subregional_power_balance_constraints_real_time_5_min",
+    "miso",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5EHRYQ21D4BTQSW4GS",
+    "https://id.skygest.io/distribution/dist_01KNX70F5EGDMHED8882BQ2PV4"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "miso_subregional_power_balance_constraints_real_time_5_min",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.misoenergy.org/markets-and-operations/real-time--market-data/market-reports/#nt=%2FMarketReportType%3AReal-Time%2FMarketReportName%3AReal-Time%20Binding%20Sub-Regional%20Power%20Balance%20Constraints%20(csv)&t=10&p=0&s=MarketReportPublished&sd=desc",
+      "relation": "closeMatch"
+    }
+  ]
+}
