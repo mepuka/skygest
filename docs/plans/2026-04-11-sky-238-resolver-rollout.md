@@ -2,14 +2,16 @@
 
 ## Deploy order
 
-1. Deploy `skygest-resolver` with `wrangler.resolver.toml`.
-2. Deploy `skygest-bi-ingest` so the enrichment workflow can call the resolver binding.
-3. Deploy `skygest-bi-agent` so operator surfaces and future internal callers share the same binding layout.
+1. Provision the resolver worker secret:
+   `bunx wrangler secret put OPERATOR_SECRET --config wrangler.resolver.toml --env staging`
+2. Deploy `skygest-resolver` with `wrangler.resolver.toml`.
+3. Deploy `skygest-bi-ingest` so the enrichment workflow can call the resolver binding.
+4. Deploy `skygest-bi-agent` so operator surfaces and future internal callers share the same binding layout.
 
 ## Initial rollout posture
 
 - Leave `ENABLE_DATA_REF_RESOLUTION` unset or `false` in production.
-- Enable the flag in staging first.
+- Enable the flag in staging first. The staging ingest config now sets `ENABLE_DATA_REF_RESOLUTION = "true"`.
 - In staging, the source-attribution workflow will persist `data-ref-resolution` after source-attribution completes.
 - Stage 3 dispatch is only exercised from staging admin-triggered runs.
 

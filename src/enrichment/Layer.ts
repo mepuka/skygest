@@ -22,6 +22,10 @@ import { ResolverClient } from "../resolver/Client";
 export const makeWorkflowEnrichmentLayer = (
   env: WorkflowEnrichmentEnvBindings
 ) => {
+  const requiredBindings = env.ENABLE_DATA_REF_RESOLUTION === "true"
+    ? ["DB", "RESOLVER", "OPERATOR_SECRET"] as const
+    : ["DB"] as const;
+
   // Build a ConfigProvider from Worker env bindings so Config.string()
   // resolves GOOGLE_API_KEY, GEMINI_VISION_MODEL, etc. at runtime.
   const configLayer = ConfigProvider.layer(
@@ -35,7 +39,7 @@ export const makeWorkflowEnrichmentLayer = (
   );
 
   const baseLayer = Layer.mergeAll(
-    CloudflareEnv.layer(env, { required: ["DB"] }),
+    CloudflareEnv.layer(env, { required: requiredBindings }),
     D1Client.layer({ db: env.DB }),
     Logging.layer,
     configLayer
@@ -82,7 +86,7 @@ export const makeWorkflowEnrichmentLayer = (
     ? null
     : ResolverClient.layerFromFetcher(
         env.RESOLVER,
-        env.OPERATOR_SECRET ?? ""
+        env.OPERATOR_SECRET!
       );
 
   const coreLayer = Layer.mergeAll(

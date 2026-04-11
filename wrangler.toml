@@ -79,6 +79,7 @@ DEFAULT_DOMAIN = "energy"
 MCP_LIMIT_DEFAULT = "20"
 MCP_LIMIT_MAX = "100"
 ENABLE_STAGING_OPS = "true"
+ENABLE_DATA_REF_RESOLUTION = "true"
 GEMINI_VISION_MODEL = "gemini-3-flash-preview"
 
 [[env.staging.d1_databases]]

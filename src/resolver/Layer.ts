@@ -11,7 +11,7 @@ import { ResolverService } from "./ResolverService";
 
 export const makeResolverLayer = (env: ResolverWorkerEnvBindings) => {
   const baseLayer = Layer.mergeAll(
-    CloudflareEnv.layer(env, { required: ["DB", "RESOLVER_RUN_WORKFLOW"] }),
+    CloudflareEnv.layer(env, { required: ["DB", "OPERATOR_SECRET"] }),
     D1Client.layer({ db: env.DB }),
     Logging.layer
   );

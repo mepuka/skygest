@@ -31,6 +31,11 @@ import {
   VisionOrganizationMention,
   VisionSourceLineAttribution
 } from "./sourceMatching";
+import {
+  ResolverVersion,
+  ResolveStage3Queued,
+  Stage2Output
+} from "./resolutionShared";
 import { Stage1Result } from "./stage1Resolution";
 
 const DeferredStage1Result = Schema.suspend(() => Stage1Result);
@@ -273,10 +278,7 @@ export type GroundingEnrichment = Schema.Schema.Type<typeof GroundingEnrichment>
 // Data-ref resolution enrichment (SKY-238: persisted Stage 1 resolver result)
 // ---------------------------------------------------------------------------
 
-export const DataRefResolutionStage3 = Schema.Struct({
-  status: Schema.Literal("queued"),
-  jobId: Schema.String.pipe(Schema.check(Schema.isMinLength(1)))
-});
+export const DataRefResolutionStage3 = ResolveStage3Queued;
 export type DataRefResolutionStage3 = Schema.Schema.Type<
   typeof DataRefResolutionStage3
 >;
@@ -284,9 +286,9 @@ export type DataRefResolutionStage3 = Schema.Schema.Type<
 export const DataRefResolutionEnrichment = Schema.Struct({
   kind: Schema.Literal("data-ref-resolution"),
   stage1: DeferredStage1Result,
-  stage2: Schema.optionalKey(Schema.Unknown),
+  stage2: Schema.optionalKey(Stage2Output),
   stage3: Schema.optionalKey(DataRefResolutionStage3),
-  resolverVersion: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
+  resolverVersion: ResolverVersion,
   processedAt: Schema.Number
 });
 export type DataRefResolutionEnrichment = Schema.Schema.Type<

@@ -22,6 +22,7 @@ import {
   type ResolvePostRequest as ResolvePostRequestValue,
   type ResolvePostResponse as ResolvePostResponseValue
 } from "../domain/resolution";
+import { type ResolverBulkItemError as ResolverBulkItemErrorValue } from "../domain/resolutionShared";
 import {
   type EnrichmentExecutionPlan,
   type EnrichmentPlannedExistingEnrichment
@@ -30,9 +31,14 @@ import { Stage1Residual } from "../domain/stage1Resolution";
 import { PostUri } from "../domain/types";
 import { EnrichmentPlanner } from "../enrichment/EnrichmentPlanner";
 import { CloudflareEnv } from "../platform/Env";
-import { formatSchemaParseError, stringifyUnknown } from "../platform/Json";
+import {
+  formatSchemaParseError,
+  stringifyUnknown,
+  stripUndefined
+} from "../platform/Json";
 import { Stage1Resolver } from "../resolution/Stage1Resolver";
 import { buildStage1Input } from "./stage1Input";
+import { Logging } from "../platform/Logging";
 
 const RESOLVER_VERSION = "stage1-resolver@sky-238";
 
@@ -68,7 +74,6 @@ export class ResolverService extends ServiceMap.Service<
       | EnrichmentPostContextMissingError
       | EnrichmentSchemaDecodeError
       | ResolverSourceAttributionMissingError
-      | ResolverWorkflowLaunchError
       | SqlError
     >;
     readonly resolveBulk: (
@@ -81,7 +86,6 @@ export class ResolverService extends ServiceMap.Service<
       | EnrichmentPostContextMissingError
       | EnrichmentSchemaDecodeError
       | ResolverSourceAttributionMissingError
-      | ResolverWorkflowLaunchError
       | SqlError
     >;
   }
@@ -92,17 +96,16 @@ export class ResolverService extends ServiceMap.Service<
       const planner = yield* EnrichmentPlanner;
       const stage1Resolver = yield* Stage1Resolver;
       const env = yield* CloudflareEnv;
-      const decodePostRequest = (input: unknown) => {
-        const decoded = Schema.decodeUnknownResult(ResolvePostRequest)(input);
-        return Result.isSuccess(decoded)
-          ? Effect.succeed(decoded.success)
-          : Effect.fail(
+      const decodePostRequest = (input: unknown) =>
+        Schema.decodeUnknownEffect(ResolvePostRequest)(input).pipe(
+          Effect.mapError(
+            (decodeError) =>
               new EnrichmentSchemaDecodeError({
-                message: formatSchemaParseError(decoded.failure),
+                message: formatSchemaParseError(decodeError),
                 operation: "ResolverService.resolvePost"
               })
-            );
-      };
+          )
+        );
 
       const loadStoredStage1Input = Effect.fn(
         "ResolverService.loadStoredStage1Input"
@@ -177,19 +180,32 @@ export class ResolverService extends ServiceMap.Service<
         const stage1 = yield* stage1Resolver.resolve(stage1Input);
         const stage1FinishedAt = yield* Clock.currentTimeMillis;
 
-        const stage3 =
+        const stage3 = yield* (
           request.dispatchStage3 === true && stage1.residuals.length > 0
-            ? {
-                status: "queued" as const,
-                jobId: yield* queueStage3(request.postUri, stage1.residuals)
-              }
-            : ({
-                status: "not-needed" as const
-              });
+            ? queueStage3(request.postUri, stage1.residuals).pipe(
+                Effect.tapError((error) =>
+                  Logging.logWarning("resolver stage3 dispatch failed", {
+                    postUri: request.postUri,
+                    errorTag: error._tag,
+                    operation: "ResolverService.resolvePost"
+                  })
+                ),
+                Effect.result,
+                Effect.map((result) =>
+                  Result.isSuccess(result)
+                    ? ({
+                        status: "queued" as const,
+                        jobId: result.success
+                      })
+                    : undefined
+                )
+              )
+            : Effect.void.pipe(Effect.as(undefined))
+        );
 
         const finishedAt = yield* Clock.currentTimeMillis;
 
-        return {
+        return stripUndefined({
           postUri: request.postUri,
           stage1,
           stage3,
@@ -198,19 +214,59 @@ export class ResolverService extends ServiceMap.Service<
             stage1: stage1FinishedAt - stage1StartedAt,
             total: finishedAt - startedAt
           }
-        } satisfies ResolvePostResponseValue;
+        }) as ResolvePostResponseValue;
       });
 
       const resolveBulk = Effect.fn("ResolverService.resolveBulk")(function* (
         input: ResolveBulkRequest
       ) {
-        const responses = yield* Effect.forEach(input.posts, resolvePost, {
-          concurrency: "unbounded"
-        });
+        const settled = yield* Effect.forEach(
+          input.posts,
+          (request) =>
+            resolvePost(request).pipe(
+              Effect.result,
+              Effect.map((result) => ({
+                postUri: request.postUri,
+                result
+              }))
+            ),
+          {
+            concurrency: 8
+          }
+        );
+
+        const results: Record<string, ResolvePostResponseValue> = {};
+        const errors: Record<string, ResolverBulkItemErrorValue> = {};
+
+        for (const item of settled) {
+          if (Result.isSuccess(item.result)) {
+            results[item.postUri] = item.result.success;
+            continue;
+          }
+
+          const error = item.result.failure;
+          errors[item.postUri] = {
+            tag:
+              typeof error === "object" &&
+              error !== null &&
+              "_tag" in error &&
+              typeof error._tag === "string"
+                ? error._tag
+                : "ResolverBulkItemError",
+            message:
+              typeof error === "object" &&
+              error !== null &&
+              "message" in error &&
+              typeof error.message === "string"
+                ? error.message
+                : stringifyUnknown(error)
+          };
+        }
 
         return {
-          items: responses
-        } satisfies ResolveBulkResponseValue;
+          results,
+          errors
+        } as ResolveBulkResponseValue;
       });
 
       return {

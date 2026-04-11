@@ -1,4 +1,4 @@
-import { ServiceMap, Effect, Layer, Result, Schema } from "effect";
+import { ServiceMap, Effect, Layer, Schema } from "effect";
 import {
   ResolveBulkResponse,
   ResolvePostResponse,
@@ -20,21 +20,20 @@ const decodeResponse = <S extends Schema.Decoder<unknown>>(
   schema: S,
   body: unknown,
   error: ResolverClientError
-) => {
-  const decoded = Schema.decodeUnknownResult(schema)(body);
-  return Result.isSuccess(decoded)
-    ? Effect.succeed(decoded.success)
-    : Effect.fail(
+) =>
+  Schema.decodeUnknownEffect(schema)(body).pipe(
+    Effect.mapError(
+      (decodeError) =>
         new ResolverClientError({
-          message: formatSchemaParseError(decoded.failure),
+          message: formatSchemaParseError(decodeError),
           status: error.status,
           ...(error.postUri === undefined ? {} : { postUri: error.postUri }),
           ...(error.operation === undefined
             ? {}
             : { operation: error.operation })
         })
-      );
-};
+    )
+  );
 
 const parseJsonBody = async (response: Response) => {
   try {

@@ -2,20 +2,17 @@ import * as HttpApi from "effect/unstable/httpapi/HttpApi";
 import * as HttpApiBuilder from "effect/unstable/httpapi/HttpApiBuilder";
 import * as HttpApiEndpoint from "effect/unstable/httpapi/HttpApiEndpoint";
 import * as HttpApiGroup from "effect/unstable/httpapi/HttpApiGroup";
-import * as HttpApiSchema from "effect/unstable/httpapi/HttpApiSchema";
 import { Effect, Layer, Schema } from "effect";
 import {
   ApiErrorSchemas,
   badRequestError,
-  notFoundError,
-  serviceUnavailableError
+  notFoundError
 } from "../domain/api";
 import {
   EnrichmentPayloadMissingError,
   EnrichmentPostContextMissingError,
   EnrichmentSchemaDecodeError,
-  ResolverSourceAttributionMissingError,
-  ResolverWorkflowLaunchError
+  ResolverSourceAttributionMissingError
 } from "../domain/errors";
 import {
   ResolveBulkRequest,
@@ -99,17 +96,6 @@ const withResolverErrors = <A, R>(
           getStringField(error, "message") ?? "invalid resolver input"
         );
       }
-
-      if (
-        error instanceof ResolverWorkflowLaunchError ||
-        isTaggedError(error, "ResolverWorkflowLaunchError")
-      ) {
-        return serviceUnavailableError(
-          "failed to queue resolver workflow",
-          true
-        );
-      }
-
       return undefined;
     }
   });
