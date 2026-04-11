@@ -14,15 +14,15 @@ const readSource = (relativePath: string) =>
   readFileSync(resolve(fixtureRoot, relativePath), "utf8");
 
 describe("ontology snapshot builder", () => {
-  it("builds a deterministic curated canonical snapshot from the release artifacts", () => {
+  it("builds a deterministic curated canonical snapshot from the release artifacts", async () => {
     const input = {
       ttl: readSource("energy-news-reference-individuals.ttl"),
       derivedStoreFilter: readSource("derived-store-filter.md"),
       owlJson: readSource("energy-news.json")
     };
 
-    const first = buildOntologySnapshot(input);
-    const second = buildOntologySnapshot(input);
+    const first = await buildOntologySnapshot(input);
+    const second = await buildOntologySnapshot(input);
 
     expect(first).toEqual(second);
     expect(first.concepts).toHaveLength(92);
@@ -34,8 +34,8 @@ describe("ontology snapshot builder", () => {
     expect(first.anomalies.some((anomaly) => anomaly.code === "hashtag_heading_count_mismatch")).toBe(true);
   });
 
-  it("merges the checked-in curated publication supplement into the generated seed", () => {
-    const { publicationsSeed } = buildOntologyArtifacts({
+  it("merges the checked-in curated publication supplement into the generated seed", async () => {
+    const { publicationsSeed } = await buildOntologyArtifacts({
       ttl: readSource("energy-news-reference-individuals.ttl"),
       derivedStoreFilter: readSource("derived-store-filter.md"),
       owlJson: readSource("energy-news.json")
@@ -55,13 +55,13 @@ describe("ontology snapshot builder", () => {
     }
   });
 
-  it("changes the publication seed version when ABox-only entries change without changing the ontology snapshot version", () => {
-    const base = buildOntologyArtifacts({
+  it("changes the publication seed version when ABox-only entries change without changing the ontology snapshot version", async () => {
+    const base = await buildOntologyArtifacts({
       ttl: readSource("energy-news-reference-individuals.ttl"),
       derivedStoreFilter: readSource("derived-store-filter.md"),
       owlJson: readSource("energy-news.json")
     });
-    const withAbox = buildOntologyArtifacts({
+    const withAbox = await buildOntologyArtifacts({
       ttl: readSource("energy-news-reference-individuals.ttl"),
       derivedStoreFilter: readSource("derived-store-filter.md"),
       owlJson: readSource("energy-news.json"),
@@ -75,8 +75,8 @@ describe("ontology snapshot builder", () => {
     expect(withAbox.publicationsSeed.snapshotVersion).not.toBe(base.publicationsSeed.snapshotVersion);
   });
 
-  it("keeps targeted junk hosts out of the ABox seed while allowing institutional hosts through", () => {
-    const { publicationsSeed } = buildOntologyArtifacts({
+  it("keeps targeted junk hosts out of the ABox seed while allowing institutional hosts through", async () => {
+    const { publicationsSeed } = await buildOntologyArtifacts({
       ttl: readSource("energy-news-reference-individuals.ttl"),
       derivedStoreFilter: readSource("derived-store-filter.md"),
       owlJson: readSource("energy-news.json"),
