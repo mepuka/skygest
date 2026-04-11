@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5NTMKFAEMVZP0DF5Q4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5N2XQSEA98TGDCSEZ1",
+  "kind": "api-access",
+  "title": "SPP Load Forecast Mid Term JSON API",
+  "description": "Hourly load forecast data for both SPP East (SPP) and SPP West (SWPW) for +7 days\n(actual RT load shown is averaged by hour as well).\n\nBalancing authority areas are delineated by the `baa` column.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/spp_load_forecast_mid_term/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/spp_load_forecast_mid_term/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F51PSZ8XMHF2HDN3VTY",
+  "title": "GridStatus ERCOT Unplanned Resource Outages",
+  "description": "This dataset contains all of the unplanned outages and derates for resources in\nERCOT during a given day, published with a three day delay. The report includes\ninformation on all resources covered by the ERCOT Outage Scheduler process, which\ndoes include resources in Private Use Networks. Unplanned outages includes both\nforced and maintenance outages.\n\n💡 Individual unit outages do not always start or end cleanly on a cadence with\nother market intervals and can be changed or extended during the outage or derate.\nThe current_as_of and publish_time fields can be used to help define analysis.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_unplanned_resource_outages",
+  "accessRights": "public",
+  "temporal": "2022-12-07T05:06:18+00:00/2026-04-10T10:00:46+00:00",
+  "keywords": [
+    "ercot_unplanned_resource_outages",
+    "ercot",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5186115082Z1GASZER",
+    "https://id.skygest.io/distribution/dist_01KNX70F5193JY6VK9S2HTTB1Y"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_unplanned_resource_outages",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP1-346-ER",
+      "relation": "closeMatch"
+    }
+  ]
+}

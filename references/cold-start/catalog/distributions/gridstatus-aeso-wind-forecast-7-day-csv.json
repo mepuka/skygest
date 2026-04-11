@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4HCNEX1AW2MWSC9S0S",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4HS1708VJ2PQ1G5D69",
+  "kind": "download",
+  "title": "AESO Wind Forecast 7 Day CSV download",
+  "description": "This dataset contains AESO’s forecasted wind generation for the next 7 days, calculated every hour. AESO calculates three generation forecasts: minimum, most likely, and maximum. Additionally, AESO calculates a percentage of generation compared to installed capacity for each forecast range. ",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/aeso_wind_forecast_7_day/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/aeso_wind_forecast_7_day/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

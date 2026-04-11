@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F58WBP3GJS09DFV0G9M",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F58XCXQX7AC0R95GK54",
+  "kind": "api-access",
+  "title": "ISONE Ancillary Services Strike Prices Day Ahead JSON API",
+  "description": "Day-ahead strike prices and close-out components for ISO-NE. Includes the forecasted hourly Hub RT percentile values and load forecast.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/isone_ancillary_services_strike_prices_day_ahead/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/isone_ancillary_services_strike_prices_day_ahead/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

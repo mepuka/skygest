@@ -1,0 +1,40 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F573ZJK7W1D0EW3D7VX",
+  "title": "GridStatus IESO Load Hourly",
+  "description": "IESO load data for the Market and Ontario aggregated on an hourly basis from the IESO Load 5 minute data.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ieso_load_hourly",
+  "accessRights": "public",
+  "keywords": [
+    "ieso_load_hourly",
+    "ieso",
+    "view",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F57GRZ7FF3KGPGE9T4Y",
+    "https://id.skygest.io/distribution/dist_01KNX70F571J681EXVZ7KPMDC6"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ieso_load_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ieso.ca/Power-Data",
+      "relation": "closeMatch"
+    }
+  ]
+}

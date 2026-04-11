@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F50PKCB1NP03MR09F45",
+  "title": "GridStatus ERCOT SPP Real Time Price Corrections",
+  "description": "Real-time corrected settlement point prices (SPPs) in ERCOT. These prices are irregularly updated by ERCOT in the event of necessary price corrections or errors. These are derived from LMPs as well as price adders to calculate prices used in settlements. SPPs are calculated for Resource Nodes, Load Zones, and Hubs.\n\nThe location types present are:\n\nTrading Hub\nLoad Zone Energy Weighted\nLoad Zone DC Tie\nResource Node\nLoad Zone\nLoad Zone DC Tie Energy Weighted\n💡 There are many fewer settlement point locations than buses. Keeping this in mind can help to slim down initial ERCOT analyses before turning to individual bus locations.\n",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_spp_real_time_price_corrections",
+  "accessRights": "public",
+  "temporal": "2012-02-27T20:37:06+00:00/2025-12-09T22:00:00+00:00",
+  "keywords": [
+    "ercot_spp_real_time_price_corrections",
+    "ercot",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F504X0RPNAF7SMZVPPK",
+    "https://id.skygest.io/distribution/dist_01KNX70F50D734TRGDWDN963JY"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_spp_real_time_price_corrections",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP4-197-M",
+      "relation": "closeMatch"
+    }
+  ]
+}

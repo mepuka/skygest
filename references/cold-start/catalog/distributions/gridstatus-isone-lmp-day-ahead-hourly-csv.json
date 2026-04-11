@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5AB7PCX6BJVPA5NCZW",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5AWPAH39H7CG7XR6PQ",
+  "kind": "download",
+  "title": "ISONE LMP Day Ahead Hourly CSV download",
+  "description": "Day Ahead Hourly LMPs as reported by ISONE. Includes all locations.\n\nThis dataset includes the location types:\n\n- *DRRAZ*\n- *NETWORK NODE*\n- *EXT. NODE*\n- *HUB*\n- *LOAD ZONE*\n- *HUB NODE*",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/isone_lmp_day_ahead_hourly/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/isone_lmp_day_ahead_hourly/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

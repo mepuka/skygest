@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4FMDXYCHY78WW9S5D1",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4FGZ2DWKXHDNZFJESV",
+  "kind": "download",
+  "title": "AESO Load CSV download",
+  "description": "Calculated total Alberta demand based on all telemetered Control Area Net Generation minus Net Actual Interchange (in MW).",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/aeso_load/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/aeso_load/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

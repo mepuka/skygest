@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5F4B43EKX18RN0S4ZP",
+  "title": "GridStatus PJM Actual And Scheduled Interchange Summary",
+  "description": "A breakdown of hourly flows across PJM’s external tie lines. PJM breaks flows down by actual flows, scheduled flows, and inadvertent flows. Inadvertent flows are the difference between Scheduled and Actual flows. This data is released weekly on Sundays. Negative values indicate PJM is exporting whereas positive values indicate imports. ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_actual_and_scheduled_interchange_summary",
+  "accessRights": "public",
+  "temporal": "2014-01-01T05:00:00+00:00/2026-04-05T11:00:00+00:00",
+  "keywords": [
+    "pjm_actual_and_scheduled_interchange_summary",
+    "pjm",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5FC0H0BCAZ7T6BDF9Y",
+    "https://id.skygest.io/distribution/dist_01KNX70F5FRDPHBCYRR24HJXQQ"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_actual_and_scheduled_interchange_summary",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/act_sch_interchange/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

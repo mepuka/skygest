@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5JVYKPSG7KH76VB0S8",
+  "title": "GridStatus PJM Reserve Subzone Buses",
+  "description": "Reserve mappings (not geographic) for PJM reserves as well as resource id, type, and zone. ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_reserve_subzone_buses",
+  "accessRights": "public",
+  "temporal": "2022-10-01T04:00:00+00:00/2026-03-13T04:00:00+00:00",
+  "keywords": [
+    "pjm_reserve_subzone_buses",
+    "pjm",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5JYEVQQGFF22DWP6CY",
+    "https://id.skygest.io/distribution/dist_01KNX70F5JSFP3810FA79W4ST6"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_reserve_subzone_buses",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/sync_pri_reserves_buses_list/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

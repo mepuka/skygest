@@ -1,0 +1,35 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4YB700S2R1M3MMVTMX",
+  "title": "GridStatus ERCOT Net Load Forecast",
+  "description": "This dataset contains forecasted net load levels for the current day and next six days in ERCOT. This is calculated by combining forecasted wind and solar generation and subtracting that from load forecasts. Net load is a clear metric that helps illustrate how much load is met by thermal and other dispatchable resources, which is particularly valuable as the net load peak has grown increasingly volatile. ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_net_load_forecast",
+  "accessRights": "public",
+  "keywords": [
+    "ercot_net_load_forecast",
+    "ercot",
+    "view",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4YW752MQ7CTPP4T152",
+    "https://id.skygest.io/distribution/dist_01KNX70F4YT8K45JB3WAMDEGQ5"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_net_load_forecast",
+      "relation": "exactMatch"
+    }
+  ]
+}

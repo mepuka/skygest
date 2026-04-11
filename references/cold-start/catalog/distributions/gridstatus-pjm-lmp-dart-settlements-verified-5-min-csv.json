@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5GYFYNG9PRAWGDJ841",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5GCNM8B7N2T2S37YKT",
+  "kind": "download",
+  "title": "PJM LMP DART Settlements Verified 5 Min CSV download",
+  "description": "DART spread in PJM between day-ahead hourly LMPs and real-time 5-minute settlements verified LMPs. Hourly day-ahead values are brought to a 5-minute interval across the hour for the purposes of this dataset.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/pjm_lmp_dart_settlements_verified_5_min/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/pjm_lmp_dart_settlements_verified_5_min/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

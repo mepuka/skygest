@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5KW7VNNX86SVK0TNNS",
+  "title": "GridStatus PJM Wind Generation By Area",
+  "description": "Wind generation by Area in PJM on an hourly basis. Areas include *MIDATL*,\n*Other*, *RFC*, *RTO*, *South*, and *West*. The *Other* region contains\nexternal units as well as units for which the region/area is unknown.\n\n⚠️ Not all Areas are present across the historical data. Null values\nrepresent records in which an Area did not exist.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_wind_generation_by_area",
+  "accessRights": "public",
+  "temporal": "2011-01-01T05:00:00+00:00/2026-04-09T02:00:00+00:00",
+  "keywords": [
+    "pjm_wind_generation_by_area",
+    "pjm",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5KTDQ64AM3P63KV2EE",
+    "https://id.skygest.io/distribution/dist_01KNX70F5KD8AYSQBJ5KJ6TH2D"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_wind_generation_by_area",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/wind_gen/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

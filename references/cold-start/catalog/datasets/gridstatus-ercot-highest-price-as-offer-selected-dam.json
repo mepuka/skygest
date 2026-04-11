@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4XCW3WJ0JPM04XGM3K",
+  "title": "GridStatus ERCOT Highest Price AS Offer Selected DAM",
+  "description": "The price and name of the QSE, DME, and resource submitting the offer for the highest-priced selected Ancillary Service (AS) Offer in the day-ahead market in ERCOT for each AS product in each hour of the next operating day.\n\nPublished with a 3 day delay.\n\nImplemented on December 5th, 2025, as part of ERCOT's RTC+B project.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_highest_price_as_offer_selected_dam",
+  "accessRights": "public",
+  "temporal": "2016-12-29T06:00:00+00:00/2026-04-08T04:00:00+00:00",
+  "keywords": [
+    "ercot_highest_price_as_offer_selected_dam",
+    "ercot",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4XRWDMWW51GWX51Z1X",
+    "https://id.skygest.io/distribution/dist_01KNX70F4XFSXMX08MHJGY10N4"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_highest_price_as_offer_selected_dam",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP3-915-EX",
+      "relation": "closeMatch"
+    }
+  ]
+}

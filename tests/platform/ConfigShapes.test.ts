@@ -2,7 +2,9 @@ import { describe, expect, it } from "@effect/vitest";
 import { Config, ConfigProvider, Effect, Redacted } from "effect";
 import {
   ColdStartCommonKeys,
+  EmberIngestKeys,
   EiaIngestKeys,
+  GridStatusIngestKeys,
   OperatorKeys,
   WorkerKeys,
   WorkerDeployKeys,
@@ -195,6 +197,62 @@ describe("ConfigShapes", () => {
         });
         const result = yield* Effect.result(
           Config.all(EiaIngestKeys).parse(provider)
+        );
+        expect(result._tag).toBe("Failure");
+      })
+    );
+  });
+
+  describe("EmberIngestKeys", () => {
+    it.effect("parses Ember config with defaults and a required API key", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({
+          EMBER_ENERGY_API_KEY: "ember-secret"
+        });
+        const result = yield* Config.all(EmberIngestKeys).parse(provider);
+        expect(Redacted.value(result.apiKey)).toBe("ember-secret");
+        expect(result.rootDir).toBe("references/cold-start");
+        expect(result.openApiUrl).toBe(
+          "https://api.ember-energy.org/v1/openapi.json"
+        );
+        expect(result.minIntervalMs).toBe(1000);
+      })
+    );
+
+    it.effect("rejects an empty Ember API key", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({
+          EMBER_ENERGY_API_KEY: "   "
+        });
+        const result = yield* Effect.result(
+          Config.all(EmberIngestKeys).parse(provider)
+        );
+        expect(result._tag).toBe("Failure");
+      })
+    );
+  });
+
+  describe("GridStatusIngestKeys", () => {
+    it.effect("parses GridStatus config with defaults and a required API key", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({
+          GRIDSTATUS_API_KEY: "gridstatus-secret"
+        });
+        const result = yield* Config.all(GridStatusIngestKeys).parse(provider);
+        expect(Redacted.value(result.apiKey)).toBe("gridstatus-secret");
+        expect(result.rootDir).toBe("references/cold-start");
+        expect(result.baseUrl).toBe("https://api.gridstatus.io/v1");
+        expect(result.minIntervalMs).toBe(200);
+      })
+    );
+
+    it.effect("rejects an empty GridStatus API key", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({
+          GRIDSTATUS_API_KEY: "   "
+        });
+        const result = yield* Effect.result(
+          Config.all(GridStatusIngestKeys).parse(provider)
         );
         expect(result._tag).toBe("Failure");
       })

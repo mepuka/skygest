@@ -1,0 +1,35 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4XWTXHKEB1T5XTD80S",
+  "title": "GridStatus ERCOT LMP DART By Bus",
+  "description": "DART spread in ERCOT between day-ahead hourly LMPs and real-time 5-minute LMPs by bus. Hourly day-ahead values are brought to a 5-minute interval across the hour for the purposes of this dataset.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_lmp_dart_by_bus",
+  "accessRights": "public",
+  "keywords": [
+    "ercot_lmp_dart_by_bus",
+    "ercot",
+    "view",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4XX0SGT8MRRAA6J51D",
+    "https://id.skygest.io/distribution/dist_01KNX70F4X5D4HCVN14AV0M175"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_lmp_dart_by_bus",
+      "relation": "exactMatch"
+    }
+  ]
+}

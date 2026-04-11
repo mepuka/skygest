@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4SDFM83KWVXMAWNAPX",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4SFBSCTY6K0J32D7RX",
+  "kind": "download",
+  "title": "ERCOT AS Deployment Factors Weekly RUC CSV download",
+  "description": "Ancillary Service Deployment Factors (ASDFs) utilized by the Weekly Reliability Unit Commitment (WRUC) process in ERCOT.\n\nASDFs range from 0 to 1 and represent the percentage of a particular ancillary service type that is assumed to be deployed. These values are derived from actual system conditions as well as forecasts, including demand and production from solar and wind.\n\nImplemented on December 5th, 2025, as part of ERCOT's RTC+B project.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/ercot_as_deployment_factors_weekly_ruc/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ercot_as_deployment_factors_weekly_ruc/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

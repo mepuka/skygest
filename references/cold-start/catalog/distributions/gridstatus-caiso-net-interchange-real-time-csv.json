@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4MS64QDZT7S8J87VT4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4MFC5NFY1WB4NA88QX",
+  "kind": "download",
+  "title": "CAISO Net Interchange Real Time CSV download",
+  "description": "Five-minute, real-time interchange in the West via CAISO data presented as a summarized view of flows between balacing authorities to enable easier BA-level analysis.\n\nThis view sums the MW values for each 5 minute interval for each unique pairing of from and to. This view does not contain individual ties. For tie-level data, refer to [caiso_tie_flows_real_time_5_min](https://www.gridstatus.io/datasets/caiso_tie_flows_real_time_5_min).",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/caiso_net_interchange_real_time/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/caiso_net_interchange_real_time/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

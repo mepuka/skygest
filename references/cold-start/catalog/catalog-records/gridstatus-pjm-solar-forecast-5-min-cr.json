@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F5JE3XDCDADJN64CT3J",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F5JH09CPYSRMEVPXBGS",
+  "sourceRecordId": "pjm_solar_forecast_5_min",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2024-10-07T16:43:24+00:00",
+  "lastSeen": "2026-04-11T02:46:46+00:00",
+  "sourceModified": "2026-04-11T02:40:00+00:00",
+  "isAuthoritative": true
+}

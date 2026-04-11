@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F54ZDFMVFGHAMZ7EQNK",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F54WZBY6EY2S7ACZJF4",
+  "kind": "download",
+  "title": "IESO LMP Real Time 5 Min Intertie CSV download",
+  "description": "Five-minute intertie LMPs for IESO interchange. \nInterfaces by neighboring region: \n\nQuébec (PQ):\n- PQ.BEAUHARNOIS_PQBE\n- PQ.BRYSON_PQXY\n- PQ.KIPAWA_PQHZ\n- PQ.MACLAREN_PQDA\n- PQ.MASSON_PQHA\n- PQ.OUTAOUAIS_PQAT\n- PQ.PAUGAN_PQPC\n- PQ.QUYON_PQQC\n- PQ.RAPIDDESISLE_PQDZ\n\nNew York ISO (NY)\n\n- EC.MARITIMES_NYSI\n- NY.ROSETON_NYSI\n\nManitoba (MB)\n\n- MB.SEVENSISTERS_MBSK\n- MB.WHITESHELL_MBSI\n\nMichigan (MI):\n\n- MI.LUDINGTON_MISI\n- MI.LUDINGTON.SOURCE \n- WC.PRAIRERANGES_MISI\n- MD.CALVERTCLIFF_MISI\n- MD.CALVERTCLIFF_NYSI\n\nMinnesota (MN):\n\n- MN.INTFALLS_MNSI\n\n\n",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/ieso_lmp_real_time_5_min_intertie/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ieso_lmp_real_time_5_min_intertie/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

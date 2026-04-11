@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F4ZGM0B15QAV7BFQE0Y",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F4ZDHQ2CX978F5M4HQA",
+  "sourceRecordId": "ercot_sced_as_offer_updates_in_op_hour_60_day",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2026-02-07T22:45:47+00:00",
+  "lastSeen": "2026-04-10T11:39:30+00:00",
+  "sourceModified": "2026-02-10T05:00:00+00:00",
+  "isAuthoritative": true
+}

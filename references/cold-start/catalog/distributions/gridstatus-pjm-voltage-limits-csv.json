@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5KB9N1DF2FWRDEH7KM",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5JV1NTS2S4T636WCH5",
+  "kind": "download",
+  "title": "PJM Voltage Limits CSV download",
+  "description": "This dataset contains daily flow limits across transmission lines that provides PJM default voltage values and voltage stability limits by voltage class. Transmission owners can elect to deviate from PJM, designated by a “no” value in the “follow_pjm” column. Additional, voltage limits, including high, low, and normal kV ratings are included. ",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/pjm_voltage_limits/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/pjm_voltage_limits/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

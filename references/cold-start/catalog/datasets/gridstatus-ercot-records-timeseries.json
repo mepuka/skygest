@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZCAAMRRT9JMTZ2YC7",
+  "title": "GridStatus ERCOT New Records Timeline",
+  "description": "Timeline of new records for ERCOT",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_records_timeseries",
+  "accessRights": "public",
+  "temporal": "2017-01-01T20:15:00+00:00/2026-03-23T14:45:00+00:00",
+  "keywords": [
+    "ercot_records_timeseries",
+    "ercot",
+    "materialized_view",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4ZE016KK3Z2REQ42DY",
+    "https://id.skygest.io/distribution/dist_01KNX70F4ZYDKB63TT2PCVTCKA"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_records_timeseries",
+      "relation": "exactMatch"
+    }
+  ]
+}

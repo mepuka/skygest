@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4MSK51TZE6FY93J43B",
+  "title": "GridStatus CAISO Outages Aggregated Hourly",
+  "description": "CAISO Outages Aggregated by forced and planned on an hourly basis. For generator level data including the reason, see the caiso_curtailed_non_operational_generator dataset.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/caiso_outages_aggregated_hourly",
+  "accessRights": "public",
+  "temporal": "2021-06-17T07:00:00+00:00/2026-03-25T06:00:00+00:00",
+  "keywords": [
+    "caiso_outages_aggregated_hourly",
+    "caiso",
+    "materialized_view",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4MHJXCV1WN1ES0J117",
+    "https://id.skygest.io/distribution/dist_01KNX70F4MH7SVFEY6H9E3XH44"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "caiso_outages_aggregated_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.caiso.com/market-operations/outages/curtailed-and-non-operational-generators",
+      "relation": "closeMatch"
+    }
+  ]
+}

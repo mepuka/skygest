@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZZMBDKZVNS321NQ72",
+  "title": "GridStatus ERCOT Real Time Adders",
+  "description": "The Real-Time Reliability Deployment Price Adders (RTRDPAs) for energy and each ancillary service, for each SCED run in ERCOT.\n\nThis dataset also includes:\n* System Lambda (λ), which is the Shadow Price for the system-wide Power Balance constraint\n* Total RUC/RMR Low Dispatch Limit (LDL) relaxed\n* Deployed Load Resource MWs that are added to Demand\n* Energy Storage Resource Charging MWs that are added to Demand\n* Total Low Sustained Limit (LSL)\n* Total High Sustained Limit (HSL)\n\nThis dataset was implemented on December 5th, 2025, as part of ERCOT's RTC+B project, which modified many existing datasets related to ancillary services and system capacity while also introducing new reports.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_real_time_adders",
+  "accessRights": "public",
+  "temporal": "2025-12-05T06:05:17+00:00/2026-04-11T02:45:18+00:00",
+  "keywords": [
+    "ercot_real_time_adders",
+    "ercot",
+    "table",
+    "ERCOT_SCED_RUN"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4ZWF7B7NFTPBTJN9RF",
+    "https://id.skygest.io/distribution/dist_01KNX70F4Z6CVT96E5WVA7VBHD"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_real_time_adders",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP6-323-CD",
+      "relation": "closeMatch"
+    }
+  ]
+}

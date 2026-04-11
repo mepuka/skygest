@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5JSQJX1RADBKGD6Q7B",
+  "title": "GridStatus PJM Solar Generation By Area",
+  "description": "Solar generation by Area in PJM on an hourly basis. Areas include *MIDATL*, *Other*, *RFC*, *RTO*, *South*, and *West*. The *Other* region contains external units as well as units for which the region/area is unknown.\n\nFinal data for this dataset is delayed by up to 4 months. Prior to updating with final data, PJM may provide both 0 and negative values.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_solar_generation_by_area",
+  "accessRights": "public",
+  "temporal": "2019-01-01T05:00:00+00:00/2026-04-09T02:00:00+00:00",
+  "keywords": [
+    "pjm_solar_generation_by_area",
+    "pjm",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5J2F4CE40QMB1YMARS",
+    "https://id.skygest.io/distribution/dist_01KNX70F5JHSX45353288AHX54"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_solar_generation_by_area",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/solar_gen/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

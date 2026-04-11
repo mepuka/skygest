@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4Y892AH76DPCQ11K0V",
+  "title": "GridStatus ERCOT Load Forecast By Model",
+  "description": "Forecasted hourly demand by Model and Weather Zone as reported by ERCOT.\nReleased every hour for for the current day and the next 7.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_load_forecast_by_model",
+  "accessRights": "public",
+  "temporal": "2017-06-29T16:30:03+00:00/2026-04-11T02:30:00+00:00",
+  "keywords": [
+    "ercot_load_forecast_by_model",
+    "ercot",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4YKJ1MRJ61R5HSJKS7",
+    "https://id.skygest.io/distribution/dist_01KNX70F4YT3SRQ80RF83WQBDJ"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_load_forecast_by_model",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP3-565-CD",
+      "relation": "closeMatch"
+    }
+  ]
+}

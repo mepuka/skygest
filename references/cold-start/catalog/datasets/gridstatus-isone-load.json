@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5AC12N3QH242K1ZY1S",
+  "title": "GridStatus ISONE Load",
+  "description": "Load in 5 minute intervals as reported by ISONE.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/isone_load",
+  "accessRights": "public",
+  "temporal": "2020-12-01T00:00:00+00:00/2026-04-11T02:45:00+00:00",
+  "keywords": [
+    "isone_load",
+    "isone",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5AAXX1P13R5RTDHJ87",
+    "https://id.skygest.io/distribution/dist_01KNX70F5A9PNMM1VSGBPCNZA8"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "isone_load",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.iso-ne.com/isoexpress/web/reports/load-and-demand/-/reports/dmnd-five-minute-sys",
+      "relation": "closeMatch"
+    }
+  ]
+}

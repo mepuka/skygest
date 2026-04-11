@@ -1,0 +1,40 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F51B2BQRR59ZHVH0NT6",
+  "title": "GridStatus HQ Interconnection Outages",
+  "description": "Hydro-Québec’s planned interconnection outages with neighboring regions. Published irregularly, at least once per year for the following year. TTC is total transfer capability.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/hq_interconnection_outages",
+  "accessRights": "public",
+  "temporal": "2025-10-17T00:00:00+00:00/2026-03-27T00:00:00+00:00",
+  "keywords": [
+    "hq_interconnection_outages",
+    "hq",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F51WX9P8B40KDKB092G",
+    "https://id.skygest.io/distribution/dist_01KNX70F5126YK7QY3FEZVJ00F"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "hq_interconnection_outages",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.oasis.oati.com/hqt/index.html",
+      "relation": "closeMatch"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4YS9Z2P5YQRQ6HZPPM",
+  "title": "GridStatus ERCOT MCPC Real Time 15 Min",
+  "description": "Prices for Ancillary Services as reported by ERCOT for each 15-minute interval. \n\nCurrently, these ancillary services are: *ERCOT Contingency Reserve Servic*e (ECRS), *Non-Spinning Responsive Reserves* (NSPIN), *Regulation Down* (REGDN), *Regulation Up* (REGUP), and *Responsive Reserves* (RRS).\n\nImplemented on December 5th, 2025, as part of ERCOT's RTC+B project.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_mcpc_real_time_15_min",
+  "accessRights": "public",
+  "temporal": "2025-12-05T06:00:00+00:00/2026-04-11T02:30:00+00:00",
+  "keywords": [
+    "ercot_mcpc_real_time_15_min",
+    "ercot",
+    "table",
+    "15_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4YT5NMGBTG27R7N4PR",
+    "https://id.skygest.io/distribution/dist_01KNX70F4YP3RH5RTKWBC7N44H"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_mcpc_real_time_15_min",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP6-331-CD",
+      "relation": "closeMatch"
+    }
+  ]
+}

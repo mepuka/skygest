@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5KTDQ64AM3P63KV2EE",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5KW7VNNX86SVK0TNNS",
+  "kind": "api-access",
+  "title": "PJM Wind Generation By Area JSON API",
+  "description": "Wind generation by Area in PJM on an hourly basis. Areas include *MIDATL*,\n*Other*, *RFC*, *RTO*, *South*, and *West*. The *Other* region contains\nexternal units as well as units for which the region/area is unknown.\n\n⚠️ Not all Areas are present across the historical data. Null values\nrepresent records in which an Area did not exist.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/pjm_wind_generation_by_area/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/pjm_wind_generation_by_area/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

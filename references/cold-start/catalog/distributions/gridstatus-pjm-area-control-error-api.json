@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5GKDAAGHFV84X6SJN4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5GNXDKS024GXF8EFPB",
+  "kind": "api-access",
+  "title": "PJM Area Control Error JSON API",
+  "description": "Area Control Error (ACE) measures the imbalance between supply and demand. PJM calculates this value in MWs every 15 seconds. Negative ACE values tend to indicate the need for generation to ramp up while positive ACE values tend to point to generation overcommitment. ",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/pjm_area_control_error/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/pjm_area_control_error/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

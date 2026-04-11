@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5A8HJ6E47Z0ECHBKH9",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5A3STYNZQV2CM9J0Q2",
+  "kind": "download",
+  "title": "ISONE Reliability Region Load Forecast CSV download",
+  "description": "Hourly Load Forecast for the ISO New England Reliability Regions. \n\nForecasts are currently published by the ISO for hourly intervals for each region simultaneously, roughly every half hour, with a roughly 3 day rolling horizon. Forecast publishing has increased over the last 7 years to its current rate, so older data may have fewer forecasts for each interval. The load column is in MW, and the regional percentage represents each location's share of overall demand in ISO-NE. \n\nThe locations included are ISO-NE's Reliability Regions:\n* .Z.MAINE\n* .Z.NEWHAMPSHIRE\n* .Z.VERMONT\n* .Z.RHODEISLAND\n* .Z.CONNECTICUT\n* .Z.WCMASS\n* .Z.SEMASS\n * .Z.NEMASSBOST\n\nThe three zones with \"MASS\" in the name represent regions within Massachusetts, the highest demand region within New England. Reliability Regions generally overlap with Load Zones in ISO-NE.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/isone_reliability_region_load_forecast/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/isone_reliability_region_load_forecast/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

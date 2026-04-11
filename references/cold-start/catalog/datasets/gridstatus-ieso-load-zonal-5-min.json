@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F57QH2SXAP8Y9AS0QD2",
+  "title": "GridStatus IESO Load Zonal 5 Min",
+  "description": "Daily-published five-minute, zonal demand for IESO.\n\nSummed together across an hour these values reach the actual demand. Each interval can be multiplied by 12 to get a 5-minute total demand value.\n\nThere is a known data gap from source for 2025-12-31 in this dataset.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ieso_load_zonal_5_min",
+  "accessRights": "public",
+  "temporal": "2025-01-01T05:00:00+00:00/2026-04-10T04:55:00+00:00",
+  "keywords": [
+    "ieso_load_zonal_5_min",
+    "ieso",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F57D2400M7KY7PM6EY3",
+    "https://id.skygest.io/distribution/dist_01KNX70F57GY49EAJYCZP87344"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ieso_load_zonal_5_min",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://reports-public.ieso.ca/public/RealtimeDemandZonal/",
+      "relation": "closeMatch"
+    }
+  ]
+}

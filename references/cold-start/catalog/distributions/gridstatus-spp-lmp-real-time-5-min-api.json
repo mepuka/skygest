@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5MV8WEZAF6WPW3PB8T",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5MH4KS840BD9VS3WRB",
+  "kind": "api-access",
+  "title": "SPP LMP Real Time 5 Min JSON API",
+  "description": "Real Time 5 Minute LMPs as reported by SPP.\n\nThe location types present are:\n\n- *Settlement Location*\n- *Interface*\n- *Hub*",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/spp_lmp_real_time_5_min/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/spp_lmp_real_time_5_min/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

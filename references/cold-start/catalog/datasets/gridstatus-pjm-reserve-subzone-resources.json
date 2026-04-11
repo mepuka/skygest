@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5JZN9Z23C4NGPGHEHQ",
+  "title": "GridStatus PJM Reserve Subzone Resources",
+  "description": "Reserve subzone mapping (not geographic location) for PJM reserves. This dataset also contains node id, name, and the type of resource. ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_reserve_subzone_resources",
+  "accessRights": "public",
+  "temporal": "2022-10-01T04:00:00+00:00/2026-04-04T04:00:00+00:00",
+  "keywords": [
+    "pjm_reserve_subzone_resources",
+    "pjm",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5JC761T6FMZ55C2H2F",
+    "https://id.skygest.io/distribution/dist_01KNX70F5JQ1YJH39G764N3RJQ"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_reserve_subzone_resources",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/sync_pri_reserves_resources_list/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

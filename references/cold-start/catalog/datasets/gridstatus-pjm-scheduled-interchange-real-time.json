@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5JGV2G93CJ40CB2TJ3",
+  "title": "GridStatus PJM Scheduled Interchange Real Time",
+  "description": "Hourly scheduled net real time tie flows between PJM and nearby balancing authorities. This data its released daily for the prior day. Positive values indicate imports and negative values represent exports. ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_scheduled_interchange_real_time",
+  "accessRights": "public",
+  "temporal": "2011-08-17T04:00:00+00:00/2026-04-10T03:00:00+00:00",
+  "keywords": [
+    "pjm_scheduled_interchange_real_time",
+    "pjm",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5JPQTD8QNSM1F2SQGA",
+    "https://id.skygest.io/distribution/dist_01KNX70F5JE8G134HS1KJX4R6F"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_scheduled_interchange_real_time",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/rt_scheduled_interchange/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

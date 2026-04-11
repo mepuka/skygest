@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5C07AGY5SREN3NBSFB",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5CSVSW6H5NX7GKWCGG",
+  "kind": "api-access",
+  "title": "MISO Binding Constraints Real Time 5 Min JSON API",
+  "description": "Real-time, five-minute, binding constraints in MISO. \n\nConstraints are limited elements of the transmission system, when binding power flow is limited between locations by the constraint. Managing these may require generators to be dispatched out of the merit order.\n\nThis data is made available on the day after the operating day which it covers.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/miso_binding_constraints_real_time_5_min/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/miso_binding_constraints_real_time_5_min/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

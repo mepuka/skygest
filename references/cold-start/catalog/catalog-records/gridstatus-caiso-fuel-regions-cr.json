@@ -1,0 +1,12 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F4KCJW56V36J8JMJ6AN",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F4KXA0GCRK031JK4SVP",
+  "sourceRecordId": "caiso_fuel_regions",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2024-09-04T16:23:46+00:00",
+  "lastSeen": "2026-04-09T21:28:14+00:00",
+  "isAuthoritative": true
+}

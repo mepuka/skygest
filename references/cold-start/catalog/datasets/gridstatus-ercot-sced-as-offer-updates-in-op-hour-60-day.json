@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZDHQ2CX978F5M4HQA",
+  "title": "GridStatus ERCOT SCED AS Offer Updates in Op Hour 60 Day",
+  "description": "ERCOT resources updated offers to provide ancillary services within a real-time operating hour. This data is posted on a 60-day delay from the market day.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_sced_as_offer_updates_in_op_hour_60_day",
+  "accessRights": "public",
+  "temporal": "2025-12-05T06:00:00+00:00/2026-02-10T05:00:00+00:00",
+  "keywords": [
+    "ercot_sced_as_offer_updates_in_op_hour_60_day",
+    "ercot",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4Z5C33G0C4SCVFWNEZ",
+    "https://id.skygest.io/distribution/dist_01KNX70F4ZQWHZAGNZ8AZSPGDX"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_sced_as_offer_updates_in_op_hour_60_day",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP3-965-ER",
+      "relation": "closeMatch"
+    }
+  ]
+}

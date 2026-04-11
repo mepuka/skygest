@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5JHC9TTADQHKM3D8B4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5JJ0T2SBKH986STE3P",
+  "kind": "download",
+  "title": "PJM Projected RTO Statistics At Peak CSV download",
+  "description": "This data is prepared each morning and contains information for the projected peak of the day for the entire PJM footprint. PJM publishes scheduled tie flows, total scheduled capacity, peak load forecast, operational reserves, and unscheduled steam capacity. Data is refreshed on top of the hour from 5 a.m. to 8 a.m.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/pjm_projected_rto_statistics_at_peak/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/pjm_projected_rto_statistics_at_peak/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4YB7S873AQW0ZVB7PE",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4YVB7X3W4PZ8NX640G",
+  "kind": "download",
+  "title": "ERCOT Load By Forecast Zone CSV download",
+  "description": "Hourly load by forecast zone as reported by ERCOT.\n\nIncluded zones: North, South, West, Houston, and ERCOT-wide total.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/ercot_load_by_forecast_zone/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ercot_load_by_forecast_zone/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

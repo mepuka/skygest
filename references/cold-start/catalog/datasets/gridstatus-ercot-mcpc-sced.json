@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4YY52A4TJMN8KB71K7",
+  "title": "GridStatus ERCOT MCPC SCED",
+  "description": "Prices for Ancillary Services as reported by ERCOT for each SCED run in real-time. \n\nCurrently, these ancillary services are: *ERCOT Contingency Reserve Servic*e (ECRS), *Non-Spinning Responsive Reserves* (NSPIN), *Regulation Down* (REGDN), *Regulation Up* (REGUP), and *Responsive Reserves* (RRS).\n\nImplemented on December 5th, 2025, as part of ERCOT's RTC+B project.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_mcpc_sced",
+  "accessRights": "public",
+  "temporal": "2025-12-05T06:05:17+00:00/2026-04-11T02:45:18+00:00",
+  "keywords": [
+    "ercot_mcpc_sced",
+    "ercot",
+    "table",
+    "ERCOT_SCED_RUN"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4YTPTC0DP3VW2B83NF",
+    "https://id.skygest.io/distribution/dist_01KNX70F4Y1WT36NGX34D4V9RZ"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_mcpc_sced",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP6-332-CD",
+      "relation": "closeMatch"
+    }
+  ]
+}

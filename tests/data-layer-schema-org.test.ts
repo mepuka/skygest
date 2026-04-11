@@ -209,6 +209,7 @@ describe("datasetToSchemaOrg", () => {
       id: DS_ID,
       title: "Alberta Electricity Generation",
       description: "Monthly electricity generation data for Alberta",
+      creatorAgentId: AGENT_ID,
       landingPage: "https://open.canada.ca/data/en/dataset/electricity",
       license: "https://creativecommons.org/licenses/by/4.0/",
       keywords: ["electricity", "alberta", "generation"],
@@ -229,6 +230,7 @@ describe("datasetToSchemaOrg", () => {
     expect(ld["@id"]).toBe(DS_ID);
     expect(ld.name).toBe("Alberta Electricity Generation");
     expect(ld.description).toBe("Monthly electricity generation data for Alberta");
+    expect(ld.creator).toEqual({ "@id": AGENT_ID });
     expect(ld.url).toBe("https://open.canada.ca/data/en/dataset/electricity");
     expect(ld.license).toBe("https://creativecommons.org/licenses/by/4.0/");
     expect(ld.keywords).toEqual(["electricity", "alberta", "generation"]);

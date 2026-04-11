@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5NBMWWVNC5Q6DWJ1CT",
+  "title": "GridStatus SPP Market Clearing Day Ahead",
+  "description": "Provides a summary of market clearing data for each Day-Ahead Market solution for each Operating Day.  Posting is updated each day after the DA Market results are posted.\n\nIncludes data from both SPP East (SPP) and SPP West (SWPW) via the `baa` column.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/spp_market_clearing_day_ahead",
+  "accessRights": "public",
+  "temporal": "2013-05-29T05:00:00+00:00/2026-04-12T04:00:00+00:00",
+  "keywords": [
+    "spp_market_clearing_day_ahead",
+    "spp",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5N8P8GB8D0RKKM963M",
+    "https://id.skygest.io/distribution/dist_01KNX70F5NFX9Y55ZS3KXH4F9N"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "spp_market_clearing_day_ahead",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://portal.spp.org/pages/market-clearing",
+      "relation": "closeMatch"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F51N9FH0WHFZWXT3SKR",
+  "title": "GridStatus IESO Intertie Limits Real Time 5 Min",
+  "description": "Real time, five minute limits for each of Ontario’s intertie zones with Manitoba, Michigan, Minnesota, New York, and Québec.  ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ieso_intertie_limits_real_time_5_min",
+  "accessRights": "public",
+  "temporal": "2025-11-07T08:00:00+00:00/2026-04-11T01:55:00+00:00",
+  "keywords": [
+    "ieso_intertie_limits_real_time_5_min",
+    "ieso",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F51FKEP9RXCYJS0ZGE8",
+    "https://id.skygest.io/distribution/dist_01KNX70F51E67NG5MS0RZDNG2X"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ieso_intertie_limits_real_time_5_min",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://reports-public.ieso.ca/public/RealtimeIntertieSchedLimits/",
+      "relation": "closeMatch"
+    }
+  ]
+}

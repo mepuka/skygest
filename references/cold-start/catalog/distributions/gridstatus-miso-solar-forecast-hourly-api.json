@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5EWJGTVPJZYV5F8GTE",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5EXS2S63FBC2JSVTST",
+  "kind": "api-access",
+  "title": "MISO Solar Forecast Hourly JSON API",
+  "description": "Hourly Solar Forecast for the next 6 days as reported by MISO.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/miso_solar_forecast_hourly/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/miso_solar_forecast_hourly/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

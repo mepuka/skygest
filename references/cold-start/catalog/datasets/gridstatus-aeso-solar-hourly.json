@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4GRZ5JG39KFAZM4K1A",
+  "title": "GridStatus AESO Solar Hourly",
+  "description": "AESO's actual solar generation at an hourly frequency. ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXP6MWXWMNJ2A93ESKT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/aeso_solar_hourly",
+  "accessRights": "public",
+  "temporal": "2023-03-01T07:00:00+00:00/2026-04-11T01:00:00+00:00",
+  "keywords": [
+    "aeso_solar_hourly",
+    "aeso",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4GQ5QTB6VM89MNR8SZ",
+    "https://id.skygest.io/distribution/dist_01KNX70F4GCCB0BFVTPB6WCMGB"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "aeso_solar_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.aeso.ca/grid/grid-planning/forecasting/wind-and-solar-power-forecasting",
+      "relation": "closeMatch"
+    }
+  ]
+}

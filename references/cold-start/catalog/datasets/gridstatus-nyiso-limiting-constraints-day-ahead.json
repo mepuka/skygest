@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5FXVQ5TJH6QG21MVJM",
+  "title": "GridStatus NYISO Limiting Constraints Day Ahead",
+  "description": "This dataset contains day-ahead binding constraint data in NYISO. NYISO includes the constraint, contingency, congestion cost, as well as the facility ID. ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/nyiso_limiting_constraints_day_ahead",
+  "accessRights": "public",
+  "temporal": "2010-01-01T05:00:00+00:00/2026-04-12T03:00:00+00:00",
+  "keywords": [
+    "nyiso_limiting_constraints_day_ahead",
+    "nyiso",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5F5RY88NVHJYDG4SPZ",
+    "https://id.skygest.io/distribution/dist_01KNX70F5FE47VTHWZJNMT1FW9"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "nyiso_limiting_constraints_day_ahead",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "http://mis.nyiso.com/public/P-511Alist.htm",
+      "relation": "closeMatch"
+    }
+  ]
+}

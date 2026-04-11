@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5JV1NTS2S4T636WCH5",
+  "title": "GridStatus PJM Voltage Limits",
+  "description": "This dataset contains daily flow limits across transmission lines that provides PJM default voltage values and voltage stability limits by voltage class. Transmission owners can elect to deviate from PJM, designated by a “no” value in the “follow_pjm” column. Additional, voltage limits, including high, low, and normal kV ratings are included. ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_voltage_limits",
+  "accessRights": "public",
+  "temporal": "2025-12-16T05:02:01+00:00/2026-04-10T04:02:01+00:00",
+  "keywords": [
+    "pjm_voltage_limits",
+    "pjm",
+    "table",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5KS2ZZD1V7HMR721K2",
+    "https://id.skygest.io/distribution/dist_01KNX70F5KB9N1DF2FWRDEH7KM"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_voltage_limits",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://edart.pjm.com/reports/voltagelimits.csv",
+      "relation": "closeMatch"
+    }
+  ]
+}

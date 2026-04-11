@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5C0RMXTMFD9MCDWACQ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5C48RE94ZGJKRWFV90",
+  "kind": "download",
+  "title": "ISONE Zonal Load Estimated 5 Min CSV download",
+  "description": "Estimated five minute zonal load and BTM solar generation across all 8 of ISO-NE’s forecast zones. ",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/isone_zonal_load_estimated_5_min/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/isone_zonal_load_estimated_5_min/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

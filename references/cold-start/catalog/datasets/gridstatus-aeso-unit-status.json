@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4H3DEP9Z8KRS3WHFXW",
+  "title": "GridStatus AESO Unit Status",
+  "description": "Unit-level status reports in AESO. AESO reports out the maximum capacity (MC), Total Net Generation (TNG), Gross Generation minus Asset service, and Dispatched (and Accepted) Contingency Reserve (DCR). This data is sampled every 1-2 minutes.   ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXP6MWXWMNJ2A93ESKT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/aeso_unit_status",
+  "accessRights": "public",
+  "temporal": "2025-06-11T20:45:00+00:00/2026-04-11T02:47:00+00:00",
+  "keywords": [
+    "aeso_unit_status",
+    "aeso",
+    "table",
+    "1_MINUTE"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4HNZHGA86Y0PTH9G7T",
+    "https://id.skygest.io/distribution/dist_01KNX70F4H8Y860F38R726J967"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "aeso_unit_status",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://developer-apim.aeso.ca/api-details#api=currentsupplydemand-api-v1&operation=getCSDReportByAsset",
+      "relation": "closeMatch"
+    }
+  ]
+}

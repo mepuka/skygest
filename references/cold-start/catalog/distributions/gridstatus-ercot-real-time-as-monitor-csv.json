@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4ZQZ0K55EDTQCBPGMF",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4ZN112DJR4APYAXP7S",
+  "kind": "download",
+  "title": "ERCOT Real Time AS Monitor CSV download",
+  "description": "⚠️ Due to large changes in AS data post RTC+C, we've decide to retire this dataset. The historical data is still available, but will no longer receive updates.\nThe dataset id of the new dataset is [ercot_system_as_capacity_monitor](https://www.gridstatus.io/datasets/ercot_system_as_capacity_monitor). \n___\n\nReal Time AS Monitor as reported by ERCOT. Includes capacity and responsibility. Updates ~10 seconds.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/ercot_real_time_as_monitor/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ercot_real_time_as_monitor/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

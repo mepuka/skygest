@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4X25H5HH6TWP81N6RD",
+  "title": "GridStatus ERCOT Fuel Mix Detailed",
+  "description": "Generation, High Sustained Limit (HSL), and seasonal capacity of energy generation broken down by resource type ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_fuel_mix_detailed",
+  "accessRights": "public",
+  "temporal": "2025-02-27T06:04:57+00:00/2026-04-11T02:39:58+00:00",
+  "keywords": [
+    "ercot_fuel_mix_detailed",
+    "ercot",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4X9T53W7ZYQDE8E5T4",
+    "https://id.skygest.io/distribution/dist_01KNX70F4XY0VGM7JEQKDECDAX"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_fuel_mix_detailed",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/gridmktinfo/dashboards/fuelmix",
+      "relation": "closeMatch"
+    }
+  ]
+}

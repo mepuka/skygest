@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5NS12DJZHACZJ2PPQ7",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5NJZYVV16MSSVVS9M9",
+  "kind": "api-access",
+  "title": "SPP Load Forecast By BAA JSON API",
+  "description": "SPP hourly Mid Term Load Forecast resampled and interpolated to 5 minute resolution by BAA.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/spp_load_forecast_by_baa/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/spp_load_forecast_by_baa/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

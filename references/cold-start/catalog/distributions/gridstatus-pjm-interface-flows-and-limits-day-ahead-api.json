@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5GF5ATZWKFYRG2DVP3",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5GKN0HRK6TWBSEKX87",
+  "kind": "api-access",
+  "title": "PJM Interface Flows And Limits Day Ahead JSON API",
+  "description": "This dataset contains hourly day ahead flows and flow limits for PJM’s internal interfaces. \n\nPublished daily between 12:00pm and 03:15 p.m.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/pjm_interface_flows_and_limits_day_ahead/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/pjm_interface_flows_and_limits_day_ahead/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

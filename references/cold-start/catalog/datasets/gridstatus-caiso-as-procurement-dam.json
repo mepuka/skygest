@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4HJ1HZEPH161Q5YMXD",
+  "title": "GridStatus CAISO AS Procurement DAM",
+  "description": "Ancillary services procurement data from CAISO.\nIncludes total MW procured and costs.  Corresponds\nto CAISO AS_RESULTS dataset on OASIS. See caiso_as_prices dataset\nfor per MW prices that result from market run.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/caiso_as_procurement_dam",
+  "accessRights": "public",
+  "temporal": "2010-01-01T08:00:00+00:00/2026-04-12T06:00:00+00:00",
+  "keywords": [
+    "caiso_as_procurement_dam",
+    "caiso",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4H9Q4D1Z2EP993C936",
+    "https://id.skygest.io/distribution/dist_01KNX70F4HVZ9HVEDER498MNSP"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "caiso_as_procurement_dam",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "http://oasis.caiso.com/mrioasis/logon.do",
+      "relation": "closeMatch"
+    }
+  ]
+}

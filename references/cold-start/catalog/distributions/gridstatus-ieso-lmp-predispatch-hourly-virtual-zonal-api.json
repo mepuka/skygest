@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F54MQPJ3C0PX4AVVJ98",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F54SFGZRJ13Q8H8ZPNF",
+  "kind": "api-access",
+  "title": "IESO LMP Predispatch Hourly Virtual Zonal JSON API",
+  "description": "Pre-Dispatch hourly zonal LMPs for IESO used for virtual transactions.\n\nIESO's virtual zones are East, Essa, Niagara, Northeast, Northwest, Ottawa, Southwest, Toronto, and West.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/ieso_lmp_predispatch_hourly_virtual_zonal/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ieso_lmp_predispatch_hourly_virtual_zonal/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

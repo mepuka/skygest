@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4GBQVWH4SNWTY67778",
+  "title": "GridStatus AESO Supply And Demand",
+  "description": "Supply and demand information in AESO, sampled every 1-2 minutes. ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXP6MWXWMNJ2A93ESKT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/aeso_supply_and_demand",
+  "accessRights": "public",
+  "temporal": "2025-06-05T15:03:00+00:00/2026-04-11T02:47:00+00:00",
+  "keywords": [
+    "aeso_supply_and_demand",
+    "aeso",
+    "table",
+    "1_MINUTE"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4G69JR8RP0WPGJCFQQ",
+    "https://id.skygest.io/distribution/dist_01KNX70F4G8MAK50D48M76XZSC"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "aeso_supply_and_demand",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://developer-apim.aeso.ca/api-details#api=currentsupplydemand-api-v1&operation=getCSDSummaryDataReport",
+      "relation": "closeMatch"
+    }
+  ]
+}

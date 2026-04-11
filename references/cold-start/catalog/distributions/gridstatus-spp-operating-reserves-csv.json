@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5NQMA6VM6NBDXSPRDQ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5N5P3SK3X9HYM45GPV",
+  "kind": "download",
+  "title": "SPP Operating Reserves CSV download",
+  "description": "Total Operating Reserve product (ancillary services) clearing in MW by Reserve Zone in SPP for each Real-Time Balancing Market solution for each Operating Interval.  Posting is updated after each study completes, roughly 5 minutes prior to the end of the operating interval.\n\n\nIncludes data from both SPP East (SPP) and SPP West (SWPW) via the `reserve_zone` column.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/spp_operating_reserves/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/spp_operating_reserves/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

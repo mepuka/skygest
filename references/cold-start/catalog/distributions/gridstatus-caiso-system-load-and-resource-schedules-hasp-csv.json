@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4R7BD3S9EHVCHW8TPW",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4RM8DJVYT24BKSR7MT",
+  "kind": "download",
+  "title": "CAISO System Load and Resource Schedules HASP CSV download",
+  "description": "HASP hourly CAISO system schedule. Includes generation, imports, and exports per TAC Area to balance the CAISO system.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/caiso_system_load_and_resource_schedules_hasp/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/caiso_system_load_and_resource_schedules_hasp/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

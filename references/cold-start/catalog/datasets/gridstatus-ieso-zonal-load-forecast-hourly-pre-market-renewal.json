@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F58ZD397WPMJWYKK8TP",
+  "title": "GridStatus IESO Zonal Load Forecast (Pre-Market Renewal)",
+  "description": "Hourly load forecast by zone for the Independent Electricity System Operator (IESO) in Ontario. Values are reported for *Ontario*, *East*, and *West*. \n\n⚠️ Following the implementation of IESO's Market Renewal Program this report is no longer updated and exists for historical data only. [See the new source here](https://www.gridstatus.io/datasets/ieso_zonal_load_forecast_hourly). ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ieso_zonal_load_forecast_hourly_pre_market_renewal",
+  "accessRights": "public",
+  "temporal": "2023-10-06T14:01:20+00:00/2025-04-30T14:01:48+00:00",
+  "keywords": [
+    "ieso_zonal_load_forecast_hourly_pre_market_renewal",
+    "ieso",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F58TGVYVTDQV952EATD",
+    "https://id.skygest.io/distribution/dist_01KNX70F58QQGCSWEYNK1CHHRY"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ieso_zonal_load_forecast_hourly_pre_market_renewal",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "http://reports.ieso.ca/public/OntarioZonalDemand",
+      "relation": "closeMatch"
+    }
+  ]
+}

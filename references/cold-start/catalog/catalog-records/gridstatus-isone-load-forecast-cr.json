@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F5AKGPX88NCX2THPTP7",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F5AWRMSYP6A4Q8J5SXG",
+  "sourceRecordId": "isone_load_forecast",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2023-04-20T04:02:56+00:00",
+  "lastSeen": "2026-04-11T02:47:10+00:00",
+  "sourceModified": "2026-04-10T20:26:37+00:00",
+  "isAuthoritative": true
+}

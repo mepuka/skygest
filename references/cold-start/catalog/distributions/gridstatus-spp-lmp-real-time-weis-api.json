@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5M71Z2BW5B5P117JEM",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5M4VP6XES4EAEKMBAD",
+  "kind": "api-access",
+  "title": "SPP LMP Real Time WEIS JSON API",
+  "description": "Real-time five-minute LMP data for the WEIS real-time balancing market by settlement location.  \n\n💡 WEIS is a real-time only balancing market administered by SPP in the Western Interconnect.\n\n 📝 This dataset was utilized in *[SPP Expansion Provides a Blueprint for the Future of the Grid](https://blog.gridstatus.io/spp-expansion-west/)*\n\nFor more information: https://portal.spp.org/groups/weis",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/spp_lmp_real_time_weis/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/spp_lmp_real_time_weis/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

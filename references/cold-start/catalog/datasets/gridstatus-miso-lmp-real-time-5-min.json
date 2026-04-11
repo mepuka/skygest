@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5DBRZ33601KBHP8VHJ",
+  "title": "GridStatus MISO LMP Real Time 5 Min",
+  "description": "Preliminary real-time ExPost LMP prelim in 5 minute intervals as reported by MISO.\n\nThis dataset includes the location types:\n- *Gennode*\n-  *Hub*\n-  *Interface*\n-  *Loadzone*",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/miso_lmp_real_time_5_min",
+  "accessRights": "public",
+  "temporal": "2023-03-24T20:05:00+00:00/2026-04-11T02:40:00+00:00",
+  "keywords": [
+    "miso_lmp_real_time_5_min",
+    "miso",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5D6TZ2188YMFV5VPN4",
+    "https://id.skygest.io/distribution/dist_01KNX70F5D3XQQNJRGV9S11XV5"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "miso_lmp_real_time_5_min",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.misoenergy.org/markets-and-operations/rtdataapis/",
+      "relation": "closeMatch"
+    }
+  ]
+}

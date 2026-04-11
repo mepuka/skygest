@@ -1,0 +1,11 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX53R1470ZPHYR6T974C7TC",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQEZ5VTBG4KT77H4S11J7XG",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX53R14CCFFY3HPBA81XWVA",
+  "harvestedFrom": "https://api.ember-energy.org/v1/openapi.json",
+  "firstSeen": "2026-04-11T02:14:38.945Z",
+  "lastSeen": "2026-04-11T02:14:54.829Z",
+  "isAuthoritative": true
+}

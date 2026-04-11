@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5DCKGDVQHTW18R3881",
+  "title": "GridStatus MISO LMP Real Time 5 Min Ex Ante",
+  "description": "Ex-Ante, real-time, five-minute, LMPs in MISO. These are the LMPs calculated via the *SCED* program on a 5-minute basis in MISO, which produces the economic dispatch. Ex-Ante LMPs in real-time are for informational purposes only. \n\nEx-Post LMPs may differ from Ex-Ante LMPs depending on fast start and emergency operations resources.\n\nSee MISO's *BPM 002 - Energy and Operating Reserves* for additional discussion.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/miso_lmp_real_time_5_min_ex_ante",
+  "accessRights": "public",
+  "temporal": "2019-01-01T05:00:00+00:00/2026-04-10T04:55:00+00:00",
+  "keywords": [
+    "miso_lmp_real_time_5_min_ex_ante",
+    "miso",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5DAA6ZMH60PNYBC2SW",
+    "https://id.skygest.io/distribution/dist_01KNX70F5DM2SY370RB1AG383F"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "miso_lmp_real_time_5_min_ex_ante",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.misoenergy.org/markets-and-operations/real-time--market-data/market-reports/#nt=%2FMarketReportType%3AHistorical%20LMP%2FMarketReportName%3AReal-Time%205-Min%20ExAnte%20LMPs%20(xlsx)&t=10&p=0&s=MarketReportPublished&sd=desc",
+      "relation": "closeMatch"
+    }
+  ]
+}

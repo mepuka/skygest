@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5DKD4EXMAM4RVE1T5X",
+  "title": "GridStatus MISO Interchange Hourly",
+  "description": "Hourly scheduled and real-time power flows between MISO and neighboring balancing authorities. These include Associated Electric Cooperative Inc (AECI), Louisville Gas and Electric (LGEE), Manitoba Hydro-Electric Board (MHEB), Ontario (ONT), PJM, Southern Company (SOCO), Southwest Power Association (SPA), Southwest Power Pool (SWPP), and Tennessee Valley Authority (TVA). Negative values indicate MISO is importing, positive values indicate exports.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/miso_interchange_hourly",
+  "accessRights": "public",
+  "temporal": "2018-04-30T05:00:00+00:00/2026-04-10T04:00:00+00:00",
+  "keywords": [
+    "miso_interchange_hourly",
+    "miso",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5DQ5B3CNG2TDM3WWDM",
+    "https://id.skygest.io/distribution/dist_01KNX70F5DVB9540754099M232"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "miso_interchange_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://data-exchange.misoenergy.org/api-details#api=load-generation-and-interchange-api&operation=get-v1-historical-date-interchange-net-scheduled",
+      "relation": "closeMatch"
+    }
+  ]
+}

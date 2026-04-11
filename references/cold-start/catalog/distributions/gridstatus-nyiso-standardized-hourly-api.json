@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5F9P1WMV5KHFN5EZ41",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5FH2PNXEJD105W5BXF",
+  "kind": "api-access",
+  "title": "NYISO hourly standardized data JSON API",
+  "description": "This table is a curated set of hourly data for NYSIO. All standardized datasets are intended to speed up analysis and feature engineering work by providing commonly used data series in one denormalized table. Data in this feed is resampled to an hourly frequency from five minutes.\n\nThe standardized datasets are a conveience for API users who only want to query one dataset for each ISO. If you plan on loading in every dataset or want to work with more multiple series alone and together it is recommended to pull the individual datasets to have full visibility into each one.\n\n⚠️ Not all data series are present for the entire length of the dataset. This can occur due to a lack of historical data or the publication of new core datasets by an ISO.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/nyiso_standardized_hourly/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/nyiso_standardized_hourly/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

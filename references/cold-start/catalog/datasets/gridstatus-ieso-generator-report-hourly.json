@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F51QMFTKBWMNX2NGP29",
+  "title": "GridStatus IESO Generator Report Hourly",
+  "description": "Hourly report for each generator in IESO. For dispatchable units, the output and capability is reported, while wind and solar resources report output, available capacity, and forecasted values. All values reported in MW. \n\n💡 Almost no market operators report generator-level production in near real-time publicly, making IESO relatively unique in this regard.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ieso_generator_report_hourly",
+  "accessRights": "public",
+  "temporal": "2023-10-20T05:00:00+00:00/2026-04-11T01:00:00+00:00",
+  "keywords": [
+    "ieso_generator_report_hourly",
+    "ieso",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F511CEQ1R1HYMV3HGCJ",
+    "https://id.skygest.io/distribution/dist_01KNX70F51MWB0YW0H2AR3QQ4B"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ieso_generator_report_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://reports-public.ieso.ca/public/GenOutputCapability/",
+      "relation": "closeMatch"
+    }
+  ]
+}

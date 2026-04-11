@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4M165KF6QRQ5J4XZAC",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4MQP4W8P0QCVC4WXKM",
+  "kind": "download",
+  "title": "CAISO LMP Scheduling Point Tie Real Time 5 Min CSV download",
+  "description": "Five-minute LMPs for Scheduling Point (SP) - Intertie (Tie) combinations. Interchange schedules are settled at the relevant SP-Tie combination. Both the SP and the Tie are declared by a scheduling coordinator when submitting a bid, while for registered system resources, the SP is their PNode/APNode, and the Tie is the registered primary intertie. \n\nThe data is known to contain gaps originating in the CAISO Source.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/caiso_lmp_scheduling_point_tie_real_time_5_min/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/caiso_lmp_scheduling_point_tie_real_time_5_min/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4K5Y9ZS3DFSYZ9CWW3",
+  "title": "GridStatus CAISO Fuel Prices and Descriptions",
+  "description": "Fuel prices as reported by CAISO with detailed names and descriptions where available.\n\nFor the raw fuel price data, see [CAISO Fuel Prices](https://www.gridstatus.io/datasets/caiso_fuel_prices).",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/caiso_fuel_prices_and_descriptions",
+  "accessRights": "public",
+  "keywords": [
+    "caiso_fuel_prices_and_descriptions",
+    "caiso",
+    "view",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4KAGPKYQJNHTD66VPQ",
+    "https://id.skygest.io/distribution/dist_01KNX70F4KYV0E15FKT7ENN4TB"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "caiso_fuel_prices_and_descriptions",
+      "relation": "exactMatch"
+    }
+  ]
+}

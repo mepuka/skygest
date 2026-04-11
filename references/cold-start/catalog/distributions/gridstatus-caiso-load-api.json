@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4MGNA3M800T2Y1WR5G",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4MB3PT3VRTVZAGYDFB",
+  "kind": "api-access",
+  "title": "CAISO Load JSON API",
+  "description": "Load in 5 minute intervals as reported by CAISO. Does not include load from storage charging.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/caiso_load/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/caiso_load/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

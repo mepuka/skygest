@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4RVWZMWCQHH1AYJZYD",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4RB9854MVN3F63613B",
+  "kind": "download",
+  "title": "EIA BA Interchange Hourly CSV download",
+  "description": "Balancing Authority (BA) Interchange Data in hourly intervals as reported in the EIA-930 dataset. This dataset contains both \"to\" and \"from\" for each BA.\n\n⚠️ For the most accurate and up to date ISO/RTO interchange data, we recommend using their respective datasets instead.\n\n 📝 This dataset was utilized in *[SPP Expansion Provides a Blueprint for the Future of the Grid](https://blog.gridstatus.io/spp-expansion-west/)*\n\nℹ️ We recheck historical data for 30 days after publication in case of updates. Updates are applied only when the new values are non-null.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/eia_ba_interchange_hourly/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/eia_ba_interchange_hourly/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

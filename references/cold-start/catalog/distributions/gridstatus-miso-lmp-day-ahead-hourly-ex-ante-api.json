@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5DJWTQST3KTPZDV3S4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5DTRWC1139JNBP8ER2",
+  "kind": "api-access",
+  "title": "MISO LMP Day Ahead Hourly Ex Ante JSON API",
+  "description": "Day-ahead, hourly, Ex-Ante, LMPs publishing by MISO prior to the operating day. Ex-Ante LMPs are published in the early afternoon of the day prior to the market day, several hours before the Ex-Post day-ahead LMPs. The Ex-Ante LMPs are derived from the day-aead market clearing process.\n\nSee MISO's *BPM 002 - Energy and Operating Reserves* for additional discussion.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/miso_lmp_day_ahead_hourly_ex_ante/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/miso_lmp_day_ahead_hourly_ex_ante/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

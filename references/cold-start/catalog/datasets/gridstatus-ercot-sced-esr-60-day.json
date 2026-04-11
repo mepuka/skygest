@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZXFC3T33CAP4N0J6Y",
+  "title": "GridStatus ERCOT SCED ESR 60 Day",
+  "description": "SCED Energy Storage Resource data. Published with 60 day delay. Contains offer curves, telemetry, and other data.\n\nWith this data you can construct the actual operations and instructions for each operationla storage unit in ERCOT. As an example, with this data it is possible to understand a unit's typical adherence to schedule and instructions by comparing the output schedule (an input to SCED) against a unit's base points (an output from SCED) and their actual telemetered net output to the grid using the columns output_schedule, base_point, and telemetered_net_output.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_sced_esr_60_day",
+  "accessRights": "public",
+  "temporal": "2025-12-05T06:00:19+00:00/2026-02-10T05:55:18+00:00",
+  "keywords": [
+    "ercot_sced_esr_60_day",
+    "ercot",
+    "table",
+    "ERCOT_SCED_RUN"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4ZBPHBBXZR09XKCK4K",
+    "https://id.skygest.io/distribution/dist_01KNX70F4Z2ZVPP0Z2YKF2JNZV"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_sced_esr_60_day",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP3-965-ER",
+      "relation": "closeMatch"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5E6YMRJ99J35EEMNWP",
+  "title": "GridStatus MISO Look Ahead Hourly",
+  "description": "Hourly load and outage forecasts in MISO for the next seven days. While source data for this dataset is in GW, it is converted and available here in MW",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/miso_look_ahead_hourly",
+  "accessRights": "public",
+  "temporal": "2022-01-01T05:00:00+00:00/2026-04-10T05:00:00+00:00",
+  "keywords": [
+    "miso_look_ahead_hourly",
+    "miso",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5EAEG5KNDNYJ4MTBS8",
+    "https://id.skygest.io/distribution/dist_01KNX70F5EZX92S5G0FAA72N7P"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "miso_look_ahead_hourly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.misoenergy.org/markets-and-operations/real-time--market-data/market-reports/#nt=%2FMarketReportType%3ASummary%2FMarketReportName%3ALook%20Ahead%20by%20Region%20(csv)&t=10&p=0&s=MarketReportPublished&sd=desc",
+      "relation": "closeMatch"
+    }
+  ]
+}

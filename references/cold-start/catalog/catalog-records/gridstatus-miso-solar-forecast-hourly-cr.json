@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F5E3MYSFADCAHHCDTMN",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F5EXS2S63FBC2JSVTST",
+  "sourceRecordId": "miso_solar_forecast_hourly",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2024-03-31T19:51:39+00:00",
+  "lastSeen": "2026-04-11T02:46:22+00:00",
+  "sourceModified": "2026-04-10T23:39:34+00:00",
+  "isAuthoritative": true
+}

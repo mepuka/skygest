@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F58FJVQ53YA5NJNTQ2C",
+  "title": "GridStatus IESO Wind Market Participant Forecast",
+  "description": "Hourly market participant wind forecast generation for Ontario and its zones for the next 48 hours.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ieso_wind_market_participant_forecast",
+  "accessRights": "public",
+  "temporal": "2025-04-12T04:33:08+00:00/2026-04-11T01:33:20+00:00",
+  "keywords": [
+    "ieso_wind_market_participant_forecast",
+    "ieso",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F58812V10XM35N9W5S6",
+    "https://id.skygest.io/distribution/dist_01KNX70F58A5NHBEFSRP3HY8D9"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ieso_wind_market_participant_forecast",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://reports-public.ieso.ca/public/VGForecastSummary/",
+      "relation": "closeMatch"
+    }
+  ]
+}

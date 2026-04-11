@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F540JZT2YG7NJ842X9V",
+  "title": "GridStatus IESO LMP Real Time 5 Min Ontario Zonal",
+  "description": "Five-minute, real-time, LMP values for the Ontario-wide zonal price in IESO. This Ontario Zonal Price (OZNP) is a load-weighted LMP across the entire province, that passive loads settle against. \n\nThis price is similar to the old Hourly Ontario Energy Price (HOEP), and was part of a compromise in the design of the Market Renewal Program, which originally planned on using aggregate zonal prices for passive load settlement.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ieso_lmp_real_time_5_min_ontario_zonal",
+  "accessRights": "public",
+  "temporal": "2025-05-01T08:00:00+00:00/2026-04-11T02:45:00+00:00",
+  "keywords": [
+    "ieso_lmp_real_time_5_min_ontario_zonal",
+    "ieso",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F54GHV6NPNR0P37KZJP",
+    "https://id.skygest.io/distribution/dist_01KNX70F543T144VTZ5TPNK96M"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ieso_lmp_real_time_5_min_ontario_zonal",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://reports-public.ieso.ca/public/RealtimeOntarioZonalPrice/",
+      "relation": "closeMatch"
+    }
+  ]
+}

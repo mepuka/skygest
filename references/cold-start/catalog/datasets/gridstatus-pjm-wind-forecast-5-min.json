@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5KTTQ1KE2BAEB194ZG",
+  "title": "GridStatus PJM Wind Forecast 5 Min",
+  "description": "Five-minute wind power forecast within PJM. \n\nUpdated every 10 minutes, forecasting the next 6 hours. It is available for the previous 30 days.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_wind_forecast_5_min",
+  "accessRights": "public",
+  "temporal": "2024-09-08T00:00:00+00:00/2026-04-11T02:40:00+00:00",
+  "keywords": [
+    "pjm_wind_forecast_5_min",
+    "pjm",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5K9BG9DRDFSSF212F5",
+    "https://id.skygest.io/distribution/dist_01KNX70F5KH9SX9E3XJZVV6FGA"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_wind_forecast_5_min",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/five_min_wind_power_forecast/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

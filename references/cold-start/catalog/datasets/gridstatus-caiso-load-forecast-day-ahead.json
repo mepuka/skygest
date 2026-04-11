@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4MXX56ZYFTV5PM7B8V",
+  "title": "GridStatus CAISO Load Forecast Day Ahead",
+  "description": "Hourly load forecast data for each hour of the following day, which is the operating day. This load forecast is posted prior to CAISO running the day-ahead market for the operating day.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/caiso_load_forecast_day_ahead",
+  "accessRights": "public",
+  "temporal": "2009-03-31T16:10:00+00:00/2026-04-10T16:10:00+00:00",
+  "keywords": [
+    "caiso_load_forecast_day_ahead",
+    "caiso",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4M4FCX5R702A8BXMEB",
+    "https://id.skygest.io/distribution/dist_01KNX70F4MTJJDPS5GE1X5RPF4"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "caiso_load_forecast_day_ahead",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "http://oasis.caiso.com/mrioasis/logon.do",
+      "relation": "closeMatch"
+    }
+  ]
+}

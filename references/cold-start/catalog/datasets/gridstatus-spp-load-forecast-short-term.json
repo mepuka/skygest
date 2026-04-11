@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5NTCR8KGZJ25Z7Y1B3",
+  "title": "GridStatus SPP Load Forecast Short Term",
+  "description": "5-minute load forecast data for the SPP footprint (system-wide).\n\nNo future forecasts are included. The dataset shows what SPP historically forecasted for each interval.\n\nIncludes data from both SPP East (SPP) and SPP West (SWPW) via the `baa` column.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/spp_load_forecast_short_term",
+  "accessRights": "public",
+  "temporal": "2024-01-01T06:00:00+00:00/2026-04-11T02:45:00+00:00",
+  "keywords": [
+    "spp_load_forecast_short_term",
+    "spp",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5N298AEG2G671H5TDH",
+    "https://id.skygest.io/distribution/dist_01KNX70F5N26SVF607XJNY0CY5"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "spp_load_forecast_short_term",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://portal.spp.org/pages/stlf-vs-actual",
+      "relation": "closeMatch"
+    }
+  ]
+}

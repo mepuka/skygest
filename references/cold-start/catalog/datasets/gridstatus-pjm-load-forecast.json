@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5H1FGVTGR0Y709H9SZ",
+  "title": "GridStatus PJM Load Forecast",
+  "description": "PJM hourly load forecast for the next seven days resampled to 5 minute intervals.\n\n- Only includes data from the most recent published vintage for each interval\n- Only includes data for the combined RTO (not individual forecast areas)",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_load_forecast",
+  "accessRights": "public",
+  "temporal": "2023-04-12T22:47:11+00:00/2026-04-11T02:17:24+00:00",
+  "keywords": [
+    "pjm_load_forecast",
+    "pjm",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5H69Z70P26Y29Q5JDY",
+    "https://id.skygest.io/distribution/dist_01KNX70F5HTVGDMTRAPPCBKG28"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_load_forecast",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/load_frcstd_7_day/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

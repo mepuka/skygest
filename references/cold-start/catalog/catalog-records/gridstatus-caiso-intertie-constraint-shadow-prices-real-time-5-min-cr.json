@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KNX70F4KXQ8E869Q3ZKA794E",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQSXA3M9T29PKZ6966GASNW",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNX70F4KNNCVVY2XYFC4BV5J",
+  "sourceRecordId": "caiso_intertie_constraint_shadow_prices_real_time_5_min",
+  "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
+  "firstSeen": "2025-10-29T22:12:56+00:00",
+  "lastSeen": "2026-04-11T02:44:21+00:00",
+  "sourceModified": "2026-04-11T00:10:00+00:00",
+  "isAuthoritative": true
+}

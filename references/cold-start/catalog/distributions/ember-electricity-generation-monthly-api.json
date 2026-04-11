@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX53R14VFXJYFNVKT8QTV3P",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX53R14VCPTYD4B6NG7GNMQ",
+  "kind": "api-access",
+  "title": "Ember Electricity Generation Monthly API",
+  "description": "Get electricity generation data at a monthly grain.\n    e.g.\n\n`https://api.ember-energy.org/v1/electricity-generation/monthly?is_aggregate_entity=true&series=Solar,Wind&start_date=2020-01&api_key=MY_API_KEY`\n    \n\nThe methodology of this dataset can be found on its [dataset page](https://ember-energy.org/data/monthly-electricity-data/)\n    within the 'Methodology - Ember Electricity Data' pdf.",
+  "accessURL": "https://api.ember-energy.org/v1/electricity-generation/monthly",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "license": "CC-BY-4.0",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNX53R13BMFM6TQ8CKSG2VTV",
+  "createdAt": "2026-04-11T02:14:38.945Z",
+  "updatedAt": "2026-04-11T02:14:54.829Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.ember-energy.org/v1/electricity-generation/monthly",
+      "relation": "exactMatch"
+    }
+  ]
+}

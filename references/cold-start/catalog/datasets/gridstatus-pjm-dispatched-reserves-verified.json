@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5G3C0BP0QVDBTZ1TDT",
+  "title": "GridStatus PJM Dispatched Reserves Verified",
+  "description": "This dataset contains the five-minute verified quantity, prices, and requirement for each of the reserve types in PJM. This data is not updated on the day following the current market day. Preliminary real-time values can be found [here](https://www.gridstatus.io/datasets/pjm_dispatched_reserves_prelim). \n\nReserve types, for both the PJM RTO and Mid-Atlantic/Dominion Reserve subzones include:\n\n- Primary Reserves\n- Synchronized Reserves\n- Thirty-Minute Reserves (only PJM RTO Reserve Zone)",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_dispatched_reserves_verified",
+  "accessRights": "public",
+  "temporal": "2018-01-01T05:00:00+00:00/2026-04-10T03:55:00+00:00",
+  "keywords": [
+    "pjm_dispatched_reserves_verified",
+    "pjm",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5GKT8GB9K22KS5SWC1",
+    "https://id.skygest.io/distribution/dist_01KNX70F5GEVS5DN3FZ2KHRAB4"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_dispatched_reserves_verified",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/rt_dispatch_reserves/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

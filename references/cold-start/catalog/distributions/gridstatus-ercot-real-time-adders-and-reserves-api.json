@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4ZZG6PK4DTQEYM8A1S",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4ZFAHQM18D24FWKB8C",
+  "kind": "api-access",
+  "title": "ERCOT Real Time Adders And Reserves JSON API",
+  "description": "⚠️ Due to large changes in AS data post RTC+C, we've decide to retired this dataset. The historical data is still available, but will no longer receive updates.\nThe dataset id of the new dataset is [ercot_real_time_adders](https://www.gridstatus.io/datasets/ercot_real_time_adders). \n\n___\n\nERCOT Real-Time ORDC and Reliability Deployment Price Adders and Reserves by SCED Interval\n\nThis ERCOT dataset contains the real-time adders and reserve elements in each run of SCED. Deployed ERS and load resources are included, as are RUC/RMR LDL relaxed, and total LASL and HASL.\n\nThere are a few common elements in the columm names from ERCOT that can assist in understanding and using this dataset. Let's use RTORPA as an example:\n\n* RT = Real-Time\n* OR = Operating Reserves\n* PA = Price Adder \n\nCollectively, these create the column RTORPA, or the Real-Time On-Line Reserve Price Adder. If you replace the OR with OFF you have the Real-Time Off-Line Reserve Price Adder. Swapping in CAP for PA changes the column from Price to Capacity, so RTOFFCAP is Real-Time Off-Line Capacity. Following from these conventions, the Real-Time On-Line Reliability Deployment Price Adder is RTORDPA.\n\nAdditional acronyms include:\n\n* CLR = Controllable Load Resource\n* RMR = Reliability Must Run\n* REG = Regulation\n* RRS = Responsive Reserve\n* ECRS = ERCOT Contingency Reserve Service\n* RUC = Reliabililty Unit Commitment",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/ercot_real_time_adders_and_reserves/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ercot_real_time_adders_and_reserves/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

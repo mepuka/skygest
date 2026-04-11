@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F59C0ZHKH8WNMQM79FE",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F59V75R7QZBHPJBAR12",
+  "kind": "download",
+  "title": "ISONE Interchange 15 Min CSV download",
+  "description": "15 minute net interchange levels between ISO-NE and and the New York ISO (NYISO) at the Roseton interface. ISO-NE and NYISO manage this interface via Coordinated Transaction Scheduling (CTS). CTS interfaces enable enhanced scheduling by coordinating economic clearing of transactions at the interface while eliminating certain fees. This improves the efficiency of trades between the regions. ",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/isone_interchange_15_min/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/isone_interchange_15_min/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

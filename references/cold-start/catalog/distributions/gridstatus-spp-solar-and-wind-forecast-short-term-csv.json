@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5N9683RRHDV7N2MFMQ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5NNEY4TKF9Z543V3AW",
+  "kind": "download",
+  "title": "SPP Solar And Wind Forecast Short Term CSV download",
+  "description": "System-wide wind and solar forecast data for +4 hours and including actual wind\nand solar resource totals from previous intervals.\n\nIncludes data from both SPP East (SPP) and SPP West (SWPW) via the `baa` column.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/spp_solar_and_wind_forecast_short_term/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/spp_solar_and_wind_forecast_short_term/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

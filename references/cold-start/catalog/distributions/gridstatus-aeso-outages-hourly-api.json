@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4GD1ANWZAH6YVSMJ4V",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4G5HK7MJS5C4DR755H",
+  "kind": "api-access",
+  "title": "AESO Outages Hourly JSON API",
+  "description": "This dataset contains hourly average MW values for AESO outages over the next 90 days, broken down by fuel type. Fuel types include simple cycle (SC), cogen, combined cycle (CC), gas-fired steam (GFS), hydro, wind, solar, energy storage, biomass and other, and units mothballed (MBO). ",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/aeso_outages_hourly/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/aeso_outages_hourly/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

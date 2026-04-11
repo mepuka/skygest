@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5F8MXGYYT1M9MJCVG1",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5FFRFGTEXHG8JMEQFJ",
+  "kind": "download",
+  "title": "NYISO Load Raw CSV download",
+  "description": "Load as reported by NYISO. Includes each region",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/nyiso_load_raw/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/nyiso_load_raw/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

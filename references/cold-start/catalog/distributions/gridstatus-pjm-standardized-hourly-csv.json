@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5JY0G0Y76WX6ZK6ZCR",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5JDDM47G4CP9PFKEAC",
+  "kind": "download",
+  "title": "PJM hourly standardized data CSV download",
+  "description": "This table is a curated set of hourly data for PJM. All standardized datasets are intended to speed up analysis and feature engineering work by providing commonly used data series in one denormalized table. Data in this feed is resampled to an hourly frequency from five minutes.\n\nMetrics include:\n\n- Load Forecasts (Regional, Zonal, and RTO-Wide)\n- Renewable Generation\n- Load Ratios (Net load levels, Renewable to load ratios)\n- Wind and Solar Output\n- Generation by fuel type (Coal, Gas, Hydro, Multiple Fuels, Nuclear, Oil, Solar, Storage, Wind, Other, and Other Renewable)\n\nThe standardized datasets are a convenience for API users who only want to query one dataset for each ISO. If you plan on loading in every dataset or want to work with more multiple series alone and together it is recommended to pull the individual datasets to have full visibility into each one.\n\n⚠️ Not all data series are present for the entire length of the dataset. This can occur due to a lack of historical data or the publication of new core datasets by an ISO.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/pjm_standardized_hourly/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/pjm_standardized_hourly/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

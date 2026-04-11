@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX53R1443PQH6NRMM5DHFSK",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX53R14CCFFY3HPBA81XWVA",
+  "kind": "api-access",
+  "title": "Ember Electricity Demand Yearly API",
+  "description": "Get Yearly Demand",
+  "accessURL": "https://api.ember-energy.org/v1/electricity-demand/yearly",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "license": "CC-BY-4.0",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNX53R13BMFM6TQ8CKSG2VTV",
+  "createdAt": "2026-04-11T02:14:38.945Z",
+  "updatedAt": "2026-04-11T02:14:54.829Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.ember-energy.org/v1/electricity-demand/yearly",
+      "relation": "exactMatch"
+    }
+  ]
+}

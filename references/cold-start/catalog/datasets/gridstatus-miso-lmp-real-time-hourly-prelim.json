@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5DAD2ZE7V1M8ZRVRKA",
+  "title": "GridStatus MISO LMP Real Time Hourly Prelim",
+  "description": "Preliminary hourly real-time LMPs for each Pnode in MISO, includes energy, loss,\nand congestion components. It takes 3-5 days for MISO to finalize LMPs, these are\nthe interim values before final LMPs are published. This dataset includes the location types:\n- *Gennode*\n-  *Hub*\n-  *Interface*\n-  *Loadzone*\n\nFor more information see the MISO Pricing Reports Guide (PDF): [https://misodocs.blob.core.windows.net/marketreports/Real-Time Preliminary Market LMPs_MISO Pricing Reports Readers Guide.pdf](https://misodocs.blob.core.windows.net/marketreports/Real-Time%20Preliminary%20Market%20LMPs_MISO%20Pricing%20Reports%20Readers%20Guide.pdf)",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/miso_lmp_real_time_hourly_prelim",
+  "accessRights": "public",
+  "temporal": "2024-06-30T05:42:04+00:00/2026-04-10T04:00:00+00:00",
+  "keywords": [
+    "miso_lmp_real_time_hourly_prelim",
+    "miso",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5D38DR3Y0HZD3FWA15",
+    "https://id.skygest.io/distribution/dist_01KNX70F5D8E6H1PQWT0AB2112"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "miso_lmp_real_time_hourly_prelim",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.misoenergy.org/markets-and-operations/real-time--market-data/market-reports/#nt=%2FMarketReportType%3AHistorical%20LMP%2FMarketReportName%3AReal-Time%20Preliminary%20Market%20LMPs%20(csv)&t=10&p=0&s=MarketReportPublished&sd=desc",
+      "relation": "closeMatch"
+    }
+  ]
+}

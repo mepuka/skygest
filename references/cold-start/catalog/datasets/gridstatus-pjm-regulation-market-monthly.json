@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5JTM0P6F3FZNB1J5MA",
+  "title": "GridStatus PJM Regulation Market Monthly",
+  "description": "Hourly regulation capacity requirements in PJM. Mileage ratios and performance data are also included. \n\nThis data is posted monthly on the first Friday of the month, but due to its reliance on settlement data may be delayed based on delays in the settlement process.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/pjm_regulation_market_monthly",
+  "accessRights": "public",
+  "temporal": "2012-10-01T04:00:00+00:00/2026-04-01T03:30:00+00:00",
+  "keywords": [
+    "pjm_regulation_market_monthly",
+    "pjm",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5JRBCNKPH463YWZ8XJ",
+    "https://id.skygest.io/distribution/dist_01KNX70F5JNPA1R3FNCD51F8W9"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "pjm_regulation_market_monthly",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://dataminer2.pjm.com/feed/reg_market_results/definition",
+      "relation": "closeMatch"
+    }
+  ]
+}

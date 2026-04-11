@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5DTA31NM5PEP77MXFC",
+  "title": "GridStatus MISO LMP Day Ahead Hourly Ex Post",
+  "description": "Day-ahead, hourly, Ex-Post, LMPs publishing by MISO prior to the operating day. Ex-Post LMPs are published in the late afternoon or early evening of the day prior to the market day, several hours after the Ex-Ante day-ahead LMPs.\n\nSee MISO's *BPM 002 - Energy and Operating Reserves* for additional discussion.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/miso_lmp_day_ahead_hourly_ex_post",
+  "accessRights": "public",
+  "temporal": "2016-01-12T05:00:00+00:00/2026-04-12T04:00:00+00:00",
+  "keywords": [
+    "miso_lmp_day_ahead_hourly_ex_post",
+    "miso",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5DJB2K3611CXTCHMKV",
+    "https://id.skygest.io/distribution/dist_01KNX70F5DXJ6W8SAPH614MFCP"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "miso_lmp_day_ahead_hourly_ex_post",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.misoenergy.org/markets-and-operations/real-time--market-data/market-reports/#nt=%2FMarketReportType%3AHistorical%20LMP%2FMarketReportName%3ADay-Ahead%20Market%20ExPost%20LMPs%20(csv)&t=10&p=0&s=MarketReportPublished&sd=desc",
+      "relation": "closeMatch"
+    }
+  ]
+}

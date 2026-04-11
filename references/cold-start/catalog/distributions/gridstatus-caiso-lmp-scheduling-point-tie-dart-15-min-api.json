@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4KJ5C64R565WWQAWQE",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4K3QZR2CHCECJ4PB8Y",
+  "kind": "api-access",
+  "title": "CAISO LMP Scheduling Point Tie DART 15 Min JSON API",
+  "description": "DART spread in CAISO between day-ahead hourly LMPs and real-time 15-minute LMPs for scheduling point tie locations. Hourly day-ahead values are brought to a 15-minute interval across the hour for the purposes of this dataset.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/caiso_lmp_scheduling_point_tie_dart_15_min/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/caiso_lmp_scheduling_point_tie_dart_15_min/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

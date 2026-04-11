@@ -1,0 +1,40 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F54EA682JNTGGZQCMBC",
+  "title": "GridStatus IESO LMP Real Time 5 Min All",
+  "description": "Real-time 5-minute LMPs and their component costs for all pricing locations in Ontario, including virtual zones, interties, and the Ontario Zonal Price.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ieso_lmp_real_time_5_min_all",
+  "accessRights": "public",
+  "keywords": [
+    "ieso_lmp_real_time_5_min_all",
+    "ieso",
+    "view",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5416S8TW55TP9YEVEV",
+    "https://id.skygest.io/distribution/dist_01KNX70F54WXYVTHD6055DEFTT"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ieso_lmp_real_time_5_min_all",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://reports-public.ieso.ca/public",
+      "relation": "closeMatch"
+    }
+  ]
+}

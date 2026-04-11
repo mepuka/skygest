@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5M1Y0YYQBG3TVWNEET",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5MRZ27G1S25F3A3M05",
+  "kind": "download",
+  "title": "SPP Generation Capacity On Outage CSV download",
+  "description": "Generation capacity on outage data by fuel type in hourly intervals for next 7 days. Published each morning around 8am CT.\n\nPublished daily around 8am CT.\n\n\nIncludes data from both SPP East (SPP) and SPP West (SWPW) via the `baa` column.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/spp_generation_capacity_on_outage/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/spp_generation_capacity_on_outage/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

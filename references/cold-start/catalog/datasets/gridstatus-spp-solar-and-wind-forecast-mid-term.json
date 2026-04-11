@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5NK7CAZ2WBJE6V5B0P",
+  "title": "GridStatus SPP Solar And Wind Forecast Mid Term",
+  "description": "System-wide wind and solar forecast data for the next 7 days, organized by hour.\n\nIncludes data from both SPP East (SPP) and SPP West (SWPW) via the `baa` column.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/spp_solar_and_wind_forecast_mid_term",
+  "accessRights": "public",
+  "temporal": "2017-07-20T15:00:00+00:00/2026-04-11T02:00:00+00:00",
+  "keywords": [
+    "spp_solar_and_wind_forecast_mid_term",
+    "spp",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5N6YPW5ERGY2X3R6NS",
+    "https://id.skygest.io/distribution/dist_01KNX70F5NMKNXVH3B9RBMYN88"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "spp_solar_and_wind_forecast_mid_term",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://portal.spp.org/pages/midterm-resource-forecast",
+      "relation": "closeMatch"
+    }
+  ]
+}

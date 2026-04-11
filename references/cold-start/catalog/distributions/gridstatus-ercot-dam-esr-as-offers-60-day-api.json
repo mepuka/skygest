@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4V1T07YTAX3N16SXQZ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4VGD5ZCEXBK74SH73Q",
+  "kind": "api-access",
+  "title": "ERCOT DAM ESR AS Offers 60 Day JSON API",
+  "description": "Day-ahead ancillary services offers from ESRs (Energy Storage Resources) in ERCOT. Each ancillary service has its own bid curve with price-quantity pairs.\n\nThis data is published with a 60-day delay.\n\nThis dataset begins on 12/6/2025, the first day with a day-ahead market following the implementation of RTC+B.",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/ercot_dam_esr_as_offers_60_day/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ercot_dam_esr_as_offers_60_day/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5FRAEQZD7HEJCCHYQ4",
+  "title": "GridStatus NYISO Records",
+  "description": "Top 10 daily records for various metrics in NYISO",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/nyiso_records",
+  "accessRights": "public",
+  "temporal": "2018-07-02T18:35:00+00:00/2026-03-08T01:50:00+00:00",
+  "keywords": [
+    "nyiso_records",
+    "nyiso",
+    "materialized_view",
+    "IRREGULAR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5F2388HNFBY5JBJWS0",
+    "https://id.skygest.io/distribution/dist_01KNX70F5FBKGABHWTYFCZ8911"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "nyiso_records",
+      "relation": "exactMatch"
+    }
+  ]
+}

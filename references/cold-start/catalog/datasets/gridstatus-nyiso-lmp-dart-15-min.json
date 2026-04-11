@@ -1,0 +1,35 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5FC39HAJAS91X6RT23",
+  "title": "GridStatus NYISO LMP DART 15 Min",
+  "description": "DART spread in NYISO between day-ahead hourly LMPs and real-time 15-minute LMPs. Hourly day-ahead values are brought to a 15-minute interval across the hour for the purposes of this dataset.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/nyiso_lmp_dart_15_min",
+  "accessRights": "public",
+  "keywords": [
+    "nyiso_lmp_dart_15_min",
+    "nyiso",
+    "view",
+    "15_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5F7YVG3RGSP57N7V75",
+    "https://id.skygest.io/distribution/dist_01KNX70F5FFWT72PDE9XJ1F7YG"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "nyiso_lmp_dart_15_min",
+      "relation": "exactMatch"
+    }
+  ]
+}

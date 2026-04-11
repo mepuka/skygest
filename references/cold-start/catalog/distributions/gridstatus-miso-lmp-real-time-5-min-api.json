@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5D6TZ2188YMFV5VPN4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5DBRZ33601KBHP8VHJ",
+  "kind": "api-access",
+  "title": "MISO LMP Real Time 5 Min JSON API",
+  "description": "Preliminary real-time ExPost LMP prelim in 5 minute intervals as reported by MISO.\n\nThis dataset includes the location types:\n- *Gennode*\n-  *Hub*\n-  *Interface*\n-  *Loadzone*",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/miso_lmp_real_time_5_min/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/miso_lmp_real_time_5_min/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

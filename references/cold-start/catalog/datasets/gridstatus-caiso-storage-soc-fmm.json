@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4Q2MJ3Z5WHR2Z29RDV",
+  "title": "GridStatus CAISO Storage SOC FMM",
+  "description": "Fifteen-minute market (FMM) storage state of charge in CAISO. This only includes standalone storage.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/caiso_storage_soc_fmm",
+  "accessRights": "public",
+  "temporal": "2024-05-24T07:00:00+00:00/2026-04-10T06:55:00+00:00",
+  "keywords": [
+    "caiso_storage_soc_fmm",
+    "caiso",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4QPHV4XMJ3AXCP1MRE",
+    "https://id.skygest.io/distribution/dist_01KNX70F4QWEV76WPGDS7GQPDG"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "caiso_storage_soc_fmm",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.caiso.com/library/daily-energy-storage-reports",
+      "relation": "closeMatch"
+    }
+  ]
+}

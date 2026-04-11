@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4N1V6Y7EGXEY2BKH4T",
+  "title": "GridStatus CAISO Renewables Forecast DAM",
+  "description": "Day-ahead solar and wind forecasts by trading hub as reported by CAISO.\n\nIncludes data for solar and wind in CAISO, ZP26, SP15, and NP15.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/caiso_renewables_forecast_dam",
+  "accessRights": "public",
+  "temporal": "2020-12-31T15:00:00+00:00/2026-04-10T14:00:00+00:00",
+  "keywords": [
+    "caiso_renewables_forecast_dam",
+    "caiso",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4NB25Z3SPCQPKR55MV",
+    "https://id.skygest.io/distribution/dist_01KNX70F4NDXGJS0WT7626MNQN"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "caiso_renewables_forecast_dam",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "http://oasis.caiso.com/mrioasis/logon.do",
+      "relation": "closeMatch"
+    }
+  ]
+}

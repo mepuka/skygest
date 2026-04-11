@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F51VFSB7EGD26VGXJWY",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F51CGPVPJM313GGCRJ5",
+  "kind": "api-access",
+  "title": "IESO Forecast Surplus Baseload Generation JSON API",
+  "description": "Report on surplus baseload generation (SBG) in Ontario by IESO. \n\nSBG occurs when electricity production from baseload facilities is greater than Ontario demand. Baseload is comprised of available nuclear, must-run hydro, self-scheduling, commissioning, intermittent, and variable generators. \n\nPublished once per day by 5PM EST.\n\nMore information [here](https://www.ieso.ca/-/media/Files/IESO/uploaded/SBG/SurplusBaseloadGen_h3.pdf)",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/ieso_forecast_surplus_baseload_generation/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ieso_forecast_surplus_baseload_generation/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}

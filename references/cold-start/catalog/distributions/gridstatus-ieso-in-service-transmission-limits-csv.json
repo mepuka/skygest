@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F51KBN8XB1JEK2Y0FSP",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F51KAZ8FFBKRJ4DBK6S",
+  "kind": "download",
+  "title": "IESO In Service Transmission Limits CSV download",
+  "description": "MW limits for transmission lines in the context of all in-service conditions. Contains both internal and intertie facility limits.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/ieso_in_service_transmission_limits/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/ieso_in_service_transmission_limits/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

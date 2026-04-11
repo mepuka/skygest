@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4MTJJDPS5GE1X5RPF4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4MXX56ZYFTV5PM7B8V",
+  "kind": "download",
+  "title": "CAISO Load Forecast Day Ahead CSV download",
+  "description": "Hourly load forecast data for each hour of the following day, which is the operating day. This load forecast is posted prior to CAISO running the day-ahead market for the operating day.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/caiso_load_forecast_day_ahead/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/caiso_load_forecast_day_ahead/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

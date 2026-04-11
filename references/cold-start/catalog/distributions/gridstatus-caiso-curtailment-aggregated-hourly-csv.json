@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4J6V4DEWAQ1PA6HX5Y",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4JZ4YRZ1N651ZB5P60",
+  "kind": "download",
+  "title": "CAISO Curtailment Aggregated Hourly CSV download",
+  "description": "CAISO curtailment aggregated by wind and solar on an hourly basis. For more granular data, on curtailment type and reason, see the caiso_curtailment dataset.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/caiso_curtailment_aggregated_hourly/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/caiso_curtailment_aggregated_hourly/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

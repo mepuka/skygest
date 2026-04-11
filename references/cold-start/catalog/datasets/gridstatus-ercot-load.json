@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4YAN0DET85A3DQQHE3",
+  "title": "GridStatus ERCOT Load",
+  "description": "Five-minute load as reported by ERCOT in real-time; contains systemwide demand.\n\nBeginning December 5th, 2025, with the implementation of RTC+B, ERCOT's real-time load reporting no longer includes wholesale storage charging.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_load",
+  "accessRights": "public",
+  "temporal": "2013-06-13T05:00:00+00:00/2026-04-11T02:40:00+00:00",
+  "keywords": [
+    "ercot_load",
+    "ercot",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4YFCG5K6YTBKJZXNGF",
+    "https://id.skygest.io/distribution/dist_01KNX70F4Y7S3A44VAMEEJVRN3"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_load",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/gridmktinfo/dashboards/supplyanddemand",
+      "relation": "closeMatch"
+    }
+  ]
+}

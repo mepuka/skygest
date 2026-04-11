@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5D7BRAXZSBMKJV073C",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5D2ZGX8RVYZ8EDGGS8",
+  "kind": "download",
+  "title": "MISO Generation Outages Forecast CSV download",
+  "description": "This dataset contains daily week-ahead data and forecasts from MISO on generator outags. Outage data in this dataset is available by the region and type of outage and represents MISO's forecast of outages for the peak hour in a given day. MISO derives outage data from information filed with the Control Room Operations Window (CROW) system.\n\nThe regions are:\n* North\n* Central\n* South\n* MISO\n\nThe outage types included are:\n* Forced\n* Derate\n* Planned\n* Unplanned\n\n\nThis dataset is derived from MISO's *Multiday Operating Margin Forecast Report*. ",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/miso_generation_outages_forecast/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/miso_generation_outages_forecast/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

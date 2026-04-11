@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F5AVCTCWY9A426AC4ZS",
+  "title": "GridStatus ISONE LMP Real Time Hourly Final",
+  "description": "Finalized locational marginal prices (LMPs) by hour for the Hub, load zones, and network nodes. Prices are broken into their various cost components: energy, congestion, and losses.",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/isone_lmp_real_time_hourly_final",
+  "accessRights": "public",
+  "temporal": "2017-07-01T00:00:00+00:00/2026-04-10T03:00:00+00:00",
+  "keywords": [
+    "isone_lmp_real_time_hourly_final",
+    "isone",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F5ANG6PRSRSTRBSJNH4",
+    "https://id.skygest.io/distribution/dist_01KNX70F5AR7Q3CK1DJ3PA2ETD"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "isone_lmp_real_time_hourly_final",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://webservices.iso-ne.com/docs/v1.1/rest.hourlylmp.rt.final.day.day.html",
+      "relation": "closeMatch"
+    }
+  ]
+}

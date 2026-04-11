@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F50198PC6AXET0PKSTY",
+  "title": "GridStatus ERCOT Short Term System Adequacy",
+  "description": "ERCOT Short-term system adequacy.\n\nThe available On-Line Resource capacity for Generation Resources and the available\ncapacity for Load Resources, for each hour of the current day and six days forward.\n",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_short_term_system_adequacy",
+  "accessRights": "public",
+  "temporal": "2017-01-01T06:00:03+00:00/2026-04-11T02:00:53+00:00",
+  "keywords": [
+    "ercot_short_term_system_adequacy",
+    "ercot",
+    "table",
+    "1_HOUR"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F50VSY7AP3SRPR8AXZS",
+    "https://id.skygest.io/distribution/dist_01KNX70F5023GHSW715RPZYY5Q"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_short_term_system_adequacy",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/mp/data-products/data-product-details?id=NP3-763-CD",
+      "relation": "closeMatch"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5GMKHD7VAR8GXAMBQS",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5G6WD6P0J2K3AGEG8T",
+  "kind": "download",
+  "title": "PJM AS Market Results Real Time CSV download",
+  "description": "Real-time five-minute ancillary service prices and volumes for PJM. This includes *Regulation*, *Synchronized Reserves*, *Primary Reserves*, and *Thirty Minute Reserves*, and covers the entire RTO, Mid-Atlantic/Dominion (MAD), and Baltimore/Pepco/Dominion (BPD) locales.\n\nThis data series begins in the autumn of 2022, when PJM implemented Comprehensive Pricing Reform which altered price formation for reserves. For more on these changes, see [this article](https://insidelines.pjm.com/pjm-implements-reserve-price-formation-changes/) from PJM.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/pjm_as_market_results_real_time/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/pjm_as_market_results_real_time/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F4RGW28CKYDR6MGTV8F",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F4RHQ6T7WHGN5QY16SD",
+  "kind": "download",
+  "title": "CAISO Tie Flows Real Time 5 Min CSV download",
+  "description": "Five-minute real-time CAISO tie data. Includes all transfers within the EIM.",
+  "downloadURL": "https://api.gridstatus.io/v1/datasets/caiso_tie_flows_real_time_5_min/query?return_format=csv&download=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/caiso_tie_flows_real_time_5_min/query?return_format=csv&download=true",
+      "relation": "exactMatch"
+    }
+  ]
+}

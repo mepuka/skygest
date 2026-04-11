@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4WDHG40Z28Y2FHKNJQ",
+  "title": "GridStatus ERCOT Energy Storage Resources",
+  "description": "Energy Storage Resources as reported by ERCOT.\nIncludes Total Charging, Total Discharging, and Net Output",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/ercot_energy_storage_resources",
+  "accessRights": "public",
+  "temporal": "2023-12-06T06:00:00+00:00/2026-04-11T02:40:00+00:00",
+  "keywords": [
+    "ercot_energy_storage_resources",
+    "ercot",
+    "table",
+    "5_MINUTES"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4WBF3E9FZGTDQGW34E",
+    "https://id.skygest.io/distribution/dist_01KNX70F4WK0T6YQDAFH3FGHXB"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "ercot_energy_storage_resources",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://www.ercot.com/gridmktinfo/dashboards/energystorageresources",
+      "relation": "closeMatch"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNX70F4EWFG956NK7DACQKYP",
+  "title": "GridStatus AESO Daily Average Pool Price",
+  "description": "Average daily prices in AESO. AESO reports out prices for both peak (Hour Ending 8-23) and off-peak. This dataset also contains 30-day rolling average price, defined as the average of the current date and the prior 29 days. ",
+  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXP6MWXWMNJ2A93ESKT",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "landingPage": "https://www.gridstatus.io/datasets/aeso_daily_average_pool_price",
+  "accessRights": "public",
+  "temporal": "2000-01-01T07:00:00+00:00/2026-04-09T06:00:00+00:00",
+  "keywords": [
+    "aeso_daily_average_pool_price",
+    "aeso",
+    "table",
+    "1_DAY"
+  ],
+  "themes": [
+    "grid operations"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNX70F4EZMX6JVZ9E2HMXH2Z",
+    "https://id.skygest.io/distribution/dist_01KNX70F4FVNRNE46ADQ4PTPD9"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
+  ],
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "aeso_daily_average_pool_price",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://developer-apim.aeso.ca/api-details#api=poolprice-api-v1-1&operation=getPoolPriceDateRangeReport",
+      "relation": "closeMatch"
+    }
+  ]
+}

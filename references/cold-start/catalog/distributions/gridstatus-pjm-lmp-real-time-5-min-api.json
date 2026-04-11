@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KNX70F5HBSQH0TGYCPENX84H",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F5H1RW2DAZJ3CMHNX6G",
+  "kind": "api-access",
+  "title": "PJM LMP Real Time 5 Min JSON API",
+  "description": "Real-time LMP in 5 minute intervals as reported by PJM. Also includes load-weighted average transmission zone and residual aggregate prices, which are estimates by PJM. \n\nThe location types present are:\n\n- *ZONE*\n- *HUB*\n- *AGGREGATE*\n- *INTERFACE*\n- *EHV*\n- *BUS*",
+  "accessURL": "https://api.gridstatus.io/v1/datasets/pjm_lmp_real_time_5_min/query?return_format=json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0",
+  "createdAt": "2026-04-11T02:47:48.597Z",
+  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.gridstatus.io/v1/datasets/pjm_lmp_real_time_5_min/query?return_format=json",
+      "relation": "exactMatch"
+    }
+  ]
+}
