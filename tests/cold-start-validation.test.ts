@@ -8,6 +8,8 @@ import { layer as localFileSystemLayer } from "./helpers/LocalFileSystem";
 
 const ROOT = join(import.meta.dirname, "..", checkedInDataLayerRegistryRoot);
 const CANDIDATES_DIR = join(ROOT, "candidates");
+// Flake fix: these cold-start checks load the registry and scan many JSON files under full-suite contention.
+const coldStartValidationTimeoutMs = 30_000;
 
 async function collectJson(dir: string): Promise<string[]> {
   const out: string[] = [];
@@ -31,14 +33,17 @@ async function collectJson(dir: string): Promise<string[]> {
 }
 
 describe("Cold-start validation", () => {
-  it.effect("registry-owned cold-start files load through the checked-in registry loader", () =>
-    Effect.gen(function* () {
-      const prepared = yield* loadCheckedInDataLayerRegistry().pipe(
-        Effect.provide(localFileSystemLayer)
-      );
+  it.effect(
+    "registry-owned cold-start files load through the checked-in registry loader",
+    () =>
+      Effect.gen(function* () {
+        const prepared = yield* loadCheckedInDataLayerRegistry().pipe(
+          Effect.provide(localFileSystemLayer)
+        );
 
-      expect(Array.from(prepared.entities).length).toBeGreaterThan(0);
-    })
+        expect(Array.from(prepared.entities).length).toBeGreaterThan(0);
+      }),
+    coldStartValidationTimeoutMs
   );
 
   it("candidate files decode against the Candidate schema", async () => {
@@ -94,7 +99,7 @@ describe("Cold-start validation", () => {
         `Missing IDs:\n${missing.map((ref) => `  ${ref.file}: ${ref.field} -> ${ref.id}`).join("\n")}`
       );
     }
-  });
+  }, coldStartValidationTimeoutMs);
 
   it("candidate semantic consistency — linked records belong together", async () => {
     const registry = await Effect.runPromise(
@@ -151,5 +156,5 @@ describe("Cold-start validation", () => {
     if (errors.length > 0) {
       throw new Error(`Candidate semantic consistency errors:\n${errors.join("\n")}`);
     }
-  });
+  }, coldStartValidationTimeoutMs);
 });

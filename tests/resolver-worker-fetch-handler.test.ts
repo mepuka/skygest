@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
-import { beforeEach, vi } from "vitest";
+import { beforeAll, beforeEach, vi } from "vitest";
 import {
   MissingOperatorScopeError,
   MissingOperatorSecretError
@@ -34,6 +34,14 @@ vi.mock("../src/resolver/Router", () => ({
 }));
 
 describe("resolver worker fetch handler", () => {
+  let handleResolverWorkerRequest: typeof import("../src/resolver-worker/fetchHandler")["handleResolverWorkerRequest"];
+
+  beforeAll(async () => {
+    ({ handleResolverWorkerRequest } = await import(
+      "../src/resolver-worker/fetchHandler"
+    ));
+  });
+
   beforeEach(() => {
     authorizeOperator.mockReset();
     scheduleDeniedOperatorRequestLog.mockReset();
@@ -49,10 +57,6 @@ describe("resolver worker fetch handler", () => {
   });
 
   it("lets /health bypass auth entirely", async () => {
-    const { handleResolverWorkerRequest } = await import(
-      "../src/resolver-worker/fetchHandler"
-    );
-
     const response = await handleResolverWorkerRequest(
       new Request("https://skygest.local/health"),
       {} as ResolverWorkerEnvBindings
@@ -65,10 +69,6 @@ describe("resolver worker fetch handler", () => {
   });
 
   it("lets /v1/resolve/health bypass auth and delegate to the router", async () => {
-    const { handleResolverWorkerRequest } = await import(
-      "../src/resolver-worker/fetchHandler"
-    );
-
     const response = await handleResolverWorkerRequest(
       new Request("https://skygest.local/v1/resolve/health"),
       {} as ResolverWorkerEnvBindings
@@ -82,10 +82,6 @@ describe("resolver worker fetch handler", () => {
   it("returns 401 when operator auth fails", async () => {
     authorizeOperator.mockRejectedValueOnce(new MissingOperatorSecretError());
     const ctx = { waitUntil: vi.fn() };
-    const { handleResolverWorkerRequest } = await import(
-      "../src/resolver-worker/fetchHandler"
-    );
-
     const response = await handleResolverWorkerRequest(
       new Request("https://skygest.local/v1/resolve/post"),
       {} as ResolverWorkerEnvBindings,
@@ -109,10 +105,6 @@ describe("resolver worker fetch handler", () => {
       })
     );
     const ctx = { waitUntil: vi.fn() };
-    const { handleResolverWorkerRequest } = await import(
-      "../src/resolver-worker/fetchHandler"
-    );
-
     const response = await handleResolverWorkerRequest(
       new Request("https://skygest.local/v1/resolve/post"),
       {} as ResolverWorkerEnvBindings,

@@ -304,7 +304,7 @@ describe("IngestRunWorkflow", () => {
           enqueueBackfill: async () => ({ accepted: true }),
           enqueueReconcile: async () => ({ accepted: true })
         })
-      } as unknown as DurableObjectNamespace;
+      } as unknown as WorkflowIngestEnvBindings["EXPERT_POLL_COORDINATOR"];
 
       const workflow = new IngestRunWorkflow(
         ({
@@ -756,7 +756,7 @@ describe("IngestRunWorkflow", () => {
           enqueueBackfill: async () => ({ accepted: true }),
           enqueueReconcile: async () => ({ accepted: true })
         })
-      } as unknown as DurableObjectNamespace;
+      } as unknown as WorkflowIngestEnvBindings["EXPERT_POLL_COORDINATOR"];
 
       const workflow = new IngestRunWorkflow(
         ({

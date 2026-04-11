@@ -5,7 +5,7 @@
 
     // Environment setup & latest features
     "lib": ["ESNext"],
-    "types": ["@cloudflare/workers-types", "bun"],
+    "types": ["bun"],
     "target": "ESNext",
     "module": "Preserve",
     "moduleDetection": "force",
@@ -39,7 +39,7 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "worker-configuration.d.ts", "worker-runtime.d.ts"],
   "exclude": [
     "analysis/**",
     "src/**/*.test.ts",

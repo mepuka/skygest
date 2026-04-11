@@ -9,7 +9,12 @@
     "incremental": true,
     "tsBuildInfoFile": ".cache/tsc/test.tsbuildinfo"
   },
-  "include": ["tests/**/*.ts", "vitest.config.ts"],
+  "include": [
+    "tests/**/*.ts",
+    "vitest.config.ts",
+    "worker-configuration.d.ts",
+    "worker-runtime.d.ts"
+  ],
   // Mirror the root config's source-side exclusions so test files that
   // transitively import suppressed source paths don't surface errors the
   // main typecheck deliberately ignores. Tests live under tests/, never

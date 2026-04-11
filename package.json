@@ -7,6 +7,7 @@
     "prepare": "effect-language-service patch",
     "test": "vitest run",
     "test:watch": "vitest",
+    "cf:types": "bun run scripts/generate-worker-types.ts",
     "typecheck": "tsgo --noEmit && tsgo --noEmit -p tsconfig.test.json && tsgo --noEmit -p tsconfig.web.json",
     "typecheck:web": "tsgo --noEmit -p tsconfig.web.json",
     "dev": "bun --hot scripts/dev.ts",
@@ -19,7 +20,6 @@
     "ops": "bun run src/scripts/ops.ts"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260120.0",
     "@effect/language-service": "^0.71.2",
     "@effect/platform-bun": "4.0.0-beta.43",
     "@effect/sql-sqlite-bun": "4.0.0-beta.43",
@@ -33,7 +33,8 @@
     "d3": "^7.9.0",
     "jsdom": "^28.0.0",
     "ulid": "^3.0.2",
-    "vitest": "^3.1.1"
+    "vitest": "^3.1.1",
+    "wrangler": "^4.81.1"
   },
   "peerDependencies": {
     "typescript": "^5"
