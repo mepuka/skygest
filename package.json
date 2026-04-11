@@ -44,6 +44,7 @@
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@typescript/native-preview": "^7.0.0-dev.20260411.1",
     "agents": "^0.0.104",
     "bun-plugin-tailwind": "^0.1.2",
     "effect": "4.0.0-beta.43",
