@@ -15,6 +15,7 @@
     "bootstrap:experts": "bun run src/scripts/bootstrap-experts.ts",
     "build:ontology-snapshot": "bun run src/scripts/build-ontology-snapshot.ts",
     "seed:ontology-kv": "bun run src/scripts/seed-ontology-kv.ts",
+    "sync:data-layer": "bun run scripts/sync-data-layer.ts",
     "ops": "bun run src/scripts/ops.ts"
   },
   "devDependencies": {

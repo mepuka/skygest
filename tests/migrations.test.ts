@@ -16,6 +16,14 @@ describe("phase-one migrations", () => {
         WHERE type IN ('table', 'virtual table')
           AND name IN (
             'editorial_picks',
+            'agents',
+            'catalog_records',
+            'catalogs',
+            'data_layer_audit',
+            'data_services',
+            'dataset_series',
+            'datasets',
+            'distributions',
             'experts',
             'expert_sync_state',
             'expert_sources',
@@ -33,7 +41,9 @@ describe("phase-one migrations", () => {
             'post_topics',
             'links',
             'posts_fts',
-            'publications'
+            'publications',
+            'series',
+            'variables'
           )
         ORDER BY name ASC
       `;
@@ -44,6 +54,14 @@ describe("phase-one migrations", () => {
       `;
 
       expect(rows.map((row) => row.name)).toEqual([
+        "agents",
+        "catalog_records",
+        "catalogs",
+        "data_layer_audit",
+        "data_services",
+        "dataset_series",
+        "datasets",
+        "distributions",
         "editorial_picks",
         "expert_sources",
         "expert_sync_state",
@@ -62,7 +80,9 @@ describe("phase-one migrations", () => {
         "post_topics",
         "posts",
         "posts_fts",
-        "publications"
+        "publications",
+        "series",
+        "variables"
       ]);
       expect(applied).toEqual([
         { id: 1, name: "init" },
@@ -85,7 +105,8 @@ describe("phase-one migrations", () => {
         { id: 18, name: "mcp_sessions" },
         { id: 19, name: "pipeline_status_indexes" },
         { id: 20, name: "publication_registry_identity" },
-        { id: 21, name: "podcast_schema" }
+        { id: 21, name: "podcast_schema" },
+        { id: 22, name: "data_layer_registry" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );

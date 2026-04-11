@@ -26,6 +26,7 @@ import { OntologyCatalog } from "../services/OntologyCatalog";
 import { PostImportService } from "../services/PostImportService";
 import { StagingOpsService } from "../services/StagingOpsService";
 import { CandidatePayloadRepoD1 } from "../services/d1/CandidatePayloadRepoD1";
+import { DataLayerReposD1 } from "../services/d1/DataLayerReposD1";
 import { EnrichmentRunsRepoD1 } from "../services/d1/EnrichmentRunsRepoD1";
 import { ExpertSyncStateRepoD1 } from "../services/d1/ExpertSyncStateRepoD1";
 import { EditorialPickBundleReadService } from "../services/EditorialPickBundleReadService";
@@ -112,6 +113,9 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     Layer.provideMerge(pipelineStatusRepoLayer)
   );
   const curationRepoLayer = CurationRepoD1.layer.pipe(
+    Layer.provideMerge(baseLayer)
+  );
+  const dataLayerReposLayer = DataLayerReposD1.layer.pipe(
     Layer.provideMerge(baseLayer)
   );
   const queryRepositoriesLayer = Layer.mergeAll(
@@ -236,7 +240,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         pipelineStatusServiceLayer,
         curationServiceLayer,
         pipelineStatusServiceLayer,
-        postImportServiceLayer
+        postImportServiceLayer,
+        dataLayerReposLayer
       )
     : Layer.mergeAll(
         baseLayer,
@@ -258,6 +263,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         pipelineStatusServiceLayer,
         curationServiceLayer,
         postImportServiceLayer,
+        dataLayerReposLayer,
         enrichmentLauncherLayer
       );
 
@@ -277,6 +283,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     pipelineStatusServiceLayer,
     postImportServiceLayer,
     curationRepoLayer,
+    dataLayerReposLayer,
     curationServiceLayer,
     queryLayer,
     blueskyLayer,
