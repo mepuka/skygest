@@ -58,7 +58,7 @@ import { describe, expect, it } from "@effect/vitest";
 
 - **Branching:** Trunk-based. Feature branches: `sky-<issue>/<description>`.
 - **PRs:** Always to `main`, squash merge. Reference `SKY-XX` in branch name or PR body.
-- **CI:** GitHub Actions runs `bunx tsc --noEmit` + `bun run test`. Staging auto-deploys on merge to main.
+- **CI:** GitHub Actions runs `bun run typecheck` (tsgo via `@typescript/native-preview`) and `bun run test` in parallel jobs. Staging auto-deploys on merge to main after both pass.
 - **Linear:** Project key is `SKY`. GitHub integration auto-links via issue ID.
 
 <!-- effect-solutions:start -->
