@@ -28,6 +28,7 @@ const workerSpecs: ReadonlyArray<WorkerSpec> = [
 const combinedOutputPath = "worker-configuration.d.ts";
 const runtimeOutputPath = "worker-runtime.d.ts";
 const projectRoot = import.meta.dir + "/..";
+const propertyLinePattern = /^(\s*)([A-Z0-9_]+)(\??:\s.*)$/;
 
 const run = (cmd: ReadonlyArray<string>) => {
   const result = Bun.spawnSync({
@@ -71,6 +72,55 @@ const extractInterfaceBody = (
 const normalizeGeneratedImports = (source: string) =>
   source.replaceAll('import("../../src/', 'import("./src/');
 
+const extractAllowedKeys = (configPath: string): ReadonlySet<string> => {
+  const source = readFileSync(join(projectRoot, configPath), "utf8");
+  const keys = new Set<string>();
+
+  for (const match of source.matchAll(/binding\s*=\s*"([A-Z0-9_]+)"/g)) {
+    keys.add(match[1]);
+  }
+
+  for (
+    const match of source.matchAll(
+      /\[\[[^\]]*durable_objects\.bindings\]\][\s\S]*?name\s*=\s*"([A-Z0-9_]+)"/g
+    )
+  ) {
+    keys.add(match[1]);
+  }
+
+  let inVarsBlock = false;
+
+  for (const rawLine of source.split("\n")) {
+    const line = rawLine.trim();
+
+    if (line.startsWith("[") && line.endsWith("]")) {
+      inVarsBlock = line === "[vars]" || line === "[env.staging.vars]";
+      continue;
+    }
+
+    if (!inVarsBlock) {
+      continue;
+    }
+
+    const match = line.match(/^([A-Z0-9_]+)\s*=/);
+
+    if (match) {
+      keys.add(match[1]);
+    }
+  }
+
+  return keys;
+};
+
+const filterInterfaceBody = (
+  lines: ReadonlyArray<string>,
+  allowedKeys: ReadonlySet<string>
+) =>
+  lines.filter((line) => {
+    const match = line.match(propertyLinePattern);
+    return match == null || allowedKeys.has(match[2]);
+  });
+
 const formatInterfaceBody = (lines: ReadonlyArray<string>) =>
   normalizeGeneratedImports(
     lines.map((line) => `  ${line.replace(/^\t/, "")}`).join("\n")
@@ -82,6 +132,7 @@ const tempDir = mkdtempSync(join(projectRoot, ".cache", "wrangler-types-"));
 try {
   const generatedSections = workerSpecs.map((spec) => {
     const rawPath = join(tempDir, `${spec.label.toLowerCase()}.d.ts`);
+    const allowedKeys = extractAllowedKeys(spec.config);
 
     run([
       "bunx",
@@ -98,8 +149,12 @@ try {
 
     return {
       label: spec.label,
-      env: formatInterfaceBody(extractInterfaceBody(raw, "Env")),
-      stagingEnv: formatInterfaceBody(extractInterfaceBody(raw, "StagingEnv"))
+      env: formatInterfaceBody(
+        filterInterfaceBody(extractInterfaceBody(raw, "Env"), allowedKeys)
+      ),
+      stagingEnv: formatInterfaceBody(
+        filterInterfaceBody(extractInterfaceBody(raw, "StagingEnv"), allowedKeys)
+      )
     };
   });
 

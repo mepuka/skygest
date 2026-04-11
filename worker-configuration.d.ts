@@ -14,13 +14,6 @@ declare namespace WorkerConfiguration {
   	ENABLE_STAGING_OPS: "true";
   	ENABLE_DATA_REF_RESOLUTION: "true";
   	GEMINI_VISION_MODEL: "gemini-3-flash-preview";
-  	GOOGLE_API_KEY: string;
-  	ANTHROPIC_API_KEY: string;
-  	EMBER_ENERGY_API_KEY: string;
-  	GRIDSTATUS_API_KEY: string;
-  	EIA_API_KEY: string;
-  	NOAA_CDO_API_KEY: string;
-  	ENTSOE_API_KEY: string;
   	EXPERT_POLL_COORDINATOR: DurableObjectNamespace<import("./src/worker/filter").ExpertPollCoordinatorDo>;
   	RESOLVER: Fetcher /* skygest-resolver-staging */;
   	INGEST_RUN_WORKFLOW: Workflow<Parameters<import("./src/worker/filter").IngestRunWorkflow['run']>[0]['payload']>;
@@ -39,13 +32,6 @@ declare namespace WorkerConfiguration {
   	ENABLE_STAGING_OPS?: "true";
   	ENABLE_DATA_REF_RESOLUTION?: "true";
   	GEMINI_VISION_MODEL: "gemini-3-flash-preview" | "gemini-2.5-flash";
-  	GOOGLE_API_KEY: string;
-  	ANTHROPIC_API_KEY: string;
-  	EMBER_ENERGY_API_KEY: string;
-  	GRIDSTATUS_API_KEY: string;
-  	EIA_API_KEY: string;
-  	NOAA_CDO_API_KEY: string;
-  	ENTSOE_API_KEY: string;
   	EXPERT_POLL_COORDINATOR: DurableObjectNamespace<import("./src/worker/filter").ExpertPollCoordinatorDo>;
   	RESOLVER: Fetcher /* skygest-resolver-staging */ | Fetcher /* skygest-resolver */;
   	INGEST_RUN_WORKFLOW: Workflow<Parameters<import("./src/worker/filter").IngestRunWorkflow['run']>[0]['payload']>;
@@ -62,13 +48,6 @@ declare namespace WorkerConfiguration {
   	MCP_LIMIT_DEFAULT: "20";
   	MCP_LIMIT_MAX: "100";
   	ENABLE_STAGING_OPS: "true";
-  	GOOGLE_API_KEY: string;
-  	ANTHROPIC_API_KEY: string;
-  	EMBER_ENERGY_API_KEY: string;
-  	GRIDSTATUS_API_KEY: string;
-  	EIA_API_KEY: string;
-  	NOAA_CDO_API_KEY: string;
-  	ENTSOE_API_KEY: string;
   	INGEST_SERVICE: Fetcher /* skygest-bi-ingest-staging */;
   	RESOLVER: Fetcher /* skygest-resolver-staging */;
   }
@@ -83,38 +62,17 @@ declare namespace WorkerConfiguration {
   	MCP_LIMIT_DEFAULT: "20";
   	MCP_LIMIT_MAX: "100";
   	ENABLE_STAGING_OPS?: "true";
-  	GOOGLE_API_KEY: string;
-  	ANTHROPIC_API_KEY: string;
-  	EMBER_ENERGY_API_KEY: string;
-  	GRIDSTATUS_API_KEY: string;
-  	EIA_API_KEY: string;
-  	NOAA_CDO_API_KEY: string;
-  	ENTSOE_API_KEY: string;
   	INGEST_SERVICE: Fetcher /* skygest-bi-ingest-staging */ | Fetcher /* skygest-bi-ingest */;
   	RESOLVER: Fetcher /* skygest-resolver-staging */ | Fetcher /* skygest-resolver */;
   }
 
   interface ResolverStagingEnv {
   	DB: D1Database;
-  	GOOGLE_API_KEY: string;
-  	ANTHROPIC_API_KEY: string;
-  	EMBER_ENERGY_API_KEY: string;
-  	GRIDSTATUS_API_KEY: string;
-  	EIA_API_KEY: string;
-  	NOAA_CDO_API_KEY: string;
-  	ENTSOE_API_KEY: string;
   	RESOLVER_RUN_WORKFLOW: Workflow<Parameters<import("./src/resolver-worker/index").DataRefResolverWorkflow['run']>[0]['payload']>;
   }
 
   interface ResolverEnv {
   	DB: D1Database;
-  	GOOGLE_API_KEY: string;
-  	ANTHROPIC_API_KEY: string;
-  	EMBER_ENERGY_API_KEY: string;
-  	GRIDSTATUS_API_KEY: string;
-  	EIA_API_KEY: string;
-  	NOAA_CDO_API_KEY: string;
-  	ENTSOE_API_KEY: string;
   	RESOLVER_RUN_WORKFLOW: Workflow<Parameters<import("./src/resolver-worker/index").DataRefResolverWorkflow['run']>[0]['payload']>;
   }
 
