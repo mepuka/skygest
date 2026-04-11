@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, Exit, FileSystem, Layer, Schema } from "effect";
+import { Effect, Exit, Layer, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import {
   checkedInDataLayerRegistryRoot,
@@ -14,6 +14,10 @@ import {
   type DataLayerRegistrySeed
 } from "../src/domain/data-layer";
 import {
+  Stage1Input as Stage1InputSchema,
+  type Stage1Input
+} from "../src/domain/stage1Resolution";
+import {
   applyDataLayerSyncPlan,
   planDataLayerSync,
   syncCheckedInDataLayer
@@ -22,13 +26,13 @@ import { runStage1 } from "../src/resolution/Stage1";
 import { toDataLayerRegistryLookup } from "../src/resolution/dataLayerRegistry";
 import { AgentsRepo } from "../src/services/AgentsRepo";
 import { DataLayerReposD1 } from "../src/services/d1/DataLayerReposD1";
-import { loadSnapshotFromString, toStage1Input } from "../eval/resolution-stage1/shared";
 import { layer as localFileSystemLayer } from "./helpers/LocalFileSystem";
 import { makeSqliteLayer } from "./support/runtime";
 
 const decodeAgent = Schema.decodeUnknownSync(AgentSchema);
 const decodeVariable = Schema.decodeUnknownSync(VariableSchema);
 const decodeSeries = Schema.decodeUnknownSync(SeriesSchema);
+const decodeStage1Input = Schema.decodeUnknownSync(Stage1InputSchema);
 
 const iso = "2026-04-11T12:00:00.000Z";
 const quoteSqlString = (value: string) => `'${value.replaceAll("'", "''")}'`;
@@ -56,6 +60,149 @@ const makeLayer = () => {
     DataLayerReposD1.layer.pipe(Layer.provideMerge(sqliteLayer))
   );
 };
+
+type Stage1ParityCase = {
+  readonly name: string;
+  readonly input: Stage1Input;
+};
+
+const stage1ParityCases: ReadonlyArray<Stage1ParityCase> = [
+  {
+    name: "distribution exact url",
+    input: decodeStage1Input({
+      postContext: {
+        postUri: "at://did:plc:test/app.bsky.feed.post/distribution" as any,
+        text: "Monthly generation API",
+        links: [
+          {
+            url: "https://api.ember-energy.org/v1/electricity-generation/monthly",
+            title: null,
+            description: null,
+            imageUrl: null,
+            domain: "api.ember-energy.org",
+            extractedAt: 0
+          }
+        ],
+        linkCards: [],
+        threadCoverage: "focus-only"
+      },
+      vision: null,
+      sourceAttribution: null
+    })
+  },
+  {
+    name: "provider label",
+    input: decodeStage1Input({
+      postContext: {
+        postUri: "at://did:plc:test/app.bsky.feed.post/provider" as any,
+        text: "EIA outlook",
+        links: [],
+        linkCards: [],
+        threadCoverage: "focus-only"
+      },
+      vision: null,
+      sourceAttribution: {
+        kind: "source-attribution",
+        provider: {
+          providerId: "eia",
+          providerLabel: "EIA",
+          sourceFamily: null
+        },
+        resolution: "matched",
+        providerCandidates: [],
+        contentSource: null,
+        socialProvenance: null,
+        processedAt: 0
+      }
+    })
+  },
+  {
+    name: "provider homepage domain",
+    input: decodeStage1Input({
+      postContext: {
+        postUri: "at://did:plc:test/app.bsky.feed.post/homepage" as any,
+        text: "Ember write-up",
+        links: [],
+        linkCards: [],
+        threadCoverage: "focus-only"
+      },
+      vision: null,
+      sourceAttribution: {
+        kind: "source-attribution",
+        provider: null,
+        resolution: "unmatched",
+        providerCandidates: [],
+        contentSource: {
+          url: "https://ember-energy.org/data/yearly-electricity-data/",
+          title: null,
+          domain: "ember-energy.org",
+          publication: null
+        },
+        socialProvenance: null,
+        processedAt: 0
+      }
+    })
+  },
+  {
+    name: "vision organization mention",
+    input: decodeStage1Input({
+      postContext: {
+        postUri: "at://did:plc:test/app.bsky.feed.post/vision" as any,
+        text: "Chart image",
+        links: [],
+        linkCards: [],
+        threadCoverage: "focus-only"
+      },
+      sourceAttribution: null,
+      vision: {
+        kind: "vision",
+        summary: {
+          text: "Ember chart",
+          mediaTypes: ["chart"],
+          chartTypes: ["line-chart"],
+          titles: ["Ember chart"],
+          keyFindings: []
+        },
+        assets: [
+          {
+            assetKey: "asset-ember",
+            assetType: "image",
+            source: "embed",
+            index: 0,
+            originalAltText: null,
+            extractionRoute: "full",
+            analysis: {
+              mediaType: "chart",
+              chartTypes: ["line-chart"],
+              altText: null,
+              altTextProvenance: "absent",
+              xAxis: null,
+              yAxis: null,
+              series: [],
+              sourceLines: [],
+              temporalCoverage: null,
+              keyFindings: [],
+              visibleUrls: [],
+              organizationMentions: [
+                {
+                  name: "Ember",
+                  location: "body"
+                }
+              ],
+              logoText: [],
+              title: "Ember chart",
+              modelId: "test",
+              processedAt: 0
+            }
+          }
+        ],
+        modelId: "test",
+        promptVersion: "v1",
+        processedAt: 0
+      }
+    })
+  }
+] as const;
 
 describe("data layer sync", () => {
   it.effect("plans inserts, updates, and missing-in-source rows deterministically", () =>
@@ -196,22 +343,11 @@ describe("data layer sync", () => {
         const fileLookup = toDataLayerRegistryLookup(filePrepared);
         const d1Lookup = toDataLayerRegistryLookup(d1Prepared);
 
-        const fs = yield* FileSystem.FileSystem;
-        const snapshot = yield* fs.readFileString("eval/resolution-stage1/snapshot.jsonl");
-        const rows = yield* loadSnapshotFromString(snapshot);
-        const sampleSlugs = new Set([
-          "001-ember-energy",
-          "002-1reluctantcog",
-          "011-thomashochman",
-          "012-hausfath-bsky-social"
-        ]);
-        const fixtureRows = rows.filter((row) => sampleSlugs.has(row.slug));
+        expect(stage1ParityCases).toHaveLength(4);
 
-        expect(fixtureRows).toHaveLength(sampleSlugs.size);
-
-        for (const row of fixtureRows) {
-          const fileResult = runStage1(toStage1Input(row), fileLookup);
-          const d1Result = runStage1(toStage1Input(row), d1Lookup);
+        for (const testCase of stage1ParityCases) {
+          const fileResult = runStage1(testCase.input, fileLookup);
+          const d1Result = runStage1(testCase.input, d1Lookup);
           expect(d1Result).toEqual(fileResult);
         }
       }).pipe(Effect.provide(makeLayer())),
