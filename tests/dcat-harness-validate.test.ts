@@ -63,6 +63,7 @@ describe("dcat-harness validate", () => {
       const node: IngestNode = {
         _tag: "agent",
         slug: "eia",
+        merged: false,
         data: validAgentBody("U.S. Energy Information Administration", "01KNQEZ5V57VJJJFYV6HWM03VB", [
           {
             scheme: "url",
@@ -84,6 +85,7 @@ describe("dcat-harness validate", () => {
       const good: IngestNode = {
         _tag: "agent",
         slug: "eia",
+        merged: false,
         data: validAgentBody("U.S. Energy Information Administration", "01KNQEZ5V57VJJJFYV6HWM03VB", [
           {
             scheme: "url",

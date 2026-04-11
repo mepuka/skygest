@@ -1,16 +1,14 @@
-import { Schema } from "effect";
-import { ulid } from "ulid";
 import {
   Agent,
-  AgentId,
   AliasSchemeValues,
   Catalog,
-  CatalogId,
   DataService,
-  DataServiceId,
+  mintAgentId,
+  mintCatalogId,
+  mintDataServiceId,
   type ExternalIdentifier
 } from "../../../domain/data-layer";
-import { stripUndefined } from "../../../platform/Json";
+import { stripUndefinedAndDecodeWith } from "../../../platform/Json";
 import { type CatalogIndex, unionAliases } from "../../dcat-harness";
 import {
   ENERGY_CHARTS_AGENT_NAME,
@@ -25,17 +23,9 @@ import {
   FRAUNHOFER_ISE_HOMEPAGE
 } from "./endpointCatalog";
 
-const makeAgentId = Schema.decodeUnknownSync(AgentId);
-const makeCatalogId = Schema.decodeUnknownSync(CatalogId);
-const makeDataServiceId = Schema.decodeUnknownSync(DataServiceId);
-
-const mintEntityId = (entityKind: string, prefix: string): string =>
-  `https://id.skygest.io/${entityKind}/${prefix}_${ulid()}`;
-
-const agentIdFromUlid = () => makeAgentId(mintEntityId("agent", "ag"));
-const catalogIdFromUlid = () => makeCatalogId(mintEntityId("catalog", "cat"));
-const dataServiceIdFromUlid = () =>
-  makeDataServiceId(mintEntityId("data-service", "svc"));
+const decodeAgent = stripUndefinedAndDecodeWith(Agent);
+const decodeCatalog = stripUndefinedAndDecodeWith(Catalog);
+const decodeDataService = stripUndefinedAndDecodeWith(DataService);
 
 const hasUrlAlias = (
   aliases: ReadonlyArray<ExternalIdentifier>,
@@ -108,9 +98,9 @@ const resolveExistingDataService = (
   null;
 
 const buildAgentCandidate = (nowIso: string, existing: Agent | null): Agent =>
-  stripUndefined({
+  decodeAgent({
     _tag: "Agent" as const,
-    id: existing?.id ?? agentIdFromUlid(),
+    id: existing?.id ?? mintAgentId(),
     kind: "organization" as const,
     name: ENERGY_CHARTS_AGENT_NAME,
     alternateNames: existing?.alternateNames ?? ["Fraunhofer ISE"],
@@ -118,16 +108,16 @@ const buildAgentCandidate = (nowIso: string, existing: Agent | null): Agent =>
     aliases: unionAliases(existing?.aliases ?? [], freshAgentAliases),
     createdAt: existing?.createdAt ?? nowIso,
     updatedAt: nowIso
-  }) as unknown as Agent;
+  });
 
 const buildCatalogCandidate = (
   nowIso: string,
   agent: Agent,
   existing: Catalog | null
 ): Catalog =>
-  stripUndefined({
+  decodeCatalog({
     _tag: "Catalog" as const,
-    id: existing?.id ?? catalogIdFromUlid(),
+    id: existing?.id ?? mintCatalogId(),
     title: ENERGY_CHARTS_CATALOG_TITLE,
     description:
       existing?.description ??
@@ -137,16 +127,16 @@ const buildCatalogCandidate = (
     aliases: unionAliases(existing?.aliases ?? [], freshCatalogAliases),
     createdAt: existing?.createdAt ?? nowIso,
     updatedAt: nowIso
-  }) as unknown as Catalog;
+  });
 
 const buildDataServiceCandidate = (
   nowIso: string,
   agent: Agent,
   existing: DataService | null
 ): DataService =>
-  stripUndefined({
+  decodeDataService({
     _tag: "DataService" as const,
-    id: existing?.id ?? dataServiceIdFromUlid(),
+    id: existing?.id ?? mintDataServiceId(),
     title: ENERGY_CHARTS_DATA_SERVICE_TITLE,
     description:
       existing?.description ??
@@ -160,13 +150,16 @@ const buildDataServiceCandidate = (
     aliases: unionAliases(existing?.aliases ?? [], freshDataServiceAliases),
     createdAt: existing?.createdAt ?? nowIso,
     updatedAt: nowIso
-  }) as unknown as DataService;
+  });
 
 export interface BuildContext {
   readonly nowIso: string;
   readonly agentSlug: string;
   readonly catalogSlug: string;
   readonly dataServiceSlug: string;
+  readonly agentMerged: boolean;
+  readonly catalogMerged: boolean;
+  readonly dataServiceMerged: boolean;
   readonly agent: Agent;
   readonly catalog: Catalog;
   readonly dataService: DataService;
@@ -194,6 +187,10 @@ export const buildContextFromIndex = (
     agentSlug: ENERGY_CHARTS_AGENT_SLUG,
     catalogSlug: ENERGY_CHARTS_CATALOG_SLUG,
     dataServiceSlug: ENERGY_CHARTS_DATA_SERVICE_SLUG,
+    agentMerged: existingAgent !== null,
+    catalogMerged: resolveExistingCatalog(idx, existingAgent ?? agent) !== null,
+    dataServiceMerged:
+      resolveExistingDataService(idx, existingAgent ?? agent) !== null,
     agent,
     catalog,
     dataService

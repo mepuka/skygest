@@ -1,20 +1,39 @@
 import { Graph } from "effect";
+import { IngestHarnessError } from "./errors";
 import type { IngestEdge } from "./IngestEdge";
 import type { IngestGraph } from "./IngestGraph";
 import type { IngestNode } from "./IngestNode";
 
 const nodeKey = (node: IngestNode): string => `${node._tag}::${node.data.id}`;
 
+const nodeIndex = (indexById: Map<string, number>, node: IngestNode): number => {
+  const index = indexById.get(nodeKey(node));
+  if (index !== undefined) {
+    return index;
+  }
+
+  throw new IngestHarnessError({
+    message: `Missing node index for ${nodeKey(node)} while building graph`
+  });
+};
+
 export const buildIngestGraph = (
   validatedNodes: ReadonlyArray<IngestNode>
-): IngestGraph =>
-  Graph.directed<IngestNode, IngestEdge>((mutable) => {
-    const indexById = new Map<string, number>();
+): IngestGraph => {
+  const indexById = new Map<string, number>();
+  const seenNodeKeys = new Set<string>();
 
-    for (const node of validatedNodes) {
-      indexById.set(nodeKey(node), Graph.addNode(mutable, node));
+  for (const node of validatedNodes) {
+    const key = nodeKey(node);
+    if (seenNodeKeys.has(key)) {
+      throw new IngestHarnessError({
+        message: `Duplicate ingest graph node key ${key}`
+      });
     }
+    seenNodeKeys.add(key);
+  }
 
+  return Graph.directed<IngestNode, IngestEdge>((mutable) => {
     const agentNodes: Array<Extract<IngestNode, { _tag: "agent" }>> = [];
     const catalogNodes: Array<Extract<IngestNode, { _tag: "catalog" }>> = [];
     const dataServiceNodes: Array<
@@ -25,6 +44,7 @@ export const buildIngestGraph = (
     const crNodes: Array<Extract<IngestNode, { _tag: "catalog-record" }>> = [];
 
     for (const node of validatedNodes) {
+      indexById.set(nodeKey(node), Graph.addNode(mutable, node));
       switch (node._tag) {
         case "agent":
           agentNodes.push(node);
@@ -48,13 +68,13 @@ export const buildIngestGraph = (
     }
 
     for (const agent of agentNodes) {
-      const agentIdx = indexById.get(nodeKey(agent))!;
+      const agentIdx = nodeIndex(indexById, agent);
       for (const catalog of catalogNodes) {
         if (catalog.data.publisherAgentId === agent.data.id) {
           Graph.addEdge(
             mutable,
             agentIdx,
-            indexById.get(nodeKey(catalog))!,
+            nodeIndex(indexById, catalog),
             "publishes"
           );
         }
@@ -64,7 +84,7 @@ export const buildIngestGraph = (
           Graph.addEdge(
             mutable,
             agentIdx,
-            indexById.get(nodeKey(dataset))!,
+            nodeIndex(indexById, dataset),
             "publishes"
           );
         }
@@ -74,7 +94,7 @@ export const buildIngestGraph = (
           Graph.addEdge(
             mutable,
             agentIdx,
-            indexById.get(nodeKey(dataService))!,
+            nodeIndex(indexById, dataService),
             "publishes"
           );
         }
@@ -82,13 +102,13 @@ export const buildIngestGraph = (
     }
 
     for (const catalog of catalogNodes) {
-      const catalogIdx = indexById.get(nodeKey(catalog))!;
+      const catalogIdx = nodeIndex(indexById, catalog);
       for (const catalogRecord of crNodes) {
         if (catalogRecord.data.catalogId === catalog.data.id) {
           Graph.addEdge(
             mutable,
             catalogIdx,
-            indexById.get(nodeKey(catalogRecord))!,
+            nodeIndex(indexById, catalogRecord),
             "contains-record"
           );
         }
@@ -96,13 +116,13 @@ export const buildIngestGraph = (
     }
 
     for (const dataset of datasetNodes) {
-      const datasetIdx = indexById.get(nodeKey(dataset))!;
+      const datasetIdx = nodeIndex(indexById, dataset);
       for (const distribution of distNodes) {
         if (distribution.data.datasetId === dataset.data.id) {
           Graph.addEdge(
             mutable,
             datasetIdx,
-            indexById.get(nodeKey(distribution))!,
+            nodeIndex(indexById, distribution),
             "has-distribution"
           );
         }
@@ -112,7 +132,7 @@ export const buildIngestGraph = (
           Graph.addEdge(
             mutable,
             datasetIdx,
-            indexById.get(nodeKey(catalogRecord))!,
+            nodeIndex(indexById, catalogRecord),
             "primary-topic-of"
           );
         }
@@ -122,10 +142,11 @@ export const buildIngestGraph = (
           Graph.addEdge(
             mutable,
             datasetIdx,
-            indexById.get(nodeKey(dataService))!,
+            nodeIndex(indexById, dataService),
             "served-by"
           );
         }
       }
     }
   });
+};

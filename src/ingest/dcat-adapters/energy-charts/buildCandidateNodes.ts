@@ -1,15 +1,15 @@
-import { ulid } from "ulid";
 import {
   AliasSchemeValues,
   CatalogRecord,
+  DataService,
   Dataset,
   Distribution,
-  makeCatalogRecordId,
-  makeDatasetId,
-  makeDistributionId,
+  mintCatalogRecordId,
+  mintDatasetId,
+  mintDistributionId,
   type ExternalIdentifier
 } from "../../../domain/data-layer";
-import { stripUndefined } from "../../../platform/Json";
+import { stripUndefinedAndDecodeWith } from "../../../platform/Json";
 import {
   stableSlug,
   type CatalogIndex,
@@ -25,14 +25,10 @@ import {
 } from "./endpointCatalog";
 import type { BuildContext } from "./buildContext";
 
-const mintEntityId = (entityKind: string, prefix: string): string =>
-  `https://id.skygest.io/${entityKind}/${prefix}_${ulid()}`;
-
-const datasetIdFromUlid = () => makeDatasetId(mintEntityId("dataset", "ds"));
-const distributionIdFromUlid = () =>
-  makeDistributionId(mintEntityId("distribution", "dist"));
-const catalogRecordIdFromUlid = () =>
-  makeCatalogRecordId(mintEntityId("catalog-record", "cr"));
+const decodeDataset = stripUndefinedAndDecodeWith(Dataset);
+const decodeDistribution = stripUndefinedAndDecodeWith(Distribution);
+const decodeCatalogRecord = stripUndefinedAndDecodeWith(CatalogRecord);
+const decodeDataService = stripUndefinedAndDecodeWith(DataService);
 
 const freshDatasetAliases = (
   family: EndpointFamily
@@ -66,7 +62,7 @@ const buildDatasetCandidate = (
   existing: Dataset | null,
   distributionIds: ReadonlyArray<Distribution["id"]>
 ): Dataset =>
-  stripUndefined({
+  decodeDataset({
     _tag: "Dataset" as const,
     id: datasetId,
     title: family.title,
@@ -84,7 +80,7 @@ const buildDatasetCandidate = (
     aliases: unionAliases(existing?.aliases ?? [], freshDatasetAliases(family)),
     createdAt: existing?.createdAt ?? ctx.nowIso,
     updatedAt: ctx.nowIso
-  }) as unknown as Dataset;
+  });
 
 export const buildDistributionCandidate = (
   family: EndpointFamily,
@@ -92,9 +88,9 @@ export const buildDistributionCandidate = (
   ctx: BuildContext,
   existing: Distribution | null
 ): Distribution =>
-  stripUndefined({
+  decodeDistribution({
     _tag: "Distribution" as const,
-    id: existing?.id ?? distributionIdFromUlid(),
+    id: existing?.id ?? mintDistributionId(),
     datasetId,
     kind: "api-access" as const,
     title: existing?.title ?? `${family.title} API`,
@@ -112,7 +108,7 @@ export const buildDistributionCandidate = (
     ),
     createdAt: existing?.createdAt ?? ctx.nowIso,
     updatedAt: ctx.nowIso
-  }) as unknown as Distribution;
+  });
 
 export const buildCatalogRecord = (
   family: EndpointFamily,
@@ -120,9 +116,9 @@ export const buildCatalogRecord = (
   ctx: BuildContext,
   existing: CatalogRecord | null
 ): CatalogRecord =>
-  stripUndefined({
+  decodeCatalogRecord({
     _tag: "CatalogRecord" as const,
-    id: existing?.id ?? catalogRecordIdFromUlid(),
+    id: existing?.id ?? mintCatalogRecordId(),
     catalogId: ctx.catalog.id,
     primaryTopicType: "dataset" as const,
     primaryTopicId: datasetId,
@@ -133,7 +129,7 @@ export const buildCatalogRecord = (
     sourceModified: existing?.sourceModified,
     isAuthoritative: existing?.isAuthoritative ?? true,
     duplicateOf: existing?.duplicateOf
-  }) as unknown as CatalogRecord;
+  });
 
 export const buildCandidateNodes = (
   families: ReadonlyArray<EndpointFamily>,
@@ -149,7 +145,7 @@ export const buildCandidateNodes = (
 
   for (const family of families) {
     const existingDataset = existingDatasetForFamily(idx, family);
-    const datasetId = existingDataset?.id ?? datasetIdFromUlid();
+    const datasetId = existingDataset?.id ?? mintDatasetId();
     const existingApiDistribution =
       idx.distributionsByDatasetIdKind.get(`${datasetId}::api-access`) ?? null;
     const preservedDistributionIds = idx.allDistributions
@@ -201,7 +197,8 @@ export const buildCandidateNodes = (
           : idx.distributionFileSlugById.get(existingApiDistribution.id),
         () => family.distributionSlug
       ),
-      data: apiDistribution
+      data: apiDistribution,
+      merged: existingApiDistribution !== null
     });
     catalogRecordNodes.push({
       _tag: "catalog-record",
@@ -211,7 +208,8 @@ export const buildCandidateNodes = (
           : idx.catalogRecordFileSlugById.get(existingCatalogRecord.id),
         () => family.catalogRecordSlug
       ),
-      data: catalogRecord
+      data: catalogRecord,
+      merged: existingCatalogRecord !== null
     });
   }
 
@@ -221,22 +219,24 @@ export const buildCandidateNodes = (
       ...datasetNodes.map((node) => node.data.id)
     ])
   ).sort();
-  const dataService = stripUndefined({
+  const dataService = decodeDataService({
     ...ctx.dataService,
     servesDatasetIds: servedDatasetIds,
     updatedAt: ctx.nowIso
-  }) as unknown as BuildContext["dataService"];
+  });
 
   return [
     {
       _tag: "agent",
       slug: ctx.agentSlug,
-      data: ctx.agent
+      data: ctx.agent,
+      merged: ctx.agentMerged
     },
     {
       _tag: "catalog",
       slug: ctx.catalogSlug,
-      data: ctx.catalog
+      data: ctx.catalog,
+      merged: ctx.catalogMerged
     },
     ...datasetNodes,
     ...distributionNodes,
@@ -244,7 +244,8 @@ export const buildCandidateNodes = (
     {
       _tag: "data-service",
       slug: ctx.dataServiceSlug,
-      data: dataService
+      data: dataService,
+      merged: ctx.dataServiceMerged
     }
   ];
 };

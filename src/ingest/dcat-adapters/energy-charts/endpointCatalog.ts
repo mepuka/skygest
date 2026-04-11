@@ -1,4 +1,5 @@
 import { AliasSchemeValues } from "../../../domain/data-layer";
+import type { EnergyChartsOpenApiDocument } from "./openApi";
 
 export const ENERGY_CHARTS_AGENT_SLUG = "fraunhofer-ise";
 export const ENERGY_CHARTS_CATALOG_SLUG = "energy-charts";
@@ -16,20 +17,6 @@ export const ENERGY_CHARTS_AGENT_NAME =
   "Fraunhofer Institute for Solar Energy Systems ISE";
 export const ENERGY_CHARTS_CATALOG_TITLE = "Energy Charts API Catalog";
 export const ENERGY_CHARTS_DATA_SERVICE_TITLE = "Energy Charts API";
-
-export interface OpenApiOperation {
-  readonly summary?: string;
-  readonly description?: string;
-  readonly operationId?: string;
-}
-
-export interface OpenApiPathItem {
-  readonly get?: OpenApiOperation;
-}
-
-export interface OpenApiDocument {
-  readonly paths: Record<string, OpenApiPathItem>;
-}
 
 export interface EndpointFamily {
   readonly path: string;
@@ -63,7 +50,7 @@ export const energyChartsCatalogRecordSlug = (endpointKey: string): string =>
   `${energyChartsDatasetSlug(endpointKey)}-cr`;
 
 export const listEndpointFamilies = (
-  document: OpenApiDocument
+  document: EnergyChartsOpenApiDocument
 ): ReadonlyArray<EndpointFamily> =>
   Object.entries(document.paths)
     .filter(([path, pathItem]) => trimPath(path).length > 0 && pathItem.get !== undefined)

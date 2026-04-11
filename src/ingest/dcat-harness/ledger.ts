@@ -6,6 +6,7 @@ import {
   stringifyUnknown
 } from "../../platform/Json";
 import type { IngestNode } from "./IngestNode";
+import { IngestLedgerError } from "./errors";
 import { isNotFoundPlatformError } from "./entityFiles";
 
 export const EntityIdLedger = Schema.Record(Schema.String, Schema.String);
@@ -26,11 +27,18 @@ const ledgerKindByTag: Record<IngestNode["_tag"], string> = {
 export const ledgerKeyForNode = (node: IngestNode): string =>
   `${ledgerKindByTag[node._tag]}:${node.slug}`;
 
-export const loadLedgerWith = <E>(
+export function loadLedgerWith(
+  rootDir: string
+): Effect.Effect<EntityIdLedger, IngestLedgerError, FileSystem.FileSystem | Path.Path>;
+export function loadLedgerWith<E>(
   rootDir: string,
-  mapLedgerError: (message: string) => E
-): Effect.Effect<EntityIdLedger, E, FileSystem.FileSystem | Path.Path> =>
-  Effect.gen(function* () {
+  mapError: (message: string) => E
+): Effect.Effect<EntityIdLedger, E, FileSystem.FileSystem | Path.Path>;
+export function loadLedgerWith<E>(
+  rootDir: string,
+  mapError?: (message: string) => E
+): Effect.Effect<EntityIdLedger, E | IngestLedgerError, FileSystem.FileSystem | Path.Path> {
+  return Effect.gen(function* () {
     const fs_ = yield* FileSystem.FileSystem;
     const path_ = yield* Path.Path;
     const ledgerPath = path_.resolve(rootDir, ".entity-ids.json");
@@ -40,23 +48,34 @@ export const loadLedgerWith = <E>(
       if (isNotFoundPlatformError(readExit.cause)) {
         return {} satisfies EntityIdLedger;
       }
-      return yield* Effect.fail(
-        mapLedgerError(
+      return yield* new IngestLedgerError({
+        message:
           `Cannot read ledger at ${ledgerPath}: ${stringifyUnknown(readExit.cause)}`
-        )
-      );
+      });
     }
 
     const decoded = decodeEntityIdLedger(readExit.value);
     if (Result.isFailure(decoded)) {
-      return yield* Effect.fail(
-        mapLedgerError(
+      return yield* new IngestLedgerError({
+        message:
           `Cannot decode ledger at ${ledgerPath}: ${formatSchemaParseError(decoded.failure)}`
-        )
-      );
+      });
     }
     return decoded.success;
-  });
+  }).pipe(
+    Effect.mapError((error) =>
+      mapError === undefined ? error : mapError(error.message)
+    )
+  );
+}
+
+export const loadLedgerWithMapped = <E>(
+  rootDir: string,
+  mapError: (message: string) => E
+): Effect.Effect<EntityIdLedger, E, FileSystem.FileSystem | Path.Path> =>
+  loadLedgerWith(rootDir).pipe(
+    Effect.mapError((error) => mapError(error.message))
+  );
 
 export const saveLedgerWith = <E, R>(
   rootDir: string,

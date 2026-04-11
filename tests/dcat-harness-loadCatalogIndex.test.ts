@@ -6,7 +6,10 @@ import * as fsp from "node:fs/promises";
 import * as os from "node:os";
 import * as nodePath from "node:path";
 import { AliasSchemeValues } from "../src/domain/data-layer";
-import { loadCatalogIndexWith } from "../src/ingest/dcat-harness";
+import {
+  IngestHarnessError,
+  loadCatalogIndexWith
+} from "../src/ingest/dcat-harness";
 
 const bunFsLayer = Layer.mergeAll(BunFileSystem.layer, BunPath.layer);
 const FIXTURE_NOW = "2026-04-10T00:00:00.000Z";
@@ -319,6 +322,48 @@ describe("loadCatalogIndexWith", () => {
           mergeAliasValue: null
         }
       ]);
+    }).pipe(Effect.provide(bunFsLayer))
+  );
+
+  it.effect("fails when two datasets share the same merge key", () =>
+    Effect.gen(function* () {
+      const tmp = yield* Effect.promise(() =>
+        makeTmpFixture({
+          datasets: [
+            {
+              slug: "eia-electricity-retail-sales",
+              body: validDatasetBody("Retail Sales A", "01KNQSXEPPXRC56GM4SED9D0K1", [
+                {
+                  scheme: "eia-route",
+                  value: "electricity/retail-sales",
+                  relation: "exactMatch"
+                }
+              ])
+            },
+            {
+              slug: "eia-electricity-retail-sales-duplicate",
+              body: validDatasetBody("Retail Sales B", "01KNQSXEPPXRC56GM4SED9D0K2", [
+                {
+                  scheme: "eia-route",
+                  value: "electricity/retail-sales",
+                  relation: "exactMatch"
+                }
+              ])
+            }
+          ]
+        })
+      );
+
+      const error = yield* loadCatalogIndexWith({
+        rootDir: tmp,
+        mergeAliasScheme: AliasSchemeValues.eiaRoute
+      }).pipe(
+        Effect.flip,
+        Effect.ensuring(Effect.promise(() => cleanup(tmp)))
+      );
+
+      expect(error).toBeInstanceOf(IngestHarnessError);
+      expect(error.message).toContain("Duplicate dataset merge key");
     }).pipe(Effect.provide(bunFsLayer))
   );
 });

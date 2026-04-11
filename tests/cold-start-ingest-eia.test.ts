@@ -721,6 +721,7 @@ const NOW = "2026-04-10T00:00:00.000Z" as unknown as Agent["createdAt"];
 const fakeAgent = (slug: string, ulid: string): IngestNode => ({
   _tag: "agent",
   slug,
+  merged: false,
   data: {
     _tag: "Agent",
     id: `https://id.skygest.io/agent/ag_${ulid}` as unknown as Agent["id"],
@@ -739,6 +740,7 @@ const fakeCatalog = (
 ): IngestNode => ({
   _tag: "catalog",
   slug,
+  merged: false,
   data: {
     _tag: "Catalog",
     id: `https://id.skygest.io/catalog/cat_${ulid}` as unknown as Catalog["id"],
@@ -776,6 +778,7 @@ const fakeDistribution = (
 ): IngestNode => ({
   _tag: "distribution",
   slug,
+  merged: false,
   data: {
     _tag: "Distribution",
     id: `https://id.skygest.io/distribution/dist_${ulid}` as unknown as Distribution["id"],
@@ -795,6 +798,7 @@ const fakeDataService = (
 ): IngestNode => ({
   _tag: "data-service",
   slug,
+  merged: false,
   data: {
     _tag: "DataService",
     id: `https://id.skygest.io/data-service/svc_${ulid}` as unknown as DataService["id"],
@@ -816,6 +820,7 @@ const fakeCatalogRecord = (
 ): IngestNode => ({
   _tag: "catalog-record",
   slug,
+  merged: false,
   data: {
     _tag: "CatalogRecord",
     id: `https://id.skygest.io/catalog-record/cr_${ulid}` as unknown as CatalogRecord["id"],
@@ -2061,6 +2066,13 @@ describe("buildCandidateNodes", () => {
     expect(topo[0]?._tag).toBe("agent");
   });
 
+  it("fails fast on duplicate node keys", () => {
+    const agent = fakeAgent("eia", "01KNQEZ5V57VJJJFYV6HWM03VB");
+    expect(() => buildIngestGraph([agent, agent])).toThrow(
+      "Duplicate ingest graph node key"
+    );
+  });
+
   it("marks merged=true on a dataset whose route is already in the catalog index", () => {
     const ctx = makeBuilderCtx(FIXTURE_NOW);
     const existing = {
@@ -2206,6 +2218,7 @@ describe("validateNode", () => {
       const node: IngestNode = {
         _tag: "agent",
         slug: "eia",
+        merged: false,
         data: validAgentBody(
           "U.S. Energy Information Administration",
           BUILDER_AGENT_ULID,
@@ -2240,6 +2253,7 @@ describe("validateNode", () => {
       const node: IngestNode = {
         _tag: "catalog",
         slug: "eia-open-data",
+        merged: false,
         data: validCatalogBody(
           "EIA Open Data Catalog",
           CATALOG_ULID,
@@ -2261,6 +2275,7 @@ describe("validateNode", () => {
       const node: IngestNode = {
         _tag: "data-service",
         slug: "eia-api-v2",
+        merged: false,
         data: validDataServiceBody(
           "EIA Open Data API v2",
           DATA_SERVICE_ULID,
@@ -2283,6 +2298,7 @@ describe("validateNode", () => {
       const node: IngestNode = {
         _tag: "distribution",
         slug: "eia-retail-sales-api",
+        merged: false,
         data: validDistributionBody(
           DISTRIBUTION_ULID,
           DATASET_ID_FOR_CR,
@@ -2303,6 +2319,7 @@ describe("validateNode", () => {
       const node: IngestNode = {
         _tag: "catalog-record",
         slug: "eia-retail-sales-record",
+        merged: false,
         data: validCatalogRecordBody(
           CATALOG_RECORD_ULID,
           CATALOG_ID,
@@ -2325,6 +2342,7 @@ describe("validateCandidates", () => {
       const agentA: IngestNode = {
         _tag: "agent",
         slug: "eia",
+        merged: false,
         data: validAgentBody(
           "U.S. Energy Information Administration",
           BUILDER_AGENT_ULID,
@@ -2334,6 +2352,7 @@ describe("validateCandidates", () => {
       const agentB: IngestNode = {
         _tag: "agent",
         slug: "noaa",
+        merged: false,
         data: validAgentBody(
           "NOAA",
           "01KNQEZ5V57VJJJFYV6HWM03VZ",

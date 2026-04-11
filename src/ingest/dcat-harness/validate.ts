@@ -7,7 +7,9 @@ import {
   Dataset,
   Distribution
 } from "../../domain/data-layer";
+import { formatSchemaParseError } from "../../platform/Json";
 import type { IngestNode } from "./IngestNode";
+import { IngestSchemaError } from "./errors";
 
 const decodeNode = (
   node: IngestNode
@@ -40,16 +42,48 @@ const decodeNode = (
   }
 };
 
+export const validateNode = (
+  node: IngestNode
+): Effect.Effect<IngestNode, IngestSchemaError> =>
+  decodeNode(node).pipe(
+    Effect.mapError(
+      (error) =>
+        new IngestSchemaError({
+          kind: node._tag,
+          slug: node.slug,
+          message: formatSchemaParseError(error)
+        })
+    )
+  );
+
 export const validateNodeWith = <E>(
   node: IngestNode,
   mapError: (node: IngestNode, error: Schema.SchemaError) => E
-): Effect.Effect<IngestNode, E> => decodeNode(node).pipe(
-  Effect.mapError((error) => mapError(node, error))
-);
+): Effect.Effect<IngestNode, E> =>
+  decodeNode(node).pipe(
+    Effect.mapError((error) => mapError(node, error))
+  );
+
+export const validateCandidates = <R>(
+  candidates: ReadonlyArray<IngestNode>,
+  validate: (candidate: IngestNode) => Effect.Effect<IngestNode, IngestSchemaError, R> = validateNode
+): Effect.Effect<
+  {
+    readonly failures: ReadonlyArray<IngestSchemaError>;
+    readonly successes: ReadonlyArray<IngestNode>;
+  },
+  never,
+  R
+> =>
+  Effect.partition(candidates, (candidate) => validate(candidate), {
+    concurrency: "unbounded"
+  }).pipe(
+    Effect.map(([failures, successes]) => ({ failures, successes }))
+  );
 
 export const validateCandidatesWith = <E, R>(
   candidates: ReadonlyArray<IngestNode>,
-  validateNode: (candidate: IngestNode) => Effect.Effect<IngestNode, E, R>
+  validate: (candidate: IngestNode) => Effect.Effect<IngestNode, E, R>
 ): Effect.Effect<
   {
     readonly failures: ReadonlyArray<E>;
@@ -58,7 +92,7 @@ export const validateCandidatesWith = <E, R>(
   never,
   R
 > =>
-  Effect.partition(candidates, (candidate) => validateNode(candidate), {
+  Effect.partition(candidates, (candidate) => validate(candidate), {
     concurrency: "unbounded"
   }).pipe(
     Effect.map(([failures, successes]) => ({ failures, successes }))

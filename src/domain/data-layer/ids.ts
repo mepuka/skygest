@@ -1,4 +1,5 @@
 import { Schema } from "effect";
+import { ulid } from "ulid";
 import { DesignDecision } from "./annotations";
 
 const makeEntityId = <B extends string>(
@@ -32,9 +33,11 @@ export type ObservationId = Schema.Schema.Type<typeof ObservationId>;
 
 export const AgentId = makeEntityId("agent", "ag", "AgentId");
 export type AgentId = Schema.Schema.Type<typeof AgentId>;
+export const makeAgentId = decodeEntityIdSync<AgentId>(AgentId);
 
 export const CatalogId = makeEntityId("catalog", "cat", "CatalogId");
 export type CatalogId = Schema.Schema.Type<typeof CatalogId>;
+export const makeCatalogId = decodeEntityIdSync<CatalogId>(CatalogId);
 
 export const CatalogRecordId = makeEntityId("catalog-record", "cr", "CatalogRecordId");
 export type CatalogRecordId = Schema.Schema.Type<typeof CatalogRecordId>;
@@ -52,9 +55,30 @@ export const makeDistributionId =
 
 export const DataServiceId = makeEntityId("data-service", "svc", "DataServiceId");
 export type DataServiceId = Schema.Schema.Type<typeof DataServiceId>;
+export const makeDataServiceId = decodeEntityIdSync<DataServiceId>(DataServiceId);
 
 export const DatasetSeriesId = makeEntityId("dataset-series", "dser", "DatasetSeriesId");
 export type DatasetSeriesId = Schema.Schema.Type<typeof DatasetSeriesId>;
 
 export const CandidateId = makeEntityId("candidate", "cand", "CandidateId");
 export type CandidateId = Schema.Schema.Type<typeof CandidateId>;
+
+const mintEntityUri = (entityKind: string, prefix: string): string =>
+  `https://id.skygest.io/${entityKind}/${prefix}_${ulid()}`;
+
+export const mintAgentId = (): AgentId => makeAgentId(mintEntityUri("agent", "ag"));
+
+export const mintCatalogId = (): CatalogId =>
+  makeCatalogId(mintEntityUri("catalog", "cat"));
+
+export const mintCatalogRecordId = (): CatalogRecordId =>
+  makeCatalogRecordId(mintEntityUri("catalog-record", "cr"));
+
+export const mintDatasetId = (): DatasetId =>
+  makeDatasetId(mintEntityUri("dataset", "ds"));
+
+export const mintDistributionId = (): DistributionId =>
+  makeDistributionId(mintEntityUri("distribution", "dist"));
+
+export const mintDataServiceId = (): DataServiceId =>
+  makeDataServiceId(mintEntityUri("data-service", "svc"));
