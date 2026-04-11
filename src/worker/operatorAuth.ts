@@ -13,7 +13,7 @@ import {
   unauthorizedError
 } from "../domain/api";
 import { makeAuthLayer } from "../edge/Layer";
-import { encodeJsonString } from "../platform/Json";
+import { encodeJsonString, stringifyUnknown } from "../platform/Json";
 import { type EnvBindings } from "../platform/Env";
 import { Logging } from "../platform/Logging";
 import { makeSharedRuntime } from "../platform/EffectRuntime";
@@ -26,6 +26,13 @@ type OperatorRequestPolicy = {
   readonly action: string | null;
   readonly scopes: ReadonlyArray<string>;
 };
+
+type BackgroundExecutionContext = Pick<ExecutionContext, "waitUntil">;
+
+type DeniedOperatorRequestLogger = (
+  request: Request,
+  error: unknown
+) => Promise<void>;
 
 const isExpertActivatePath = (pathname: string) =>
   /^\/admin\/experts\/[^/]+\/activate$/u.test(pathname);
@@ -367,6 +374,31 @@ export const logDeniedOperatorRequest = async (
       Effect.provide(Logging.layer)
     )
   );
+};
+
+export const scheduleDeniedOperatorRequestLog = (
+  request: Request,
+  error: unknown,
+  ctx?: BackgroundExecutionContext,
+  logger: DeniedOperatorRequestLogger = logDeniedOperatorRequest
+) => {
+  const { action } = operatorRequestPolicy(request);
+  const task = logger(request, error).catch((logError) => {
+    console.error(
+      encodeJsonString({
+        message: "operator denial log failed",
+        action: action ?? "unknown",
+        error: stringifyUnknown(logError)
+      })
+    );
+  });
+
+  if (ctx !== undefined) {
+    ctx.waitUntil(task);
+    return;
+  }
+
+  void task;
 };
 
 export const operatorRequestAction = (request: Request) =>

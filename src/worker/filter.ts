@@ -1,6 +1,7 @@
 import { Effect } from "effect";
 import { handleEnrichmentRequest } from "../enrichment/Router";
 import { EnrichmentRunWorkflow } from "../enrichment/EnrichmentRunWorkflow";
+import { toHttpErrorResponse } from "../http/ErrorMapping";
 import { handleIngestRequest, makeWorkflowIngestLayer } from "../ingest/Router";
 import { ExpertPollCoordinatorDo, ExpertPollCoordinatorDoIsolated } from "../ingest/ExpertPollCoordinatorDo";
 import { IngestRunWorkflow } from "../ingest/IngestRunWorkflow";
@@ -12,12 +13,18 @@ import {
 } from "../platform/EffectRuntime";
 import {
   authorizeOperator,
-  logDeniedOperatorRequest,
   requiredOperatorScopes,
+  scheduleDeniedOperatorRequestLog,
   toAuthErrorResponse
 } from "./operatorAuth";
 
-export const fetch = async (request: Request, env: WorkflowFilterEnvBindings) => {
+type BackgroundExecutionContext = Pick<ExecutionContext, "waitUntil">;
+
+export const handleFilterWorkerRequest = async (
+  request: Request,
+  env: WorkflowFilterEnvBindings,
+  ctx?: BackgroundExecutionContext
+) => {
   const url = new URL(request.url);
 
   if (url.pathname === "/health") {
@@ -29,7 +36,7 @@ export const fetch = async (request: Request, env: WorkflowFilterEnvBindings) =>
     try {
       identity = await authorizeOperator(request, env, requiredOperatorScopes(request));
     } catch (error) {
-      await logDeniedOperatorRequest(request, error);
+      scheduleDeniedOperatorRequestLog(request, error, ctx);
       return toAuthErrorResponse(error);
     }
     return handleIngestRequest(request, env, identity);
@@ -40,7 +47,7 @@ export const fetch = async (request: Request, env: WorkflowFilterEnvBindings) =>
     try {
       identity = await authorizeOperator(request, env, requiredOperatorScopes(request));
     } catch (error) {
-      await logDeniedOperatorRequest(request, error);
+      scheduleDeniedOperatorRequestLog(request, error, ctx);
       return toAuthErrorResponse(error);
     }
     return handleEnrichmentRequest(request, env, identity);
@@ -48,6 +55,35 @@ export const fetch = async (request: Request, env: WorkflowFilterEnvBindings) =>
 
   return new Response("not found", { status: 404 });
 };
+
+export const handleFetchWithBoundary = async (
+  request: Request,
+  env: WorkflowFilterEnvBindings,
+  ctx?: BackgroundExecutionContext,
+  handler: (
+    request: Request,
+    env: WorkflowFilterEnvBindings,
+    ctx?: BackgroundExecutionContext
+  ) => Promise<Response> = handleFilterWorkerRequest
+): Promise<Response> => {
+  try {
+    return await handler(request, env, ctx);
+  } catch (error) {
+    return toHttpErrorResponse(error, {
+      route: "worker/filter",
+      operation: "IngestWorker.fetch",
+      internalMessage: "internal error",
+      logMessage: "ingest worker top-level error"
+    });
+  }
+};
+
+export const fetch = (
+  request: Request,
+  env: WorkflowFilterEnvBindings,
+  ctx?: ExecutionContext
+) =>
+  handleFetchWithBoundary(request, env, ctx, handleFilterWorkerRequest);
 
 export const scheduled = async (
   _controller: ScheduledController,

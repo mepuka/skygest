@@ -7,7 +7,7 @@ import {
 import type { ResolverWorkerEnvBindings } from "../src/platform/Env";
 
 const authorizeOperator = vi.fn();
-const logDeniedOperatorRequest = vi.fn(async () => {});
+const scheduleDeniedOperatorRequestLog = vi.fn();
 const handleResolverRequest = vi.fn(async () =>
   new Response(JSON.stringify({ status: "ok" }), {
     status: 200,
@@ -25,7 +25,7 @@ vi.mock("../src/worker/operatorAuth", async () => {
   return {
     ...actual,
     authorizeOperator,
-    logDeniedOperatorRequest
+    scheduleDeniedOperatorRequestLog
   };
 });
 
@@ -36,7 +36,7 @@ vi.mock("../src/resolver/Router", () => ({
 describe("resolver worker fetch handler", () => {
   beforeEach(() => {
     authorizeOperator.mockReset();
-    logDeniedOperatorRequest.mockReset();
+    scheduleDeniedOperatorRequestLog.mockReset();
     handleResolverRequest.mockReset();
     handleResolverRequest.mockResolvedValue(
       new Response(JSON.stringify({ status: "ok" }), {
@@ -81,17 +81,24 @@ describe("resolver worker fetch handler", () => {
 
   it("returns 401 when operator auth fails", async () => {
     authorizeOperator.mockRejectedValueOnce(new MissingOperatorSecretError());
+    const ctx = { waitUntil: vi.fn() };
     const { handleResolverWorkerRequest } = await import(
       "../src/resolver-worker/fetchHandler"
     );
 
     const response = await handleResolverWorkerRequest(
       new Request("https://skygest.local/v1/resolve/post"),
-      {} as ResolverWorkerEnvBindings
+      {} as ResolverWorkerEnvBindings,
+      ctx
     );
 
     expect(response.status).toBe(401);
-    expect(logDeniedOperatorRequest).toHaveBeenCalledTimes(1);
+    expect(scheduleDeniedOperatorRequestLog).toHaveBeenCalledTimes(1);
+    expect(scheduleDeniedOperatorRequestLog).toHaveBeenCalledWith(
+      expect.any(Request),
+      expect.any(MissingOperatorSecretError),
+      ctx
+    );
     expect(handleResolverRequest).not.toHaveBeenCalled();
   });
 
@@ -101,17 +108,24 @@ describe("resolver worker fetch handler", () => {
         missingScopes: ["ops:refresh"]
       })
     );
+    const ctx = { waitUntil: vi.fn() };
     const { handleResolverWorkerRequest } = await import(
       "../src/resolver-worker/fetchHandler"
     );
 
     const response = await handleResolverWorkerRequest(
       new Request("https://skygest.local/v1/resolve/post"),
-      {} as ResolverWorkerEnvBindings
+      {} as ResolverWorkerEnvBindings,
+      ctx
     );
 
     expect(response.status).toBe(403);
-    expect(logDeniedOperatorRequest).toHaveBeenCalledTimes(1);
+    expect(scheduleDeniedOperatorRequestLog).toHaveBeenCalledTimes(1);
+    expect(scheduleDeniedOperatorRequestLog).toHaveBeenCalledWith(
+      expect.any(Request),
+      expect.any(MissingOperatorScopeError),
+      ctx
+    );
     expect(handleResolverRequest).not.toHaveBeenCalled();
   });
 });

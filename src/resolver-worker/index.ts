@@ -7,9 +7,10 @@ import {
 
 export const fetch = (
   request: Request,
-  env: ResolverWorkerEnvBindings
+  env: ResolverWorkerEnvBindings,
+  ctx?: ExecutionContext
 ): Promise<Response> =>
-  handleFetchWithBoundary(request, env, handleResolverWorkerRequest);
+  handleFetchWithBoundary(request, env, ctx, handleResolverWorkerRequest);
 
 export { DataRefResolverWorkflow };
 

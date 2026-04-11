@@ -1,8 +1,10 @@
 import { describe, expect, it } from "@effect/vitest";
+import { vi } from "vitest";
 import { MissingOperatorScopeError } from "../src/auth/AuthService";
 import {
   operatorRequestAction,
   requiredOperatorScopes,
+  scheduleDeniedOperatorRequestLog,
   toAuthErrorResponse
 } from "../src/worker/operatorAuth";
 
@@ -239,5 +241,43 @@ describe("operator request policies", () => {
       error: "Forbidden",
       message: "forbidden"
     });
+  });
+
+  it("schedules denial logs on waitUntil without blocking the caller", async () => {
+    let resolveLog: (() => void) | undefined;
+    const logger = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveLog = resolve;
+        })
+    );
+    const waitUntil = vi.fn();
+    const ctx = { waitUntil };
+
+    scheduleDeniedOperatorRequestLog(
+      new Request("https://skygest.local/admin/enrichment/start", {
+        method: "POST"
+      }),
+      new MissingOperatorScopeError({ missingScopes: ["ops:refresh"] }),
+      ctx,
+      logger
+    );
+
+    expect(logger).toHaveBeenCalledTimes(1);
+    expect(waitUntil).toHaveBeenCalledTimes(1);
+
+    const scheduledTask = waitUntil.mock.calls[0]?.[0] as Promise<void>;
+    let settled = false;
+    void scheduledTask.then(() => {
+      settled = true;
+    });
+
+    await Promise.resolve();
+    expect(settled).toBe(false);
+
+    resolveLog?.();
+    await scheduledTask;
+
+    expect(settled).toBe(true);
   });
 });
