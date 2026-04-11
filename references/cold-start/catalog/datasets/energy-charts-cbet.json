@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNWVQMFH3EXRDDRB9BDP5YHR",
+  "title": "Energy Charts Cbet",
+  "description": "Returns the cross-border electricity trading (cbet) in GW between a specified country and its neighbors.\n        \n\nPositive values indicate an import of electricity, whereas negative values show electricity exports.\n        \n\n\n        \n\nResponse schema:\n        \n\n```json\n{\n    \"unix_seconds\": [int],\n    \"countries\": [\n        {\n        \"name\": str,\n        \"data\": [float]\n        }\n    ],\n    \"deprecated\": bool\n}\n```",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNWVQMFHEZD7KVN03TEAVA1Q",
+  "accessRights": "public",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "keywords": [
+    "cbet"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNWVQMFJQ9N1BA9T6Q47E8N6"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNWVQMFH6QYQC1EQ63T1JNN3"
+  ],
+  "createdAt": "2026-04-10T23:30:44.590Z",
+  "updatedAt": "2026-04-10T23:31:05.948Z",
+  "aliases": [
+    {
+      "scheme": "energy-charts-endpoint",
+      "value": "cbet",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KNWVQMFJW787DBEYS7C474ZD",
+  "title": "Energy Charts Ren Share Daily Avg",
+  "description": "<b>Average daily renewable share of load</b>\n    \n\n\n    \n\nReturns the average daily renewable share of load of the last 365 days (year = -1) or for a given year if provided.\n    \n\n\n    \n\nResponse schema:\n    \n\n```json\n\n    {\n        \"days\": [\"dd.mm.yyyy\"],\n        \"data\": [float],\n        \"deprecated\": bool\n    }\n\n    ```",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNWVQMFHEZD7KVN03TEAVA1Q",
+  "accessRights": "public",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "keywords": [
+    "ren_share_daily_avg"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KNWVQMFJXFVDD72T501HQ58X"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNWVQMFH6QYQC1EQ63T1JNN3"
+  ],
+  "createdAt": "2026-04-10T23:30:44.590Z",
+  "updatedAt": "2026-04-10T23:31:05.948Z",
+  "aliases": [
+    {
+      "scheme": "energy-charts-endpoint",
+      "value": "ren_share_daily_avg",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -39,6 +39,17 @@ describe("ExternalIdentifier", () => {
     const input = { scheme: "eia-bulk-id", value: "EBA", relation: "exactMatch" };
     expect(Schema.decodeUnknownSync(ExternalIdentifier)(input).scheme).toBe("eia-bulk-id");
   });
+
+  it("accepts the energy-charts-endpoint scheme for Fraunhofer endpoint merges", () => {
+    const input = {
+      scheme: "energy-charts-endpoint",
+      value: "public_power",
+      relation: "exactMatch"
+    };
+    expect(Schema.decodeUnknownSync(ExternalIdentifier)(input).scheme).toBe(
+      "energy-charts-endpoint"
+    );
+  });
 });
 
 describe("Aliases (unique (scheme, value) enforcement)", () => {

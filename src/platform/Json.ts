@@ -56,6 +56,10 @@ export const stripUndefined = <T extends Record<string, unknown>>(obj: T): { [K 
   return result;
 };
 
+export const stripUndefinedAndDecodeWith = <S extends Schema.Decoder<unknown>>(schema: S) =>
+  <T extends Record<string, unknown>>(input: T): S["Type"] =>
+    Schema.decodeUnknownSync(schema)(stripUndefined(input));
+
 export const stringifyUnknown = (value: unknown): string => {
   if (typeof value === "string") {
     return value;

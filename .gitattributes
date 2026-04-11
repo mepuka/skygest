@@ -1,1 +1,11 @@
 references/cold-start/reports/harvest/eia-api-v2-walk.json -diff linguist-generated
+
+# Cold-start DCAT ingest outputs — script-minted per provider refresh.
+# Marked linguist-generated so GitHub collapses them in PR diffs while
+# keeping them fully diffable and revertible in local git. Hand-curated
+# entities (agents/, catalogs/, data-services/, variables/, candidates/,
+# survey/) stay tracked normally so curation changes surface in review.
+references/cold-start/catalog/datasets/*.json linguist-generated=true
+references/cold-start/catalog/distributions/*.json linguist-generated=true
+references/cold-start/catalog/catalog-records/*.json linguist-generated=true
+references/cold-start/.entity-ids.json linguist-generated=true
