@@ -11,6 +11,8 @@
     "resolveJsonModule": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".cache/tsc/web.tsbuildinfo",
     "strict": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,

@@ -1,14 +1,14 @@
-import { internalServerError } from "../domain/api";
-import { encodeJsonString, stringifyUnknown } from "../platform/Json";
+import { toHttpErrorResponse } from "../http/ErrorMapping";
 import type { ResolverWorkerEnvBindings } from "../platform/Env";
 import { handleResolverRequest } from "../resolver/Router";
 import {
   authorizeOperator,
-  logDeniedOperatorRequest,
+  scheduleDeniedOperatorRequestLog,
   toAuthErrorResponse
 } from "../worker/operatorAuth";
 
 const resolverScopes = ["ops:refresh"] as const;
+type BackgroundExecutionContext = Pick<ExecutionContext, "waitUntil">;
 
 /**
  * Inner fetch handler for the resolver worker. Kept free of any `cloudflare:workers`
@@ -17,7 +17,8 @@ const resolverScopes = ["ops:refresh"] as const;
  */
 export const handleResolverWorkerRequest = async (
   request: Request,
-  env: ResolverWorkerEnvBindings
+  env: ResolverWorkerEnvBindings,
+  ctx?: BackgroundExecutionContext
 ): Promise<Response> => {
   const url = new URL(request.url);
 
@@ -33,7 +34,7 @@ export const handleResolverWorkerRequest = async (
     try {
       await authorizeOperator(request, env, resolverScopes);
     } catch (error) {
-      await logDeniedOperatorRequest(request, error);
+      scheduleDeniedOperatorRequestLog(request, error, ctx);
       return toAuthErrorResponse(error);
     }
 
@@ -41,32 +42,6 @@ export const handleResolverWorkerRequest = async (
   }
 
   return new Response("not found", { status: 404 });
-};
-
-/**
- * Sanitized 500 response for any unhandled error that escapes the inner
- * handler (layer construction failure, top-level Effect runtime failure,
- * unexpected throw). Logs the raw error for diagnostics but returns a
- * scrubbed envelope so internal details never leak to the caller.
- */
-const toInternalServerErrorResponse = (error: unknown): Response => {
-  // Workers Logs requires structured JSON on a single line.
-  console.error(
-    encodeJsonString({
-      message: "resolver worker top-level error",
-      error: stringifyUnknown(error)
-    })
-  );
-
-  return new Response(
-    encodeJsonString(internalServerError("internal error")),
-    {
-      status: 500,
-      headers: {
-        "content-type": "application/json"
-      }
-    }
-  );
 };
 
 /**
@@ -79,14 +54,21 @@ const toInternalServerErrorResponse = (error: unknown): Response => {
 export const handleFetchWithBoundary = async (
   request: Request,
   env: ResolverWorkerEnvBindings,
+  ctx?: BackgroundExecutionContext,
   handler: (
     request: Request,
-    env: ResolverWorkerEnvBindings
+    env: ResolverWorkerEnvBindings,
+    ctx?: BackgroundExecutionContext
   ) => Promise<Response> = handleResolverWorkerRequest
 ): Promise<Response> => {
   try {
-    return await handler(request, env);
+    return await handler(request, env, ctx);
   } catch (error) {
-    return toInternalServerErrorResponse(error);
+    return toHttpErrorResponse(error, {
+      route: "resolver-worker/fetch",
+      operation: "ResolverWorker.fetch",
+      internalMessage: "internal error",
+      logMessage: "resolver worker top-level error"
+    });
   }
 };

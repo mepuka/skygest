@@ -7,6 +7,41 @@ on:
     branches: [main]
 
 jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Link twitter scraper
+        run: |
+          git clone --depth 1 https://github.com/mepuka/better-twitter-scraper.git ../better_twitter_scraper
+          cd ../better_twitter_scraper && bun install && bun run build && bun link
+
+      - run: bun install --frozen-lockfile
+
+      - name: Resolve twitter scraper link
+        run: bun link @pooks/twitter-scraper
+
+      # Cache the tsgo incremental build info so warm runs on the same source
+      # tree can skip most of the typecheck work. actions/checkout rewrites
+      # file mtimes on every run, so this cache only pays off when source
+      # content is unchanged (doc-only PRs, dependabot PRs, re-runs of the
+      # same SHA). Source-touching PRs still pay the full cold cost.
+      - uses: actions/cache@v4
+        with:
+          path: .cache/tsc
+          key: tsbuildinfo-${{ runner.os }}-${{ hashFiles('bun.lock', 'package.json', 'tsconfig*.json') }}-${{ github.sha }}
+          restore-keys: |
+            tsbuildinfo-${{ runner.os }}-${{ hashFiles('bun.lock', 'package.json', 'tsconfig*.json') }}-
+            tsbuildinfo-${{ runner.os }}-
+
+      - name: Type check
+        run: bun run typecheck
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -26,14 +61,11 @@ jobs:
       - name: Resolve twitter scraper link
         run: bun link @pooks/twitter-scraper
 
-      - name: Type check
-        run: bunx tsc --noEmit
-
       - name: Test
         run: bun run test
 
   deploy-staging:
-    needs: test
+    needs: [typecheck, test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:

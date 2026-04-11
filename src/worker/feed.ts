@@ -2,15 +2,16 @@ import { ConfigProvider, Effect } from "effect";
 import { handleAdminRequest } from "../admin/Router";
 import { handleApiRequest } from "../api/Router";
 import { handleDataLayerRequest } from "../data-layer/Router";
+import { toHttpErrorResponse } from "../http/ErrorMapping";
 import { handleMcpRequest } from "../mcp/Router";
 import { AppConfig } from "../platform/Config";
 import type { AgentWorkerEnvBindings } from "../platform/Env";
 import {
   authorizeOperator,
   isStagingOpsPath,
-  logDeniedOperatorRequest,
   notFoundJsonResponse,
   requiredOperatorScopes,
+  scheduleDeniedOperatorRequestLog,
   toAuthErrorResponse
 } from "./operatorAuth";
 
@@ -29,7 +30,13 @@ const isJsonRpcNotification = async (request: Request): Promise<boolean> => {
   }
 };
 
-export const fetch = async (request: Request, env: AgentWorkerEnvBindings) => {
+type BackgroundExecutionContext = Pick<ExecutionContext, "waitUntil">;
+
+export const handleFeedRequest = async (
+  request: Request,
+  env: AgentWorkerEnvBindings,
+  ctx?: BackgroundExecutionContext
+) => {
   const url = new URL(request.url);
 
   if (url.pathname === "/health") {
@@ -61,7 +68,7 @@ export const fetch = async (request: Request, env: AgentWorkerEnvBindings) => {
     try {
       identity = await authorizeOperator(request, env, requiredOperatorScopes(request));
     } catch (error) {
-      await logDeniedOperatorRequest(request, error);
+      scheduleDeniedOperatorRequestLog(request, error, ctx);
       return toAuthErrorResponse(error);
     }
     const notification = await isJsonRpcNotification(request);
@@ -76,7 +83,7 @@ export const fetch = async (request: Request, env: AgentWorkerEnvBindings) => {
     try {
       await authorizeOperator(request, env, requiredOperatorScopes(request));
     } catch (error) {
-      await logDeniedOperatorRequest(request, error);
+      scheduleDeniedOperatorRequestLog(request, error, ctx);
       return toAuthErrorResponse(error);
     }
     return env.INGEST_SERVICE.fetch(request);
@@ -92,7 +99,7 @@ export const fetch = async (request: Request, env: AgentWorkerEnvBindings) => {
         requiredOperatorScopes(request)
       );
     } catch (error) {
-      await logDeniedOperatorRequest(request, error);
+      scheduleDeniedOperatorRequestLog(request, error, ctx);
       return toAuthErrorResponse(error);
     }
 
@@ -113,7 +120,7 @@ export const fetch = async (request: Request, env: AgentWorkerEnvBindings) => {
         requiredOperatorScopes(request)
       );
     } catch (error) {
-      await logDeniedOperatorRequest(request, error);
+      scheduleDeniedOperatorRequestLog(request, error, ctx);
       return toAuthErrorResponse(error);
     }
 
@@ -122,5 +129,34 @@ export const fetch = async (request: Request, env: AgentWorkerEnvBindings) => {
 
   return new Response("not found", { status: 404 });
 };
+
+export const handleFetchWithBoundary = async (
+  request: Request,
+  env: AgentWorkerEnvBindings,
+  ctx?: BackgroundExecutionContext,
+  handler: (
+    request: Request,
+    env: AgentWorkerEnvBindings,
+    ctx?: BackgroundExecutionContext
+  ) => Promise<Response> = handleFeedRequest
+): Promise<Response> => {
+  try {
+    return await handler(request, env, ctx);
+  } catch (error) {
+    return toHttpErrorResponse(error, {
+      route: "worker/feed",
+      operation: "AgentWorker.fetch",
+      internalMessage: "internal error",
+      logMessage: "agent worker top-level error"
+    });
+  }
+};
+
+export const fetch = (
+  request: Request,
+  env: AgentWorkerEnvBindings,
+  ctx?: ExecutionContext
+) =>
+  handleFetchWithBoundary(request, env, ctx, handleFeedRequest);
 
 export default { fetch };

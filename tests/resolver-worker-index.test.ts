@@ -13,6 +13,7 @@ describe("resolver-worker top-level error boundary", () => {
     const response = await handleFetchWithBoundary(
       makeRequest(),
       emptyEnv,
+      undefined,
       () => {
         throw new Error(sensitive);
       }
@@ -37,6 +38,7 @@ describe("resolver-worker top-level error boundary", () => {
     const response = await handleFetchWithBoundary(
       makeRequest(),
       emptyEnv,
+      undefined,
       // eslint-disable-next-line @typescript-eslint/no-throw-literal
       () => {
         throw { secret: sensitiveKey };
@@ -64,6 +66,7 @@ describe("resolver-worker top-level error boundary", () => {
     const response = await handleFetchWithBoundary(
       makeRequest(),
       emptyEnv,
+      undefined,
       async () => expected
     );
 

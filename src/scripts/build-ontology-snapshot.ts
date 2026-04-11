@@ -107,7 +107,7 @@ if (aboxTtl !== undefined) {
   console.log(`No ABox snapshot found at ${aboxPath} — skipping ABox enrichment`);
 }
 
-const { snapshot, publicationsSeed } = buildOntologyArtifacts({
+const { snapshot, publicationsSeed } = await buildOntologyArtifacts({
   ttl: await readRequired(resolve(ontologyRoot, "release/energy-news-reference-individuals.ttl")),
   derivedStoreFilter: await readRequired(resolve(ontologyRoot, "docs/derived-store-filter.md")),
   owlJson: await readRequired(resolve(ontologyRoot, "release/energy-news.json")),

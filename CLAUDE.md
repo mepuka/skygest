@@ -11,6 +11,8 @@ This is a Cloudflare Worker built with Effect.ts. Every rule below is non-negoti
 
 - `bun <file>`, `bun run test`, `bun install`, `bunx <pkg>` — never Node, npm, npx, vite, jest.
 - Bun loads `.env` automatically — no dotenv.
+- Keep every `wrangler*.toml` `compatibility_date` current when touching Worker deploy config.
+- Do not enable `compatibility_flags = ["nodejs_compat"]` as a fallback. If Worker code needs a Node built-in, remove that dependency instead so `src/` stays Node-free.
 
 ## Architecture
 
@@ -56,7 +58,7 @@ import { describe, expect, it } from "@effect/vitest";
 
 - **Branching:** Trunk-based. Feature branches: `sky-<issue>/<description>`.
 - **PRs:** Always to `main`, squash merge. Reference `SKY-XX` in branch name or PR body.
-- **CI:** GitHub Actions runs `bunx tsc --noEmit` + `bun run test`. Staging auto-deploys on merge to main.
+- **CI:** GitHub Actions runs `bun run typecheck` (tsgo via `@typescript/native-preview`) and `bun run test` in parallel jobs. Staging auto-deploys on merge to main after both pass.
 - **Linear:** Project key is `SKY`. GitHub integration auto-links via issue ID.
 
 <!-- effect-solutions:start -->

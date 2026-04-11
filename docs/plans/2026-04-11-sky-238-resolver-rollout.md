@@ -1,5 +1,16 @@
 # SKY-238 Resolver Rollout Notes
 
+## Account note (2026-04-11)
+
+The current Cloudflare account only has the staging split workers:
+
+- `skygest-bi-agent-staging`
+- `skygest-bi-ingest-staging`
+- `skygest-resolver-staging`
+
+So the non-staging names below are rollout targets or future production names,
+not workers that currently exist in this account.
+
 ## Deploy order
 
 1. Provision the resolver worker secret:

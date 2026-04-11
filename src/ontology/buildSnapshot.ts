@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { canonicalTopics, conceptToCanonicalTopicSlug, legacyTopicCompatibility, matcherSignalExclusionConceptSlugs, ambiguityTerms, type CanonicalTopicSlug } from "./canonical";
 import { compactWhitespace, normalizeWord, normalizeHashtag, normalizeDomain } from "./normalize";
 import publicationCuratedSupplementJson from "../../config/ontology/publication-curated-supplement.json";
@@ -254,26 +253,28 @@ const extractOntologyVersion = (ttl: string) =>
 const extractOntologyModifiedDate = (ttl: string) =>
   ttl.match(/dcterms:modified\s+"([^"]+)"/u)?.[1] ?? "1970-01-01";
 
+const bytesToHex = (bytes: Uint8Array) =>
+  Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");
+
+const sha256Hex = async (input: string) => {
+  const encoded = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest("SHA-256", encoded);
+  return bytesToHex(new Uint8Array(digest));
+};
+
 const makeSourceDigest = (input: BuildOntologySnapshotInput) =>
-  createHash("sha256")
-    .update(input.ttl)
-    .update(input.derivedStoreFilter)
-    .update(input.owlJson ?? "")
-    .digest("hex");
+  sha256Hex(`${input.ttl}\u0000${input.derivedStoreFilter}\u0000${input.owlJson ?? ""}`);
 
 const makePublicationSeedVersion = (
   ontologyVersion: string,
   publications: ReadonlyArray<PublicationSeed>
-) => {
-  const digest = createHash("sha256")
-    .update(JSON.stringify({
+) =>
+  sha256Hex(
+    JSON.stringify({
       ontologyVersion,
       publications
-    }))
-    .digest("hex");
-
-  return `${ontologyVersion}-${digest.slice(0, 12)}`;
-};
+    })
+  ).then((digest) => `${ontologyVersion}-${digest.slice(0, 12)}`);
 
 const validateMappingCoverage = (concepts: ReadonlyArray<ParsedConcept>) => {
   const parsedSlugs = new Set(concepts.map((concept) => concept.slug));
@@ -465,11 +466,11 @@ const publicationHostnameRejectionReason = (
   return null;
 };
 
-const buildPublicationSeed = (
+const buildPublicationSeed = async (
   derivedStoreFilter: string,
   ontologyVersion: string,
   aboxTtl?: string
-): PublicationSeedManifest => {
+): Promise<PublicationSeedManifest> => {
   const energyFocusedDomains = parseDomains(derivedStoreFilter);
   const generalOutletDomains = parseGeneralOutletDomains(derivedStoreFilter);
   const energyFocusedDomainSet = new Set(energyFocusedDomains);
@@ -540,7 +541,7 @@ const buildPublicationSeed = (
     hostname,
     tier
   })).sort((a, b) => a.hostname.localeCompare(b.hostname));
-  const snapshotVersion = makePublicationSeedVersion(
+  const snapshotVersion = await makePublicationSeedVersion(
     ontologyVersion,
     publications
   );
@@ -565,11 +566,11 @@ const buildPublicationSeed = (
   };
 };
 
-export const buildOntologyArtifacts = (
+export const buildOntologyArtifacts = async (
   input: BuildOntologySnapshotInput
-): OntologyArtifacts => {
-  const snapshot = buildOntologySnapshot(input);
-  const publicationsSeed = buildPublicationSeed(
+): Promise<OntologyArtifacts> => {
+  const snapshot = await buildOntologySnapshot(input);
+  const publicationsSeed = await buildPublicationSeed(
     input.derivedStoreFilter,
     snapshot.ontologyVersion,
     input.aboxTtl
@@ -578,12 +579,12 @@ export const buildOntologyArtifacts = (
   return { snapshot, publicationsSeed };
 };
 
-export const buildOntologySnapshot = (
+export const buildOntologySnapshot = async (
   input: BuildOntologySnapshotInput
-): OntologySnapshotData => {
+): Promise<OntologySnapshotData> => {
   const ontologyVersion = extractOntologyVersion(input.ttl);
   const generatedAt = `${extractOntologyModifiedDate(input.ttl)}T00:00:00.000Z`;
-  const sourceDigest = makeSourceDigest(input);
+  const sourceDigest = await makeSourceDigest(input);
   const snapshotVersion = `${ontologyVersion}-${sourceDigest.slice(0, 12)}`;
   const anomalies: Array<OntologyAnomaly> = [];
 

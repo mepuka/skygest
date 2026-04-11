@@ -9,7 +9,7 @@ import {
   type UpstreamFailureError,
   upstreamFailureError
 } from "../domain/api";
-import { stringifyUnknown } from "../platform/Json";
+import { encodeJsonString, stringifyUnknown } from "../platform/Json";
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -80,6 +80,10 @@ export type HttpErrorMappingOptions = {
   readonly internalMessage?: string;
 };
 
+type HttpErrorResponseOptions = HttpErrorMappingOptions & {
+  readonly logMessage?: string;
+};
+
 export const mapHttpError = (
   error: unknown,
   options: HttpErrorMappingOptions
@@ -95,6 +99,56 @@ export const mapHttpError = (
 
   return internalServerError(
     options.internalMessage ?? "internal error"
+  );
+};
+
+const toHttpStatus = (error: HttpErrorEnvelope) => {
+  switch (error.error) {
+    case "BadRequest":
+      return 400;
+    case "Unauthorized":
+      return 401;
+    case "Forbidden":
+      return 403;
+    case "NotFound":
+      return 404;
+    case "Conflict":
+      return 409;
+    case "UpstreamFailure":
+      return 502;
+    case "ServiceUnavailable":
+      return 503;
+    case "InternalServerError":
+      return 500;
+  }
+};
+
+export const toHttpErrorResponse = (
+  error: unknown,
+  options: HttpErrorResponseOptions
+) => {
+  if (options.logMessage !== undefined) {
+    // Workers Logs expects a single JSON line per event.
+    console.error(
+      encodeJsonString({
+        message: options.logMessage,
+        route: options.route,
+        operation: options.operation ?? "unknown",
+        error: stringifyUnknown(error)
+      })
+    );
+  }
+
+  const envelope = mapHttpError(error, options);
+
+  return new Response(
+    encodeJsonString(envelope),
+    {
+      status: toHttpStatus(envelope),
+      headers: {
+        "content-type": "application/json"
+      }
+    }
   );
 };
 
