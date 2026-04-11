@@ -35,6 +35,8 @@ const decodeSeries = Schema.decodeUnknownSync(SeriesSchema);
 const decodeStage1Input = Schema.decodeUnknownSync(Stage1InputSchema);
 
 const iso = "2026-04-11T12:00:00.000Z";
+// Flake fix: this sync/parity test does two full registry syncs plus Stage 1 verification and can starve under full-suite contention.
+const registrySyncTimeoutMs = 120_000;
 const quoteSqlString = (value: string) => `'${value.replaceAll("'", "''")}'`;
 
 const makeSeed = (
@@ -351,6 +353,6 @@ describe("data layer sync", () => {
           expect(d1Result).toEqual(fileResult);
         }
       }).pipe(Effect.provide(makeLayer())),
-    10_000
+    registrySyncTimeoutMs
   );
 });
