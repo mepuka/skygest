@@ -6,6 +6,25 @@
 
 ## Executive Summary
 
+## Historical Addendum (2026-04-11)
+
+A follow-up Cloudflare account check on 2026-04-11 changed the live-state
+picture in one important way:
+
+- the account still only has the staging split workers
+  (`skygest-bi-agent-staging`, `skygest-bi-ingest-staging`,
+  `skygest-resolver-staging`)
+- no non-staging `skygest-bi-agent` or `skygest-bi-ingest` worker exists in the
+  current account
+- the only live Skygest coordinator namespace is
+  `skygest-bi-ingest-staging_ExpertPollCoordinatorDo`
+- the staging agent worker no longer binds `EXPERT_POLL_COORDINATOR`
+
+That means the "split coordinator namespaces in staging" caveat captured below
+is now historical. The current account state is simpler: the ingest worker owns
+the coordinator namespace directly, and the agent worker does not have its own
+live coordinator namespace.
+
 Skygest is currently an operator-managed, Cloudflare-native ingestion and retrieval system for a domain-specific Bluesky knowledge base.
 
 Today it does four concrete things:
@@ -47,7 +66,7 @@ Not confirmed remotely:
 Important deployment caveat confirmed from `wrangler versions view --json`:
 
 - the staging `agent` worker and staging `ingest` worker share the same D1 database and KV namespace
-- they do **not** share the same `EXPERT_POLL_COORDINATOR` Durable Object namespace
+- on 2026-03-12 they did **not** share the same `EXPERT_POLL_COORDINATOR` Durable Object namespace
 - staging config disables cron triggers for the ingest worker
 - observed staging namespace IDs:
   - agent worker: `004eb27c42204a7c858d73ddcc396f03`
@@ -56,9 +75,17 @@ Important deployment caveat confirmed from `wrangler versions view --json`:
 Inference from that deployment state:
 
 - the codebase is architected as if there is one logical per-expert coordinator layer
-- live staging currently splits that coordinator state by worker deployment
+- live staging on 2026-03-12 split that coordinator state by worker deployment
 - admin-triggered runs and cron-triggered runs therefore do **not** share the same live Durable Object state in staging
 - because staging cron is disabled and all observed staging runs were operator-triggered, this mismatch is a real deployment caveat but not one that appears to be exercised by scheduled traffic today
+
+Re-check on 2026-04-11:
+
+- the staging agent worker no longer exposes an `EXPERT_POLL_COORDINATOR`
+  binding in its deployed version metadata
+- the only live coordinator namespace now belongs to
+  `skygest-bi-ingest-staging`
+- no `ExpertPollCoordinatorDoIsolated` namespace exists in the account
 
 ### Verified staging D1 state
 

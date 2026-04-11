@@ -3,6 +3,21 @@
 Date: 2026-03-16
 Status: Revised draft after architecture review
 
+## Historical note (2026-04-11)
+
+A later account check showed that this transfer plan was never executed in the
+current Cloudflare account:
+
+- only `skygest-bi-agent-staging`, `skygest-bi-ingest-staging`, and
+  `skygest-resolver-staging` exist for the split workers
+- no `skygest-bi-agent` or `skygest-bi-ingest` production workers exist
+- the only live coordinator namespace is
+  `skygest-bi-ingest-staging_ExpertPollCoordinatorDo`
+- no `ExpertPollCoordinatorDoIsolated` namespace exists
+- Wrangler `4.81.1` no longer supports `wrangler durable-objects list`; use the
+  Durable Objects namespaces and objects APIs plus `wrangler versions view
+  --json` when re-checking live ownership
+
 ## Objective
 
 Protect the agent worker from ingest coordination CPU by moving ingest control-plane traffic and Durable Object execution off the agent worker without introducing migration-domain drift.
@@ -98,12 +113,16 @@ Do this against production first. Staging is useful for rehearsals, not for bran
 
 ### 0.1 Check production DO ownership
 
-Run against production code names, not `--env staging`:
+Wrangler `4.81.1` no longer exposes `wrangler durable-objects list`.
+Verify ownership from live account data instead:
 
-```bash
-bunx wrangler durable-objects list --config wrangler.agent.toml
-bunx wrangler durable-objects list --config wrangler.toml
-```
+- list worker names from `GET /accounts/<account_id>/workers/scripts`
+- inspect live bindings with `bunx wrangler deployments status ...` and
+  `bunx wrangler versions view <version-id> ... --json`
+- inspect coordinator namespaces from
+  `GET /accounts/<account_id>/workers/durable_objects/namespaces`
+- inspect object counts from
+  `GET /accounts/<account_id>/workers/durable_objects/namespaces/<namespace_id>/objects`
 
 Record:
 
