@@ -10,5 +10,15 @@
     "tsBuildInfoFile": ".cache/tsc/test.tsbuildinfo"
   },
   "include": ["tests/**/*.ts", "vitest.config.ts"],
-  "exclude": ["analysis/**"]
+  // Mirror the root config's source-side exclusions so test files that
+  // transitively import suppressed source paths don't surface errors the
+  // main typecheck deliberately ignores. Tests live under tests/, never
+  // src/**/*.test.ts, so the .test.ts root exclude is not needed here.
+  "exclude": [
+    "analysis/**",
+    "src/filters/**",
+    "src/services/CandidateSessionsRepo.ts",
+    "src/services/kv/**",
+    "src/web/**"
+  ]
 }

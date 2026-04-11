@@ -34,9 +34,9 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: .cache/tsc
-          key: tsbuildinfo-${{ runner.os }}-${{ hashFiles('bun.lock', 'tsconfig*.json') }}-${{ github.sha }}
+          key: tsbuildinfo-${{ runner.os }}-${{ hashFiles('bun.lock', 'package.json', 'tsconfig*.json') }}-${{ github.sha }}
           restore-keys: |
-            tsbuildinfo-${{ runner.os }}-${{ hashFiles('bun.lock', 'tsconfig*.json') }}-
+            tsbuildinfo-${{ runner.os }}-${{ hashFiles('bun.lock', 'package.json', 'tsconfig*.json') }}-
             tsbuildinfo-${{ runner.os }}-
 
       - name: Type check
