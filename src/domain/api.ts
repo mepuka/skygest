@@ -61,7 +61,38 @@ import {
   CuratePostInput,
   CuratePostOutput
 } from "./curation";
-import { DataLayerRegistryEntity } from "./data-layer";
+import {
+  AccessRights,
+  AgentKind,
+  Agent,
+  AgentId,
+  Aggregation,
+  Aliases,
+  Cadence,
+  Catalog,
+  CatalogId,
+  CatalogRecord,
+  CatalogRecordId,
+  DataLayerRegistryEntity,
+  DataService,
+  DataServiceId,
+  Dataset,
+  DatasetId,
+  DatasetSeries,
+  DatasetSeriesId,
+  Distribution,
+  DistributionId,
+  DistributionKind,
+  FixedDims,
+  Series,
+  SeriesId,
+  StatisticType,
+  UnitFamily,
+  Variable,
+  VariableId,
+  WebUrl,
+  DateLike
+} from "./data-layer";
 import { AtUri, Did, PostUri } from "./types";
 
 const withStatus = <S extends Schema.Top>(
@@ -332,6 +363,23 @@ const DecodedId = StringFromUriComponent.pipe(
 );
 const DecodedDataLayerKind = StringFromUriComponent.pipe(
   Schema.decodeTo(DataLayerKind)
+);
+
+export const DataLayerEntityId = Schema.Union([
+  AgentId,
+  CatalogId,
+  CatalogRecordId,
+  DatasetId,
+  DistributionId,
+  DataServiceId,
+  DatasetSeriesId,
+  VariableId,
+  SeriesId
+]);
+export type DataLayerEntityId = Schema.Schema.Type<typeof DataLayerEntityId>;
+
+const DecodedDataLayerEntityId = StringFromUriComponent.pipe(
+  Schema.decodeTo(DataLayerEntityId)
 );
 
 
@@ -779,6 +827,156 @@ export const ImportPostsOutput = Schema.Struct({
 });
 export type ImportPostsOutput = Schema.Schema.Type<typeof ImportPostsOutput>;
 
+export const AgentCreateInput = Schema.Struct({
+  _tag: Schema.Literal("Agent"),
+  kind: AgentKind,
+  name: Schema.String,
+  alternateNames: Schema.optionalKey(Schema.Array(Schema.String)),
+  homepage: Schema.optionalKey(WebUrl),
+  parentAgentId: Schema.optionalKey(AgentId),
+  aliases: Aliases
+});
+export type AgentCreateInput = Schema.Schema.Type<typeof AgentCreateInput>;
+
+export const CatalogCreateInput = Schema.Struct({
+  _tag: Schema.Literal("Catalog"),
+  title: Schema.String,
+  description: Schema.optionalKey(Schema.String),
+  publisherAgentId: AgentId,
+  homepage: Schema.optionalKey(WebUrl),
+  aliases: Aliases
+});
+export type CatalogCreateInput = Schema.Schema.Type<typeof CatalogCreateInput>;
+
+export const CatalogRecordCreateInput = Schema.Struct({
+  _tag: Schema.Literal("CatalogRecord"),
+  catalogId: CatalogId,
+  primaryTopicType: Schema.Literals(["dataset", "dataService"]),
+  primaryTopicId: Schema.String,
+  sourceRecordId: Schema.optionalKey(Schema.String),
+  harvestedFrom: Schema.optionalKey(Schema.String),
+  firstSeen: Schema.optionalKey(DateLike),
+  lastSeen: Schema.optionalKey(DateLike),
+  sourceModified: Schema.optionalKey(DateLike),
+  isAuthoritative: Schema.optionalKey(Schema.Boolean),
+  duplicateOf: Schema.optionalKey(CatalogRecordId)
+});
+export type CatalogRecordCreateInput = Schema.Schema.Type<
+  typeof CatalogRecordCreateInput
+>;
+
+export const DatasetCreateInput = Schema.Struct({
+  _tag: Schema.Literal("Dataset"),
+  title: Schema.String,
+  description: Schema.optionalKey(Schema.String),
+  creatorAgentId: Schema.optionalKey(AgentId),
+  wasDerivedFrom: Schema.optionalKey(Schema.Array(AgentId)),
+  publisherAgentId: Schema.optionalKey(AgentId),
+  landingPage: Schema.optionalKey(WebUrl),
+  accessRights: Schema.optionalKey(AccessRights),
+  license: Schema.optionalKey(Schema.String),
+  temporal: Schema.optionalKey(Schema.String),
+  keywords: Schema.optionalKey(Schema.Array(Schema.String)),
+  themes: Schema.optionalKey(Schema.Array(Schema.String)),
+  distributionIds: Schema.optionalKey(Schema.Array(DistributionId)),
+  dataServiceIds: Schema.optionalKey(Schema.Array(DataServiceId)),
+  inSeries: Schema.optionalKey(DatasetSeriesId),
+  aliases: Aliases
+});
+export type DatasetCreateInput = Schema.Schema.Type<typeof DatasetCreateInput>;
+
+export const DistributionCreateInput = Schema.Struct({
+  _tag: Schema.Literal("Distribution"),
+  datasetId: DatasetId,
+  kind: DistributionKind,
+  title: Schema.optionalKey(Schema.String),
+  description: Schema.optionalKey(Schema.String),
+  accessURL: Schema.optionalKey(WebUrl),
+  downloadURL: Schema.optionalKey(WebUrl),
+  mediaType: Schema.optionalKey(Schema.String),
+  format: Schema.optionalKey(Schema.String),
+  byteSize: Schema.optionalKey(Schema.Number),
+  checksum: Schema.optionalKey(Schema.String),
+  accessRights: Schema.optionalKey(AccessRights),
+  license: Schema.optionalKey(Schema.String),
+  accessServiceId: Schema.optionalKey(DataServiceId),
+  aliases: Aliases
+});
+export type DistributionCreateInput = Schema.Schema.Type<
+  typeof DistributionCreateInput
+>;
+
+export const DataServiceCreateInput = Schema.Struct({
+  _tag: Schema.Literal("DataService"),
+  title: Schema.String,
+  description: Schema.optionalKey(Schema.String),
+  publisherAgentId: Schema.optionalKey(AgentId),
+  endpointURLs: Schema.Array(WebUrl),
+  endpointDescription: Schema.optionalKey(WebUrl),
+  conformsTo: Schema.optionalKey(Schema.String),
+  servesDatasetIds: Schema.Array(DatasetId),
+  accessRights: Schema.optionalKey(AccessRights),
+  license: Schema.optionalKey(Schema.String),
+  aliases: Aliases
+});
+export type DataServiceCreateInput = Schema.Schema.Type<
+  typeof DataServiceCreateInput
+>;
+
+export const DatasetSeriesCreateInput = Schema.Struct({
+  _tag: Schema.Literal("DatasetSeries"),
+  title: Schema.String,
+  description: Schema.optionalKey(Schema.String),
+  publisherAgentId: Schema.optionalKey(AgentId),
+  cadence: Cadence,
+  aliases: Aliases
+});
+export type DatasetSeriesCreateInput = Schema.Schema.Type<
+  typeof DatasetSeriesCreateInput
+>;
+
+export const VariableCreateInput = Schema.Struct({
+  _tag: Schema.Literal("Variable"),
+  label: Schema.String,
+  definition: Schema.optionalKey(Schema.String),
+  measuredProperty: Schema.optionalKey(Schema.String),
+  domainObject: Schema.optionalKey(Schema.String),
+  technologyOrFuel: Schema.optionalKey(Schema.String),
+  statisticType: Schema.optionalKey(StatisticType),
+  aggregation: Schema.optionalKey(Aggregation),
+  basis: Schema.optionalKey(Schema.Array(Schema.String)),
+  unitFamily: Schema.optionalKey(UnitFamily),
+  aliases: Aliases
+});
+export type VariableCreateInput = Schema.Schema.Type<typeof VariableCreateInput>;
+
+export const SeriesCreateInput = Schema.Struct({
+  _tag: Schema.Literal("Series"),
+  label: Schema.String,
+  variableId: VariableId,
+  fixedDims: FixedDims,
+  aliases: Aliases
+});
+export type SeriesCreateInput = Schema.Schema.Type<typeof SeriesCreateInput>;
+
+export const DataLayerCreateInput = Schema.Union([
+  AgentCreateInput,
+  CatalogCreateInput,
+  CatalogRecordCreateInput,
+  DatasetCreateInput,
+  DistributionCreateInput,
+  DataServiceCreateInput,
+  DatasetSeriesCreateInput,
+  VariableCreateInput,
+  SeriesCreateInput
+]);
+export type DataLayerCreateInput = Schema.Schema.Type<typeof DataLayerCreateInput>;
+
+export const DataLayerReplaceInput = DataLayerCreateInput;
+export type DataLayerReplaceInput = Schema.Schema.Type<
+  typeof DataLayerReplaceInput
+>;
+
 export const DataLayerKindPathParams = Schema.Struct({
   kind: DecodedDataLayerKind
 });
@@ -788,14 +986,14 @@ export type DataLayerKindPathParams = Schema.Schema.Type<
 
 export const DataLayerEntityPathParams = Schema.Struct({
   kind: DecodedDataLayerKind,
-  id: DecodedId
+  id: DecodedDataLayerEntityId
 });
 export type DataLayerEntityPathParams = Schema.Schema.Type<
   typeof DataLayerEntityPathParams
 >;
 
 export const DataLayerAuditPathParams = Schema.Struct({
-  id: DecodedId
+  id: DecodedDataLayerEntityId
 });
 export type DataLayerAuditPathParams = Schema.Schema.Type<
   typeof DataLayerAuditPathParams
@@ -847,7 +1045,8 @@ export const AdminRequestSchemas = {
   listEditorialPicks: ListEditorialPicksUrlParams,
   editorialPickBundlePath: PostUriEnrichmentsPath,
   importPosts: ImportPostsInput,
-  dataLayerEntity: DataLayerRegistryEntity,
+  dataLayerCreateInput: DataLayerCreateInput,
+  dataLayerReplaceInput: DataLayerReplaceInput,
   dataLayerList: ListDataLayerUrlParams,
   dataLayerKindPath: DataLayerKindPathParams,
   dataLayerEntityPath: DataLayerEntityPathParams,

@@ -1,7 +1,11 @@
 import { Effect, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { SqlError } from "effect/unstable/sql/SqlError";
-import type { AliasScheme, ExternalIdentifier } from "../../domain/data-layer";
+import type {
+  AliasScheme,
+  DataLayerRegistryEntity,
+  ExternalIdentifier
+} from "../../domain/data-layer";
 import type { DbError } from "../../domain/errors";
 import {
   normalizeAliasLookupValue,
@@ -39,11 +43,11 @@ export const matchesHostname = (candidate: string | undefined, domain: string) =
 
 type DataLayerAuditInsert = {
   readonly entityId: string;
-  readonly entityKind: string;
+  readonly entityKind: DataLayerRegistryEntity["_tag"];
   readonly operation: "insert" | "update" | "delete";
   readonly operator: string;
-  readonly beforeRow: unknown | null;
-  readonly afterRow: unknown | null;
+  readonly beforeRow: DataLayerRegistryEntity | null;
+  readonly afterRow: DataLayerRegistryEntity | null;
   readonly timestamp: string;
 };
 

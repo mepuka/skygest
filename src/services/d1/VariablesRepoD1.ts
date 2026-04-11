@@ -235,24 +235,26 @@ export const VariablesRepoD1 = {
         `Invalid variable ${operation} input for ${variable.id}`
       ).pipe(
         Effect.flatMap((validated) =>
-          Effect.gen(function* () {
-            const before = yield* findByUri(validated.id);
+          sql.withTransaction(
+            Effect.gen(function* () {
+              const before = yield* findByUri(validated.id);
 
-            yield* withSchemaDbError(
-              upsertVariableRow(toVariableUpsertRow(validated, updatedBy)),
-              `Failed to persist variable ${validated.id}`
-            );
+              yield* withSchemaDbError(
+                upsertVariableRow(toVariableUpsertRow(validated, updatedBy)),
+                `Failed to persist variable ${validated.id}`
+              );
 
-            yield* insertDataLayerAudit(sql, {
-              entityId: validated.id,
-              entityKind: "Variable",
-              operation,
-              operator: updatedBy,
-              beforeRow: before,
-              afterRow: validated,
-              timestamp: validated.updatedAt
-            });
-          })
+              yield* insertDataLayerAudit(sql, {
+                entityId: validated.id,
+                entityKind: "Variable",
+                operation,
+                operator: updatedBy,
+                beforeRow: before,
+                afterRow: validated,
+                timestamp: validated.updatedAt
+              });
+            })
+          )
         )
       );
 
@@ -263,31 +265,33 @@ export const VariablesRepoD1 = {
       save(variable, updatedBy, "update");
 
     const deleteByUri = (uri: string, deletedAt: string, updatedBy: string) =>
-      Effect.gen(function* () {
-        const before = yield* findByUri(uri);
+      sql.withTransaction(
+        Effect.gen(function* () {
+          const before = yield* findByUri(uri);
 
-        yield* withSchemaDbError(
-          deleteVariableRow({
-            id: uri,
-            updated_at: deletedAt,
-            updated_by: updatedBy,
-            deleted_at: deletedAt
-          }),
-          `Failed to delete variable ${uri}`
-        );
+          yield* withSchemaDbError(
+            deleteVariableRow({
+              id: uri,
+              updated_at: deletedAt,
+              updated_by: updatedBy,
+              deleted_at: deletedAt
+            }),
+            `Failed to delete variable ${uri}`
+          );
 
-        if (before !== null) {
-          yield* insertDataLayerAudit(sql, {
-            entityId: uri,
-            entityKind: "Variable",
-            operation: "delete",
-            operator: updatedBy,
-            beforeRow: before,
-            afterRow: null,
-            timestamp: deletedAt
-          });
-        }
-      });
+          if (before !== null) {
+            yield* insertDataLayerAudit(sql, {
+              entityId: uri,
+              entityKind: "Variable",
+              operation: "delete",
+              operator: updatedBy,
+              beforeRow: before,
+              afterRow: null,
+              timestamp: deletedAt
+            });
+          }
+        })
+      );
 
     const findByAlias = (scheme: AliasScheme, value: string) =>
       listAll().pipe(

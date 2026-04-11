@@ -278,24 +278,28 @@ export const DistributionsRepoD1 = {
         `Invalid distribution ${operation} input for ${distribution.id}`
       ).pipe(
         Effect.flatMap((validated) =>
-          Effect.gen(function* () {
-            const before = yield* findByUri(validated.id);
+          sql.withTransaction(
+            Effect.gen(function* () {
+              const before = yield* findByUri(validated.id);
 
-            yield* withSchemaDbError(
-              upsertDistributionRow(toDistributionUpsertRow(validated, updatedBy)),
-              `Failed to persist distribution ${validated.id}`
-            );
+              yield* withSchemaDbError(
+                upsertDistributionRow(
+                  toDistributionUpsertRow(validated, updatedBy)
+                ),
+                `Failed to persist distribution ${validated.id}`
+              );
 
-            yield* insertDataLayerAudit(sql, {
-              entityId: validated.id,
-              entityKind: "Distribution",
-              operation,
-              operator: updatedBy,
-              beforeRow: before,
-              afterRow: validated,
-              timestamp: validated.updatedAt
-            });
-          })
+              yield* insertDataLayerAudit(sql, {
+                entityId: validated.id,
+                entityKind: "Distribution",
+                operation,
+                operator: updatedBy,
+                beforeRow: before,
+                afterRow: validated,
+                timestamp: validated.updatedAt
+              });
+            })
+          )
         )
       );
 
@@ -310,31 +314,33 @@ export const DistributionsRepoD1 = {
     ) => save(distribution, updatedBy, "update");
 
     const deleteByUri = (uri: string, deletedAt: string, updatedBy: string) =>
-      Effect.gen(function* () {
-        const before = yield* findByUri(uri);
+      sql.withTransaction(
+        Effect.gen(function* () {
+          const before = yield* findByUri(uri);
 
-        yield* withSchemaDbError(
-          deleteDistributionRow({
-            id: uri,
-            updated_at: deletedAt,
-            updated_by: updatedBy,
-            deleted_at: deletedAt
-          }),
-          `Failed to delete distribution ${uri}`
-        );
+          yield* withSchemaDbError(
+            deleteDistributionRow({
+              id: uri,
+              updated_at: deletedAt,
+              updated_by: updatedBy,
+              deleted_at: deletedAt
+            }),
+            `Failed to delete distribution ${uri}`
+          );
 
-        if (before !== null) {
-          yield* insertDataLayerAudit(sql, {
-            entityId: uri,
-            entityKind: "Distribution",
-            operation: "delete",
-            operator: updatedBy,
-            beforeRow: before,
-            afterRow: null,
-            timestamp: deletedAt
-          });
-        }
-      });
+          if (before !== null) {
+            yield* insertDataLayerAudit(sql, {
+              entityId: uri,
+              entityKind: "Distribution",
+              operation: "delete",
+              operator: updatedBy,
+              beforeRow: before,
+              afterRow: null,
+              timestamp: deletedAt
+            });
+          }
+        })
+      );
 
     const findByHostname = (hostname: string) => {
       const normalized = normalizeDistributionHostname(hostname);

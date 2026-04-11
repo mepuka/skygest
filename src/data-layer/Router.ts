@@ -3,25 +3,54 @@ import * as HttpApiBuilder from "effect/unstable/httpapi/HttpApiBuilder";
 import * as HttpApiEndpoint from "effect/unstable/httpapi/HttpApiEndpoint";
 import * as HttpApiGroup from "effect/unstable/httpapi/HttpApiGroup";
 import * as HttpApiSchema from "effect/unstable/httpapi/HttpApiSchema";
-import { Clock, DateTime, Effect, Layer } from "effect";
+import { DateTime, Effect, Layer, Result, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import type { AccessIdentity } from "../auth/AuthService";
 import {
+  Agent as AgentSchema,
+  AgentId,
   type Agent,
+  Catalog as CatalogSchema,
+  CatalogId,
   type Catalog,
+  CatalogRecord as CatalogRecordSchema,
+  CatalogRecordId,
   type CatalogRecord,
+  DataService as DataServiceSchema,
+  DataServiceId,
   type DataLayerRegistryEntity,
+  Dataset as DatasetSchema,
+  DatasetId,
   type DataService,
+  DatasetSeries as DatasetSeriesSchema,
+  DatasetSeriesId,
   type Dataset,
+  Distribution as DistributionSchema,
+  DistributionId,
   type DatasetSeries,
   type Distribution,
+  Series as SeriesSchema,
+  SeriesId,
   type Series,
+  Variable as VariableSchema,
+  VariableId,
+  mintAgentId,
+  mintCatalogId,
+  mintCatalogRecordId,
+  mintDataServiceId,
+  mintDatasetId,
+  mintDatasetSeriesId,
+  mintDistributionId,
+  mintSeriesId,
+  mintVariableId,
   type Variable
 } from "../domain/data-layer";
 import {
   AdminRequestSchemas,
   AdminResponseSchemas,
   ApiErrorSchemas,
+  type DataLayerCreateInput,
+  type DataLayerReplaceInput,
   badRequestError,
   conflictError,
   notFoundError,
@@ -34,9 +63,11 @@ import { withHttpErrorMapping } from "../http/ErrorMapping";
 import { OperatorIdentity, operatorIdentityContext } from "../http/Identity";
 import type { EnvBindings } from "../platform/Env";
 import { clampLimit } from "../platform/Limit";
+import { formatSchemaParseError } from "../platform/Json";
 import { AgentsRepo } from "../services/AgentsRepo";
 import { CatalogRecordsRepo } from "../services/CatalogRecordsRepo";
 import { CatalogsRepo } from "../services/CatalogsRepo";
+import type { DataLayerWriteOptions } from "../services/DataLayerWriteOptions";
 import { DataServicesRepo } from "../services/DataServicesRepo";
 import { DatasetSeriesRepo } from "../services/DatasetSeriesRepo";
 import { DatasetsRepo } from "../services/DatasetsRepo";
@@ -69,11 +100,11 @@ type DataLayerRepoEntry = {
   ) => Effect.Effect<DataLayerRegistryEntity | null, unknown>;
   readonly insert: (
     entity: DataLayerRegistryEntity,
-    updatedBy: string
+    options: DataLayerWriteOptions
   ) => Effect.Effect<void, unknown>;
   readonly update: (
     entity: DataLayerRegistryEntity,
-    updatedBy: string
+    options: DataLayerWriteOptions
   ) => Effect.Effect<void, unknown>;
   readonly delete: (
     uri: string,
@@ -99,19 +130,6 @@ const toUpdatedBy = (identity: AccessIdentity) =>
 const clampDataLayerLimit = (limit: number | undefined) =>
   clampLimit(limit, DEFAULT_LIST_LIMIT, MAX_LIST_LIMIT);
 
-const getEntityWriteTimestamp = (entity: DataLayerRegistryEntity) =>
-  "updatedAt" in entity ? entity.updatedAt : undefined;
-
-const toWriteOptions = (
-  updatedBy: string,
-  entity: DataLayerRegistryEntity
-) => {
-  const timestamp = getEntityWriteTimestamp(entity);
-  return timestamp === undefined
-    ? { updatedBy }
-    : { updatedBy, timestamp };
-};
-
 const decodeAuditEntity = (value: string | null, field: string) =>
   decodeJsonColumnWithDbError(value, field).pipe(
     Effect.flatMap((json) =>
@@ -125,13 +143,134 @@ const decodeAuditEntity = (value: string | null, field: string) =>
     )
   );
 
-const getDeleteTimestamp = Effect.gen(function* () {
-  const now = yield* Clock.currentTimeMillis;
-  const dateTime = yield* Effect.fromOption(DateTime.make(now)).pipe(
-    Effect.orDie
+const getCurrentTimestamp = DateTime.now.pipe(Effect.map(DateTime.formatIso));
+
+const dataLayerEntitySchemas = {
+  agents: AgentSchema,
+  catalogs: CatalogSchema,
+  "catalog-records": CatalogRecordSchema,
+  datasets: DatasetSchema,
+  distributions: DistributionSchema,
+  "data-services": DataServiceSchema,
+  "dataset-series": DatasetSeriesSchema,
+  variables: VariableSchema,
+  series: SeriesSchema
+} as const;
+
+const dataLayerIdSchemas = {
+  agents: AgentId,
+  catalogs: CatalogId,
+  "catalog-records": CatalogRecordId,
+  datasets: DatasetId,
+  distributions: DistributionId,
+  "data-services": DataServiceId,
+  "dataset-series": DatasetSeriesId,
+  variables: VariableId,
+  series: SeriesId
+} as const;
+
+const mintDataLayerEntityId = {
+  agents: mintAgentId,
+  catalogs: mintCatalogId,
+  "catalog-records": mintCatalogRecordId,
+  datasets: mintDatasetId,
+  distributions: mintDistributionId,
+  "data-services": mintDataServiceId,
+  "dataset-series": mintDatasetSeriesId,
+  variables: mintVariableId,
+  series: mintSeriesId
+} as const;
+
+type DataLayerMutationInput = DataLayerCreateInput | DataLayerReplaceInput;
+
+const decodeRequest = <S extends Schema.Decoder<unknown>>(
+  schema: S,
+  input: unknown,
+  message: string
+): Effect.Effect<S["Type"], ReturnType<typeof badRequestError>> => {
+  const decoded = Schema.decodeUnknownResult(schema)(input);
+  return Result.isSuccess(decoded)
+    ? Effect.succeed(decoded.success)
+    : Effect.fail(
+        badRequestError(`${message}: ${formatSchemaParseError(decoded.failure)}`)
+      );
+};
+
+const validateEntityIdForKind = (
+  kind: ApiDataLayerKind,
+  id: string
+) =>
+  decodeRequest(
+    dataLayerIdSchemas[kind],
+    id,
+    `invalid ${kind} entity id`
   );
-  return DateTime.formatIso(dateTime);
-});
+
+const toWriteOptions = (
+  kind: ApiDataLayerKind,
+  updatedBy: string,
+  timestamp: string
+): DataLayerWriteOptions =>
+  kind === "catalog-records"
+    ? { updatedBy, timestamp }
+    : { updatedBy };
+
+const buildCreateEntityCandidate = (
+  kind: ApiDataLayerKind,
+  input: DataLayerMutationInput,
+  timestamp: string
+) => {
+  const base = input as Record<string, unknown>;
+  const id = mintDataLayerEntityId[kind]();
+  switch (kind) {
+    case "catalog-records":
+      return { ...base, id };
+    default:
+      return { ...base, id, createdAt: timestamp, updatedAt: timestamp };
+  }
+};
+
+const buildReplaceEntityCandidate = (
+  input: DataLayerMutationInput,
+  existing: DataLayerRegistryEntity,
+  timestamp: string
+) => {
+  const base = input as Record<string, unknown>;
+  switch (existing._tag) {
+    case "CatalogRecord":
+      return { ...base, id: existing.id };
+    default:
+      return {
+        ...base,
+        id: existing.id,
+        createdAt: existing.createdAt,
+        updatedAt: timestamp
+      };
+  }
+};
+
+const materializeCreateEntity = (
+  kind: ApiDataLayerKind,
+  input: DataLayerMutationInput,
+  timestamp: string
+) =>
+  decodeRequest(
+    dataLayerEntitySchemas[kind],
+    buildCreateEntityCandidate(kind, input, timestamp),
+    `invalid ${kind} create payload`
+  );
+
+const materializeReplaceEntity = (
+  kind: ApiDataLayerKind,
+  input: DataLayerMutationInput,
+  existing: DataLayerRegistryEntity,
+  timestamp: string
+) =>
+  decodeRequest(
+    dataLayerEntitySchemas[kind],
+    buildReplaceEntityCandidate(input, existing, timestamp),
+    `invalid ${kind} replacement payload`
+  );
 
 const getRepoEntry = (kind: ApiDataLayerKind) =>
   Effect.gen(function* () {
@@ -150,10 +289,10 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
         tag: "Agent",
         listAll: () => agents.listAll(),
         findByUri: (uri) => agents.findByUri(uri),
-        insert: (entity, updatedBy) =>
-          agents.insert(entity as Agent, toWriteOptions(updatedBy, entity)),
-        update: (entity, updatedBy) =>
-          agents.update(entity as Agent, toWriteOptions(updatedBy, entity)),
+        insert: (entity, options) =>
+          agents.insert(entity as Agent, options),
+        update: (entity, options) =>
+          agents.update(entity as Agent, options),
         delete: (uri, deletedAt, updatedBy) =>
           agents.delete(uri, deletedAt, updatedBy)
       },
@@ -161,10 +300,10 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
         tag: "Catalog",
         listAll: () => catalogs.listAll(),
         findByUri: (uri) => catalogs.findByUri(uri),
-        insert: (entity, updatedBy) =>
-          catalogs.insert(entity as Catalog, toWriteOptions(updatedBy, entity)),
-        update: (entity, updatedBy) =>
-          catalogs.update(entity as Catalog, toWriteOptions(updatedBy, entity)),
+        insert: (entity, options) =>
+          catalogs.insert(entity as Catalog, options),
+        update: (entity, options) =>
+          catalogs.update(entity as Catalog, options),
         delete: (uri, deletedAt, updatedBy) =>
           catalogs.delete(uri, deletedAt, updatedBy)
       },
@@ -172,16 +311,10 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
         tag: "CatalogRecord",
         listAll: () => catalogRecords.listAll(),
         findByUri: (uri) => catalogRecords.findByUri(uri),
-        insert: (entity, updatedBy) =>
-          catalogRecords.insert(
-            entity as CatalogRecord,
-            toWriteOptions(updatedBy, entity)
-          ),
-        update: (entity, updatedBy) =>
-          catalogRecords.update(
-            entity as CatalogRecord,
-            toWriteOptions(updatedBy, entity)
-          ),
+        insert: (entity, options) =>
+          catalogRecords.insert(entity as CatalogRecord, options),
+        update: (entity, options) =>
+          catalogRecords.update(entity as CatalogRecord, options),
         delete: (uri, deletedAt, updatedBy) =>
           catalogRecords.delete(uri, deletedAt, updatedBy)
       },
@@ -189,10 +322,10 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
         tag: "Dataset",
         listAll: () => datasets.listAll(),
         findByUri: (uri) => datasets.findByUri(uri),
-        insert: (entity, updatedBy) =>
-          datasets.insert(entity as Dataset, toWriteOptions(updatedBy, entity)),
-        update: (entity, updatedBy) =>
-          datasets.update(entity as Dataset, toWriteOptions(updatedBy, entity)),
+        insert: (entity, options) =>
+          datasets.insert(entity as Dataset, options),
+        update: (entity, options) =>
+          datasets.update(entity as Dataset, options),
         delete: (uri, deletedAt, updatedBy) =>
           datasets.delete(uri, deletedAt, updatedBy)
       },
@@ -200,16 +333,10 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
         tag: "Distribution",
         listAll: () => distributions.listAll(),
         findByUri: (uri) => distributions.findByUri(uri),
-        insert: (entity, updatedBy) =>
-          distributions.insert(
-            entity as Distribution,
-            toWriteOptions(updatedBy, entity)
-          ),
-        update: (entity, updatedBy) =>
-          distributions.update(
-            entity as Distribution,
-            toWriteOptions(updatedBy, entity)
-          ),
+        insert: (entity, options) =>
+          distributions.insert(entity as Distribution, options),
+        update: (entity, options) =>
+          distributions.update(entity as Distribution, options),
         delete: (uri, deletedAt, updatedBy) =>
           distributions.delete(uri, deletedAt, updatedBy)
       },
@@ -217,16 +344,10 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
         tag: "DataService",
         listAll: () => dataServices.listAll(),
         findByUri: (uri) => dataServices.findByUri(uri),
-        insert: (entity, updatedBy) =>
-          dataServices.insert(
-            entity as DataService,
-            toWriteOptions(updatedBy, entity)
-          ),
-        update: (entity, updatedBy) =>
-          dataServices.update(
-            entity as DataService,
-            toWriteOptions(updatedBy, entity)
-          ),
+        insert: (entity, options) =>
+          dataServices.insert(entity as DataService, options),
+        update: (entity, options) =>
+          dataServices.update(entity as DataService, options),
         delete: (uri, deletedAt, updatedBy) =>
           dataServices.delete(uri, deletedAt, updatedBy)
       },
@@ -234,16 +355,10 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
         tag: "DatasetSeries",
         listAll: () => datasetSeries.listAll(),
         findByUri: (uri) => datasetSeries.findByUri(uri),
-        insert: (entity, updatedBy) =>
-          datasetSeries.insert(
-            entity as DatasetSeries,
-            toWriteOptions(updatedBy, entity)
-          ),
-        update: (entity, updatedBy) =>
-          datasetSeries.update(
-            entity as DatasetSeries,
-            toWriteOptions(updatedBy, entity)
-          ),
+        insert: (entity, options) =>
+          datasetSeries.insert(entity as DatasetSeries, options),
+        update: (entity, options) =>
+          datasetSeries.update(entity as DatasetSeries, options),
         delete: (uri, deletedAt, updatedBy) =>
           datasetSeries.delete(uri, deletedAt, updatedBy)
       },
@@ -251,10 +366,10 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
         tag: "Variable",
         listAll: () => variables.listAll(),
         findByUri: (uri) => variables.findByUri(uri),
-        insert: (entity, updatedBy) =>
-          variables.insert(entity as Variable, toWriteOptions(updatedBy, entity)),
-        update: (entity, updatedBy) =>
-          variables.update(entity as Variable, toWriteOptions(updatedBy, entity)),
+        insert: (entity, options) =>
+          variables.insert(entity as Variable, options),
+        update: (entity, options) =>
+          variables.update(entity as Variable, options),
         delete: (uri, deletedAt, updatedBy) =>
           variables.delete(uri, deletedAt, updatedBy)
       },
@@ -262,10 +377,10 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
         tag: "Series",
         listAll: () => series.listAll(),
         findByUri: (uri) => series.findByUri(uri),
-        insert: (entity, updatedBy) =>
-          series.insert(entity as Series, toWriteOptions(updatedBy, entity)),
-        update: (entity, updatedBy) =>
-          series.update(entity as Series, toWriteOptions(updatedBy, entity)),
+        insert: (entity, options) =>
+          series.insert(entity as Series, options),
+        update: (entity, options) =>
+          series.update(entity as Series, options),
         delete: (uri, deletedAt, updatedBy) =>
           series.delete(uri, deletedAt, updatedBy)
       }
@@ -276,7 +391,7 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
 
 const ensureMatchingKind = (
   kind: ApiDataLayerKind,
-  entity: DataLayerRegistryEntity
+  entity: { readonly _tag: DataLayerRegistryEntity["_tag"] }
 ) =>
   entity._tag === dataLayerKindToTag[kind]
     ? Effect.void
@@ -293,7 +408,7 @@ const DataLayerApi = HttpApi.make("dataLayer")
         HttpApiEndpoint.post("create", "/admin/data-layer/:kind", {
           disableCodecs: true,
           params: AdminRequestSchemas.dataLayerKindPath,
-          payload: AdminRequestSchemas.dataLayerEntity,
+          payload: AdminRequestSchemas.dataLayerCreateInput,
           success: AdminResponseSchemas.dataLayerEntity.pipe(
             HttpApiSchema.status(201)
           ),
@@ -301,10 +416,10 @@ const DataLayerApi = HttpApi.make("dataLayer")
         })
       )
       .add(
-        HttpApiEndpoint.patch("update", "/admin/data-layer/:kind/:id", {
+        HttpApiEndpoint.put("update", "/admin/data-layer/:kind/:id", {
           disableCodecs: true,
           params: AdminRequestSchemas.dataLayerEntityPath,
-          payload: AdminRequestSchemas.dataLayerEntity,
+          payload: AdminRequestSchemas.dataLayerReplaceInput,
           success: AdminResponseSchemas.dataLayerEntity,
           error: ApiErrorSchemas
         })
@@ -338,7 +453,7 @@ const DataLayerApi = HttpApi.make("dataLayer")
   .add(
     HttpApiGroup.make("audit")
       .add(
-        HttpApiEndpoint.post("list", "/admin/data-layer/audit/:id", {
+        HttpApiEndpoint.get("list", "/admin/data-layer/audit/:id", {
           disableCodecs: true,
           params: AdminRequestSchemas.dataLayerAuditPath,
           success: AdminResponseSchemas.dataLayerAudit,
@@ -363,16 +478,21 @@ const DataLayerHandlers = Layer.mergeAll(
           yield* ensureMatchingKind(path.kind, payload);
           const actor = yield* OperatorIdentity;
           const repo = yield* getRepoEntry(path.kind);
-          const existing = yield* repo.findByUri(payload.id);
+          const timestamp = yield* getCurrentTimestamp;
+          const entity = yield* materializeCreateEntity(path.kind, payload, timestamp);
+          const existing = yield* repo.findByUri(entity.id);
 
           if (existing !== null) {
             return yield* Effect.fail(
-              conflictError(`entity already exists: ${payload.id}`)
+              conflictError(`entity already exists: ${entity.id}`)
             );
           }
 
-          yield* repo.insert(payload, toUpdatedBy(actor));
-          return payload;
+          yield* repo.insert(
+            entity,
+            toWriteOptions(path.kind, toUpdatedBy(actor), timestamp)
+          );
+          return entity;
         }))
       )
       .handle("update", ({ params: path, payload }) =>
@@ -380,27 +500,30 @@ const DataLayerHandlers = Layer.mergeAll(
           "/admin/data-layer/:kind/:id",
           Effect.gen(function* () {
             yield* ensureMatchingKind(path.kind, payload);
-
-            if (payload.id !== path.id) {
-              return yield* Effect.fail(
-                badRequestError(
-                  `payload id ${payload.id} does not match path id ${path.id}`
-                )
-              );
-            }
-
+            const id = yield* validateEntityIdForKind(path.kind, path.id);
             const actor = yield* OperatorIdentity;
             const repo = yield* getRepoEntry(path.kind);
-            const existing = yield* repo.findByUri(path.id);
+            const existing = yield* repo.findByUri(id);
 
             if (existing === null) {
               return yield* Effect.fail(
-                notFoundError(`entity not found: ${path.id}`)
+                notFoundError(`entity not found: ${id}`)
               );
             }
 
-            yield* repo.update(payload, toUpdatedBy(actor));
-            return payload;
+            const timestamp = yield* getCurrentTimestamp;
+            const entity = yield* materializeReplaceEntity(
+              path.kind,
+              payload,
+              existing,
+              timestamp
+            );
+
+            yield* repo.update(
+              entity,
+              toWriteOptions(path.kind, toUpdatedBy(actor), timestamp)
+            );
+            return entity;
           })
         )
       )
@@ -408,18 +531,19 @@ const DataLayerHandlers = Layer.mergeAll(
         withDataLayerErrors(
           "/admin/data-layer/:kind/:id",
           Effect.gen(function* () {
+            const id = yield* validateEntityIdForKind(path.kind, path.id);
             const actor = yield* OperatorIdentity;
             const repo = yield* getRepoEntry(path.kind);
-            const existing = yield* repo.findByUri(path.id);
-            const deletedAt = yield* getDeleteTimestamp;
+            const existing = yield* repo.findByUri(id);
+            const deletedAt = yield* getCurrentTimestamp;
 
             if (existing === null) {
               return yield* Effect.fail(
-                notFoundError(`entity not found: ${path.id}`)
+                notFoundError(`entity not found: ${id}`)
               );
             }
 
-            yield* repo.delete(path.id, deletedAt, toUpdatedBy(actor));
+            yield* repo.delete(id, deletedAt, toUpdatedBy(actor));
             return { ok: true as const };
           })
         )
@@ -444,12 +568,13 @@ const DataLayerHandlers = Layer.mergeAll(
         withDataLayerErrors(
           "/admin/data-layer/:kind/:id",
           Effect.gen(function* () {
+            const id = yield* validateEntityIdForKind(path.kind, path.id);
             const repo = yield* getRepoEntry(path.kind);
-            const item = yield* repo.findByUri(path.id);
+            const item = yield* repo.findByUri(id);
 
             if (item === null) {
               return yield* Effect.fail(
-                notFoundError(`entity not found: ${path.id}`)
+                notFoundError(`entity not found: ${id}`)
               );
             }
 
@@ -509,20 +634,21 @@ const DataLayerHandlers = Layer.mergeAll(
   )
 );
 
-const makeDataLayerApiLayer = (serviceLayer: Layer.Layer<any, any, never>) =>
-  (() => {
-    const handlersLayer = DataLayerHandlers.pipe(
-      Layer.provideMerge(serviceLayer)
-    );
+const makeDataLayerApiLayer = (serviceLayer: Layer.Layer<any, any, never>) => {
+  const handlersLayer = DataLayerHandlers.pipe(
+    Layer.provideMerge(serviceLayer)
+  );
 
-    return HttpApiBuilder.layer(DataLayerApi).pipe(
-      Layer.provideMerge(handlersLayer)
-    );
-  })();
+  return HttpApiBuilder.layer(DataLayerApi).pipe(
+    Layer.provideMerge(handlersLayer)
+  ) as Layer.Layer<any, any, never>;
+};
 
 const handleCachedDataLayerRequest = makeCachedApiHandler(
   (env: EnvBindings) =>
-    makeDataLayerApiLayer(makeAdminWorkerLayer(env))
+    makeDataLayerApiLayer(
+      makeAdminWorkerLayer(env) as Layer.Layer<any, any, never>
+    )
 );
 
 export const handleDataLayerRequestWithLayer = (
@@ -532,7 +658,7 @@ export const handleDataLayerRequestWithLayer = (
 ) =>
   handleWithApiLayer(
     request,
-    makeDataLayerApiLayer(layer),
+    makeDataLayerApiLayer(layer) as Layer.Layer<any, any, never>,
     operatorIdentityContext(identity)
   );
 

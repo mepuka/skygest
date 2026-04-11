@@ -24,9 +24,11 @@ const decodeEntityIdSync = <A>(schema: Schema.Decoder<unknown>) =>
 
 export const VariableId = makeEntityId("variable", "var", "VariableId");
 export type VariableId = Schema.Schema.Type<typeof VariableId>;
+export const makeVariableId = decodeEntityIdSync<VariableId>(VariableId);
 
 export const SeriesId = makeEntityId("series", "ser", "SeriesId");
 export type SeriesId = Schema.Schema.Type<typeof SeriesId>;
+export const makeSeriesId = decodeEntityIdSync<SeriesId>(SeriesId);
 
 export const ObservationId = makeEntityId("observation", "obs", "ObservationId");
 export type ObservationId = Schema.Schema.Type<typeof ObservationId>;
@@ -59,6 +61,8 @@ export const makeDataServiceId = decodeEntityIdSync<DataServiceId>(DataServiceId
 
 export const DatasetSeriesId = makeEntityId("dataset-series", "dser", "DatasetSeriesId");
 export type DatasetSeriesId = Schema.Schema.Type<typeof DatasetSeriesId>;
+export const makeDatasetSeriesId =
+  decodeEntityIdSync<DatasetSeriesId>(DatasetSeriesId);
 
 export const CandidateId = makeEntityId("candidate", "cand", "CandidateId");
 export type CandidateId = Schema.Schema.Type<typeof CandidateId>;
@@ -82,3 +86,12 @@ export const mintDistributionId = (): DistributionId =>
 
 export const mintDataServiceId = (): DataServiceId =>
   makeDataServiceId(mintEntityUri("data-service", "svc"));
+
+export const mintDatasetSeriesId = (): DatasetSeriesId =>
+  makeDatasetSeriesId(mintEntityUri("dataset-series", "dser"));
+
+export const mintVariableId = (): VariableId =>
+  makeVariableId(mintEntityUri("variable", "var"));
+
+export const mintSeriesId = (): SeriesId =>
+  makeSeriesId(mintEntityUri("series", "ser"));

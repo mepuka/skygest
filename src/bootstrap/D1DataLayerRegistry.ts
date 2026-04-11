@@ -30,17 +30,20 @@ export const loadD1DataLayerSeed = () =>
     const variables = yield* VariablesRepo;
     const series = yield* SeriesRepo;
 
-    return {
-      agents: yield* agents.listAll(),
-      catalogs: yield* catalogs.listAll(),
-      catalogRecords: yield* catalogRecords.listAll(),
-      datasets: yield* datasets.listAll(),
-      distributions: yield* distributions.listAll(),
-      dataServices: yield* dataServices.listAll(),
-      datasetSeries: yield* datasetSeries.listAll(),
-      variables: yield* variables.listAll(),
-      series: yield* series.listAll()
-    };
+    return yield* Effect.all(
+      {
+        agents: agents.listAll(),
+        catalogs: catalogs.listAll(),
+        catalogRecords: catalogRecords.listAll(),
+        datasets: datasets.listAll(),
+        distributions: distributions.listAll(),
+        dataServices: dataServices.listAll(),
+        datasetSeries: datasetSeries.listAll(),
+        variables: variables.listAll(),
+        series: series.listAll()
+      },
+      { concurrency: "unbounded" }
+    );
   });
 
 export const loadD1DataLayerRegistry = (

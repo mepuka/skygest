@@ -1,7 +1,9 @@
 import { describe, expect, it } from "@effect/vitest";
+import { MissingOperatorScopeError } from "../src/auth/AuthService";
 import {
   operatorRequestAction,
-  requiredOperatorScopes
+  requiredOperatorScopes,
+  toAuthErrorResponse
 } from "../src/worker/operatorAuth";
 
 describe("operator request policies", () => {
@@ -44,9 +46,36 @@ describe("operator request policies", () => {
         })
       )
     ).toEqual(["ops:read"]);
+    expect(
+      requiredOperatorScopes(
+        new Request("https://skygest.local/admin/data-layer/agents", {
+          method: "GET"
+        })
+      )
+    ).toEqual(["ops:read"]);
+    expect(
+      requiredOperatorScopes(
+        new Request(
+          "https://skygest.local/admin/data-layer/agents/https%3A%2F%2Fid.skygest.io%2Fagent%2Fag_TEST01",
+          {
+            method: "GET"
+          }
+        )
+      )
+    ).toEqual(["ops:read"]);
+    expect(
+      requiredOperatorScopes(
+        new Request(
+          "https://skygest.local/admin/data-layer/audit/https%3A%2F%2Fid.skygest.io%2Fagent%2Fag_TEST01",
+          {
+            method: "GET"
+          }
+        )
+      )
+    ).toEqual(["ops:read"]);
   });
 
-  it("assigns write scopes to expert, ingest, and staging mutations", () => {
+  it("assigns write scopes to expert, ingest, staging, and data-layer mutations", () => {
     expect(
       requiredOperatorScopes(
         new Request("https://skygest.local/admin/experts", { method: "POST" })
@@ -102,6 +131,33 @@ describe("operator request policies", () => {
         })
       )
     ).toEqual(["ops:refresh"]);
+    expect(
+      requiredOperatorScopes(
+        new Request("https://skygest.local/admin/data-layer/agents", {
+          method: "POST"
+        })
+      )
+    ).toEqual(["ops:refresh"]);
+    expect(
+      requiredOperatorScopes(
+        new Request(
+          "https://skygest.local/admin/data-layer/agents/https%3A%2F%2Fid.skygest.io%2Fagent%2Fag_TEST01",
+          {
+            method: "PUT"
+          }
+        )
+      )
+    ).toEqual(["ops:refresh"]);
+    expect(
+      requiredOperatorScopes(
+        new Request(
+          "https://skygest.local/admin/data-layer/agents/https%3A%2F%2Fid.skygest.io%2Fagent%2Fag_TEST01",
+          {
+            method: "DELETE"
+          }
+        )
+      )
+    ).toEqual(["ops:refresh"]);
   });
 
   it("classifies audited operator actions consistently", () => {
@@ -150,5 +206,38 @@ describe("operator request policies", () => {
         })
       )
     ).toBe("repair_enrichment");
+    expect(
+      operatorRequestAction(
+        new Request(
+          "https://skygest.local/admin/data-layer/audit/https%3A%2F%2Fid.skygest.io%2Fagent%2Fag_TEST01",
+          {
+            method: "GET"
+          }
+        )
+      )
+    ).toBe("list_data_layer_audit");
+    expect(
+      operatorRequestAction(
+        new Request(
+          "https://skygest.local/admin/data-layer/agents/https%3A%2F%2Fid.skygest.io%2Fagent%2Fag_TEST01",
+          {
+            method: "PUT"
+          }
+        )
+      )
+    ).toBe("update_data_layer_entity");
+  });
+
+  it("maps missing scopes to a forbidden response", async () => {
+    const response = toAuthErrorResponse(
+      new MissingOperatorScopeError({ missingScopes: ["ops:refresh"] })
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(body).toEqual({
+      error: "Forbidden",
+      message: "forbidden"
+    });
   });
 });

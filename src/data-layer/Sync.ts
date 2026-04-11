@@ -1,4 +1,5 @@
 import { Effect, Equal, Hash, Schema } from "effect";
+import { SqlClient } from "effect/unstable/sql";
 import {
   DataLayerRegistryEntity,
   type DataLayerRegistrySeed
@@ -81,7 +82,7 @@ type EntitySnapshot = {
   readonly hash: string;
 };
 
-const encodeEntity = Schema.encodeUnknownSync(DataLayerRegistryEntity);
+const encodeEntity = Schema.encodeEffect(DataLayerRegistryEntity);
 
 const writeKindOrder: Record<DataLayerEntityKind, number> = {
   Agent: 0,
@@ -123,22 +124,21 @@ const allEntities = (
 
 const formatHash = (value: number) => (value >>> 0).toString(16).padStart(8, "0");
 
-const toEntitySnapshot = (entity: DataLayerRegistryEntity): EntitySnapshot => {
-  const encoded = encodeEntity(entity);
-  return {
+const toEntitySnapshot = (entity: DataLayerRegistryEntity) =>
+  Effect.map(encodeEntity(entity), (encoded): EntitySnapshot => ({
     entity,
     kind: entity._tag,
     id: entity.id,
     encoded,
     hash: formatHash(Hash.hash(encoded))
-  };
-};
+  }));
 
 const toEntitySnapshotMap = (seed: DataLayerRegistrySeed) =>
-  new Map(allEntities(seed).map((entity) => {
-    const snapshot = toEntitySnapshot(entity);
-    return [snapshot.id, snapshot] as const;
-  }));
+  Effect.map(
+    Effect.forEach(allEntities(seed), toEntitySnapshot),
+    (snapshots) =>
+      new Map(snapshots.map((snapshot) => [snapshot.id, snapshot] as const))
+  );
 
 const compareChangeKeys = (
   left: { readonly kind: DataLayerEntityKind; readonly id: string },
@@ -170,84 +170,85 @@ const summarizeSection = (
 export const planDataLayerSync = (
   sourceSeed: DataLayerRegistrySeed,
   currentSeed: DataLayerRegistrySeed
-): DataLayerSyncPlan => {
-  const counts = buildEmptyCounts();
-  const source = toEntitySnapshotMap(sourceSeed);
-  const current = toEntitySnapshotMap(currentSeed);
+) =>
+  Effect.gen(function* () {
+    const counts = buildEmptyCounts();
+    const source = yield* toEntitySnapshotMap(sourceSeed);
+    const current = yield* toEntitySnapshotMap(currentSeed);
 
-  const inserts: Array<DataLayerSyncInsert> = [];
-  const updates: Array<DataLayerSyncUpdate> = [];
-  const missingInSource: Array<DataLayerSyncMissingInSource> = [];
+    const inserts: Array<DataLayerSyncInsert> = [];
+    const updates: Array<DataLayerSyncUpdate> = [];
+    const missingInSource: Array<DataLayerSyncMissingInSource> = [];
 
-  for (const [id, nextSnapshot] of source) {
-    const currentSnapshot = current.get(id);
+    for (const [id, nextSnapshot] of source) {
+      const currentSnapshot = current.get(id);
 
-    if (currentSnapshot === undefined) {
+      if (currentSnapshot === undefined) {
+        counts[nextSnapshot.kind] = {
+          ...counts[nextSnapshot.kind],
+          inserts: counts[nextSnapshot.kind].inserts + 1
+        };
+        inserts.push({
+          action: "insert",
+          kind: nextSnapshot.kind,
+          id,
+          hash: nextSnapshot.hash,
+          entity: nextSnapshot.entity
+        });
+        continue;
+      }
+
+      if (
+        currentSnapshot.hash === nextSnapshot.hash &&
+        Equal.equals(currentSnapshot.encoded, nextSnapshot.encoded)
+      ) {
+        continue;
+      }
+
       counts[nextSnapshot.kind] = {
         ...counts[nextSnapshot.kind],
-        inserts: counts[nextSnapshot.kind].inserts + 1
+        updates: counts[nextSnapshot.kind].updates + 1
       };
-      inserts.push({
-        action: "insert",
+      updates.push({
+        action: "update",
         kind: nextSnapshot.kind,
         id,
-        hash: nextSnapshot.hash,
-        entity: nextSnapshot.entity
+        currentHash: currentSnapshot.hash,
+        nextHash: nextSnapshot.hash,
+        current: currentSnapshot.entity,
+        next: nextSnapshot.entity
       });
-      continue;
     }
 
-    if (
-      currentSnapshot.hash === nextSnapshot.hash &&
-      Equal.equals(currentSnapshot.encoded, nextSnapshot.encoded)
-    ) {
-      continue;
+    for (const [id, currentSnapshot] of current) {
+      if (source.has(id)) {
+        continue;
+      }
+
+      counts[currentSnapshot.kind] = {
+        ...counts[currentSnapshot.kind],
+        missingInSource: counts[currentSnapshot.kind].missingInSource + 1
+      };
+      missingInSource.push({
+        action: "missing-in-source",
+        kind: currentSnapshot.kind,
+        id,
+        hash: currentSnapshot.hash,
+        entity: currentSnapshot.entity
+      });
     }
 
-    counts[nextSnapshot.kind] = {
-      ...counts[nextSnapshot.kind],
-      updates: counts[nextSnapshot.kind].updates + 1
-    };
-    updates.push({
-      action: "update",
-      kind: nextSnapshot.kind,
-      id,
-      currentHash: currentSnapshot.hash,
-      nextHash: nextSnapshot.hash,
-      current: currentSnapshot.entity,
-      next: nextSnapshot.entity
-    });
-  }
+    inserts.sort(compareChangeKeys);
+    updates.sort(compareChangeKeys);
+    missingInSource.sort(compareChangeKeys);
 
-  for (const [id, currentSnapshot] of current) {
-    if (source.has(id)) {
-      continue;
-    }
-
-    counts[currentSnapshot.kind] = {
-      ...counts[currentSnapshot.kind],
-      missingInSource: counts[currentSnapshot.kind].missingInSource + 1
-    };
-    missingInSource.push({
-      action: "missing-in-source",
-      kind: currentSnapshot.kind,
-      id,
-      hash: currentSnapshot.hash,
-      entity: currentSnapshot.entity
-    });
-  }
-
-  inserts.sort(compareChangeKeys);
-  updates.sort(compareChangeKeys);
-  missingInSource.sort(compareChangeKeys);
-
-  return {
-    inserts,
-    updates,
-    missingInSource,
-    counts
-  };
-};
+    return {
+      inserts,
+      updates,
+      missingInSource,
+      counts
+    } satisfies DataLayerSyncPlan;
+  });
 
 export const formatDataLayerSyncPlan = (plan: DataLayerSyncPlan) => {
   const lines: Array<string> = [
@@ -297,92 +298,66 @@ export const formatDataLayerSyncPlan = (plan: DataLayerSyncPlan) => {
   return lines.join("\n");
 };
 
-const insertEntity = (
+const writeEntity = (
   entity: DataLayerRegistryEntity,
-  updatedBy: string
+  updatedBy: string,
+  operation: "insert" | "update"
 ) =>
   Effect.gen(function* () {
     switch (entity._tag) {
       case "Agent": {
         const repo = yield* AgentsRepo;
-        return yield* repo.insert(entity, { updatedBy });
+        return yield* (operation === "insert"
+          ? repo.insert(entity, { updatedBy })
+          : repo.update(entity, { updatedBy }));
       }
       case "Catalog": {
         const repo = yield* CatalogsRepo;
-        return yield* repo.insert(entity, { updatedBy });
+        return yield* (operation === "insert"
+          ? repo.insert(entity, { updatedBy })
+          : repo.update(entity, { updatedBy }));
       }
       case "CatalogRecord": {
         const repo = yield* CatalogRecordsRepo;
-        return yield* repo.insert(entity, { updatedBy });
+        return yield* (operation === "insert"
+          ? repo.insert(entity, { updatedBy })
+          : repo.update(entity, { updatedBy }));
       }
       case "Dataset": {
         const repo = yield* DatasetsRepo;
-        return yield* repo.insert(entity, { updatedBy });
+        return yield* (operation === "insert"
+          ? repo.insert(entity, { updatedBy })
+          : repo.update(entity, { updatedBy }));
       }
       case "Distribution": {
         const repo = yield* DistributionsRepo;
-        return yield* repo.insert(entity, { updatedBy });
+        return yield* (operation === "insert"
+          ? repo.insert(entity, { updatedBy })
+          : repo.update(entity, { updatedBy }));
       }
       case "DataService": {
         const repo = yield* DataServicesRepo;
-        return yield* repo.insert(entity, { updatedBy });
+        return yield* (operation === "insert"
+          ? repo.insert(entity, { updatedBy })
+          : repo.update(entity, { updatedBy }));
       }
       case "DatasetSeries": {
         const repo = yield* DatasetSeriesRepo;
-        return yield* repo.insert(entity, { updatedBy });
+        return yield* (operation === "insert"
+          ? repo.insert(entity, { updatedBy })
+          : repo.update(entity, { updatedBy }));
       }
       case "Variable": {
         const repo = yield* VariablesRepo;
-        return yield* repo.insert(entity, { updatedBy });
+        return yield* (operation === "insert"
+          ? repo.insert(entity, { updatedBy })
+          : repo.update(entity, { updatedBy }));
       }
       case "Series": {
         const repo = yield* SeriesRepo;
-        return yield* repo.insert(entity, { updatedBy });
-      }
-    }
-  });
-
-const updateEntity = (
-  entity: DataLayerRegistryEntity,
-  updatedBy: string
-) =>
-  Effect.gen(function* () {
-    switch (entity._tag) {
-      case "Agent": {
-        const repo = yield* AgentsRepo;
-        return yield* repo.update(entity, { updatedBy });
-      }
-      case "Catalog": {
-        const repo = yield* CatalogsRepo;
-        return yield* repo.update(entity, { updatedBy });
-      }
-      case "CatalogRecord": {
-        const repo = yield* CatalogRecordsRepo;
-        return yield* repo.update(entity, { updatedBy });
-      }
-      case "Dataset": {
-        const repo = yield* DatasetsRepo;
-        return yield* repo.update(entity, { updatedBy });
-      }
-      case "Distribution": {
-        const repo = yield* DistributionsRepo;
-        return yield* repo.update(entity, { updatedBy });
-      }
-      case "DataService": {
-        const repo = yield* DataServicesRepo;
-        return yield* repo.update(entity, { updatedBy });
-      }
-      case "DatasetSeries": {
-        const repo = yield* DatasetSeriesRepo;
-        return yield* repo.update(entity, { updatedBy });
-      }
-      case "Variable": {
-        const repo = yield* VariablesRepo;
-        return yield* repo.update(entity, { updatedBy });
-      }
-      case "Series": {
-        const repo = yield* SeriesRepo;
-        return yield* repo.update(entity, { updatedBy });
+        return yield* (operation === "insert"
+          ? repo.insert(entity, { updatedBy })
+          : repo.update(entity, { updatedBy }));
       }
     }
   });
@@ -394,16 +369,22 @@ export const applyDataLayerSyncPlan = (
   }
 ) =>
   Effect.gen(function* () {
-    yield* Effect.forEach(
-      plan.inserts,
-      (change) => insertEntity(change.entity, options.updatedBy),
-      { discard: true }
-    );
+    const sql = yield* SqlClient.SqlClient;
 
-    yield* Effect.forEach(
-      plan.updates,
-      (change) => updateEntity(change.next, options.updatedBy),
-      { discard: true }
+    yield* sql.withTransaction(
+      Effect.gen(function* () {
+        yield* Effect.forEach(
+          plan.inserts,
+          (change) => writeEntity(change.entity, options.updatedBy, "insert"),
+          { discard: true }
+        );
+
+        yield* Effect.forEach(
+          plan.updates,
+          (change) => writeEntity(change.next, options.updatedBy, "update"),
+          { discard: true }
+        );
+      })
     );
 
     return {
@@ -423,7 +404,7 @@ export const syncCheckedInDataLayer = (options?: {
       options?.root ?? checkedInDataLayerRegistryRoot
     );
     const currentSeed = yield* loadD1DataLayerSeed();
-    const plan = planDataLayerSync(sourceSeed, currentSeed);
+    const plan = yield* planDataLayerSync(sourceSeed, currentSeed);
 
     const applied = options?.apply === true
       ? yield* applyDataLayerSyncPlan(plan, {

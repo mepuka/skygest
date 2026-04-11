@@ -253,24 +253,26 @@ export const DatasetsRepoD1 = {
         `Invalid dataset ${operation} input for ${dataset.id}`
       ).pipe(
         Effect.flatMap((validated) =>
-          Effect.gen(function* () {
-            const before = yield* findByUri(validated.id);
+          sql.withTransaction(
+            Effect.gen(function* () {
+              const before = yield* findByUri(validated.id);
 
-            yield* withSchemaDbError(
-              upsertDatasetRow(toDatasetUpsertRow(validated, updatedBy)),
-              `Failed to persist dataset ${validated.id}`
-            );
+              yield* withSchemaDbError(
+                upsertDatasetRow(toDatasetUpsertRow(validated, updatedBy)),
+                `Failed to persist dataset ${validated.id}`
+              );
 
-            yield* insertDataLayerAudit(sql, {
-              entityId: validated.id,
-              entityKind: "Dataset",
-              operation,
-              operator: updatedBy,
-              beforeRow: before,
-              afterRow: validated,
-              timestamp: validated.updatedAt
-            });
-          })
+              yield* insertDataLayerAudit(sql, {
+                entityId: validated.id,
+                entityKind: "Dataset",
+                operation,
+                operator: updatedBy,
+                beforeRow: before,
+                afterRow: validated,
+                timestamp: validated.updatedAt
+              });
+            })
+          )
         )
       );
 
@@ -281,31 +283,33 @@ export const DatasetsRepoD1 = {
       save(dataset, updatedBy, "update");
 
     const deleteByUri = (uri: string, deletedAt: string, updatedBy: string) =>
-      Effect.gen(function* () {
-        const before = yield* findByUri(uri);
+      sql.withTransaction(
+        Effect.gen(function* () {
+          const before = yield* findByUri(uri);
 
-        yield* withSchemaDbError(
-          deleteDatasetRow({
-            id: uri,
-            updated_at: deletedAt,
-            updated_by: updatedBy,
-            deleted_at: deletedAt
-          }),
-          `Failed to delete dataset ${uri}`
-        );
+          yield* withSchemaDbError(
+            deleteDatasetRow({
+              id: uri,
+              updated_at: deletedAt,
+              updated_by: updatedBy,
+              deleted_at: deletedAt
+            }),
+            `Failed to delete dataset ${uri}`
+          );
 
-        if (before !== null) {
-          yield* insertDataLayerAudit(sql, {
-            entityId: uri,
-            entityKind: "Dataset",
-            operation: "delete",
-            operator: updatedBy,
-            beforeRow: before,
-            afterRow: null,
-            timestamp: deletedAt
-          });
-        }
-      });
+          if (before !== null) {
+            yield* insertDataLayerAudit(sql, {
+              entityId: uri,
+              entityKind: "Dataset",
+              operation: "delete",
+              operator: updatedBy,
+              beforeRow: before,
+              afterRow: null,
+              timestamp: deletedAt
+            });
+          }
+        })
+      );
 
     const findByTitle = (title: string) =>
       listAll().pipe(

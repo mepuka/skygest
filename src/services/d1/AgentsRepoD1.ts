@@ -6,6 +6,7 @@ import {
   Aliases,
   type Agent
 } from "../../domain/data-layer";
+import { normalizeDistributionHostname } from "../../resolution/normalize";
 import { AgentsRepo } from "../AgentsRepo";
 import { decodeWithDbError, withSchemaDbError } from "./schemaDecode";
 import {
@@ -85,7 +86,7 @@ const toAgentUpsertRow = (
   homepage: agent.homepage ?? null,
   homepage_domain: agent.homepage === undefined
     ? null
-    : new URL(agent.homepage).hostname.toLowerCase(),
+    : normalizeDistributionHostname(agent.homepage),
   parent_agent_id: agent.parentAgentId ?? null,
   aliases_json: agent.aliases,
   created_at: agent.createdAt,
@@ -190,24 +191,26 @@ export const AgentsRepoD1 = {
         `Invalid agent ${operation} input for ${agent.id}`
       ).pipe(
         Effect.flatMap((validated) =>
-          Effect.gen(function* () {
-            const before = yield* findByUri(validated.id);
+          sql.withTransaction(
+            Effect.gen(function* () {
+              const before = yield* findByUri(validated.id);
 
-            yield* withSchemaDbError(
-              upsertAgentRow(toAgentUpsertRow(validated, updatedBy)),
-              `Failed to persist agent ${validated.id}`
-            );
+              yield* withSchemaDbError(
+                upsertAgentRow(toAgentUpsertRow(validated, updatedBy)),
+                `Failed to persist agent ${validated.id}`
+              );
 
-            yield* insertDataLayerAudit(sql, {
-              entityId: validated.id,
-              entityKind: "Agent",
-              operation,
-              operator: updatedBy,
-              beforeRow: before,
-              afterRow: validated,
-              timestamp: validated.updatedAt
-            });
-          })
+              yield* insertDataLayerAudit(sql, {
+                entityId: validated.id,
+                entityKind: "Agent",
+                operation,
+                operator: updatedBy,
+                beforeRow: before,
+                afterRow: validated,
+                timestamp: validated.updatedAt
+              });
+            })
+          )
         )
       );
 
@@ -218,31 +221,33 @@ export const AgentsRepoD1 = {
       save(agent, updatedBy, "update");
 
     const deleteByUri = (uri: string, deletedAt: string, updatedBy: string) =>
-      Effect.gen(function* () {
-        const before = yield* findByUri(uri);
+      sql.withTransaction(
+        Effect.gen(function* () {
+          const before = yield* findByUri(uri);
 
-        yield* withSchemaDbError(
-          deleteAgentRow({
-            id: uri,
-            updated_at: deletedAt,
-            updated_by: updatedBy,
-            deleted_at: deletedAt
-          }),
-          `Failed to delete agent ${uri}`
-        );
+          yield* withSchemaDbError(
+            deleteAgentRow({
+              id: uri,
+              updated_at: deletedAt,
+              updated_by: updatedBy,
+              deleted_at: deletedAt
+            }),
+            `Failed to delete agent ${uri}`
+          );
 
-        if (before !== null) {
-          yield* insertDataLayerAudit(sql, {
-            entityId: uri,
-            entityKind: "Agent",
-            operation: "delete",
-            operator: updatedBy,
-            beforeRow: before,
-            afterRow: null,
-            timestamp: deletedAt
-          });
-        }
-      });
+          if (before !== null) {
+            yield* insertDataLayerAudit(sql, {
+              entityId: uri,
+              entityKind: "Agent",
+              operation: "delete",
+              operator: updatedBy,
+              beforeRow: before,
+              afterRow: null,
+              timestamp: deletedAt
+            });
+          }
+        })
+      );
 
     const findByLabel = (label: string) =>
       listAll().pipe(

@@ -236,47 +236,49 @@ export const CatalogRecordsRepoD1 = {
         `Invalid catalog record ${operation} input for ${record.id}`
       ).pipe(
         Effect.flatMap((validated) =>
-          Effect.gen(function* () {
-            const beforeRow = yield* withSchemaDbError(
-              findCatalogRecordRowByUri(validated.id),
-              `Failed to decode catalog record row for ${validated.id}`
-            );
-            const before = yield* Option.match(beforeRow, {
-              onNone: () => Effect.succeed<CatalogRecord | null>(null),
-              onSome: (row) => decodeCatalogRecordRow(row)
-            });
+          sql.withTransaction(
+            Effect.gen(function* () {
+              const beforeRow = yield* withSchemaDbError(
+                findCatalogRecordRowByUri(validated.id),
+                `Failed to decode catalog record row for ${validated.id}`
+              );
+              const before = yield* Option.match(beforeRow, {
+                onNone: () => Effect.succeed<CatalogRecord | null>(null),
+                onSome: (row) => decodeCatalogRecordRow(row)
+              });
 
-            const writeTimestamp = defaultCatalogRecordWriteTimestamp(
-              validated,
-              timestamp
-            );
-            const createdAt = Option.match(beforeRow, {
-              onNone: () => writeTimestamp,
-              onSome: (row) => row.created_at
-            });
+              const writeTimestamp = defaultCatalogRecordWriteTimestamp(
+                validated,
+                timestamp
+              );
+              const createdAt = Option.match(beforeRow, {
+                onNone: () => writeTimestamp,
+                onSome: (row) => row.created_at
+              });
 
-            yield* withSchemaDbError(
-              upsertCatalogRecordRow(
-                toCatalogRecordUpsertRow(
-                  validated,
-                  updatedBy,
-                  createdAt,
-                  writeTimestamp
-                )
-              ),
-              `Failed to persist catalog record ${validated.id}`
-            );
+              yield* withSchemaDbError(
+                upsertCatalogRecordRow(
+                  toCatalogRecordUpsertRow(
+                    validated,
+                    updatedBy,
+                    createdAt,
+                    writeTimestamp
+                  )
+                ),
+                `Failed to persist catalog record ${validated.id}`
+              );
 
-            yield* insertDataLayerAudit(sql, {
-              entityId: validated.id,
-              entityKind: "CatalogRecord",
-              operation,
-              operator: updatedBy,
-              beforeRow: before,
-              afterRow: validated,
-              timestamp: writeTimestamp
-            });
-          })
+              yield* insertDataLayerAudit(sql, {
+                entityId: validated.id,
+                entityKind: "CatalogRecord",
+                operation,
+                operator: updatedBy,
+                beforeRow: before,
+                afterRow: validated,
+                timestamp: writeTimestamp
+              });
+            })
+          )
         )
       );
 
@@ -291,31 +293,33 @@ export const CatalogRecordsRepoD1 = {
     ) => save(record, options.updatedBy, options.timestamp, "update");
 
     const deleteByUri = (uri: string, deletedAt: string, updatedBy: string) =>
-      Effect.gen(function* () {
-        const before = yield* findByUri(uri);
+      sql.withTransaction(
+        Effect.gen(function* () {
+          const before = yield* findByUri(uri);
 
-        yield* withSchemaDbError(
-          deleteCatalogRecordRow({
-            id: uri,
-            updated_at: deletedAt,
-            updated_by: updatedBy,
-            deleted_at: deletedAt
-          }),
-          `Failed to delete catalog record ${uri}`
-        );
+          yield* withSchemaDbError(
+            deleteCatalogRecordRow({
+              id: uri,
+              updated_at: deletedAt,
+              updated_by: updatedBy,
+              deleted_at: deletedAt
+            }),
+            `Failed to delete catalog record ${uri}`
+          );
 
-        if (before !== null) {
-          yield* insertDataLayerAudit(sql, {
-            entityId: uri,
-            entityKind: "CatalogRecord",
-            operation: "delete",
-            operator: updatedBy,
-            beforeRow: before,
-            afterRow: null,
-            timestamp: deletedAt
-          });
-        }
-      });
+          if (before !== null) {
+            yield* insertDataLayerAudit(sql, {
+              entityId: uri,
+              entityKind: "CatalogRecord",
+              operation: "delete",
+              operator: updatedBy,
+              beforeRow: before,
+              afterRow: null,
+              timestamp: deletedAt
+            });
+          }
+        })
+      );
 
     return CatalogRecordsRepo.of({
       listAll,

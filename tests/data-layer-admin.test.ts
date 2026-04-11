@@ -17,13 +17,8 @@ const operatorIdentity: AccessIdentity = {
 
 const decodeAgent = Schema.decodeUnknownSync(AgentSchema);
 
-const createdAt = "2026-04-11T01:00:00.000Z";
-const updatedAt = "2026-04-11T01:30:00.000Z";
-const updatedAt2 = "2026-04-11T02:00:00.000Z";
-
-const firstAgent = decodeAgent({
+const firstAgentInput = {
   _tag: "Agent",
-  id: "https://id.skygest.io/agent/ag_ADMINROUTE01",
   kind: "organization",
   name: "U.S. Energy Information Administration",
   alternateNames: ["Energy Information Administration"],
@@ -34,14 +29,11 @@ const firstAgent = decodeAgent({
       value: "https://www.eia.gov/",
       relation: "exactMatch"
     }
-  ],
-  createdAt,
-  updatedAt
-});
+  ]
+} as const;
 
-const secondAgent = decodeAgent({
+const secondAgentInput = {
   _tag: "Agent",
-  id: "https://id.skygest.io/agent/ag_ADMINROUTE02",
   kind: "organization",
   name: "GridStatus",
   homepage: "https://www.gridstatus.io/",
@@ -51,19 +43,16 @@ const secondAgent = decodeAgent({
       value: "https://www.gridstatus.io/",
       relation: "exactMatch"
     }
-  ],
-  createdAt,
-  updatedAt
-});
+  ]
+} as const;
 
-const updatedFirstAgent = decodeAgent({
-  ...firstAgent,
+const updatedFirstAgentInput = {
+  ...firstAgentInput,
   alternateNames: [
-    ...(firstAgent.alternateNames ?? []),
+    ...(firstAgentInput.alternateNames ?? []),
     "EIA"
-  ],
-  updatedAt: updatedAt2
-});
+  ]
+} as const;
 
 const makeDataLayerTestLayer = (filename: string) => {
   const sqliteLayer = makeSqliteLayer(filename);
@@ -100,7 +89,7 @@ const expectJsonResponse = async <A>(
 };
 
 describe("data-layer admin routes", () => {
-  it.live("creates, lists, updates, deletes, and audits entities", () =>
+  it.live("creates, lists, replaces, deletes, and audits entities with server-owned ids and timestamps", () =>
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const layer = makeDataLayerTestLayer(filename);
@@ -113,7 +102,7 @@ describe("data-layer admin routes", () => {
             headers: {
               "content-type": "application/json"
             },
-            body: encodeJsonString(firstAgent)
+            body: encodeJsonString(firstAgentInput)
           }),
           operatorIdentity,
           layer
@@ -125,10 +114,17 @@ describe("data-layer admin routes", () => {
             headers: {
               "content-type": "application/json"
             },
-            body: encodeJsonString(secondAgent)
+            body: encodeJsonString(secondAgentInput)
           }),
           operatorIdentity,
           layer
+        );
+
+        const createdFirstBody = decodeAgent(
+          await expectJsonResponse<unknown>(createFirst, 201)
+        );
+        const createdSecondBody = decodeAgent(
+          await expectJsonResponse<unknown>(createSecond, 201)
         );
 
         const listPage = await handleDataLayerRequestWithLayer(
@@ -139,7 +135,7 @@ describe("data-layer admin routes", () => {
 
         const getFirst = await handleDataLayerRequestWithLayer(
           makeRequest(
-            `/admin/data-layer/agents/${encodeURIComponent(firstAgent.id)}`
+            `/admin/data-layer/agents/${encodeURIComponent(createdFirstBody.id)}`
           ),
           operatorIdentity,
           layer
@@ -147,13 +143,13 @@ describe("data-layer admin routes", () => {
 
         const updateFirst = await handleDataLayerRequestWithLayer(
           makeRequest(
-            `/admin/data-layer/agents/${encodeURIComponent(firstAgent.id)}`,
+            `/admin/data-layer/agents/${encodeURIComponent(createdFirstBody.id)}`,
             {
-              method: "PATCH",
+              method: "PUT",
               headers: {
                 "content-type": "application/json"
               },
-              body: encodeJsonString(updatedFirstAgent)
+              body: encodeJsonString(updatedFirstAgentInput)
             }
           ),
           operatorIdentity,
@@ -162,7 +158,7 @@ describe("data-layer admin routes", () => {
 
         const deleteFirst = await handleDataLayerRequestWithLayer(
           makeRequest(
-            `/admin/data-layer/agents/${encodeURIComponent(firstAgent.id)}`,
+            `/admin/data-layer/agents/${encodeURIComponent(createdFirstBody.id)}`,
             {
               method: "DELETE"
             }
@@ -173,7 +169,7 @@ describe("data-layer admin routes", () => {
 
         const deletedGet = await handleDataLayerRequestWithLayer(
           makeRequest(
-            `/admin/data-layer/agents/${encodeURIComponent(firstAgent.id)}`
+            `/admin/data-layer/agents/${encodeURIComponent(createdFirstBody.id)}`
           ),
           operatorIdentity,
           layer
@@ -181,10 +177,7 @@ describe("data-layer admin routes", () => {
 
         const auditLog = await handleDataLayerRequestWithLayer(
           makeRequest(
-            `/admin/data-layer/audit/${encodeURIComponent(firstAgent.id)}`,
-            {
-              method: "POST"
-            }
+            `/admin/data-layer/audit/${encodeURIComponent(createdFirstBody.id)}`
           ),
           operatorIdentity,
           layer
@@ -196,13 +189,6 @@ describe("data-layer admin routes", () => {
           layer
         );
 
-        const createdFirstBody = await expectJsonResponse<{
-          readonly id: string;
-          readonly _tag: string;
-        }>(createFirst, 201);
-        const createdSecondBody = await expectJsonResponse<{
-          readonly id: string;
-        }>(createSecond, 201);
         const listBody = await expectJsonResponse<{
           readonly items: ReadonlyArray<{ readonly id: string }>;
           readonly page: {
@@ -211,13 +197,10 @@ describe("data-layer admin routes", () => {
             readonly total: number;
           };
         }>(listPage);
-        const getBody = await expectJsonResponse<{
-          readonly id: string;
-          readonly name: string;
-        }>(getFirst);
-        const updatedBody = await expectJsonResponse<{
-          readonly alternateNames?: ReadonlyArray<string>;
-        }>(updateFirst);
+        const getBody = decodeAgent(await expectJsonResponse<unknown>(getFirst));
+        const updatedBody = decodeAgent(
+          await expectJsonResponse<unknown>(updateFirst)
+        );
         const deleteBody = await expectJsonResponse<{ readonly ok: boolean }>(
           deleteFirst
         );
@@ -229,8 +212,15 @@ describe("data-layer admin routes", () => {
           readonly items: ReadonlyArray<{
             readonly operation: "insert" | "update" | "delete";
             readonly operator: string;
-            readonly beforeRow: null | { readonly alternateNames?: ReadonlyArray<string> };
-            readonly afterRow: null | { readonly alternateNames?: ReadonlyArray<string> };
+            readonly beforeRow: null | {
+              readonly id: string;
+              readonly alternateNames?: ReadonlyArray<string>;
+            };
+            readonly afterRow: null | {
+              readonly id: string;
+              readonly alternateNames?: ReadonlyArray<string>;
+            };
+            readonly timestamp: string;
           }>;
         }>(auditLog);
         const finalListBody = await expectJsonResponse<{
@@ -238,22 +228,28 @@ describe("data-layer admin routes", () => {
           readonly page: { readonly total: number };
         }>(finalList);
 
-        expect(createdFirstBody.id).toBe(firstAgent.id);
+        expect(createdFirstBody.id).toMatch(
+          /^https:\/\/id\.skygest\.io\/agent\/ag_[A-Za-z0-9]{10,}$/u
+        );
         expect(createdFirstBody._tag).toBe("Agent");
-        expect(createdSecondBody.id).toBe(secondAgent.id);
+        expect(createdFirstBody.createdAt).toBe(createdFirstBody.updatedAt);
+        expect(createdSecondBody.id).not.toBe(createdFirstBody.id);
         expect(listBody.items).toHaveLength(1);
-        expect(listBody.items[0]?.id).toBe(firstAgent.id);
+        expect(listBody.items[0]?.id).toBe(createdFirstBody.id);
         expect(listBody.page).toEqual({
           offset: 0,
           limit: 1,
           total: 2
         });
-        expect(getBody.id).toBe(firstAgent.id);
-        expect(getBody.name).toBe(firstAgent.name);
+        expect(getBody.id).toBe(createdFirstBody.id);
+        expect(getBody.name).toBe(firstAgentInput.name);
+        expect(updatedBody.id).toBe(createdFirstBody.id);
+        expect(updatedBody.createdAt).toBe(createdFirstBody.createdAt);
+        expect(updatedBody.updatedAt >= createdFirstBody.updatedAt).toBe(true);
         expect(updatedBody.alternateNames).toContain("EIA");
         expect(deleteBody.ok).toBe(true);
         expect(deletedGetBody.error).toBe("NotFound");
-        expect(deletedGetBody.message).toContain(firstAgent.id);
+        expect(deletedGetBody.message).toContain(createdFirstBody.id);
         expect(auditBody.items.map((item) => item.operation)).toEqual([
           "delete",
           "update",
@@ -266,11 +262,13 @@ describe("data-layer admin routes", () => {
         ).toBe(true);
         expect(auditBody.items[0]?.afterRow).toBeNull();
         expect(auditBody.items[1]?.beforeRow?.alternateNames).toEqual(
-          firstAgent.alternateNames
+          firstAgentInput.alternateNames
         );
+        expect(auditBody.items[1]?.afterRow?.id).toBe(createdFirstBody.id);
         expect(auditBody.items[1]?.afterRow?.alternateNames).toContain("EIA");
+        expect(auditBody.items[2]?.afterRow?.id).toBe(createdFirstBody.id);
         expect(finalListBody.items).toHaveLength(1);
-        expect(finalListBody.items[0]?.id).toBe(secondAgent.id);
+        expect(finalListBody.items[0]?.id).toBe(createdSecondBody.id);
         expect(finalListBody.page.total).toBe(1);
       })
     )
@@ -289,7 +287,7 @@ describe("data-layer admin routes", () => {
             headers: {
               "content-type": "application/json"
             },
-            body: encodeJsonString(firstAgent)
+            body: encodeJsonString(firstAgentInput)
           }),
           operatorIdentity,
           layer
@@ -302,6 +300,32 @@ describe("data-layer admin routes", () => {
 
         expect(body.error).toBe("BadRequest");
         expect(body.message).toContain("does not match kind catalogs");
+      })
+    )
+  );
+
+  it.live("rejects ids whose kind does not match the route kind", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeDataLayerTestLayer(filename);
+
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        const response = await handleDataLayerRequestWithLayer(
+          makeRequest(
+            "/admin/data-layer/agents/https%3A%2F%2Fid.skygest.io%2Fdataset%2Fds_ADMINROUTE01"
+          ),
+          operatorIdentity,
+          layer
+        );
+
+        const body = await expectJsonResponse<{
+          readonly error: string;
+          readonly message: string;
+        }>(response, 400);
+
+        expect(body.error).toBe("BadRequest");
+        expect(body.message).toContain("invalid agents entity id");
       })
     )
   );

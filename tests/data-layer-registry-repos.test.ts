@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, Layer, Schema } from "effect";
+import { Effect, Exit, Layer, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { d1DataLayerRegistryLayer } from "../src/bootstrap/D1DataLayerRegistry";
 import { runMigrations } from "../src/db/migrate";
@@ -51,6 +51,7 @@ const deletedAt = "2026-04-11T13:00:00.000Z";
 const updatedBy = "test-operator";
 const persistenceCreatedAt = "2026-04-11T09:00:00.000Z";
 const persistenceUpdatedAt = "2026-04-11T10:00:00.000Z";
+const quoteSqlString = (value: string) => `'${value.replaceAll("'", "''")}'`;
 
 const makeLayer = () => {
   const sqliteLayer = makeSqliteLayer();
@@ -309,6 +310,30 @@ describe("data layer registry repos", () => {
 
       expect(afterDelete).toBeNull();
       expect(auditCount?.count).toBe(3);
+    }).pipe(Effect.provide(makeLayer()))
+  );
+
+  it.effect("rolls back agent writes when the audit insert fails", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+
+      const repo = yield* AgentsRepo;
+      const sql = yield* SqlClient.SqlClient;
+
+      yield* sql`${sql.unsafe(`
+        CREATE TRIGGER fail_agent_audit
+        BEFORE INSERT ON data_layer_audit
+        WHEN NEW.entity_id = ${quoteSqlString(agent.id)}
+        BEGIN
+          SELECT RAISE(FAIL, 'forced audit failure');
+        END
+      `)}`.pipe(Effect.asVoid);
+
+      const exit = yield* Effect.exit(repo.insert(agent, { updatedBy }));
+      const stored = yield* repo.findByUri(agent.id);
+
+      expect(Exit.isFailure(exit)).toBe(true);
+      expect(stored).toBeNull();
     }).pipe(Effect.provide(makeLayer()))
   );
 

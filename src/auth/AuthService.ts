@@ -13,6 +13,13 @@ export class InvalidOperatorSecretError extends Schema.TaggedErrorClass<InvalidO
   {}
 ) {}
 
+export class MissingOperatorScopeError extends Schema.TaggedErrorClass<MissingOperatorScopeError>()(
+  "MissingOperatorScopeError",
+  {
+    missingScopes: Schema.Array(Schema.String)
+  }
+) {}
+
 export type AccessIdentity = {
   readonly subject: string | null;
   readonly email: string | null;

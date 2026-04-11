@@ -3,9 +3,12 @@ import {
   type AccessIdentity,
   AuthService,
   InvalidOperatorSecretError,
+  MissingOperatorScopeError,
   MissingOperatorSecretError
 } from "../auth/AuthService";
 import {
+  DataLayerKind,
+  forbiddenError,
   notFoundError,
   unauthorizedError
 } from "../domain/api";
@@ -16,6 +19,8 @@ import { Logging } from "../platform/Logging";
 import { makeSharedRuntime } from "../platform/EffectRuntime";
 
 const sharedAuthRuntime = makeSharedRuntime(makeAuthLayer);
+
+const dataLayerKindPathPattern = DataLayerKind.literals.join("|");
 
 type OperatorRequestPolicy = {
   readonly action: string | null;
@@ -38,10 +43,15 @@ const isEnrichmentRunPath = (pathname: string) =>
   /^\/admin\/enrichment\/runs\/[^/]+$/u.test(pathname);
 
 const isDataLayerKindPath = (pathname: string) =>
-  /^\/admin\/data-layer\/(agents|catalogs|catalog-records|datasets|distributions|data-services|dataset-series|variables|series)$/u.test(pathname);
+  new RegExp(`^/admin/data-layer/(${dataLayerKindPathPattern})$`, "u").test(
+    pathname
+  );
 
 const isDataLayerEntityPath = (pathname: string) =>
-  /^\/admin\/data-layer\/(agents|catalogs|catalog-records|datasets|distributions|data-services|dataset-series|variables|series)\/[^/]+$/u.test(pathname);
+  new RegExp(
+    `^/admin/data-layer/(${dataLayerKindPathPattern})/[^/]+$`,
+    "u"
+  ).test(pathname);
 
 const isDataLayerAuditPath = (pathname: string) =>
   /^\/admin\/data-layer\/audit\/[^/]+$/u.test(pathname);
@@ -133,7 +143,7 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
     };
   }
 
-  if (request.method === "POST" && isDataLayerAuditPath(pathname)) {
+  if (request.method === "GET" && isDataLayerAuditPath(pathname)) {
     return {
       action: "list_data_layer_audit",
       scopes: ["ops:read"]
@@ -147,7 +157,7 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
     };
   }
 
-  if (request.method === "PATCH" && isDataLayerEntityPath(pathname)) {
+  if (request.method === "PUT" && isDataLayerEntityPath(pathname)) {
     return {
       action: "update_data_layer_entity",
       scopes: ["ops:refresh"]
@@ -282,7 +292,7 @@ export const authorizeOperator = (
         );
 
         if (missing.length > 0) {
-          return yield* new InvalidOperatorSecretError();
+          return yield* new MissingOperatorScopeError({ missingScopes: missing });
         }
       }
 
@@ -300,6 +310,18 @@ export const toAuthErrorResponse = (error: unknown) => {
       encodeJsonString(unauthorizedError("unauthorized")),
       {
         status: 401,
+        headers: {
+          "content-type": "application/json"
+        }
+      }
+    );
+  }
+
+  if (error instanceof MissingOperatorScopeError) {
+    return new Response(
+      encodeJsonString(forbiddenError("forbidden")),
+      {
+        status: 403,
         headers: {
           "content-type": "application/json"
         }
@@ -331,6 +353,8 @@ export const logDeniedOperatorRequest = async (
     ? "invalid operator secret"
     : error instanceof MissingOperatorSecretError
       ? "missing operator secret"
+      : error instanceof MissingOperatorScopeError
+        ? `missing scopes: ${error.missingScopes.join(", ")}`
       : "missing or invalid bearer token";
 
   await Effect.runPromise(
