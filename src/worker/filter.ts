@@ -1,7 +1,20 @@
+import { WorkerEntrypoint } from "cloudflare:workers";
 import { Effect } from "effect";
-import { handleEnrichmentRequest } from "../enrichment/Router";
+import {
+  internalServerError,
+  type HttpErrorEnvelope
+} from "../domain/api";
+import {
+  handleEnrichmentRequest,
+  startEnrichmentEffect
+} from "../enrichment/Router";
+import { makeWorkflowEnrichmentLayer } from "../enrichment/Layer";
 import { EnrichmentRunWorkflow } from "../enrichment/EnrichmentRunWorkflow";
-import { toHttpErrorResponse } from "../http/ErrorMapping";
+import {
+  httpErrorStatus,
+  isHttpEnvelope,
+  toHttpErrorResponse
+} from "../http/ErrorMapping";
 import { handleIngestRequest, makeWorkflowIngestLayer } from "../ingest/Router";
 import { ExpertPollCoordinatorDo, ExpertPollCoordinatorDoIsolated } from "../ingest/ExpertPollCoordinatorDo";
 import { IngestRunWorkflow } from "../ingest/IngestRunWorkflow";
@@ -11,6 +24,8 @@ import {
   runScopedWithRuntime,
   withManagedRuntime
 } from "../platform/EffectRuntime";
+import { makeEffectRpc } from "../platform/Rpc";
+import type { StartEnrichmentRpcInput } from "../services/EnrichmentTriggerClient";
 import {
   authorizeOperator,
   requiredOperatorScopes,
@@ -19,6 +34,38 @@ import {
 } from "./operatorAuth";
 
 type BackgroundExecutionContext = Pick<ExecutionContext, "waitUntil">;
+
+const enrichmentRpc = makeEffectRpc(makeWorkflowEnrichmentLayer);
+
+const toRpcHttpError = (error: unknown): HttpErrorEnvelope =>
+  isHttpEnvelope(error)
+    ? error
+    : internalServerError("internal error");
+
+export class EnrichmentEntrypoint extends WorkerEntrypoint<WorkflowFilterEnvBindings> {
+  startEnrichment(input: StartEnrichmentRpcInput) {
+    return enrichmentRpc.run(
+      this.env,
+      startEnrichmentEffect(
+        {
+          postUri: input.postUri,
+          enrichmentType: input.enrichmentType,
+          ...(input.schemaVersion === undefined
+            ? {}
+            : { schemaVersion: input.schemaVersion })
+        },
+        input.requestedBy ?? "operator"
+      ),
+      (error) => {
+        const envelope = toRpcHttpError(error);
+        return {
+          message: envelope.message,
+          status: httpErrorStatus(envelope)
+        };
+      }
+    );
+  }
+}
 
 export const handleFilterWorkerRequest = async (
   request: Request,

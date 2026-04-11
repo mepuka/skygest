@@ -709,6 +709,7 @@ const startEnrichmentViaTrigger = (
   input: {
     readonly postUri: PostUri;
     readonly enrichmentType: GapEnrichmentType;
+    readonly requestedBy?: string;
   }
 ) =>
   trigger.start(input).pipe(
@@ -1244,9 +1245,11 @@ const makeStartEnrichmentHandler = () => ({
         enrichmentType = inferPrimaryEnrichmentType(payload.embedPayload);
       }
 
+      const identity = yield* OperatorIdentity;
       const result = yield* startEnrichmentViaTrigger(trigger, "start_enrichment", {
         postUri: input.postUri,
-        enrichmentType
+        enrichmentType,
+        requestedBy: identity.email ?? identity.subject ?? "operator"
       });
 
       return {
@@ -1280,6 +1283,7 @@ const makeBulkStartEnrichmentHandler = () => ({
 
       const trigger = triggerOption.value;
       const payloadService = yield* CandidatePayloadService;
+      const identity = yield* OperatorIdentity;
       const posts = yield* validateBulkStartEnrichmentInput(input);
       const outcomes = yield* Effect.forEach(
         posts,
@@ -1299,7 +1303,8 @@ const makeBulkStartEnrichmentHandler = () => ({
 
             return yield* trigger.start({
               postUri,
-              enrichmentType: resolvedEnrichmentType
+              enrichmentType: resolvedEnrichmentType,
+              requestedBy: identity.email ?? identity.subject ?? "operator"
             }).pipe(
               Effect.retry({
                 schedule: ENRICHMENT_TRIGGER_RETRY_SCHEDULE,

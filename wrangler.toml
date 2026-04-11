@@ -19,6 +19,7 @@ class_name = "EnrichmentRunWorkflow"
 [[services]]
 binding = "RESOLVER"
 service = "skygest-resolver"
+entrypoint = "ResolverEntrypoint"
 
 [[durable_objects.bindings]]
 name = "EXPERT_POLL_COORDINATOR"
@@ -67,6 +68,7 @@ class_name = "EnrichmentRunWorkflow"
 [[env.staging.services]]
 binding = "RESOLVER"
 service = "skygest-resolver-staging"
+entrypoint = "ResolverEntrypoint"
 
 [[env.staging.durable_objects.bindings]]
 name = "EXPERT_POLL_COORDINATOR"

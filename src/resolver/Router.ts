@@ -100,6 +100,22 @@ const withResolverErrors = <A, R>(
     }
   });
 
+export const resolvePostEffect = (
+  payload: typeof ResolvePostRequest.Type
+) =>
+  withResolverErrors(
+    "/v1/resolve/post",
+    ResolverService.use((resolver) => resolver.resolvePost(payload))
+  );
+
+export const resolveBulkEffect = (
+  payload: typeof ResolveBulkRequest.Type
+) =>
+  withResolverErrors(
+    "/v1/resolve/bulk",
+    ResolverService.use((resolver) => resolver.resolveBulk(payload))
+  );
+
 const ResolverHandlers = Layer.mergeAll(
   HttpApiBuilder.group(ResolverApi, "health", (handlers) =>
     handlers.handle("get", () =>
@@ -110,18 +126,8 @@ const ResolverHandlers = Layer.mergeAll(
   ),
   HttpApiBuilder.group(ResolverApi, "resolve", (handlers) =>
     handlers
-      .handle("post", ({ payload }) =>
-        withResolverErrors(
-          "/v1/resolve/post",
-          ResolverService.use((resolver) => resolver.resolvePost(payload))
-        )
-      )
-      .handle("bulk", ({ payload }) =>
-        withResolverErrors(
-          "/v1/resolve/bulk",
-          ResolverService.use((resolver) => resolver.resolveBulk(payload))
-        )
-      )
+      .handle("post", ({ payload }) => resolvePostEffect(payload))
+      .handle("bulk", ({ payload }) => resolveBulkEffect(payload))
   )
 );
 

@@ -15,7 +15,7 @@ declare namespace WorkerConfiguration {
   	ENABLE_DATA_REF_RESOLUTION: "true";
   	GEMINI_VISION_MODEL: "gemini-3-flash-preview";
   	EXPERT_POLL_COORDINATOR: DurableObjectNamespace<import("./src/worker/filter").ExpertPollCoordinatorDo>;
-  	RESOLVER: Fetcher /* skygest-resolver-staging */;
+  	RESOLVER: Service<typeof import("./src/resolver-worker/index").ResolverEntrypoint>;
   	INGEST_RUN_WORKFLOW: Workflow<Parameters<import("./src/worker/filter").IngestRunWorkflow['run']>[0]['payload']>;
   	ENRICHMENT_RUN_WORKFLOW: Workflow<Parameters<import("./src/worker/filter").EnrichmentRunWorkflow['run']>[0]['payload']>;
   }
@@ -33,7 +33,7 @@ declare namespace WorkerConfiguration {
   	ENABLE_DATA_REF_RESOLUTION?: "true";
   	GEMINI_VISION_MODEL: "gemini-3-flash-preview" | "gemini-2.5-flash";
   	EXPERT_POLL_COORDINATOR: DurableObjectNamespace<import("./src/worker/filter").ExpertPollCoordinatorDo>;
-  	RESOLVER: Fetcher /* skygest-resolver-staging */ | Fetcher /* skygest-resolver */;
+  	RESOLVER: Service<typeof import("./src/resolver-worker/index").ResolverEntrypoint>;
   	INGEST_RUN_WORKFLOW: Workflow<Parameters<import("./src/worker/filter").IngestRunWorkflow['run']>[0]['payload']>;
   	ENRICHMENT_RUN_WORKFLOW: Workflow<Parameters<import("./src/worker/filter").EnrichmentRunWorkflow['run']>[0]['payload']>;
   }
@@ -48,8 +48,8 @@ declare namespace WorkerConfiguration {
   	MCP_LIMIT_DEFAULT: "20";
   	MCP_LIMIT_MAX: "100";
   	ENABLE_STAGING_OPS: "true";
-  	INGEST_SERVICE: Fetcher /* skygest-bi-ingest-staging */;
-  	RESOLVER: Fetcher /* skygest-resolver-staging */;
+  	INGEST_SERVICE: Service<typeof import("./src/worker/filter").EnrichmentEntrypoint>;
+  	RESOLVER: Service<typeof import("./src/resolver-worker/index").ResolverEntrypoint>;
   }
 
   interface AgentEnv {
@@ -62,8 +62,8 @@ declare namespace WorkerConfiguration {
   	MCP_LIMIT_DEFAULT: "20";
   	MCP_LIMIT_MAX: "100";
   	ENABLE_STAGING_OPS?: "true";
-  	INGEST_SERVICE: Fetcher /* skygest-bi-ingest-staging */ | Fetcher /* skygest-bi-ingest */;
-  	RESOLVER: Fetcher /* skygest-resolver-staging */ | Fetcher /* skygest-resolver */;
+  	INGEST_SERVICE: Service<typeof import("./src/worker/filter").EnrichmentEntrypoint>;
+  	RESOLVER: Service<typeof import("./src/resolver-worker/index").ResolverEntrypoint>;
   }
 
   interface ResolverStagingEnv {

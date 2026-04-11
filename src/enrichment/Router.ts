@@ -159,34 +159,45 @@ const withEnrichmentErrors = <A, R>(
     }
   });
 
+export const startEnrichmentEffect = (
+  payload: typeof EnrichmentRequestSchemas.start.Type,
+  requestedBy: string
+) =>
+  withEnrichmentErrors(
+    "/admin/enrichment/start",
+    Effect.gen(function* () {
+      const launcher = yield* EnrichmentWorkflowLauncher;
+      const schemaVersion =
+        payload.schemaVersion ??
+        defaultSchemaVersionForEnrichmentKind(payload.enrichmentType);
+
+      yield* ensureEnrichmentStartAllowed({
+        postUri: payload.postUri,
+        enrichmentType: payload.enrichmentType,
+        schemaVersion
+      });
+
+      return yield* launcher.start({
+        postUri: payload.postUri,
+        enrichmentType: payload.enrichmentType,
+        schemaVersion,
+        triggeredBy: "admin",
+        requestedBy
+      });
+    })
+  );
+
 const EnrichmentHandlers = Layer.mergeAll(
   HttpApiBuilder.group(EnrichmentApi, "commands", (handlers) =>
     handlers
       .handle("start", ({ payload }) =>
-        withEnrichmentErrors(
-          "/admin/enrichment/start",
-          Effect.gen(function* () {
-            const actor = yield* OperatorIdentity;
-            const launcher = yield* EnrichmentWorkflowLauncher;
-            const schemaVersion =
-              payload.schemaVersion ??
-              defaultSchemaVersionForEnrichmentKind(payload.enrichmentType);
-
-            yield* ensureEnrichmentStartAllowed({
-              postUri: payload.postUri,
-              enrichmentType: payload.enrichmentType,
-              schemaVersion
-            });
-
-            return yield* launcher.start({
-              postUri: payload.postUri,
-              enrichmentType: payload.enrichmentType,
-              schemaVersion,
-              triggeredBy: "admin",
-              requestedBy: toRequestedBy(actor)
-            });
-          })
-        )
+        Effect.gen(function* () {
+          const actor = yield* OperatorIdentity;
+          return yield* startEnrichmentEffect(
+            payload,
+            toRequestedBy(actor)
+          );
+        })
       )
       .handle("repair", () =>
         withEnrichmentErrors(

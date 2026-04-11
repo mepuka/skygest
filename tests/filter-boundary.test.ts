@@ -3,6 +3,10 @@ import { vi } from "vitest";
 import type { WorkflowFilterEnvBindings } from "../src/platform/Env";
 import { handleFetchWithBoundary } from "../src/worker/filter";
 
+vi.mock("cloudflare:workers", () => ({
+  WorkerEntrypoint: class {}
+}));
+
 vi.mock("../src/enrichment/Router", () => ({
   handleEnrichmentRequest: vi.fn()
 }));

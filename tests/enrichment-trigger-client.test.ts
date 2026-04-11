@@ -7,25 +7,19 @@ const asPostUri = Schema.decodeUnknownSync(PostUri);
 
 describe("EnrichmentTriggerClient", () => {
   it.effect("start returns queued response on success", () => {
-    const mockFetcher = {
-      fetch: async (_input: RequestInfo | URL, _init?: RequestInit) => {
-        return new Response(
-          JSON.stringify({
+    const mockBinding = {
+      startEnrichment: async () => ({
+        ok: true as const,
+        value: {
             runId: "test-run-id",
             workflowInstanceId: "test-run-id",
             status: "queued"
-          }),
-          {
-            status: 202,
-            headers: { "content-type": "application/json" }
-          }
-        );
-      }
-    } as unknown as Fetcher;
+        }
+      })
+    };
 
-    const layer = EnrichmentTriggerClient.layerFromFetcher(
-      mockFetcher,
-      "test-secret"
+    const layer = EnrichmentTriggerClient.layerFromBinding(
+      mockBinding as never
     );
 
     return Effect.gen(function* () {
@@ -40,23 +34,19 @@ describe("EnrichmentTriggerClient", () => {
   });
 
   it.effect("start fails with EnrichmentTriggerError on 409", () => {
-    const mockFetcher = {
-      fetch: async () => {
-        return new Response(
-          JSON.stringify({
-            message: "enrichment run already exists"
-          }),
-          {
-            status: 409,
-            headers: { "content-type": "application/json" }
-          }
-        );
-      }
-    } as unknown as Fetcher;
+    const mockBinding = {
+      startEnrichment: async () => ({
+        ok: false as const,
+        error: {
+          message: "enrichment run already exists",
+          status: 409,
+          postUri: "at://did:plc:abc/app.bsky.feed.post/xyz"
+        }
+      })
+    };
 
-    const layer = EnrichmentTriggerClient.layerFromFetcher(
-      mockFetcher,
-      "test-secret"
+    const layer = EnrichmentTriggerClient.layerFromBinding(
+      mockBinding as never
     );
 
     return Effect.gen(function* () {
@@ -71,43 +61,39 @@ describe("EnrichmentTriggerClient", () => {
     }).pipe(Effect.provide(layer));
   });
 
-  it.effect("start sends correct auth header and body", () => {
-    let capturedRequest: Request | null = null;
-    const mockFetcher = {
-      fetch: async (input: RequestInfo | URL) => {
-        capturedRequest = input as Request;
-        return new Response(
-          JSON.stringify({
+  it.effect("start sends the normalized RPC payload", () => {
+    let capturedInput: Record<string, unknown> | null = null;
+    const mockBinding = {
+      startEnrichment: async (input: Record<string, unknown>) => {
+        capturedInput = input;
+        return {
+          ok: true as const,
+          value: {
             runId: "run-1",
             workflowInstanceId: "run-1",
             status: "queued"
-          }),
-          { status: 202, headers: { "content-type": "application/json" } }
-        );
+          }
+        };
       }
-    } as unknown as Fetcher;
+    };
 
-    const layer = EnrichmentTriggerClient.layerFromFetcher(
-      mockFetcher,
-      "my-secret-123"
+    const layer = EnrichmentTriggerClient.layerFromBinding(
+      mockBinding as never
     );
 
     return Effect.gen(function* () {
       const client = yield* EnrichmentTriggerClient;
       yield* client.start({
         postUri: asPostUri("at://did:plc:abc/app.bsky.feed.post/xyz"),
-        enrichmentType: "vision"
+        enrichmentType: "vision",
+        requestedBy: "operator@example.com"
       });
-      expect(capturedRequest).not.toBeNull();
-      expect(capturedRequest!.headers.get("authorization")).toBe(
-        "Bearer my-secret-123"
-      );
-      const body = yield* Effect.promise(
-        () => capturedRequest!.json() as Promise<Record<string, unknown>>
-      );
-      expect(body.postUri).toBe("at://did:plc:abc/app.bsky.feed.post/xyz");
-      expect(body.enrichmentType).toBe("vision");
-      expect(body.schemaVersion).toBe("v2");
+      expect(capturedInput).toEqual({
+        postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
+        enrichmentType: "vision",
+        schemaVersion: "v2",
+        requestedBy: "operator@example.com"
+      });
     }).pipe(Effect.provide(layer));
   });
 });
