@@ -1,0 +1,14 @@
+{
+  // Test config (SKY-298). Tests were previously part of the root tsconfig's
+  // include, which made the typecheck graph ~94k LOC. Splitting them out lets
+  // the main config check only src/ and keeps a warm .tsbuildinfo scoped to
+  // test files. Source files that tests import are still pulled in as
+  // dependencies and checked transitively.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": ".cache/tsc/test.tsbuildinfo"
+  },
+  "include": ["tests/**/*.ts", "vitest.config.ts"],
+  "exclude": ["analysis/**"]
+}

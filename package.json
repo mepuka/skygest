@@ -7,7 +7,7 @@
     "prepare": "effect-language-service patch",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsgo --noEmit && tsgo --noEmit -p tsconfig.web.json",
+    "typecheck": "tsgo --noEmit && tsgo --noEmit -p tsconfig.test.json && tsgo --noEmit -p tsconfig.web.json",
     "typecheck:web": "tsgo --noEmit -p tsconfig.web.json",
     "dev": "bun --hot scripts/dev.ts",
     "build:web": "bun build src/web/app.tsx --outdir dist --target browser && bunx @tailwindcss/cli -i src/web/styles.css -o dist/styles.css && cp src/web/index.html dist/index.html",

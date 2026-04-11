@@ -19,6 +19,13 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
 
+    // Incremental typecheck cache (see SKY-298). `incremental: true` writes a
+    // .tsbuildinfo next to the project; we redirect it under .cache/tsc/ so
+    // the three configs (main / test / web) don't collide and CI can cache
+    // the whole directory.
+    "incremental": true,
+    "tsBuildInfoFile": ".cache/tsc/main.tsbuildinfo",
+
     // Best practices
     "strict": true,
     "skipLibCheck": true,
@@ -32,12 +39,13 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "vitest.config.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": [
     "analysis/**",
     "src/**/*.test.ts",
     "src/filters/**",
     "src/services/CandidateSessionsRepo.ts",
-    "src/services/kv/**"
+    "src/services/kv/**",
+    "src/web/**"
   ]
 }
