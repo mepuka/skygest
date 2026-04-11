@@ -16,6 +16,10 @@ name = "enrichment-run"
 binding = "ENRICHMENT_RUN_WORKFLOW"
 class_name = "EnrichmentRunWorkflow"
 
+[[services]]
+binding = "RESOLVER"
+service = "skygest-resolver"
+
 [[durable_objects.bindings]]
 name = "EXPERT_POLL_COORDINATOR"
 class_name = "ExpertPollCoordinatorDo"
@@ -59,6 +63,10 @@ class_name = "IngestRunWorkflow"
 name = "enrichment-run"
 binding = "ENRICHMENT_RUN_WORKFLOW"
 class_name = "EnrichmentRunWorkflow"
+
+[[env.staging.services]]
+binding = "RESOLVER"
+service = "skygest-resolver-staging"
 
 [[env.staging.durable_objects.bindings]]
 name = "EXPERT_POLL_COORDINATOR"

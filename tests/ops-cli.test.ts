@@ -259,7 +259,7 @@ const makeCliLayer = (options?: {
 };
 
 describe("ops CLI", () => {
-  it.live("parses deploy and fans out to both workers", () =>
+  it.live("parses deploy and fans out to all configured workers", () =>
     Effect.promise(async () => {
       const { layer, deployCalls } = makeCliLayer();
       const runtimeLayer = Layer.mergeAll(BunContext.layer, layer);
@@ -272,7 +272,8 @@ describe("ops CLI", () => {
 
       expect(deployCalls).toEqual([
         { configFile: "wrangler.toml", env: "staging" },
-        { configFile: "wrangler.agent.toml", env: "staging" }
+        { configFile: "wrangler.agent.toml", env: "staging" },
+        { configFile: "wrangler.resolver.toml", env: "staging" }
       ]);
     })
   );

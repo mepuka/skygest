@@ -1,5 +1,6 @@
 import { D1Client } from "@effect/sql-d1";
 import { ConfigProvider, Layer } from "effect";
+import { AppConfig } from "../platform/Config";
 import {
   CloudflareEnv,
   makeWorkflowEnrichmentEnvLayer,
@@ -16,6 +17,7 @@ import { EnrichmentWorkflowLauncher } from "./EnrichmentWorkflowLauncher";
 import { GeminiVisionServiceLive } from "./GeminiVisionServiceLive";
 import { SourceAttributionMatcher } from "../source/SourceAttributionMatcher";
 import { VisionEnrichmentExecutor } from "./VisionEnrichmentExecutor";
+import { ResolverClient } from "../resolver/Client";
 
 export const makeWorkflowEnrichmentLayer = (
   env: WorkflowEnrichmentEnvBindings
@@ -37,6 +39,9 @@ export const makeWorkflowEnrichmentLayer = (
     D1Client.layer({ db: env.DB }),
     Logging.layer,
     configLayer
+  );
+  const appConfigLayer = AppConfig.layer.pipe(
+    Layer.provideMerge(baseLayer)
   );
   const workflowEnvLayer = makeWorkflowEnrichmentEnvLayer(env);
   const payloadsLayer = CandidatePayloadRepoD1.layer.pipe(
@@ -73,9 +78,16 @@ export const makeWorkflowEnrichmentLayer = (
   const sourceExecutorLayer = SourceAttributionExecutor.layer.pipe(
     Layer.provideMerge(sourceMatcherLayer)
   );
+  const resolverClientLayer = env.RESOLVER == null
+    ? null
+    : ResolverClient.layerFromFetcher(
+        env.RESOLVER,
+        env.OPERATOR_SECRET ?? ""
+      );
 
-  return Layer.mergeAll(
+  const coreLayer = Layer.mergeAll(
     baseLayer,
+    appConfigLayer,
     workflowEnvLayer,
     payloadsLayer,
     runsLayer,
@@ -88,4 +100,8 @@ export const makeWorkflowEnrichmentLayer = (
     sourceMatcherLayer,
     sourceExecutorLayer
   );
+
+  return resolverClientLayer === null
+    ? coreLayer
+    : Layer.mergeAll(coreLayer, resolverClientLayer);
 };

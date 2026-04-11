@@ -1241,7 +1241,8 @@ describe("MCP get_pipeline_status", () => {
             total: 3,
             vision: 1,
             sourceAttribution: 1,
-            grounding: 1
+            grounding: 1,
+            dataRefResolution: 0
           });
           expect(summary.enrichments.runs).toEqual({
             queued: 1,
@@ -1319,7 +1320,8 @@ describe("MCP get_pipeline_status", () => {
             total: 0,
             vision: 0,
             sourceAttribution: 0,
-            grounding: 0
+            grounding: 0,
+            dataRefResolution: 0
           });
           expect(snapshot.enrichments.runs).toEqual({
             queued: 0,

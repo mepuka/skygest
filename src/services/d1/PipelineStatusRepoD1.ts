@@ -25,6 +25,7 @@ const SnapshotCountsRowSchema = Schema.Struct({
   vision: Schema.Number,
   sourceAttribution: Schema.Number,
   grounding: Schema.Number,
+  dataRefResolution: Schema.Number,
   runComplete: Schema.Number,
   runQueued: Schema.Number,
   runRunning: Schema.Number,
@@ -51,6 +52,7 @@ const zeroSnapshotCounts: Schema.Schema.Type<typeof SnapshotCountsRowSchema> = {
   vision: 0,
   sourceAttribution: 0,
   grounding: 0,
+  dataRefResolution: 0,
   runComplete: 0,
   runQueued: 0,
   runRunning: 0,
@@ -101,7 +103,8 @@ const toStatus = ({
       total: snapshotCounts.enrichmentTotal,
       vision: snapshotCounts.vision,
       sourceAttribution: snapshotCounts.sourceAttribution,
-      grounding: snapshotCounts.grounding
+      grounding: snapshotCounts.grounding,
+      dataRefResolution: snapshotCounts.dataRefResolution
     },
     runs: {
       complete: snapshotCounts.runComplete,
@@ -170,6 +173,11 @@ export const PipelineStatusRepoD1 = {
               WHERE enrichment_type = 'source-attribution'
             ) as sourceAttribution,
             (SELECT COUNT(*) FROM post_enrichments WHERE enrichment_type = 'grounding') as grounding,
+            (
+              SELECT COUNT(*)
+              FROM post_enrichments
+              WHERE enrichment_type = 'data-ref-resolution'
+            ) as dataRefResolution,
             (
               SELECT COUNT(*)
               FROM post_enrichment_runs

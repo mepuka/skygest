@@ -1,6 +1,6 @@
 import { ServiceMap, Effect, Layer, Schema } from "effect";
 import { PostUri } from "../domain/types";
-import type { EnrichmentKind, GapEnrichmentType } from "../domain/enrichment";
+import type { GapEnrichmentType } from "../domain/enrichment";
 import { defaultSchemaVersionForEnrichmentKind } from "../domain/enrichment";
 
 // ---------------------------------------------------------------------------
@@ -52,9 +52,7 @@ export class EnrichmentTriggerClient extends ServiceMap.Service<
             try: async () => {
               const schemaVersion =
                 input.schemaVersion ??
-                defaultSchemaVersionForEnrichmentKind(
-                  input.enrichmentType as EnrichmentKind
-                );
+                defaultSchemaVersionForEnrichmentKind(input.enrichmentType);
 
               const response = await fetcher.fetch(
                 new Request("https://ingest.internal/admin/enrichment/start", {

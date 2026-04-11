@@ -11,6 +11,11 @@ import { SourceAttributionEnrichment, VisionEnrichment } from "./enrichment";
 import { PostUri } from "./types";
 import { PostLinkCard, ThreadCoverage } from "./postContext";
 
+const DeferredVisionEnrichment = Schema.suspend(() => VisionEnrichment);
+const DeferredSourceAttributionEnrichment = Schema.suspend(
+  () => SourceAttributionEnrichment
+);
+
 export const Stage1Rank = Schema.Int.pipe(
   Schema.check(Schema.isGreaterThanOrEqualTo(1))
 );
@@ -29,8 +34,8 @@ export type Stage1PostContext = Schema.Schema.Type<typeof Stage1PostContext>;
 
 export const stage1InputFields = {
   postContext: Stage1PostContext,
-  vision: Schema.NullOr(VisionEnrichment),
-  sourceAttribution: Schema.NullOr(SourceAttributionEnrichment)
+  vision: Schema.NullOr(DeferredVisionEnrichment),
+  sourceAttribution: Schema.NullOr(DeferredSourceAttributionEnrichment)
 } as const;
 
 export const Stage1Input = Schema.Struct(stage1InputFields).annotate({

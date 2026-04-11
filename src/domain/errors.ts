@@ -255,6 +255,31 @@ export class EnrichmentDependencyPendingError extends Schema.TaggedErrorClass<En
   }
 ) {}
 
+export class ResolverSourceAttributionMissingError extends Schema.TaggedErrorClass<ResolverSourceAttributionMissingError>()(
+  "ResolverSourceAttributionMissingError",
+  {
+    postUri: PostUri
+  }
+) {}
+
+export class ResolverWorkflowLaunchError extends Schema.TaggedErrorClass<ResolverWorkflowLaunchError>()(
+  "ResolverWorkflowLaunchError",
+  {
+    message: Schema.String,
+    operation: Schema.String
+  }
+) {}
+
+export class ResolverClientError extends Schema.TaggedErrorClass<ResolverClientError>()(
+  "ResolverClientError",
+  {
+    message: Schema.String,
+    status: Schema.Number,
+    postUri: Schema.optionalKey(PostUri),
+    operation: Schema.optionalKey(Schema.String)
+  }
+) {}
+
 export const IngestErrorEnvelope = Schema.Struct({
   tag: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   message: Schema.String,

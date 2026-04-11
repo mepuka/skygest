@@ -2,8 +2,14 @@ import { Effect, Layer } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { vi } from "vitest";
 import type { WorkflowStep } from "cloudflare:workers";
-import type { EnrichmentErrorEnvelope } from "../src/domain/errors";
-import type { VisionEnrichment } from "../src/domain/enrichment";
+import {
+  ResolverClientError,
+  type EnrichmentErrorEnvelope
+} from "../src/domain/errors";
+import type {
+  SourceAttributionEnrichment,
+  VisionEnrichment
+} from "../src/domain/enrichment";
 import type { EnrichmentExecutionPlan } from "../src/domain/enrichmentPlan";
 import type {
   EnrichmentRunParams,
@@ -12,10 +18,14 @@ import type {
 import type { PostUri } from "../src/domain/types";
 import { EnrichmentPlanner } from "../src/enrichment/EnrichmentPlanner";
 import { EnrichmentWorkflowLauncher } from "../src/enrichment/EnrichmentWorkflowLauncher";
+import { AppConfig } from "../src/platform/Config";
 import { VisionEnrichmentExecutor } from "../src/enrichment/VisionEnrichmentExecutor";
+import { SourceAttributionExecutor } from "../src/enrichment/SourceAttributionExecutor";
+import { ResolverClient } from "../src/resolver/Client";
 import type { WorkflowEnrichmentEnvBindings } from "../src/platform/Env";
 import { CandidatePayloadRepo } from "../src/services/CandidatePayloadRepo";
 import { EnrichmentRunsRepo } from "../src/services/EnrichmentRunsRepo";
+import { testConfig } from "./support/runtime";
 
 let currentLayer: Layer.Layer<any, any, never>;
 
@@ -172,6 +182,16 @@ const makeVisionEnrichment = (): VisionEnrichment => ({
   processedAt: 10
 });
 
+const makeSourceAttributionEnrichment = (): SourceAttributionEnrichment => ({
+  kind: "source-attribution",
+  provider: null,
+  resolution: "unmatched",
+  providerCandidates: [],
+  contentSource: null,
+  socialProvenance: null,
+  processedAt: 20
+});
+
 describe("EnrichmentRunWorkflow", () => {
   it.live("completes a vision run and persists the enrichment payload", () =>
     Effect.promise(async () => {
@@ -319,6 +339,173 @@ describe("EnrichmentRunWorkflow", () => {
       expect(completions).toHaveLength(1);
       expect(reviewMarks).toEqual([]);
       expect(failures).toEqual([]);
+    })
+  );
+
+  it.live("persists data-ref resolution after source attribution when the flag is enabled", () =>
+    Effect.promise(async () => {
+      const { EnrichmentRunWorkflow } = await import(
+        "../src/enrichment/EnrichmentRunWorkflow"
+      );
+
+      const persisted: Array<unknown> = [];
+      const resolverCalls: Array<unknown> = [];
+      const completions: Array<unknown> = [];
+      const sourcePlan = makePlan({
+        enrichmentType: "source-attribution",
+        vision: makeVisionEnrichment()
+      });
+
+      currentLayer = Layer.succeed(EnrichmentRunsRepo, {
+        createQueuedIfAbsent: () => Effect.succeed(true),
+        getById: () =>
+          Effect.succeed(
+            makeRunRecord({
+              enrichmentType: "source-attribution"
+            })
+          ),
+        listRunning: () => Effect.succeed([]),
+        listRecent: () => Effect.succeed([]),
+        listActive: () => Effect.succeed([]),
+        listStaleActive: () => Effect.succeed([]),
+        markPhase: () => Effect.void,
+        resetForRetry: () => Effect.succeed(false),
+        listLatestByPostUri: () => Effect.succeed([]),
+        markComplete: (input) =>
+          Effect.sync(() => {
+            completions.push(input);
+          }),
+        markFailed: () => Effect.void,
+        markNeedsReview: () => Effect.void
+      }).pipe(
+        Layer.provideMerge(
+          Layer.mergeAll(
+            Layer.succeed(AppConfig, testConfig({
+              enableDataRefResolution: true,
+              enableStagingOps: true
+            })),
+            Layer.succeed(EnrichmentPlanner, {
+              plan: () => Effect.succeed(sourcePlan)
+            }),
+            Layer.succeed(SourceAttributionExecutor, {
+              execute: () => Effect.succeed(makeSourceAttributionEnrichment())
+            }),
+            Layer.succeed(ResolverClient, {
+              resolvePost: (input, options) =>
+                Effect.sync(() => {
+                  resolverCalls.push({ input, options });
+                  return {
+                    postUri: input.postUri,
+                    stage1: {
+                      matches: [],
+                      residuals: []
+                    },
+                    stage3: {
+                      status: "not-needed" as const
+                    },
+                    resolverVersion: "stage1-resolver@sky-238",
+                    latencyMs: {
+                      stage1: 3,
+                      total: 5
+                    }
+                  };
+                }),
+              resolveBulk: () =>
+                Effect.fail(
+                  new ResolverClientError({
+                    message: "bulk resolution should not be called in this test",
+                    status: 500,
+                    operation: "ResolverClient.resolveBulk"
+                  })
+                )
+            }),
+            Layer.succeed(EnrichmentWorkflowLauncher, {
+              start: () =>
+                Effect.succeed({
+                  runId: "unused",
+                  workflowInstanceId: "unused",
+                  status: "queued" as const
+                }),
+              startIfAbsent: () => Effect.succeed(true)
+            }),
+            Layer.succeed(CandidatePayloadRepo, {
+              upsertCapture: () => Effect.succeed(false),
+              getByPostUri: () => Effect.succeed(null),
+              markPicked: () => Effect.succeed(false),
+              saveEnrichment: (input) =>
+                Effect.sync(() => {
+                  persisted.push(input);
+                  return true;
+                })
+            })
+          )
+        )
+      );
+
+      const workflow = new EnrichmentRunWorkflow(
+        {} as ExecutionContext,
+        makeEnv()
+      );
+      const result = await workflow.run(
+        {
+          instanceId: "run-1",
+          payload: {
+            postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+            enrichmentType: "source-attribution",
+            schemaVersion: "v2",
+            triggeredBy: "admin",
+            requestedBy: "operator@example.com"
+          } satisfies EnrichmentRunParams
+        } as any,
+        makeStep()
+      );
+
+      expect(result).toEqual({
+        runId: "run-1",
+        status: "complete"
+      });
+      expect(resolverCalls).toEqual([
+        {
+          input: {
+            postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
+            stage1Input: {
+              postContext: {
+                postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
+                text: "Stored post text",
+                links: [],
+                linkCards: [],
+                threadCoverage: "focus-only"
+              },
+              vision: makeVisionEnrichment(),
+              sourceAttribution: makeSourceAttributionEnrichment()
+            },
+            dispatchStage3: true
+          },
+          options: {
+            requestId: "run-1"
+          }
+        }
+      ]);
+      expect(persisted).toEqual([
+        {
+          postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
+          enrichmentType: "source-attribution",
+          enrichmentPayload: makeSourceAttributionEnrichment()
+        },
+        {
+          postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
+          enrichmentType: "data-ref-resolution",
+          enrichmentPayload: expect.objectContaining({
+            kind: "data-ref-resolution",
+            stage1: {
+              matches: [],
+              residuals: []
+            },
+            resolverVersion: "stage1-resolver@sky-238"
+          })
+        }
+      ]);
+      expect(completions).toHaveLength(1);
     })
   );
 

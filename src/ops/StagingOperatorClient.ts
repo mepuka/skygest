@@ -26,7 +26,7 @@ import {
   EnrichmentRunStatus,
   EnrichmentRunsOutput
 } from "../domain/enrichmentRun";
-import { EnrichmentKind } from "../domain/enrichment";
+import { WorkflowEnrichmentKind } from "../domain/enrichment";
 import {
   callTool,
   decodeCallToolResultWith,
@@ -183,7 +183,7 @@ export class StagingOperatorClient extends ServiceMap.Service<
       secret: Redacted.Redacted<string>,
       input: {
         readonly postUri: string;
-        readonly enrichmentType: Schema.Schema.Type<typeof EnrichmentKind>;
+        readonly enrichmentType: Schema.Schema.Type<typeof WorkflowEnrichmentKind>;
         readonly schemaVersion?: string;
       }
     ) => Effect.Effect<Schema.Schema.Type<typeof EnrichmentQueuedResponse>, StagingRequestError>;

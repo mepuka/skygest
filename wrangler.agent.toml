@@ -15,6 +15,10 @@ enabled = true
 binding = "INGEST_SERVICE"
 service = "skygest-bi-ingest"
 
+[[services]]
+binding = "RESOLVER"
+service = "skygest-resolver"
+
 [vars]
 PUBLIC_BSKY_API = "https://public.api.bsky.app"
 INGEST_SHARD_COUNT = "1"
@@ -49,6 +53,10 @@ enabled = true
 [[env.staging.services]]
 binding = "INGEST_SERVICE"
 service = "skygest-bi-ingest-staging"
+
+[[env.staging.services]]
+binding = "RESOLVER"
+service = "skygest-resolver-staging"
 
 # Set with:
 # bunx wrangler secret put OPERATOR_SECRET --config wrangler.agent.toml --env staging

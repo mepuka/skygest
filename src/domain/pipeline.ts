@@ -52,7 +52,8 @@ export const PipelineStoredEnrichmentCounts = Schema.Struct({
   total: NonNegativeInt,
   vision: NonNegativeInt,
   sourceAttribution: NonNegativeInt,
-  grounding: NonNegativeInt
+  grounding: NonNegativeInt,
+  dataRefResolution: NonNegativeInt
 });
 export type PipelineStoredEnrichmentCounts = Schema.Schema.Type<typeof PipelineStoredEnrichmentCounts>;
 

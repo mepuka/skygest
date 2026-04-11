@@ -102,6 +102,7 @@ export const testConfig = (
   mcpLimitMax: 100,
   operatorSecret: Redacted.make(""),
   enableStagingOps: false,
+  enableDataRefResolution: false,
   editorialDefaultExpiryHours: 24,
   curationMinSignalScore: 30,
   ...overrides

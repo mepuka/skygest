@@ -10,7 +10,10 @@ import { normalizeBlueskyThread } from "./BlueskyNormalizer";
 import { energySeedDid } from "../bootstrap/CheckedInExpertSeeds";
 import type { ExpertTier } from "../domain/bi";
 import type { CurationAction } from "../domain/curation";
-import { defaultSchemaVersionForEnrichmentKind } from "../domain/enrichment";
+import {
+  defaultSchemaVersionForEnrichmentKind,
+  WorkflowEnrichmentKind
+} from "../domain/enrichment";
 import type { EnrichmentRunRecord } from "../domain/enrichmentRun";
 import type { IngestRunRecord } from "../domain/polling";
 import { stringifyUnknown } from "../platform/Json";
@@ -37,7 +40,8 @@ const blueskyCliLayer = Layer.effect(
 const deployWorkers = [
   "all",
   "ingest",
-  "agent"
+  "agent",
+  "resolver"
 ] as const;
 
 type DeployWorker = typeof deployWorkers[number];
@@ -53,7 +57,7 @@ const enrichmentKinds = [
   "vision",
   "source-attribution",
   "grounding"
-] as const;
+] as const satisfies ReadonlyArray<WorkflowEnrichmentKind>;
 const curationActions = [
   "curate",
   "reject"
@@ -181,9 +185,17 @@ const deploySelection = (env: string, worker: DeployWorker) =>
     const targets = worker === "all"
       ? [
         ["ingest", "wrangler.toml"],
-        ["agent", "wrangler.agent.toml"]
+        ["agent", "wrangler.agent.toml"],
+        ["resolver", "wrangler.resolver.toml"]
       ] as const
-      : [[worker, worker === "ingest" ? "wrangler.toml" : "wrangler.agent.toml"]] as const;
+      : [[
+          worker,
+          worker === "ingest"
+            ? "wrangler.toml"
+            : worker === "agent"
+              ? "wrangler.agent.toml"
+              : "wrangler.resolver.toml"
+        ]] as const;
 
     yield* Effect.forEach(
       targets,
