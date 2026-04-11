@@ -24,6 +24,7 @@ export class AppConfig extends ServiceMap.Service<
           ["MCP_LIMIT_MAX", env.MCP_LIMIT_MAX],
           ["OPERATOR_SECRET", env.OPERATOR_SECRET],
           ["ENABLE_STAGING_OPS", env.ENABLE_STAGING_OPS],
+          ["ENABLE_DATA_REF_RESOLUTION", env.ENABLE_DATA_REF_RESOLUTION],
           ["EDITORIAL_DEFAULT_EXPIRY_HOURS", env.EDITORIAL_DEFAULT_EXPIRY_HOURS],
           ["CURATION_MIN_SIGNAL_SCORE", env.CURATION_MIN_SIGNAL_SCORE]
         ] as const,

@@ -3,10 +3,13 @@ import {
   type WorkflowEvent,
   type WorkflowStep
 } from "cloudflare:workers";
-import { Effect, Result, ManagedRuntime, Schema } from "effect";
+import { Effect, ManagedRuntime, Result, Schema } from "effect";
 import {
+  DataRefResolutionEnrichment,
   defaultSchemaVersionForEnrichmentKind,
+  type EnrichmentKind,
   type EnrichmentOutput,
+  type SourceAttributionEnrichment,
   type VisionEnrichment
 } from "../domain/enrichment";
 import {
@@ -34,7 +37,9 @@ import {
   makeManagedRuntime,
   runScopedWithRuntime
 } from "../platform/EffectRuntime";
+import { AppConfig } from "../platform/Config";
 import type { WorkflowEnrichmentEnvBindings } from "../platform/Env";
+import { Logging } from "../platform/Logging";
 import { CandidatePayloadRepo } from "../services/CandidatePayloadRepo";
 import { EnrichmentRunsRepo } from "../services/EnrichmentRunsRepo";
 import { formatSchemaParseError } from "../platform/Json";
@@ -48,19 +53,19 @@ import { EnrichmentWorkflowLauncher } from "./EnrichmentWorkflowLauncher";
 import { assessVisionQuality } from "./EnrichmentQualityGate";
 import { SourceAttributionExecutor } from "./SourceAttributionExecutor";
 import { VisionEnrichmentExecutor } from "./VisionEnrichmentExecutor";
+import { ResolverClient } from "../resolver/Client";
+import { buildStage1Input } from "../resolver/stage1Input";
 
 const decodeEnrichmentRunParams = (input: unknown) =>
-  (() => {
-    const decoded = Schema.decodeUnknownResult(EnrichmentRunParams)(input);
-    return Result.isSuccess(decoded)
-      ? Effect.succeed(decoded.success)
-      : Effect.fail(
-          new EnrichmentSchemaDecodeError({
-            message: formatSchemaParseError(decoded.failure),
-            operation: "EnrichmentRunWorkflow.run"
-          })
-        );
-  })();
+  Schema.decodeUnknownEffect(EnrichmentRunParams)(input).pipe(
+    Effect.mapError(
+      (decodeError) =>
+        new EnrichmentSchemaDecodeError({
+          message: formatSchemaParseError(decodeError),
+          operation: "EnrichmentRunWorkflow.run"
+        })
+    )
+  );
 
 export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
   WorkflowEnrichmentEnvBindings,
@@ -118,15 +123,16 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
   }
 
   private persistEnrichment(
-    plan: EnrichmentExecutionPlan,
+    postUri: EnrichmentExecutionPlan["postUri"],
+    enrichmentType: EnrichmentKind,
     enrichment: EnrichmentOutput,
     resultWrittenAt: number
   ) {
     return CandidatePayloadRepo.use( (payloads) =>
       payloads.saveEnrichment(
         {
-          postUri: plan.postUri,
-          enrichmentType: plan.enrichmentType,
+          postUri,
+          enrichmentType,
           enrichmentPayload: enrichment
         },
         resultWrittenAt,
@@ -138,7 +144,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
           ? Effect.void
           : Effect.fail(
               new EnrichmentPayloadMissingError({
-                postUri: plan.postUri
+                postUri
               })
             )
       )
@@ -200,17 +206,15 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
         )
       );
 
-      const plan = await step.do("assemble enrichment plan", async () =>
-        this.runEffect(
-          EnrichmentPlanner.use( (planner) =>
-            planner.plan({
-              postUri: run.postUri,
-              enrichmentType: run.enrichmentType,
-              schemaVersion: run.schemaVersion
-            })
-          ),
-          "EnrichmentRunWorkflow.plan"
-        )
+      const plan = await this.runEffect(
+        EnrichmentPlanner.use( (planner) =>
+          planner.plan({
+            postUri: run.postUri,
+            enrichmentType: run.enrichmentType,
+            schemaVersion: run.schemaVersion
+          })
+        ),
+        "EnrichmentRunWorkflow.plan"
       );
 
       if (
@@ -293,9 +297,15 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
       );
 
       const resultWrittenAt = Date.now();
+      let latestResultWrittenAt = resultWrittenAt;
       await step.do(`persist ${plan.enrichmentType} enrichment`, async () =>
         this.runEffect(
-          this.persistEnrichment(plan, enrichment, resultWrittenAt),
+          this.persistEnrichment(
+            plan.postUri,
+            plan.enrichmentType,
+            enrichment,
+            resultWrittenAt
+          ),
           "EnrichmentRunWorkflow.persistEnrichment"
         )
       );
@@ -313,7 +323,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
                 runs.markNeedsReview({
                   id: run.id,
                   lastProgressAt: Date.now(),
-                  resultWrittenAt,
+                  resultWrittenAt: latestResultWrittenAt,
                   error: toEnrichmentErrorEnvelope(
                     new EnrichmentQualityGateError({
                       postUri: plan.postUri,
@@ -358,13 +368,118 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
         );
       }
 
+      if (isSourceAttributionExecutionPlan(plan)) {
+        const config = await this.runEffect(
+          Effect.gen(function* () {
+            return yield* AppConfig;
+          }),
+          "EnrichmentRunWorkflow.loadConfig"
+        );
+
+        if (!config.enableDataRefResolution) {
+          await step.do("mark complete", async () =>
+            this.runEffect(
+              EnrichmentRunsRepo.use( (runs) =>
+                runs.markComplete({
+                  id: run.id,
+                  finishedAt: Date.now(),
+                  resultWrittenAt: latestResultWrittenAt
+                })
+              ),
+              "EnrichmentRunWorkflow.markComplete"
+            )
+          );
+
+          return {
+            runId,
+            status: "complete"
+          } as const;
+        }
+
+        const resolverResponse = await step.do(
+          "call resolver service binding",
+          async () =>
+            this.runEffect(
+              ResolverClient.use((client) =>
+                client.resolvePost(
+                  {
+                    postUri: plan.postUri,
+                    stage1Input: buildStage1Input(
+                      plan,
+                      enrichment as SourceAttributionEnrichment
+                    ),
+                    dispatchStage3:
+                      config.enableStagingOps && run.triggeredBy === "admin"
+                  },
+                  {
+                    requestId: run.id
+                  }
+                )
+              ).pipe(
+                Effect.tapError((error) =>
+                  Logging.logWarning("data-ref resolution skipped after resolver failure", {
+                    postUri: plan.postUri,
+                    runId: run.id,
+                    errorTag: error._tag
+                  })
+                ),
+                Effect.result,
+                Effect.map((result) =>
+                  Result.isSuccess(result) ? result.success : null
+                )
+              ),
+              "EnrichmentRunWorkflow.resolveDataRefs"
+            )
+        );
+
+        if (resolverResponse !== null) {
+          const resolverWrittenAt = Date.now();
+          latestResultWrittenAt = resolverWrittenAt;
+          const decodedResolverEnrichment = await this.runEffect(
+            Schema.decodeUnknownEffect(DataRefResolutionEnrichment)({
+              kind: "data-ref-resolution",
+              stage1: resolverResponse.stage1,
+              ...(resolverResponse.stage2 === undefined
+                ? {}
+                : { stage2: resolverResponse.stage2 }),
+              ...(resolverResponse.stage3 === undefined
+                ? {}
+                : { stage3: resolverResponse.stage3 }),
+              resolverVersion: resolverResponse.resolverVersion,
+              processedAt: resolverWrittenAt
+            }).pipe(
+              Effect.mapError(
+                (decodeError) =>
+                  new EnrichmentSchemaDecodeError({
+                    message: formatSchemaParseError(decodeError),
+                    operation: "EnrichmentRunWorkflow.resolveDataRefs"
+                  })
+              )
+            ),
+            "EnrichmentRunWorkflow.decodeDataRefResolution"
+          );
+
+          await step.do("persist data-ref resolution", async () =>
+            this.runEffect(
+              this.persistEnrichment(
+                plan.postUri,
+                "data-ref-resolution",
+                decodedResolverEnrichment,
+                resolverWrittenAt
+              ),
+              "EnrichmentRunWorkflow.persistDataRefResolution"
+            )
+          );
+        }
+      }
+
       await step.do("mark complete", async () =>
         this.runEffect(
           EnrichmentRunsRepo.use( (runs) =>
             runs.markComplete({
               id: run.id,
               finishedAt: Date.now(),
-              resultWrittenAt
+              resultWrittenAt: latestResultWrittenAt
             })
           ),
           "EnrichmentRunWorkflow.markComplete"

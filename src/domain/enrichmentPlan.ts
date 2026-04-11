@@ -2,7 +2,7 @@ import { Schema } from "effect";
 import { LinkRecord, StoredTopicMatch, ThreadEmbedType } from "./bi";
 import { EmbedPayload, QuoteRef } from "./embed";
 import {
-  EnrichmentKind,
+  WorkflowEnrichmentKind,
   EnrichmentOutput,
   VisionEnrichment
 } from "./enrichment";
@@ -26,7 +26,7 @@ export type EnrichmentPlannerStopReason = Schema.Schema.Type<
 
 export const EnrichmentPlannerInput = Schema.Struct({
   postUri: PostUri,
-  enrichmentType: EnrichmentKind,
+  enrichmentType: WorkflowEnrichmentKind,
   schemaVersion: Schema.String.pipe(Schema.check(Schema.isMinLength(1)))
 });
 export type EnrichmentPlannerInput = Schema.Schema.Type<
@@ -101,7 +101,7 @@ export type EnrichmentPlannedExistingEnrichment = Schema.Schema.Type<
 
 export const EnrichmentExecutionPlan = Schema.Struct({
   postUri: PostUri,
-  enrichmentType: EnrichmentKind,
+  enrichmentType: WorkflowEnrichmentKind,
   schemaVersion: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   decision: EnrichmentPlannerDecision,
   stopReason: Schema.optionalKey(EnrichmentPlannerStopReason),

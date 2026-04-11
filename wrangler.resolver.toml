@@ -1,0 +1,33 @@
+name = "skygest-resolver"
+account_id = "af578620f2ff4eae2042c031be82f7e7"
+main = "src/resolver-worker/index.ts"
+compatibility_date = "2026-04-11"
+
+[observability]
+enabled = true
+
+[[workflows]]
+name = "resolver-run"
+binding = "RESOLVER_RUN_WORKFLOW"
+class_name = "DataRefResolverWorkflow"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "skygest"
+database_id = "b33d6089-883e-4f62-bcfd-3b30153e51e9"
+
+[env.staging]
+name = "skygest-resolver-staging"
+
+[env.staging.observability]
+enabled = true
+
+[[env.staging.workflows]]
+name = "resolver-run"
+binding = "RESOLVER_RUN_WORKFLOW"
+class_name = "DataRefResolverWorkflow"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "skygest-staging"
+database_id = "29a612d3-67c9-429d-93af-6e976681e7c8"

@@ -384,7 +384,7 @@ export const ListCurationCandidatesTool = Tool.make("list_curation_candidates", 
   .annotate(Tool.OpenWorld, false);
 
 export const GetPostEnrichmentsTool = Tool.make("get_post_enrichments", {
-  description: "Inspect enrichment state and readiness for a post. Returns validated enrichment payloads (vision, source-attribution, grounding) and latest enrichment run summaries. Readiness values: none, pending, complete, failed, needs-review.",
+  description: "Inspect enrichment state and readiness for a post. Returns validated enrichment payloads (vision, source-attribution, data-ref-resolution, grounding) and latest enrichment run summaries. Readiness values: none, pending, complete, failed, needs-review.",
   parameters: GetPostEnrichmentsInput,
   success: PostEnrichmentsMcpOutput,
   failure: McpToolQueryError

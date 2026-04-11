@@ -31,15 +31,31 @@ import {
   VisionOrganizationMention,
   VisionSourceLineAttribution
 } from "./sourceMatching";
+import {
+  ResolverVersion,
+  ResolveStage3Queued,
+  Stage2Output
+} from "./resolutionShared";
+import { Stage1Result } from "./stage1Resolution";
+
+const DeferredStage1Result = Schema.suspend(() => Stage1Result);
 
 // ---------------------------------------------------------------------------
 // Enrichment kind discriminator
 // ---------------------------------------------------------------------------
 
-export const EnrichmentKind = Schema.Literals([
+export const WorkflowEnrichmentKind = Schema.Literals([
   "vision",
   "source-attribution",
   "grounding"
+]);
+export type WorkflowEnrichmentKind = Schema.Schema.Type<
+  typeof WorkflowEnrichmentKind
+>;
+
+export const EnrichmentKind = Schema.Literals([
+  ...WorkflowEnrichmentKind.literals,
+  "data-ref-resolution"
 ]);
 export type EnrichmentKind = Schema.Schema.Type<typeof EnrichmentKind>;
 
@@ -51,6 +67,7 @@ export const defaultSchemaVersionForEnrichmentKind = (
     case "source-attribution":
       return "v2";
     case "grounding":
+    case "data-ref-resolution":
       return "v1";
   }
 };
@@ -258,13 +275,35 @@ export const GroundingEnrichment = Schema.Struct({
 export type GroundingEnrichment = Schema.Schema.Type<typeof GroundingEnrichment>;
 
 // ---------------------------------------------------------------------------
+// Data-ref resolution enrichment (SKY-238: persisted Stage 1 resolver result)
+// ---------------------------------------------------------------------------
+
+export const DataRefResolutionStage3 = ResolveStage3Queued;
+export type DataRefResolutionStage3 = Schema.Schema.Type<
+  typeof DataRefResolutionStage3
+>;
+
+export const DataRefResolutionEnrichment = Schema.Struct({
+  kind: Schema.Literal("data-ref-resolution"),
+  stage1: DeferredStage1Result,
+  stage2: Schema.optionalKey(Stage2Output),
+  stage3: Schema.optionalKey(DataRefResolutionStage3),
+  resolverVersion: ResolverVersion,
+  processedAt: Schema.Number
+});
+export type DataRefResolutionEnrichment = Schema.Schema.Type<
+  typeof DataRefResolutionEnrichment
+>;
+
+// ---------------------------------------------------------------------------
 // EnrichmentOutput union
 // ---------------------------------------------------------------------------
 
 export const EnrichmentOutput = Schema.Union([
   VisionEnrichment,
   SourceAttributionEnrichment,
-  GroundingEnrichment
+  GroundingEnrichment,
+  DataRefResolutionEnrichment
 ]);
 export type EnrichmentOutput = Schema.Schema.Type<typeof EnrichmentOutput>;
 
@@ -295,10 +334,20 @@ export type GroundingPostEnrichmentResult = Schema.Schema.Type<
   typeof GroundingPostEnrichmentResult
 >;
 
+export const DataRefResolutionPostEnrichmentResult = Schema.Struct({
+  kind: Schema.Literal("data-ref-resolution"),
+  payload: DataRefResolutionEnrichment,
+  enrichedAt: Schema.Number
+});
+export type DataRefResolutionPostEnrichmentResult = Schema.Schema.Type<
+  typeof DataRefResolutionPostEnrichmentResult
+>;
+
 export const PostEnrichmentResult = Schema.Union([
   VisionPostEnrichmentResult,
   SourceAttributionPostEnrichmentResult,
-  GroundingPostEnrichmentResult
+  GroundingPostEnrichmentResult,
+  DataRefResolutionPostEnrichmentResult
 ]);
 export type PostEnrichmentResult = Schema.Schema.Type<
   typeof PostEnrichmentResult
@@ -335,7 +384,7 @@ export type GetPostEnrichmentsInput = Schema.Schema.Type<typeof GetPostEnrichmen
  * Declared inline to avoid a circular import (enrichmentRun -> enrichment).
  */
 export const PostEnrichmentRunSummary = Schema.Struct({
-  enrichmentType: EnrichmentKind,
+  enrichmentType: WorkflowEnrichmentKind,
   status: Schema.Literals(["queued", "running", "complete", "failed", "needs-review"]),
   phase: Schema.Literals([
     "queued", "assembling", "planning", "executing",
@@ -407,7 +456,7 @@ export type ListEnrichmentIssuesInput = Schema.Schema.Type<typeof ListEnrichment
 export const EnrichmentIssueItem = Schema.Struct({
   runId: Schema.String,
   postUri: PostUri,
-  enrichmentType: EnrichmentKind,
+  enrichmentType: WorkflowEnrichmentKind,
   status: Schema.Literals(["failed", "needs-review"]),
   error: Schema.NullOr(EnrichmentErrorEnvelope),
   lastProgressAt: Schema.NullOr(Schema.Number)

@@ -1,6 +1,7 @@
 import { Array, ServiceMap, Effect, Layer, Option, Schema } from "effect";
 import type { IngestRunParams } from "../domain/polling";
 import type { EnrichmentRunParams } from "../domain/enrichmentRun";
+import type { DataRefResolverRunParams } from "../domain/resolution";
 
 export class EnvError extends Schema.TaggedErrorClass<EnvError>()("EnvError", {
   missing: Schema.String
@@ -14,20 +15,24 @@ export interface EnvBindings {
   readonly MCP_LIMIT_MAX?: string;
   readonly OPERATOR_SECRET?: string;
   readonly ENABLE_STAGING_OPS?: string;
+  readonly ENABLE_DATA_REF_RESOLUTION?: string;
   readonly EDITORIAL_DEFAULT_EXPIRY_HOURS?: string;
   readonly CURATION_MIN_SIGNAL_SCORE?: string;
   readonly GOOGLE_API_KEY?: string;
   readonly GEMINI_VISION_MODEL?: string;
   readonly INGEST_RUN_WORKFLOW?: Workflow<IngestRunParams>;
   readonly ENRICHMENT_RUN_WORKFLOW?: Workflow<EnrichmentRunParams>;
+  readonly RESOLVER_RUN_WORKFLOW?: Workflow<DataRefResolverRunParams>;
   readonly EXPERT_POLL_COORDINATOR?: DurableObjectNamespace;
   readonly ONTOLOGY_KV?: KVNamespace;
   readonly TRANSCRIPTS_BUCKET?: R2Bucket;
+  readonly RESOLVER?: Fetcher;
   readonly DB: D1Database;
 }
 
 export interface AgentWorkerEnvBindings extends EnvBindings {
   readonly INGEST_SERVICE: Fetcher;
+  readonly RESOLVER?: Fetcher;
 }
 
 export type WorkflowIngestEnvBindings = EnvBindings & {
@@ -37,6 +42,10 @@ export type WorkflowIngestEnvBindings = EnvBindings & {
 
 export type WorkflowEnrichmentEnvBindings = EnvBindings & {
   readonly ENRICHMENT_RUN_WORKFLOW: Workflow<EnrichmentRunParams>;
+};
+
+export type ResolverWorkerEnvBindings = EnvBindings & {
+  readonly RESOLVER_RUN_WORKFLOW: Workflow<DataRefResolverRunParams>;
 };
 
 export type WorkflowFilterEnvBindings =

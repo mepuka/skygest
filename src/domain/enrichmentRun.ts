@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { EnrichmentErrorEnvelope } from "./errors";
-import { EnrichmentKind } from "./enrichment";
+import { WorkflowEnrichmentKind } from "./enrichment";
 import { PostUri } from "./types";
 
 const EpochMillis = Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)));
@@ -46,7 +46,7 @@ export const EnrichmentRunRecord = Schema.Struct({
   id: Schema.String,
   workflowInstanceId: Schema.String,
   postUri: PostUri,
-  enrichmentType: EnrichmentKind,
+  enrichmentType: WorkflowEnrichmentKind,
   schemaVersion: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   triggeredBy: EnrichmentTrigger,
   requestedBy: Schema.NullOr(Schema.String),
@@ -68,7 +68,7 @@ export const CreateQueuedEnrichmentRun = Schema.Struct({
   id: Schema.String,
   workflowInstanceId: Schema.String,
   postUri: PostUri,
-  enrichmentType: EnrichmentKind,
+  enrichmentType: WorkflowEnrichmentKind,
   schemaVersion: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   triggeredBy: EnrichmentTrigger,
   requestedBy: Schema.NullOr(Schema.String),
@@ -118,7 +118,7 @@ export type MarkEnrichmentRunNeedsReview = Schema.Schema.Type<
 
 export const EnrichmentRunParams = Schema.Struct({
   postUri: PostUri,
-  enrichmentType: EnrichmentKind,
+  enrichmentType: WorkflowEnrichmentKind,
   schemaVersion: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
   triggeredBy: EnrichmentTrigger,
   requestedBy: Schema.optionalKey(Schema.NullOr(Schema.String))

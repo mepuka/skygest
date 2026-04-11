@@ -794,7 +794,7 @@ export const formatPipelineStatus = (
     `Posts: ${output.posts.total} active | bluesky ${output.posts.bluesky} | twitter ${output.posts.twitter}`,
     `Curation: curated ${output.curation.curated} | rejected ${output.curation.rejected} | flagged ${output.curation.flagged} | uncurated ${output.curation.uncurated}`,
     "",
-    `Stored enrichments: ${output.enrichments.stored.total} total | vision ${output.enrichments.stored.vision} | source-attribution ${output.enrichments.stored.sourceAttribution} | grounding ${output.enrichments.stored.grounding}`,
+    `Stored enrichments: ${output.enrichments.stored.total} total | vision ${output.enrichments.stored.vision} | source-attribution ${output.enrichments.stored.sourceAttribution} | grounding ${output.enrichments.stored.grounding} | data-ref-resolution ${output.enrichments.stored.dataRefResolution}`,
     `Enrichment runs: queued ${output.enrichments.runs.queued} | running ${output.enrichments.runs.running} | complete ${output.enrichments.runs.complete} | failed ${output.enrichments.runs.failed} | needs-review ${output.enrichments.runs.needsReview}`
   ];
 
@@ -892,6 +892,18 @@ export const formatEnrichments = (
           const claim = truncate(collapse(e.payload.claimText), 100);
           lines.push(`[G] grounding \u00B7 ${evidenceCount} evidence \u00B7 ${date}`);
           lines.push(`    ${claim}`);
+          break;
+        }
+        case "data-ref-resolution": {
+          const matchCount = e.payload.stage1.matches.length;
+          const residualCount = e.payload.stage1.residuals.length;
+          const stage3 =
+            e.payload.stage3 === undefined
+              ? "no stage3"
+              : `stage3 ${e.payload.stage3.status}`;
+          lines.push(
+            `[R] data-ref-resolution \u00B7 ${matchCount} match${matchCount !== 1 ? "es" : ""} \u00B7 ${residualCount} residual${residualCount !== 1 ? "s" : ""} \u00B7 ${stage3} \u00B7 ${date}`
+          );
           break;
         }
       }

@@ -46,7 +46,11 @@ import {
   EnrichmentRunsOutput
 } from "./enrichmentRun";
 import { EmbedKind, EmbedPayload } from "./embed";
-import { EnrichmentKind, PostEnrichmentsOutput } from "./enrichment";
+import {
+  EnrichmentKind,
+  PostEnrichmentsOutput,
+  WorkflowEnrichmentKind
+} from "./enrichment";
 import {
   EditorialPickBundle,
   EditorialScore,
@@ -692,7 +696,7 @@ export type ListEnrichmentRunsUrlParams = Schema.Schema.Type<
 
 export const StartEnrichmentInput = Schema.Struct({
   postUri: PostUri,
-  enrichmentType: EnrichmentKind,
+  enrichmentType: WorkflowEnrichmentKind,
   schemaVersion: Schema.optionalKey(
     Schema.String.pipe(Schema.check(Schema.isMinLength(1)))
   )

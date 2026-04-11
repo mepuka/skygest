@@ -30,7 +30,7 @@ import { BulkCurateOutput, CurationCandidatesOutput, CuratePostOutput } from "..
 import {
   BulkStartEnrichmentOutput,
   GetPostEnrichmentsOutput,
-  EnrichmentKind,
+  WorkflowEnrichmentKind,
   ListEnrichmentGapsOutput,
   ListEnrichmentIssuesOutput
 } from "../domain/enrichment.ts";
@@ -114,7 +114,7 @@ export type ImportPostsMcpOutput = typeof ImportPostsMcpOutput.Type;
 
 export const StartEnrichmentMcpOutput = Schema.Struct({
   postUri: PostUri,
-  enrichmentType: EnrichmentKind,
+  enrichmentType: WorkflowEnrichmentKind,
   status: Schema.Literal("queued"),
   runId: Schema.String
 }).pipe(Schema.fieldsAssign(displayFields));

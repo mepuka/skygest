@@ -22,7 +22,7 @@ import {
 import type { KnowledgePost } from "../domain/bi";
 import {
   defaultSchemaVersionForEnrichmentKind,
-  type EnrichmentKind
+  type GapEnrichmentType
 } from "../domain/enrichment";
 import { AppConfig } from "../platform/Config";
 import { clampLimit } from "../platform/Limit";
@@ -96,7 +96,9 @@ export class CurationService extends ServiceMap.Service<
         return false;
       }
 
-      const enrichmentType: EnrichmentKind = inferPrimaryEnrichmentType(embedPayload);
+      const enrichmentType: GapEnrichmentType = inferPrimaryEnrichmentType(
+        embedPayload
+      );
 
       return yield* maybeLauncher.value.startIfAbsent({
         postUri,
