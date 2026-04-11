@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4TGH57TEX67B4D283G",
-  "title": "ERCOT Capacity Committed",
+  "title": "GridStatus ERCOT Capacity Committed",
   "description": "Committed capacity in ERCOT.\n\nThe actual committed capacity (the amount of power available from\ngenerating units that were on-line or providing operating reserves).\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

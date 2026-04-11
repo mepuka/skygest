@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4N1V6Y7EGXEY2BKH4T",
-  "title": "CAISO Renewables Forecast DAM",
+  "title": "GridStatus CAISO Renewables Forecast DAM",
   "description": "Day-ahead solar and wind forecasts by trading hub as reported by CAISO.\n\nIncludes data for solar and wind in CAISO, ZP26, SP15, and NP15.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4HZ777Q9PMVPS5SS2M",
-  "title": "CAISO Curtailed Non Operational Generator Report",
+  "title": "GridStatus CAISO Curtailed Non Operational Generator Report",
   "description": "Prior Day Curtailed Non-Operational Generator Report as reported by CAISO.\n\nGlossary: https://www.caiso.com/glossary",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

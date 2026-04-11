@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4T9V58ZNHTC27M82P2",
-  "title": "ERCOT CCP Resource Names",
+  "title": "GridStatus ERCOT CCP Resource Names",
   "description": "Combined Cycle Plant (CCP) names mapping to the logical resource node names in ERCOT. Combined cycle power plants consist of multiple individual units configured together into one CCT (Combined Cycle Train).",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

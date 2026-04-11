@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5G1RJSP02TJA26DXZ0",
-  "title": "PJM LMP DART 5 Min",
+  "title": "GridStatus PJM LMP DART 5 Min",
   "description": "DART spread in PJM between day-ahead hourly LMPs and real-time 5-minute LMPs. Hourly day-ahead values are brought to a 5-minute interval across the hour for the purposes of this dataset.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

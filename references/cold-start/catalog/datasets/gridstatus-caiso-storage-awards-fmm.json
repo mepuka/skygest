@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4Q4CAD1BKK5YTZK9P9",
-  "title": "CAISO Storage Awards FMM",
+  "title": "GridStatus CAISO Storage Awards FMM",
   "description": "Energy and ancillary services awards to storage resources in CAISO in the Fifteen-Minute Market (FMM). Includes both Standalone and Hybrid storage resources.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

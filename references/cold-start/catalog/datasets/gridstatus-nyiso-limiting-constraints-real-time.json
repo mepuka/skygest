@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5F0A5NBPY1SKQETHP0",
-  "title": "NYISO Limiting Constraints Real Time",
+  "title": "GridStatus NYISO Limiting Constraints Real Time",
   "description": "Real-time limiting constraints in NYISO.\n\nThere will often be SCED data repricing events in NYISO that result in 2 constraint costs for a given interval. Here we have provided a `gs_entity_id` column to identify unique rows.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5H6B7D1X0X46X57HT0",
-  "title": "PJM Pricing Nodes",
+  "title": "GridStatus PJM Pricing Nodes",
   "description": "This dataset contains all pricing nodes modeled across PJM. PJM calculates locational marginal prices for each of these points, representing generation, load, and aggregations like hubs and zones. Additionally, this dataset includes information such as voltage level, transmission zone, subtypes, and when the node was created.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

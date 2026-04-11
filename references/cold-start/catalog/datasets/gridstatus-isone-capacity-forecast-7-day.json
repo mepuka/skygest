@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F59NPBGS2Q2XGKWMJZB",
-  "title": "ISONE Seven-Day Capacity Forecast",
+  "title": "GridStatus ISONE Seven-Day Capacity Forecast",
   "description": "Forecast published by ISO New England each morning for the next 7 days. This forecast includes a number of factors related to possible capacity deficiencies in New England, such as local temperatures, available capacity, and peak demand.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

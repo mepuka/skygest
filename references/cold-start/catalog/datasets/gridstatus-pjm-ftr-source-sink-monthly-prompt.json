@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5GKJNANSN12M7NVXJB",
-  "title": "PJM FTR Source Sink Monthly Prompt",
+  "title": "GridStatus PJM FTR Source Sink Monthly Prompt",
   "description": "Source-Sink pairs for the prompt month FTR (Financial Transmission Rights) auction in PJM.\n\nFor noon-prompt month Source-SInk pairs, see [this dataset](https://www.gridstatus.io/datasets/pjm_ftr_source_sink_monthly_non_prompt).",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

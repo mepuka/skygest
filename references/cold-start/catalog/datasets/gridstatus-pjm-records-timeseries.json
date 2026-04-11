@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5JWJXMZGJNBNW3TTEJ",
-  "title": "PJM New Records Timeline",
+  "title": "GridStatus PJM New Records Timeline",
   "description": "Timeline of new records in PJM covering renewables and net load since 2016.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

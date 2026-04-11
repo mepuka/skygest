@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4YTGQRG1Q1RZXKTCA3",
-  "title": "ERCOT Load Forecast By Forecast Zone",
+  "title": "GridStatus ERCOT Load Forecast By Forecast Zone",
   "description": "Forecasted hourly demand by Forecast Zone and system total as reported by ERCOT.\nReleased every hour for the current day and six days forward.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

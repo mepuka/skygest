@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F51B2BQRR59ZHVH0NT6",
-  "title": "HQ Interconnection Outages",
+  "title": "GridStatus HQ Interconnection Outages",
   "description": "Hydro-Québec’s planned interconnection outages with neighboring regions. Published irregularly, at least once per year for the following year. TTC is total transfer capability.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/hq_interconnection_outages",

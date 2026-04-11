@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5MCQW8GWXZD2W5S97G",
-  "title": "SPP Hourly Load",
+  "title": "GridStatus SPP Hourly Load",
   "description": "⚠️ This dataset is deprecated in favor of [SPP Load Hourly](https://www.gridstatus.io/datasets/spp_load_hourly). That dataset has all the same info as this dataset, but in “long” rather than “wide” format. It also has additional areas and details on conforming vs non-conforming loads.\n\nHourly load data in SPP by Area.\n\nReleased daily around 5pm CT. for the previous day.\n\n💡 The Areas in this dataset are the legacy balancing authorities for the region that SPP serves.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

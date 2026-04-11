@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4P6C0XPXGK5EH7E26F",
-  "title": "CAISO Solar And Wind Forecast DAM",
+  "title": "GridStatus CAISO Solar And Wind Forecast DAM",
   "description": "Day-ahead solar and wind forecasts by trading hub as reported by CAISO.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

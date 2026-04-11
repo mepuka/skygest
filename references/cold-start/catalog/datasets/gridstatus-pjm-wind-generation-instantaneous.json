@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5K01ERMK2095F2Q1C8",
-  "title": "PJM Wind Generation Instantaneous",
+  "title": "GridStatus PJM Wind Generation Instantaneous",
   "description": "Instantaneous real-time wind generation sampled every 15 seconds for the PJM RTO\narea.\n\n⚠️ PJM does not backfill this data series in the event of data drops.\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

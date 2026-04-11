@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5E6AV7FGMSKW6XEAGD",
-  "title": "NYISO BTM Solar",
+  "title": "GridStatus NYISO BTM Solar",
   "description": "Estimated actual BTM Solar production\nin hourly intervals as reported by NYISO\nfor system and zone level data.\n\nDaily data published ~8 hour after end of previous day.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

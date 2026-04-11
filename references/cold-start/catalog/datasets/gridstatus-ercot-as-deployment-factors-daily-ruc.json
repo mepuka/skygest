@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4ST5RCQKPPDR8V7S15",
-  "title": "ERCOT AS Deployment Factors Daily RUC",
+  "title": "GridStatus ERCOT AS Deployment Factors Daily RUC",
   "description": "Ancillary Service Deployment Factors (ASDFs) utilized by the Daily Reliability Unit Commitment (DRUC) process in ERCOT.\n\nASDFs range from 0 to 1 and represent the percentage of a particular ancillary service type that is assumed to be deployed. These values are derived from actual system conditions as well as forecasts, including demand and production from solar and wind.\n\nImplemented on December 5th, 2025, as part of ERCOT's RTC+B project.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

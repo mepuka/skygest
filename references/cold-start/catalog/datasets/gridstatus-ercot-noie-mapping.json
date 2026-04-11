@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZQW41V3CF9FWPS389",
-  "title": "ERCOT NOIE Mapping",
+  "title": "GridStatus ERCOT NOIE Mapping",
   "description": "Mapping of Non-opt-in Entities (NOIEs) to substations and electrical buses in ERCOT.\n\nA NOIE is the default provider in its territory, which is not paticipating in the competitive retail market, and:\n\n> at its sole discretion may authorize third party QSEs to provide Load Resource and ERS services within their service territory. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

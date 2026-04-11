@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4T863ZXXY655T0JBGZ",
-  "title": "ERCOT DAM Energy Bids 60 Day",
+  "title": "GridStatus ERCOT DAM Energy Bids 60 Day",
   "description": "Day-ahead, hourly bids to buy energy submitted by Qualified Scheduling Entities (QSEs) in ERCOT. Includes the settlement point name as well as bid curve for each interval. \n\nExtracted from the file named `60d_DAM_EnergyBids-DD-MMM-YY` in the archive published by ERCOT\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

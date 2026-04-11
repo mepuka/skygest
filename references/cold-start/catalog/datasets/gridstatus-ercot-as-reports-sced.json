@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4T1676J5MPNTBJ5H30",
-  "title": "ERCOT AS Reports SCED",
+  "title": "GridStatus ERCOT AS Reports SCED",
   "description": "2-day disclosure data for real-time ancillary services offers in ERCOT. Contains the MW offered and price for each quantity for each AS product. Does not contain identifying information for the offers.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

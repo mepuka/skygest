@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZSAT3KDWX57N1BWPX",
-  "title": "ERCOT Real Time System Conditions",
+  "title": "GridStatus ERCOT Real Time System Conditions",
   "description": "Real Time System Conditions as reported by ERCOT. This data is sampled by ERCOT out of a number of different data feeds. This dataset is useful for understanding the instantaneous condition of the grid.\n\nMetrics include:\n* Frequency\n* DC Tie Flow\n* System Inertia\n* Wind and Solar Output\n* System Demand\n* Time Error",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4R20Z7EGMSGWN3GMJC",
-  "title": "EIA Henry Hub Natural Gas Spot Prices Daily",
+  "title": "GridStatus EIA Henry Hub Natural Gas Spot Prices Daily",
   "description": "Natural Gas Spot and Futures Prices\n\n- Spot prices are based on delivery at the Henry Hub in Louisiana\n- Futures prices are official daily closing prices at 2:30 p.m. from the trading floor of the New York Mercantile Exchange (NYMEX) for a specific delivery month.\n\n⚠️ This feed is refreshed once a week and does not include weekends and holidays.\n\n**NOTE**: Futures prices do not extend beyond April 5, 2024",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

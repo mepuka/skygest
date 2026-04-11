@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5HW0K4GVYHYT9JAA1X",
-  "title": "PJM Load Forecast 5 Min",
+  "title": "GridStatus PJM Load Forecast 5 Min",
   "description": "Five-minute load forecast data showing forecast amounts every five minutes for a two hour window by area. This forecast is updated every five minutes. The data is presented for 25 areas to maintain consistency with the seven day load forecasts ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

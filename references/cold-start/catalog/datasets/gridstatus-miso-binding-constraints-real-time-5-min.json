@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5CSVSW6H5NX7GKWCGG",
-  "title": "MISO Binding Constraints Real Time 5 Min",
+  "title": "GridStatus MISO Binding Constraints Real Time 5 Min",
   "description": "Real-time, five-minute, binding constraints in MISO. \n\nConstraints are limited elements of the transmission system, when binding power flow is limited between locations by the constraint. Managing these may require generators to be dispatched out of the merit order.\n\nThis data is made available on the day after the operating day which it covers.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

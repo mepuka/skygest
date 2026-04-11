@@ -257,6 +257,9 @@ const resolvedDerivedFrom = (
   }
 };
 
+const gridstatusDatasetTitle = (name: string): string =>
+  name.startsWith("GridStatus ") ? name : `GridStatus ${name}`;
+
 const buildDatasetCandidate = (input: {
   readonly datasetInfo: GridStatusDatasetInfo;
   readonly datasetId: Dataset["id"];
@@ -280,7 +283,7 @@ const buildDatasetCandidate = (input: {
     dataset: decodeDataset({
       _tag: "Dataset" as const,
       id: input.datasetId,
-      title: input.datasetInfo.name,
+      title: gridstatusDatasetTitle(input.datasetInfo.name),
       description: input.existing?.description ?? description,
       wasDerivedFrom: resolvedDerivedFrom(resolution),
       publisherAgentId: input.ctx.agent.id,

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4R0JWNZ70YY8XFX744",
-  "title": "CAISO System Load And Resource Schedules Day Ahead",
+  "title": "GridStatus CAISO System Load And Resource Schedules Day Ahead",
   "description": "Day-ahead hourly CAISO system schedule. Includes generation, imports, and exports per TAC Area to balance the CAISO system.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

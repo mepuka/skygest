@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4GC1BWNHCJ5NNTQ5C5",
-  "title": "AESO Pool Price Forecast",
+  "title": "GridStatus AESO Pool Price Forecast",
   "description": "Forecasted pool prices for AESO for the current and next two hours. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXP6MWXWMNJ2A93ESKT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

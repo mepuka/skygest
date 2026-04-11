@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F51NMZZ536Y13FG057Y",
-  "title": "IESO Fuel Mix",
+  "title": "GridStatus IESO Fuel Mix",
   "description": "Hourly fuel mix for IESO derived from the Hourly Generator Report. For each hour, all generators in an individual fuel type are summed together.  ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

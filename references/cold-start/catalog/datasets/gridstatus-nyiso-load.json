@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5F51GCMZN6H1AJ6QSC",
-  "title": "NYISO Load",
+  "title": "GridStatus NYISO Load",
   "description": "Load for NYISO resampled to 5 minute intervals.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

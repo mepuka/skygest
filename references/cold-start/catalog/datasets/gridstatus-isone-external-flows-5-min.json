@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5902BQ4CQ1QDF6JS3J",
-  "title": "ISONE External Flows 5 Min",
+  "title": "GridStatus ISONE External Flows 5 Min",
   "description": "\nThis dataset contains 5 minute flow levels at interfaces between ISO-NE and neighboring balancing authorities. This dataset also contains both import and export limits for each interface as well as total import and export limits for the ISO. \n\nInterfaces by neighboring region:\n\n- Hydro-Québec (HQ):\n    - .I.HQHIGATE120 2\n    - .I.HQ_P1_P2345 5\n    - .I.HQMRL_RD345 1\n- New York ISO (NYISO)\n    - .I.NRTHPORT138 5\n    - .I.ROSETON 345 1\n    - .I.SHOREHAM138 99\n- New Brunswick (NB)\n    - .I.SALBRYNB345 1.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

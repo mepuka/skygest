@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5EF5Z0SXP47P0KS3S1",
-  "title": "NYISO AS Prices Day Ahead Hourly",
+  "title": "GridStatus NYISO AS Prices Day Ahead Hourly",
   "description": "Day-Ahead hourly prices for ancillary services products in the NYISO market.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

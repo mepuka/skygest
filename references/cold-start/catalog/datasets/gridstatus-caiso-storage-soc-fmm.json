@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4Q2MJ3Z5WHR2Z29RDV",
-  "title": "CAISO Storage SOC FMM",
+  "title": "GridStatus CAISO Storage SOC FMM",
   "description": "Fifteen-minute market (FMM) storage state of charge in CAISO. This only includes standalone storage.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

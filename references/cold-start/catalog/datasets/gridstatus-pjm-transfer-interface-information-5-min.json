@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5JRC0126YP5XYBVXDY",
-  "title": "PJM Transfer Interface Information 5 Min",
+  "title": "GridStatus PJM Transfer Interface Information 5 Min",
   "description": "Actual MW flow and transfer limits for PJM’s Transfer Interfaces. This data\nis reported on a five-minute basis. These interfaces are internal to PJM.\nEach interface is comprised of a set of transmission lines defined in\n*PJM Manual 03: Transmission Operations*.\n\n⚠️ PJM does not typically backfill this data series in the event of data drops.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

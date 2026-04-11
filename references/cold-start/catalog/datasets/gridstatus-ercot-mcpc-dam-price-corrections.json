@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4Y9W0BKV1ZA4HYH659",
-  "title": "ERCOT DAM AS Price Corrections",
+  "title": "GridStatus ERCOT DAM AS Price Corrections",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/ercot_mcpc_dam_price_corrections",

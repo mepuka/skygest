@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4Q5HDFH1P8D3X3DVE5",
-  "title": "CAISO Storage",
+  "title": "GridStatus CAISO Storage",
   "description": "Data on storage and hybrid resources as reported by CAISO.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

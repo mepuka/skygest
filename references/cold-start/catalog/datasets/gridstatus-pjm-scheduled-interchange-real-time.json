@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5JGV2G93CJ40CB2TJ3",
-  "title": "PJM Scheduled Interchange Real Time",
+  "title": "GridStatus PJM Scheduled Interchange Real Time",
   "description": "Hourly scheduled net real time tie flows between PJM and nearby balancing authorities. This data its released daily for the prior day. Positive values indicate imports and negative values represent exports. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

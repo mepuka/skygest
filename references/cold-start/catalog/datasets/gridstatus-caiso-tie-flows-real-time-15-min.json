@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4R14VKETGWYKZRFC76",
-  "title": "CAISO Tie Flows Real Time 15 Min",
+  "title": "GridStatus CAISO Tie Flows Real Time 15 Min",
   "description": "Fifteen-minute real-time CAISO tie data. Includes all transfers within the EIM.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

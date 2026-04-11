@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5GSYCTAY45GS6B77JC",
-  "title": "PJM Daily Cleared INCs, DECs and UTCs",
+  "title": "GridStatus PJM Daily Cleared INCs, DECs and UTCs",
   "description": "This dataset contains the total quantity, in MWs, of incremental, decremental, and up-to-congestion (UTC) transactions cleared in the PJM Day-Ahead market. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

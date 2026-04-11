@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5BPD9KJYR8CEG719SQ",
-  "title": "ISONE Solar Forecast Hourly",
+  "title": "GridStatus ISONE Solar Forecast Hourly",
   "description": "Solar Forecast for next 7 days in 1 hour intervals as reported by ISONE.\n\nUpdated each day at 10:00 AM ET.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

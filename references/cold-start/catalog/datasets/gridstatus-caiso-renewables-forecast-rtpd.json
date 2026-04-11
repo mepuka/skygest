@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4P829K60QTTEDK27P4",
-  "title": "CAISO Renewables Forecast RTPD",
+  "title": "GridStatus CAISO Renewables Forecast RTPD",
   "description": "The FMM RTPD renewables forecast published by the market operator. Forecast data is published roughly 22.5 minutes before the forecasted interval.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

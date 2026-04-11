@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F54M5WG1CEV3A9BX23S",
-  "title": "IESO LMP Day Ahead Hourly Virtual Zonal",
+  "title": "GridStatus IESO LMP Day Ahead Hourly Virtual Zonal",
   "description": "Day-ahead, hourly zonal LMPs for IESO used for virtual transactions.\n\nIESO's virtual zones are East, Essa, Niagara, Northeast, Northwest, Ottawa, Southwest, Toronto, and West.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

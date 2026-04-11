@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5MNKP9G2T9X7SWT47H",
-  "title": "SPP AS Prices Real Time 5 Min",
+  "title": "GridStatus SPP AS Prices Real Time 5 Min",
   "description": "Real-time, five-minute Marginal Clearing Prices (MCPs) by Reserve Zone for ancillary services in SPP. \n\nIncludes regulation, ramp, spinning, and supplemental reserves, and uncertainty up products.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

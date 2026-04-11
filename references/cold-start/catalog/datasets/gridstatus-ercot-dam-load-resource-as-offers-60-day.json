@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4VVJT86FJG903F9H2Q",
-  "title": "ERCOT DAM Load Resource AS Offers 60 Day",
+  "title": "GridStatus ERCOT DAM Load Resource AS Offers 60 Day",
   "description": "Load offers for ancillary services in ERCOT with a 60-day delay.\n\nThis dataset contains the offers to provide ancillary servies by load resources in ERCOT. Each row contains bids across all products for a particular resource at a particular time. Services offered include ERCOT Contingency Reserve Service (ECRS), Non-Spinning Responsive Reserves (NSPIN), Regulation Down (REGDN), Regulation Up (REGUP), and Responsive Reserves (RRS).",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

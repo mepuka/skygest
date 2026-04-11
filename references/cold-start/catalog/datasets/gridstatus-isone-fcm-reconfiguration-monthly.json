@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5938SN7PCF3WVBHPYX",
-  "title": "ISONE FCM Reconfiguration Monthly",
+  "title": "GridStatus ISONE FCM Reconfiguration Monthly",
   "description": "Monthly reconfiguration auction results for ISO New England’s Forward Capacity market.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

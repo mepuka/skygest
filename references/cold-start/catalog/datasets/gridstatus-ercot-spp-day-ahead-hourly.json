@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F50WGXX617GED00MPGP",
-  "title": "ERCOT SPP Day Ahead Hourly",
+  "title": "GridStatus ERCOT SPP Day Ahead Hourly",
   "description": "Settlement Point Prices in hourly intervals as reported by ERCOT from the day-ahead market run. These are derived from LMPs as well as price adders to calculate prices used in settlements. SPPs are calculated for Resource Nodes, Load Zones, and Hubs. \n\nThe location types present are:\n\n- *Trading Hub*\n- *Load Zone DC Tie*\n- *Resource Node*\n- *Load Zone*\n\n💡 There are many fewer settlement point locations than buses. Keeping this in mind can help to slim down initial ERCOT analyses before turning to individual bus locations.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

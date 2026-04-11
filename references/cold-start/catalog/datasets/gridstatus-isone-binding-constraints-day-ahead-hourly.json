@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F58VFNH6FH4GXBGZFRG",
-  "title": "ISONE Binding Constraints Day Ahead Hourly",
+  "title": "GridStatus ISONE Binding Constraints Day Ahead Hourly",
   "description": "Hourly, day-ahead binding constraints in ISO New England.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

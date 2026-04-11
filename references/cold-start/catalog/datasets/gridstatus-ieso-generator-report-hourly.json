@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F51QMFTKBWMNX2NGP29",
-  "title": "IESO Generator Report Hourly",
+  "title": "GridStatus IESO Generator Report Hourly",
   "description": "Hourly report for each generator in IESO. For dispatchable units, the output and capability is reported, while wind and solar resources report output, available capacity, and forecasted values. All values reported in MW. \n\n💡 Almost no market operators report generator-level production in near real-time publicly, making IESO relatively unique in this regard.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

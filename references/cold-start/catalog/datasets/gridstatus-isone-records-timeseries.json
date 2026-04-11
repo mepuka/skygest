@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5A1C6YXPV8WEVS0EHK",
-  "title": "ISONE New Records Timeline",
+  "title": "GridStatus ISONE New Records Timeline",
   "description": "Timeline of new records for ISONE",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5PWMGGHMVVSSM1176E",
-  "title": "SPP West Interchange Real Time",
+  "title": "GridStatus SPP West Interchange Real Time",
   "description": "SWPW interchange tie flow from neighboring RTOs and balancing authorities. Data is sampled every minute. Negative values indicate SWPW importing and positive values indicate SWPW exporting.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

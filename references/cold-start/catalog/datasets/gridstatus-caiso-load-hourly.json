@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4MDV07PXXGMEGR6C0E",
-  "title": "CAISO Load Hourly",
+  "title": "GridStatus CAISO Load Hourly",
   "description": "Actual hourly load reported by CAISO. Unlike [`caiso_load`](/datasets/caiso_load), the reported load includes load from charging storage.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

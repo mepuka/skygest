@@ -423,6 +423,10 @@ const buildPreparedRegistry = (
       dataset
     );
     for (const alias of dataset.aliases) {
+      if (alias.scheme === "url") {
+        continue;
+      }
+
       registerExactLookup(
         issues,
         "dataset-alias",

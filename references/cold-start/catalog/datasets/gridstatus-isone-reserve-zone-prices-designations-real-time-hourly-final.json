@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5BRQ1PG5BP11ZXJFAD",
-  "title": "ISONE Reserve Zone Prices Designations Real Time Hourly Final",
+  "title": "GridStatus ISONE Reserve Zone Prices Designations Real Time Hourly Final",
   "description": "Final hourly reserve prices, requirements, and designations by zone in ISO-NE. Includes 10-minute and 30-minute reserve requirements. Generally published the day following the operating day although sometimes delayed.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

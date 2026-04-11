@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5FXVQ5TJH6QG21MVJM",
-  "title": "NYISO Limiting Constraints Day Ahead",
+  "title": "GridStatus NYISO Limiting Constraints Day Ahead",
   "description": "This dataset contains day-ahead binding constraint data in NYISO. NYISO includes the constraint, contingency, congestion cost, as well as the facility ID. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

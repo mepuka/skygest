@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5N6BJ9DZWB14HGKWX6",
-  "title": "SPP Net Load",
+  "title": "GridStatus SPP Net Load",
   "description": "This dataset contains 5-minute net load levels across SPP. Net load is calculated by combining solar and wind generation and subtracting that from load. Net load is a clear metric that helps illustrate how much load is met by thermal and other dispatchable resources.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

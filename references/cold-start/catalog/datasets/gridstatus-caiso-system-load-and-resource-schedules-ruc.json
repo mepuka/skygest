@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4REZGEKSPTH0Q26YKM",
-  "title": "CAISO System Load and Resource Schedules RUC",
+  "title": "GridStatus CAISO System Load and Resource Schedules RUC",
   "description": "RUC hourly CAISO system schedule. Includes generation, imports, and exports per TAC Area to balance the CAISO system.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

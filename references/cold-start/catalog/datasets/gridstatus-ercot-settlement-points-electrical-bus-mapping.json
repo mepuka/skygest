@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F50PK7EZ45DAKM5JKGF",
-  "title": "ERCOT Settlement Points Electrical Bus Mapping",
+  "title": "GridStatus ERCOT Settlement Points Electrical Bus Mapping",
   "description": "Mapping between settlement points and electrical buses in ERCOT. Includes Load Zone for settlement points, (column name is `resource_node`). Updated weekly.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5HZAHMXET7JDQZSNZZ",
-  "title": "PJM Load Forecast Hourly",
+  "title": "GridStatus PJM Load Forecast Hourly",
   "description": "PJM hourly load forecast for the next seven days by region and zone.\n\n- Includes all published vintages.\n- Published every half hour on the quarter E.g. 1:15 and 1:45\n- Includes data for all forecast areas.\n- Data available at https://dataminer2.pjm.com/feed/load_frcstd_7_day/definition.\n- For more history use `load_forecast_hourly_historical` (note the historical dataset does not contain all the forecast areas as the current dataset does)",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

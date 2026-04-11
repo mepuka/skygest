@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4WRHQGB0F8ZREKFD6V",
-  "title": "ERCOT DAM Total Energy Sold",
+  "title": "GridStatus ERCOT DAM Total Energy Sold",
   "description": "The total amount of energy sold via three-part supply offers, energy offer curves, and energy-only offers per Settlement Point from the Day-Ahead Market",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

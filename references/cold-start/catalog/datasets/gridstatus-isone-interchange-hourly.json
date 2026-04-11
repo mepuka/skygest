@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F59M7XHGK932643B8PT",
-  "title": "ISONE Interchange Hourly",
+  "title": "GridStatus ISONE Interchange Hourly",
   "description": "This dataset contains the hourly net level of flows between ISO-NE and neighboring balancing authorities. Sale represents the number of MWs flowing out of New England and Purchase represents flows into New England, with the actual interchange being the combination of the two. Negative values indicate imports and positive values indicate exports.\n\nInterfaces by neighboring region:\n\n- Hydro-Québec (HQ):\n    - .I.HQHIGATE120 2\n    - .I.HQ_P1_P2345 5\n- New York ISO (NYISO)\n    - .I.NRTHPORT138 5\n    - .I.NRTHPORT138 5\n    - .I.ROSETON 345 1\n    - .I.SHOREHAM138 99\n- New Brunswick (NB)\n    - .I.SALBRYNB345 1.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

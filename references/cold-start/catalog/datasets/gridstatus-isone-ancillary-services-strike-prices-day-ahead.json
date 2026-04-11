@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F58XCXQX7AC0R95GK54",
-  "title": "ISONE Ancillary Services Strike Prices Day Ahead",
+  "title": "GridStatus ISONE Ancillary Services Strike Prices Day Ahead",
   "description": "Day-ahead strike prices and close-out components for ISO-NE. Includes the forecasted hourly Hub RT percentile values and load forecast.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

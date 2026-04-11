@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5CR33XHHEKDW05SEGX",
-  "title": "ISONE Wind Forecast Hourly",
+  "title": "GridStatus ISONE Wind Forecast Hourly",
   "description": "Wind Forecast for next 7 days in 1 hour intervals as reported by ISONE.\n\nUpdated each day at 10:00 AM ET.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

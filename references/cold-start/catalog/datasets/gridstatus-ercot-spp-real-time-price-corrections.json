@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F50PKCB1NP03MR09F45",
-  "title": "ERCOT SPP Real Time Price Corrections",
+  "title": "GridStatus ERCOT SPP Real Time Price Corrections",
   "description": "Real-time corrected settlement point prices (SPPs) in ERCOT. These prices are irregularly updated by ERCOT in the event of necessary price corrections or errors. These are derived from LMPs as well as price adders to calculate prices used in settlements. SPPs are calculated for Resource Nodes, Load Zones, and Hubs.\n\nThe location types present are:\n\nTrading Hub\nLoad Zone Energy Weighted\nLoad Zone DC Tie\nResource Node\nLoad Zone\nLoad Zone DC Tie Energy Weighted\n💡 There are many fewer settlement point locations than buses. Keeping this in mind can help to slim down initial ERCOT analyses before turning to individual bus locations.\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

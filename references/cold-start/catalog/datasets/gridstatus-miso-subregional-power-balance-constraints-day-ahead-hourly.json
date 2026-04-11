@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5EKJ3THR95CCWSM6JW",
-  "title": "MISO Subregional Power Balance Constraints Day Ahead Hourly",
+  "title": "GridStatus MISO Subregional Power Balance Constraints Day Ahead Hourly",
   "description": "Day-ahead binding sub-regional power balance constraints in MISO. This dataset contains information on the hours in which the North-South interface connecting the Midwest and South regions of MISO is binding.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F57KKF6DKA1ZYXWN3XW",
-  "title": "IESO Load Forecast Hourly",
+  "title": "GridStatus IESO Load Forecast Hourly",
   "description": "Load forecast from the Independent Electricity System Operator (IESO) in Ontario. This forecast is hourly and updates every 30 minutes.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

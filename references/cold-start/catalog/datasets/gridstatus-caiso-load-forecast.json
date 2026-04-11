@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4M23JC3KDGVY5RFGGJ",
-  "title": "CAISO Load Forecast",
+  "title": "GridStatus CAISO Load Forecast",
   "description": "Load Forecast resampled to 5 minute intervals",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5JZN9Z23C4NGPGHEHQ",
-  "title": "PJM Reserve Subzone Resources",
+  "title": "GridStatus PJM Reserve Subzone Resources",
   "description": "Reserve subzone mapping (not geographic location) for PJM reserves. This dataset also contains node id, name, and the type of resource. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

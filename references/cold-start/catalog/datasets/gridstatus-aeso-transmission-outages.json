@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4GH1CERYF1VBG2ZHXH",
-  "title": "AESO Transmission Outages",
+  "title": "GridStatus AESO Transmission Outages",
   "description": "This dataset contains information on transmission outages across IESO. Contained in this data are transmission owners, scheduled activity, and estimated length of outages.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXP6MWXWMNJ2A93ESKT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

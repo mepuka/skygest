@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4WPK4J493HACBQN76M",
-  "title": "ERCOT DAM Total AS Sold",
+  "title": "GridStatus ERCOT DAM Total AS Sold",
   "description": "The total quantity of awarded day-ahead market ancillary service offers in ERCOT. This data is hourly and published once a day for the following (operating) day.\n\n\nThe Ancillary Services are:\n* ECRS\n* Non-Spin\n* Regulation\n* Responsive Reserves \n\nImplemented on December 5th, 2025, as part of ERCOT's RTC+B project.\n\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

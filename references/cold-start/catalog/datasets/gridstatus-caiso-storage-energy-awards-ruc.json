@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4QS0WCB1JDJKQQ3BSX",
-  "title": "CAISO Storage Energy Awards RUC",
+  "title": "GridStatus CAISO Storage Energy Awards RUC",
   "description": "Hourly RUC energy awards to storage resources in CAISO. Includes both Standalone and Hybrid resources.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4H563Z0BK0EBJBW2B1",
-  "title": "CAISO Branch Shadow Prices HASP Hourly",
+  "title": "GridStatus CAISO Branch Shadow Prices HASP Hourly",
   "description": "Constraint pricing in CAISO at each Nomogram and Branch from the hour-ahead scheduling process. \n\nCAISO uses Nomograms to: “define a constraint relationship between two power system MW variables.”  See section 3.1.7 of the Market+Operations Business Practice Manual for more information on CAISO’s use of Nomograms. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

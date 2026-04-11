@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F57WB93MR2AM979ATTA",
-  "title": "IESO Load Zonal Hourly",
+  "title": "GridStatus IESO Load Zonal Hourly",
   "description": "Daily-published hourly zonal demand for IESO.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

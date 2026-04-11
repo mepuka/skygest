@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5CV8B6G58K2RQK63S9",
-  "title": "Latest Data for ISOs",
+  "title": "GridStatus Latest Data for ISOs",
   "description": "Latest load, primary power source, and Real Time LMP data for each ISO",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

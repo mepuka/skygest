@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZN112DJR4APYAXP7S",
-  "title": "ERCOT Real Time AS Monitor",
+  "title": "GridStatus ERCOT Real Time AS Monitor",
   "description": "⚠️ Due to large changes in AS data post RTC+C, we've decide to retire this dataset. The historical data is still available, but will no longer receive updates.\nThe dataset id of the new dataset is [ercot_system_as_capacity_monitor](https://www.gridstatus.io/datasets/ercot_system_as_capacity_monitor). \n___\n\nReal Time AS Monitor as reported by ERCOT. Includes capacity and responsibility. Updates ~10 seconds.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

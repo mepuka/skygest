@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5E6YMRJ99J35EEMNWP",
-  "title": "MISO Look Ahead Hourly",
+  "title": "GridStatus MISO Look Ahead Hourly",
   "description": "Hourly load and outage forecasts in MISO for the next seven days. While source data for this dataset is in GW, it is converted and available here in MW",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

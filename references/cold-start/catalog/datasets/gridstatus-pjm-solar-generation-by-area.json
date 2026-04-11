@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5JSQJX1RADBKGD6Q7B",
-  "title": "PJM Solar Generation By Area",
+  "title": "GridStatus PJM Solar Generation By Area",
   "description": "Solar generation by Area in PJM on an hourly basis. Areas include *MIDATL*, *Other*, *RFC*, *RTO*, *South*, and *West*. The *Other* region contains external units as well as units for which the region/area is unknown.\n\nFinal data for this dataset is delayed by up to 4 months. Prior to updating with final data, PJM may provide both 0 and negative values.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

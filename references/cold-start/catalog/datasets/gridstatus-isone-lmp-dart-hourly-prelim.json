@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5A8TADEJNH5B2MXHFR",
-  "title": "ISONE LMP DART Hourly Prelim",
+  "title": "GridStatus ISONE LMP DART Hourly Prelim",
   "description": "DART spread in ISONE between day-ahead hourly LMPs and real-time hourly preliminary LMPs. Both day-ahead and real-time values are at hourly intervals.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

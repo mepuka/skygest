@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5D37PQW1KQTAH7X1DH",
-  "title": "MISO LMP DART Ex Post Hourly",
+  "title": "GridStatus MISO LMP DART Ex Post Hourly",
   "description": "DART spread in MISO between day-ahead hourly ex-post LMPs and real-time hourly ex-post final LMPs. Both day-ahead and real-time values are at hourly intervals.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

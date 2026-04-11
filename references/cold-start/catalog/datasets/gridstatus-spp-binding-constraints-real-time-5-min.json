@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5M64MQ4JYQMBA2A0KQ",
-  "title": "SPP Binding Constraints Real Time 5 Min",
+  "title": "GridStatus SPP Binding Constraints Real Time 5 Min",
   "description": "Real-time binding constraint information in SPP. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

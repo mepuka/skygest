@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5DM4YP4K4PPR0R28YB",
-  "title": "MISO LMP Real Time 5 Min Ex Post Final",
+  "title": "GridStatus MISO LMP Real Time 5 Min Ex Post Final",
   "description": "Final Ex Post real-time five-minute LMPs in MISO. These are the LMPs calculated after the publication of Preliminary real-time LMPs by MISO following the approval of each Unit Dispatch System (UDS) case.\n\nThe Final values are not available immediately in real-time, but calculated via an offline process throughout the operating day and into the next day.\n\nSee MISO's *BPM 002 - Energy and Operating Reserves* for additional discussion.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

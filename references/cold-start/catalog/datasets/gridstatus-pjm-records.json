@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5JZ2WJCN00E571SXB8",
-  "title": "PJM Records",
+  "title": "GridStatus PJM Records",
   "description": "Top 10 daily records in PJM. Records including minimum and maximum net load levels, record levels of RTO wide wind and solar generation, and the renewables to load ratio.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

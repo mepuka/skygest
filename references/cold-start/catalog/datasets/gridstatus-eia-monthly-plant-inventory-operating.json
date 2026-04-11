@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4SXSMGWB461SKAWXBN",
-  "title": "EIA Monthly Plant Inventory Operating",
+  "title": "GridStatus EIA Monthly Plant Inventory Operating",
   "description": "List of operating power plants in the United States and their characteristics from the Energy Information Administration (EIA). Notably, this dataset allows for exporting via the gs_entity_id, enabling the ability to pull historical data for specific units back to 2016.\n\nThis data is updated on a monthly basis and lagged by several weeks for the previous month. This data does not include retired or planned power plants.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

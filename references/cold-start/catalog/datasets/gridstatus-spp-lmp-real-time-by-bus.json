@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5MPY7JB6K8MPWSH625",
-  "title": "SPP LMP Real Time By Bus",
+  "title": "GridStatus SPP LMP Real Time By Bus",
   "description": "Real-time five-minute prices in SPP by bus for Pricing Nodes in SPP's commercial model.\n\n\nThe location types present are:\n\n- *Bus*",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

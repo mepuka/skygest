@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5NK7CAZ2WBJE6V5B0P",
-  "title": "SPP Solar And Wind Forecast Mid Term",
+  "title": "GridStatus SPP Solar And Wind Forecast Mid Term",
   "description": "System-wide wind and solar forecast data for the next 7 days, organized by hour.\n\nIncludes data from both SPP East (SPP) and SPP West (SWPW) via the `baa` column.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

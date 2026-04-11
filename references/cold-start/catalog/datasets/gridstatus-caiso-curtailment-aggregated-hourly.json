@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4JZ4YRZ1N651ZB5P60",
-  "title": "CAISO Curtailment Aggregated Hourly",
+  "title": "GridStatus CAISO Curtailment Aggregated Hourly",
   "description": "CAISO curtailment aggregated by wind and solar on an hourly basis. For more granular data, on curtailment type and reason, see the caiso_curtailment dataset.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

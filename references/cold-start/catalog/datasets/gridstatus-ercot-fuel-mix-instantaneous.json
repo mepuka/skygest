@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4XHM7PS4XF72GXGKW5",
-  "title": "ERCOT Fuel Mix Instantaneous",
+  "title": "GridStatus ERCOT Fuel Mix Instantaneous",
   "description": "Real-time fuel mix as reported by ERCOT, sampled every five minutes. The resource types in this dataset are *Solar*, *Wind*, *Hydro*, *Power Storage*, *Other*, *Natural Gas*, *Coal and Lignite*, and *Nuclear*.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

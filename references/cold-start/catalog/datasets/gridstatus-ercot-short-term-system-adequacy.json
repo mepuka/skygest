@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F50198PC6AXET0PKSTY",
-  "title": "ERCOT Short Term System Adequacy",
+  "title": "GridStatus ERCOT Short Term System Adequacy",
   "description": "ERCOT Short-term system adequacy.\n\nThe available On-Line Resource capacity for Generation Resources and the available\ncapacity for Load Resources, for each hour of the current day and six days forward.\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

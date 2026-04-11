@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4HHGKF2SP443E27D7Z",
-  "title": "All Records",
+  "title": "GridStatus All Records",
   "description": "Top daily records for various metrics across all ISOs",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

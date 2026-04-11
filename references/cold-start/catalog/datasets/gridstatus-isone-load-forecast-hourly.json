@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5ASBJ7W5B45DJJ0THD",
-  "title": "ISONE Load Forecast Hourly",
+  "title": "GridStatus ISONE Load Forecast Hourly",
   "description": "Load Forecast in 1 hour intervals as reported by ISONE.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

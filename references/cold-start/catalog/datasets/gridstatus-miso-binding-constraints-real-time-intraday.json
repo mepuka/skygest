@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5CGYQSDP5019J74FRN",
-  "title": "MISO Binding Constraints Real Time Intraday",
+  "title": "GridStatus MISO Binding Constraints Real Time Intraday",
   "description": "Active, binding, real-time constraint data from MISO. This dataset should only be used during the current day, for more complete real-time constraint information use [MISO Binding Constraints Real Time 5 Min](https://www.gridstatus.io/datasets/miso_binding_constraints_real_time_5_min), which contains additional information and is published the day following the operating day.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

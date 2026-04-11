@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F58R2MJ1EJM5KHHH054",
-  "title": "IESO Wind Embedded Forecast",
+  "title": "GridStatus IESO Wind Embedded Forecast",
   "description": "Hourly embedded wind forecast generation for Ontario and its zones for the next 48 hours.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

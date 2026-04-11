@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5C8CRSW1C9MX7THY3S",
-  "title": "MISO AS MCP Day Ahead Ex Post",
+  "title": "GridStatus MISO AS MCP Day Ahead Ex Post",
   "description": "Hourly marginal clearing prices (MCPs) for ancillary services in MISO from the day-ahead market. These are the Ex Post prices.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5CCTWV3G49YA7KQ2NF",
-  "title": "ISONE Zonal Load Real Time Hourly",
+  "title": "GridStatus ISONE Zonal Load Real Time Hourly",
   "description": "Actual Hourly Demand by load zone, published by the ISO.\n\n\nAs exact hourly demand requires some settlement processes by the ISO, this data is typically 3-5 days delayed from the current time. Demand is given in MW.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

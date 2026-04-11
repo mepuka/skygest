@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5G50447E4PBKFYRQ7P",
-  "title": "PJM Fuel Mix Hourly",
+  "title": "GridStatus PJM Fuel Mix Hourly",
   "description": "Fuel mix by type (Coal, Gas, Hydro, Multiple Fuels, Nuclear, Oil, Solar, Storage, Wind, Other, and Other Renewable) in hourly intervals as reported by PJM.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4GRSJMF41J47VXTG3N",
-  "title": "AESO Pool Price",
+  "title": "GridStatus AESO Pool Price",
   "description": "Time-weighted hourly averages of the one-minute system marginal prices across AESO. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXP6MWXWMNJ2A93ESKT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

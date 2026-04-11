@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F51KAZ8FFBKRJ4DBK6S",
-  "title": "IESO In Service Transmission Limits",
+  "title": "GridStatus IESO In Service Transmission Limits",
   "description": "MW limits for transmission lines in the context of all in-service conditions. Contains both internal and intertie facility limits.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5G5KXVR5QAD7H7JFZP",
-  "title": "PJM Incremental and Decremental Bids Day-Ahead Hourly",
+  "title": "GridStatus PJM Incremental and Decremental Bids Day-Ahead Hourly",
   "description": "Hourly virtual day-ahead incremental and decremental bids aggregated by pricing point, hour, and type of bid, released with a 4-month delay. Virtual incremental (INCs) bids are offered to sell into the day-ahead, while decremental (DECs) bids are virtual offers to buy day-ahead power. These transactions are settled in the real-time market. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

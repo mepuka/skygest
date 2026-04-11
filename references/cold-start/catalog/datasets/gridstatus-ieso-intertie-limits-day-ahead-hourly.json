@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F511917YR3XZYMRHEQB",
-  "title": "IESO Intertie Limits Day Ahead Hourly",
+  "title": "GridStatus IESO Intertie Limits Day Ahead Hourly",
   "description": "Available transfer capacity used in the Day Ahead model run for each of Ontario’s intertie zones with Manitoba, Michigan, Minnesota, New York, and Québec.  ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

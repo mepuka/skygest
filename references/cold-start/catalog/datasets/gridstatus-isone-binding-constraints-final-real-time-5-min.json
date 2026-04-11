@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F58W2CQ91N5J6CTZY03",
-  "title": "ISONE Binding Constraints Final Real Time 5 Min",
+  "title": "GridStatus ISONE Binding Constraints Final Real Time 5 Min",
   "description": "Real-time, five-minute final binding constraints in ISO New England published after the market day. \n\nFinal binding constraint data is typically published in the afternoon of the next business day following the market day.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

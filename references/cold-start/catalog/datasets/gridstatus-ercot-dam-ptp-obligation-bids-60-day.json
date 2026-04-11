@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4WJCDACWECDTBAQ3VG",
-  "title": "ERCOT DAM PTP Obligation Bids 60 Day",
+  "title": "GridStatus ERCOT DAM PTP Obligation Bids 60 Day",
   "description": "Day-ahead, hourly, point-to-point (PTP) obligation bids submitted by Qualified Scheduling Entities (QSEs) in ERCOT. \n\nDAM PTP awards are purchased at the DAM price spread but settled at the real-time price spread, this allows entities to hedge congestion costs in the real-time market. Includes the source and sink settlement points as well as the bid-price pair in each interval.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

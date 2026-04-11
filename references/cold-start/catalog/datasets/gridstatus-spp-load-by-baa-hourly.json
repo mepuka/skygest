@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5NTKHWHSN52786G50T",
-  "title": "SPP Load By BAA Hourly",
+  "title": "GridStatus SPP Load By BAA Hourly",
   "description": "Hourly Load in SPP by BAA. The SWPW BAA which this dataset makes available became available on 2026-04-01, and thus this dataset does not contain all available historical load data from SPP. If you require load data before 2026, use the `spp_load_hourly` [dataset](https://www.gridstatus.io/datasets/spp_load_hourly).",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

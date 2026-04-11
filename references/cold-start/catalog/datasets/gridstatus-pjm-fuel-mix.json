@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5GPXMGR8F3JV6Y68GQ",
-  "title": "PJM Fuel Mix",
+  "title": "GridStatus PJM Fuel Mix",
   "description": "PJM fuel mix in 5 minute intervals. Based on hourly fuel mix data that\nis resampled and interpolated to 5 minute intervals.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

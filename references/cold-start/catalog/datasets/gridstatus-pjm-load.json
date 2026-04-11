@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5HY4JPQJ62ZGV0NZD8",
-  "title": "PJM Load",
+  "title": "GridStatus PJM Load",
   "description": "Real time PJM load across each zone, region, and RTO total in 5 minute intervals.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

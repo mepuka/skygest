@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5HQ76VWGC1T1D0HPE0",
-  "title": "PJM Marginal Value Day Ahead Hourly",
+  "title": "GridStatus PJM Marginal Value Day Ahead Hourly",
   "description": "Day-ahead binding constraint data for PJM. This includes the contingency and the shadow price, or marginal value of 1 MW of relaxation.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

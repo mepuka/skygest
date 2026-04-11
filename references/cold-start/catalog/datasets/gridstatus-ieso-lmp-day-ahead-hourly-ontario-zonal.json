@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F54FKAW7YGH2XTE0KHK",
-  "title": "IESO LMP Day Ahead Hourly Ontario Zonal",
+  "title": "GridStatus IESO LMP Day Ahead Hourly Ontario Zonal",
   "description": "Day-ahead, hourly, LMP values for the Ontario-wide zonal price in IESO. This Ontario Zonal Price (OZNP) is a load-weighted LMP across the entire province, that passive loads settle against. \n\nThis price is similar to the old Hourly Ontario Energy Price (HOEP), and was part of a compromise in the design fo the Market Renewal Program, which originally planned on using aggregate zonal prices for passive load settlement.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

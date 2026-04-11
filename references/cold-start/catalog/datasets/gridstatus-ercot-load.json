@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4YAN0DET85A3DQQHE3",
-  "title": "ERCOT Load",
+  "title": "GridStatus ERCOT Load",
   "description": "Five-minute load as reported by ERCOT in real-time; contains systemwide demand.\n\nBeginning December 5th, 2025, with the implementation of RTC+B, ERCOT's real-time load reporting no longer includes wholesale storage charging.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

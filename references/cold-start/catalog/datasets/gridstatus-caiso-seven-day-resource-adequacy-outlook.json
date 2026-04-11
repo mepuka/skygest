@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4PZYDJZT157YMQJDCA",
-  "title": "CAISO Seven Day Resource Adequacy Outlook",
+  "title": "GridStatus CAISO Seven Day Resource Adequacy Outlook",
   "description": "Seven-day resource adequacy outlook in CAISO. Includes demand forecasts as well as RA (resource adequacy) forecasts and credits, along with reserve requirements.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

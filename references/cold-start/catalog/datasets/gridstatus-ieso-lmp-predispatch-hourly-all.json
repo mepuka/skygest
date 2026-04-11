@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F542TEXP4PD3NRJVJNY",
-  "title": "IESO LMP Predispatch Hourly All",
+  "title": "GridStatus IESO LMP Predispatch Hourly All",
   "description": "Hourly pre-dispatch LMPs and their component costs for all pricing locations in Ontario, including virtual zones, interties, and the Ontario Zonal Price.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

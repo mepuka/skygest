@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5FWZVKTP4GGZWSZH5Q",
-  "title": "NYISO Lake Erie Circulation Real Time",
+  "title": "GridStatus NYISO Lake Erie Circulation Real Time",
   "description": "Real-time, five-minute, observed Lake Erie Loop flows affecting NYISO transmission. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

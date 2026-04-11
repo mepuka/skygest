@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4MB3PT3VRTVZAGYDFB",
-  "title": "CAISO Load",
+  "title": "GridStatus CAISO Load",
   "description": "Load in 5 minute intervals as reported by CAISO. Does not include load from storage charging.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

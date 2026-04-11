@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5MRZ27G1S25F3A3M05",
-  "title": "SPP Generation Capacity On Outage",
+  "title": "GridStatus SPP Generation Capacity On Outage",
   "description": "Generation capacity on outage data by fuel type in hourly intervals for next 7 days. Published each morning around 8am CT.\n\nPublished daily around 8am CT.\n\n\nIncludes data from both SPP East (SPP) and SPP West (SWPW) via the `baa` column.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5J698844TYP67PTY7H",
-  "title": "PJM Synchronized Reserve Events",
+  "title": "GridStatus PJM Synchronized Reserve Events",
   "description": "This dataset contains the history of declared synchronized reserve events in PJM, including the time, location, and percentage of reserves deployed.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

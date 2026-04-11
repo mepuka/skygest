@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZDHQ2CX978F5M4HQA",
-  "title": "ERCOT SCED AS Offer Updates in Op Hour 60 Day",
+  "title": "GridStatus ERCOT SCED AS Offer Updates in Op Hour 60 Day",
   "description": "ERCOT resources updated offers to provide ancillary services within a real-time operating hour. This data is posted on a 60-day delay from the market day.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

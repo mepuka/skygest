@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5FVZ1K25KZM45Y3Y63",
-  "title": "NYISO New Records Timeline",
+  "title": "GridStatus NYISO New Records Timeline",
   "description": "Timeline of new records for NYISO",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4H3DEP9Z8KRS3WHFXW",
-  "title": "AESO Unit Status",
+  "title": "GridStatus AESO Unit Status",
   "description": "Unit-level status reports in AESO. AESO reports out the maximum capacity (MC), Total Net Generation (TNG), Gross Generation minus Asset service, and Dispatched (and Accepted) Contingency Reserve (DCR). This data is sampled every 1-2 minutes.   ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXP6MWXWMNJ2A93ESKT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5AWHZBVPQKSDT7K3Q8",
-  "title": "ISONE LMP Real Time 5 Min Final",
+  "title": "GridStatus ISONE LMP Real Time 5 Min Final",
   "description": "Final approved locational marginal prices (LMPs) for each five-minute interval of the operating day. LMPs are presented for the Hub, load zones, and network nodes.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

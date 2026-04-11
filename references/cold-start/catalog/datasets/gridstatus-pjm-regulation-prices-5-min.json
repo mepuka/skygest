@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5JPJ2NS2RBNCG7FV1T",
-  "title": "PJM Regulation Prices 5 Min",
+  "title": "GridStatus PJM Regulation Prices 5 Min",
   "description": "The dataset contains preliminary five minute quantity, requirement, and prices PJM RTO wide. Regulation resources are compensated for adjusting their consumption or generation in response to grid frequency needs.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

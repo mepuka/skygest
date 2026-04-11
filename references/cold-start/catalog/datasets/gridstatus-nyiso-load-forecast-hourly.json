@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5F6E00SKNBPM9WDD6B",
-  "title": "NYISO Load Forecast Hourly",
+  "title": "GridStatus NYISO Load Forecast Hourly",
   "description": "⚠️ This dataset is deprecated in favor of  [nyiso_zonal_load_forecast_hourly](https://www.gridstatus.io/datasets/nyiso_zonal_load_forecast_hourly) which contains this same system wide forecast alongside the zonal load forecasts. \n\nLoad Forecast in 1 hour intervals as reported by NYISO.\n\nPublished by 8am ET each day.\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

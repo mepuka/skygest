@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5NJZYVV16MSSVVS9M9",
-  "title": "SPP Load Forecast By BAA",
+  "title": "GridStatus SPP Load Forecast By BAA",
   "description": "SPP hourly Mid Term Load Forecast resampled and interpolated to 5 minute resolution by BAA.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

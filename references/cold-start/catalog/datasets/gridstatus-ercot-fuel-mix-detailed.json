@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4X25H5HH6TWP81N6RD",
-  "title": "ERCOT Fuel Mix Detailed",
+  "title": "GridStatus ERCOT Fuel Mix Detailed",
   "description": "Generation, High Sustained Limit (HSL), and seasonal capacity of energy generation broken down by resource type ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

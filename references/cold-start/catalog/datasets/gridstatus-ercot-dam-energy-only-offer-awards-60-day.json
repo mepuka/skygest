@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4T5XVDHWK50H73DHES",
-  "title": "ERCOT DAM Energy Only Offer Awards 60 Day",
+  "title": "GridStatus ERCOT DAM Energy Only Offer Awards 60 Day",
   "description": "Day-ahead, hourly awards for offers to sell energy submitted by Qualified Scheduling Entities (QSEs) in ERCOT. Includes the settlement point as well as the price in each interval.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

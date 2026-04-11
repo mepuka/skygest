@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4X8JWC6X4NG299M7DX",
-  "title": "ERCOT LMP By Bus",
+  "title": "GridStatus ERCOT LMP By Bus",
   "description": "The Locational Marginal Price for each Electrical Bus in ERCOT,\nnormally produced by SCED every five minutes. \n\nThe location type present is:\n\n- *Electrical Bus*\n\nSee list of available locations\nby using the `ercot_electrical_buses` dataset.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

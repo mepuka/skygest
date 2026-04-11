@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5JR2V9A803HWS3ZKV8",
-  "title": "PJM Settlements Verified LMP Hourly",
+  "title": "GridStatus PJM Settlements Verified LMP Hourly",
   "description": "Verified, hourly, LMPs for both day-ahead and real-time including component costs, for the aggregate and zonal pnodes used for settlement in PJM.\n\nThe location types present are:\n\n- *ZONE*\n- *RESIDUAL_METERED_EDC*\n- *HUB*\n- *AGGREGATE*\n- *INTERFACE*\n- *EHV*",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

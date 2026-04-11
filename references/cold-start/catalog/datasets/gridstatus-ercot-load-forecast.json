@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4YD6VVS1Y169JTWCEM",
-  "title": "ERCOT Load Forecast",
+  "title": "GridStatus ERCOT Load Forecast",
   "description": "Load Forecast reported by ERCOT resampled to 5 minute intervals.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

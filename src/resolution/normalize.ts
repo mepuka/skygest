@@ -4,6 +4,13 @@ import { normalizeDomain } from "../domain/normalize";
 
 const collapseWhitespace = (value: string) => value.replace(/\s+/gu, " ").trim();
 
+const EXACT_DISTRIBUTION_QUERY_KEYS = new Set([
+  "download",
+  "file_format",
+  "format",
+  "return_format"
+]);
+
 export const normalizeLookupText = (value: string) =>
   collapseWhitespace(value.normalize("NFKC").toLowerCase());
 
@@ -49,7 +56,31 @@ export const normalizeDistributionUrl = (input: string): string | null =>
     Option.map(parseUrlLike(input), (url) => {
       const hostname = normalizeDomain(url.hostname);
       const pathname = normalizeUrlPath(url.pathname);
-      return pathname === "/" ? hostname : `${hostname}${pathname}`;
+      const preservedQueryEntries = [...url.searchParams.entries()]
+        .map(([key, value]) => [key.toLowerCase(), value.trim()] as const)
+        .filter(([key, value]) =>
+          EXACT_DISTRIBUTION_QUERY_KEYS.has(key) && value.length > 0
+        )
+        .sort(([leftKey, leftValue], [rightKey, rightValue]) =>
+          leftKey === rightKey
+            ? leftValue.localeCompare(rightValue)
+            : leftKey.localeCompare(rightKey)
+        );
+      const query =
+        preservedQueryEntries.length === 0
+          ? ""
+          : `?${preservedQueryEntries
+              .map(
+                ([key, value]) =>
+                  `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+              )
+              .join("&")}`;
+
+      if (pathname === "/") {
+        return `${hostname}${query}`;
+      }
+
+      return `${hostname}${pathname}${query}`;
     })
   );
 

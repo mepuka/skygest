@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4MVSSVFDCNZQAEMGHX",
-  "title": "CAISO Load Forecast 5 Min",
+  "title": "GridStatus CAISO Load Forecast 5 Min",
   "description": "5-minute load forecast data from the Very Short Term Load Forecast (VSTLF) used by CAISO in Real-Time Dispatch (RTD).",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

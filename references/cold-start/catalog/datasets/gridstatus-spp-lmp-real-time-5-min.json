@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5MH4KS840BD9VS3WRB",
-  "title": "SPP LMP Real Time 5 Min",
+  "title": "GridStatus SPP LMP Real Time 5 Min",
   "description": "Real Time 5 Minute LMPs as reported by SPP.\n\nThe location types present are:\n\n- *Settlement Location*\n- *Interface*\n- *Hub*",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

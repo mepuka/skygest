@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5FD909ZAFBGVW9TC5Y",
-  "title": "NYISO LMP Day Ahead Hourly",
+  "title": "GridStatus NYISO LMP Day Ahead Hourly",
   "description": "NYISO LMPs in hourly intervals as reported by NYISO.\n\nIncludes All zone and generator level data. The location types present are:\n\n- *Generator*\n- *Zone* \n\nNOTE: in NYISO's raw data, a negative congestion component results in a higher LMP\nvalue, which is the opposite of other ISOs. Thus, we flip the sign on the\ncongestion component before inserting into our database to be consistent with other\nISOs. This means that in our database, LMP = Energy + Congestion + Loss.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

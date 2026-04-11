@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5B68APC498S44BF49Z",
-  "title": "ISONE hourly standardized data",
+  "title": "GridStatus ISONE hourly standardized data",
   "description": "This table is a curated set of hourly data for ISO-NE. All standardized datasets are intended to speed up analysis and feature engineering work by providing commonly used data series in one denormalized table. Data in this feed is resampled to an hourly frequency from five minutes.\n\nThe standardized datasets are a conveience for API users who only want to query one dataset for each ISO. If you plan on loading in every dataset or want to work with more multiple series alone and together it is recommended to pull the individual datasets to have full visibility into each one.\n\n⚠️ Not all data series are present for the entire length of the dataset. This can occur due to a lack of historical data or the publication of new core datasets by an ISO.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

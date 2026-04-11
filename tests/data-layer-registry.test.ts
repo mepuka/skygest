@@ -148,4 +148,105 @@ describe("data layer registry prep", () => {
       )
     ).toBe(true);
   });
+
+  it("does not treat dataset close-match urls as unique registry keys", () => {
+    const seed = makeSeed();
+    const firstDataset = seed.datasets[0]!;
+    const sharedUrl = "https://example.com/shared-catalog-page";
+    const prepared = prepareDataLayerRegistry({
+      ...seed,
+      datasets: [
+        {
+          ...firstDataset,
+          aliases: [
+            {
+              scheme: "url",
+              value: sharedUrl,
+              relation: "closeMatch"
+            }
+          ]
+        },
+        {
+          ...firstDataset,
+          id: "https://id.skygest.io/dataset/ds_ABCDEFGHIJKL" as any,
+          title: "Sibling dataset",
+          distributionIds: [],
+          aliases: [
+            {
+              scheme: "url",
+              value: sharedUrl,
+              relation: "closeMatch"
+            }
+          ]
+        }
+      ]
+    });
+
+    expect(Result.isSuccess(prepared)).toBe(true);
+
+    if (Result.isFailure(prepared)) {
+      throw new Error("expected registry prep to ignore dataset url collisions");
+    }
+
+    const lookup = toDataLayerRegistryLookup(prepared.success);
+    expect(
+      Option.getOrNull(lookup.findDatasetByAlias("url", sharedUrl))
+    ).toBeNull();
+  });
+
+  it("keeps format-changing distribution query params in exact url lookups", () => {
+    const seed = makeSeed();
+    const firstDataset = seed.datasets[0]!;
+    const firstDistribution = seed.distributions[0]!;
+    const prepared = prepareDataLayerRegistry({
+      ...seed,
+      datasets: [
+        {
+          ...firstDataset,
+          distributionIds: [
+            "https://id.skygest.io/distribution/dist_1234567890AB" as any,
+            "https://id.skygest.io/distribution/dist_ABCDEFGHIJKL" as any
+          ]
+        }
+      ],
+      distributions: [
+        {
+          ...firstDistribution,
+          id: "https://id.skygest.io/distribution/dist_1234567890AB" as any,
+          accessURL:
+            "https://api.gridstatus.io/v1/datasets/pjm_load_forecast/query?return_format=json" as any
+        },
+        {
+          ...firstDistribution,
+          id: "https://id.skygest.io/distribution/dist_ABCDEFGHIJKL" as any,
+          kind: "download",
+          title: "PJM Load Forecast CSV",
+          downloadURL:
+            "https://api.gridstatus.io/v1/datasets/pjm_load_forecast/query?return_format=csv&download=true" as any
+        }
+      ]
+    });
+
+    expect(Result.isSuccess(prepared)).toBe(true);
+
+    if (Result.isFailure(prepared)) {
+      throw new Error("expected query-distinct distributions to prepare cleanly");
+    }
+
+    const lookup = toDataLayerRegistryLookup(prepared.success);
+    expect(
+      Option.getOrNull(
+        lookup.findDistributionByUrl(
+          "https://api.gridstatus.io/v1/datasets/pjm_load_forecast/query?return_format=json&utm_source=test"
+        )
+      )?.id
+    ).toBe("https://id.skygest.io/distribution/dist_1234567890AB");
+    expect(
+      Option.getOrNull(
+        lookup.findDistributionByUrl(
+          "https://api.gridstatus.io/v1/datasets/pjm_load_forecast/query?download=true&return_format=csv#fragment"
+        )
+      )?.id
+    ).toBe("https://id.skygest.io/distribution/dist_ABCDEFGHIJKL");
+  });
 });

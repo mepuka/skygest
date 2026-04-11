@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4K5Y9ZS3DFSYZ9CWW3",
-  "title": "CAISO Fuel Prices and Descriptions",
+  "title": "GridStatus CAISO Fuel Prices and Descriptions",
   "description": "Fuel prices as reported by CAISO with detailed names and descriptions where available.\n\nFor the raw fuel price data, see [CAISO Fuel Prices](https://www.gridstatus.io/datasets/caiso_fuel_prices).",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

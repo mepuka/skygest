@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5NBMWWVNC5Q6DWJ1CT",
-  "title": "SPP Market Clearing Day Ahead",
+  "title": "GridStatus SPP Market Clearing Day Ahead",
   "description": "Provides a summary of market clearing data for each Day-Ahead Market solution for each Operating Day.  Posting is updated each day after the DA Market results are posted.\n\nIncludes data from both SPP East (SPP) and SPP West (SWPW) via the `baa` column.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4SNXGA9CPW31K5W5G0",
-  "title": "ERCOT AS Demand Curves Hourly RUC",
+  "title": "GridStatus ERCOT AS Demand Curves Hourly RUC",
   "description": "Ancillary Service Demand Curves (ASDCs) in ERCOT, used in the hourly RUC process. The ASDCs are related to the elimination of the pre-RTC+B ORDC price adders and the new adder price determination process.\n\nImplemented on December 5th, 2025, as part of ERCOT's RTC+B project.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

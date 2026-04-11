@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4X761XRDEZ80N8JJWA",
-  "title": "ERCOT Highest Price AS Offer Selected",
+  "title": "GridStatus ERCOT Highest Price AS Offer Selected",
   "description": "The price and name of the Entity submitting\nthe offer for the highest-priced selected Ancillary Service (AS) Offer in ERCOT for each hour of the operating day.\n\nPublished with a 3 day delay.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

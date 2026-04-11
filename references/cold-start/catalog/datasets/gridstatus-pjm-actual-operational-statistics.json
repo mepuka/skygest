@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5FMSWJA4VX07VDGDV1",
-  "title": "PJM Actual Operational Statistics",
+  "title": "GridStatus PJM Actual Operational Statistics",
   "description": "Actual load and dispatch rate data by zone. PJM combines load zones in the Mid-A, whereas it separates this data by zone for all others. This data is updated in the morning with information regarding the prior day. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5DBRZ33601KBHP8VHJ",
-  "title": "MISO LMP Real Time 5 Min",
+  "title": "GridStatus MISO LMP Real Time 5 Min",
   "description": "Preliminary real-time ExPost LMP prelim in 5 minute intervals as reported by MISO.\n\nThis dataset includes the location types:\n- *Gennode*\n-  *Hub*\n-  *Interface*\n-  *Loadzone*",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

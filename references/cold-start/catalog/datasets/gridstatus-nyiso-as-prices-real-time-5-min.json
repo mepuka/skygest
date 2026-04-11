@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5ERXVPC4D7NYSCKDZ0",
-  "title": "NYISO AS Prices Real Time 5 Min",
+  "title": "GridStatus NYISO AS Prices Real Time 5 Min",
   "description": "Real-time five-minute prices for ancillary services products in the NYISO market.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

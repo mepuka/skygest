@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5AWPAH39H7CG7XR6PQ",
-  "title": "ISONE LMP Day Ahead Hourly",
+  "title": "GridStatus ISONE LMP Day Ahead Hourly",
   "description": "Day Ahead Hourly LMPs as reported by ISONE. Includes all locations.\n\nThis dataset includes the location types:\n\n- *DRRAZ*\n- *NETWORK NODE*\n- *EXT. NODE*\n- *HUB*\n- *LOAD ZONE*\n- *HUB NODE*",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

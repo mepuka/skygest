@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4S59BHR2SER2WBJ16T",
-  "title": "EIA Preliminary Monthly Electric Generator Inventory: Planned",
+  "title": "GridStatus EIA Preliminary Monthly Electric Generator Inventory: Planned",
   "description": "List containing generators published by the Energy Information Administration (EIA) which are currently planned or under development. Project status is indicated in the status column. Additionally, this dataset contains unit specific information such as location, capacity, fuel source, as well as the planned operation month and year.\n\nThis data is updated on a monthly basis, though is lagged by several weeks for the previous month.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

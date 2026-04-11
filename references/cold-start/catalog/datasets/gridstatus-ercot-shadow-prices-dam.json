@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F50N2QTKVPAN391RGVE",
-  "title": "ERCOT Shadow Prices DAM",
+  "title": "GridStatus ERCOT Shadow Prices DAM",
   "description": "The active and binding constraints as well as the associated shadow prices from the Day-Ahead Market\n\nData in hourly intervals and released once per day around 1 PM Central for the next operating day.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

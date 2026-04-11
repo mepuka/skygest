@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4XZJGNRR37RMYT0P9T",
-  "title": "ERCOT Hourly Wind Report",
+  "title": "GridStatus ERCOT Hourly Wind Report",
   "description": "⚠️ This dataset has been deprecated in favor of [ercot_wind_actual_and_forecast_hourly](https://www.gridstatus.io/datasets/ercot_wind_actual_and_forecast_hourly). The following changes should be considered when migrating:\n- `actual_ column` prefix renamed to `gen_` to better match ERCOT's reporting and the solar datasets\n- `hsl_system_wide` moved from last column to 8th column\n---\n\nHourly wind report with forecasts as published by ERCOT.\n\nThis report is published each hour and includes System-wide and geographic regional hourly averaged wind power production, forecasts, and the High Sustainable Limit (HSL) of online resources in the Current Operating Plan (COP). HSL is ERCOT's forecast of uncertailed power generation potential.\n\nThe STWPF and WGRPP values are forecasts representing a 50% and 80% chance of exceedance respectively. These forecasts are produced for a rolling 168-hour future period with each hourly report.\n\nOn Sept 26, 2024, `hsl_system_wide` column was added",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F54HD8T4H2C560RXV5Y",
-  "title": "IESO LMP Day Ahead Hourly All",
+  "title": "GridStatus IESO LMP Day Ahead Hourly All",
   "description": "Day-ahead hourly LMPs and their component costs for all pricing locations in Ontario, including virtual zones, interties, and the Ontario Zonal Price\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

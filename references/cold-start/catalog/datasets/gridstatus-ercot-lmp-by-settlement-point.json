@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4XR3B3G3FMWRTV9QJ6",
-  "title": "ERCOT LMP By Settlement Point",
+  "title": "GridStatus ERCOT LMP By Settlement Point",
   "description": "The Locational Marginal Price (LMP) for each Settlement Point in ERCOT,\nnormally produced by SCED every five minutes.\n\nThe location types present are:\n\n- *Load Zone*\n- *Load Zone DC Tie*\n- *Resource Node*\n- *Trading Hub*",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

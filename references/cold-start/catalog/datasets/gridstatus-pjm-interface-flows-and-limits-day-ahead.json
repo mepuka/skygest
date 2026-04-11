@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5GKN0HRK6TWBSEKX87",
-  "title": "PJM Interface Flows And Limits Day Ahead",
+  "title": "GridStatus PJM Interface Flows And Limits Day Ahead",
   "description": "This dataset contains hourly day ahead flows and flow limits for PJM’s internal interfaces. \n\nPublished daily between 12:00pm and 03:15 p.m.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

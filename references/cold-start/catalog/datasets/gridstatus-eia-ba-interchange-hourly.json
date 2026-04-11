@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4RB9854MVN3F63613B",
-  "title": "EIA BA Interchange Hourly",
+  "title": "GridStatus EIA BA Interchange Hourly",
   "description": "Balancing Authority (BA) Interchange Data in hourly intervals as reported in the EIA-930 dataset. This dataset contains both \"to\" and \"from\" for each BA.\n\n⚠️ For the most accurate and up to date ISO/RTO interchange data, we recommend using their respective datasets instead.\n\n 📝 This dataset was utilized in *[SPP Expansion Provides a Blueprint for the Future of the Grid](https://blog.gridstatus.io/spp-expansion-west/)*\n\nℹ️ We recheck historical data for 30 days after publication in case of updates. Updates are applied only when the new values are non-null.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

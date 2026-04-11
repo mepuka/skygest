@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5GFGF8ZF8BMVRDJM65",
-  "title": "PJM Instantaneous Dispatch Rates",
+  "title": "GridStatus PJM Instantaneous Dispatch Rates",
   "description": "This dataset contains instantaneous dispatch rates, in $/MWh, across all PJM zones based on a combination of manual and electronic dispatch signals updated every 15 seconds. In the event of an outage, PJM typically does not backfill this data. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

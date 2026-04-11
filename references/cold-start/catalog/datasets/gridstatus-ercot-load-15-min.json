@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4YFA0PX5GPY984M8WE",
-  "title": "ERCOT Load 15 Min",
+  "title": "GridStatus ERCOT Load 15 Min",
   "description": "System wide actual load in 15-minute intervals as reported by ERCOT. Refreshes\nevery hour at 5 minutes past the hour. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

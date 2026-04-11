@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4RAN9HS8T8VQGDR26N",
-  "title": "EIA Fuel Mix Hourly",
+  "title": "GridStatus EIA Fuel Mix Hourly",
   "description": "Hourly fuel mix for all regions and balancing authorities in the United States as reported by the EIA-930 dataset.\n\nℹ️ EIA data can be delayed or revised. To avoid missing updates, we:\n* Check for new data and revisions throughout the day for the previous 24 hours.\n* At 04:00 UTC, recheck the past 30 days for any changes.\nIn both cases, updates are only applied when the new values are non-null.\n\n⚠️ For the most accurate and up to date ISO/RTO fuel data, we recommend using their respective datasets instead.\n\n📝 This dataset was utilized in *[SPP Expansion Provides a Blueprint for the Future of the Grid](https://blog.gridstatus.io/spp-expansion-west/)*\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

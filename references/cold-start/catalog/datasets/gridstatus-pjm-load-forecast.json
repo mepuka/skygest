@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5H1FGVTGR0Y709H9SZ",
-  "title": "PJM Load Forecast",
+  "title": "GridStatus PJM Load Forecast",
   "description": "PJM hourly load forecast for the next seven days resampled to 5 minute intervals.\n\n- Only includes data from the most recent published vintage for each interval\n- Only includes data for the combined RTO (not individual forecast areas)",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

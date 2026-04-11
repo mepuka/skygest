@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4YMS61Y6SDXMJV2C93",
-  "title": "ERCOT Day Ahead Load Forecast",
+  "title": "GridStatus ERCOT Day Ahead Load Forecast",
   "description": "The load forecast for each interval based on 14:30 CT forecast from the previous day.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

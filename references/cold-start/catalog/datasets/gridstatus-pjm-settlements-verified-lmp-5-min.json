@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5JJ2BFEEHRYGZ9MD6N",
-  "title": "PJM Settlements Verified LMP 5 Min",
+  "title": "GridStatus PJM Settlements Verified LMP 5 Min",
   "description": "Verified, real-time, five-minute LMPs, including component costs, for the aggregate and zonal pnodes used for settlement in PJM.\n\nResidual aggregate and loadweighted transmission zone prices are PJM estimates.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

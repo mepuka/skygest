@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F51FMNNJC90C69E93MJ",
-  "title": "ERCOT Temperature Forecast By Weather Zone",
+  "title": "GridStatus ERCOT Temperature Forecast By Weather Zone",
   "description": "Hourly temperature forecast in Fahrenheit for each weather zone in ERCOT.\n\nEvery day a file is published at 5AM. This file contains an hourly temperature\nforecast which begins at 2AM 3 days prior to the publish date and ends with the 1AM\nhour for the day 9 days past the publication day.\n\nNote: We've observed source data issues during the repeated hour on DST changes, such as incorrect repeated hour timestamps and apparent doubling of temperature forecast values.\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

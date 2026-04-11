@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5CN7MZB5X6M8YFAX9W",
-  "title": "MISO AS MCP Real Time 5 Min Ex Post Prelim",
+  "title": "GridStatus MISO AS MCP Real Time 5 Min Ex Post Prelim",
   "description": "Five-minute, real-time marginal clearing prices (MCPs) for ancillary services in MISO. These are the Ex Post preliminary prices.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

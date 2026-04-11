@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F57PEWB68V0GQ3WQASV",
-  "title": "IESO Shadow Prices Real Time 5 Min",
+  "title": "GridStatus IESO Shadow Prices Real Time 5 Min",
   "description": "Real-time, 5 minute shadow prices and binding constraints for IESO. Shadow prices are published on a six day delay. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

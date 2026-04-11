@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4W1M0YWM2R85FWMVXJ",
-  "title": "ERCOT DAM System Lambda",
+  "title": "GridStatus ERCOT DAM System Lambda",
   "description": "Day Ahead Market System Lambda as reported by ERCOT.\n\nHourly intervals, published once a day around 12:30pm Central for tomorrow.\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

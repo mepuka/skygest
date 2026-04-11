@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F59S37AQ6RR74AX42YJ",
-  "title": "ISONE BTM Solar",
+  "title": "GridStatus ISONE BTM Solar",
   "description": "BTM Solar derived from data reported by ISONE.\n\nNotes:\n* Data is missing for 2021-11-17",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4GSSZSGABA33W3A4H8",
-  "title": "AESO Solar Forecast 7 Day",
+  "title": "GridStatus AESO Solar Forecast 7 Day",
   "description": "This dataset contains AESO’s forecasted solar generation for the next 7 days, calculated every hour. AESO calculates three generation forecasts: minimum, most likely, and maximum. Additionally, AESO calculates a percentage of generation compared to the current installed capacity for each forecast range. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXP6MWXWMNJ2A93ESKT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

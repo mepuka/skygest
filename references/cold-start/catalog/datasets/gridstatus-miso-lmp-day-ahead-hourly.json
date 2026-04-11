@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5DF832GDFJ3RB7PTQK",
-  "title": "MISO LMP Day Ahead Hourly",
+  "title": "GridStatus MISO LMP Day Ahead Hourly",
   "description": "Day Ahead LMP in hourly intervals as reported by MISO.\n\nThis dataset includes the location types:\n- *Gennode*\n-  *Hub*\n-  *Interface*\n-  *Loadzone*",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

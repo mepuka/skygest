@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4MT3H15K8HZHNVSM8N",
-  "title": "CAISO Load Forecast 7 Day",
+  "title": "GridStatus CAISO Load Forecast 7 Day",
   "description": "Hourly load forecast data for each hour of an operating day in CAISO, published seven days prior to the operating day.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

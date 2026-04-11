@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F573ZJK7W1D0EW3D7VX",
-  "title": "IESO Load Hourly",
+  "title": "GridStatus IESO Load Hourly",
   "description": "IESO load data for the Market and Ontario aggregated on an hourly basis from the IESO Load 5 minute data.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

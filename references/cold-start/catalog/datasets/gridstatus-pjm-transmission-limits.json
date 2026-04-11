@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5JK33M296WTMQ9M1HV",
-  "title": "PJM Transmission Limits",
+  "title": "GridStatus PJM Transmission Limits",
   "description": "This dataset contains transmission limits as well as the shadow price in PJM for every actively binding constraint within a five-minute interval.\n\nIncluded in the data is the type of constraint violation (thermal, actual, and reactive interface) as well as the contingency that is being violated. If there are no active constraints within a given interval no data will be available for that interval.\n\n⚠️ PJM does not typically backfill this data series in the event of data drops.\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

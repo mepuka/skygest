@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5AVCTCWY9A426AC4ZS",
-  "title": "ISONE LMP Real Time Hourly Final",
+  "title": "GridStatus ISONE LMP Real Time Hourly Final",
   "description": "Finalized locational marginal prices (LMPs) by hour for the Hub, load zones, and network nodes. Prices are broken into their various cost components: energy, congestion, and losses.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F50SDA7KXQR856T6AZ5",
-  "title": "ERCOT SCED System Lambda",
+  "title": "GridStatus ERCOT SCED System Lambda",
   "description": "System Lambda (λ) as reported by ERCOT. System Lambda is the Shadow Price for the system-wide Power Balance constraint.\n\nThe Shadow Price for the Power Balance constraint represents system costs to serve the last MW of load.\n\n💡 λ is the cost of providing one MWh of energy at the reference bus and is therefore the energy component of the LMP at each Settlement Point.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

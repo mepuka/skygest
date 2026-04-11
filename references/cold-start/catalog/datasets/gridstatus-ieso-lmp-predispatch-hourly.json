@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F54SYKS6716M3TMKSS8",
-  "title": "IESO LMP Predispatch Hourly",
+  "title": "GridStatus IESO LMP Predispatch Hourly",
   "description": "Pre-Dispatch hourly nodal LMPs for IESO. Unlike other ISO/RTOs, IESO maintains separate data feeds for Intertie and Zonal prices. For those values, refer to their individual datasets or the \"IESO LMP Predispatch Hourly All\" combined views. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

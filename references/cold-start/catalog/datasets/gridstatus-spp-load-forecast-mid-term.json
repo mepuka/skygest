@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5N2XQSEA98TGDCSEZ1",
-  "title": "SPP Load Forecast Mid Term",
+  "title": "GridStatus SPP Load Forecast Mid Term",
   "description": "Hourly load forecast data for both SPP East (SPP) and SPP West (SWPW) for +7 days\n(actual RT load shown is averaged by hour as well).\n\nBalancing authority areas are delineated by the `baa` column.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

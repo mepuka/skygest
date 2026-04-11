@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4WW5Y666V0RGSMYFQH",
-  "title": "ERCOT Estimated Coincident Peak Load",
+  "title": "GridStatus ERCOT Estimated Coincident Peak Load",
   "description": "This dataset contains key data series related to coincident peak intervals in ERCOT as well as an estimated coincident peak load value, all in real-time. There are four fifteen-minute coincident peak intervals each year, one in each of the summer months. The estimated value in this dataset utiliizes operational load and real-time storage operations in ERCOT. \n\nThe dataseries comprising this dataset are real-time operational data and should not be used in place of settlement data. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

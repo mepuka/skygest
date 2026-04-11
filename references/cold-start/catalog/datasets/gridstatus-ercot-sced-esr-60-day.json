@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZXFC3T33CAP4N0J6Y",
-  "title": "ERCOT SCED ESR 60 Day",
+  "title": "GridStatus ERCOT SCED ESR 60 Day",
   "description": "SCED Energy Storage Resource data. Published with 60 day delay. Contains offer curves, telemetry, and other data.\n\nWith this data you can construct the actual operations and instructions for each operationla storage unit in ERCOT. As an example, with this data it is possible to understand a unit's typical adherence to schedule and instructions by comparing the output schedule (an input to SCED) against a unit's base points (an output from SCED) and their actual telemetered net output to the grid using the columns output_schedule, base_point, and telemetered_net_output.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

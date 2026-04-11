@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5JTM0P6F3FZNB1J5MA",
-  "title": "PJM Regulation Market Monthly",
+  "title": "GridStatus PJM Regulation Market Monthly",
   "description": "Hourly regulation capacity requirements in PJM. Mileage ratios and performance data are also included. \n\nThis data is posted monthly on the first Friday of the month, but due to its reliance on settlement data may be delayed based on delays in the settlement process.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

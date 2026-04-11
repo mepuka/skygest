@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5JXT03949YKYSMCNYD",
-  "title": "PJM Transfer Limits And Flows",
+  "title": "GridStatus PJM Transfer Limits And Flows",
   "description": "Hourly average of transfer limits and flows across PJM’s internal interfaces. PJM releases this data on a monthly basis. For more real time data, use the PJM Transfer Interface Information 5 Min dataset. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

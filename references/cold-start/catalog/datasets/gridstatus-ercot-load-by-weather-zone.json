@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4YPQBFSBA60P9F3Q6T",
-  "title": "ERCOT Load By Weather Zone",
+  "title": "GridStatus ERCOT Load By Weather Zone",
   "description": "Hourly load by weather zone as reported by ERCOT.\n\nIncluded zones: Coast, East, Far West, North, North Central,\nSouth, South Central, West, and ERCOT-wide total.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

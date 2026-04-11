@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4Z6M82B1SSDKZ5V8B0",
-  "title": "ERCOT PRC",
+  "title": "GridStatus ERCOT PRC",
   "description": "Physical Responsive Capability (PRC) in ERCOT. New data is published on an irregular frequency, but is generally multiple times per minute.\n\nPRC is the generation and load resources that can quickly respond to sudden changes on the system. Events such as the unexpected trip of a large generator rely on fast response of other resources to fill the gap. The PRC is a measure of those other resources' capability. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

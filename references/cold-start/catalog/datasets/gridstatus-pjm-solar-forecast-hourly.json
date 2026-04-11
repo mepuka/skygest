@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5JWY35K4AFZAZWPE7D",
-  "title": "PJM Solar Forecast Hourly",
+  "title": "GridStatus PJM Solar Forecast Hourly",
   "description": "Hourly solar power forecast within PJM\n\nThe hourly power forecast within PJM area for metered- utility scale solar power\nand behind the meter solar power such as residential solar panels. Behind The Meter\n(BTM) solar power is aggregated and handled through Load Serving Entities (LSE),\nnot directly through PJM. The forecast is updated every hour and is available for\nthe next 48 hours.\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4MXX56ZYFTV5PM7B8V",
-  "title": "CAISO Load Forecast Day Ahead",
+  "title": "GridStatus CAISO Load Forecast Day Ahead",
   "description": "Hourly load forecast data for each hour of the following day, which is the operating day. This load forecast is posted prior to CAISO running the day-ahead market for the operating day.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

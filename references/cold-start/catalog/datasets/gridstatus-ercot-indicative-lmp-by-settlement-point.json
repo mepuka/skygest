@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4X5HY1HB7NZHDMZQS5",
-  "title": "ERCOT Indicative LMP By Settlement Point",
+  "title": "GridStatus ERCOT Indicative LMP By Settlement Point",
   "description": "Contains 5-minute indicative LMPs at settlement points in ERCOT. Every 5 minutes ERCOT publishes these values for the following 12 intervals in the Look Ahead SCED-RTD Study Period. Settlement points include Resource Nodes, Hubs, and Load Zones.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

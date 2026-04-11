@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4PXKNM71ZGZAJZ7FHA",
-  "title": "CAISO Renewables Hourly",
+  "title": "GridStatus CAISO Renewables Hourly",
   "description": "Actual hourly generation from wind and solar in CAISO. \n\nIncludes data for all of CAISO as well as ZP26, SP15, and NP15.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

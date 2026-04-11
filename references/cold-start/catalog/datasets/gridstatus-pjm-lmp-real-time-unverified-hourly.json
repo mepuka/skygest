@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5H60VGWPAWF4JWKSZN",
-  "title": "PJM LMP Real Time Unverified Hourly",
+  "title": "GridStatus PJM LMP Real Time Unverified Hourly",
   "description": "Real-Time unverified locational marginal pricing (LMP) data for all bus locations.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

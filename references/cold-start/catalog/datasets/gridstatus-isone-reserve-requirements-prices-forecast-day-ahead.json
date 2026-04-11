@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5BZ77B8YW4P2VN3N6B",
-  "title": "ISONE Reserve Requirements Prices Forecast Day Ahead",
+  "title": "GridStatus ISONE Reserve Requirements Prices Forecast Day Ahead",
   "description": "Day-ahead reserve prices, requirements, and forecast from ISO-NE. This is hourly data for the system as a whole, reserve zone 7000.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

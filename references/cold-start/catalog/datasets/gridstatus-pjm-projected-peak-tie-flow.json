@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5HYNZH7PBHN2GAPVA2",
-  "title": "PJM Projected Peak Tie Flow",
+  "title": "GridStatus PJM Projected Peak Tie Flow",
   "description": "This dataset contains scheduled tie flows at each of PJM’s interfaces during the peak hour, updated each morning. ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

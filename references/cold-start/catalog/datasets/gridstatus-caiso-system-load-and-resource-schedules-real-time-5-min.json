@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4RH6052BYF8V7GZQJ6",
-  "title": "CAISO System Load And Resource Schedules Real Time 5 Min",
+  "title": "GridStatus CAISO System Load And Resource Schedules Real Time 5 Min",
   "description": "Real-time 5-minute CAISO system schedule. Includes generation, imports, and exports per TAC Area to balance the CAISO system.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

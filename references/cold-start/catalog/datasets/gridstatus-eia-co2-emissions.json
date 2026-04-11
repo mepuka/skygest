@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4RMSFT3KH2JZ1ENT6J",
-  "title": "EIA CO2 Emissions",
+  "title": "GridStatus EIA CO2 Emissions",
   "description": "Hourly emissions data for each EIA area. Includes Balancing Authorities and Regions. Emissions from generation, imports, and exports reported in metric tons. Emissions intensity reported in lbs/KWh",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

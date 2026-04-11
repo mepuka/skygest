@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4KXA0GCRK031JK4SVP",
-  "title": "CAISO Fuel Regions",
+  "title": "GridStatus CAISO Fuel Regions",
   "description": "List of ISO fuel regions and electric regions with IDs, names, and descriptions.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

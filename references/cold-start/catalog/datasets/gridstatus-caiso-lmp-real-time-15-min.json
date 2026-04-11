@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4KWSN3PBAE2B2CAN82",
-  "title": "CAISO LMP Real Time 15 Min",
+  "title": "GridStatus CAISO LMP Real Time 15 Min",
   "description": "Real-time 15-minute locational marginal prices (LMPs) for locations administered by CAISO internally as well as through the WEIM. Inclues AP Nodes, Trading Hubs, and Nodes.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5CS724HKS52BFM4TKV",
-  "title": "MISO Fuel Mix",
+  "title": "GridStatus MISO Fuel Mix",
   "description": "Fuel Mix in 5 minute intervals as reported by MISO.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

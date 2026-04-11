@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F57QKNFE1CMAPYZV4CD",
-  "title": "IESO Outage Transmission Limits",
+  "title": "GridStatus IESO Outage Transmission Limits",
   "description": "Transmission limits for impacted facilities during outages for transmission facilities in IESO. Includes both internal and intertie transmission equipment.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

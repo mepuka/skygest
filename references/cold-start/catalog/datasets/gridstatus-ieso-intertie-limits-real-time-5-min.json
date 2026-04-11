@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F51N9FH0WHFZWXT3SKR",
-  "title": "IESO Intertie Limits Real Time 5 Min",
+  "title": "GridStatus IESO Intertie Limits Real Time 5 Min",
   "description": "Real time, five minute limits for each of Ontario’s intertie zones with Manitoba, Michigan, Minnesota, New York, and Québec.  ",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZXPAV9JMQQBVB9CQ9",
-  "title": "ERCOT Resource Node To Unit",
+  "title": "GridStatus ERCOT Resource Node To Unit",
   "description": "Mapping of resource nodes (settlement points) to unit names and substations in ERCOT.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

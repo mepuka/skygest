@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZZMBDKZVNS321NQ72",
-  "title": "ERCOT Real Time Adders",
+  "title": "GridStatus ERCOT Real Time Adders",
   "description": "The Real-Time Reliability Deployment Price Adders (RTRDPAs) for energy and each ancillary service, for each SCED run in ERCOT.\n\nThis dataset also includes:\n* System Lambda (λ), which is the Shadow Price for the system-wide Power Balance constraint\n* Total RUC/RMR Low Dispatch Limit (LDL) relaxed\n* Deployed Load Resource MWs that are added to Demand\n* Energy Storage Resource Charging MWs that are added to Demand\n* Total Low Sustained Limit (LSL)\n* Total High Sustained Limit (HSL)\n\nThis dataset was implemented on December 5th, 2025, as part of ERCOT's RTC+B project, which modified many existing datasets related to ancillary services and system capacity while also introducing new reports.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

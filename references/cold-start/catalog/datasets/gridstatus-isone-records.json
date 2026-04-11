@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5AJHH8FVQMVPR4KTB0",
-  "title": "ISONE Records",
+  "title": "GridStatus ISONE Records",
   "description": "Top 10 daily records for various metrics in ISONE",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

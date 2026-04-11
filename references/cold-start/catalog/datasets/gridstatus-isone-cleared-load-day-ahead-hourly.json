@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F59FWEKSHDT1T00EWQ7",
-  "title": "ISONE Cleared Load Day Ahead Hourly",
+  "title": "GridStatus ISONE Cleared Load Day Ahead Hourly",
   "description": "Cleared Day Ahead Market Hourly Demand by load zone, published by the ISO.\n\n\nLatest data is typically available for tomorrow, once Day Ahead supply is scheduled. See Realtime Hourly Demand for the actual historical recorded demand. Load is given in MW. \n\nThe locations are ISO-NE's load zones as well as the internal hub and NEPOOL as a whole:\n* .Z.MAINE\n* .Z.NEWHAMPSHIRE\n* .Z.VERMONT\n* .Z.RHODEISLAND\n* .Z.CONNECTICUT\n* .Z.WCMASS\n* .Z.SEMASS\n* .Z.NEMASSBOST\n* NEPOOL AREA\n* .H.INTERNALHUB\n\nThe three zones with MASS represent regions within Massachusetts, the highest demand region within New England. The Internal Hub is a comprised of a collection of nodes in central New England with very little congestion, so its values can be quite different from load zones.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

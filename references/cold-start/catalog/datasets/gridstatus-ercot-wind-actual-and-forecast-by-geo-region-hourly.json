@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F518MVGXPC0BJNF64AM",
-  "title": "ERCOT Wind Actual And Forecast By Geo Region Hourly",
+  "title": "GridStatus ERCOT Wind Actual And Forecast By Geo Region Hourly",
   "description": "Hourly wind report with forecasts as published by ERCOT.\n\nThis report is published each hour and includes System-wide and geographic regional hourly averaged wind power production, forecasts, and the High Sustainable Limit (HSL) of online resources in the Current Operating Plan (COP). HSL is ERCOT's forecast of uncurtailed power generation potential.\n\nThe STWPF and WGRPP values are forecasts representing a 50% and 80% chance of exceedance respectively. These forecasts are produced for a rolling 168-hour future period with each hourly report.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

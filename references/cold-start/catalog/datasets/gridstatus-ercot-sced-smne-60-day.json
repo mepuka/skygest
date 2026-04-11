@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F508DWGD9F7W63DTPAA",
-  "title": "ERCOT SCED SMNE 60 Day",
+  "title": "GridStatus ERCOT SCED SMNE 60 Day",
   "description": "SCED Settlement Metered Net Energy (SMNE) for Generation Resources data, published with a 60-day delay.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

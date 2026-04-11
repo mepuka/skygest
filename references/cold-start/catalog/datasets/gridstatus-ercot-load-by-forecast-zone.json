@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4YVB7X3W4PZ8NX640G",
-  "title": "ERCOT Load By Forecast Zone",
+  "title": "GridStatus ERCOT Load By Forecast Zone",
   "description": "Hourly load by forecast zone as reported by ERCOT.\n\nIncluded zones: North, South, West, Houston, and ERCOT-wide total.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

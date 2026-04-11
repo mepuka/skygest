@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4THQH0KNK9GBXJA2M0",
-  "title": "ERCOT Available Seasonal Capacity Forecast",
+  "title": "GridStatus ERCOT Available Seasonal Capacity Forecast",
   "description": "Available seasonal capacity forecast in ERCOT.\n\nThe forecasted demand (Load Forecast) and the forecasted available\nseasonal capacity (Available Capacity) for the next 6 days.\n\nThe forecasted available seasonal capacity is comprised of non-renewable generators\nbased on seasonal capacity ratings without regard to the operating plans of these\nunits, minus any known outages or derates of these units, and the forecasted wind\nand solar generation output.\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

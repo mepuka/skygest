@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4MSK51TZE6FY93J43B",
-  "title": "CAISO Outages Aggregated Hourly",
+  "title": "GridStatus CAISO Outages Aggregated Hourly",
   "description": "CAISO Outages Aggregated by forced and planned on an hourly basis. For generator level data including the reason, see the caiso_curtailed_non_operational_generator dataset.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

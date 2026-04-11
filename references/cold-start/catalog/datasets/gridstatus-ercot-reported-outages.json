@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZC85AFKT9Q2WYTXM3",
-  "title": "ERCOT Reported Outages",
+  "title": "GridStatus ERCOT Reported Outages",
   "description": "Report generation outages in ERCOT.\n\nMW values of planned and forced generation outages, including energy storage\nresources, currently taking place as well as any that occurred during the previous\n6 days. These quantities include full outages, as well as partial reductions in\ngeneration capability that meet reporting requirements. The values\nreflect MW capability reductions relative to a generator's maximum seasonal\ncapability.\n\nIncludes\n- Dispatchable outages\n- Renewable outages\n- Combined outages",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

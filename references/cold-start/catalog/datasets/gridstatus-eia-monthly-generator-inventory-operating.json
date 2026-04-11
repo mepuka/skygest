@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4SQK4DWPZZ49TT4TKC",
-  "title": "EIA Preliminary Monthly Electric Generator Inventory: Operating",
+  "title": "GridStatus EIA Preliminary Monthly Electric Generator Inventory: Operating",
   "description": "List of operating power plants in the United States and their characteristics from the Energy Information Administration (EIA).\n\nThis data is updated on a monthly basis and lagged by several weeks for the previous month. This data does not include retired or planned power plants.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

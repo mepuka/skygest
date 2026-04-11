@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4HWNVE7PAFM3QFM9FV",
-  "title": "All Records Timeseries",
+  "title": "GridStatus All Records Timeseries",
   "description": "Timeline of new records for various metrics in all ISOs",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

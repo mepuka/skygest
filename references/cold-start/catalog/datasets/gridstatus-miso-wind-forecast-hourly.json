@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5EDHZXCYCQ55QG7KSE",
-  "title": "MISO Wind Forecast Hourly",
+  "title": "GridStatus MISO Wind Forecast Hourly",
   "description": "Hourly Wind Forecast for the next 6 days as reported by MISO. Published each day\n",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

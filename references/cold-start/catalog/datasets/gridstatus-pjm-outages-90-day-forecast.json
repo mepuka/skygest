@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5HH7BWPRKKT0B6P0SX",
-  "title": "PJM 90-Day Generation Outages Forecast",
+  "title": "GridStatus PJM 90-Day Generation Outages Forecast",
   "description": "Forecast total MWs of generation on outage in PJM, including the West region, out 90 days. Unlike the dataset [here](https://staging.preview.gridstatus.io/datasets/pjm_outages_daily), this forecast from PJM does not separate out the type of outages and lacks additional location classifications.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

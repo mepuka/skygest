@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZXZMGJ3AYNCE8EW08",
-  "title": "ERCOT Records",
+  "title": "GridStatus ERCOT Records",
   "description": "Top 10 daily records for various metrics in ERCOT",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

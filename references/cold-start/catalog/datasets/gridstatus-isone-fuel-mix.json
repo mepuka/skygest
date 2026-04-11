@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F59TKZV03RKP1G8T2KE",
-  "title": "ISONE Fuel Mix",
+  "title": "GridStatus ISONE Fuel Mix",
   "description": "Fuel Mix for ISONE resampled to 5 minute intervals",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

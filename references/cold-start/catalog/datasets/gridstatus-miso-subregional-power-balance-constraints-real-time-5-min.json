@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5EQHQV88JG6R0JYMJ2",
-  "title": "MISO Subregional Power Balance Constraints Real Time 5 Minutes",
+  "title": "GridStatus MISO Subregional Power Balance Constraints Real Time 5 Minutes",
   "description": "Real-time binding sub-regional power balance constraints in MISO. This dataset contains information on the hours in which the North-South interface connecting the Midwest and South regions of MISO is binding.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",

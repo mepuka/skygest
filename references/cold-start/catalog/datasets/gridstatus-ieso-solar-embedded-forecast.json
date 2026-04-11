@@ -1,7 +1,7 @@
 {
   "_tag": "Dataset",
   "id": "https://id.skygest.io/dataset/ds_01KNX70F57VAMJ1ADCNEHM2NFQ",
-  "title": "IESO Solar Embedded Forecast",
+  "title": "GridStatus IESO Solar Embedded Forecast",
   "description": "Hourly embedded solar forecast generation for Ontario and its zones for the next 48 hours.",
   "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
