@@ -11,6 +11,8 @@ This is a Cloudflare Worker built with Effect.ts. Every rule below is non-negoti
 
 - `bun <file>`, `bun run test`, `bun install`, `bunx <pkg>` — never Node, npm, npx, vite, jest.
 - Bun loads `.env` automatically — no dotenv.
+- Keep every `wrangler*.toml` `compatibility_date` current when touching Worker deploy config.
+- Do not enable `compatibility_flags = ["nodejs_compat"]` as a fallback. If Worker code needs a Node built-in, remove that dependency instead so `src/` stays Node-free.
 
 ## Architecture
 

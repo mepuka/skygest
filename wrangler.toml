@@ -119,10 +119,11 @@ deleted_classes = ["JetstreamIngestorDoV2"]
 tag = "v5"
 new_sqlite_classes = ["ExpertPollCoordinatorDo"]
 
-# Phase C: production DO transfer migration will be added here
-# [[migrations]]
-# tag = "v6"
-# [[migrations.transferred_classes]]
-# from = "ExpertPollCoordinatorDo"
-# from_script = "skygest-bi-agent"
-# to = "ExpertPollCoordinatorDoIsolated"
+# Verified against the live account on 2026-04-11:
+# - only staging workers exist for the split ingest/agent pair
+# - the only ExpertPollCoordinatorDo namespace belongs to
+#   skygest-bi-ingest-staging
+# - no ExpertPollCoordinatorDoIsolated namespace exists in the account
+# If production workers are introduced later and the coordinator ever needs
+# to move between scripts, plan a fresh transfer migration from that live
+# state instead of reviving the old commented v6 sketch.
