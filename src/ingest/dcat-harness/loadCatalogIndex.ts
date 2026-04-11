@@ -31,6 +31,7 @@ export interface CatalogIndex {
   readonly catalogRecordsByCatalogAndPrimaryTopic: Map<string, CatalogRecord>;
   readonly catalogRecordFileSlugById: Map<CatalogRecord["id"], string>;
   readonly agentsById: Map<Agent["id"], Agent>;
+  readonly agentFileSlugById: Map<Agent["id"], string>;
   readonly agentsByName: Map<string, Agent>;
   readonly catalogsById: Map<Catalog["id"], Catalog>;
   readonly dataServicesById: Map<DataService["id"], DataService>;
@@ -232,6 +233,7 @@ export const buildCatalogIndex = Effect.fn("DcatHarness.buildCatalogIndex")(
     >();
     const catalogRecordFileSlugById = new Map<CatalogRecord["id"], string>();
     const agentsById = new Map<Agent["id"], Agent>();
+    const agentFileSlugById = new Map<Agent["id"], string>();
     const agentsByName = new Map<string, Agent>();
     const catalogsById = new Map<Catalog["id"], Catalog>();
     const dataServicesById = new Map<DataService["id"], DataService>();
@@ -293,7 +295,8 @@ export const buildCatalogIndex = Effect.fn("DcatHarness.buildCatalogIndex")(
       );
     }
 
-    for (const agent of allAgents) {
+    for (const { slug, data: agent } of entities.agents) {
+      agentFileSlugById.set(agent.id, slug);
       agentsById.set(agent.id, agent);
       agentsByName.set(agent.name, agent);
     }
@@ -315,6 +318,7 @@ export const buildCatalogIndex = Effect.fn("DcatHarness.buildCatalogIndex")(
         catalogRecordsByCatalogAndPrimaryTopic,
         catalogRecordFileSlugById,
         agentsById,
+        agentFileSlugById,
         agentsByName,
         catalogsById,
         dataServicesById,

@@ -196,7 +196,7 @@ export const runEmberIngest = Effect.fn("Ember.runIngest")(function* (
     mergeAliasScheme: AliasSchemeValues.emberRoute,
     describeStart: (cfg) => ({ openApiUrl: cfg.openApiUrl }),
     fetch: (cfg) =>
-      fetchSpec(cfg.apiKey, cfg.openApiUrl).pipe(
+      fetchSpec(cfg.apiKey, cfg.openApiUrl, cfg.minIntervalMs).pipe(
         Effect.map((spec) => ({
           spec,
           families: listEndpointFamilies(spec)

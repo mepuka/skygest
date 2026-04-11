@@ -150,6 +150,11 @@ export const Dataset = Schema.Struct({
   creatorAgentId: Schema.optionalKey(AgentId.annotate({
     [DcatProperty]: "http://purl.org/dc/terms/creator"
   })),
+  wasDerivedFrom: Schema.optionalKey(
+    Schema.Array(AgentId).annotate({
+      [DcatProperty]: "http://www.w3.org/ns/prov#wasDerivedFrom"
+    })
+  ),
   publisherAgentId: Schema.optionalKey(AgentId.annotate({
     [DcatProperty]: "http://purl.org/dc/terms/publisher"
   })),

@@ -31,9 +31,6 @@ export interface EndpointFamily {
 
 const trimPath = (path: string): string => path.replace(/^\/+|\/+$/gu, "");
 
-const emberPathPattern =
-  /^(?:v1\/)?([a-z-]+)\/(monthly|yearly)$/u;
-
 const titleCase = (value: string): string =>
   value
     .split(/[-/]+/u)
@@ -42,13 +39,24 @@ const titleCase = (value: string): string =>
     .join(" ");
 
 export const routeFromPath = (path: string): string | null => {
-  const match = trimPath(path).match(emberPathPattern);
-  if (match === null) {
+  const trimmed = trimPath(path);
+  const segments = trimmed.split("/").filter((segment) => segment.length > 0);
+  if (segments.length < 2) {
     return null;
   }
 
-  const [, family, resolution] = match;
-  return `${family!}/${resolution!}`;
+  const resolution = segments.at(-1);
+  if (resolution !== "monthly" && resolution !== "yearly") {
+    return null;
+  }
+
+  const prefixSegments =
+    segments[0] === "v1" ? segments.slice(1, -1) : segments.slice(0, -1);
+  if (prefixSegments.length === 0) {
+    return null;
+  }
+
+  return `${prefixSegments.join("/")}/${resolution}`;
 };
 
 export const emberDatasetSlug = (route: string): string =>

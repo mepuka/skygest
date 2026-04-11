@@ -141,14 +141,33 @@ const DATASET_FIXTURE = {
   }
 } as const;
 
+const API_USAGE_FIXTURE = {
+  plan_name: "pro",
+  limits: {
+    api_rows_returned_limit: 100000,
+    api_requests_limit: 1000,
+    api_rows_per_response_limit: 10000,
+    per_second_api_rate_limit: 5,
+    per_minute_api_rate_limit: 100,
+    per_hour_api_rate_limit: 1000
+  },
+  current_usage_period_start: "2026-04-01T00:00:00+00:00",
+  current_usage_period_end: "2026-05-01T00:00:00+00:00",
+  current_period_usage: {
+    total_requests: 42,
+    total_api_rows_returned: 2048
+  }
+} as const;
+
 const jsonResponse = (
   request: Parameters<typeof HttpClientResponse.fromWeb>[0],
-  body: unknown
+  body: unknown,
+  status = 200
 ) =>
   HttpClientResponse.fromWeb(
     request,
     new Response(JSON.stringify(body), {
-      status: 200,
+      status,
       headers: { "content-type": "application/json" }
     })
   );
@@ -317,6 +336,7 @@ const emptyIndex = (): CatalogIndex => ({
   catalogRecordsByCatalogAndPrimaryTopic: new Map(),
   catalogRecordFileSlugById: new Map(),
   agentsById: new Map(),
+  agentFileSlugById: new Map(),
   agentsByName: new Map(),
   catalogsById: new Map(),
   dataServicesById: new Map(),
@@ -350,12 +370,14 @@ describe("gridstatus adapter", () => {
 
   it.effect("fetches the dataset catalog with x-api-key auth", () =>
     Effect.gen(function* () {
+      const client = yield* HttpClient.HttpClient;
       const response = yield* fetchCatalog(
+        client,
         Redacted.make("gridstatus-secret"),
         GRIDSTATUS_BASE_URL
       );
-      expect(response.data).toHaveLength(2);
-      expect(response.data[0]?.id).toBe("pjm_load_forecast");
+      expect(response.datasets).toHaveLength(2);
+      expect(response.datasets[0]?.id).toBe("pjm_load_forecast");
     }).pipe(
       Effect.provide(
         makeHttpLayer((request, url) =>
@@ -364,6 +386,125 @@ describe("gridstatus adapter", () => {
             expect(request.headers["x-api-key"]).toBe("gridstatus-secret");
             return jsonResponse(request, DATASET_FIXTURE);
           })
+        )
+      )
+    )
+  );
+
+  it.effect("surfaces unauthorized responses as fetch errors", () =>
+    Effect.gen(function* () {
+      const client = yield* HttpClient.HttpClient;
+      const error = yield* fetchCatalog(
+        client,
+        Redacted.make("gridstatus-secret"),
+        GRIDSTATUS_BASE_URL
+      ).pipe(Effect.flip);
+
+      expect(error._tag).toBe("GridStatusCatalogFetchError");
+      if (error._tag !== "GridStatusCatalogFetchError") {
+        throw new Error(`unexpected error tag: ${error._tag}`);
+      }
+      expect(error.status).toBe(401);
+    }).pipe(
+      Effect.provide(
+        makeHttpLayer((request) =>
+          Effect.succeed(jsonResponse(request, { error: "unauthorized" }, 401))
+        )
+      )
+    )
+  );
+
+  it.effect("paginates the dataset catalog until hasNextPage is false", () => {
+    const seenCursors: Array<string | null> = [];
+
+    return Effect.gen(function* () {
+      const client = yield* HttpClient.HttpClient;
+      const response = yield* fetchCatalog(
+        client,
+        Redacted.make("gridstatus-secret"),
+        GRIDSTATUS_BASE_URL
+      );
+
+      expect(seenCursors).toEqual([null, "page-2"]);
+      expect(response.pageCount).toBe(2);
+      expect(response.datasets.map((dataset) => dataset.id)).toEqual([
+        "pjm_load_forecast",
+        "gridstatus_status"
+      ]);
+      expect(response.rowFailures).toEqual([]);
+    }).pipe(
+      Effect.provide(
+        makeHttpLayer((request, url) =>
+          Effect.gen(function* () {
+            expect(request.headers["x-api-key"]).toBe("gridstatus-secret");
+            const cursor = new URL(url.toString()).searchParams.get("cursor");
+            seenCursors.push(cursor);
+
+            return jsonResponse(
+              request,
+              cursor === "page-2"
+                ? {
+                    data: [DATASET_FIXTURE.data[1]],
+                    meta: {
+                      page: 2,
+                      limit: null,
+                      page_size: null,
+                      hasNextPage: false,
+                      cursor: null
+                    }
+                  }
+                : {
+                    data: [DATASET_FIXTURE.data[0]],
+                    meta: {
+                      page: 1,
+                      limit: null,
+                      page_size: null,
+                      hasNextPage: true,
+                      cursor: "page-2"
+                    }
+                  }
+            );
+          })
+        )
+      )
+    );
+  });
+
+  it.effect("keeps malformed rows out of the success set and reports them", () =>
+    Effect.gen(function* () {
+      const client = yield* HttpClient.HttpClient;
+      const response = yield* fetchCatalog(
+        client,
+        Redacted.make("gridstatus-secret"),
+        GRIDSTATUS_BASE_URL
+      );
+
+      expect(response.datasets.map((dataset) => dataset.id)).toEqual([
+        "pjm_load_forecast"
+      ]);
+      expect(response.rowFailures).toHaveLength(1);
+      expect(response.rowFailures[0]).toMatchObject({
+        page: 1,
+        row: 2,
+        datasetId: "broken_dataset"
+      });
+      expect(response.rowFailures[0]?.message).toContain("name");
+    }).pipe(
+      Effect.provide(
+        makeHttpLayer((request) =>
+          Effect.succeed(
+            jsonResponse(request, {
+              data: [
+                DATASET_FIXTURE.data[0],
+                {
+                  id: "broken_dataset",
+                  primary_key_columns: [],
+                  all_columns: []
+                }
+              ],
+              meta: DATASET_FIXTURE.meta
+            })
+          )
         )
       )
     )
@@ -384,14 +525,19 @@ describe("gridstatus adapter", () => {
     );
 
     const ctx = buildContextFromIndex(emptyIndex(), FIXTURE_NOW);
-    const candidates = buildCandidateNodes(
+    const result = buildCandidateNodes(
       DATASET_FIXTURE.data,
       emptyIndex(),
       ctx,
       GRIDSTATUS_BASE_URL
     );
+    const candidates = result.candidates;
 
     expect(candidates).toHaveLength(11);
+    expect(result.provenanceWarnings).toHaveLength(1);
+    expect(result.provenanceWarnings[0]?.reason).toBe(
+      "missingRegistryAgent"
+    );
     expect(candidates[0]).toMatchObject({
       _tag: "agent",
       slug: "gridstatus"
@@ -406,6 +552,86 @@ describe("gridstatus adapter", () => {
     });
   });
 
+  it("emits an unknown-source warning without inventing provenance", () => {
+    const ctx = buildContextFromIndex(emptyIndex(), FIXTURE_NOW);
+    const result = buildCandidateNodes(
+      [
+        {
+          ...DATASET_FIXTURE.data[0],
+          id: "mystery_dataset",
+          source: "mystery-iso"
+        }
+      ],
+      emptyIndex(),
+      ctx,
+      GRIDSTATUS_BASE_URL
+    );
+    const datasetNode = result.candidates.find(
+      (candidate): candidate is Extract<typeof result.candidates[number], { _tag: "dataset" }> =>
+        candidate._tag === "dataset"
+    );
+
+    expect(datasetNode?.data.wasDerivedFrom).toBeUndefined();
+    expect(result.provenanceWarnings).toEqual([
+      expect.objectContaining({
+        datasetId: "mystery_dataset",
+        reason: "unknownSourceLabel"
+      })
+    ]);
+  });
+
+  it("preserves prior provenance when a rerun loses the source label", () => {
+    const existingDataset = Schema.decodeUnknownSync(Dataset)({
+      _tag: "Dataset" as const,
+      id: "https://id.skygest.io/dataset/ds_01KNYDNDXG01V5YJ2RPQW1QABC",
+      title: "PJM Load Forecast",
+      publisherAgentId: "https://id.skygest.io/agent/ag_01KNYDNDXG01V5YJ2RPQW1QABD",
+      wasDerivedFrom: [PLACEHOLDER_AGENT_ID],
+      aliases: [
+        {
+          scheme: GRIDSTATUS_DATASET_ALIAS_SCHEME,
+          value: "pjm_load_forecast",
+          relation: "exactMatch"
+        }
+      ],
+      createdAt: FIXTURE_NOW,
+      updatedAt: FIXTURE_NOW
+    });
+    const idx: CatalogIndex = {
+      ...emptyIndex(),
+      datasetsByMergeKey: new Map([["pjm_load_forecast", existingDataset]]),
+      datasetFileSlugById: new Map([
+        [existingDataset.id, "gridstatus-pjm-load-forecast"]
+      ]),
+      allDatasets: [existingDataset]
+    };
+    const ctx = buildContextFromIndex(idx, FIXTURE_NOW);
+    const result = buildCandidateNodes(
+      [
+        {
+          ...DATASET_FIXTURE.data[0],
+          source: null
+        }
+      ],
+      idx,
+      ctx,
+      GRIDSTATUS_BASE_URL
+    );
+    const datasetNode = result.candidates.find(
+      (candidate): candidate is Extract<typeof result.candidates[number], { _tag: "dataset" }> =>
+        candidate._tag === "dataset"
+    );
+
+    expect(datasetNode?.merged).toBe(true);
+    expect(datasetNode?.data.wasDerivedFrom).toEqual([PLACEHOLDER_AGENT_ID]);
+    expect(result.provenanceWarnings).toEqual([
+      expect.objectContaining({
+        datasetId: "pjm_load_forecast",
+        reason: "unknownSourceLabel"
+      })
+    ]);
+  });
+
   it.effect(
     "replaces the placeholder bundle, writes per-dataset files, and reuses ids on rerun",
     () =>
@@ -417,14 +643,18 @@ describe("gridstatus adapter", () => {
           noCache: false,
           apiKey: Redacted.make("gridstatus-secret"),
           baseUrl: GRIDSTATUS_BASE_URL,
-          minIntervalMs: 200
+          minIntervalMs: 0
         };
         const layer = Layer.mergeAll(
           bunFsLayer,
           makeHttpLayer((request, url) =>
             Effect.gen(function* () {
-              expect(url.toString()).toBe(datasetCatalogUrl(GRIDSTATUS_BASE_URL));
               expect(request.headers["x-api-key"]).toBe("gridstatus-secret");
+              if (url.toString().endsWith("/api_usage")) {
+                return jsonResponse(request, API_USAGE_FIXTURE);
+              }
+
+              expect(url.toString()).toBe(datasetCatalogUrl(GRIDSTATUS_BASE_URL));
               return jsonResponse(request, DATASET_FIXTURE);
             })
           )
@@ -495,9 +725,7 @@ describe("gridstatus adapter", () => {
         expect(firstCatalog.publisherAgentId).toBe(firstAgent.id);
         expect(firstDataService.publisherAgentId).toBe(firstAgent.id);
         expect(firstDataService.servesDatasetIds).toHaveLength(2);
-        expect(firstDataset.creatorAgentId).toBe(
-          "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX"
-        );
+        expect(firstDataset.wasDerivedFrom).toEqual([PLACEHOLDER_AGENT_ID]);
         expect(firstDataset.publisherAgentId).toBe(firstAgent.id);
         expect(firstDataset.aliases).toEqual([
           {

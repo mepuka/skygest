@@ -1,6 +1,9 @@
 import { Duration, Effect, Redacted, Schema } from "effect";
 import { HttpClient, HttpClientResponse } from "effect/unstable/http";
-import { withTransientHttpRetry } from "../../dcat-harness";
+import {
+  retryTransientHttpEffect,
+  withMinIntervalHttpRateLimit
+} from "../../dcat-harness";
 import {
   getResponseStatus,
   isDecodeError
@@ -27,10 +30,17 @@ export class EmberSpecDecodeError extends Schema.TaggedErrorClass<EmberSpecDecod
 ) {}
 
 export const fetchSpec = Effect.fn("Ember.fetchSpec")(function* (
-  apiKey: Redacted.Redacted,
-  url: string = EMBER_OPENAPI_URL
+  apiKey: Redacted.Redacted<string>,
+  url: string = EMBER_OPENAPI_URL,
+  minIntervalMs = 1000
 ) {
-  const http = withTransientHttpRetry(yield* HttpClient.HttpClient);
+  const http = yield* withMinIntervalHttpRateLimit(
+    yield* HttpClient.HttpClient,
+    {
+      key: "ember-openapi",
+      minIntervalMs
+    }
+  );
 
   return yield* http
     .get(url, {
@@ -39,6 +49,7 @@ export const fetchSpec = Effect.fn("Ember.fetchSpec")(function* (
     .pipe(
       Effect.timeout(Duration.seconds(10)),
       Effect.flatMap(HttpClientResponse.filterStatusOk),
+      (effect) => retryTransientHttpEffect(effect),
       Effect.flatMap(HttpClientResponse.schemaBodyJson(EmberOpenApiDocument)),
       Effect.mapError((cause) =>
         isDecodeError(cause)
@@ -50,11 +61,11 @@ export const fetchSpec = Effect.fn("Ember.fetchSpec")(function* (
               getResponseStatus(cause) === undefined
                 ? {
                     url,
-                    message: stringifyUnknown(cause)
+                    message: "Ember OpenAPI request failed"
                   }
                 : {
                     url,
-                    message: stringifyUnknown(cause),
+                    message: "Ember OpenAPI request failed",
                     status: getResponseStatus(cause)!
                   }
             )

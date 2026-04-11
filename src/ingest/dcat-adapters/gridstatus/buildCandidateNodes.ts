@@ -1,11 +1,11 @@
+import { Result, Schema } from "effect";
 import {
+  AgentId,
   AliasSchemeValues,
   CatalogRecord,
   DataService,
   Dataset,
   Distribution,
-  type Agent,
-  type AgentId,
   mintCatalogRecordId,
   mintDatasetId,
   mintDistributionId,
@@ -35,56 +35,60 @@ const decodeDistribution = stripUndefinedAndDecodeWith(Distribution);
 const decodeCatalogRecord = stripUndefinedAndDecodeWith(CatalogRecord);
 const decodeDataService = stripUndefinedAndDecodeWith(DataService);
 
+export const GridStatusProvenanceWarning = Schema.Struct({
+  datasetId: Schema.String,
+  source: Schema.NullOr(Schema.String),
+  reason: Schema.Literals(["unknownSourceLabel", "missingRegistryAgent"]),
+  message: Schema.String
+});
+export type GridStatusProvenanceWarning = Schema.Schema.Type<
+  typeof GridStatusProvenanceWarning
+>;
+
+export interface BuildCandidateNodesResult {
+  readonly candidates: ReadonlyArray<IngestNode>;
+  readonly provenanceWarnings: ReadonlyArray<GridStatusProvenanceWarning>;
+}
+
+type SourceAgentResolution =
+  | { readonly _tag: "resolved"; readonly agentId: AgentId }
+  | { readonly _tag: "selfPublished" }
+  | {
+      readonly _tag: "warning";
+      readonly warning: GridStatusProvenanceWarning;
+      readonly fallbackAgentId: AgentId | undefined;
+    };
+
 const normalize = (value: string): string => value.trim().toLowerCase();
 
-const SOURCE_AGENT_MATCHERS: Record<string, ReadonlyArray<string>> = {
-  aeso: ["alberta electric system operator", "aeso"],
-  caiso: ["california independent system operator", "caiso"],
-  eia: [
-    "u.s. energy information administration",
-    "us energy information administration",
-    "energy information administration",
-    "eia"
-  ],
-  ercot: ["electric reliability council of texas", "ercot"],
-  ieso: ["independent electricity system operator", "ieso"],
-  isone: ["iso new england", "iso-ne", "isone"],
-  miso: ["midcontinent independent system operator", "miso"],
-  nyiso: ["new york independent system operator", "nyiso"],
-  pjm: ["pjm interconnection", "pjm interconnection, l.l.c.", "pjm"],
-  spp: ["southwest power pool", "spp"],
-  gridstatus: ["gridstatus"]
-};
-
-const resolveSourceAgentId = (
-  idx: CatalogIndex,
-  source: string | null | undefined,
-  gridStatusAgentId: Agent["id"]
-): AgentId | undefined => {
-  if (source === null || source === undefined) {
-    return undefined;
-  }
-
-  const normalizedSource = normalize(source);
-  if (normalizedSource === "gridstatus") {
-    return gridStatusAgentId;
-  }
-
-  const matchers = SOURCE_AGENT_MATCHERS[normalizedSource];
-  if (matchers === undefined) {
-    return undefined;
-  }
-
-  const existingAgent = idx.allAgents.find((agent) => {
-    const candidates = [
-      agent.name,
-      ...(agent.alternateNames ?? []),
-      ...agent.aliases.map((alias) => alias.value)
-    ].map(normalize);
-    return matchers.some((matcher) => candidates.includes(matcher));
-  });
-
-  return existingAgent?.id;
+const SOURCE_AGENT_SLUGS: Record<string, string> = {
+  "alberta electric system operator": "aeso",
+  aeso: "aeso",
+  "california independent system operator": "caiso",
+  caiso: "caiso",
+  "u.s. energy information administration": "eia",
+  "us energy information administration": "eia",
+  "energy information administration": "eia",
+  eia: "eia",
+  "electric reliability council of texas": "ercot",
+  ercot: "ercot",
+  "independent electricity system operator": "ieso",
+  ieso: "ieso",
+  "iso new england": "isone",
+  "iso-ne": "isone",
+  isone: "isone",
+  "midcontinent independent system operator": "miso",
+  miso: "miso",
+  "new york independent system operator": "nyiso",
+  nyiso: "nyiso",
+  "pjm interconnection": "pjm",
+  "pjm interconnection, l.l.c.": "pjm",
+  pjm: "pjm",
+  "southwest power pool": "spp",
+  spp: "spp",
+  "hydro-quebec": "hq",
+  hq: "hq",
+  gridstatus: "gridstatus"
 };
 
 const temporalRange = (
@@ -92,7 +96,12 @@ const temporalRange = (
 ): string | undefined => {
   const start = dataset.earliest_available_time_utc;
   const end = dataset.latest_available_time_utc;
-  if (start === null || start === undefined || end === null || end === undefined) {
+  if (
+    start === null ||
+    start === undefined ||
+    end === null ||
+    end === undefined
+  ) {
     return undefined;
   }
 
@@ -159,58 +168,155 @@ const existingGridStatusServedDatasetIds = (
       .map((dataset) => dataset.id)
   );
 
-  return dataService.servesDatasetIds.filter((datasetId) => validIds.has(datasetId));
+  return dataService.servesDatasetIds.filter((datasetId) =>
+    validIds.has(datasetId)
+  );
 };
 
-const buildDatasetCandidate = (
-  datasetInfo: GridStatusDatasetInfo,
-  datasetId: Dataset["id"],
-  ctx: BuildContext,
-  idx: CatalogIndex,
-  existing: Dataset | null,
-  distributionIds: ReadonlyArray<Distribution["id"]>
-): Dataset => {
-  const source = datasetInfo.source ?? undefined;
-  const description = datasetInfo.description ?? undefined;
+const existingDerivedFromAgentId = (
+  existing: Dataset | null
+): AgentId | undefined => {
+  const [firstSource] = existing?.wasDerivedFrom ?? [];
+  if (firstSource === undefined) {
+    return undefined;
+  }
 
-  return decodeDataset({
-    _tag: "Dataset" as const,
-    id: datasetId,
-    title: datasetInfo.name,
-    description: existing?.description ?? description,
-    creatorAgentId:
-      existing?.creatorAgentId ??
-      resolveSourceAgentId(idx, source, ctx.agent.id),
-    publisherAgentId: ctx.agent.id,
-    landingPage:
-      existing?.landingPage ?? gridstatusDatasetLandingPage(datasetInfo.id),
-    accessRights: existing?.accessRights ?? "public",
-    temporal: existing?.temporal ?? temporalRange(datasetInfo),
-    keywords:
-      existing?.keywords ??
-      [
-        datasetInfo.id,
-        ...(source === undefined ? [] : [source]),
-        ...(datasetInfo.table_type === undefined ||
-        datasetInfo.table_type === null
-          ? []
-          : [datasetInfo.table_type]),
-        ...(datasetInfo.data_frequency === undefined ||
-        datasetInfo.data_frequency === null
-          ? []
-          : [datasetInfo.data_frequency])
-      ],
-    themes: existing?.themes ?? ["grid operations"],
-    distributionIds,
-    dataServiceIds: [ctx.dataService.id],
-    inSeries: existing?.inSeries,
-    aliases: unionAliases(
-      existing?.aliases ?? [],
-      freshDatasetAliases(datasetInfo)
-    ),
-    createdAt: existing?.createdAt ?? ctx.nowIso,
-    updatedAt: ctx.nowIso
-  });
+  const decoded = Schema.decodeUnknownResult(AgentId)(firstSource);
+  return Result.isSuccess(decoded) ? decoded.success : undefined;
+};
+
+const resolveSourceAgent = (
+  idx: CatalogIndex,
+  datasetInfo: GridStatusDatasetInfo,
+  existing: Dataset | null
+): SourceAgentResolution => {
+  const source = datasetInfo.source;
+  if (source === undefined || source === null || source.trim().length === 0) {
+    return {
+      _tag: "warning",
+      warning: {
+        datasetId: datasetInfo.id,
+        source: source ?? null,
+        reason: "unknownSourceLabel",
+        message: `GridStatus dataset ${datasetInfo.id} has no source label`
+      },
+      fallbackAgentId: existingDerivedFromAgentId(existing)
+    };
+  }
+
+  const normalizedSource = normalize(source);
+  if (normalizedSource === "gridstatus") {
+    return { _tag: "selfPublished" };
+  }
+
+  const expectedSlug = SOURCE_AGENT_SLUGS[normalizedSource];
+  if (expectedSlug === undefined) {
+    return {
+      _tag: "warning",
+      warning: {
+        datasetId: datasetInfo.id,
+        source,
+        reason: "unknownSourceLabel",
+        message: `Unknown GridStatus source label "${source}" for dataset ${datasetInfo.id}`
+      },
+      fallbackAgentId: existingDerivedFromAgentId(existing)
+    };
+  }
+
+  const existingAgent = idx.allAgents.find(
+    (agent) => idx.agentFileSlugById.get(agent.id) === expectedSlug
+  );
+  if (existingAgent === undefined) {
+    return {
+      _tag: "warning",
+      warning: {
+        datasetId: datasetInfo.id,
+        source,
+        reason: "missingRegistryAgent",
+        message: `GridStatus source "${source}" mapped to "${expectedSlug}" but no matching registry agent exists`
+      },
+      fallbackAgentId: existingDerivedFromAgentId(existing)
+    };
+  }
+
+  return { _tag: "resolved", agentId: existingAgent.id };
+};
+
+const resolvedDerivedFrom = (
+  resolution: SourceAgentResolution
+): ReadonlyArray<AgentId> | undefined => {
+  switch (resolution._tag) {
+    case "resolved":
+      return [resolution.agentId];
+    case "selfPublished":
+      return undefined;
+    case "warning":
+      return resolution.fallbackAgentId === undefined
+        ? undefined
+        : [resolution.fallbackAgentId];
+  }
+};
+
+const buildDatasetCandidate = (input: {
+  readonly datasetInfo: GridStatusDatasetInfo;
+  readonly datasetId: Dataset["id"];
+  readonly ctx: BuildContext;
+  readonly idx: CatalogIndex;
+  readonly existing: Dataset | null;
+  readonly distributionIds: ReadonlyArray<Distribution["id"]>;
+}): {
+  readonly dataset: Dataset;
+  readonly provenanceWarning: GridStatusProvenanceWarning | undefined;
+} => {
+  const source = input.datasetInfo.source ?? undefined;
+  const description = input.datasetInfo.description ?? undefined;
+  const resolution = resolveSourceAgent(
+    input.idx,
+    input.datasetInfo,
+    input.existing
+  );
+
+  return {
+    dataset: decodeDataset({
+      _tag: "Dataset" as const,
+      id: input.datasetId,
+      title: input.datasetInfo.name,
+      description: input.existing?.description ?? description,
+      wasDerivedFrom: resolvedDerivedFrom(resolution),
+      publisherAgentId: input.ctx.agent.id,
+      landingPage:
+        input.existing?.landingPage ??
+        gridstatusDatasetLandingPage(input.datasetInfo.id),
+      accessRights: input.existing?.accessRights ?? "public",
+      temporal: input.existing?.temporal ?? temporalRange(input.datasetInfo),
+      keywords:
+        input.existing?.keywords ??
+        [
+          input.datasetInfo.id,
+          ...(source === undefined ? [] : [source]),
+          ...(input.datasetInfo.table_type === undefined ||
+          input.datasetInfo.table_type === null
+            ? []
+            : [input.datasetInfo.table_type]),
+          ...(input.datasetInfo.data_frequency === undefined ||
+          input.datasetInfo.data_frequency === null
+            ? []
+            : [input.datasetInfo.data_frequency])
+        ],
+      themes: input.existing?.themes ?? ["grid operations"],
+      distributionIds: input.distributionIds,
+      dataServiceIds: [input.ctx.dataService.id],
+      inSeries: input.existing?.inSeries,
+      aliases: unionAliases(
+        input.existing?.aliases ?? [],
+        freshDatasetAliases(input.datasetInfo)
+      ),
+      createdAt: input.existing?.createdAt ?? input.ctx.nowIso,
+      updatedAt: input.ctx.nowIso
+    }),
+    provenanceWarning:
+      resolution._tag === "warning" ? resolution.warning : undefined
+  };
 };
 
 const buildApiDistributionCandidate = (
@@ -293,20 +399,25 @@ const buildCatalogRecord = (
     sourceRecordId: existing?.sourceRecordId ?? datasetInfo.id,
     harvestedFrom:
       existing?.harvestedFrom ?? `${baseUrl.replace(/\/+$/u, "")}/datasets`,
-    firstSeen:
-      existing?.firstSeen ??
-      datasetInfo.created_at_utc ??
-      ctx.nowIso,
+    firstSeen: existing?.firstSeen ?? datasetInfo.created_at_utc ?? ctx.nowIso,
     lastSeen:
-      existing?.lastSeen ??
-      datasetInfo.last_checked_time_utc ??
-      ctx.nowIso,
+      datasetInfo.last_checked_time_utc ?? existing?.lastSeen ?? ctx.nowIso,
     sourceModified:
-      existing?.sourceModified ??
       datasetInfo.latest_available_time_utc ??
+      existing?.sourceModified ??
       undefined,
     isAuthoritative: existing?.isAuthoritative ?? true,
     duplicateOf: existing?.duplicateOf
+  });
+
+const buildDataServiceCandidate = (
+  ctx: BuildContext,
+  servedDatasetIds: ReadonlyArray<Dataset["id"]>
+): DataService =>
+  decodeDataService({
+    ...ctx.dataService,
+    servesDatasetIds: servedDatasetIds,
+    updatedAt: ctx.nowIso
   });
 
 export const buildCandidateNodes = (
@@ -314,13 +425,14 @@ export const buildCandidateNodes = (
   idx: CatalogIndex,
   ctx: BuildContext,
   baseUrl: string
-): ReadonlyArray<IngestNode> => {
+): BuildCandidateNodesResult => {
   const datasetNodes: Array<Extract<IngestNode, { _tag: "dataset" }>> = [];
   const distributionNodes: Array<Extract<IngestNode, { _tag: "distribution" }>> =
     [];
   const catalogRecordNodes: Array<
     Extract<IngestNode, { _tag: "catalog-record" }>
   > = [];
+  const provenanceWarnings: Array<GridStatusProvenanceWarning> = [];
 
   for (const datasetInfo of datasets) {
     const existingDataset = existingDatasetForInfo(idx, datasetInfo);
@@ -351,14 +463,21 @@ export const buildCandidateNodes = (
       existingCsvDistribution,
       baseUrl
     );
-    const dataset = buildDatasetCandidate(
+    const { dataset, provenanceWarning } = buildDatasetCandidate({
       datasetInfo,
       datasetId,
       ctx,
       idx,
-      existingDataset,
-      [...preservedDistributionIds, apiDistribution.id, csvDistribution.id]
-    );
+      existing: existingDataset,
+      distributionIds: [
+        ...preservedDistributionIds,
+        apiDistribution.id,
+        csvDistribution.id
+      ]
+    });
+    if (provenanceWarning !== undefined) {
+      provenanceWarnings.push(provenanceWarning);
+    }
     const existingCatalogRecord =
       idx.catalogRecordsByCatalogAndPrimaryTopic.get(
         `${ctx.catalog.id}::${dataset.id}`
@@ -423,33 +542,32 @@ export const buildCandidateNodes = (
       ...datasetNodes.map((node) => node.data.id)
     ])
   ).sort();
-  const dataService = decodeDataService({
-    ...ctx.dataService,
-    servesDatasetIds: servedDatasetIds,
-    updatedAt: ctx.nowIso
-  });
+  const dataService = buildDataServiceCandidate(ctx, servedDatasetIds);
 
-  return [
-    {
-      _tag: "agent",
-      slug: ctx.agentSlug,
-      data: ctx.agent,
-      merged: ctx.agentMerged
-    },
-    {
-      _tag: "catalog",
-      slug: ctx.catalogSlug,
-      data: ctx.catalog,
-      merged: ctx.catalogMerged
-    },
-    ...datasetNodes,
-    ...distributionNodes,
-    ...catalogRecordNodes,
-    {
-      _tag: "data-service",
-      slug: ctx.dataServiceSlug,
-      data: dataService,
-      merged: ctx.dataServiceMerged
-    }
-  ];
+  return {
+    candidates: [
+      {
+        _tag: "agent",
+        slug: ctx.agentSlug,
+        data: ctx.agent,
+        merged: ctx.agentMerged
+      },
+      {
+        _tag: "catalog",
+        slug: ctx.catalogSlug,
+        data: ctx.catalog,
+        merged: ctx.catalogMerged
+      },
+      ...datasetNodes,
+      ...distributionNodes,
+      ...catalogRecordNodes,
+      {
+        _tag: "data-service",
+        slug: ctx.dataServiceSlug,
+        data: dataService,
+        merged: ctx.dataServiceMerged
+      }
+    ],
+    provenanceWarnings
+  };
 };

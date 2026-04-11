@@ -114,6 +114,7 @@ const emptyIndex = (): CatalogIndex => ({
   catalogRecordsByCatalogAndPrimaryTopic: new Map(),
   catalogRecordFileSlugById: new Map(),
   agentsById: new Map(),
+  agentFileSlugById: new Map(),
   agentsByName: new Map(),
   catalogsById: new Map(),
   dataServicesById: new Map(),

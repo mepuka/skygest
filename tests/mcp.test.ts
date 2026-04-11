@@ -1,3 +1,4 @@
+/** @effect-diagnostics preferSchemaOverJson:skip-file */
 import { Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { describe, expect, it } from "@effect/vitest";
