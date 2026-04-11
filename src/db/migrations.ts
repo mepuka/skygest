@@ -686,6 +686,201 @@ const migration21: D1Migration = {
   ]
 };
 
+const migration22: D1Migration = {
+  id: 22,
+  name: "data_layer_registry",
+  statements: [
+    `CREATE TABLE IF NOT EXISTS variables (
+      id TEXT PRIMARY KEY,
+      label TEXT NOT NULL,
+      definition TEXT,
+      measured_property TEXT,
+      domain_object TEXT,
+      technology_or_fuel TEXT,
+      statistic_type TEXT,
+      aggregation TEXT,
+      basis_json TEXT,
+      unit_family TEXT,
+      aliases_json TEXT NOT NULL,
+      facets_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      updated_by TEXT NOT NULL,
+      deleted_at TEXT
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_variables_label
+      ON variables(label)`,
+    `CREATE TABLE IF NOT EXISTS series (
+      id TEXT PRIMARY KEY,
+      label TEXT NOT NULL,
+      variable_id TEXT NOT NULL,
+      fixed_dims_json TEXT NOT NULL,
+      aliases_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      updated_by TEXT NOT NULL,
+      deleted_at TEXT
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_series_variable_id
+      ON series(variable_id)`,
+    `CREATE TABLE IF NOT EXISTS agents (
+      id TEXT PRIMARY KEY,
+      kind TEXT NOT NULL,
+      name TEXT NOT NULL,
+      alternate_names_json TEXT,
+      homepage TEXT,
+      homepage_domain TEXT,
+      parent_agent_id TEXT,
+      aliases_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      updated_by TEXT NOT NULL,
+      deleted_at TEXT
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_agents_homepage_domain
+      ON agents(homepage_domain)`,
+    `CREATE INDEX IF NOT EXISTS idx_agents_parent_agent_id
+      ON agents(parent_agent_id)`,
+    `CREATE TABLE IF NOT EXISTS catalogs (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT,
+      publisher_agent_id TEXT NOT NULL,
+      homepage TEXT,
+      aliases_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      updated_by TEXT NOT NULL,
+      deleted_at TEXT
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_catalogs_publisher_agent_id
+      ON catalogs(publisher_agent_id)`,
+    `CREATE TABLE IF NOT EXISTS catalog_records (
+      id TEXT PRIMARY KEY,
+      catalog_id TEXT NOT NULL,
+      primary_topic_type TEXT NOT NULL,
+      primary_topic_id TEXT NOT NULL,
+      source_record_id TEXT,
+      harvested_from TEXT,
+      first_seen TEXT,
+      last_seen TEXT,
+      source_modified TEXT,
+      is_authoritative INTEGER,
+      duplicate_of TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      updated_by TEXT NOT NULL,
+      deleted_at TEXT
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_catalog_records_catalog_id
+      ON catalog_records(catalog_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_catalog_records_primary_topic_id
+      ON catalog_records(primary_topic_id)`,
+    `CREATE TABLE IF NOT EXISTS datasets (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT,
+      creator_agent_id TEXT,
+      was_derived_from_json TEXT,
+      publisher_agent_id TEXT,
+      landing_page TEXT,
+      access_rights TEXT,
+      license TEXT,
+      temporal_coverage_json TEXT,
+      keywords_json TEXT,
+      themes_json TEXT,
+      distribution_ids_json TEXT,
+      data_service_ids_json TEXT,
+      in_series TEXT,
+      aliases_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      updated_by TEXT NOT NULL,
+      deleted_at TEXT
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_datasets_publisher_agent_id
+      ON datasets(publisher_agent_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_datasets_in_series
+      ON datasets(in_series)`,
+    `CREATE TABLE IF NOT EXISTS distributions (
+      id TEXT PRIMARY KEY,
+      dataset_id TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      title TEXT,
+      description TEXT,
+      access_url TEXT,
+      access_url_hostname TEXT,
+      download_url TEXT,
+      download_url_hostname TEXT,
+      media_type TEXT,
+      format TEXT,
+      byte_size REAL,
+      checksum TEXT,
+      access_rights TEXT,
+      license TEXT,
+      access_service_id TEXT,
+      aliases_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      updated_by TEXT NOT NULL,
+      deleted_at TEXT
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_distributions_dataset_id
+      ON distributions(dataset_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_distributions_access_service_id
+      ON distributions(access_service_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_distributions_access_url_hostname
+      ON distributions(access_url_hostname)`,
+    `CREATE INDEX IF NOT EXISTS idx_distributions_download_url_hostname
+      ON distributions(download_url_hostname)`,
+    `CREATE TABLE IF NOT EXISTS data_services (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT,
+      publisher_agent_id TEXT,
+      endpoint_urls_json TEXT NOT NULL,
+      endpoint_description TEXT,
+      conforms_to TEXT,
+      serves_dataset_ids_json TEXT NOT NULL,
+      access_rights TEXT,
+      license TEXT,
+      aliases_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      updated_by TEXT NOT NULL,
+      deleted_at TEXT
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_data_services_publisher_agent_id
+      ON data_services(publisher_agent_id)`,
+    `CREATE TABLE IF NOT EXISTS dataset_series (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT,
+      publisher_agent_id TEXT,
+      cadence TEXT NOT NULL,
+      aliases_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      updated_by TEXT NOT NULL,
+      deleted_at TEXT
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_dataset_series_publisher_agent_id
+      ON dataset_series(publisher_agent_id)`,
+    `CREATE TABLE IF NOT EXISTS data_layer_audit (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      entity_id TEXT NOT NULL,
+      entity_kind TEXT NOT NULL,
+      operation TEXT NOT NULL CHECK (operation IN ('insert', 'update', 'delete')),
+      operator TEXT NOT NULL,
+      before_row TEXT,
+      after_row TEXT,
+      timestamp TEXT NOT NULL
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_data_layer_audit_entity
+      ON data_layer_audit(entity_kind, entity_id, timestamp DESC)`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -707,5 +902,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration18,
   migration19,
   migration20,
-  migration21
+  migration21,
+  migration22
 ];

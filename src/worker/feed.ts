@@ -1,6 +1,7 @@
 import { ConfigProvider, Effect } from "effect";
 import { handleAdminRequest } from "../admin/Router";
 import { handleApiRequest } from "../api/Router";
+import { handleDataLayerRequest } from "../data-layer/Router";
 import { handleMcpRequest } from "../mcp/Router";
 import { AppConfig } from "../platform/Config";
 import type { AgentWorkerEnvBindings } from "../platform/Env";
@@ -79,6 +80,23 @@ export const fetch = async (request: Request, env: AgentWorkerEnvBindings) => {
       return toAuthErrorResponse(error);
     }
     return env.INGEST_SERVICE.fetch(request);
+  }
+
+  if (url.pathname.startsWith("/admin/data-layer/")) {
+    let identity;
+
+    try {
+      identity = await authorizeOperator(
+        request,
+        env,
+        requiredOperatorScopes(request)
+      );
+    } catch (error) {
+      await logDeniedOperatorRequest(request, error);
+      return toAuthErrorResponse(error);
+    }
+
+    return handleDataLayerRequest(request, env, identity);
   }
 
   if (url.pathname.startsWith("/admin")) {

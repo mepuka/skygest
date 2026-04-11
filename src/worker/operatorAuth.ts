@@ -37,6 +37,15 @@ const isEnrichmentRunRetryPath = (pathname: string) =>
 const isEnrichmentRunPath = (pathname: string) =>
   /^\/admin\/enrichment\/runs\/[^/]+$/u.test(pathname);
 
+const isDataLayerKindPath = (pathname: string) =>
+  /^\/admin\/data-layer\/(agents|catalogs|catalog-records|datasets|distributions|data-services|dataset-series|variables|series)$/u.test(pathname);
+
+const isDataLayerEntityPath = (pathname: string) =>
+  /^\/admin\/data-layer\/(agents|catalogs|catalog-records|datasets|distributions|data-services|dataset-series|variables|series)\/[^/]+$/u.test(pathname);
+
+const isDataLayerAuditPath = (pathname: string) =>
+  /^\/admin\/data-layer\/audit\/[^/]+$/u.test(pathname);
+
 const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
   const { pathname } = new URL(request.url);
 
@@ -107,6 +116,48 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
     return {
       action: "ops_stats",
       scopes: ["ops:read"]
+    };
+  }
+
+  if (request.method === "GET" && isDataLayerKindPath(pathname)) {
+    return {
+      action: "list_data_layer_entities",
+      scopes: ["ops:read"]
+    };
+  }
+
+  if (request.method === "GET" && isDataLayerEntityPath(pathname)) {
+    return {
+      action: "get_data_layer_entity",
+      scopes: ["ops:read"]
+    };
+  }
+
+  if (request.method === "POST" && isDataLayerAuditPath(pathname)) {
+    return {
+      action: "list_data_layer_audit",
+      scopes: ["ops:read"]
+    };
+  }
+
+  if (request.method === "POST" && isDataLayerKindPath(pathname)) {
+    return {
+      action: "create_data_layer_entity",
+      scopes: ["ops:refresh"]
+    };
+  }
+
+  if (request.method === "PATCH" && isDataLayerEntityPath(pathname)) {
+    return {
+      action: "update_data_layer_entity",
+      scopes: ["ops:refresh"]
+    };
+  }
+
+  if (request.method === "DELETE" && isDataLayerEntityPath(pathname)) {
+    return {
+      action: "delete_data_layer_entity",
+      scopes: ["ops:refresh"]
     };
   }
 

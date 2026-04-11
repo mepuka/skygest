@@ -28,3 +28,26 @@ export const decodeWithDbError = <S extends Schema.Decoder<unknown>>(
       })
     );
 };
+
+export const mapSchemaErrorToDbError = (
+  error: unknown,
+  message: string
+) =>
+  Schema.isSchemaError(error)
+    ? new DbError({
+        message: `${message}: ${toDecodeMessage(error)}`
+      })
+    : error;
+
+export const withSchemaDbError = <A, E, R>(
+  effect: Effect.Effect<A, E, R>,
+  message: string
+): Effect.Effect<A, Exclude<E, Schema.SchemaError> | DbError, R> =>
+  effect.pipe(
+    Effect.mapError((error) =>
+      mapSchemaErrorToDbError(
+        error,
+        message
+      ) as Exclude<E, Schema.SchemaError> | DbError
+    )
+  );

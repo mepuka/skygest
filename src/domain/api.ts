@@ -61,6 +61,7 @@ import {
   CuratePostInput,
   CuratePostOutput
 } from "./curation";
+import { DataLayerRegistryEntity } from "./data-layer";
 import { AtUri, Did, PostUri } from "./types";
 
 const withStatus = <S extends Schema.Top>(
@@ -294,6 +295,32 @@ const OptionalNonNegativeIntFromString = Schema.optionalKey(
 );
 const OptionalBooleanFromString = Schema.optionalKey(BooleanFromString);
 const OptionalString = Schema.optionalKey(Schema.String);
+export const DataLayerKind = Schema.Literals([
+  "agents",
+  "catalogs",
+  "catalog-records",
+  "datasets",
+  "distributions",
+  "data-services",
+  "dataset-series",
+  "variables",
+  "series"
+]);
+export type DataLayerKind = Schema.Schema.Type<typeof DataLayerKind>;
+
+export const DataLayerEntityTag = Schema.Literals([
+  "Agent",
+  "Catalog",
+  "CatalogRecord",
+  "Dataset",
+  "Distribution",
+  "DataService",
+  "DatasetSeries",
+  "Variable",
+  "Series"
+]);
+export type DataLayerEntityTag = Schema.Schema.Type<typeof DataLayerEntityTag>;
+
 const DecodedDid = StringFromUriComponent.pipe(Schema.decodeTo(Did));
 const DecodedAtUri = StringFromUriComponent.pipe(Schema.decodeTo(AtUri));
 const DecodedPostUri = StringFromUriComponent.pipe(Schema.decodeTo(PostUri));
@@ -302,6 +329,9 @@ const DecodedSlug = StringFromUriComponent.pipe(
 );
 const DecodedId = StringFromUriComponent.pipe(
   Schema.decodeTo(Schema.String.pipe(Schema.check(Schema.isMinLength(1))))
+);
+const DecodedDataLayerKind = StringFromUriComponent.pipe(
+  Schema.decodeTo(DataLayerKind)
 );
 
 
@@ -749,6 +779,63 @@ export const ImportPostsOutput = Schema.Struct({
 });
 export type ImportPostsOutput = Schema.Schema.Type<typeof ImportPostsOutput>;
 
+export const DataLayerKindPathParams = Schema.Struct({
+  kind: DecodedDataLayerKind
+});
+export type DataLayerKindPathParams = Schema.Schema.Type<
+  typeof DataLayerKindPathParams
+>;
+
+export const DataLayerEntityPathParams = Schema.Struct({
+  kind: DecodedDataLayerKind,
+  id: DecodedId
+});
+export type DataLayerEntityPathParams = Schema.Schema.Type<
+  typeof DataLayerEntityPathParams
+>;
+
+export const DataLayerAuditPathParams = Schema.Struct({
+  id: DecodedId
+});
+export type DataLayerAuditPathParams = Schema.Schema.Type<
+  typeof DataLayerAuditPathParams
+>;
+
+export const ListDataLayerUrlParams = Schema.Struct({
+  limit: OptionalNonNegativeIntFromString,
+  offset: OptionalNonNegativeIntFromString
+});
+export type ListDataLayerUrlParams = Schema.Schema.Type<
+  typeof ListDataLayerUrlParams
+>;
+
+export const DataLayerEntityPageOutput = Schema.Struct({
+  items: Schema.Array(DataLayerRegistryEntity),
+  page: OffsetPage
+});
+export type DataLayerEntityPageOutput = Schema.Schema.Type<
+  typeof DataLayerEntityPageOutput
+>;
+
+export const DataLayerAuditEntry = Schema.Struct({
+  id: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  entityId: Schema.String,
+  entityKind: DataLayerEntityTag,
+  operation: Schema.Literals(["insert", "update", "delete"]),
+  operator: Schema.String,
+  beforeRow: Schema.NullOr(DataLayerRegistryEntity),
+  afterRow: Schema.NullOr(DataLayerRegistryEntity),
+  timestamp: Schema.String
+});
+export type DataLayerAuditEntry = Schema.Schema.Type<typeof DataLayerAuditEntry>;
+
+export const DataLayerAuditOutput = Schema.Struct({
+  items: Schema.Array(DataLayerAuditEntry)
+});
+export type DataLayerAuditOutput = Schema.Schema.Type<
+  typeof DataLayerAuditOutput
+>;
+
 export const AdminRequestSchemas = {
   addExpert: AddExpertInput,
   listExperts: ListExpertsUrlParams,
@@ -759,7 +846,12 @@ export const AdminRequestSchemas = {
   retractEditorialPick: RemoveEditorialPickInput,
   listEditorialPicks: ListEditorialPicksUrlParams,
   editorialPickBundlePath: PostUriEnrichmentsPath,
-  importPosts: ImportPostsInput
+  importPosts: ImportPostsInput,
+  dataLayerEntity: DataLayerRegistryEntity,
+  dataLayerList: ListDataLayerUrlParams,
+  dataLayerKindPath: DataLayerKindPathParams,
+  dataLayerEntityPath: DataLayerEntityPathParams,
+  dataLayerAuditPath: DataLayerAuditPathParams
 } as const;
 
 export const AdminResponseSchemas = {
@@ -777,7 +869,11 @@ export const AdminResponseSchemas = {
   listEditorialPicks: EditorialPicksOutput,
   editorialPickBundle: EditorialPickBundle,
   importPosts: ImportPostsOutput,
-  stats: StagingStats
+  stats: StagingStats,
+  dataLayerEntity: DataLayerRegistryEntity,
+  dataLayerEntitiesPage: DataLayerEntityPageOutput,
+  dataLayerDelete: Schema.Struct({ ok: Schema.Literal(true) }),
+  dataLayerAudit: DataLayerAuditOutput
 } as const;
 
 export const IngestRequestSchemas = {
