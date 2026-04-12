@@ -4,8 +4,10 @@ import { Result, Schema } from "effect";
 import {
   FACET_KEYS,
   PARTIAL_VARIABLE_GENERATOR_VALUES,
+  PARTIAL_VARIABLE_GENERATOR_KEYS,
   PartialVariableShape,
   joinPartials,
+  matched,
   missingRequired,
   mismatched,
   resolvable,
@@ -80,6 +82,10 @@ const joinRight = (
 };
 
 describe("partialVariableAlgebra property laws", () => {
+  it("keeps generator coverage aligned with the locked facet set", () => {
+    expect(PARTIAL_VARIABLE_GENERATOR_KEYS).toEqual([...FACET_KEYS]);
+  });
+
   it("join is commutative", () => {
     fc.assert(
       fc.property(
@@ -157,6 +163,35 @@ describe("partialVariableAlgebra property laws", () => {
     }
   });
 
+  it("conflict failures remain order-invariant after a successful first join", () => {
+    const nonConflictingFacetFor = (facet: (typeof FACET_KEYS)[number]) =>
+      FACET_KEYS.find((candidate) => candidate !== facet) ?? "measuredProperty";
+
+    for (const facet of FACET_KEYS) {
+      const [leftValue, rightValue] = PARTIAL_VARIABLE_GENERATOR_VALUES[facet];
+      const supportingFacet = nonConflictingFacetFor(facet);
+      const supportingValue =
+        PARTIAL_VARIABLE_GENERATOR_VALUES[supportingFacet][0];
+
+      const first = decodePartial({
+        [facet]: leftValue,
+        [supportingFacet]: supportingValue
+      });
+      const second = decodePartial({
+        [supportingFacet]: supportingValue
+      });
+      const third = decodePartial({
+        [facet]: rightValue
+      });
+
+      const leftAssociative = joinLeft(first, second, third);
+      const rightAssociative = joinRight(first, second, third);
+
+      expect(Result.isFailure(leftAssociative)).toBe(true);
+      expect(leftAssociative).toEqual(rightAssociative);
+    }
+  });
+
   it("subsumption is reflexive and transitive", () => {
     fc.assert(
       fc.property(
@@ -222,6 +257,23 @@ describe("partialVariableAlgebra property laws", () => {
         (general, specific) => {
           if (subsumes(general, specific)) {
             expect(mismatched(general, specific)).toHaveLength(0);
+          }
+        }
+      )
+    );
+  });
+
+  it("matched facets fully covering the general partial implies subsumption", () => {
+    fc.assert(
+      fc.property(
+        partialVariableArbitrary,
+        partialVariableArbitrary,
+        (general, specific) => {
+          if (
+            mismatched(general, specific).length === 0 &&
+            matched(general, specific).length === specificity(general)
+          ) {
+            expect(subsumes(general, specific)).toBe(true);
           }
         }
       )

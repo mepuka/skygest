@@ -198,9 +198,9 @@ No. The slice should model the structural core the resolver actually needs: data
 
 No. The checked-in data layer is broader than the binding subset. The audit should preserve broad coverage while carving out a smaller kernel-ready slice. `[R6]`
 
-### Issue 5: Should the dormant SHACL generator block this slice?
+### Issue 5: Should the SHACL generator become part of the runtime contract?
 
-No. The current slice should use one honest hand-maintained runtime profile module now, then wire the dormant SHACL generator as a later hardening step once the ontology artifacts are part of the app-side workflow. `[O6]`
+Yes. Once the manifest handoff exists, the generated runtime profile should become the TypeScript source of truth and the hand-maintained duplicate should be removed. `[O6]`
 
 ### Issue 6: Is centralizing the profile enough by itself?
 
@@ -220,9 +220,9 @@ This profile should define:
 
 ### Recommended artifact split
 
-**Shared profile artifact**
+**Generated profile artifact**
 
-- `src/domain/profile/energyVariableProfile.ts`
+- `src/domain/generated/energyVariableProfile.ts`
 
 This file should centralize the runtime facet contract for now. It should export:
 
@@ -249,9 +249,9 @@ This file should define:
 
 The point of the split is simple:
 
-- one explicit profile module for the shared semantic contract
+- one explicit generated profile module for the shared semantic contract
 - hand-authored runtime rules for product/runtime policy
-- future generator wiring can replace the profile module inputs later without changing the rest of the app contract
+- future ontology changes flow through the manifest and generator without changing the rest of the app contract
 
 ## Registry Audit Contract
 
@@ -391,6 +391,7 @@ This slice is done when all of the following are true:
 - the runtime no longer hand-maintains closed enum members or facet keys in multiple places
 - the active runtime variable profile is seven-dimensional and uses `policyInstrument`
 - `Dataset -> variableIds` exists as the canonical stored membership edge
+- pre-existing datasets without `variableIds` stay in the broad registry but remain outside the kernel-ready subset until a backfill or rewrite populates them
 - registry load produces:
   - a broad registry
   - a kernel-ready subset

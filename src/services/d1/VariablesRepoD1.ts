@@ -11,10 +11,17 @@ import {
 } from "../../domain/data-layer";
 import { VariablesRepo } from "../VariablesRepo";
 import { decodeWithDbError, withSchemaDbError } from "./schemaDecode";
-import {
-  insertDataLayerAudit,
-  matchesAlias
-} from "./dataLayerHelpers";
+import { insertDataLayerAudit, matchesAlias } from "./dataLayerHelpers";
+
+const VariableFacetsSchema = Schema.Struct({
+  measuredProperty: Schema.NullOr(Schema.String),
+  domainObject: Schema.NullOr(Schema.String),
+  technologyOrFuel: Schema.NullOr(Schema.String),
+  statisticType: Schema.NullOr(StatisticType),
+  aggregation: Schema.NullOr(Aggregation),
+  unitFamily: Schema.NullOr(UnitFamily),
+  policyInstrument: Schema.NullOr(Schema.String)
+});
 
 const VariableRowSchema = Schema.Struct({
   id: Schema.String,
@@ -27,21 +34,12 @@ const VariableRowSchema = Schema.Struct({
   aggregation: Schema.NullOr(Aggregation),
   unit_family: Schema.NullOr(UnitFamily),
   policy_instrument: Schema.NullOr(Schema.String),
+  facets_json: Schema.fromJsonString(VariableFacetsSchema),
   aliases_json: Schema.fromJsonString(Aliases),
   created_at: Schema.String,
   updated_at: Schema.String
 });
 type VariableRow = Schema.Schema.Type<typeof VariableRowSchema>;
-
-const VariableFacetsSchema = Schema.Struct({
-  measuredProperty: Schema.NullOr(Schema.String),
-  domainObject: Schema.NullOr(Schema.String),
-  technologyOrFuel: Schema.NullOr(Schema.String),
-  statisticType: Schema.NullOr(StatisticType),
-  aggregation: Schema.NullOr(Aggregation),
-  unitFamily: Schema.NullOr(UnitFamily),
-  policyInstrument: Schema.NullOr(Schema.String)
-});
 
 const VariableUpsertRowSchema = Schema.Struct({
   id: Schema.String,
@@ -54,8 +52,8 @@ const VariableUpsertRowSchema = Schema.Struct({
   aggregation: Schema.NullOr(Aggregation),
   unit_family: Schema.NullOr(UnitFamily),
   policy_instrument: Schema.NullOr(Schema.String),
-  aliases_json: Schema.fromJsonString(Aliases),
   facets_json: Schema.fromJsonString(VariableFacetsSchema),
+  aliases_json: Schema.fromJsonString(Aliases),
   created_at: Schema.String,
   updated_at: Schema.String,
   updated_by: Schema.String,
@@ -78,19 +76,27 @@ const decodeVariableRow = (row: VariableRow) =>
       id: row.id,
       label: row.label,
       ...(row.definition === null ? {} : { definition: row.definition }),
-      ...(row.measured_property === null
+      ...(row.facets_json.measuredProperty === null
         ? {}
-        : { measuredProperty: row.measured_property }),
-      ...(row.domain_object === null ? {} : { domainObject: row.domain_object }),
-      ...(row.technology_or_fuel === null
+        : { measuredProperty: row.facets_json.measuredProperty }),
+      ...(row.facets_json.domainObject === null
         ? {}
-        : { technologyOrFuel: row.technology_or_fuel }),
-      ...(row.statistic_type === null ? {} : { statisticType: row.statistic_type }),
-      ...(row.aggregation === null ? {} : { aggregation: row.aggregation }),
-      ...(row.unit_family === null ? {} : { unitFamily: row.unit_family }),
-      ...(row.policy_instrument === null
+        : { domainObject: row.facets_json.domainObject }),
+      ...(row.facets_json.technologyOrFuel === null
         ? {}
-        : { policyInstrument: row.policy_instrument }),
+        : { technologyOrFuel: row.facets_json.technologyOrFuel }),
+      ...(row.facets_json.statisticType === null
+        ? {}
+        : { statisticType: row.facets_json.statisticType }),
+      ...(row.facets_json.aggregation === null
+        ? {}
+        : { aggregation: row.facets_json.aggregation }),
+      ...(row.facets_json.unitFamily === null
+        ? {}
+        : { unitFamily: row.facets_json.unitFamily }),
+      ...(row.facets_json.policyInstrument === null
+        ? {}
+        : { policyInstrument: row.facets_json.policyInstrument }),
       aliases: row.aliases_json,
       createdAt: row.created_at,
       updatedAt: row.updated_at
@@ -98,6 +104,9 @@ const decodeVariableRow = (row: VariableRow) =>
     `Failed to normalize variable row for ${row.id}`
   );
 
+// `facets_json` is the canonical read model. The mirrored scalar columns stay
+// in sync on writes so SQL-side filtering and manual inspection can still use
+// ordinary columns without parsing JSON.
 const toVariableUpsertRow = (
   variable: Variable,
   updatedBy: string
@@ -112,7 +121,6 @@ const toVariableUpsertRow = (
   aggregation: variable.aggregation ?? null,
   unit_family: variable.unitFamily ?? null,
   policy_instrument: variable.policyInstrument ?? null,
-  aliases_json: variable.aliases,
   facets_json: {
     measuredProperty: variable.measuredProperty ?? null,
     domainObject: variable.domainObject ?? null,
@@ -122,6 +130,7 @@ const toVariableUpsertRow = (
     unitFamily: variable.unitFamily ?? null,
     policyInstrument: variable.policyInstrument ?? null
   },
+  aliases_json: variable.aliases,
   created_at: variable.createdAt,
   updated_at: variable.updatedAt,
   updated_by: updatedBy,
@@ -148,6 +157,7 @@ export const VariablesRepoD1 = {
             aggregation,
             unit_family,
             policy_instrument,
+            facets_json,
             aliases_json,
             created_at,
             updated_at
@@ -173,6 +183,7 @@ export const VariablesRepoD1 = {
             aggregation,
             unit_family,
             policy_instrument,
+            facets_json,
             aliases_json,
             created_at,
             updated_at

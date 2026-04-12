@@ -44,6 +44,19 @@ const decodeDatasetSeries = Schema.decodeUnknownSync(DatasetSeriesSchema);
 const decodeDistribution = Schema.decodeUnknownSync(DistributionSchema);
 const decodeVariable = Schema.decodeUnknownSync(VariableSchema);
 const decodeSeries = Schema.decodeUnknownSync(SeriesSchema);
+const decodePersistedVariableFacets = Schema.decodeUnknownSync(
+  Schema.fromJsonString(
+    Schema.Struct({
+      measuredProperty: Schema.NullOr(Schema.String),
+      domainObject: Schema.NullOr(Schema.String),
+      technologyOrFuel: Schema.NullOr(Schema.String),
+      statisticType: Schema.NullOr(Schema.String),
+      aggregation: Schema.NullOr(Schema.String),
+      unitFamily: Schema.NullOr(Schema.String),
+      policyInstrument: Schema.NullOr(Schema.String)
+    })
+  )
+);
 
 const createdAt = "2026-04-11T12:00:00.000Z";
 const updatedAt = "2026-04-11T12:30:00.000Z";
@@ -338,7 +351,7 @@ describe("data layer registry repos", () => {
     }).pipe(Effect.provide(makeLayer()))
   );
 
-  it.effect("round-trips variable alias lookups through schema-backed JSON columns", () =>
+  it.effect("round-trips variables through the JSON source of truth while mirroring scalar facet columns", () =>
     Effect.gen(function* () {
       yield* runMigrations;
 
@@ -350,9 +363,51 @@ describe("data layer registry repos", () => {
         "eia-series",
         "ELEC.PRICE.US-ALL.M"
       );
+      const sql = yield* SqlClient.SqlClient;
+      const [persisted] = yield* sql<{
+        measuredProperty: string | null;
+        domainObject: string | null;
+        technologyOrFuel: string | null;
+        statisticType: string | null;
+        aggregation: string | null;
+        unitFamily: string | null;
+        policyInstrument: string | null;
+        facetsJson: string;
+      }>`
+        SELECT
+          measured_property as measuredProperty,
+          domain_object as domainObject,
+          technology_or_fuel as technologyOrFuel,
+          statistic_type as statisticType,
+          aggregation as aggregation,
+          unit_family as unitFamily,
+          policy_instrument as policyInstrument,
+          facets_json as facetsJson
+        FROM variables
+        WHERE id = ${variable.id}
+      `;
 
       expect(stored).toEqual(variable);
       expect(byAlias).toEqual(variable);
+      expect(persisted).toEqual({
+        measuredProperty: "price",
+        domainObject: "electricity",
+        technologyOrFuel: null,
+        statisticType: "price",
+        aggregation: "average",
+        unitFamily: "currency_per_energy",
+        policyInstrument: "capacity market",
+        facetsJson: persisted?.facetsJson ?? ""
+      });
+      expect(decodePersistedVariableFacets(persisted?.facetsJson ?? "")).toEqual({
+        measuredProperty: "price",
+        domainObject: "electricity",
+        technologyOrFuel: null,
+        statisticType: "price",
+        aggregation: "average",
+        unitFamily: "currency_per_energy",
+        policyInstrument: "capacity market"
+      });
     }).pipe(Effect.provide(makeLayer()))
   );
 

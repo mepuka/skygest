@@ -1,12 +1,9 @@
 import { Schema } from "effect";
+import { ZeroToOneScore } from "./confidence";
 import { FacetKey } from "./partialVariableAlgebra";
 import { Stage2PartialVariableShape } from "./stage2Core";
 import { Stage1Rank } from "./stage1Shared";
 import { SurfaceFormEntryAny } from "./surfaceForm";
-
-const ZeroToOneScore = Schema.Number.pipe(
-  Schema.check(Schema.isBetween({ minimum: 0, maximum: 1 }))
-);
 
 export const FacetDecompositionEvidence = Schema.TaggedStruct(
   "FacetDecompositionEvidence",

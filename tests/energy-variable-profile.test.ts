@@ -1,4 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import aggregationJson from "../references/vocabulary/aggregation.json";
 import domainObjectJson from "../references/vocabulary/domain-object.json";
 import measuredPropertyJson from "../references/vocabulary/measured-property.json";
@@ -18,8 +20,7 @@ import {
   TechnologyOrFuelCanonicals,
   UnitFamilyCanonicals,
   UnitFamilyMembers
-} from "../src/domain/profile/energyVariableProfile";
-import * as GeneratedProfile from "../src/domain/generated/energyVariableProfile";
+} from "../src/domain/generated/energyVariableProfile";
 
 type VocabularyEntry = {
   readonly canonical: string;
@@ -29,6 +30,25 @@ const uniqueCanonicals = (entries: ReadonlyArray<VocabularyEntry>) =>
   [...new Set(entries.map((entry) => entry.canonical))].sort();
 
 const sorted = (values: ReadonlyArray<string>) => [...values].sort();
+
+const maybeLoadOntologyCanonicals = (
+  filename: string
+): ReadonlyArray<string> | null => {
+  const ontologyVocabularyRoot = path.resolve(
+    process.cwd(),
+    "../ontology_skill/ontologies/skygest-energy-vocab/data/vocabulary"
+  );
+
+  if (!existsSync(ontologyVocabularyRoot)) {
+    return null;
+  }
+
+  return uniqueCanonicals(
+    JSON.parse(
+      readFileSync(path.join(ontologyVocabularyRoot, filename), "utf8")
+    ) as ReadonlyArray<VocabularyEntry>
+  );
+};
 
 describe("energy variable profile", () => {
   it("locks the active semantic facets and required pair", () => {
@@ -77,29 +97,46 @@ describe("energy variable profile", () => {
     );
   });
 
-  it("matches the generated shadow profile", () => {
-    expect(GeneratedProfile.FACET_KEYS).toEqual(FACET_KEYS);
-    expect(GeneratedProfile.REQUIRED_FACET_KEYS).toEqual(REQUIRED_FACET_KEYS);
-    expect(GeneratedProfile.StatisticTypeMembers).toEqual(StatisticTypeMembers);
-    expect(GeneratedProfile.AggregationMembers).toEqual(AggregationMembers);
-    expect(GeneratedProfile.UnitFamilyMembers).toEqual(UnitFamilyMembers);
-    expect(GeneratedProfile.MeasuredPropertyCanonicals).toEqual(
-      MeasuredPropertyCanonicals
+  it("keeps canonical arrays sorted for stable generation output", () => {
+    expect(MeasuredPropertyCanonicals).toEqual(sorted(MeasuredPropertyCanonicals));
+    expect(DomainObjectCanonicals).toEqual(sorted(DomainObjectCanonicals));
+    expect(TechnologyOrFuelCanonicals).toEqual(
+      sorted(TechnologyOrFuelCanonicals)
     );
-    expect(GeneratedProfile.DomainObjectCanonicals).toEqual(
+    expect(PolicyInstrumentCanonicals).toEqual(
+      sorted(PolicyInstrumentCanonicals)
+    );
+    expect(AggregationCanonicals).toEqual(sorted(AggregationCanonicals));
+    expect(UnitFamilyCanonicals).toEqual(sorted(UnitFamilyCanonicals));
+  });
+
+  it("matches the sibling ontology vocabulary canonicals when that repo is present", () => {
+    const ontologyMeasuredProperty = maybeLoadOntologyCanonicals(
+      "measured-property.json"
+    );
+    if (ontologyMeasuredProperty === null) {
+      expect(true).toBe(true);
+      return;
+    }
+
+    expect(ontologyMeasuredProperty).toEqual(MeasuredPropertyCanonicals);
+    expect(maybeLoadOntologyCanonicals("domain-object.json")).toEqual(
       DomainObjectCanonicals
     );
-    expect(GeneratedProfile.TechnologyOrFuelCanonicals).toEqual(
+    expect(maybeLoadOntologyCanonicals("technology-or-fuel.json")).toEqual(
       TechnologyOrFuelCanonicals
     );
-    expect(GeneratedProfile.PolicyInstrumentCanonicals).toEqual(
-      PolicyInstrumentCanonicals
+    expect(maybeLoadOntologyCanonicals("statistic-type.json")).toEqual(
+      sorted(StatisticTypeMembers)
     );
-    expect(GeneratedProfile.AggregationCanonicals).toEqual(
+    expect(maybeLoadOntologyCanonicals("aggregation.json")).toEqual(
       AggregationCanonicals
     );
-    expect(GeneratedProfile.UnitFamilyCanonicals).toEqual(
+    expect(maybeLoadOntologyCanonicals("unit-family.json")).toEqual(
       UnitFamilyCanonicals
+    );
+    expect(maybeLoadOntologyCanonicals("policy-instrument.json")).toEqual(
+      PolicyInstrumentCanonicals
     );
   });
 });

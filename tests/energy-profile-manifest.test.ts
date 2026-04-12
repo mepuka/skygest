@@ -8,7 +8,7 @@ import {
   REQUIRED_FACET_KEYS,
   StatisticTypeMembers,
   UnitFamilyMembers
-} from "../src/domain/profile/energyVariableProfile";
+} from "../src/domain/generated/energyVariableProfile";
 
 const decodeManifest = Schema.decodeUnknownResult(EnergyProfileManifest);
 

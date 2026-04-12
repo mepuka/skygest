@@ -210,6 +210,86 @@ describe("phase-one migrations", () => {
     }).pipe(Effect.provide(makeSqliteLayer()))
   );
 
+  it.effect("adds runtime profile columns idempotently when a partial environment already has them", () =>
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient;
+
+      yield* sql`
+        CREATE TABLE IF NOT EXISTS _migrations (
+          id INTEGER PRIMARY KEY,
+          name TEXT NOT NULL,
+          applied_at INTEGER NOT NULL
+        )
+      `.pipe(Effect.asVoid);
+
+      for (let id = 1; id <= 22; id++) {
+        yield* sql`
+          INSERT INTO _migrations (id, name, applied_at)
+          VALUES (${id}, ${`migration-${String(id)}`}, ${1_710_000_100_000 + id})
+        `.pipe(Effect.asVoid);
+      }
+
+      yield* sql`
+        CREATE TABLE variables (
+          id TEXT PRIMARY KEY,
+          policy_instrument TEXT
+        )
+      `.pipe(Effect.asVoid);
+      yield* sql`
+        CREATE TABLE datasets (
+          id TEXT PRIMARY KEY,
+          variable_ids_json TEXT
+        )
+      `.pipe(Effect.asVoid);
+
+      yield* runMigrations;
+      yield* runMigrations;
+
+      const variableColumns = yield* sql<{ name: string; isNotNull: number }>`
+        SELECT name as name, [notnull] as isNotNull
+        FROM pragma_table_info('variables')
+        WHERE name = 'policy_instrument'
+      `;
+      const datasetColumns = yield* sql<{ name: string; isNotNull: number }>`
+        SELECT name as name, [notnull] as isNotNull
+        FROM pragma_table_info('datasets')
+        WHERE name = 'variable_ids_json'
+      `;
+
+      expect(variableColumns).toEqual([
+        { name: "policy_instrument", isNotNull: 0 }
+      ]);
+      expect(datasetColumns).toEqual([
+        { name: "variable_ids_json", isNotNull: 0 }
+      ]);
+    }).pipe(Effect.provide(makeSqliteLayer()))
+  );
+
+  it.effect("adds runtime profile columns on a full migration run from an empty database", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      const sql = yield* SqlClient.SqlClient;
+
+      const variableColumns = yield* sql<{ name: string; isNotNull: number }>`
+        SELECT name as name, [notnull] as isNotNull
+        FROM pragma_table_info('variables')
+        WHERE name = 'policy_instrument'
+      `;
+      const datasetColumns = yield* sql<{ name: string; isNotNull: number }>`
+        SELECT name as name, [notnull] as isNotNull
+        FROM pragma_table_info('datasets')
+        WHERE name = 'variable_ids_json'
+      `;
+
+      expect(variableColumns).toEqual([
+        { name: "policy_instrument", isNotNull: 0 }
+      ]);
+      expect(datasetColumns).toEqual([
+        { name: "variable_ids_json", isNotNull: 0 }
+      ]);
+    }).pipe(Effect.provide(makeSqliteLayer()))
+  );
+
   it.effect("upgrades publications to the new identity shape and backfills existing rows", () =>
     Effect.gen(function* () {
       const sql = yield* SqlClient.SqlClient;

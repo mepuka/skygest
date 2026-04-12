@@ -1,5 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Schema } from "effect";
+import ligniteProductionJson from "../references/cold-start/variables/lignite-production.json";
 import {
   Variable,
   Series,
@@ -72,6 +73,14 @@ describe("Variable", () => {
     );
     expect(a[SdmxConcept]).toBe("Concept");
     expect(a[DesignDecision]).toBe("D1, D2");
+  });
+
+  it("locks the lignite fixture to the brown-coal supply interpretation", () => {
+    const decoded = Schema.decodeUnknownSync(Variable)(ligniteProductionJson);
+    expect(decoded.label).toBe("Lignite production");
+    expect(decoded.measuredProperty).toBe("supply");
+    expect(decoded.technologyOrFuel).toBe("brown coal");
+    expect("domainObject" in decoded).toBe(false);
   });
 });
 

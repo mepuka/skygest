@@ -16,6 +16,12 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Checkout ontology reference
+        uses: actions/checkout@v4
+        with:
+          repository: mepuka/ontology_skill
+          path: ontology_skill
+
       - name: Link twitter scraper
         run: |
           git clone --depth 1 https://github.com/mepuka/better-twitter-scraper.git ../better_twitter_scraper
@@ -33,8 +39,9 @@ jobs:
 
       - name: Verify generated energy profile
         run: |
+          bun run sync:energy-profile --source ontology_skill/ontologies/skygest-energy-vocab/build/shacl-manifest.json --ontology-vocabulary-root ontology_skill/ontologies/skygest-energy-vocab/data/vocabulary
           bun run gen:energy-profile
-          git diff --exit-code -- src/domain/generated/energyVariableProfile.ts
+          git diff --exit-code -- references/energy-profile/shacl-manifest.json src/domain/generated/energyVariableProfile.ts
 
       # Cache the tsgo incremental build info so warm runs on the same source
       # tree can skip most of the typecheck work. actions/checkout rewrites

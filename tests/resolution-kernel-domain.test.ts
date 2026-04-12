@@ -187,7 +187,6 @@ describe("resolutionKernel domain contract", () => {
           measuredProperty: "generation"
         },
         missingRequired: ["statisticType"],
-        hypotheses: [hypothesis],
         confidence: 0.6,
         tier: "weak-heuristic"
       }),
@@ -195,6 +194,8 @@ describe("resolutionKernel domain contract", () => {
         _tag: "Conflicted" as const,
         bundle,
         hypotheses: [hypothesis],
+        confidence: 0.5,
+        tier: "strong-heuristic",
         conflicts: [
           {
             facet: "measuredProperty",
@@ -230,5 +231,214 @@ describe("resolutionKernel domain contract", () => {
 
       expect(matchedTag).toBe(outcome._tag);
     }
+  });
+
+  it("keeps the encoded outcome wire format stable", () => {
+    const bundle = decodeBundle({
+      postText: ["Retail power prices rose"],
+      series: [],
+      keyFindings: [],
+      sourceLines: [],
+      publisherHints: []
+    });
+
+    expect(
+      [
+        encodeOutcome(
+          decodeOutcome({
+            _tag: "Resolved" as const,
+            bundle,
+            sharedPartial: {
+              measuredProperty: "price",
+              statisticType: "price"
+            },
+            attachedContext: {},
+            items: [],
+            confidence: 1,
+            tier: "entailment"
+          })
+        ),
+        encodeOutcome(
+          decodeOutcome({
+            _tag: "Ambiguous" as const,
+            bundle,
+            hypotheses: [],
+            confidence: 0.5,
+            tier: "weak-heuristic"
+          })
+        ),
+        encodeOutcome(
+          decodeOutcome({
+            _tag: "Underspecified" as const,
+            bundle,
+            partial: {
+              measuredProperty: "price"
+            },
+            missingRequired: ["statisticType"],
+            confidence: 0.4,
+            tier: "weak-heuristic"
+          })
+        ),
+        encodeOutcome(
+          decodeOutcome({
+            _tag: "Conflicted" as const,
+            bundle,
+            hypotheses: [],
+            conflicts: [
+              {
+                facet: "measuredProperty",
+                values: ["capacity", "price"]
+              }
+            ],
+            confidence: 0.3,
+            tier: "strong-heuristic"
+          })
+        ),
+        encodeOutcome(
+          decodeOutcome({
+            _tag: "OutOfRegistry" as const,
+            bundle,
+            hypothesis: {
+              sharedPartial: {
+                measuredProperty: "price",
+                statisticType: "price"
+              },
+              attachedContext: {},
+              items: [],
+              evidence: [],
+              confidence: 0.8,
+              tier: "strong-heuristic"
+            },
+            items: []
+          })
+        ),
+        encodeOutcome(
+          decodeOutcome({
+            _tag: "NoMatch" as const,
+            bundle,
+            reason: "no signal"
+          })
+        )
+      ]
+    ).toMatchInlineSnapshot(`
+      [
+        {
+          "_tag": "Resolved",
+          "attachedContext": {},
+          "bundle": {
+            "keyFindings": [],
+            "postText": [
+              "Retail power prices rose",
+            ],
+            "publisherHints": [],
+            "series": [],
+            "sourceLines": [],
+          },
+          "confidence": 1,
+          "items": [],
+          "sharedPartial": {
+            "measuredProperty": "price",
+            "statisticType": "price",
+          },
+          "tier": "entailment",
+        },
+        {
+          "_tag": "Ambiguous",
+          "bundle": {
+            "keyFindings": [],
+            "postText": [
+              "Retail power prices rose",
+            ],
+            "publisherHints": [],
+            "series": [],
+            "sourceLines": [],
+          },
+          "confidence": 0.5,
+          "hypotheses": [],
+          "tier": "weak-heuristic",
+        },
+        {
+          "_tag": "Underspecified",
+          "bundle": {
+            "keyFindings": [],
+            "postText": [
+              "Retail power prices rose",
+            ],
+            "publisherHints": [],
+            "series": [],
+            "sourceLines": [],
+          },
+          "confidence": 0.4,
+          "missingRequired": [
+            "statisticType",
+          ],
+          "partial": {
+            "measuredProperty": "price",
+          },
+          "tier": "weak-heuristic",
+        },
+        {
+          "_tag": "Conflicted",
+          "bundle": {
+            "keyFindings": [],
+            "postText": [
+              "Retail power prices rose",
+            ],
+            "publisherHints": [],
+            "series": [],
+            "sourceLines": [],
+          },
+          "confidence": 0.3,
+          "conflicts": [
+            {
+              "facet": "measuredProperty",
+              "values": [
+                "capacity",
+                "price",
+              ],
+            },
+          ],
+          "hypotheses": [],
+          "tier": "strong-heuristic",
+        },
+        {
+          "_tag": "OutOfRegistry",
+          "bundle": {
+            "keyFindings": [],
+            "postText": [
+              "Retail power prices rose",
+            ],
+            "publisherHints": [],
+            "series": [],
+            "sourceLines": [],
+          },
+          "hypothesis": {
+            "attachedContext": {},
+            "confidence": 0.8,
+            "evidence": [],
+            "items": [],
+            "sharedPartial": {
+              "measuredProperty": "price",
+              "statisticType": "price",
+            },
+            "tier": "strong-heuristic",
+          },
+          "items": [],
+        },
+        {
+          "_tag": "NoMatch",
+          "bundle": {
+            "keyFindings": [],
+            "postText": [
+              "Retail power prices rose",
+            ],
+            "publisherHints": [],
+            "series": [],
+            "sourceLines": [],
+          },
+          "reason": "no signal",
+        },
+      ]
+    `);
   });
 });
