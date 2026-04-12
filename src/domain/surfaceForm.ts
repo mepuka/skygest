@@ -10,6 +10,7 @@ export const SurfaceFormProvenance = Schema.Literals([
   "hand-curated",
   "oeo-derived",
   "ucum-derived",
+  "wikidata-derived",
   "agent-curated",
   "eval-feedback"
 ]);
