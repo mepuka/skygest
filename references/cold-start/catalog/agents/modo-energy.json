@@ -1,0 +1,12 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KP172ZRE9PA6D2K48FYBED5M",
+  "kind": "organization",
+  "name": "Modo Energy",
+  "aliases": [
+    { "scheme": "url", "value": "https://modoenergy.com/", "relation": "exactMatch" }
+  ],
+  "homepage": "https://modoenergy.com/",
+  "createdAt": "2026-04-12T00:00:00.000Z",
+  "updatedAt": "2026-04-12T00:00:00.000Z"
+}

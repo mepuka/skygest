@@ -1,0 +1,13 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "kind": "organization",
+  "name": "National Energy System Operator (NESO)",
+  "aliases": [
+    { "scheme": "url", "value": "https://www.neso.energy/", "relation": "exactMatch" },
+    { "scheme": "wikidata", "value": "Q130538498", "relation": "exactMatch" }
+  ],
+  "homepage": "https://www.neso.energy/",
+  "createdAt": "2026-04-12T00:00:00.000Z",
+  "updatedAt": "2026-04-12T00:00:00.000Z"
+}
