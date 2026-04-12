@@ -1,0 +1,32 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZE08MB3NGAQGF5B1JS",
+  "title": "https-katalog-opendata-sachsen-de-store-1-resource-30 (Staatsbetrieb Sächsisches Immobilien- und Baumanagement (SIB))",
+  "description": "[Publisher: Staatsbetrieb Sächsisches Immobilien- und Baumanagement (SIB)]",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/https-katalog-opendata-sachsen-de-store-1-resource-30",
+  "accessRights": "public",
+  "license": "http://dcat-ap.de/def/licenses/dl-by-de/2.0",
+  "temporal": "2025-01-01T00:00:00Z/2025-12-31T00:00:00Z",
+  "themes": [
+    "economy",
+    "energy",
+    "government"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZEBDEYBJNM5WW7MKB6",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZEBX03K5QQKS4W0E9V"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "https-katalog-opendata-sachsen-de-store-1-resource-30",
+      "relation": "exactMatch"
+    }
+  ]
+}

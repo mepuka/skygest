@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ897B1NK7B3MPEDNV9",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ8SJJQCASGQG33KGXC",
+  "kind": "landing-page",
+  "title": "HTML distribution",
+  "accessURL": "https://data.fingal.ie/datasets/FingalCoCo::aie-disclosure-logs-2024-2028-fcc",
+  "mediaType": "text/html",
+  "format": "html",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

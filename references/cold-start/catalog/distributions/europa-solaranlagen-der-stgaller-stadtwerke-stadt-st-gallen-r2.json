@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ5CFTFN75EPX6HBSQ9",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ5MNZWYSSAAR73WTQ3",
+  "kind": "download",
+  "title": "CSV distribution",
+  "accessURL": "https://daten.stadt.sg.ch/api/v2/catalog/datasets/solaranlagen-der-stgaller-stadtwerke/exports/csv?use_labels=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

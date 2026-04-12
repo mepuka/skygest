@@ -1,0 +1,29 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZPQBHJ59SP8WA9KNSX",
+  "title": "033 - ORES Gas - Charging curve Schedule (ORES)",
+  "description": "[Publisher: ORES] In order to measure the impact of its Open Data, Ores is interested in being kept informed of the reuses that will be made of the data made available.\nThe information provided on this site is for information purposes only. They have not been officially validated and should not be considered as validated data.nnAvailability of 2 datasets linked by the ID number:\n1. Hourly load curves from gas-connecting meters over an entire year.\n2. Contractual data of customers with hourly load curves from gas-connecting meters over an entire year\n&gt; These 2 complete files, as well as the corresponding captions can be downloaded from the Attachments section at the bottom of the page.\n&gt; The dataset that can be downloaded via the Export tab is a sample of the complete ‘Charge curve’ file.nnDescription of fields:\n1. Hourly load curves from gas-connecting meters over an entire year.\nName of report: Hourly load curves from gas-connecting meters over an entire year.\nLevel of aggregation: The dataset contains unaggregated raw data.\nYear of consumption: 2025\nScope: This dataset contains sampling hourly load curves for 1500 anonymised communicating gas meters.\nThe data relate exclusively to residential customers.\nEnergy: Gas\nFrequency: Annual\nDate on which the dataset was made available: March 2026\nID: Anonymized customer identification number\nMeasuredUTCAt: Date and time (UTC) corresponding to the beginning of the volume measurement interval, in a 60-minute window.\n_m_ levy: Volume taken over the time period (1h) - in m³nn2.Contractual data of customers with hourly load curves from electricity communicating meters over an entire year.\nName of report: Contractual data of customers with hourly load curves from gas communicating meters over an entire year.\nYear of consumption: 2025\nScope: This dataset contains contractual data for customers with hourly load curves.\nEnergy: Gas\nFrequency: Annual\nDate on which the dataset was made available: March 2026\nID: Anonymized customer identification number\n_total_m³ levy: Total annual levy volume (m³)",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/https-www-odwb-be-explore-dataset-2025-gaz_fichier_exemple_courbe_de_charge_quart_horaire-",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "2024-12-31T23:00:00Z/2025-12-30T23:00:00Z",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZPE7T7NMXDDEETAYDN"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "https-www-odwb-be-explore-dataset-2025-gaz_fichier_exemple_courbe_de_charge_quart_horaire-",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYSX1Q3WN9Z3VA52C87",
+  "title": "Emprise des ouvrages de rétention des eaux (Office cantonal de l'eau)",
+  "description": "[Publisher: Office cantonal de l'eau] La couche de polygones d'emprise des ouvrages de rétention des eaux est liée à la couche de points des ouvrages de rétention des eaux. La couche de polygones permet de visualiser la surface et la disposition réelle de ces ouvrages dans le terrain tandis que la couche de points permet une vision plus schématique à large échelle.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/rae_stockage_eaux_emprise-canton-geneve",
+  "accessRights": "public",
+  "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by",
+  "themes": [
+    "society",
+    "environment",
+    "energy",
+    "regions",
+    "education"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYSDQH03FBG3RA1T7FK",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYSB310ZCBX8SB05MRE",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYS50MDPP8AK5K48641",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYS6B5JM16BRYT8VJQK",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYS6N48PQ6VR8QCD8DC",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYS0JMAXSGAPSTQ10WK",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYSJMXW101A09Q5H6VJ"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "rae_stockage_eaux_emprise-canton-geneve",
+      "relation": "exactMatch"
+    }
+  ]
+}

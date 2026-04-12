@@ -1,0 +1,32 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYY6CQEFKYAP6F0TSA4",
+  "title": "School Warning Signs SDCC (South Dublin County Council)",
+  "description": "[Publisher: South Dublin County Council] <p><span style='background-color:rgb(255,255,255); color:rgb(20,20,20); font-family:&quot;Avenir Next&quot;, Avenir, &quot;Helvetica Neue&quot;, sans-serif; font-size:16px;'><span style='display:inline !important; float:none; font-style:normal; font-variant-caps:normal; font-variant-ligatures:normal; font-weight:400; letter-spacing:normal; text-align:start; text-decoration-color:initial; text-decoration-style:initial; text-indent:0px; text-transform:none; word-spacing:0px;'>This a mapping and listing of Static Reduce Speed VAS signs in the Administrative area of South Dublin County Council. These are in use to make drivers aware of their speed and no data is collected from these its for information purpose of locations see disclaimer below.&nbsp;</span></span></p><p><span style='background-color:rgb(255,255,255); color:rgb(20,20,20); font-family:&quot;Avenir Next&quot;, Avenir, &quot;Helvetica Neue&quot;, sans-serif; font-size:16px;'><span style='display:inline !important; float:none; font-style:normal; font-variant-caps:normal; font-variant-ligatures:normal; font-weight:400; letter-spacing:normal; text-align:start; text-decoration-color:initial; text-decoration-style:initial; text-indent:0px; text-transform:none; word-spacing:0px;'>Disclaimer - Please note that this data set is for citizen to be aware of the varying approximate Location of Static VAS Sings and no data is available on the stats. This is for information purposes only.</span></span></p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/203f1c46-080e-462f-96f2-eeab29e002b6",
+  "accessRights": "public",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYYV5SZVVZVZBVEHY39",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYYX9NXENX7CS8TCWDD",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYYXM2GT2Z9F2N9GTJ0",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYY09GK3HPEJQCEYRY8",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYY5FBV5T2YDNSP23XF",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYYFVDCEJ0TBZXJHHA6"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "203f1c46-080e-462f-96f2-eeab29e002b6",
+      "relation": "exactMatch"
+    }
+  ]
+}

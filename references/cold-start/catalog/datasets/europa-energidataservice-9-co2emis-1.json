@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZ8XTKW579A6D6Q1W1P",
+  "title": "CO2 Emission (Energinet)",
+  "description": "[Publisher: Energinet] The dataset is an updated near up-to-date history for the CO2 emission from electricity consumed in Denmark measured in g/kWh. This is initial data, for more updated emission, please see [Declaration Grid Emission](https://www.energidataservice.dk/tso-electricity/DeclarationGridEmission).\nThe calculations for the CO2 emissions are based on emissions from each power plant above 10MW and where all power plants below 10MW is regarded as one power plant. Furthermore, the calculations are based on production per hour, consumption per hour and exchange per hour.\n\nPlease also note: \n* The resolution of the data is 5 minutes but the up-date frequency is a bit slower, which is 15 minutes.\n* To calculate the emission rate from CO2, the 125% method is used, which means that coproduced heat is produced by a given efficiency by 125%. \n\nFor further information, please read [Deklarationer af EL](https://energinet.dk/el/gron-el/eldeklarationer) (Danish). \n\nData are based on upscaled real-time power measurements from the SCADA system. Errors will occur, and will generally not be corrected. ",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/energidataservice_9_co2emis~~1",
+  "accessRights": "public",
+  "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
+  "temporal": "2017-01-01T00:00:00Z/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ8NN8BESS9NEVF8Q24",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ87XZT79WFH9B3RSVE"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "energidataservice_9_co2emis~~1",
+      "relation": "exactMatch"
+    }
+  ]
+}

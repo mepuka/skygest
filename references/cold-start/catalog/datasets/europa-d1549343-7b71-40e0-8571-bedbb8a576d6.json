@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYP34PX8GTR58AB99JK",
+  "title": "EBQ01 - Domestic Building Energy Ratings with Renewable Energy Installations (Central Statistics Office)",
+  "description": "[Publisher: Central Statistics Office] Domestic Building Energy Ratings with Renewable Energy Installations",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/d1549343-7b71-40e0-8571-bedbb8a576d6",
+  "accessRights": "public",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYPTTWR1B00X1KG194A",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYPR842S48BX026R1EP",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYQ3ADJ3ZDKT5BH07AX",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYQKBJWMC81W25M0X7S"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "d1549343-7b71-40e0-8571-bedbb8a576d6",
+      "relation": "exactMatch"
+    }
+  ]
+}

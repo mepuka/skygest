@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYBNYC04G74DNXNV5KY",
+  "title": "Electricity prices components for household consumers - annual data (from 2007 onwards) (Eurostat)",
+  "description": "[Publisher: Eurostat] Electricity prices components for household consumers - annual data (from 2007 onwards)",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/qi7sghy3jzhreytblt8jrg",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "2017-01-01T00:00:00Z/2025-12-31T00:00:00Z",
+  "themes": [
+    "energy",
+    "environment"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYBTENMRDFC840RXPD3",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYC4VB8CP3TXX1SV8CS",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYC68X724X3JWA8VWTC",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYCRFVQZ5G4YXTN1VF1",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYCPG707XT8X2CGWCCF"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "qi7sghy3jzhreytblt8jrg",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ0XSJ0ZPG31FEKBNW6",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ0VYT41GFFAFT7PJHG",
+  "kind": "download",
+  "title": "TSV distribution",
+  "accessURL": "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/env_epea_cint?format=tsv&compressed=true",
+  "mediaType": "text/tab-separated-values",
+  "format": "tsv",
+  "byteSize": 71785,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

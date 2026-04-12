@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZNG10CSZTWYD9Y1DQ5",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZNPX1W8W2CPKCMDCTA",
+  "kind": "download",
+  "title": "PDF distribution",
+  "accessURL": "https://www.hamburg.de/contentblob/8679336/abfc99dc53a6f145a9daa7c93a259ce4/data/d-handbuch.pdf",
+  "mediaType": "application/pdf",
+  "format": "pdf",
+  "byteSize": 19656,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ10RG9YWK6778X0MBQ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ1KWJ1ZNNN7SR3GWJV",
+  "kind": "download",
+  "title": "CSV distribution",
+  "accessURL": "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/env_epea_pap?format=SDMX-CSV&compressed=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "byteSize": 738836,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

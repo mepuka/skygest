@@ -1,0 +1,29 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZG77STYF0F80TF6HMB",
+  "title": "41f0ac71-1ebc-4bf2-bcf1-a993cd2e1fcc (Stadt Moers)",
+  "description": "[Publisher: Stadt Moers]",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/41f0ac71-1ebc-4bf2-bcf1-a993cd2e1fcc",
+  "accessRights": "public",
+  "license": "http://dcat-ap.de/def/licenses/dl-zero-de/2.0",
+  "themes": [
+    "energy",
+    "environment"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZGVWED1F7G7SRWJ5YD"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "41f0ac71-1ebc-4bf2-bcf1-a993cd2e1fcc",
+      "relation": "exactMatch"
+    }
+  ]
+}

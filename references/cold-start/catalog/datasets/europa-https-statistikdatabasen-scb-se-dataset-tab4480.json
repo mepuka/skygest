@@ -1,0 +1,29 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZ9DJWCRK1ABCKTQWCS",
+  "title": "Renegotiated electricity contracts in numbers by bidding zone and type of customer. Month 2023M01 - 2026M01 (Statistikmyndigheten SCB - Statistiska centralbyrån)",
+  "description": "[Publisher: Statistikmyndigheten SCB - Statistiska centralbyrån] Renegotiated electricity contracts, numbers by bidding zone, type of customer and month",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/https-statistikdatabasen-scb-se-dataset-tab4480",
+  "accessRights": "public",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ97S85GT1Z0P6PD79D",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ9CTTVDHCBQJK9PH5H"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "https-statistikdatabasen-scb-se-dataset-tab4480",
+      "relation": "exactMatch"
+    }
+  ]
+}

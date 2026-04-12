@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZSKTM69RWKJASH0SGV",
+  "title": "Simplified energy balances (Eurostat)",
+  "description": "[Publisher: Eurostat] Simplified energy balances",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/h0neerixfkrm8qq0j1zstg",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "1990-01-01T00:00:00Z/2024-12-31T00:00:00Z",
+  "themes": [
+    "environment",
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZSFED5YB5KPFVM9CT3",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZSPYKDJTQ29Z43QVYA",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZS5A0836G6RG5GHAX6",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZSNMJ4R1F4WGKK0P7F",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZS24CQNSE7MAQTJBGA"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "h0neerixfkrm8qq0j1zstg",
+      "relation": "exactMatch"
+    }
+  ]
+}

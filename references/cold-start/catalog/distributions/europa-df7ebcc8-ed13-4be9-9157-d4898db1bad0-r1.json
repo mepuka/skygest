@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYY207P9614SHWK0E8C",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYYBF8WEVY983B2FYDS",
+  "kind": "download",
+  "title": "DOWNLOAD distribution",
+  "accessURL": "https://ogc-api.geobasis-bb.de/datasets/polbb",
+  "format": "download",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

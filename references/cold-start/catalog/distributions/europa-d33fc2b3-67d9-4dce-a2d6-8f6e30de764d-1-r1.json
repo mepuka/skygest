@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZHKVVY3FY6MKJGMDZD",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZHVNYAZMR1T60JJQZJ",
+  "kind": "download",
+  "title": "DOWNLOAD distribution",
+  "accessURL": "https://geoportal.saarland.de/mapbender//php/mod_inspireDownloadFeed.php?id=d33fc2b3-67d9-4dce-a2d6-8f6e30de764d&type=SERVICE&generateFrom=wfs&wfsid=425",
+  "format": "download",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

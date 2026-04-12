@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYYCX1Y13K8ETY9ACMY",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYY69MGEF417D0RNWM3",
+  "kind": "download",
+  "title": "JSON_LD distribution",
+  "accessURL": "https://daten.stadt.sg.ch/api/v2/catalog/datasets/heizgradtage-st-galler-stadtwerke/exports/jsonld",
+  "format": "json_ld",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

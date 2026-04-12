@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZN63GV4HXVD36CFESF",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZNPX1W8W2CPKCMDCTA",
+  "kind": "download",
+  "title": "WMS_SRVC distribution",
+  "accessURL": "https://geodienste.hamburg.de/wms_eignung_waermenetzversorgung_kwp?SERVICE=WMS&REQUEST=GetCapabilities",
+  "format": "wms_srvc",
+  "byteSize": 13609,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

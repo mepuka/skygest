@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ83CXRP2E845EFPBNP",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ8MGP1KCX547BY1WNC",
+  "kind": "download",
+  "title": "PDF distribution",
+  "accessURL": "https://ogd.ankoe.at/ifg/dataset/ankoe-foia-607/file/b6439854-80fe-4428-a576-d11fd3ae2f5b",
+  "mediaType": "application/pdf",
+  "format": "pdf",
+  "byteSize": 404000,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

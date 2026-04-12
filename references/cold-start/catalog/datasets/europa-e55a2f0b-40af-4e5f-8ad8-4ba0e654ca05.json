@@ -1,0 +1,28 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZ57DH89GXN6ZBT3XG0",
+  "title": "Route 4: Tallaght (South Dublin County Council)",
+  "description": "[Publisher: South Dublin County Council] SDCC Salt Gritting Routes.<div>Seven standard routes: </div><div>Route 1: Lucan </div><div>Route 2: Clondalkin </div><div>Route 3: Saggart </div><div>Route 4: Tallaght </div><div>Route 5: Kimmage </div><div>Route 6: Ballyboden </div><div>Route 7: N81</div>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/e55a2f0b-40af-4e5f-8ad8-4ba0e654ca05",
+  "accessRights": "public",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ520BJVG8PTJS2MG97",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ5454HK89GNRE1CHNW"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "e55a2f0b-40af-4e5f-8ad8-4ba0e654ca05",
+      "relation": "exactMatch"
+    }
+  ]
+}

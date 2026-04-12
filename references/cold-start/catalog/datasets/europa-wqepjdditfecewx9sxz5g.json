@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYH4NAT375QSA5EGNND",
+  "title": "Gas prices for non-household consumers - bi-annual data (from 2007 onwards) (Eurostat)",
+  "description": "[Publisher: Eurostat] Gas prices for non-household consumers - bi-annual data (from 2007 onwards)",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/wqepjdditfecewx9sxz5g",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "2007-01-01T00:00:00Z/2025-12-31T00:00:00Z",
+  "themes": [
+    "energy",
+    "environment"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYH873SB8740C2GMQ8S",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYH9RQEQ2JZJA1FCPH8",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYHHCEWGEM8SKTP8MYP",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYHXDDCZ4CMR97B9WGE",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYH5CWE0MCMCB7P445T"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "wqepjdditfecewx9sxz5g",
+      "relation": "exactMatch"
+    }
+  ]
+}

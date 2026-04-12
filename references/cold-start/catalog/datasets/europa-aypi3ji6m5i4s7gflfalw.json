@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYDSPT6WZFP1WHQD7HH",
+  "title": "Supply, transformation and consumption of solid fossil fuels (Eurostat)",
+  "description": "[Publisher: Eurostat] Supply, transformation and consumption of solid fossil fuels",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/aypi3ji6m5i4s7gflfalw",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "1990-01-01T00:00:00Z/2024-12-31T00:00:00Z",
+  "themes": [
+    "environment",
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYDB17P251Z3XAG9XSN",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYDPRFW41BEENWHH211",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYD4HTTEJE22ME94R6Z",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYDAP9GCSTK6XYV1NWZ",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYDFHDAXZDN282WM26S"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "aypi3ji6m5i4s7gflfalw",
+      "relation": "exactMatch"
+    }
+  ]
+}

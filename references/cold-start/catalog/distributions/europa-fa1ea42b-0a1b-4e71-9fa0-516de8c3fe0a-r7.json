@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZMB88J57X52PK6DP7M",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZMDDEXKPYYZ0QDKHHQ",
+  "kind": "download",
+  "title": "JSON distribution",
+  "accessURL": "https://opendata.schleswig-holstein.de/dataset/fa1ea42b-0a1b-4e71-9fa0-516de8c3fe0a/resource/ac97c24d-bea3-431e-8c16-044a81d632cf/download/windkraftanlagen-2026-02-12-tdr.json",
+  "mediaType": "application/json",
+  "format": "json",
+  "byteSize": 599,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

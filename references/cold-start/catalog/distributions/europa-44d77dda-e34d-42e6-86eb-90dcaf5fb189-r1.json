@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYP576PEBN2V1AHN7WP",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYP9EZQB9ECVW31VMAM",
+  "kind": "download",
+  "title": "CSV distribution",
+  "accessURL": "https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/NGSD01/CSV/1.0/en",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

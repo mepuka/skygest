@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYH63TR4DACBJBH2G43",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYHE31067947WCBHQ4B",
+  "kind": "landing-page",
+  "title": "HTML distribution",
+  "accessURL": "https://danak.dk/find-en-akkrediteret-virksomhed",
+  "mediaType": "text/html",
+  "format": "html",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

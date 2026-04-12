@@ -1,0 +1,29 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYZ2002GBD9AH4NANE9",
+  "title": "Monatliche Menge Abfall, Restoff und Energie (Wärme- und Stromabgabe) (Klärwerk Werdhölzli, Entsorgung + Recycling Zürich, Tiefbau- und Entsorgungsdepartement)",
+  "description": "[Publisher: Klärwerk Werdhölzli, Entsorgung + Recycling Zürich, Tiefbau- und Entsorgungsdepartement] Dieser Datensatz beinhaltet die monatlichen Mengen der in der Kehrichtverwertungsanlage Hagenholz thermisch verwerterten Abfällen [to], den daraus resultierten abtransportierten Restprodukte [to] sowie die daraus abgesetzten Wärme [MWh] und Strom [MWh]. ",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/2c4902c0-c4ac-4e3b-8039-a102123e172a-stadt-zurich",
+  "accessRights": "public",
+  "license": "http://dcat-ap.ch/vocabulary/licenses/terms_open",
+  "themes": [
+    "energy",
+    "environment"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZH0EGR0YWAJ8FM377"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "2c4902c0-c4ac-4e3b-8039-a102123e172a-stadt-zurich",
+      "relation": "exactMatch"
+    }
+  ]
+}

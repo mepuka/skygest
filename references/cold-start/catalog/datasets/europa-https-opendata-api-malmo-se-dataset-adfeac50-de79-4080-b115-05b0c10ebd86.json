@@ -1,0 +1,28 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZH0VKF6XBSP3S28QAQ",
+  "title": "Final energy use in households within the geographical area, MWh/inhabitant (Malmö stad)",
+  "description": "[Publisher: Malmö stad] Final use of energy measured in megawatt hours (MWh) divided by the number of\ninhabitants in the municipality. Refers to final use consumed by households\n(single-family homes, apartment buildings, holiday homes) regardless of fuel\ntype, within the boundaries of the geographical area.\n\nSource: Swedish Energy Agency and Statistics Sweden (via Kolada)\n\n",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/https-opendata-api-malmo-se-dataset-adfeac50-de79-4080-b115-05b0c10ebd86",
+  "accessRights": "public",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZHT5EV032JGXAHH6YZ"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "https-opendata-api-malmo-se-dataset-adfeac50-de79-4080-b115-05b0c10ebd86",
+      "relation": "exactMatch"
+    }
+  ]
+}

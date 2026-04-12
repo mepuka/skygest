@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZ00GSSTWPMWQPWYZ13",
+  "title": "Parking Fines Issued 2025 FCC (Fingal County Council)",
+  "description": "[Publisher: Fingal County Council] <p style='font-family:&quot;Avenir Next W01&quot;, &quot;Avenir Next W00&quot;, &quot;Avenir Next&quot;, Avenir, &quot;Helvetica Neue&quot;, sans-serif; font-size:16px; margin-bottom:1.5rem; margin-top:0px;'>This Data set contains the details of the Parking Fines Issued in Fingal County Council for 2025 from the Operation/Transportation Department in Fingal County Council. This is listing the Top Ten Areas for Fines and the total per month and also lists the Top Ten Offence with quoting the Section of the Fine.</p><p style='font-family:&quot;Avenir Next W01&quot;, &quot;Avenir Next W00&quot;, &quot;Avenir Next&quot;, Avenir, &quot;Helvetica Neue&quot;, sans-serif; font-size:16px; margin-bottom:0px; margin-top:0px;'>&nbsp;</p><p style='font-family:&quot;Avenir Next W01&quot;, &quot;Avenir Next W00&quot;, &quot;Avenir Next&quot;, Avenir, &quot;Helvetica Neue&quot;, sans-serif; font-size:16px; margin-bottom:1.5rem; margin-top:0px;'>This is the fourth year of publishing Parking Fines, 2020, 2021, 2022 ,2023and this Parking Fines 2024 is in a new formula with more information on see the other data sets for previous years. This relates to 2025 Top Ten Parking Fines issued and the total number per month and lists top ten offences and legislation codes.</p><p style='font-family:&quot;Avenir Next W01&quot;, &quot;Avenir Next W00&quot;, &quot;Avenir Next&quot;, Avenir, &quot;Helvetica Neue&quot;, sans-serif; font-size:16px; margin-bottom:1.5rem; margin-top:0px;'>(1) Top Ten Areas of Parking Offence<br />(2) The total Offence per calendar month<br />(3) The Offence code<br />(4) Details of Offence - varies month by month.<br />(5) Number per Offence varies month by month</p><p style='font-family:&quot;Avenir Next W01&quot;, &quot;Avenir Next W00&quot;, &quot;Avenir Next&quot;, Avenir, &quot;Helvetica Neue&quot;, sans-serif; font-size:16px; margin-bottom:1.5rem; margin-top:0px;'>This is now completed the total amount of Parking Fines Issued in 2025 = &nbsp;12,163</p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/850fbb4f-dc10-4f58-bd9e-2c37fb1e12e1",
+  "accessRights": "public",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ0BV480ZXK9GTVSJMQ"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "850fbb4f-dc10-4f58-bd9e-2c37fb1e12e1",
+      "relation": "exactMatch"
+    }
+  ]
+}

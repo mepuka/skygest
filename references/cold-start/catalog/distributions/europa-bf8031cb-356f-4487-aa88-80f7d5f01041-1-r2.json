@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZF1QVAZF08PNCT0K6N",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZFB00XTES3X95JCQ51",
+  "kind": "download",
+  "title": "SHP distribution",
+  "accessURL": "https://geodaten-geoweb-diepholz.hub.arcgis.com/datasets/geoweb-diepholz::erneuerbare-energien-1/explore?layer=2&location=52.572809%2C8.754475%2C8.27",
+  "format": "shp",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

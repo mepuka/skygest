@@ -1,0 +1,29 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZ3F4KX6T55JGHGC7BT",
+  "title": "Electricity prices for households by consumer category. Half-year 2014H2 - 2025H2 (Statistikmyndigheten SCB - Statistiska centralbyrån)",
+  "description": "[Publisher: Statistikmyndigheten SCB - Statistiska centralbyrån] Electricity prices for households, csek/kWh by consumer category (annual electricity consumption kWh), observations and half-year",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/https-statistikdatabasen-scb-se-dataset-tab4310",
+  "accessRights": "public",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ3KVJ65VPCFSB4XRAW",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ30DA3G9ZRBGG66HR8"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "https-statistikdatabasen-scb-se-dataset-tab4310",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ8H5Y8RCKBHV7ZRKW9",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ8DTA7BHFS3DNTJJWB",
+  "kind": "download",
+  "title": "RDF_XML distribution",
+  "accessURL": "https://www.odwb.be/explore/dataset/ores-electricite-nombre-de-productions-decentralisees-par-localite-annuel/information/",
+  "format": "rdf_xml",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

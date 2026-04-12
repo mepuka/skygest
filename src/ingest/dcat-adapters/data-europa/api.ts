@@ -1,4 +1,4 @@
-import { Duration, Effect, Schema } from "effect";
+import { Duration, Effect, Schema, SchemaGetter } from "effect";
 import {
   HttpClient,
   HttpClientResponse
@@ -24,6 +24,16 @@ const REQUEST_TIMEOUT = Duration.seconds(30);
 const PAGE_SIZE = 100;
 
 const nullableString = Schema.NullOr(Schema.String);
+
+/** CKAN wraps some URLs in square brackets — e.g. `[https://example.com]`. */
+const stripBrackets = (s: string) => s.replace(/^\[|\]$/g, "").trim();
+const CkanUrl = Schema.String.pipe(
+  Schema.decode({
+    decode: SchemaGetter.transform(stripBrackets),
+    encode: SchemaGetter.transform((s: string) => s)
+  })
+);
+const ckanUrl = Schema.NullOr(CkanUrl);
 
 // ---------------------------------------------------------------------------
 // API Response Schemas (lenient — all fields optional/nullable)
@@ -58,7 +68,7 @@ const CkanOrganization = Schema.Struct({
 
 const CkanResource = Schema.Struct({
   id: Schema.String,
-  access_url: Schema.optionalKey(nullableString),
+  access_url: Schema.optionalKey(ckanUrl),
   format: Schema.optionalKey(nullableString),
   size: Schema.optionalKey(Schema.NullOr(Schema.Number)),
   created: Schema.optionalKey(nullableString),

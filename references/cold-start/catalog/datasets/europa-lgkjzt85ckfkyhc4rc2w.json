@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYJFR8AJEACAWW4Y7N2",
+  "title": "Supply and transformation of oil and petroleum products - monthly data (Eurostat)",
+  "description": "[Publisher: Eurostat] Supply and transformation of oil and petroleum products - monthly data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/lgkjzt85ckfkyhc4rc2w",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "2008-01-01T00:00:00Z/2026-02-28T00:00:00Z",
+  "themes": [
+    "environment",
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYJF1N8357FSYR65HX9",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYJPHZJM79XQMM7MKTM",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYJS0YAAGN17XC5YMR7",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYJ094QC3WN6GB3C7PA",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYJ6Q5R58ZXZ67D0K15"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "lgkjzt85ckfkyhc4rc2w",
+      "relation": "exactMatch"
+    }
+  ]
+}

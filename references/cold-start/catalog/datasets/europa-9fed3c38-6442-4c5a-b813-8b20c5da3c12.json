@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYR1N0MVPFPNP7XDVMA",
+  "title": "Inventarliste 2025 (Wasserleitungsverband der Triestingtal und Südbahngemeinden)",
+  "description": "[Publisher: Wasserleitungsverband der Triestingtal und Südbahngemeinden] Inventarliste - Verbrauchsdaten",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/9fed3c38-6442-4c5a-b813-8b20c5da3c12",
+  "accessRights": "public",
+  "license": "https://creativecommons.org/licenses/by/4.0/deed.de",
+  "temporal": "2026-04-07T00:00:00Z/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYR9GBKQYYYY639KXRS",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYRRWEGTWHQCVMD85J4"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "9fed3c38-6442-4c5a-b813-8b20c5da3c12",
+      "relation": "exactMatch"
+    }
+  ]
+}

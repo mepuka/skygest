@@ -1,0 +1,29 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYCEYM3VX65RC15HEZ4",
+  "title": "Electricity supply in Sweden by type of production. Monthly 1974M01 - 2026M02 (Statistikmyndigheten SCB - Statistiska centralbyrån)",
+  "description": "[Publisher: Statistikmyndigheten SCB - Statistiska centralbyrån] Net electricity supply, GWh  by type of power plants and month",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/https-statistikdatabasen-scb-se-dataset-tab1011",
+  "accessRights": "public",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYCQK36MYJ04ZVDVNQS",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYC8XEC6YX94A6JN290"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "https-statistikdatabasen-scb-se-dataset-tab1011",
+      "relation": "exactMatch"
+    }
+  ]
+}

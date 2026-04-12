@@ -1,0 +1,29 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZHYMA7PCK3QNW0N2JY",
+  "title": "Deliveries of fuels to the Swedish market by type of goods. Month 2023M01 - 2026M01 (Statistikmyndigheten SCB - Statistiska centralbyrån)",
+  "description": "[Publisher: Statistikmyndigheten SCB - Statistiska centralbyrån] Deliveries of fuels to the Swedish market, volume in cubic metre by commodity and month",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/https-statistikdatabasen-scb-se-dataset-tab485",
+  "accessRights": "public",
+  "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZHXCYZRPVYMPF6VXH7",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZHS7KW05SNQ6SW92E4"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "https-statistikdatabasen-scb-se-dataset-tab485",
+      "relation": "exactMatch"
+    }
+  ]
+}

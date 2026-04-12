@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZMMQ407CPVYVDF3THE",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZM7EDND0EBNQJHFTVS",
+  "kind": "download",
+  "title": "GEOJSON distribution",
+  "accessURL": "https://dati.comune.milano.it/dataset/8da5a672-c5c8-4c96-a083-f10fb4270fe2/resource/640ea79c-f1e9-4f5c-985c-48860f269698/download/ds924_civici-non-metanizzati__coord.geojson",
+  "mediaType": "application/geo+json",
+  "format": "geojson",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

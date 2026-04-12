@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZQ4KJ7RGA0YA2SZ2SZ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZQXFT739WD79R03N2M",
+  "kind": "download",
+  "title": "CSV distribution",
+  "accessURL": "https://opendata.oldenburg.de/dataset/jahresberichte-der-blockheizkraftwerke/resource/762421f5-8044-4226-acdc-9c18919e9f70",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "byteSize": 2098,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

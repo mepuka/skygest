@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYK2J3BN2BTGHE17SC9",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYKN6NMEZEJM61HK42X",
+  "kind": "download",
+  "title": "XLSX distribution",
+  "accessURL": "https://statistikbanken.dk/ENERGI1",
+  "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "format": "xlsx",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

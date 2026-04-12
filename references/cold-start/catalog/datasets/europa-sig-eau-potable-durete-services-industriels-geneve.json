@@ -1,0 +1,41 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYV74F3EXZ0SFFWEQGT",
+  "title": "Dureté du réseau d'eau potable SIG (Services industriels de Genève)",
+  "description": "[Publisher: Services industriels de Genève] DURETE DU RESEAU D'EAU POTABLE DES SERVICES INDUSTRIELS DE GENEVE Cette couche vous renseigne sur la dureté de l'eau potable distribuée par les Services Industriels de Genève. La dureté de l'eau est l'expression de sa teneur en calcium et en magnésium. Elle varie en fonction des sols qu'elle traverse. La dureté de l'eau s'exprime en degré francais (°F). 1° F équivaut à 10 mg de carbonate de calcium (calcaire) par litre d'eau. Jusqu'à 15°F, l'eau est considérée comme \"douce\". Elle devient \"très dure\" au-delà de 30°F.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/sig_eau_potable_durete-services-industriels-geneve",
+  "accessRights": "public",
+  "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by_ask",
+  "themes": [
+    "education",
+    "regions",
+    "energy",
+    "economy",
+    "agriculture",
+    "health",
+    "environment",
+    "society"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYV83H53WD5JQZP5JT3",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYV2W0NPY8MMTR9VFKW",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYV8DQ9TYQSFZFNVDDT",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYVF08QJEWZGMJ68X2P",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYV5HV30W6X28N4DKWZ",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYV7HTX44WE8RHSG2YV",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYV0B1E33RY08E5FG0F"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "sig_eau_potable_durete-services-industriels-geneve",
+      "relation": "exactMatch"
+    }
+  ]
+}

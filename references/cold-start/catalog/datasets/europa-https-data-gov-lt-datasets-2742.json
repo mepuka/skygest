@@ -1,0 +1,28 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYRD8B218AQCKZEEP6T",
+  "title": "Electricity consumption data of legal persons (Valstybės duomenų agentūra)",
+  "description": "[Publisher: Valstybės duomenų agentūra] The table shows the electricity consumption data of the legal entities of the Energy Distribution Operator (ESO) combined with the economic activity classification (Rev. 2). The set is compiled by the State Data Agency. Addresses are provided in rectangular stalls of 10 kilometres in the Lithuanian coordinate system (LKS-94). Electricity consumption data shall be provided with the accuracy of the month. The user code, company code, and object number are encrypted. The actual amount of electricity consumed may differ from the data provided in case the consumer incorrectly declares the amount of electricity consumed or has installed a solar power plant. Data time coverage: from 1 January 2019.\n\nContact the atverimas@stat.gov.lt for technical questions or possible errors.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/https-data-gov-lt-datasets-2742-",
+  "accessRights": "public",
+  "license": "https://creativecommons.org/licenses/by/4.0/deed.lt",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYR8HBGSA8CFKXFC0PN"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "https-data-gov-lt-datasets-2742-",
+      "relation": "exactMatch"
+    }
+  ]
+}

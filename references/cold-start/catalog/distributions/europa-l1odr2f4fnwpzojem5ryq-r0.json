@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ4DW4JXK54B29JAT5E",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ4NRC4SQ92FJD74FMS",
+  "kind": "download",
+  "title": "XML distribution",
+  "accessURL": "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/nrg_ind_market?format=sdmx_2.1_structured&compressed=true",
+  "mediaType": "application/xml",
+  "format": "xml",
+  "byteSize": 31366,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ2TSXZ9WVBDCRTHJDQ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ20XMPTWGA4A04N2CR",
+  "kind": "download",
+  "title": "KML distribution",
+  "accessURL": "https://data-sdublincoco.opendata.arcgis.com/api/download/v1/items/af5db0cb62984fe8afea30e8b2389904/kml?layers=0",
+  "format": "kml",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

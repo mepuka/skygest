@@ -16,6 +16,7 @@ import {
   type IngestNode,
   unionAliases
 } from "../../dcat-harness";
+import { normalizeDistributionUrl } from "../../../resolution/normalize";
 import type { DataEuropaDatasetInfo } from "./api";
 import type { BuildContext } from "./buildContext";
 
@@ -101,7 +102,7 @@ const deriveDistributionKind = (
 // ---------------------------------------------------------------------------
 
 const europaDatasetSlug = (datasetId: string): string =>
-  `europa-${datasetId.slice(0, 40).replace(/[^a-z0-9-]/giu, "-").replace(/-+/gu, "-").replace(/^-|-$/gu, "")}`;
+  `europa-${datasetId.replace(/[^a-z0-9-]/giu, "-").replace(/-+/gu, "-").replace(/^-|-$/gu, "")}`;
 
 const europaDistributionSlug = (
   datasetId: string,
@@ -170,15 +171,12 @@ const freshDatasetAliases = (
   }
 ];
 
+// No URL aliases for EU federated catalog distributions — WMS/WFS endpoints
+// are shared across many datasets, causing registry URL-lookup collisions.
+// The europa-dataset-id alias on the parent dataset is the merge key.
 const freshDistributionAliases = (
-  accessUrl: string
-): ReadonlyArray<ExternalIdentifier> => [
-  {
-    scheme: AliasSchemeValues.url,
-    value: accessUrl,
-    relation: "exactMatch"
-  }
-];
+  _accessUrl: string
+): ReadonlyArray<ExternalIdentifier> => [];
 
 // ---------------------------------------------------------------------------
 // Entity lookup
@@ -195,7 +193,15 @@ const existingDatasetForInfo = (
 
 const buildDatasetTitle = (info: DataEuropaDatasetInfo): string => {
   const title = extractTranslationField(info, "title");
-  return title ?? info.id;
+  const base = title ?? info.id;
+  const publisherName =
+    info.publisher !== null && info.publisher !== undefined
+      ? (info.publisher.name ?? undefined)
+      : undefined;
+  // Disambiguate: federated catalog often has duplicate titles from different publishers
+  return publisherName !== undefined && publisherName !== null
+    ? `${base} (${publisherName})`
+    : base;
 };
 
 const buildDatasetDescription = (info: DataEuropaDatasetInfo): string | undefined => {
@@ -329,7 +335,8 @@ const buildDistributionCandidate = (
   },
   datasetId: Dataset["id"],
   ctx: BuildContext,
-  existing: Distribution | null
+  existing: Distribution | null,
+  seenUrls: Set<string>
 ): Distribution | null => {
   const accessUrl =
     resource.access_url !== null && resource.access_url !== undefined
@@ -339,6 +346,16 @@ const buildDistributionCandidate = (
   if (accessUrl === undefined) {
     return null;
   }
+
+  // EU federated catalog has shared service endpoints (WMS, WFS, ATOM)
+  // across many datasets — skip duplicates to avoid registry URL collisions.
+  // Use the same normalization as the registry so we catch all collisions.
+  const normalizedUrl = normalizeDistributionUrl(accessUrl);
+  const dedupeKey = normalizedUrl ?? accessUrl;
+  if (seenUrls.has(dedupeKey)) {
+    return null;
+  }
+  seenUrls.add(dedupeKey);
 
   const format = resource.format ?? undefined;
   const kind = deriveDistributionKind(format);
@@ -412,7 +429,14 @@ export const buildCandidateNodes = (
     Extract<IngestNode, { _tag: "catalog-record" }>
   > = [];
 
+  const seenTitles = new Set<string>();
+  const seenDistributionUrls = new Set<string>();
+
   for (const info of datasets) {
+    const title = buildDatasetTitle(info).toLowerCase();
+    if (seenTitles.has(title)) continue;
+    seenTitles.add(title);
+
     const existingDataset = existingDatasetForInfo(idx, info.id);
     const datasetId = existingDataset?.id ?? mintDatasetId();
 
@@ -435,7 +459,8 @@ export const buildCandidateNodes = (
         resource,
         datasetId,
         ctx,
-        existingDistribution
+        existingDistribution,
+        seenDistributionUrls
       );
 
       if (distribution !== null) {

@@ -1,0 +1,28 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZYK503TJCSNND58V6M",
+  "title": "ef72c933-53db-485c-877e-48169b189a9d~~1 (Bayerische Staatsregierung)",
+  "description": "[Publisher: Bayerische Staatsregierung]",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/ef72c933-53db-485c-877e-48169b189a9d~~1",
+  "accessRights": "public",
+  "license": "http://dcat-ap.de/def/licenses/cc-by/4.0",
+  "themes": [
+    "environment",
+    "government",
+    "energy"
+  ],
+  "distributionIds": [],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "ef72c933-53db-485c-877e-48169b189a9d~~1",
+      "relation": "exactMatch"
+    }
+  ]
+}

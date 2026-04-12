@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYQ5WHK7FSTBGD85JJY",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYQH0Y9KE3Z1F4QTT6M",
+  "kind": "download",
+  "title": "JSON-STAT distribution",
+  "accessURL": "https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/NDBER03/JSON-stat/1.0/en",
+  "format": "json-stat",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

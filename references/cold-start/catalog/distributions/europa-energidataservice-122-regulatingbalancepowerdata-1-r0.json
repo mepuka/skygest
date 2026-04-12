@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZVQXJDTJESNSH1FNJS",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZV0YKP0KVJH1M2S4NE",
+  "kind": "download",
+  "title": "JSON distribution",
+  "accessURL": "https://api.energidataservice.dk/dataset/RegulatingBalancePowerdata",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

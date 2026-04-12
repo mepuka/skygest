@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYZBD7NVQ2CPVDM0TJH",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYZQ0PM0DC2HSCAX2ZG",
+  "kind": "download",
+  "title": "ARCGIS GEOSERVICES REST API distribution",
+  "accessURL": "https://services1.arcgis.com/PxbTDTskGHCe4sv6/arcgis/rest/services/Tree_Maintenance_Data_2024_SDCC/FeatureServer/0",
+  "format": "arcgis geoservices rest api",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

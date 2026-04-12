@@ -1,0 +1,13 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYPP39YG4WC1MR51JBJ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYPZF71YM1NQMMM4YAR",
+  "kind": "download",
+  "title": "Distribution",
+  "accessURL": "https://dms.wien.gv.at/share/ifg/ZDI4ZGU5ZjktNmU5Ni00N2UxLWE3ZWMtZWM5MjVhNGExNGRjLWZmZTNlMmY2LTJiOTktNDc4MS05MmFmLTI3ODJiMjcxYjY5NA",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

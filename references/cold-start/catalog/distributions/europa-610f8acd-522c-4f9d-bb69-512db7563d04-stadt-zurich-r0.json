@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZRT197S7H530WG94PF",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZRWXNF300R82GQF8Q1",
+  "kind": "download",
+  "title": "CSV distribution",
+  "accessURL": "https://data.stadt-zuerich.ch/dataset/prd_ssz_fz_pw_haushalt_quartier_jahr_od2041/download/VER204OD2041.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "byteSize": 81280,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

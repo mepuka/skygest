@@ -1,0 +1,38 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYY8T80PXBCE3WMS1JS",
+  "title": "Points de collecte des déchets (Office du patrimoine et des sites)",
+  "description": "[Publisher: Office du patrimoine et des sites] Recensement des infrastructures mises à disposition par les collectivités publiques, dans chaque quartier, chaque commune, permettant la récupération des déchets ménagers, dans le cadre du plan de gestion des déchets. Ces infrastructures peuvent êtretrès différentes d'une commune à l'autre : - conteneurs de surface - conteneurs enterrés - points de collecte gardiennés avec horaires (ESREC) - etc. De même, le nom donné à ces sites varie suivant les communes : - point de récupération - point de collecte - déchetterie - éco-point - espace récupération - etc. Enfin, chaque commune ne récupère pas forcément les mêmes types de déchets. La valeur 1 représente la présence des types de déchets pouvant être recyclés sur ce point de collecte. La valeur 0 représente l'absence de ces types de déchets.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/gol_dechetterie-canton-geneve",
+  "accessRights": "public",
+  "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by",
+  "themes": [
+    "education",
+    "energy",
+    "regions",
+    "society",
+    "environment"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYYZ558H450C0TMGV1N",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZ9K3PETY68HZPAQ55",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZSW5Y8N1K4V1P2GT5",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZ6NYZDS256TSJ1ZYE",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZ39QH0XXDA4GX52V6",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZ27CDTBZZ8EM59QH9",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZE7ZG8KK11A2X0HME"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "gol_dechetterie-canton-geneve",
+      "relation": "exactMatch"
+    }
+  ]
+}

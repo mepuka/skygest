@@ -1,0 +1,37 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYVXJFXAN2FMANYQE7T",
+  "title": "Indice De Dépense De Chaleur (Idc) Des Bâtiments - Moyenne Sur 2 Ou 3 Ans (Office du patrimoine et des sites)",
+  "description": "[Publisher: Office du patrimoine et des sites] L'indice de dépense de chaleur (IDC) est un indicateur de la consommation d'énergie d'un bâtiment pour couvrir ses besoins de chaleur (chauffage et eau chaude sanitaire 'ECS'). Exprimé en mégajoules par mètre carré et par an (MJ/m2a), il représente la quantité annuelle d'énergie finale consommée pour la production de chaleur, ramenée à un mètre carré de plancher chauffé (SRE) et corrigée en fonction des données climatiques de l'année considérée.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/scane_indice_moyennes_3_ans-canton-geneve",
+  "accessRights": "public",
+  "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by",
+  "themes": [
+    "regions",
+    "energy",
+    "environment",
+    "education"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYVKTYP4JYB5D5TA8YV",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYV53130EE53T73A2SW",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYV0Q8PW6Z9B469373P",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYVQJQNWRDMB92SFWEW",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYV7S9Z05K34WCTA8YQ",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYVTW1R7GA5YVHKXT08",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYVJQM9A6F45A70WVJ2"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "scane_indice_moyennes_3_ans-canton-geneve",
+      "relation": "exactMatch"
+    }
+  ]
+}

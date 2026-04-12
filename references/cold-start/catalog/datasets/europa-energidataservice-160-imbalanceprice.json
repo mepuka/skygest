@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZKZRB8YJ3DH3H48MH2",
+  "title": "Imbalance Price (Energinet)",
+  "description": "[Publisher: Energinet] This dataset shows all relevant information regarding the imbalance price design. The data is in 15-minute resolution and shows satisfied demand and the imbalance price and contains all the components relevant to the imbalance price, including the aFRR volumes, aFRR volume-weighted average price, and the mFRR marginal price.\n**Note**: The data will always reflect the prevailing conditions in the market design. Before March 4th, 2026 the dominating direction was determined by Balancing demand. From March 4th, 2026 the dominating direction is determined by Satisfied demand. Before March 19th, 2025 the imbalance price equal imbalance price from Pricing Module.  \n\nBalancing demand (mFRR SA), can not be found in a new dynamic dataset mFRR Energy Activation Market.\n\n**Find more** information about imbalance price design here: [Slides fra Webinar om nyt ubalancedesign](https://energinet.dk/el/systemydelser/nyheder-om-systemydelser/2025/02/14/slides-fra-webinar-om-nyt-ubalancedesign/) or [Explanatory-note-nyt-design-for-ubalanceafregning.pdf](https://energinet.dk/regler/el/elmarked/)  (Danish) \n\n**Recommended parameters and frequencies for API requests:** Call the dataset every 10 minutes with the parameters: [start=now-PT1H](https://api.energidataservice.dk/dataset/ImbalancePrice?start=now-PT1H)",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/energidataservice_160_imbalanceprice",
+  "accessRights": "public",
+  "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
+  "temporal": "2025-03-04T00:00:00Z/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZK6PMZXHEJ0WZX56S0",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZK21R4K6WTGJR4QE3T"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "energidataservice_160_imbalanceprice",
+      "relation": "exactMatch"
+    }
+  ]
+}

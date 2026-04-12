@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYZ0CJN78ZZJT0HMS1X",
+  "title": "Tree Maintenance Data 2025 SDCC (South Dublin County Council)",
+  "description": "[Publisher: South Dublin County Council] <p>The Tree Maintenance Data consists of &nbsp;numbers of Trees managed in one calendar year. &nbsp;This data is created by the Public Realm Section as part of Environment Water and Climate Change Department.</p><p>Data includes the Number of Trees Pruned, Trees Removed, Tree Stumps Removed, Trees Planted and Tree Whips planted as mini-woodlands.</p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/2a5b018f-924f-4e60-accd-9f8b25c2c297",
+  "accessRights": "public",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZY8CHBSFPNR3V08XW",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZM1VJB8R4GPQHQ2Q4",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZWNJCQ1JN65E0F08M",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZV0YF9ZTARM3DJVR1",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZGQTAMHED1Q7ME2X1"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "2a5b018f-924f-4e60-accd-9f8b25c2c297",
+      "relation": "exactMatch"
+    }
+  ]
+}

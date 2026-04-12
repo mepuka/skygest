@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZAQFW5817TR79HVYCX",
+  "title": "Supply of biomass - annual data (Eurostat)",
+  "description": "[Publisher: Eurostat] Supply of biomass - annual data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/whpf1fy2iy2i9osksflqtg",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "2019-01-01T00:00:00Z/2023-12-31T00:00:00Z",
+  "themes": [
+    "environment",
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZAHA05DN2XAPEBYT1R",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZAXXP66SKHBWZ3VDKS",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZAGDAGB8KQJHXS6H6Q",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZA2SFPHQKE05R6EWBW",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZAZH9VB0SA7HFSZA1K"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "whpf1fy2iy2i9osksflqtg",
+      "relation": "exactMatch"
+    }
+  ]
+}

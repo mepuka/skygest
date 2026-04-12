@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ027F7QCP35W9DPZK3",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ0MP8414BEPEZXYY3G",
+  "kind": "download",
+  "title": "CSV distribution",
+  "accessURL": "https://data.stadt-zuerich.ch/dataset/ewz_fw_abonnierte_leistung_kva_und_holz/download/ewz_fw_abonnierte_leistung_kva_und_holz.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "byteSize": 115,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

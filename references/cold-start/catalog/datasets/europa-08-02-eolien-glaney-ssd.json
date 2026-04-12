@@ -1,0 +1,37 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZKY7DAXJ7R7QR0JHK9",
+  "title": "Mesures de vents - Côte du Glâney (ssd)",
+  "description": "[Publisher: ssd] Ce jeu de données fournit des mesures de vent enregistrées toutes les 10 minutes pour le périmètre « Côte du Glâney », situé dans le canton de Fribourg. Collectées dans le cadre du mandat du Grand Conseil pour la planification éolienne cantonale, ces données comprennent la vitesse et la direction du vent, la température, l'humidité relative à différentes hauteurs, ainsi que le potentiel de production éolienne (productible éolien). Ces informations sont essentielles pour la planification énergétique et sont mises à disposition en libre accès sur la plateforme Open Government Data du canton de Fribourg dans un souci de transparence et d'accès à l'information pour tous. Le périmètre « Côte du Glâney » se situe dans le district de la Glâne à environ 800 mètres d’altitude, à l’ouest et sud-ouest de la commune de Romont.L'heure\nUTC (temps universel coordonné) sert de référence mondiale et ne change pas\navec les saisons. Pour obtenir l'heure locale, ajoutez 1 heure en hiver (UTC+1)\net 2 heures en été (UTC+2).Pour plus d'informations : [https://www.fr.ch/fribourg-vents/cote-du-glaney-avec-espace-didactique](https://www.fr.ch/fribourg-vents/cote-du-glaney-avec-espace-didactique)",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/08_02_eolien_glaney-ssd",
+  "accessRights": "public",
+  "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by",
+  "temporal": "2025-02-10T00:00:00Z/2026-03-02T23:50:00Z",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZKA87EQMS1JFYQ1K7A",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZKYJWFQ1SD0MRBSZ8D",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZKDASVVMV0GPSQ3KKR",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZKM65WESBTP45RDESA",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZKN0806FKKQZ52CMJQ",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZKF8GYHWZEWPYN2TEX",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZK8DACK1VPVEMJGNVQ",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZK1J8Y73X2YM5JATWJ",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZK8Q26R1RCH57428K7"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "08_02_eolien_glaney-ssd",
+      "relation": "exactMatch"
+    }
+  ]
+}

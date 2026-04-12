@@ -1,0 +1,42 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZ5MNZWYSSAAR73WTQ3",
+  "title": "Solaranlagen der St.Galler Stadtwerke (stadt-st-gallen)",
+  "description": "[Publisher: stadt-st-gallen] Der Datensatz zeigt die Solaranlagen der St.Galler Stadtwerke (sgsw) und deren Eigenschaften.Die Anlagen mit smart_me_id und smart_me_name sind Teil des Pilotprojekts Kraftwerk St.Gallen und deren aktuelle Stromproduktion zeigt folgender Datensatz:[https://daten.stadt.sg.ch/explore/dataset/aktuelle-stromproduktion-der-solaranlagen-der-stgaller-stadtwerke](https://daten.stadt.sg.ch/explore/dataset/aktuelle-stromproduktion-der-solaranlagen-der-stgaller-stadtwerke)",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/solaranlagen-der-stgaller-stadtwerke-stadt-st-gallen",
+  "accessRights": "public",
+  "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ5H7PKR4K6YBGXF601",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ507TSGJB36JH7EBSJ",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ5CFTFN75EPX6HBSQ9",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ574RMJGWKTVFGKT96",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ5GH322DP2PB3AH8G0",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ5Q38B32928ZM3EW80",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ5BZPN818H57YQKMJN",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ5XT3EXY4F69BCC8M6",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ5F2SVYK6ESN0P6R2Q",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ5D1PXPFMAE91BJV36",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ5RFWVTRJ7HYHECQ7Q",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ5FKJ8CB4VX43NWH26",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ5H116CR7HJVXAART9",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ5N0XP34G3SW23HX19",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ5TY916E10QTT2340A"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "solaranlagen-der-stgaller-stadtwerke-stadt-st-gallen",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZV0YKP0KVJH1M2S4NE",
+  "title": "Regulating and Balance Power, Overall Data (Discontinued, please read description) (Energinet)",
+  "description": "[Publisher: Energinet] This dataset has been Discontinued. Data is available in [Imbalance Price](https://www.energidataservice.dk/tso-electricity/ImbalancePrice) and [mFRR Energy Activation Market](https://www.energidataservice.dk/tso-electricity/MfrrEnergyActivationMarket).\n\nIn connection with the go-live of the new imbalance price design, the dataset [Imbalance Price](https://www.energidataservice.dk/tso-electricity/ImbalancePrice) was introduced, replacing [Regulating and Balance Power, Overall Data](https://www.energidataservice.dk/tso-electricity/RegulatingBalancePowerdata). The dataset is in 15-minute resolution and contains all the components relevant to the imbalance price, including the imbalance price, aFRR volume-weighted average price, and mFRR marginal price.\n\nmFRR activation, balance power prices and imbalance, overall data.\n",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/energidataservice_122_regulatingbalancepowerdata~~1",
+  "accessRights": "public",
+  "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
+  "temporal": "1999-07-01T00:00:00Z/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZVQXJDTJESNSH1FNJS",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZVZQK86ZVFXV7F54SW"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "energidataservice_122_regulatingbalancepowerdata~~1",
+      "relation": "exactMatch"
+    }
+  ]
+}

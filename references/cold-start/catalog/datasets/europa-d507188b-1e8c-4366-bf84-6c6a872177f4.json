@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZQQ689AJWX0P8SCFQ7",
+  "title": "d507188b-1e8c-4366-bf84-6c6a872177f4 (Bundesnetzagentur)",
+  "description": "[Publisher: Bundesnetzagentur]",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/d507188b-1e8c-4366-bf84-6c6a872177f4",
+  "accessRights": "public",
+  "license": "der-hier-beschriebene-online-dienst-ist-mit-seinen-inhalten-urheberrechtlich-geschu-tzt-der-online-dienst-steht-unter-der-datenlizenz-namensnennung-keine-bearbeitung-3-0-deutschland-cc-by-nd-3-0-de-https-creativecommons-org-licenses-by-nd-3-0-de-zur-verfu-gung-der-quellenvermerk-ist-zu-beachten-",
+  "themes": [
+    "government",
+    "energy",
+    "environment"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZQERNJAZJX1KNNT6A3",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZQHVVQ11QAFJF2BG0H"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "d507188b-1e8c-4366-bf84-6c6a872177f4",
+      "relation": "exactMatch"
+    }
+  ]
+}

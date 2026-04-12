@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYH9RQEQ2JZJA1FCPH8",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYH4NAT375QSA5EGNND",
+  "kind": "download",
+  "title": "CSV distribution",
+  "accessURL": "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/nrg_pc_203?format=SDMX-CSV&compressed=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "byteSize": 737106,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

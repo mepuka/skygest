@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZGN45T5RPGQBVJBBJ4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZG3JKG0VP5RPDV2B19",
+  "kind": "download",
+  "title": "PARQUET distribution",
+  "accessURL": "https://daten.stadt.sg.ch/api/v2/catalog/datasets/aktuelle-stromproduktion-der-solaranlagen-der-stgaller-stadtwerke/exports/parquet",
+  "format": "parquet",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

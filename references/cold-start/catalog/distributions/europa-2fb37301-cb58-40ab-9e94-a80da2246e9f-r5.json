@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ6QBT0R33T736WZYV7",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ6TQP6XY9FBDPA41AJ",
+  "kind": "download",
+  "title": "ARCGIS GEOSERVICES REST API distribution",
+  "accessURL": "https://services1.arcgis.com/PxbTDTskGHCe4sv6/arcgis/rest/services/Salt_Gritting_Routes_2015_2016/FeatureServer/2",
+  "format": "arcgis geoservices rest api",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

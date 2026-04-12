@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYNMR7RTBQA0CC7MTKB",
+  "title": "BER Ratings Building Certs 2025 2027 FCC (Fingal County Council)",
+  "description": "[Publisher: Fingal County Council] <p>This Data set contains the details of the Building Energy Rating for Fingal County Council Buildings (BER Certs) from 2025 up to 31st May 2027. The BER Certs are updated Annually with ratings and data.</p><p>The BER System is a rating of Energy Efficiency and is rated from A the highest to G the lowest.</p><p>This helps people to improve the properties or building to be more Environmentally Friendly by using energy efficient items e.g. light bulbs, heating devices and lower energy omitting machines and using timers etc. This is part of Green Government and better for the Nature as our carbon footprint is lowered.</p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/4dc521e8-b97c-4c14-b9eb-523db7fffb37~~1",
+  "accessRights": "public",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYP6G3P3DB99JZ7QC9V"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "4dc521e8-b97c-4c14-b9eb-523db7fffb37~~1",
+      "relation": "exactMatch"
+    }
+  ]
+}

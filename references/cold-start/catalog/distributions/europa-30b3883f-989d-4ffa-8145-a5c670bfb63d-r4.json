@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZP0WAE7M2KGJMC2PD6",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZN85SGY7BJZ8SMNN6Y",
+  "kind": "download",
+  "title": "OAF distribution",
+  "accessURL": "https://api.hamburg.de/datasets/v1/eignung_dezentr_waermeversorgung_kwp",
+  "format": "oaf",
+  "byteSize": 2526,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

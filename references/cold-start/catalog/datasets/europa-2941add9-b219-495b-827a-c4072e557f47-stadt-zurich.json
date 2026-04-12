@@ -1,0 +1,28 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZ1TPC005MR7XA92Q0A",
+  "title": "Fernwärme, jährlicher Wärmeabsatz (FG Bewilligungen, Stadtpolizei, Sicherheitsdepartement)",
+  "description": "[Publisher: FG Bewilligungen, Stadtpolizei, Sicherheitsdepartement] Jährlicher Wärmeabsatz aller Fernwärmebezüger pro Jahr in MWh im Wärmeverbund KVA und Holz",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/2941add9-b219-495b-827a-c4072e557f47-stadt-zurich",
+  "accessRights": "public",
+  "license": "http://dcat-ap.ch/vocabulary/licenses/terms_open",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ13FH5QP9DC0T05DM2"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "2941add9-b219-495b-827a-c4072e557f47-stadt-zurich",
+      "relation": "exactMatch"
+    }
+  ]
+}

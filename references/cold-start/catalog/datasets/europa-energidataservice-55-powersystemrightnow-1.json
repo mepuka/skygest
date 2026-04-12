@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZ9NWB261HSSE6FVQKD",
+  "title": "Power System Right Now (Energinet)",
+  "description": "[Publisher: Energinet] Production, flow, and balance on interconnectors right now in one-minute resolution.\nNOTE: Data are based on upscaled realtime power measurements from the SCADA system. Errors will occur, and will generally not be corrected. For statistical purposes, see [Production and Consumption - Settlement](https://www.energidataservice.dk/tso-electricity/ProductionConsumptionSettlement).\n\n**Recommended parameters and frequencies for API requests:**\nCall the dataset every 1 minute with the parameters: [start=now-PT10M](https://api.energidataservice.dk/dataset/PowerSystemRightNow?start=now-PT10M)\n\n---\n\n**Pilot phase: Realtime publication of imbalances** 6 new columns have been added to the dataset as part of a pilot phase: Realtime publication of imbalances.\n* Imbalance DK1/DK2: The imbalance the system would experience without TSO regulations [MW].\n* aFRR activated DK1/DK2: The current value of aFRR activations [MW].\n* mFRR activated DK1/DK2: The current value of mFRR activations [MW].\n\n**Q&A:** Energinet is experiencing significant interest in the pilot and has received many questions. Answers to these questions are compiled on [Q&A: Realtime publication of imbalances](https://www.energidataservice.dk/QA-realtime-publication-of-imbalances).\n\nUsers of the dataset are advised that the realtime dataset may contain errors. It is important to stress that this is a pilot phase aimed at confirming whether real time publication of imbalance volumes has a positive impact on system balancing.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/energidataservice_55_powersystemrightnow~~1",
+  "accessRights": "public",
+  "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
+  "temporal": "2018-10-31T00:00:00Z/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ99364MEGE8NYWZMKZ",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ9ZQJ9AA0YKYAJKRS6"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "energidataservice_55_powersystemrightnow~~1",
+      "relation": "exactMatch"
+    }
+  ]
+}

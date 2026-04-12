@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYM8DA1K9AEJNPREBPN",
+  "title": "Production of electricity and heat by autoproducers and type of plant (Eurostat)",
+  "description": "[Publisher: Eurostat] Production of electricity and heat by autoproducers and type of plant",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/r0wlvyibnp72lqhgjwa",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "1990-01-01T00:00:00Z/2024-12-31T00:00:00Z",
+  "themes": [
+    "environment",
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYMMCNNDN2CYMG9G8WY",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYMWKDRY8QBC88JKWKH",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYM6A1K2JAF33KWWWZQ",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYMV0WZYN4BZ5CEPSPJ",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYMH41DS7X1QNDKR546"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "r0wlvyibnp72lqhgjwa",
+      "relation": "exactMatch"
+    }
+  ]
+}

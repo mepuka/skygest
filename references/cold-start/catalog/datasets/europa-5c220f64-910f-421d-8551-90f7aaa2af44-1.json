@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZRECW4VZN6HF6BHBT8",
+  "title": "5c220f64-910f-421d-8551-90f7aaa2af44~~1 (Senatsverwaltung für Wissenschaft, Gesundheit, Pflege und Gleichstellung)",
+  "description": "[Publisher: Senatsverwaltung für Wissenschaft, Gesundheit, Pflege und Gleichstellung]",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/5c220f64-910f-421d-8551-90f7aaa2af44~~1",
+  "accessRights": "public",
+  "license": "http://dcat-ap.de/def/licenses/dl-zero-de/2.0",
+  "themes": [
+    "energy",
+    "government",
+    "environment"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZRNSC6SXHZ7Q12SD3W",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZRV7Q2KMSQE3JB1P5H"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "5c220f64-910f-421d-8551-90f7aaa2af44~~1",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZRFPZPP8BQH6NMGSE4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZR9SYPPSAFWR90RK5J",
+  "kind": "download",
+  "title": "XLSX distribution",
+  "accessURL": "https://wirtschaft.nrw/system/files/media/document/file/umfrage_energie_und_mobilitaetsverhalten_landesverwaltung_2024_offene_frage_gruppiert.xlsx",
+  "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "format": "xlsx",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYP9EZQB9ECVW31VMAM",
+  "title": "NGSD01 - Networked Gas Daily Supply (Central Statistics Office)",
+  "description": "[Publisher: Central Statistics Office] Networked Gas Daily Supply",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/44d77dda-e34d-42e6-86eb-90dcaf5fb189",
+  "accessRights": "public",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYPTR5SX7P5279K8VF0",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYP576PEBN2V1AHN7WP",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYPTQTXM7N0RJX3JT3E",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYPTYJN5EAN631B09JR"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "44d77dda-e34d-42e6-86eb-90dcaf5fb189",
+      "relation": "exactMatch"
+    }
+  ]
+}

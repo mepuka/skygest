@@ -1,0 +1,28 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZJK0X5DX7B00CZM5SJ",
+  "title": "Number of access points at the Social, Exception and supplier of last resort as of 01/2022 (Fluvius)",
+  "description": "[Publisher: Fluvius] In this open dataset you can find the number of access points at the social and exception provider managed by Fluvius per energy per main municipality. We determine the main municipality on the basis of the postcode where the point is located (delivery address).\nThis includes both domestic and non-domestic customers.\nSocial provider: supplier responsible for coordinating activities related to social public service obligations.\nException provider: the distribution system operator is temporarily in the access register as an access holder in very specific circumstances, pending closure or regularisation of the situation.\nSupplier of last resort: The supplier who has to supply electricity and/or natural gas to consumers whose suppliers are in default. (e.g. due to bankruptcy, withdrawal of the supply contract, cessation of supplier activities, denial of access to the distribution network.).",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/https-opendata-fluvius-be-explore-dataset-1_09-aantal-toegangspunten-bij-de-sociale-uitzondering-en-noodleverancier-vanaf-",
+  "accessRights": "public",
+  "license": "https://opendata.fluvius.be/p/licentieopendatafluvius/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZJQGJM3J8HGJNN4GSK"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "https-opendata-fluvius-be-explore-dataset-1_09-aantal-toegangspunten-bij-de-sociale-uitzondering-en-noodleverancier-vanaf-",
+      "relation": "exactMatch"
+    }
+  ]
+}

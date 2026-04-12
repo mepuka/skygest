@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZ7F9GC6FQCT8MTH12N",
+  "title": "iMio - Events in Wallonia (iMio)",
+  "description": "[Publisher: iMio] All events published on the public websites of the Walloon local authorities working with the iMio intercommunale.\n\nComposition of the dataset Field Labeled Description id Identifier Local unique identifier. start_datetime Start date Event start date. end_datetime End date Event end date. recurrence Recurrence Rule of recurrence of the event. whole_day Whole day The event is held all day (yes/no). open_end Indefinite The event is indefinite (yes/no). title Title Title of the event. description DescriptionD Description of the event. Category Category Event category. topics Themes Theme(s) of the event. target_audience Public target Public target. expectees Participants Active participants in the event. text Text Descriptive and detailed text of the event. reduced_mobility_facilities Persons with reduced mobility Suitable for persons with reduced mobility (yes/no). free_entry Free entry Free entry (yes/no). coordinates Geographical coordinates Geographical coordinates. address_street_name Street name Street name. address_house_number House number Building door number. address_postal_code Postcode Postcode. address_city Municipality City / Commune / Village. address_country Country Country. online_meeting_url Link visio Link to the event that happens online. contact_name Contact name Contact name. contact_email Contact email address Contact email address. contact_phone Contact telephone Contact telephone. ticket_url Ticket link Link to the ticket office. event_url Link event site Link to event site. facebook_url Facebook Link to the facebook of the event. instagram_url Instagram Link to the event's Instagram. twitter_url X (twitter) Link to the event twitter. video_url Link to video Link to event video. owner_id Owner ID The identifier of the entity that owns the event. owner_name Name of the owner Name of the entity that owns the event. owner_diary_id Calendar ID Calendar ID of the event owner entity. owner_diary_name Calendar name Calendar name of the entity that owns the event. creation_datetime Creation date Event creation date. modification_datetime Date of modification Last date of modification of the event..",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/https-www-odwb-be-explore-dataset-evenements-en-wallonie-",
+  "accessRights": "public",
+  "themes": [
+    "education",
+    "economy",
+    "energy",
+    "government",
+    "agriculture",
+    "society",
+    "transport",
+    "regions"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ759Y5JY7WEA5STVCY"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "https-www-odwb-be-explore-dataset-evenements-en-wallonie-",
+      "relation": "exactMatch"
+    }
+  ]
+}
