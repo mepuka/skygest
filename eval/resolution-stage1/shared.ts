@@ -218,7 +218,7 @@ export const diffDirectRefs = (
   }
 });
 
-const hasAnyRefs = (refs: Stage1ActualRefs) =>
+export const hasAnyRefs = (refs: Stage1ActualRefs) =>
   refs.distributionIds.length > 0 ||
   refs.datasetIds.length > 0 ||
   refs.agentIds.length > 0 ||
