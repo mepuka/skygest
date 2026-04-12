@@ -281,7 +281,7 @@ export const runOdreIngest = Effect.fn("Odre.runIngest")(function* (
       rowFailureCount: rowFailures.length
     }),
     buildContextFromIndex: (idx, nowIso) =>
-      Effect.succeed(buildContextFromIndex(idx, nowIso)),
+      Effect.sync(() => buildContextFromIndex(idx, nowIso)),
     buildCandidateNodes: ({ datasets }, idx, context) =>
       buildCandidateNodes(datasets, idx, context),
     onValidationFailure,

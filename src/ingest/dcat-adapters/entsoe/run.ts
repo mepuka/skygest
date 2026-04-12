@@ -235,7 +235,7 @@ export const runEntsoeIngest = Effect.fn("Entsoe.runIngest")(function* (
       manifestEntryCount: entries.length
     }),
     buildContextFromIndex: (idx, nowIso) =>
-      Effect.succeed(buildContextFromIndex(idx, nowIso)),
+      Effect.sync(() => buildContextFromIndex(idx, nowIso)),
     buildCandidateNodes: ({ entries }, idx, context) =>
       buildCandidateNodes(entries, idx, context),
     onValidationFailure,
