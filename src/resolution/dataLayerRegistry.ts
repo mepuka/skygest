@@ -254,6 +254,20 @@ const validateReferences = (
         checkReference(issues, path, "publisherAgentId", entity.publisherAgentId, "Agent", entityById);
         for (const datasetId of entity.servesDatasetIds) {
           checkReference(issues, path, "servesDatasetIds", datasetId, "Dataset", entityById);
+          const dataset = entityById.get(datasetId);
+          if (
+            dataset !== undefined &&
+            dataset._tag === "Dataset" &&
+            !(dataset.dataServiceIds ?? []).includes(entity.id)
+          ) {
+            pushIssue(
+              issues,
+              makeSemanticConsistencyIssue(
+                path,
+                `service/dataset backref missing: servesDatasetIds includes ${datasetId} but that dataset does not list this service in dataServiceIds`
+              )
+            );
+          }
         }
         break;
       case "DatasetSeries":
