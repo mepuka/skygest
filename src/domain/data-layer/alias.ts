@@ -6,7 +6,7 @@ export const aliasSchemes = [
   "entsoe-psr", "entsoe-eic", "entsoe-document-type",
   "eia-route", "eia-series", "eia-bulk-id", "energy-charts-endpoint",
   "ember-route", "gridstatus-dataset-id", "odre-dataset-id",
-  "eurostat-code",
+  "eurostat-code", "europa-dataset-id",
   "ror", "wikidata", "doi",
   "iso3166", "url", "other"
  ] as const;
@@ -19,6 +19,7 @@ export const AliasSchemeValues = {
   entsoeDocumentType: "entsoe-document-type",
   gridstatusDatasetId: "gridstatus-dataset-id",
   odreDatasetId: "odre-dataset-id",
+  europaDatasetId: "europa-dataset-id",
   url: "url"
 } as const;
 
