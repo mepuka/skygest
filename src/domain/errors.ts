@@ -262,6 +262,42 @@ export class ResolverSourceAttributionMissingError extends Schema.TaggedErrorCla
   }
 ) {}
 
+export class OntologyDecodeError extends Schema.TaggedErrorClass<OntologyDecodeError>()(
+  "OntologyDecodeError",
+  {
+    source: Schema.String,
+    path: Schema.String,
+    message: Schema.String
+  }
+) {}
+
+export class VocabularyLoadError extends Schema.TaggedErrorClass<VocabularyLoadError>()(
+  "VocabularyLoadError",
+  {
+    facet: Schema.String,
+    path: Schema.String,
+    issues: Schema.Array(Schema.String)
+  }
+) {}
+
+export class VocabularyCollisionError extends Schema.TaggedErrorClass<VocabularyCollisionError>()(
+  "VocabularyCollisionError",
+  {
+    facet: Schema.String,
+    normalizedSurfaceForm: Schema.String,
+    canonicalA: Schema.String,
+    canonicalB: Schema.String
+  }
+) {}
+
+export class FacetDecompositionError extends Schema.TaggedErrorClass<FacetDecompositionError>()(
+  "FacetDecompositionError",
+  {
+    postUri: PostUri,
+    reason: Schema.String
+  }
+) {}
+
 export class ResolverWorkflowLaunchError extends Schema.TaggedErrorClass<ResolverWorkflowLaunchError>()(
   "ResolverWorkflowLaunchError",
   {
