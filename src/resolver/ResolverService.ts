@@ -42,7 +42,7 @@ import { Stage2Resolver } from "../resolution/Stage2Resolver";
 import { buildStage1Input } from "./stage1Input";
 import { Logging } from "../platform/Logging";
 
-const RESOLVER_VERSION = "stage2-resolver@sky-307";
+const RESOLVER_VERSION = "stage2-resolver@sky-306-307";
 
 const selectLatestSourceAttribution = (
   enrichments: ReadonlyArray<EnrichmentPlannedExistingEnrichment>

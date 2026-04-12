@@ -32,4 +32,24 @@ describe("jaccardTokenSet", () => {
     expect(FUZZY_CANDIDATE_THRESHOLD).toBe(0.6);
     expect(FUZZY_CONFIDENT_THRESHOLD).toBe(0.85);
   });
+
+  it("discriminates below-candidate, candidate, and confident ranges", () => {
+    const belowCandidate = jaccardTokenSet(
+      "wind energy capacity",
+      "wind capacity additions report"
+    );
+    const candidateBoundary = jaccardTokenSet(
+      "wind energy capacity",
+      "us wind energy capacity report"
+    );
+    const confidentRange = jaccardTokenSet(
+      "us energy information administration monthly electric report",
+      "us energy information administration monthly electric report archive"
+    );
+
+    expect(belowCandidate).toBeLessThan(FUZZY_CANDIDATE_THRESHOLD);
+    expect(candidateBoundary).toBeCloseTo(FUZZY_CANDIDATE_THRESHOLD);
+    expect(candidateBoundary).toBeLessThan(FUZZY_CONFIDENT_THRESHOLD);
+    expect(confidentRange).toBeGreaterThan(FUZZY_CONFIDENT_THRESHOLD);
+  });
 });

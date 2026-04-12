@@ -56,6 +56,9 @@ type FuzzyCandidate<T extends Agent | Dataset> = {
 
 type ResolvedMatchEntity = Agent | Dataset | Variable;
 
+// This feeds unmatched-surface-form breadcrumbs, so punctuation and symbols
+// should break into separate alphanumeric fragments. Fuzzy scoring keeps a
+// different tokenizer in `fuzzyMatch.ts` because it compares word bags.
 const tokenizeForUnmatched = (value: string) =>
   normalizeLookupText(value)
     .split(/[^\p{L}\p{N}]+/u)
@@ -583,6 +586,9 @@ const handleAgentLabelResidual = (
   residual: UnmatchedTextResidual,
   lookup: DataLayerRegistryLookup
 ) => {
+  // `UnmatchedTextResidual` covers several free-text sources, but in this
+  // slice only agent-name lookup has a safe deterministic Stage 2 action.
+  // Other free-text classes stay generic and continue to Stage 3 untouched.
   const candidates = topFuzzyCandidates(
     [...lookup.entities].filter((entity): entity is Agent => entity._tag === "Agent"),
     (agent) => [agent.name, ...(agent.alternateNames ?? [])],

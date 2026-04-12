@@ -1,4 +1,4 @@
-import { Option, Result, Schema } from "effect";
+import { Option, Result } from "effect";
 import {
   makeSurfaceFormEntry,
   SurfaceFormEntryAny,
@@ -57,7 +57,10 @@ export type SurfaceFormLookup<
     Entry["canonical"]
   >;
   readonly entryByNormalizedSurfaceForm: ReadonlyMap<string, Entry>;
-  readonly orderedEntries: ReadonlyArray<Entry>;
+  readonly orderedMatchers: ReadonlyArray<{
+    readonly entry: Entry;
+    readonly matches: (normalizedText: string) => boolean;
+  }>;
 };
 
 const ALNUM_PATTERN = /[\p{L}\p{N}]/u;
@@ -65,22 +68,19 @@ const ALNUM_PATTERN = /[\p{L}\p{N}]/u;
 const escapeRegExp = (value: string) =>
   value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 
-const matchesSurfaceForm = (
-  normalizedText: string,
+const buildSurfaceFormMatcher = (
   normalizedSurfaceForm: string
-) => {
-  if (normalizedText === normalizedSurfaceForm) {
-    return true;
-  }
-
+): ((normalizedText: string) => boolean) => {
   if (!ALNUM_PATTERN.test(normalizedSurfaceForm)) {
-    return normalizedText.includes(normalizedSurfaceForm);
+    return (normalizedText) => normalizedText.includes(normalizedSurfaceForm);
   }
 
-  return new RegExp(
+  const pattern = new RegExp(
     `(^|[^\\p{L}\\p{N}])${escapeRegExp(normalizedSurfaceForm)}(?=$|[^\\p{L}\\p{N}])`,
     "u"
-  ).test(normalizedText);
+  );
+
+  return (normalizedText) => pattern.test(normalizedText);
 };
 
 export const buildSurfaceFormLookup = <
@@ -109,11 +109,15 @@ export const buildSurfaceFormLookup = <
       right.normalizedSurfaceForm.length - left.normalizedSurfaceForm.length ||
       left.normalizedSurfaceForm.localeCompare(right.normalizedSurfaceForm)
   );
+  const orderedMatchers = orderedEntries.map((entry) => ({
+    entry,
+    matches: buildSurfaceFormMatcher(entry.normalizedSurfaceForm)
+  }));
 
   return Result.succeed({
     canonicalByNormalizedSurfaceForm: canonicalIndex.success,
     entryByNormalizedSurfaceForm,
-    orderedEntries
+    orderedMatchers
   });
 };
 
@@ -133,9 +137,7 @@ export const matchSurfaceForm = <
   }
 
   return Option.fromNullishOr(
-    lookup.orderedEntries.find((entry) =>
-      matchesSurfaceForm(normalizedText, entry.normalizedSurfaceForm)
-    )
+    lookup.orderedMatchers.find((matcher) => matcher.matches(normalizedText))?.entry
   );
 };
 

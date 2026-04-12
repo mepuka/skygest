@@ -51,21 +51,33 @@ const VOCABULARY_PATHS = {
   technologyOrFuel: "references/vocabulary/technology-or-fuel.json"
 } as const;
 
-const decodeVocabulary = <A>(
+export type FacetVocabularyJsonSources = {
+  readonly statisticType: unknown;
+  readonly aggregation: unknown;
+  readonly unitFamily: unknown;
+  readonly technologyOrFuel: unknown;
+};
+
+const DEFAULT_VOCABULARY_JSON_SOURCES: FacetVocabularyJsonSources = {
+  statisticType: statisticTypeJson,
+  aggregation: aggregationJson,
+  unitFamily: unitFamilyJson,
+  technologyOrFuel: technologyOrFuelJson
+};
+
+const decodeVocabulary = <S extends Schema.Decoder<unknown>>(
   facet: string,
   path: string,
-  schema: Schema.Schema<ReadonlyArray<A>>,
+  schema: S,
   json: unknown
-): Effect.Effect<ReadonlyArray<A>, VocabularyLoadError> => {
-  const decoded = decodeUnknownEitherWith(
-    schema as unknown as Schema.Decoder<unknown>
-  )(json) as Result.Result<ReadonlyArray<A>, unknown>;
+): Effect.Effect<S["Type"], VocabularyLoadError> => {
+  const decoded = decodeUnknownEitherWith(schema)(json);
   if (Result.isFailure(decoded)) {
     return Effect.fail(
       new VocabularyLoadError({
         facet,
         path,
-        issues: [formatSchemaParseError(decoded.failure as any)]
+        issues: [formatSchemaParseError(decoded.failure)]
       })
     );
   }
@@ -99,55 +111,75 @@ export type FacetVocabularyShape = {
   ) => ReturnType<typeof matchTechnologyOrFuel>;
 };
 
-type LoadedLookups = {
+type FacetVocabularyLookups = {
   readonly statisticType: StatisticTypeLookup;
   readonly aggregation: AggregationLookup;
   readonly unitFamily: UnitFamilyLookup;
   readonly technologyOrFuel: TechnologyOrFuelLookup;
 };
 
-const loadLookups = () =>
-  Effect.gen(function* () {
-  const statisticTypeEntries = yield* decodeVocabulary(
-    "statistic-type",
-    VOCABULARY_PATHS.statisticType,
-    StatisticTypeVocabulary,
-    statisticTypeJson
-  );
-  const aggregationEntries = yield* decodeVocabulary(
-    "aggregation",
-    VOCABULARY_PATHS.aggregation,
-    AggregationVocabulary,
-    aggregationJson
-  );
-  const unitFamilyEntries = yield* decodeVocabulary(
-    "unit-family",
-    VOCABULARY_PATHS.unitFamily,
-    UnitFamilyVocabulary,
-    unitFamilyJson
-  );
-  const technologyOrFuelEntries = yield* decodeVocabulary(
-    "technology-or-fuel",
-    VOCABULARY_PATHS.technologyOrFuel,
-    TechnologyOrFuelVocabulary,
-    technologyOrFuelJson
-  );
-
-  return {
-    statisticType: yield* buildLookup(
-      buildStatisticTypeLookup(statisticTypeEntries)
-    ),
-    aggregation: yield* buildLookup(
-      buildAggregationLookup(aggregationEntries)
-    ),
-    unitFamily: yield* buildLookup(
-      buildUnitFamilyLookup(unitFamilyEntries)
-    ),
-    technologyOrFuel: yield* buildLookup(
-      buildTechnologyOrFuelLookup(technologyOrFuelEntries)
-    )
-  };
+const makeFacetVocabulary = (
+  lookups: FacetVocabularyLookups
+): FacetVocabularyShape => ({
+  parseStatisticType: (text) => parseStatisticType(lookups.statisticType, text),
+  matchStatisticType: (text) => matchStatisticType(lookups.statisticType, text),
+  parseAggregation: (text) => parseAggregation(lookups.aggregation, text),
+  matchAggregation: (text) => matchAggregation(lookups.aggregation, text),
+  parseUnitFamily: (text) => parseUnitFamily(lookups.unitFamily, text),
+  matchUnitFamily: (text) => matchUnitFamily(lookups.unitFamily, text),
+  parseTechnologyOrFuel: (text) =>
+    parseTechnologyOrFuel(lookups.technologyOrFuel, text),
+  matchTechnologyOrFuel: (text) =>
+    matchTechnologyOrFuel(lookups.technologyOrFuel, text)
 });
+
+export const loadFacetVocabularyLookups = (
+  sources: FacetVocabularyJsonSources = DEFAULT_VOCABULARY_JSON_SOURCES
+): Effect.Effect<
+  FacetVocabularyLookups,
+  VocabularyCollisionError | VocabularyLoadError
+> =>
+  Effect.gen(function* () {
+    const statisticTypeEntries = yield* decodeVocabulary(
+      "statistic-type",
+      VOCABULARY_PATHS.statisticType,
+      StatisticTypeVocabulary,
+      sources.statisticType
+    );
+    const aggregationEntries = yield* decodeVocabulary(
+      "aggregation",
+      VOCABULARY_PATHS.aggregation,
+      AggregationVocabulary,
+      sources.aggregation
+    );
+    const unitFamilyEntries = yield* decodeVocabulary(
+      "unit-family",
+      VOCABULARY_PATHS.unitFamily,
+      UnitFamilyVocabulary,
+      sources.unitFamily
+    );
+    const technologyOrFuelEntries = yield* decodeVocabulary(
+      "technology-or-fuel",
+      VOCABULARY_PATHS.technologyOrFuel,
+      TechnologyOrFuelVocabulary,
+      sources.technologyOrFuel
+    );
+
+    return {
+      statisticType: yield* buildLookup(
+        buildStatisticTypeLookup(statisticTypeEntries)
+      ),
+      aggregation: yield* buildLookup(
+        buildAggregationLookup(aggregationEntries)
+      ),
+      unitFamily: yield* buildLookup(
+        buildUnitFamilyLookup(unitFamilyEntries)
+      ),
+      technologyOrFuel: yield* buildLookup(
+        buildTechnologyOrFuelLookup(technologyOrFuelEntries)
+      )
+    };
+  });
 
 export class FacetVocabulary extends ServiceMap.Service<
   FacetVocabulary,
@@ -155,24 +187,21 @@ export class FacetVocabulary extends ServiceMap.Service<
 >()("@skygest/FacetVocabulary") {
   static readonly layer = Layer.effect(
     FacetVocabulary,
-    Effect.gen(function* () {
-      const lookups = yield* loadLookups();
-
-      return FacetVocabulary.of({
-        parseStatisticType: (text) => parseStatisticType(lookups.statisticType, text),
-        matchStatisticType: (text) => matchStatisticType(lookups.statisticType, text),
-        parseAggregation: (text) => parseAggregation(lookups.aggregation, text),
-        matchAggregation: (text) => matchAggregation(lookups.aggregation, text),
-        parseUnitFamily: (text) => parseUnitFamily(lookups.unitFamily, text),
-        matchUnitFamily: (text) => matchUnitFamily(lookups.unitFamily, text),
-        parseTechnologyOrFuel: (text) =>
-          parseTechnologyOrFuel(lookups.technologyOrFuel, text),
-        matchTechnologyOrFuel: (text) =>
-          matchTechnologyOrFuel(lookups.technologyOrFuel, text)
-      });
-    })
+    Effect.map(loadFacetVocabularyLookups(), (lookups) =>
+      FacetVocabulary.of(makeFacetVocabulary(lookups))
+    )
   );
 }
+
+export const makeFacetVocabularyLayer = (
+  sources: FacetVocabularyJsonSources = DEFAULT_VOCABULARY_JSON_SOURCES
+) =>
+  Layer.effect(
+    FacetVocabulary,
+    Effect.map(loadFacetVocabularyLookups(sources), (lookups) =>
+      FacetVocabulary.of(makeFacetVocabulary(lookups))
+    )
+  );
 
 export type {
   AggregationLookup,
