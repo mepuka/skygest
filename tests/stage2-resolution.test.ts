@@ -1,11 +1,13 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Match, Schema } from "effect";
 import type { Variable } from "../src/domain/data-layer/variable";
+import { VariableMatch } from "../src/domain/stage1Resolution";
 import { PostUri } from "../src/domain/types";
 import {
   CandidateEntry,
   PartialVariableShape,
   Stage2Evidence,
+  Stage2Result,
   Stage3Input
 } from "../src/domain/stage2Resolution";
 
@@ -21,6 +23,10 @@ const decodeCandidateEntry = Schema.decodeUnknownSync(CandidateEntry);
 const encodeCandidateEntry = Schema.encodeSync(CandidateEntry);
 const decodeStage3Input = Schema.decodeUnknownSync(Stage3Input);
 const encodeStage3Input = Schema.encodeSync(Stage3Input);
+const decodeStage2Result = Schema.decodeUnknownSync(Stage2Result);
+const encodeStage2Result = Schema.encodeSync(Stage2Result);
+const decodeVariableMatch = Schema.decodeUnknownSync(VariableMatch);
+const encodeVariableMatch = Schema.encodeSync(VariableMatch);
 
 describe("stage2Resolution", () => {
   it("round-trips the Stage2Evidence union and stays exhaustively matchable", () => {
@@ -111,6 +117,43 @@ describe("stage2Resolution", () => {
     expect(candidateEntry.rank).toBe(1);
   });
 
+  it("accepts mixed Stage 1 and Stage 2 evidence on a VariableMatch", () => {
+    const variableMatch = decodeVariableMatch(
+      encodeVariableMatch({
+        _tag: "VariableMatch",
+        variableId: "https://id.skygest.io/variable/var_1234567890AB" as any,
+        label: "Installed wind generation",
+        bestRank: 1,
+        evidence: [
+          {
+            _tag: "VariableAliasEvidence",
+            signal: "variable-alias",
+            rank: 1,
+            aliasScheme: "eia-series",
+            aliasValue: "ELEC.WND.US-ALL.A",
+            source: "post-text"
+          },
+          {
+            _tag: "FacetDecompositionEvidence",
+            signal: "facet-decomposition",
+            rank: 1,
+            matchedFacets: ["technologyOrFuel", "statisticType"],
+            partialShape: {
+              technologyOrFuel: "wind",
+              statisticType: "flow",
+              unitFamily: "energy"
+            },
+            matchedSurfaceForms: [{ surfaceForm: "wind" }]
+          }
+        ]
+      })
+    );
+
+    expect(variableMatch.evidence).toHaveLength(2);
+    expect(variableMatch.evidence[0]?._tag).toBe("VariableAliasEvidence");
+    expect(variableMatch.evidence[1]?._tag).toBe("FacetDecompositionEvidence");
+  });
+
   it("round-trips Stage3Input and accepts multiple Stage1Residual variants", () => {
     const residuals = [
       {
@@ -179,5 +222,85 @@ describe("stage2Resolution", () => {
       expect(roundTripped.matchedSurfaceForms).toHaveLength(2);
       expect(roundTripped.unmatchedSurfaceForms).toEqual(["generation"]);
     }
+  });
+
+  it("round-trips Stage2Result with new matches, corroborations, and escalations", () => {
+    const roundTripped = decodeStage2Result(
+      encodeStage2Result({
+        matches: [
+          {
+            _tag: "VariableMatch",
+            variableId: "https://id.skygest.io/variable/var_1234567890AB" as any,
+            label: "Installed wind generation",
+            bestRank: 1,
+            evidence: [
+              {
+                _tag: "FacetDecompositionEvidence",
+                signal: "facet-decomposition",
+                rank: 1,
+                matchedFacets: ["technologyOrFuel", "statisticType"],
+                partialShape: {
+                  technologyOrFuel: "wind",
+                  statisticType: "flow",
+                  unitFamily: "energy"
+                },
+                matchedSurfaceForms: [{ surfaceForm: "wind" }]
+              }
+            ]
+          }
+        ],
+        corroborations: [
+          {
+            matchKey: {
+              grain: "Dataset",
+              entityId: "https://id.skygest.io/dataset/ds_1234567890AB"
+            },
+            evidence: [
+              {
+                _tag: "FuzzyDatasetTitleEvidence",
+                signal: "fuzzy-dataset-title",
+                rank: 2,
+                candidateTitle: "EIA Wind Tables",
+                score: 0.86,
+                threshold: 0.85
+              }
+            ]
+          }
+        ],
+        escalations: [
+          {
+            _tag: "Stage3Input",
+            postUri: asPostUri,
+            originalResidual: {
+              _tag: "DeferredToStage2Residual",
+              source: "post-text",
+              text: "EIA annual wind generation",
+              reason: "needs structured decomposition"
+            },
+            stage2Lane: "facet-decomposition",
+            partialDecomposition: {
+              technologyOrFuel: "wind",
+              statisticType: "flow"
+            },
+            candidateSet: [
+              {
+                entityId: "https://id.skygest.io/variable/var_1234567890AB",
+                label: "Installed wind generation",
+                grain: "Variable",
+                matchedFacets: ["technologyOrFuel", "statisticType"],
+                rank: 1
+              }
+            ],
+            matchedSurfaceForms: [{ surfaceForm: "wind" }],
+            unmatchedSurfaceForms: ["generation"],
+            reason: "multiple candidates remain after decomposition"
+          }
+        ]
+      })
+    );
+
+    expect(roundTripped.matches).toHaveLength(1);
+    expect(roundTripped.corroborations).toHaveLength(1);
+    expect(roundTripped.escalations).toHaveLength(1);
   });
 });
