@@ -4,7 +4,9 @@ import { d1DataLayerRegistryLayer } from "../bootstrap/D1DataLayerRegistry";
 import { EnrichmentPlanner } from "../enrichment/EnrichmentPlanner";
 import { CloudflareEnv, type ResolverWorkerEnvBindings } from "../platform/Env";
 import { Logging } from "../platform/Logging";
+import { FacetVocabulary } from "../resolution/facetVocabulary";
 import { Stage1Resolver } from "../resolution/Stage1Resolver";
+import { Stage2Resolver } from "../resolution/Stage2Resolver";
 import { CandidatePayloadRepoD1 } from "../services/d1/CandidatePayloadRepoD1";
 import { DataLayerReposD1 } from "../services/d1/DataLayerReposD1";
 import { ResolverService } from "./ResolverService";
@@ -30,9 +32,18 @@ export const makeResolverLayer = (env: ResolverWorkerEnvBindings) => {
   const stage1ResolverLayer = Stage1Resolver.layer.pipe(
     Layer.provideMerge(registryLayer)
   );
+  const facetVocabularyLayer = FacetVocabulary.layer;
+  const stage2ResolverLayer = Stage2Resolver.layer.pipe(
+    Layer.provideMerge(Layer.mergeAll(registryLayer, facetVocabularyLayer))
+  );
   const resolverServiceLayer = ResolverService.layer.pipe(
     Layer.provideMerge(
-      Layer.mergeAll(baseLayer, plannerLayer, stage1ResolverLayer)
+      Layer.mergeAll(
+        baseLayer,
+        plannerLayer,
+        stage1ResolverLayer,
+        stage2ResolverLayer
+      )
     )
   );
 
@@ -42,7 +53,9 @@ export const makeResolverLayer = (env: ResolverWorkerEnvBindings) => {
     plannerLayer,
     dataLayerReposLayer,
     registryLayer,
+    facetVocabularyLayer,
     stage1ResolverLayer,
+    stage2ResolverLayer,
     resolverServiceLayer
   );
 };
