@@ -42,7 +42,7 @@ export class DataRefResolverWorkflow extends WorkflowEntrypoint<
       await Effect.runPromise(
         Schema.decodeUnknownEffect(DataRefResolverWorkflowResult)({
           postUri: params.postUri,
-          residualCount: params.residuals.length,
+          residualCount: params.stage3Inputs.length,
           status: "not-implemented" as const
         })
       ) as Schema.Schema.Type<typeof DataRefResolverWorkflowResult>

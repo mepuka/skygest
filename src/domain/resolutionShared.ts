@@ -1,7 +1,8 @@
 import { Schema } from "effect";
+import { Stage2Result } from "./stage2Resolution";
 import { NonNegativeInt, PostUri } from "./types";
 
-export const Stage2Output = Schema.Struct({});
+export const Stage2Output = Stage2Result;
 export type Stage2Output = Schema.Schema.Type<typeof Stage2Output>;
 
 export const Stage3JobId = Schema.String.pipe(

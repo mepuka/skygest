@@ -196,12 +196,21 @@ describe("ResolverService", () => {
         expect(createdJobs).toHaveLength(1);
         expect(createdJobs[0]?.params).toEqual({
           postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
-          residuals: [
+          stage3Inputs: [
             {
-              _tag: "UnmatchedTextResidual",
-              source: "post-text",
-              text: "ERCOT",
-              normalizedText: "ercot"
+              _tag: "Stage3Input",
+              postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
+              originalResidual: {
+                _tag: "UnmatchedTextResidual",
+                source: "post-text",
+                text: "ERCOT",
+                normalizedText: "ercot"
+              },
+              stage2Lane: "no-op",
+              candidateSet: [],
+              matchedSurfaceForms: [],
+              unmatchedSurfaceForms: [],
+              reason: "Stage 2 kernel not yet executed"
             }
           ]
         });
