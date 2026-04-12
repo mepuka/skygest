@@ -1,6 +1,6 @@
 # Resolution Trace: One Post, Two Runtime Passes plus One Prep Loop
 
-This document walks a single real post through the Skygest pipeline as it will exist after SKY-238 (Slice 2c) ships, but it now starts one step earlier than the March snapshot: with the prep loop that makes Stage 1 worth running at all. The post is `at://did:plc:3zhdeyok4trlrd3cijz7p4e6/app.bsky.feed.post/3m7rx7sb6q22l` — a Bluesky post about the 25th anniversary of the UK's first offshore wind farm (Blyth Offshore Wind), citing Ember data with a chart. It was chosen because the gold file at `references/cold-start/candidates/cand-284-jz7p4e6_app_bsky_feed_post_3m7rx7sb6q22l.json` pins the target Stage 1 resolution to a concrete publisher (Ember), dataset (Ember Data Explorer), distribution, and UK-electricity variable — every intermediate stage has somewhere real to land. Effect vocabulary is load-bearing throughout: every named component is a Service Tag, a Workflow class, a Worker name, or a Schema you can grep.
+This document walks a single real post through the Skygest pipeline as it exists after the April 11-12, 2026 resolver merges: `SKY-238` shipped the resolver Worker and persistence lane on April 11, 2026, `SKY-287` moved the internal Worker seam to typed `WorkerEntrypoint` RPC later that same day, and `SKY-239` / `SKY-306` / `SKY-307` plus PR #91 shipped the Stage 2 runtime, vocabulary loader, and comparative eval loop on April 12, 2026. The post is `at://did:plc:3zhdeyok4trlrd3cijz7p4e6/app.bsky.feed.post/3m7rx7sb6q22l` — a Bluesky post about the 25th anniversary of the UK's first offshore wind farm (Blyth Offshore Wind), citing Ember data with a chart. It was chosen because the gold file at `references/cold-start/candidates/cand-284-jz7p4e6_app_bsky_feed_post_3m7rx7sb6q22l.json` pins the target direct-grain resolution to a concrete publisher (Ember), dataset (Ember Data Explorer), distribution, and UK-electricity variable — every intermediate stage has somewhere real to land. Effect vocabulary is load-bearing throughout: every named component is a Service Tag, a Workflow class, a Worker name, or a Schema you can grep.
 
 ## Prep loop — how cand-284 became resolvable
 
@@ -20,13 +20,21 @@ This document walks a single real post through the Skygest pipeline as it will e
 - **Output:** the nine D1 tables (`variables`, `series`, `distributions`, `datasets`, `agents`, `catalogs`, `catalog_records`, `data_services`, `dataset_series`) plus `data_layer_audit`.
 - **For cand-284:** the Ember agent/dataset/distribution/variable rows that the gold file names are loaded into D1 and served through `d1DataLayerRegistryLayer`. *Shipped (`SKY-237`).*
 
-### Stage 0C. Staging snapshot → Stage 1 eval rows
+### Stage 0C. Vocabulary sync → checked-in Stage 2 facet vocabularies
 
-- **Component:** `scripts/build-stage1-eval-snapshot.ts`, `src/platform/D1Snapshot.ts`, `src/eval/Stage1EvalSnapshotBuilder.ts`, `eval/resolution-stage1/run-eval.ts`.
-- **Primitive:** cached `wrangler d1 export` → local sqlite snapshot, then the Stage 1 snapshot builder over the gold-set manifest.
+- **Component:** `scripts/sync-vocabulary.ts`, `references/vocabulary/`, `src/resolution/facetVocabulary/`.
+- **Primitive:** checked-in JSON facet vocabularies synced from the ontology repo, then loaded once at runtime by `FacetVocabulary`.
+- **Input:** exported vocabulary surfaces for the currently shipped Stage 2 facets.
+- **Output:** four checked-in JSON files under `references/vocabulary/`: `statistic-type.json`, `aggregation.json`, `unit-family.json`, and `technology-or-fuel.json`.
+- **For cand-284:** Stage 2 now has canonical surface forms for signals like "offshore wind" and the chart's unit/aggregation hints before the post ever reaches the runtime path. *Shipped (`SKY-239`, `SKY-306`).*
+
+### Stage 0D. Staging snapshot → Stage 1 + Stage 2 eval rows
+
+- **Component:** `scripts/build-stage1-eval-snapshot.ts`, `src/platform/D1Snapshot.ts`, `src/eval/Stage1EvalSnapshotBuilder.ts`, `eval/resolution-stage1/run-eval.ts`, `eval/resolution-stage2/run-eval.ts`.
+- **Primitive:** cached `wrangler d1 export` → local sqlite snapshot, then one shared snapshot builder feeding both the Stage 1 harness and the comparative Stage 1 + Stage 2 harness.
 - **Input:** current staging D1 state plus `references/cold-start/survey/gold-set-resolver.json`.
-- **Output:** `eval/resolution-stage1/snapshot.jsonl` and the paired build report. Recent follow-ups removed the Twitter-only block and made the staging snapshot cache the default path, so both `at://` and `x://` posts now participate in the same eval loop.
-- **For cand-284:** one snapshot row whose `postContext`, `vision`, and `sourceAttribution` come from the same staging-shaped data Stage 1 will see after deploy. *Shipped (`SKY-235`, `SKY-248`, `SKY-249`).*
+- **Output:** `eval/resolution-stage1/snapshot.jsonl` plus local comparative Stage 2 eval reports. The first Stage 1 + Stage 2 run on April 12, 2026 surfaced concrete backlog on vocabulary misclassification, ambiguity, and coverage (`SKY-308`, `SKY-309`, `SKY-310`).
+- **For cand-284:** one snapshot row whose `postContext`, `vision`, and `sourceAttribution` come from the same staging-shaped data the live resolver sees, and which is then reused by both harnesses. *Shipped (`SKY-235`, `SKY-239`, `SKY-248`, `SKY-249`, PR #91).*
 
 ## Pass 1 — Runtime data flow
 
@@ -106,7 +114,7 @@ const SourceAttributionEnrichmentV2 = Schema.Struct({
 ### Stage 4. Stage 1 resolver → `Stage1Result`
 
 - **Component:** Data-Ref Resolution Stage 1, `src/resolution/Stage1Resolver.ts:18-41` + `src/resolution/Stage1.ts`.
-- **Primitive:** `Stage1Resolver` (Tag `@skygest/Stage1Resolver`) layered on `DataLayerRegistry` (Tag `@skygest/DataLayerRegistry`, `src/services/DataLayerRegistry.ts:7-22`). The lookup contract is defined in `src/resolution/dataLayerRegistry.ts`, and `SKY-237` shipped the D1-backed prepared registry (`src/bootstrap/D1DataLayerRegistry.ts`) that now feeds that same contract; Slice 2c is the deployment step that moves this logic behind the resolver Worker fast path.
+- **Primitive:** `Stage1Resolver` (Tag `@skygest/Stage1Resolver`) layered on `DataLayerRegistry` (Tag `@skygest/DataLayerRegistry`, `src/services/DataLayerRegistry.ts:7-22`). The lookup contract is defined in `src/resolution/dataLayerRegistry.ts`, and `SKY-237` shipped the D1-backed prepared registry (`src/bootstrap/D1DataLayerRegistry.ts`) that now feeds the same contract inside the live resolver Worker fast path.
 - **Input:**
 
 ```typescript
@@ -169,57 +177,55 @@ export const Stage1Residual = Schema.Union([
   - `matches[1]` carries `referencedDatasetId = https://id.skygest.io/dataset/ds_01KNQEZ5VN88FSP5QD5M4Z6EGW` (Ember Data Explorer) via `DatasetTitleEvidence` / `DatasetAliasEvidence`.
   - `matches[2]` carries `referencedDistributionId = https://id.skygest.io/distribution/dist_01KNQEZ5VNBTKYXXQN623KFTFG` — one of `ember-explorer-web.json` / `ember-explorer-csv.json` — via `DistributionHostnameEvidence`.
   - `matches[3]` carries `referencedVariableId = https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH` (UK electricity generation variable) via `VariableAliasEvidence` keyed on `rawDims = { geography: "gb", category: "generation" }`.
-  - `residuals` is likely a single `DeferredToStage2Residual` covering the "25 years" temporal framing, which Stage 1 does not model. *Shipped in code (`SKY-235`); Slice 2c wires it into the resolver Worker fast path.*
+  - `residuals` is likely a single `DeferredToStage2Residual` covering the "25 years" temporal framing, which Stage 1 does not model. *Shipped end-to-end (`SKY-235`, `SKY-238`).*
   - The new Ember API-backed datasets from `SKY-265` widen future coverage, but they do not change cand-284's current gold target; the post still lands on the hand-curated Explorer dataset/distribution pair above. That distinction matters when reading Stage 1 regressions: this gold file is still measuring the legacy analytical-product path, not the new API route family.
 
 ### Stage 5. Stage 2 resolver
 
-- **Component:** `src/resolution/Stage2Resolver.ts` (does not yet exist).
-- **Primitive:** will follow the `Stage1Resolver` pattern — Tag `@skygest/Stage2Resolver`, layered on `DataLayerRegistry`.
-- **Input:** a `Stage1Result` whose `residuals[]` contain `DeferredToStage2Residual` entries plus the original `Stage1Input`.
-- **Output:** shape not yet authored; will add facet-decomposition matches against the seven-facet `Variable` composition from the April 8 D2 design (variable, observation_time, reference_area, unit, sector, frequency, measure). Will produce a `Stage2Output` with additional `Candidate` rows marked at facet grain plus narrowed residuals.
-- **For cand-284:** would turn the `rawDims = { geography: "gb", category: "generation" }` hint plus the "Monday marked 25 years" temporal frame into facet-decomposed matches against the UK generation variable. *Planned — Slice 2d (SKY-239). NOT YET IMPLEMENTED — design session pending.*
+- **Component:** `src/resolution/Stage2Resolver.ts`, `src/resolution/Stage2.ts`, `src/resolution/facetVocabulary/`.
+- **Primitive:** `Stage2Resolver` (Tag `@skygest/Stage2Resolver`) layered on `DataLayerRegistry` plus `FacetVocabulary`; it calls the pure `runStage2(postContext, stage1, registry.lookup, vocabulary)` kernel and dispatches exhaustively over the typed `Stage1Residual` union. The shipped runtime currently uses four checked-in facets (`statisticType`, `aggregation`, `unitFamily`, `technologyOrFuel`) plus fuzzy dataset-title and agent-label lanes.
+- **Input:** `Stage1PostContext` plus the full `Stage1Result`.
+- **Output:**
+
+```typescript
+// src/domain/stage2Result.ts:24-31
+export const Stage2Result = Schema.Struct({
+  matches: Schema.Array(Stage1Match),
+  corroborations: Schema.Array(Stage2Corroboration),
+  escalations: Schema.Array(Stage3Input)
+});
+```
+
+- **For cand-284:** Stage 2 is not load-bearing for the four direct Ember matches that Stage 1 already makes. Its job is to inspect any leftover text, optionally add corroboration, and, if it still cannot safely resolve the remaining frame, emit a structured `Stage3Input` instead of the old placeholder handoff. *Shipped (`SKY-239`, `SKY-306`, `SKY-307`).*
 
 ### Stage 6. Stage 3 resolver
 
 - **Component:** `DataRefResolverWorkflow` at `src/resolver-worker/DataRefResolverWorkflow.ts`.
-- **Primitive:** `class DataRefResolverWorkflow extends WorkflowEntrypoint<...>`, hosted by the `skygest-resolver` Worker and reached via the `RESOLVER_RUN_WORKFLOW` Workflow binding declared in the resolver Worker's dedicated Wrangler config. Dispatched by `launcher.startIfAbsent` when Stage 2 residuals warrant LLM escalation.
-- **Input:** Stage 2 candidate set + residuals + the original `Stage1Input`.
-- **Output:** constrained-output LLM pick over the Stage 2 candidate set; writes resolved `Candidate` rows back into D1 via the Registry's write surface.
-- **For cand-284:** would not normally fire — the Ember resolution is clean enough that Stage 1 alone produces accepted matches. *Planned — Slice 6 (SKY-240). NOT YET IMPLEMENTED — design session pending; Slice 2c ships only a workflow stub, real LLM body lands in Slice 6.*
+- **Primitive:** `class DataRefResolverWorkflow extends WorkflowEntrypoint<...>`, hosted by the `skygest-resolver` Worker and reached via the `RESOLVER_RUN_WORKFLOW` Workflow binding declared in the resolver Worker's dedicated Wrangler config. The boundary is real and typed, but the normal fast path only dispatches it on admin-triggered staging runs when `dispatchStage3` is enabled and Stage 2 emitted escalations.
+- **Input:** `DataRefResolverRunParams` carrying `postUri` plus `Stage3Input[]`.
+- **Output:** today this is a workflow stub and typed handoff boundary, not the final constrained-output LLM body. `SKY-240` is the slice that will turn these escalations into the real Stage 3 reranking path.
+- **For cand-284:** would not normally fire. Even when forced in staging, it exercises the workflow envelope rather than the final LLM resolver body. *Stub shipped with `SKY-238`; real Stage 3 body planned in `SKY-240`.*
 
-### Stage 7. `data-ref-resolution` enrichment persisted via SKY-238 fast path
+### Stage 7. `data-ref-resolution` enrichment persisted through the shipped resolver fast path
 
-- **Component:** `skygest-resolver` Worker entry `src/resolver-worker/index.ts` (new), called from `EnrichmentRunWorkflow`.
-- **Primitive:** new standalone Worker `skygest-resolver`, deployed from its own Wrangler config, with a `DB` D1 binding and a `RESOLVER_RUN_WORKFLOW` Workflow binding. HTTP surface:
+- **Component:** `skygest-resolver` Worker entry `src/resolver-worker/index.ts`, `src/resolver/ResolverService.ts`, called from `EnrichmentRunWorkflow`.
+- **Primitive:** standalone `skygest-resolver`, deployed from `wrangler.resolver.toml`, with a `DB` D1 binding and a `RESOLVER_RUN_WORKFLOW` Workflow binding. It exposes both HTTP routes and typed Service Binding RPC via `ResolverEntrypoint extends WorkerEntrypoint<ResolverWorkerEnvBindings>`. HTTP surface:
   - `POST /v1/resolve/post` — single post
   - `POST /v1/resolve/bulk` — batch
   - `GET /v1/resolve/health`
-  Both `skygest-bi-ingest` (`wrangler.toml`) and `skygest-bi-agent` (`wrangler.agent.toml`) declare a `RESOLVER` Service Binding; the Effect client wrapper lives at `src/resolver/Client.ts`.
-- **Workflow step:** `EnrichmentRunWorkflow` gains one `step.do("call resolver service binding")` at the end of the source-attribution run, gated behind `AppConfig.enableDataRefResolution`. The step loads the vision + source-attribution rows from `post_enrichments`, calls `env.RESOLVER.fetch(...)` via the client, and persists the fast-path response as a new `post_enrichments` row with `enrichment_type = "data-ref-resolution"` (additive, no D1 migration).
+  Both `skygest-bi-ingest` (`wrangler.toml`) and `skygest-bi-agent` (`wrangler.agent.toml`) declare a typed `RESOLVER` Service Binding; the Effect client wrapper lives at `src/resolver/Client.ts`.
+- **Workflow step:** `EnrichmentRunWorkflow` calls `ResolverClient.resolvePost(...)` at the end of the source-attribution run, gated behind `AppConfig.enableDataRefResolution`. The step builds `Stage1Input`, crosses the typed `RESOLVER` Service Binding RPC with the run ID as `x-skygest-request-id`, and persists the response as a new `post_enrichments` row with `enrichment_type = "data-ref-resolution"` (additive, no D1 migration).
 - **Observability boundary:** the resolver client forwards `x-skygest-request-id` when present so request correlation survives the Worker hop. Cloudflare trace propagation across the Service Binding is handled separately by `SKY-272`; resolver-specific events and metrics belong to `SKY-278`.
 - **New enrichment variant:**
 
 ```typescript
-// src/domain/enrichment.ts (Slice 2c additions)
-export const EnrichmentKind = Schema.Literals([
-  "vision",
-  "source-attribution",
-  "grounding",
-  "data-ref-resolution"
-]);
+// src/domain/enrichment.ts:284-291
 export const DataRefResolutionEnrichment = Schema.Struct({
   kind: Schema.Literal("data-ref-resolution"),
-  stage1: Stage1Result,
-  stage2: Schema.optionalKey(Stage2Output),
-  stage3: Schema.optionalKey(
-    Schema.Struct({
-      jobId: Schema.String,
-      status: Schema.Literal("queued")
-    })
-  ),
-  resolverVersion: Schema.String,
-  registryVersion: Schema.String,
+  stage1: DeferredStage1Result,
+  stage2: Schema.optionalKey(Stage2Result),
+  stage3: Schema.optionalKey(DataRefResolutionStage3),
+  resolverVersion: ResolverVersion,
   processedAt: Schema.Number
 });
 ```
@@ -227,19 +233,18 @@ export const DataRefResolutionEnrichment = Schema.Struct({
 - **Response shape:**
 
 ```typescript
-type ResolvePostResponse = {
-  postUri: PostUri;
-  stage1: Stage1Result;
-  stage2?: Stage2Output;        // lands in Slice 2d / SKY-239
-  stage3?: { jobId: string; status: "queued" };
-  resolverVersion: string;
-  registryVersion: string;
-  latencyMs: { stage1: number; stage2?: number; total: number };
-};
+export const ResolvePostResponse = Schema.Struct({
+  postUri: PostUri,
+  stage1: Stage1Result,
+  stage2: Schema.optionalKey(Stage2Result),
+  stage3: Schema.optionalKey(ResolveStage3Result),
+  resolverVersion: ResolverVersion,
+  latencyMs: ResolveLatencyMs
+});
 ```
 
-- **Persistence:** one `post_enrichments` row, `enrichment_type = "data-ref-resolution"`, body carrying the staged resolver result, with Stage 1 already populated for the four cand-284 matches enumerated in Stage 4. *Planned — Slice 2c (SKY-238).*
-- **Context note:** by the time this step lands, the D1 registry it reads from is already materially broader than the March architecture snapshot: EIA, Energy Charts, Ember API, and GridStatus catalog state now sit in the same lookup surface as the original hand-curated entities. The deployment slice is moving a stronger resolver substrate, not standing up an empty worker.
+- **Persistence:** one `post_enrichments` row, `enrichment_type = "data-ref-resolution"`, carrying Stage 1 plus optional Stage 2 and queued Stage 3 stub metadata. For cand-284, the direct Ember matches from Stage 1 are already present in this row the moment the resolver fast path succeeds. *Shipped (`SKY-238`, `SKY-287`).*
+- **Context note:** by the time this step shipped, the D1 registry it read from was already materially broader than the March architecture snapshot: EIA, Energy Charts, Ember API, and GridStatus catalog state now sit in the same lookup surface as the original hand-curated entities. The deploy shipped a stronger resolver substrate, not an empty Worker.
 
 ### Stage 8. Editorial pick → curation skill commit
 
@@ -295,7 +300,7 @@ export const PostAnnotationFrontmatter = Schema.Struct({
 ```
 
 - **Persistence:** filesystem under `skygest-editorial/narratives/<slug>/stories/` and `post-annotations/<curation_date>/`. Validated on read by `scripts/build-graph.ts`.
-- **For cand-284:** one story scaffold and one `PostAnnotationFrontmatter` whose `source_providers` contains the Ember `ProviderId`; `data_refs` will carry the four `Candidate` IDs from Stage 1 once `SKY-242` lands. The cache substrate that later validates those refs is already shipped in `SKY-232`; the build-graph warning pass over them is the follow-on `SKY-243`. *Shipped (base); `dataRefs:` block is `SKY-242`, NOT YET IMPLEMENTED.*
+- **For cand-284:** one story scaffold and one `PostAnnotationFrontmatter` whose `source_providers` contains the Ember `ProviderId`; `data_refs` will carry the resolved Skygest entity URIs from the resolver row once `SKY-242` lands. The cache substrate that later validates those refs is already shipped in `SKY-232`; the build-graph warning pass over them is the follow-on `SKY-243`. *Shipped (base); `dataRefs:` block is `SKY-242`, not yet implemented.*
 
 ### Stage 10. Discussion skill consumes the hydrated story
 
@@ -303,7 +308,7 @@ export const PostAnnotationFrontmatter = Schema.Struct({
 - **Primitive:** Claude Code Skill — no Effect Tag. Reads the story file, calls MCP tools (`get_post_enrichments`, `get_post_thread`, `list_editorial_picks`, …) for additional context, and writes editorial prose back into the markdown body and arc files under `narratives/<slug>/index.md`.
 - **Input:** the hydrated `StoryFrontmatter` + post-annotation files from Stage 9, plus any MCP responses it pulls mid-conversation.
 - **Output:** in-place edits to the same story markdown and arc markdown; on next read, `build-graph` revalidates the frontmatter against `@skygest/domain/narrative`.
-- **For cand-284:** the editor would discuss the 25-year offshore-wind frame, pull additional Ember context if warranted, and write a narrative body that cites the Candidate IDs from Stage 7 once they are available on disk. The ad-hoc MCP lookup/join pair that would let the skill resolve or cross-reference those data refs mid-conversation is still `SKY-241` / `SKY-244`. *Shipped (voice loop); data-ref lookup/join tools are planned.*
+- **For cand-284:** the editor would discuss the 25-year offshore-wind frame, pull additional Ember context if warranted, and write a narrative body that cites the resolved entity URIs from Stage 7 once they are available on disk. The ad-hoc MCP lookup/join pair that would let the skill resolve or cross-reference those data refs mid-conversation is still `SKY-241` / `SKY-244`. *Shipped (voice loop); data-ref lookup/join tools are planned.*
 
 ## Pass 2 — Actor intentions
 
@@ -330,19 +335,19 @@ Every stage above was set in motion by a named actor. Some handoffs are within o
 - **Failure mode:** `Stage1Result.residuals` non-empty with `AmbiguousCandidatesResidual`; today this is visible as missing resolver output in `get_post_enrichments`, and once `SKY-242` lands it becomes `data_refs: []` during hydration.
 
 ### Stage 5. Stage 2 resolver
-- **Who:** not yet wired.
-- **Intent:** same workflow run, on behalf of the Operator; will fire when Stage 1 emits `DeferredToStage2Residual`.
-- **Failure mode:** will surface the same way as Stage 1 — empty or ambiguous `data_refs` on the annotation.
+- **Who:** Cloudflare Workflow scheduler, on behalf of the Operator.
+- **Intent:** same workflow run; once Stage 1 leaves typed residuals behind, Stage 2 runs the shipped facet/fuzzy kernel before the result is persisted.
+- **Failure mode:** the `data-ref-resolution` row exists but contains no useful Stage 2 additions or only `escalations[]`; that now feeds the comparative eval and follow-on tuning backlog (`SKY-308`, `SKY-309`, `SKY-310`) instead of disappearing into an undocumented placeholder.
 
 ### Stage 6. Stage 3 resolver
-- **Who:** not yet wired.
-- **Intent:** the `skygest-resolver` Worker, on behalf of the Operator, starts `DataRefResolverWorkflow` via `launcher.startIfAbsent` when Stage 2 residuals justify LLM escalation.
-- **Failure mode:** `stage3.status = "queued"` in the fast-path response but no completion row ever lands; visible via `get_post_enrichments` as a `data-ref-resolution` row whose `stage3.jobId` is present but whose staged result never advances.
+- **Who:** the Operator, on staging/admin-triggered runs only.
+- **Intent:** the `skygest-resolver` Worker starts `DataRefResolverWorkflow` via `launcher.startIfAbsent` when Stage 2 emitted `Stage3Input[]` and the run explicitly asked to dispatch Stage 3.
+- **Failure mode:** `stage3.status = "queued"` appears in the fast-path response but nothing advances past the stub boundary, which is expected until `SKY-240` lands the real LLM body.
 
 ### Stage 7. `data-ref-resolution` fast-path persist
-- **Who:** Cloudflare Workflow scheduler, on behalf of the Operator's Slice 2c deploy.
-- **Intent:** end of the `EnrichmentRunWorkflow`, `step.do("call resolver service binding")` calls `env.RESOLVER.fetch(...)` and writes the response as a new `post_enrichments` row. The Operator's intent is "make data-ref resolution a normal enrichment lane so MCP tools can read it without a second round trip".
-- **Failure mode:** `AppConfig.enableDataRefResolution = false`, or the Service Binding 500s — the Operator sees a missing `data-ref-resolution` row via `list_enrichment_gaps`.
+- **Who:** Cloudflare Workflow scheduler, on behalf of the Operator's shipped resolver deploy.
+- **Intent:** end of the `EnrichmentRunWorkflow`, `ResolverClient.resolvePost(...)` crosses the typed `RESOLVER` binding and writes the response as a new `post_enrichments` row. The Operator's intent is "make data-ref resolution a normal enrichment lane so MCP tools can read it without a second round trip".
+- **Failure mode:** `AppConfig.enableDataRefResolution = false`, the RPC call fails, or the persisted payload fails schema decode — the Operator sees a missing `data-ref-resolution` row via `list_enrichment_gaps`.
 
 ### Stage 8. Editorial pick
 - **Who:** the Editor (Mepuka, by voice) driving the discussion skill, or the Operator directly calling `/admin/editorial/*`.
@@ -363,8 +368,8 @@ Every stage above was set in motion by a named actor. Some handoffs are within o
 
 | Seam class | Count | Notes |
 |---|---:|---|
-| Worker hops | 3 | `skygest-bi-ingest` (host of `IngestRunWorkflow` + `EnrichmentRunWorkflow`) → `skygest-resolver` (Slice 2c; hosts the Stage 1 HTTP surface, is invoked via `RESOLVER` for Stage 7, and can optionally launch `DataRefResolverWorkflow` for Stage 6) → `skygest-bi-agent` (host of MCP Surface + HTTP API, reaches backend via `INGEST_SERVICE` Service Binding). |
-| Workflow class invocations | 3 | `IngestRunWorkflow` (Stage 1), `EnrichmentRunWorkflow` (Stages 2, 3, 4, 7), `DataRefResolverWorkflow` (Stage 6, planned). |
+| Worker hops | 3 | `skygest-bi-ingest` (host of `IngestRunWorkflow` + `EnrichmentRunWorkflow`) → `skygest-resolver` (hosts `ResolverEntrypoint` RPC + HTTP routes, is invoked via `RESOLVER` for Stage 7, and can optionally launch `DataRefResolverWorkflow` for Stage 6) → `skygest-bi-agent` (host of MCP Surface + HTTP API, reaches backend via `INGEST_SERVICE` Service Binding). |
+| Workflow class invocations | 2 by default, 3 with Stage 3 dispatch | `IngestRunWorkflow` (Stage 1), `EnrichmentRunWorkflow` (Stages 2, 3, 4, 5, 7), plus `DataRefResolverWorkflow` only when staging/admin runs explicitly dispatch Stage 3. |
 | D1 rows written | 7+ | `posts` (1), `post_payloads` (1), `ingest_runs` (1), `post_enrichments` × 3 (`vision`, `source-attribution`, `data-ref-resolution`) + `post_enrichment_runs` (1 per), `editorial_picks` (1), `post_curation` (1). Plus `experts` touched for the author. |
 | R2 objects | 0 | `TRANSCRIPTS_BUCKET` is not on this post's path. |
 | Files on disk (editorial repo) | 2 | One `narratives/<slug>/stories/*.md` scaffold, one `post-annotations/<curation_date>/*.md`. |
@@ -381,7 +386,7 @@ Actor-handoff trace for cand-284 (headline number — 11):
 4. `EnrichmentRunWorkflow` → `VisionEnrichmentExecutor` → Gemini → D1 row (Stage 2)
 5. `EnrichmentRunWorkflow` → `SourceAttributionExecutor` → D1 row (Stage 3)
 6. `EnrichmentRunWorkflow` → `RESOLVER` Service Binding → `skygest-resolver` Worker (Stage 7 entry)
-7. `skygest-resolver` Worker → `Stage1Resolver` → `DataLayerRegistry` → response → D1 row (Stages 4 and 7)
+7. `skygest-resolver` Worker → `ResolverService` → `Stage1Resolver` + `Stage2Resolver` → `DataLayerRegistry` / `FacetVocabulary` → response → D1 row (Stages 4, 5, and 7)
 8. Editor (voice) → Discussion Skill → MCP-calling LLM (Stage 8 open)
 9. MCP-calling LLM → `curate_post` + `submit_editorial_pick` MCP tools → `skygest-bi-agent` → `INGEST_SERVICE` → D1 rows (Stage 8)
 10. MCP-calling LLM → `get_editorial_pick_bundle` + `hydrate-story` → filesystem write (Stage 9)
