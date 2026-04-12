@@ -400,6 +400,27 @@ describe("EnrichmentRunWorkflow", () => {
                       matches: [],
                       residuals: []
                     },
+                    stage2: {
+                      matches: [],
+                      corroborations: [],
+                      escalations: [
+                        {
+                          _tag: "Stage3Input",
+                          postUri: input.postUri,
+                          originalResidual: {
+                            _tag: "DeferredToStage2Residual",
+                            source: "post-text",
+                            text: "ERCOT annual load",
+                            reason: "needs stage 2"
+                          },
+                          stage2Lane: "pending",
+                          candidateSet: [],
+                          matchedSurfaceForms: [],
+                          unmatchedSurfaceForms: [],
+                          reason: "Stage 2 kernel not yet executed"
+                        }
+                      ]
+                    },
                     resolverVersion: "stage1-resolver@sky-238",
                     latencyMs: {
                       stage1: 3,
@@ -497,6 +518,16 @@ describe("EnrichmentRunWorkflow", () => {
             stage1: {
               matches: [],
               residuals: []
+            },
+            stage2: {
+              matches: [],
+              corroborations: [],
+              escalations: [
+                expect.objectContaining({
+                  _tag: "Stage3Input",
+                  stage2Lane: "pending"
+                })
+              ]
             },
             resolverVersion: "stage1-resolver@sky-238"
           })

@@ -23,6 +23,7 @@ import {
   type ResolvePostResponse as ResolvePostResponseValue
 } from "../domain/resolution";
 import { type ResolverBulkItemError as ResolverBulkItemErrorValue } from "../domain/resolutionShared";
+import { Stage3Input } from "../domain/stage2Resolution";
 import {
   type EnrichmentExecutionPlan,
   type EnrichmentPlannedExistingEnrichment
@@ -128,7 +129,7 @@ export class ResolverService extends ServiceMap.Service<
 
       const queueStage3 = Effect.fn("ResolverService.queueStage3")(function* (
         postUri: Schema.Schema.Type<typeof PostUri>,
-        residuals: ReadonlyArray<Stage1Residual>
+        stage3Inputs: ReadonlyArray<Stage3Input>
       ) {
         const workflow = env.RESOLVER_RUN_WORKFLOW;
         if (workflow == null) {
@@ -145,8 +146,8 @@ export class ResolverService extends ServiceMap.Service<
               id: jobId,
               params: {
                 postUri,
-                residuals: [...residuals]
-              }
+                stage3Inputs: [...stage3Inputs]
+              } satisfies DataRefResolverRunParams
             }),
           catch: (cause) =>
             new ResolverWorkflowLaunchError({
@@ -157,6 +158,24 @@ export class ResolverService extends ServiceMap.Service<
 
         return jobId;
       });
+
+      const decodePendingStage3Input = Schema.decodeUnknownSync(Stage3Input);
+      const buildPendingStage3Inputs = (
+        postUri: Schema.Schema.Type<typeof PostUri>,
+        residuals: ReadonlyArray<Stage1Residual>
+      ): ReadonlyArray<Stage3Input> =>
+        residuals.map((originalResidual) =>
+          decodePendingStage3Input({
+            _tag: "Stage3Input",
+            postUri,
+            originalResidual,
+            stage2Lane: "pending",
+            candidateSet: [],
+            matchedSurfaceForms: [],
+            unmatchedSurfaceForms: [],
+            reason: "Stage 2 kernel not yet executed"
+          })
+        );
 
       const resolvePost = Effect.fn("ResolverService.resolvePost")(function* (
         input: ResolvePostRequestValue
@@ -182,7 +201,10 @@ export class ResolverService extends ServiceMap.Service<
 
         const stage3 = yield* (
           request.dispatchStage3 === true && stage1.residuals.length > 0
-            ? queueStage3(request.postUri, stage1.residuals).pipe(
+            ? queueStage3(
+                request.postUri,
+                buildPendingStage3Inputs(request.postUri, stage1.residuals)
+              ).pipe(
                 Effect.tapError((error) =>
                   Logging.logWarning("resolver stage3 dispatch failed", {
                     postUri: request.postUri,
@@ -204,10 +226,13 @@ export class ResolverService extends ServiceMap.Service<
         );
 
         const finishedAt = yield* Clock.currentTimeMillis;
+        const stage2 = undefined;
 
         return stripUndefined({
           postUri: request.postUri,
           stage1,
+          // TODO(2d-4): populate with a real Stage2Result once the kernel lands.
+          stage2,
           stage3,
           resolverVersion: RESOLVER_VERSION,
           latencyMs: {

@@ -17,18 +17,39 @@ describe("ResolverClient", () => {
       ) => {
         capturedInput = input;
         capturedOptions = options;
-        return {
-          ok: true as const,
-          value: {
-            postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
-            stage1: {
-              matches: [],
-              residuals: []
-            },
-            resolverVersion: "stage1-resolver@sky-238",
-            latencyMs: {
-              stage1: 2,
-              total: 3
+      return {
+        ok: true as const,
+        value: {
+          postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
+          stage1: {
+            matches: [],
+            residuals: []
+          },
+          stage2: {
+            matches: [],
+            corroborations: [],
+            escalations: [
+              {
+                _tag: "Stage3Input",
+                postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
+                originalResidual: {
+                  _tag: "DeferredToStage2Residual",
+                  source: "post-text",
+                  text: "ERCOT annual load",
+                  reason: "needs stage 2"
+                },
+                stage2Lane: "pending",
+                candidateSet: [],
+                matchedSurfaceForms: [],
+                unmatchedSurfaceForms: [],
+                reason: "Stage 2 kernel not yet executed"
+              }
+            ]
+          },
+          resolverVersion: "stage1-resolver@sky-238",
+          latencyMs: {
+            stage1: 2,
+            total: 3
             }
           }
         };
@@ -53,6 +74,7 @@ describe("ResolverClient", () => {
 
       expect(result.resolverVersion).toBe("stage1-resolver@sky-238");
       expect(result.stage1.matches).toEqual([]);
+      expect(result.stage2?.escalations).toHaveLength(1);
       expect(result.stage3).toBeUndefined();
       expect(capturedOptions).toEqual({
         requestId: "req-123",
@@ -76,6 +98,11 @@ describe("ResolverClient", () => {
               stage1: {
                 matches: [],
                 residuals: []
+              },
+              stage2: {
+                matches: [],
+                corroborations: [],
+                escalations: []
               },
               resolverVersion: "stage1-resolver@sky-238",
               latencyMs: {

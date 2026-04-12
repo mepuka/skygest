@@ -1,9 +1,6 @@
 import { Schema } from "effect";
 import { NonNegativeInt, PostUri } from "./types";
 
-export const Stage2Output = Schema.Struct({});
-export type Stage2Output = Schema.Schema.Type<typeof Stage2Output>;
-
 export const Stage3JobId = Schema.String.pipe(
   Schema.check(Schema.isMinLength(1))
 );

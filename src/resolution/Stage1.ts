@@ -32,6 +32,7 @@ import type {
   VariableAliasEvidence,
   VariableMatch
 } from "../domain/stage1Resolution";
+import { ResolutionEntityId } from "../domain/resolutionEntityId";
 import { stripUndefined } from "../platform/Json";
 import type { DataLayerRegistryLookup } from "./dataLayerRegistry";
 import {
@@ -59,7 +60,7 @@ type ResidualEntry = {
 
 class MatchKey extends Data.Class<{
   readonly grain: Stage1MatchGrain;
-  readonly entityId: string;
+  readonly entityId: ResolutionEntityId;
 }> {}
 
 const structuredAliasSchemes = aliasSchemes.filter(
