@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2JB7DP7NCVFASEJ4EG",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9SCJ2BVGYX9WEG5DY5",
   "sourceRef": {
     "contentId": "at://did:plc:aaliphcev6x7cpfgtto4sefd/app.bsky.feed.post/3ldfctzrg222a"
   },
@@ -9,7 +9,7 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQC6CKPFX43G49A89P",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
   "rawLabel": "This is how you make progress on the transition - many small changes to market o",
   "rawDims": {
     "geography": "us-ca",

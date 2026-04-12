@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS35J8Z3NGPHSJKJY6BB",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQA2KSAH5CWR3VSX7F9J",
   "sourceRef": {
     "contentId": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mhyvkovp672t"
   },
@@ -10,7 +10,7 @@
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VN88FSP5QD5M4Z6EGW",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VNBTKYXXQN623KFTFG",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
-  "rawLabel": "Belgium: IPP Storm raises \u20ac330 million, starts building 1.2GWh battery storage p",
+  "rawLabel": "Belgium: IPP Storm raises €330 million, starts building 1.2GWh battery storage p",
   "rawDims": {
     "geography": "BE",
     "category": "generation"

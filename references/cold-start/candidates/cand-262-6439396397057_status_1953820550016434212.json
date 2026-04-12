@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS34R2YZHH5A0DEC0QPX",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQA1WYHMYKGB39NBKSBW",
   "sourceRef": {
     "contentId": "x://1558466439396397057/status/1953820550016434212"
   },
@@ -10,7 +10,7 @@
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHCC3BMQX00JTTGNMH",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH4ZJK16FMMWK9NXBP",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
-  "rawLabel": "Wildfire smoke complicated NYISO\u2019s BTM solar forecast this week, overforecasting",
+  "rawLabel": "Wildfire smoke complicated NYISO’s BTM solar forecast this week, overforecasting",
   "rawDims": {
     "geography": "us-nyiso",
     "category": "capacity"

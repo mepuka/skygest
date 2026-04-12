@@ -1,19 +1,17 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2G5P9FA7X97KQG6VGT",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9RRM20FES93EDP3PRP",
   "sourceRef": {
     "contentId": "at://did:plc:tywkpd4s5utvhnucftqtsjyc/app.bsky.feed.post/3m5hk2xfgos2l"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQSDAYK3P9HNMKYW5J",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQ774B2VG14CWMTFRS",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VJABSQMB8M5DS8B776",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VJF05MC4FPDJ65N4EG",
   "rawLabel": "I took the historical data from here: www.iea.org/data-and-sta...\n\nNotes say it ",
   "rawDims": {
     "geography": "us-ca",
     "category": "other"
-  },
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBN5CJ6XA9MTF6SE4K"
+  }
 }

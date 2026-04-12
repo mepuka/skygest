@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS35CN2J6ENFR6M83Z80",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQA26H6GWY5KBE10MC2F",
   "sourceRef": {
     "contentId": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mhew47gdb42o"
   },
@@ -10,7 +10,7 @@
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VN88FSP5QD5M4Z6EGW",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VNBTKYXXQN623KFTFG",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
-  "rawLabel": "Italy\u2019s Terna approves 3GWh BESS; project progress elsewhere in Europe #energysk",
+  "rawLabel": "Italy’s Terna approves 3GWh BESS; project progress elsewhere in Europe #energysk",
   "rawDims": {
     "geography": "eu",
     "category": "generation"

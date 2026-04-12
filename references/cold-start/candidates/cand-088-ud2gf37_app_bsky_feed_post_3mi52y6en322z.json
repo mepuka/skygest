@@ -1,17 +1,17 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2CPX4TD56EHQ39GEAZ",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9N7XRPT4XYWJJSDXF5",
   "sourceRef": {
     "contentId": "at://did:plc:5buzphfdtce4ev3ukud2gf37/app.bsky.feed.post/3mi52y6en322z"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VN88FSP5QD5M4Z6EGW",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VNBTKYXXQN623KFTFG",
   "rawLabel": "Thanks to Ember for putting the data together here: ember-energy.org/data/china-",
   "rawDims": {
     "geography": "china",
     "category": "other"
-  },
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQSDAYK3P9HNMKYW5J",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQ774B2VG14CWMTFRS"
+  }
 }

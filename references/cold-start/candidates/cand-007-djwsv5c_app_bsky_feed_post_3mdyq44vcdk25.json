@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS1TY6RC40KZ7BKSQ2C0",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9AZSADCYMYSCRM5N0H",
   "sourceRef": {
     "contentId": "at://did:plc:siy6dvqvtlkl4tbytdjwsv5c/app.bsky.feed.post/3mdyq44vcdk25"
   },
@@ -12,6 +12,5 @@
   "rawLabel": "Currently to Sep 2025\nwww.eia.gov/electricity/...\nAnother data set that Trump ad",
   "rawDims": {
     "category": "other"
-  },
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"
+  }
 }

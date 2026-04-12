@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS38VFCP6B4CVZ42M7SS",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQA32V3N134BXWR6R5JN",
   "sourceRef": {
     "contentId": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3lbfobue46d2j"
   },
@@ -9,7 +9,7 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VN88FSP5QD5M4Z6EGW",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VNBTKYXXQN623KFTFG",
-  "rawLabel": "NHOA to provide sub-1-hour BESS to Spain\u2019s TSO for grid support in Balearic Isla",
+  "rawLabel": "NHOA to provide sub-1-hour BESS to Spain’s TSO for grid support in Balearic Isla",
   "rawDims": {
     "geography": "es",
     "category": "other"

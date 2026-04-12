@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2F9VVYNMJJ674AC617",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9QG8E63954994GRAPJ",
   "sourceRef": {
     "contentId": "at://did:plc:zk73rhzraoy2jnqdz3i2okoo/app.bsky.feed.post/3m7ij6kmzlh2t"
   },
@@ -14,6 +14,5 @@
   "rawDims": {
     "geography": "us-ca",
     "category": "capacity"
-  },
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBN5CJ6XA9MTF6SE4K"
+  }
 }

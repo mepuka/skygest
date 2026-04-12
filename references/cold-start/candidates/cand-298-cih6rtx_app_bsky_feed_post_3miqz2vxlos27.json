@@ -1,0 +1,14 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQA4WAKAV0F7KJGJFN7M",
+  "sourceRef": {
+    "contentId": "at://did:plc:yoeonndfygr7ilq5scih6rtx/app.bsky.feed.post/3miqz2vxlos27"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
+  "rawLabel": "This bar chart shows that our emissions are just ~8 lbs/day or 75% reduction in emissions. 🧪🔌💡☀️💨💧🔋",
+  "rawDims": {
+    "category": "emissions"
+  }
+}
