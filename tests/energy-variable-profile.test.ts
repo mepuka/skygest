@@ -8,6 +8,7 @@ import technologyOrFuelJson from "../references/vocabulary/technology-or-fuel.js
 import unitFamilyJson from "../references/vocabulary/unit-family.json";
 import {
   AggregationMembers,
+  AggregationCanonicals,
   DomainObjectCanonicals,
   FACET_KEYS,
   MeasuredPropertyCanonicals,
@@ -15,8 +16,10 @@ import {
   REQUIRED_FACET_KEYS,
   StatisticTypeMembers,
   TechnologyOrFuelCanonicals,
+  UnitFamilyCanonicals,
   UnitFamilyMembers
 } from "../src/domain/profile/energyVariableProfile";
+import * as GeneratedProfile from "../src/domain/generated/energyVariableProfile";
 
 type VocabularyEntry = {
   readonly canonical: string;
@@ -65,6 +68,38 @@ describe("energy variable profile", () => {
     );
     expect(PolicyInstrumentCanonicals).toEqual(
       uniqueCanonicals(policyInstrumentJson as ReadonlyArray<VocabularyEntry>)
+    );
+    expect(AggregationCanonicals).toEqual(
+      uniqueCanonicals(aggregationJson as ReadonlyArray<VocabularyEntry>)
+    );
+    expect(UnitFamilyCanonicals).toEqual(
+      uniqueCanonicals(unitFamilyJson as ReadonlyArray<VocabularyEntry>)
+    );
+  });
+
+  it("matches the generated shadow profile", () => {
+    expect(GeneratedProfile.FACET_KEYS).toEqual(FACET_KEYS);
+    expect(GeneratedProfile.REQUIRED_FACET_KEYS).toEqual(REQUIRED_FACET_KEYS);
+    expect(GeneratedProfile.StatisticTypeMembers).toEqual(StatisticTypeMembers);
+    expect(GeneratedProfile.AggregationMembers).toEqual(AggregationMembers);
+    expect(GeneratedProfile.UnitFamilyMembers).toEqual(UnitFamilyMembers);
+    expect(GeneratedProfile.MeasuredPropertyCanonicals).toEqual(
+      MeasuredPropertyCanonicals
+    );
+    expect(GeneratedProfile.DomainObjectCanonicals).toEqual(
+      DomainObjectCanonicals
+    );
+    expect(GeneratedProfile.TechnologyOrFuelCanonicals).toEqual(
+      TechnologyOrFuelCanonicals
+    );
+    expect(GeneratedProfile.PolicyInstrumentCanonicals).toEqual(
+      PolicyInstrumentCanonicals
+    );
+    expect(GeneratedProfile.AggregationCanonicals).toEqual(
+      AggregationCanonicals
+    );
+    expect(GeneratedProfile.UnitFamilyCanonicals).toEqual(
+      UnitFamilyCanonicals
     );
   });
 });

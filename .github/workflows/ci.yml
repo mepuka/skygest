@@ -31,6 +31,11 @@ jobs:
           bun run cf:types
           git diff --exit-code -- worker-configuration.d.ts worker-runtime.d.ts
 
+      - name: Verify generated energy profile
+        run: |
+          bun run gen:energy-profile
+          git diff --exit-code -- src/domain/generated/energyVariableProfile.ts
+
       # Cache the tsgo incremental build info so warm runs on the same source
       # tree can skip most of the typecheck work. actions/checkout rewrites
       # file mtimes on every run, so this cache only pays off when source

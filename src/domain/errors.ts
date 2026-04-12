@@ -291,6 +291,24 @@ export class VocabularyCollisionError extends Schema.TaggedErrorClass<Vocabulary
   }
 ) {}
 
+export class EnergyProfileManifestLoadError extends Schema.TaggedErrorClass<EnergyProfileManifestLoadError>()(
+  "EnergyProfileManifestLoadError",
+  {
+    message: Schema.String,
+    path: Schema.String,
+    issues: Schema.Array(Schema.String)
+  }
+) {}
+
+export class EnergyProfilePipelineError extends Schema.TaggedErrorClass<EnergyProfilePipelineError>()(
+  "EnergyProfilePipelineError",
+  {
+    operation: Schema.String,
+    path: Schema.String,
+    message: Schema.String
+  }
+) {}
+
 export class FacetDecompositionError extends Schema.TaggedErrorClass<FacetDecompositionError>()(
   "FacetDecompositionError",
   {
