@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYWFM3FZVX7T5MNWGVD",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYWZX8YST8PM2M47DY0",
+  "kind": "download",
+  "title": "REST distribution",
+  "accessURL": "https://vector.sitg.ge.ch/arcgis/rest/services/RAE_STOCKAGE_EAUX/FeatureServer",
+  "format": "rest",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

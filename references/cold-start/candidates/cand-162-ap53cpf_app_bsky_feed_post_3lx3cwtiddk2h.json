@@ -1,18 +1,18 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2N2AXBG4DN8H895X11",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9VV2M4200MFMNEJQ30",
   "sourceRef": {
     "contentId": "at://did:plc:2nwxwnckaqlzrtsvyap53cpf/app.bsky.feed.post/3lx3cwtiddk2h"
   },
-  "resolutionState": "resolved",
+  "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
-  "rawLabel": "States will do anything to get tech company data centers.\n\nA 4-1 vote from Louis",
-  "rawDims": {
-    "category": "price"
-  },
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHCC3BMQX00JTTGNMH",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH4ZJK16FMMWK9NXBP",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XC2A209DPSH50E6HJM"
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XC2A209DPSH50E6HJM",
+  "rawLabel": "States will do anything to get tech company data centers.\n\nA 4-1 vote from Louis",
+  "rawDims": {
+    "category": "price"
+  }
 }

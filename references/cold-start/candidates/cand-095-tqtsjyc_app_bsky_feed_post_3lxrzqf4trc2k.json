@@ -1,12 +1,14 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2CNGZ54ANS4QXQD3KR",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9N2GPMMQS82HQ45SPA",
   "sourceRef": {
     "contentId": "at://did:plc:tywkpd4s5utvhnucftqtsjyc/app.bsky.feed.post/3lxrzqf4trc2k"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VN88FSP5QD5M4Z6EGW",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VNBTKYXXQN623KFTFG",
   "rawLabel": "Based on data from @ember-energy.org: ember-energy.org/data/electri...",
   "rawDims": {
     "category": "other"

@@ -1,0 +1,33 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYXWA31KVT8ASJ9R6TS",
+  "title": "r_lombar-cm2i-qe47 (Regione Lombardia)",
+  "description": "[Publisher: Regione Lombardia]",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/r_lombar-cm2i-qe47",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "2026-04-04T00:00:00Z/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYX8TMFFD172NSYEXR0",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYX7DA5CJE29Z078YSV",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYX5FYE7BX0VC68TYZA",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYX6BFYFE3ADCGVSQ8P",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYX60AZYF332HF37XH3"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "r_lombar-cm2i-qe47",
+      "relation": "exactMatch"
+    }
+  ]
+}

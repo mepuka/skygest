@@ -1,0 +1,32 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKG1MG8F0BWH5ZC55SJN",
+  "title": "Production mensuelle consolidée de biométhane",
+  "description": "<p>Ce jeu de données présente la production mensuelle de biométhane en France (MWh) injectée dans l'ensemble des réseaux de transport et distribution. Il propose également un focus sur la production injectée dans le réseau de NaTran (données redressées). </p><p>Ces données sont publiées dans le respect des règles relatives à la protection des Informations Commercialement Sensibles (ICS). Lorsque ce principe n'est pas respecté, les données ne sont pas publiées (exemple : données mensuelles au périmètre de NaTran ; données de production pour un seul site ou plusieurs sites dont le principal représente 85% de la production totale).</p><p>Les données sont mises à jour autour du 15 du mois n+1.</p><p>Attention ce jeu de données sera supprimé d'ici la fin 2022 et n'est plus mis à jour depuis juin 2022. Un jeu de données plus exhaustif a été rajouté depuis <a href=\"https://odre.opendatasoft.com/explore/dataset/odre-prod-grdgrt-operateur-def/information/?disjunctive.grx_demandeur&amp;sort=-id&amp;dataChart=eyJxdWVyaWVzIjpbeyJjaGFydHMiOlt7InR5cGUiOiJjb2x1bW4iLCJmdW5jIjoiU1VNIiwieUF4aXMiOiJwcm9kdWN0aW9uX2Jpb21ldGhhbmVfbXdoIiwic2NpZW50aWZpY0Rpc3BsYXkiOnRydWUsImNvbG9yIjoicmFuZ2UtU2V0MiJ9XSwieEF4aXMiOiJkYXRlIiwibWF4cG9pbnRzIjoiIiwidGltZXNjYWxlIjoieWVhciIsInNvcnQiOiIiLCJzZXJpZXNCcmVha2Rvd24iOiJncnhfZGVtYW5kZXVyIiwiY29uZmlnIjp7ImRhdGFzZXQiOiJvZHJlLXByb2QtZ3JkZ3J0LW9wZXJhdGV1ci1kZWYiLCJvcHRpb25zIjp7ImRpc2p1bmN0aXZlLmdyeF9kZW1hbmRldXIiOnRydWUsInNvcnQiOiItaWQifX19XSwiZGlzcGxheUxlZ2VuZCI6dHJ1ZSwiYWxpZ25Nb250aCI6dHJ1ZX0%3D\" target=\"_blank\">Production quotidienne consolidée de biométhane sur le réseau de transport et de distribution par opérateur</a>. Vous pouvez retrouver par ailleurs le nombre de sites raccordé sur le jeu de données : <a href=\"https://odre.opendatasoft.com/explore/dataset/points-dinjection-de-biomethane-en-france/information/?disjunctive.site&amp;disjunctive.departement&amp;disjunctive.region&amp;disjunctive.type_de_reseau&amp;disjunctive.grx_demandeur&amp;disjunctive.nom_epci#carte-des-sites-sous-ods\" target=\"_blank\">Points d'injection de Biométhane en France en service</a></p><p> </p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/production-mensuelle-biomethane/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "EnR",
+    "Biogaz"
+  ],
+  "themes": [
+    "Production"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKG1SPF5RPR8K0BM5AQG"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "production-mensuelle-biomethane",
+      "relation": "exactMatch"
+    }
+  ]
+}

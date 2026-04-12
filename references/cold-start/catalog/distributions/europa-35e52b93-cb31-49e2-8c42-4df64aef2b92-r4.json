@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZEPHP9XKFFZ5BFKZNR",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZEYPG7MFE6T443FB9P",
+  "kind": "download",
+  "title": "ZIP distribution",
+  "accessURL": "https://data-sdublincoco.opendata.arcgis.com/api/download/v1/items/312a35d243f14b5ab5623b9a2fef6593/shapefile?layers=0",
+  "mediaType": "application/zip",
+  "format": "zip",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

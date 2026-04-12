@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG2C2KC1PDK22EWHHTV",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG2ME8Q3V1E12NGC2ZA",
+  "kind": "api-access",
+  "title": "Filière de production de biogaz en Europe JSON API",
+  "description": "<p>Ce jeu de donnée donne la production de biogaz pour les principaux pays producteurs européens, selon les procédés utilisés.</p><p>Les données proviennent de Eurobserv'ER (<a href=\"https://www.eurobserv-er.org/\" target=\"_blank\">https://www.eurobserv-er.org/</a>)*</p><p>Une réutilisation des données est faîte sur Gas in Focus : <a href=\"https://www.gasinfocus.com/fili%C3%A8res-de-production\" target=\"_blank\">https://www.gasinfocus.com/fili%C3%A8res-de-production</a></p>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/filiere-de-production-de-biogaz-en-europe-eurobserver/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/filiere-de-production-de-biogaz-en-europe-eurobserver/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

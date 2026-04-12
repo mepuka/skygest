@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4TNWAKX93DJ5YNZ07V",
   "title": "GridStatus ERCOT DAM ESR 60 Day",
   "description": "Day-ahead market data for ESRs (Energy Storage Resources) in ERCOT. Includes cost-based parameters, unit capabilities, and ancillary service awards as well as capabilities. \n\nThis data is published with a 60-day delay.\n\nThis dataset begins on 12/6/2025, the first day with a day-ahead market following the implementation of RTC+B.",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/ercot_dam_esr_60_day",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

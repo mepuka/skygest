@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYNPS6TQ8MNNP6BGFXT",
+  "title": "Waste electrical and electronic equipment (WEEE) by waste management operations - open scope, 6 product categories (from 2018 onwards) (Eurostat)",
+  "description": "[Publisher: Eurostat] Waste electrical and electronic equipment (WEEE) by waste management operations - open scope, 6 product categories (from 2018 onwards)",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/ymw9ktbrzkxm5dljrb1q",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "2005-01-01T00:00:00Z/2023-12-31T00:00:00Z",
+  "themes": [
+    "energy",
+    "environment"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYN4YSX9ZW7R7GA9K66",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYNH0KT634SBFBJ3A4K",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYNN647DSY2JPGEF9SS",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYN0ZG88M42Y162492V",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYNT4PPD2RKG91WB6SX"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "ymw9ktbrzkxm5dljrb1q",
+      "relation": "exactMatch"
+    }
+  ]
+}

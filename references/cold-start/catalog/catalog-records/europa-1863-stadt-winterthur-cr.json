@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KP1CQKYSXTCX244H79XH0HYC",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KP1CQKY8BVF9WHKYBE8YPMZT",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KP1CQKYSW8369V4GYPG7XBJK",
+  "sourceRecordId": "1863-stadt-winterthur",
+  "harvestedFrom": "https://data.europa.eu/api/hub/search/ckan/package_search",
+  "firstSeen": "2026-04-12T17:44:45.202Z",
+  "lastSeen": "2026-04-12T17:44:45.202Z",
+  "sourceModified": "2026-04-06T11:51:25.978365+02:00",
+  "isAuthoritative": true
+}

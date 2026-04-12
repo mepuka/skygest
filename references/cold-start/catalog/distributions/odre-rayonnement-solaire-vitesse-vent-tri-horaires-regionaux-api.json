@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKFWJBBR6FX6MBG3YJNG",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKFWY23HTZGRDPYJ78W0",
+  "kind": "api-access",
+  "title": "Rayonnement solaire global et vitesse du vent à 100 mètres tri-horaires régionaux (depuis janvier 2016) JSON API",
+  "description": "<p>\nCe jeu de données présente le rayonnement solaire global (W/m2) et la vitesse du vent à 100 mètres (m/s), par région administrative française, depuis le 1er janvier 2016, et pour plusieurs moments de la journée (0h, 3h, 6h, 9h, 12h, 15h, 18h 21h UTC ; les heures fournies sont en heure locale).\n</p>\n<p>\nIl s'agit de moyennes régionales de données estimées à partir de points de grille du modèle de prévision déterministe du Centre Européen de Prévisions Météorologiques à Moyen Terme (CEPMMT). Les moyennes ne sont pas pondérées en fonction de l'emplacement des parcs (éoliens ou solaires).\n</p>\n<p>\nCe modèle de prévisions météorologiques est considéré comme le meilleur modèle actuel au niveau mondial :\n</p>\n<ul>\n<li><a href=\"https://www.ecmwf.int/en/research/modelling-and-pr...\">https://www.ecmwf.int/en/research/modelling-and-pr...</a></li>\n<li><a href=\"http://apps.ecmwf.int/wmolcdnv/\">http://apps.ecmwf.int/wmolcdnv</a></li>\n</ul>\n<hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/rayonnement-solaire-vitesse-vent-tri-horaires-regionaux/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/rayonnement-solaire-vitesse-vent-tri-horaires-regionaux/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

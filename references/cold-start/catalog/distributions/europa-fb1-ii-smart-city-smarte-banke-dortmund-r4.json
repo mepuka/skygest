@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYTE82777Y1MJYMVTWG",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYT0HDX5FQV4GTCV5AD",
+  "kind": "download",
+  "title": "CSV distribution",
+  "accessURL": "https://open-data.dortmund.de/api/v2/catalog/datasets/fb1-ii-smart-city-smarte-banke/exports/csv?use_labels=true",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

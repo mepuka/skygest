@@ -157,6 +157,29 @@ export const GridStatusIngestKeys = {
   )
 } as const;
 
+export const EntsoeIngestKeys = {
+  ...ColdStartCommonKeys
+} as const;
+
+export const OdreIngestKeys = {
+  ...ColdStartCommonKeys,
+  baseUrl: Config.withDefault(
+    Config.string("ODRE_BASE_URL"),
+    "https://odre.opendatasoft.com/api/explore/v2.1"
+  ),
+  minIntervalMs: Config.withDefault(Config.int("ODRE_MIN_INTERVAL_MS"), 500)
+} as const;
+
+export const DataEuropaIngestKeys = {
+  ...ColdStartCommonKeys,
+  baseUrl: Config.withDefault(
+    Config.string("DATA_EUROPA_BASE_URL"),
+    "https://data.europa.eu/api/hub/search"
+  ),
+  minIntervalMs: Config.withDefault(Config.int("DATA_EUROPA_MIN_INTERVAL_MS"), 500),
+  maxDatasets: Config.withDefault(Config.int("DATA_EUROPA_MAX_DATASETS"), 500)
+} as const;
+
 // ── Twitter / editorial ingestion keys ────────────────────────────────
 
 /** Non-empty string config that rejects empty/whitespace-only values. */

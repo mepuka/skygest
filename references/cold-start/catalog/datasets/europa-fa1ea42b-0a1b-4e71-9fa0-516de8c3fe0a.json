@@ -1,0 +1,37 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZMDDEXKPYYZ0QDKHHQ",
+  "title": "fa1ea42b-0a1b-4e71-9fa0-516de8c3fe0a (Landesamt für Umwelt)",
+  "description": "[Publisher: Landesamt für Umwelt]",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/fa1ea42b-0a1b-4e71-9fa0-516de8c3fe0a",
+  "accessRights": "public",
+  "license": "http://dcat-ap.de/def/licenses/dl-by-de/2.0",
+  "temporal": "2026-02-12T00:00:00Z/",
+  "themes": [
+    "environment",
+    "energy",
+    "technology"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZMR15XW9ETRFRYBYDJ",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZMVN88YS3P3C9RJQXW",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZM1N0E49GWATQ1JE22",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZMTDT21SJ5P9QBR3AC",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZM1JKYMNH8HBV904ZA",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZMFSQ8ZVPDZM73K7DA",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZMB88J57X52PK6DP7M"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "fa1ea42b-0a1b-4e71-9fa0-516de8c3fe0a",
+      "relation": "exactMatch"
+    }
+  ]
+}

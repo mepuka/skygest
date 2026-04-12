@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG0Q9F2DHPNGWVN9R9F",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG0CFD4996GEV1ZBH28",
+  "kind": "api-access",
+  "title": "Consommation finale corrigée par secteur d'activité (2014 à 2024) JSON API",
+  "description": "<p>\nCe jeu de données présente les données de consommation d’électricité des clients raccordés au réseau public de transport, corrigées des variations saisonnières.\n</p>\n<p>\nLe périmètre étant celui de RTE, la consommation des gestionnaires de réseau de distribution (consommation des PME/PMI, professionnels et particuliers) inclut les pertes relatives à leurs réseaux. La consommation des clients industriels (grande industrie) est hors pertes, puisque directement raccordés au réseau public de transport, hors secteur de l’énergie et hors 29 février. Elle inclut l’autoconsommation et est détaillée par secteur.\n</p>\n<hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/conso-finale-corrigee-par-secteur/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/conso-finale-corrigee-par-secteur/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

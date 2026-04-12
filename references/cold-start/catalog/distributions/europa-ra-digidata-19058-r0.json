@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKY9K507R477CWEY2FVV",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKY8W93VDT5HFHXF57MB",
+  "kind": "download",
+  "title": "CSV distribution",
+  "accessURL": "https://dx.doi.org/10.5279/dk-ra-19058",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

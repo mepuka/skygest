@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ8WBMQE87E6C8WA0ZF",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ8VG3CKEP08TS9SJA1",
+  "kind": "download",
+  "title": "JSON distribution",
+  "accessURL": "https://www.odwb.be/explore/dataset/actualites-en-wallonie/information/",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

@@ -1,0 +1,13 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYV108933RG6CJX2N7M",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYV818C3HAKSACV6FZE",
+  "kind": "download",
+  "title": "Distribution",
+  "accessURL": "https://ge.ch/sitg/geodata/SITG/OPENDATA/VDG_CORBEILLES_DECHETS-CSV.zip",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

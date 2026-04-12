@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG03A05VD2XYZTW40W7",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG02E6CTY9NVWV106NS",
+  "kind": "api-access",
+  "title": "Evolutions régionales annuelles des longueurs de circuits du réseau de transport d'électricité (2013 à 2024) JSON API",
+  "description": "<p>\nEvolution régionale annuelle des longueurs (km) de circuits en exploitation du réseau de transport d’électricité par niveau de tension (63 kV, 90 kV, 225 kV, 400 kV, ...) et par nature d’évolution (nouvelle infrastructure, renouvellement, mise en souterrain, ferraillée, autres modifications). Données définitives.\n</p>\n<p>\nLes natures d'évolution d'un tronçon sont :\n</p>\n<ul>\n<li>Nouveau : quand l’installation du tronçon fait l’objet d’un nouveau tracé (une nouvelle liaison par exemple)</li>\t\n<li>Renouvelé : quand un tronçon aérien est remplacé par un tronçon aérien ou quand un tronçon souterrain est remplacé par un tronçon souterrain</li>\t\n<li>Mis en souterrain : quand un tronçon aérien est remplacé par un tronçon souterrain</li>\t\n<li>Ferraillé : quand le tronçon a été retiré physiquement du réseau\t</li>\t\n<li>Autres modifications : ce sont toutes les variations de longueur non recensées dans les tronçons neufs et ferraillés. Cela concerne principalement les tronçons mis en réserve (déconnectés du réseau mais toujours en place) mais aussi les corrections d’erreur ou de longueur</li>\n</ul>\n<hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/evolutions-longueurs-regionales-annuelles-circuits-rte/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/evolutions-longueurs-regionales-annuelles-circuits-rte/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ2J7BJ0JX9KWV0ZCDC",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ2YMN7X0GQKP1RYS41",
+  "kind": "download",
+  "title": "JSON distribution",
+  "accessURL": "https://daten.stadt.sg.ch/api/v2/catalog/datasets/massnahmen-energiekonzept-2050-der-stadt-st-gallen-mit-status/exports/jsonl",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

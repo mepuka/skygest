@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG5K7H14JJNFHDETSZZ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG5WPF3EG0MD0Q7P6JW",
+  "kind": "api-access",
+  "title": "Stock quotidien dans les stockages de gaz (à partir de novembre 2010) JSON API",
+  "description": "<p>Ce jeu de données présente le stock de gaz présent dans les stockages de gaz de Teréga et Storengy, par PITS et en fin de journée gazière depuis le 1<sup>er</sup> novembre 2010 (GWh  \t<a href=\"https://opendata.reseaux-energies.fr/pages/glossaire/\">PCS</a> 0°C).</p><hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/stock-quotidien-stockages-gaz/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/stock-quotidien-stockages-gaz/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

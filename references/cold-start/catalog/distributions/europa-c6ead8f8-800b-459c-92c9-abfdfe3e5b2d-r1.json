@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ6ND028BCVZAAEZEJ7",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ6VAWTD50FY0Q7KXZD",
+  "kind": "download",
+  "title": "CSV distribution",
+  "accessURL": "https://data.smartdublin.ie/dataset/c6ead8f8-800b-459c-92c9-abfdfe3e5b2d/resource/ba2ea489-2b87-4f09-920d-b36cf9c603d5/download/swimming-pools-open-data-dataset.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

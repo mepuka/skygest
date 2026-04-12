@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYPFR3CGCB0KPSSY1K6",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYPX7Y53YGZ7CYRNXWK",
+  "kind": "download",
+  "title": "JSON distribution",
+  "accessURL": "https://www.gasnetworks.ie/sites/default/files/2026-04/Gas_Demand.json",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

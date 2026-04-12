@@ -1,0 +1,14 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQA5T0W4W9WHP1M48TSY",
+  "sourceRef": {
+    "contentId": "x://1309223351055872000/status/2041067813700518365"
+  },
+  "resolutionState": "source_only",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "rawLabel": "It’s been interesting hearing Opposition Leader Chris Hipkins saying that the closure of the Marsden",
+  "rawDims": {
+    "geography": "NZ",
+    "category": "policy"
+  }
+}

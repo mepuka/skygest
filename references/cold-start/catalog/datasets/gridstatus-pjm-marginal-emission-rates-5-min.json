@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5HS1G9RBYMMARCB13Y",
   "title": "GridStatus PJM Marginal Emission Rates 5 Min",
   "description": "PJM estimates marginal emissions every five minutes for load zones across the grid. These estimates include CO₂, SO₂, and NOₓ, expressed in lbs/MWh. The calculation reflects the physical costs of power flows, capturing the impact of congestion on nodal emissions. When imports are marginal at a node, PJM assigns them zero emissions because the fuel source is unknown. PJM notes several caveats in its data catalog due to the complexity and variability of the underlying data. These emissions estimates, along with PJM’s own disclaimers, are discussed in more detail in this blog post: https://blog.gridstatus.io/apple-grid-forecast/",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/pjm_marginal_emission_rates_5_min",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

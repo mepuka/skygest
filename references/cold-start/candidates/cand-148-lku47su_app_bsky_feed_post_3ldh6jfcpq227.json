@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2KR8VJ4V4NR2YKVZKG",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9THQXGPVKYNQX6PHMD",
   "sourceRef": {
     "contentId": "at://did:plc:xfycvygit2cyxd2oqlku47su/app.bsky.feed.post/3ldh6jfcpq227"
   },
@@ -13,6 +13,5 @@
   "rawDims": {
     "geography": "us",
     "category": "other"
-  },
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WP0PD1A7H3TA56PTAG"
+  }
 }

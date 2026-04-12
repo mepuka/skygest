@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5GA94SZBA1DYREHY4X",
   "title": "GridStatus PJM AS Market Results DAM",
   "description": "Day-ahead hourly ancillary service prices and volumes for PJM. This includes *Synchronized Reserves*, *Primary Reserves*, and *Thirty Minute Reserves*, and covers the entire RTO as well as the Mid-Atlantic/Dominion Reserve Sub-Zone.\n\nThis data series begins in the autumn of 2022, when PJM implemented Comprehensive Pricing Reform which altered price formation for reserves. For more on these changes, see [this article](https://insidelines.pjm.com/pjm-implements-reserve-price-formation-changes/) from PJM.",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/pjm_as_market_results_dam",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

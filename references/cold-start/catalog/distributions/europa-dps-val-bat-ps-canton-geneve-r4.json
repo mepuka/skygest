@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZB6QQP6K2WZ90Q64PT",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZABXKY9YK89FZ38712",
+  "kind": "download",
+  "title": "WFS_SRVC distribution",
+  "accessURL": "https://vector.sitg.ge.ch/arcgis/services/DPS_VAL_BAT_PS/MapServer/WFSServer?service=WFS&request=GetCapabilities",
+  "format": "wfs_srvc",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

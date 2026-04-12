@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYP77E31HA5XHB0Y28S",
+  "title": "FPA01 - Fuel Excise Clearance (Central Statistics Office)",
+  "description": "[Publisher: Central Statistics Office] Fuel Excise Clearance",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/0a1b7fad-ae9f-4b48-96bf-8c9c35733544",
+  "accessRights": "public",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYPH6SGX7CKHEZEVAQ3",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYP68PEFXG2ZX74B0PA",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYPWYTTVJVRD54FJN2J",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYP1YC70T6ESE8QYQTC"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "0a1b7fad-ae9f-4b48-96bf-8c9c35733544",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZQ4SRZB9RFS9N900W4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZQ5NSGFCEKBN0KVNWX",
+  "kind": "download",
+  "title": "GEOJSON distribution",
+  "accessURL": "https://data-sdublincoco.opendata.arcgis.com/api/download/v1/items/0977d07bfcdc4850b0a12fcc043be275/geojson?layers=0",
+  "mediaType": "application/geo+json",
+  "format": "geojson",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

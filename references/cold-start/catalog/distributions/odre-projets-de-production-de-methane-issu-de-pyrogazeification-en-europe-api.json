@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG16AFFZJJGV2RA2AZA",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG1Y8MM83CKP0CRZADT",
+  "kind": "api-access",
+  "title": "Nombre de projets de production de méthane issu de la pyrogazéification en Europe JSON API",
+  "description": "<p><span style='color: rgb(12, 60, 96); font-family: \"open sans\", sans-serif; font-size: 15px; text-align: justify;'>Ce jeu de données donne la vision des projets de production de méthane par la voie \"pyrogazéification\" en Europe. </span></p><p><span style='color: rgb(12, 60, 96); font-family: \"open sans\", sans-serif; font-size: 15px; text-align: justify;'>La pyrogazéification est une filière innovante de production d’énergie renouvelable ou bas-carbone, non-intermittente, à partir de biomasse sèche et/ou de déchets résiduels variés lorsque ceux-ci ne peuvent pas être valorisés sous forme de matière. L’indicateur montre l’évolution, en Europe et depuis 2008, du nombre de projets de production de méthane de synthèse en phase de construction ainsi que de ceux ayant déjà produit du méthane de synthèse.</span><br></p>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/projets-de-production-de-methane-issu-de-pyrogazeification-en-europe/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/projets-de-production-de-methane-issu-de-pyrogazeification-en-europe/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKG3MZF5PBFMZGNBP08A",
+  "title": "Consommation d'électricité des grandes Métropoles françaises temps réel",
+  "description": "<p>\n</p><p><span style=\"font-family: inherit; font-size: 0.875rem;\">Ce jeu de données présente la consommation réalisée des métropoles au pas quart d'heure issue de l'application éCO</span><sub style=\"font-family: inherit;\">2</sub><span style=\"font-family: inherit; font-size: 0.875rem;\">mix. Ces données proviennent des télémesures des ouvrages complétées par des forfaits et estimations.</span></p>\n<p>\nCe jeu de données est mis à jour deux fois par jour : à 0h00 et 18h00.\n</p>\n<p>\nDu fait de la durée moyenne de mise à jour (environ 50 min), RTE travaille à l'optimisation de la mise à jour afin de rendre possible ultérieurement les mises à jour toutes les heures.\n</p>\n<p>\n<string>Ce jeu de données est mis à jour automatiquement quatre fois par jour : en raison d'un nombre de téléchargements excessif des données éCO<sub>2</sub>mix métropoles temps réel par des robots à des fréquences disproportionnées au regard de la fréquence de mise à jour du jeu de données, un quota de 50000 appels API par utilisateur et par mois a été mis en place. Si vous constatez des soucis d'accès aux données suite à \nla mise en place de ce quota, merci de nous contacter à l'adresse <a href=\"mailto:rte-opendata@rte-france.com\">rte-opendata@rte-france.com</a>.\n</string></p>\n<p>\nPour information, il est possible d'avoir des enregistrements n'ayant pas de valeur de consommation associée, notamment avant la date de mise en service des métropoles. Ci-dessous, un tableau avec les dates de mise en service de chaque métropole :\n</p>\n<table>\n<tbody>\n<tr><td>Date</td><td>Métropole</td></tr>\n<tr><td>02/04/2019</td><td>Clermont Auvergne Métropole</td></tr>\n<tr><td>02/04/2019</td><td>Dijon Métropole</td></tr>\n<tr><td>02/04/2019</td><td>Orléans Métropole</td></tr>\n<tr><td>02/04/2019</td><td>Saint-Etienne Métropole</td></tr>\n<tr><td>02/04/2019</td><td>Métropole Toulon-Provence-Méditerranée</td></tr>\n<tr><td>02/04/2019</td><td>Tours Métropole Val de Loire</td></tr>\n<tr><td> 25/06/2018</td><td>Eurométropole de Strasbourg</td></tr>\n<tr><td>17/10/2017</td><td>Brest Métropole</td></tr>\n<tr><td>17/10/2017</td><td>Métropole Rouen Normandie</td></tr>\n<tr><td>11/09/2017</td><td>Montpellier Méditerranée Métropole</td></tr>\n<tr><td>11/09/2017</td><td>Bordeaux Métropole</td></tr>\n<tr><td>03/07/2017</td><td>Métropole Nice Côte d'Azur</td></tr>\n<tr><td>03/07/2017</td><td>Métropole du Grand Nancy</td></tr>\n<tr><td>03/07/2017</td><td>Toulouse Métropole</td></tr>\n<tr><td>03/07/2017</td><td>Métropole Rennes Métropole</td></tr>\n<tr><td>03/07/2017</td><td>Métropole Grenoble-Alpes-Métropole</td></tr>\n<tr><td>11/05/2017</td><td>Métropole Européenne de Lille</td></tr>\n<tr><td>11/05/2017</td><td>Métropole d'Aix-Marseille-Provence</td></tr>\n<tr><td>11/05/2017</td><td>Métropole de Lyon</td></tr>\n<tr><td>13/03/2017</td><td>Nantes Métropole</td></tr>\n<tr><td>13/02/2017</td><td>Métropole du Grand Paris</td></tr>\n</tbody>\n</table>\n<br>\n<hr>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/eco2mix-metropoles-tr/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "éCO2mix"
+  ],
+  "themes": [
+    "Consommation",
+    "Territoires et régions"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKG3ACSZZ8BFRS5N3WXP"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "eco2mix-metropoles-tr",
+      "relation": "exactMatch"
+    }
+  ]
+}

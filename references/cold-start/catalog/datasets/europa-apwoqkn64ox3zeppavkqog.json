@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZ9FTHE7YNCE6J2EXP4",
+  "title": "Exports of natural gas by partner country (Eurostat)",
+  "description": "[Publisher: Eurostat] Exports of natural gas by partner country",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/apwoqkn64ox3zeppavkqog",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "1990-01-01T00:00:00Z/2024-12-31T00:00:00Z",
+  "themes": [
+    "energy",
+    "environment"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ96XFJS51WKBED5NGM",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ9KVVEQFXRRNKK7ZPS",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ9TX73EN4KM1GEKS8K",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ927832P41ZA8YPAB5",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ900G0DFSF78JY4KK0"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "apwoqkn64ox3zeppavkqog",
+      "relation": "exactMatch"
+    }
+  ]
+}

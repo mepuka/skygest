@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KP1CQKZKCCZAGW11CPAH19WR",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KP1CQKY8BVF9WHKYBE8YPMZT",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KP1CQKZKY7DAXJ7R7QR0JHK9",
+  "sourceRecordId": "08_02_eolien_glaney-ssd",
+  "harvestedFrom": "https://data.europa.eu/api/hub/search/ckan/package_search",
+  "firstSeen": "2026-04-12T17:44:45.202Z",
+  "lastSeen": "2026-04-12T17:44:45.202Z",
+  "sourceModified": "2026-03-17T13:25:06.150000+00:00",
+  "isAuthoritative": true
+}

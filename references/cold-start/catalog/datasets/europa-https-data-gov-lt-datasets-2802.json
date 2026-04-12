@@ -1,0 +1,28 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYRNZ1EB4TBHZ4T9WAK",
+  "title": "Plans of independent electricity suppliers (Valstybės duomenų agentūra)",
+  "description": "[Publisher: Valstybės duomenų agentūra] The data set shall contain plans of independent electricity suppliers for household customers. The price of the plan shall consist of the supplier's price, the cost of the ESO plan, the components of the transfer, distribution and viap. The price of the stock exchange plans consists of Nordpool stock exchange price (not included in the set), which changes monthly or hourly (depending on the plan chosen), supplier price, ESO price and state-regulated price shares. State-regulated price components (distribution, transfer and viap components) are recorded independently of the time limit for fixation of the plan, therefore the total price of the fixed plan may change.\n\nContact the atverimas@stat.gov.lt for technical questions or possible errors.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/https-data-gov-lt-datasets-2802-",
+  "accessRights": "public",
+  "license": "https://creativecommons.org/licenses/by/4.0/deed.lt",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYRQ67DJ9DDF9EMZ405"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "https-data-gov-lt-datasets-2802-",
+      "relation": "exactMatch"
+    }
+  ]
+}

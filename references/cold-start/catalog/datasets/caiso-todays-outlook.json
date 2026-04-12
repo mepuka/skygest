@@ -18,7 +18,11 @@
     "grid operations"
   ],
   "distributionIds": [
-    "https://id.skygest.io/distribution/dist_01KNQEZ5VQC6CKPFX43G49A89P"
+    "https://id.skygest.io/distribution/dist_01KNQEZ5VQC6CKPFX43G49A89P",
+    "https://id.skygest.io/distribution/dist_01KP165RQ3DWK8NW0BPE9CANN0"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VH7SFKBQWANM6TSKMV"
   ],
   "accessRights": "public"
 }

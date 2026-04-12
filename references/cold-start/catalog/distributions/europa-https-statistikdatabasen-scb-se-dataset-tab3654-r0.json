@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZR27VQ7SRHQG0GCD80",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZRSSTQ8MZTE8KR247J",
+  "kind": "download",
+  "title": "APPLICATION/JSON distribution",
+  "accessURL": "https://api.scb.se/OV0104/v1/doris/sv/ssd/EN/EN0203/EN0203A/SlutAnvSektor",
+  "format": "application/json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKFXPNAPPYPD70FKYFKP",
+  "title": "Consommation mensuelle de gaz des clients industriels de NaTran répartis par secteur industriel",
+  "description": "<p>Ce jeu de données présentent les quantités mensuelles livrées aux sites industriels sur le périmètre NaTran par grands secteurs d'activités industriels : Automobile-Pneumatiques, Chimie, Raffinage et pétrochimie, Métallurgie, Matériaux non métalliques, Verre, Production électrique centralisée, Papier, Agroalimentaire, Chauffage urbain. </p><p>Les consommations sont exprimées en GWh PCS 0°C et les données sont redressées</p><p>Le secteur d'activité \"production d'électricité\" regroupe les consommations de gaz relevées au niveau des CCCG, des TAC et de certains sites de cogénérations.</p><hr>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/grt-conso-gaz-secteurs-indus-def/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "BIlan Gaz"
+  ],
+  "themes": [
+    "Consommation"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKFX6NZZSQSGMHM43076"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "grt-conso-gaz-secteurs-indus-def",
+      "relation": "exactMatch"
+    }
+  ]
+}

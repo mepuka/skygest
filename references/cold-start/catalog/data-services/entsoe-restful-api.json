@@ -1,0 +1,56 @@
+{
+  "_tag": "DataService",
+  "id": "https://id.skygest.io/data-service/svc_01KP1ASA196ZW4HCGRC7TGWS41",
+  "title": "ENTSO-E Transparency Platform RESTful API",
+  "description": "RESTful XML API serving ENTSO-E Transparency Platform datasets (load, generation, transmission, balancing, outages)",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9",
+  "endpointURLs": [
+    "https://web-api.tp.entsoe.eu/api"
+  ],
+  "endpointDescription": "https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html",
+  "conformsTo": "EU Regulation 543/2013",
+  "servesDatasetIds": [
+    "https://id.skygest.io/dataset/ds_01KP1ASA199CK0ETQJP117VWJ9",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1A13MD8JVG1MDSWC6P",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1AAG4S1S0NQPKQSVVF",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1ABKS6DT1NZHX6PJW4",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1ACX4AMBEDC1GT0XB0",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1B1SAZMZ2QW0S5N621",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1B341GMFCMDFV8GX24",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1B7Z6BRX92HPCCGPMM",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1B87YCBRSG9WZ8NZHZ",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1B9TJ9Z4JX9BREBPDT",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1BEQ4G321J3Z9513K4",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1BKK140NBSZ8EHCDHP",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1BMCC6JSHNDPP8GNV0",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1BME1Z2K2X9KTSXP3B",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1BQAZA3Q36KK5KETP6",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1BRVBJ74PSJ3CA48XG",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1BV5ZBQ0ZN2WMG6YWF",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1BWKM61NVNKEH1FF4R",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1C08NKYCJC51R0959H",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1C0AEAFEQWJC1R8ZRK",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1C0STVEYW4BTCGVFA4",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1C406NHZRKC6DZ5GDN",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1C8A9Z86EF7WBNJKA9",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1C8TCJHYBJ311K680N",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1C9ZRV2R8D9YG2BA9Y",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1CFEZABA5BSR8Z5437",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1CH1KCK9BWJJ6Z05AZ",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1CHKP96GW8EBW7R23A",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1CN4XFC9DVPHWP4GVH",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1CPSNJW6ZY8PQH0WYG",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1CTVMD75F903T6VKP7",
+    "https://id.skygest.io/dataset/ds_01KP1ASA1CZ9B4B3V3BGRRRSW6"
+  ],
+  "accessRights": "public",
+  "createdAt": "2026-04-12T17:10:46.402Z",
+  "updatedAt": "2026-04-12T17:10:46.402Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://web-api.tp.entsoe.eu/api",
+      "relation": "exactMatch"
+    }
+  ]
+}

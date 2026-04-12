@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZMFSQ8ZVPDZM73K7DA",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZMDDEXKPYYZ0QDKHHQ",
+  "kind": "landing-page",
+  "title": "HTML distribution",
+  "accessURL": "https://map.odi.schleswig-holstein.de/?mdid=windkraftanlagen-2026-02-12&ZOOMTOEXTENT=470938.708331872%2C5918091.611767777%2C650523.727310262%2C6086166.321759336",
+  "mediaType": "text/html",
+  "format": "html",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

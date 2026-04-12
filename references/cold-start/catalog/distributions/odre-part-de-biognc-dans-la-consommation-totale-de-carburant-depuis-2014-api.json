@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG0Z0807BMJ26DXGFAV",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG0F1GPENQ2P7WKTCQG",
+  "kind": "api-access",
+  "title": "Part de bioGNC dans la consommation totale de carburant (depuis 2014) JSON API",
+  "description": "<p>Ce jeu de données donne la part de bioGNC en % dans la consommation de GNC en France. <br></p>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/part-de-biognc-dans-la-consommation-totale-de-carburant-depuis-2014/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/part-de-biognc-dans-la-consommation-totale-de-carburant-depuis-2014/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5J694HEPZ790PBV9M7",
   "title": "GridStatus PJM Tie Flows 5 Min",
   "description": "Tie flows (power flows) between PJM and neighboring control areas. Positive values are for net megawatt (MW) flows into PJM, while negative values are for net MW flows out of PJM. Hourly averages, with more historical data, can be found using the PJM Actual And Scheduled Interchange Summary datset.\n\nFor additional history at an hourly granularity, see [PJM Actual And Scheduled Interchange Summary](https://www.gridstatus.io/datasets/pjm_actual_and_scheduled_interchange_summary).\n",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/pjm_tie_flows_5_min",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

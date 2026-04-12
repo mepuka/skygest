@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYQG948PB11DB3BFH8H",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYQ728SJ19NGAQBPKMM",
+  "kind": "download",
+  "title": "XLSX distribution",
+  "accessURL": "https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/NDBER01/XLSX/2007/en",
+  "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "format": "xlsx",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

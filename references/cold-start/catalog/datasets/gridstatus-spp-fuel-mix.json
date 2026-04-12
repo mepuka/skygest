@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5MAKBC0X6RJ121F4M5",
   "title": "GridStatus SPP Fuel Mix",
   "description": "Fuel Mix in 5-minute intervals as reported by SPP.\n\nAs of April 1st, 2026, this data includes output from generators in SPP West (SWPW) as RTO's expansion into the Western Interconnection went live.\n\nFor fuel mix by individual SPP BAA, see [SPP Fuel Mix by BAA](https://www.gridstatus.io/datasets/spp_fuel_mix_by_baa).",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/spp_fuel_mix",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

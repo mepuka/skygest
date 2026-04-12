@@ -1,14 +1,14 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2TBM92ZDMZKCM9QJMM",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9ZXSS6ZNH6655QYP6A",
   "sourceRef": {
     "contentId": "at://did:plc:7kjk27cxb7s2h3xc5s5yojor/app.bsky.feed.post/3m4iot2bolk2v"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHP6M9Z732WJY61H35",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH9V4TF0K64AHSS1FV",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHGV1ZECFSTCKW0B2R",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH6D2AT4HKRTB707PR",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
   "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XABVZJXM3Y5TJHFJCP",
   "rawLabel": "US ethanol exports on the rise. Very discouraging bc it continues to be sold as ",

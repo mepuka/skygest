@@ -1,0 +1,38 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYR5DRS17DNTM6T2XBB",
+  "title": "Ouvrages d'infiltration ponctuels (Office cantonal de l'eau)",
+  "description": "[Publisher: Office cantonal de l'eau] Les ouvrages d'infiltration, ponctuels ou linéaires, permettent d'infiltrer les eaux de pluies progressivement dans le sol, ce qui se rapproche le plus d'une circulation naturelle des eaux, avec un apport aux cours d'eau différé et étalé dans le temps, les préservant au mieux de l'érosion des petites et moyennes crues, et soutenant leurs débits en période d'étiage.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/rae_ouv_infiltration-canton-geneve",
+  "accessRights": "public",
+  "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by",
+  "themes": [
+    "society",
+    "energy",
+    "environment",
+    "education",
+    "regions"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYR69143G43HJVXCWB5",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYRXXT2NHR2HK831ZTY",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYRQ46AQ1MYY3CJA3VH",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYRVCG4VV6X3K15S84A",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYRCZ4YMF0R4PCFJARG",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYR6PWSEAFJP551SP4J",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYRFC3PFWE859RTD3FS"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "rae_ouv_infiltration-canton-geneve",
+      "relation": "exactMatch"
+    }
+  ]
+}

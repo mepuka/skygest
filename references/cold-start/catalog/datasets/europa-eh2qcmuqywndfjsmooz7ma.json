@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZ77HXR6A1J0DE4TZJ3",
+  "title": "Imports of oil and petroleum products by partner country (Eurostat)",
+  "description": "[Publisher: Eurostat] Imports of oil and petroleum products by partner country",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/eh2qcmuqywndfjsmooz7ma",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "1990-01-01T00:00:00Z/2024-12-31T00:00:00Z",
+  "themes": [
+    "environment",
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ7AVPE3EA8VGA13AM7",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ7N8SR68EBXKT8SC4Z",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ7APZSRMB73TWBDZ6Z",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ78XCWQQ8BHFAYQ7HT",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ7PNXTBYTTA313F878"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "eh2qcmuqywndfjsmooz7ma",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKG2FTWVEMVXVWM3WCPE",
+  "title": "Grandes Infrastructures gazières en France",
+  "description": "<p class=\"\"><span style='color: rgb(12, 60, 96); font-family: \"open sans\", sans-serif; font-size: 15px; text-align: justify;'>Ce jeu de données situe les grandes infrastructures gazières en France (transport, stockages et terminaux méthaniers), ainsi que les principaux points d’interconnexion avec les pays frontaliers.</span></p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/infrastructures-gaz/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "Carte",
+    "Interconnexion"
+  ],
+  "themes": [
+    "Infrastructures"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKG25DJ44BA72QWEEZ3C"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "infrastructures-gaz",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5F0QS6SRQKJ2K9Z9VE",
   "title": "GridStatus NYISO LMP DART Hourly",
   "description": "DART spread in NYISO between day-ahead hourly LMPs and real-time hourly LMPs. Both day-ahead and real-time values are at hourly intervals.",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/nyiso_lmp_dart_hourly",
   "accessRights": "public",
@@ -24,7 +26,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

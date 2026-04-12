@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKFX1ZVAS99SNXNQ3QNH",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKFXGY09E8C84DDD37DY",
+  "kind": "api-access",
+  "title": "Consommation horaire définitive de gaz des clients industriels raccordés sur le réseau de transport de gaz JSON API",
+  "description": "<p style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; margin-bottom: 1em; color: rgb(51, 51, 51); font-size: 14px;'>Ce jeu de données présente les consommations de gaz à la maille nationale à un pas de temps horaire (en MWh <a href=\"https://opendata.reseaux-energies.fr/pages/glossaire/\" style=\"text-decoration: none; color: rgb(118, 154, 174);\">PCS</a> 0°C). La mise à jour de ce jeu de données est mensuelle.</p><p style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; margin-bottom: 1em; color: rgb(51, 51, 51); font-size: 14px;'>Ce jeu de données concerne uniquement les <b>consommations des clients raccordés au réseau de transport de NaTran et Teréga</b>. Ces données sont élaborées à partir des équipements de comptage.</p><p style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; margin-bottom: 1em; color: rgb(51, 51, 51); font-size: 14px;'>Ce jeu de données est publié conformément à l'article D 111-66 du code de l'énergie et en application de l'arrêté du 29 décembre 2017 (Loi pour une République Numérique).</p><p style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; margin-bottom: 0px; color: rgb(51, 51, 51); font-size: 14px;'><b>NB : Un écart de 0.2% maximum peut être constaté entre les données de certaines journées et celles publiées sur les sites des opérateurs. Il est lié à l'application du secret statistique.</b></p>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-nationale-horaire-de-gaz-donnees-definitives-grtgaz-v2/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-nationale-horaire-de-gaz-donnees-definitives-grtgaz-v2/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

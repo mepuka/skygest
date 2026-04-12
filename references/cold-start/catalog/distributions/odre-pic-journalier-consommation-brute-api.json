@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG39T4745X00BFSCSSG",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG3TVGG8M7SYPZFWXZQ",
+  "kind": "api-access",
+  "title": "Pic journalier de la consommation brute d'électricité JSON API",
+  "description": "<p>\n</p><p><span style=\"font-family: inherit; font-size: 0.875rem;\">Historique journalier de la puissance maximale (GW) nécessaire pour couvrir les pics de la consommation brute française.</span></p>\n<p>\nCet historique est complété par les valeurs des températures de référence et moyenne.\n</p>\n<hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/pic-journalier-consommation-brute/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/pic-journalier-consommation-brute/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

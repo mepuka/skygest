@@ -1,0 +1,15 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQA59T9F0D7QT2PXMJPH",
+  "sourceRef": {
+    "contentId": "at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3migue6dcyc25"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
+  "rawLabel": "2/3\n\nThe Low Carbon Contracts Company forecasts the technology-averaged CfD strike prices for Q2 202",
+  "rawDims": {
+    "geography": "gb",
+    "category": "price"
+  }
+}

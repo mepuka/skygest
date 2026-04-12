@@ -1,0 +1,13 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYV53130EE53T73A2SW",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYVXJFXAN2FMANYQE7T",
+  "kind": "download",
+  "title": "Distribution",
+  "accessURL": "https://ge.ch/sitg/geodata/SITG/OPENDATA/SCANE_INDICE_MOYENNES_3_ANS-KML.zip",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

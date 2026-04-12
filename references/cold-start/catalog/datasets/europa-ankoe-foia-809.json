@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZ8HMX965QJBA5DYBD2",
+  "title": "Ausschreibung der Auffangversorgung gem. § 33 Abs. 1 ElWG (Magistrat der Stadt Wien - Magistratsabteilung 31)",
+  "description": "[Publisher: Magistrat der Stadt Wien - Magistratsabteilung 31] Einleitung des Ausschreibungsverfahrens zu GZ V ZUW 01/26 der Energie-Control Austria für die Regulierung der Elektrizitäts-, Gas- und Wasserstoffwirtschaft (E-Control) zur Ernennung eines Auffangversorgers gem. § 33 Abs. 1 ElWG (https://www.e-control.at/strom/ausschreibungsverfahrenauffangversorger\nund https://www.e-control.at/bereich-recht/edikte).",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/ankoe-foia-809",
+  "accessRights": "public",
+  "license": "CC0",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ8CE5ZF3KES17TFY8T",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ8VDFT7J5A4N1CT69D",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ8Y15KAJB84W1533W0"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "ankoe-foia-809",
+      "relation": "exactMatch"
+    }
+  ]
+}

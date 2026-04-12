@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG2JJ4HB7MV549KW8AP",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG2KA01WNQ7HX5ZNF7M",
+  "kind": "api-access",
+  "title": "Capacités d'injection de biométhane réservées par département actuellement inscrites au Registre JSON API",
+  "description": "<p><span style='color: rgb(88, 88, 88); font-family: Asap, \"Helvetica Neue\", Helvetica, sans-serif;'>Ce jeu de données présente la répartition départementale du nombre et des capacités maximales (GWh/an) des projets d'injection de biométhane</span><span style='color: rgb(88, 88, 88); font-family: Asap, \"Helvetica Neue\", Helvetica, sans-serif;'> inscrits dans la file d'attente à chaque fin d'année depuis 2022 sur les réseaux de transport et de distribution de gaz. Sur l'année en cours, les données sont mises à jour à la fin de chaque trimestre. </span></p><p><span style='color: rgb(88, 88, 88); font-family: Asap, \"Helvetica Neue\", Helvetica, sans-serif;'>Pour des raisons d'Informations Commercialement Sensibles, des projets peuvent émerger dans des départements malgré l'absence de remontées de données sur ODRe (notamment lorsqu'il y a moins de 3 sites en projet sur un département).</span></p><p><span style='color: rgb(88, 88, 88); font-family: Asap, \"Helvetica Neue\", Helvetica, sans-serif; font-size: 0.875rem;'>Périmètre : France métropolitaine, hors Corse.</span></p>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/capacites-annuelles-d-injection-de-biomethane-reservees-par-departement/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/capacites-annuelles-d-injection-de-biomethane-reservees-par-departement/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

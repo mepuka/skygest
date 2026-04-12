@@ -1,0 +1,35 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKG15AAASAPWGBF93F60",
+  "title": "Projets de production de gaz renouvelable et bas carbone par pyrogazeification pour injection dans les réseaux gaziers",
+  "description": "<p>Ce jeu de données fournit en Open Data la localisation de plus d'une quarantaine de projets commerciaux et démonstrateurs de production de biogaz via la pyrogazéification. </p><p>Dernière mise à jour : 19/09/2025</p><p>D'autres informations complémentaires sont disponibles sur le site de l'ATEE : <a href=\"https://atee.fr/energies-renouvelables/club-pyrogazeification\" target=\"_blank\">https://atee.fr/energies-renouvelables/club-pyrogazeification</a><a href=\"https://atee.fr/energies-renouvelables/club-pyrogazeification\" target=\"_blank\"></a></p><p>------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</p><p>La pyrogazéification est un procédé innovant de production de gaz injectable dans les réseaux existants. Ce procédé transforme en gaz des résidus solides peu ou mal valorisés (bois usé, plastiques non recyclés, combustibles solides de récupération…), en les chauffant à haute température (entre 800 et 1 500°), avec peu (ou pas) d’oxygène. À l’horizon 2030, le bilan prévisionnel des opérateurs de réseaux basé sur les ambitions inscrites dans les plans régionaux (SRADDET et études spécifiques) montre que la pyrogazéification pourrait représenter 6 TWh de gaz injecté par an correspondant jusqu’à 1 million de tonnes de CO2 évité.</p><p>Cette technologie d’avenir contribuera ainsi à l’atteinte d’une consommation de gaz 100% renouvelable ou bas-carbone en France à l’horizon 2050.</p><p>Information sur le statut démonstrateur industriel : il s'agit de démonstrateurs actuellement en activité, à une échelle semi-industrielle ou industrielle. Tous ne disposent pas de la chaine de procédés complète pour une production de méthane de qualité injectable, mais la brique pyrogazéification est adaptée à la filière injection.</p><p>Informations sur les statuts des projets commerciaux :</p><ul style=\"font-family: Calibri, Arial, Helvetica, sans-serif; font-size: 16px;\"><li><span style=\"border: 0px; font: inherit; margin: 0px; padding: 0px; vertical-align: baseline; color: inherit;\">Projet en étude préliminaire : </span>Dispose d’un projet (besoin de déchets à traiter ou de production de gaz à produire, porteur de projet avec premiers éléments de site, …).</li><li><span style=\"border: 0px; font: inherit; margin: 0px; padding: 0px; vertical-align: baseline; color: inherit;\">Projet en développement </span><span style=\"border: 0px; font: inherit; margin: 0px; padding: 0px; vertical-align: baseline;\">: </span><span style=\"border: 0px; font: inherit; margin: 0px; padding: 0px; vertical-align: baseline; color: inherit;\"><span style=\"border: 0px; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: 12pt; line-height: inherit; font-family: Calibri, Helvetica, sans-serif; margin: 0px; padding: 0px; vertical-align: baseline;\">étude de faisabilité du projet réalisée avec un premier Business Plan établi.</span></span></li></ul>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/projet-commerciaux-et-demonstrateurs-en-france-de-pyrogazeification/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "EnR",
+    "Biogaz",
+    "Carte",
+    "Pyrogazeification"
+  ],
+  "themes": [
+    "Production",
+    "Environnement"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKG1FGAWYY5K5RKANPM3"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "projet-commerciaux-et-demonstrateurs-en-france-de-pyrogazeification",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1ASA1CW0E61RES57JHV52A",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1ASA1CZ9B4B3V3BGRRRSW6",
+  "kind": "api-access",
+  "title": "Transmission Infrastructure Unavailability XML API",
+  "description": "Planned and forced unavailability of cross-border transmission infrastructure.",
+  "accessURL": "https://web-api.tp.entsoe.eu/api?documentType=A78",
+  "mediaType": "application/xml",
+  "format": "xml",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1ASA196ZW4HCGRC7TGWS41",
+  "createdAt": "2026-04-12T17:10:46.402Z",
+  "updatedAt": "2026-04-12T17:10:46.402Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://web-api.tp.entsoe.eu/api?documentType=A78",
+      "relation": "exactMatch"
+    }
+  ]
+}

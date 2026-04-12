@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5M4XRA79DCB0351XYK",
   "title": "GridStatus SPP Fuel Mix By BAA",
   "description": "Fuel mix for SPP, with a BAA column to view SPP East and SPP West fuel mix values independently. \n\nData begins on March 30th, 2026 for SPP, April 1st, 2026 for SWPW.\n\nCombined all-SPP fuel mix data with further historical data is available from the `spp_fuel_mix` [dataset](https://www.gridstatus.io/datasets/spp_fuel_mix).",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/spp_fuel_mix_by_baa",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

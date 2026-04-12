@@ -1,0 +1,14 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQA56HNWY8QKC3CEFAVE",
+  "sourceRef": {
+    "contentId": "at://did:plc:r5ofoghdcbtjqiujqpvja4uh/app.bsky.feed.post/3mif3epqb7t2r"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
+  "rawLabel": "We can see this in the IPCC's Figure 6.24, which shows the breakdown between short-lived pollutants",
+  "rawDims": {
+    "category": "emissions"
+  }
+}

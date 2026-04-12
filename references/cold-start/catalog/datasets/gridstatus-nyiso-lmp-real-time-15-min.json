@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5FXMKAK6YRGR0F6W7D",
   "title": "GridStatus NYISO LMP Real Time 15 Min",
   "description": "NYISO LMPs in 15 minute intervals as reported by NYISO. These are Real Time\nCommitment (RTC) values. RTC runs every 15 minutes and looks ahead 2.5 hours.\n\nIncludes All zone and generator level data. The location types present are:\n\n- *Generator*\n- *Zone* \n\nNOTE: in NYISO's raw data, a negative congestion component results in a higher LMP\nvalue, which is the opposite of other ISOs. Thus, we flip the sign on the\ncongestion component before inserting into our database to be consistent with other\nISOs. This means that in our database, LMP = Energy + Congestion + Loss.",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/nyiso_lmp_real_time_15_min",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

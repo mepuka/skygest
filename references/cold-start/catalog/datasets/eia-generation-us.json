@@ -17,7 +17,11 @@
     "electricity"
   ],
   "distributionIds": [
-    "https://id.skygest.io/distribution/dist_01KNQEZ5VJB0QE6WEN9HJD5G5A"
+    "https://id.skygest.io/distribution/dist_01KNQEZ5VJB0QE6WEN9HJD5G5A",
+    "https://id.skygest.io/distribution/dist_01KP165RQ7KEP9NXQGV03SF9KW"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
   ],
   "accessRights": "public"
 }

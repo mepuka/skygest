@@ -1,12 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2VG65RQCWAW4ZMF62N",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQA0ERYJ0S1PRFB4B0ZS",
   "sourceRef": {
     "contentId": "x://952613187765047297/2040490502399611310"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHCC3BMQX00JTTGNMH",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH4ZJK16FMMWK9NXBP",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
   "rawLabel": "At the start of summer 2000, NYISO issued a warning about the following summer's",
   "rawDims": {
     "geography": "us-nyiso",

@@ -1,0 +1,15 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQA43501EGW1PE7HF41T",
+  "sourceRef": {
+    "contentId": "x://982294921/status/2042172070218330174"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
+  "rawLabel": "For the first time ever, heat pumps outsold gas boilers in Germany in 2025.\n\n48% of all new heating",
+  "rawDims": {
+    "geography": "de",
+    "category": "capacity"
+  }
+}

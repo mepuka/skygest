@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYQH0Y9KE3Z1F4QTT6M",
+  "title": "NDBER03 - Non-Domestic Building Energy Ratings (Central Statistics Office)",
+  "description": "[Publisher: Central Statistics Office] Non-Domestic Building Energy Ratings",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/357ddb54-c3f7-4197-919f-48ba5bcc238e~~1",
+  "accessRights": "public",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYQECQ2WPPRBZCTB6PC",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYQ5WHK7FSTBGD85JJY",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYQCJPJ8HTYCVSVWZ45",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYQQ8JGB02M3FMZE7MA"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "357ddb54-c3f7-4197-919f-48ba5bcc238e~~1",
+      "relation": "exactMatch"
+    }
+  ]
+}

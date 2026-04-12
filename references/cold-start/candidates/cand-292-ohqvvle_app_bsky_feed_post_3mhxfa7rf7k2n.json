@@ -1,0 +1,15 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQA40DQN2FYAHPW9HZW5",
+  "sourceRef": {
+    "contentId": "at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhxfa7rf7k2n"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+  "rawLabel": "There was a new wind power record for Britain yesterday:\n\n23,880 MW at 13:30 – 14:00, 25th March 202",
+  "rawDims": {
+    "geography": "gb",
+    "category": "technology"
+  }
+}

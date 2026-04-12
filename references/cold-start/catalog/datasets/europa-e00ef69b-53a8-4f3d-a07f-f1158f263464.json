@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYZ88D12JXTQ98D5WDW",
+  "title": "Tree Maintenance Data 2023 SDCC (South Dublin County Council)",
+  "description": "[Publisher: South Dublin County Council] <p><span style='background-color:rgb(255,255,255); color:rgb(20,20,20); font-family:&quot;Avenir Next&quot;, Avenir, &quot;Helvetica Neue&quot;, sans-serif; font-size:16px;'><span style='display:inline !important; float:none; font-style:normal; font-variant-caps:normal; font-variant-ligatures:normal; font-weight:400; letter-spacing:normal; text-align:start; text-decoration-color:initial; text-decoration-style:initial; text-indent:0px; text-transform:none; word-spacing:0px;'>The Tree Maintenance Data consists of numbers of Trees managed in one calendar year. This data is created by the Public Realm Section as part of Environment Water and Climate Change Department. Data includes the Number of Trees Pruned, Trees Removed, Tree Stumps Removed, Trees Planted and Tree Whips planted as mini-woodlands.</span></span></p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/e00ef69b-53a8-4f3d-a07f-f1158f263464",
+  "accessRights": "public",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZG7DT7BB00X70R15B",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZQP028PN85014T0VD",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZS00MX47P3F4X702Y",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZ6684316M8HW7YPGB",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZFZBH8N39JAQFZ6AH"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "e00ef69b-53a8-4f3d-a07f-f1158f263464",
+      "relation": "exactMatch"
+    }
+  ]
+}

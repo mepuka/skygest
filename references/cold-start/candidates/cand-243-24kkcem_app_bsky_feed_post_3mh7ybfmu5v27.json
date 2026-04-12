@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2XJNGW8NZD9ZZJHDQ7",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQA01DJYEGM8F80NNQB2",
   "sourceRef": {
     "contentId": "at://did:plc:yapvitpo2txykwiua24kkcem/app.bsky.feed.post/3mh7ybfmu5v27"
   },
@@ -9,7 +9,8 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VN88FSP5QD5M4Z6EGW",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VNBTKYXXQN623KFTFG",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMM5YKEQCPBX960YXC",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XA1FY6T4MMQ075S84B",
   "rawLabel": "US sodium-ion startup Peak Energy piloting 3.1MWh system at RWE Wisconsin lab #e",
   "rawDims": {
     "geography": "us",

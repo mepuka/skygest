@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYGMFVN8YFHSHECJCNE",
+  "title": "Energy productivity (Eurostat)",
+  "description": "[Publisher: Eurostat] Energy productivity",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/hkoqcafeicoacynmhtub8a",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "1990-01-01T00:00:00Z/2024-12-31T00:00:00Z",
+  "themes": [
+    "environment",
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYGBMBBVVH48F8ER66C",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYGBE5YHRAHNSW4QNSP",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYGPAP1W9FV425EY9T6",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYGM4SGEYR5K4S2F84A",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYGAM397TV3DBG52QBB"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "hkoqcafeicoacynmhtub8a",
+      "relation": "exactMatch"
+    }
+  ]
+}

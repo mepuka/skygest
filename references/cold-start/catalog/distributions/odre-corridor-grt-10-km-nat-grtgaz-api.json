@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKFSAD6N4KC3KPN2FQPS",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKFR0WBH92419EK05D25",
+  "kind": "api-access",
+  "title": "Corridor de largeur 10 km de part et d’autre du réseau de transport de gaz JSON API",
+  "description": "<p><span class=\"fontstyle0\">Corridor de largeur 10 km de part et d’autre du réseau de transport de gaz.</span></p><p></p><p><span class=\"fontstyle0\">Ce corridor a été calculé à partir des données « </span><span class=\"fontstyle0\" style=\"color: rgb(5, 99, 193);\"><a href=\"https://odre.opendatasoft.com/explore/dataset/trace-du-reseau-grt-250/information/\" target=\"_blank\">tracé simplifié du réseau NaTran précis à environ 250 m</a> </span><span class=\"fontstyle0\">» et « </span><span class=\"fontstyle0\" style=\"color: rgb(5, 99, 193);\"><a href=\"https://odre.opendatasoft.com/explore/dataset/terega-trace-du-reseau/\" target=\"_blank\">tracé simplifié du réseau TEREGA précis à environ 250 m </a></span><span class=\"fontstyle0\">présentes sur la plate-forme </span><a href=\"https://opendata.reseaux-energies.fr/\" style=\"background-color: rgb(255, 255, 255); font-family: sans-serif; font-size: 14px; font-weight: 400;\" target=\"_blank\">ODRÉ</a><span class=\"fontstyle0\" style=\"color: rgb(5, 99, 193);\"></span><span class=\"fontstyle0\">.</span><br></p><p></p><p><span class=\"fontstyle0\">Ce jeu de données reflète la présence d’un réseau de transport de gaz dans un rayon de 10 km en tout point à l’intérieur du corridor.</span></p><p></p><p><span class=\"fontstyle0\"></span><span class=\"fontstyle2\">Attention ! </span><span class=\"fontstyle0\">Ces informations ne permettent pas d’identifier avec précision la présence ou l’absence de réseaux ou canalisation sur une zone géographique donnée. Vous ne pouvez en aucun cas les utiliser dans le cadre de travaux sur voirie. Dans ce cadre, seules les informations obtenues via le téléservice (guichet unique) http://www.reseaux-et-canalisations.ineris.fr font foi.</span> \n<br style=\"font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-alternates: normal; font-variant-position: normal; line-height: normal; text-align: -webkit-auto; text-size-adjust: auto;\"/></p>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/corridor_grt_10_km-nat-grtgaz/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/corridor_grt_10_km-nat-grtgaz/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

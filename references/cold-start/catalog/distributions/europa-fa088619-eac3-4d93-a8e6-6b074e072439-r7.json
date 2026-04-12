@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZPMQJGSNBWCK3GQ6G9",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZPRA6SYRKGDGP0N2JR",
+  "kind": "download",
+  "title": "OAF distribution",
+  "accessURL": "https://api.hamburg.de/datasets/v1/dachflaechen",
+  "format": "oaf",
+  "byteSize": 2238,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

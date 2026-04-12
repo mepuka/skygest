@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZGAR2NZZ38X2PMZQTK",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZGV76ESHSHATE8TGT4",
+  "kind": "download",
+  "title": "GEOJSON distribution",
+  "accessURL": "https://geoportal-niederrhein.de/lgv-config/geojson/moers/kWP_Moersbach_Bereiche.geojson",
+  "mediaType": "application/geo+json",
+  "format": "geojson",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

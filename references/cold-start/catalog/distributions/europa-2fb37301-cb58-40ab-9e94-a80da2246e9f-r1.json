@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ6D41MNR4GG0FB411A",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ6TQP6XY9FBDPA41AJ",
+  "kind": "landing-page",
+  "title": "HTML distribution",
+  "accessURL": "https://data-sdublincoco.opendata.arcgis.com/datasets/sdublincoco::route-3-saggart",
+  "mediaType": "text/html",
+  "format": "html",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

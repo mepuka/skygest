@@ -1,0 +1,15 @@
+{
+  "_tag": "Candidate",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQA5PGGAH29C0RJ62EE5",
+  "sourceRef": {
+    "contentId": "at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhngjqn5nc2b"
+  },
+  "resolutionState": "partially_resolved",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
+  "rawLabel": "50 years of electricity decarbonisation, 1975–2025,\nfor the largest four European economies,\nGermany",
+  "rawDims": {
+    "geography": "de",
+    "category": "emissions"
+  }
+}

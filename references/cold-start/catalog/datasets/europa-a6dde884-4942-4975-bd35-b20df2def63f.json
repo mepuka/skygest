@@ -1,0 +1,37 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZTY885F4FHB2X9FHCA",
+  "title": "Protokoll der Gemeinderatssitzung vom 12.02.2026 (Marktgemeinde Feldkirchen an der Donau)",
+  "description": "[Publisher: Marktgemeinde Feldkirchen an der Donau] Protokoll der Gemeinderatssitzung vom 12.02.2026",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/a6dde884-4942-4975-bd35-b20df2def63f",
+  "accessRights": "public",
+  "license": "https://creativecommons.org/licenses/by/4.0/deed.de",
+  "temporal": "2026-03-06T00:00:00Z/",
+  "themes": [
+    "society",
+    "economy",
+    "government",
+    "justice",
+    "environment",
+    "transport",
+    "energy",
+    "education"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZTN7HM8ZCDH1B6V6TF",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZT2RWG11D12RP1JY9T"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "a6dde884-4942-4975-bd35-b20df2def63f",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ6FA9W7BW1ECAENPYG",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ6M2QT6TG0F10JVYP8",
+  "kind": "download",
+  "title": "JSON distribution",
+  "accessURL": "https://api.energidataservice.dk/dataset/ProductionConsumptionSettlement",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

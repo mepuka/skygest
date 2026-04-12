@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYR9GBKQYYYY639KXRS",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYR1N0MVPFPNP7XDVMA",
+  "kind": "download",
+  "title": "PDF distribution",
+  "accessURL": "https://verwaltungscloud.at/s/ecNtaJdii8CkBnd",
+  "mediaType": "application/pdf",
+  "format": "pdf",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

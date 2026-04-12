@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ9DZ01DH4638FCR1S9",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ9X2HCHDT5G9ECAMGV",
+  "kind": "download",
+  "title": "APPLICATION/JSON distribution",
+  "accessURL": "https://api.scb.se/OV0104/v1/doris/sv/ssd/EN/EN0301/EN0301A/SSDManadElVolymer",
+  "format": "application/json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

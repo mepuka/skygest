@@ -1,0 +1,29 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZG2P1Q1GBGPKW0ZAMY",
+  "title": "029 - ORES Electricity and Gas - Smart Meter Communicability Rate (ORES)",
+  "description": "[Publisher: ORES] Name of the report: Ratio of communication capability of smart meters\nAggregation level: The dataset contains aggregated information at monthly level.\nScope: Indicator concerning all smart meters connected to the Telekom network and all smart meters in flight mode. Photo at the end of the month.\nEnergy: Electricity and gas\nFrequency: monthly\nEnd date of the record: not determined\nDate of provision of the dataset: 20/mm/NN, on the 20th of the month\nRate of communication ability: Share of unexposed provisioned communicating smart meters in relation to the number of unexposed provisioned smart meters\nProvisioned numerator: Smart meter that could be added to the communication chain\nDiscontinued counter: Smart meters whose services are exposed in the communication chain.\nThis term may be temporary or definitive.\nSmart meters:\ndigital low-voltage counter, non-mechanical counter\n\n\nAntenna disabled (flight mode): At the request of the customer, ORES deactivates the communication function of the smart meter. These meters become non-communicating smart meters.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/https-www-odwb-be-explore-dataset-029-ores-electricite-et-gaz-taux-de-communicabilite-des-compteurs-smart-",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "2024-01-30T22:00:00Z/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZGB5XFZYZ1X0F2KA1R"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "https-www-odwb-be-explore-dataset-029-ores-electricite-et-gaz-taux-de-communicabilite-des-compteurs-smart-",
+      "relation": "exactMatch"
+    }
+  ]
+}

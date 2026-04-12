@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2D2F87VJJM0Z393MGX",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9PHYA11Y52EKH8RM7T",
   "sourceRef": {
     "contentId": "at://did:plc:afwyjr6qfcjfwq5fdqnnyldi/app.bsky.feed.post/3mb7wnkreyl24"
   },
@@ -9,7 +9,7 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VN88FSP5QD5M4Z6EGW",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VNBTKYXXQN623KFTFG",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
   "rawLabel": "As #2025 comes to a close, the global direction is clear: renewables are now the",
   "rawDims": {
     "geography": "us-ca",

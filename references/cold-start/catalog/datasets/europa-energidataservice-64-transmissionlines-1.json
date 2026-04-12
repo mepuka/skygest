@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZVHM73HS84S4RCZGA0",
+  "title": "Transmission Lines (Discontinued, please read description) (Energinet)",
+  "description": "[Publisher: Energinet] Data on capacity, scheduled trade, actual exchange and congestion income.\n#### Where to find data:\n**Import and Export Capacity - Day Ahead**\n* Capacities between Nordic bidding zones: [JAO: Flowbased Domain](https://publicationtool.jao.eu/nordic/flowbasedDomain)\n* Capacities between Denmark and Germany, The Netherlands, and Great Britain: [Transparency Platform: Implicit Allocations - Day Ahead](https://transparency.entsoe.eu/market/allocation/implicit/intraday)\n \n**Scheduled exchange Day Ahead**\n* [Transparency Platform: Scheduled Commercial Exchange](https://newtransparency.entsoe.eu/transmission/scheduledExchange)\n\n**Scheduled exchange Intraday**\n* Can be calculated by subtracting \"Day-ahead\" from \"Total\" in the dataset [Scheduled Commercial Exchange](https://newtransparency.entsoe.eu/transmission/scheduledExchange)\n\nAlso see:\n* [Transparency Platform: Explicit Allocations - Intraday](https://transparency.entsoe.eu/transmission/r2/explicitAllocationsIntraday/show)\n* [Transparency Platform: Explicit Allocations - Intraday - OC evolution](https://transparency.entsoe.eu/transmission/r2/offeredIntradayTransferCapacities/show)\n* [Transparency Platform: Implicit Allocations - Intraday](https://transparency.entsoe.eu/transmission-domain/r2/implicitAllocationsIntraday/show)\n* [Transparency Platform: Continuous Allocations - OC Evolution](https://newtransparency.entsoe.eu/market/allocation/continuous/ocEvolution)\n \n**Physical exchange non-validated** \n* [Electricity Balance Non-Validated](https://www.energidataservice.dk/tso-electricity/ElectricityBalanceNonv)\n* [Transparency Platform: Cross-Border Physical Flow](https://transparency.entsoe.eu/transmission-domain/physicalFlow/show)\n\n**Physical exchange settlement**\n* [Foreign Exchange](https://www.energidataservice.dk/tso-electricity/ForeignExchange)\n* [Production and Consumption - Settlement](https://www.energidataservice.dk/tso-electricity/ProductionConsumptionSettlement)\n\n**Congestion Income**\n* Implicit Allocations - Congestion Income - Intraday per border (will be available in the future at [Transparency Platform](https://newtransparency.entsoe.eu/market/congestionIncome/implicit/intraday))\n* [Transparency Platform: Flow-based - Congestion Income](https://newtransparency.entsoe.eu/market/congestionIncome/flowbased/dayAhead?appState=%7b%22sa%22:%5b%22BZN%7c10YDK-1--------W%22%5d%2c%22st%22:%22BZN%22%2c%22mm%22:true%2c%22ma%22:false%2c%22sp%22:%22HALF%22%2c%22dt%22:%22TABLE%22%2c%22df%22:%5b%222025-05-12%22%2c%222025-05-12%22%5d%2c%22tz%22:%22CET%22%7d) - Day Ahead per border\n* [Transparency Platform: Implicit Allocations - Congestion Income](https://newtransparency.entsoe.eu/market/congestionIncome/implicit/daily?appState=%7b%22sa%22:%5b%22CTA%7c10Y1001A1001A796%22%5d%2c%22st%22:%22CTA%22%2c%22mm%22:true%2c%22ma%22:false%2c%22sp%22:%22HALF%22%2c%22dt%22:%22TABLE%22%2c%22df%22:%5b%222024-11-01%22%2c%222024-11-07%22%5d%2c%22tz%22:%22CET%22%7d) - Day Ahead per border\n* [Transparency Platform: Flow-based - Congestion Income](https://newtransparency.entsoe.eu/market/congestionIncome/flowbased/dayAhead?appState=%7b%22sa%22:%5b%22BZN%7c10YDK-1--------W%22%5d%2c%22st%22:%22BZN%22%2c%22mm%22:true%2c%22ma%22:false%2c%22sp%22:%22HALF%22%2c%22dt%22:%22TABLE%22%2c%22df%22:%5b%222025-05-12%22%2c%222025-05-12%22%5d%2c%22tz%22:%22CET%22%7d) - Day Ahead per bidding zone without borders\n\n**Prices**\n* [Transparency Platform: Energy Prices](https://newtransparency.entsoe.eu/market/energyPrices)\n\n---\n\n**The TSOs** decide how much capacity is to be transferred, and the capacity for the coming day is published at Nord Pool Spot every day before 10:00.\n\nScheduled trade on the transmission lines is the flow of electricity from areas of surplus to areas of deficit resulting from the Nord Pool Spots price calculation. The physical exchange is the actual measured exchange of electricity. Negative values indicate export of electricity out of the area to the connected area, and positive values indicate import. \n\nCongestion rent is calculated as the difference in spot prices betwe",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/energidataservice_64_transmissionlines~~1",
+  "accessRights": "public",
+  "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
+  "temporal": "1999-07-01T00:00:00Z/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZV3S6NDP6BTY62Y13B",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZV0GCQQAEC5VCP1RKM"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "energidataservice_64_transmissionlines~~1",
+      "relation": "exactMatch"
+    }
+  ]
+}

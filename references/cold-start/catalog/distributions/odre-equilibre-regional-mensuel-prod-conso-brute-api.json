@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG4TD9K4QCKS7X4GGMS",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG4DWZ23YJ5PMK9D2X7",
+  "kind": "api-access",
+  "title": "Equilibre régional mensuel production = consommation brute (janvier 2014 à décembre 2025) JSON API",
+  "description": "<p>\nHistorique régional définitif de la réalisation de l’équilibre mensuel production/consommation (GWh) en fonction de la consommation brute, du solde des échanges physiques avec l’étranger et des soutirages dus au pompage.</p><p><span style='color: rgb(88, 88, 88); font-family: Asap, \"Helvetica Neue\", Helvetica, sans-serif; font-weight: 700; font-size: 0.875rem;'>Suite à un recalcul de l'autoconsommation photovoltaïque, la consommation sur les années 2022 à 2024 a augmenté.</span></p><hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/equilibre-regional-mensuel-prod-conso-brute/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/equilibre-regional-mensuel-prod-conso-brute/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

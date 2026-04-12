@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5G80NAAXFPS0P677WD",
   "title": "GridStatus PJM Dispatched Reserves Prelim",
   "description": "This dataset contains the quantity, requirement, and clearing price for reserves in PJM updated every five minutes. Prices are preliminary and are subject to change in the verification process, with verified prices found [here](https://www.gridstatus.io/datasets/pjm_dispatched_reserves_verified). PJM uses these reserves in order to balance grid frequency in the event of unplanned generator trips, ramps in exports, or other events that may cause [Area Control Error](https://www.gridstatus.io/datasets/pjm_area_control_error) to go negative. \n\nReserve types, for both the PJM RTO and Mid-Atlantic/Dominion Reserve subzones include:\n\n- Primary Reserves\n- Synchronized Reserves\n- Thirty-Minute Reserves (only PJM RTO Reserve Zone)\n\n⚠️ In the event of technical issues PJM typically does not backfill this data.",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/pjm_dispatched_reserves_prelim",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

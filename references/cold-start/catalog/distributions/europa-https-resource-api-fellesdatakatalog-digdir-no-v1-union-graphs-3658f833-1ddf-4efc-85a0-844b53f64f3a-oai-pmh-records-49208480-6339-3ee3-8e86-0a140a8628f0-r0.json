@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYSRN0WN97J8ZD5WBB0",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYSJZ9GVZ6GHP2F81PD",
+  "kind": "download",
+  "title": "TXT distribution",
+  "accessURL": "https://kartkatalog.geonorge.no/metadata/uuid/82cd33ef-52dd-4c83-b2d6-e55a0941b33b",
+  "format": "txt",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

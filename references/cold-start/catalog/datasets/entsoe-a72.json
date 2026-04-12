@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1ASA1BME1Z2K2X9KTSXP3B",
+  "title": "Reservoir Filling Information",
+  "description": "Weekly water reservoir filling level as share of usable capacity in each bidding zone.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9",
+  "landingPage": "https://transparency.entsoe.eu/",
+  "accessRights": "public",
+  "keywords": [
+    "generation",
+    "Art. 16.1(c)"
+  ],
+  "themes": [
+    "generation"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1ASA1BT6EH4038W15Q790P"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1ASA196ZW4HCGRC7TGWS41"
+  ],
+  "createdAt": "2026-04-12T17:10:46.402Z",
+  "updatedAt": "2026-04-12T17:10:46.402Z",
+  "aliases": [
+    {
+      "scheme": "entsoe-document-type",
+      "value": "A72",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKG47CK6TK9SKQT2EX9B",
+  "title": "Production nucléaire",
+  "description": "<p><span style='font-size:11.0pt;font-family:\"Aptos\",sans-serif;\nmso-fareast-font-family:\"Times New Roman\";mso-bidi-font-family:Aptos;\nmso-ligatures:standardcontextual;mso-ansi-language:FR;mso-fareast-language:\nEN-US;mso-bidi-language:AR-SA'>Ce jeu de données présente la production nette\nd’électricité d’origine nucléaire  française moyennée au pas de temps horaire et\nceci depuis 2001 en GWh.</span></p><p><span style=\"font-family: inherit; font-size: 0.875rem;\">Note : la convention débutante est appliquée. </span></p><p><br></p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/production-nette-nucleaire/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "Nucléaire"
+  ],
+  "themes": [
+    "Production"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKG4045X86ADGF4Y238A"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "production-nette-nucleaire",
+      "relation": "exactMatch"
+    }
+  ]
+}

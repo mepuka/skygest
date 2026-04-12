@@ -1,0 +1,28 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKFY6S3C6MBPD5WGEZBE",
+  "title": "Injections régionales quotidiennes consolidées sur le réseau de transport d'électricité (2019 à 2026)",
+  "description": "<p>\nCe jeu de données présente, depuis le 1er janvier 2019, les valeurs consolidées des injections des producteurs raccordés au réseau de transport d'électricité (RTE), par jour, par région administrative, par plage de puissance maximale, par filière et par demi-heure. Ces données sont élaborées à partir des équipements de comptage.\n</p>\n<p>\nPour chaque demi-heure, la puissance est fournie en MW. L'énergie journalière est exprimée en MWh.\n</p>\n<p>\nLes valeurs d'un mois donné sont publiées en milieu de mois suivant lorsqu'elles ont été consolidées, c'est à dire vérifiées et complétées. Elles deviennent définitives lorsque tous les partenaires ont transmis et vérifié l'ensemble de leurs comptages (livraison deuxième semestre A+1). Par ailleurs, le non-respect du <a href=\"https://opendata.reseaux-energies.fr/pages/glossaire/\">secret statistique</a> par demi-heure peut conduire à masquer la ligne correspondant à la journée, la région administrative, la filière et la plage de puissance maximale concernées.</p><p>Depuis le 1er juin 2022, une modification du modèle utilisé pour définir le secret statistique peut amener à prendre en compte des valeurs qui étaient exclues auparavant.<br></p><p>\n</p>\n<p>\nCe jeu de données est publié conformément à l'article D 111-66 du code de l'énergie et en application de l'arrêté du 29 décembre 2017 (Loi pour une République Numérique).\n</p>\n<hr>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/injections-regionales-quotidiennes-consolidees-rpt/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "themes": [
+    "Production"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKFYRGTPB9WAG37782V1"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "injections-regionales-quotidiennes-consolidees-rpt",
+      "relation": "exactMatch"
+    }
+  ]
+}

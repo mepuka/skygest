@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG1P67P4HX1DQMXF3RW",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG1SEF3WXYV4YA08CPP",
+  "kind": "api-access",
+  "title": "Longueurs départementales annuelle des canalisations du réseau de transport de gaz français JSON API",
+  "description": "<p style=\"margin-top:0cm;margin-right:0cm;margin-bottom:7.5pt;margin-left:0cm\"><span style='font-size:11.0pt;font-family:\"Calibri\",sans-serif;mso-ascii-theme-font:\nminor-latin;mso-hansi-theme-font:minor-latin;mso-bidi-theme-font:minor-latin'>Ce\njeu de données présente</span>, par département, les longueurs cumulées de canalisations de\ntransport de gaz en service et leur diamètre nominal maximal (DN max),\ndéclinées selon la nature du réseau (<b><a href=\"http://www.natrangroupe.com/fr/acces-direct/clients/consommateur/le-reseau-de-gaz-naturel.html\" target=\"_blank\">principal </a></b><a href=\"http://www.natrangroupe.com/fr/acces-direct/clients/consommateur/le-reseau-de-gaz-naturel.html\" target=\"_blank\">ou régional</a>)\net son opérateur (Terega ou NaTran).<span style='font-size:9.5pt;\nfont-family:\"Calibri\",sans-serif;mso-ascii-theme-font:minor-latin;mso-hansi-theme-font:\nminor-latin;mso-bidi-theme-font:minor-latin'><o:p></o:p></span></p><p style=\"margin: 0cm 0cm 7.5pt;\"><b style=\"font-family: inherit;\"><span style='font-size:11.0pt;font-family:\"Calibri\",sans-serif;mso-ascii-theme-font:\nminor-latin;mso-hansi-theme-font:minor-latin;mso-bidi-theme-font:minor-latin'>Nota </span></b><span style=\"font-size: 11pt; font-family: Calibri, sans-serif;\">:\nles canalisations dont le tracé reste proche (« canalisations\nparallèles ») interviennent bien dans ces chiffres chacune pour son propre\ncompte : deux canalisations parallèles sur 10 km comptent donc pour 20 km. </span></p><p></p><p></p><p></p>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/longueurs-departementales-canalisations-gaz/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/longueurs-departementales-canalisations-gaz/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

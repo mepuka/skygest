@@ -1,0 +1,27 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZHG736CY5JC1WCDMH1",
+  "title": "5e57339e-d6d8-482d-a839-2795d2dcb01e (Referat F/1 Energiepolitik und Energiewende)",
+  "description": "[Publisher: Referat F/1 Energiepolitik und Energiewende]",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/5e57339e-d6d8-482d-a839-2795d2dcb01e",
+  "accessRights": "public",
+  "license": "http://dcat-ap.de/def/licenses/cc-by/4.0",
+  "themes": [
+    "economy",
+    "energy"
+  ],
+  "distributionIds": [],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "5e57339e-d6d8-482d-a839-2795d2dcb01e",
+      "relation": "exactMatch"
+    }
+  ]
+}

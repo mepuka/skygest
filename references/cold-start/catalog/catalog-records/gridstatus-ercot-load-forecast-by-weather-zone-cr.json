@@ -7,7 +7,7 @@
   "sourceRecordId": "ercot_load_forecast_by_weather_zone",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2023-11-29T04:40:58+00:00",
-  "lastSeen": "2026-04-11T02:31:30+00:00",
-  "sourceModified": "2026-04-11T02:30:00+00:00",
+  "lastSeen": "2026-04-12T15:31:22+00:00",
+  "sourceModified": "2026-04-12T15:30:00+00:00",
   "isAuthoritative": true
 }

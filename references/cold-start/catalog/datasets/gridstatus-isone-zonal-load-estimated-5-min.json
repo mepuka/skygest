@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5C48RE94ZGJKRWFV90",
   "title": "GridStatus ISONE Zonal Load Estimated 5 Min",
   "description": "Estimated five minute zonal load and BTM solar generation across all 8 of ISO-NE’s forecast zones. ",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQS8K6ZDJM27C1APBMGSSTJ"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/isone_zonal_load_estimated_5_min",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

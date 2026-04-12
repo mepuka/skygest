@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZN87Y2P5W4ZS7Q7RN9",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZNPX1W8W2CPKCMDCTA",
+  "kind": "landing-page",
+  "title": "HTML distribution",
+  "accessURL": "http://www.hamburg.de/energiewende/waermekataster/",
+  "mediaType": "text/html",
+  "format": "html",
+  "byteSize": 241021,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5H11XR2Y137PPES5X7",
   "title": "GridStatus PJM LMP Real Time Hourly",
   "description": "Hourly, real-time, LMP data for all buses and aggregates in PJM. Also includes load-weighted average transmission zone and residual aggregate prices, which are estimates by PJM. This dataset is published daily with a day of lag time. \n\nPricing node types include:\n\n* *AGGREGATE*\n* *EHV*\n* *EXT*\n* *GEN*\n* *HUB*\n* *INTERFACE*\n* *LOAD*\n* *RESIDUAL_METERED_EDC*\n* *ZONE*  ",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/pjm_lmp_real_time_hourly",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

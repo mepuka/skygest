@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ9H8699N8812SK2B23",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ9YXGM9V3HDE91VFX4",
+  "kind": "landing-page",
+  "title": "HTML distribution",
+  "accessURL": "https://ec.europa.eu/eurostat/databrowser/view/env_ac_aibrid_r2/default/table",
+  "mediaType": "text/html",
+  "format": "html",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

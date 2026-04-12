@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4K4T28DFSVGG3SRJWA",
   "title": "GridStatus CAISO LMP Scheduling Point Tie Day Ahead Hourly",
   "description": "Hourly LMPs for Scheduling Point (SP) - Intertie (Tie) combinations. Interchange schedules are settled at the relevant SP-Tie combination. Both the SP and the Tie are declared by a scheduling coordinator when submitting a bid, while for registered system resources, the SP is their PNode/APNode, and the Tie is the registered primary intertie. ",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/caiso_lmp_scheduling_point_tie_day_ahead_hourly",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

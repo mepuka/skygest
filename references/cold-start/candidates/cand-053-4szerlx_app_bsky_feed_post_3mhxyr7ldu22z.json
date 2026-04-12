@@ -1,13 +1,15 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS27F3GE71V20TBTSDAH",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9FNYJDK0NG62S2N713",
   "sourceRef": {
     "contentId": "at://did:plc:owyl5siz6ibqxwxls4szerlx/app.bsky.feed.post/3mhxyr7ldu22z"
   },
-  "resolutionState": "source_only",
+  "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEXGPY479BCNJPJZMS",
-  "rawLabel": "As oil market surplus keeps rising, something\u2019s got to give \u2013 Analysis - IEA www",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VJABSQMB8M5DS8B776",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VJF05MC4FPDJ65N4EG",
+  "rawLabel": "As oil market surplus keeps rising, something’s got to give – Analysis - IEA www",
   "rawDims": {
     "category": "other"
   }

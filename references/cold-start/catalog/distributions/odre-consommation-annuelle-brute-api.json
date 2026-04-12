@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG1J82KST9HNRAGKXJQ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG15BGZN12EP95RNDJN",
+  "kind": "api-access",
+  "title": "Consommation annuelle brute JSON API",
+  "description": "<p class=\"\">\n\t\tCe jeu de données présente les consommations nationales annuelles brutes d’électricité (GWh) et de gaz (GWh \n\t<a href=\"https://opendata.reseaux-energies.fr/pages/glossaire/\">PCS</a> 0°C).</p><p class=\"\" style=\"font-family: sans-serif;\"><span style=\"font-family: inherit;\">Concernant les données Electricité :</span></p><p class=\"\"></p><ul><li>Périmètre : France continentale et Corse, pertes comprises avec et sans correction de l'aléa climatique.</li></ul><ul><li><span style=\"font-weight: bolder;\">Suite à un recalcul de l'autoconsommation photovoltaïque, la consommation sur les années 2022 à 2024 a augmenté.</span></li></ul><ul><li>Pour l'électricité, les données sont dites consolidées lorsqu'elles ont été \nvérifiées et complétées (livraison en milieu de M+1). Elles deviennent \ndéfinitives lorsque tous les partenaires ont transmis et vérifié \nl'ensemble de leurs comptages (livraison deuxième semestre A+1)</li></ul><p><span style=\"font-family: inherit;\">Concernant les données Gaz : </span></p><ul><li>Périmètre : France continentale sans correction de l'aléa climatique.</li></ul><ul><li><b>Nouveauté 2024 : Les valeurs de consommation de gaz depuis 2015 inclus les consommations mesurées au réseau de transport (Clients industriels et distributions publiques) ainsi que les consommations issues des injections de biométhane produites et consommées sur le réseau de distribution.</b></li></ul><p></p><p><br></p><p><br></p><p><span style=\"font-family: inherit; font-size: 0.875rem;\"><br></span></p><p class=\"\"><br></p><hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-annuelle-brute/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-annuelle-brute/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -7,7 +7,7 @@
   "sourceRecordId": "ercot_settlement_points_electrical_bus_mapping",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2026-03-06T20:06:29+00:00",
-  "lastSeen": "2026-04-10T18:09:03+00:00",
+  "lastSeen": "2026-04-11T18:03:34+00:00",
   "sourceModified": "2026-04-08T05:00:00+00:00",
   "isAuthoritative": true
 }

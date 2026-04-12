@@ -1,0 +1,13 @@
+{
+  "_tag": "Agent",
+  "id": "https://id.skygest.io/agent/ag_01KP172ZREZAZPB9EQH2Z7TYN5",
+  "kind": "organization",
+  "name": "BDH — Bundesverband der Deutschen Heizungsindustrie",
+  "description": "Federal Association of the German Heating Industry",
+  "aliases": [
+    { "scheme": "url", "value": "https://www.bdh-industrie.de/", "relation": "exactMatch" }
+  ],
+  "homepage": "https://www.bdh-industrie.de/",
+  "createdAt": "2026-04-12T00:00:00.000Z",
+  "updatedAt": "2026-04-12T00:00:00.000Z"
+}

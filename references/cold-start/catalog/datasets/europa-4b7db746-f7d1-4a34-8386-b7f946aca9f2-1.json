@@ -1,0 +1,28 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZXQ2W0S9PYMYMBGSC0",
+  "title": "Regional Courts/Public Prosecutor's Offices (areas) (Bayerische Staatsregierung)",
+  "description": "[Publisher: Bayerische Staatsregierung] Areas of competence of the regional courts or public prosecutor’s offices.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/4b7db746-f7d1-4a34-8386-b7f946aca9f2~~1",
+  "accessRights": "public",
+  "license": "http://dcat-ap.de/def/licenses/cc-by/4.0",
+  "themes": [
+    "environment",
+    "energy",
+    "government"
+  ],
+  "distributionIds": [],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "4b7db746-f7d1-4a34-8386-b7f946aca9f2~~1",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKFTT72YH3Q3DAFPV0Y8",
+  "title": "Rejets SF6 de RTE par année et par type de rejets",
+  "description": "<p>\nLe SF6 est un gaz de synthèse utilisé par l’industrie électrique comme isolant, en particulier dans les postes sous enveloppe métallique (PSEM), car il permet une grande compacité, ainsi que dans les disjoncteurs aériens. Puissant gaz à effet de serre, son pouvoir de réchauffement est\n23500 fois celui du CO<sub>2</sub>. Les rejets de SF6 peuvent être dus aux fuites accidentelles sur les appareils, au vieillissement des installations, aux opérations de maintenance ou à la dépose des matériels en fin de vie.\n</p>\n<p>Ce jeu de données présente les données annuelles depuis 2014 des rejets de SF6 en tonnes et en équivalent CO<sub>2</sub> par type de rejets (avarie matérielle, disjoncteurs en exploitation, PSEM en exploitation, interventions d’entretien).\n</p>\n<p>\nPour plus de détails, vous pouvez vous rendre sur site\ninstitutionnel de RTE : <a href=\"https://assets.rte-france.com/prod/public/2024-03/RTE-rapport-gestion-2023.pdf\">RG 2023</a></p>\n<hr>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/rejets-sf6-par-annee-et-par-type-de-rejets/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "GES"
+  ],
+  "themes": [
+    "Environnement",
+    "Infrastructures"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKFTN4YD38DFM6EFYNVV"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "rejets-sf6-par-annee-et-par-type-de-rejets",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -7,7 +7,7 @@
   "sourceRecordId": "ercot_spp_real_time_price_corrections",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2023-09-19T16:13:43+00:00",
-  "lastSeen": "2026-04-10T15:31:32+00:00",
+  "lastSeen": "2026-04-12T15:33:11+00:00",
   "sourceModified": "2025-12-09T22:00:00+00:00",
   "isAuthoritative": true
 }

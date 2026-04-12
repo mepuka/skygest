@@ -7,7 +7,7 @@
   "sourceRecordId": "miso_lmp_real_time_hourly_prelim",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2024-07-02T14:42:05+00:00",
-  "lastSeen": "2026-04-10T11:21:57+00:00",
-  "sourceModified": "2026-04-10T04:00:00+00:00",
+  "lastSeen": "2026-04-12T11:22:07+00:00",
+  "sourceModified": "2026-04-12T04:00:00+00:00",
   "isAuthoritative": true
 }

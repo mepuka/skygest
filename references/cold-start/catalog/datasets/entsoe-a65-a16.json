@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1ASA199CK0ETQJP117VWJ9",
+  "title": "Actual Total Load",
+  "description": "Total electricity load actually measured on the transmission grid, per bidding zone.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9",
+  "landingPage": "https://transparency.entsoe.eu/",
+  "accessRights": "public",
+  "keywords": [
+    "load",
+    "Art. 6.1(a)"
+  ],
+  "themes": [
+    "load"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1ASA1AW5QSPTAJB8QMP884"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1ASA196ZW4HCGRC7TGWS41"
+  ],
+  "createdAt": "2026-04-12T17:10:46.402Z",
+  "updatedAt": "2026-04-12T17:10:46.402Z",
+  "aliases": [
+    {
+      "scheme": "entsoe-document-type",
+      "value": "A65:A16",
+      "relation": "exactMatch"
+    }
+  ]
+}

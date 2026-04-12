@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ43KYDYPZKE115KFVQ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ4NAW83P3Q59VD2CZD",
+  "kind": "download",
+  "title": "APPLICATION/JSON distribution",
+  "accessURL": "https://opendata-api.malmo.se/dataset/fe874d5d-ab1d-46d9-8631-3e910e59cdba/resource/1cb04771-24b8-46bb-a28d-144f694769e3/download/elproduktion.json",
+  "format": "application/json",
+  "byteSize": 1886414,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2KK8V9HE8XN8VPBWKC",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9SPKZDGTSWVC5WVM13",
   "sourceRef": {
     "contentId": "at://did:plc:a4py7lzj6xarzriaht7uyxq2/app.bsky.feed.post/3mdlymglw2s26"
   },
@@ -11,7 +11,7 @@
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH4ZJK16FMMWK9NXBP",
   "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
   "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XA1FY6T4MMQ075S84B",
-  "rawLabel": "According to the Energy Information Administration, \ud83c\uddfa\ud83c\uddf8 US electricity is expec",
+  "rawLabel": "According to the Energy Information Administration, 🇺🇸 US electricity is expec",
   "rawDims": {
     "geography": "us",
     "category": "generation"

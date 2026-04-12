@@ -40,7 +40,9 @@ type FacetField =
   | "statisticType"
   | "aggregation"
   | "unitFamily"
-  | "technologyOrFuel";
+  | "technologyOrFuel"
+  | "measuredProperty"
+  | "domainObject";
 
 type ScoredVariableCandidate = {
   readonly variable: Variable;
@@ -268,6 +270,20 @@ const scoreVariableCandidate = (
     matchedFacets.push("technologyOrFuel");
   }
 
+  if (
+    partial.measuredProperty !== undefined &&
+    variable.measuredProperty === partial.measuredProperty
+  ) {
+    matchedFacets.push("measuredProperty");
+  }
+
+  if (
+    partial.domainObject !== undefined &&
+    variable.domainObject === partial.domainObject
+  ) {
+    matchedFacets.push("domainObject");
+  }
+
   return {
     variable,
     matchedFacets,
@@ -385,6 +401,8 @@ const handleFacetDecomposition = (
     aggregation?: PartialVariableShape["aggregation"];
     unitFamily?: PartialVariableShape["unitFamily"];
     technologyOrFuel?: PartialVariableShape["technologyOrFuel"];
+    measuredProperty?: PartialVariableShape["measuredProperty"];
+    domainObject?: PartialVariableShape["domainObject"];
   } = {};
   const matchedEntriesByFacet: Partial<Record<FacetField, SurfaceFormEntryAny>> =
     {};
@@ -393,6 +411,8 @@ const handleFacetDecomposition = (
   const aggregation = vocabulary.matchAggregation(residual.text);
   const unitFamily = vocabulary.matchUnitFamily(residual.text);
   const technologyOrFuel = vocabulary.matchTechnologyOrFuel(residual.text);
+  const measuredProperty = vocabulary.matchMeasuredProperty(residual.text);
+  const domainObject = vocabulary.matchDomainObject(residual.text);
 
   if (Option.isSome(statisticType)) {
     partialDraft.statisticType = statisticType.value.canonical;
@@ -414,25 +434,34 @@ const handleFacetDecomposition = (
     matchedEntriesByFacet.technologyOrFuel = technologyOrFuel.value;
   }
 
+  if (Option.isSome(measuredProperty)) {
+    partialDraft.measuredProperty = measuredProperty.value.canonical;
+    matchedEntriesByFacet.measuredProperty = measuredProperty.value;
+  }
+
+  if (Option.isSome(domainObject)) {
+    partialDraft.domainObject = domainObject.value.canonical;
+    matchedEntriesByFacet.domainObject = domainObject.value;
+  }
+
   const partial = partialDraft as PartialVariableShape;
 
+  const allMatchedEntries = [
+    matchedEntriesByFacet.statisticType,
+    matchedEntriesByFacet.aggregation,
+    matchedEntriesByFacet.unitFamily,
+    matchedEntriesByFacet.technologyOrFuel,
+    matchedEntriesByFacet.measuredProperty,
+    matchedEntriesByFacet.domainObject
+  ];
+
   const matchedSurfaceForms = uniqueStrings(
-    [
-      matchedEntriesByFacet.statisticType,
-      matchedEntriesByFacet.aggregation,
-      matchedEntriesByFacet.unitFamily,
-      matchedEntriesByFacet.technologyOrFuel
-    ]
+    allMatchedEntries
       .filter((entry): entry is SurfaceFormEntryAny => entry !== undefined)
       .map((entry) => entry.normalizedSurfaceForm)
   ).map(
     (normalizedSurfaceForm) =>
-      [
-        matchedEntriesByFacet.statisticType,
-        matchedEntriesByFacet.aggregation,
-        matchedEntriesByFacet.unitFamily,
-        matchedEntriesByFacet.technologyOrFuel
-      ].find(
+      allMatchedEntries.find(
         (entry): entry is SurfaceFormEntryAny =>
           entry !== undefined &&
           entry.normalizedSurfaceForm === normalizedSurfaceForm

@@ -22,7 +22,11 @@
     "international energy"
   ],
   "distributionIds": [
-    "https://id.skygest.io/distribution/dist_01KNQEZ5VJ4EX1Y76TYTX29TCT"
+    "https://id.skygest.io/distribution/dist_01KNQEZ5VJ4EX1Y76TYTX29TCT",
+    "https://id.skygest.io/distribution/dist_01KP165RQ7YVQBHB1T7YAYKHZC"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
   ],
   "accessRights": "public"
 }

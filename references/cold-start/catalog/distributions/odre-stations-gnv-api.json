@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG35N62N2AC6WBMPK85",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG3N9R8MNFZEZGYK27Q",
+  "kind": "api-access",
+  "title": "Stations GNV publiques en France JSON API",
+  "description": "<p>\n\tCe jeu de données présente les stations GNV ouvertes au public et en projet en France avec leurs caractéristiques (année d'ouverture, exploitant, localisation, pompes GNC et/ou GNL, modes de paiements ... etc.)\n</p>\n<hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/stations-gnv/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/stations-gnv/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

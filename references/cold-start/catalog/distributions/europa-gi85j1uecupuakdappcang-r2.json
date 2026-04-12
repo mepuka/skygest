@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYMHJFV8Z8JGA1SKNNF",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYM15K80CGSCE6FA3A9",
+  "kind": "download",
+  "title": "XML distribution",
+  "accessURL": "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/nrg_stk_gasm?format=sdmx_2.1_structured&compressed=true",
+  "mediaType": "application/xml",
+  "format": "xml",
+  "byteSize": 159548,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

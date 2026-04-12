@@ -1,0 +1,32 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZFWNTFPTGY73N8QJVC",
+  "title": "Bring Centre Network SDCC (South Dublin County Council)",
+  "description": "[Publisher: South Dublin County Council] <span style='font-family:Calibri, sans-serif;'><font size='4'>The\ndata includes the location, site ownership and type of bring banks located at\neach bring centre within the South Dublin County Admin Area.</font></span>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/4f3a0a34-17ef-47af-b680-5184523d654a",
+  "accessRights": "public",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZF4T3NXYTTBPPSCBXQ",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZFC1T5K3DC6H3WA2WX",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZF69SCV58DHM2H0YQG",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZFK353PXCY91KTS4XZ",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZFH770VPR038R5JAA1",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZFX46DK0PSXDRCT91W"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "4f3a0a34-17ef-47af-b680-5184523d654a",
+      "relation": "exactMatch"
+    }
+  ]
+}

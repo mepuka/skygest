@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS1V9PQ1AB8DYJD4MEAX",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9BVT3VHE13R6G1Q3V8",
   "sourceRef": {
     "contentId": "x://1123808797556920325/status/1847661541295824971"
   },
@@ -14,6 +14,5 @@
   "rawDims": {
     "geography": "us-california",
     "category": "technology"
-  },
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBSF4QWT3MAJ76KXC0"
+  }
 }

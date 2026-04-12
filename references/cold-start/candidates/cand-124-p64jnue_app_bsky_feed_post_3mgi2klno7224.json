@@ -1,17 +1,17 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2GV9RHT5XTPB2XY9F3",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9RWWC961KC0WYP2DKR",
   "sourceRef": {
     "contentId": "at://did:plc:rcu7ybho7gdw3x3cxp64jnue/app.bsky.feed.post/3mgi2klno7224"
   },
   "resolutionState": "partially_resolved",
   "createdAt": "2026-04-08T00:00:00.000Z",
-  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
-  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQJN53T6M83MN1XJFC",
-  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VQ0X85PSM8SRCMP4W7",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMCMT7RPEX24A69ZBQ",
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBY0GFXYCZCVGPDKQ5",
-  "rawLabel": "\u201cWhen solar PV plants are deployed on disturbed or degraded land, for example, t",
+  "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFCSDF9WTNRJ2JSMEN",
+  "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRV0G2XWPZD8NKXBMT",
+  "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VR5541VRGC2KSM60RZ",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
+  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBN5CJ6XA9MTF6SE4K",
+  "rawLabel": "“When solar PV plants are deployed on disturbed or degraded land, for example, t",
   "rawDims": {
     "category": "capacity"
   }

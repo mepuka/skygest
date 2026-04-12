@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZT7SPT5N8F7VBTS4DB",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZTB98JYK73FGQQKD7P",
+  "kind": "download",
+  "title": "CSV distribution",
+  "accessURL": "https://cidportal.jrc.ec.europa.eu/ftp/jrc-opendata/NUCLEAR-TRADE-ATLAS/TOTAL-TRADE_YEAR_2026.zip",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

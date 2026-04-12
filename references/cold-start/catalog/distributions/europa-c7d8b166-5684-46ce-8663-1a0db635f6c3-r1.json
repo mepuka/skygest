@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZQX90S67EXWMD0TA2W",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZQVKE89WKFEN1DBQ2E",
+  "kind": "download",
+  "title": "WMS_SRVC distribution",
+  "accessURL": "https://geodienste.sachsen.de/wms_bund_emobil/guest?REQUEST=GetCapabilities&SERVICE=WMS",
+  "format": "wms_srvc",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

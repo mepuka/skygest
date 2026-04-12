@@ -1,0 +1,29 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZ4PRG7853B7PF7Q5CD",
+  "title": "Charging stations in Potsdam (Bundesnetzagentur)",
+  "description": "[Publisher: Bundesnetzagentur] The data of the charging station map of the Federal Network Agency for Potsdam.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/ladesaeulenregister-potsdam",
+  "accessRights": "public",
+  "license": "https://www.dcat-ap.de/def/licenses/cc-by/4.0",
+  "themes": [
+    "energy",
+    "transport"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ4DJEC6ZNPX5ZEGRPR"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "ladesaeulenregister-potsdam",
+      "relation": "exactMatch"
+    }
+  ]
+}

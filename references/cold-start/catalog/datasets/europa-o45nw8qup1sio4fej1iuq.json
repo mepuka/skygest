@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZS9TGP5B0NW5C2Z65A",
+  "title": "Final energy consumption in industry by type of fuel (Eurostat)",
+  "description": "[Publisher: Eurostat] <p>Covers the energy consumption of the industry sector, by type of fuel (according to the Standard International Energy product Classification - SIEC). Expressed in thousand tonnes of oil equivalent.&nbsp;The industry sector is defined according to the NACE Rev. 2 classification (divisions 10-18, 20-32, 41-43; for divisions 7-9, only mining and quarrying of non-energy products is included, as the extraction of energy products is reported in the energy sector). Quantities of energies transformed into another energy product are excluded from the industry sector (reported in the transformation sector).</p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/o45nw8qup1sio4fej1iuq",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "2013-01-01T00:00:00Z/2024-12-31T00:00:00Z",
+  "themes": [
+    "energy",
+    "environment"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZSKVY54MK9W3V1KG0T",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZS7C871QNDWEM3MCEC",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZSWDFXHVDAM7N2W98M",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZS0YYWZS4YW5EM44KY",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZS3D3964MEQDX79E29"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "o45nw8qup1sio4fej1iuq",
+      "relation": "exactMatch"
+    }
+  ]
+}

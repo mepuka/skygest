@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKFZZW0Q1TRN295RJ49A",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKFZGFRNDS3PQ7VBADRR",
+  "kind": "api-access",
+  "title": "Points d'avitaillement GNV publiques en France JSON API",
+  "description": "<p style=\"font-family: sans-serif;\">Ce jeu de données présente les points d'avitaillement* GNV ouverts au publiques et en projet en France avec leurs caractéristiques (horaires d'ouverture,modes de paiements...)</p><p style=\"font-family: sans-serif;\">*Une station compte pour deux points d'avitaillement lorsqu'elle propose du GNL et du GNC</p>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/points-d-avitaillement-gnv-publiques-en-france/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/points-d-avitaillement-gnv-publiques-en-france/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

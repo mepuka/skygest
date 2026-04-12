@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYVF9YE233P20NAABKZ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYVRY7V5PB2JT85RB6F",
+  "kind": "download",
+  "title": "XML distribution",
+  "accessURL": "https://www.ogd.stadt-zuerich.ch/mapproxy/wmts/1.0.0/WMTSCapabilities.xml",
+  "mediaType": "application/xml",
+  "format": "xml",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

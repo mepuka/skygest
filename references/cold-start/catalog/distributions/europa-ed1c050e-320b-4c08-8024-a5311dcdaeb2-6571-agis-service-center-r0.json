@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZMFNFXNV7GM32KGTGK",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZM28G41KD546BDH1S1",
+  "kind": "download",
+  "title": "WMS_SRVC distribution",
+  "accessURL": "https://wms.geo.ag.ch/public/ch_ag_geo_afu_gwn/wms?service=wms&version=1.3.0&request=GetCapabilities",
+  "format": "wms_srvc",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

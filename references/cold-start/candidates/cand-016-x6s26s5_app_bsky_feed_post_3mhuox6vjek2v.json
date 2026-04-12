@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS1YS2WK3VEFSSM3RN3T",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9CFAJE4X70NZZHJS9B",
   "sourceRef": {
     "contentId": "at://did:plc:3uqlk6hebu6vurixcx6s26s5/app.bsky.feed.post/3mhuox6vjek2v"
   },
@@ -9,11 +9,10 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHCC3BMQX00JTTGNMH",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH4ZJK16FMMWK9NXBP",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WM9HP0NBCS5J38GJYT",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
   "rawLabel": "Battery is such a game-changer, and nowhere is that more obvious than in Califor",
   "rawDims": {
     "geography": "us-california",
     "category": "forecast"
-  },
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBDC7D5CKHCNY2QTE7"
+  }
 }

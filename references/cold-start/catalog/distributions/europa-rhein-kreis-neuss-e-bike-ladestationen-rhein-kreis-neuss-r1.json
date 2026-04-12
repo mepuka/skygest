@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYZZ5CW56R5M4WFB0BT",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYZJZBPJ7CDSN2WJ85H",
+  "kind": "download",
+  "title": "RDF_XML distribution",
+  "accessURL": "https://opendata.rhein-kreis-neuss.de/api/v2/catalog/datasets/rhein-kreis-neuss-e-bike-ladestationen/exports/rdfxml",
+  "format": "rdf_xml",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

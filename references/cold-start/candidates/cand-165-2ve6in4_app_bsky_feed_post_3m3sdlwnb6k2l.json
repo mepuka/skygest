@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2N4073EJ7E3M5W5MHE",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9V7ZJ7FRB28TFAZY45",
   "sourceRef": {
     "contentId": "at://did:plc:5tf65pf4gdrfvsp7s2ve6in4/app.bsky.feed.post/3m3sdlwnb6k2l"
   },
@@ -12,6 +12,5 @@
   "rawLabel": "The Western Resource Adequacy Program is facing participant uncertainty ahead of",
   "rawDims": {
     "category": "other"
-  },
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG"
+  }
 }

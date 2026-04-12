@@ -1,0 +1,32 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZMHRGPVDTVR67ESR15",
+  "title": "49f4ab05-7b0a-4fc9-9613-4f5741899b04~~1 (Fachbereich 3.1  Natur- und Artenschutz)",
+  "description": "[Publisher: Fachbereich 3.1  Natur- und Artenschutz]",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/49f4ab05-7b0a-4fc9-9613-4f5741899b04~~1",
+  "accessRights": "public",
+  "license": "http://dcat-ap.de/def/licenses/cc-by/4.0",
+  "themes": [
+    "energy",
+    "environment",
+    "technology",
+    "economy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZM627SX4725Z2RDD85",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZMANTBFZ92JX2AERAM"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "49f4ab05-7b0a-4fc9-9613-4f5741899b04~~1",
+      "relation": "exactMatch"
+    }
+  ]
+}

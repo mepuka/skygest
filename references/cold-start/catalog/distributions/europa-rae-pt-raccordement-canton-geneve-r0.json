@@ -1,0 +1,13 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYW5W2MZ27C1S7T9A2Q",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYW89X38K9Y3KQ2YWWZ",
+  "kind": "download",
+  "title": "Distribution",
+  "accessURL": "https://ge.ch/sitg/geodata/SITG/OPENDATA/RAE_PT_RACCORDEMENT-KML.zip",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

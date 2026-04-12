@@ -44,6 +44,21 @@ export const VOCABULARY_FACETS: ReadonlyArray<VocabularyFacetDescriptor> = [
     facet: "technology-or-fuel",
     filename: "technology-or-fuel.json",
     codec: makeSurfaceFormEntry(Schema.String)
+  },
+  {
+    facet: "measured-property",
+    filename: "measured-property.json",
+    codec: makeSurfaceFormEntry(Schema.String)
+  },
+  {
+    facet: "domain-object",
+    filename: "domain-object.json",
+    codec: makeSurfaceFormEntry(Schema.String)
+  },
+  {
+    facet: "policy-instrument",
+    filename: "policy-instrument.json",
+    codec: makeSurfaceFormEntry(Schema.String)
   }
 ];
 

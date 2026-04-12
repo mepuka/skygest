@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYEDRBRZ76B4ZMZ0Y0S",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYEMMQJGVDA67QR5KB8",
+  "kind": "download",
+  "title": "TSV distribution",
+  "accessURL": "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/nrg_pc_205_c?format=tsv&compressed=true",
+  "mediaType": "text/tab-separated-values",
+  "format": "tsv",
+  "byteSize": 155206,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

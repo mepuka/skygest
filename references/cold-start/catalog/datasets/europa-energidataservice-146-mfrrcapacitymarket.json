@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZVYS2ZBPCRG5248X4T",
+  "title": "mFRR, manual Frequency Restoration Reserves, Capacity Market (Energinet)",
+  "description": "[Publisher: Energinet] Energinet makes daily procurement of manuel frequency restoration reserves (mFRR), on an hourly capacity market. This site provides market-related information for the balancing capacity market, which runs every morning. Here, you can find details on requested demand, procured volumes, and reserve prices across different directions and price areas per hour. \n**Note:**\n* The demand and procured volume may not match exactly. Some of the demand can be covered by other TSOs and likewise, the procured volume may help meet other TSOs’ needs. This is managed by the platform algorithm in the Nordic mFRR capacity market.  \n* This dataset includes results from the daily auctions only. In DK2, additional mFRR capacity is procured in a monthly auction. For more information, see [mFRR](https://energinet.dk/el/balancering-og-systemydelser/priser-indkob-og-prognoser/).\n\nFor further information, please see: \n* [Nordic mFRR capacity market](https://nordicbalancingmodel.net/roadmap-and-projects/nordic-mfrr-capacity-market/)\n* [Balancering og systemydelser](https://energinet.dk/el/balancering-og-systemydelser/)\n* [Balancing and Ancillary Services](https://en.energinet.dk/electricity/balancing-and-ancillary-services/)\n\n**Update frequency:** The dataset is usually updated between 9 and 9.30 am CET. \n\nAt November 19 2024, Denmark, Sweden, and Finland transitioned from national markets to a trilateral mFRR capacity market. The market operates on a common Nordic platform, enabling the exchange of mFRR balancing capacity across bidding zones. \n\nSince January 2025, mFRR capacity demand is determined daily via dynamic dimensioning based on forecasts. If forecasts underestimate the need, Energinet may initiate an extra auction to secure sufficient reserves. Results are available under: [mFRR, extra auction](https://www.energidataservice.dk/tso-electricity/MfrrCapacityMarketExtra). \n\nThis dataset has data from June 2023 and is updated daily. Data before June 2023 can be found here [mFRR, Frequency Restoration Reserves manual, DK1 or mFRR, Frequency Restoration Reserves manual, DK2](https://www.energidataservice.dk/tso-electricity/MfrrReservesDK2).\n\nThe Upward demand and Downward demand columns contain values starting on 2025-08-21.\n\n**Looking for realtime \"mFRR Request\"?** Find the data on [Realtime Electricity Market Data](https://www.energidataservice.dk/datasets/realtime-electricity-market).",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/energidataservice_146_mfrrcapacitymarket",
+  "accessRights": "public",
+  "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
+  "temporal": "2023-06-21T00:00:00Z/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZV350NKDM1SWQ8B88J",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZVXKXEDXDP1CX5NTD5"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "energidataservice_146_mfrrcapacitymarket",
+      "relation": "exactMatch"
+    }
+  ]
+}

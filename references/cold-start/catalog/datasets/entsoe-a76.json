@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1ASA1C406NHZRKC6DZ5GDN",
+  "title": "Consumption Unavailability",
+  "description": "Planned and forced consumption unit unavailability (large demand units).",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9",
+  "landingPage": "https://transparency.entsoe.eu/",
+  "accessRights": "public",
+  "keywords": [
+    "outages",
+    "Art. 7.2"
+  ],
+  "themes": [
+    "outages"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1ASA1CJJHBZAS6X6VQNJVW"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1ASA196ZW4HCGRC7TGWS41"
+  ],
+  "createdAt": "2026-04-12T17:10:46.402Z",
+  "updatedAt": "2026-04-12T17:10:46.402Z",
+  "aliases": [
+    {
+      "scheme": "entsoe-document-type",
+      "value": "A76",
+      "relation": "exactMatch"
+    }
+  ]
+}

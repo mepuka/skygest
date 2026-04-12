@@ -1,0 +1,37 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYSRWZ870597R5RZNET",
+  "title": "Gasverbrauch im Versorgungsgebiet der IWB (Industrielle Werke Basel)",
+  "description": "[Publisher: Industrielle Werke Basel] Dieser Datensatz beinhaltet die Summe des Gasverbrauchs, die innert Stunden-Intervallen aus dem Netz bezogen wird. Neben dem Kanton Basel-Stadt versorgt IWB auch weitere 29 Gemeinden in den Kantonen Basel-Landschaft, Solothurn und Aargau mit Gas. Diese sind auch im Datensatz enthalten.Die Gemeinden, die im Versorgungsgebiet enthalten sind, sind:Aesch BL, Allschwil, Arlesheim, Augst, Basel, Bettingen, Binningen, Birsfelden, Bottmingen, Dornach, Eiken, Ettingen, Frenkendorf, Frick, Füllinsdorf, Gipf-Oberfrick, Lausen, Liestal, Möhlin, Münchenstein, Muttenz, Oberwil, Oeschgen, Pfeffingen, Pratteln, Reinach BL, Rheinfelden, Riehen, Schönenbuch, Therwil, Wallbach",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/100304-kanton-basel-stadt",
+  "accessRights": "public",
+  "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by_ask",
+  "temporal": "2021-08-31T22:00:00Z/2026-04-04T22:00:00Z",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYSK9M5ECB75DTAR4G8",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYS4JH568K04RARAQFK",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYSFDFHND35Z5QT90F6",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYSWEP19C6MAYF18J5V",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYSDNJN97RC486A39DP",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYSJH8TBHEG3NEDTABG",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYSJ7D61E8MH2EWSAGT",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYS5QB2HCE1MWH34CCF",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYSMXPKQ8FMW7K89QRP"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "100304-kanton-basel-stadt",
+      "relation": "exactMatch"
+    }
+  ]
+}

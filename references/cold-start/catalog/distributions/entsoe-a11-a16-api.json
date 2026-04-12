@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1ASA1BH7TVTMA3W93223W4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1ASA1B341GMFCMDFV8GX24",
+  "kind": "api-access",
+  "title": "Physical Cross-Border Flows (Realised) XML API",
+  "description": "Measured physical electricity flows on cross-border interconnectors.",
+  "accessURL": "https://web-api.tp.entsoe.eu/api?documentType=A11&processType=A16",
+  "mediaType": "application/xml",
+  "format": "xml",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1ASA196ZW4HCGRC7TGWS41",
+  "createdAt": "2026-04-12T17:10:46.402Z",
+  "updatedAt": "2026-04-12T17:10:46.402Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://web-api.tp.entsoe.eu/api?documentType=A11&processType=A16",
+      "relation": "exactMatch"
+    }
+  ]
+}

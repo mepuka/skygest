@@ -7,7 +7,7 @@
   "sourceRecordId": "ieso_transmission_outages_planned",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-04-30T15:46:41+00:00",
-  "lastSeen": "2026-04-11T02:47:36+00:00",
-  "sourceModified": "2026-04-11T02:02:59+00:00",
+  "lastSeen": "2026-04-12T16:29:34+00:00",
+  "sourceModified": "2026-04-12T16:03:17+00:00",
   "isAuthoritative": true
 }

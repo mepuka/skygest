@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZQ2RW6E5DYVC1YEA48",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZQVMS70FWZX46H6NXT",
+  "kind": "download",
+  "title": "ATOM distribution",
+  "accessURL": "https://geoportal.bayern.de/gdiadmin/ausgabe/ATOM_SERVICE/211eb465-315e-43aa-8bc3-05191cf12c0a",
+  "format": "atom",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

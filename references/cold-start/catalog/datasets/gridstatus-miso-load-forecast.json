@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5DPNFQM9JBCCN4B8BE",
   "title": "GridStatus MISO Load Forecast",
   "description": "MISO total mid-term load forecast (MTLF) for the current and future days resampled\nto 5 minute intervals.\n\n[Guide to data](https://misodocs.blob.core.windows.net/marketreports/Daily%20Forecast%20and%20Actual%20Load%20by%20Local%20Resource%20Zone_Daily%20Forecast%20and%20Actual%20Load%20Report%20by%20Local%20Resource%20Zone%20Report%20Readers%20Guide.pdf)",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/miso_load_forecast",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

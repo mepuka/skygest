@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZ3GKASHJS14DCYZ0VR",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZ3S26KQ6TKV6C1HQJ8",
+  "kind": "download",
+  "title": "CSV distribution",
+  "accessURL": "https://opendata.stuttgart.de/dataset/1ec2bdaf-e4f0-4f94-8d9d-120f2da6e851/resource/03259f36-b1cc-4743-9ba1-c6ad9d445bbc/download/energie_und_wasserverbrauch_stuttgart.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "byteSize": 37720,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

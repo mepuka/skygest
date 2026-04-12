@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKFSTEPBCQKACCD9HTZR",
+  "title": "Premiers projets hydrogène français sélectionnés dans le cadre du Projet important d’intérêt européen commun (PIIEC)",
+  "description": "<p>Cette carte présente les 15 projets français sélectionnés pour le PIIEC sur\nl’hydrogène et transmis à la Commission européenne : dès validation de l’aide, l’Etat se tient\nprêt à soutenir le projet avec ses partenaires en ayant réservé l’enveloppe nécessaire à sa\nréalisation. </p><p>Au total, ce sont plus de 7 milliards d’euros d’investissements publics et privés qui\npourront être déployés à l’issue de l’instruction par les services de la Commission européenne.<br></p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/projets-prenotifie-fr-piiec-h2/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "H2",
+    "Carte",
+    "Hydrogène"
+  ],
+  "themes": [
+    "Production",
+    "Infrastructures"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKFSBK2CV3W3TRHNNJJT"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "projets-prenotifie-fr-piiec-h2",
+      "relation": "exactMatch"
+    }
+  ]
+}

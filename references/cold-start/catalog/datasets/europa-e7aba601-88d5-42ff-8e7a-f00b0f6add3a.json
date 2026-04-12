@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYPB0F0P8DZWYFNZJVT",
+  "title": "NGSDM01 - Networked Gas Monthly Supply (Central Statistics Office)",
+  "description": "[Publisher: Central Statistics Office] Networked Gas Monthly Supply",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/e7aba601-88d5-42ff-8e7a-f00b0f6add3a",
+  "accessRights": "public",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYPJEK9PY3BEP8GW9F0",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYP7GXEWDPQ8M5096N1",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYP1FX9NANSM4ZZ4ATY",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYPW2V1RR6R2S5VA387"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "e7aba601-88d5-42ff-8e7a-f00b0f6add3a",
+      "relation": "exactMatch"
+    }
+  ]
+}

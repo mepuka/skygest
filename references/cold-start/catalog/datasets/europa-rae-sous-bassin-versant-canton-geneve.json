@@ -1,0 +1,38 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYWVH72364Z2TNTAEE5",
+  "title": "Réseau d'assainissement des eaux - Sous bassins versant (Office cantonal de l'eau)",
+  "description": "[Publisher: Office cantonal de l'eau] Un bassin versant est une portion de territoire dont les eaux ont un exutoire commun. Lorsqu'un bassin versant est subdivisé en de plus petites unités, on parle de sous bassin versant. En hydrologie urbaine, un bassin ou sous bassin versant, avant de voir ses eaux de ruissellement au final déversées dans un milieu récepteur, dispose la plupart du temps comme exutoire d'un réseau de canalisations. Cette couche contient autant les sous bassins versant des eaux pluviales que des eaux usées. Ces objets font également partie du produit \"Cadastre du réseau d'assainissement des eaux\".",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/rae_sous_bassin_versant-canton-geneve",
+  "accessRights": "public",
+  "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by",
+  "themes": [
+    "environment",
+    "education",
+    "energy",
+    "society",
+    "regions"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYWAR0DM3FF6X7D68N5",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYWGC9SRNQJ89YK1HFB",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYWRPDS6HW0JPVNW61B",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYW2MZXKV1TM7GGBD19",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYW08NPY96V2NGZTA87",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYWXG8WC3JSYPS5X6ZG",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYWBKGY40QX82PDJB0Z"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "rae_sous_bassin_versant-canton-geneve",
+      "relation": "exactMatch"
+    }
+  ]
+}

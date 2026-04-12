@@ -1,0 +1,29 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYPCCH4XKB4RTYCF5WK",
+  "title": "511741-2026 (Stadt Wien)",
+  "description": "[Publisher: Stadt Wien] Die Studie „Umrüstung von Wärmeabgabesystemen“ zeigt, wie bestehende Heizkörper- und Wärmeabgabesysteme in Wiener Mehrgeschoßbauten so angepasst werden können, dass niedrigere Vorlauftemperaturen möglich werden – eine wichtige Voraussetzung für den effizienten Einsatz von Wärmepumpen (und teilweise auch für Kühlung). Der Kurzbericht gibt einen Überblick, welche Systeme im Bestand am häufigsten vorkommen, und beschreibt praxisnahe Umrüststrategien: von einfachen Optimierungen (z. B. hydraulischer Abgleich, Heizkurve, bessere Regelung) über kleinere Anpassungen (z. B. größere bzw. Niedertemperatur-Heizkörper) bis hin zu umfassenderen Lösungen wie Flächenheizungen oder lüfterunterstützten Systemen. Ergänzend enthält die Studie konkrete Empfehlungen für das Nutzer*innenverhalten, damit die technischen Potenziale im Alltag auch wirksam werden.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/c04c484d-46aa-43ad-919c-1170a2f116aa",
+  "accessRights": "public",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "themes": [
+    "energy",
+    "technology"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYPXS32A18AFJD8HJY7"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "c04c484d-46aa-43ad-919c-1170a2f116aa",
+      "relation": "exactMatch"
+    }
+  ]
+}

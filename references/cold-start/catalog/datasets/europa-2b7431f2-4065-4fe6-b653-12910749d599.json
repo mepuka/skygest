@@ -1,0 +1,32 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZQ5NSGFCEKBN0KVNWX",
+  "title": "Parking Fines 2025 SDCC",
+  "description": "<p><span style='background-color:rgb(255,255,255); color:rgb(20,20,20); font-family:&quot;Avenir Next&quot;, Avenir, &quot;Helvetica Neue&quot;, sans-serif; font-size:16px;'><span style='display:inline !important; float:none; font-style:normal; font-variant-caps:normal; font-variant-ligatures:normal; font-weight:400; letter-spacing:normal; text-align:start; text-decoration-color:initial; text-decoration-style:initial; text-indent:0px; text-transform:none; word-spacing:0px;'>Parking Fines Issued in 2025 in South Dublin County.</span></span></p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/2b7431f2-4065-4fe6-b653-12910749d599",
+  "accessRights": "public",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZQHKWQ5P1EC2HRGBPM",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZQWGM7CMMZZQ0ASH7F",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZQ56ES0SZGQNT6HTSG",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZQ0GENYX6DXB9C5CXA",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZQQMRX3QRPVSFJK12K",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZQ4SRZB9RFS9N900W4"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "2b7431f2-4065-4fe6-b653-12910749d599",
+      "relation": "exactMatch"
+    }
+  ]
+}

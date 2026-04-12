@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP165RQ7K8KPBJ6126R0W66Y",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHGV1ZECFSTCKW0B2R",
+  "kind": "api-access",
+  "title": "EIA Open Data API — State CO2 Emissions",
+  "accessURL": "https://api.eia.gov/v2/co2-emissions/co2-emissions-aggregates",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y",
+  "accessRights": "public",
+  "aliases": [],
+  "createdAt": "2026-04-12T00:00:00.000Z",
+  "updatedAt": "2026-04-12T00:00:00.000Z"
+}

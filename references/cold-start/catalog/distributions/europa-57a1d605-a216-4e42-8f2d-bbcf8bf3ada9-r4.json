@@ -1,0 +1,16 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZJGSERCTFXYT320TNA",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZJGZRH8TA41EY8S1NA",
+  "kind": "landing-page",
+  "title": "HTML distribution",
+  "accessURL": "https://geoportal-hamburg.de/?MAPS=%257b%2522center%2522:%255b565874%252C5934140%255d%252C%2522mode%2522:%25222D%2522%252C%2522zoom%2522:6%257d&MENU=%257b%2522main%2522:%257b%2522currentComponent%2522:%2522root%2522%257d%252C%2522secondary%2522:%257b%2522currentComponent%2522:%2522root%2522%257d%257d&LAYERS=%255b%257b%2522id%2522:%252219969%2522%252C%2522visibility%2522:true%257d%252C%257b%2522id%2522:%252230916%2522%252C%2522visibility%2522:true%257d%252C%257b%2522id%2522:%252230915%2522%252C%2522visibility%2522:true%257d%255d&mdid=57A1D605-A216-4E42-8F2D-BBCF8BF3ADA9",
+  "mediaType": "text/html",
+  "format": "html",
+  "byteSize": 620,
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

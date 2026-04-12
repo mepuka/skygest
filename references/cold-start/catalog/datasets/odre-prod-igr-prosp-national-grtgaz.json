@@ -1,0 +1,33 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKFWS82Q71WPYMJ43AR5",
+  "title": "Indicateur Prospectif de Gaz Renouvelable - Dynamique engagée à la maille nationale",
+  "description": "<p>Ce jeu de données restitue la dynamique de production de biométhane engagée par un territoire par rapport à sa consommation de gaz. Le calcul de ce ration s'appuie sur : </p><ul><li>la production annuelle de biométhane (en cours et à venir) enregistrée dans le registre de capacité dont NaTran est le gestionnaire. </li><li>la consommation annuelle de gaz à 3 ans d'après les scenarii Perspectives Gaz 2024</li></ul>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/prod-igr-prosp-national-grtgaz/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "IGR",
+    "Prospective",
+    "EnR"
+  ],
+  "themes": [
+    "Production"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKFW6QS3NTE85RMKPP9J"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "prod-igr-prosp-national-grtgaz",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -18,7 +18,11 @@
   ],
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KNQEZ5VH6D2AT4HKRTB707PR",
-    "https://id.skygest.io/distribution/dist_01KNQEZ5VHHY6CGDJEYXZ2T8T4"
+    "https://id.skygest.io/distribution/dist_01KNQEZ5VHHY6CGDJEYXZ2T8T4",
+    "https://id.skygest.io/distribution/dist_01KP165RQ7K8KPBJ6126R0W66Y"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
   ],
   "accessRights": "public"
 }

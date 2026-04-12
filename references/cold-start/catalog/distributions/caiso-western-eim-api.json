@@ -1,0 +1,13 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP165RQ7T9F75DPFE7E6BS6W",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQQGF56XTPKAKE0XHQ",
+  "kind": "api-access",
+  "title": "CAISO OASIS API — Western EIM",
+  "accessURL": "https://oasis.caiso.com/",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQEZ5VH7SFKBQWANM6TSKMV",
+  "accessRights": "public",
+  "aliases": [],
+  "createdAt": "2026-04-12T00:00:00.000Z",
+  "updatedAt": "2026-04-12T00:00:00.000Z"
+}

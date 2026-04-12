@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZ0QBHQJMC7KBX0F20N",
+  "title": "Final consumption expenditure on environmental protection services by institutional sector and environmental purpose (Eurostat)",
+  "description": "[Publisher: Eurostat] Final consumption expenditure on environmental protection services by institutional sector and environmental purpose",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/7tp0z5dvrlttm8yacou6aa",
+  "accessRights": "public",
+  "license": "CC_BY_4_0",
+  "temporal": "2012-01-01T00:00:00Z/2024-12-31T00:00:00Z",
+  "themes": [
+    "environment",
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ0G92YYD73TC22QD9C",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ0ASNZYAWWXVHZVMMG",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ0JDN47K15DGQCWMNG",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ0Y7DPH2W3SGWC9GYH",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZ0AM9GV6A873WRJ8H9"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "7tp0z5dvrlttm8yacou6aa",
+      "relation": "exactMatch"
+    }
+  ]
+}

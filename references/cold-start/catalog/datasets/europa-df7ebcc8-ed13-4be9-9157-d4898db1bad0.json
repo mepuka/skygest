@@ -1,0 +1,32 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYYBF8WEVY983B2FYDS",
+  "title": "df7ebcc8-ed13-4be9-9157-d4898db1bad0 (Zentraldienst der Polizei (ZDPol))",
+  "description": "[Publisher: Zentraldienst der Polizei (ZDPol)]",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/df7ebcc8-ed13-4be9-9157-d4898db1bad0",
+  "accessRights": "public",
+  "license": "http://dcat-ap.de/def/licenses/dl-by-de/2.0",
+  "themes": [
+    "energy",
+    "government",
+    "environment"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYYQ6GJY3DWWAFEP86Z",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYY207P9614SHWK0E8C",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYY4W1S0AYWZ8P3WS12"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "df7ebcc8-ed13-4be9-9157-d4898db1bad0",
+      "relation": "exactMatch"
+    }
+  ]
+}

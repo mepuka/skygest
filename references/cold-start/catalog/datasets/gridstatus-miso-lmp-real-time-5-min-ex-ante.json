@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5DCKGDVQHTW18R3881",
   "title": "GridStatus MISO LMP Real Time 5 Min Ex Ante",
   "description": "Ex-Ante, real-time, five-minute, LMPs in MISO. These are the LMPs calculated via the *SCED* program on a 5-minute basis in MISO, which produces the economic dispatch. Ex-Ante LMPs in real-time are for informational purposes only. \n\nEx-Post LMPs may differ from Ex-Ante LMPs depending on fast start and emergency operations resources.\n\nSee MISO's *BPM 002 - Energy and Operating Reserves* for additional discussion.",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/miso_lmp_real_time_5_min_ex_ante",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1ASA1CQ5WS0SAZ2BKEZ3F7",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1ASA1CN4XFC9DVPHWP4GVH",
+  "kind": "api-access",
+  "title": "Imbalance Volumes XML API",
+  "description": "Total imbalance volumes per control area, positive and negative.",
+  "accessURL": "https://web-api.tp.entsoe.eu/api?documentType=A86",
+  "mediaType": "application/xml",
+  "format": "xml",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1ASA196ZW4HCGRC7TGWS41",
+  "createdAt": "2026-04-12T17:10:46.402Z",
+  "updatedAt": "2026-04-12T17:10:46.402Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://web-api.tp.entsoe.eu/api?documentType=A86",
+      "relation": "exactMatch"
+    }
+  ]
+}

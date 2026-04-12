@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1ASA1C43GRQGNHQKKK5E8S",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1ASA1CPSNJW6ZY8PQH0WYG",
+  "kind": "api-access",
+  "title": "Day-Ahead Electricity Prices XML API",
+  "description": "Day-ahead market clearing prices per bidding zone and market time unit.",
+  "accessURL": "https://web-api.tp.entsoe.eu/api?documentType=A44&processType=A01",
+  "mediaType": "application/xml",
+  "format": "xml",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1ASA196ZW4HCGRC7TGWS41",
+  "createdAt": "2026-04-12T17:10:46.402Z",
+  "updatedAt": "2026-04-12T17:10:46.402Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://web-api.tp.entsoe.eu/api?documentType=A44&processType=A01",
+      "relation": "exactMatch"
+    }
+  ]
+}

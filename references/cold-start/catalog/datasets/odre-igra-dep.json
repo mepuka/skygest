@@ -1,0 +1,35 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKG1D7AF2HQ12DSKY3GA",
+  "title": "Indicateur Annualisé Gaz Renouvelable des territoires par département",
+  "description": "<p>Ce jeu de données présente les valeurs du ratio entre la production locale\nde gaz renouvelable et la consommation locale de gaz sur le périmètre départemental.</p><p>Pour calculer ce ratio :<o:p></o:p></p><p style=\"margin-left:36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo1;\ntab-stops:list 36.0pt\">•     La quantité de gaz renouvelable produite les <b>3\nderniers mois </b>sur le territoire est annualisée grâce à une multiplication par\nquatre. <o:p></o:p></p><p style=\"margin-left:36.0pt;text-indent:-18.0pt;mso-list:l0 level1 lfo1;\ntab-stops:list 36.0pt\">•     La consommation de gaz correspond à la consommation\nsur le territoire de l’année précédente. <o:p></o:p></p><p class=\"MsoNormal\"> L’indicateur est mis à jour tous les mois.</p><p>Certains territoires ne sont pas disponibles pour respecter les obligations de confidentialité.</p><p><br></p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/igra-dep/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "IGR",
+    "EnR",
+    "Biogaz"
+  ],
+  "themes": [
+    "Production",
+    "Consommation",
+    "Territoires et régions"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKG19YZVS33BMZX4ZGDM"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "igra-dep",
+      "relation": "exactMatch"
+    }
+  ]
+}

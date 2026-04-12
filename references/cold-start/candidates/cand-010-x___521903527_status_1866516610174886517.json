@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS1VNGRVA4C0KCH961V4",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9BMRZJ6209N7MM3XK6",
   "sourceRef": {
     "contentId": "x://521903527/status/1866516610174886517"
   },
@@ -9,11 +9,10 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHCC3BMQX00JTTGNMH",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VH4ZJK16FMMWK9NXBP",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
   "rawLabel": "In the last 5 years, electricity consumption in Texas has risen by 20%.   Over t",
   "rawDims": {
     "geography": "us-texas",
     "category": "generation"
-  },
-  "referencedSeriesId": "https://id.skygest.io/series/ser_01KNQEZ5XBA89H56T1XQ24CXED"
+  }
 }

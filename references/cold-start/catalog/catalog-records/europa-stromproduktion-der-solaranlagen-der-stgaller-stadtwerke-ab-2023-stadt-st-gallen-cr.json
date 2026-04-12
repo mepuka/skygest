@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KP1CQKZ5443Y1BFR8TCFVWGF",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KP1CQKY8BVF9WHKYBE8YPMZT",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KP1CQKZ4QCA2Y7Y0D0ESTZ4C",
+  "sourceRecordId": "stromproduktion-der-solaranlagen-der-stgaller-stadtwerke-ab-2023-stadt-st-gallen",
+  "harvestedFrom": "https://data.europa.eu/api/hub/search/ckan/package_search",
+  "firstSeen": "2026-04-12T17:44:45.202Z",
+  "lastSeen": "2026-04-12T17:44:45.202Z",
+  "sourceModified": "2026-03-25T15:33:41.643000+00:00",
+  "isAuthoritative": true
+}

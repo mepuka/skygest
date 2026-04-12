@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKZRM3MV4SSPMHKVW8QQ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZR9SYPPSAFWR90RK5J",
+  "kind": "download",
+  "title": "CSV distribution",
+  "accessURL": "https://www.wirtschaft.nrw/system/files/media/document/file/umfrage_energie_und_mobilitaetsverhalten_landesverwaltung_2024_2025.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

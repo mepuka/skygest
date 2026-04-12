@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYB7JPT6MWBJPF2YYGQ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYBVESXPBYE2ZHBM6SY",
+  "kind": "download",
+  "title": "GDB distribution",
+  "accessURL": "https://kartkatalog.geonorge.no/metadata/uuid/a894ea02-d2dc-4550-ac3e-49230ceed42a",
+  "format": "gdb",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

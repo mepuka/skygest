@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZVJ7TE8Q8467T97J7R",
+  "title": "FCR N and D, Frequency Containment Reserves, DK2 (Energinet)",
+  "description": "[Publisher: Energinet] Frequency Containment Reserve - Normal operation/-Disturbance, FCR N and D, also called primary reserve, is there to stabilize the frequency in the electricity grid in DK2 and in the rest of the Nordic synchronous area, in the event of a frequency dip/jump.\n\nEnerginet procures FCR-N, FCR-D up and FCR-D down capacity reserve in collaboration with Svenska Kraftnät in daily auctions where part of the required volume is procured two days before the day of operation, D-1 early (former D-2) and the remaining part is procured the day before the day of operation, D-1 late (former D-1).\nFor further information, please see:\n* [Balancering og systemydelser](https://energinet.dk/el/balancering-og-systemydelser/)\n* [Ancillary Services](https://en.energinet.dk/electricity/balancing-and-ancillary-services/)\n\nPrices of FCR regulation before July 2023 is available here [FCR, Frequency Containment Reserves, DK2](https://www.energidataservice.dk/tso-electricity/FcrReservesDK2).",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/energidataservice_77_fcrnddk2~~1",
+  "accessRights": "public",
+  "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
+  "temporal": "2021-11-10T00:00:00Z/",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKZV4C7A388H91FP5DR6",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZV4J0PK8N9V3TNTP70"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "energidataservice_77_fcrnddk2~~1",
+      "relation": "exactMatch"
+    }
+  ]
+}

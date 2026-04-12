@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG1WKQS2MYSKGH9HPWH",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG1M4QGTRF7GQEE45CN",
+  "kind": "api-access",
+  "title": "Conversion des unités gazières JSON API",
+  "description": "<p>\nJeu de données pour simplifier la conversion d'une unité de mesure gazière vers une autre unité.\n</p>\n<p>\nDéfinitions des unités mentionnées dans le jeu de données :\n</p>\n<table>\n<tbody>\n<tr><td>Unité</td><td>Description</td></tr>\n<tr><td>tep</td><td>Tonne équivalent pétrole</td></tr>\n<tr><td>GJ</td><td>Giga joules</td></tr>\n<tr><td>Therm</td><td>Therm = Unité de mesure d'énergie anglo-saxonne</td></tr>\n<tr><td>MBTU</td><td>Thousand british thermal unit = Unité de mesure d'énergie anglo-saxonne</td></tr>\n<tr><td>bep</td><td>Baril équivalent pétrole</td></tr>\n<tr><td>kwh</td><td>Kilowattheure, équivalence énergétique d'un gaz stocké, transporté, produit, ...</td></tr>\n<tr><td>m3</td><td>Mètre cube, unité de volume classique pour quantifier le volume de gaz</td></tr>\n</tbody>\n</table>\n<p>\n<br>\n</p><hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/conversion-des-unites-gazieres/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/conversion-des-unites-gazieres/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

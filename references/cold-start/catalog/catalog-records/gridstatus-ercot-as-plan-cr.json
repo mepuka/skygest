@@ -7,7 +7,7 @@
   "sourceRecordId": "ercot_as_plan",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2024-07-17T14:24:34+00:00",
-  "lastSeen": "2026-04-10T10:00:14+00:00",
-  "sourceModified": "2026-04-10T10:00:00+00:00",
+  "lastSeen": "2026-04-12T10:00:38+00:00",
+  "sourceModified": "2026-04-12T10:00:00+00:00",
   "isAuthoritative": true
 }

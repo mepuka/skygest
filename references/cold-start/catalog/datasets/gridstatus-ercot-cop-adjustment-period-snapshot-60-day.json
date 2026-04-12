@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4TK9QQRQWJHTBYEVPZ",
   "title": "GridStatus ERCOT COP Adjustment Period Snapshot 60 Day",
   "description": "Hourly Current Operating Plan (COP) for each Qualified Scheduling Entity (QSE) in ERCOT. Published on a 60-day delay.\n\n\nRRSPFR, RRRSFFR, and RRSUFR values are null prior to their introduction into the market, while RRS values are null starting with the first market day on which the current products were implemented. ",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/ercot_cop_adjustment_period_snapshot_60_day",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

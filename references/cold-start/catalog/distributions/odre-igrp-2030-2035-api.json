@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKFXS8B4D5X292TCY07Q",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKFXY5JECVNY02DZHNPY",
+  "kind": "api-access",
+  "title": "Indicateur Gaz Renouvelables aux horizons 2030 et 2035 JSON API",
+  "description": "<p style='font-family: Asap, \"Helvetica Neue\", Helvetica, sans-serif; color: rgb(88, 88, 88);'>Ce jeu de données restitue la dynamique de production de biométhane nationale par rapport à sa consommation de gaz (suivants 3 scénarios de consommation). </p><p style='font-family: Asap, \"Helvetica Neue\", Helvetica, sans-serif; color: rgb(88, 88, 88);'>Le calcul de ce ration s'appuie sur :</p><ul style='color: rgb(88, 88, 88); font-family: Asap, \"Helvetica Neue\", Helvetica, sans-serif;'><li>la production de gaz à horizon 2030 et 2035 d'après les scenarii Perspectives Gaz disponibles sur ODRE.</li><li>la consommation annuelle de gaz à horizon 2030 et 2035 d'après les scenarii Perspectives Gaz disponibles sur ODRE.</li></ul><p><br></p>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/igrp_2030_2035/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/igrp_2030_2035/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

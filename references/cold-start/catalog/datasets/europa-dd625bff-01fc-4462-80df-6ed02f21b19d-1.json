@@ -1,0 +1,28 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKZZAHPQYQCXZSJXMMH2",
+  "title": "Air traffic management (locations) (Bayerische Staatsregierung)",
+  "description": "[Publisher: Bayerische Staatsregierung] Seats of the air offices of Northern and Southern Bavaria, located under the governments of Middle Franconia and Upper Bavaria.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/dd625bff-01fc-4462-80df-6ed02f21b19d~~1",
+  "accessRights": "public",
+  "license": "http://dcat-ap.de/def/licenses/cc-by/4.0",
+  "themes": [
+    "government",
+    "energy",
+    "environment"
+  ],
+  "distributionIds": [],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "dd625bff-01fc-4462-80df-6ed02f21b19d~~1",
+      "relation": "exactMatch"
+    }
+  ]
+}

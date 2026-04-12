@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKG28XNMWZW62WZNWNJF",
+  "title": "Extremas quotidiens des flux commerciaux",
+  "description": "<p>\n</p><p class=\"MsoNormal\"><span style=\"font-family: inherit; font-size: 0.875rem;\">Valeurs minimales et maximales journalières en puissance (MW) du bilan des flux commerciaux sur l'ensemble des frontières contextualisées par la température moyenne journalière.</span><br></p>\n<hr>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/extremas-quotidiens-flux-commerciaux/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "Interconnexion"
+  ],
+  "themes": [
+    "Marchés"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKG2CW0BWK1E8T71YKWH"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "extremas-quotidiens-flux-commerciaux",
+      "relation": "exactMatch"
+    }
+  ]
+}

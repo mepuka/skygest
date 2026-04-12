@@ -7,7 +7,7 @@
   "sourceRecordId": "ercot_hourly_solar_report",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2023-07-11T02:34:24+00:00",
-  "lastSeen": "2026-04-11T01:56:46+00:00",
-  "sourceModified": "2026-04-11T01:55:30+00:00",
+  "lastSeen": "2026-04-12T15:56:31+00:00",
+  "sourceModified": "2026-04-12T15:55:28+00:00",
   "isAuthoritative": true
 }

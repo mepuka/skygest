@@ -7,7 +7,7 @@
   "sourceRecordId": "caiso_as_procurement_dam",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2023-11-20T15:34:56+00:00",
-  "lastSeen": "2026-04-11T02:46:39+00:00",
-  "sourceModified": "2026-04-12T06:00:00+00:00",
+  "lastSeen": "2026-04-12T16:27:21+00:00",
+  "sourceModified": "2026-04-13T06:00:00+00:00",
   "isAuthoritative": true
 }

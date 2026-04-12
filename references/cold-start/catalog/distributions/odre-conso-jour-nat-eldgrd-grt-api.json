@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG4J8PSBY1QFK14NQY2",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG3V1NA8XN3X69NEMHV",
+  "kind": "api-access",
+  "title": "Consommation horaire définitive de gaz des distributions publiques à l'interface avec le réseau de transport de gaz JSON API",
+  "description": "<p>Ce jeu de données donne la consommation nationale brute de gaz des clients Distributions Publiques et ELD de NaTran et de Teréga.</p><p>Les données sont agrégées de manière horaire et journalière et sont définitives.</p>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/conso-jour-nat-eldgrd-grt/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/conso-jour-nat-eldgrd-grt/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

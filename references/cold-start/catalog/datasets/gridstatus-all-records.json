@@ -3,7 +3,6 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4HHGKF2SP443E27D7Z",
   "title": "GridStatus All Records",
   "description": "Top daily records for various metrics across all ISOs",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/all_records",
   "accessRights": "public",
@@ -25,7 +24,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

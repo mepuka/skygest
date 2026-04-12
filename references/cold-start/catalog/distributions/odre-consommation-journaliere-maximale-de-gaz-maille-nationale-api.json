@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG0KJCPXBGWC0GTNMHR",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG0A5SH1X3M6HM07EE7",
+  "kind": "api-access",
+  "title": "Extremas de consommation quotidienne définitive de gaz relevée sur le réseau de NaTran et Teréga JSON API",
+  "description": "Ce jeu de données présente la consommation horaire maximale de gaz (en MWh PCS 0°C) par jour à la maille nationale sur le réseau de NaTran et de Teréga. Les données sont définitives. Les consommations maximum sont complétées par les valeurs des températures de référence et moyenne.",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-journaliere-maximale-de-gaz-maille-nationale/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-journaliere-maximale-de-gaz-maille-nationale/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

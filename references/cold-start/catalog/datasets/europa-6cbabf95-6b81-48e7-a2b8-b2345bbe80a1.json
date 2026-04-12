@@ -1,0 +1,32 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1CQKYZDSGGAK06JK6NKZH7",
+  "title": "Public Bin locations DCC (Dublin City Council)",
+  "description": "[Publisher: Dublin City Council] CSV &amp; GeoJSON datasets of DCC’s public bin locations.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/6cbabf95-6b81-48e7-a2b8-b2345bbe80a1",
+  "accessRights": "public",
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZTN42Z5380ANKS2HE",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZH59X4F5GXVJ0PZ3G",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZ0WRG5CVWEEG7HZ24",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZGQTWEKKYWWCQRN9J",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZ9P6VFQQ669XBA8PF",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYZ2HHRGB187VMBCZ31"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "6cbabf95-6b81-48e7-a2b8-b2345bbe80a1",
+      "relation": "exactMatch"
+    }
+  ]
+}

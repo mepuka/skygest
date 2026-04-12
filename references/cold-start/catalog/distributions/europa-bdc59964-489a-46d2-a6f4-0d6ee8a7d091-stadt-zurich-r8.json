@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1CQKYVZKZ80M4SAR8M0SKR",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKYVRY7V5PB2JT85RB6F",
+  "kind": "download",
+  "title": "JSON distribution",
+  "accessURL": "https://www.stadt-zuerich.ch/geodaten/download/Zueri_wie_neu?format=10009",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "aliases": []
+}

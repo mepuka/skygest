@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4MFC5NFY1WB4NA88QX",
   "title": "GridStatus CAISO Net Interchange Real Time",
   "description": "Five-minute, real-time interchange in the West via CAISO data presented as a summarized view of flows between balacing authorities to enable easier BA-level analysis.\n\nThis view sums the MW values for each 5 minute interval for each unique pairing of from and to. This view does not contain individual ties. For tie-level data, refer to [caiso_tie_flows_real_time_5_min](https://www.gridstatus.io/datasets/caiso_tie_flows_real_time_5_min).",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/caiso_net_interchange_real_time",
   "accessRights": "public",
@@ -24,7 +26,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

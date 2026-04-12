@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1ASA1BXBG658WAY3GVDD6F",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1ASA1BWKM61NVNKEH1FF4R",
+  "kind": "api-access",
+  "title": "Year-Ahead Net Transfer Capacity XML API",
+  "description": "Year-ahead net transfer capacity on cross-border interconnectors.",
+  "accessURL": "https://web-api.tp.entsoe.eu/api?documentType=A61&processType=A33",
+  "mediaType": "application/xml",
+  "format": "xml",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1ASA196ZW4HCGRC7TGWS41",
+  "createdAt": "2026-04-12T17:10:46.402Z",
+  "updatedAt": "2026-04-12T17:10:46.402Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://web-api.tp.entsoe.eu/api?documentType=A61&processType=A33",
+      "relation": "exactMatch"
+    }
+  ]
+}

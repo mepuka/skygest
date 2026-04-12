@@ -1,6 +1,6 @@
 {
   "_tag": "Candidate",
-  "id": "https://id.skygest.io/candidate/cand_01KNQFXS2B8027HEDYT2Z55ZX1",
+  "id": "https://id.skygest.io/candidate/cand_01KP18ZQ9K48VWF6WF9QWQ4CDQ",
   "sourceRef": {
     "contentId": "at://did:plc:3uqlk6hebu6vurixcx6s26s5/app.bsky.feed.post/3mgpfo4b53s2f"
   },
@@ -9,8 +9,8 @@
   "referencedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VE7EKX7ASBD577HN9S",
   "referencedDatasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VPXM7P1ME16YJ6FVHP",
   "referencedDistributionId": "https://id.skygest.io/distribution/dist_01KNQEZ5VPPXFFSWNZZEQZYG3E",
-  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WMYHSF2J4JJFAY5DWD",
-  "rawLabel": "IS WIND STRUGGLING?  Not at all. Global deployment rose by +38% last year\ud83d\udcaa  - 1",
+  "referencedVariableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+  "rawLabel": "IS WIND STRUGGLING?  Not at all. Global deployment rose by +38% last year💪  - 1",
   "rawDims": {
     "geography": "china",
     "category": "capacity"
