@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKFTXKJBMQMYR7KZSPEP",
+  "title": "Suivi des consommations de gaz par semaine - Période 2022/2023",
+  "description": "<p class=\"MsoNormal\">Ce jeu de données présente la consommation de gaz par\nsecteurs à la maille France en brut et en corrigé du climat. Les données sont\nagrégées à un pas de temps hebdomadaire pour l'exercice débutant le 1er août\n2022 et se terminant le 31 juillet 2023. <o:p></o:p></p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/indicateur-sobriete-suivi-des-consommations-de-gaz-par-semaine/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "sobriété"
+  ],
+  "themes": [
+    "Consommation"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKFTC43G9CN9XAM0A2T2"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "indicateur-sobriete-suivi-des-consommations-de-gaz-par-semaine",
+      "relation": "exactMatch"
+    }
+  ]
+}

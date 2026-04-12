@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKFYWJV0QJZSZQW1E6DX",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKFYNEWS59NQY576BBNC",
+  "kind": "api-access",
+  "title": "Consommation quotidienne brute JSON API",
+  "description": "<p>\n\tCe jeu de données présente les courbes de consommation d’électricité (par demi-heure en MW) et de gaz (par heure en MW \n\t<a href=\"https://opendata.reseaux-energies.fr/pages/glossaire/\">PCS</a> 0°C).</p><p>\n\tPérimètre électricité : France métropolitaine hors Corse. Les années 2012 à 2024 sont au statut définitif. Les données 2025 et 2026 est au statut consolidé.</p><p>\n\tPérimètre gaz : France continentale. <span style=\"font-family: inherit;\">Les données de consommation sont au statut définitif et correspondent aux données de consommation relevées sur le réseau de transport et n'intègrent pas la consommation du biométhane produit sur sur le réseau des distributions publiques.</span></p><p></p>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-quotidienne-brute/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-quotidienne-brute/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

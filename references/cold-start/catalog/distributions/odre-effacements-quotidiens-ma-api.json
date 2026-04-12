@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG2A9WKE7WT8AJ70HT8",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG2VGQ65SK9BHZ86T7K",
+  "kind": "api-access",
+  "title": "Effacements quotidiens sur le mécanisme d'ajustement (2013 à 2024) JSON API",
+  "description": "<p>\nHistorique quotidien des capacités d’effacement de consommation d’électricité (MW) sur le mécanisme d’ajustement.\n</p>\n<ul>\n<li>Offre minimum disponible sur la journée</li>\n<li>Offre moyenne disponible sur la journée</li>\n<li>Offre maximum disponible sur la journée</li>\n<li>Effacement maximum activé sur la journée</li>\n</ul>\n<hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/effacements-quotidiens-ma/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/effacements-quotidiens-ma/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

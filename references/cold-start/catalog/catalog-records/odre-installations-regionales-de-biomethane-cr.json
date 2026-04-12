@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KP19XKFX04EM0WRYC51B8P9Y",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KP19XKFQS1H75GKRV1DJTGD4",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KP19XKFX31B214016HG9DK5S",
+  "sourceRecordId": "installations-regionales-de-biomethane",
+  "harvestedFrom": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets",
+  "firstSeen": "2026-04-12T16:55:36.147Z",
+  "lastSeen": "2026-04-12T16:55:48.622Z",
+  "sourceModified": "2026-01-08T14:41:54.740000+00:00",
+  "isAuthoritative": true
+}

@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKFZMZ2C8YE4F0NJ78BD",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKFZ2180HZGR0B5T7HH5",
+  "kind": "api-access",
+  "title": "Transformateurs de tension électrique HTB Strasbourg Electricité Réseaux JSON API",
+  "description": "<p>\nCe jeu de données  représente la position des transformateurs électriques de tension HTB  sur l’ensemble du réseau de transport géré par Strasbourg Électricité  Réseaux dans le département du Bas-Rhin.\n</p>\n<p>\nChaque appareil (souvent à l'intérieur d'un poste électrique) est représenté par un point positionné en son centre.\n</p>\n<p>\nCes données sont produites par les contributeurs OpenStreetMap et diffusées sous la licence OpenDataBase License (OdBL). Le standard attributaire retenu est celui d'OpenStreetMap. Plus de détails sont disponibles sur la documentation du projet <a href=\"https://wiki.openstreetmap.org/wiki/WikiProject_Power_networks/France#R.C3.A9seaux_de_distribution\">https://wiki.openstreetmap.org/wiki/WikiProject_Power_networks/France#R.C3.A9seaux_de_distribution</a>.\n</p>\n<p>\nLes données sont mises à disposition à titre purement indicatif sans garantie quant à leur degré de fiabilité. OpenStreetMap et <a href=\"http://Infos-Réseaux.com\">Infos-Réseaux.com</a> ne sauraient, par conséquent, être tenus responsable en cas de défaut  de fiabilité. L'utilisation des données est exclusive du respect de  toute procédure obligatoire et notamment des procédures prévues par la  réglementation dite « DT-DICT » relative à l’exécution de travaux à  proximité de certains ouvrages souterrains, aériens ou subaquatiques de  transport ou de distribution (cf. art. L. 554-1 et suivants et art. R.  554-1 et suivants du Code de l’environnement).\n</p>\n<p>\nL'utilisation des données ne saurait, en outre, exempter  l’utilisateur d’avoir à solliciter l'exploitant pour toutes les  opérations relevant de ses missions de service public et notamment celles visant à ce qu’elle apprécie, en réalisant une pré-étude ou une  étude de raccordement, l’impact sur le réseau public de distribution  d’électricité lié au raccordement d’un éventuel projet.\n</p>\n<hr/>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/transformateurs-electriques-htb-strasbourg/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/transformateurs-electriques-htb-strasbourg/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

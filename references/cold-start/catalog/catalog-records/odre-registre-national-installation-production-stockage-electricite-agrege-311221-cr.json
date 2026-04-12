@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KP19XKFXNXDZWJ9BMNA637K2",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KP19XKFQS1H75GKRV1DJTGD4",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KP19XKFX3PYDQ1QVD4H6SPMB",
+  "sourceRecordId": "registre-national-installation-production-stockage-electricite-agrege-311221",
+  "harvestedFrom": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets",
+  "firstSeen": "2026-04-12T16:55:36.147Z",
+  "lastSeen": "2026-04-12T16:55:48.622Z",
+  "sourceModified": "2024-10-09T13:00:36+00:00",
+  "isAuthoritative": true
+}

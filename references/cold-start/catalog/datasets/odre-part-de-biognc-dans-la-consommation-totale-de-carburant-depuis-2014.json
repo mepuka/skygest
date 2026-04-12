@@ -1,0 +1,33 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKG0F1GPENQ2P7WKTCQG",
+  "title": "Part de bioGNC dans la consommation totale de carburant (depuis 2014)",
+  "description": "<p>Ce jeu de données donne la part de bioGNC en % dans la consommation de GNC en France. <br></p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/part-de-biognc-dans-la-consommation-totale-de-carburant-depuis-2014/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "BioGNC",
+    "GNV"
+  ],
+  "themes": [
+    "Environnement",
+    "Mobilité"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKG0Z0807BMJ26DXGFAV"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "part-de-biognc-dans-la-consommation-totale-de-carburant-depuis-2014",
+      "relation": "exactMatch"
+    }
+  ]
+}

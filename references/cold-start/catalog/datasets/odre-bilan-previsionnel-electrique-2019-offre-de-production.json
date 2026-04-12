@@ -1,0 +1,32 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKG0V5DSMYXGAZZ5RB77",
+  "title": "Bilan prévisionnel électrique 2019 - Offre de production",
+  "description": "<p>\nCe jeu de données détaille l'offre de production en France (installations de production et capacités d'effacements) pour le cas de base du bilan prévisionnel 2019, de 2020 à 2025.\n</p>\n<p>\nLes moyens de production peuvent être distingués selon leurs caractéristiques et contraintes de fonctionnements :\n</p>\n<ul>\n<li>La production fatale dont l'énergie serait perdue si on ne l'utilisait pas au moment où elle est disponible. Il s'agit des productions intermittentes telles que l'éolien ou le solaire photovoltaïque et des productions plus régulières telles que l'hydraulique au fil de l'eau ou les bioénergies.</li>\n<li>La production de « base » destinée à fonctionner toute l'année. C'est le cas de la filière nucléaire.</li>\n<li>Les productions dites de « semi-base » (centrales au charbon et cycles combinés au gaz pour l'essentiel) et de « pointe » (groupes fioul et turbines à combustion, qui ne sont utilisés que quelques heures par an). Ces moyens de production, plus flexibles, s'adaptent aux variations de la demande résiduelle, à savoir la demande électrique défalquée de la production fatale.</li>\n</ul>\n<p>\nPour plus d'informations sur les scénarios, le bilan prévisionnel 2019 est disponible en téléchargement sur le site rte-france.com (<a href=\"https://www.rte-france.com/fr/article/bilan-previsionnel\" target=\"_blank\">https://www.rte-france.com/fr/article/bilan-previsionnel</a>).\n</p>\n<hr>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/bilan-previsionnel-electrique-2019-offre-de-production/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "Prospective",
+    "Parc"
+  ],
+  "themes": [
+    "Production"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKG0BE4JVBGBQ342VYDV"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "bilan-previsionnel-electrique-2019-offre-de-production",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG0Y9Y4FHK5WBGDJHPY",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG0DW171HRECPWR26AQ",
+  "kind": "api-access",
+  "title": "Indicateur Mensuel Gaz Renouvelable des territoires - périmètre national JSON API",
+  "description": "<p>\nCe jeu de données présente les valeurs du ratio entre la production locale de gaz renouvelable et la consommation locale de gaz. </p><p>Pour calculer ce ratio : </p><ul><li>la production correspond à la quantité de gaz renouvelable produite un mois donné sur un territoire. </li><li>La consommation correspond à la consommation de gaz d’un mois donné sur un territoire. </li></ul>\n\n<p>L’indicateur est mis à jour tous les mois.</p>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/igrm-nat/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/igrm-nat/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

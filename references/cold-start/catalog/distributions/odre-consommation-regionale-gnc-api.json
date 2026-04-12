@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKFZZH4F18AK8VJE2AYE",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKFZQPPXJM1H3RGCK6KD",
+  "kind": "api-access",
+  "title": "Consommation régionale de Gaz Naturel Carburant (GNC) JSON API",
+  "description": "<p>Ce jeu de données présente les consommations de l'ensemble des stations GNC (<a href=\"https://opendata.reseaux-energies.fr/pages/glossaire/#g\">Gaz Naturel Comprimé</a>) raccordées aux réseaux de transport et de distribution en France. Les données sont agglomérées par région administrative.</p><hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-regionale-gnc/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-regionale-gnc/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

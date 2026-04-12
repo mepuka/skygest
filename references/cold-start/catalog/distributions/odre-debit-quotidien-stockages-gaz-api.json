@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG1QAJ3463Y6NW6MFH9",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG14K1CNYYJEEGRYS9N",
+  "kind": "api-access",
+  "title": "Débit quotidien des stockages de gaz (à partir de novembre 2010) JSON API",
+  "description": "<p>\n\tCe jeu de données présente le cumul des débits de gaz (injection/soutirage) mouvementés entre le réseau de transport de gaz et les stockages de gaz de Teréga et Storengy, par PITS et au cours d’une journée gazière depuis le 1\n\t<sup>er</sup> novembre 2010 (GWh/j  \t<a href=\"https://opendata.reseaux-energies.fr/pages/glossaire/\">PCS</a> 0°C).</p><hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/debit-quotidien-stockages-gaz/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/debit-quotidien-stockages-gaz/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG1RN3ACYEWHHTEW8TS",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG131HBNVV3D5SNNYBP",
+  "kind": "api-access",
+  "title": "Données du signal écoWatt (du 16/11/20 au 31/08/22) JSON API",
+  "description": "<p>\n</p><p style=\"margin: 0cm 0cm 12pt; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;\"><span style=\"font-size: 10.5pt; font-family: Helvetica, sans-serif; color: rgb(88, 88, 88);\"><b>Attention, ce jeu de données prend fin à compter du 31 août 2022. L'historique de ce jeu de données reste disponible mais n’est plus\nalimenté.</b></span></p><p style=\"margin: 0cm 0cm 12pt; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;\"><span style=\"font-family: inherit; font-size: 0.875rem;\">Ce jeu de données, rafraichi deux fois par jour, présente les signaux écoWatt des régions françaises (hors Corse) jusqu’au surlendemain du jour courant pour quatre périodes de la journée : la nuit [0h ; 6h[, le matin [6h ; 12h[, l’après-midi [12h ; 18h[ et le soir [18h ; 24h[.</span><br></p><p>Pour chacune des périodes de la journée sont associés une valeur et un texte. La valeur peut varier de 1 à 4. La signification des valeurs est la suivante :</p>\n<ul>\n<li>1 : Notre consommation est raisonnable.</li>\n<li>2 : Notre consommation d’électricité est élevée. Adoptons les bons gestes !</li>\n<li>3 : La consommation d’électricité dans notre région est trop élevée. Pour éviter toute coupure, nous devons adopter les bons gestes ! <a href=\"http://www.monecowatt.fr\" target=\"_blank\">www.monecowatt.fr</a></li>\n<li>4 : Des coupures d’électricité sont programmées dans plusieurs régions françaises demain. Pour limiter leur durée, réduisons notre consommation ! Toutes les infos <a href=\"http://www.monecowatt.fr\" target=\"_blank\">www.monecowatt.fr</a></li>\n</ul>\n<p>\nLes données de la journée courante, du lendemain et du surlendemain peuvent évoluer tout au long de la journée selon la situation de l’équilibre offre-demande (marges disponibles), des situations de tension dans les régions Bretagne, Pays de Loire, Ile-de-France et Normandie et de la prévision de consommation de chacune des régions.\n</p>\n<hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/signal-ecowatt/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/signal-ecowatt/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

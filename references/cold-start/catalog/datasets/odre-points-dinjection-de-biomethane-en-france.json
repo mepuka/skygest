@@ -1,0 +1,37 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKFXY7A8MC8Q0QCBH16B",
+  "title": "Points d'injection de méthane renouvelable et bas carbone en France en service",
+  "description": "<p style=\"font-family: sans-serif;\">Ce jeu de données présente la liste des points d'injection de méthane renouvelable et bas carbone dans les réseaux de gaz naturel en France et leurs capacités de production en GWh/an (<span style=\"font-weight: bolder;\">la valeur de la capacité est celle correspondant à l'année en cours, la plus actuelle. Un site d'injection peut, après sa mise en service, adapter sa capacité maximale théorique vers la hausse ou la baisse</span>).</p><p style=\"font-family: sans-serif;\">Cela concerne les points d'injection directement raccordés au réseau de distribution mais également ceux directement raccordés au réseau de transport (NaTran / Terega).</p><p style=\"font-family: sans-serif;\"></p><p style=\"font-family: sans-serif;\">Ce jeu de données est mis à jour mensuellement vers le 10 du mois n+1. Il est publié dans le respect des règles relatives à la protection des Informations Commercialement Sensibles. En effet, la localisation géographique communiquée est une approximation respectant les règles du secret statistique.</p><p style=\"font-family: sans-serif; margin-bottom: 1em;\">ISDND = Installation de stockage de déchets non dangereux.</p><div><br></div>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/points-dinjection-de-biomethane-en-france/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "Tableau de Bord Régional",
+    "Carte",
+    "EnR",
+    "Biogaz",
+    "Observation de la terre et environnement",
+    "HVD"
+  ],
+  "themes": [
+    "Production",
+    "Territoires et régions"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKFXD4Z42EN6SXV7EGZ2"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "points-dinjection-de-biomethane-en-france",
+      "relation": "exactMatch"
+    }
+  ]
+}

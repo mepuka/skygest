@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KP19XKFXY8RPX57QRN457FGG",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KP19XKFQS1H75GKRV1DJTGD4",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KP19XKFXCP01DMYVEWGXXHQ3",
+  "sourceRecordId": "temperature-quotidienne-departementale",
+  "harvestedFrom": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets",
+  "firstSeen": "2026-04-12T16:55:36.147Z",
+  "lastSeen": "2026-04-12T16:55:48.622Z",
+  "sourceModified": "2025-01-16T16:15:40+00:00",
+  "isAuthoritative": true
+}

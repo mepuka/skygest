@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG0T3KNDRT0BKSN5WW4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG0VX3MVNGM0BYX5DYJ",
+  "kind": "api-access",
+  "title": "Consommation annuelle finale française d'électricité par typologie de consommateurs (2015 à 2021) JSON API",
+  "description": "<p>\nRépartition annuelle par typologie de consommateurs (résidentiels, professionnels, PME-PMI, grande industrie, entreprises) de la consommation finale française d’électricité (TWh), hors Corse.\n</p>\n<ul>\n<li>Résidentiels : clients raccordés au réseau public de distribution pour un usage résidentiel et dont la puissance souscrite est inférieure à 36 kVA</li>\n<li>Professionnels : clients raccordés au réseau public de distribution pour un usage professionnel et dont la puissance souscrite est inférieure à 36 kVA</li>\n<li>PME-PMI : clients raccordés au réseau public de distribution et dont la puissance souscrite est supérieure à 36 kVA et inférieure à 250 kVA</li>\n<li>Grande industrie : clients raccordés au réseau public de transport</li>\n<li>Entreprises : clients raccordés au réseau public de distribution et dont la puissance souscrite est supérieure à 250 kVA</li>\n</ul>\n<hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-annuelle-nette-typologie/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/consommation-annuelle-nette-typologie/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

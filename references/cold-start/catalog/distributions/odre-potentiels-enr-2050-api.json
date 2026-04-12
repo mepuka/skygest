@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKFXSGDSSN8RMD4EHETG",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKFX92W3P5J60Y9GGAN0",
+  "kind": "api-access",
+  "title": "Répartition des potentiels de gaz verts à horizon 2050 par département JSON API",
+  "description": "<p>Ce jeu de données présente la répartition par département du potentiel en gaz verts par type de ressource et par filière en France à l'horizon 2050. </p><p>Les hypothèses et le contexte  de l'étude sont présentées dans l'étude \"<a href=\"http://www.natrangroupe.com/fileadmin/medias/communiques/2018/FR/Etude-mix-gaz-100-pourcent-renouvelable-Etude.pdf\" target=\"_blank\">Un mix de gaz 100% renouvelable en 2050 ?</a>\" publiée en février 2018 par l'ADEME, GRDF et NaTran. </p><p>Sont  considérées les ressources primaires suivantes :</p><ul> <li>le potentiel de production de méthane avec les CIMSE (Cultures intermédiaires multi-services  environnementaux), les résidus de cultures, les déjections  d'élevage, les herbes, les résidus des industries agro-alimentaires (IAA), les bio-déchets et les algues, en GWh PCS ;</li><li>le potentiel bois énergie - en GWh PCI ;</li><li>le potentiel d'énergie de récupération : combustibles Solides de Récupération (CSR) et Hydrogène fatal (H2)  - en GWh PCI ; </li><li>le potentiel de production d'électricité par Power-to-Gas, en GWh élec.</li></ul><div>Dans l'étude (cf page 92), le potentiel de gaz injectable est obtenu en appliquant les rendements de conversion suivants aux ressources primaires :</div><ul>\n<li>94% méthane injecté / méthane produit,</li><li>70% pour la gazéification (potentiel bois énergie et potentiel CSR),</li><li>66% pour le power-to-gas.</li></ul><p><br></p><p>Voir aussi le jeu de données par canton: <a href=\"https://opendata.reseaux-energies.fr/explore/dataset/repartition-des-potentiels-de-methanisation-a-horizon-2050-par-canton/information/?disjunctive.departement&amp;disjunctive.region\" target=\"_blank\">Répartition des potentiels de méthanisation à horizon 2050 par canton</a>.<br></p><hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/potentiels-enr-2050/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/potentiels-enr-2050/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

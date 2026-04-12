@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP19XKG2DRF8GP30RMQRY2GS",
+  "title": "Consommation quotidienne définitive & régionalisée de gaz des distributions publiques à l'interface avec le réseau de transport de gaz",
+  "description": "<p><span style=\"color: rgb(51, 51, 51); font-size: 14px;\">Ce jeu de données donne la consommation de gaz des distributions publiques (DP) et des ELD raccordés aux réseaux de NaTran et de Terega. </span></p><p><font color=\"#333333\"><span style=\"font-size: 14px;\">Les données sont agrégées de manière horaire et journalière, par région et sont définitives.</span></font></p><p><font color=\"#333333\"><span style=\"font-size: 14px;\">Le jeu de données est rafraîchie chaque mois M avec les données de consommation du mois M-1</span></font></p><p><font color=\"#333333\"><span style=\"font-size: 14px;\">Les données sont issues de nos instruments de comptage.<br></span></font></p><p><span style=\"font-size: 0.875rem; font-family: Helvetica; color: rgb(88, 88, 88);\">Une question sur ces données ?\nn'hésitez pas à utiliser notre </span><span style=\"font-size: 0.875rem; font-family: Helvetica; color: rgb(51, 122, 183);\"><a href=\"https://odre.opendatasoft.com/pages/contactv2/\">formulaire de contact</a></span><br></p><p><br></p>",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "landingPage": "https://odre.opendatasoft.com/explore/dataset/courbe-de-charge-eldgrd-regional-grtgaz-terega/",
+  "accessRights": "public",
+  "license": "Licence Ouverte v2.0 (Etalab)",
+  "keywords": [
+    "BIlan Gaz"
+  ],
+  "themes": [
+    "Consommation"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP19XKG23GEXZD37PWQK27GJ"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
+  ],
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "courbe-de-charge-eldgrd-regional-grtgaz-terega",
+      "relation": "exactMatch"
+    }
+  ]
+}

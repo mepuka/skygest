@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKFXZA460SPQ72Z70JE2",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKFXK0YHRXJ2NXXNF7MF",
+  "kind": "api-access",
+  "title": "Production Quotidienne Consolidée de Biométhane sur le réseau de transport et de distribution par Opérateur JSON API",
+  "description": "<p>Ce jeu de données représente la production quotidienne de biométhane par opérateur.</p><p>Ces données sont des données redressées/corrigées et représente la meilleure vision de la production des sites. Les valeurs des mois précédentes peuvent donc être corrigées à postériori. Pour des raisons d'ICS, les données des opérateurs peuvent être regroupées entre eux ou certaines données non affichées (ex. données Teréga à partir de juin 2021). </p><p>Les données sont mises à jour tous les 15-20 du mois. </p>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/odre-prod-grdgrt-operateur-def/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/odre-prod-grdgrt-operateur-def/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

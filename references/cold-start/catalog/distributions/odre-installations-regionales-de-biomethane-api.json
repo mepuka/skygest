@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKFXRNTF905NRNZ0WTY7",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKFX31B214016HG9DK5S",
+  "kind": "api-access",
+  "title": "Installations de production biométhane en service par région (au 31 décembre) JSON API",
+  "description": "<p>Ce jeu de données présente le nombre de sites de production de biométhane en service en France à fin d'année (2015 à 2024) et la capacité maximale installée (en MWh) par région sur les réseaux de transport et de distribution de gaz.</p><p><span style=\"color: rgb(88, 88, 88); font-family: Helvetica, sans-serif;\">Une question sur ces données ? n'hésitez pas à utiliser notre </span><a href=\"https://odre.opendatasoft.com/pages/contactv2/\" style=\"background-color: rgb(255, 255, 255); text-decoration: none; color: rgb(1, 171, 176); font-size: 14px; font-weight: 400; font-family: Helvetica, sans-serif;\" target=\"_blank\">formulaire de contact</a><br></p><p><br></p><hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/installations-regionales-de-biomethane/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/installations-regionales-de-biomethane/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

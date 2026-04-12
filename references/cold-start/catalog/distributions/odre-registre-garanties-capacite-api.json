@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG4E5759QYM21QHVRVJ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG4KRRQ62C3H666YTTM",
+  "kind": "api-access",
+  "title": "Registre des transactions de garanties de capacité JSON API",
+  "description": "<p>\nLes règles du mécanisme de capacité, dans leur version arrêtée le 29 novembre 2016, renforcent les dispositifs de transparence sur les échanges de garanties de capacité. Ainsi, les nouvelles règles prévoient que les prix, volumes et dates de prise d’effet de toutes les transactions réalisées soient rendus publics; seule l’identité des parties à ces transactions demeure secrète afin de protéger la confidentialité d’informations commercialement sensibles.\n</p>\n<p>\nCes attributs des cessions de garanties de capacités, issus du registre des garanties de capacités tenu par RTE (<a href=\"https://rega-rte.fr\" target=\"_blank\">https://rega-rte.fr</a>), sont accessibles sur le site Open Data.\n</p>\n<p>\nLes garanties de capacité correspondent à une puissance unitaire normative de 0,1 MW/GC et sont valables pour une année de livraison donnée (année civile).\n</p>\n<p>\nUne cession de garanties de capacité (GC):\n</p>\n<ul>\n<li>Se matérialise par un mouvement de garanties d’un compte débiteur (propriétaire de la capacité) à un compte créditeur (acheteur de la capacité)</li>\n<li>Peut être effective à la date de saisie ou à une date d’échéance ultérieure (cessions dites « à termes »)</li>\n<li>Peut s’effectuer à un prix défini entre les 2 parties (transaction de capacité) ou, sous certaines conditions, sans prix (transfert de capacité)</li>\n<li>Dans le cas d’une transaction, le prix associé peut être un prix fixe (en Euro par garantie de capacité) ou un prix indexé (par exemple sur le résultat d’enchères à venir)</li>\n</ul>\n<p>\nSignification de la colonne STATUT : le statut d’une cession de garantie de capacité définit son état d’avancement dans le processus de livraison. Une transaction a pour statut « Comptabilisée ».\n</p>\n<p>\nUne cession à terme (transfert à terme ou transaction à terme) a plusieurs statuts possibles :\n</p>\n<ul>\n<li>Validée non effectuée (cession à terme validée par les deux parties mais non arrivée à sa date d’échéance)</li>\n<li>Effectuée non livrée (cession à terme validée par les deux parties, arrivée à sa date d’échéance mais non rapprochée d’une cession comptant)</li>\n<li>Effectuée et livrée (cession à terme validée par les deux parties et rapprochée d’une cession comptant)</li>\n</ul>\n<p><strong>En raison d'un nombre de téléchargements excessif des données du registre des garanties de capacités par des robots à des fréquences disproportionnées au regard de la fréquence de mise à jour du jeu de données, un quota de 50000 appels API par utilisateur et par mois a été mis en place. Si vous constatez des soucis d'accès aux données suite à la mise en place de ce quota, merci de nous contacter à l'adresse <a href=\"mailto:rte-opendata@rte-france.com\">rte-opendata@rte-france.com</a></strong>\n</p>\n<hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/registre-garanties-capacite/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/registre-garanties-capacite/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

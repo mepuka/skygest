@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG41NDDZAPYD7GQ8S6E",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG41NZJKCNHR12QE0R4",
+  "kind": "api-access",
+  "title": "Projets en développement en électricité renouvelable (au 31 décembre 2024) JSON API",
+  "description": "<p>Ce jeu de données expose les projets (en MW) de  raccordement en développement sur les réseaux de transport et de distribution en électricité au 31 décembre 2024.</p><p>Pour le réseau de RTE, il s’agit des projets ayant fait l’objet d’une « proposition d’entrée en file d’attente » ou d’une « proposition technique et financière » acceptée ainsi que des projets éoliens en mer prévus dans le cadre d’un appel d’offres.</p><p>Pour le réseau d’Enedis et des ELD, il s’agit de projets pour lesquels une demande de raccordement a été qualifiée complète par le gestionnaire de réseau de distribution.</p><p></p>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/suivi-projet-raccordement-enr/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/suivi-projet-raccordement-enr/records",
+      "relation": "exactMatch"
+    }
+  ]
+}

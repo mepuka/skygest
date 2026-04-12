@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KP19XKG2TMN3JC6EK0VSEJZG",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KP19XKFQS1H75GKRV1DJTGD4",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KP19XKG2TSX0XNV64EM2VT7M",
+  "sourceRecordId": "nombre-de-go-valorisees-en-bio-gnc-depuis-2014",
+  "harvestedFrom": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets",
+  "firstSeen": "2026-04-12T16:55:36.147Z",
+  "lastSeen": "2026-04-12T16:55:48.622Z",
+  "sourceModified": "2025-04-29T21:01:50.426000+00:00",
+  "isAuthoritative": true
+}

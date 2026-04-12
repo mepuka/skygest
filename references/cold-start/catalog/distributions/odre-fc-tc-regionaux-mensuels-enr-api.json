@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP19XKG3WPZQDKRSCAMF53YH",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP19XKG3F23J07P23FK4MF49",
+  "kind": "api-access",
+  "title": "Facteurs de charge et taux de couverture régionaux mensuels des énergies renouvelables JSON API",
+  "description": "<p>\nFacteurs de charge (%) et taux de couverture (%) régionaux mensuels pour les énergies renouvelables.\n</p>\n<ul>\n<li>Facteur de charge : rapport entre l'électricité effectivement produite par la filière et celle qu'elle aurait pu produire si elle avait fonctionné à sa puissance maximale théorique durant la même période</li>\n<li>Taux de couverture : part de la consommation couverte par la production de la filière</li>\n</ul>\n<p>\n</p><p>Remarque 1 : Les valeurs affichées pour les taux de couverture solaire sont issus d'un calcul contenant une estimation partielle de l'autoconsommation photovoltaïque.</p><p>Remarque 2 : le facteur de charge pour la bio énergie n'est pas publié car non significatif.\n</p>\n<hr>",
+  "accessURL": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/fc-tc-regionaux-mensuels-enr/records",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D",
+  "createdAt": "2026-04-12T16:55:36.147Z",
+  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/fc-tc-regionaux-mensuels-enr/records",
+      "relation": "exactMatch"
+    }
+  ]
+}
