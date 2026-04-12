@@ -104,6 +104,9 @@ const decodeVariableRow = (row: VariableRow) =>
     `Failed to normalize variable row for ${row.id}`
   );
 
+// `facets_json` is the canonical read model. The mirrored scalar columns stay
+// in sync on writes so SQL-side filtering and manual inspection can still use
+// ordinary columns without parsing JSON.
 const toVariableUpsertRow = (
   variable: Variable,
   updatedBy: string

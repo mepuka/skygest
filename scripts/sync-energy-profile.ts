@@ -155,6 +155,49 @@ const compareVocabularyRoots = (
     }
   });
 
+const compareManifestCopies = (
+  sourcePath: string,
+  sourceJsonString: string,
+  targetPath: string
+): Effect.Effect<void, EnergyProfilePipelineError, FileSystem.FileSystem> =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const targetExists = yield* fs.exists(targetPath).pipe(
+      Effect.mapError((cause) => pipelineError("exists", targetPath, cause))
+    );
+
+    if (!targetExists) {
+      return yield* Effect.fail(
+        pipelineError(
+          "compareManifestCopies",
+          targetPath,
+          `checked-in manifest is missing; run sync-energy-profile --apply using ${sourcePath}`
+        )
+      );
+    }
+
+    const targetJsonString = yield* fs.readFileString(targetPath).pipe(
+      Effect.mapError((cause) =>
+        pipelineError("readFileString", targetPath, cause)
+      )
+    );
+
+    const targetValidated = validateManifestJson(targetPath, targetJsonString);
+    if (Result.isFailure(targetValidated)) {
+      return yield* Effect.fail(targetValidated.failure);
+    }
+
+    if (targetJsonString !== sourceJsonString) {
+      return yield* Effect.fail(
+        pipelineError(
+          "compareManifestCopies",
+          targetPath,
+          `checked-in manifest does not match ${sourcePath}; run sync-energy-profile --apply`
+        )
+      );
+    }
+  });
+
 const runSyncEnergyProfile = Effect.fn("sync-energy-profile.run")(function* (
   rawOptions: CliOptions
 ) {
@@ -216,6 +259,12 @@ const runSyncEnergyProfile = Effect.fn("sync-energy-profile.run")(function* (
   }
 
   if (!options.apply) {
+    yield* compareManifestCopies(
+      options.source,
+      jsonString,
+      options.target
+    );
+    yield* Console.log(`Checked-in manifest matches ${options.source}.`);
     yield* Console.log(
       `Dry run only. Re-run with --apply to copy the manifest into ${options.target}.`
     );

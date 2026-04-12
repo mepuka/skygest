@@ -265,6 +265,31 @@ describe("phase-one migrations", () => {
     }).pipe(Effect.provide(makeSqliteLayer()))
   );
 
+  it.effect("adds runtime profile columns on a full migration run from an empty database", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      const sql = yield* SqlClient.SqlClient;
+
+      const variableColumns = yield* sql<{ name: string; isNotNull: number }>`
+        SELECT name as name, [notnull] as isNotNull
+        FROM pragma_table_info('variables')
+        WHERE name = 'policy_instrument'
+      `;
+      const datasetColumns = yield* sql<{ name: string; isNotNull: number }>`
+        SELECT name as name, [notnull] as isNotNull
+        FROM pragma_table_info('datasets')
+        WHERE name = 'variable_ids_json'
+      `;
+
+      expect(variableColumns).toEqual([
+        { name: "policy_instrument", isNotNull: 0 }
+      ]);
+      expect(datasetColumns).toEqual([
+        { name: "variable_ids_json", isNotNull: 0 }
+      ]);
+    }).pipe(Effect.provide(makeSqliteLayer()))
+  );
+
   it.effect("upgrades publications to the new identity shape and backfills existing rows", () =>
     Effect.gen(function* () {
       const sql = yield* SqlClient.SqlClient;
