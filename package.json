@@ -17,6 +17,7 @@
     "build:ontology-snapshot": "bun run src/scripts/build-ontology-snapshot.ts",
     "seed:ontology-kv": "bun run src/scripts/seed-ontology-kv.ts",
     "sync:data-layer": "bun run scripts/sync-data-layer.ts",
+    "sync:vocabulary": "bun run scripts/sync-vocabulary.ts",
     "ops": "bun run src/scripts/ops.ts"
   },
   "devDependencies": {
