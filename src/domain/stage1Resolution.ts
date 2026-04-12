@@ -14,7 +14,6 @@ export * from "./stage1Shared";
 export * from "./stage1Evidence";
 export * from "./stage1Match";
 export * from "./stage1Residual";
-export { MatchEvidence } from "./matchEvidence";
 
 export const Stage1PostContext = Schema.Struct({
   postUri: PostUri,

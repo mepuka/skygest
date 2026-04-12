@@ -1,4 +1,5 @@
 import { Schema } from "effect";
+import { ResolutionEntityId } from "./resolutionEntityId";
 import { Stage1Match } from "./stage1Match";
 import { Stage2Evidence } from "./stage2Evidence";
 import { Stage3Input } from "./stage2Core";
@@ -6,7 +7,7 @@ import { Stage1MatchGrain } from "./stage1Shared";
 
 export const Stage2CorroborationMatchKey = Schema.Struct({
   grain: Stage1MatchGrain,
-  entityId: Schema.String
+  entityId: ResolutionEntityId
 });
 export type Stage2CorroborationMatchKey = Schema.Schema.Type<
   typeof Stage2CorroborationMatchKey

@@ -206,7 +206,7 @@ describe("ResolverService", () => {
                 text: "ERCOT",
                 normalizedText: "ercot"
               },
-              stage2Lane: "no-op",
+              stage2Lane: "pending",
               candidateSet: [],
               matchedSurfaceForms: [],
               unmatchedSurfaceForms: [],

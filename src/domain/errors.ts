@@ -2,6 +2,7 @@ import { Result, Schema } from "effect";
 import { CandidatePayloadStage } from "./candidatePayload";
 import { DataLayerRegistryDiagnostic } from "./data-layer/registry";
 import { Stage1EvalSnapshotBuildReport } from "./stage1EvalBuild";
+import { Stage2Lane } from "./stage2Resolution";
 import { Did, PostUri, TranscriptR2Key } from "./types";
 import {
   decodeJsonStringEitherWith,
@@ -294,6 +295,8 @@ export class FacetDecompositionError extends Schema.TaggedErrorClass<FacetDecomp
   "FacetDecompositionError",
   {
     postUri: PostUri,
+    lane: Schema.optionalKey(Stage2Lane),
+    facet: Schema.optionalKey(Schema.String),
     reason: Schema.String
   }
 ) {}

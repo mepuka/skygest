@@ -1,6 +1,7 @@
 import { Schema } from "effect";
-import { SurfaceFormEntryAny, PartialVariableShape } from "./stage2Core";
+import { PartialVariableShape } from "./stage2Core";
 import { Stage1Rank } from "./stage1Shared";
+import { SurfaceFormEntryAny } from "./surfaceForm";
 
 const ZeroToOneScore = Schema.Number.pipe(
   Schema.check(Schema.isBetween({ minimum: 0, maximum: 1 }))

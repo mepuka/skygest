@@ -38,7 +38,7 @@ describe("ResolverClient", () => {
                   text: "ERCOT annual load",
                   reason: "needs stage 2"
                 },
-                stage2Lane: "no-op",
+                stage2Lane: "pending",
                 candidateSet: [],
                 matchedSurfaceForms: [],
                 unmatchedSurfaceForms: [],

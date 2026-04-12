@@ -1,5 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect } from "effect";
+import { makeDistributionId } from "../src/domain/data-layer/ids";
 import type { Stage1Result } from "../src/domain/stage1Resolution";
 import {
   assessEvalResult,
@@ -101,11 +102,15 @@ describe("stage1 eval helpers", () => {
           bestRank: 3,
           candidates: [
             {
-              entityId: "https://id.skygest.io/distribution/dist_1234567890AB",
+              entityId: makeDistributionId(
+                "https://id.skygest.io/distribution/dist_1234567890AB"
+              ),
               label: "A"
             },
             {
-              entityId: "https://id.skygest.io/distribution/dist_ZYXWVUTSRQPO",
+              entityId: makeDistributionId(
+                "https://id.skygest.io/distribution/dist_ZYXWVUTSRQPO"
+              ),
               label: "B"
             }
           ],

@@ -1,4 +1,5 @@
 import { Schema } from "effect";
+import { ResolutionEntityId } from "./resolutionEntityId";
 import { Stage1Evidence } from "./stage1Evidence";
 import {
   MatchTextSource,
@@ -39,7 +40,7 @@ export type UnmatchedTextResidual = Schema.Schema.Type<
 >;
 
 export const AmbiguousCandidate = Schema.Struct({
-  entityId: Schema.String,
+  entityId: ResolutionEntityId,
   label: Schema.String
 });
 export type AmbiguousCandidate = Schema.Schema.Type<typeof AmbiguousCandidate>;

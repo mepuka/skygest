@@ -1,53 +1,18 @@
 import { Result, Schema } from "effect";
 import {
+  makeSurfaceFormEntry,
+  SurfaceFormEntryAny,
+  SurfaceFormProvenance
+} from "../../domain/surfaceForm";
+import {
   VocabularyCollisionError
 } from "../../domain/errors";
-import { IsoTimestamp } from "../../domain/types";
 import { stringifyUnknown } from "../../platform/Json";
-
-const NonEmptyString = Schema.String.pipe(
-  Schema.check(Schema.isMinLength(1))
-);
-
-export const SurfaceFormProvenance = Schema.Literals([
-  "cold-start-corpus",
-  "hand-curated",
-  "oeo-derived",
-  "ucum-derived",
-  "agent-curated",
-  "eval-feedback"
-]);
-export type SurfaceFormProvenance = Schema.Schema.Type<
-  typeof SurfaceFormProvenance
->;
-
-const NotesRequiredProvenances = new Set<SurfaceFormProvenance>([
-  "agent-curated",
-  "eval-feedback"
-]);
-
-const validateSurfaceFormEntry = (entry: {
-  readonly provenance?: string;
-  readonly notes?: string;
-}) =>
-  entry.provenance !== undefined &&
-  NotesRequiredProvenances.has(entry.provenance as SurfaceFormProvenance) &&
-  (entry.notes == null || entry.notes.length === 0)
-    ? `notes are required when provenance is ${entry.provenance}`
-    : undefined;
-
-export const makeSurfaceFormEntry = <Canonical>(
-  canonical: Schema.Decoder<Canonical> & Schema.Encoder<Canonical>
-) =>
-  Schema.Struct({
-    surfaceForm: NonEmptyString,
-    normalizedSurfaceForm: NonEmptyString,
-    canonical,
-    provenance: SurfaceFormProvenance,
-    notes: Schema.optionalKey(NonEmptyString),
-    addedAt: IsoTimestamp,
-    source: Schema.optionalKey(NonEmptyString)
-  }).pipe(Schema.check(Schema.makeFilter(validateSurfaceFormEntry)));
+export {
+  makeSurfaceFormEntry,
+  SurfaceFormEntryAny,
+  SurfaceFormProvenance
+} from "../../domain/surfaceForm";
 
 export const buildVocabularyIndex = <Canonical>(
   facet: string,

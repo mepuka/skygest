@@ -4,10 +4,9 @@ import {
   DataRefResolverWorkflowResult,
   ResolverBulkItemError,
   ResolverVersion,
-  ResolveStage3Queued,
-  Stage2Output
+  ResolveStage3Queued
 } from "./resolutionShared";
-import { Stage3Input } from "./stage2Resolution";
+import { Stage2Result, Stage3Input } from "./stage2Resolution";
 import { PostUri } from "./types";
 
 const isNonEmptyResolvePostList = (
@@ -36,7 +35,7 @@ export type ResolvePostRequest = Schema.Schema.Type<typeof ResolvePostRequest>;
 export const ResolvePostResponse = Schema.Struct({
   postUri: PostUri,
   stage1: Stage1Result,
-  stage2: Schema.optionalKey(Stage2Output),
+  stage2: Schema.optionalKey(Stage2Result),
   stage3: Schema.optionalKey(ResolveStage3Result),
   resolverVersion: ResolverVersion,
   latencyMs: ResolveLatencyMs
@@ -67,6 +66,5 @@ export type DataRefResolverRunParams = Schema.Schema.Type<
 export {
   DataRefResolverWorkflowResult,
   ResolverBulkItemError,
-  ResolverVersion,
-  Stage2Output
+  ResolverVersion
 };

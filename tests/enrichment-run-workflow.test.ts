@@ -413,7 +413,7 @@ describe("EnrichmentRunWorkflow", () => {
                             text: "ERCOT annual load",
                             reason: "needs stage 2"
                           },
-                          stage2Lane: "no-op",
+                          stage2Lane: "pending",
                           candidateSet: [],
                           matchedSurfaceForms: [],
                           unmatchedSurfaceForms: [],
@@ -525,7 +525,7 @@ describe("EnrichmentRunWorkflow", () => {
               escalations: [
                 expect.objectContaining({
                   _tag: "Stage3Input",
-                  stage2Lane: "no-op"
+                  stage2Lane: "pending"
                 })
               ]
             },

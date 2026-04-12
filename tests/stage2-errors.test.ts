@@ -12,7 +12,7 @@ const asPostUri = Schema.decodeUnknownSync(PostUri)(
   "at://did:plc:test/app.bsky.feed.post/stage2"
 );
 
-describe("Stage 2 errors", () => {
+describe("Stage 2 errors (schema smoke)", () => {
   it.effect("yields and catches OntologyDecodeError", () =>
     Effect.gen(function* () {
       const error = yield* Effect.gen(function* () {
@@ -104,24 +104,35 @@ describe("Stage 2 errors", () => {
       const error = yield* Effect.gen(function* () {
         return yield* new FacetDecompositionError({
           postUri: asPostUri,
+          lane: "facet-decomposition",
+          facet: "statisticType",
           reason: "lane dispatch failed"
         });
       }).pipe(Effect.flip);
 
       expect(error._tag).toBe("FacetDecompositionError");
+      expect(error.lane).toBe("facet-decomposition");
 
       const caught = yield* Effect.gen(function* () {
         return yield* new FacetDecompositionError({
           postUri: asPostUri,
+          lane: "facet-decomposition",
+          facet: "statisticType",
           reason: "lane dispatch failed"
         });
       }).pipe(
         Effect.catchTag("FacetDecompositionError", (caughtError) =>
-          Effect.succeed(caughtError.reason)
+          Effect.succeed({
+            facet: caughtError.facet,
+            reason: caughtError.reason
+          })
         )
       );
 
-      expect(caught).toBe("lane dispatch failed");
+      expect(caught).toEqual({
+        facet: "statisticType",
+        reason: "lane dispatch failed"
+      });
     })
   );
 });

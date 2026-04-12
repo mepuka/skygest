@@ -1,6 +1,8 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Match, Schema } from "effect";
+import { makeDatasetId, makeVariableId } from "../src/domain/data-layer/ids";
 import type { Variable } from "../src/domain/data-layer/variable";
+import { SurfaceFormEntryAny } from "../src/domain/surfaceForm";
 import { VariableMatch } from "../src/domain/stage1Resolution";
 import { PostUri } from "../src/domain/types";
 import {
@@ -27,6 +29,19 @@ const decodeStage2Result = Schema.decodeUnknownSync(Stage2Result);
 const encodeStage2Result = Schema.encodeSync(Stage2Result);
 const decodeVariableMatch = Schema.decodeUnknownSync(VariableMatch);
 const encodeVariableMatch = Schema.encodeSync(VariableMatch);
+const decodeSurfaceFormEntry = Schema.decodeUnknownSync(SurfaceFormEntryAny);
+
+const makeSurfaceForm = (
+  surfaceForm: string,
+  canonical: string
+) =>
+  decodeSurfaceFormEntry({
+    surfaceForm,
+    normalizedSurfaceForm: surfaceForm.toLowerCase(),
+    canonical,
+    provenance: "cold-start-corpus",
+    addedAt: "2026-04-11T00:00:00.000Z"
+  });
 
 describe("stage2Resolution", () => {
   it("round-trips the Stage2Evidence union and stays exhaustively matchable", () => {
@@ -41,7 +56,7 @@ describe("stage2Resolution", () => {
           aggregation: "sum" as const,
           unitFamily: "energy" as const
         },
-        matchedSurfaceForms: [{ surfaceForm: "generation" }]
+        matchedSurfaceForms: [makeSurfaceForm("generation", "flow")]
       },
       {
         _tag: "FuzzyDatasetTitleEvidence" as const,
@@ -102,7 +117,9 @@ describe("stage2Resolution", () => {
 
     const candidateEntry = decodeCandidateEntry(
       encodeCandidateEntry({
-        entityId: "https://id.skygest.io/variable/var_1234567890AB",
+        entityId: makeVariableId(
+          "https://id.skygest.io/variable/var_1234567890AB"
+        ),
         label: "Installed wind generation",
         grain: "Variable",
         matchedFacets: ["technologyOrFuel", "unitFamily"],
@@ -121,7 +138,9 @@ describe("stage2Resolution", () => {
     const variableMatch = decodeVariableMatch(
       encodeVariableMatch({
         _tag: "VariableMatch",
-        variableId: "https://id.skygest.io/variable/var_1234567890AB" as any,
+        variableId: makeVariableId(
+          "https://id.skygest.io/variable/var_1234567890AB"
+        ),
         label: "Installed wind generation",
         bestRank: 1,
         evidence: [
@@ -143,7 +162,7 @@ describe("stage2Resolution", () => {
               statisticType: "flow",
               unitFamily: "energy"
             },
-            matchedSurfaceForms: [{ surfaceForm: "wind" }]
+            matchedSurfaceForms: [makeSurfaceForm("wind", "wind")]
           }
         ]
       })
@@ -161,6 +180,37 @@ describe("stage2Resolution", () => {
         source: "post-text" as const,
         text: "EIA annual wind generation",
         reason: "needs structured decomposition"
+      },
+      {
+        _tag: "UnmatchedTextResidual" as const,
+        source: "post-text" as const,
+        text: "wind output",
+        normalizedText: "wind output"
+      },
+      {
+        _tag: "UnmatchedDatasetTitleResidual" as const,
+        datasetName: "Installed wind generation",
+        normalizedTitle: "installed wind generation"
+      },
+      {
+        _tag: "AmbiguousCandidatesResidual" as const,
+        grain: "Dataset" as const,
+        bestRank: 2,
+        candidates: [
+          {
+            entityId: makeDatasetId(
+              "https://id.skygest.io/dataset/ds_1234567890AB"
+            ),
+            label: "Dataset A"
+          },
+          {
+            entityId: makeDatasetId(
+              "https://id.skygest.io/dataset/ds_ABCDEFGHIJKL"
+            ),
+            label: "Dataset B"
+          }
+        ],
+        evidence: []
       },
       {
         _tag: "UnmatchedUrlResidual" as const,
@@ -188,21 +238,27 @@ describe("stage2Resolution", () => {
           },
           candidateSet: [
             {
-              entityId: "https://id.skygest.io/variable/var_01",
+              entityId: makeVariableId(
+                "https://id.skygest.io/variable/var_1234567890AB"
+              ),
               label: "Wind generation",
               grain: "Variable",
               matchedFacets: ["technologyOrFuel", "statisticType"],
               rank: 1
             },
             {
-              entityId: "https://id.skygest.io/variable/var_02",
+              entityId: makeVariableId(
+                "https://id.skygest.io/variable/var_ABCDEFGHIJKL"
+              ),
               label: "Wind capacity",
               grain: "Variable",
               matchedFacets: ["technologyOrFuel"],
               rank: 2
             },
             {
-              entityId: "https://id.skygest.io/dataset/ds_01",
+              entityId: makeDatasetId(
+                "https://id.skygest.io/dataset/ds_1234567890AB"
+              ),
               label: "EIA wind tables",
               grain: "Dataset",
               matchedFacets: ["technologyOrFuel"],
@@ -210,8 +266,8 @@ describe("stage2Resolution", () => {
             }
           ],
           matchedSurfaceForms: [
-            { surfaceForm: "wind" },
-            { surfaceForm: "annual" }
+            makeSurfaceForm("wind", "wind"),
+            makeSurfaceForm("annual", "annual")
           ],
           unmatchedSurfaceForms: ["generation"],
           reason: "two variable candidates tied on matched facets"
@@ -230,7 +286,9 @@ describe("stage2Resolution", () => {
         matches: [
           {
             _tag: "VariableMatch",
-            variableId: "https://id.skygest.io/variable/var_1234567890AB" as any,
+            variableId: makeVariableId(
+              "https://id.skygest.io/variable/var_1234567890AB"
+            ),
             label: "Installed wind generation",
             bestRank: 1,
             evidence: [
@@ -244,7 +302,7 @@ describe("stage2Resolution", () => {
                   statisticType: "flow",
                   unitFamily: "energy"
                 },
-                matchedSurfaceForms: [{ surfaceForm: "wind" }]
+                matchedSurfaceForms: [makeSurfaceForm("wind", "wind")]
               }
             ]
           }
@@ -253,7 +311,9 @@ describe("stage2Resolution", () => {
           {
             matchKey: {
               grain: "Dataset",
-              entityId: "https://id.skygest.io/dataset/ds_1234567890AB"
+              entityId: makeDatasetId(
+                "https://id.skygest.io/dataset/ds_1234567890AB"
+              )
             },
             evidence: [
               {
@@ -284,14 +344,16 @@ describe("stage2Resolution", () => {
             },
             candidateSet: [
               {
-                entityId: "https://id.skygest.io/variable/var_1234567890AB",
+                entityId: makeVariableId(
+                  "https://id.skygest.io/variable/var_1234567890AB"
+                ),
                 label: "Installed wind generation",
                 grain: "Variable",
                 matchedFacets: ["technologyOrFuel", "statisticType"],
                 rank: 1
               }
             ],
-            matchedSurfaceForms: [{ surfaceForm: "wind" }],
+            matchedSurfaceForms: [makeSurfaceForm("wind", "wind")],
             unmatchedSurfaceForms: ["generation"],
             reason: "multiple candidates remain after decomposition"
           }

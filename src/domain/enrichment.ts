@@ -33,10 +33,10 @@ import {
 } from "./sourceMatching";
 import {
   ResolverVersion,
-  ResolveStage3Queued,
-  Stage2Output
+  ResolveStage3Queued
 } from "./resolutionShared";
 import { Stage1Result } from "./stage1Resolution";
+import { Stage2Result } from "./stage2Resolution";
 
 const DeferredStage1Result = Schema.suspend(() => Stage1Result);
 
@@ -286,7 +286,7 @@ export type DataRefResolutionStage3 = Schema.Schema.Type<
 export const DataRefResolutionEnrichment = Schema.Struct({
   kind: Schema.Literal("data-ref-resolution"),
   stage1: DeferredStage1Result,
-  stage2: Schema.optionalKey(Stage2Output),
+  stage2: Schema.optionalKey(Stage2Result),
   stage3: Schema.optionalKey(DataRefResolutionStage3),
   resolverVersion: ResolverVersion,
   processedAt: Schema.Number

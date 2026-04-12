@@ -4,23 +4,12 @@ import {
   FixedDims,
   StatisticType,
   UnitFamily,
-  type Variable
 } from "./data-layer/variable";
 import { PostUri } from "./types";
+import { ResolutionEntityId } from "./resolutionEntityId";
+import { SurfaceFormEntryAny } from "./surfaceForm";
 import { Stage1Residual } from "./stage1Residual";
 import { Stage1MatchGrain, Stage1Rank } from "./stage1Shared";
-
-// TODO(2d-3.2): replace this JSON-safe placeholder with the Phase 3 SurfaceFormEntry union.
-export const SurfaceFormEntryAny = Schema.Struct({
-  surfaceForm: Schema.String,
-  normalizedSurfaceForm: Schema.optionalKey(Schema.String),
-  canonical: Schema.optionalKey(Schema.String),
-  provenance: Schema.optionalKey(Schema.String),
-  notes: Schema.optionalKey(Schema.String),
-  addedAt: Schema.optionalKey(Schema.String),
-  source: Schema.optionalKey(Schema.String)
-});
-export type SurfaceFormEntryAny = Schema.Schema.Type<typeof SurfaceFormEntryAny>;
 
 export const PartialVariableShape = Schema.Struct({
   label: Schema.optionalKey(Schema.String),
@@ -42,7 +31,7 @@ export type PartialVariableShape = Schema.Schema.Type<
 >;
 
 export const CandidateEntry = Schema.Struct({
-  entityId: Schema.String,
+  entityId: ResolutionEntityId,
   label: Schema.String,
   grain: Stage1MatchGrain,
   matchedFacets: Schema.Array(Schema.String),
@@ -51,6 +40,7 @@ export const CandidateEntry = Schema.Struct({
 export type CandidateEntry = Schema.Schema.Type<typeof CandidateEntry>;
 
 export const Stage2Lane = Schema.Literals([
+  "pending",
   "facet-decomposition",
   "fuzzy-dataset-title",
   "fuzzy-agent-label",
@@ -70,18 +60,3 @@ export const Stage3Input = Schema.TaggedStruct("Stage3Input", {
   reason: Schema.String
 });
 export type Stage3Input = Schema.Schema.Type<typeof Stage3Input>;
-
-export type PartialVariableAsVariableSubset = Partial<
-  Pick<
-    Variable,
-    | "label"
-    | "definition"
-    | "measuredProperty"
-    | "domainObject"
-    | "technologyOrFuel"
-    | "statisticType"
-    | "aggregation"
-    | "basis"
-    | "unitFamily"
-  >
->;
