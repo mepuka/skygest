@@ -15,7 +15,9 @@ import {
   type ResolverWorkerEnvBindings
 } from "../src/platform/Env";
 import type { Stage1Input, Stage1Result } from "../src/domain/stage1Resolution";
+import type { Stage2Result, Stage3Input } from "../src/domain/stage2Resolution";
 import { Stage1Resolver } from "../src/resolution/Stage1Resolver";
+import { Stage2Resolver } from "../src/resolution/Stage2Resolver";
 import { ResolverService } from "../src/resolver/ResolverService";
 
 const asPostUri = (value: string) => value as PostUri;
@@ -79,6 +81,33 @@ const makeStage1Result = (
   residuals
 });
 
+const makeStage2Result = (
+  overrides: Partial<Stage2Result> = {}
+): Stage2Result => ({
+  matches: [],
+  corroborations: [],
+  escalations: [],
+  ...overrides
+});
+
+const makeStage3Input = (
+  postUri = "at://did:plc:test/app.bsky.feed.post/post-1"
+): Stage3Input => ({
+  _tag: "Stage3Input",
+  postUri: asPostUri(postUri),
+  originalResidual: {
+    _tag: "UnmatchedTextResidual",
+    source: "post-text",
+    text: "ERCOT",
+    normalizedText: "ercot"
+  },
+  stage2Lane: "fuzzy-agent-label",
+  candidateSet: [],
+  matchedSurfaceForms: [],
+  unmatchedSurfaceForms: ["ercot"],
+  reason: "best fuzzy score 0.20 below 0.60 threshold"
+});
+
 const makeEnv = (
   overrides: Partial<EnvBindings> = {}
 ): EnvBindings => ({
@@ -91,6 +120,10 @@ const makeServiceLayer = (options?: {
   readonly env?: Partial<EnvBindings>;
   readonly plan?: EnrichmentExecutionPlan;
   readonly resolveStage1?: (input: Stage1Input) => Effect.Effect<Stage1Result>;
+  readonly resolveStage2?: (
+    postContext: Stage1Input["postContext"],
+    stage1: Stage1Result
+  ) => Effect.Effect<Stage2Result>;
 }) =>
   ResolverService.layer.pipe(
     Layer.provideMerge(
@@ -103,6 +136,13 @@ const makeServiceLayer = (options?: {
           resolve: (input) =>
             options?.resolveStage1?.(input as Stage1Input) ??
             Effect.succeed(makeStage1Result())
+        }),
+        Layer.succeed(Stage2Resolver, {
+          resolve: (postContext, stage1) =>
+            options?.resolveStage2?.(
+              postContext as Stage1Input["postContext"],
+              stage1 as Stage1Result
+            ) ?? Effect.succeed(makeStage2Result())
         })
       )
     )
@@ -193,26 +233,11 @@ describe("ResolverService", () => {
         });
 
         expect(result.stage3?.status).toBe("queued");
+        expect(result.stage2?.escalations).toHaveLength(1);
         expect(createdJobs).toHaveLength(1);
         expect(createdJobs[0]?.params).toEqual({
           postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
-          stage3Inputs: [
-            {
-              _tag: "Stage3Input",
-              postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
-              originalResidual: {
-                _tag: "UnmatchedTextResidual",
-                source: "post-text",
-                text: "ERCOT",
-                normalizedText: "ercot"
-              },
-              stage2Lane: "pending",
-              candidateSet: [],
-              matchedSurfaceForms: [],
-              unmatchedSurfaceForms: [],
-              reason: "Stage 2 kernel not yet executed"
-            }
-          ]
+          stage3Inputs: [makeStage3Input()]
         });
       }).pipe(
         Effect.provide(
@@ -231,6 +256,13 @@ describe("ResolverService", () => {
                   }
                 ])
               )
+            ,
+            resolveStage2: () =>
+              Effect.succeed(
+                makeStage2Result({
+                  escalations: [makeStage3Input()]
+                })
+              )
           })
         )
       );
@@ -247,6 +279,7 @@ describe("ResolverService", () => {
       });
 
       expect(result.stage1.residuals).toHaveLength(1);
+      expect(result.stage2?.escalations).toHaveLength(1);
       expect(result.stage3).toBeUndefined();
     }).pipe(
       Effect.provide(
@@ -270,6 +303,12 @@ describe("ResolverService", () => {
                   normalizedText: "ercot"
                 }
               ])
+            ),
+          resolveStage2: () =>
+            Effect.succeed(
+              makeStage2Result({
+                escalations: [makeStage3Input()]
+              })
             )
         })
       )

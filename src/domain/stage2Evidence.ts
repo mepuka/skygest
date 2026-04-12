@@ -49,6 +49,8 @@ export type FuzzyAgentLabelEvidence = Schema.Schema.Type<
   typeof FuzzyAgentLabelEvidence
 >;
 
+// Reserved for a future free-text title lane once Stage 2 broadens beyond the
+// current dataset-title and agent-label handlers.
 export const FuzzyTitleEvidence = Schema.TaggedStruct("FuzzyTitleEvidence", {
   signal: Schema.Literal("fuzzy-title"),
   rank: Stage1Rank,
