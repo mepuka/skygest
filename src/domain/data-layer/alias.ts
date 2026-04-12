@@ -3,7 +3,7 @@ import { DesignDecision, SkosMapping } from "./annotations";
 
 export const aliasSchemes = [
   "oeo", "ires-siec", "iea-shortname", "ipcc",
-  "entsoe-psr", "entsoe-eic",
+  "entsoe-psr", "entsoe-eic", "entsoe-document-type",
   "eia-route", "eia-series", "eia-bulk-id", "energy-charts-endpoint",
   "ember-route", "gridstatus-dataset-id", "odre-dataset-id",
   "eurostat-code",
@@ -16,6 +16,7 @@ export const AliasSchemeValues = {
   eiaBulkId: "eia-bulk-id",
   eiaRoute: "eia-route",
   energyChartsEndpoint: "energy-charts-endpoint",
+  entsoeDocumentType: "entsoe-document-type",
   gridstatusDatasetId: "gridstatus-dataset-id",
   odreDatasetId: "odre-dataset-id",
   url: "url"

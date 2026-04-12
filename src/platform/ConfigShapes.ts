@@ -157,6 +157,10 @@ export const GridStatusIngestKeys = {
   )
 } as const;
 
+export const EntsoeIngestKeys = {
+  ...ColdStartCommonKeys
+} as const;
+
 export const OdreIngestKeys = {
   ...ColdStartCommonKeys,
   baseUrl: Config.withDefault(
