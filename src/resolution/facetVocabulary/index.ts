@@ -1,5 +1,7 @@
 import { Effect, Layer, Result, Schema, ServiceMap } from "effect";
 import aggregationJson from "../../../references/vocabulary/aggregation.json";
+import domainObjectJson from "../../../references/vocabulary/domain-object.json";
+import measuredPropertyJson from "../../../references/vocabulary/measured-property.json";
 import statisticTypeJson from "../../../references/vocabulary/statistic-type.json";
 import technologyOrFuelJson from "../../../references/vocabulary/technology-or-fuel.json";
 import unitFamilyJson from "../../../references/vocabulary/unit-family.json";
@@ -19,6 +21,22 @@ import {
   parseAggregation,
   type AggregationLookup,
 } from "./aggregation";
+import {
+  buildDomainObjectLookup,
+  DomainObjectSurfaceForm,
+  DomainObjectVocabulary,
+  matchDomainObject,
+  parseDomainObject,
+  type DomainObjectLookup
+} from "./domainObject";
+import {
+  buildMeasuredPropertyLookup,
+  matchMeasuredProperty,
+  MeasuredPropertySurfaceForm,
+  MeasuredPropertyVocabulary,
+  parseMeasuredProperty,
+  type MeasuredPropertyLookup
+} from "./measuredProperty";
 import {
   buildStatisticTypeLookup,
   matchStatisticType,
@@ -48,7 +66,9 @@ const VOCABULARY_PATHS = {
   statisticType: "references/vocabulary/statistic-type.json",
   aggregation: "references/vocabulary/aggregation.json",
   unitFamily: "references/vocabulary/unit-family.json",
-  technologyOrFuel: "references/vocabulary/technology-or-fuel.json"
+  technologyOrFuel: "references/vocabulary/technology-or-fuel.json",
+  measuredProperty: "references/vocabulary/measured-property.json",
+  domainObject: "references/vocabulary/domain-object.json"
 } as const;
 
 export type FacetVocabularyJsonSources = {
@@ -56,13 +76,17 @@ export type FacetVocabularyJsonSources = {
   readonly aggregation: unknown;
   readonly unitFamily: unknown;
   readonly technologyOrFuel: unknown;
+  readonly measuredProperty: unknown;
+  readonly domainObject: unknown;
 };
 
 const DEFAULT_VOCABULARY_JSON_SOURCES: FacetVocabularyJsonSources = {
   statisticType: statisticTypeJson,
   aggregation: aggregationJson,
   unitFamily: unitFamilyJson,
-  technologyOrFuel: technologyOrFuelJson
+  technologyOrFuel: technologyOrFuelJson,
+  measuredProperty: measuredPropertyJson,
+  domainObject: domainObjectJson
 };
 
 const decodeVocabulary = <S extends Schema.Decoder<unknown>>(
@@ -109,6 +133,18 @@ export type FacetVocabularyShape = {
   readonly matchTechnologyOrFuel: (
     text: string
   ) => ReturnType<typeof matchTechnologyOrFuel>;
+  readonly parseMeasuredProperty: (
+    text: string
+  ) => ReturnType<typeof parseMeasuredProperty>;
+  readonly matchMeasuredProperty: (
+    text: string
+  ) => ReturnType<typeof matchMeasuredProperty>;
+  readonly parseDomainObject: (
+    text: string
+  ) => ReturnType<typeof parseDomainObject>;
+  readonly matchDomainObject: (
+    text: string
+  ) => ReturnType<typeof matchDomainObject>;
 };
 
 type FacetVocabularyLookups = {
@@ -116,6 +152,8 @@ type FacetVocabularyLookups = {
   readonly aggregation: AggregationLookup;
   readonly unitFamily: UnitFamilyLookup;
   readonly technologyOrFuel: TechnologyOrFuelLookup;
+  readonly measuredProperty: MeasuredPropertyLookup;
+  readonly domainObject: DomainObjectLookup;
 };
 
 export const makeFacetVocabulary = (
@@ -130,7 +168,15 @@ export const makeFacetVocabulary = (
   parseTechnologyOrFuel: (text) =>
     parseTechnologyOrFuel(lookups.technologyOrFuel, text),
   matchTechnologyOrFuel: (text) =>
-    matchTechnologyOrFuel(lookups.technologyOrFuel, text)
+    matchTechnologyOrFuel(lookups.technologyOrFuel, text),
+  parseMeasuredProperty: (text) =>
+    parseMeasuredProperty(lookups.measuredProperty, text),
+  matchMeasuredProperty: (text) =>
+    matchMeasuredProperty(lookups.measuredProperty, text),
+  parseDomainObject: (text) =>
+    parseDomainObject(lookups.domainObject, text),
+  matchDomainObject: (text) =>
+    matchDomainObject(lookups.domainObject, text)
 });
 
 export const loadFacetVocabularyLookups = (
@@ -164,6 +210,18 @@ export const loadFacetVocabularyLookups = (
       TechnologyOrFuelVocabulary,
       sources.technologyOrFuel
     );
+    const measuredPropertyEntries = yield* decodeVocabulary(
+      "measured-property",
+      VOCABULARY_PATHS.measuredProperty,
+      MeasuredPropertyVocabulary,
+      sources.measuredProperty
+    );
+    const domainObjectEntries = yield* decodeVocabulary(
+      "domain-object",
+      VOCABULARY_PATHS.domainObject,
+      DomainObjectVocabulary,
+      sources.domainObject
+    );
 
     return {
       statisticType: yield* buildLookup(
@@ -177,6 +235,12 @@ export const loadFacetVocabularyLookups = (
       ),
       technologyOrFuel: yield* buildLookup(
         buildTechnologyOrFuelLookup(technologyOrFuelEntries)
+      ),
+      measuredProperty: yield* buildLookup(
+        buildMeasuredPropertyLookup(measuredPropertyEntries)
+      ),
+      domainObject: yield* buildLookup(
+        buildDomainObjectLookup(domainObjectEntries)
       )
     };
   });
@@ -205,6 +269,8 @@ export const makeFacetVocabularyLayer = (
 
 export type {
   AggregationLookup,
+  DomainObjectLookup,
+  MeasuredPropertyLookup,
   StatisticTypeLookup,
   TechnologyOrFuelLookup,
   UnitFamilyLookup
@@ -213,6 +279,10 @@ export type {
 export {
   parseAggregation,
   matchAggregation,
+  parseDomainObject,
+  matchDomainObject,
+  parseMeasuredProperty,
+  matchMeasuredProperty,
   parseStatisticType,
   matchStatisticType,
   parseTechnologyOrFuel,
@@ -221,6 +291,10 @@ export {
   matchUnitFamily,
   AggregationSurfaceForm,
   AggregationVocabulary,
+  DomainObjectSurfaceForm,
+  DomainObjectVocabulary,
+  MeasuredPropertySurfaceForm,
+  MeasuredPropertyVocabulary,
   StatisticTypeSurfaceForm,
   StatisticTypeVocabulary,
   TechnologyOrFuelSurfaceForm,
