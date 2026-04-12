@@ -14,6 +14,8 @@ import type {
 } from "../domain/stage1Resolution";
 import type {
   CandidateEntry,
+  ContributingResidualSummary,
+  GroupedFacetDecompositionEvidence,
   PartialVariableShape,
   Stage2Corroboration,
   Stage2Result,
@@ -42,6 +44,32 @@ type FacetField =
   | "unitFamily"
   | "technologyOrFuel";
 
+type FacetDecompositionDraft = {
+  statisticType?: PartialVariableShape["statisticType"];
+  aggregation?: PartialVariableShape["aggregation"];
+  unitFamily?: PartialVariableShape["unitFamily"];
+  technologyOrFuel?: PartialVariableShape["technologyOrFuel"];
+};
+
+type FacetMatchEntries = Partial<Record<FacetField, SurfaceFormEntryAny>>;
+
+type FacetDecompositionResult = {
+  readonly partial: PartialVariableShape;
+  readonly matchedEntriesByFacet: FacetMatchEntries;
+  readonly matchedSurfaceForms: ReadonlyArray<SurfaceFormEntryAny>;
+  readonly unmatchedSurfaceForms: ReadonlyArray<string>;
+};
+
+type GroupedFacetMergeResult = {
+  readonly partial: PartialVariableShape;
+  readonly matchedEntriesByFacet: FacetMatchEntries;
+  readonly matchedSurfaceForms: ReadonlyArray<SurfaceFormEntryAny>;
+  readonly unmatchedSurfaceForms: ReadonlyArray<string>;
+  readonly facetProvenance: GroupedFacetDecompositionEvidence["facetProvenance"];
+  readonly contributingResiduals: ReadonlyArray<ContributingResidualSummary>;
+  readonly primaryResidual: DeferredToStage2Residual;
+};
+
 type ScoredVariableCandidate = {
   readonly variable: Variable;
   readonly matchedFacets: ReadonlyArray<FacetField>;
@@ -66,6 +94,13 @@ const tokenizeForUnmatched = (value: string) =>
     .filter((token) => token.length > 0);
 
 const uniqueStrings = (values: ReadonlyArray<string>) => [...new Set(values)];
+
+const facetFields = [
+  "statisticType",
+  "aggregation",
+  "unitFamily",
+  "technologyOrFuel"
+] as const satisfies ReadonlyArray<FacetField>;
 
 const matchKey = (grain: Stage1MatchGrain, entityId: string) =>
   `${grain}\u0000${entityId}`;
@@ -234,6 +269,161 @@ const deriveUnmatchedSurfaceForms = (
   );
 };
 
+const dedupeSurfaceForms = (entries: ReadonlyArray<SurfaceFormEntryAny>) => {
+  const byNormalizedSurfaceForm = new Map<string, SurfaceFormEntryAny>();
+
+  for (const entry of entries) {
+    if (!byNormalizedSurfaceForm.has(entry.normalizedSurfaceForm)) {
+      byNormalizedSurfaceForm.set(entry.normalizedSurfaceForm, entry);
+    }
+  }
+
+  return [...byNormalizedSurfaceForm.values()];
+};
+
+const decomposeResidualFacets = (
+  text: string,
+  vocabulary: FacetVocabularyShape
+): FacetDecompositionResult => {
+  const partialDraft: FacetDecompositionDraft = {};
+  const matchedEntriesByFacet: FacetMatchEntries = {};
+
+  const statisticType = vocabulary.matchStatisticType(text);
+  const aggregation = vocabulary.matchAggregation(text);
+  const unitFamily = vocabulary.matchUnitFamily(text);
+  const technologyOrFuel = vocabulary.matchTechnologyOrFuel(text);
+
+  if (Option.isSome(statisticType)) {
+    partialDraft.statisticType = statisticType.value.canonical;
+    matchedEntriesByFacet.statisticType = statisticType.value;
+  }
+
+  if (Option.isSome(aggregation)) {
+    partialDraft.aggregation = aggregation.value.canonical;
+    matchedEntriesByFacet.aggregation = aggregation.value;
+  }
+
+  if (Option.isSome(unitFamily)) {
+    partialDraft.unitFamily = unitFamily.value.canonical;
+    matchedEntriesByFacet.unitFamily = unitFamily.value;
+  }
+
+  if (Option.isSome(technologyOrFuel)) {
+    partialDraft.technologyOrFuel = technologyOrFuel.value.canonical;
+    matchedEntriesByFacet.technologyOrFuel = technologyOrFuel.value;
+  }
+
+  const matchedSurfaceForms = dedupeSurfaceForms(
+    facetFields.flatMap((facet) => {
+      const entry = matchedEntriesByFacet[facet];
+      return entry === undefined ? [] : [entry];
+    })
+  );
+
+  return {
+    partial: partialDraft as PartialVariableShape,
+    matchedEntriesByFacet,
+    matchedSurfaceForms,
+    unmatchedSurfaceForms: deriveUnmatchedSurfaceForms(text, matchedSurfaceForms)
+  };
+};
+
+const groupedSourcePriority = (source: DeferredToStage2Residual["source"]) => {
+  switch (source) {
+    case "chart-title":
+      return 0;
+    case "axis-label":
+      return 1;
+    default:
+      return 2;
+  }
+};
+
+const mergeChartGroupFacets = (
+  residuals: ReadonlyArray<DeferredToStage2Residual>,
+  vocabulary: FacetVocabularyShape
+): GroupedFacetMergeResult => {
+  const sortedResiduals = [...residuals].sort(
+    (left, right) => groupedSourcePriority(left.source) - groupedSourcePriority(right.source)
+  );
+  const partialDraft: FacetDecompositionDraft = {};
+  const matchedEntriesByFacet: FacetMatchEntries = {};
+  const matchedSurfaceForms: Array<SurfaceFormEntryAny> = [];
+  const facetProvenance: Array<
+    GroupedFacetDecompositionEvidence["facetProvenance"][number]
+  > = [];
+
+  for (const residual of sortedResiduals) {
+    const decomposed = decomposeResidualFacets(residual.text, vocabulary);
+    matchedSurfaceForms.push(...decomposed.matchedSurfaceForms);
+
+    for (const facet of facetFields) {
+      const entry = decomposed.matchedEntriesByFacet[facet];
+      if (entry === undefined) {
+        continue;
+      }
+
+      const existing = matchedEntriesByFacet[facet];
+      if (existing === undefined) {
+        matchedEntriesByFacet[facet] = entry;
+        switch (facet) {
+          case "statisticType":
+            partialDraft.statisticType = decomposed.partial.statisticType;
+            break;
+          case "aggregation":
+            partialDraft.aggregation = decomposed.partial.aggregation;
+            break;
+          case "unitFamily":
+            partialDraft.unitFamily = decomposed.partial.unitFamily;
+            break;
+          case "technologyOrFuel":
+            partialDraft.technologyOrFuel = decomposed.partial.technologyOrFuel;
+            break;
+        }
+
+        facetProvenance.push({
+          facet,
+          source: residual.source,
+          text: residual.text,
+          surfaceForm: entry.surfaceForm,
+          status: "accepted"
+        });
+        continue;
+      }
+
+      facetProvenance.push({
+        facet,
+        source: residual.source,
+        text: residual.text,
+        surfaceForm: entry.surfaceForm,
+        status:
+          existing.canonical === entry.canonical ? "corroborating" : "conflicting"
+      });
+    }
+  }
+
+  const primaryResidual =
+    sortedResiduals.find((residual) => residual.source === "chart-title") ??
+    sortedResiduals[0]!;
+  const dedupedMatchedSurfaceForms = dedupeSurfaceForms(matchedSurfaceForms);
+
+  return {
+    partial: partialDraft as PartialVariableShape,
+    matchedEntriesByFacet,
+    matchedSurfaceForms: dedupedMatchedSurfaceForms,
+    unmatchedSurfaceForms: deriveUnmatchedSurfaceForms(
+      sortedResiduals.map((residual) => residual.text).join(" "),
+      dedupedMatchedSurfaceForms
+    ),
+    facetProvenance,
+    contributingResiduals: sortedResiduals.map((residual) => ({
+      source: residual.source,
+      text: residual.text
+    })),
+    primaryResidual
+  };
+};
+
 const scoreVariableCandidate = (
   partial: PartialVariableShape,
   variable: Variable
@@ -353,23 +543,36 @@ const topFuzzyCandidates = <T extends Agent | Dataset>(
 
 const buildFacetDecompositionEscalation = (
   postContext: Stage1PostContext,
-  originalResidual: DeferredToStage2Residual,
-  partial: PartialVariableShape | undefined,
-  candidateSet: ReadonlyArray<CandidateEntry>,
-  matchedSurfaceForms: ReadonlyArray<SurfaceFormEntryAny>,
-  unmatchedSurfaceForms: ReadonlyArray<string>,
-  reason: string
+  options: {
+    readonly originalResidual: DeferredToStage2Residual;
+    readonly stage2Lane: "facet-decomposition" | "grouped-facet-decomposition";
+    readonly partial: PartialVariableShape | undefined;
+    readonly candidateSet: ReadonlyArray<CandidateEntry>;
+    readonly matchedSurfaceForms: ReadonlyArray<SurfaceFormEntryAny>;
+    readonly unmatchedSurfaceForms: ReadonlyArray<string>;
+    readonly reason: string;
+    readonly contributingResiduals?: ReadonlyArray<ContributingResidualSummary>;
+    readonly contributingResidualCount?: number;
+  }
 ): Stage3Input => {
   return {
     _tag: "Stage3Input",
     postUri: postContext.postUri,
-    originalResidual,
-    stage2Lane: "facet-decomposition",
-    candidateSet: [...candidateSet],
-    matchedSurfaceForms: [...matchedSurfaceForms],
-    unmatchedSurfaceForms: [...unmatchedSurfaceForms],
-    reason,
-    ...(partial === undefined ? {} : { partialDecomposition: partial })
+    originalResidual: options.originalResidual,
+    stage2Lane: options.stage2Lane,
+    candidateSet: [...options.candidateSet],
+    matchedSurfaceForms: [...options.matchedSurfaceForms],
+    unmatchedSurfaceForms: [...options.unmatchedSurfaceForms],
+    reason: options.reason,
+    ...(options.partial === undefined
+      ? {}
+      : { partialDecomposition: options.partial }),
+    ...(options.contributingResiduals === undefined
+      ? {}
+      : { contributingResiduals: [...options.contributingResiduals] }),
+    ...(options.contributingResidualCount === undefined
+      ? {}
+      : { contributingResidualCount: options.contributingResidualCount })
   };
 };
 
@@ -380,81 +583,23 @@ const handleFacetDecomposition = (
   lookup: DataLayerRegistryLookup,
   vocabulary: FacetVocabularyShape
 ) => {
-  const partialDraft: {
-    statisticType?: PartialVariableShape["statisticType"];
-    aggregation?: PartialVariableShape["aggregation"];
-    unitFamily?: PartialVariableShape["unitFamily"];
-    technologyOrFuel?: PartialVariableShape["technologyOrFuel"];
-  } = {};
-  const matchedEntriesByFacet: Partial<Record<FacetField, SurfaceFormEntryAny>> =
-    {};
-
-  const statisticType = vocabulary.matchStatisticType(residual.text);
-  const aggregation = vocabulary.matchAggregation(residual.text);
-  const unitFamily = vocabulary.matchUnitFamily(residual.text);
-  const technologyOrFuel = vocabulary.matchTechnologyOrFuel(residual.text);
-
-  if (Option.isSome(statisticType)) {
-    partialDraft.statisticType = statisticType.value.canonical;
-    matchedEntriesByFacet.statisticType = statisticType.value;
-  }
-
-  if (Option.isSome(aggregation)) {
-    partialDraft.aggregation = aggregation.value.canonical;
-    matchedEntriesByFacet.aggregation = aggregation.value;
-  }
-
-  if (Option.isSome(unitFamily)) {
-    partialDraft.unitFamily = unitFamily.value.canonical;
-    matchedEntriesByFacet.unitFamily = unitFamily.value;
-  }
-
-  if (Option.isSome(technologyOrFuel)) {
-    partialDraft.technologyOrFuel = technologyOrFuel.value.canonical;
-    matchedEntriesByFacet.technologyOrFuel = technologyOrFuel.value;
-  }
-
-  const partial = partialDraft as PartialVariableShape;
-
-  const matchedSurfaceForms = uniqueStrings(
-    [
-      matchedEntriesByFacet.statisticType,
-      matchedEntriesByFacet.aggregation,
-      matchedEntriesByFacet.unitFamily,
-      matchedEntriesByFacet.technologyOrFuel
-    ]
-      .filter((entry): entry is SurfaceFormEntryAny => entry !== undefined)
-      .map((entry) => entry.normalizedSurfaceForm)
-  ).map(
-    (normalizedSurfaceForm) =>
-      [
-        matchedEntriesByFacet.statisticType,
-        matchedEntriesByFacet.aggregation,
-        matchedEntriesByFacet.unitFamily,
-        matchedEntriesByFacet.technologyOrFuel
-      ].find(
-        (entry): entry is SurfaceFormEntryAny =>
-          entry !== undefined &&
-          entry.normalizedSurfaceForm === normalizedSurfaceForm
-      )!
-  );
-
-  const unmatchedSurfaceForms = deriveUnmatchedSurfaceForms(
-    residual.text,
-    matchedSurfaceForms
-  );
+  const { partial, matchedEntriesByFacet, matchedSurfaceForms, unmatchedSurfaceForms } =
+    decomposeResidualFacets(residual.text, vocabulary);
 
   if (matchedSurfaceForms.length === 0) {
     appendEscalation(
       state,
       buildFacetDecompositionEscalation(
         postContext,
-        residual,
-        undefined,
-        [],
-        [],
-        unmatchedSurfaceForms,
-        "facet vocabulary recognized no fields in text"
+        {
+          originalResidual: residual,
+          stage2Lane: "facet-decomposition",
+          partial: undefined,
+          candidateSet: [],
+          matchedSurfaceForms: [],
+          unmatchedSurfaceForms,
+          reason: "facet vocabulary recognized no fields in text"
+        }
       )
     );
     return;
@@ -476,12 +621,15 @@ const handleFacetDecomposition = (
       state,
       buildFacetDecompositionEscalation(
         postContext,
-        residual,
-        hasPartialDecomposition(partial) ? partial : undefined,
-        [],
-        matchedSurfaceForms,
-        unmatchedSurfaceForms,
-        "no variable candidates matched the decoded facets"
+        {
+          originalResidual: residual,
+          stage2Lane: "facet-decomposition",
+          partial: hasPartialDecomposition(partial) ? partial : undefined,
+          candidateSet: [],
+          matchedSurfaceForms,
+          unmatchedSurfaceForms,
+          reason: "no variable candidates matched the decoded facets"
+        }
       )
     );
     return;
@@ -495,12 +643,17 @@ const handleFacetDecomposition = (
       state,
       buildFacetDecompositionEscalation(
         postContext,
-        residual,
-        partial,
-        topCandidates.map((candidate) => toVariableCandidateEntry(candidate, 1)),
-        matchedSurfaceForms,
-        unmatchedSurfaceForms,
-        `${topCandidates.length} candidates tied on ${topScore} matched facets`
+        {
+          originalResidual: residual,
+          stage2Lane: "facet-decomposition",
+          partial,
+          candidateSet: topCandidates.map((candidate) =>
+            toVariableCandidateEntry(candidate, 1)
+          ),
+          matchedSurfaceForms,
+          unmatchedSurfaceForms,
+          reason: `${topCandidates.length} candidates tied on ${topScore} matched facets`
+        }
       )
     );
     return;
@@ -516,6 +669,105 @@ const handleFacetDecomposition = (
     matchedSurfaceForms: winner.matchedFacets
       .map((facet) => matchedEntriesByFacet[facet])
       .filter((entry): entry is SurfaceFormEntryAny => entry !== undefined)
+  };
+
+  appendResolvedMatch(state, winner.variable, evidence);
+};
+
+const handleChartGroupDecomposition = (
+  state: Stage2State,
+  postContext: Stage1PostContext,
+  assetKey: string,
+  residuals: ReadonlyArray<DeferredToStage2Residual>,
+  lookup: DataLayerRegistryLookup,
+  vocabulary: FacetVocabularyShape
+) => {
+  const merged = mergeChartGroupFacets(residuals, vocabulary);
+
+  if (merged.matchedSurfaceForms.length === 0) {
+    appendEscalation(
+      state,
+      buildFacetDecompositionEscalation(postContext, {
+        originalResidual: merged.primaryResidual,
+        stage2Lane: "grouped-facet-decomposition",
+        partial: undefined,
+        candidateSet: [],
+        matchedSurfaceForms: [],
+        unmatchedSurfaceForms: merged.unmatchedSurfaceForms,
+        contributingResiduals: merged.contributingResiduals,
+        contributingResidualCount: residuals.length,
+        reason: "facet vocabulary recognized no fields in text"
+      })
+    );
+    return;
+  }
+
+  const candidates = [...lookup.entities]
+    .filter((entity): entity is Variable => entity._tag === "Variable")
+    .map((variable) => scoreVariableCandidate(merged.partial, variable))
+    .filter((candidate) => candidate.score > 0)
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        left.variable.label.localeCompare(right.variable.label) ||
+        left.variable.id.localeCompare(right.variable.id)
+    );
+
+  if (candidates.length === 0) {
+    appendEscalation(
+      state,
+      buildFacetDecompositionEscalation(postContext, {
+        originalResidual: merged.primaryResidual,
+        stage2Lane: "grouped-facet-decomposition",
+        partial: hasPartialDecomposition(merged.partial) ? merged.partial : undefined,
+        candidateSet: [],
+        matchedSurfaceForms: merged.matchedSurfaceForms,
+        unmatchedSurfaceForms: merged.unmatchedSurfaceForms,
+        contributingResiduals: merged.contributingResiduals,
+        contributingResidualCount: residuals.length,
+        reason: "no variable candidates matched the decoded facets"
+      })
+    );
+    return;
+  }
+
+  const topScore = candidates[0]!.score;
+  const topCandidates = candidates.filter((candidate) => candidate.score === topScore);
+
+  if (topCandidates.length > 1) {
+    appendEscalation(
+      state,
+      buildFacetDecompositionEscalation(postContext, {
+        originalResidual: merged.primaryResidual,
+        stage2Lane: "grouped-facet-decomposition",
+        partial: merged.partial,
+        candidateSet: topCandidates.map((candidate) =>
+          toVariableCandidateEntry(candidate, 1)
+        ),
+        matchedSurfaceForms: merged.matchedSurfaceForms,
+        unmatchedSurfaceForms: merged.unmatchedSurfaceForms,
+        contributingResiduals: merged.contributingResiduals,
+        contributingResidualCount: residuals.length,
+        reason: `${topCandidates.length} candidates tied on ${topScore} matched facets`
+      })
+    );
+    return;
+  }
+
+  const winner = topCandidates[0]!;
+  const evidence: GroupedFacetDecompositionEvidence = {
+    _tag: "GroupedFacetDecompositionEvidence",
+    signal: "grouped-facet-decomposition",
+    rank: 1,
+    assetKey,
+    residualCount: residuals.length,
+    matchedFacets: [...winner.matchedFacets],
+    partialShape: merged.partial,
+    matchedSurfaceForms: winner.matchedFacets
+      .map((facet) => merged.matchedEntriesByFacet[facet])
+      .filter((entry): entry is SurfaceFormEntryAny => entry !== undefined),
+    facetProvenance: [...merged.facetProvenance],
+    contributingResiduals: [...merged.contributingResiduals]
   };
 
   appendResolvedMatch(state, winner.variable, evidence);
@@ -689,11 +941,47 @@ export const runStage2 = (
   vocabulary: FacetVocabularyShape
 ): Stage2Result => {
   const state = emptyState(stage1);
+  const groupedDeferredResiduals = new Map<string, Array<DeferredToStage2Residual>>();
+  const ungroupedDeferredResiduals: Array<DeferredToStage2Residual> = [];
+  const otherResiduals: Array<
+    Exclude<
+      Stage1Residual,
+      DeferredToStage2Residual
+    >
+  > = [];
 
   for (const residual of stage1.residuals) {
+    if (residual._tag === "DeferredToStage2Residual") {
+      if (residual.assetKey !== undefined) {
+        const group = groupedDeferredResiduals.get(residual.assetKey) ?? [];
+        group.push(residual);
+        groupedDeferredResiduals.set(residual.assetKey, group);
+      } else {
+        ungroupedDeferredResiduals.push(residual);
+      }
+      continue;
+    }
+
+    otherResiduals.push(residual);
+  }
+
+  for (const [assetKey, residuals] of groupedDeferredResiduals) {
+    handleChartGroupDecomposition(
+      state,
+      postContext,
+      assetKey,
+      residuals,
+      lookup,
+      vocabulary
+    );
+  }
+
+  for (const residual of ungroupedDeferredResiduals) {
+    handleFacetDecomposition(state, postContext, residual, lookup, vocabulary);
+  }
+
+  for (const residual of otherResiduals) {
     Match.valueTags(residual, {
-      DeferredToStage2Residual: (value) =>
-        handleFacetDecomposition(state, postContext, value, lookup, vocabulary),
       UnmatchedDatasetTitleResidual: (value) =>
         handleDatasetTitleResidual(state, postContext, value, lookup),
       UnmatchedTextResidual: (value) =>

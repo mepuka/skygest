@@ -59,6 +59,48 @@ describe("stage2Resolution", () => {
         matchedSurfaceForms: [makeSurfaceForm("generation", "flow")]
       },
       {
+        _tag: "GroupedFacetDecompositionEvidence" as const,
+        signal: "grouped-facet-decomposition" as const,
+        rank: 1 as const,
+        assetKey: "chart-1",
+        residualCount: 2,
+        matchedFacets: ["technologyOrFuel", "unitFamily"],
+        partialShape: {
+          technologyOrFuel: "offshore wind" as const,
+          unitFamily: "power" as const
+        },
+        matchedSurfaceForms: [
+          makeSurfaceForm("offshore wind", "offshore wind"),
+          makeSurfaceForm("mw", "power")
+        ],
+        facetProvenance: [
+          {
+            facet: "technologyOrFuel",
+            source: "chart-title" as const,
+            text: "Offshore wind",
+            surfaceForm: "offshore wind",
+            status: "accepted" as const
+          },
+          {
+            facet: "unitFamily",
+            source: "axis-label" as const,
+            text: "MW",
+            surfaceForm: "mw",
+            status: "accepted" as const
+          }
+        ],
+        contributingResiduals: [
+          {
+            source: "chart-title" as const,
+            text: "Offshore wind"
+          },
+          {
+            source: "axis-label" as const,
+            text: "MW"
+          }
+        ]
+      },
+      {
         _tag: "FuzzyDatasetTitleEvidence" as const,
         signal: "fuzzy-dataset-title" as const,
         rank: 2 as const,
@@ -90,6 +132,7 @@ describe("stage2Resolution", () => {
 
       const matched = Match.valueTags(roundTripped, {
         FacetDecompositionEvidence: () => "facet-decomposition",
+        GroupedFacetDecompositionEvidence: () => "grouped-facet-decomposition",
         FuzzyDatasetTitleEvidence: () => "fuzzy-dataset-title",
         FuzzyAgentLabelEvidence: () => "fuzzy-agent-label",
         FuzzyTitleEvidence: () => "fuzzy-title"
@@ -278,6 +321,58 @@ describe("stage2Resolution", () => {
       expect(roundTripped.matchedSurfaceForms).toHaveLength(2);
       expect(roundTripped.unmatchedSurfaceForms).toEqual(["generation"]);
     }
+  });
+
+  it("round-trips grouped Stage3Input context", () => {
+    const originalResidual = {
+      _tag: "DeferredToStage2Residual" as const,
+      source: "chart-title" as const,
+      text: "Offshore wind",
+      reason: "needs structured decomposition",
+      assetKey: "chart-1"
+    };
+
+    const roundTripped = decodeStage3Input(
+      encodeStage3Input({
+        _tag: "Stage3Input",
+        postUri: asPostUri,
+        originalResidual,
+        stage2Lane: "grouped-facet-decomposition",
+        partialDecomposition: {
+          technologyOrFuel: "offshore wind",
+          unitFamily: "power"
+        },
+        candidateSet: [
+          {
+            entityId: makeVariableId(
+              "https://id.skygest.io/variable/var_1234567890AB"
+            ),
+            label: "Installed offshore wind capacity",
+            grain: "Variable",
+            matchedFacets: ["technologyOrFuel", "unitFamily"],
+            rank: 1
+          }
+        ],
+        matchedSurfaceForms: [
+          makeSurfaceForm("offshore wind", "offshore wind"),
+          makeSurfaceForm("mw", "power")
+        ],
+        unmatchedSurfaceForms: [],
+        contributingResiduals: [
+          { source: "chart-title", text: "Offshore wind" },
+          { source: "axis-label", text: "MW" }
+        ],
+        contributingResidualCount: 2,
+        reason: "2 candidates tied on 2 matched facets"
+      })
+    );
+
+    expect(roundTripped.stage2Lane).toBe("grouped-facet-decomposition");
+    expect(roundTripped.contributingResidualCount).toBe(2);
+    expect(roundTripped.contributingResiduals).toEqual([
+      { source: "chart-title", text: "Offshore wind" },
+      { source: "axis-label", text: "MW" }
+    ]);
   });
 
   it("round-trips Stage2Result with new matches, corroborations, and escalations", () => {

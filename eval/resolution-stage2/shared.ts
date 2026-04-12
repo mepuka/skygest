@@ -133,6 +133,7 @@ const isFuzzyLane = (lane: Stage3Input["stage2Lane"]) =>
 const isStage2Evidence = (evidence: MatchEvidence): evidence is Stage2Evidence => {
   switch (evidence._tag) {
     case "FacetDecompositionEvidence":
+    case "GroupedFacetDecompositionEvidence":
     case "FuzzyDatasetTitleEvidence":
     case "FuzzyAgentLabelEvidence":
     case "FuzzyTitleEvidence":
@@ -147,6 +148,7 @@ const residualTagForStage2Evidence = (
 ): Stage1ResidualTag => {
   switch (evidence._tag) {
     case "FacetDecompositionEvidence":
+    case "GroupedFacetDecompositionEvidence":
       return "DeferredToStage2Residual";
     case "FuzzyDatasetTitleEvidence":
       return "UnmatchedDatasetTitleResidual";
@@ -165,6 +167,11 @@ const allStage2EvidenceFromCorroborations = (
   corroborations: ReadonlyArray<Stage2Corroboration>
 ): ReadonlyArray<Stage2Evidence> =>
   corroborations.flatMap((corroboration) => corroboration.evidence);
+
+const evidenceOutcomeCount = (evidence: Stage2Evidence) =>
+  evidence._tag === "GroupedFacetDecompositionEvidence"
+    ? evidence.residualCount
+    : 1;
 
 export const mergeStage1And2Matches = (
   stage1: Stage1Result,
@@ -186,7 +193,10 @@ export const classifyEscalationBucket = (
     return "ambiguous";
   }
 
-  if (escalation.stage2Lane === "facet-decomposition") {
+  if (
+    escalation.stage2Lane === "facet-decomposition" ||
+    escalation.stage2Lane === "grouped-facet-decomposition"
+  ) {
     if (escalation.candidateSet.length > 1) {
       return "ambiguous";
     }
@@ -253,7 +263,7 @@ export const computeResidualProgression = (
     const current = byKind[kind];
     byKind[kind] = {
       ...current,
-      resolved: current.resolved + 1
+      resolved: current.resolved + evidenceOutcomeCount(evidence)
     };
   }
 
@@ -262,7 +272,7 @@ export const computeResidualProgression = (
     const current = byKind[kind];
     byKind[kind] = {
       ...current,
-      corroborated: current.corroborated + 1
+      corroborated: current.corroborated + evidenceOutcomeCount(evidence)
     };
   }
 
@@ -271,7 +281,7 @@ export const computeResidualProgression = (
     const current = byKind[kind];
     byKind[kind] = {
       ...current,
-      escalated: current.escalated + 1
+      escalated: current.escalated + (escalation.contributingResidualCount ?? 1)
     };
   }
 

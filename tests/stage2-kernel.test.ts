@@ -98,6 +98,18 @@ const makeSeed = (): DataLayerRegistrySeed => ({
       statisticType: "stock",
       aggregation: "end_of_period",
       unitFamily: "power"
+    },
+    {
+      _tag: "Variable",
+      id: makeVariableId("https://id.skygest.io/variable/var_MNBVCXZLKJHG"),
+      label: "Offshore wind generation",
+      aliases: [],
+      createdAt: iso as any,
+      updatedAt: iso as any,
+      technologyOrFuel: "offshore wind",
+      statisticType: "flow",
+      aggregation: "sum",
+      unitFamily: "energy"
     }
   ],
   series: []
@@ -157,6 +169,103 @@ describe("runStage2", () => {
     }).pipe(Effect.provide(FacetVocabulary.layer))
   );
 
+  it.effect("resolves a grouped chart using combined title and axis facets", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+      const result = runStage2(
+        makePostContext(),
+        makeStage1Result({
+          residuals: [
+            {
+              _tag: "DeferredToStage2Residual",
+              source: "chart-title",
+              text: "Offshore wind",
+              reason: "needs structured decomposition",
+              assetKey: "chart-1"
+            },
+            {
+              _tag: "DeferredToStage2Residual",
+              source: "axis-label",
+              text: "MW",
+              reason: "needs structured decomposition",
+              assetKey: "chart-1"
+            }
+          ]
+        }),
+        makeLookup(),
+        vocabulary
+      );
+
+      expect(result.matches).toHaveLength(1);
+      expect(result.matches[0]?._tag).toBe("VariableMatch");
+      if (result.matches[0]?._tag !== "VariableMatch") {
+        throw new Error("expected VariableMatch");
+      }
+
+      expect(result.matches[0].label).toBe("Installed offshore wind capacity");
+      expect(result.matches[0].evidence[0]?._tag).toBe(
+        "GroupedFacetDecompositionEvidence"
+      );
+      expect(result.escalations).toHaveLength(0);
+    }).pipe(Effect.provide(FacetVocabulary.layer))
+  );
+
+  it.effect("records grouped merge conflicts with first-set-wins priority", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+      const result = runStage2(
+        makePostContext(),
+        makeStage1Result({
+          residuals: [
+            {
+              _tag: "DeferredToStage2Residual",
+              source: "chart-title",
+              text: "Offshore wind",
+              reason: "needs structured decomposition",
+              assetKey: "chart-2"
+            },
+            {
+              _tag: "DeferredToStage2Residual",
+              source: "axis-label",
+              text: "Wind MW",
+              reason: "needs structured decomposition",
+              assetKey: "chart-2"
+            }
+          ]
+        }),
+        makeLookup(),
+        vocabulary
+      );
+
+      expect(result.matches).toHaveLength(1);
+      if (result.matches[0]?._tag !== "VariableMatch") {
+        throw new Error("expected VariableMatch");
+      }
+
+      const evidence = result.matches[0].evidence[0];
+      expect(evidence?._tag).toBe("GroupedFacetDecompositionEvidence");
+      if (evidence?._tag !== "GroupedFacetDecompositionEvidence") {
+        throw new Error("expected GroupedFacetDecompositionEvidence");
+      }
+
+      expect(evidence.partialShape.technologyOrFuel).toBe("offshore wind");
+      expect(evidence.facetProvenance).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            facet: "technologyOrFuel",
+            source: "chart-title",
+            status: "accepted"
+          }),
+          expect.objectContaining({
+            facet: "technologyOrFuel",
+            source: "axis-label",
+            status: "conflicting"
+          })
+        ])
+      );
+    }).pipe(Effect.provide(FacetVocabulary.layer))
+  );
+
   it.effect("escalates tied and no-match facet decomposition cases", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;
@@ -191,6 +300,45 @@ describe("runStage2", () => {
     }).pipe(Effect.provide(FacetVocabulary.layer))
   );
 
+  it.effect("escalates grouped chart ties once with grouped context", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+      const result = runStage2(
+        makePostContext(),
+        makeStage1Result({
+          residuals: [
+            {
+              _tag: "DeferredToStage2Residual",
+              source: "chart-title",
+              text: "Wind",
+              reason: "needs structured decomposition",
+              assetKey: "chart-3"
+            },
+            {
+              _tag: "DeferredToStage2Residual",
+              source: "axis-label",
+              text: "MW",
+              reason: "needs structured decomposition",
+              assetKey: "chart-3"
+            }
+          ]
+        }),
+        makeLookup(),
+        vocabulary
+      );
+
+      expect(result.matches).toHaveLength(0);
+      expect(result.escalations).toHaveLength(1);
+      expect(result.escalations[0]?.stage2Lane).toBe("grouped-facet-decomposition");
+      expect(result.escalations[0]?.contributingResidualCount).toBe(2);
+      expect(result.escalations[0]?.contributingResiduals).toEqual([
+        { source: "chart-title", text: "Wind" },
+        { source: "axis-label", text: "MW" }
+      ]);
+      expect(result.escalations[0]?.candidateSet).toHaveLength(2);
+    }).pipe(Effect.provide(FacetVocabulary.layer))
+  );
+
   it.effect("handles fuzzy, tie-breaker, no-op, and corroboration paths", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;
@@ -212,8 +360,16 @@ describe("runStage2", () => {
             {
               _tag: "DeferredToStage2Residual",
               source: "chart-title",
-              text: "Year-end installed offshore wind energy capacity (MW)",
-              reason: "needs structured decomposition"
+              text: "Offshore wind",
+              reason: "needs structured decomposition",
+              assetKey: "chart-4"
+            },
+            {
+              _tag: "DeferredToStage2Residual",
+              source: "axis-label",
+              text: "MW",
+              reason: "needs structured decomposition",
+              assetKey: "chart-4"
             },
             {
               _tag: "UnmatchedDatasetTitleResidual",
@@ -265,6 +421,9 @@ describe("runStage2", () => {
       ]);
       expect(result.corroborations).toHaveLength(1);
       expect(result.corroborations[0]?.matchKey.grain).toBe("Variable");
+      expect(result.corroborations[0]?.evidence[0]?._tag).toBe(
+        "GroupedFacetDecompositionEvidence"
+      );
       expect(result.escalations.map((item) => item.stage2Lane)).toEqual([
         "tie-breaker",
         "no-op"

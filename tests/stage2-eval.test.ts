@@ -71,6 +71,50 @@ const makeMatchedSurfaceForm = (surfaceForm = "offshore wind") =>
     addedAt: "2026-04-11T00:00:00.000Z"
   }) as any;
 
+const makeGroupedFacetEvidence = (residualCount: number) =>
+  ({
+    _tag: "GroupedFacetDecompositionEvidence",
+    signal: "grouped-facet-decomposition",
+    rank: 1,
+    assetKey: "chart-1",
+    residualCount,
+    matchedFacets: ["technologyOrFuel", "unitFamily"],
+    partialShape: {
+      technologyOrFuel: "offshore wind",
+      unitFamily: "power"
+    },
+    matchedSurfaceForms: [
+      makeMatchedSurfaceForm(),
+      makeMatchedSurfaceForm("mw")
+    ],
+    facetProvenance: [
+      {
+        facet: "technologyOrFuel",
+        source: "chart-title",
+        text: "Offshore wind",
+        surfaceForm: "offshore wind",
+        status: "accepted"
+      },
+      {
+        facet: "unitFamily",
+        source: "axis-label",
+        text: "MW",
+        surfaceForm: "mw",
+        status: "accepted"
+      }
+    ],
+    contributingResiduals: [
+      {
+        source: "chart-title",
+        text: "Offshore wind"
+      },
+      {
+        source: "axis-label",
+        text: "MW"
+      }
+    ]
+  }) as const;
+
 describe("stage2 eval helpers", () => {
   it("mergeStage1And2Matches combines and deduplicates ids", () => {
     const merged = mergeStage1And2Matches(
@@ -144,6 +188,36 @@ describe("stage2 eval helpers", () => {
         candidateSet: [],
         matchedSurfaceForms: [makeMatchedSurfaceForm()],
         unmatchedSurfaceForms: ["capacity"],
+        reason: "no variable candidates matched the decoded facets"
+      })
+    ).toBe("facet-match-no-variable");
+  });
+
+  it("classifies grouped facet-decomposition escalations", () => {
+    expect(
+      classifyEscalationBucket({
+        _tag: "Stage3Input",
+        postUri: makeRow().postUri,
+        originalResidual: {
+          _tag: "DeferredToStage2Residual",
+          source: "chart-title",
+          text: "installed offshore wind capacity",
+          reason: "needs structured decomposition",
+          assetKey: "chart-1"
+        },
+        stage2Lane: "grouped-facet-decomposition",
+        partialDecomposition: {
+          technologyOrFuel: "offshore wind",
+          unitFamily: "power"
+        },
+        candidateSet: [],
+        matchedSurfaceForms: [makeMatchedSurfaceForm(), makeMatchedSurfaceForm("mw")],
+        unmatchedSurfaceForms: ["capacity"],
+        contributingResiduals: [
+          { source: "chart-title", text: "installed offshore wind" },
+          { source: "axis-label", text: "mw" }
+        ],
+        contributingResidualCount: 2,
         reason: "no variable candidates matched the decoded facets"
       })
     ).toBe("facet-match-no-variable");
@@ -344,6 +418,122 @@ describe("stage2 eval helpers", () => {
     expect(progression.byKind.DeferredToStage2Residual.resolved).toBe(1);
     expect(progression.byKind.UnmatchedTextResidual.resolved).toBe(1);
     expect(progression.totals.resolved).toBe(2);
+  });
+
+  it("expands grouped resolved, corroborated, and escalated counts", () => {
+    const progression = computeResidualProgression(
+      makeStage1Result({
+        matches: [
+          {
+            _tag: "VariableMatch",
+            variableId,
+            label: "Installed offshore wind capacity",
+            bestRank: 1,
+            evidence: []
+          }
+        ],
+        residuals: [
+          {
+            _tag: "DeferredToStage2Residual",
+            source: "chart-title",
+            text: "Offshore wind",
+            reason: "needs structured decomposition",
+            assetKey: "chart-1"
+          },
+          {
+            _tag: "DeferredToStage2Residual",
+            source: "axis-label",
+            text: "MW",
+            reason: "needs structured decomposition",
+            assetKey: "chart-1"
+          },
+          {
+            _tag: "DeferredToStage2Residual",
+            source: "chart-title",
+            text: "Solar",
+            reason: "needs structured decomposition",
+            assetKey: "chart-2"
+          },
+          {
+            _tag: "DeferredToStage2Residual",
+            source: "axis-label",
+            text: "MW",
+            reason: "needs structured decomposition",
+            assetKey: "chart-2"
+          },
+          {
+            _tag: "DeferredToStage2Residual",
+            source: "chart-title",
+            text: "Hydrogen",
+            reason: "needs structured decomposition",
+            assetKey: "chart-3"
+          },
+          {
+            _tag: "DeferredToStage2Residual",
+            source: "axis-label",
+            text: "kg",
+            reason: "needs structured decomposition",
+            assetKey: "chart-3"
+          }
+        ]
+      }),
+      makeStage2Result({
+        matches: [
+          {
+            _tag: "VariableMatch",
+            variableId: alternateVariableId,
+            label: "Installed solar capacity",
+            bestRank: 1,
+            evidence: [makeGroupedFacetEvidence(2)]
+          }
+        ],
+        corroborations: [
+          {
+            matchKey: {
+              grain: "Variable",
+              entityId: variableId
+            },
+            evidence: [makeGroupedFacetEvidence(2)]
+          }
+        ],
+        escalations: [
+          {
+            _tag: "Stage3Input",
+            postUri: makeRow().postUri,
+            originalResidual: {
+              _tag: "DeferredToStage2Residual",
+              source: "chart-title",
+              text: "Hydrogen",
+              reason: "needs structured decomposition",
+              assetKey: "chart-3"
+            },
+            stage2Lane: "grouped-facet-decomposition",
+            partialDecomposition: {
+              technologyOrFuel: "hydrogen",
+              unitFamily: "energy"
+            },
+            candidateSet: [],
+            matchedSurfaceForms: [makeMatchedSurfaceForm("hydrogen")],
+            unmatchedSurfaceForms: ["kg"],
+            contributingResiduals: [
+              { source: "chart-title", text: "Hydrogen" },
+              { source: "axis-label", text: "kg" }
+            ],
+            contributingResidualCount: 2,
+            reason: "no variable candidates matched the decoded facets"
+          }
+        ]
+      })
+    );
+
+    expect(progression.byKind.DeferredToStage2Residual.total).toBe(6);
+    expect(progression.byKind.DeferredToStage2Residual.resolved).toBe(2);
+    expect(progression.byKind.DeferredToStage2Residual.corroborated).toBe(2);
+    expect(progression.byKind.DeferredToStage2Residual.escalated).toBe(2);
+    expect(progression.totals.total).toBe(6);
+    expect(progression.totals.resolved).toBe(2);
+    expect(progression.totals.corroborated).toBe(2);
+    expect(progression.totals.escalated).toBe(2);
   });
 
   it("breaks residual progression down by residual kind", () => {

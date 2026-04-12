@@ -9,7 +9,7 @@ import { PostUri } from "./types";
 import { ResolutionEntityId } from "./resolutionEntityId";
 import { SurfaceFormEntryAny } from "./surfaceForm";
 import { Stage1Residual } from "./stage1Residual";
-import { Stage1MatchGrain, Stage1Rank } from "./stage1Shared";
+import { MatchTextSource, Stage1MatchGrain, Stage1Rank } from "./stage1Shared";
 
 export const PartialVariableShape = Schema.Struct({
   label: Schema.optionalKey(Schema.String),
@@ -39,9 +39,18 @@ export const CandidateEntry = Schema.Struct({
 });
 export type CandidateEntry = Schema.Schema.Type<typeof CandidateEntry>;
 
+export const ContributingResidualSummary = Schema.Struct({
+  source: MatchTextSource,
+  text: Schema.String
+});
+export type ContributingResidualSummary = Schema.Schema.Type<
+  typeof ContributingResidualSummary
+>;
+
 export const Stage2Lane = Schema.Literals([
   "pending",
   "facet-decomposition",
+  "grouped-facet-decomposition",
   "fuzzy-dataset-title",
   "fuzzy-agent-label",
   "tie-breaker",
@@ -57,6 +66,10 @@ export const Stage3Input = Schema.TaggedStruct("Stage3Input", {
   candidateSet: Schema.Array(CandidateEntry),
   matchedSurfaceForms: Schema.Array(SurfaceFormEntryAny),
   unmatchedSurfaceForms: Schema.Array(Schema.String),
+  contributingResiduals: Schema.optionalKey(
+    Schema.Array(ContributingResidualSummary)
+  ),
+  contributingResidualCount: Schema.optionalKey(Schema.Int),
   reason: Schema.String
 });
 export type Stage3Input = Schema.Schema.Type<typeof Stage3Input>;

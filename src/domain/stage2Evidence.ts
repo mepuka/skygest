@@ -1,6 +1,9 @@
 import { Schema } from "effect";
-import { PartialVariableShape } from "./stage2Core";
-import { Stage1Rank } from "./stage1Shared";
+import {
+  ContributingResidualSummary,
+  PartialVariableShape
+} from "./stage2Core";
+import { MatchTextSource, Stage1Rank } from "./stage1Shared";
 import { SurfaceFormEntryAny } from "./surfaceForm";
 
 const ZeroToOneScore = Schema.Number.pipe(
@@ -19,6 +22,39 @@ export const FacetDecompositionEvidence = Schema.TaggedStruct(
 );
 export type FacetDecompositionEvidence = Schema.Schema.Type<
   typeof FacetDecompositionEvidence
+>;
+
+const FacetContributionStatus = Schema.Literals([
+  "accepted",
+  "corroborating",
+  "conflicting"
+]);
+
+export const FacetContribution = Schema.Struct({
+  facet: Schema.String,
+  source: MatchTextSource,
+  text: Schema.String,
+  surfaceForm: Schema.String,
+  status: FacetContributionStatus
+});
+export type FacetContribution = Schema.Schema.Type<typeof FacetContribution>;
+
+export const GroupedFacetDecompositionEvidence = Schema.TaggedStruct(
+  "GroupedFacetDecompositionEvidence",
+  {
+    signal: Schema.Literal("grouped-facet-decomposition"),
+    rank: Stage1Rank,
+    assetKey: Schema.String,
+    residualCount: Schema.Int,
+    matchedFacets: Schema.Array(Schema.String),
+    partialShape: PartialVariableShape,
+    matchedSurfaceForms: Schema.Array(SurfaceFormEntryAny),
+    facetProvenance: Schema.Array(FacetContribution),
+    contributingResiduals: Schema.Array(ContributingResidualSummary)
+  }
+);
+export type GroupedFacetDecompositionEvidence = Schema.Schema.Type<
+  typeof GroupedFacetDecompositionEvidence
 >;
 
 export const FuzzyDatasetTitleEvidence = Schema.TaggedStruct(
@@ -62,6 +98,7 @@ export type FuzzyTitleEvidence = Schema.Schema.Type<typeof FuzzyTitleEvidence>;
 
 export const Stage2Evidence = Schema.Union([
   FacetDecompositionEvidence,
+  GroupedFacetDecompositionEvidence,
   FuzzyDatasetTitleEvidence,
   FuzzyAgentLabelEvidence,
   FuzzyTitleEvidence
