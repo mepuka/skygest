@@ -16,7 +16,7 @@ import {
   StatisticTypeMembers,
   TechnologyOrFuelCanonicals,
   UnitFamilyMembers
-} from "../src/domain/generated/energyVariableProfile";
+} from "../src/domain/profile/energyVariableProfile";
 
 type VocabularyEntry = {
   readonly canonical: string;
@@ -44,7 +44,7 @@ describe("energy variable profile", () => {
     ]);
   });
 
-  it("matches generated canonical sets against the checked-in vocabulary", () => {
+  it("matches the checked-in profile against the vocabulary exports", () => {
     expect(sorted(StatisticTypeMembers)).toEqual(
       uniqueCanonicals(statisticTypeJson as ReadonlyArray<VocabularyEntry>)
     );

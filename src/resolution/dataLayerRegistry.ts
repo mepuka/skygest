@@ -20,7 +20,7 @@ import {
   StatisticTypeMembers,
   TechnologyOrFuelCanonicals,
   UnitFamilyMembers
-} from "../domain/generated/energyVariableProfile";
+} from "../domain/profile/energyVariableProfile";
 import {
   buildUrlPrefixes,
   normalizeAliasLookupValue,

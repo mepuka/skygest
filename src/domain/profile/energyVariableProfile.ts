@@ -1,3 +1,10 @@
+/**
+ * Hand-maintained runtime variable profile for the resolution kernel and data layer.
+ *
+ * This file is intentionally explicit, not generated in-repo yet. It centralizes the
+ * facet contract that must stay aligned with the ontology's EnergyVariable structure,
+ * the EnergyVariable SHACL shape, and the checked-in vocabulary JSON files.
+ */
 import aggregationJson from "../../../references/vocabulary/aggregation.json";
 import domainObjectJson from "../../../references/vocabulary/domain-object.json";
 import measuredPropertyJson from "../../../references/vocabulary/measured-property.json";

@@ -18,9 +18,9 @@ import {
   StatisticTypeMembers,
   TechnologyOrFuelCanonicals,
   UnitFamilyMembers
-} from "./generated/energyVariableProfile";
+} from "./profile/energyVariableProfile";
 
-export { FACET_KEYS, REQUIRED_FACET_KEYS } from "./generated/energyVariableProfile";
+export { FACET_KEYS, REQUIRED_FACET_KEYS } from "./profile/energyVariableProfile";
 
 export type FacetKey = (typeof FACET_KEYS)[number];
 export type RequiredFacetKey = (typeof REQUIRED_FACET_KEYS)[number];

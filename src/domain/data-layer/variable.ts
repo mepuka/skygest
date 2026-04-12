@@ -6,7 +6,7 @@ import {
   AggregationMembers,
   StatisticTypeMembers,
   UnitFamilyMembers
-} from "../generated/energyVariableProfile";
+} from "../profile/energyVariableProfile";
 
 // ---------------------------------------------------------------------------
 // Enums

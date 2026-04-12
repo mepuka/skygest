@@ -44,6 +44,9 @@ const partialVariableArbitrary: fc.Arbitrary<
     ),
     unitFamily: optional(
       fc.constantFrom(...PARTIAL_VARIABLE_GENERATOR_VALUES.unitFamily)
+    ),
+    policyInstrument: optional(
+      fc.constantFrom(...PARTIAL_VARIABLE_GENERATOR_VALUES.policyInstrument)
     )
   })
   .map((value) => decodePartial(pruneUndefined(value)));

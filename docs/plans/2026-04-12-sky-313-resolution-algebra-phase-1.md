@@ -19,6 +19,8 @@ Stage 3, if it exists at all, is downstream help, not the decision-maker. The cu
 
 **Research basis:** See `ontology_skill/docs/research/2026-04-12-resolution-algebra.md`, `ontology_skill/docs/research/2026-04-12-text-ops-and-evidence-combination.md`, `ontology_skill/docs/research/2026-04-12-resolution-trace-examples.md`, `ontology_skill/docs/research/2026-04-12-scoring-segmentation-feedback.md`, and `ontology_skill/docs/research/2026-04-12-effect-algebra-mapping.md`.
 
+**Companion spec:** See [2026-04-12-sky-313-runtime-variable-profile-and-registry-audit-spec.md](./2026-04-12-sky-313-runtime-variable-profile-and-registry-audit-spec.md) for the ontology-to-TypeScript runtime mapping, registry-readiness model, and the clean next implementation slice that should land before deeper bind work.
+
 ---
 
 ## Status
@@ -53,6 +55,7 @@ This document now captures the locked product and design decisions plus a rewrit
   - `statisticType`
   - `aggregation`
   - `unitFamily`
+  - `policyInstrument`
 - Reporting context such as place, market, sector, frequency, and time is **attached context**, not part of the core variable identity in version 1.
 - Backward compatibility with the current Stage 2 eval buckets is **not** a primary constraint. A new eval set should be written to match the new kernel outputs.
 
@@ -66,8 +69,8 @@ This document now captures the locked product and design decisions plus a rewrit
 
 - **Evidence bundle** = the structured chart or post evidence the kernel consumes as one unit
 - **Hypothesis** = one structured interpretation assembled from a bundle before registry binding
-- **Partial assignment** = a partial hypothesis over the six core semantic identity dimensions where `undefined` represents ⊥
-- **Facet key** = one of the six core semantic identity dimensions: `measuredProperty`, `domainObject`, `technologyOrFuel`, `statisticType`, `aggregation`, `unitFamily`
+- **Partial assignment** = a partial hypothesis over the seven core semantic identity dimensions where `undefined` represents ⊥
+- **Facet key** = one of the seven core semantic identity dimensions: `measuredProperty`, `domainObject`, `technologyOrFuel`, `statisticType`, `aggregation`, `unitFamily`, `policyInstrument`
 - **Compound surface form** = one lexical entry that projects into more than one semantic dimension
 - **⊥ (bottom)** = `undefined`, the unspecified value for a semantic dimension
 - **Join** = combine two partial assignments dimension-wise; disagreements should surface as competing hypotheses or conflict outcomes, not as silent overwrite
@@ -113,7 +116,7 @@ Each phase should end with `bun run typecheck` and the relevant focused tests pa
 
 **Work:**
 
-1. Define the six locked semantic identity facets in `FACET_KEYS`.
+1. Define the seven locked semantic identity facets in `FACET_KEYS`.
 2. Add typed conflict data for failed joins in `src/domain/errors.ts`.
 3. Implement the pure algebra helpers:
   - `joinPartials`
@@ -310,7 +313,7 @@ This is the minimum proof burden for the pure algebra layer. The plan is not com
 
 **Generator rules:**
 
-- Generate partials by independently choosing each of the six core facets as either `undefined` or one of a small set of real canonical values.
+- Generate partials by independently choosing each of the seven core facets as either `undefined` or one of a small set of real canonical values.
 - Keep value sets intentionally small so conflict paths are exercised often.
 - Normalize away `undefined` keys before structural equality checks.
 
@@ -355,4 +358,3 @@ This is the minimum proof burden for the pure algebra layer. The plan is not com
 | Ambiguity gets collapsed too early by ranking               | Confidence may order hypotheses, but it must not convert `Ambiguous` into `Resolved` by itself.                                       |
 | Bundle adapters lose important structure from charts        | Test shared evidence, per-series evidence, and attached context explicitly before binding work starts.                                |
 | The new eval harness accidentally reuses legacy assumptions | Write fixtures directly against the locked statuses and multi-item outcome shape.                                                     |
-
