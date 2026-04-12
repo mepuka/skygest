@@ -4,6 +4,7 @@ import domainObjectJson from "../../../references/vocabulary/domain-object.json"
 import measuredPropertyJson from "../../../references/vocabulary/measured-property.json";
 import statisticTypeJson from "../../../references/vocabulary/statistic-type.json";
 import technologyOrFuelJson from "../../../references/vocabulary/technology-or-fuel.json";
+import policyInstrumentJson from "../../../references/vocabulary/policy-instrument.json";
 import unitFamilyJson from "../../../references/vocabulary/unit-family.json";
 import {
   VocabularyCollisionError,
@@ -38,6 +39,14 @@ import {
   type MeasuredPropertyLookup
 } from "./measuredProperty";
 import {
+  buildPolicyInstrumentLookup,
+  matchPolicyInstrument,
+  parsePolicyInstrument,
+  PolicyInstrumentSurfaceForm,
+  PolicyInstrumentVocabulary,
+  type PolicyInstrumentLookup
+} from "./policyInstrument";
+import {
   buildStatisticTypeLookup,
   matchStatisticType,
   parseStatisticType,
@@ -68,7 +77,8 @@ const VOCABULARY_PATHS = {
   unitFamily: "references/vocabulary/unit-family.json",
   technologyOrFuel: "references/vocabulary/technology-or-fuel.json",
   measuredProperty: "references/vocabulary/measured-property.json",
-  domainObject: "references/vocabulary/domain-object.json"
+  domainObject: "references/vocabulary/domain-object.json",
+  policyInstrument: "references/vocabulary/policy-instrument.json"
 } as const;
 
 export type FacetVocabularyJsonSources = {
@@ -78,6 +88,7 @@ export type FacetVocabularyJsonSources = {
   readonly technologyOrFuel: unknown;
   readonly measuredProperty: unknown;
   readonly domainObject: unknown;
+  readonly policyInstrument: unknown;
 };
 
 const DEFAULT_VOCABULARY_JSON_SOURCES: FacetVocabularyJsonSources = {
@@ -86,7 +97,8 @@ const DEFAULT_VOCABULARY_JSON_SOURCES: FacetVocabularyJsonSources = {
   unitFamily: unitFamilyJson,
   technologyOrFuel: technologyOrFuelJson,
   measuredProperty: measuredPropertyJson,
-  domainObject: domainObjectJson
+  domainObject: domainObjectJson,
+  policyInstrument: policyInstrumentJson
 };
 
 const decodeVocabulary = <S extends Schema.Decoder<unknown>>(
@@ -145,6 +157,12 @@ export type FacetVocabularyShape = {
   readonly matchDomainObject: (
     text: string
   ) => ReturnType<typeof matchDomainObject>;
+  readonly parsePolicyInstrument: (
+    text: string
+  ) => ReturnType<typeof parsePolicyInstrument>;
+  readonly matchPolicyInstrument: (
+    text: string
+  ) => ReturnType<typeof matchPolicyInstrument>;
 };
 
 type FacetVocabularyLookups = {
@@ -154,6 +172,7 @@ type FacetVocabularyLookups = {
   readonly technologyOrFuel: TechnologyOrFuelLookup;
   readonly measuredProperty: MeasuredPropertyLookup;
   readonly domainObject: DomainObjectLookup;
+  readonly policyInstrument: PolicyInstrumentLookup;
 };
 
 export const makeFacetVocabulary = (
@@ -176,7 +195,11 @@ export const makeFacetVocabulary = (
   parseDomainObject: (text) =>
     parseDomainObject(lookups.domainObject, text),
   matchDomainObject: (text) =>
-    matchDomainObject(lookups.domainObject, text)
+    matchDomainObject(lookups.domainObject, text),
+  parsePolicyInstrument: (text) =>
+    parsePolicyInstrument(lookups.policyInstrument, text),
+  matchPolicyInstrument: (text) =>
+    matchPolicyInstrument(lookups.policyInstrument, text)
 });
 
 export const loadFacetVocabularyLookups = (
@@ -222,6 +245,12 @@ export const loadFacetVocabularyLookups = (
       DomainObjectVocabulary,
       sources.domainObject
     );
+    const policyInstrumentEntries = yield* decodeVocabulary(
+      "policy-instrument",
+      VOCABULARY_PATHS.policyInstrument,
+      PolicyInstrumentVocabulary,
+      sources.policyInstrument
+    );
 
     return {
       statisticType: yield* buildLookup(
@@ -241,6 +270,9 @@ export const loadFacetVocabularyLookups = (
       ),
       domainObject: yield* buildLookup(
         buildDomainObjectLookup(domainObjectEntries)
+      ),
+      policyInstrument: yield* buildLookup(
+        buildPolicyInstrumentLookup(policyInstrumentEntries)
       )
     };
   });

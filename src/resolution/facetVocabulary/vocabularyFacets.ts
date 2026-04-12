@@ -54,6 +54,11 @@ export const VOCABULARY_FACETS: ReadonlyArray<VocabularyFacetDescriptor> = [
     facet: "domain-object",
     filename: "domain-object.json",
     codec: makeSurfaceFormEntry(Schema.String)
+  },
+  {
+    facet: "policy-instrument",
+    filename: "policy-instrument.json",
+    codec: makeSurfaceFormEntry(Schema.String)
   }
 ];
 

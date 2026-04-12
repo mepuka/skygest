@@ -3,6 +3,7 @@ import { Effect, Option } from "effect";
 import aggregationJson from "../references/vocabulary/aggregation.json";
 import domainObjectJson from "../references/vocabulary/domain-object.json";
 import measuredPropertyJson from "../references/vocabulary/measured-property.json";
+import policyInstrumentJson from "../references/vocabulary/policy-instrument.json";
 import technologyOrFuelJson from "../references/vocabulary/technology-or-fuel.json";
 import unitFamilyJson from "../references/vocabulary/unit-family.json";
 import {
@@ -58,7 +59,8 @@ describe("FacetVocabulary", () => {
             unitFamily: unitFamilyJson,
             technologyOrFuel: technologyOrFuelJson,
             measuredProperty: measuredPropertyJson,
-            domainObject: domainObjectJson
+            domainObject: domainObjectJson,
+            policyInstrument: policyInstrumentJson
           })
         ),
         Effect.flip
@@ -99,7 +101,8 @@ describe("FacetVocabulary", () => {
             unitFamily: unitFamilyJson,
             technologyOrFuel: technologyOrFuelJson,
             measuredProperty: measuredPropertyJson,
-            domainObject: domainObjectJson
+            domainObject: domainObjectJson,
+            policyInstrument: policyInstrumentJson
           })
         ),
         Effect.flip
