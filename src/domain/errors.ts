@@ -301,6 +301,22 @@ export class FacetDecompositionError extends Schema.TaggedErrorClass<FacetDecomp
   }
 ) {}
 
+export const PartialVariableFacetConflict = Schema.Struct({
+  facet: Schema.String,
+  values: Schema.Tuple([Schema.String, Schema.String])
+});
+export type PartialVariableFacetConflict = Schema.Schema.Type<
+  typeof PartialVariableFacetConflict
+>;
+
+export class PartialVariableJoinConflictError extends Schema.TaggedErrorClass<PartialVariableJoinConflictError>()(
+  "PartialVariableJoinConflictError",
+  {
+    message: Schema.String,
+    conflicts: Schema.Array(PartialVariableFacetConflict)
+  }
+) {}
+
 export class ResolverWorkflowLaunchError extends Schema.TaggedErrorClass<ResolverWorkflowLaunchError>()(
   "ResolverWorkflowLaunchError",
   {
