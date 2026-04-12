@@ -1,5 +1,9 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, Result } from "effect";
+import {
+  checkedInDataLayerRegistryRoot,
+  loadCheckedInDataLayerRegistry
+} from "../src/bootstrap/CheckedInDataLayerRegistry";
 import type { DataLayerRegistrySeed } from "../src/domain/data-layer";
 import {
   makeAgentId,
@@ -16,6 +20,7 @@ import {
   prepareDataLayerRegistry,
   toDataLayerRegistryLookup
 } from "../src/resolution/dataLayerRegistry";
+import { layer as localFileSystemLayer } from "./helpers/LocalFileSystem";
 
 const iso = "2026-04-09T00:00:00.000Z" as const;
 
@@ -122,6 +127,8 @@ const makeStage1Result = (
   residuals: [],
   ...overrides
 });
+
+const registryLoadTimeoutMs = 30_000;
 
 describe("runStage2", () => {
   it.effect("resolves a unique variable from facet decomposition", () =>
@@ -263,5 +270,42 @@ describe("runStage2", () => {
         "no-op"
       ]);
     }).pipe(Effect.provide(FacetVocabulary.layer))
+  );
+
+  it.effect(
+    "resolves a real checked-in cold-start offshore wind variable",
+    () =>
+      Effect.gen(function* () {
+        const prepared = yield* loadCheckedInDataLayerRegistry(
+          checkedInDataLayerRegistryRoot
+        ).pipe(Effect.provide(localFileSystemLayer));
+        const vocabulary = yield* FacetVocabulary;
+
+        const result = runStage2(
+          makePostContext(),
+          makeStage1Result({
+            residuals: [
+              {
+                _tag: "DeferredToStage2Residual",
+                source: "chart-title",
+                text: "Year-end installed offshore wind energy capacity (MW)",
+                reason: "needs structured decomposition"
+              }
+            ]
+          }),
+          toDataLayerRegistryLookup(prepared),
+          vocabulary
+        );
+
+        expect(result.matches).toHaveLength(1);
+        expect(result.matches[0]?._tag).toBe("VariableMatch");
+        if (result.matches[0]?._tag !== "VariableMatch") {
+          throw new Error("expected VariableMatch");
+        }
+
+        expect(result.matches[0].label).toBe("Installed offshore wind capacity");
+        expect(result.escalations).toHaveLength(0);
+      }).pipe(Effect.provide(FacetVocabulary.layer)),
+    registryLoadTimeoutMs
   );
 });
