@@ -14,7 +14,7 @@ import type {
 } from "../domain/stage1Resolution";
 import type {
   CandidateEntry,
-  PartialVariableShape,
+  Stage2PartialVariableShape,
   Stage2Corroboration,
   Stage2Result,
   Stage3Input
@@ -218,7 +218,7 @@ const appendEscalation = (state: Stage2State, escalation: Stage3Input) => {
   state.escalations.push(escalation);
 };
 
-const hasPartialDecomposition = (partial: PartialVariableShape) =>
+const hasPartialDecomposition = (partial: Stage2PartialVariableShape) =>
   Object.keys(partial).length > 0;
 
 const deriveUnmatchedSurfaceForms = (
@@ -237,7 +237,7 @@ const deriveUnmatchedSurfaceForms = (
 };
 
 const scoreVariableCandidate = (
-  partial: PartialVariableShape,
+  partial: Stage2PartialVariableShape,
   variable: Variable
 ): ScoredVariableCandidate => {
   const matchedFacets: Array<FacetField> = [];
@@ -370,7 +370,7 @@ const topFuzzyCandidates = <T extends Agent | Dataset>(
 const buildFacetDecompositionEscalation = (
   postContext: Stage1PostContext,
   originalResidual: DeferredToStage2Residual,
-  partial: PartialVariableShape | undefined,
+  partial: Stage2PartialVariableShape | undefined,
   candidateSet: ReadonlyArray<CandidateEntry>,
   matchedSurfaceForms: ReadonlyArray<SurfaceFormEntryAny>,
   unmatchedSurfaceForms: ReadonlyArray<string>,
@@ -397,12 +397,12 @@ const handleFacetDecomposition = (
   vocabulary: FacetVocabularyShape
 ) => {
   const partialDraft: {
-    statisticType?: PartialVariableShape["statisticType"];
-    aggregation?: PartialVariableShape["aggregation"];
-    unitFamily?: PartialVariableShape["unitFamily"];
-    technologyOrFuel?: PartialVariableShape["technologyOrFuel"];
-    measuredProperty?: PartialVariableShape["measuredProperty"];
-    domainObject?: PartialVariableShape["domainObject"];
+    statisticType?: Stage2PartialVariableShape["statisticType"];
+    aggregation?: Stage2PartialVariableShape["aggregation"];
+    unitFamily?: Stage2PartialVariableShape["unitFamily"];
+    technologyOrFuel?: Stage2PartialVariableShape["technologyOrFuel"];
+    measuredProperty?: Stage2PartialVariableShape["measuredProperty"];
+    domainObject?: Stage2PartialVariableShape["domainObject"];
   } = {};
   const matchedEntriesByFacet: Partial<Record<FacetField, SurfaceFormEntryAny>> =
     {};
@@ -444,7 +444,7 @@ const handleFacetDecomposition = (
     matchedEntriesByFacet.domainObject = domainObject.value;
   }
 
-  const partial = partialDraft as PartialVariableShape;
+  const partial = partialDraft as Stage2PartialVariableShape;
 
   const allMatchedEntries = [
     matchedEntriesByFacet.statisticType,

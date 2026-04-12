@@ -8,7 +8,8 @@ import {
   DataServiceId,
   DatasetId,
   DatasetSeriesId,
-  DistributionId
+  DistributionId,
+  VariableId
 } from "./ids";
 
 // ---------------------------------------------------------------------------
@@ -173,6 +174,9 @@ export const Dataset = Schema.Struct({
   })),
   themes: Schema.optionalKey(Schema.Array(Schema.String).annotate({
     [DcatProperty]: "http://www.w3.org/ns/dcat#theme"
+  })),
+  variableIds: Schema.optionalKey(Schema.Array(VariableId).annotate({
+    [DcatProperty]: "https://skygest.dev/vocab/energy/hasVariable"
   })),
   distributionIds: Schema.optionalKey(Schema.Array(DistributionId).annotate({
     [DcatProperty]: "http://www.w3.org/ns/dcat#distribution"

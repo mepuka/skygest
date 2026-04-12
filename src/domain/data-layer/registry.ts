@@ -90,6 +90,18 @@ export type SemanticConsistencyIssue = Schema.Schema.Type<
   typeof SemanticConsistencyIssue
 >;
 
+export const UnknownVocabularyValueIssue = Schema.TaggedStruct(
+  "UnknownVocabularyValueIssue",
+  {
+    path: Schema.String,
+    facet: Schema.String,
+    value: Schema.String
+  }
+);
+export type UnknownVocabularyValueIssue = Schema.Schema.Type<
+  typeof UnknownVocabularyValueIssue
+>;
+
 export const LookupCollisionIssue = Schema.TaggedStruct("LookupCollisionIssue", {
   lookup: Schema.String,
   key: Schema.String,
@@ -107,6 +119,7 @@ export const DataLayerRegistryIssue = Schema.Union([
   DuplicateCanonicalIdIssue,
   MissingReferenceIssue,
   SemanticConsistencyIssue,
+  UnknownVocabularyValueIssue,
   LookupCollisionIssue
 ]);
 export type DataLayerRegistryIssue = Schema.Schema.Type<

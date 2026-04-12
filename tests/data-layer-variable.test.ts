@@ -28,8 +28,8 @@ describe("Variable", () => {
       technologyOrFuel: "wind",
       statisticType: "stock",
       aggregation: "end_of_period",
-      basis: ["gross", "onshore"],
       unitFamily: "power",
+      policyInstrument: "auction",
       aliases: [
         { scheme: "oeo", value: "OEO_00010257", relation: "exactMatch" }
       ],
@@ -41,9 +41,9 @@ describe("Variable", () => {
     expect(decoded.label).toBe("Wind installed capacity");
     expect(decoded.statisticType).toBe("stock");
     expect(decoded.aggregation).toBe("end_of_period");
-    expect(decoded.basis).toEqual(["gross", "onshore"]);
     expect(decoded.unitFamily).toBe("power");
     expect(decoded.technologyOrFuel).toBe("wind");
+    expect(decoded.policyInstrument).toBe("auction");
   });
 
   it("decodes a minimal Variable (only required fields)", () => {

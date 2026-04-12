@@ -106,7 +106,8 @@ describe("phase-one migrations", () => {
         { id: 19, name: "pipeline_status_indexes" },
         { id: 20, name: "publication_registry_identity" },
         { id: 21, name: "podcast_schema" },
-        { id: 22, name: "data_layer_registry" }
+        { id: 22, name: "data_layer_registry" },
+        { id: 23, name: "runtime_variable_profile_alignment" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );

@@ -3,11 +3,11 @@
   "id": "https://id.skygest.io/variable/var_01KP172ZREQSTR3BEW29TQJ7HY",
   "label": "Lignite production",
   "definition": "Total lignite (brown coal) extracted from mines, measured as primary energy or mass",
-  "measuredProperty": "production",
-  "domainObject": "lignite",
+  "measuredProperty": "supply",
   "statisticType": "flow",
   "unitFamily": "energy",
   "aggregation": "sum",
+  "technologyOrFuel": "brown coal",
   "aliases": [],
   "createdAt": "2026-04-12T00:00:00.000Z",
   "updatedAt": "2026-04-12T00:00:00.000Z"

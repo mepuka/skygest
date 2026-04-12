@@ -62,8 +62,8 @@ describe("Fixture 1: Wind-capacity Variable + ERCOT Series + Observation", () =>
     technologyOrFuel: "wind",
     statisticType: "stock" as const,
     aggregation: "end_of_period" as const,
-    basis: ["gross", "onshore"],
     unitFamily: "power" as const,
+    policyInstrument: "auction",
     aliases: [
       { scheme: "oeo" as const, value: "OEO_00010257", relation: "exactMatch" as const }
     ],
@@ -197,6 +197,7 @@ describe("Fixture 3: Multi-Distribution Dataset with DataService", () => {
     accessRights: "public" as const,
     keywords: ["electricity", "alberta", "generation"],
     distributionIds: [DIST_CSV_ID, DIST_API_ID, DIST_PDF_ID],
+    variableIds: [WIND_VAR_ID, PRICE_VAR_ID],
     dataServiceIds: [SVC_ID],
     inSeries: DSER_ID,
     aliases: [

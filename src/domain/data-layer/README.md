@@ -4,7 +4,7 @@ Effect Schema modules for the Skygest data intelligence layer. Implements decisi
 
 ## V/S/O Three-Tier Seam (D1)
 
-- **Variable** — place- and time-independent measurable concept (e.g., "installed wind generating capacity"). Seven optional facets define identity: `measuredProperty`, `domainObject`, `technologyOrFuel`, `statisticType`, `aggregation`, `basis`, `unitFamily`.
+- **Variable** — place- and time-independent measurable concept (e.g., "installed wind generating capacity"). Seven optional facets define identity: `measuredProperty`, `domainObject`, `technologyOrFuel`, `statisticType`, `aggregation`, `unitFamily`, `policyInstrument`.
 - **Series** — a Variable locked to a fixed reporting context via `fixedDims` (place, sector, market, frequency). E.g., "ERCOT installed wind capacity, annual."
 - **Observation** — a single data point within a Series: value + time + provenance back to a Distribution.
 
@@ -19,7 +19,7 @@ Full-fidelity W3C DCAT 3 modeling — never collapse a DCAT class into a field o
 | Agent | `foaf:Agent` | Person, organization, or program that publishes data |
 | Catalog | `dcat:Catalog` | Curated collection of dataset metadata |
 | CatalogRecord | `dcat:CatalogRecord` | A catalog's entry about a Dataset — distinct from the Dataset itself |
-| Dataset | `dcat:Dataset` | Conceptual collection of data |
+| Dataset | `dcat:Dataset` | Conceptual collection of data, including the canonical list of member Variable ids |
 | Distribution | `dcat:Distribution` | Specific access point for a Dataset (CSV, API, PDF, etc.) |
 | DataService | `dcat:DataService` | API described as a service linked from Distributions |
 | DatasetSeries | `dcat:DatasetSeries` | Recurring releases (annual Form 860, monthly Ember snapshots) |

@@ -2,7 +2,7 @@ import { Result, Schema } from "effect";
 import { CandidatePayloadStage } from "./candidatePayload";
 import { DataLayerRegistryDiagnostic } from "./data-layer/registry";
 import { Stage1EvalSnapshotBuildReport } from "./stage1EvalBuild";
-import { Stage2Lane } from "./stage2Resolution";
+import { Stage2Lane } from "./stage2Lane";
 import { Did, PostUri, TranscriptR2Key } from "./types";
 import {
   decodeJsonStringEitherWith,
@@ -291,6 +291,24 @@ export class VocabularyCollisionError extends Schema.TaggedErrorClass<Vocabulary
   }
 ) {}
 
+export class EnergyProfileManifestLoadError extends Schema.TaggedErrorClass<EnergyProfileManifestLoadError>()(
+  "EnergyProfileManifestLoadError",
+  {
+    message: Schema.String,
+    path: Schema.String,
+    issues: Schema.Array(Schema.String)
+  }
+) {}
+
+export class EnergyProfilePipelineError extends Schema.TaggedErrorClass<EnergyProfilePipelineError>()(
+  "EnergyProfilePipelineError",
+  {
+    operation: Schema.String,
+    path: Schema.String,
+    message: Schema.String
+  }
+) {}
+
 export class FacetDecompositionError extends Schema.TaggedErrorClass<FacetDecompositionError>()(
   "FacetDecompositionError",
   {
@@ -298,6 +316,22 @@ export class FacetDecompositionError extends Schema.TaggedErrorClass<FacetDecomp
     lane: Schema.optionalKey(Stage2Lane),
     facet: Schema.optionalKey(Schema.String),
     reason: Schema.String
+  }
+) {}
+
+export const PartialVariableFacetConflict = Schema.Struct({
+  facet: Schema.String,
+  values: Schema.Tuple([Schema.String, Schema.String])
+});
+export type PartialVariableFacetConflict = Schema.Schema.Type<
+  typeof PartialVariableFacetConflict
+>;
+
+export class PartialVariableJoinConflictError extends Schema.TaggedErrorClass<PartialVariableJoinConflictError>()(
+  "PartialVariableJoinConflictError",
+  {
+    message: Schema.String,
+    conflicts: Schema.Array(PartialVariableFacetConflict)
   }
 ) {}
 

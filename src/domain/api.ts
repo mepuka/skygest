@@ -948,8 +948,8 @@ export const VariableCreateInput = Schema.Struct({
   technologyOrFuel: Schema.optionalKey(Schema.String),
   statisticType: Schema.optionalKey(StatisticType),
   aggregation: Schema.optionalKey(Aggregation),
-  basis: Schema.optionalKey(Schema.Array(Schema.String)),
   unitFamily: Schema.optionalKey(UnitFamily),
+  policyInstrument: Schema.optionalKey(Schema.String),
   aliases: Aliases
 });
 export type VariableCreateInput = Schema.Schema.Type<typeof VariableCreateInput>;

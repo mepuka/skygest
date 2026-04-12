@@ -18,6 +18,8 @@
     "seed:ontology-kv": "bun run src/scripts/seed-ontology-kv.ts",
     "sync:data-layer": "bun run scripts/sync-data-layer.ts",
     "sync:vocabulary": "bun run scripts/sync-vocabulary.ts",
+    "sync:energy-profile": "bun run scripts/sync-energy-profile.ts",
+    "gen:energy-profile": "bun run scripts/generate-energy-profile.ts",
     "ops": "bun run src/scripts/ops.ts"
   },
   "devDependencies": {

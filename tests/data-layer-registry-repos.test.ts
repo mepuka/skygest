@@ -112,8 +112,8 @@ const variable = decodeVariable({
   domainObject: "electricity",
   statisticType: "price",
   aggregation: "average",
-  basis: ["nominal"],
   unitFamily: "currency_per_energy",
+  policyInstrument: "capacity market",
   aliases: [
     {
       scheme: "eia-series",
@@ -198,6 +198,7 @@ const dataset = decodeDataset({
   temporal: "monthly",
   keywords: ["electricity", "retail price"],
   themes: ["prices"],
+  variableIds: [variable.id],
   distributionIds: ["https://id.skygest.io/distribution/dist_TESTDIST01"],
   dataServiceIds: [dataService.id],
   inSeries: datasetSeries.id,
@@ -512,6 +513,12 @@ describe("data layer registry repos", () => {
       expect(
         registry.lookup.findVariableByAlias("eia-series", "ELEC.PRICE.US-ALL.M")._tag
       ).toBe("Some");
+      expect([...registry.lookup.findDatasetsByVariableId(variable.id)]).toEqual([
+        dataset
+      ]);
+      expect([...registry.lookup.findVariablesByDatasetId(dataset.id)]).toEqual([
+        variable
+      ]);
       expect(
         [...registry.lookup.findDistributionsByHostname("www.eia.gov")]
       ).toEqual([distribution]);

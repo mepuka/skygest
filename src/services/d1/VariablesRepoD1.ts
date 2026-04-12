@@ -16,8 +16,6 @@ import {
   matchesAlias
 } from "./dataLayerHelpers";
 
-const StringArrayJson = Schema.fromJsonString(Schema.Array(Schema.String));
-
 const VariableRowSchema = Schema.Struct({
   id: Schema.String,
   label: Schema.String,
@@ -27,8 +25,8 @@ const VariableRowSchema = Schema.Struct({
   technology_or_fuel: Schema.NullOr(Schema.String),
   statistic_type: Schema.NullOr(StatisticType),
   aggregation: Schema.NullOr(Aggregation),
-  basis_json: Schema.NullOr(StringArrayJson),
   unit_family: Schema.NullOr(UnitFamily),
+  policy_instrument: Schema.NullOr(Schema.String),
   aliases_json: Schema.fromJsonString(Aliases),
   created_at: Schema.String,
   updated_at: Schema.String
@@ -41,8 +39,8 @@ const VariableFacetsSchema = Schema.Struct({
   technologyOrFuel: Schema.NullOr(Schema.String),
   statisticType: Schema.NullOr(StatisticType),
   aggregation: Schema.NullOr(Aggregation),
-  basis: Schema.NullOr(Schema.Array(Schema.String)),
-  unitFamily: Schema.NullOr(UnitFamily)
+  unitFamily: Schema.NullOr(UnitFamily),
+  policyInstrument: Schema.NullOr(Schema.String)
 });
 
 const VariableUpsertRowSchema = Schema.Struct({
@@ -54,8 +52,8 @@ const VariableUpsertRowSchema = Schema.Struct({
   technology_or_fuel: Schema.NullOr(Schema.String),
   statistic_type: Schema.NullOr(StatisticType),
   aggregation: Schema.NullOr(Aggregation),
-  basis_json: Schema.NullOr(StringArrayJson),
   unit_family: Schema.NullOr(UnitFamily),
+  policy_instrument: Schema.NullOr(Schema.String),
   aliases_json: Schema.fromJsonString(Aliases),
   facets_json: Schema.fromJsonString(VariableFacetsSchema),
   created_at: Schema.String,
@@ -89,8 +87,10 @@ const decodeVariableRow = (row: VariableRow) =>
         : { technologyOrFuel: row.technology_or_fuel }),
       ...(row.statistic_type === null ? {} : { statisticType: row.statistic_type }),
       ...(row.aggregation === null ? {} : { aggregation: row.aggregation }),
-      ...(row.basis_json === null ? {} : { basis: row.basis_json }),
       ...(row.unit_family === null ? {} : { unitFamily: row.unit_family }),
+      ...(row.policy_instrument === null
+        ? {}
+        : { policyInstrument: row.policy_instrument }),
       aliases: row.aliases_json,
       createdAt: row.created_at,
       updatedAt: row.updated_at
@@ -110,8 +110,8 @@ const toVariableUpsertRow = (
   technology_or_fuel: variable.technologyOrFuel ?? null,
   statistic_type: variable.statisticType ?? null,
   aggregation: variable.aggregation ?? null,
-  basis_json: variable.basis ?? null,
   unit_family: variable.unitFamily ?? null,
+  policy_instrument: variable.policyInstrument ?? null,
   aliases_json: variable.aliases,
   facets_json: {
     measuredProperty: variable.measuredProperty ?? null,
@@ -119,8 +119,8 @@ const toVariableUpsertRow = (
     technologyOrFuel: variable.technologyOrFuel ?? null,
     statisticType: variable.statisticType ?? null,
     aggregation: variable.aggregation ?? null,
-    basis: variable.basis ?? null,
-    unitFamily: variable.unitFamily ?? null
+    unitFamily: variable.unitFamily ?? null,
+    policyInstrument: variable.policyInstrument ?? null
   },
   created_at: variable.createdAt,
   updated_at: variable.updatedAt,
@@ -146,8 +146,8 @@ export const VariablesRepoD1 = {
             technology_or_fuel,
             statistic_type,
             aggregation,
-            basis_json,
             unit_family,
+            policy_instrument,
             aliases_json,
             created_at,
             updated_at
@@ -171,8 +171,8 @@ export const VariablesRepoD1 = {
             technology_or_fuel,
             statistic_type,
             aggregation,
-            basis_json,
             unit_family,
+            policy_instrument,
             aliases_json,
             created_at,
             updated_at

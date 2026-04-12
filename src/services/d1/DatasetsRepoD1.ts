@@ -8,6 +8,7 @@ import {
   Dataset as DatasetSchema,
   DatasetSeriesId,
   DistributionId,
+  VariableId,
   type AliasScheme,
   type Dataset
 } from "../../domain/data-layer";
@@ -23,6 +24,7 @@ const AgentIdArrayJson = Schema.fromJsonString(Schema.Array(AgentId));
 const StringArrayJson = Schema.fromJsonString(Schema.Array(Schema.String));
 const DistributionIdArrayJson = Schema.fromJsonString(Schema.Array(DistributionId));
 const DataServiceIdArrayJson = Schema.fromJsonString(Schema.Array(DataServiceId));
+const VariableIdArrayJson = Schema.fromJsonString(Schema.Array(VariableId));
 
 const DatasetRowSchema = Schema.Struct({
   id: Schema.String,
@@ -37,6 +39,7 @@ const DatasetRowSchema = Schema.Struct({
   temporal_coverage_json: Schema.NullOr(Schema.String),
   keywords_json: Schema.NullOr(StringArrayJson),
   themes_json: Schema.NullOr(StringArrayJson),
+  variable_ids_json: Schema.NullOr(VariableIdArrayJson),
   distribution_ids_json: Schema.NullOr(DistributionIdArrayJson),
   data_service_ids_json: Schema.NullOr(DataServiceIdArrayJson),
   in_series: Schema.NullOr(Schema.String),
@@ -59,6 +62,7 @@ const DatasetUpsertRowSchema = Schema.Struct({
   temporal_coverage_json: Schema.NullOr(Schema.String),
   keywords_json: Schema.NullOr(StringArrayJson),
   themes_json: Schema.NullOr(StringArrayJson),
+  variable_ids_json: Schema.NullOr(VariableIdArrayJson),
   distribution_ids_json: Schema.NullOr(DistributionIdArrayJson),
   data_service_ids_json: Schema.NullOr(DataServiceIdArrayJson),
   in_series: Schema.NullOr(Schema.String),
@@ -96,6 +100,7 @@ const decodeDatasetRow = (row: DatasetRow) =>
       ...(row.temporal_coverage_json === null ? {} : { temporal: row.temporal_coverage_json }),
       ...(row.keywords_json === null ? {} : { keywords: row.keywords_json }),
       ...(row.themes_json === null ? {} : { themes: row.themes_json }),
+      ...(row.variable_ids_json === null ? {} : { variableIds: row.variable_ids_json }),
       ...(row.distribution_ids_json === null
         ? {}
         : { distributionIds: row.distribution_ids_json }),
@@ -126,6 +131,7 @@ const toDatasetUpsertRow = (
   temporal_coverage_json: dataset.temporal ?? null,
   keywords_json: dataset.keywords ?? null,
   themes_json: dataset.themes ?? null,
+  variable_ids_json: dataset.variableIds ?? null,
   distribution_ids_json: dataset.distributionIds ?? null,
   data_service_ids_json: dataset.dataServiceIds ?? null,
   in_series: dataset.inSeries ?? null,
@@ -158,6 +164,7 @@ export const DatasetsRepoD1 = {
             temporal_coverage_json,
             keywords_json,
             themes_json,
+            variable_ids_json,
             distribution_ids_json,
             data_service_ids_json,
             in_series,
@@ -188,6 +195,7 @@ export const DatasetsRepoD1 = {
             temporal_coverage_json,
             keywords_json,
             themes_json,
+            variable_ids_json,
             distribution_ids_json,
             data_service_ids_json,
             in_series,
