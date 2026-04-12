@@ -4,6 +4,7 @@ import { makeVariableId } from "../src/domain/data-layer/ids";
 import {
   AttachedContext,
   BoundResolutionItem,
+  EVIDENCE_PRECEDENCE,
   ResolutionEvidenceBundle,
   ResolutionEvidenceReference,
   ResolutionHypothesis,
@@ -20,6 +21,19 @@ const decodeOutcome = Schema.decodeUnknownSync(ResolutionOutcome);
 const encodeOutcome = Schema.encodeSync(ResolutionOutcome);
 
 describe("resolutionKernel domain contract", () => {
+  it("exports the locked evidence precedence order", () => {
+    expect(EVIDENCE_PRECEDENCE).toEqual([
+      "series-label",
+      "x-axis",
+      "y-axis",
+      "chart-title",
+      "key-finding",
+      "post-text",
+      "source-line",
+      "publisher-hint"
+    ]);
+  });
+
   it("round-trips the structured evidence bundle", () => {
     const bundle = decodeBundle(
       encodeBundle({
@@ -116,7 +130,8 @@ describe("resolutionKernel domain contract", () => {
         }
       ],
       evidence: [evidence],
-      confidence: 0.9
+      confidence: 0.9,
+      tier: "strong-heuristic"
     });
     const item = decodeItem({
       itemKey: "solar",
@@ -154,12 +169,16 @@ describe("resolutionKernel domain contract", () => {
           unitFamily: "energy"
         },
         attachedContext: context,
-        items: [item]
+        items: [item],
+        confidence: 0.95,
+        tier: "entailment"
       }),
       decodeOutcome({
         _tag: "Ambiguous" as const,
         bundle,
-        hypotheses: [hypothesis]
+        hypotheses: [hypothesis],
+        confidence: 0.7,
+        tier: "weak-heuristic"
       }),
       decodeOutcome({
         _tag: "Underspecified" as const,
@@ -167,7 +186,10 @@ describe("resolutionKernel domain contract", () => {
         partial: {
           measuredProperty: "generation"
         },
-        hypotheses: [hypothesis]
+        missingRequired: ["statisticType"],
+        hypotheses: [hypothesis],
+        confidence: 0.6,
+        tier: "weak-heuristic"
       }),
       decodeOutcome({
         _tag: "Conflicted" as const,

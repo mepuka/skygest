@@ -7,7 +7,7 @@ import { VariableMatch } from "../src/domain/stage1Resolution";
 import { PostUri } from "../src/domain/types";
 import {
   CandidateEntry,
-  PartialVariableShape,
+  Stage2PartialVariableShape,
   Stage2Evidence,
   Stage2Result,
   Stage3Input
@@ -19,8 +19,10 @@ const asPostUri = Schema.decodeUnknownSync(PostUri)(
 
 const decodeStage2Evidence = Schema.decodeUnknownSync(Stage2Evidence);
 const encodeStage2Evidence = Schema.encodeSync(Stage2Evidence);
-const decodePartialVariableShape = Schema.decodeUnknownSync(PartialVariableShape);
-const encodePartialVariableShape = Schema.encodeSync(PartialVariableShape);
+const decodePartialVariableShape = Schema.decodeUnknownSync(
+  Stage2PartialVariableShape
+);
+const encodePartialVariableShape = Schema.encodeSync(Stage2PartialVariableShape);
 const decodeCandidateEntry = Schema.decodeUnknownSync(CandidateEntry);
 const encodeCandidateEntry = Schema.encodeSync(CandidateEntry);
 const decodeStage3Input = Schema.decodeUnknownSync(Stage3Input);
@@ -50,7 +52,7 @@ describe("stage2Resolution", () => {
         _tag: "FacetDecompositionEvidence" as const,
         signal: "facet-decomposition" as const,
         rank: 1 as const,
-        matchedFacets: ["statisticType", "aggregation"],
+        matchedFacets: ["statisticType", "aggregation"] as const,
         partialShape: {
           statisticType: "flow" as const,
           aggregation: "sum" as const,
@@ -122,7 +124,7 @@ describe("stage2Resolution", () => {
         ),
         label: "Installed wind generation",
         grain: "Variable",
-        matchedFacets: ["technologyOrFuel", "unitFamily"],
+        matchedFacets: ["technologyOrFuel", "unitFamily"] as const,
         rank: 1
       })
     );
@@ -156,7 +158,7 @@ describe("stage2Resolution", () => {
             _tag: "FacetDecompositionEvidence",
             signal: "facet-decomposition",
             rank: 1,
-            matchedFacets: ["technologyOrFuel", "statisticType"],
+            matchedFacets: ["technologyOrFuel", "statisticType"] as const,
             partialShape: {
               technologyOrFuel: "wind",
               statisticType: "flow",
@@ -243,7 +245,7 @@ describe("stage2Resolution", () => {
               ),
               label: "Wind generation",
               grain: "Variable",
-              matchedFacets: ["technologyOrFuel", "statisticType"],
+              matchedFacets: ["technologyOrFuel", "statisticType"] as const,
               rank: 1
             },
             {
@@ -252,7 +254,7 @@ describe("stage2Resolution", () => {
               ),
               label: "Wind capacity",
               grain: "Variable",
-              matchedFacets: ["technologyOrFuel"],
+              matchedFacets: ["technologyOrFuel"] as const,
               rank: 2
             },
             {
@@ -261,7 +263,7 @@ describe("stage2Resolution", () => {
               ),
               label: "EIA wind tables",
               grain: "Dataset",
-              matchedFacets: ["technologyOrFuel"],
+              matchedFacets: ["technologyOrFuel"] as const,
               rank: 3
             }
           ],
@@ -296,7 +298,7 @@ describe("stage2Resolution", () => {
                 _tag: "FacetDecompositionEvidence",
                 signal: "facet-decomposition",
                 rank: 1,
-                matchedFacets: ["technologyOrFuel", "statisticType"],
+                matchedFacets: ["technologyOrFuel", "statisticType"] as const,
                 partialShape: {
                   technologyOrFuel: "wind",
                   statisticType: "flow",
@@ -349,7 +351,7 @@ describe("stage2Resolution", () => {
                 ),
                 label: "Installed wind generation",
                 grain: "Variable",
-                matchedFacets: ["technologyOrFuel", "statisticType"],
+                matchedFacets: ["technologyOrFuel", "statisticType"] as const,
                 rank: 1
               }
             ],

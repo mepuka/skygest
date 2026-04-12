@@ -19,9 +19,6 @@ const toOptionalString = (
   return trimmed.length > 0 ? trimmed : undefined;
 };
 
-const unique = (values: ReadonlyArray<string>): ReadonlyArray<string> =>
-  [...new Set(values)];
-
 const buildSourceLines = (
   asset: VisionAssetEnrichment
 ): ReadonlyArray<ResolutionSourceLine> =>
@@ -36,27 +33,45 @@ const buildPublisherHints = (
   sourceAttribution: SourceAttributionMatchResult | null,
   asset: VisionAssetEnrichment | null
 ): ReadonlyArray<ResolutionPublisherHint> => {
-  const labels = unique(
-    [
-      sourceAttribution?.provider?.providerLabel ?? undefined,
-      ...(
-        sourceAttribution?.providerCandidates.map(
-          (candidate) => candidate.providerLabel
-        ) ?? []
-      ),
-      sourceAttribution?.contentSource?.publication ?? undefined,
-      sourceAttribution?.contentSource?.title ?? undefined,
-      sourceAttribution?.contentSource?.domain ?? undefined,
-      ...(asset?.analysis.organizationMentions.map((mention) => mention.name) ??
-        []),
-      ...(asset?.analysis.logoText ?? [])
-    ].flatMap((value) => {
-      const normalized = toOptionalString(value);
-      return normalized === undefined ? [] : [normalized];
-    })
-  );
+  const hints = new Map<string, ResolutionPublisherHint>();
 
-  return labels.map((label) => ({ label }));
+  const addHint = (
+    value: string | null | undefined,
+    confidence: number
+  ): void => {
+    const label = toOptionalString(value);
+    if (label === undefined) {
+      return;
+    }
+
+    const existing = hints.get(label);
+    if (
+      existing === undefined ||
+      (existing.confidence ?? 0) < confidence
+    ) {
+      hints.set(label, { label, confidence });
+    }
+  };
+
+  addHint(sourceAttribution?.provider?.providerLabel, 1);
+
+  for (const candidate of sourceAttribution?.providerCandidates ?? []) {
+    addHint(candidate.providerLabel, 0.8);
+  }
+
+  addHint(sourceAttribution?.contentSource?.publication, 0.7);
+  addHint(sourceAttribution?.contentSource?.domain, 0.6);
+  addHint(sourceAttribution?.contentSource?.title, 0.4);
+
+  for (const mention of asset?.analysis.organizationMentions ?? []) {
+    addHint(mention.name, 0.5);
+  }
+
+  for (const label of asset?.analysis.logoText ?? []) {
+    addHint(label, 0.3);
+  }
+
+  return [...hints.values()];
 };
 
 const buildAssetBundle = (

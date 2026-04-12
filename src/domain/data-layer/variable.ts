@@ -7,20 +7,23 @@ import { DistributionId, ObservationId, SeriesId, VariableId } from "./ids";
 // Enums
 // ---------------------------------------------------------------------------
 
-export const StatisticType = Schema.Literals([
+export const StatisticTypeMembers = [
   "stock", "flow", "price", "share", "count"
-]).annotate({ description: "Statistical measure type (SDMX-aligned)" });
+] as const;
+export const StatisticType = Schema.Literals(StatisticTypeMembers).annotate({ description: "Statistical measure type (SDMX-aligned)" });
 export type StatisticType = Schema.Schema.Type<typeof StatisticType>;
 
-export const Aggregation = Schema.Literals([
+export const AggregationMembers = [
   "point", "end_of_period", "sum", "average", "max", "min", "settlement"
-]).annotate({ description: "Temporal aggregation method" });
+] as const;
+export const Aggregation = Schema.Literals(AggregationMembers).annotate({ description: "Temporal aggregation method" });
 export type Aggregation = Schema.Schema.Type<typeof Aggregation>;
 
-export const UnitFamily = Schema.Literals([
+export const UnitFamilyMembers = [
   "power", "energy", "currency", "currency_per_energy",
   "mass_co2e", "intensity", "dimensionless", "other"
-]).annotate({ description: "Unit family grouping for dimensional analysis" });
+] as const;
+export const UnitFamily = Schema.Literals(UnitFamilyMembers).annotate({ description: "Unit family grouping for dimensional analysis" });
 export type UnitFamily = Schema.Schema.Type<typeof UnitFamily>;
 
 export const TimePeriod = Schema.Struct({

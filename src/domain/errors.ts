@@ -2,7 +2,7 @@ import { Result, Schema } from "effect";
 import { CandidatePayloadStage } from "./candidatePayload";
 import { DataLayerRegistryDiagnostic } from "./data-layer/registry";
 import { Stage1EvalSnapshotBuildReport } from "./stage1EvalBuild";
-import { Stage2Lane } from "./stage2Resolution";
+import { Stage2Lane } from "./stage2Lane";
 import { Did, PostUri, TranscriptR2Key } from "./types";
 import {
   decodeJsonStringEitherWith,

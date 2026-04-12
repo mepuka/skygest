@@ -116,25 +116,25 @@ Each phase should end with `bun run typecheck` and the relevant focused tests pa
 1. Define the six locked semantic identity facets in `FACET_KEYS`.
 2. Add typed conflict data for failed joins in `src/domain/errors.ts`.
 3. Implement the pure algebra helpers:
-   - `joinPartials`
-   - `subsumes`
-   - `specificity`
-   - `matched`
-   - `mismatched`
-   - `subsumptionRatio`
+  - `joinPartials`
+  - `subsumes`
+  - `specificity`
+  - `matched`
+  - `mismatched`
+  - `subsumptionRatio`
 4. Define the kernel domain schemas:
-   - `ResolutionEvidenceBundle`
-   - `ResolutionHypothesis`
-   - `AttachedContext`
-   - `BoundResolutionItem`
-   - `ResolutionOutcome`
+  - `ResolutionEvidenceBundle`
+  - `ResolutionHypothesis`
+  - `AttachedContext`
+  - `BoundResolutionItem`
+  - `ResolutionOutcome`
 5. Make the outcome union encode the locked statuses:
-   - `Resolved`
-   - `Ambiguous`
-   - `Underspecified`
-   - `Conflicted`
-   - `OutOfRegistry`
-   - `NoMatch`
+  - `Resolved`
+  - `Ambiguous`
+  - `Underspecified`
+  - `Conflicted`
+  - `OutOfRegistry`
+  - `NoMatch`
 
 **Acceptance criteria:**
 
@@ -160,17 +160,17 @@ Each phase should end with `bun run typecheck` and the relevant focused tests pa
 1. Define a compound lexical-entry schema that projects one surface form into a partial semantic assignment.
 2. Add lookup support for compound entries alongside the existing per-facet lookups.
 3. Build a bundle adapter that folds current inputs into one `ResolutionEvidenceBundle`, including:
-   - post text
-   - chart title
-   - axis labels
-   - series labels
-   - key findings
-   - source and publisher hints
+  - post text
+  - chart title
+  - axis labels
+  - series labels
+  - key findings
+  - source and publisher hints
 4. Preserve the locked precedence rule in the bundle semantics:
-   - series labels strongest
-   - axis labels next
-   - title after that
-   - key findings and post text as supporting context
+  - series labels strongest
+  - axis labels next
+  - title after that
+  - key findings and post text as supporting context
 
 **Acceptance criteria:**
 
@@ -190,12 +190,12 @@ Each phase should end with `bun run typecheck` and the relevant focused tests pa
 **Work:**
 
 1. Implement a pure interpretation pass:
-   - project lexical matches into partial assignments
-   - join compatible evidence
-   - preserve incompatible evidence as competing hypotheses or conflict signals
+  - project lexical matches into partial assignments
+  - join compatible evidence
+  - preserve incompatible evidence as competing hypotheses or conflict signals
 2. Support multi-variable bundles by producing factored interpretations with:
-   - shared semantic content
-   - per-item varying content
+  - shared semantic content
+  - per-item varying content
 3. Do not collapse ambiguity just because one hypothesis looks stronger.
 4. Carry attached context separately from the core semantic identity.
 
@@ -222,12 +222,12 @@ Each phase should end with `bun run typecheck` and the relevant focused tests pa
 2. Use `subsumes`, `matched`, `mismatched`, and `subsumptionRatio` for ranking and explanation.
 3. Allow optional narrowing by already-known structural context such as agent or dataset hints, but do not require a single winner when evidence does not justify one.
 4. Assemble one outcome per bundle:
-   - `Resolved` when one coherent interpretation survives
-   - `Ambiguous` when multiple live interpretations remain
-   - `Underspecified` when the bundle conveys something real but not enough
-   - `Conflicted` when the evidence cannot be reconciled
-   - `OutOfRegistry` when a coherent interpretation survives but no registry binding exists
-   - `NoMatch` when no meaningful interpretation survives
+  - `Resolved` when one coherent interpretation survives
+  - `Ambiguous` when multiple live interpretations remain
+  - `Underspecified` when the bundle conveys something real but not enough
+  - `Conflicted` when the evidence cannot be reconciled
+  - `OutOfRegistry` when a coherent interpretation survives but no registry binding exists
+  - `NoMatch` when no meaningful interpretation survives
 
 **Acceptance criteria:**
 
@@ -251,9 +251,9 @@ Each phase should end with `bun run typecheck` and the relevant focused tests pa
 2. Keep `Effect.gen` at the service and orchestration layer only.
 3. If existing `Stage1` or `Stage2` names must remain temporarily, use them as adapters only.
 4. Add one narrow integration test proving:
-   - pure algebra stays pure
-   - the resolver can supply lookup services and bundle input
-   - the kernel outcome survives the boundary unchanged
+  - pure algebra stays pure
+  - the resolver can supply lookup services and bundle input
+  - the kernel outcome survives the boundary unchanged
 
 **Acceptance criteria:**
 
@@ -274,16 +274,16 @@ Each phase should end with `bun run typecheck` and the relevant focused tests pa
 **Work:**
 
 1. Define a new eval fixture format that can express:
-   - one top-level outcome per bundle
-   - multi-item resolved outcomes
-   - ambiguity
-   - conflict
-   - out-of-registry cases
+  - one top-level outcome per bundle
+  - multi-item resolved outcomes
+  - ambiguity
+  - conflict
+  - out-of-registry cases
 2. Score the right things for the new kernel:
-   - outcome status accuracy
-   - binding accuracy for resolved items
-   - ambiguity preservation
-   - out-of-registry detection
+  - outcome status accuracy
+  - binding accuracy for resolved items
+  - ambiguity preservation
+  - out-of-registry detection
 3. Stop treating the old Stage 2 `wrong-new-match` bucket as the main optimization target.
 
 **Acceptance criteria:**
@@ -305,7 +305,7 @@ This is the minimum proof burden for the pure algebra layer. The plan is not com
 - subsumption transitivity
 - specificity monotonicity under successful join
 - successful join result is subsumed by both inputs
-- `subsumes(a, b)` iff `mismatched(a, b).length === 0`
+- if `subsumes(a, b)`, then `mismatched(a, b).length === 0`
 - if `subsumes(a, b)`, then `specificity(a) <= specificity(b)`
 
 **Generator rules:**
@@ -322,33 +322,37 @@ This is the minimum proof burden for the pure algebra layer. The plan is not com
 
 ## File inventory
 
-| File | Action | Purpose |
-| --- | --- | --- |
-| `src/domain/partialVariableAlgebra.ts` | Create | Pure algebra helpers and facet constants |
-| `src/domain/resolutionKernel.ts` | Create | Public kernel domain types and outcome contract |
-| `src/domain/compoundSurfaceForm.ts` | Create | Compound lexical-entry schema |
-| `src/resolution/facetVocabulary/CompoundSurfaceForm.ts` | Create | Compound lexical lookup support |
-| `src/resolution/kernel/BundleAdapter.ts` | Create | Adapter from current resolver inputs to structured bundle |
-| `src/resolution/kernel/Interpret.ts` | Create | Pure interpretation pass |
-| `src/resolution/kernel/Bind.ts` | Create | Pure binding pipeline against registry data |
-| `src/resolution/kernel/AssembleOutcome.ts` | Create | One-outcome assembly logic |
-| `src/resolution/ResolutionKernel.ts` | Create | Thin effectful service wrapper |
-| `tests/partialVariableAlgebra.test.ts` | Create | Unit tests for algebra helpers |
-| `tests/partialVariableAlgebra.property.test.ts` | Create | Property-based law suite |
-| `tests/resolution-kernel-domain.test.ts` | Create | Schema round-trip and contract tests |
-| `tests/resolution-bundle-adapter.test.ts` | Create | Structured bundle tests |
-| `tests/resolution-interpret.test.ts` | Create | Hypothesis-generation tests |
-| `tests/resolution-bind.test.ts` | Create | Registry binding tests |
-| `tests/resolution-outcome.test.ts` | Create | Outcome assembly tests |
-| `tests/resolution-kernel.integration.test.ts` | Create | Resolver-boundary integration test |
-| `eval/resolution-kernel/run-eval.ts` | Create | New eval runner for kernel statuses |
+
+| File                                                    | Action | Purpose                                                   |
+| ------------------------------------------------------- | ------ | --------------------------------------------------------- |
+| `src/domain/partialVariableAlgebra.ts`                  | Create | Pure algebra helpers and facet constants                  |
+| `src/domain/resolutionKernel.ts`                        | Create | Public kernel domain types and outcome contract           |
+| `src/domain/compoundSurfaceForm.ts`                     | Create | Compound lexical-entry schema                             |
+| `src/resolution/facetVocabulary/CompoundSurfaceForm.ts` | Create | Compound lexical lookup support                           |
+| `src/resolution/kernel/BundleAdapter.ts`                | Create | Adapter from current resolver inputs to structured bundle |
+| `src/resolution/kernel/Interpret.ts`                    | Create | Pure interpretation pass                                  |
+| `src/resolution/kernel/Bind.ts`                         | Create | Pure binding pipeline against registry data               |
+| `src/resolution/kernel/AssembleOutcome.ts`              | Create | One-outcome assembly logic                                |
+| `src/resolution/ResolutionKernel.ts`                    | Create | Thin effectful service wrapper                            |
+| `tests/partialVariableAlgebra.test.ts`                  | Create | Unit tests for algebra helpers                            |
+| `tests/partialVariableAlgebra.property.test.ts`         | Create | Property-based law suite                                  |
+| `tests/resolution-kernel-domain.test.ts`                | Create | Schema round-trip and contract tests                      |
+| `tests/resolution-bundle-adapter.test.ts`               | Create | Structured bundle tests                                   |
+| `tests/resolution-interpret.test.ts`                    | Create | Hypothesis-generation tests                               |
+| `tests/resolution-bind.test.ts`                         | Create | Registry binding tests                                    |
+| `tests/resolution-outcome.test.ts`                      | Create | Outcome assembly tests                                    |
+| `tests/resolution-kernel.integration.test.ts`           | Create | Resolver-boundary integration test                        |
+| `eval/resolution-kernel/run-eval.ts`                    | Create | New eval runner for kernel statuses                       |
+
 
 ## Risks and mitigations
 
-| Risk | Mitigation |
-| --- | --- |
-| Old gate assumptions leak back into implementation | Treat the locked outcome contract as the source of truth and do not revive the hard `resolvable()` gate as the primary decision rule. |
-| The pure/effect boundary gets blurred again | Keep algebra and outcome modeling in `src/domain/`; keep service wiring in the resolver layer only. |
-| Ambiguity gets collapsed too early by ranking | Confidence may order hypotheses, but it must not convert `Ambiguous` into `Resolved` by itself. |
-| Bundle adapters lose important structure from charts | Test shared evidence, per-series evidence, and attached context explicitly before binding work starts. |
-| The new eval harness accidentally reuses legacy assumptions | Write fixtures directly against the locked statuses and multi-item outcome shape. |
+
+| Risk                                                        | Mitigation                                                                                                                            |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Old gate assumptions leak back into implementation          | Treat the locked outcome contract as the source of truth and do not revive the hard `resolvable()` gate as the primary decision rule. |
+| The pure/effect boundary gets blurred again                 | Keep algebra and outcome modeling in `src/domain/`; keep service wiring in the resolver layer only.                                   |
+| Ambiguity gets collapsed too early by ranking               | Confidence may order hypotheses, but it must not convert `Ambiguous` into `Resolved` by itself.                                       |
+| Bundle adapters lose important structure from charts        | Test shared evidence, per-series evidence, and attached context explicitly before binding work starts.                                |
+| The new eval harness accidentally reuses legacy assumptions | Write fixtures directly against the locked statuses and multi-item outcome shape.                                                     |
+

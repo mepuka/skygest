@@ -1,8 +1,11 @@
-import { Result, Schema } from "effect";
+import { Predicate, Result, Schema } from "effect";
 import {
   Aggregation,
+  AggregationMembers,
   StatisticType,
-  UnitFamily
+  StatisticTypeMembers,
+  UnitFamily,
+  UnitFamilyMembers
 } from "./data-layer/variable";
 import {
   PartialVariableFacetConflict,
@@ -19,26 +22,60 @@ export const FACET_KEYS = [
 ] as const;
 
 export type FacetKey = (typeof FACET_KEYS)[number];
+export const REQUIRED_FACET_KEYS = [
+  "measuredProperty",
+  "statisticType"
+] as const satisfies ReadonlyArray<FacetKey>;
+export type RequiredFacetKey = (typeof REQUIRED_FACET_KEYS)[number];
 
 export const FacetKey = Schema.Literals(FACET_KEYS).annotate({
   description: "One of the six locked semantic identity dimensions for the resolution kernel"
 });
+export const RequiredFacetKey = Schema.Literals(REQUIRED_FACET_KEYS).annotate({
+  description: "Kernel facets required for a partial to clear the minimum identity threshold"
+});
 
-export const PartialVariableShape = Schema.Struct({
+export const PARTIAL_VARIABLE_GENERATOR_VALUES = {
+  measuredProperty: ["generation", "capacity", "investment", "price"] as const,
+  domainObject: ["electricity", "natural gas", "battery storage", "grid"] as const,
+  technologyOrFuel: ["wind", "solar", "coal", "natural gas"] as const,
+  statisticType: StatisticTypeMembers,
+  aggregation: AggregationMembers,
+  unitFamily: UnitFamilyMembers
+} as const;
+
+export const PARTIAL_VARIABLE_FIELDS = {
   measuredProperty: Schema.optionalKey(Schema.String),
   domainObject: Schema.optionalKey(Schema.String),
   technologyOrFuel: Schema.optionalKey(Schema.String),
   statisticType: Schema.optionalKey(StatisticType),
   aggregation: Schema.optionalKey(Aggregation),
   unitFamily: Schema.optionalKey(UnitFamily)
-}).annotate({
+} as const;
+
+export const PartialVariableShape = Schema.Struct(PARTIAL_VARIABLE_FIELDS).annotate({
   description:
     "Resolution-kernel partial variable assignment over the six locked semantic identity dimensions"
 });
 export type PartialVariableShape = Schema.Schema.Type<typeof PartialVariableShape>;
+export type ResolvablePartial = PartialVariableShape & {
+  readonly measuredProperty: string;
+  readonly statisticType: PartialVariableShape["statisticType"];
+};
 
 const asConflictPair = (left: string, right: string): readonly [string, string] =>
   left <= right ? [left, right] : [right, left];
+
+export const missingRequired = (
+  partial: PartialVariableShape
+): ReadonlyArray<RequiredFacetKey> =>
+  REQUIRED_FACET_KEYS.filter((facet) => partial[facet] === undefined);
+
+export const resolvable: Predicate.Refinement<
+  PartialVariableShape,
+  ResolvablePartial
+> = (partial): partial is ResolvablePartial =>
+  partial.measuredProperty !== undefined && partial.statisticType !== undefined;
 
 export const specificity = (partial: PartialVariableShape): number =>
   FACET_KEYS.reduce(

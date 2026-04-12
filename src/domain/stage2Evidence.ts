@@ -1,5 +1,6 @@
 import { Schema } from "effect";
-import { PartialVariableShape } from "./stage2Core";
+import { FacetKey } from "./partialVariableAlgebra";
+import { Stage2PartialVariableShape } from "./stage2Core";
 import { Stage1Rank } from "./stage1Shared";
 import { SurfaceFormEntryAny } from "./surfaceForm";
 
@@ -12,8 +13,8 @@ export const FacetDecompositionEvidence = Schema.TaggedStruct(
   {
     signal: Schema.Literal("facet-decomposition"),
     rank: Stage1Rank,
-    matchedFacets: Schema.Array(Schema.String),
-    partialShape: PartialVariableShape,
+    matchedFacets: Schema.Array(FacetKey),
+    partialShape: Stage2PartialVariableShape,
     matchedSurfaceForms: Schema.Array(SurfaceFormEntryAny)
   }
 );

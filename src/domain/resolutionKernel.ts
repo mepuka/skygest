@@ -3,7 +3,10 @@ import { VariableId } from "./data-layer/ids";
 import { TimePeriod } from "./data-layer/variable";
 import { PartialVariableFacetConflict } from "./errors";
 import { ChartAxis, TemporalCoverage } from "./media";
-import { PartialVariableShape } from "./partialVariableAlgebra";
+import {
+  PartialVariableShape,
+  RequiredFacetKey
+} from "./partialVariableAlgebra";
 import { PostUri } from "./types";
 
 const ZeroToOneScore = Schema.Number.pipe(
@@ -34,6 +37,26 @@ export const ResolutionEvidenceSource = Schema.Literals([
 ]);
 export type ResolutionEvidenceSource = Schema.Schema.Type<
   typeof ResolutionEvidenceSource
+>;
+
+export const EVIDENCE_PRECEDENCE = [
+  "series-label",
+  "x-axis",
+  "y-axis",
+  "chart-title",
+  "key-finding",
+  "post-text",
+  "source-line",
+  "publisher-hint"
+] as const satisfies ReadonlyArray<ResolutionEvidenceSource>;
+
+export const ResolutionEvidenceTier = Schema.Literals([
+  "entailment",
+  "strong-heuristic",
+  "weak-heuristic"
+]);
+export type ResolutionEvidenceTier = Schema.Schema.Type<
+  typeof ResolutionEvidenceTier
 >;
 
 export const ResolutionEvidenceReference = Schema.Struct({
@@ -118,7 +141,8 @@ export const ResolutionHypothesis = Schema.Struct({
   attachedContext: AttachedContext,
   items: Schema.Array(ResolutionHypothesisItem),
   evidence: Schema.Array(ResolutionEvidenceReference),
-  confidence: Schema.optionalKey(ZeroToOneScore)
+  confidence: Schema.optionalKey(ZeroToOneScore),
+  tier: Schema.optionalKey(ResolutionEvidenceTier)
 }).annotate({
   description:
     "Structured interpretation assembled from one bundle before registry binding"
@@ -142,20 +166,27 @@ export const Resolved = Schema.TaggedStruct("Resolved", {
   bundle: ResolutionEvidenceBundle,
   sharedPartial: PartialVariableShape,
   attachedContext: AttachedContext,
-  items: Schema.Array(BoundResolutionItem)
+  items: Schema.Array(BoundResolutionItem),
+  confidence: Schema.optionalKey(ZeroToOneScore),
+  tier: Schema.optionalKey(ResolutionEvidenceTier)
 });
 export type Resolved = Schema.Schema.Type<typeof Resolved>;
 
 export const Ambiguous = Schema.TaggedStruct("Ambiguous", {
   bundle: ResolutionEvidenceBundle,
-  hypotheses: Schema.Array(ResolutionHypothesis)
+  hypotheses: Schema.Array(ResolutionHypothesis),
+  confidence: Schema.optionalKey(ZeroToOneScore),
+  tier: Schema.optionalKey(ResolutionEvidenceTier)
 });
 export type Ambiguous = Schema.Schema.Type<typeof Ambiguous>;
 
 export const Underspecified = Schema.TaggedStruct("Underspecified", {
   bundle: ResolutionEvidenceBundle,
   partial: PartialVariableShape,
-  hypotheses: Schema.Array(ResolutionHypothesis)
+  missingRequired: Schema.Array(RequiredFacetKey),
+  hypotheses: Schema.Array(ResolutionHypothesis),
+  confidence: Schema.optionalKey(ZeroToOneScore),
+  tier: Schema.optionalKey(ResolutionEvidenceTier)
 });
 export type Underspecified = Schema.Schema.Type<typeof Underspecified>;
 

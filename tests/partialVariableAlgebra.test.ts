@@ -3,9 +3,12 @@ import { Result, Schema } from "effect";
 import {
   FACET_KEYS,
   PartialVariableShape,
+  REQUIRED_FACET_KEYS,
   joinPartials,
   matched,
   mismatched,
+  missingRequired,
+  resolvable,
   specificity,
   subsumes,
   subsumptionRatio
@@ -23,6 +26,10 @@ describe("partialVariableAlgebra", () => {
       "aggregation",
       "unitFamily"
     ]);
+  });
+
+  it("exports the minimum required facet keys for resolvability", () => {
+    expect(REQUIRED_FACET_KEYS).toEqual(["measuredProperty", "statisticType"]);
   });
 
   it("joins compatible partials without losing filled facets", () => {
@@ -133,5 +140,20 @@ describe("partialVariableAlgebra", () => {
 
     expect(subsumes(general, specific)).toBe(false);
     expect(subsumptionRatio(general, specific)).toBe(0);
+  });
+
+  it("tracks missing required facets and refines resolvable partials", () => {
+    const unresolved = asPartial({
+      measuredProperty: "generation"
+    });
+    const resolved = asPartial({
+      measuredProperty: "generation",
+      statisticType: "flow"
+    });
+
+    expect(missingRequired(unresolved)).toEqual(["statisticType"]);
+    expect(resolvable(unresolved)).toBe(false);
+    expect(missingRequired(resolved)).toEqual([]);
+    expect(resolvable(resolved)).toBe(true);
   });
 });

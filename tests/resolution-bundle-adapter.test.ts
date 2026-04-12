@@ -139,10 +139,10 @@ describe("buildResolutionEvidenceBundles", () => {
         }
       ],
       publisherHints: [
-        { label: "Fraunhofer ISE" },
-        { label: "Energy Charts" },
-        { label: "German solar generation" },
-        { label: "energy-charts.info" }
+        { label: "Fraunhofer ISE", confidence: 1 },
+        { label: "Energy Charts", confidence: 0.8 },
+        { label: "energy-charts.info", confidence: 0.6 },
+        { label: "German solar generation", confidence: 0.4 }
       ],
       temporalCoverage: {
         startDate: "2024-01",
@@ -187,7 +187,8 @@ describe("buildResolutionEvidenceBundles", () => {
         sourceLines: [],
         publisherHints: [
           {
-            label: "U.S. Energy Information Administration"
+            label: "U.S. Energy Information Administration",
+            confidence: 1
           }
         ]
       }
