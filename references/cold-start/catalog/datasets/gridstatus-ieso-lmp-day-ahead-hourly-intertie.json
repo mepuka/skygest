@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F54K04FBAD57Y1Z8V33",
   "title": "GridStatus IESO LMP Day Ahead Hourly Intertie",
   "description": "Day-ahead hourly intertie LMPs for IESO interchange. Interfaces by neighboring region:\n\nQuébec (PQ):\n- PQ.BEAUHARNOIS_PQBE\n- PQ.BRYSON_PQXY\n- PQ.KIPAWA_PQHZ\n- PQ.MACLAREN_PQDA\n- PQ.MASSON_PQHA\n- PQ.OUTAOUAIS_PQAT\n- PQ.PAUGAN_PQPC\n- PQ.QUYON_PQQC\n- PQ.RAPIDDESISLE_PQDZ\n\nNew York ISO (NY)\n- EC.MARITIMES_NYSI\n- NY.ROSETON_NYSI\n\nManitoba (MB)\n- MB.SEVENSISTERS_MBSK\n- MB.WHITESHELL_MBSI\n\nMichigan (MI):\n\n- MI.LUDINGTON_MISI\n- MI.LUDINGTON.SOURCE\n- WC.PRAIRERANGES_MISI\n- MD.CALVERTCLIFF_MISI\n- MD.CALVERTCLIFF_NYSI\n\nMinnesota (MN):\n- MN.INTFALLS_MNSI",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNR9ESXRS6RY2TE0AAXD16ZT"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/ieso_lmp_day_ahead_hourly_intertie",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

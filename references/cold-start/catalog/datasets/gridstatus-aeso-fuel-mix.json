@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4FQG0Q8QWWANBKTVBQ",
   "title": "GridStatus AESO Fuel Mix",
   "description": "Fuel mix data in AESO. This data is sampled every 1-2 minutes.  ",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXP6MWXWMNJ2A93ESKT",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNR9ESXP6MWXWMNJ2A93ESKT"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/aeso_fuel_mix",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

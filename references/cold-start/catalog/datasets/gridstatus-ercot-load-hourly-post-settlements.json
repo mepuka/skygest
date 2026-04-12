@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4YCP01YQ1VHKRPBYVN",
   "title": "GridStatus ERCOT Load Hourly Post Settlements",
   "description": "Hourly load data for each of ERCOT’s weather zones. This data is published for each month in the first two weeks of the following month, after settlements have been processed. \n\nThis dataset differs from [ERCOT Load By Weather Zone](https://www.gridstatus.io/datasets/ercot_load_by_weather_zone) as that data is reported in real time.\n\nThis dataset may be updated over the course of the month in which it is initially published. ",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/ercot_load_hourly_post_settlements",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

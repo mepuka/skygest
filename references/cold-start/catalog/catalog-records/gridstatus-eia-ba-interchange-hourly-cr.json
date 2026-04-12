@@ -7,7 +7,7 @@
   "sourceRecordId": "eia_ba_interchange_hourly",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2023-04-28T19:50:26+00:00",
-  "lastSeen": "2026-04-11T02:31:21+00:00",
-  "sourceModified": "2026-04-09T06:00:00+00:00",
+  "lastSeen": "2026-04-12T16:17:58+00:00",
+  "sourceModified": "2026-04-11T06:00:00+00:00",
   "isAuthoritative": true
 }

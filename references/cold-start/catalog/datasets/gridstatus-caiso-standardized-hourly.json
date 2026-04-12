@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4QXWV5VD663ZDP84V7",
   "title": "GridStatus CAISO hourly standardized data",
   "description": "This table is a curated set of hourly data for CAISO. All standardized datasets are intended to speed up analysis and feature engineering work by providing commonly used data series in one denormalized table. Data in this feed is resampled to an hourly frequency from five minutes.\n\nThe standardized datasets are a conveience for API users who only want to query one dataset for each ISO. If you plan on loading in every dataset or want to work with more multiple series alone and together it is recommended to pull the individual datasets to have full visibility into each one.\n\n⚠️ Not all data series are present for the entire length of the dataset. This can occur due to a lack of historical data or the publication of new core datasets by an ISO.",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/caiso_standardized_hourly",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

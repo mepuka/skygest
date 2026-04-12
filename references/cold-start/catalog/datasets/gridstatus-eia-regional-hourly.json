@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4SC5AH95D4GWB68GBT",
   "title": "GridStatus EIA Regional Hourly",
   "description": "Hourly regional summary data as reported the EIA-930 dataset. Contains data on Load, Load Forecast, Net Generation, and Net Interchange.\n\nℹ️ EIA data can be delayed or revised. To avoid missing updates, we:\n* Check for new data and revisions throughout the day for the previous 24 hours.\n* At 04:00 UTC, recheck the past 30 days for any changes.\nIn both cases, updates are only applied when the new values are non-null.\n\n⚠️ For the most accurate and up to date ISO/RTO load, generation, and interchange data, we recommend using their respective datasets instead.\n\n",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/eia_regional_hourly",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

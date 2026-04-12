@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5HYY0BP794RGV3BJEE",
   "title": "GridStatus PJM Net Exports By State Hourly",
   "description": "This dataset contains the hourly difference between generation and load in each of PJM’s 13 states as well as Washington, DC. Negative values indicate net flows into the state whereas positive indicate exports. This dataset does not account for actual power flows. ",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/pjm_net_exports_by_state_hourly",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

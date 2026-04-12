@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4K69KRAYVWEA0RCRZ4",
   "title": "GridStatus CAISO LMP HASP 15 Min",
   "description": "15-minute Locational Marginal Prices in $/MWh, for the HASP hour. Posts the LMP, plus the Congestion, Loss and Energy Components that make up the LMP. Posts the HASP Binding LMP for PNodes and APNodes relevant to Hourly Pre-Dispatched Resources. Posts the HASP Advisory LMP for PNodes and APNodes relevant to the Non-Hourly Pre-Dispatch Resources.",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/caiso_lmp_hasp_15_min",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

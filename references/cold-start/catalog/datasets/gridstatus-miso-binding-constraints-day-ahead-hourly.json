@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5C3DKZM7NMWH4QTKZZ",
   "title": "GridStatus MISO Binding Constraints Day Ahead Hourly",
   "description": "Day-ahead, hourly, binding constraints in MISO. \n\nConstraints are limited elements of the transmission system, when binding power flow is limited between locations by the constraint. Managing these may require generators to be dispatched out of the merit order.",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/miso_binding_constraints_day_ahead_hourly",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

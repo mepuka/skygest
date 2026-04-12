@@ -74,9 +74,9 @@ const SOURCE_AGENT_SLUGS: Record<string, string> = {
   ercot: "ercot",
   "independent electricity system operator": "ieso",
   ieso: "ieso",
-  "iso new england": "isone",
-  "iso-ne": "isone",
-  isone: "isone",
+  "iso new england": "iso-ne",
+  "iso-ne": "iso-ne",
+  isone: "iso-ne",
   "midcontinent independent system operator": "miso",
   miso: "miso",
   "new york independent system operator": "nyiso",
@@ -86,8 +86,8 @@ const SOURCE_AGENT_SLUGS: Record<string, string> = {
   pjm: "pjm",
   "southwest power pool": "spp",
   spp: "spp",
-  "hydro-quebec": "hq",
-  hq: "hq",
+  "hydro-quebec": "hydro-quebec",
+  hq: "hydro-quebec",
   gridstatus: "gridstatus"
 };
 

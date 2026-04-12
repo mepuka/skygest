@@ -7,7 +7,7 @@
   "sourceRecordId": "pjm_pricing_nodes",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-07-18T21:10:50+00:00",
-  "lastSeen": "2026-04-10T19:04:42+00:00",
+  "lastSeen": "2026-04-11T19:03:24+00:00",
   "sourceModified": "2026-04-02T04:00:00+00:00",
   "isAuthoritative": true
 }

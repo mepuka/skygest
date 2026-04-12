@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4ZPJKEEF59YQB78334",
   "title": "GridStatus ERCOT SCED Load Resource 60 Day",
   "description": "SCED load resource data. Published with 60 day delay. Contains bid curves, telemetry, and other data.\n\n\nWith this data you can construct the actual operations and instructions for each load resource in ERCOT. As an example, with this data it is possible to understand a resource's typical adherence to schedule and instructions by comparing the base points (an output from SCED) and their real power consumption using the columns `base_point` and `real_power_consumption`.\n\nFor most load resources, ancillary service schedules can also be derived from this dataset. However, because energy storage resources are generation resources when discharging, it is necessary to refer to the [ERCOT SCED Generation Resource 60 Day](https://www.gridstatus.io/datasets/ercot_sced_gen_resource_60_day) dataset for a complete picture of their obligations.\n\n⚠️ Beginning with data for 12/5/2025, the active columns in this dataset changed due to ERCOT's implementation of RTC+B. Changes include the retirement of columns, which will be null going forward, and the addition of new columns, which will be null prior to 12/5/2025.\n\nNew columns post RTC+B:\n* ramp_rate_up\n* ramp_rate_down\n* as_capability_regup\n* as_capability_regdown\n* as_capability_ecrs\n* as_capability_nonspin\n* as_awards_nonspin\n* as_awards_rrsffr\n* as_awards_rrspfr\n* as_awards_rrsufr\n* as_awards_ecrs\n* as_awards_regup\n* as_awards_regdown\n* self_provided_rrsffr\n* self_provided_rrsufr\n* self_provided_ecrs\n \nColumns without new data post-RTC+B:\n* as_responsibility_for_rrs\n* as_responsibility_for_rrsffr\n* as_responsibility_for_nonspin\n* as_responsibility_for_regup\n* as_responsibility_for_regdown\n* as_responsibility_for_ecrs\n* hasl\n* lasl",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/ercot_sced_load_resource_60_day",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

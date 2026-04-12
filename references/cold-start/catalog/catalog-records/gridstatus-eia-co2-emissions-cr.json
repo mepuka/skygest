@@ -7,7 +7,7 @@
   "sourceRecordId": "eia_co2_emissions",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2023-09-19T00:21:14+00:00",
-  "lastSeen": "2026-04-10T03:36:45+00:00",
-  "sourceModified": "2026-04-09T06:00:00+00:00",
+  "lastSeen": "2026-04-12T03:46:24+00:00",
+  "sourceModified": "2026-04-11T06:00:00+00:00",
   "isAuthoritative": true
 }

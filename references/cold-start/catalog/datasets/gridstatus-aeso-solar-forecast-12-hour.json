@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4GJEY1GQ4J1FGW8GYX",
   "title": "GridStatus AESO Solar Forecast 12 Hour",
   "description": "This dataset contains AESO’s forecasted solar generation for the next 12 hours, calculated every 10 minutes. AESO calculates three generation forecasts: minimum, most likely, and maximum. Additionally, AESO calculates a percentage of generation compared to the current installed capacity for each forecast range. ",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNR9ESXP6MWXWMNJ2A93ESKT",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNR9ESXP6MWXWMNJ2A93ESKT"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/aeso_solar_forecast_12_hour",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

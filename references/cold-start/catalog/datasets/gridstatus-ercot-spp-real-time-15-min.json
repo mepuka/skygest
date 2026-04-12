@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F50RB9WFEM2CGYP1JN2",
   "title": "GridStatus ERCOT SPP Real Time 15 Min",
   "description": "Settlement Point Prices in 15-minute intervals as reported by ERCOT in real-time. These are derived from LMPs as well as price adders to calculate prices used in settlements. SPPs are calculated for Resource Nodes, Load Zones, and Hubs.\n\nThe location types present are:\n\n- *Trading Hub*\n- *Load Zone Energy Weighted*\n- *Load Zone DC Tie*\n- *Resource Node*\n- *Load Zone*\n- *Load Zone DC Tie Energy Weighted*\n\n\n💡 There are many fewer settlement point locations than buses. Keeping this in mind can help to slim down initial ERCOT analyses before turning to individual bus locations.",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/ercot_spp_real_time_15_min",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

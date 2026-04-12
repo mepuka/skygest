@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4VH9TW4Y45RSH406DF",
   "title": "GridStatus ERCOT DAM Generation Resource AS Offers 60 Day",
   "description": "Generation offers for ancillary services in ERCOT with a 60-day delay.\n\nThis dataset contains the offers to provide ancillary servies by generation resources in ERCOT. Each row contains bids across all products for a particular resource at a particular time. Services offered include ERCOT Contingency Reserve Service (ECRS), Non-Spinning Responsive Reserves (NSPIN), Regulation Down (REGDN), Regulation Up (REGUP), and Responsive Reserves (RRS).",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/ercot_dam_gen_resource_as_offers_60_day",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

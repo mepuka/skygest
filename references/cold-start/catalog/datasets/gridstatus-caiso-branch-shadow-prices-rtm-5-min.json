@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4HTJ3K0Z7MKG2G843V",
   "title": "GridStatus CAISO Branch Shadow Prices RTM 5 Min",
   "description": "Five-minute real-time constraint pricing in CAISO at each Nomogram and Branch. \n\nCAISO uses Nomograms to: “define a constraint relationship between two power system MW variables.”  See section 3.1.7 of the Market+Operations Business Practice Manual for more information on CAISO’s use of Nomograms. ",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VF8QYJ4ZRG4NNERPQG"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/caiso_branch_shadow_prices_rtm_5_min",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

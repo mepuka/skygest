@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5EWHE1P8TGFN4WSJJ7",
   "title": "GridStatus NYISO Fuel Mix Raw",
   "description": "Fuel Mix as reported by NYISO. Typically in 5-minute intervals, but with occasional off-interval entries, e.g. 18:01 or 17:57.\n\n💡 The main differentiating element of the NYISO fuel mix relative\nto other ISOs is the presence of *Dual Fuel*.\n\nRather than changing units between multiple fuels in the data as they\nswitch, *Dual Fuel* units in NYISO represent generators that can run\non either fuel oil or natural gas. In most hours these units will be\nrunning on natural gas, which tends to be cheaper. This is possible\nto ascertain from systemwide prices when there is a significant price\nspread between fuel oil and natural gas.",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQS8K6ZT00RZB0JG1HG34CV"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/nyiso_fuel_mix_raw",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

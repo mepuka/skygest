@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4TGAKJB59Q2ZBV6R9Y",
   "title": "GridStatus ERCOT Capacity Forecast",
   "description": "Committed and available capacity forecast in ERCOT.\n\nThe forecasted committed capacity (Committed Capacity) and the\nforecasted available capacity (Available Capacity) for the current day.\n\nThe forecasted committed capacity is based on generating units' Current Operating\nPlans and change over time based on generating units' start-up and shut-down plans,\nas well as forecasted wind and solar generation output.\n\nThe forecasted available capacity is the sum of:\n* The forecasted committed capacity;\n* Current committed capacity that is planning to go off-line but is available to\n    remain on-line, and;\n* Additional capacity available to come on-line, if committed at present. (The\n    available capacity in each future hour takes into account the start-up time of\n    each generating unit, therefore it typically increases further out in time.)\n",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/ercot_capacity_forecast",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

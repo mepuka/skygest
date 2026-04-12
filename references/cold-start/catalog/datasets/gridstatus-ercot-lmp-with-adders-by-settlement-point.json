@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F4XTGK79AEXVF9R1FZK",
   "title": "GridStatus ERCOT LMP with Adders by Settlement Point",
   "description": "This dataset combines the real-time, five-minute LMP pricing for each settlement point with the active online adder pricing to produce a five-minute view of price data that is otherwise only available in 15-minute SPPs. \n\nPrior to the implementation of RTB+C on 12/5/2025, the adders added to the LMP were the Real Time Online Reserve Price Adder (RTORPA) and the Real Time Online Reliability Deployment Price Adder (RTORDPA). From 12/5/2025 on, the remaining adder is the Real-time Reliability Deployment Price Adder (RTRDPA).",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VFAP11ATA25CCWARSF"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/ercot_lmp_with_adders_by_settlement_point",
   "accessRights": "public",
@@ -24,7 +26,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5D88HTDXN0HAGNGP49",
   "title": "GridStatus MISO Interchange 5 Min",
   "description": "5 minute power flows between MISO and neighboring balancing authorities. These include Associated Electric Cooperative Inc (AECI), Louisville Gas and Electric (LGEE), Manitoba Hydro-Electric Board (MHEB), Ontario (ONT), PJM, Southern Company (SOCO), Southwest Power Association (SPA), Southwest Power Pool (SWPP), and Tennessee Valley Authority (TVA). Additionally, both total scheduled and total real time flows are included. Negative values indicate MISO is importing, positive indicate exports.",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQS8K6VGJ1M1PCNH6D005KC"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/miso_interchange_5_min",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

@@ -3,7 +3,9 @@
   "id": "https://id.skygest.io/dataset/ds_01KNX70F5NC7S9Q2EG87C4Q1ZX",
   "title": "GridStatus SPP VER Curtailments By BAA",
   "description": "VER curtailment data in 5 minute intervals for SPP by BAA, SPP East (SPP) and SPP West (SWPW). For SPP East, the data begins on March 30th, 2026, while SWPW begins on April 1st, 2026.\n\nFor SPP-wide and historical VER curtailment data, see the `spp_ver_curtailments` [dataset](https://www.gridstatus.io/datasets/spp_ver_curtailments).\n\n\nThis data is total VER curtailment (not per resource).",
-  "creatorAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB",
+  "wasDerivedFrom": [
+    "https://id.skygest.io/agent/ag_01KNQEZ5VG5ZTH2XCS61PZZ8SB"
+  ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/spp_ver_curtailments_by_baa",
   "accessRights": "public",
@@ -25,7 +27,7 @@
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-11T02:47:57.485Z",
+  "updatedAt": "2026-04-12T16:29:41.516Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

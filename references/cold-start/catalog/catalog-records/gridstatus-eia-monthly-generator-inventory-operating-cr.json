@@ -7,7 +7,7 @@
   "sourceRecordId": "eia_monthly_generator_inventory_operating",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-02-24T23:20:23+00:00",
-  "lastSeen": "2026-04-10T03:36:56+00:00",
+  "lastSeen": "2026-04-12T03:46:38+00:00",
   "sourceModified": "2026-02-01T00:00:00+00:00",
   "isAuthoritative": true
 }

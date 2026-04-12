@@ -7,7 +7,7 @@
   "sourceRecordId": "caiso_lmp_hasp_15_min",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-03-20T15:25:08+00:00",
-  "lastSeen": "2026-04-11T02:03:37+00:00",
-  "sourceModified": "2026-04-11T03:45:00+00:00",
+  "lastSeen": "2026-04-12T16:02:42+00:00",
+  "sourceModified": "2026-04-12T17:45:00+00:00",
   "isAuthoritative": true
 }

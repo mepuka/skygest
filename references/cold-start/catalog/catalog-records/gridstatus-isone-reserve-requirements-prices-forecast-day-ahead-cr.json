@@ -7,7 +7,7 @@
   "sourceRecordId": "isone_reserve_requirements_prices_forecast_day_ahead",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-10-14T21:35:23+00:00",
-  "lastSeen": "2026-04-10T17:10:39+00:00",
-  "sourceModified": "2026-04-12T03:00:00+00:00",
+  "lastSeen": "2026-04-12T16:29:11+00:00",
+  "sourceModified": "2026-04-13T03:00:00+00:00",
   "isAuthoritative": true
 }
