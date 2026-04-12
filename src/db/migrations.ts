@@ -881,6 +881,15 @@ const migration22: D1Migration = {
   ]
 };
 
+const migration23: D1Migration = {
+  id: 23,
+  name: "runtime_variable_profile_alignment",
+  statements: [
+    `ALTER TABLE variables ADD COLUMN policy_instrument TEXT`,
+    `ALTER TABLE datasets ADD COLUMN variable_ids_json TEXT`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -903,5 +912,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration19,
   migration20,
   migration21,
-  migration22
+  migration22,
+  migration23
 ];

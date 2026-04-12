@@ -4,12 +4,16 @@ import type { DataLayerRegistrySeed } from "../src/domain/data-layer";
 import { prepareDataLayerRegistry, toDataLayerRegistryLookup } from "../src/resolution/dataLayerRegistry";
 
 const iso = "2026-04-09T00:00:00.000Z" as const;
+const agentId = "https://id.skygest.io/agent/ag_1234567890AB" as any;
+const datasetId = "https://id.skygest.io/dataset/ds_1234567890AB" as any;
+const distributionId = "https://id.skygest.io/distribution/dist_1234567890AB" as any;
+const variableId = "https://id.skygest.io/variable/var_1234567890AB" as any;
 
 const makeSeed = (): DataLayerRegistrySeed => ({
   agents: [
     {
       _tag: "Agent",
-      id: "https://id.skygest.io/agent/ag_1234567890AB" as any,
+      id: agentId,
       kind: "organization",
       name: "Energy Information Administration",
       alternateNames: ["EIA"],
@@ -24,9 +28,9 @@ const makeSeed = (): DataLayerRegistrySeed => ({
   datasets: [
     {
       _tag: "Dataset",
-      id: "https://id.skygest.io/dataset/ds_1234567890AB" as any,
+      id: datasetId,
       title: "EIA Emissions Data",
-      publisherAgentId: "https://id.skygest.io/agent/ag_1234567890AB" as any,
+      publisherAgentId: agentId,
       aliases: [
         {
           scheme: "eia-route",
@@ -36,16 +40,15 @@ const makeSeed = (): DataLayerRegistrySeed => ({
       ],
       createdAt: iso as any,
       updatedAt: iso as any,
-      distributionIds: [
-        "https://id.skygest.io/distribution/dist_1234567890AB" as any
-      ]
+      distributionIds: [distributionId],
+      variableIds: [variableId]
     }
   ],
   distributions: [
     {
       _tag: "Distribution",
-      id: "https://id.skygest.io/distribution/dist_1234567890AB" as any,
-      datasetId: "https://id.skygest.io/dataset/ds_1234567890AB" as any,
+      id: distributionId,
+      datasetId,
       kind: "api-access",
       title: "EIA Emissions API",
       accessURL:
@@ -60,7 +63,7 @@ const makeSeed = (): DataLayerRegistrySeed => ({
   variables: [
     {
       _tag: "Variable",
-      id: "https://id.skygest.io/variable/var_1234567890AB" as any,
+      id: variableId,
       label: "Net generation",
       aliases: [
         {
@@ -89,20 +92,20 @@ describe("data layer registry prep", () => {
 
     expect(
       Option.getOrNull(lookup.findAgentByLabel("EIA"))?.id
-    ).toBe("https://id.skygest.io/agent/ag_1234567890AB");
+    ).toBe(agentId);
     expect(
       Option.getOrNull(lookup.findDatasetByTitle("EIA Emissions Data"))?.id
-    ).toBe("https://id.skygest.io/dataset/ds_1234567890AB");
+    ).toBe(datasetId);
     expect(
       Option.getOrNull(lookup.findDatasetByAlias("eia-route", "EMISS"))?.id
-    ).toBe("https://id.skygest.io/dataset/ds_1234567890AB");
+    ).toBe(datasetId);
     expect(
       Option.getOrNull(
         lookup.findDistributionByUrl(
           "https://api.eia.gov/v2/emissions/emissions-co2-by-state-by-fuel/data/?frequency=monthly#table"
         )
       )?.id
-    ).toBe("https://id.skygest.io/distribution/dist_1234567890AB");
+    ).toBe(distributionId);
     expect(
       Chunk.size(
         lookup.findDistributionsByHostname(
@@ -110,11 +113,17 @@ describe("data layer registry prep", () => {
         )
       )
     ).toBe(1);
+    expect([...lookup.findDatasetsByVariableId(variableId)]).toEqual([
+      prepared.success.seed.datasets[0]
+    ]);
+    expect([...lookup.findVariablesByDatasetId(datasetId)]).toEqual([
+      prepared.success.seed.variables[0]
+    ]);
     expect(
       Option.getOrNull(
         lookup.findVariableByAlias("eia-series", "ELEC.GEN.ALL-US-99.M")
       )?.id
-    ).toBe("https://id.skygest.io/variable/var_1234567890AB");
+    ).toBe(variableId);
   });
 
   it("rejects normalized exact-match collisions during preparation", () => {
@@ -192,6 +201,31 @@ describe("data layer registry prep", () => {
     expect(
       Option.getOrNull(lookup.findDatasetByAlias("url", sharedUrl))
     ).toBeNull();
+  });
+
+  it("rejects unknown canonical values on populated semantic facets", () => {
+    const seed = makeSeed();
+    const prepared = prepareDataLayerRegistry({
+      ...seed,
+      variables: [
+        {
+          ...seed.variables[0]!,
+          policyInstrument: "not-a-real-policy"
+        }
+      ]
+    });
+    expect(Result.isFailure(prepared)).toBe(true);
+
+    if (Result.isSuccess(prepared)) {
+      throw new Error("expected unknown canonical value failure");
+    }
+
+    expect(prepared.failure.issues).toContainEqual({
+      _tag: "UnknownVocabularyValueIssue",
+      path: `Variable:${variableId}`,
+      facet: "policyInstrument",
+      value: "not-a-real-policy"
+    });
   });
 
   it("keeps format-changing distribution query params in exact url lookups", () => {

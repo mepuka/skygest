@@ -1,47 +1,45 @@
 import { Predicate, Result, Schema } from "effect";
 import {
   Aggregation,
-  AggregationMembers,
   StatisticType,
-  StatisticTypeMembers,
-  UnitFamily,
-  UnitFamilyMembers
+  UnitFamily
 } from "./data-layer/variable";
 import {
   PartialVariableFacetConflict,
   PartialVariableJoinConflictError
 } from "./errors";
+import {
+  AggregationMembers,
+  DomainObjectCanonicals,
+  FACET_KEYS,
+  MeasuredPropertyCanonicals,
+  PolicyInstrumentCanonicals,
+  REQUIRED_FACET_KEYS,
+  StatisticTypeMembers,
+  TechnologyOrFuelCanonicals,
+  UnitFamilyMembers
+} from "./generated/energyVariableProfile";
 
-export const FACET_KEYS = [
-  "measuredProperty",
-  "domainObject",
-  "technologyOrFuel",
-  "statisticType",
-  "aggregation",
-  "unitFamily"
-] as const;
+export { FACET_KEYS, REQUIRED_FACET_KEYS } from "./generated/energyVariableProfile";
 
 export type FacetKey = (typeof FACET_KEYS)[number];
-export const REQUIRED_FACET_KEYS = [
-  "measuredProperty",
-  "statisticType"
-] as const satisfies ReadonlyArray<FacetKey>;
 export type RequiredFacetKey = (typeof REQUIRED_FACET_KEYS)[number];
 
 export const FacetKey = Schema.Literals(FACET_KEYS).annotate({
-  description: "One of the six locked semantic identity dimensions for the resolution kernel"
+  description: "One of the seven locked semantic identity dimensions for the resolution kernel"
 });
 export const RequiredFacetKey = Schema.Literals(REQUIRED_FACET_KEYS).annotate({
   description: "Kernel facets required for a partial to clear the minimum identity threshold"
 });
 
 export const PARTIAL_VARIABLE_GENERATOR_VALUES = {
-  measuredProperty: ["generation", "capacity", "investment", "price"] as const,
-  domainObject: ["electricity", "natural gas", "battery storage", "grid"] as const,
-  technologyOrFuel: ["wind", "solar", "coal", "natural gas"] as const,
+  measuredProperty: MeasuredPropertyCanonicals.slice(0, 4),
+  domainObject: DomainObjectCanonicals.slice(0, 4),
+  technologyOrFuel: TechnologyOrFuelCanonicals.slice(0, 4),
   statisticType: StatisticTypeMembers,
   aggregation: AggregationMembers,
-  unitFamily: UnitFamilyMembers
+  unitFamily: UnitFamilyMembers,
+  policyInstrument: PolicyInstrumentCanonicals.slice(0, 4)
 } as const;
 
 export const PARTIAL_VARIABLE_FIELDS = {
@@ -50,12 +48,13 @@ export const PARTIAL_VARIABLE_FIELDS = {
   technologyOrFuel: Schema.optionalKey(Schema.String),
   statisticType: Schema.optionalKey(StatisticType),
   aggregation: Schema.optionalKey(Aggregation),
-  unitFamily: Schema.optionalKey(UnitFamily)
+  unitFamily: Schema.optionalKey(UnitFamily),
+  policyInstrument: Schema.optionalKey(Schema.String)
 } as const;
 
 export const PartialVariableShape = Schema.Struct(PARTIAL_VARIABLE_FIELDS).annotate({
   description:
-    "Resolution-kernel partial variable assignment over the six locked semantic identity dimensions"
+    "Resolution-kernel partial variable assignment over the seven locked semantic identity dimensions"
 });
 export type PartialVariableShape = Schema.Schema.Type<typeof PartialVariableShape>;
 export type ResolvablePartial = PartialVariableShape & {

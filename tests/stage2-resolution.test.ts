@@ -109,8 +109,8 @@ describe("stage2Resolution", () => {
         technologyOrFuel: "wind",
         statisticType: "flow",
         aggregation: "sum",
-        basis: ["gross"],
         unitFamily: "energy",
+        policyInstrument: "auction",
         fixedDims: {
           frequency: "annual"
         }

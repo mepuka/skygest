@@ -17,14 +17,15 @@ import {
 const asPartial = Schema.decodeUnknownSync(PartialVariableShape);
 
 describe("partialVariableAlgebra", () => {
-  it("exports the locked six facet keys", () => {
+  it("exports the locked seven facet keys", () => {
     expect(FACET_KEYS).toEqual([
       "measuredProperty",
       "domainObject",
       "technologyOrFuel",
       "statisticType",
       "aggregation",
-      "unitFamily"
+      "unitFamily",
+      "policyInstrument"
     ]);
   });
 

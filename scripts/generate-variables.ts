@@ -22,8 +22,8 @@ interface VariableDef {
   technologyOrFuel?: string;
   statisticType: string;
   aggregation?: string;
-  basis?: string[];
   unitFamily: string;
+  policyInstrument?: string;
   aliases?: Array<{ scheme: string; value: string; relation: string }>;
 }
 
@@ -76,7 +76,7 @@ for (const v of VARIABLES) {
   };
   if (v.technologyOrFuel) entity.technologyOrFuel = v.technologyOrFuel;
   if (v.aggregation) entity.aggregation = v.aggregation;
-  if (v.basis) entity.basis = v.basis;
+  if (v.policyInstrument) entity.policyInstrument = v.policyInstrument;
 
   writeFileSync(join(ROOT, `${v.slug}.json`), JSON.stringify(entity, null, 2) + "\n");
 }

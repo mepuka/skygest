@@ -18,7 +18,6 @@ export const Stage2PartialVariableShape = Schema.Struct({
   ...PARTIAL_VARIABLE_FIELDS,
   label: Schema.optionalKey(Schema.String),
   definition: Schema.optionalKey(Schema.String),
-  basis: Schema.optionalKey(Schema.Array(Schema.String)),
   fixedDims: Schema.optionalKey(FixedDims)
 }).annotate({
   description:

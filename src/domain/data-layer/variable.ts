@@ -2,27 +2,22 @@ import { Schema } from "effect";
 import { DesignDecision, SchemaOrgType, SdmxConcept } from "./annotations";
 import { DateLike, TimestampedAliasedFields } from "./base";
 import { DistributionId, ObservationId, SeriesId, VariableId } from "./ids";
+import {
+  AggregationMembers,
+  StatisticTypeMembers,
+  UnitFamilyMembers
+} from "../generated/energyVariableProfile";
 
 // ---------------------------------------------------------------------------
 // Enums
 // ---------------------------------------------------------------------------
 
-export const StatisticTypeMembers = [
-  "stock", "flow", "price", "share", "count"
-] as const;
 export const StatisticType = Schema.Literals(StatisticTypeMembers).annotate({ description: "Statistical measure type (SDMX-aligned)" });
 export type StatisticType = Schema.Schema.Type<typeof StatisticType>;
 
-export const AggregationMembers = [
-  "point", "end_of_period", "sum", "average", "max", "min", "settlement"
-] as const;
 export const Aggregation = Schema.Literals(AggregationMembers).annotate({ description: "Temporal aggregation method" });
 export type Aggregation = Schema.Schema.Type<typeof Aggregation>;
 
-export const UnitFamilyMembers = [
-  "power", "energy", "currency", "currency_per_energy",
-  "mass_co2e", "intensity", "dimensionless", "other"
-] as const;
 export const UnitFamily = Schema.Literals(UnitFamilyMembers).annotate({ description: "Unit family grouping for dimensional analysis" });
 export type UnitFamily = Schema.Schema.Type<typeof UnitFamily>;
 
@@ -56,8 +51,8 @@ export const Variable = Schema.Struct({
   technologyOrFuel: Schema.optionalKey(Schema.String),
   statisticType: Schema.optionalKey(StatisticType),
   aggregation: Schema.optionalKey(Aggregation),
-  basis: Schema.optionalKey(Schema.Array(Schema.String)),
-  unitFamily: Schema.optionalKey(UnitFamily)
+  unitFamily: Schema.optionalKey(UnitFamily),
+  policyInstrument: Schema.optionalKey(Schema.String)
 }).annotate({
   description: "Statistical variable defined by up to seven semantic facets (D1, D2)",
   [SchemaOrgType]: "https://schema.org/StatisticalVariable",

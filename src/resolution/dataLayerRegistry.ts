@@ -1,6 +1,6 @@
 import { Chunk, Option, Order, Result } from "effect";
-import type { Agent, Catalog, CatalogRecord, Dataset, DataService, DatasetSeries, Distribution, Series, Variable } from "../domain/data-layer";
-import type { AliasScheme, ExternalIdentifier } from "../domain/data-layer/alias";
+import type { Agent, Dataset, Distribution, Variable } from "../domain/data-layer";
+import type { AliasScheme } from "../domain/data-layer/alias";
 import type {
   DataLayerRegistryDiagnostic,
   DataLayerRegistryEntity,
@@ -9,8 +9,18 @@ import type {
   DuplicateCanonicalIdIssue,
   LookupCollisionIssue,
   MissingReferenceIssue,
-  SemanticConsistencyIssue
+  SemanticConsistencyIssue,
+  UnknownVocabularyValueIssue
 } from "../domain/data-layer/registry";
+import {
+  AggregationMembers,
+  DomainObjectCanonicals,
+  MeasuredPropertyCanonicals,
+  PolicyInstrumentCanonicals,
+  StatisticTypeMembers,
+  TechnologyOrFuelCanonicals,
+  UnitFamilyMembers
+} from "../domain/generated/energyVariableProfile";
 import {
   buildUrlPrefixes,
   normalizeAliasLookupValue,
@@ -23,9 +33,23 @@ const distributionOrder = Order.mapInput(
   Order.String,
   (distribution: Distribution) => distribution.id
 );
+const datasetOrder = Order.mapInput(Order.String, (dataset: Dataset) => dataset.id);
+const variableOrder = Order.mapInput(Order.String, (variable: Variable) => variable.id);
 
 const sortDistributions = (items: Iterable<Distribution>) =>
   Chunk.sort(Chunk.fromIterable(items), distributionOrder);
+const sortDatasets = (items: Iterable<Dataset>) =>
+  Chunk.sort(Chunk.fromIterable(items), datasetOrder);
+const sortVariables = (items: Iterable<Variable>) =>
+  Chunk.sort(Chunk.fromIterable(items), variableOrder);
+
+const measuredPropertyCanonicals = new Set(MeasuredPropertyCanonicals);
+const domainObjectCanonicals = new Set(DomainObjectCanonicals);
+const technologyOrFuelCanonicals = new Set(TechnologyOrFuelCanonicals);
+const statisticTypeCanonicals = new Set(StatisticTypeMembers);
+const aggregationCanonicals = new Set(AggregationMembers);
+const unitFamilyCanonicals = new Set(UnitFamilyMembers);
+const policyInstrumentCanonicals = new Set(PolicyInstrumentCanonicals);
 
 type RegistryRecord = {
   readonly entity: DataLayerRegistryEntity;
@@ -42,6 +66,8 @@ export type PreparedDataLayerRegistry = {
   readonly datasetByTitle: ReadonlyMap<string, Dataset>;
   readonly datasetByAlias: ReadonlyMap<string, Dataset>;
   readonly variableByAlias: ReadonlyMap<string, Variable>;
+  readonly datasetsByVariableId: ReadonlyMap<string, Chunk.Chunk<Dataset>>;
+  readonly variablesByDatasetId: ReadonlyMap<string, Chunk.Chunk<Variable>>;
   readonly distributionByUrl: ReadonlyMap<string, Distribution>;
   readonly distributionsByHostname: ReadonlyMap<string, Chunk.Chunk<Distribution>>;
   readonly distributionUrlPrefixEntries: ReadonlyArray<{
@@ -62,6 +88,8 @@ export type DataLayerRegistryLookup = {
     scheme: AliasScheme,
     value: string
   ) => Option.Option<Dataset>;
+  readonly findDatasetsByVariableId: (variableId: string) => Chunk.Chunk<Dataset>;
+  readonly findVariablesByDatasetId: (datasetId: string) => Chunk.Chunk<Variable>;
   readonly findDistributionByUrl: (
     url: string
   ) => Option.Option<Distribution>;
@@ -138,6 +166,17 @@ const makeSemanticConsistencyIssue = (
   message
 });
 
+const makeUnknownVocabularyValueIssue = (
+  path: string,
+  facet: string,
+  value: string
+): UnknownVocabularyValueIssue => ({
+  _tag: "UnknownVocabularyValueIssue",
+  path,
+  facet,
+  value
+});
+
 const makeLookupCollisionIssue = (
   lookup: string,
   key: string,
@@ -184,6 +223,20 @@ const checkReference = (
   }
 };
 
+const checkVocabularyValue = (
+  issues: Array<DataLayerRegistryIssue>,
+  path: string,
+  facet: string,
+  value: string | undefined,
+  allowedValues: ReadonlySet<string>
+) => {
+  if (value === undefined || allowedValues.has(value)) {
+    return;
+  }
+
+  pushIssue(issues, makeUnknownVocabularyValueIssue(path, facet, value));
+};
+
 const validateReferences = (
   records: ReadonlyArray<RegistryRecord>,
   entityById: ReadonlyMap<string, DataLayerRegistryEntity>
@@ -222,6 +275,9 @@ const validateReferences = (
       case "Dataset":
         checkReference(issues, path, "publisherAgentId", entity.publisherAgentId, "Agent", entityById);
         checkReference(issues, path, "inSeries", entity.inSeries, "DatasetSeries", entityById);
+        for (const variableId of entity.variableIds ?? []) {
+          checkReference(issues, path, "variableIds", variableId, "Variable", entityById);
+        }
         for (const distributionId of entity.distributionIds ?? []) {
           checkReference(issues, path, "distributionIds", distributionId, "Distribution", entityById);
           const distribution = entityById.get(distributionId);
@@ -274,6 +330,55 @@ const validateReferences = (
         checkReference(issues, path, "publisherAgentId", entity.publisherAgentId, "Agent", entityById);
         break;
       case "Variable":
+        checkVocabularyValue(
+          issues,
+          path,
+          "measuredProperty",
+          entity.measuredProperty,
+          measuredPropertyCanonicals
+        );
+        checkVocabularyValue(
+          issues,
+          path,
+          "domainObject",
+          entity.domainObject,
+          domainObjectCanonicals
+        );
+        checkVocabularyValue(
+          issues,
+          path,
+          "technologyOrFuel",
+          entity.technologyOrFuel,
+          technologyOrFuelCanonicals
+        );
+        checkVocabularyValue(
+          issues,
+          path,
+          "statisticType",
+          entity.statisticType,
+          statisticTypeCanonicals
+        );
+        checkVocabularyValue(
+          issues,
+          path,
+          "aggregation",
+          entity.aggregation,
+          aggregationCanonicals
+        );
+        checkVocabularyValue(
+          issues,
+          path,
+          "unitFamily",
+          entity.unitFamily,
+          unitFamilyCanonicals
+        );
+        checkVocabularyValue(
+          issues,
+          path,
+          "policyInstrument",
+          entity.policyInstrument,
+          policyInstrumentCanonicals
+        );
         break;
       case "Series":
         checkReference(issues, path, "variableId", entity.variableId, "Variable", entityById);
@@ -390,6 +495,8 @@ const buildPreparedRegistry = (
   const datasetByTitle = new Map<string, Dataset>();
   const datasetByAlias = new Map<string, Dataset>();
   const variableByAlias = new Map<string, Variable>();
+  const datasetsByVariableId = new Map<string, Array<Dataset>>();
+  const variablesByDatasetId = new Map<string, Array<Variable>>();
   const distributionByUrl = new Map<string, Distribution>();
   const distributionsByHostname = new Map<string, Array<Distribution>>();
   const distributionUrlPrefixEntries: Array<{
@@ -448,6 +555,14 @@ const buildPreparedRegistry = (
         aliasLookupKey(alias.scheme, alias.value),
         dataset
       );
+    }
+
+    for (const variableId of dataset.variableIds ?? []) {
+      const variable = entityById.get(variableId);
+      if (variable !== undefined && variable._tag === "Variable") {
+        registerManyLookup(datasetsByVariableId, variableId, dataset);
+        registerManyLookup(variablesByDatasetId, dataset.id, variable);
+      }
     }
   }
 
@@ -519,6 +634,18 @@ const buildPreparedRegistry = (
     datasetByTitle,
     datasetByAlias,
     variableByAlias,
+    datasetsByVariableId: new Map(
+      [...datasetsByVariableId.entries()].map(([key, value]) => [
+        key,
+        sortDatasets(value)
+      ])
+    ),
+    variablesByDatasetId: new Map(
+      [...variablesByDatasetId.entries()].map(([key, value]) => [
+        key,
+        sortVariables(value)
+      ])
+    ),
     distributionByUrl,
     distributionsByHostname: new Map(
       [...distributionsByHostname.entries()].map(([key, value]) => [
@@ -560,6 +687,10 @@ export const toDataLayerRegistryLookup = (
     Option.fromNullishOr(
       prepared.datasetByAlias.get(aliasLookupKey(scheme, value))
     ),
+  findDatasetsByVariableId: (variableId) =>
+    prepared.datasetsByVariableId.get(variableId) ?? Chunk.empty(),
+  findVariablesByDatasetId: (datasetId) =>
+    prepared.variablesByDatasetId.get(datasetId) ?? Chunk.empty(),
   findDistributionByUrl: (url) => {
     const normalized = normalizeDistributionUrl(url);
     return normalized === null
@@ -618,6 +749,8 @@ export const formatDataLayerRegistryDiagnostic = (
           return `- ${issue.path}: ${issue.field} -> ${issue.targetId} missing (${issue.expectedTag})`;
         case "SemanticConsistencyIssue":
           return `- ${issue.path}: ${issue.message}`;
+        case "UnknownVocabularyValueIssue":
+          return `- ${issue.path}: ${issue.facet} has unknown canonical value "${issue.value}"`;
         case "LookupCollisionIssue":
           return `- ${issue.lookup} collision on "${issue.key}": ${issue.entityIds.join(", ")}`;
       }

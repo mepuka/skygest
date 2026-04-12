@@ -27,7 +27,7 @@ const collectSameAs = (aliases: ReadonlyArray<ExternalIdentifier>): string[] | u
 /**
  * Variable -> schema:StatisticalVariable (pending).
  *
- * Drops: seven-facet composition (domainObject, technologyOrFuel, basis,
+ * Drops: seven-facet composition (domainObject, technologyOrFuel, policyInstrument,
  * aggregation, unitFamily), alias relation strengths. All alias URIs
  * become sameAs regardless of SKOS relation type.
  */
