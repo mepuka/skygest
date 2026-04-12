@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1ASA1CFEZABA5BSR8Z5437",
+  "title": "Realised Scheduled Exchanges",
+  "description": "Realised (final) commercial schedules for cross-border exchanges.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9",
+  "landingPage": "https://transparency.entsoe.eu/",
+  "accessRights": "public",
+  "keywords": [
+    "transmission",
+    "Art. 12.1(c)"
+  ],
+  "themes": [
+    "transmission"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1ASA1CVPZFWJXH87DKHPAQ"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1ASA196ZW4HCGRC7TGWS41"
+  ],
+  "createdAt": "2026-04-12T17:10:46.402Z",
+  "updatedAt": "2026-04-12T17:10:46.402Z",
+  "aliases": [
+    {
+      "scheme": "entsoe-document-type",
+      "value": "A09:A16",
+      "relation": "exactMatch"
+    }
+  ]
+}

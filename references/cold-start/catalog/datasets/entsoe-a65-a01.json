@@ -1,0 +1,31 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP1ASA1A13MD8JVG1MDSWC6P",
+  "title": "Day-Ahead Total Load Forecast",
+  "description": "Day-ahead forecast of total electricity load per bidding zone.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9",
+  "landingPage": "https://transparency.entsoe.eu/",
+  "accessRights": "public",
+  "keywords": [
+    "load",
+    "Art. 6.1(b)"
+  ],
+  "themes": [
+    "load"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP1ASA1AX4QDE0MSE5MBRJ0H"
+  ],
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1ASA196ZW4HCGRC7TGWS41"
+  ],
+  "createdAt": "2026-04-12T17:10:46.402Z",
+  "updatedAt": "2026-04-12T17:10:46.402Z",
+  "aliases": [
+    {
+      "scheme": "entsoe-document-type",
+      "value": "A65:A01",
+      "relation": "exactMatch"
+    }
+  ]
+}

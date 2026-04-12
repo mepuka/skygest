@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP1ASA1BQY5E3X3KM4DCCQ3R",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1ASA1BV5ZBQ0ZN2WMG6YWF",
+  "kind": "api-access",
+  "title": "Actual Generation per Type XML API",
+  "description": "Aggregated actual generation per production type in each bidding zone.",
+  "accessURL": "https://web-api.tp.entsoe.eu/api?documentType=A75",
+  "mediaType": "application/xml",
+  "format": "xml",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1ASA196ZW4HCGRC7TGWS41",
+  "createdAt": "2026-04-12T17:10:46.402Z",
+  "updatedAt": "2026-04-12T17:10:46.402Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://web-api.tp.entsoe.eu/api?documentType=A75",
+      "relation": "exactMatch"
+    }
+  ]
+}
