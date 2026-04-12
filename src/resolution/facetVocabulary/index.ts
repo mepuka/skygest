@@ -118,7 +118,7 @@ type FacetVocabularyLookups = {
   readonly technologyOrFuel: TechnologyOrFuelLookup;
 };
 
-const makeFacetVocabulary = (
+export const makeFacetVocabulary = (
   lookups: FacetVocabularyLookups
 ): FacetVocabularyShape => ({
   parseStatisticType: (text) => parseStatisticType(lookups.statisticType, text),
