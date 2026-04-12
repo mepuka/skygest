@@ -18,9 +18,10 @@ import {
   StatisticTypeMembers,
   TechnologyOrFuelCanonicals,
   UnitFamilyMembers
-} from "./profile/energyVariableProfile";
+} from "./generated/energyVariableProfile";
 
-export { FACET_KEYS, REQUIRED_FACET_KEYS } from "./profile/energyVariableProfile";
+// The generated profile is the canonical runtime source of facet metadata.
+export { FACET_KEYS, REQUIRED_FACET_KEYS } from "./generated/energyVariableProfile";
 
 export type FacetKey = (typeof FACET_KEYS)[number];
 export type RequiredFacetKey = (typeof REQUIRED_FACET_KEYS)[number];
@@ -41,6 +42,10 @@ export const PARTIAL_VARIABLE_GENERATOR_VALUES = {
   unitFamily: UnitFamilyMembers,
   policyInstrument: PolicyInstrumentCanonicals.slice(0, 4)
 } as const;
+
+export const PARTIAL_VARIABLE_GENERATOR_KEYS = Object.keys(
+  PARTIAL_VARIABLE_GENERATOR_VALUES
+) as ReadonlyArray<FacetKey>;
 
 export const PARTIAL_VARIABLE_FIELDS = {
   measuredProperty: Schema.optionalKey(Schema.String),
@@ -117,6 +122,10 @@ export const mismatched = (
     ];
   });
 
+/**
+ * Returns true when every defined facet in `general` is matched by `specific`.
+ * In lattice terms: general <= specific.
+ */
 export const subsumes = (
   general: PartialVariableShape,
   specific: PartialVariableShape

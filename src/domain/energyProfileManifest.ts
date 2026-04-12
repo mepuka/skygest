@@ -3,14 +3,14 @@ import { IsoTimestamp } from "./types";
 
 const NonEmptyString = Schema.String.pipe(Schema.check(Schema.isMinLength(1)));
 
-export const EnergyProfileFacetKey = Schema.Union([
-  Schema.Literal("measuredProperty"),
-  Schema.Literal("domainObject"),
-  Schema.Literal("technologyOrFuel"),
-  Schema.Literal("statisticType"),
-  Schema.Literal("aggregation"),
-  Schema.Literal("unitFamily"),
-  Schema.Literal("policyInstrument")
+export const EnergyProfileFacetKey = Schema.Literals([
+  "measuredProperty",
+  "domainObject",
+  "technologyOrFuel",
+  "statisticType",
+  "aggregation",
+  "unitFamily",
+  "policyInstrument"
 ]);
 export type EnergyProfileFacetKey = Schema.Schema.Type<
   typeof EnergyProfileFacetKey

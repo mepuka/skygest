@@ -1,10 +1,11 @@
 import { Command, Flag } from "effect/unstable/cli";
-import { Console, Effect, FileSystem, Path, Result } from "effect";
+import { Console, Effect, FileSystem, Path, Result, Schema } from "effect";
 import {
   EnergyProfileManifestLoadError,
   EnergyProfilePipelineError
 } from "../src/domain/errors";
 import { EnergyProfileManifest } from "../src/domain/energyProfileManifest";
+import { SurfaceFormEntryAny } from "../src/domain/surfaceForm";
 import {
   decodeJsonStringEitherWith,
   formatSchemaParseError,
@@ -18,10 +19,14 @@ import {
 type CliOptions = {
   readonly source: string;
   readonly target: string;
+  readonly ontologyVocabularyRoot: string;
   readonly apply: boolean;
 };
 
 const decodeManifestJson = decodeJsonStringEitherWith(EnergyProfileManifest);
+const decodeVocabularyJson = decodeJsonStringEitherWith(
+  Schema.Array(SurfaceFormEntryAny)
+);
 
 const sourceFlag = Flag.string("source").pipe(
   Flag.withDescription("Source SHACL manifest file"),
@@ -33,6 +38,13 @@ const sourceFlag = Flag.string("source").pipe(
 const targetFlag = Flag.string("target").pipe(
   Flag.withDescription("Target checked-in manifest path"),
   Flag.withDefault("references/energy-profile/shacl-manifest.json")
+);
+
+const ontologyVocabularyRootFlag = Flag.string("ontology-vocabulary-root").pipe(
+  Flag.withDescription(
+    "Sibling ontology vocabulary directory used for canonical drift checks"
+  ),
+  Flag.withDefault("../ontology_skill/ontologies/skygest-energy-vocab/data/vocabulary")
 );
 
 const applyFlag = Flag.boolean("apply").pipe(
@@ -69,6 +81,80 @@ const validateManifestJson = (sourcePath: string, jsonString: string) => {
   return decoded;
 };
 
+const VOCABULARY_FILENAMES = [
+  "measured-property.json",
+  "domain-object.json",
+  "technology-or-fuel.json",
+  "statistic-type.json",
+  "aggregation.json",
+  "unit-family.json",
+  "policy-instrument.json"
+] as const;
+
+const loadCanonicalSet = (
+  filePath: string
+): Effect.Effect<ReadonlyArray<string>, EnergyProfilePipelineError, FileSystem.FileSystem> =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const jsonString = yield* fs.readFileString(filePath).pipe(
+      Effect.mapError((cause) =>
+        pipelineError("readVocabularyFile", filePath, cause)
+      )
+    );
+
+    const decoded = decodeVocabularyJson(jsonString);
+    if (Result.isFailure(decoded)) {
+      return yield* Effect.fail(
+        pipelineError("decodeVocabularyFile", filePath, [
+          formatSchemaParseError(decoded.failure)
+        ])
+      );
+    }
+
+    return [...new Set(decoded.success.map((entry) => entry.canonical))].sort();
+  });
+
+const compareVocabularyRoots = (
+  checkedInRoot: string,
+  ontologyRoot: string
+): Effect.Effect<void, EnergyProfilePipelineError, FileSystem.FileSystem | Path.Path> =>
+  Effect.gen(function* () {
+    const path = yield* Path.Path;
+    const pairs = yield* Effect.forEach(
+      VOCABULARY_FILENAMES,
+      (filename) =>
+        Effect.all([
+          loadCanonicalSet(path.join(checkedInRoot, filename)),
+          loadCanonicalSet(path.join(ontologyRoot, filename))
+        ]).pipe(
+          Effect.map(([checkedIn, ontology]) => ({
+            filename,
+            checkedIn,
+            ontology
+          }))
+        ),
+      { concurrency: "unbounded" }
+    );
+
+    const mismatches = pairs.filter(
+      (pair) =>
+        JSON.stringify(pair.checkedIn) !== JSON.stringify(pair.ontology)
+    );
+
+    if (mismatches.length > 0) {
+      return yield* Effect.fail(
+        pipelineError(
+          "compareVocabularyCanonicals",
+          ontologyRoot,
+          mismatches.map(
+            (mismatch) =>
+              `${mismatch.filename}: checked-in canonicals do not match ontology source`
+          )
+        )
+      );
+    }
+  });
+
 const runSyncEnergyProfile = Effect.fn("sync-energy-profile.run")(function* (
   rawOptions: CliOptions
 ) {
@@ -77,6 +163,10 @@ const runSyncEnergyProfile = Effect.fn("sync-energy-profile.run")(function* (
   const options = {
     source: path.resolve(process.cwd(), rawOptions.source),
     target: path.resolve(process.cwd(), rawOptions.target),
+    ontologyVocabularyRoot: path.resolve(
+      process.cwd(),
+      rawOptions.ontologyVocabularyRoot
+    ),
     apply: rawOptions.apply
   };
 
@@ -104,6 +194,26 @@ const runSyncEnergyProfile = Effect.fn("sync-energy-profile.run")(function* (
   yield* Console.log(
     `Manifest v${String(manifest.manifestVersion)} OK: ${String(manifest.facetKeys.length)} facets, ${String(Object.keys(manifest.closedEnums).length)} closed enums.`
   );
+
+  const hasOntologyVocabularyRoot = yield* fs.exists(options.ontologyVocabularyRoot).pipe(
+    Effect.mapError((cause) =>
+      pipelineError("exists", options.ontologyVocabularyRoot, cause)
+    )
+  );
+
+  if (hasOntologyVocabularyRoot) {
+    yield* compareVocabularyRoots(
+      path.resolve(process.cwd(), "references/vocabulary"),
+      options.ontologyVocabularyRoot
+    );
+    yield* Console.log(
+      `Checked-in vocabulary canonicals match ${options.ontologyVocabularyRoot}.`
+    );
+  } else {
+    yield* Console.log(
+      `Skipping vocabulary drift check because ${options.ontologyVocabularyRoot} is not present.`
+    );
+  }
 
   if (!options.apply) {
     yield* Console.log(
@@ -136,6 +246,7 @@ const syncEnergyProfileCommand = Command.make(
   {
     source: sourceFlag,
     target: targetFlag,
+    ontologyVocabularyRoot: ontologyVocabularyRootFlag,
     apply: applyFlag
   },
   runSyncEnergyProfile

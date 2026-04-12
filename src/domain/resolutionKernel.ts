@@ -1,4 +1,5 @@
 import { Schema } from "effect";
+import { ZeroToOneScore } from "./confidence";
 import { VariableId } from "./data-layer/ids";
 import { TimePeriod } from "./data-layer/variable";
 import { PartialVariableFacetConflict } from "./errors";
@@ -8,10 +9,6 @@ import {
   RequiredFacetKey
 } from "./partialVariableAlgebra";
 import { PostUri } from "./types";
-
-const ZeroToOneScore = Schema.Number.pipe(
-  Schema.check(Schema.isBetween({ minimum: 0, maximum: 1 }))
-);
 
 export const ResolutionOutcomeStatus = Schema.Literals([
   "Resolved",
@@ -184,7 +181,6 @@ export const Underspecified = Schema.TaggedStruct("Underspecified", {
   bundle: ResolutionEvidenceBundle,
   partial: PartialVariableShape,
   missingRequired: Schema.Array(RequiredFacetKey),
-  hypotheses: Schema.Array(ResolutionHypothesis),
   confidence: Schema.optionalKey(ZeroToOneScore),
   tier: Schema.optionalKey(ResolutionEvidenceTier)
 });
@@ -193,7 +189,9 @@ export type Underspecified = Schema.Schema.Type<typeof Underspecified>;
 export const Conflicted = Schema.TaggedStruct("Conflicted", {
   bundle: ResolutionEvidenceBundle,
   hypotheses: Schema.Array(ResolutionHypothesis),
-  conflicts: Schema.Array(PartialVariableFacetConflict)
+  conflicts: Schema.Array(PartialVariableFacetConflict),
+  confidence: Schema.optionalKey(ZeroToOneScore),
+  tier: Schema.optionalKey(ResolutionEvidenceTier)
 });
 export type Conflicted = Schema.Schema.Type<typeof Conflicted>;
 

@@ -881,13 +881,39 @@ const migration22: D1Migration = {
   ]
 };
 
+const runRuntimeVariableProfileAlignmentMigration = (
+  sql: SqlClient.SqlClient
+) =>
+  Effect.gen(function* () {
+    const hasPolicyInstrument = yield* columnExists(
+      sql,
+      "variables",
+      "policy_instrument"
+    );
+    if (!hasPolicyInstrument) {
+      yield* executeUnsafeStatement(
+        sql,
+        `ALTER TABLE variables ADD COLUMN policy_instrument TEXT`
+      );
+    }
+
+    const hasVariableIds = yield* columnExists(
+      sql,
+      "datasets",
+      "variable_ids_json"
+    );
+    if (!hasVariableIds) {
+      yield* executeUnsafeStatement(
+        sql,
+        `ALTER TABLE datasets ADD COLUMN variable_ids_json TEXT`
+      );
+    }
+  });
+
 const migration23: D1Migration = {
   id: 23,
   name: "runtime_variable_profile_alignment",
-  statements: [
-    `ALTER TABLE variables ADD COLUMN policy_instrument TEXT`,
-    `ALTER TABLE datasets ADD COLUMN variable_ids_json TEXT`
-  ]
+  run: runRuntimeVariableProfileAlignmentMigration
 };
 
 export const migrations: ReadonlyArray<D1Migration> = [

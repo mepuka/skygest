@@ -1,9 +1,14 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Schema } from "effect";
+import { ResolutionEvidenceBundle } from "../src/domain/resolutionKernel";
 import { Stage1Input } from "../src/domain/stage1Resolution";
-import { buildResolutionEvidenceBundles } from "../src/resolution/kernel/BundleAdapter";
+import {
+  buildResolutionEvidenceBundles,
+  listBundleEvidenceSources
+} from "../src/resolution/kernel/BundleAdapter";
 
 const decodeStage1Input = Schema.decodeUnknownSync(Stage1Input);
+const decodeBundle = Schema.decodeUnknownSync(ResolutionEvidenceBundle);
 
 describe("buildResolutionEvidenceBundles", () => {
   it("builds one bundle per vision asset and preserves chart evidence", () => {
@@ -111,6 +116,7 @@ describe("buildResolutionEvidenceBundles", () => {
     const bundles = buildResolutionEvidenceBundles(input);
 
     expect(bundles).toHaveLength(1);
+    expect(() => decodeBundle(bundles[0])).not.toThrow();
     expect(bundles[0]).toEqual({
       postUri: input.postContext.postUri,
       assetKey: "asset-1",
@@ -149,6 +155,88 @@ describe("buildResolutionEvidenceBundles", () => {
         endDate: "2024-12"
       }
     });
+    expect(listBundleEvidenceSources(bundles[0]!)).toEqual([
+      "series-label",
+      "x-axis",
+      "y-axis",
+      "chart-title",
+      "key-finding",
+      "post-text",
+      "source-line",
+      "publisher-hint"
+    ]);
+  });
+
+  it("assigns stable item keys for multi-series assets", () => {
+    const input = decodeStage1Input({
+      postContext: {
+        postUri: "at://did:plc:test/app.bsky.feed.post/sky-315",
+        text: "Solar and wind generation both increased",
+        links: [],
+        linkCards: [],
+        threadCoverage: "focus-only"
+      },
+      vision: {
+        kind: "vision",
+        summary: {
+          text: "Two-series chart",
+          mediaTypes: ["chart"],
+          chartTypes: ["bar-chart"],
+          titles: ["EU Solar and Wind Generation"],
+          keyFindings: []
+        },
+        assets: [
+          {
+            assetKey: "asset-2",
+            assetType: "image",
+            source: "embed",
+            index: 0,
+            originalAltText: null,
+            extractionRoute: "full",
+            analysis: {
+              mediaType: "chart",
+              chartTypes: ["bar-chart"],
+              altText: null,
+              altTextProvenance: "synthetic",
+              xAxis: { label: "Year", unit: null },
+              yAxis: { label: "Generation", unit: "TWh" },
+              series: [
+                { legendLabel: "Solar", unit: "TWh" },
+                { legendLabel: "Wind", unit: "TWh" }
+              ],
+              sourceLines: [],
+              temporalCoverage: null,
+              keyFindings: ["Both technologies rose year over year"],
+              visibleUrls: [],
+              organizationMentions: [],
+              logoText: [],
+              title: "EU Solar and Wind Generation",
+              modelId: "gemini-test",
+              processedAt: 1712900000000
+            }
+          }
+        ],
+        modelId: "gemini-test",
+        promptVersion: "v2",
+        processedAt: 1712900000000
+      },
+      sourceAttribution: null
+    });
+
+    const bundles = buildResolutionEvidenceBundles(input);
+
+    expect(bundles[0]?.series).toEqual([
+      {
+        itemKey: "asset-2:series:0",
+        legendLabel: "Solar",
+        unit: "TWh"
+      },
+      {
+        itemKey: "asset-2:series:1",
+        legendLabel: "Wind",
+        unit: "TWh"
+      }
+    ]);
   });
 
   it("falls back to a post-level bundle when no vision assets exist", () => {
