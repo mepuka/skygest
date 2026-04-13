@@ -177,17 +177,35 @@ describe("Cold-start validation", () => {
       zeroEvidence: ReadonlyArray<string>;
     };
 
-    const expectedLinked = Object.keys(manifest.explicit).length;
-    const expectedUnlinked =
+    // Partition series filenames into SKY-317 manifest-covered and net-new
+    // (SKY-323+ series that declare datasetId inline in generate-series.ts).
+    const seriesDirEntries = await readdir(join(ROOT, "series"));
+    const seriesSlugs = seriesDirEntries
+      .filter((f) => f.endsWith(".json") && !f.startsWith("."))
+      .map((f) => f.replace(/\.json$/, ""));
+
+    const manifestSlugs = new Set<string>([
+      ...Object.keys(manifest.explicit),
+      ...Object.keys(manifest.deliberatelyOmitted),
+      ...manifest.zeroEvidence
+    ]);
+    const manifestCoveredSlugs = seriesSlugs.filter((s) => manifestSlugs.has(s));
+    const netNewSlugs = seriesSlugs.filter((s) => !manifestSlugs.has(s));
+
+    const expectedManifestLinked = Object.keys(manifest.explicit).length;
+    const expectedManifestUnlinked =
       Object.keys(manifest.deliberatelyOmitted).length + manifest.zeroEvidence.length;
 
-    expect(total).toBe(expectedLinked + expectedUnlinked);
-    expect(linked).toBe(expectedLinked);
-    expect(unlinked).toBe(expectedUnlinked);
+    // Every manifest slug must have a matching series file.
+    expect(manifestCoveredSlugs.length).toBe(
+      expectedManifestLinked + expectedManifestUnlinked
+    );
+    // Total series count == manifest-covered + net-new.
+    expect(total).toBe(manifestCoveredSlugs.length + netNewSlugs.length);
 
     console.log(
       `[SKY-317 coverage] series.datasetId: ${linked}/${total} linked, ${unlinked} unlinked ` +
-        `(${Object.keys(manifest.deliberatelyOmitted).length} deliberately omitted, ${manifest.zeroEvidence.length} zero-evidence)`
+        `(${Object.keys(manifest.deliberatelyOmitted).length} deliberately omitted, ${manifest.zeroEvidence.length} zero-evidence, ${netNewSlugs.length} net-new)`
     );
   }, coldStartValidationTimeoutMs);
 });

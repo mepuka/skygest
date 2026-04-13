@@ -23,5 +23,9 @@
   "us-pjm-capacity-auction-annual": "https://id.skygest.io/series/ser_01KNQEZ5XC33Y21V4CW5K6FZHB",
   "us-pjm-load-forecast": "https://id.skygest.io/series/ser_01KNQEZ5XCNTATHE4Z9PNS9VZ7",
   "de-wholesale-electricity-price": "https://id.skygest.io/series/ser_01KNQEZ5XC2A209DPSH50E6HJM",
-  "global-electricity-generation-annual": "https://id.skygest.io/series/ser_01KNQEZ5XCD9GTJ99N6J4AYRK6"
+  "global-electricity-generation-annual": "https://id.skygest.io/series/ser_01KNQEZ5XCD9GTJ99N6J4AYRK6",
+  "de-public-electricity-generation-daily": "https://id.skygest.io/series/ser_01KP3W7H4Y5QW1E2JP0T86G6Y3",
+  "eu-public-electricity-generation-quarterly": "https://id.skygest.io/series/ser_01KP3W7H50RN1FF3WJTN8KDVQJ",
+  "tr-electricity-generation-by-fuel-annual": "https://id.skygest.io/series/ser_01KP3W7H50CXTAZZW2M5P4E71Q",
+  "global-energy-co2-emissions-ar6-annual": "https://id.skygest.io/series/ser_01KP3W7H503YTZVQ2VYXHXX04V"
 }
