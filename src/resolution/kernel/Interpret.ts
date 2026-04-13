@@ -20,6 +20,28 @@ import type { FacetVocabularyShape } from "../facetVocabulary";
 const DEFAULT_BUNDLE_ITEM_KEY = "bundle";
 const SEGMENT_DELIMITER = /(?:\s+\band\b\s+)|(?:\s+\bor\b\s+)|[;\n]+/giu;
 
+// Identity sources witness the variable's identity directly: chart/axis/series
+// text names what the chart is measuring. These feed the shared partial via
+// `foldAssignments`.
+const IDENTITY_SOURCES: ReadonlySet<ResolutionEvidenceSource> = new Set([
+  "series-label",
+  "x-axis",
+  "y-axis",
+  "chart-title"
+]);
+
+// Narrative sources are commentary about the observation, not witnesses for
+// its identity. They must never project onto the shared partial because the
+// algebra's join operator is only valid over co-referential projections of
+// the same variable. Narrative matches are still surfaced in the hypothesis
+// `evidence[]` for downstream trace output.
+const NARRATIVE_SOURCES: ReadonlySet<ResolutionEvidenceSource> = new Set([
+  "key-finding",
+  "post-text",
+  "source-line",
+  "publisher-hint"
+]);
+
 type EvidenceSite = {
   readonly source: ResolutionEvidenceSource;
   readonly text: string;
@@ -225,21 +247,26 @@ const foldAssignments = (
 };
 
 const buildSharedSites = (bundle: ResolutionEvidenceBundle): ReadonlyArray<EvidenceSite> => {
-  const sitesBySource = new Map<ResolutionEvidenceSource, Array<EvidenceSite>>();
+  // Push order is intentionally precedence-ordered (x-axis -> y-axis ->
+  // chart-title). Series-label is an item-level signal handled in
+  // buildItemSites, not a shared-partial signal, so it is not collected here.
+  const sites: Array<EvidenceSite> = [];
 
   const push = (
     source: ResolutionEvidenceSource,
     text: string | null | undefined
   ) => {
+    if (!IDENTITY_SOURCES.has(source)) {
+      return;
+    }
+
     const value = asOptionalString(text);
     if (value === undefined) {
       return;
     }
 
     for (const segment of segmentText(source, value)) {
-      const entries = sitesBySource.get(source) ?? [];
-      entries.push({ source, text: segment });
-      sitesBySource.set(source, entries);
+      sites.push({ source, text: segment });
     }
   };
 
@@ -249,26 +276,59 @@ const buildSharedSites = (bundle: ResolutionEvidenceBundle): ReadonlyArray<Evide
   push("y-axis", bundle.yAxis?.unit);
   push("chart-title", bundle.chartTitle);
 
+  return sites;
+};
+
+// Collects narrative evidence matches purely for trace output. These never
+// participate in the shared-partial fold — they exist so downstream consumers
+// can see what narrative signals were observed alongside the identity
+// partial.
+const buildNarrativeTraceEvidence = (
+  bundle: ResolutionEvidenceBundle,
+  vocabulary: FacetVocabularyShape
+): ReadonlyArray<ResolutionEvidenceReference> => {
+  const sites: Array<EvidenceSite> = [];
+
+  const push = (
+    source: ResolutionEvidenceSource,
+    text: string | null | undefined
+  ) => {
+    if (!NARRATIVE_SOURCES.has(source)) {
+      return;
+    }
+
+    const value = asOptionalString(text);
+    if (value === undefined) {
+      return;
+    }
+
+    for (const segment of segmentText(source, value)) {
+      sites.push({ source, text: segment });
+    }
+  };
+
   for (const finding of bundle.keyFindings) {
     push("key-finding", finding);
   }
-
   for (const text of bundle.postText) {
     push("post-text", text);
   }
-
   for (const sourceLine of bundle.sourceLines) {
     push("source-line", sourceLine.sourceText);
     push("source-line", sourceLine.datasetName);
   }
-
   for (const hint of bundle.publisherHints) {
     push("publisher-hint", hint.label);
   }
 
-  return EVIDENCE_PRECEDENCE.flatMap((source) =>
-    source === "series-label" ? [] : (sitesBySource.get(source) ?? [])
-  );
+  const references: Array<ResolutionEvidenceReference> = [];
+  for (const site of sites) {
+    const assignment = matchSite(site, vocabulary);
+    if (assignment !== null) {
+      references.push(assignment.evidence);
+    }
+  }
+  return references;
 };
 
 const buildItemSites = (
@@ -372,6 +432,7 @@ export const interpretBundle = (
     .map((site) => matchSite(site, vocabulary))
     .filter((assignment): assignment is SiteAssignment => assignment !== null);
   const itemAssignments = buildItemSites(bundle);
+  const narrativeTraceEvidence = buildNarrativeTraceEvidence(bundle, vocabulary);
 
   const foldedShared = foldAssignments(sharedAssignments);
   if (Result.isFailure(foldedShared)) {
@@ -447,7 +508,8 @@ export const interpretBundle = (
 
   const evidence = [
     ...foldedShared.success.evidence,
-    ...items.flatMap((item) => item.evidence)
+    ...items.flatMap((item) => item.evidence),
+    ...narrativeTraceEvidence
   ];
 
   if (

@@ -17,6 +17,7 @@ import {
 import { prepareDataLayerRegistry, toDataLayerRegistryLookup } from "../src/resolution/dataLayerRegistry";
 import { FacetVocabulary } from "../src/resolution/facetVocabulary";
 import { bindHypothesis } from "../src/resolution/kernel/Bind";
+import { interpretBundle } from "../src/resolution/kernel/Interpret";
 import { resolveBundle } from "../src/resolution/kernel/ResolutionKernel";
 import { layer as localFileSystemLayer } from "./helpers/LocalFileSystem";
 
@@ -328,7 +329,7 @@ const customAmbiguousBundle = decodeBundle({
 });
 
 describe("resolveBundle", () => {
-  it.effect("keeps research trace Example 1 underspecified instead of falsely binding the heat-pump post", () =>
+  it.effect("refuses to bind the heat-pump post when only narrative evidence is present", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;
       const prepared = yield* loadCheckedInDataLayerRegistry(
@@ -336,6 +337,10 @@ describe("resolveBundle", () => {
       );
       const lookup = toDataLayerRegistryLookup(prepared);
 
+      // Post-text is narrative, not an identity witness for any chart. Under
+      // the identity/narrative split the kernel must decline to project the
+      // narrative tokens onto the shared partial, so the outcome is NoMatch
+      // (the strongest possible form of "does not falsely bind").
       const outcome = decodeOutcome(
         resolveBundle(
           decodeBundle({
@@ -350,16 +355,7 @@ describe("resolveBundle", () => {
         )
       );
 
-      expect(outcome._tag).toBe("Underspecified");
-      if (outcome._tag !== "Underspecified") {
-        return;
-      }
-
-      expect(outcome.missingRequired).toEqual(
-        expect.arrayContaining(["measuredProperty", "statisticType"])
-      );
-      expect(outcome.gap.reason).toBe("missing-required");
-      expect(outcome.gaps).toHaveLength(1);
+      expect(outcome._tag).toBe("NoMatch");
     }).pipe(
       Effect.provide(FacetVocabulary.layer),
       Effect.provide(localFileSystemLayer)
@@ -435,7 +431,7 @@ describe("resolveBundle", () => {
     15_000
   );
 
-  it.effect("keeps higher-precedence chart semantics when a publisher hint disagrees", () =>
+  it.effect("ignores a disagreeing publisher hint because narrative sources do not project onto identity", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;
 
@@ -467,13 +463,55 @@ describe("resolveBundle", () => {
         return;
       }
 
-      expect(outcome.tier).toBe("strong-heuristic");
+      // Publisher hints are narrative and never touch the shared partial, so
+      // the fold never sees a conflict and the interpretation remains an
+      // entailment of the chart-title identity.
+      expect(outcome.tier).toBe("entailment");
       expect(outcome.items[0]?._tag).toBe("bound");
       if (outcome.items[0]?._tag !== "bound") {
         return;
       }
 
       expect(outcome.items[0].variableId).toBe(windVariableAId);
+    }).pipe(Effect.provide(FacetVocabulary.layer)),
+    15_000
+  );
+
+  it.effect("does not leak technologyOrFuel from key-findings into the shared partial", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+
+      // Mirrors the 005-klstone evidence bundle: chart title is generic
+      // electricity generation, but a key-finding mentions wind as the
+      // leading source. Under the identity/narrative split, `wind` is
+      // narrative and must not end up in the shared partial.
+      //
+      // We assert directly on the interpret step's hypothesis rather than
+      // going through resolveBundle so the invariant is tested unconditionally
+      // — otherwise a regression to Underspecified/Ambiguous/OutOfRegistry
+      // would silently skip the assertion in the previous Resolved-only guard.
+      const bundle = decodeBundle({
+        postText: [],
+        chartTitle: "Public net electricity generation in Germany",
+        series: [],
+        keyFindings: [
+          "Wind power was the leading source of generation, with Wind Onshore contributing 33.6%"
+        ],
+        sourceLines: [],
+        publisherHints: []
+      });
+
+      const interpreted = interpretBundle(bundle, vocabulary);
+
+      expect(interpreted._tag).toBe("Hypothesis");
+      if (interpreted._tag !== "Hypothesis") {
+        return;
+      }
+
+      expect(interpreted.hypothesis.sharedPartial.technologyOrFuel).toBeUndefined();
+      for (const item of interpreted.hypothesis.items) {
+        expect(item.partial.technologyOrFuel).toBeUndefined();
+      }
     }).pipe(Effect.provide(FacetVocabulary.layer)),
     15_000
   );
@@ -990,7 +1028,7 @@ describe("resolveBundle", () => {
     15_000
   );
 
-  it.effect("returns Conflicted when same-precedence evidence disagrees on a required facet", () =>
+  it.effect("returns Conflicted when same-precedence identity evidence disagrees on a required facet", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;
       const prepared = yield* loadCheckedInDataLayerRegistry(
@@ -998,17 +1036,19 @@ describe("resolveBundle", () => {
       );
       const lookup = toDataLayerRegistryLookup(prepared);
 
-      // Both key-findings are from the same precedence tier (key-finding),
-      // so neither can dominate. The fold must surface the real conflict.
+      // Both sites come from `x-axis` (one from the label, one from the
+      // unit string), so they share a precedence index. Neither can
+      // dominate the other, and the fold must surface the real conflict.
       const outcome = decodeOutcome(
         resolveBundle(
           decodeBundle({
             postText: [],
+            xAxis: {
+              label: "Electricity generation",
+              unit: "Capacity in MW"
+            },
             series: [],
-            keyFindings: [
-              "Electricity generation",
-              "Capacity in MW"
-            ],
+            keyFindings: [],
             sourceLines: [],
             publisherHints: []
           }),

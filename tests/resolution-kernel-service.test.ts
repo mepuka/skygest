@@ -133,7 +133,50 @@ describe("ResolutionKernel service", () => {
           linkCards: [],
           threadCoverage: "focus-only"
         },
-        vision: null,
+        // Provide a chart so there is identity evidence to resolve against;
+        // narrative signals (post-text, publisher hints) never drive the
+        // shared partial under the identity/narrative split.
+        vision: {
+          kind: "vision",
+          summary: {
+            text: "Wind chart",
+            mediaTypes: ["chart"],
+            chartTypes: ["line-chart"],
+            titles: [],
+            keyFindings: []
+          },
+          assets: [
+            {
+              assetKey: "asset:1",
+              assetType: "image",
+              source: "embed",
+              index: 0,
+              originalAltText: null,
+              extractionRoute: "full",
+              analysis: {
+                mediaType: "chart",
+                chartTypes: ["line-chart"],
+                altText: "Wind generation",
+                altTextProvenance: "synthetic",
+                xAxis: null,
+                yAxis: { label: "Generation", unit: "TWh" },
+                series: [{ legendLabel: "Wind", unit: "TWh" }],
+                sourceLines: [],
+                temporalCoverage: null,
+                keyFindings: [],
+                visibleUrls: [],
+                organizationMentions: [],
+                logoText: [],
+                title: "Wind electricity generation",
+                modelId: "gemini-2.5-flash",
+                processedAt: 1
+              }
+            }
+          ],
+          modelId: "gemini-2.5-flash",
+          promptVersion: "v2",
+          processedAt: 1
+        },
         sourceAttribution: {
           kind: "source-attribution",
           provider: {
