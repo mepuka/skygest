@@ -1,0 +1,2043 @@
+{
+  "kind": "annotated",
+  "slug": "003-janrosenow",
+  "postUri": "x://982294921/status/2042172070218330174",
+  "expected": {
+    "postUri": "x://982294921/status/2042172070218330174",
+    "outcomeTag": "Resolved",
+    "expectedVariableIds": [
+      "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9"
+    ],
+    "notes": "seed 003-janrosenow: heat pumps outsold gas boilers GB"
+  },
+  "selectedBundle": {
+    "assetKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg",
+    "actual": {
+      "outcomeTag": "Ambiguous",
+      "boundVariableIds": [],
+      "candidateVariableIds": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WP0PD1A7H3TA56PTAG",
+        "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+        "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E",
+        "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
+        "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA"
+      ],
+      "gapReason": "required-facet-conflict",
+      "matchedFacetCounts": [
+        2,
+        1,
+        0,
+        0,
+        0,
+        2,
+        1,
+        0,
+        0,
+        0
+      ],
+      "agentId": null,
+      "confidence": null,
+      "tier": "weak-heuristic"
+    },
+    "trace": {
+      "bundle": {
+        "postUri": "x://982294921/status/2042172070218330174",
+        "assetKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg",
+        "postText": [
+          "For the first time ever, heat pumps outsold gas boilers in Germany in 2025.\n\n48% of all new heating systems installed last year were heat pumps. Gas fell to just 39%. A decade ago, heat pumps had a 7% market share. The transformation has been remarkable. https://t.co/wWX35d5yqE"
+        ],
+        "chartTitle": "Heat pumps overtake gas in Germany's heating market",
+        "xAxis": {
+          "label": null,
+          "unit": null
+        },
+        "yAxis": {
+          "label": "Share of new installations",
+          "unit": "%"
+        },
+        "series": [
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0",
+            "legendLabel": "Gas boilers",
+            "unit": "%"
+          },
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1",
+            "legendLabel": "Oil boilers",
+            "unit": "%"
+          },
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2",
+            "legendLabel": "Biomass & other",
+            "unit": "%"
+          },
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3",
+            "legendLabel": "Heat pumps",
+            "unit": "%"
+          }
+        ],
+        "keyFindings": [
+          "Heat pumps are projected to reach a 48% share of new heating installations in Germany by 2025, overtaking gas boilers for the first time.",
+          "The market share of gas boilers remained stable above 65% from 2010 to 2021 but is expected to decline sharply to roughly 39% by 2025.",
+          "Heat pump adoption saw a major inflection point in 2022, jumping from 17% in 2021 to 24% and continuing its rapid growth thereafter.",
+          "The combined share of oil boilers and biomass/other heating systems has steadily contracted as low-carbon electric alternatives gained dominance."
+        ],
+        "sourceLines": [
+          {
+            "sourceText": "Jan Rosenow | Source: BDH (Federal Association of the German Heating Industry); BWP; TGA-Praxis"
+          }
+        ],
+        "publisherHints": [
+          {
+            "label": "BDH (Federal Association of the German Heating Industry)",
+            "confidence": 0.5
+          },
+          {
+            "label": "BWP",
+            "confidence": 0.5
+          },
+          {
+            "label": "TGA-Praxis",
+            "confidence": 0.5
+          }
+        ],
+        "temporalCoverage": {
+          "startDate": "2010",
+          "endDate": "2025"
+        }
+      },
+      "assetKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg",
+      "agentId": null,
+      "interpreted": {
+        "_tag": "Hypothesis",
+        "bundle": {
+          "postUri": "x://982294921/status/2042172070218330174",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg",
+          "postText": [
+            "For the first time ever, heat pumps outsold gas boilers in Germany in 2025.\n\n48% of all new heating systems installed last year were heat pumps. Gas fell to just 39%. A decade ago, heat pumps had a 7% market share. The transformation has been remarkable. https://t.co/wWX35d5yqE"
+          ],
+          "chartTitle": "Heat pumps overtake gas in Germany's heating market",
+          "xAxis": {
+            "label": null,
+            "unit": null
+          },
+          "yAxis": {
+            "label": "Share of new installations",
+            "unit": "%"
+          },
+          "series": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0",
+              "legendLabel": "Gas boilers",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1",
+              "legendLabel": "Oil boilers",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2",
+              "legendLabel": "Biomass & other",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3",
+              "legendLabel": "Heat pumps",
+              "unit": "%"
+            }
+          ],
+          "keyFindings": [
+            "Heat pumps are projected to reach a 48% share of new heating installations in Germany by 2025, overtaking gas boilers for the first time.",
+            "The market share of gas boilers remained stable above 65% from 2010 to 2021 but is expected to decline sharply to roughly 39% by 2025.",
+            "Heat pump adoption saw a major inflection point in 2022, jumping from 17% in 2021 to 24% and continuing its rapid growth thereafter.",
+            "The combined share of oil boilers and biomass/other heating systems has steadily contracted as low-carbon electric alternatives gained dominance."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Jan Rosenow | Source: BDH (Federal Association of the German Heating Industry); BWP; TGA-Praxis"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "BDH (Federal Association of the German Heating Industry)",
+              "confidence": 0.5
+            },
+            {
+              "label": "BWP",
+              "confidence": 0.5
+            },
+            {
+              "label": "TGA-Praxis",
+              "confidence": 0.5
+            }
+          ],
+          "temporalCoverage": {
+            "startDate": "2010",
+            "endDate": "2025"
+          }
+        },
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "deployment",
+            "statisticType": "share",
+            "domainObject": "heat pump",
+            "technologyOrFuel": "heat pump"
+          },
+          "attachedContext": {
+            "time": {
+              "start": "2010",
+              "end": "2025"
+            }
+          },
+          "items": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0",
+              "partial": {
+                "domainObject": "natural gas",
+                "technologyOrFuel": "natural gas"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Gas boilers",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1",
+              "partial": {
+                "domainObject": "oil"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Oil boilers",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2",
+              "partial": {
+                "unitFamily": "other"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Biomass & other",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3",
+              "partial": {
+                "domainObject": "heat pump",
+                "technologyOrFuel": "heat pump"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Heat pumps",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3"
+                }
+              ]
+            }
+          ],
+          "evidence": [
+            {
+              "source": "y-axis",
+              "text": "Share of new installations"
+            },
+            {
+              "source": "chart-title",
+              "text": "Heat pumps overtake gas in Germany's heating market"
+            },
+            {
+              "source": "key-finding",
+              "text": "Heat pump adoption saw a major inflection point in 2022, jumping from 17% in 2021 to 24%"
+            },
+            {
+              "source": "post-text",
+              "text": "For the first time ever, heat pumps outsold gas boilers in Germany in 2025."
+            },
+            {
+              "source": "series-label",
+              "text": "Gas boilers",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0"
+            },
+            {
+              "source": "series-label",
+              "text": "Oil boilers",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1"
+            },
+            {
+              "source": "series-label",
+              "text": "Biomass & other",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2"
+            },
+            {
+              "source": "series-label",
+              "text": "Heat pumps",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3"
+            }
+          ],
+          "tier": "weak-heuristic"
+        }
+      },
+      "bound": {
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "deployment",
+            "statisticType": "share",
+            "domainObject": "heat pump",
+            "technologyOrFuel": "heat pump"
+          },
+          "attachedContext": {
+            "time": {
+              "start": "2010",
+              "end": "2025"
+            }
+          },
+          "items": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0",
+              "partial": {
+                "domainObject": "natural gas",
+                "technologyOrFuel": "natural gas"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Gas boilers",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1",
+              "partial": {
+                "domainObject": "oil"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Oil boilers",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2",
+              "partial": {
+                "unitFamily": "other"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Biomass & other",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3",
+              "partial": {
+                "domainObject": "heat pump",
+                "technologyOrFuel": "heat pump"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Heat pumps",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3"
+                }
+              ]
+            }
+          ],
+          "evidence": [
+            {
+              "source": "y-axis",
+              "text": "Share of new installations"
+            },
+            {
+              "source": "chart-title",
+              "text": "Heat pumps overtake gas in Germany's heating market"
+            },
+            {
+              "source": "key-finding",
+              "text": "Heat pump adoption saw a major inflection point in 2022, jumping from 17% in 2021 to 24%"
+            },
+            {
+              "source": "post-text",
+              "text": "For the first time ever, heat pumps outsold gas boilers in Germany in 2025."
+            },
+            {
+              "source": "series-label",
+              "text": "Gas boilers",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0"
+            },
+            {
+              "source": "series-label",
+              "text": "Oil boilers",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1"
+            },
+            {
+              "source": "series-label",
+              "text": "Biomass & other",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2"
+            },
+            {
+              "source": "series-label",
+              "text": "Heat pumps",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3"
+            }
+          ],
+          "tier": "weak-heuristic"
+        },
+        "items": [
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0",
+            "semanticPartial": {
+              "measuredProperty": "deployment",
+              "statisticType": "share",
+              "domainObject": "heat pump",
+              "technologyOrFuel": "heat pump"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2010",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Gas boilers",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1",
+            "semanticPartial": {
+              "measuredProperty": "deployment",
+              "statisticType": "share",
+              "domainObject": "heat pump",
+              "technologyOrFuel": "heat pump"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2010",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Oil boilers",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2",
+            "semanticPartial": {
+              "measuredProperty": "deployment",
+              "statisticType": "share",
+              "domainObject": "heat pump",
+              "technologyOrFuel": "heat pump",
+              "unitFamily": "other"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2010",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Biomass & other",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2"
+              }
+            ],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WP0PD1A7H3TA56PTAG",
+                "label": "Heat pump installations",
+                "matchedFacets": [
+                  "domainObject",
+                  "technologyOrFuel"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "count",
+                      "deployment"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "share",
+                      "stock"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "dimensionless",
+                      "other"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "count",
+                  "domainObject": "heat pump",
+                  "technologyOrFuel": "heat pump",
+                  "statisticType": "stock",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+                "label": "Clean electricity share",
+                "matchedFacets": [
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "dimensionless",
+                      "other"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "share",
+                  "domainObject": "electricity",
+                  "statisticType": "share",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E",
+                "label": "Clean energy investment",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "investment"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "clean energy",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "currency",
+                      "other"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "investment",
+                  "domainObject": "clean energy",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "currency"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
+                "label": "CO2 emissions from energy",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "emissions"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "energy consumption",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "mass_co2e",
+                      "other"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "emissions",
+                  "domainObject": "energy consumption",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "mass_co2e"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                "label": "Data center power demand",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "demand",
+                      "deployment"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "data center",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "share",
+                      "stock"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "other",
+                      "power"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "data center",
+                  "statisticType": "stock",
+                  "unitFamily": "power"
+                }
+              }
+            ],
+            "reason": "no-candidates"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3",
+            "semanticPartial": {
+              "measuredProperty": "deployment",
+              "statisticType": "share",
+              "domainObject": "heat pump",
+              "technologyOrFuel": "heat pump"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2010",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Heat pumps",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3"
+              }
+            ],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WP0PD1A7H3TA56PTAG",
+                "label": "Heat pump installations",
+                "matchedFacets": [
+                  "domainObject",
+                  "technologyOrFuel"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "count",
+                      "deployment"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "share",
+                      "stock"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "count",
+                  "domainObject": "heat pump",
+                  "technologyOrFuel": "heat pump",
+                  "statisticType": "stock",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+                "label": "Clean electricity share",
+                "matchedFacets": [
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "heat pump"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "share",
+                  "domainObject": "electricity",
+                  "statisticType": "share",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E",
+                "label": "Clean energy investment",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "investment"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "clean energy",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "share"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "investment",
+                  "domainObject": "clean energy",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "currency"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
+                "label": "CO2 emissions from energy",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "emissions"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "energy consumption",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "share"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "emissions",
+                  "domainObject": "energy consumption",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "mass_co2e"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                "label": "Data center power demand",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "demand",
+                      "deployment"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "data center",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "share",
+                      "stock"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "data center",
+                  "statisticType": "stock",
+                  "unitFamily": "power"
+                }
+              }
+            ],
+            "reason": "no-candidates"
+          }
+        ]
+      },
+      "outcome": {
+        "_tag": "Ambiguous",
+        "bundle": {
+          "postUri": "x://982294921/status/2042172070218330174",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg",
+          "postText": [
+            "For the first time ever, heat pumps outsold gas boilers in Germany in 2025.\n\n48% of all new heating systems installed last year were heat pumps. Gas fell to just 39%. A decade ago, heat pumps had a 7% market share. The transformation has been remarkable. https://t.co/wWX35d5yqE"
+          ],
+          "chartTitle": "Heat pumps overtake gas in Germany's heating market",
+          "xAxis": {
+            "label": null,
+            "unit": null
+          },
+          "yAxis": {
+            "label": "Share of new installations",
+            "unit": "%"
+          },
+          "series": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0",
+              "legendLabel": "Gas boilers",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1",
+              "legendLabel": "Oil boilers",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2",
+              "legendLabel": "Biomass & other",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3",
+              "legendLabel": "Heat pumps",
+              "unit": "%"
+            }
+          ],
+          "keyFindings": [
+            "Heat pumps are projected to reach a 48% share of new heating installations in Germany by 2025, overtaking gas boilers for the first time.",
+            "The market share of gas boilers remained stable above 65% from 2010 to 2021 but is expected to decline sharply to roughly 39% by 2025.",
+            "Heat pump adoption saw a major inflection point in 2022, jumping from 17% in 2021 to 24% and continuing its rapid growth thereafter.",
+            "The combined share of oil boilers and biomass/other heating systems has steadily contracted as low-carbon electric alternatives gained dominance."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Jan Rosenow | Source: BDH (Federal Association of the German Heating Industry); BWP; TGA-Praxis"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "BDH (Federal Association of the German Heating Industry)",
+              "confidence": 0.5
+            },
+            {
+              "label": "BWP",
+              "confidence": 0.5
+            },
+            {
+              "label": "TGA-Praxis",
+              "confidence": 0.5
+            }
+          ],
+          "temporalCoverage": {
+            "startDate": "2010",
+            "endDate": "2025"
+          }
+        },
+        "hypotheses": [
+          {
+            "sharedPartial": {
+              "measuredProperty": "deployment",
+              "statisticType": "share",
+              "domainObject": "heat pump",
+              "technologyOrFuel": "heat pump"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2010",
+                "end": "2025"
+              }
+            },
+            "items": [
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0",
+                "partial": {
+                  "domainObject": "natural gas",
+                  "technologyOrFuel": "natural gas"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Gas boilers",
+                    "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0"
+                  }
+                ]
+              },
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1",
+                "partial": {
+                  "domainObject": "oil"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Oil boilers",
+                    "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1"
+                  }
+                ]
+              },
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2",
+                "partial": {
+                  "unitFamily": "other"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Biomass & other",
+                    "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2"
+                  }
+                ]
+              },
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3",
+                "partial": {
+                  "domainObject": "heat pump",
+                  "technologyOrFuel": "heat pump"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Heat pumps",
+                    "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3"
+                  }
+                ]
+              }
+            ],
+            "evidence": [
+              {
+                "source": "y-axis",
+                "text": "Share of new installations"
+              },
+              {
+                "source": "chart-title",
+                "text": "Heat pumps overtake gas in Germany's heating market"
+              },
+              {
+                "source": "key-finding",
+                "text": "Heat pump adoption saw a major inflection point in 2022, jumping from 17% in 2021 to 24%"
+              },
+              {
+                "source": "post-text",
+                "text": "For the first time ever, heat pumps outsold gas boilers in Germany in 2025."
+              },
+              {
+                "source": "series-label",
+                "text": "Gas boilers",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0"
+              },
+              {
+                "source": "series-label",
+                "text": "Oil boilers",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1"
+              },
+              {
+                "source": "series-label",
+                "text": "Biomass & other",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2"
+              },
+              {
+                "source": "series-label",
+                "text": "Heat pumps",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3"
+              }
+            ],
+            "tier": "weak-heuristic"
+          }
+        ],
+        "items": [
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0",
+            "semanticPartial": {
+              "measuredProperty": "deployment",
+              "statisticType": "share",
+              "domainObject": "heat pump",
+              "technologyOrFuel": "heat pump"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2010",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Gas boilers",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:0"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1",
+            "semanticPartial": {
+              "measuredProperty": "deployment",
+              "statisticType": "share",
+              "domainObject": "heat pump",
+              "technologyOrFuel": "heat pump"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2010",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Oil boilers",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:1"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2",
+            "semanticPartial": {
+              "measuredProperty": "deployment",
+              "statisticType": "share",
+              "domainObject": "heat pump",
+              "technologyOrFuel": "heat pump",
+              "unitFamily": "other"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2010",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Biomass & other",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:2"
+              }
+            ],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WP0PD1A7H3TA56PTAG",
+                "label": "Heat pump installations",
+                "matchedFacets": [
+                  "domainObject",
+                  "technologyOrFuel"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "count",
+                      "deployment"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "share",
+                      "stock"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "dimensionless",
+                      "other"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "count",
+                  "domainObject": "heat pump",
+                  "technologyOrFuel": "heat pump",
+                  "statisticType": "stock",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+                "label": "Clean electricity share",
+                "matchedFacets": [
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "dimensionless",
+                      "other"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "share",
+                  "domainObject": "electricity",
+                  "statisticType": "share",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E",
+                "label": "Clean energy investment",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "investment"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "clean energy",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "currency",
+                      "other"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "investment",
+                  "domainObject": "clean energy",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "currency"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
+                "label": "CO2 emissions from energy",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "emissions"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "energy consumption",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "mass_co2e",
+                      "other"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "emissions",
+                  "domainObject": "energy consumption",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "mass_co2e"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                "label": "Data center power demand",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "demand",
+                      "deployment"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "data center",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "share",
+                      "stock"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "other",
+                      "power"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "data center",
+                  "statisticType": "stock",
+                  "unitFamily": "power"
+                }
+              }
+            ],
+            "reason": "no-candidates"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3",
+            "semanticPartial": {
+              "measuredProperty": "deployment",
+              "statisticType": "share",
+              "domainObject": "heat pump",
+              "technologyOrFuel": "heat pump"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2010",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Heat pumps",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFdArEWXMAAkAkK.jpg:series:3"
+              }
+            ],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WP0PD1A7H3TA56PTAG",
+                "label": "Heat pump installations",
+                "matchedFacets": [
+                  "domainObject",
+                  "technologyOrFuel"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "count",
+                      "deployment"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "share",
+                      "stock"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "count",
+                  "domainObject": "heat pump",
+                  "technologyOrFuel": "heat pump",
+                  "statisticType": "stock",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+                "label": "Clean electricity share",
+                "matchedFacets": [
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "heat pump"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "share",
+                  "domainObject": "electricity",
+                  "statisticType": "share",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E",
+                "label": "Clean energy investment",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "investment"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "clean energy",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "share"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "investment",
+                  "domainObject": "clean energy",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "currency"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
+                "label": "CO2 emissions from energy",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "emissions"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "energy consumption",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "share"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "emissions",
+                  "domainObject": "energy consumption",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "mass_co2e"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                "label": "Data center power demand",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "demand",
+                      "deployment"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "data center",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "share",
+                      "stock"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "data center",
+                  "statisticType": "stock",
+                  "unitFamily": "power"
+                }
+              }
+            ],
+            "reason": "no-candidates"
+          }
+        ],
+        "gaps": [
+          {
+            "partial": {
+              "measuredProperty": "deployment",
+              "statisticType": "share",
+              "domainObject": "heat pump",
+              "technologyOrFuel": "heat pump"
+            },
+            "candidates": [],
+            "reason": "required-facet-conflict",
+            "context": {
+              "attachedContext": {
+                "time": {
+                  "start": "2010",
+                  "end": "2025"
+                }
+              }
+            }
+          },
+          {
+            "partial": {
+              "measuredProperty": "deployment",
+              "statisticType": "share",
+              "domainObject": "heat pump",
+              "technologyOrFuel": "heat pump"
+            },
+            "candidates": [],
+            "reason": "required-facet-conflict",
+            "context": {
+              "attachedContext": {
+                "time": {
+                  "start": "2010",
+                  "end": "2025"
+                }
+              }
+            }
+          },
+          {
+            "partial": {
+              "measuredProperty": "deployment",
+              "statisticType": "share",
+              "domainObject": "heat pump",
+              "technologyOrFuel": "heat pump",
+              "unitFamily": "other"
+            },
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WP0PD1A7H3TA56PTAG",
+                "label": "Heat pump installations",
+                "matchedFacets": [
+                  "domainObject",
+                  "technologyOrFuel"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "count",
+                      "deployment"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "share",
+                      "stock"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "dimensionless",
+                      "other"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "count",
+                  "domainObject": "heat pump",
+                  "technologyOrFuel": "heat pump",
+                  "statisticType": "stock",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+                "label": "Clean electricity share",
+                "matchedFacets": [
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "dimensionless",
+                      "other"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "share",
+                  "domainObject": "electricity",
+                  "statisticType": "share",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E",
+                "label": "Clean energy investment",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "investment"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "clean energy",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "currency",
+                      "other"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "investment",
+                  "domainObject": "clean energy",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "currency"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
+                "label": "CO2 emissions from energy",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "emissions"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "energy consumption",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "mass_co2e",
+                      "other"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "emissions",
+                  "domainObject": "energy consumption",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "mass_co2e"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                "label": "Data center power demand",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "demand",
+                      "deployment"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "data center",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "share",
+                      "stock"
+                    ]
+                  },
+                  {
+                    "facet": "unitFamily",
+                    "values": [
+                      "other",
+                      "power"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "data center",
+                  "statisticType": "stock",
+                  "unitFamily": "power"
+                }
+              }
+            ],
+            "reason": "no-candidates",
+            "context": {
+              "attachedContext": {
+                "time": {
+                  "start": "2010",
+                  "end": "2025"
+                }
+              }
+            }
+          },
+          {
+            "partial": {
+              "measuredProperty": "deployment",
+              "statisticType": "share",
+              "domainObject": "heat pump",
+              "technologyOrFuel": "heat pump"
+            },
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WP0PD1A7H3TA56PTAG",
+                "label": "Heat pump installations",
+                "matchedFacets": [
+                  "domainObject",
+                  "technologyOrFuel"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "count",
+                      "deployment"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "share",
+                      "stock"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "count",
+                  "domainObject": "heat pump",
+                  "technologyOrFuel": "heat pump",
+                  "statisticType": "stock",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+                "label": "Clean electricity share",
+                "matchedFacets": [
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "heat pump"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "share",
+                  "domainObject": "electricity",
+                  "statisticType": "share",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E",
+                "label": "Clean energy investment",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "investment"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "clean energy",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "share"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "investment",
+                  "domainObject": "clean energy",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "currency"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
+                "label": "CO2 emissions from energy",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "deployment",
+                      "emissions"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "energy consumption",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "share"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "emissions",
+                  "domainObject": "energy consumption",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "mass_co2e"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                "label": "Data center power demand",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "demand",
+                      "deployment"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "data center",
+                      "heat pump"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "share",
+                      "stock"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "data center",
+                  "statisticType": "stock",
+                  "unitFamily": "power"
+                }
+              }
+            ],
+            "reason": "no-candidates",
+            "context": {
+              "attachedContext": {
+                "time": {
+                  "start": "2010",
+                  "end": "2025"
+                }
+              }
+            }
+          }
+        ],
+        "tier": "weak-heuristic"
+      }
+    }
+  },
+  "checks": [
+    {
+      "kind": "outcome-tag",
+      "pass": false,
+      "expected": "Resolved",
+      "actual": "Ambiguous"
+    },
+    {
+      "kind": "variable-ids",
+      "pass": false,
+      "expected": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9"
+      ],
+      "missing": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9"
+      ],
+      "unexpected": []
+    }
+  ],
+  "hasFindings": true,
+  "error": null
+}

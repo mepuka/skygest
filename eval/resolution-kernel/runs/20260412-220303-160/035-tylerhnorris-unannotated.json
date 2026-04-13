@@ -1,0 +1,409 @@
+{
+  "kind": "unannotated",
+  "slug": "035-tylerhnorris",
+  "postUri": "x://23008743/status/1893380642701754563",
+  "bundles": [
+    {
+      "assetKey": "embed:0:https://pbs.twimg.com/media/GkajKoqWsAA9wGS.png",
+      "actual": {
+        "outcomeTag": "NoMatch",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": null,
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": null
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "x://23008743/status/1893380642701754563",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/GkajKoqWsAA9wGS.png",
+          "postText": [
+            "Glad to see consumer advocates already using our study to support ratepayer protection efforts, in this case the oldest utility consumer advocacy office of its kind in the US (MD Office of People's Counsel). https://t.co/ORw4ojXWVe"
+          ],
+          "chartTitle": "Large load growth: Uncertain, and not Maryland ratepayers’ issue to resolve",
+          "series": [],
+          "keyFindings": [
+            "Maryland's large load growth through 2030 is projected to be less than 0.4% of PJM's total growth, amounting to only 124 MWs.",
+            "The majority of PJM's 32,671 MW projected load growth is concentrated in Virginia (34%), Ohio (30%), Pennsylvania (14%), and Illinois (7%).",
+            "Demand growth forecasts are considered highly uncertain, and failure to materialize as predicted can lead to significant bill increases for current ratepayers.",
+            "PJM potentially has 23,000 MWs of flexible system headroom in existing generation that could accommodate data center loads.",
+            "The BGE long-term forecast has decreased from the previous year, showing only modest growth through 2045."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "i US Power & Utilities: Year Ahead 2025: Is Past What’s Prologue?, Bank of America (January 7, 2025).",
+              "datasetName": "US Power & Utilities: Year Ahead 2025: Is Past What’s Prologue?"
+            },
+            {
+              "sourceText": "ii Wall Street Journal (Jan. 27, 2025)."
+            },
+            {
+              "sourceText": "iii https://nicholasinstitute.duke.edu/sites/default/files/publications/rethinking-load-growth.pdf",
+              "datasetName": "rethinking-load-growth.pdf"
+            },
+            {
+              "sourceText": "https://www.pjm.com/planning/resource-adequacy-planning/load-forecast-dev-process.aspx",
+              "datasetName": "PJM Load Forecast Development Process"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "PJM",
+              "confidence": 1
+            },
+            {
+              "label": "BGE",
+              "confidence": 0.5
+            },
+            {
+              "label": "Pepco",
+              "confidence": 0.5
+            },
+            {
+              "label": "Delmarva",
+              "confidence": 0.5
+            },
+            {
+              "label": "Bank of America",
+              "confidence": 0.5
+            },
+            {
+              "label": "Wall Street Journal",
+              "confidence": 0.5
+            },
+            {
+              "label": "Nicholas Institute",
+              "confidence": 0.5
+            },
+            {
+              "label": "Office of People's Counsel",
+              "confidence": 0.5
+            },
+            {
+              "label": "OPC",
+              "confidence": 0.3
+            },
+            {
+              "label": "OFFICE OF PEOPLE'S COUNSEL",
+              "confidence": 0.3
+            },
+            {
+              "label": "State of Maryland",
+              "confidence": 0.3
+            }
+          ]
+        },
+        "assetKey": "embed:0:https://pbs.twimg.com/media/GkajKoqWsAA9wGS.png",
+        "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX",
+        "interpreted": {
+          "_tag": "Hypothesis",
+          "bundle": {
+            "postUri": "x://23008743/status/1893380642701754563",
+            "assetKey": "embed:0:https://pbs.twimg.com/media/GkajKoqWsAA9wGS.png",
+            "postText": [
+              "Glad to see consumer advocates already using our study to support ratepayer protection efforts, in this case the oldest utility consumer advocacy office of its kind in the US (MD Office of People's Counsel). https://t.co/ORw4ojXWVe"
+            ],
+            "chartTitle": "Large load growth: Uncertain, and not Maryland ratepayers’ issue to resolve",
+            "series": [],
+            "keyFindings": [
+              "Maryland's large load growth through 2030 is projected to be less than 0.4% of PJM's total growth, amounting to only 124 MWs.",
+              "The majority of PJM's 32,671 MW projected load growth is concentrated in Virginia (34%), Ohio (30%), Pennsylvania (14%), and Illinois (7%).",
+              "Demand growth forecasts are considered highly uncertain, and failure to materialize as predicted can lead to significant bill increases for current ratepayers.",
+              "PJM potentially has 23,000 MWs of flexible system headroom in existing generation that could accommodate data center loads.",
+              "The BGE long-term forecast has decreased from the previous year, showing only modest growth through 2045."
+            ],
+            "sourceLines": [
+              {
+                "sourceText": "i US Power & Utilities: Year Ahead 2025: Is Past What’s Prologue?, Bank of America (January 7, 2025).",
+                "datasetName": "US Power & Utilities: Year Ahead 2025: Is Past What’s Prologue?"
+              },
+              {
+                "sourceText": "ii Wall Street Journal (Jan. 27, 2025)."
+              },
+              {
+                "sourceText": "iii https://nicholasinstitute.duke.edu/sites/default/files/publications/rethinking-load-growth.pdf",
+                "datasetName": "rethinking-load-growth.pdf"
+              },
+              {
+                "sourceText": "https://www.pjm.com/planning/resource-adequacy-planning/load-forecast-dev-process.aspx",
+                "datasetName": "PJM Load Forecast Development Process"
+              }
+            ],
+            "publisherHints": [
+              {
+                "label": "PJM",
+                "confidence": 1
+              },
+              {
+                "label": "BGE",
+                "confidence": 0.5
+              },
+              {
+                "label": "Pepco",
+                "confidence": 0.5
+              },
+              {
+                "label": "Delmarva",
+                "confidence": 0.5
+              },
+              {
+                "label": "Bank of America",
+                "confidence": 0.5
+              },
+              {
+                "label": "Wall Street Journal",
+                "confidence": 0.5
+              },
+              {
+                "label": "Nicholas Institute",
+                "confidence": 0.5
+              },
+              {
+                "label": "Office of People's Counsel",
+                "confidence": 0.5
+              },
+              {
+                "label": "OPC",
+                "confidence": 0.3
+              },
+              {
+                "label": "OFFICE OF PEOPLE'S COUNSEL",
+                "confidence": 0.3
+              },
+              {
+                "label": "State of Maryland",
+                "confidence": 0.3
+              }
+            ]
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "measuredProperty": "demand",
+              "aggregation": "sum",
+              "unitFamily": "power",
+              "domainObject": "electricity"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/GkajKoqWsAA9wGS.png",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "chart-title",
+                "text": "Large load growth: Uncertain, and not Maryland ratepayers’ issue to resolve"
+              },
+              {
+                "source": "key-finding",
+                "text": "Maryland's large load growth through 2030 is projected to be less than 0.4% of PJM's total growth, amounting to only 124 MWs."
+              },
+              {
+                "source": "key-finding",
+                "text": "The majority of PJM's 32,671 MW projected load growth is concentrated in Virginia (34%), Ohio (30%), Pennsylvania (14%),"
+              },
+              {
+                "source": "key-finding",
+                "text": "Demand growth forecasts are considered highly uncertain,"
+              },
+              {
+                "source": "source-line",
+                "text": "i US Power & Utilities: Year Ahead 2025: Is Past What’s Prologue?, Bank of America (January 7, 2025)."
+              },
+              {
+                "source": "source-line",
+                "text": "US Power & Utilities: Year Ahead 2025: Is Past What’s Prologue?"
+              },
+              {
+                "source": "source-line",
+                "text": "iii https://nicholasinstitute.duke.edu/sites/default/files/publications/rethinking-load-growth.pdf"
+              },
+              {
+                "source": "source-line",
+                "text": "rethinking-load-growth.pdf"
+              },
+              {
+                "source": "source-line",
+                "text": "https://www.pjm.com/planning/resource-adequacy-planning/load-forecast-dev-process.aspx"
+              },
+              {
+                "source": "source-line",
+                "text": "PJM Load Forecast Development Process"
+              }
+            ],
+            "tier": "weak-heuristic"
+          }
+        },
+        "bound": {
+          "hypothesis": {
+            "sharedPartial": {
+              "measuredProperty": "demand",
+              "aggregation": "sum",
+              "unitFamily": "power",
+              "domainObject": "electricity"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/GkajKoqWsAA9wGS.png",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "chart-title",
+                "text": "Large load growth: Uncertain, and not Maryland ratepayers’ issue to resolve"
+              },
+              {
+                "source": "key-finding",
+                "text": "Maryland's large load growth through 2030 is projected to be less than 0.4% of PJM's total growth, amounting to only 124 MWs."
+              },
+              {
+                "source": "key-finding",
+                "text": "The majority of PJM's 32,671 MW projected load growth is concentrated in Virginia (34%), Ohio (30%), Pennsylvania (14%),"
+              },
+              {
+                "source": "key-finding",
+                "text": "Demand growth forecasts are considered highly uncertain,"
+              },
+              {
+                "source": "source-line",
+                "text": "i US Power & Utilities: Year Ahead 2025: Is Past What’s Prologue?, Bank of America (January 7, 2025)."
+              },
+              {
+                "source": "source-line",
+                "text": "US Power & Utilities: Year Ahead 2025: Is Past What’s Prologue?"
+              },
+              {
+                "source": "source-line",
+                "text": "iii https://nicholasinstitute.duke.edu/sites/default/files/publications/rethinking-load-growth.pdf"
+              },
+              {
+                "source": "source-line",
+                "text": "rethinking-load-growth.pdf"
+              },
+              {
+                "source": "source-line",
+                "text": "https://www.pjm.com/planning/resource-adequacy-planning/load-forecast-dev-process.aspx"
+              },
+              {
+                "source": "source-line",
+                "text": "PJM Load Forecast Development Process"
+              }
+            ],
+            "tier": "weak-heuristic"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/GkajKoqWsAA9wGS.png",
+              "semanticPartial": {
+                "measuredProperty": "demand",
+                "aggregation": "sum",
+                "unitFamily": "power",
+                "domainObject": "electricity"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [],
+              "missingRequired": [
+                "statisticType"
+              ],
+              "reason": "missing-required"
+            }
+          ],
+          "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF596JA72ARPNWXEEX"
+        },
+        "outcome": {
+          "_tag": "NoMatch",
+          "bundle": {
+            "postUri": "x://23008743/status/1893380642701754563",
+            "assetKey": "embed:0:https://pbs.twimg.com/media/GkajKoqWsAA9wGS.png",
+            "postText": [
+              "Glad to see consumer advocates already using our study to support ratepayer protection efforts, in this case the oldest utility consumer advocacy office of its kind in the US (MD Office of People's Counsel). https://t.co/ORw4ojXWVe"
+            ],
+            "chartTitle": "Large load growth: Uncertain, and not Maryland ratepayers’ issue to resolve",
+            "series": [],
+            "keyFindings": [
+              "Maryland's large load growth through 2030 is projected to be less than 0.4% of PJM's total growth, amounting to only 124 MWs.",
+              "The majority of PJM's 32,671 MW projected load growth is concentrated in Virginia (34%), Ohio (30%), Pennsylvania (14%), and Illinois (7%).",
+              "Demand growth forecasts are considered highly uncertain, and failure to materialize as predicted can lead to significant bill increases for current ratepayers.",
+              "PJM potentially has 23,000 MWs of flexible system headroom in existing generation that could accommodate data center loads.",
+              "The BGE long-term forecast has decreased from the previous year, showing only modest growth through 2045."
+            ],
+            "sourceLines": [
+              {
+                "sourceText": "i US Power & Utilities: Year Ahead 2025: Is Past What’s Prologue?, Bank of America (January 7, 2025).",
+                "datasetName": "US Power & Utilities: Year Ahead 2025: Is Past What’s Prologue?"
+              },
+              {
+                "sourceText": "ii Wall Street Journal (Jan. 27, 2025)."
+              },
+              {
+                "sourceText": "iii https://nicholasinstitute.duke.edu/sites/default/files/publications/rethinking-load-growth.pdf",
+                "datasetName": "rethinking-load-growth.pdf"
+              },
+              {
+                "sourceText": "https://www.pjm.com/planning/resource-adequacy-planning/load-forecast-dev-process.aspx",
+                "datasetName": "PJM Load Forecast Development Process"
+              }
+            ],
+            "publisherHints": [
+              {
+                "label": "PJM",
+                "confidence": 1
+              },
+              {
+                "label": "BGE",
+                "confidence": 0.5
+              },
+              {
+                "label": "Pepco",
+                "confidence": 0.5
+              },
+              {
+                "label": "Delmarva",
+                "confidence": 0.5
+              },
+              {
+                "label": "Bank of America",
+                "confidence": 0.5
+              },
+              {
+                "label": "Wall Street Journal",
+                "confidence": 0.5
+              },
+              {
+                "label": "Nicholas Institute",
+                "confidence": 0.5
+              },
+              {
+                "label": "Office of People's Counsel",
+                "confidence": 0.5
+              },
+              {
+                "label": "OPC",
+                "confidence": 0.3
+              },
+              {
+                "label": "OFFICE OF PEOPLE'S COUNSEL",
+                "confidence": 0.3
+              },
+              {
+                "label": "State of Maryland",
+                "confidence": 0.3
+              }
+            ]
+          },
+          "reason": "Kernel could not bind an underspecified partial"
+        }
+      }
+    }
+  ],
+  "error": null
+}

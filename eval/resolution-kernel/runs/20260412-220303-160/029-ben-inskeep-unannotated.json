@@ -1,0 +1,712 @@
+{
+  "kind": "unannotated",
+  "slug": "029-ben-inskeep",
+  "postUri": "x://2687569825/status/2040488919955898559",
+  "bundles": [
+    {
+      "assetKey": "embed:0:https://pbs.twimg.com/media/HFFDqTiagAAPelc.png",
+      "actual": {
+        "outcomeTag": "NoMatch",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": null,
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": null
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "x://2687569825/status/2040488919955898559",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/HFFDqTiagAAPelc.png",
+          "postText": [
+            "A new data center proposed in Indianapolis would include 56 backup diesel generators and be located directly across the street from an elementary school 😱 https://t.co/5RJOhIf0SR"
+          ],
+          "series": [],
+          "keyFindings": [
+            "The map identifies specific residential assets within the Indianapolis metropolitan area, which are relevant for localized energy demand modeling.",
+            "Targeted locations are situated in close proximity to major transit corridors, indicating areas of high potential for EV charging infrastructure development.",
+            "The distribution of marked points across various neighborhoods suggests a diverse set of data points for urban utility service analysis."
+          ],
+          "sourceLines": [],
+          "publisherHints": [
+            {
+              "label": "Google",
+              "confidence": 0.5
+            },
+            {
+              "label": "Google Maps",
+              "confidence": 0.3
+            }
+          ]
+        },
+        "assetKey": "embed:0:https://pbs.twimg.com/media/HFFDqTiagAAPelc.png",
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Hypothesis",
+          "bundle": {
+            "postUri": "x://2687569825/status/2040488919955898559",
+            "assetKey": "embed:0:https://pbs.twimg.com/media/HFFDqTiagAAPelc.png",
+            "postText": [
+              "A new data center proposed in Indianapolis would include 56 backup diesel generators and be located directly across the street from an elementary school 😱 https://t.co/5RJOhIf0SR"
+            ],
+            "series": [],
+            "keyFindings": [
+              "The map identifies specific residential assets within the Indianapolis metropolitan area, which are relevant for localized energy demand modeling.",
+              "Targeted locations are situated in close proximity to major transit corridors, indicating areas of high potential for EV charging infrastructure development.",
+              "The distribution of marked points across various neighborhoods suggests a diverse set of data points for urban utility service analysis."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "Google",
+                "confidence": 0.5
+              },
+              {
+                "label": "Google Maps",
+                "confidence": 0.3
+              }
+            ]
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "measuredProperty": "demand",
+              "domainObject": "buildings"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFFDqTiagAAPelc.png",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "key-finding",
+                "text": "The map identifies specific residential assets within the Indianapolis metropolitan area, which are relevant for localized energy demand modeling."
+              }
+            ],
+            "tier": "strong-heuristic"
+          }
+        },
+        "bound": {
+          "hypothesis": {
+            "sharedPartial": {
+              "measuredProperty": "demand",
+              "domainObject": "buildings"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFFDqTiagAAPelc.png",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "key-finding",
+                "text": "The map identifies specific residential assets within the Indianapolis metropolitan area, which are relevant for localized energy demand modeling."
+              }
+            ],
+            "tier": "strong-heuristic"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFFDqTiagAAPelc.png",
+              "semanticPartial": {
+                "measuredProperty": "demand",
+                "domainObject": "buildings"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [],
+              "missingRequired": [
+                "statisticType"
+              ],
+              "reason": "missing-required"
+            }
+          ]
+        },
+        "outcome": {
+          "_tag": "NoMatch",
+          "bundle": {
+            "postUri": "x://2687569825/status/2040488919955898559",
+            "assetKey": "embed:0:https://pbs.twimg.com/media/HFFDqTiagAAPelc.png",
+            "postText": [
+              "A new data center proposed in Indianapolis would include 56 backup diesel generators and be located directly across the street from an elementary school 😱 https://t.co/5RJOhIf0SR"
+            ],
+            "series": [],
+            "keyFindings": [
+              "The map identifies specific residential assets within the Indianapolis metropolitan area, which are relevant for localized energy demand modeling.",
+              "Targeted locations are situated in close proximity to major transit corridors, indicating areas of high potential for EV charging infrastructure development.",
+              "The distribution of marked points across various neighborhoods suggests a diverse set of data points for urban utility service analysis."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "Google",
+                "confidence": 0.5
+              },
+              {
+                "label": "Google Maps",
+                "confidence": 0.3
+              }
+            ]
+          },
+          "reason": "Kernel could not bind an underspecified partial"
+        }
+      }
+    },
+    {
+      "assetKey": "embed:1:https://pbs.twimg.com/media/HFFDqTeaAAAef6H.png",
+      "actual": {
+        "outcomeTag": "NoMatch",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": null,
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": null
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "x://2687569825/status/2040488919955898559",
+          "assetKey": "embed:1:https://pbs.twimg.com/media/HFFDqTeaAAAef6H.png",
+          "postText": [
+            "A new data center proposed in Indianapolis would include 56 backup diesel generators and be located directly across the street from an elementary school 😱 https://t.co/5RJOhIf0SR"
+          ],
+          "chartTitle": "Outdoor Operations",
+          "series": [],
+          "keyFindings": [
+            "Each data center building requires approximately 56 generators for emergency power, highlighting the high infrastructure demand for data center reliability.",
+            "Backup systems are designed with fuel storage for a 48-hour runtime at 100% load to ensure operational continuity during extended outages.",
+            "Noise and community impact are managed by placing generators in insulated enclosures and restricting testing to between 7:00 a.m. and 5:00 p.m. on weekdays.",
+            "The project commits to environmental standards through a Spill Prevention, Control and Countermeasure (SPCC) plan and adherence to IDEM air permit limits."
+          ],
+          "sourceLines": [],
+          "publisherHints": [
+            {
+              "label": "IDEM",
+              "confidence": 0.5
+            }
+          ]
+        },
+        "assetKey": "embed:1:https://pbs.twimg.com/media/HFFDqTeaAAAef6H.png",
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Hypothesis",
+          "bundle": {
+            "postUri": "x://2687569825/status/2040488919955898559",
+            "assetKey": "embed:1:https://pbs.twimg.com/media/HFFDqTeaAAAef6H.png",
+            "postText": [
+              "A new data center proposed in Indianapolis would include 56 backup diesel generators and be located directly across the street from an elementary school 😱 https://t.co/5RJOhIf0SR"
+            ],
+            "chartTitle": "Outdoor Operations",
+            "series": [],
+            "keyFindings": [
+              "Each data center building requires approximately 56 generators for emergency power, highlighting the high infrastructure demand for data center reliability.",
+              "Backup systems are designed with fuel storage for a 48-hour runtime at 100% load to ensure operational continuity during extended outages.",
+              "Noise and community impact are managed by placing generators in insulated enclosures and restricting testing to between 7:00 a.m. and 5:00 p.m. on weekdays.",
+              "The project commits to environmental standards through a Spill Prevention, Control and Countermeasure (SPCC) plan and adherence to IDEM air permit limits."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "IDEM",
+                "confidence": 0.5
+              }
+            ]
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "measuredProperty": "demand",
+              "domainObject": "data center",
+              "technologyOrFuel": "diesel"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:1:https://pbs.twimg.com/media/HFFDqTeaAAAef6H.png",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "key-finding",
+                "text": "Each data center building requires approximately 56 generators for emergency power, highlighting the high infrastructure demand for data center reliability."
+              },
+              {
+                "source": "key-finding",
+                "text": "Backup systems are designed with fuel storage for a 48-hour runtime at 100% load to ensure operational continuity during extended outages."
+              },
+              {
+                "source": "post-text",
+                "text": "A new data center proposed in Indianapolis would include 56 backup diesel generators"
+              }
+            ],
+            "tier": "entailment"
+          }
+        },
+        "bound": {
+          "hypothesis": {
+            "sharedPartial": {
+              "measuredProperty": "demand",
+              "domainObject": "data center",
+              "technologyOrFuel": "diesel"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:1:https://pbs.twimg.com/media/HFFDqTeaAAAef6H.png",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "key-finding",
+                "text": "Each data center building requires approximately 56 generators for emergency power, highlighting the high infrastructure demand for data center reliability."
+              },
+              {
+                "source": "key-finding",
+                "text": "Backup systems are designed with fuel storage for a 48-hour runtime at 100% load to ensure operational continuity during extended outages."
+              },
+              {
+                "source": "post-text",
+                "text": "A new data center proposed in Indianapolis would include 56 backup diesel generators"
+              }
+            ],
+            "tier": "entailment"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:1:https://pbs.twimg.com/media/HFFDqTeaAAAef6H.png",
+              "semanticPartial": {
+                "measuredProperty": "demand",
+                "domainObject": "data center",
+                "technologyOrFuel": "diesel"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [],
+              "missingRequired": [
+                "statisticType"
+              ],
+              "reason": "missing-required"
+            }
+          ]
+        },
+        "outcome": {
+          "_tag": "NoMatch",
+          "bundle": {
+            "postUri": "x://2687569825/status/2040488919955898559",
+            "assetKey": "embed:1:https://pbs.twimg.com/media/HFFDqTeaAAAef6H.png",
+            "postText": [
+              "A new data center proposed in Indianapolis would include 56 backup diesel generators and be located directly across the street from an elementary school 😱 https://t.co/5RJOhIf0SR"
+            ],
+            "chartTitle": "Outdoor Operations",
+            "series": [],
+            "keyFindings": [
+              "Each data center building requires approximately 56 generators for emergency power, highlighting the high infrastructure demand for data center reliability.",
+              "Backup systems are designed with fuel storage for a 48-hour runtime at 100% load to ensure operational continuity during extended outages.",
+              "Noise and community impact are managed by placing generators in insulated enclosures and restricting testing to between 7:00 a.m. and 5:00 p.m. on weekdays.",
+              "The project commits to environmental standards through a Spill Prevention, Control and Countermeasure (SPCC) plan and adherence to IDEM air permit limits."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "IDEM",
+                "confidence": 0.5
+              }
+            ]
+          },
+          "reason": "Kernel could not bind an underspecified partial"
+        }
+      }
+    },
+    {
+      "assetKey": "embed:2:https://pbs.twimg.com/media/HFFDqThbAAAzbDz.jpg",
+      "actual": {
+        "outcomeTag": "NoMatch",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": null,
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": null
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "x://2687569825/status/2040488919955898559",
+          "assetKey": "embed:2:https://pbs.twimg.com/media/HFFDqThbAAAzbDz.jpg",
+          "postText": [
+            "A new data center proposed in Indianapolis would include 56 backup diesel generators and be located directly across the street from an elementary school 😱 https://t.co/5RJOhIf0SR"
+          ],
+          "chartTitle": "Attachment \"B\" Data Center Site Plan",
+          "series": [],
+          "keyFindings": [
+            "The data center campus consists of three buildings with a total combined floor area of approximately 417,197 square feet.",
+            "Building 3 is the largest structure on site, totaling 194,708 square feet over two floors with a building height of 56 feet.",
+            "The site design integrates significant energy infrastructure, including an existing substation easement to support high-density power requirements.",
+            "Proposed infrastructure includes equipment yards and a proposed 8-foot tall soil berm, likely intended for noise mitigation of cooling and power systems.",
+            "The development requires a total of 251 parking stalls, with Building 2 and Building 3 requesting a 50% variance for parking requirements."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "© 2025 Microsoft Corporation"
+            },
+            {
+              "sourceText": "© 2025 Maxar"
+            },
+            {
+              "sourceText": "© CN"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "Microsoft Corporation",
+              "confidence": 0.5
+            },
+            {
+              "label": "Maxar",
+              "confidence": 0.5
+            },
+            {
+              "label": "CN",
+              "confidence": 0.5
+            }
+          ]
+        },
+        "assetKey": "embed:2:https://pbs.twimg.com/media/HFFDqThbAAAzbDz.jpg",
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Hypothesis",
+          "bundle": {
+            "postUri": "x://2687569825/status/2040488919955898559",
+            "assetKey": "embed:2:https://pbs.twimg.com/media/HFFDqThbAAAzbDz.jpg",
+            "postText": [
+              "A new data center proposed in Indianapolis would include 56 backup diesel generators and be located directly across the street from an elementary school 😱 https://t.co/5RJOhIf0SR"
+            ],
+            "chartTitle": "Attachment \"B\" Data Center Site Plan",
+            "series": [],
+            "keyFindings": [
+              "The data center campus consists of three buildings with a total combined floor area of approximately 417,197 square feet.",
+              "Building 3 is the largest structure on site, totaling 194,708 square feet over two floors with a building height of 56 feet.",
+              "The site design integrates significant energy infrastructure, including an existing substation easement to support high-density power requirements.",
+              "Proposed infrastructure includes equipment yards and a proposed 8-foot tall soil berm, likely intended for noise mitigation of cooling and power systems.",
+              "The development requires a total of 251 parking stalls, with Building 2 and Building 3 requesting a 50% variance for parking requirements."
+            ],
+            "sourceLines": [
+              {
+                "sourceText": "© 2025 Microsoft Corporation"
+              },
+              {
+                "sourceText": "© 2025 Maxar"
+              },
+              {
+                "sourceText": "© CN"
+              }
+            ],
+            "publisherHints": [
+              {
+                "label": "Microsoft Corporation",
+                "confidence": 0.5
+              },
+              {
+                "label": "Maxar",
+                "confidence": 0.5
+              },
+              {
+                "label": "CN",
+                "confidence": 0.5
+              }
+            ]
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "domainObject": "data center",
+              "aggregation": "min",
+              "technologyOrFuel": "diesel"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFFDqThbAAAzbDz.jpg",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "chart-title",
+                "text": "Attachment \"B\" Data Center Site Plan"
+              },
+              {
+                "source": "key-finding",
+                "text": "The data center campus consists of three buildings with a total combined floor area of approximately 417,197 square feet."
+              },
+              {
+                "source": "post-text",
+                "text": "A new data center proposed in Indianapolis would include 56 backup diesel generators"
+              }
+            ],
+            "tier": "strong-heuristic"
+          }
+        },
+        "bound": {
+          "hypothesis": {
+            "sharedPartial": {
+              "domainObject": "data center",
+              "aggregation": "min",
+              "technologyOrFuel": "diesel"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFFDqThbAAAzbDz.jpg",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "chart-title",
+                "text": "Attachment \"B\" Data Center Site Plan"
+              },
+              {
+                "source": "key-finding",
+                "text": "The data center campus consists of three buildings with a total combined floor area of approximately 417,197 square feet."
+              },
+              {
+                "source": "post-text",
+                "text": "A new data center proposed in Indianapolis would include 56 backup diesel generators"
+              }
+            ],
+            "tier": "strong-heuristic"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:2:https://pbs.twimg.com/media/HFFDqThbAAAzbDz.jpg",
+              "semanticPartial": {
+                "domainObject": "data center",
+                "aggregation": "min",
+                "technologyOrFuel": "diesel"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [],
+              "missingRequired": [
+                "measuredProperty",
+                "statisticType"
+              ],
+              "reason": "missing-required"
+            }
+          ]
+        },
+        "outcome": {
+          "_tag": "NoMatch",
+          "bundle": {
+            "postUri": "x://2687569825/status/2040488919955898559",
+            "assetKey": "embed:2:https://pbs.twimg.com/media/HFFDqThbAAAzbDz.jpg",
+            "postText": [
+              "A new data center proposed in Indianapolis would include 56 backup diesel generators and be located directly across the street from an elementary school 😱 https://t.co/5RJOhIf0SR"
+            ],
+            "chartTitle": "Attachment \"B\" Data Center Site Plan",
+            "series": [],
+            "keyFindings": [
+              "The data center campus consists of three buildings with a total combined floor area of approximately 417,197 square feet.",
+              "Building 3 is the largest structure on site, totaling 194,708 square feet over two floors with a building height of 56 feet.",
+              "The site design integrates significant energy infrastructure, including an existing substation easement to support high-density power requirements.",
+              "Proposed infrastructure includes equipment yards and a proposed 8-foot tall soil berm, likely intended for noise mitigation of cooling and power systems.",
+              "The development requires a total of 251 parking stalls, with Building 2 and Building 3 requesting a 50% variance for parking requirements."
+            ],
+            "sourceLines": [
+              {
+                "sourceText": "© 2025 Microsoft Corporation"
+              },
+              {
+                "sourceText": "© 2025 Maxar"
+              },
+              {
+                "sourceText": "© CN"
+              }
+            ],
+            "publisherHints": [
+              {
+                "label": "Microsoft Corporation",
+                "confidence": 0.5
+              },
+              {
+                "label": "Maxar",
+                "confidence": 0.5
+              },
+              {
+                "label": "CN",
+                "confidence": 0.5
+              }
+            ]
+          },
+          "reason": "Kernel could not bind an underspecified partial"
+        }
+      }
+    },
+    {
+      "assetKey": "embed:3:https://pbs.twimg.com/media/HFFFIeXaoAAOnHK.png",
+      "actual": {
+        "outcomeTag": "NoMatch",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": null,
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": null
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "x://2687569825/status/2040488919955898559",
+          "assetKey": "embed:3:https://pbs.twimg.com/media/HFFFIeXaoAAOnHK.png",
+          "postText": [
+            "A new data center proposed in Indianapolis would include 56 backup diesel generators and be located directly across the street from an elementary school 😱 https://t.co/5RJOhIf0SR"
+          ],
+          "series": [],
+          "keyFindings": [
+            "A linear distance of 675.15 feet is measured from a point near Irvington Community Elementary School to a target location marked by a red pin.",
+            "The measurement path crosses the Pennsy Trail, which may serve as a corridor for utility easements or public access.",
+            "The proximity of the target location to an educational facility (approximately 675 feet) is a critical constraint for energy infrastructure siting or environmental assessments.",
+            "The site is located east of S Kitley Ave and south of Julian Ave."
+          ],
+          "sourceLines": [],
+          "publisherHints": [
+            {
+              "label": "Irvington Community Elementary School",
+              "confidence": 0.5
+            }
+          ]
+        },
+        "assetKey": "embed:3:https://pbs.twimg.com/media/HFFFIeXaoAAOnHK.png",
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Hypothesis",
+          "bundle": {
+            "postUri": "x://2687569825/status/2040488919955898559",
+            "assetKey": "embed:3:https://pbs.twimg.com/media/HFFFIeXaoAAOnHK.png",
+            "postText": [
+              "A new data center proposed in Indianapolis would include 56 backup diesel generators and be located directly across the street from an elementary school 😱 https://t.co/5RJOhIf0SR"
+            ],
+            "series": [],
+            "keyFindings": [
+              "A linear distance of 675.15 feet is measured from a point near Irvington Community Elementary School to a target location marked by a red pin.",
+              "The measurement path crosses the Pennsy Trail, which may serve as a corridor for utility easements or public access.",
+              "The proximity of the target location to an educational facility (approximately 675 feet) is a critical constraint for energy infrastructure siting or environmental assessments.",
+              "The site is located east of S Kitley Ave and south of Julian Ave."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "Irvington Community Elementary School",
+                "confidence": 0.5
+              }
+            ]
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "domainObject": "data center",
+              "technologyOrFuel": "diesel"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:3:https://pbs.twimg.com/media/HFFFIeXaoAAOnHK.png",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "post-text",
+                "text": "A new data center proposed in Indianapolis would include 56 backup diesel generators"
+              }
+            ],
+            "tier": "entailment"
+          }
+        },
+        "bound": {
+          "hypothesis": {
+            "sharedPartial": {
+              "domainObject": "data center",
+              "technologyOrFuel": "diesel"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:3:https://pbs.twimg.com/media/HFFFIeXaoAAOnHK.png",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "post-text",
+                "text": "A new data center proposed in Indianapolis would include 56 backup diesel generators"
+              }
+            ],
+            "tier": "entailment"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:3:https://pbs.twimg.com/media/HFFFIeXaoAAOnHK.png",
+              "semanticPartial": {
+                "domainObject": "data center",
+                "technologyOrFuel": "diesel"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [],
+              "missingRequired": [
+                "measuredProperty",
+                "statisticType"
+              ],
+              "reason": "missing-required"
+            }
+          ]
+        },
+        "outcome": {
+          "_tag": "NoMatch",
+          "bundle": {
+            "postUri": "x://2687569825/status/2040488919955898559",
+            "assetKey": "embed:3:https://pbs.twimg.com/media/HFFFIeXaoAAOnHK.png",
+            "postText": [
+              "A new data center proposed in Indianapolis would include 56 backup diesel generators and be located directly across the street from an elementary school 😱 https://t.co/5RJOhIf0SR"
+            ],
+            "series": [],
+            "keyFindings": [
+              "A linear distance of 675.15 feet is measured from a point near Irvington Community Elementary School to a target location marked by a red pin.",
+              "The measurement path crosses the Pennsy Trail, which may serve as a corridor for utility easements or public access.",
+              "The proximity of the target location to an educational facility (approximately 675 feet) is a critical constraint for energy infrastructure siting or environmental assessments.",
+              "The site is located east of S Kitley Ave and south of Julian Ave."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "Irvington Community Elementary School",
+                "confidence": 0.5
+              }
+            ]
+          },
+          "reason": "Kernel could not bind an underspecified partial"
+        }
+      }
+    }
+  ],
+  "error": null
+}

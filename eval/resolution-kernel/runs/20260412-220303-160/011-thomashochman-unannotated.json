@@ -1,0 +1,336 @@
+{
+  "kind": "unannotated",
+  "slug": "011-thomashochman",
+  "postUri": "x://900122526474354688/status/2042070324481589299",
+  "bundles": [
+    {
+      "assetKey": "embed:0:https://pbs.twimg.com/media/HFbjn_1WIAAN5ys.jpg",
+      "actual": {
+        "outcomeTag": "Conflicted",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": "required-facet-conflict",
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": "strong-heuristic"
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "x://900122526474354688/status/2042070324481589299",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/HFbjn_1WIAAN5ys.jpg",
+          "postText": [
+            "One thing of note: \n\nFar more solar projects underwent ESA formal consultations during this period than underwent NEPA EISs/EAs.\n\nSame thing with wind. https://t.co/2I2a90mJgF"
+          ],
+          "chartTitle": "Formal Consultation Records",
+          "series": [],
+          "keyFindings": [
+            "The query results identify 55 formal consultation records specifically filtered for 'solar' and 'power generation' projects.",
+            "Consultation timelines for the visible solar projects vary significantly, ranging from a minimum of 112 days for the Genesis Solar Energy Project to a maximum of 332 days for the North Bay Regional Water Treatment Plant Solar.",
+            "The Bureau of Land Management (BLM) is the lead agency for 7 of the 9 visible solar power projects, primarily located in California and Nevada.",
+            "Despite differences in project duration and the number of species impacted (ranging from 1 to 4), all visible records are classified as 'Standard' complexity.",
+            "Visible records show project starts beginning in late 2009 with several major conclusions occurring in the second half of 2010."
+          ],
+          "sourceLines": [],
+          "publisherHints": [
+            {
+              "label": "Bureau of Land Management",
+              "confidence": 0.5
+            },
+            {
+              "label": "Army Corps of Engineers",
+              "confidence": 0.5
+            }
+          ],
+          "temporalCoverage": {
+            "startDate": "2009-11",
+            "endDate": "2010-11"
+          }
+        },
+        "assetKey": "embed:0:https://pbs.twimg.com/media/HFbjn_1WIAAN5ys.jpg",
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Conflicted",
+          "bundle": {
+            "postUri": "x://900122526474354688/status/2042070324481589299",
+            "assetKey": "embed:0:https://pbs.twimg.com/media/HFbjn_1WIAAN5ys.jpg",
+            "postText": [
+              "One thing of note: \n\nFar more solar projects underwent ESA formal consultations during this period than underwent NEPA EISs/EAs.\n\nSame thing with wind. https://t.co/2I2a90mJgF"
+            ],
+            "chartTitle": "Formal Consultation Records",
+            "series": [],
+            "keyFindings": [
+              "The query results identify 55 formal consultation records specifically filtered for 'solar' and 'power generation' projects.",
+              "Consultation timelines for the visible solar projects vary significantly, ranging from a minimum of 112 days for the Genesis Solar Energy Project to a maximum of 332 days for the North Bay Regional Water Treatment Plant Solar.",
+              "The Bureau of Land Management (BLM) is the lead agency for 7 of the 9 visible solar power projects, primarily located in California and Nevada.",
+              "Despite differences in project duration and the number of species impacted (ranging from 1 to 4), all visible records are classified as 'Standard' complexity.",
+              "Visible records show project starts beginning in late 2009 with several major conclusions occurring in the second half of 2010."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "Bureau of Land Management",
+                "confidence": 0.5
+              },
+              {
+                "label": "Army Corps of Engineers",
+                "confidence": 0.5
+              }
+            ],
+            "temporalCoverage": {
+              "startDate": "2009-11",
+              "endDate": "2010-11"
+            }
+          },
+          "conflicts": [
+            {
+              "facet": "measuredProperty",
+              "values": [
+                "count",
+                "generation"
+              ]
+            },
+            {
+              "facet": "statisticType",
+              "values": [
+                "count",
+                "flow"
+              ]
+            }
+          ],
+          "hypotheses": [
+            {
+              "sharedPartial": {
+                "technologyOrFuel": "solar PV",
+                "measuredProperty": "generation",
+                "domainObject": "electricity",
+                "statisticType": "flow",
+                "aggregation": "max"
+              },
+              "attachedContext": {
+                "time": {
+                  "start": "2009-11",
+                  "end": "2010-11"
+                }
+              },
+              "items": [
+                {
+                  "itemKey": "bundle",
+                  "partial": {},
+                  "evidence": []
+                }
+              ],
+              "evidence": [
+                {
+                  "source": "key-finding",
+                  "text": "The query results identify 55 formal consultation records specifically filtered for 'solar'"
+                },
+                {
+                  "source": "key-finding",
+                  "text": "'power generation' projects."
+                },
+                {
+                  "source": "key-finding",
+                  "text": "Consultation timelines for the visible solar projects vary significantly, ranging from a minimum of 112 days for the Genesis Solar Energy Project to a maximum of 332 days for the North Bay Regional Water Treatment Plant Solar."
+                },
+                {
+                  "source": "key-finding",
+                  "text": "The Bureau of Land Management (BLM) is the lead agency for 7 of the 9 visible solar power projects, primarily located in California"
+                }
+              ],
+              "tier": "entailment"
+            },
+            {
+              "sharedPartial": {
+                "measuredProperty": "count",
+                "statisticType": "count"
+              },
+              "attachedContext": {
+                "time": {
+                  "start": "2009-11",
+                  "end": "2010-11"
+                }
+              },
+              "items": [
+                {
+                  "itemKey": "bundle",
+                  "partial": {},
+                  "evidence": []
+                }
+              ],
+              "evidence": [
+                {
+                  "source": "key-finding",
+                  "text": "the number of species impacted (ranging from 1 to 4), all visible records are classified as 'Standard' complexity."
+                }
+              ],
+              "tier": "strong-heuristic"
+            }
+          ],
+          "tier": "strong-heuristic"
+        },
+        "bound": null,
+        "outcome": {
+          "_tag": "Conflicted",
+          "bundle": {
+            "postUri": "x://900122526474354688/status/2042070324481589299",
+            "assetKey": "embed:0:https://pbs.twimg.com/media/HFbjn_1WIAAN5ys.jpg",
+            "postText": [
+              "One thing of note: \n\nFar more solar projects underwent ESA formal consultations during this period than underwent NEPA EISs/EAs.\n\nSame thing with wind. https://t.co/2I2a90mJgF"
+            ],
+            "chartTitle": "Formal Consultation Records",
+            "series": [],
+            "keyFindings": [
+              "The query results identify 55 formal consultation records specifically filtered for 'solar' and 'power generation' projects.",
+              "Consultation timelines for the visible solar projects vary significantly, ranging from a minimum of 112 days for the Genesis Solar Energy Project to a maximum of 332 days for the North Bay Regional Water Treatment Plant Solar.",
+              "The Bureau of Land Management (BLM) is the lead agency for 7 of the 9 visible solar power projects, primarily located in California and Nevada.",
+              "Despite differences in project duration and the number of species impacted (ranging from 1 to 4), all visible records are classified as 'Standard' complexity.",
+              "Visible records show project starts beginning in late 2009 with several major conclusions occurring in the second half of 2010."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "Bureau of Land Management",
+                "confidence": 0.5
+              },
+              {
+                "label": "Army Corps of Engineers",
+                "confidence": 0.5
+              }
+            ],
+            "temporalCoverage": {
+              "startDate": "2009-11",
+              "endDate": "2010-11"
+            }
+          },
+          "hypotheses": [
+            {
+              "sharedPartial": {
+                "technologyOrFuel": "solar PV",
+                "measuredProperty": "generation",
+                "domainObject": "electricity",
+                "statisticType": "flow",
+                "aggregation": "max"
+              },
+              "attachedContext": {
+                "time": {
+                  "start": "2009-11",
+                  "end": "2010-11"
+                }
+              },
+              "items": [
+                {
+                  "itemKey": "bundle",
+                  "partial": {},
+                  "evidence": []
+                }
+              ],
+              "evidence": [
+                {
+                  "source": "key-finding",
+                  "text": "The query results identify 55 formal consultation records specifically filtered for 'solar'"
+                },
+                {
+                  "source": "key-finding",
+                  "text": "'power generation' projects."
+                },
+                {
+                  "source": "key-finding",
+                  "text": "Consultation timelines for the visible solar projects vary significantly, ranging from a minimum of 112 days for the Genesis Solar Energy Project to a maximum of 332 days for the North Bay Regional Water Treatment Plant Solar."
+                },
+                {
+                  "source": "key-finding",
+                  "text": "The Bureau of Land Management (BLM) is the lead agency for 7 of the 9 visible solar power projects, primarily located in California"
+                }
+              ],
+              "tier": "entailment"
+            },
+            {
+              "sharedPartial": {
+                "measuredProperty": "count",
+                "statisticType": "count"
+              },
+              "attachedContext": {
+                "time": {
+                  "start": "2009-11",
+                  "end": "2010-11"
+                }
+              },
+              "items": [
+                {
+                  "itemKey": "bundle",
+                  "partial": {},
+                  "evidence": []
+                }
+              ],
+              "evidence": [
+                {
+                  "source": "key-finding",
+                  "text": "the number of species impacted (ranging from 1 to 4), all visible records are classified as 'Standard' complexity."
+                }
+              ],
+              "tier": "strong-heuristic"
+            }
+          ],
+          "conflicts": [
+            {
+              "facet": "measuredProperty",
+              "values": [
+                "count",
+                "generation"
+              ]
+            },
+            {
+              "facet": "statisticType",
+              "values": [
+                "count",
+                "flow"
+              ]
+            }
+          ],
+          "gaps": [
+            {
+              "partial": {
+                "technologyOrFuel": "solar PV",
+                "measuredProperty": "generation",
+                "domainObject": "electricity",
+                "statisticType": "flow",
+                "aggregation": "max"
+              },
+              "missingRequired": [],
+              "candidates": [],
+              "reason": "required-facet-conflict",
+              "context": {
+                "attachedContext": {
+                  "time": {
+                    "start": "2009-11",
+                    "end": "2010-11"
+                  }
+                }
+              }
+            },
+            {
+              "partial": {
+                "measuredProperty": "count",
+                "statisticType": "count"
+              },
+              "missingRequired": [],
+              "candidates": [],
+              "reason": "required-facet-conflict",
+              "context": {
+                "attachedContext": {
+                  "time": {
+                    "start": "2009-11",
+                    "end": "2010-11"
+                  }
+                }
+              }
+            }
+          ],
+          "tier": "strong-heuristic"
+        }
+      }
+    }
+  ],
+  "error": null
+}

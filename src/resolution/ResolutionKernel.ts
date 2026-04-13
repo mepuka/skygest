@@ -19,7 +19,7 @@ const decodeStage1Input = (input: unknown) =>
     )
   );
 
-const resolveAgentIdFromStage1Input = (
+export const resolveAgentIdFromStage1Input = (
   input: typeof Stage1Input.Type,
   lookup: DataLayerRegistryLookup
 ) => {

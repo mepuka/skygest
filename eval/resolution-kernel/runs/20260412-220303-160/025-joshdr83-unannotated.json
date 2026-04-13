@@ -1,0 +1,141 @@
+{
+  "kind": "unannotated",
+  "slug": "025-joshdr83",
+  "postUri": "x://304177743/status/2042024733798232066",
+  "bundles": [
+    {
+      "assetKey": "embed:0:https://video.twimg.com/amplify_video/2042024585277927425/vid/avc1/1280x720/ANLN6pr0EFM-iJZH.mp4?tag=14",
+      "actual": {
+        "outcomeTag": "NoMatch",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": null,
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": null
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "x://304177743/status/2042024733798232066",
+          "assetKey": "embed:0:https://video.twimg.com/amplify_video/2042024585277927425/vid/avc1/1280x720/ANLN6pr0EFM-iJZH.mp4?tag=14",
+          "postText": [
+            "I asked ERCOT CEO Pablo Vegas how RTC+B is performing since going live on December 5th.\n\ntl;dr: ERCOT projects more than $3 billion a year in wholesale market savings from real-time co-optimization of energy and ancillary services. They can already see it in the data. https://t.co/z1GkXo4S4n"
+          ],
+          "series": [],
+          "keyFindings": [
+            "The image depicts an industry panel discussion, a common format for communicating corporate strategy and market outlooks in the energy sector.",
+            "Executive-level participation in public forums highlights the importance of thought leadership and stakeholder engagement within the industry."
+          ],
+          "sourceLines": [],
+          "publisherHints": []
+        },
+        "assetKey": "embed:0:https://video.twimg.com/amplify_video/2042024585277927425/vid/avc1/1280x720/ANLN6pr0EFM-iJZH.mp4?tag=14",
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Hypothesis",
+          "bundle": {
+            "postUri": "x://304177743/status/2042024733798232066",
+            "assetKey": "embed:0:https://video.twimg.com/amplify_video/2042024585277927425/vid/avc1/1280x720/ANLN6pr0EFM-iJZH.mp4?tag=14",
+            "postText": [
+              "I asked ERCOT CEO Pablo Vegas how RTC+B is performing since going live on December 5th.\n\ntl;dr: ERCOT projects more than $3 billion a year in wholesale market savings from real-time co-optimization of energy and ancillary services. They can already see it in the data. https://t.co/z1GkXo4S4n"
+            ],
+            "series": [],
+            "keyFindings": [
+              "The image depicts an industry panel discussion, a common format for communicating corporate strategy and market outlooks in the energy sector.",
+              "Executive-level participation in public forums highlights the importance of thought leadership and stakeholder engagement within the industry."
+            ],
+            "sourceLines": [],
+            "publisherHints": []
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "domainObject": "industry"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:0:https://video.twimg.com/amplify_video/2042024585277927425/vid/avc1/1280x720/ANLN6pr0EFM-iJZH.mp4?tag=14",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "key-finding",
+                "text": "The image depicts an industry panel discussion, a common format for communicating corporate strategy"
+              },
+              {
+                "source": "key-finding",
+                "text": "stakeholder engagement within the industry."
+              }
+            ],
+            "tier": "strong-heuristic"
+          }
+        },
+        "bound": {
+          "hypothesis": {
+            "sharedPartial": {
+              "domainObject": "industry"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:0:https://video.twimg.com/amplify_video/2042024585277927425/vid/avc1/1280x720/ANLN6pr0EFM-iJZH.mp4?tag=14",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "key-finding",
+                "text": "The image depicts an industry panel discussion, a common format for communicating corporate strategy"
+              },
+              {
+                "source": "key-finding",
+                "text": "stakeholder engagement within the industry."
+              }
+            ],
+            "tier": "strong-heuristic"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:0:https://video.twimg.com/amplify_video/2042024585277927425/vid/avc1/1280x720/ANLN6pr0EFM-iJZH.mp4?tag=14",
+              "semanticPartial": {
+                "domainObject": "industry"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [],
+              "missingRequired": [
+                "measuredProperty",
+                "statisticType"
+              ],
+              "reason": "missing-required"
+            }
+          ]
+        },
+        "outcome": {
+          "_tag": "NoMatch",
+          "bundle": {
+            "postUri": "x://304177743/status/2042024733798232066",
+            "assetKey": "embed:0:https://video.twimg.com/amplify_video/2042024585277927425/vid/avc1/1280x720/ANLN6pr0EFM-iJZH.mp4?tag=14",
+            "postText": [
+              "I asked ERCOT CEO Pablo Vegas how RTC+B is performing since going live on December 5th.\n\ntl;dr: ERCOT projects more than $3 billion a year in wholesale market savings from real-time co-optimization of energy and ancillary services. They can already see it in the data. https://t.co/z1GkXo4S4n"
+            ],
+            "series": [],
+            "keyFindings": [
+              "The image depicts an industry panel discussion, a common format for communicating corporate strategy and market outlooks in the energy sector.",
+              "Executive-level participation in public forums highlights the importance of thought leadership and stakeholder engagement within the industry."
+            ],
+            "sourceLines": [],
+            "publisherHints": []
+          },
+          "reason": "Kernel could not bind an underspecified partial"
+        }
+      }
+    }
+  ],
+  "error": null
+}

@@ -1,0 +1,205 @@
+{
+  "kind": "unannotated",
+  "slug": "033-simonmahan",
+  "postUri": "x://1886502618/status/2041680596435390522",
+  "bundles": [
+    {
+      "assetKey": "embed:0:https://video.twimg.com/amplify_video/2041507927165386752/vid/avc1/1920x1080/_ejcUA9CqToEIcZH.mp4?tag=21",
+      "actual": {
+        "outcomeTag": "NoMatch",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": null,
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": null
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "x://1886502618/status/2041680596435390522",
+          "assetKey": "embed:0:https://video.twimg.com/amplify_video/2041507927165386752/vid/avc1/1920x1080/_ejcUA9CqToEIcZH.mp4?tag=21",
+          "postText": [
+            "RT @SawyerMerritt: First installation of Tesla's new 420W solar panel in Texas. https://t.co/WVAIq8UcsX"
+          ],
+          "chartTitle": "New Tesla Panels?",
+          "series": [],
+          "keyFindings": [
+            "The image promotes Tesla's network of 'Premier Certified Installers' for residential solar systems.",
+            "Tesla's solar products are marketed with a focus on sleek, low-profile aesthetic integration on rooftops.",
+            "Good Faith Energy is identifying itself as a qualified technician for the installation of new Tesla solar panel technology."
+          ],
+          "sourceLines": [],
+          "publisherHints": [
+            {
+              "label": "Tesla",
+              "confidence": 0.5
+            },
+            {
+              "label": "Good Faith Energy",
+              "confidence": 0.5
+            },
+            {
+              "label": "GOOD FAITH ENERGY",
+              "confidence": 0.3
+            }
+          ]
+        },
+        "assetKey": "embed:0:https://video.twimg.com/amplify_video/2041507927165386752/vid/avc1/1920x1080/_ejcUA9CqToEIcZH.mp4?tag=21",
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Hypothesis",
+          "bundle": {
+            "postUri": "x://1886502618/status/2041680596435390522",
+            "assetKey": "embed:0:https://video.twimg.com/amplify_video/2041507927165386752/vid/avc1/1920x1080/_ejcUA9CqToEIcZH.mp4?tag=21",
+            "postText": [
+              "RT @SawyerMerritt: First installation of Tesla's new 420W solar panel in Texas. https://t.co/WVAIq8UcsX"
+            ],
+            "chartTitle": "New Tesla Panels?",
+            "series": [],
+            "keyFindings": [
+              "The image promotes Tesla's network of 'Premier Certified Installers' for residential solar systems.",
+              "Tesla's solar products are marketed with a focus on sleek, low-profile aesthetic integration on rooftops.",
+              "Good Faith Energy is identifying itself as a qualified technician for the installation of new Tesla solar panel technology."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "Tesla",
+                "confidence": 0.5
+              },
+              {
+                "label": "Good Faith Energy",
+                "confidence": 0.5
+              },
+              {
+                "label": "GOOD FAITH ENERGY",
+                "confidence": 0.3
+              }
+            ]
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "domainObject": "buildings",
+              "technologyOrFuel": "solar PV"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:0:https://video.twimg.com/amplify_video/2041507927165386752/vid/avc1/1920x1080/_ejcUA9CqToEIcZH.mp4?tag=21",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "key-finding",
+                "text": "The image promotes Tesla's network of 'Premier Certified Installers' for residential solar systems."
+              },
+              {
+                "source": "key-finding",
+                "text": "Tesla's solar products are marketed with a focus on sleek, low-profile aesthetic integration on rooftops."
+              },
+              {
+                "source": "key-finding",
+                "text": "Good Faith Energy is identifying itself as a qualified technician for the installation of new Tesla solar panel technology."
+              },
+              {
+                "source": "post-text",
+                "text": "RT @SawyerMerritt: First installation of Tesla's new 420W solar panel in Texas. https://t.co/WVAIq8UcsX"
+              }
+            ],
+            "tier": "entailment"
+          }
+        },
+        "bound": {
+          "hypothesis": {
+            "sharedPartial": {
+              "domainObject": "buildings",
+              "technologyOrFuel": "solar PV"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:0:https://video.twimg.com/amplify_video/2041507927165386752/vid/avc1/1920x1080/_ejcUA9CqToEIcZH.mp4?tag=21",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "key-finding",
+                "text": "The image promotes Tesla's network of 'Premier Certified Installers' for residential solar systems."
+              },
+              {
+                "source": "key-finding",
+                "text": "Tesla's solar products are marketed with a focus on sleek, low-profile aesthetic integration on rooftops."
+              },
+              {
+                "source": "key-finding",
+                "text": "Good Faith Energy is identifying itself as a qualified technician for the installation of new Tesla solar panel technology."
+              },
+              {
+                "source": "post-text",
+                "text": "RT @SawyerMerritt: First installation of Tesla's new 420W solar panel in Texas. https://t.co/WVAIq8UcsX"
+              }
+            ],
+            "tier": "entailment"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:0:https://video.twimg.com/amplify_video/2041507927165386752/vid/avc1/1920x1080/_ejcUA9CqToEIcZH.mp4?tag=21",
+              "semanticPartial": {
+                "domainObject": "buildings",
+                "technologyOrFuel": "solar PV"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [],
+              "missingRequired": [
+                "measuredProperty",
+                "statisticType"
+              ],
+              "reason": "missing-required"
+            }
+          ]
+        },
+        "outcome": {
+          "_tag": "NoMatch",
+          "bundle": {
+            "postUri": "x://1886502618/status/2041680596435390522",
+            "assetKey": "embed:0:https://video.twimg.com/amplify_video/2041507927165386752/vid/avc1/1920x1080/_ejcUA9CqToEIcZH.mp4?tag=21",
+            "postText": [
+              "RT @SawyerMerritt: First installation of Tesla's new 420W solar panel in Texas. https://t.co/WVAIq8UcsX"
+            ],
+            "chartTitle": "New Tesla Panels?",
+            "series": [],
+            "keyFindings": [
+              "The image promotes Tesla's network of 'Premier Certified Installers' for residential solar systems.",
+              "Tesla's solar products are marketed with a focus on sleek, low-profile aesthetic integration on rooftops.",
+              "Good Faith Energy is identifying itself as a qualified technician for the installation of new Tesla solar panel technology."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "Tesla",
+                "confidence": 0.5
+              },
+              {
+                "label": "Good Faith Energy",
+                "confidence": 0.5
+              },
+              {
+                "label": "GOOD FAITH ENERGY",
+                "confidence": 0.3
+              }
+            ]
+          },
+          "reason": "Kernel could not bind an underspecified partial"
+        }
+      }
+    }
+  ],
+  "error": null
+}

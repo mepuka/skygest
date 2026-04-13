@@ -1,0 +1,441 @@
+{
+  "kind": "unannotated",
+  "slug": "015-josephmooneymp",
+  "postUri": "x://1309223351055872000/status/2038197281284096309",
+  "bundles": [
+    {
+      "assetKey": "embed:0:https://pbs.twimg.com/media/HEkhnpNawAAohLV.jpg",
+      "actual": {
+        "outcomeTag": "NoMatch",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": null,
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": null
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "x://1309223351055872000/status/2038197281284096309",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/HEkhnpNawAAohLV.jpg",
+          "postText": [
+            "As New Zealand turns its mind to energy, and offshore petroleum prospecting permits are being considered, it’s worth noting that Southland and Otago sit on millions of years of solar investment, with more than 9 billion tonnes of lignite in 10 major deposits - containing more than 20 times the energy content of the Maui gas field.\n\nThis is a very large, nationally significant resource which has the potential to be used as a feedstock for a petrochemical industry, using gasification technology to convert lignite to fertiliser, transport fuels or other high value energy products.\n\nIf extracted at a rate of 20 million tonnes per year, the lignite resource could provide energy and feedstock for most of New Zealand’s transport fuel and petrochemical requirements for over 300 years.\n\nIt largely sits close to the surface and is easy to access with opencast mining. It accounts for about 80% of New Zealand’s total coal resource and means New Zealand has one of the biggest coal reserves on earth, sitting around 14th in the world with more coal deposits than countries like Canada and Brazil.\n\nThere were plans in the past to build plants using the Fischer-Tropsch process to turn some of the lignite into low-sulphur diesel and naphtha (used in the production of plastics, solvents and as a component of fuels like petrol and jet fuels).\n\nIn South Africa, Sasol has been producing diesel, petrol and jet fuel from coal since the 1950s, supplying approximately 28% of South Africa’s fuel needs, saving that country more than US$5 billion a year in foreign exchange.\n\nThere have also previously been plans to make up to 1.2 million tonnes of urea from 2 million tonnes of Southland lignite, which would be twice New Zealand’s current urea use. Most of our urea currently comes from Saudi Arabia, but this could make us a urea exporter.\n\nSouthland’s lignite is low sulphur, low ash, and 1.5 to 2 times as reactive as Australian or German brown coals. This makes it one of the best lignites globally for making syngas.\n\nSyngas is an important universal industrial feedstock. It can be used to produce diesel and petrol via the Fischer-Tropsch process (which can run in existing engines and pipelines without modification), urea fertiliser via the Haber-Bosch process, methanol, hydrogen, or electricity via a combined cycle gas turbine.\n\nThere would be carbon and environmental trade offs to utilise this resource which would not be easy, but it’s hard to overstate just how significant the potential energy resource is."
+          ],
+          "chartTitle": "South Island lignite resources",
+          "series": [],
+          "keyFindings": [
+            "Otago and Southland contain over 9 billion tonnes of lignite across 10 major deposits.",
+            "The total energy content of mineable lignite is estimated at 75,000 PJ, roughly 20 times the energy content of the Maui gas field.",
+            "At an extraction rate of 20 million tonnes per year, the resource could meet most of New Zealand's transport fuel and petrochemical needs for over 300 years.",
+            "Gasification technology could be utilized to convert the lignite into fertilizers, transport fuels, and other high-value energy products."
+          ],
+          "sourceLines": [],
+          "publisherHints": []
+        },
+        "assetKey": "embed:0:https://pbs.twimg.com/media/HEkhnpNawAAohLV.jpg",
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Hypothesis",
+          "bundle": {
+            "postUri": "x://1309223351055872000/status/2038197281284096309",
+            "assetKey": "embed:0:https://pbs.twimg.com/media/HEkhnpNawAAohLV.jpg",
+            "postText": [
+              "As New Zealand turns its mind to energy, and offshore petroleum prospecting permits are being considered, it’s worth noting that Southland and Otago sit on millions of years of solar investment, with more than 9 billion tonnes of lignite in 10 major deposits - containing more than 20 times the energy content of the Maui gas field.\n\nThis is a very large, nationally significant resource which has the potential to be used as a feedstock for a petrochemical industry, using gasification technology to convert lignite to fertiliser, transport fuels or other high value energy products.\n\nIf extracted at a rate of 20 million tonnes per year, the lignite resource could provide energy and feedstock for most of New Zealand’s transport fuel and petrochemical requirements for over 300 years.\n\nIt largely sits close to the surface and is easy to access with opencast mining. It accounts for about 80% of New Zealand’s total coal resource and means New Zealand has one of the biggest coal reserves on earth, sitting around 14th in the world with more coal deposits than countries like Canada and Brazil.\n\nThere were plans in the past to build plants using the Fischer-Tropsch process to turn some of the lignite into low-sulphur diesel and naphtha (used in the production of plastics, solvents and as a component of fuels like petrol and jet fuels).\n\nIn South Africa, Sasol has been producing diesel, petrol and jet fuel from coal since the 1950s, supplying approximately 28% of South Africa’s fuel needs, saving that country more than US$5 billion a year in foreign exchange.\n\nThere have also previously been plans to make up to 1.2 million tonnes of urea from 2 million tonnes of Southland lignite, which would be twice New Zealand’s current urea use. Most of our urea currently comes from Saudi Arabia, but this could make us a urea exporter.\n\nSouthland’s lignite is low sulphur, low ash, and 1.5 to 2 times as reactive as Australian or German brown coals. This makes it one of the best lignites globally for making syngas.\n\nSyngas is an important universal industrial feedstock. It can be used to produce diesel and petrol via the Fischer-Tropsch process (which can run in existing engines and pipelines without modification), urea fertiliser via the Haber-Bosch process, methanol, hydrogen, or electricity via a combined cycle gas turbine.\n\nThere would be carbon and environmental trade offs to utilise this resource which would not be easy, but it’s hard to overstate just how significant the potential energy resource is."
+            ],
+            "chartTitle": "South Island lignite resources",
+            "series": [],
+            "keyFindings": [
+              "Otago and Southland contain over 9 billion tonnes of lignite across 10 major deposits.",
+              "The total energy content of mineable lignite is estimated at 75,000 PJ, roughly 20 times the energy content of the Maui gas field.",
+              "At an extraction rate of 20 million tonnes per year, the resource could meet most of New Zealand's transport fuel and petrochemical needs for over 300 years.",
+              "Gasification technology could be utilized to convert the lignite into fertilizers, transport fuels, and other high-value energy products."
+            ],
+            "sourceLines": [],
+            "publisherHints": []
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "technologyOrFuel": "brown coal",
+              "domainObject": "natural gas",
+              "aggregation": "sum",
+              "unitFamily": "other",
+              "measuredProperty": "investment"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HEkhnpNawAAohLV.jpg",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "chart-title",
+                "text": "South Island lignite resources"
+              },
+              {
+                "source": "key-finding",
+                "text": "Southland contain over 9 billion tonnes of lignite across 10 major deposits."
+              },
+              {
+                "source": "key-finding",
+                "text": "The total energy content of mineable lignite is estimated at 75,000 PJ, roughly 20 times the energy content of the Maui gas field."
+              },
+              {
+                "source": "key-finding",
+                "text": "other high-value energy products."
+              },
+              {
+                "source": "post-text",
+                "text": "Otago sit on millions of years of solar investment, with more than 9 billion tonnes of lignite in 10 major deposits - containing more than 20 times the energy content of the Maui gas field."
+              },
+              {
+                "source": "post-text",
+                "text": "other high value energy products."
+              },
+              {
+                "source": "post-text",
+                "text": "There were plans in the past to build plants using the Fischer-Tropsch process to turn some of the lignite into low-sulphur diesel"
+              },
+              {
+                "source": "post-text",
+                "text": "Southland’s lignite is low sulphur, low ash,"
+              }
+            ],
+            "tier": "weak-heuristic"
+          }
+        },
+        "bound": {
+          "hypothesis": {
+            "sharedPartial": {
+              "technologyOrFuel": "brown coal",
+              "domainObject": "natural gas",
+              "aggregation": "sum",
+              "unitFamily": "other",
+              "measuredProperty": "investment"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HEkhnpNawAAohLV.jpg",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "chart-title",
+                "text": "South Island lignite resources"
+              },
+              {
+                "source": "key-finding",
+                "text": "Southland contain over 9 billion tonnes of lignite across 10 major deposits."
+              },
+              {
+                "source": "key-finding",
+                "text": "The total energy content of mineable lignite is estimated at 75,000 PJ, roughly 20 times the energy content of the Maui gas field."
+              },
+              {
+                "source": "key-finding",
+                "text": "other high-value energy products."
+              },
+              {
+                "source": "post-text",
+                "text": "Otago sit on millions of years of solar investment, with more than 9 billion tonnes of lignite in 10 major deposits - containing more than 20 times the energy content of the Maui gas field."
+              },
+              {
+                "source": "post-text",
+                "text": "other high value energy products."
+              },
+              {
+                "source": "post-text",
+                "text": "There were plans in the past to build plants using the Fischer-Tropsch process to turn some of the lignite into low-sulphur diesel"
+              },
+              {
+                "source": "post-text",
+                "text": "Southland’s lignite is low sulphur, low ash,"
+              }
+            ],
+            "tier": "weak-heuristic"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HEkhnpNawAAohLV.jpg",
+              "semanticPartial": {
+                "technologyOrFuel": "brown coal",
+                "domainObject": "natural gas",
+                "aggregation": "sum",
+                "unitFamily": "other",
+                "measuredProperty": "investment"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [],
+              "missingRequired": [
+                "statisticType"
+              ],
+              "reason": "missing-required"
+            }
+          ]
+        },
+        "outcome": {
+          "_tag": "NoMatch",
+          "bundle": {
+            "postUri": "x://1309223351055872000/status/2038197281284096309",
+            "assetKey": "embed:0:https://pbs.twimg.com/media/HEkhnpNawAAohLV.jpg",
+            "postText": [
+              "As New Zealand turns its mind to energy, and offshore petroleum prospecting permits are being considered, it’s worth noting that Southland and Otago sit on millions of years of solar investment, with more than 9 billion tonnes of lignite in 10 major deposits - containing more than 20 times the energy content of the Maui gas field.\n\nThis is a very large, nationally significant resource which has the potential to be used as a feedstock for a petrochemical industry, using gasification technology to convert lignite to fertiliser, transport fuels or other high value energy products.\n\nIf extracted at a rate of 20 million tonnes per year, the lignite resource could provide energy and feedstock for most of New Zealand’s transport fuel and petrochemical requirements for over 300 years.\n\nIt largely sits close to the surface and is easy to access with opencast mining. It accounts for about 80% of New Zealand’s total coal resource and means New Zealand has one of the biggest coal reserves on earth, sitting around 14th in the world with more coal deposits than countries like Canada and Brazil.\n\nThere were plans in the past to build plants using the Fischer-Tropsch process to turn some of the lignite into low-sulphur diesel and naphtha (used in the production of plastics, solvents and as a component of fuels like petrol and jet fuels).\n\nIn South Africa, Sasol has been producing diesel, petrol and jet fuel from coal since the 1950s, supplying approximately 28% of South Africa’s fuel needs, saving that country more than US$5 billion a year in foreign exchange.\n\nThere have also previously been plans to make up to 1.2 million tonnes of urea from 2 million tonnes of Southland lignite, which would be twice New Zealand’s current urea use. Most of our urea currently comes from Saudi Arabia, but this could make us a urea exporter.\n\nSouthland’s lignite is low sulphur, low ash, and 1.5 to 2 times as reactive as Australian or German brown coals. This makes it one of the best lignites globally for making syngas.\n\nSyngas is an important universal industrial feedstock. It can be used to produce diesel and petrol via the Fischer-Tropsch process (which can run in existing engines and pipelines without modification), urea fertiliser via the Haber-Bosch process, methanol, hydrogen, or electricity via a combined cycle gas turbine.\n\nThere would be carbon and environmental trade offs to utilise this resource which would not be easy, but it’s hard to overstate just how significant the potential energy resource is."
+            ],
+            "chartTitle": "South Island lignite resources",
+            "series": [],
+            "keyFindings": [
+              "Otago and Southland contain over 9 billion tonnes of lignite across 10 major deposits.",
+              "The total energy content of mineable lignite is estimated at 75,000 PJ, roughly 20 times the energy content of the Maui gas field.",
+              "At an extraction rate of 20 million tonnes per year, the resource could meet most of New Zealand's transport fuel and petrochemical needs for over 300 years.",
+              "Gasification technology could be utilized to convert the lignite into fertilizers, transport fuels, and other high-value energy products."
+            ],
+            "sourceLines": [],
+            "publisherHints": []
+          },
+          "reason": "Kernel could not bind an underspecified partial"
+        }
+      }
+    },
+    {
+      "assetKey": "embed:1:https://pbs.twimg.com/media/HEkhnu2aEAA9WH2.jpg",
+      "actual": {
+        "outcomeTag": "NoMatch",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": null,
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": null
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "x://1309223351055872000/status/2038197281284096309",
+          "assetKey": "embed:1:https://pbs.twimg.com/media/HEkhnu2aEAA9WH2.jpg",
+          "postText": [
+            "As New Zealand turns its mind to energy, and offshore petroleum prospecting permits are being considered, it’s worth noting that Southland and Otago sit on millions of years of solar investment, with more than 9 billion tonnes of lignite in 10 major deposits - containing more than 20 times the energy content of the Maui gas field.\n\nThis is a very large, nationally significant resource which has the potential to be used as a feedstock for a petrochemical industry, using gasification technology to convert lignite to fertiliser, transport fuels or other high value energy products.\n\nIf extracted at a rate of 20 million tonnes per year, the lignite resource could provide energy and feedstock for most of New Zealand’s transport fuel and petrochemical requirements for over 300 years.\n\nIt largely sits close to the surface and is easy to access with opencast mining. It accounts for about 80% of New Zealand’s total coal resource and means New Zealand has one of the biggest coal reserves on earth, sitting around 14th in the world with more coal deposits than countries like Canada and Brazil.\n\nThere were plans in the past to build plants using the Fischer-Tropsch process to turn some of the lignite into low-sulphur diesel and naphtha (used in the production of plastics, solvents and as a component of fuels like petrol and jet fuels).\n\nIn South Africa, Sasol has been producing diesel, petrol and jet fuel from coal since the 1950s, supplying approximately 28% of South Africa’s fuel needs, saving that country more than US$5 billion a year in foreign exchange.\n\nThere have also previously been plans to make up to 1.2 million tonnes of urea from 2 million tonnes of Southland lignite, which would be twice New Zealand’s current urea use. Most of our urea currently comes from Saudi Arabia, but this could make us a urea exporter.\n\nSouthland’s lignite is low sulphur, low ash, and 1.5 to 2 times as reactive as Australian or German brown coals. This makes it one of the best lignites globally for making syngas.\n\nSyngas is an important universal industrial feedstock. It can be used to produce diesel and petrol via the Fischer-Tropsch process (which can run in existing engines and pipelines without modification), urea fertiliser via the Haber-Bosch process, methanol, hydrogen, or electricity via a combined cycle gas turbine.\n\nThere would be carbon and environmental trade offs to utilise this resource which would not be easy, but it’s hard to overstate just how significant the potential energy resource is."
+          ],
+          "chartTitle": "2.2 Lignite: What is being proposed",
+          "series": [],
+          "keyFindings": [
+            "Proposals for New Zealand lignite exploitation focus on producing liquid fuels, urea, and electricity to meet or exceed domestic demand.",
+            "Proposed diesel plants could produce up to 50,000 barrels per day, potentially matching the entirety of New Zealand's current diesel consumption.",
+            "Lignite processing pathways utilize gasification to create syngas, which serves as a feedstock for diesel production via Fischer-Tropsch or urea via the Haber process.",
+            "A proposed 1.2 million tonne urea plant would double New Zealand's current urea usage.",
+            "Infrastructure plans have included a 500 MW lignite-fired power station specifically linked to powering the Tiwai Point aluminium smelter."
+          ],
+          "sourceLines": [],
+          "publisherHints": [
+            {
+              "label": "Tiwai Point aluminium smelter",
+              "confidence": 0.5
+            }
+          ]
+        },
+        "assetKey": "embed:1:https://pbs.twimg.com/media/HEkhnu2aEAA9WH2.jpg",
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Hypothesis",
+          "bundle": {
+            "postUri": "x://1309223351055872000/status/2038197281284096309",
+            "assetKey": "embed:1:https://pbs.twimg.com/media/HEkhnu2aEAA9WH2.jpg",
+            "postText": [
+              "As New Zealand turns its mind to energy, and offshore petroleum prospecting permits are being considered, it’s worth noting that Southland and Otago sit on millions of years of solar investment, with more than 9 billion tonnes of lignite in 10 major deposits - containing more than 20 times the energy content of the Maui gas field.\n\nThis is a very large, nationally significant resource which has the potential to be used as a feedstock for a petrochemical industry, using gasification technology to convert lignite to fertiliser, transport fuels or other high value energy products.\n\nIf extracted at a rate of 20 million tonnes per year, the lignite resource could provide energy and feedstock for most of New Zealand’s transport fuel and petrochemical requirements for over 300 years.\n\nIt largely sits close to the surface and is easy to access with opencast mining. It accounts for about 80% of New Zealand’s total coal resource and means New Zealand has one of the biggest coal reserves on earth, sitting around 14th in the world with more coal deposits than countries like Canada and Brazil.\n\nThere were plans in the past to build plants using the Fischer-Tropsch process to turn some of the lignite into low-sulphur diesel and naphtha (used in the production of plastics, solvents and as a component of fuels like petrol and jet fuels).\n\nIn South Africa, Sasol has been producing diesel, petrol and jet fuel from coal since the 1950s, supplying approximately 28% of South Africa’s fuel needs, saving that country more than US$5 billion a year in foreign exchange.\n\nThere have also previously been plans to make up to 1.2 million tonnes of urea from 2 million tonnes of Southland lignite, which would be twice New Zealand’s current urea use. Most of our urea currently comes from Saudi Arabia, but this could make us a urea exporter.\n\nSouthland’s lignite is low sulphur, low ash, and 1.5 to 2 times as reactive as Australian or German brown coals. This makes it one of the best lignites globally for making syngas.\n\nSyngas is an important universal industrial feedstock. It can be used to produce diesel and petrol via the Fischer-Tropsch process (which can run in existing engines and pipelines without modification), urea fertiliser via the Haber-Bosch process, methanol, hydrogen, or electricity via a combined cycle gas turbine.\n\nThere would be carbon and environmental trade offs to utilise this resource which would not be easy, but it’s hard to overstate just how significant the potential energy resource is."
+            ],
+            "chartTitle": "2.2 Lignite: What is being proposed",
+            "series": [],
+            "keyFindings": [
+              "Proposals for New Zealand lignite exploitation focus on producing liquid fuels, urea, and electricity to meet or exceed domestic demand.",
+              "Proposed diesel plants could produce up to 50,000 barrels per day, potentially matching the entirety of New Zealand's current diesel consumption.",
+              "Lignite processing pathways utilize gasification to create syngas, which serves as a feedstock for diesel production via Fischer-Tropsch or urea via the Haber process.",
+              "A proposed 1.2 million tonne urea plant would double New Zealand's current urea usage.",
+              "Infrastructure plans have included a 500 MW lignite-fired power station specifically linked to powering the Tiwai Point aluminium smelter."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "Tiwai Point aluminium smelter",
+                "confidence": 0.5
+              }
+            ]
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "technologyOrFuel": "brown coal",
+              "domainObject": "electricity",
+              "measuredProperty": "demand",
+              "unitFamily": "power"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:1:https://pbs.twimg.com/media/HEkhnu2aEAA9WH2.jpg",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "chart-title",
+                "text": "2.2 Lignite: What is being proposed"
+              },
+              {
+                "source": "key-finding",
+                "text": "Proposals for New Zealand lignite exploitation focus on producing liquid fuels, urea,"
+              },
+              {
+                "source": "key-finding",
+                "text": "electricity to meet"
+              },
+              {
+                "source": "key-finding",
+                "text": "exceed domestic demand."
+              },
+              {
+                "source": "key-finding",
+                "text": "Lignite processing pathways utilize gasification to create syngas, which serves as a feedstock for diesel production via Fischer-Tropsch"
+              },
+              {
+                "source": "key-finding",
+                "text": "A proposed 1.2 million tonne urea plant would double New Zealand's current urea usage."
+              },
+              {
+                "source": "key-finding",
+                "text": "Infrastructure plans have included a 500 MW lignite-fired power station specifically linked to powering the Tiwai Point aluminium smelter."
+              },
+              {
+                "source": "post-text",
+                "text": "There were plans in the past to build plants using the Fischer-Tropsch process to turn some of the lignite into low-sulphur diesel"
+              },
+              {
+                "source": "post-text",
+                "text": "There have also previously been plans to make up to 1.2 million tonnes of urea from 2 million tonnes of Southland lignite, which would be twice New Zealand’s current urea use. Most of our urea currently comes from Saudi Arabia, but this could make us a urea exporter."
+              },
+              {
+                "source": "post-text",
+                "text": "Southland’s lignite is low sulphur, low ash,"
+              }
+            ],
+            "tier": "weak-heuristic"
+          }
+        },
+        "bound": {
+          "hypothesis": {
+            "sharedPartial": {
+              "technologyOrFuel": "brown coal",
+              "domainObject": "electricity",
+              "measuredProperty": "demand",
+              "unitFamily": "power"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:1:https://pbs.twimg.com/media/HEkhnu2aEAA9WH2.jpg",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "chart-title",
+                "text": "2.2 Lignite: What is being proposed"
+              },
+              {
+                "source": "key-finding",
+                "text": "Proposals for New Zealand lignite exploitation focus on producing liquid fuels, urea,"
+              },
+              {
+                "source": "key-finding",
+                "text": "electricity to meet"
+              },
+              {
+                "source": "key-finding",
+                "text": "exceed domestic demand."
+              },
+              {
+                "source": "key-finding",
+                "text": "Lignite processing pathways utilize gasification to create syngas, which serves as a feedstock for diesel production via Fischer-Tropsch"
+              },
+              {
+                "source": "key-finding",
+                "text": "A proposed 1.2 million tonne urea plant would double New Zealand's current urea usage."
+              },
+              {
+                "source": "key-finding",
+                "text": "Infrastructure plans have included a 500 MW lignite-fired power station specifically linked to powering the Tiwai Point aluminium smelter."
+              },
+              {
+                "source": "post-text",
+                "text": "There were plans in the past to build plants using the Fischer-Tropsch process to turn some of the lignite into low-sulphur diesel"
+              },
+              {
+                "source": "post-text",
+                "text": "There have also previously been plans to make up to 1.2 million tonnes of urea from 2 million tonnes of Southland lignite, which would be twice New Zealand’s current urea use. Most of our urea currently comes from Saudi Arabia, but this could make us a urea exporter."
+              },
+              {
+                "source": "post-text",
+                "text": "Southland’s lignite is low sulphur, low ash,"
+              }
+            ],
+            "tier": "weak-heuristic"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:1:https://pbs.twimg.com/media/HEkhnu2aEAA9WH2.jpg",
+              "semanticPartial": {
+                "technologyOrFuel": "brown coal",
+                "domainObject": "electricity",
+                "measuredProperty": "demand",
+                "unitFamily": "power"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [],
+              "missingRequired": [
+                "statisticType"
+              ],
+              "reason": "missing-required"
+            }
+          ]
+        },
+        "outcome": {
+          "_tag": "NoMatch",
+          "bundle": {
+            "postUri": "x://1309223351055872000/status/2038197281284096309",
+            "assetKey": "embed:1:https://pbs.twimg.com/media/HEkhnu2aEAA9WH2.jpg",
+            "postText": [
+              "As New Zealand turns its mind to energy, and offshore petroleum prospecting permits are being considered, it’s worth noting that Southland and Otago sit on millions of years of solar investment, with more than 9 billion tonnes of lignite in 10 major deposits - containing more than 20 times the energy content of the Maui gas field.\n\nThis is a very large, nationally significant resource which has the potential to be used as a feedstock for a petrochemical industry, using gasification technology to convert lignite to fertiliser, transport fuels or other high value energy products.\n\nIf extracted at a rate of 20 million tonnes per year, the lignite resource could provide energy and feedstock for most of New Zealand’s transport fuel and petrochemical requirements for over 300 years.\n\nIt largely sits close to the surface and is easy to access with opencast mining. It accounts for about 80% of New Zealand’s total coal resource and means New Zealand has one of the biggest coal reserves on earth, sitting around 14th in the world with more coal deposits than countries like Canada and Brazil.\n\nThere were plans in the past to build plants using the Fischer-Tropsch process to turn some of the lignite into low-sulphur diesel and naphtha (used in the production of plastics, solvents and as a component of fuels like petrol and jet fuels).\n\nIn South Africa, Sasol has been producing diesel, petrol and jet fuel from coal since the 1950s, supplying approximately 28% of South Africa’s fuel needs, saving that country more than US$5 billion a year in foreign exchange.\n\nThere have also previously been plans to make up to 1.2 million tonnes of urea from 2 million tonnes of Southland lignite, which would be twice New Zealand’s current urea use. Most of our urea currently comes from Saudi Arabia, but this could make us a urea exporter.\n\nSouthland’s lignite is low sulphur, low ash, and 1.5 to 2 times as reactive as Australian or German brown coals. This makes it one of the best lignites globally for making syngas.\n\nSyngas is an important universal industrial feedstock. It can be used to produce diesel and petrol via the Fischer-Tropsch process (which can run in existing engines and pipelines without modification), urea fertiliser via the Haber-Bosch process, methanol, hydrogen, or electricity via a combined cycle gas turbine.\n\nThere would be carbon and environmental trade offs to utilise this resource which would not be easy, but it’s hard to overstate just how significant the potential energy resource is."
+            ],
+            "chartTitle": "2.2 Lignite: What is being proposed",
+            "series": [],
+            "keyFindings": [
+              "Proposals for New Zealand lignite exploitation focus on producing liquid fuels, urea, and electricity to meet or exceed domestic demand.",
+              "Proposed diesel plants could produce up to 50,000 barrels per day, potentially matching the entirety of New Zealand's current diesel consumption.",
+              "Lignite processing pathways utilize gasification to create syngas, which serves as a feedstock for diesel production via Fischer-Tropsch or urea via the Haber process.",
+              "A proposed 1.2 million tonne urea plant would double New Zealand's current urea usage.",
+              "Infrastructure plans have included a 500 MW lignite-fired power station specifically linked to powering the Tiwai Point aluminium smelter."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "Tiwai Point aluminium smelter",
+                "confidence": 0.5
+              }
+            ]
+          },
+          "reason": "Kernel could not bind an underspecified partial"
+        }
+      }
+    }
+  ],
+  "error": null
+}

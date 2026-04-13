@@ -1,0 +1,312 @@
+{
+  "kind": "unannotated",
+  "slug": "028-josephmooneymp",
+  "postUri": "x://1309223351055872000/status/2041067813700518365",
+  "bundles": [
+    {
+      "assetKey": "embed:0:https://pbs.twimg.com/media/HFNUWxsaQAE2I7f.jpg",
+      "actual": {
+        "outcomeTag": "Conflicted",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": "required-facet-conflict",
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": "strong-heuristic"
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "x://1309223351055872000/status/2041067813700518365",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/HFNUWxsaQAE2I7f.jpg",
+          "postText": [
+            "It’s been interesting hearing Opposition Leader Chris Hipkins saying that the closure of the Marsden Point refinery was a “private business decision.” \n\nWhile strictly correct, it omits significant government policies and decisions which made that “private decision” the only realistic one.  I haven’t seen any media commentary on this.\n\nA May 2021 letter from the Refinery’s CEO to the then Minister of Finance described Marsden Point as one of “the safest and most reliable refineries in the region.” \n\nNotwithstanding that, the letter said it was considering a major change to its business to significantly reduce its Scope 1 and Scope 2 emissions, and become an import only terminal.  It noted that the Minister had directed ACC to accelerate moves to divest from fossil fuels.  The letter noted that ACC held around 10% of Refining NZ’s shares, and as significant investments would be required to change it into an import only terminal, it asked the Minister to distinguish investment in Refining NZ from other fossil fuel investments given its critical infrastructure role.\n\nBut why was Refining NZ looking at shutting down its refinery despite being one of the “safest and most reliable in the region”?\n\nA 2019 Ministry for the Environment Regulatory Impact Statement lays it out plainly.\n\nRefining NZ’s Negotiated Greenhouse Agreement - protecting it from full ETS exposure since 2003 - expired 31 December 2022. Under government policy settings it would then receive zero industrial allocation and face the full cost of its emissions. The ministry’s own analysis said this would “nearly halve the profitability of the refining business” - at 2019 prices of just $18 per NZU, it would produce an annual ETS bill of ~$20 million.\n\nThe RIS recorded Refining NZ’s profits over five years:\n∙2012: $31M\n∙2013: -$5M (a loss)\n∙2014: $10M\n∙2015: $151M\n∙2016: $47M\nAverage that out and you get roughly $47M per year (with an exceptional 2015 year).\n\nThe ministry itself said full ETS exposure would nearly halve profitability even at $18/unit.\n\nNZU prices didn’t stay at $18 which was readily foreseeable.  \n\nThe NZU price hit a record high of $88.50/unit in late 2022.\n\nApplied to the Refinery’s Scope 1 emissions of 1 to 1.3 million tonnes per year, that’s an annual ETS liability of $88.5M to $115M, and that’s before Scope 2 costs on purchased electricity and gas.\n\nOn a business losing money in bad years, a potential $100M+ annual carbon bill isn’t a headwind. It’s a death sentence.\n\nThe ministry knew this in 2019, and suggested options the government could take in terms of emissions liabilities to keep the refinery in operation, warning:\n\n“The closure of Refining NZ, which employs approximately 300 people, would have a\nsignificant negative impact on the Northland economy and would leave New Zealand\ndependent on the supply of refined petroleum products sourced from overseas refineries that may choose to prioritise supply to other nations ahead of New Zealand at times of shortages.”\n\nRead the Ministry’s RIS for yourself (that specific comment is at paragraph 25) 👇\n\nhttps://t.co/DxIE8OdHVT"
+          ],
+          "chartTitle": "Investing in New Zealand’s critical infrastructure",
+          "series": [],
+          "keyFindings": [
+            "Refining NZ is transitioning its Marsden Point refinery into an import terminal, aiming to reduce Scope 1 and 2 emissions by over 1 Mt of CO2 equivalent.",
+            "The Marsden Point facility and the Refinery to Auckland Pipeline are identified as critical infrastructure for New Zealand's fuel security and Auckland Airport's operations.",
+            "The company is exploring future energy projects including solar power development and the production and storage of biofuels and sustainable aviation fuels (SAF).",
+            "Refining NZ expresses concern regarding ACC's potential divestment from fossil fuels, noting that ACC holds approximately 10% of RNZ shares.",
+            "The CEO advocates for distinguishing investment in Refining NZ from standard oil and gas investments due to its role in supporting the country's decarbonization and 2030 Paris Agreement goals."
+          ],
+          "sourceLines": [],
+          "publisherHints": [
+            {
+              "label": "Refining NZ",
+              "confidence": 0.5
+            },
+            {
+              "label": "ACC",
+              "confidence": 0.5
+            },
+            {
+              "label": "Auckland Airport",
+              "confidence": 0.5
+            },
+            {
+              "label": "REFINING NZ",
+              "confidence": 0.3
+            },
+            {
+              "label": "Your Energy Hive",
+              "confidence": 0.3
+            }
+          ]
+        },
+        "assetKey": "embed:0:https://pbs.twimg.com/media/HFNUWxsaQAE2I7f.jpg",
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Conflicted",
+          "bundle": {
+            "postUri": "x://1309223351055872000/status/2041067813700518365",
+            "assetKey": "embed:0:https://pbs.twimg.com/media/HFNUWxsaQAE2I7f.jpg",
+            "postText": [
+              "It’s been interesting hearing Opposition Leader Chris Hipkins saying that the closure of the Marsden Point refinery was a “private business decision.” \n\nWhile strictly correct, it omits significant government policies and decisions which made that “private decision” the only realistic one.  I haven’t seen any media commentary on this.\n\nA May 2021 letter from the Refinery’s CEO to the then Minister of Finance described Marsden Point as one of “the safest and most reliable refineries in the region.” \n\nNotwithstanding that, the letter said it was considering a major change to its business to significantly reduce its Scope 1 and Scope 2 emissions, and become an import only terminal.  It noted that the Minister had directed ACC to accelerate moves to divest from fossil fuels.  The letter noted that ACC held around 10% of Refining NZ’s shares, and as significant investments would be required to change it into an import only terminal, it asked the Minister to distinguish investment in Refining NZ from other fossil fuel investments given its critical infrastructure role.\n\nBut why was Refining NZ looking at shutting down its refinery despite being one of the “safest and most reliable in the region”?\n\nA 2019 Ministry for the Environment Regulatory Impact Statement lays it out plainly.\n\nRefining NZ’s Negotiated Greenhouse Agreement - protecting it from full ETS exposure since 2003 - expired 31 December 2022. Under government policy settings it would then receive zero industrial allocation and face the full cost of its emissions. The ministry’s own analysis said this would “nearly halve the profitability of the refining business” - at 2019 prices of just $18 per NZU, it would produce an annual ETS bill of ~$20 million.\n\nThe RIS recorded Refining NZ’s profits over five years:\n∙2012: $31M\n∙2013: -$5M (a loss)\n∙2014: $10M\n∙2015: $151M\n∙2016: $47M\nAverage that out and you get roughly $47M per year (with an exceptional 2015 year).\n\nThe ministry itself said full ETS exposure would nearly halve profitability even at $18/unit.\n\nNZU prices didn’t stay at $18 which was readily foreseeable.  \n\nThe NZU price hit a record high of $88.50/unit in late 2022.\n\nApplied to the Refinery’s Scope 1 emissions of 1 to 1.3 million tonnes per year, that’s an annual ETS liability of $88.5M to $115M, and that’s before Scope 2 costs on purchased electricity and gas.\n\nOn a business losing money in bad years, a potential $100M+ annual carbon bill isn’t a headwind. It’s a death sentence.\n\nThe ministry knew this in 2019, and suggested options the government could take in terms of emissions liabilities to keep the refinery in operation, warning:\n\n“The closure of Refining NZ, which employs approximately 300 people, would have a\nsignificant negative impact on the Northland economy and would leave New Zealand\ndependent on the supply of refined petroleum products sourced from overseas refineries that may choose to prioritise supply to other nations ahead of New Zealand at times of shortages.”\n\nRead the Ministry’s RIS for yourself (that specific comment is at paragraph 25) 👇\n\nhttps://t.co/DxIE8OdHVT"
+            ],
+            "chartTitle": "Investing in New Zealand’s critical infrastructure",
+            "series": [],
+            "keyFindings": [
+              "Refining NZ is transitioning its Marsden Point refinery into an import terminal, aiming to reduce Scope 1 and 2 emissions by over 1 Mt of CO2 equivalent.",
+              "The Marsden Point facility and the Refinery to Auckland Pipeline are identified as critical infrastructure for New Zealand's fuel security and Auckland Airport's operations.",
+              "The company is exploring future energy projects including solar power development and the production and storage of biofuels and sustainable aviation fuels (SAF).",
+              "Refining NZ expresses concern regarding ACC's potential divestment from fossil fuels, noting that ACC holds approximately 10% of RNZ shares.",
+              "The CEO advocates for distinguishing investment in Refining NZ from standard oil and gas investments due to its role in supporting the country's decarbonization and 2030 Paris Agreement goals."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "Refining NZ",
+                "confidence": 0.5
+              },
+              {
+                "label": "ACC",
+                "confidence": 0.5
+              },
+              {
+                "label": "Auckland Airport",
+                "confidence": 0.5
+              },
+              {
+                "label": "REFINING NZ",
+                "confidence": 0.3
+              },
+              {
+                "label": "Your Energy Hive",
+                "confidence": 0.3
+              }
+            ]
+          },
+          "conflicts": [
+            {
+              "facet": "measuredProperty",
+              "values": [
+                "emissions",
+                "investment"
+              ]
+            },
+            {
+              "facet": "domainObject",
+              "values": [
+                "electricity",
+                "oil"
+              ]
+            }
+          ],
+          "hypotheses": [
+            {
+              "sharedPartial": {
+                "measuredProperty": "emissions",
+                "domainObject": "electricity",
+                "technologyOrFuel": "solar PV"
+              },
+              "attachedContext": {},
+              "items": [
+                {
+                  "itemKey": "bundle",
+                  "partial": {},
+                  "evidence": []
+                }
+              ],
+              "evidence": [
+                {
+                  "source": "key-finding",
+                  "text": "2 emissions by over 1 Mt of CO2 equivalent."
+                },
+                {
+                  "source": "key-finding",
+                  "text": "The company is exploring future energy projects including solar power development"
+                }
+              ],
+              "tier": "strong-heuristic"
+            },
+            {
+              "sharedPartial": {
+                "measuredProperty": "investment",
+                "domainObject": "oil"
+              },
+              "attachedContext": {},
+              "items": [
+                {
+                  "itemKey": "bundle",
+                  "partial": {},
+                  "evidence": []
+                }
+              ],
+              "evidence": [
+                {
+                  "source": "key-finding",
+                  "text": "The CEO advocates for distinguishing investment in Refining NZ from standard oil"
+                }
+              ],
+              "tier": "strong-heuristic"
+            }
+          ],
+          "tier": "strong-heuristic"
+        },
+        "bound": null,
+        "outcome": {
+          "_tag": "Conflicted",
+          "bundle": {
+            "postUri": "x://1309223351055872000/status/2041067813700518365",
+            "assetKey": "embed:0:https://pbs.twimg.com/media/HFNUWxsaQAE2I7f.jpg",
+            "postText": [
+              "It’s been interesting hearing Opposition Leader Chris Hipkins saying that the closure of the Marsden Point refinery was a “private business decision.” \n\nWhile strictly correct, it omits significant government policies and decisions which made that “private decision” the only realistic one.  I haven’t seen any media commentary on this.\n\nA May 2021 letter from the Refinery’s CEO to the then Minister of Finance described Marsden Point as one of “the safest and most reliable refineries in the region.” \n\nNotwithstanding that, the letter said it was considering a major change to its business to significantly reduce its Scope 1 and Scope 2 emissions, and become an import only terminal.  It noted that the Minister had directed ACC to accelerate moves to divest from fossil fuels.  The letter noted that ACC held around 10% of Refining NZ’s shares, and as significant investments would be required to change it into an import only terminal, it asked the Minister to distinguish investment in Refining NZ from other fossil fuel investments given its critical infrastructure role.\n\nBut why was Refining NZ looking at shutting down its refinery despite being one of the “safest and most reliable in the region”?\n\nA 2019 Ministry for the Environment Regulatory Impact Statement lays it out plainly.\n\nRefining NZ’s Negotiated Greenhouse Agreement - protecting it from full ETS exposure since 2003 - expired 31 December 2022. Under government policy settings it would then receive zero industrial allocation and face the full cost of its emissions. The ministry’s own analysis said this would “nearly halve the profitability of the refining business” - at 2019 prices of just $18 per NZU, it would produce an annual ETS bill of ~$20 million.\n\nThe RIS recorded Refining NZ’s profits over five years:\n∙2012: $31M\n∙2013: -$5M (a loss)\n∙2014: $10M\n∙2015: $151M\n∙2016: $47M\nAverage that out and you get roughly $47M per year (with an exceptional 2015 year).\n\nThe ministry itself said full ETS exposure would nearly halve profitability even at $18/unit.\n\nNZU prices didn’t stay at $18 which was readily foreseeable.  \n\nThe NZU price hit a record high of $88.50/unit in late 2022.\n\nApplied to the Refinery’s Scope 1 emissions of 1 to 1.3 million tonnes per year, that’s an annual ETS liability of $88.5M to $115M, and that’s before Scope 2 costs on purchased electricity and gas.\n\nOn a business losing money in bad years, a potential $100M+ annual carbon bill isn’t a headwind. It’s a death sentence.\n\nThe ministry knew this in 2019, and suggested options the government could take in terms of emissions liabilities to keep the refinery in operation, warning:\n\n“The closure of Refining NZ, which employs approximately 300 people, would have a\nsignificant negative impact on the Northland economy and would leave New Zealand\ndependent on the supply of refined petroleum products sourced from overseas refineries that may choose to prioritise supply to other nations ahead of New Zealand at times of shortages.”\n\nRead the Ministry’s RIS for yourself (that specific comment is at paragraph 25) 👇\n\nhttps://t.co/DxIE8OdHVT"
+            ],
+            "chartTitle": "Investing in New Zealand’s critical infrastructure",
+            "series": [],
+            "keyFindings": [
+              "Refining NZ is transitioning its Marsden Point refinery into an import terminal, aiming to reduce Scope 1 and 2 emissions by over 1 Mt of CO2 equivalent.",
+              "The Marsden Point facility and the Refinery to Auckland Pipeline are identified as critical infrastructure for New Zealand's fuel security and Auckland Airport's operations.",
+              "The company is exploring future energy projects including solar power development and the production and storage of biofuels and sustainable aviation fuels (SAF).",
+              "Refining NZ expresses concern regarding ACC's potential divestment from fossil fuels, noting that ACC holds approximately 10% of RNZ shares.",
+              "The CEO advocates for distinguishing investment in Refining NZ from standard oil and gas investments due to its role in supporting the country's decarbonization and 2030 Paris Agreement goals."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "Refining NZ",
+                "confidence": 0.5
+              },
+              {
+                "label": "ACC",
+                "confidence": 0.5
+              },
+              {
+                "label": "Auckland Airport",
+                "confidence": 0.5
+              },
+              {
+                "label": "REFINING NZ",
+                "confidence": 0.3
+              },
+              {
+                "label": "Your Energy Hive",
+                "confidence": 0.3
+              }
+            ]
+          },
+          "hypotheses": [
+            {
+              "sharedPartial": {
+                "measuredProperty": "emissions",
+                "domainObject": "electricity",
+                "technologyOrFuel": "solar PV"
+              },
+              "attachedContext": {},
+              "items": [
+                {
+                  "itemKey": "bundle",
+                  "partial": {},
+                  "evidence": []
+                }
+              ],
+              "evidence": [
+                {
+                  "source": "key-finding",
+                  "text": "2 emissions by over 1 Mt of CO2 equivalent."
+                },
+                {
+                  "source": "key-finding",
+                  "text": "The company is exploring future energy projects including solar power development"
+                }
+              ],
+              "tier": "strong-heuristic"
+            },
+            {
+              "sharedPartial": {
+                "measuredProperty": "investment",
+                "domainObject": "oil"
+              },
+              "attachedContext": {},
+              "items": [
+                {
+                  "itemKey": "bundle",
+                  "partial": {},
+                  "evidence": []
+                }
+              ],
+              "evidence": [
+                {
+                  "source": "key-finding",
+                  "text": "The CEO advocates for distinguishing investment in Refining NZ from standard oil"
+                }
+              ],
+              "tier": "strong-heuristic"
+            }
+          ],
+          "conflicts": [
+            {
+              "facet": "measuredProperty",
+              "values": [
+                "emissions",
+                "investment"
+              ]
+            },
+            {
+              "facet": "domainObject",
+              "values": [
+                "electricity",
+                "oil"
+              ]
+            }
+          ],
+          "gaps": [
+            {
+              "partial": {
+                "measuredProperty": "emissions",
+                "domainObject": "electricity",
+                "technologyOrFuel": "solar PV"
+              },
+              "missingRequired": [
+                "statisticType"
+              ],
+              "candidates": [],
+              "reason": "required-facet-conflict",
+              "context": {
+                "attachedContext": {}
+              }
+            },
+            {
+              "partial": {
+                "measuredProperty": "investment",
+                "domainObject": "oil"
+              },
+              "missingRequired": [
+                "statisticType"
+              ],
+              "candidates": [],
+              "reason": "required-facet-conflict",
+              "context": {
+                "attachedContext": {}
+              }
+            }
+          ],
+          "tier": "strong-heuristic"
+        }
+      }
+    }
+  ],
+  "error": null
+}

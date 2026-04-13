@@ -1,0 +1,717 @@
+{
+  "kind": "annotated",
+  "slug": "019-nicolasfulghum",
+  "postUri": "x://777116516357726208/status/2042196391292817787",
+  "expected": {
+    "postUri": "x://777116516357726208/status/2042196391292817787",
+    "outcomeTag": "Resolved",
+    "expectedVariableIds": [
+      "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"
+    ],
+    "expectedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+    "notes": "seed 019-nicolasfulghum: UK high gas prices"
+  },
+  "selectedBundle": {
+    "assetKey": "embed:0:https://pbs.twimg.com/media/HFdURdpWoAAsdzi.jpg",
+    "actual": {
+      "outcomeTag": "OutOfRegistry",
+      "boundVariableIds": [],
+      "candidateVariableIds": [],
+      "gapReason": "no-candidates",
+      "matchedFacetCounts": [],
+      "agentId": null,
+      "confidence": null,
+      "tier": null
+    },
+    "trace": {
+      "bundle": {
+        "postUri": "x://777116516357726208/status/2042196391292817787",
+        "assetKey": "embed:0:https://pbs.twimg.com/media/HFdURdpWoAAsdzi.jpg",
+        "postText": [
+          "For the second time in four years, the UK is facing high gas-fired electricity costs due to a global fossil crisis.\n\nThe difference between four years ago and now?\n\nWind and solar capacity deployed since 2021 is reducing gas reliance and saving an estimated £7 million per day! https://t.co/F3INGGbZcR"
+        ],
+        "chartTitle": "Wind and solar growth since 2021 has cut Britain's gas generation - saving £7 million per day since the latest gas crisis hit",
+        "series": [],
+        "keyFindings": [
+          "Britain's reliance on gas for power generation has decreased significantly between 2021 and 2024 due to the expansion of wind and solar capacity.",
+          "The reduction in gas-fired generation translates to an estimated saving of £7 million per day since the recent gas crisis began.",
+          "Visual evidence shows a shift from high gas-share days (represented by dark brown stripes) in 2021 to much lower gas-share days (blue stripes) in 2024.",
+          "A new record for wind generation was established during the March 2024 period, further reducing the need for gas."
+        ],
+        "sourceLines": [
+          {
+            "sourceText": "Source: NESO"
+          }
+        ],
+        "publisherHints": [
+          {
+            "label": "NESO",
+            "confidence": 0.5
+          },
+          {
+            "label": "EMBER",
+            "confidence": 0.5
+          }
+        ]
+      },
+      "assetKey": "embed:0:https://pbs.twimg.com/media/HFdURdpWoAAsdzi.jpg",
+      "agentId": null,
+      "interpreted": {
+        "_tag": "Hypothesis",
+        "bundle": {
+          "postUri": "x://777116516357726208/status/2042196391292817787",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/HFdURdpWoAAsdzi.jpg",
+          "postText": [
+            "For the second time in four years, the UK is facing high gas-fired electricity costs due to a global fossil crisis.\n\nThe difference between four years ago and now?\n\nWind and solar capacity deployed since 2021 is reducing gas reliance and saving an estimated £7 million per day! https://t.co/F3INGGbZcR"
+          ],
+          "chartTitle": "Wind and solar growth since 2021 has cut Britain's gas generation - saving £7 million per day since the latest gas crisis hit",
+          "series": [],
+          "keyFindings": [
+            "Britain's reliance on gas for power generation has decreased significantly between 2021 and 2024 due to the expansion of wind and solar capacity.",
+            "The reduction in gas-fired generation translates to an estimated saving of £7 million per day since the recent gas crisis began.",
+            "Visual evidence shows a shift from high gas-share days (represented by dark brown stripes) in 2021 to much lower gas-share days (blue stripes) in 2024.",
+            "A new record for wind generation was established during the March 2024 period, further reducing the need for gas."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Source: NESO"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "NESO",
+              "confidence": 0.5
+            },
+            {
+              "label": "EMBER",
+              "confidence": 0.5
+            }
+          ]
+        },
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "generation",
+            "domainObject": "natural gas",
+            "technologyOrFuel": "solar PV",
+            "statisticType": "flow"
+          },
+          "attachedContext": {},
+          "items": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdURdpWoAAsdzi.jpg",
+              "partial": {},
+              "evidence": []
+            }
+          ],
+          "evidence": [
+            {
+              "source": "chart-title",
+              "text": "Wind and solar growth since 2021 has cut Britain's gas generation - saving £7 million per day since the latest gas crisis hit"
+            }
+          ],
+          "tier": "weak-heuristic"
+        }
+      },
+      "bound": {
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "generation",
+            "domainObject": "natural gas",
+            "technologyOrFuel": "solar PV",
+            "statisticType": "flow"
+          },
+          "attachedContext": {},
+          "items": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdURdpWoAAsdzi.jpg",
+              "partial": {},
+              "evidence": []
+            }
+          ],
+          "evidence": [
+            {
+              "source": "chart-title",
+              "text": "Wind and solar growth since 2021 has cut Britain's gas generation - saving £7 million per day since the latest gas crisis hit"
+            }
+          ],
+          "tier": "weak-heuristic"
+        },
+        "items": [
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFdURdpWoAAsdzi.jpg",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "solar PV",
+              "statisticType": "flow"
+            },
+            "attachedContext": {},
+            "evidence": [],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+                "label": "Solar electricity generation",
+                "matchedFacets": [
+                  "measuredProperty",
+                  "technologyOrFuel",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "natural gas"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "solar PV",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+                "label": "Electricity generation",
+                "matchedFacets": [
+                  "measuredProperty",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "natural gas"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KP172ZRES5RNDND1J224XNS7",
+                "label": "Natural gas consumption",
+                "matchedFacets": [
+                  "domainObject",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "consumption",
+                      "generation"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "consumption",
+                  "domainObject": "natural gas",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WM9HP0NBCS5J38GJYT",
+                "label": "Battery discharge",
+                "matchedFacets": [
+                  "measuredProperty",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "battery storage",
+                      "natural gas"
+                    ]
+                  },
+                  {
+                    "facet": "technologyOrFuel",
+                    "values": [
+                      "battery",
+                      "solar PV"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "battery storage",
+                  "technologyOrFuel": "battery",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+                "label": "Coal electricity generation",
+                "matchedFacets": [
+                  "measuredProperty",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "natural gas"
+                    ]
+                  },
+                  {
+                    "facet": "technologyOrFuel",
+                    "values": [
+                      "coal",
+                      "solar PV"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "coal",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "reason": "no-candidates"
+          }
+        ]
+      },
+      "outcome": {
+        "_tag": "OutOfRegistry",
+        "bundle": {
+          "postUri": "x://777116516357726208/status/2042196391292817787",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/HFdURdpWoAAsdzi.jpg",
+          "postText": [
+            "For the second time in four years, the UK is facing high gas-fired electricity costs due to a global fossil crisis.\n\nThe difference between four years ago and now?\n\nWind and solar capacity deployed since 2021 is reducing gas reliance and saving an estimated £7 million per day! https://t.co/F3INGGbZcR"
+          ],
+          "chartTitle": "Wind and solar growth since 2021 has cut Britain's gas generation - saving £7 million per day since the latest gas crisis hit",
+          "series": [],
+          "keyFindings": [
+            "Britain's reliance on gas for power generation has decreased significantly between 2021 and 2024 due to the expansion of wind and solar capacity.",
+            "The reduction in gas-fired generation translates to an estimated saving of £7 million per day since the recent gas crisis began.",
+            "Visual evidence shows a shift from high gas-share days (represented by dark brown stripes) in 2021 to much lower gas-share days (blue stripes) in 2024.",
+            "A new record for wind generation was established during the March 2024 period, further reducing the need for gas."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Source: NESO"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "NESO",
+              "confidence": 0.5
+            },
+            {
+              "label": "EMBER",
+              "confidence": 0.5
+            }
+          ]
+        },
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "generation",
+            "domainObject": "natural gas",
+            "technologyOrFuel": "solar PV",
+            "statisticType": "flow"
+          },
+          "attachedContext": {},
+          "items": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFdURdpWoAAsdzi.jpg",
+              "partial": {},
+              "evidence": []
+            }
+          ],
+          "evidence": [
+            {
+              "source": "chart-title",
+              "text": "Wind and solar growth since 2021 has cut Britain's gas generation - saving £7 million per day since the latest gas crisis hit"
+            }
+          ],
+          "tier": "weak-heuristic"
+        },
+        "items": [
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFdURdpWoAAsdzi.jpg",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "solar PV",
+              "statisticType": "flow"
+            },
+            "attachedContext": {},
+            "evidence": [],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+                "label": "Solar electricity generation",
+                "matchedFacets": [
+                  "measuredProperty",
+                  "technologyOrFuel",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "natural gas"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "solar PV",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+                "label": "Electricity generation",
+                "matchedFacets": [
+                  "measuredProperty",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "natural gas"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KP172ZRES5RNDND1J224XNS7",
+                "label": "Natural gas consumption",
+                "matchedFacets": [
+                  "domainObject",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "consumption",
+                      "generation"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "consumption",
+                  "domainObject": "natural gas",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WM9HP0NBCS5J38GJYT",
+                "label": "Battery discharge",
+                "matchedFacets": [
+                  "measuredProperty",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "battery storage",
+                      "natural gas"
+                    ]
+                  },
+                  {
+                    "facet": "technologyOrFuel",
+                    "values": [
+                      "battery",
+                      "solar PV"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "battery storage",
+                  "technologyOrFuel": "battery",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+                "label": "Coal electricity generation",
+                "matchedFacets": [
+                  "measuredProperty",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "natural gas"
+                    ]
+                  },
+                  {
+                    "facet": "technologyOrFuel",
+                    "values": [
+                      "coal",
+                      "solar PV"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "coal",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "reason": "no-candidates"
+          }
+        ],
+        "gap": {
+          "partial": {
+            "measuredProperty": "generation",
+            "domainObject": "natural gas",
+            "technologyOrFuel": "solar PV",
+            "statisticType": "flow"
+          },
+          "candidates": [
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+              "label": "Solar electricity generation",
+              "matchedFacets": [
+                "measuredProperty",
+                "technologyOrFuel",
+                "statisticType"
+              ],
+              "mismatchedFacets": [
+                {
+                  "facet": "domainObject",
+                  "values": [
+                    "electricity",
+                    "natural gas"
+                  ]
+                }
+              ],
+              "subsumptionRatio": 0,
+              "partialSpecificity": 6,
+              "semanticPartial": {
+                "measuredProperty": "generation",
+                "domainObject": "electricity",
+                "technologyOrFuel": "solar PV",
+                "statisticType": "flow",
+                "aggregation": "sum",
+                "unitFamily": "energy"
+              }
+            },
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+              "label": "Electricity generation",
+              "matchedFacets": [
+                "measuredProperty",
+                "statisticType"
+              ],
+              "mismatchedFacets": [
+                {
+                  "facet": "domainObject",
+                  "values": [
+                    "electricity",
+                    "natural gas"
+                  ]
+                }
+              ],
+              "subsumptionRatio": 0,
+              "partialSpecificity": 5,
+              "semanticPartial": {
+                "measuredProperty": "generation",
+                "domainObject": "electricity",
+                "statisticType": "flow",
+                "aggregation": "sum",
+                "unitFamily": "energy"
+              }
+            },
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KP172ZRES5RNDND1J224XNS7",
+              "label": "Natural gas consumption",
+              "matchedFacets": [
+                "domainObject",
+                "statisticType"
+              ],
+              "mismatchedFacets": [
+                {
+                  "facet": "measuredProperty",
+                  "values": [
+                    "consumption",
+                    "generation"
+                  ]
+                }
+              ],
+              "subsumptionRatio": 0,
+              "partialSpecificity": 5,
+              "semanticPartial": {
+                "measuredProperty": "consumption",
+                "domainObject": "natural gas",
+                "statisticType": "flow",
+                "aggregation": "sum",
+                "unitFamily": "energy"
+              }
+            },
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WM9HP0NBCS5J38GJYT",
+              "label": "Battery discharge",
+              "matchedFacets": [
+                "measuredProperty",
+                "statisticType"
+              ],
+              "mismatchedFacets": [
+                {
+                  "facet": "domainObject",
+                  "values": [
+                    "battery storage",
+                    "natural gas"
+                  ]
+                },
+                {
+                  "facet": "technologyOrFuel",
+                  "values": [
+                    "battery",
+                    "solar PV"
+                  ]
+                }
+              ],
+              "subsumptionRatio": 0,
+              "partialSpecificity": 6,
+              "semanticPartial": {
+                "measuredProperty": "generation",
+                "domainObject": "battery storage",
+                "technologyOrFuel": "battery",
+                "statisticType": "flow",
+                "aggregation": "sum",
+                "unitFamily": "energy"
+              }
+            },
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+              "label": "Coal electricity generation",
+              "matchedFacets": [
+                "measuredProperty",
+                "statisticType"
+              ],
+              "mismatchedFacets": [
+                {
+                  "facet": "domainObject",
+                  "values": [
+                    "electricity",
+                    "natural gas"
+                  ]
+                },
+                {
+                  "facet": "technologyOrFuel",
+                  "values": [
+                    "coal",
+                    "solar PV"
+                  ]
+                }
+              ],
+              "subsumptionRatio": 0,
+              "partialSpecificity": 6,
+              "semanticPartial": {
+                "measuredProperty": "generation",
+                "domainObject": "electricity",
+                "technologyOrFuel": "coal",
+                "statisticType": "flow",
+                "aggregation": "sum",
+                "unitFamily": "energy"
+              }
+            }
+          ],
+          "reason": "no-candidates",
+          "context": {
+            "attachedContext": {}
+          }
+        }
+      }
+    }
+  },
+  "checks": [
+    {
+      "kind": "outcome-tag",
+      "pass": false,
+      "expected": "Resolved",
+      "actual": "OutOfRegistry"
+    },
+    {
+      "kind": "variable-ids",
+      "pass": false,
+      "expected": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"
+      ],
+      "missing": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"
+      ],
+      "unexpected": []
+    },
+    {
+      "kind": "agent-scope",
+      "pass": false,
+      "expected": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+      "actual": null
+    }
+  ],
+  "hasFindings": true,
+  "error": null
+}

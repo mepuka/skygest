@@ -1,0 +1,542 @@
+{
+  "kind": "annotated",
+  "slug": "021-lightbucket-bsky-social",
+  "postUri": "at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhnvtgx52k2e",
+  "expected": {
+    "postUri": "at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhnvtgx52k2e",
+    "outcomeTag": "Resolved",
+    "expectedVariableIds": [
+      "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG"
+    ],
+    "notes": "seed 021-lightbucket: per capita natural gas EU"
+  },
+  "selectedBundle": {
+    "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem",
+    "actual": {
+      "outcomeTag": "Ambiguous",
+      "boundVariableIds": [],
+      "candidateVariableIds": [],
+      "gapReason": "required-facet-conflict",
+      "matchedFacetCounts": [],
+      "agentId": null,
+      "confidence": null,
+      "tier": "weak-heuristic"
+    },
+    "trace": {
+      "bundle": {
+        "postUri": "at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhnvtgx52k2e",
+        "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem",
+        "postText": [
+          "Per capita natural gas consumption in the E.U. nations and the U.K.\n\nThe Netherlands, Belgium and Italy have the highest per capita gas consumption,\nCyprus, Sweden and Finland the lowest.\n\nThe UK is seventh in this grouping.\n\n⸻\nRef: Our World In Data ourworldindata.org/grapher/per-..."
+        ],
+        "chartTitle": "Per capita gas consumption, 2024",
+        "xAxis": {
+          "label": "Average natural gas consumption per capita",
+          "unit": "kilowatt-hours per person"
+        },
+        "yAxis": {
+          "label": null,
+          "unit": null
+        },
+        "series": [
+          {
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0",
+            "legendLabel": "Average natural gas consumption per capita",
+            "unit": "kWh"
+          }
+        ],
+        "keyFindings": [
+          "The Netherlands had the highest average natural gas consumption per capita in 2024 at 14,342 kWh, approximately 27% higher than second-ranked Belgium.",
+          "Major European economies like Italy (9,930 kWh), Germany (9,293 kWh), and the United Kingdom (8,947 kWh) are among the top consumers per capita.",
+          "There is a stark contrast in gas reliance across the continent; Nordic countries like Finland (2,254 kWh) and Sweden (896 kWh) use significantly less gas per person than Western European nations.",
+          "Cyprus recorded zero natural gas consumption per capita for the year 2024."
+        ],
+        "sourceLines": [
+          {
+            "sourceText": "Energy Institute - Statistical Review of World Energy (2025)",
+            "datasetName": "Statistical Review of World Energy"
+          },
+          {
+            "sourceText": "Population based on various sources (2024)"
+          }
+        ],
+        "publisherHints": [
+          {
+            "label": "Our World in Data",
+            "confidence": 0.5
+          },
+          {
+            "label": "Energy Institute",
+            "confidence": 0.5
+          }
+        ],
+        "temporalCoverage": {
+          "startDate": "2024",
+          "endDate": "2024"
+        }
+      },
+      "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem",
+      "agentId": null,
+      "interpreted": {
+        "_tag": "Hypothesis",
+        "bundle": {
+          "postUri": "at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhnvtgx52k2e",
+          "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem",
+          "postText": [
+            "Per capita natural gas consumption in the E.U. nations and the U.K.\n\nThe Netherlands, Belgium and Italy have the highest per capita gas consumption,\nCyprus, Sweden and Finland the lowest.\n\nThe UK is seventh in this grouping.\n\n⸻\nRef: Our World In Data ourworldindata.org/grapher/per-..."
+          ],
+          "chartTitle": "Per capita gas consumption, 2024",
+          "xAxis": {
+            "label": "Average natural gas consumption per capita",
+            "unit": "kilowatt-hours per person"
+          },
+          "yAxis": {
+            "label": null,
+            "unit": null
+          },
+          "series": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0",
+              "legendLabel": "Average natural gas consumption per capita",
+              "unit": "kWh"
+            }
+          ],
+          "keyFindings": [
+            "The Netherlands had the highest average natural gas consumption per capita in 2024 at 14,342 kWh, approximately 27% higher than second-ranked Belgium.",
+            "Major European economies like Italy (9,930 kWh), Germany (9,293 kWh), and the United Kingdom (8,947 kWh) are among the top consumers per capita.",
+            "There is a stark contrast in gas reliance across the continent; Nordic countries like Finland (2,254 kWh) and Sweden (896 kWh) use significantly less gas per person than Western European nations.",
+            "Cyprus recorded zero natural gas consumption per capita for the year 2024."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Energy Institute - Statistical Review of World Energy (2025)",
+              "datasetName": "Statistical Review of World Energy"
+            },
+            {
+              "sourceText": "Population based on various sources (2024)"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "Our World in Data",
+              "confidence": 0.5
+            },
+            {
+              "label": "Energy Institute",
+              "confidence": 0.5
+            }
+          ],
+          "temporalCoverage": {
+            "startDate": "2024",
+            "endDate": "2024"
+          }
+        },
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "consumption",
+            "domainObject": "natural gas",
+            "technologyOrFuel": "natural gas",
+            "unitFamily": "power",
+            "aggregation": "max"
+          },
+          "attachedContext": {
+            "time": {
+              "start": "2024",
+              "end": "2024"
+            }
+          },
+          "items": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0",
+              "partial": {
+                "measuredProperty": "consumption",
+                "domainObject": "natural gas",
+                "technologyOrFuel": "natural gas",
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Average natural gas consumption per capita",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+                },
+                {
+                  "source": "series-label",
+                  "text": "kWh",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+                }
+              ]
+            }
+          ],
+          "evidence": [
+            {
+              "source": "x-axis",
+              "text": "Average natural gas consumption per capita"
+            },
+            {
+              "source": "x-axis",
+              "text": "kilowatt-hours per person"
+            },
+            {
+              "source": "chart-title",
+              "text": "Per capita gas consumption, 2024"
+            },
+            {
+              "source": "key-finding",
+              "text": "There is a stark contrast in gas reliance across the continent"
+            },
+            {
+              "source": "key-finding",
+              "text": "Cyprus recorded zero natural gas consumption per capita for the year 2024."
+            },
+            {
+              "source": "post-text",
+              "text": "Per capita natural gas consumption in the E.U. nations"
+            },
+            {
+              "source": "post-text",
+              "text": "Italy have the highest per capita gas consumption,"
+            },
+            {
+              "source": "series-label",
+              "text": "Average natural gas consumption per capita",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+            },
+            {
+              "source": "series-label",
+              "text": "kWh",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+            }
+          ],
+          "tier": "weak-heuristic"
+        }
+      },
+      "bound": {
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "consumption",
+            "domainObject": "natural gas",
+            "technologyOrFuel": "natural gas",
+            "unitFamily": "power",
+            "aggregation": "max"
+          },
+          "attachedContext": {
+            "time": {
+              "start": "2024",
+              "end": "2024"
+            }
+          },
+          "items": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0",
+              "partial": {
+                "measuredProperty": "consumption",
+                "domainObject": "natural gas",
+                "technologyOrFuel": "natural gas",
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Average natural gas consumption per capita",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+                },
+                {
+                  "source": "series-label",
+                  "text": "kWh",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+                }
+              ]
+            }
+          ],
+          "evidence": [
+            {
+              "source": "x-axis",
+              "text": "Average natural gas consumption per capita"
+            },
+            {
+              "source": "x-axis",
+              "text": "kilowatt-hours per person"
+            },
+            {
+              "source": "chart-title",
+              "text": "Per capita gas consumption, 2024"
+            },
+            {
+              "source": "key-finding",
+              "text": "There is a stark contrast in gas reliance across the continent"
+            },
+            {
+              "source": "key-finding",
+              "text": "Cyprus recorded zero natural gas consumption per capita for the year 2024."
+            },
+            {
+              "source": "post-text",
+              "text": "Per capita natural gas consumption in the E.U. nations"
+            },
+            {
+              "source": "post-text",
+              "text": "Italy have the highest per capita gas consumption,"
+            },
+            {
+              "source": "series-label",
+              "text": "Average natural gas consumption per capita",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+            },
+            {
+              "source": "series-label",
+              "text": "kWh",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+            }
+          ],
+          "tier": "weak-heuristic"
+        },
+        "items": [
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0",
+            "semanticPartial": {
+              "measuredProperty": "consumption",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "natural gas",
+              "unitFamily": "power",
+              "aggregation": "max"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2024",
+                "end": "2024"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Average natural gas consumption per capita",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+              },
+              {
+                "source": "series-label",
+                "text": "kWh",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          }
+        ]
+      },
+      "outcome": {
+        "_tag": "Ambiguous",
+        "bundle": {
+          "postUri": "at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhnvtgx52k2e",
+          "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem",
+          "postText": [
+            "Per capita natural gas consumption in the E.U. nations and the U.K.\n\nThe Netherlands, Belgium and Italy have the highest per capita gas consumption,\nCyprus, Sweden and Finland the lowest.\n\nThe UK is seventh in this grouping.\n\n⸻\nRef: Our World In Data ourworldindata.org/grapher/per-..."
+          ],
+          "chartTitle": "Per capita gas consumption, 2024",
+          "xAxis": {
+            "label": "Average natural gas consumption per capita",
+            "unit": "kilowatt-hours per person"
+          },
+          "yAxis": {
+            "label": null,
+            "unit": null
+          },
+          "series": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0",
+              "legendLabel": "Average natural gas consumption per capita",
+              "unit": "kWh"
+            }
+          ],
+          "keyFindings": [
+            "The Netherlands had the highest average natural gas consumption per capita in 2024 at 14,342 kWh, approximately 27% higher than second-ranked Belgium.",
+            "Major European economies like Italy (9,930 kWh), Germany (9,293 kWh), and the United Kingdom (8,947 kWh) are among the top consumers per capita.",
+            "There is a stark contrast in gas reliance across the continent; Nordic countries like Finland (2,254 kWh) and Sweden (896 kWh) use significantly less gas per person than Western European nations.",
+            "Cyprus recorded zero natural gas consumption per capita for the year 2024."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Energy Institute - Statistical Review of World Energy (2025)",
+              "datasetName": "Statistical Review of World Energy"
+            },
+            {
+              "sourceText": "Population based on various sources (2024)"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "Our World in Data",
+              "confidence": 0.5
+            },
+            {
+              "label": "Energy Institute",
+              "confidence": 0.5
+            }
+          ],
+          "temporalCoverage": {
+            "startDate": "2024",
+            "endDate": "2024"
+          }
+        },
+        "hypotheses": [
+          {
+            "sharedPartial": {
+              "measuredProperty": "consumption",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "natural gas",
+              "unitFamily": "power",
+              "aggregation": "max"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2024",
+                "end": "2024"
+              }
+            },
+            "items": [
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0",
+                "partial": {
+                  "measuredProperty": "consumption",
+                  "domainObject": "natural gas",
+                  "technologyOrFuel": "natural gas",
+                  "unitFamily": "energy"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Average natural gas consumption per capita",
+                    "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+                  },
+                  {
+                    "source": "series-label",
+                    "text": "kWh",
+                    "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+                  }
+                ]
+              }
+            ],
+            "evidence": [
+              {
+                "source": "x-axis",
+                "text": "Average natural gas consumption per capita"
+              },
+              {
+                "source": "x-axis",
+                "text": "kilowatt-hours per person"
+              },
+              {
+                "source": "chart-title",
+                "text": "Per capita gas consumption, 2024"
+              },
+              {
+                "source": "key-finding",
+                "text": "There is a stark contrast in gas reliance across the continent"
+              },
+              {
+                "source": "key-finding",
+                "text": "Cyprus recorded zero natural gas consumption per capita for the year 2024."
+              },
+              {
+                "source": "post-text",
+                "text": "Per capita natural gas consumption in the E.U. nations"
+              },
+              {
+                "source": "post-text",
+                "text": "Italy have the highest per capita gas consumption,"
+              },
+              {
+                "source": "series-label",
+                "text": "Average natural gas consumption per capita",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+              },
+              {
+                "source": "series-label",
+                "text": "kWh",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+              }
+            ],
+            "tier": "weak-heuristic"
+          }
+        ],
+        "items": [
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0",
+            "semanticPartial": {
+              "measuredProperty": "consumption",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "natural gas",
+              "unitFamily": "power",
+              "aggregation": "max"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2024",
+                "end": "2024"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Average natural gas consumption per capita",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+              },
+              {
+                "source": "series-label",
+                "text": "kWh",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreiewqts4jhzqec4rlfcv4htyvirogfdnmsyhpuy7a3kuibpixitwem:series:0"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          }
+        ],
+        "gaps": [
+          {
+            "partial": {
+              "measuredProperty": "consumption",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "natural gas",
+              "unitFamily": "power",
+              "aggregation": "max"
+            },
+            "candidates": [],
+            "reason": "required-facet-conflict",
+            "context": {
+              "attachedContext": {
+                "time": {
+                  "start": "2024",
+                  "end": "2024"
+                }
+              }
+            }
+          }
+        ],
+        "tier": "weak-heuristic"
+      }
+    }
+  },
+  "checks": [
+    {
+      "kind": "outcome-tag",
+      "pass": false,
+      "expected": "Resolved",
+      "actual": "Ambiguous"
+    },
+    {
+      "kind": "variable-ids",
+      "pass": false,
+      "expected": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG"
+      ],
+      "missing": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG"
+      ],
+      "unexpected": []
+    }
+  ],
+  "hasFindings": true,
+  "error": null
+}
