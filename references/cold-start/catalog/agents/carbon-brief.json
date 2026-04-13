@@ -3,7 +3,10 @@
   "id": "https://id.skygest.io/agent/ag_01KNR1N2T77SZEH0K9ZFWKNSR1",
   "kind": "organization",
   "name": "Carbon Brief",
-  "alternateNames": [],
+  "alternateNames": [
+    "CarbonBrief",
+    "Carbon Brief analysis"
+  ],
   "homepage": "https://www.carbonbrief.org",
   "aliases": [
     {

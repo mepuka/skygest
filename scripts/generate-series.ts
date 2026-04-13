@@ -50,6 +50,10 @@ interface SeriesDef {
   market?: string;
   frequency?: string;
   extra?: Record<string, string>;
+  // Inline dataset linkage for net-new series (SKY-323+).
+  // The SKY-317 backfill manifest remains the source of truth for
+  // retroactive backfills derived from candidate evidence.
+  datasetId?: string;
 }
 
 const SERIES: SeriesDef[] = [
@@ -101,6 +105,15 @@ const SERIES: SeriesDef[] = [
 
   // Global generation
   { slug: "global-electricity-generation-annual", label: "Global electricity generation (annual)", variableSlug: "electricity-generation", place: "GLOBAL", frequency: "annual" },
+
+  // SKY-323 — series pinned to existing programmatically-ingested datasets
+  // Fraunhofer ISE / Energy-Charts (public_power endpoint, CC-BY-4.0)
+  { slug: "de-public-electricity-generation-daily", label: "Germany public net electricity generation (daily)", variableSlug: "electricity-generation", place: "DE", frequency: "daily", datasetId: "https://id.skygest.io/dataset/ds_01KNWVQMFJY7ACRKH6WTJM07HD" },
+  { slug: "eu-public-electricity-generation-quarterly", label: "EU-27 public electricity generation (quarterly)", variableSlug: "electricity-generation", place: "EU", frequency: "quarterly", datasetId: "https://id.skygest.io/dataset/ds_01KNWVQMFJY7ACRKH6WTJM07HD" },
+  // Ember Türkiye electricity generation by fuel
+  { slug: "tr-electricity-generation-by-fuel-annual", label: "Turkey electricity generation by fuel (annual)", variableSlug: "electricity-generation", place: "TR", frequency: "annual", datasetId: "https://id.skygest.io/dataset/ds_01KNQEZ5VN7VR6AYRJ5NCDMHTR" },
+  // IPCC AR6 WG3 Annex III
+  { slug: "global-energy-co2-emissions-ar6-annual", label: "Global energy-sector CO2 emissions (IPCC AR6 WG3)", variableSlug: "co2-emissions-from-energy", place: "GLOBAL", frequency: "annual", datasetId: "https://id.skygest.io/dataset/ds_01KNQXP4PM3HQBQ8F6MD4BMMJ7" },
 ];
 
 mkdirSync(ROOT, { recursive: true });
@@ -124,7 +137,8 @@ for (const s of SERIES) {
   if (s.frequency) fixedDims.frequency = s.frequency;
   if (s.extra) fixedDims.extra = s.extra;
 
-  const datasetId = backfillManifest.explicit[s.slug]?.datasetId;
+  const datasetId =
+    s.datasetId ?? backfillManifest.explicit[s.slug]?.datasetId;
   const out: Record<string, unknown> = {
     _tag: "Series",
     id,
