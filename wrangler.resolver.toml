@@ -6,11 +6,6 @@ compatibility_date = "2026-04-11"
 [observability]
 enabled = true
 
-[[workflows]]
-name = "resolver-run"
-binding = "RESOLVER_RUN_WORKFLOW"
-class_name = "DataRefResolverWorkflow"
-
 [[d1_databases]]
 binding = "DB"
 database_name = "skygest"
@@ -21,11 +16,6 @@ name = "skygest-resolver-staging"
 
 [env.staging.observability]
 enabled = true
-
-[[env.staging.workflows]]
-name = "resolver-run"
-binding = "RESOLVER_RUN_WORKFLOW"
-class_name = "DataRefResolverWorkflow"
 
 [[env.staging.d1_databases]]
 binding = "DB"

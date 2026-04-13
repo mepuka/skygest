@@ -68,12 +68,10 @@ declare namespace WorkerConfiguration {
 
   interface ResolverStagingEnv {
   	DB: D1Database;
-  	RESOLVER_RUN_WORKFLOW: Workflow<Parameters<import("./src/resolver-worker/index").DataRefResolverWorkflow['run']>[0]['payload']>;
   }
 
   interface ResolverEnv {
   	DB: D1Database;
-  	RESOLVER_RUN_WORKFLOW: Workflow<Parameters<import("./src/resolver-worker/index").DataRefResolverWorkflow['run']>[0]['payload']>;
   }
 
 }

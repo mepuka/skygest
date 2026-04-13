@@ -239,7 +239,7 @@ export const classifyMissBucket = (
     return "stage1-ambiguity";
   }
 
-  if (result.residuals.some((residual) => residual._tag === "DeferredToStage2Residual")) {
+  if (result.residuals.some((residual) => residual._tag === "DeferredToKernelResidual")) {
     return "deferred-to-stage2";
   }
 

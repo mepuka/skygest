@@ -1,16 +1,4 @@
 import { Schema } from "effect";
-import { NonNegativeInt, PostUri } from "./types";
-
-export const Stage3JobId = Schema.String.pipe(
-  Schema.check(Schema.isMinLength(1))
-);
-export type Stage3JobId = Schema.Schema.Type<typeof Stage3JobId>;
-
-export const ResolveStage3Queued = Schema.Struct({
-  status: Schema.Literal("queued"),
-  jobId: Stage3JobId
-});
-export type ResolveStage3Queued = Schema.Schema.Type<typeof ResolveStage3Queued>;
 
 export const ResolverVersion = Schema.String.pipe(
   Schema.check(Schema.isMinLength(1))
@@ -24,13 +12,4 @@ export const ResolverBulkItemError = Schema.Struct({
 });
 export type ResolverBulkItemError = Schema.Schema.Type<
   typeof ResolverBulkItemError
->;
-
-export const DataRefResolverWorkflowResult = Schema.Struct({
-  postUri: PostUri,
-  residualCount: NonNegativeInt,
-  status: Schema.Literal("not-implemented")
-});
-export type DataRefResolverWorkflowResult = Schema.Schema.Type<
-  typeof DataRefResolverWorkflowResult
 >;

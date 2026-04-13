@@ -5,6 +5,18 @@ import { ResolverClientError } from "../src/domain/errors";
 import { PostUri } from "../src/domain/types";
 
 const asPostUri = Schema.decodeUnknownSync(PostUri);
+const makeKernelOutcome = (postUri: string) => ({
+  _tag: "NoMatch" as const,
+  bundle: {
+    postUri,
+    postText: ["ERCOT annual load"],
+    series: [],
+    keyFindings: [],
+    sourceLines: [],
+    publisherHints: []
+  },
+  reason: "no checked-in registry match"
+});
 
 describe("ResolverClient", () => {
   it.effect("forwards request correlation and decodes the resolver response", () => {
@@ -25,30 +37,11 @@ describe("ResolverClient", () => {
             matches: [],
             residuals: []
           },
-          stage2: {
-            matches: [],
-            corroborations: [],
-            escalations: [
-              {
-                _tag: "Stage3Input",
-                postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
-                originalResidual: {
-                  _tag: "DeferredToStage2Residual",
-                  source: "post-text",
-                  text: "ERCOT annual load",
-                  reason: "needs stage 2"
-                },
-                stage2Lane: "pending",
-                candidateSet: [],
-                matchedSurfaceForms: [],
-                unmatchedSurfaceForms: [],
-                reason: "Stage 2 kernel not yet executed"
-              }
-            ]
-          },
-          resolverVersion: "stage1-resolver@sky-238",
+          kernel: [makeKernelOutcome("at://did:plc:abc/app.bsky.feed.post/xyz")],
+          resolverVersion: "resolution-kernel@sky-314",
           latencyMs: {
             stage1: 2,
+            kernel: 1,
             total: 3
             }
           }
@@ -64,25 +57,23 @@ describe("ResolverClient", () => {
       const client = yield* ResolverClient;
       const result = yield* client.resolvePost(
         {
-          postUri: asPostUri("at://did:plc:abc/app.bsky.feed.post/xyz"),
-          dispatchStage3: false
+          postUri: asPostUri("at://did:plc:abc/app.bsky.feed.post/xyz")
         },
         {
           requestId: "req-123"
         }
       );
 
-      expect(result.resolverVersion).toBe("stage1-resolver@sky-238");
+      expect(result.resolverVersion).toBe("resolution-kernel@sky-314");
       expect(result.stage1.matches).toEqual([]);
-      expect(result.stage2?.escalations).toHaveLength(1);
-      expect(result.stage3).toBeUndefined();
+      expect(result.kernel).toHaveLength(1);
+      expect(result.kernel[0]?._tag).toBe("NoMatch");
       expect(capturedOptions).toEqual({
         requestId: "req-123",
         [RESOLVER_REQUEST_ID_HEADER]: "req-123"
       });
       expect(capturedInput).toEqual({
-        postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
-        dispatchStage3: false
+        postUri: "at://did:plc:abc/app.bsky.feed.post/xyz"
       });
     }).pipe(Effect.provide(layer));
   });
@@ -99,14 +90,15 @@ describe("ResolverClient", () => {
                 matches: [],
                 residuals: []
               },
-              stage2: {
-                matches: [],
-                corroborations: [],
-                escalations: []
-              },
-              resolverVersion: "stage1-resolver@sky-238",
+              kernel: [
+                makeKernelOutcome(
+                  "at://did:plc:abc/app.bsky.feed.post/xyz"
+                )
+              ],
+              resolverVersion: "resolution-kernel@sky-314",
               latencyMs: {
                 stage1: 2,
+                kernel: 1,
                 total: 3
               }
             }

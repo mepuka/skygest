@@ -32,11 +32,10 @@ import {
   VisionSourceLineAttribution
 } from "./sourceMatching";
 import {
-  ResolverVersion,
-  ResolveStage3Queued
+  ResolverVersion
 } from "./resolutionShared";
 import { Stage1Result } from "./stage1Resolution";
-import { Stage2Result } from "./stage2Resolution";
+import { ResolutionOutcome } from "./resolutionKernel";
 
 const DeferredStage1Result = Schema.suspend(() => Stage1Result);
 
@@ -275,19 +274,13 @@ export const GroundingEnrichment = Schema.Struct({
 export type GroundingEnrichment = Schema.Schema.Type<typeof GroundingEnrichment>;
 
 // ---------------------------------------------------------------------------
-// Data-ref resolution enrichment (SKY-238: persisted Stage 1 resolver result)
+// Data-ref resolution enrichment (SKY-314: persisted Stage 1 + kernel result)
 // ---------------------------------------------------------------------------
-
-export const DataRefResolutionStage3 = ResolveStage3Queued;
-export type DataRefResolutionStage3 = Schema.Schema.Type<
-  typeof DataRefResolutionStage3
->;
 
 export const DataRefResolutionEnrichment = Schema.Struct({
   kind: Schema.Literal("data-ref-resolution"),
   stage1: DeferredStage1Result,
-  stage2: Schema.optionalKey(Stage2Result),
-  stage3: Schema.optionalKey(DataRefResolutionStage3),
+  kernel: Schema.Array(ResolutionOutcome),
   resolverVersion: ResolverVersion,
   processedAt: Schema.Number
 });

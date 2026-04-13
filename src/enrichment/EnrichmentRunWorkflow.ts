@@ -407,9 +407,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
                     stage1Input: buildStage1Input(
                       plan,
                       enrichment as SourceAttributionEnrichment
-                    ),
-                    dispatchStage3:
-                      config.enableStagingOps && run.triggeredBy === "admin"
+                    )
                   },
                   {
                     requestId: run.id
@@ -439,12 +437,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
             Schema.decodeUnknownEffect(DataRefResolutionEnrichment)({
               kind: "data-ref-resolution",
               stage1: resolverResponse.stage1,
-              ...(resolverResponse.stage2 === undefined
-                ? {}
-                : { stage2: resolverResponse.stage2 }),
-              ...(resolverResponse.stage3 === undefined
-                ? {}
-                : { stage3: resolverResponse.stage3 }),
+              kernel: resolverResponse.kernel,
               resolverVersion: resolverResponse.resolverVersion,
               processedAt: resolverWrittenAt
             }).pipe(

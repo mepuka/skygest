@@ -897,12 +897,21 @@ export const formatEnrichments = (
         case "data-ref-resolution": {
           const matchCount = e.payload.stage1.matches.length;
           const residualCount = e.payload.stage1.residuals.length;
-          const stage3 =
-            e.payload.stage3 === undefined
-              ? "no stage3"
-              : `stage3 ${e.payload.stage3.status}`;
+          const outcomeCounts = new Map<string, number>();
+          for (const outcome of e.payload.kernel) {
+            outcomeCounts.set(
+              outcome._tag,
+              (outcomeCounts.get(outcome._tag) ?? 0) + 1
+            );
+          }
+          const outcomeSummary =
+            outcomeCounts.size === 0
+              ? "0 outcomes"
+              : Array.from(outcomeCounts.entries())
+                  .map(([tag, count]) => `${count} ${tag}`)
+                  .join(", ");
           lines.push(
-            `[R] data-ref-resolution \u00B7 ${matchCount} match${matchCount !== 1 ? "es" : ""} \u00B7 ${residualCount} residual${residualCount !== 1 ? "s" : ""} \u00B7 ${stage3} \u00B7 ${date}`
+            `[R] data-ref-resolution \u00B7 ${matchCount} match${matchCount !== 1 ? "es" : ""} \u00B7 ${residualCount} residual${residualCount !== 1 ? "s" : ""} \u00B7 ${outcomeSummary} \u00B7 ${date}`
           );
           break;
         }

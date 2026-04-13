@@ -1,7 +1,6 @@
 import { Array, ServiceMap, Effect, Layer, Option, Schema } from "effect";
 import type { EnrichmentRunParams } from "../domain/enrichmentRun";
 import type { IngestRunParams } from "../domain/polling";
-import type { DataRefResolverRunParams } from "../domain/resolution";
 import type { ResolverBinding } from "../resolver/Client";
 import type { EnrichmentTriggerBinding } from "../services/EnrichmentTriggerClient";
 
@@ -33,7 +32,6 @@ interface SharedRuntimeEnv {
 
 type IngestWorkflowBinding = Workflow<IngestRunParams>;
 type EnrichmentWorkflowBinding = Workflow<EnrichmentRunParams>;
-type ResolverWorkflowBinding = Workflow<DataRefResolverRunParams>;
 type ExpertPollCoordinatorNamespace = DurableObjectNamespace;
 type IngestServiceBinding = EnrichmentTriggerBinding & Fetcher;
 
@@ -44,7 +42,6 @@ export type EnvBindings = Simplify<
       readonly RESOLVER?: ResolverBinding;
       readonly INGEST_RUN_WORKFLOW?: IngestWorkflowBinding;
       readonly ENRICHMENT_RUN_WORKFLOW?: EnrichmentWorkflowBinding;
-      readonly RESOLVER_RUN_WORKFLOW?: ResolverWorkflowBinding;
       readonly EXPERT_POLL_COORDINATOR?: ExpertPollCoordinatorNamespace;
     }
 >;
@@ -71,11 +68,7 @@ export type WorkflowEnrichmentEnvBindings =
   >;
 
 export type ResolverWorkerEnvBindings =
-  Simplify<
-    EnvBindings & {
-      readonly RESOLVER_RUN_WORKFLOW: ResolverWorkflowBinding;
-    }
-  >;
+  Simplify<EnvBindings>;
 
 export type WorkflowFilterEnvBindings =
   Simplify<

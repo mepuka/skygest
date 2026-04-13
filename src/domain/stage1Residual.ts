@@ -58,8 +58,8 @@ export type AmbiguousCandidatesResidual = Schema.Schema.Type<
   typeof AmbiguousCandidatesResidual
 >;
 
-export const DeferredToStage2Residual = Schema.TaggedStruct(
-  "DeferredToStage2Residual",
+export const DeferredToKernelResidual = Schema.TaggedStruct(
+  "DeferredToKernelResidual",
   {
     source: MatchTextSource,
     text: Schema.String,
@@ -67,8 +67,8 @@ export const DeferredToStage2Residual = Schema.TaggedStruct(
     assetKey: Schema.optionalKey(Schema.String)
   }
 );
-export type DeferredToStage2Residual = Schema.Schema.Type<
-  typeof DeferredToStage2Residual
+export type DeferredToKernelResidual = Schema.Schema.Type<
+  typeof DeferredToKernelResidual
 >;
 
 export const Stage1Residual = Schema.Union([
@@ -76,6 +76,6 @@ export const Stage1Residual = Schema.Union([
   UnmatchedDatasetTitleResidual,
   UnmatchedTextResidual,
   AmbiguousCandidatesResidual,
-  DeferredToStage2Residual
+  DeferredToKernelResidual
 ]);
 export type Stage1Residual = Schema.Schema.Type<typeof Stage1Residual>;

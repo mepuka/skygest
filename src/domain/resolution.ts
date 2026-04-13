@@ -1,42 +1,33 @@
 import { Schema } from "effect";
 import { Stage1Input, Stage1Result } from "./stage1Resolution";
+import { ResolutionOutcome } from "./resolutionKernel";
 import {
-  DataRefResolverWorkflowResult,
   ResolverBulkItemError,
-  ResolverVersion,
-  ResolveStage3Queued
+  ResolverVersion
 } from "./resolutionShared";
-import { Stage2Result, Stage3Input } from "./stage2Resolution";
 import { PostUri } from "./types";
 
 const isNonEmptyResolvePostList = (
   posts: ReadonlyArray<ResolvePostRequest>
 ): boolean => posts.length > 0;
 
-export const ResolveStage3Result = ResolveStage3Queued;
-export type ResolveStage3Result = Schema.Schema.Type<typeof ResolveStage3Result>;
-
 export const ResolveLatencyMs = Schema.Struct({
   stage1: Schema.Number.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
-  stage2: Schema.optionalKey(
-    Schema.Number.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
-  ),
+  kernel: Schema.Number.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   total: Schema.Number.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
 });
 export type ResolveLatencyMs = Schema.Schema.Type<typeof ResolveLatencyMs>;
 
 export const ResolvePostRequest = Schema.Struct({
   postUri: PostUri,
-  stage1Input: Schema.optionalKey(Stage1Input),
-  dispatchStage3: Schema.optionalKey(Schema.Boolean)
+  stage1Input: Schema.optionalKey(Stage1Input)
 });
 export type ResolvePostRequest = Schema.Schema.Type<typeof ResolvePostRequest>;
 
 export const ResolvePostResponse = Schema.Struct({
   postUri: PostUri,
   stage1: Stage1Result,
-  stage2: Schema.optionalKey(Stage2Result),
-  stage3: Schema.optionalKey(ResolveStage3Result),
+  kernel: Schema.Array(ResolutionOutcome),
   resolverVersion: ResolverVersion,
   latencyMs: ResolveLatencyMs
 });
@@ -55,16 +46,7 @@ export const ResolveBulkResponse = Schema.Struct({
 });
 export type ResolveBulkResponse = Schema.Schema.Type<typeof ResolveBulkResponse>;
 
-export const DataRefResolverRunParams = Schema.Struct({
-  postUri: PostUri,
-  stage3Inputs: Schema.Array(Stage3Input)
-});
-export type DataRefResolverRunParams = Schema.Schema.Type<
-  typeof DataRefResolverRunParams
->;
-
 export {
-  DataRefResolverWorkflowResult,
   ResolverBulkItemError,
   ResolverVersion
 };
