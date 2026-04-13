@@ -1,3 +1,7 @@
+> **Archived 2026-04-13.** This plan predates the 2026-04-12 resolver cutover and describes an architecture that no longer matches `main`. See `docs/architecture/system-context.md`, `docs/architecture/product-alignment.md`, and `docs/plans/2026-04-13-product-loop-cleanup-and-ship.md` for the current story.
+
+---
+
 # Jetstream Ingestor Supervisor + Logging Design
 
 ## Goal

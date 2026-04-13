@@ -588,10 +588,6 @@ export const PostUriEnrichmentsPath = Schema.Struct({
 });
 export type PostUriEnrichmentsPath = Schema.Schema.Type<typeof PostUriEnrichmentsPath>;
 
-/** @deprecated Use PostUriThreadPath or PostUriEnrichmentsPath */
-export const PostUriPathParams = PostUriEnrichmentsPath;
-export type PostUriPathParams = PostUriEnrichmentsPath;
-
 export const IngestRunPathParams = Schema.Struct({
   id: DecodedId
 });
