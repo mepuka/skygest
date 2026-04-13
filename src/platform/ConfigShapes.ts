@@ -161,6 +161,10 @@ export const EntsoeIngestKeys = {
   ...ColdStartCommonKeys
 } as const;
 
+export const EnergyInstituteIngestKeys = {
+  ...ColdStartCommonKeys
+} as const;
+
 export const OdreIngestKeys = {
   ...ColdStartCommonKeys,
   baseUrl: Config.withDefault(
