@@ -434,6 +434,27 @@
     "addedAt": "2026-04-12T16:51:56.000Z"
   },
   {
+    "surfaceForm": "electricity production",
+    "normalizedSurfaceForm": "electricity production",
+    "canonical": "generation",
+    "provenance": "hand-curated",
+    "addedAt": "2026-04-13T00:00:00.000Z"
+  },
+  {
+    "surfaceForm": "Stromerzeugung",
+    "normalizedSurfaceForm": "stromerzeugung",
+    "canonical": "generation",
+    "provenance": "hand-curated",
+    "addedAt": "2026-04-13T00:00:00.000Z"
+  },
+  {
+    "surfaceForm": "Nettostromerzeugung",
+    "normalizedSurfaceForm": "nettostromerzeugung",
+    "canonical": "generation",
+    "provenance": "hand-curated",
+    "addedAt": "2026-04-13T00:00:00.000Z"
+  },
+  {
     "surfaceForm": "capex",
     "normalizedSurfaceForm": "capex",
     "canonical": "investment",
