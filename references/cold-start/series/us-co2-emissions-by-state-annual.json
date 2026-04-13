@@ -3,6 +3,7 @@
   "id": "https://id.skygest.io/series/ser_01KNQEZ5XABVZJXM3Y5TJHFJCP",
   "label": "U.S. CO2 emissions by state (annual)",
   "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHGV1ZECFSTCKW0B2R",
   "fixedDims": {
     "place": "US",
     "frequency": "annual",

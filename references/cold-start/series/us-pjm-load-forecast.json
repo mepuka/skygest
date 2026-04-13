@@ -3,6 +3,7 @@
   "id": "https://id.skygest.io/series/ser_01KNQEZ5XCNTATHE4Z9PNS9VZ7",
   "label": "PJM load forecast",
   "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRS8ZDD0YCERY6C64B",
   "fixedDims": {
     "place": "US-PJM",
     "market": "PJM",
