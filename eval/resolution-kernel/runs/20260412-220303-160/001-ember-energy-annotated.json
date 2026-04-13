@@ -1,0 +1,1178 @@
+{
+  "kind": "annotated",
+  "slug": "001-ember-energy",
+  "postUri": "x://1207638939277955072/status/2042135430498304378",
+  "expected": {
+    "postUri": "x://1207638939277955072/status/2042135430498304378",
+    "outcomeTag": "Resolved",
+    "expectedVariableIds": [
+      "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"
+    ],
+    "expectedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+    "notes": "seed 001-ember-energy: wind+solar generation record"
+  },
+  "selectedBundle": {
+    "assetKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg",
+    "actual": {
+      "outcomeTag": "Ambiguous",
+      "boundVariableIds": [],
+      "candidateVariableIds": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2"
+      ],
+      "gapReason": "required-facet-conflict",
+      "matchedFacetCounts": [
+        4
+      ],
+      "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+      "confidence": null,
+      "tier": "weak-heuristic"
+    },
+    "trace": {
+      "bundle": {
+        "postUri": "x://1207638939277955072/status/2042135430498304378",
+        "assetKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg",
+        "postText": [
+          "🚨 NEW | Wind and solar generated a RECORD 22% of #Türkiye’s electricity in 2025, limiting natural gas imports ☀️🌪️\n\nMeanwhile, coal remained the largest power source at 34%, with TWO-THIRDS coming from IMPORTS.\n\nhttps://t.co/qafGtO308W https://t.co/F4p5nxD7uy"
+        ],
+        "chartTitle": "Wind and solar reached 22% of Türkiye’s electricity mix, yet coal still remains dominant at 34%",
+        "xAxis": {
+          "label": null,
+          "unit": null
+        },
+        "yAxis": {
+          "label": "Share of electricity generation",
+          "unit": "%"
+        },
+        "series": [
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0",
+            "legendLabel": "Coal",
+            "unit": "%"
+          },
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1",
+            "legendLabel": "Gas",
+            "unit": "%"
+          },
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2",
+            "legendLabel": "Wind and solar",
+            "unit": "%"
+          },
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:3",
+            "legendLabel": "Hydro",
+            "unit": "%"
+          },
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4",
+            "legendLabel": "Other renewables",
+            "unit": "%"
+          },
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5",
+            "legendLabel": "Other fossil",
+            "unit": "%"
+          }
+        ],
+        "keyFindings": [
+          "Wind and solar generation in Türkiye has grown from near zero in 2000 to 22% of the electricity mix by 2025, now equaling natural gas.",
+          "Coal remains the dominant source of electricity generation at 34% in 2025, having maintained a relatively stable share above 25% for two decades.",
+          "Gas-fired generation has significantly decreased from a peak of nearly 50% in the late 2000s to 22% by 2025.",
+          "Hydroelectric power remains a major but volatile component of the mix, ending the period at approximately 16%."
+        ],
+        "sourceLines": [
+          {
+            "sourceText": "Source: EPİAŞ, TEİAŞ"
+          }
+        ],
+        "publisherHints": [
+          {
+            "label": "ember-energy.org",
+            "confidence": 0.7
+          },
+          {
+            "label": "EPİAŞ",
+            "confidence": 0.5
+          },
+          {
+            "label": "TEİAŞ",
+            "confidence": 0.5
+          },
+          {
+            "label": "EMBER",
+            "confidence": 0.5
+          }
+        ],
+        "temporalCoverage": {
+          "startDate": "2000",
+          "endDate": "2025"
+        }
+      },
+      "assetKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg",
+      "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+      "interpreted": {
+        "_tag": "Hypothesis",
+        "bundle": {
+          "postUri": "x://1207638939277955072/status/2042135430498304378",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg",
+          "postText": [
+            "🚨 NEW | Wind and solar generated a RECORD 22% of #Türkiye’s electricity in 2025, limiting natural gas imports ☀️🌪️\n\nMeanwhile, coal remained the largest power source at 34%, with TWO-THIRDS coming from IMPORTS.\n\nhttps://t.co/qafGtO308W https://t.co/F4p5nxD7uy"
+          ],
+          "chartTitle": "Wind and solar reached 22% of Türkiye’s electricity mix, yet coal still remains dominant at 34%",
+          "xAxis": {
+            "label": null,
+            "unit": null
+          },
+          "yAxis": {
+            "label": "Share of electricity generation",
+            "unit": "%"
+          },
+          "series": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0",
+              "legendLabel": "Coal",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1",
+              "legendLabel": "Gas",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2",
+              "legendLabel": "Wind and solar",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:3",
+              "legendLabel": "Hydro",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4",
+              "legendLabel": "Other renewables",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5",
+              "legendLabel": "Other fossil",
+              "unit": "%"
+            }
+          ],
+          "keyFindings": [
+            "Wind and solar generation in Türkiye has grown from near zero in 2000 to 22% of the electricity mix by 2025, now equaling natural gas.",
+            "Coal remains the dominant source of electricity generation at 34% in 2025, having maintained a relatively stable share above 25% for two decades.",
+            "Gas-fired generation has significantly decreased from a peak of nearly 50% in the late 2000s to 22% by 2025.",
+            "Hydroelectric power remains a major but volatile component of the mix, ending the period at approximately 16%."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Source: EPİAŞ, TEİAŞ"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "ember-energy.org",
+              "confidence": 0.7
+            },
+            {
+              "label": "EPİAŞ",
+              "confidence": 0.5
+            },
+            {
+              "label": "TEİAŞ",
+              "confidence": 0.5
+            },
+            {
+              "label": "EMBER",
+              "confidence": 0.5
+            }
+          ],
+          "temporalCoverage": {
+            "startDate": "2000",
+            "endDate": "2025"
+          }
+        },
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "generation",
+            "domainObject": "electricity",
+            "statisticType": "flow",
+            "technologyOrFuel": "wind"
+          },
+          "attachedContext": {
+            "time": {
+              "start": "2000",
+              "end": "2025"
+            }
+          },
+          "items": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0",
+              "partial": {
+                "technologyOrFuel": "coal"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Coal",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1",
+              "partial": {
+                "domainObject": "natural gas",
+                "technologyOrFuel": "natural gas"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Gas",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2",
+              "partial": {
+                "technologyOrFuel": "solar PV"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Wind and solar",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:3",
+              "partial": {},
+              "evidence": []
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4",
+              "partial": {
+                "technologyOrFuel": "renewable",
+                "unitFamily": "other"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Other renewables",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5",
+              "partial": {
+                "technologyOrFuel": "fossil fuel",
+                "unitFamily": "other"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Other fossil",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5"
+                }
+              ]
+            }
+          ],
+          "evidence": [
+            {
+              "source": "y-axis",
+              "text": "Share of electricity generation"
+            },
+            {
+              "source": "key-finding",
+              "text": "Wind"
+            },
+            {
+              "source": "post-text",
+              "text": "🚨 NEW | Wind"
+            },
+            {
+              "source": "series-label",
+              "text": "Coal",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0"
+            },
+            {
+              "source": "series-label",
+              "text": "Gas",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1"
+            },
+            {
+              "source": "series-label",
+              "text": "Wind and solar",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2"
+            },
+            {
+              "source": "series-label",
+              "text": "Other renewables",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4"
+            },
+            {
+              "source": "series-label",
+              "text": "Other fossil",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5"
+            }
+          ],
+          "tier": "weak-heuristic"
+        }
+      },
+      "bound": {
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "generation",
+            "domainObject": "electricity",
+            "statisticType": "flow",
+            "technologyOrFuel": "wind"
+          },
+          "attachedContext": {
+            "time": {
+              "start": "2000",
+              "end": "2025"
+            }
+          },
+          "items": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0",
+              "partial": {
+                "technologyOrFuel": "coal"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Coal",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1",
+              "partial": {
+                "domainObject": "natural gas",
+                "technologyOrFuel": "natural gas"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Gas",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2",
+              "partial": {
+                "technologyOrFuel": "solar PV"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Wind and solar",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:3",
+              "partial": {},
+              "evidence": []
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4",
+              "partial": {
+                "technologyOrFuel": "renewable",
+                "unitFamily": "other"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Other renewables",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5",
+              "partial": {
+                "technologyOrFuel": "fossil fuel",
+                "unitFamily": "other"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Other fossil",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5"
+                }
+              ]
+            }
+          ],
+          "evidence": [
+            {
+              "source": "y-axis",
+              "text": "Share of electricity generation"
+            },
+            {
+              "source": "key-finding",
+              "text": "Wind"
+            },
+            {
+              "source": "post-text",
+              "text": "🚨 NEW | Wind"
+            },
+            {
+              "source": "series-label",
+              "text": "Coal",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0"
+            },
+            {
+              "source": "series-label",
+              "text": "Gas",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1"
+            },
+            {
+              "source": "series-label",
+              "text": "Wind and solar",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2"
+            },
+            {
+              "source": "series-label",
+              "text": "Other renewables",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4"
+            },
+            {
+              "source": "series-label",
+              "text": "Other fossil",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5"
+            }
+          ],
+          "tier": "weak-heuristic"
+        },
+        "items": [
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2000",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Coal",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2000",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Gas",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2000",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Wind and solar",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:3",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2000",
+                "end": "2025"
+              }
+            },
+            "evidence": [],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+                "label": "Wind electricity generation",
+                "matchedFacets": [
+                  "measuredProperty",
+                  "domainObject",
+                  "technologyOrFuel",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.6666666666666666,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "wind",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "reason": "agent-scope-empty"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2000",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Other renewables",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2000",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Other fossil",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          }
+        ],
+        "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1"
+      },
+      "outcome": {
+        "_tag": "Ambiguous",
+        "bundle": {
+          "postUri": "x://1207638939277955072/status/2042135430498304378",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg",
+          "postText": [
+            "🚨 NEW | Wind and solar generated a RECORD 22% of #Türkiye’s electricity in 2025, limiting natural gas imports ☀️🌪️\n\nMeanwhile, coal remained the largest power source at 34%, with TWO-THIRDS coming from IMPORTS.\n\nhttps://t.co/qafGtO308W https://t.co/F4p5nxD7uy"
+          ],
+          "chartTitle": "Wind and solar reached 22% of Türkiye’s electricity mix, yet coal still remains dominant at 34%",
+          "xAxis": {
+            "label": null,
+            "unit": null
+          },
+          "yAxis": {
+            "label": "Share of electricity generation",
+            "unit": "%"
+          },
+          "series": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0",
+              "legendLabel": "Coal",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1",
+              "legendLabel": "Gas",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2",
+              "legendLabel": "Wind and solar",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:3",
+              "legendLabel": "Hydro",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4",
+              "legendLabel": "Other renewables",
+              "unit": "%"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5",
+              "legendLabel": "Other fossil",
+              "unit": "%"
+            }
+          ],
+          "keyFindings": [
+            "Wind and solar generation in Türkiye has grown from near zero in 2000 to 22% of the electricity mix by 2025, now equaling natural gas.",
+            "Coal remains the dominant source of electricity generation at 34% in 2025, having maintained a relatively stable share above 25% for two decades.",
+            "Gas-fired generation has significantly decreased from a peak of nearly 50% in the late 2000s to 22% by 2025.",
+            "Hydroelectric power remains a major but volatile component of the mix, ending the period at approximately 16%."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Source: EPİAŞ, TEİAŞ"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "ember-energy.org",
+              "confidence": 0.7
+            },
+            {
+              "label": "EPİAŞ",
+              "confidence": 0.5
+            },
+            {
+              "label": "TEİAŞ",
+              "confidence": 0.5
+            },
+            {
+              "label": "EMBER",
+              "confidence": 0.5
+            }
+          ],
+          "temporalCoverage": {
+            "startDate": "2000",
+            "endDate": "2025"
+          }
+        },
+        "hypotheses": [
+          {
+            "sharedPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2000",
+                "end": "2025"
+              }
+            },
+            "items": [
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0",
+                "partial": {
+                  "technologyOrFuel": "coal"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Coal",
+                    "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0"
+                  }
+                ]
+              },
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1",
+                "partial": {
+                  "domainObject": "natural gas",
+                  "technologyOrFuel": "natural gas"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Gas",
+                    "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1"
+                  }
+                ]
+              },
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2",
+                "partial": {
+                  "technologyOrFuel": "solar PV"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Wind and solar",
+                    "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2"
+                  }
+                ]
+              },
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:3",
+                "partial": {},
+                "evidence": []
+              },
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4",
+                "partial": {
+                  "technologyOrFuel": "renewable",
+                  "unitFamily": "other"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Other renewables",
+                    "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4"
+                  }
+                ]
+              },
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5",
+                "partial": {
+                  "technologyOrFuel": "fossil fuel",
+                  "unitFamily": "other"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Other fossil",
+                    "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5"
+                  }
+                ]
+              }
+            ],
+            "evidence": [
+              {
+                "source": "y-axis",
+                "text": "Share of electricity generation"
+              },
+              {
+                "source": "key-finding",
+                "text": "Wind"
+              },
+              {
+                "source": "post-text",
+                "text": "🚨 NEW | Wind"
+              },
+              {
+                "source": "series-label",
+                "text": "Coal",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0"
+              },
+              {
+                "source": "series-label",
+                "text": "Gas",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1"
+              },
+              {
+                "source": "series-label",
+                "text": "Wind and solar",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2"
+              },
+              {
+                "source": "series-label",
+                "text": "Other renewables",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4"
+              },
+              {
+                "source": "series-label",
+                "text": "Other fossil",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5"
+              }
+            ],
+            "tier": "weak-heuristic"
+          }
+        ],
+        "items": [
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2000",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Coal",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:0"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2000",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Gas",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:1"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2000",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Wind and solar",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:2"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:3",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2000",
+                "end": "2025"
+              }
+            },
+            "evidence": [],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+                "label": "Wind electricity generation",
+                "matchedFacets": [
+                  "measuredProperty",
+                  "domainObject",
+                  "technologyOrFuel",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.6666666666666666,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "wind",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "reason": "agent-scope-empty"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2000",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Other renewables",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:4"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2000",
+                "end": "2025"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Other fossil",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFcfWeoWMAAJsvE.jpg:series:5"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          }
+        ],
+        "gaps": [
+          {
+            "partial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "candidates": [],
+            "reason": "required-facet-conflict",
+            "context": {
+              "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+              "attachedContext": {
+                "time": {
+                  "start": "2000",
+                  "end": "2025"
+                }
+              }
+            }
+          },
+          {
+            "partial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "candidates": [],
+            "reason": "required-facet-conflict",
+            "context": {
+              "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+              "attachedContext": {
+                "time": {
+                  "start": "2000",
+                  "end": "2025"
+                }
+              }
+            }
+          },
+          {
+            "partial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "candidates": [],
+            "reason": "required-facet-conflict",
+            "context": {
+              "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+              "attachedContext": {
+                "time": {
+                  "start": "2000",
+                  "end": "2025"
+                }
+              }
+            }
+          },
+          {
+            "partial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+                "label": "Wind electricity generation",
+                "matchedFacets": [
+                  "measuredProperty",
+                  "domainObject",
+                  "technologyOrFuel",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.6666666666666666,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "wind",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "reason": "agent-scope-empty",
+            "context": {
+              "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+              "attachedContext": {
+                "time": {
+                  "start": "2000",
+                  "end": "2025"
+                }
+              }
+            }
+          },
+          {
+            "partial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "candidates": [],
+            "reason": "required-facet-conflict",
+            "context": {
+              "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+              "attachedContext": {
+                "time": {
+                  "start": "2000",
+                  "end": "2025"
+                }
+              }
+            }
+          },
+          {
+            "partial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "statisticType": "flow",
+              "technologyOrFuel": "wind"
+            },
+            "candidates": [],
+            "reason": "required-facet-conflict",
+            "context": {
+              "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+              "attachedContext": {
+                "time": {
+                  "start": "2000",
+                  "end": "2025"
+                }
+              }
+            }
+          }
+        ],
+        "tier": "weak-heuristic"
+      }
+    }
+  },
+  "checks": [
+    {
+      "kind": "outcome-tag",
+      "pass": false,
+      "expected": "Resolved",
+      "actual": "Ambiguous"
+    },
+    {
+      "kind": "variable-ids",
+      "pass": false,
+      "expected": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"
+      ],
+      "missing": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"
+      ],
+      "unexpected": []
+    },
+    {
+      "kind": "agent-scope",
+      "pass": true,
+      "expected": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+      "actual": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1"
+    }
+  ],
+  "hasFindings": true,
+  "error": null
+}

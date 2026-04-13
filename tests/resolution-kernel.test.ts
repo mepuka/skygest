@@ -17,6 +17,7 @@ import {
 import { prepareDataLayerRegistry, toDataLayerRegistryLookup } from "../src/resolution/dataLayerRegistry";
 import { FacetVocabulary } from "../src/resolution/facetVocabulary";
 import { bindHypothesis } from "../src/resolution/kernel/Bind";
+import { interpretBundle } from "../src/resolution/kernel/Interpret";
 import { resolveBundle } from "../src/resolution/kernel/ResolutionKernel";
 import { layer as localFileSystemLayer } from "./helpers/LocalFileSystem";
 
@@ -328,7 +329,7 @@ const customAmbiguousBundle = decodeBundle({
 });
 
 describe("resolveBundle", () => {
-  it.effect("keeps research trace Example 1 underspecified instead of falsely binding the heat-pump post", () =>
+  it.effect("refuses to bind the heat-pump post when only narrative evidence is present", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;
       const prepared = yield* loadCheckedInDataLayerRegistry(
@@ -336,6 +337,10 @@ describe("resolveBundle", () => {
       );
       const lookup = toDataLayerRegistryLookup(prepared);
 
+      // Post-text is narrative, not an identity witness for any chart. Under
+      // the identity/narrative split the kernel must decline to project the
+      // narrative tokens onto the shared partial, so the outcome is NoMatch
+      // (the strongest possible form of "does not falsely bind").
       const outcome = decodeOutcome(
         resolveBundle(
           decodeBundle({
@@ -350,16 +355,7 @@ describe("resolveBundle", () => {
         )
       );
 
-      expect(outcome._tag).toBe("Underspecified");
-      if (outcome._tag !== "Underspecified") {
-        return;
-      }
-
-      expect(outcome.missingRequired).toEqual(
-        expect.arrayContaining(["measuredProperty", "statisticType"])
-      );
-      expect(outcome.gap.reason).toBe("missing-required");
-      expect(outcome.gaps).toHaveLength(1);
+      expect(outcome._tag).toBe("NoMatch");
     }).pipe(
       Effect.provide(FacetVocabulary.layer),
       Effect.provide(localFileSystemLayer)
@@ -435,7 +431,71 @@ describe("resolveBundle", () => {
     15_000
   );
 
-  it.effect("keeps higher-precedence chart semantics when a publisher hint disagrees", () =>
+  it.effect("retracts shared-level facets when an item specifies them", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+      const prepared = yield* loadCheckedInDataLayerRegistry(
+        checkedInDataLayerRegistryRoot
+      );
+      const lookup = toDataLayerRegistryLookup(prepared);
+
+      // Shared partial (from chart title "Wind generation") carries
+      // technologyOrFuel=wind. The series label "Offshore wind" resolves to
+      // technologyOrFuel=offshore_wind, which conflicts with the shared value.
+      // Under the retraction join, the item is strictly more specific, so the
+      // shared value is retracted before the join and no conflict is produced.
+      const outcome = decodeOutcome(
+        resolveBundle(
+          decodeBundle({
+            postText: [],
+            chartTitle: "Wind generation",
+            series: [
+              {
+                itemKey: "offshore",
+                legendLabel: "Offshore wind",
+                unit: "GW"
+              }
+            ],
+            keyFindings: [],
+            sourceLines: [],
+            publisherHints: []
+          }),
+          lookup,
+          vocabulary
+        )
+      );
+
+      // Retraction must prevent the shared↔item join from failing, so the
+      // outcome cannot be Conflicted on this input, and no item gap can
+      // report required-facet-conflict.
+      expect(outcome._tag).not.toBe("Conflicted");
+
+      const items =
+        outcome._tag === "Resolved"
+          ? outcome.items
+          : outcome._tag === "Ambiguous"
+            ? outcome.items
+            : outcome._tag === "OutOfRegistry"
+              ? outcome.items
+              : [];
+      expect(items.length).toBeGreaterThan(0);
+      for (const item of items) {
+        if (item._tag === "gap") {
+          expect(item.reason).not.toBe("required-facet-conflict");
+        }
+      }
+      // The retracted shared partial (generation, flow) joined with the
+      // item partial (offshore wind, power) must yield a semantic partial
+      // carrying the more-specific technologyOrFuel value.
+      expect(items[0]?.semanticPartial.technologyOrFuel).toBe("offshore wind");
+    }).pipe(
+      Effect.provide(FacetVocabulary.layer),
+      Effect.provide(localFileSystemLayer)
+    ),
+    15_000
+  );
+
+  it.effect("ignores a disagreeing publisher hint because narrative sources do not project onto identity", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;
 
@@ -467,13 +527,55 @@ describe("resolveBundle", () => {
         return;
       }
 
-      expect(outcome.tier).toBe("strong-heuristic");
+      // Publisher hints are narrative and never touch the shared partial, so
+      // the fold never sees a conflict and the interpretation remains an
+      // entailment of the chart-title identity.
+      expect(outcome.tier).toBe("entailment");
       expect(outcome.items[0]?._tag).toBe("bound");
       if (outcome.items[0]?._tag !== "bound") {
         return;
       }
 
       expect(outcome.items[0].variableId).toBe(windVariableAId);
+    }).pipe(Effect.provide(FacetVocabulary.layer)),
+    15_000
+  );
+
+  it.effect("does not leak technologyOrFuel from key-findings into the shared partial", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+
+      // Mirrors the 005-klstone evidence bundle: chart title is generic
+      // electricity generation, but a key-finding mentions wind as the
+      // leading source. Under the identity/narrative split, `wind` is
+      // narrative and must not end up in the shared partial.
+      //
+      // We assert directly on the interpret step's hypothesis rather than
+      // going through resolveBundle so the invariant is tested unconditionally
+      // — otherwise a regression to Underspecified/Ambiguous/OutOfRegistry
+      // would silently skip the assertion in the previous Resolved-only guard.
+      const bundle = decodeBundle({
+        postText: [],
+        chartTitle: "Public net electricity generation in Germany",
+        series: [],
+        keyFindings: [
+          "Wind power was the leading source of generation, with Wind Onshore contributing 33.6%"
+        ],
+        sourceLines: [],
+        publisherHints: []
+      });
+
+      const interpreted = interpretBundle(bundle, vocabulary);
+
+      expect(interpreted._tag).toBe("Hypothesis");
+      if (interpreted._tag !== "Hypothesis") {
+        return;
+      }
+
+      expect(interpreted.hypothesis.sharedPartial.technologyOrFuel).toBeUndefined();
+      for (const item of interpreted.hypothesis.items) {
+        expect(item.partial.technologyOrFuel).toBeUndefined();
+      }
     }).pipe(Effect.provide(FacetVocabulary.layer)),
     15_000
   );
@@ -929,7 +1031,7 @@ describe("resolveBundle", () => {
     15_000
   );
 
-  it.effect("returns Conflicted with preserved conflict gaps when required evidence disagrees", () =>
+  it.effect("lets stronger-precedence evidence dominate a weaker-precedence required-facet conflict", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;
       const prepared = yield* loadCheckedInDataLayerRegistry(
@@ -937,6 +1039,12 @@ describe("resolveBundle", () => {
       );
       const lookup = toDataLayerRegistryLookup(prepared);
 
+      // y-axis (precedence 2) fires first with measuredProperty=capacity, while
+      // chart-title (precedence 3) would emit measuredProperty=generation. Under
+      // the evidence-precedence rule the weaker chart-title assignment is
+      // dropped with a tier downgrade rather than hard-conflicting — the eval
+      // gold set relies on this because real posts routinely mention a
+      // secondary measuredProperty in lower-precedence evidence.
       const outcome = decodeOutcome(
         resolveBundle(
           decodeBundle({
@@ -945,6 +1053,63 @@ describe("resolveBundle", () => {
             yAxis: {
               label: "Capacity",
               unit: "MW"
+            },
+            series: [],
+            keyFindings: [],
+            sourceLines: [],
+            publisherHints: []
+          }),
+          lookup,
+          vocabulary
+        )
+      );
+
+      expect(outcome._tag).not.toBe("Conflicted");
+      if (outcome._tag === "Conflicted") {
+        return;
+      }
+
+      // The fold keeps y-axis's capacity and drops chart-title's generation.
+      // The expected outcome depends on whether the registry has a variable
+      // compatible with {measuredProperty=capacity, unitFamily=power}, but
+      // regardless the fold must NOT fork into hypotheses.
+      if (outcome._tag === "Resolved") {
+        for (const item of outcome.items) {
+          if (item._tag !== "bound") {
+            continue;
+          }
+          expect(item.semanticPartial.measuredProperty).toBe("capacity");
+        }
+      }
+
+      if (outcome._tag === "Underspecified" || outcome._tag === "Ambiguous") {
+        expect(outcome.tier).toBe("weak-heuristic");
+      }
+    }).pipe(
+      Effect.provide(FacetVocabulary.layer),
+      Effect.provide(localFileSystemLayer)
+    ),
+    15_000
+  );
+
+  it.effect("returns Conflicted when same-precedence identity evidence disagrees on a required facet", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+      const prepared = yield* loadCheckedInDataLayerRegistry(
+        checkedInDataLayerRegistryRoot
+      );
+      const lookup = toDataLayerRegistryLookup(prepared);
+
+      // Both sites come from `x-axis` (one from the label, one from the
+      // unit string), so they share a precedence index. Neither can
+      // dominate the other, and the fold must surface the real conflict.
+      const outcome = decodeOutcome(
+        resolveBundle(
+          decodeBundle({
+            postText: [],
+            xAxis: {
+              label: "Electricity generation",
+              unit: "Capacity in MW"
             },
             series: [],
             keyFindings: [],

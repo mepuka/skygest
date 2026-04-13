@@ -1,0 +1,1658 @@
+{
+  "kind": "unannotated",
+  "slug": "008-ben-inskeep",
+  "postUri": "x://2687569825/status/2042291388335694128",
+  "bundles": [
+    {
+      "assetKey": "embed:1:https://pbs.twimg.com/media/HFeslxoWYAAZIcp.png",
+      "actual": {
+        "outcomeTag": "NoMatch",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": null,
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": null
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "x://2687569825/status/2042291388335694128",
+          "assetKey": "embed:1:https://pbs.twimg.com/media/HFeslxoWYAAZIcp.png",
+          "postText": [
+            "A sanitary sewer system Amazon is constructing for 2 of its ~30 AI data center buildings at Project Rainier in New Carlisle, IN is designed to use more than 1.6 million gallons per day on hot summer days, recent IDEM filings show https://t.co/cuRyNZ41kK"
+          ],
+          "series": [],
+          "keyFindings": [
+            "The development plan incorporates an AEP substation and a private substation to support significant electrical power requirements.",
+            "The site features six 2-story 'Titus' buildings (1A-1F) with a finished floor elevation (FFE) of 725.5 feet.",
+            "Capacity for future expansion is indicated by eight designated building pads labeled 2A-2C and 3A-3E.",
+            "A 16.04-acre detention basin is located at the edge of the site within a designated 'Zone A' Special Flood Hazard Area."
+          ],
+          "sourceLines": [],
+          "publisherHints": [
+            {
+              "label": "AEP",
+              "confidence": 0.5
+            }
+          ]
+        },
+        "assetKey": "embed:1:https://pbs.twimg.com/media/HFeslxoWYAAZIcp.png",
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Hypothesis",
+          "bundle": {
+            "postUri": "x://2687569825/status/2042291388335694128",
+            "assetKey": "embed:1:https://pbs.twimg.com/media/HFeslxoWYAAZIcp.png",
+            "postText": [
+              "A sanitary sewer system Amazon is constructing for 2 of its ~30 AI data center buildings at Project Rainier in New Carlisle, IN is designed to use more than 1.6 million gallons per day on hot summer days, recent IDEM filings show https://t.co/cuRyNZ41kK"
+            ],
+            "series": [],
+            "keyFindings": [
+              "The development plan incorporates an AEP substation and a private substation to support significant electrical power requirements.",
+              "The site features six 2-story 'Titus' buildings (1A-1F) with a finished floor elevation (FFE) of 725.5 feet.",
+              "Capacity for future expansion is indicated by eight designated building pads labeled 2A-2C and 3A-3E.",
+              "A 16.04-acre detention basin is located at the edge of the site within a designated 'Zone A' Special Flood Hazard Area."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "AEP",
+                "confidence": 0.5
+              }
+            ]
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "domainObject": "electricity",
+              "measuredProperty": "capacity"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:1:https://pbs.twimg.com/media/HFeslxoWYAAZIcp.png",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "key-finding",
+                "text": "a private substation to support significant electrical power requirements."
+              },
+              {
+                "source": "key-finding",
+                "text": "Capacity for future expansion is indicated by eight designated building pads labeled 2A-2C"
+              }
+            ],
+            "tier": "weak-heuristic"
+          }
+        },
+        "bound": {
+          "hypothesis": {
+            "sharedPartial": {
+              "domainObject": "electricity",
+              "measuredProperty": "capacity"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:1:https://pbs.twimg.com/media/HFeslxoWYAAZIcp.png",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "key-finding",
+                "text": "a private substation to support significant electrical power requirements."
+              },
+              {
+                "source": "key-finding",
+                "text": "Capacity for future expansion is indicated by eight designated building pads labeled 2A-2C"
+              }
+            ],
+            "tier": "weak-heuristic"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:1:https://pbs.twimg.com/media/HFeslxoWYAAZIcp.png",
+              "semanticPartial": {
+                "domainObject": "electricity",
+                "measuredProperty": "capacity"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [],
+              "missingRequired": [
+                "statisticType"
+              ],
+              "reason": "missing-required"
+            }
+          ]
+        },
+        "outcome": {
+          "_tag": "NoMatch",
+          "bundle": {
+            "postUri": "x://2687569825/status/2042291388335694128",
+            "assetKey": "embed:1:https://pbs.twimg.com/media/HFeslxoWYAAZIcp.png",
+            "postText": [
+              "A sanitary sewer system Amazon is constructing for 2 of its ~30 AI data center buildings at Project Rainier in New Carlisle, IN is designed to use more than 1.6 million gallons per day on hot summer days, recent IDEM filings show https://t.co/cuRyNZ41kK"
+            ],
+            "series": [],
+            "keyFindings": [
+              "The development plan incorporates an AEP substation and a private substation to support significant electrical power requirements.",
+              "The site features six 2-story 'Titus' buildings (1A-1F) with a finished floor elevation (FFE) of 725.5 feet.",
+              "Capacity for future expansion is indicated by eight designated building pads labeled 2A-2C and 3A-3E.",
+              "A 16.04-acre detention basin is located at the edge of the site within a designated 'Zone A' Special Flood Hazard Area."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "AEP",
+                "confidence": 0.5
+              }
+            ]
+          },
+          "reason": "Kernel could not bind an underspecified partial"
+        }
+      }
+    },
+    {
+      "assetKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png",
+      "actual": {
+        "outcomeTag": "Ambiguous",
+        "boundVariableIds": [],
+        "candidateVariableIds": [
+          "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+          "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+          "https://id.skygest.io/variable/var_01KP172ZREQSTR3BEW29TQJ7HY",
+          "https://id.skygest.io/variable/var_01KNQEZ5WM9HP0NBCS5J38GJYT",
+          "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E"
+        ],
+        "gapReason": "no-candidates",
+        "matchedFacetCounts": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          2,
+          2,
+          1,
+          1,
+          1
+        ],
+        "agentId": null,
+        "confidence": null,
+        "tier": "weak-heuristic"
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "x://2687569825/status/2042291388335694128",
+          "assetKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png",
+          "postText": [
+            "A sanitary sewer system Amazon is constructing for 2 of its ~30 AI data center buildings at Project Rainier in New Carlisle, IN is designed to use more than 1.6 million gallons per day on hot summer days, recent IDEM filings show https://t.co/cuRyNZ41kK"
+          ],
+          "chartTitle": "COLLECTION SYSTEM DESIGN SUMMARY",
+          "series": [
+            {
+              "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:0",
+              "legendLabel": "Design Flow Per Unit",
+              "unit": "gpd/unit"
+            },
+            {
+              "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1",
+              "legendLabel": "Number of Units"
+            },
+            {
+              "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:2",
+              "legendLabel": "Unit Design Flow",
+              "unit": "gpd"
+            }
+          ],
+          "keyFindings": [
+            "The data center project includes a current requirement for 6 units and a future expansion of 13 units, each with a design flow of 2,895 gpd/unit.",
+            "The total average design flow for the collection system is estimated at 55,000 gallons per day (gpd).",
+            "A high peaking factor of 29.3 is applied, resulting in a peak design flow capacity requirement of 1,612,000 gpd.",
+            "The design parameters are explicitly tied to the 327 IAC 3-6-11 regulatory requirement for flow rates."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Refer to 327 IAC 3-6-11 for Design Flow Rate Requirements",
+              "datasetName": "327 IAC 3-6-11"
+            }
+          ],
+          "publisherHints": []
+        },
+        "assetKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png",
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Hypothesis",
+          "bundle": {
+            "postUri": "x://2687569825/status/2042291388335694128",
+            "assetKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png",
+            "postText": [
+              "A sanitary sewer system Amazon is constructing for 2 of its ~30 AI data center buildings at Project Rainier in New Carlisle, IN is designed to use more than 1.6 million gallons per day on hot summer days, recent IDEM filings show https://t.co/cuRyNZ41kK"
+            ],
+            "chartTitle": "COLLECTION SYSTEM DESIGN SUMMARY",
+            "series": [
+              {
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:0",
+                "legendLabel": "Design Flow Per Unit",
+                "unit": "gpd/unit"
+              },
+              {
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1",
+                "legendLabel": "Number of Units"
+              },
+              {
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:2",
+                "legendLabel": "Unit Design Flow",
+                "unit": "gpd"
+              }
+            ],
+            "keyFindings": [
+              "The data center project includes a current requirement for 6 units and a future expansion of 13 units, each with a design flow of 2,895 gpd/unit.",
+              "The total average design flow for the collection system is estimated at 55,000 gallons per day (gpd).",
+              "A high peaking factor of 29.3 is applied, resulting in a peak design flow capacity requirement of 1,612,000 gpd.",
+              "The design parameters are explicitly tied to the 327 IAC 3-6-11 regulatory requirement for flow rates."
+            ],
+            "sourceLines": [
+              {
+                "sourceText": "Refer to 327 IAC 3-6-11 for Design Flow Rate Requirements",
+                "datasetName": "327 IAC 3-6-11"
+              }
+            ],
+            "publisherHints": []
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "domainObject": "data center",
+              "statisticType": "count",
+              "aggregation": "sum",
+              "measuredProperty": "demand"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:0",
+                "partial": {},
+                "evidence": []
+              },
+              {
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1",
+                "partial": {
+                  "measuredProperty": "count",
+                  "statisticType": "count"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Number of Units",
+                    "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1"
+                  }
+                ]
+              },
+              {
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:2",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "key-finding",
+                "text": "The data center project includes a current requirement for 6 units"
+              },
+              {
+                "source": "key-finding",
+                "text": "a future expansion of 13 units, each with a design flow of 2,895 gpd/unit."
+              },
+              {
+                "source": "key-finding",
+                "text": "The total average design flow for the collection system is estimated at 55,000 gallons per day (gpd)."
+              },
+              {
+                "source": "post-text",
+                "text": "A sanitary sewer system Amazon is constructing for 2 of its ~30 AI data center buildings at Project Rainier in New Carlisle, IN is designed to use more than 1.6 million gallons per day on hot summer days, recent IDEM filings show https://t.co/cuRyNZ41kK"
+              },
+              {
+                "source": "series-label",
+                "text": "Number of Units",
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1"
+              }
+            ],
+            "tier": "weak-heuristic"
+          }
+        },
+        "bound": {
+          "hypothesis": {
+            "sharedPartial": {
+              "domainObject": "data center",
+              "statisticType": "count",
+              "aggregation": "sum",
+              "measuredProperty": "demand"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:0",
+                "partial": {},
+                "evidence": []
+              },
+              {
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1",
+                "partial": {
+                  "measuredProperty": "count",
+                  "statisticType": "count"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Number of Units",
+                    "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1"
+                  }
+                ]
+              },
+              {
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:2",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "key-finding",
+                "text": "The data center project includes a current requirement for 6 units"
+              },
+              {
+                "source": "key-finding",
+                "text": "a future expansion of 13 units, each with a design flow of 2,895 gpd/unit."
+              },
+              {
+                "source": "key-finding",
+                "text": "The total average design flow for the collection system is estimated at 55,000 gallons per day (gpd)."
+              },
+              {
+                "source": "post-text",
+                "text": "A sanitary sewer system Amazon is constructing for 2 of its ~30 AI data center buildings at Project Rainier in New Carlisle, IN is designed to use more than 1.6 million gallons per day on hot summer days, recent IDEM filings show https://t.co/cuRyNZ41kK"
+              },
+              {
+                "source": "series-label",
+                "text": "Number of Units",
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1"
+              }
+            ],
+            "tier": "weak-heuristic"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:0",
+              "semanticPartial": {
+                "domainObject": "data center",
+                "statisticType": "count",
+                "aggregation": "sum",
+                "measuredProperty": "demand"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                  "label": "Data center power demand",
+                  "matchedFacets": [
+                    "measuredProperty",
+                    "domainObject"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "stock"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 4,
+                  "semanticPartial": {
+                    "measuredProperty": "demand",
+                    "domainObject": "data center",
+                    "statisticType": "stock",
+                    "unitFamily": "power"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                  "label": "Electricity demand",
+                  "matchedFacets": [
+                    "measuredProperty",
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "data center",
+                        "electricity"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "demand",
+                    "domainObject": "electricity",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KP172ZREQSTR3BEW29TQJ7HY",
+                  "label": "Lignite production",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "supply"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "supply",
+                    "technologyOrFuel": "brown coal",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WM9HP0NBCS5J38GJYT",
+                  "label": "Battery discharge",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "generation"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "battery storage",
+                        "data center"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 6,
+                  "semanticPartial": {
+                    "measuredProperty": "generation",
+                    "domainObject": "battery storage",
+                    "technologyOrFuel": "battery",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E",
+                  "label": "Clean energy investment",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "investment"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "clean energy",
+                        "data center"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "investment",
+                    "domainObject": "clean energy",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "currency"
+                  }
+                }
+              ],
+              "reason": "no-candidates"
+            },
+            {
+              "_tag": "gap",
+              "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1",
+              "semanticPartial": {
+                "domainObject": "data center",
+                "statisticType": "count",
+                "aggregation": "sum",
+                "measuredProperty": "demand"
+              },
+              "attachedContext": {},
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Number of Units",
+                  "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1"
+                }
+              ],
+              "candidates": [],
+              "reason": "required-facet-conflict"
+            },
+            {
+              "_tag": "gap",
+              "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:2",
+              "semanticPartial": {
+                "domainObject": "data center",
+                "statisticType": "count",
+                "aggregation": "sum",
+                "measuredProperty": "demand"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                  "label": "Data center power demand",
+                  "matchedFacets": [
+                    "measuredProperty",
+                    "domainObject"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "stock"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 4,
+                  "semanticPartial": {
+                    "measuredProperty": "demand",
+                    "domainObject": "data center",
+                    "statisticType": "stock",
+                    "unitFamily": "power"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                  "label": "Electricity demand",
+                  "matchedFacets": [
+                    "measuredProperty",
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "data center",
+                        "electricity"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "demand",
+                    "domainObject": "electricity",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KP172ZREQSTR3BEW29TQJ7HY",
+                  "label": "Lignite production",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "supply"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "supply",
+                    "technologyOrFuel": "brown coal",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WM9HP0NBCS5J38GJYT",
+                  "label": "Battery discharge",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "generation"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "battery storage",
+                        "data center"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 6,
+                  "semanticPartial": {
+                    "measuredProperty": "generation",
+                    "domainObject": "battery storage",
+                    "technologyOrFuel": "battery",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E",
+                  "label": "Clean energy investment",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "investment"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "clean energy",
+                        "data center"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "investment",
+                    "domainObject": "clean energy",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "currency"
+                  }
+                }
+              ],
+              "reason": "no-candidates"
+            }
+          ]
+        },
+        "outcome": {
+          "_tag": "Ambiguous",
+          "bundle": {
+            "postUri": "x://2687569825/status/2042291388335694128",
+            "assetKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png",
+            "postText": [
+              "A sanitary sewer system Amazon is constructing for 2 of its ~30 AI data center buildings at Project Rainier in New Carlisle, IN is designed to use more than 1.6 million gallons per day on hot summer days, recent IDEM filings show https://t.co/cuRyNZ41kK"
+            ],
+            "chartTitle": "COLLECTION SYSTEM DESIGN SUMMARY",
+            "series": [
+              {
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:0",
+                "legendLabel": "Design Flow Per Unit",
+                "unit": "gpd/unit"
+              },
+              {
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1",
+                "legendLabel": "Number of Units"
+              },
+              {
+                "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:2",
+                "legendLabel": "Unit Design Flow",
+                "unit": "gpd"
+              }
+            ],
+            "keyFindings": [
+              "The data center project includes a current requirement for 6 units and a future expansion of 13 units, each with a design flow of 2,895 gpd/unit.",
+              "The total average design flow for the collection system is estimated at 55,000 gallons per day (gpd).",
+              "A high peaking factor of 29.3 is applied, resulting in a peak design flow capacity requirement of 1,612,000 gpd.",
+              "The design parameters are explicitly tied to the 327 IAC 3-6-11 regulatory requirement for flow rates."
+            ],
+            "sourceLines": [
+              {
+                "sourceText": "Refer to 327 IAC 3-6-11 for Design Flow Rate Requirements",
+                "datasetName": "327 IAC 3-6-11"
+              }
+            ],
+            "publisherHints": []
+          },
+          "hypotheses": [
+            {
+              "sharedPartial": {
+                "domainObject": "data center",
+                "statisticType": "count",
+                "aggregation": "sum",
+                "measuredProperty": "demand"
+              },
+              "attachedContext": {},
+              "items": [
+                {
+                  "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:0",
+                  "partial": {},
+                  "evidence": []
+                },
+                {
+                  "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1",
+                  "partial": {
+                    "measuredProperty": "count",
+                    "statisticType": "count"
+                  },
+                  "evidence": [
+                    {
+                      "source": "series-label",
+                      "text": "Number of Units",
+                      "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1"
+                    }
+                  ]
+                },
+                {
+                  "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:2",
+                  "partial": {},
+                  "evidence": []
+                }
+              ],
+              "evidence": [
+                {
+                  "source": "key-finding",
+                  "text": "The data center project includes a current requirement for 6 units"
+                },
+                {
+                  "source": "key-finding",
+                  "text": "a future expansion of 13 units, each with a design flow of 2,895 gpd/unit."
+                },
+                {
+                  "source": "key-finding",
+                  "text": "The total average design flow for the collection system is estimated at 55,000 gallons per day (gpd)."
+                },
+                {
+                  "source": "post-text",
+                  "text": "A sanitary sewer system Amazon is constructing for 2 of its ~30 AI data center buildings at Project Rainier in New Carlisle, IN is designed to use more than 1.6 million gallons per day on hot summer days, recent IDEM filings show https://t.co/cuRyNZ41kK"
+                },
+                {
+                  "source": "series-label",
+                  "text": "Number of Units",
+                  "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1"
+                }
+              ],
+              "tier": "weak-heuristic"
+            }
+          ],
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:0",
+              "semanticPartial": {
+                "domainObject": "data center",
+                "statisticType": "count",
+                "aggregation": "sum",
+                "measuredProperty": "demand"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                  "label": "Data center power demand",
+                  "matchedFacets": [
+                    "measuredProperty",
+                    "domainObject"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "stock"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 4,
+                  "semanticPartial": {
+                    "measuredProperty": "demand",
+                    "domainObject": "data center",
+                    "statisticType": "stock",
+                    "unitFamily": "power"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                  "label": "Electricity demand",
+                  "matchedFacets": [
+                    "measuredProperty",
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "data center",
+                        "electricity"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "demand",
+                    "domainObject": "electricity",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KP172ZREQSTR3BEW29TQJ7HY",
+                  "label": "Lignite production",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "supply"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "supply",
+                    "technologyOrFuel": "brown coal",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WM9HP0NBCS5J38GJYT",
+                  "label": "Battery discharge",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "generation"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "battery storage",
+                        "data center"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 6,
+                  "semanticPartial": {
+                    "measuredProperty": "generation",
+                    "domainObject": "battery storage",
+                    "technologyOrFuel": "battery",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E",
+                  "label": "Clean energy investment",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "investment"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "clean energy",
+                        "data center"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "investment",
+                    "domainObject": "clean energy",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "currency"
+                  }
+                }
+              ],
+              "reason": "no-candidates"
+            },
+            {
+              "_tag": "gap",
+              "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1",
+              "semanticPartial": {
+                "domainObject": "data center",
+                "statisticType": "count",
+                "aggregation": "sum",
+                "measuredProperty": "demand"
+              },
+              "attachedContext": {},
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Number of Units",
+                  "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:1"
+                }
+              ],
+              "candidates": [],
+              "reason": "required-facet-conflict"
+            },
+            {
+              "_tag": "gap",
+              "itemKey": "embed:2:https://pbs.twimg.com/media/HFeslxsXkAAMmJT.png:series:2",
+              "semanticPartial": {
+                "domainObject": "data center",
+                "statisticType": "count",
+                "aggregation": "sum",
+                "measuredProperty": "demand"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                  "label": "Data center power demand",
+                  "matchedFacets": [
+                    "measuredProperty",
+                    "domainObject"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "stock"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 4,
+                  "semanticPartial": {
+                    "measuredProperty": "demand",
+                    "domainObject": "data center",
+                    "statisticType": "stock",
+                    "unitFamily": "power"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                  "label": "Electricity demand",
+                  "matchedFacets": [
+                    "measuredProperty",
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "data center",
+                        "electricity"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "demand",
+                    "domainObject": "electricity",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KP172ZREQSTR3BEW29TQJ7HY",
+                  "label": "Lignite production",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "supply"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "supply",
+                    "technologyOrFuel": "brown coal",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WM9HP0NBCS5J38GJYT",
+                  "label": "Battery discharge",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "generation"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "battery storage",
+                        "data center"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 6,
+                  "semanticPartial": {
+                    "measuredProperty": "generation",
+                    "domainObject": "battery storage",
+                    "technologyOrFuel": "battery",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E",
+                  "label": "Clean energy investment",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "investment"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "clean energy",
+                        "data center"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "investment",
+                    "domainObject": "clean energy",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "currency"
+                  }
+                }
+              ],
+              "reason": "no-candidates"
+            }
+          ],
+          "gaps": [
+            {
+              "partial": {
+                "domainObject": "data center",
+                "statisticType": "count",
+                "aggregation": "sum",
+                "measuredProperty": "demand"
+              },
+              "candidates": [
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                  "label": "Data center power demand",
+                  "matchedFacets": [
+                    "measuredProperty",
+                    "domainObject"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "stock"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 4,
+                  "semanticPartial": {
+                    "measuredProperty": "demand",
+                    "domainObject": "data center",
+                    "statisticType": "stock",
+                    "unitFamily": "power"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                  "label": "Electricity demand",
+                  "matchedFacets": [
+                    "measuredProperty",
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "data center",
+                        "electricity"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "demand",
+                    "domainObject": "electricity",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KP172ZREQSTR3BEW29TQJ7HY",
+                  "label": "Lignite production",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "supply"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "supply",
+                    "technologyOrFuel": "brown coal",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WM9HP0NBCS5J38GJYT",
+                  "label": "Battery discharge",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "generation"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "battery storage",
+                        "data center"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 6,
+                  "semanticPartial": {
+                    "measuredProperty": "generation",
+                    "domainObject": "battery storage",
+                    "technologyOrFuel": "battery",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E",
+                  "label": "Clean energy investment",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "investment"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "clean energy",
+                        "data center"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "investment",
+                    "domainObject": "clean energy",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "currency"
+                  }
+                }
+              ],
+              "reason": "no-candidates",
+              "context": {
+                "attachedContext": {}
+              }
+            },
+            {
+              "partial": {
+                "domainObject": "data center",
+                "statisticType": "count",
+                "aggregation": "sum",
+                "measuredProperty": "demand"
+              },
+              "candidates": [],
+              "reason": "required-facet-conflict",
+              "context": {
+                "attachedContext": {}
+              }
+            },
+            {
+              "partial": {
+                "domainObject": "data center",
+                "statisticType": "count",
+                "aggregation": "sum",
+                "measuredProperty": "demand"
+              },
+              "candidates": [
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                  "label": "Data center power demand",
+                  "matchedFacets": [
+                    "measuredProperty",
+                    "domainObject"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "stock"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 4,
+                  "semanticPartial": {
+                    "measuredProperty": "demand",
+                    "domainObject": "data center",
+                    "statisticType": "stock",
+                    "unitFamily": "power"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                  "label": "Electricity demand",
+                  "matchedFacets": [
+                    "measuredProperty",
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "data center",
+                        "electricity"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "demand",
+                    "domainObject": "electricity",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KP172ZREQSTR3BEW29TQJ7HY",
+                  "label": "Lignite production",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "supply"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "supply",
+                    "technologyOrFuel": "brown coal",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WM9HP0NBCS5J38GJYT",
+                  "label": "Battery discharge",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "generation"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "battery storage",
+                        "data center"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 6,
+                  "semanticPartial": {
+                    "measuredProperty": "generation",
+                    "domainObject": "battery storage",
+                    "technologyOrFuel": "battery",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN17BV79YERCQWG27E",
+                  "label": "Clean energy investment",
+                  "matchedFacets": [
+                    "aggregation"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "demand",
+                        "investment"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "clean energy",
+                        "data center"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "investment",
+                    "domainObject": "clean energy",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "currency"
+                  }
+                }
+              ],
+              "reason": "no-candidates",
+              "context": {
+                "attachedContext": {}
+              }
+            }
+          ],
+          "tier": "weak-heuristic"
+        }
+      }
+    }
+  ],
+  "error": null
+}

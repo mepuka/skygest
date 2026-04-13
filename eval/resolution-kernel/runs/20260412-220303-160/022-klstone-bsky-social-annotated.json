@@ -1,0 +1,277 @@
+{
+  "kind": "annotated",
+  "slug": "022-klstone-bsky-social",
+  "postUri": "at://did:plc:eokofv4mj6egxuhucqseamtz/app.bsky.feed.post/3mitdstlgtc2q",
+  "expected": {
+    "postUri": "at://did:plc:eokofv4mj6egxuhucqseamtz/app.bsky.feed.post/3mitdstlgtc2q",
+    "outcomeTag": "Resolved",
+    "expectedVariableIds": [
+      "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"
+    ],
+    "notes": "seed 022-klstone: DE Stromerzeugung"
+  },
+  "selectedBundle": {
+    "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:eokofv4mj6egxuhucqseamtz/bafkreib6f4xytwhtqp5q4ymhnvgtcfx7ibpct7p3pvq66i2tspankwucuu",
+    "actual": {
+      "outcomeTag": "Resolved",
+      "boundVariableIds": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2"
+      ],
+      "candidateVariableIds": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2"
+      ],
+      "gapReason": null,
+      "matchedFacetCounts": [
+        6
+      ],
+      "agentId": null,
+      "confidence": null,
+      "tier": "weak-heuristic"
+    },
+    "trace": {
+      "bundle": {
+        "postUri": "at://did:plc:eokofv4mj6egxuhucqseamtz/app.bsky.feed.post/3mitdstlgtc2q",
+        "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:eokofv4mj6egxuhucqseamtz/bafkreib6f4xytwhtqp5q4ymhnvgtcfx7ibpct7p3pvq66i2tspankwucuu",
+        "postText": [
+          "Öffentliche Nettostromerzeugung in Deutschland am gestrigen 05.04.26:\n\nGesamt 1,292 TWh\n\nEE (Wind, PV, Biom., Wasser): 87,3%\nFossil (Kohle, Gas, Öl):             12,7%\n\nCO2 138g/kWh\n\nNettoEXPORT 2026 gesamt: 2,95 TWh von 131,8 TWh (2,2% der Erzeugung)\n\n#Energiewende\n\n1/5"
+        ],
+        "chartTitle": "Öffentliche Nettostromerzeugung in Deutschland am 5. April 2026",
+        "series": [],
+        "keyFindings": [
+          "Renewable energy sources dominated Germany's public net electricity generation on April 5, 2026, reaching 87.3% of the total.",
+          "Wind Onshore was the single most significant power source, contributing 49.2% (635.77 GWh) of the total daily generation.",
+          "Solar power provided 18.5% (238.95 GWh) of the electricity, representing the second largest generation source.",
+          "Fossil fuels collectively accounted for 12.7% (164.07 GWh) of the net generation during this period."
+        ],
+        "sourceLines": [
+          {
+            "sourceText": "Energy-Charts.info"
+          }
+        ],
+        "publisherHints": [
+          {
+            "label": "Energy-Charts",
+            "confidence": 0.5
+          },
+          {
+            "label": "Energy-Charts.info",
+            "confidence": 0.5
+          }
+        ]
+      },
+      "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:eokofv4mj6egxuhucqseamtz/bafkreib6f4xytwhtqp5q4ymhnvgtcfx7ibpct7p3pvq66i2tspankwucuu",
+      "agentId": null,
+      "interpreted": {
+        "_tag": "Hypothesis",
+        "bundle": {
+          "postUri": "at://did:plc:eokofv4mj6egxuhucqseamtz/app.bsky.feed.post/3mitdstlgtc2q",
+          "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:eokofv4mj6egxuhucqseamtz/bafkreib6f4xytwhtqp5q4ymhnvgtcfx7ibpct7p3pvq66i2tspankwucuu",
+          "postText": [
+            "Öffentliche Nettostromerzeugung in Deutschland am gestrigen 05.04.26:\n\nGesamt 1,292 TWh\n\nEE (Wind, PV, Biom., Wasser): 87,3%\nFossil (Kohle, Gas, Öl):             12,7%\n\nCO2 138g/kWh\n\nNettoEXPORT 2026 gesamt: 2,95 TWh von 131,8 TWh (2,2% der Erzeugung)\n\n#Energiewende\n\n1/5"
+          ],
+          "chartTitle": "Öffentliche Nettostromerzeugung in Deutschland am 5. April 2026",
+          "series": [],
+          "keyFindings": [
+            "Renewable energy sources dominated Germany's public net electricity generation on April 5, 2026, reaching 87.3% of the total.",
+            "Wind Onshore was the single most significant power source, contributing 49.2% (635.77 GWh) of the total daily generation.",
+            "Solar power provided 18.5% (238.95 GWh) of the electricity, representing the second largest generation source.",
+            "Fossil fuels collectively accounted for 12.7% (164.07 GWh) of the net generation during this period."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Energy-Charts.info"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "Energy-Charts",
+              "confidence": 0.5
+            },
+            {
+              "label": "Energy-Charts.info",
+              "confidence": 0.5
+            }
+          ]
+        },
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "generation",
+            "domainObject": "electricity",
+            "technologyOrFuel": "wind",
+            "statisticType": "flow",
+            "aggregation": "sum",
+            "unitFamily": "energy"
+          },
+          "attachedContext": {},
+          "items": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:eokofv4mj6egxuhucqseamtz/bafkreib6f4xytwhtqp5q4ymhnvgtcfx7ibpct7p3pvq66i2tspankwucuu",
+              "partial": {},
+              "evidence": []
+            }
+          ],
+          "evidence": [
+            {
+              "source": "key-finding",
+              "text": "Renewable energy sources dominated Germany's public net electricity generation on April 5, 2026, reaching 87.3% of the total."
+            },
+            {
+              "source": "key-finding",
+              "text": "Wind Onshore was the single most significant power source, contributing 49.2% (635.77 GWh) of the total daily generation."
+            },
+            {
+              "source": "post-text",
+              "text": "Gesamt 1,292 TWh"
+            },
+            {
+              "source": "post-text",
+              "text": "NettoEXPORT 2026 gesamt: 2,95 TWh von 131,8 TWh (2,2% der Erzeugung)"
+            }
+          ],
+          "tier": "weak-heuristic"
+        }
+      },
+      "bound": {
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "generation",
+            "domainObject": "electricity",
+            "technologyOrFuel": "wind",
+            "statisticType": "flow",
+            "aggregation": "sum",
+            "unitFamily": "energy"
+          },
+          "attachedContext": {},
+          "items": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:eokofv4mj6egxuhucqseamtz/bafkreib6f4xytwhtqp5q4ymhnvgtcfx7ibpct7p3pvq66i2tspankwucuu",
+              "partial": {},
+              "evidence": []
+            }
+          ],
+          "evidence": [
+            {
+              "source": "key-finding",
+              "text": "Renewable energy sources dominated Germany's public net electricity generation on April 5, 2026, reaching 87.3% of the total."
+            },
+            {
+              "source": "key-finding",
+              "text": "Wind Onshore was the single most significant power source, contributing 49.2% (635.77 GWh) of the total daily generation."
+            },
+            {
+              "source": "post-text",
+              "text": "Gesamt 1,292 TWh"
+            },
+            {
+              "source": "post-text",
+              "text": "NettoEXPORT 2026 gesamt: 2,95 TWh von 131,8 TWh (2,2% der Erzeugung)"
+            }
+          ],
+          "tier": "weak-heuristic"
+        },
+        "items": [
+          {
+            "_tag": "bound",
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:eokofv4mj6egxuhucqseamtz/bafkreib6f4xytwhtqp5q4ymhnvgtcfx7ibpct7p3pvq66i2tspankwucuu",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "technologyOrFuel": "wind",
+              "statisticType": "flow",
+              "aggregation": "sum",
+              "unitFamily": "energy"
+            },
+            "attachedContext": {},
+            "evidence": [],
+            "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+            "label": "Wind electricity generation"
+          }
+        ]
+      },
+      "outcome": {
+        "_tag": "Resolved",
+        "bundle": {
+          "postUri": "at://did:plc:eokofv4mj6egxuhucqseamtz/app.bsky.feed.post/3mitdstlgtc2q",
+          "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:eokofv4mj6egxuhucqseamtz/bafkreib6f4xytwhtqp5q4ymhnvgtcfx7ibpct7p3pvq66i2tspankwucuu",
+          "postText": [
+            "Öffentliche Nettostromerzeugung in Deutschland am gestrigen 05.04.26:\n\nGesamt 1,292 TWh\n\nEE (Wind, PV, Biom., Wasser): 87,3%\nFossil (Kohle, Gas, Öl):             12,7%\n\nCO2 138g/kWh\n\nNettoEXPORT 2026 gesamt: 2,95 TWh von 131,8 TWh (2,2% der Erzeugung)\n\n#Energiewende\n\n1/5"
+          ],
+          "chartTitle": "Öffentliche Nettostromerzeugung in Deutschland am 5. April 2026",
+          "series": [],
+          "keyFindings": [
+            "Renewable energy sources dominated Germany's public net electricity generation on April 5, 2026, reaching 87.3% of the total.",
+            "Wind Onshore was the single most significant power source, contributing 49.2% (635.77 GWh) of the total daily generation.",
+            "Solar power provided 18.5% (238.95 GWh) of the electricity, representing the second largest generation source.",
+            "Fossil fuels collectively accounted for 12.7% (164.07 GWh) of the net generation during this period."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Energy-Charts.info"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "Energy-Charts",
+              "confidence": 0.5
+            },
+            {
+              "label": "Energy-Charts.info",
+              "confidence": 0.5
+            }
+          ]
+        },
+        "sharedPartial": {
+          "measuredProperty": "generation",
+          "domainObject": "electricity",
+          "technologyOrFuel": "wind",
+          "statisticType": "flow",
+          "aggregation": "sum",
+          "unitFamily": "energy"
+        },
+        "attachedContext": {},
+        "items": [
+          {
+            "_tag": "bound",
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:eokofv4mj6egxuhucqseamtz/bafkreib6f4xytwhtqp5q4ymhnvgtcfx7ibpct7p3pvq66i2tspankwucuu",
+            "semanticPartial": {
+              "measuredProperty": "generation",
+              "domainObject": "electricity",
+              "technologyOrFuel": "wind",
+              "statisticType": "flow",
+              "aggregation": "sum",
+              "unitFamily": "energy"
+            },
+            "attachedContext": {},
+            "evidence": [],
+            "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+            "label": "Wind electricity generation"
+          }
+        ],
+        "tier": "weak-heuristic"
+      }
+    }
+  },
+  "checks": [
+    {
+      "kind": "outcome-tag",
+      "pass": true,
+      "expected": "Resolved",
+      "actual": "Resolved"
+    },
+    {
+      "kind": "variable-ids",
+      "pass": false,
+      "expected": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"
+      ],
+      "missing": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"
+      ],
+      "unexpected": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2"
+      ]
+    }
+  ],
+  "hasFindings": true,
+  "error": null
+}

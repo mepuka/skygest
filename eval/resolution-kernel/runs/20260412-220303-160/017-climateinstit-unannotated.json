@@ -1,0 +1,810 @@
+{
+  "kind": "unannotated",
+  "slug": "017-climateinstit",
+  "postUri": "x://1173979439501336576/status/2042237406850523163",
+  "bundles": [
+    {
+      "assetKey": "embed:0:https://pbs.twimg.com/media/HFd8GVbWIAAvgat.jpg",
+      "actual": {
+        "outcomeTag": "OutOfRegistry",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": "no-candidates",
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": null
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "x://1173979439501336576/status/2042237406850523163",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/HFd8GVbWIAAvgat.jpg",
+          "postText": [
+            "Canada’s public charging network has grown rapidly, but the total numbers alone give a limited picture of progress. We took a closer look at three indicators to see if EV charging is headed in the right direction🔌⚡️\nhttps://t.co/KNi0t6YvnB https://t.co/A5NXuDbtVU"
+          ],
+          "chartTitle": "Canada's fast-charging installations are not keeping pace with EVs, but build quality is improving",
+          "series": [],
+          "keyFindings": [
+            "The availability of DC fast-charge ports relative to the EV population in Canada has declined significantly, dropping from approximately 13 ports per 1,000 EVs in 2020 to around 8 by late 2025.",
+            "Quarterly installations of DC fast-charging ports reached a peak of over 630 units in late 2025, following several years of volatile but generally increasing growth.",
+            "The infrastructure is shifting toward higher performance, with the share of ultra-fast DC ports rising from roughly 49% in 2020 to over 53% by the end of 2025."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Source: Electric Charging and Alternative Fuelling Stations Locator, Natural Resources Canada as of March 2026. Some networks are not listed with this source.",
+              "datasetName": "Electric Charging and Alternative Fuelling Stations Locator"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "440megatonnes.ca",
+              "confidence": 0.6
+            },
+            {
+              "label": "Natural Resources Canada",
+              "confidence": 0.5
+            },
+            {
+              "label": "440",
+              "confidence": 0.3
+            }
+          ]
+        },
+        "assetKey": "embed:0:https://pbs.twimg.com/media/HFd8GVbWIAAvgat.jpg",
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Hypothesis",
+          "bundle": {
+            "postUri": "x://1173979439501336576/status/2042237406850523163",
+            "assetKey": "embed:0:https://pbs.twimg.com/media/HFd8GVbWIAAvgat.jpg",
+            "postText": [
+              "Canada’s public charging network has grown rapidly, but the total numbers alone give a limited picture of progress. We took a closer look at three indicators to see if EV charging is headed in the right direction🔌⚡️\nhttps://t.co/KNi0t6YvnB https://t.co/A5NXuDbtVU"
+            ],
+            "chartTitle": "Canada's fast-charging installations are not keeping pace with EVs, but build quality is improving",
+            "series": [],
+            "keyFindings": [
+              "The availability of DC fast-charge ports relative to the EV population in Canada has declined significantly, dropping from approximately 13 ports per 1,000 EVs in 2020 to around 8 by late 2025.",
+              "Quarterly installations of DC fast-charging ports reached a peak of over 630 units in late 2025, following several years of volatile but generally increasing growth.",
+              "The infrastructure is shifting toward higher performance, with the share of ultra-fast DC ports rising from roughly 49% in 2020 to over 53% by the end of 2025."
+            ],
+            "sourceLines": [
+              {
+                "sourceText": "Source: Electric Charging and Alternative Fuelling Stations Locator, Natural Resources Canada as of March 2026. Some networks are not listed with this source.",
+                "datasetName": "Electric Charging and Alternative Fuelling Stations Locator"
+              }
+            ],
+            "publisherHints": [
+              {
+                "label": "440megatonnes.ca",
+                "confidence": 0.6
+              },
+              {
+                "label": "Natural Resources Canada",
+                "confidence": 0.5
+              },
+              {
+                "label": "440",
+                "confidence": 0.3
+              }
+            ]
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "measuredProperty": "count",
+              "domainObject": "transport",
+              "statisticType": "count",
+              "aggregation": "max"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFd8GVbWIAAvgat.jpg",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "chart-title",
+                "text": "Canada's fast-charging installations are not keeping pace with EVs, but build quality is improving"
+              },
+              {
+                "source": "key-finding",
+                "text": "The availability of DC fast-charge ports relative to the EV population in Canada has declined significantly, dropping from approximately 13 ports per 1,000 EVs in 2020 to around 8 by late 2025."
+              },
+              {
+                "source": "key-finding",
+                "text": "Quarterly installations of DC fast-charging ports reached a peak of over 630 units in late 2025, following several years of volatile but generally increasing growth."
+              }
+            ],
+            "tier": "weak-heuristic"
+          }
+        },
+        "bound": {
+          "hypothesis": {
+            "sharedPartial": {
+              "measuredProperty": "count",
+              "domainObject": "transport",
+              "statisticType": "count",
+              "aggregation": "max"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFd8GVbWIAAvgat.jpg",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "chart-title",
+                "text": "Canada's fast-charging installations are not keeping pace with EVs, but build quality is improving"
+              },
+              {
+                "source": "key-finding",
+                "text": "The availability of DC fast-charge ports relative to the EV population in Canada has declined significantly, dropping from approximately 13 ports per 1,000 EVs in 2020 to around 8 by late 2025."
+              },
+              {
+                "source": "key-finding",
+                "text": "Quarterly installations of DC fast-charging ports reached a peak of over 630 units in late 2025, following several years of volatile but generally increasing growth."
+              }
+            ],
+            "tier": "weak-heuristic"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFd8GVbWIAAvgat.jpg",
+              "semanticPartial": {
+                "measuredProperty": "count",
+                "domainObject": "transport",
+                "statisticType": "count",
+                "aggregation": "max"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WP0PD1A7H3TA56PTAG",
+                  "label": "Heat pump installations",
+                  "matchedFacets": [
+                    "measuredProperty"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "heat pump",
+                        "transport"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "stock"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "count",
+                    "domainObject": "heat pump",
+                    "technologyOrFuel": "heat pump",
+                    "statisticType": "stock",
+                    "unitFamily": "dimensionless"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+                  "label": "Clean electricity share",
+                  "matchedFacets": [],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "count",
+                        "share"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "electricity",
+                        "transport"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "share"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 4,
+                  "semanticPartial": {
+                    "measuredProperty": "share",
+                    "domainObject": "electricity",
+                    "statisticType": "share",
+                    "unitFamily": "dimensionless"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                  "label": "Data center power demand",
+                  "matchedFacets": [],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "count",
+                        "demand"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "data center",
+                        "transport"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "stock"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 4,
+                  "semanticPartial": {
+                    "measuredProperty": "demand",
+                    "domainObject": "data center",
+                    "statisticType": "stock",
+                    "unitFamily": "power"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KP172ZREQSTR3BEW29TQJ7HY",
+                  "label": "Lignite production",
+                  "matchedFacets": [],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "count",
+                        "supply"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    },
+                    {
+                      "facet": "aggregation",
+                      "values": [
+                        "max",
+                        "sum"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "supply",
+                    "technologyOrFuel": "brown coal",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNTF139XKP1XD29BF8",
+                  "label": "Offshore wind capital cost",
+                  "matchedFacets": [],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "count",
+                        "price"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "offshore wind farm",
+                        "transport"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "price"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "price",
+                    "domainObject": "offshore wind farm",
+                    "technologyOrFuel": "offshore wind",
+                    "statisticType": "price",
+                    "unitFamily": "currency"
+                  }
+                }
+              ],
+              "reason": "no-candidates"
+            }
+          ]
+        },
+        "outcome": {
+          "_tag": "OutOfRegistry",
+          "bundle": {
+            "postUri": "x://1173979439501336576/status/2042237406850523163",
+            "assetKey": "embed:0:https://pbs.twimg.com/media/HFd8GVbWIAAvgat.jpg",
+            "postText": [
+              "Canada’s public charging network has grown rapidly, but the total numbers alone give a limited picture of progress. We took a closer look at three indicators to see if EV charging is headed in the right direction🔌⚡️\nhttps://t.co/KNi0t6YvnB https://t.co/A5NXuDbtVU"
+            ],
+            "chartTitle": "Canada's fast-charging installations are not keeping pace with EVs, but build quality is improving",
+            "series": [],
+            "keyFindings": [
+              "The availability of DC fast-charge ports relative to the EV population in Canada has declined significantly, dropping from approximately 13 ports per 1,000 EVs in 2020 to around 8 by late 2025.",
+              "Quarterly installations of DC fast-charging ports reached a peak of over 630 units in late 2025, following several years of volatile but generally increasing growth.",
+              "The infrastructure is shifting toward higher performance, with the share of ultra-fast DC ports rising from roughly 49% in 2020 to over 53% by the end of 2025."
+            ],
+            "sourceLines": [
+              {
+                "sourceText": "Source: Electric Charging and Alternative Fuelling Stations Locator, Natural Resources Canada as of March 2026. Some networks are not listed with this source.",
+                "datasetName": "Electric Charging and Alternative Fuelling Stations Locator"
+              }
+            ],
+            "publisherHints": [
+              {
+                "label": "440megatonnes.ca",
+                "confidence": 0.6
+              },
+              {
+                "label": "Natural Resources Canada",
+                "confidence": 0.5
+              },
+              {
+                "label": "440",
+                "confidence": 0.3
+              }
+            ]
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "measuredProperty": "count",
+              "domainObject": "transport",
+              "statisticType": "count",
+              "aggregation": "max"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFd8GVbWIAAvgat.jpg",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "chart-title",
+                "text": "Canada's fast-charging installations are not keeping pace with EVs, but build quality is improving"
+              },
+              {
+                "source": "key-finding",
+                "text": "The availability of DC fast-charge ports relative to the EV population in Canada has declined significantly, dropping from approximately 13 ports per 1,000 EVs in 2020 to around 8 by late 2025."
+              },
+              {
+                "source": "key-finding",
+                "text": "Quarterly installations of DC fast-charging ports reached a peak of over 630 units in late 2025, following several years of volatile but generally increasing growth."
+              }
+            ],
+            "tier": "weak-heuristic"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFd8GVbWIAAvgat.jpg",
+              "semanticPartial": {
+                "measuredProperty": "count",
+                "domainObject": "transport",
+                "statisticType": "count",
+                "aggregation": "max"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WP0PD1A7H3TA56PTAG",
+                  "label": "Heat pump installations",
+                  "matchedFacets": [
+                    "measuredProperty"
+                  ],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "heat pump",
+                        "transport"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "stock"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "count",
+                    "domainObject": "heat pump",
+                    "technologyOrFuel": "heat pump",
+                    "statisticType": "stock",
+                    "unitFamily": "dimensionless"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+                  "label": "Clean electricity share",
+                  "matchedFacets": [],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "count",
+                        "share"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "electricity",
+                        "transport"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "share"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 4,
+                  "semanticPartial": {
+                    "measuredProperty": "share",
+                    "domainObject": "electricity",
+                    "statisticType": "share",
+                    "unitFamily": "dimensionless"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                  "label": "Data center power demand",
+                  "matchedFacets": [],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "count",
+                        "demand"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "data center",
+                        "transport"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "stock"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 4,
+                  "semanticPartial": {
+                    "measuredProperty": "demand",
+                    "domainObject": "data center",
+                    "statisticType": "stock",
+                    "unitFamily": "power"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KP172ZREQSTR3BEW29TQJ7HY",
+                  "label": "Lignite production",
+                  "matchedFacets": [],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "count",
+                        "supply"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "flow"
+                      ]
+                    },
+                    {
+                      "facet": "aggregation",
+                      "values": [
+                        "max",
+                        "sum"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "supply",
+                    "technologyOrFuel": "brown coal",
+                    "statisticType": "flow",
+                    "aggregation": "sum",
+                    "unitFamily": "energy"
+                  }
+                },
+                {
+                  "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNTF139XKP1XD29BF8",
+                  "label": "Offshore wind capital cost",
+                  "matchedFacets": [],
+                  "mismatchedFacets": [
+                    {
+                      "facet": "measuredProperty",
+                      "values": [
+                        "count",
+                        "price"
+                      ]
+                    },
+                    {
+                      "facet": "domainObject",
+                      "values": [
+                        "offshore wind farm",
+                        "transport"
+                      ]
+                    },
+                    {
+                      "facet": "statisticType",
+                      "values": [
+                        "count",
+                        "price"
+                      ]
+                    }
+                  ],
+                  "subsumptionRatio": 0,
+                  "partialSpecificity": 5,
+                  "semanticPartial": {
+                    "measuredProperty": "price",
+                    "domainObject": "offshore wind farm",
+                    "technologyOrFuel": "offshore wind",
+                    "statisticType": "price",
+                    "unitFamily": "currency"
+                  }
+                }
+              ],
+              "reason": "no-candidates"
+            }
+          ],
+          "gap": {
+            "partial": {
+              "measuredProperty": "count",
+              "domainObject": "transport",
+              "statisticType": "count",
+              "aggregation": "max"
+            },
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WP0PD1A7H3TA56PTAG",
+                "label": "Heat pump installations",
+                "matchedFacets": [
+                  "measuredProperty"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "heat pump",
+                      "transport"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "count",
+                      "stock"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "count",
+                  "domainObject": "heat pump",
+                  "technologyOrFuel": "heat pump",
+                  "statisticType": "stock",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+                "label": "Clean electricity share",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "count",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "transport"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "count",
+                      "share"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "share",
+                  "domainObject": "electricity",
+                  "statisticType": "share",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNY9KBANGDA9W9BKAA",
+                "label": "Data center power demand",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "count",
+                      "demand"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "data center",
+                      "transport"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "count",
+                      "stock"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "data center",
+                  "statisticType": "stock",
+                  "unitFamily": "power"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KP172ZREQSTR3BEW29TQJ7HY",
+                "label": "Lignite production",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "count",
+                      "supply"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "count",
+                      "flow"
+                    ]
+                  },
+                  {
+                    "facet": "aggregation",
+                    "values": [
+                      "max",
+                      "sum"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "supply",
+                  "technologyOrFuel": "brown coal",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNTF139XKP1XD29BF8",
+                "label": "Offshore wind capital cost",
+                "matchedFacets": [],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "count",
+                      "price"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "offshore wind farm",
+                      "transport"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "count",
+                      "price"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "price",
+                  "domainObject": "offshore wind farm",
+                  "technologyOrFuel": "offshore wind",
+                  "statisticType": "price",
+                  "unitFamily": "currency"
+                }
+              }
+            ],
+            "reason": "no-candidates",
+            "context": {
+              "attachedContext": {}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "error": null
+}

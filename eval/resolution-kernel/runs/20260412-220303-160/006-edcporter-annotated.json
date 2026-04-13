@@ -1,0 +1,810 @@
+{
+  "kind": "annotated",
+  "slug": "006-edcporter",
+  "postUri": "x://1085245460825149443/status/2042159952765055188",
+  "expected": {
+    "postUri": "x://1085245460825149443/status/2042159952765055188",
+    "outcomeTag": "Resolved",
+    "expectedVariableIds": [
+      "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71"
+    ],
+    "expectedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9",
+    "notes": "seed 006-edcporter: gas prices since Iran war"
+  },
+  "selectedBundle": {
+    "assetKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg",
+    "actual": {
+      "outcomeTag": "NoMatch",
+      "boundVariableIds": [],
+      "candidateVariableIds": [],
+      "gapReason": null,
+      "matchedFacetCounts": [],
+      "agentId": null,
+      "confidence": null,
+      "tier": null
+    },
+    "trace": {
+      "bundle": {
+        "postUri": "x://1085245460825149443/status/2042159952765055188",
+        "assetKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg",
+        "postText": [
+          "While gas prices remain volatile a month into the Iran war, they have consistently stayed higher than pre-crisis levels throughout the last month.  \n\nIn Europe, gas is used not only for heating homes but also to generate electricity, especially during hours when demand cannot be met by renewables.  \n\nWith peak prices now having to take a new gas price regime into account, but midday prices still being set by renewables, the daily spread between highest-priced and lowest-priced hours widens.  \n\nFor batteries, that is good news: charging at low prices in the middle of the day, but earning higher peak prices when discharging into the evening peak set by gas (no European country so far has enough battery capacity to displace gas completely during peak hours).  \n\nOf course, spreads typically widen from February to March in line with seasonal expectations - more solar irradiation, more hours where renewables can set the price at or near zero."
+        ],
+        "chartTitle": "Battery spreads rose sharply in March driven by higher gas prices",
+        "xAxis": {
+          "label": null,
+          "unit": null
+        },
+        "yAxis": {
+          "label": "Price spread",
+          "unit": "€/MWh"
+        },
+        "series": [
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:0",
+            "legendLabel": "Germany",
+            "unit": "€/MWh"
+          },
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:1",
+            "legendLabel": "Spain",
+            "unit": "€/MWh"
+          },
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:2",
+            "legendLabel": "France",
+            "unit": "€/MWh"
+          },
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:3",
+            "legendLabel": "GB",
+            "unit": "€/MWh"
+          },
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:4",
+            "legendLabel": "Italy",
+            "unit": "€/MWh"
+          },
+          {
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:5",
+            "legendLabel": "Poland",
+            "unit": "€/MWh"
+          }
+        ],
+        "keyFindings": [
+          "Battery price spreads across major European markets saw a significant upward trend in March 2026, with Poland and Germany reaching 7-day average peaks above 200 €/MWh.",
+          "Daily volatility was extreme in early March, with individual daily spikes in some markets exceeding 300 €/MWh.",
+          "Great Britain (GB) consistently exhibited the lowest spreads among the group, rarely exceeding 100 €/MWh even during the March peak.",
+          "The spreads in Italy and Spain were more moderate compared to Central European markets like Germany and Poland but still followed the general upward trend in March.",
+          "By late March and early April, spreads began to converge and stabilize between 100 and 150 €/MWh for most continental European markets."
+        ],
+        "sourceLines": [
+          {
+            "sourceText": "Source: ENTSO-E, N2EX, Modo Energy"
+          }
+        ],
+        "publisherHints": [
+          {
+            "label": "ENTSO-E",
+            "confidence": 1
+          },
+          {
+            "label": "Modo Energy",
+            "confidence": 0.5
+          },
+          {
+            "label": "N2EX",
+            "confidence": 0.5
+          },
+          {
+            "label": "MODO ENERGY",
+            "confidence": 0.3
+          }
+        ],
+        "temporalCoverage": {
+          "startDate": "2026-02",
+          "endDate": "2026-04"
+        }
+      },
+      "assetKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg",
+      "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9",
+      "interpreted": {
+        "_tag": "Hypothesis",
+        "bundle": {
+          "postUri": "x://1085245460825149443/status/2042159952765055188",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg",
+          "postText": [
+            "While gas prices remain volatile a month into the Iran war, they have consistently stayed higher than pre-crisis levels throughout the last month.  \n\nIn Europe, gas is used not only for heating homes but also to generate electricity, especially during hours when demand cannot be met by renewables.  \n\nWith peak prices now having to take a new gas price regime into account, but midday prices still being set by renewables, the daily spread between highest-priced and lowest-priced hours widens.  \n\nFor batteries, that is good news: charging at low prices in the middle of the day, but earning higher peak prices when discharging into the evening peak set by gas (no European country so far has enough battery capacity to displace gas completely during peak hours).  \n\nOf course, spreads typically widen from February to March in line with seasonal expectations - more solar irradiation, more hours where renewables can set the price at or near zero."
+          ],
+          "chartTitle": "Battery spreads rose sharply in March driven by higher gas prices",
+          "xAxis": {
+            "label": null,
+            "unit": null
+          },
+          "yAxis": {
+            "label": "Price spread",
+            "unit": "€/MWh"
+          },
+          "series": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:0",
+              "legendLabel": "Germany",
+              "unit": "€/MWh"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:1",
+              "legendLabel": "Spain",
+              "unit": "€/MWh"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:2",
+              "legendLabel": "France",
+              "unit": "€/MWh"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:3",
+              "legendLabel": "GB",
+              "unit": "€/MWh"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:4",
+              "legendLabel": "Italy",
+              "unit": "€/MWh"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:5",
+              "legendLabel": "Poland",
+              "unit": "€/MWh"
+            }
+          ],
+          "keyFindings": [
+            "Battery price spreads across major European markets saw a significant upward trend in March 2026, with Poland and Germany reaching 7-day average peaks above 200 €/MWh.",
+            "Daily volatility was extreme in early March, with individual daily spikes in some markets exceeding 300 €/MWh.",
+            "Great Britain (GB) consistently exhibited the lowest spreads among the group, rarely exceeding 100 €/MWh even during the March peak.",
+            "The spreads in Italy and Spain were more moderate compared to Central European markets like Germany and Poland but still followed the general upward trend in March.",
+            "By late March and early April, spreads began to converge and stabilize between 100 and 150 €/MWh for most continental European markets."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Source: ENTSO-E, N2EX, Modo Energy"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "ENTSO-E",
+              "confidence": 1
+            },
+            {
+              "label": "Modo Energy",
+              "confidence": 0.5
+            },
+            {
+              "label": "N2EX",
+              "confidence": 0.5
+            },
+            {
+              "label": "MODO ENERGY",
+              "confidence": 0.3
+            }
+          ],
+          "temporalCoverage": {
+            "startDate": "2026-02",
+            "endDate": "2026-04"
+          }
+        },
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "price",
+            "unitFamily": "energy",
+            "domainObject": "natural gas",
+            "technologyOrFuel": "battery",
+            "aggregation": "max"
+          },
+          "attachedContext": {
+            "time": {
+              "start": "2026-02",
+              "end": "2026-04"
+            }
+          },
+          "items": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:0",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "€/MWh",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:0"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:1",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "€/MWh",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:1"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:2",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "€/MWh",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:2"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:3",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "€/MWh",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:3"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:4",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "€/MWh",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:4"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:5",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "€/MWh",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:5"
+                }
+              ]
+            }
+          ],
+          "evidence": [
+            {
+              "source": "y-axis",
+              "text": "Price spread"
+            },
+            {
+              "source": "y-axis",
+              "text": "€/MWh"
+            },
+            {
+              "source": "chart-title",
+              "text": "Battery spreads rose sharply in March driven by higher gas prices"
+            },
+            {
+              "source": "key-finding",
+              "text": "Battery price spreads across major European markets saw a significant upward trend in March 2026, with Poland"
+            },
+            {
+              "source": "key-finding",
+              "text": "Germany reaching 7-day average peaks above 200 €/MWh."
+            },
+            {
+              "source": "key-finding",
+              "text": "Daily volatility was extreme in early March, with individual daily spikes in some markets exceeding 300 €/MWh."
+            },
+            {
+              "source": "key-finding",
+              "text": "Great Britain (GB) consistently exhibited the lowest spreads among the group, rarely exceeding 100 €/MWh even during the March peak."
+            },
+            {
+              "source": "key-finding",
+              "text": "150 €/MWh for most continental European markets."
+            },
+            {
+              "source": "series-label",
+              "text": "€/MWh",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:0"
+            },
+            {
+              "source": "series-label",
+              "text": "€/MWh",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:1"
+            },
+            {
+              "source": "series-label",
+              "text": "€/MWh",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:2"
+            },
+            {
+              "source": "series-label",
+              "text": "€/MWh",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:3"
+            },
+            {
+              "source": "series-label",
+              "text": "€/MWh",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:4"
+            },
+            {
+              "source": "series-label",
+              "text": "€/MWh",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:5"
+            }
+          ],
+          "tier": "weak-heuristic"
+        }
+      },
+      "bound": {
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "price",
+            "unitFamily": "energy",
+            "domainObject": "natural gas",
+            "technologyOrFuel": "battery",
+            "aggregation": "max"
+          },
+          "attachedContext": {
+            "time": {
+              "start": "2026-02",
+              "end": "2026-04"
+            }
+          },
+          "items": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:0",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "€/MWh",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:0"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:1",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "€/MWh",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:1"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:2",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "€/MWh",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:2"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:3",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "€/MWh",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:3"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:4",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "€/MWh",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:4"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:5",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "€/MWh",
+                  "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:5"
+                }
+              ]
+            }
+          ],
+          "evidence": [
+            {
+              "source": "y-axis",
+              "text": "Price spread"
+            },
+            {
+              "source": "y-axis",
+              "text": "€/MWh"
+            },
+            {
+              "source": "chart-title",
+              "text": "Battery spreads rose sharply in March driven by higher gas prices"
+            },
+            {
+              "source": "key-finding",
+              "text": "Battery price spreads across major European markets saw a significant upward trend in March 2026, with Poland"
+            },
+            {
+              "source": "key-finding",
+              "text": "Germany reaching 7-day average peaks above 200 €/MWh."
+            },
+            {
+              "source": "key-finding",
+              "text": "Daily volatility was extreme in early March, with individual daily spikes in some markets exceeding 300 €/MWh."
+            },
+            {
+              "source": "key-finding",
+              "text": "Great Britain (GB) consistently exhibited the lowest spreads among the group, rarely exceeding 100 €/MWh even during the March peak."
+            },
+            {
+              "source": "key-finding",
+              "text": "150 €/MWh for most continental European markets."
+            },
+            {
+              "source": "series-label",
+              "text": "€/MWh",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:0"
+            },
+            {
+              "source": "series-label",
+              "text": "€/MWh",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:1"
+            },
+            {
+              "source": "series-label",
+              "text": "€/MWh",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:2"
+            },
+            {
+              "source": "series-label",
+              "text": "€/MWh",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:3"
+            },
+            {
+              "source": "series-label",
+              "text": "€/MWh",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:4"
+            },
+            {
+              "source": "series-label",
+              "text": "€/MWh",
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:5"
+            }
+          ],
+          "tier": "weak-heuristic"
+        },
+        "items": [
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:0",
+            "semanticPartial": {
+              "measuredProperty": "price",
+              "unitFamily": "energy",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "battery",
+              "aggregation": "max"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2026-02",
+                "end": "2026-04"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "€/MWh",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:0"
+              }
+            ],
+            "candidates": [],
+            "missingRequired": [
+              "statisticType"
+            ],
+            "reason": "missing-required"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:1",
+            "semanticPartial": {
+              "measuredProperty": "price",
+              "unitFamily": "energy",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "battery",
+              "aggregation": "max"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2026-02",
+                "end": "2026-04"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "€/MWh",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:1"
+              }
+            ],
+            "candidates": [],
+            "missingRequired": [
+              "statisticType"
+            ],
+            "reason": "missing-required"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:2",
+            "semanticPartial": {
+              "measuredProperty": "price",
+              "unitFamily": "energy",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "battery",
+              "aggregation": "max"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2026-02",
+                "end": "2026-04"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "€/MWh",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:2"
+              }
+            ],
+            "candidates": [],
+            "missingRequired": [
+              "statisticType"
+            ],
+            "reason": "missing-required"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:3",
+            "semanticPartial": {
+              "measuredProperty": "price",
+              "unitFamily": "energy",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "battery",
+              "aggregation": "max"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2026-02",
+                "end": "2026-04"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "€/MWh",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:3"
+              }
+            ],
+            "candidates": [],
+            "missingRequired": [
+              "statisticType"
+            ],
+            "reason": "missing-required"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:4",
+            "semanticPartial": {
+              "measuredProperty": "price",
+              "unitFamily": "energy",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "battery",
+              "aggregation": "max"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2026-02",
+                "end": "2026-04"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "€/MWh",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:4"
+              }
+            ],
+            "candidates": [],
+            "missingRequired": [
+              "statisticType"
+            ],
+            "reason": "missing-required"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:5",
+            "semanticPartial": {
+              "measuredProperty": "price",
+              "unitFamily": "energy",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "battery",
+              "aggregation": "max"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2026-02",
+                "end": "2026-04"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "€/MWh",
+                "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:5"
+              }
+            ],
+            "candidates": [],
+            "missingRequired": [
+              "statisticType"
+            ],
+            "reason": "missing-required"
+          }
+        ],
+        "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9"
+      },
+      "outcome": {
+        "_tag": "NoMatch",
+        "bundle": {
+          "postUri": "x://1085245460825149443/status/2042159952765055188",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg",
+          "postText": [
+            "While gas prices remain volatile a month into the Iran war, they have consistently stayed higher than pre-crisis levels throughout the last month.  \n\nIn Europe, gas is used not only for heating homes but also to generate electricity, especially during hours when demand cannot be met by renewables.  \n\nWith peak prices now having to take a new gas price regime into account, but midday prices still being set by renewables, the daily spread between highest-priced and lowest-priced hours widens.  \n\nFor batteries, that is good news: charging at low prices in the middle of the day, but earning higher peak prices when discharging into the evening peak set by gas (no European country so far has enough battery capacity to displace gas completely during peak hours).  \n\nOf course, spreads typically widen from February to March in line with seasonal expectations - more solar irradiation, more hours where renewables can set the price at or near zero."
+          ],
+          "chartTitle": "Battery spreads rose sharply in March driven by higher gas prices",
+          "xAxis": {
+            "label": null,
+            "unit": null
+          },
+          "yAxis": {
+            "label": "Price spread",
+            "unit": "€/MWh"
+          },
+          "series": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:0",
+              "legendLabel": "Germany",
+              "unit": "€/MWh"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:1",
+              "legendLabel": "Spain",
+              "unit": "€/MWh"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:2",
+              "legendLabel": "France",
+              "unit": "€/MWh"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:3",
+              "legendLabel": "GB",
+              "unit": "€/MWh"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:4",
+              "legendLabel": "Italy",
+              "unit": "€/MWh"
+            },
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/HFc1dP2XMAA5Aco.jpg:series:5",
+              "legendLabel": "Poland",
+              "unit": "€/MWh"
+            }
+          ],
+          "keyFindings": [
+            "Battery price spreads across major European markets saw a significant upward trend in March 2026, with Poland and Germany reaching 7-day average peaks above 200 €/MWh.",
+            "Daily volatility was extreme in early March, with individual daily spikes in some markets exceeding 300 €/MWh.",
+            "Great Britain (GB) consistently exhibited the lowest spreads among the group, rarely exceeding 100 €/MWh even during the March peak.",
+            "The spreads in Italy and Spain were more moderate compared to Central European markets like Germany and Poland but still followed the general upward trend in March.",
+            "By late March and early April, spreads began to converge and stabilize between 100 and 150 €/MWh for most continental European markets."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Source: ENTSO-E, N2EX, Modo Energy"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "ENTSO-E",
+              "confidence": 1
+            },
+            {
+              "label": "Modo Energy",
+              "confidence": 0.5
+            },
+            {
+              "label": "N2EX",
+              "confidence": 0.5
+            },
+            {
+              "label": "MODO ENERGY",
+              "confidence": 0.3
+            }
+          ],
+          "temporalCoverage": {
+            "startDate": "2026-02",
+            "endDate": "2026-04"
+          }
+        },
+        "reason": "Kernel could not bind an underspecified partial"
+      }
+    }
+  },
+  "checks": [
+    {
+      "kind": "outcome-tag",
+      "pass": false,
+      "expected": "Resolved",
+      "actual": "NoMatch"
+    },
+    {
+      "kind": "variable-ids",
+      "pass": false,
+      "expected": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71"
+      ],
+      "missing": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71"
+      ],
+      "unexpected": []
+    },
+    {
+      "kind": "agent-scope",
+      "pass": false,
+      "expected": "https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9",
+      "actual": null
+    }
+  ],
+  "hasFindings": true,
+  "error": null
+}

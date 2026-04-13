@@ -1,0 +1,824 @@
+{
+  "kind": "annotated",
+  "slug": "002-1reluctantcog",
+  "postUri": "x://1521502626323574785/status/1978187907778359345",
+  "expected": {
+    "postUri": "x://1521502626323574785/status/1978187907778359345",
+    "outcomeTag": "Resolved",
+    "expectedVariableIds": [
+      "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71"
+    ],
+    "expectedAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+    "notes": "seed 002-1reluctantcog: LBNL study"
+  },
+  "selectedBundle": {
+    "assetKey": "embed:0:https://pbs.twimg.com/media/G3Pp1RbW0AAJQy_.jpg",
+    "actual": {
+      "outcomeTag": "OutOfRegistry",
+      "boundVariableIds": [],
+      "candidateVariableIds": [],
+      "gapReason": "no-candidates",
+      "matchedFacetCounts": [],
+      "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+      "confidence": null,
+      "tier": null
+    },
+    "trace": {
+      "bundle": {
+        "postUri": "x://1521502626323574785/status/1978187907778359345",
+        "assetKey": "embed:0:https://pbs.twimg.com/media/G3Pp1RbW0AAJQy_.jpg",
+        "postText": [
+          "Congrats and thank you to @LBNL on a great and needed study on rising retail electricity rates - which should be required reading for policy & media conversations. Thorough and thoughtful review of drivers including T&D, natural gas prices, renewable policies, and yes - load growth. Unsurprisingly load growth has been correlated with decreasing prices over the last several years! \n\nAuthors are very careful, and correctly so, about what their data can demonstrate throughout the study. They are right to point out risk that this demand growth-retail rates correlation could shift in the future. I'd argue this is mostly a question of state and federal policy - to what extent do states lean in and greenlight rapid supply + grid investment, especially under new models that limit ratepayer exposure!"
+        ],
+        "chartTitle": "Load growth at the state level has tended to depress retail electricity prices in recent years...unclear to what degree this will hold in the future",
+        "series": [],
+        "keyFindings": [
+          "States with the highest load growth over the last 5 years generally experienced real retail electricity price declines, often exceeding 1 ¢/kWh.",
+          "Price reductions are attributed to spreading fixed maintenance costs over a larger volume of demand, thereby reducing the per-unit cost.",
+          "Commercial customers were the primary drivers of load growth and the main beneficiaries of subsequent price reductions.",
+          "States with declining electricity load tended to experience increases in retail prices over the same period.",
+          "The historical relationship where growth lowers prices may not persist if future demand requires significant and costly supply or delivery infrastructure expansion."
+        ],
+        "sourceLines": [
+          {
+            "sourceText": "Source: EIA"
+          },
+          {
+            "sourceText": "Sources: ¹ Fares and King (2017)"
+          }
+        ],
+        "publisherHints": [
+          {
+            "label": "EIA",
+            "confidence": 1
+          },
+          {
+            "label": "Lawrence Berkeley National Laboratory",
+            "confidence": 0.5
+          },
+          {
+            "label": "The Brattle Group",
+            "confidence": 0.5
+          },
+          {
+            "label": "Datawrapper",
+            "confidence": 0.5
+          }
+        ]
+      },
+      "assetKey": "embed:0:https://pbs.twimg.com/media/G3Pp1RbW0AAJQy_.jpg",
+      "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+      "interpreted": {
+        "_tag": "Hypothesis",
+        "bundle": {
+          "postUri": "x://1521502626323574785/status/1978187907778359345",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/G3Pp1RbW0AAJQy_.jpg",
+          "postText": [
+            "Congrats and thank you to @LBNL on a great and needed study on rising retail electricity rates - which should be required reading for policy & media conversations. Thorough and thoughtful review of drivers including T&D, natural gas prices, renewable policies, and yes - load growth. Unsurprisingly load growth has been correlated with decreasing prices over the last several years! \n\nAuthors are very careful, and correctly so, about what their data can demonstrate throughout the study. They are right to point out risk that this demand growth-retail rates correlation could shift in the future. I'd argue this is mostly a question of state and federal policy - to what extent do states lean in and greenlight rapid supply + grid investment, especially under new models that limit ratepayer exposure!"
+          ],
+          "chartTitle": "Load growth at the state level has tended to depress retail electricity prices in recent years...unclear to what degree this will hold in the future",
+          "series": [],
+          "keyFindings": [
+            "States with the highest load growth over the last 5 years generally experienced real retail electricity price declines, often exceeding 1 ¢/kWh.",
+            "Price reductions are attributed to spreading fixed maintenance costs over a larger volume of demand, thereby reducing the per-unit cost.",
+            "Commercial customers were the primary drivers of load growth and the main beneficiaries of subsequent price reductions.",
+            "States with declining electricity load tended to experience increases in retail prices over the same period.",
+            "The historical relationship where growth lowers prices may not persist if future demand requires significant and costly supply or delivery infrastructure expansion."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Source: EIA"
+            },
+            {
+              "sourceText": "Sources: ¹ Fares and King (2017)"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "EIA",
+              "confidence": 1
+            },
+            {
+              "label": "Lawrence Berkeley National Laboratory",
+              "confidence": 0.5
+            },
+            {
+              "label": "The Brattle Group",
+              "confidence": 0.5
+            },
+            {
+              "label": "Datawrapper",
+              "confidence": 0.5
+            }
+          ]
+        },
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "demand",
+            "domainObject": "electricity",
+            "statisticType": "price"
+          },
+          "attachedContext": {},
+          "items": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/G3Pp1RbW0AAJQy_.jpg",
+              "partial": {},
+              "evidence": []
+            }
+          ],
+          "evidence": [
+            {
+              "source": "chart-title",
+              "text": "Load growth at the state level has tended to depress retail electricity prices in recent years...unclear to what degree this will hold in the future"
+            },
+            {
+              "source": "key-finding",
+              "text": "Price reductions are attributed to spreading fixed maintenance costs over a larger volume of demand, thereby reducing the per-unit cost."
+            },
+            {
+              "source": "key-finding",
+              "text": "States with declining electricity load tended to experience increases in retail prices over the same period."
+            },
+            {
+              "source": "key-finding",
+              "text": "The historical relationship where growth lowers prices may not persist if future demand requires significant"
+            },
+            {
+              "source": "post-text",
+              "text": "needed study on rising retail electricity rates - which should be required reading for policy & media conversations. Thorough"
+            },
+            {
+              "source": "post-text",
+              "text": "yes - load growth. Unsurprisingly load growth has been correlated with decreasing prices over the last several years!"
+            },
+            {
+              "source": "post-text",
+              "text": "correctly so, about what their data can demonstrate throughout the study. They are right to point out risk that this demand growth-retail rates correlation could shift in the future. I'd argue this is mostly a question of state"
+            }
+          ],
+          "tier": "weak-heuristic"
+        }
+      },
+      "bound": {
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "demand",
+            "domainObject": "electricity",
+            "statisticType": "price"
+          },
+          "attachedContext": {},
+          "items": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/G3Pp1RbW0AAJQy_.jpg",
+              "partial": {},
+              "evidence": []
+            }
+          ],
+          "evidence": [
+            {
+              "source": "chart-title",
+              "text": "Load growth at the state level has tended to depress retail electricity prices in recent years...unclear to what degree this will hold in the future"
+            },
+            {
+              "source": "key-finding",
+              "text": "Price reductions are attributed to spreading fixed maintenance costs over a larger volume of demand, thereby reducing the per-unit cost."
+            },
+            {
+              "source": "key-finding",
+              "text": "States with declining electricity load tended to experience increases in retail prices over the same period."
+            },
+            {
+              "source": "key-finding",
+              "text": "The historical relationship where growth lowers prices may not persist if future demand requires significant"
+            },
+            {
+              "source": "post-text",
+              "text": "needed study on rising retail electricity rates - which should be required reading for policy & media conversations. Thorough"
+            },
+            {
+              "source": "post-text",
+              "text": "yes - load growth. Unsurprisingly load growth has been correlated with decreasing prices over the last several years!"
+            },
+            {
+              "source": "post-text",
+              "text": "correctly so, about what their data can demonstrate throughout the study. They are right to point out risk that this demand growth-retail rates correlation could shift in the future. I'd argue this is mostly a question of state"
+            }
+          ],
+          "tier": "weak-heuristic"
+        },
+        "items": [
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/G3Pp1RbW0AAJQy_.jpg",
+            "semanticPartial": {
+              "measuredProperty": "demand",
+              "domainObject": "electricity",
+              "statisticType": "price"
+            },
+            "attachedContext": {},
+            "evidence": [],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                "label": "Electricity demand",
+                "matchedFacets": [
+                  "measuredProperty",
+                  "domainObject"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "price"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
+                "label": "Wholesale electricity price",
+                "matchedFacets": [
+                  "domainObject",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "demand",
+                      "price"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "price",
+                  "domainObject": "electricity",
+                  "statisticType": "price",
+                  "aggregation": "average",
+                  "unitFamily": "currency_per_energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN52GGSKRQ0PP5V8V4",
+                "label": "Battery pack price",
+                "matchedFacets": [
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "demand",
+                      "price"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "lithium-ion battery pack"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "price",
+                  "domainObject": "lithium-ion battery pack",
+                  "technologyOrFuel": "battery",
+                  "statisticType": "price",
+                  "aggregation": "average",
+                  "unitFamily": "currency_per_energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+                "label": "Clean electricity share",
+                "matchedFacets": [
+                  "domainObject"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "demand",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "price",
+                      "share"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "share",
+                  "domainObject": "electricity",
+                  "statisticType": "share",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+                "label": "Coal electricity generation",
+                "matchedFacets": [
+                  "domainObject"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "demand",
+                      "generation"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "price"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "coal",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "reason": "no-candidates"
+          }
+        ],
+        "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB"
+      },
+      "outcome": {
+        "_tag": "OutOfRegistry",
+        "bundle": {
+          "postUri": "x://1521502626323574785/status/1978187907778359345",
+          "assetKey": "embed:0:https://pbs.twimg.com/media/G3Pp1RbW0AAJQy_.jpg",
+          "postText": [
+            "Congrats and thank you to @LBNL on a great and needed study on rising retail electricity rates - which should be required reading for policy & media conversations. Thorough and thoughtful review of drivers including T&D, natural gas prices, renewable policies, and yes - load growth. Unsurprisingly load growth has been correlated with decreasing prices over the last several years! \n\nAuthors are very careful, and correctly so, about what their data can demonstrate throughout the study. They are right to point out risk that this demand growth-retail rates correlation could shift in the future. I'd argue this is mostly a question of state and federal policy - to what extent do states lean in and greenlight rapid supply + grid investment, especially under new models that limit ratepayer exposure!"
+          ],
+          "chartTitle": "Load growth at the state level has tended to depress retail electricity prices in recent years...unclear to what degree this will hold in the future",
+          "series": [],
+          "keyFindings": [
+            "States with the highest load growth over the last 5 years generally experienced real retail electricity price declines, often exceeding 1 ¢/kWh.",
+            "Price reductions are attributed to spreading fixed maintenance costs over a larger volume of demand, thereby reducing the per-unit cost.",
+            "Commercial customers were the primary drivers of load growth and the main beneficiaries of subsequent price reductions.",
+            "States with declining electricity load tended to experience increases in retail prices over the same period.",
+            "The historical relationship where growth lowers prices may not persist if future demand requires significant and costly supply or delivery infrastructure expansion."
+          ],
+          "sourceLines": [
+            {
+              "sourceText": "Source: EIA"
+            },
+            {
+              "sourceText": "Sources: ¹ Fares and King (2017)"
+            }
+          ],
+          "publisherHints": [
+            {
+              "label": "EIA",
+              "confidence": 1
+            },
+            {
+              "label": "Lawrence Berkeley National Laboratory",
+              "confidence": 0.5
+            },
+            {
+              "label": "The Brattle Group",
+              "confidence": 0.5
+            },
+            {
+              "label": "Datawrapper",
+              "confidence": 0.5
+            }
+          ]
+        },
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "demand",
+            "domainObject": "electricity",
+            "statisticType": "price"
+          },
+          "attachedContext": {},
+          "items": [
+            {
+              "itemKey": "embed:0:https://pbs.twimg.com/media/G3Pp1RbW0AAJQy_.jpg",
+              "partial": {},
+              "evidence": []
+            }
+          ],
+          "evidence": [
+            {
+              "source": "chart-title",
+              "text": "Load growth at the state level has tended to depress retail electricity prices in recent years...unclear to what degree this will hold in the future"
+            },
+            {
+              "source": "key-finding",
+              "text": "Price reductions are attributed to spreading fixed maintenance costs over a larger volume of demand, thereby reducing the per-unit cost."
+            },
+            {
+              "source": "key-finding",
+              "text": "States with declining electricity load tended to experience increases in retail prices over the same period."
+            },
+            {
+              "source": "key-finding",
+              "text": "The historical relationship where growth lowers prices may not persist if future demand requires significant"
+            },
+            {
+              "source": "post-text",
+              "text": "needed study on rising retail electricity rates - which should be required reading for policy & media conversations. Thorough"
+            },
+            {
+              "source": "post-text",
+              "text": "yes - load growth. Unsurprisingly load growth has been correlated with decreasing prices over the last several years!"
+            },
+            {
+              "source": "post-text",
+              "text": "correctly so, about what their data can demonstrate throughout the study. They are right to point out risk that this demand growth-retail rates correlation could shift in the future. I'd argue this is mostly a question of state"
+            }
+          ],
+          "tier": "weak-heuristic"
+        },
+        "items": [
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://pbs.twimg.com/media/G3Pp1RbW0AAJQy_.jpg",
+            "semanticPartial": {
+              "measuredProperty": "demand",
+              "domainObject": "electricity",
+              "statisticType": "price"
+            },
+            "attachedContext": {},
+            "evidence": [],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                "label": "Electricity demand",
+                "matchedFacets": [
+                  "measuredProperty",
+                  "domainObject"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "price"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
+                "label": "Wholesale electricity price",
+                "matchedFacets": [
+                  "domainObject",
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "demand",
+                      "price"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "price",
+                  "domainObject": "electricity",
+                  "statisticType": "price",
+                  "aggregation": "average",
+                  "unitFamily": "currency_per_energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN52GGSKRQ0PP5V8V4",
+                "label": "Battery pack price",
+                "matchedFacets": [
+                  "statisticType"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "demand",
+                      "price"
+                    ]
+                  },
+                  {
+                    "facet": "domainObject",
+                    "values": [
+                      "electricity",
+                      "lithium-ion battery pack"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "price",
+                  "domainObject": "lithium-ion battery pack",
+                  "technologyOrFuel": "battery",
+                  "statisticType": "price",
+                  "aggregation": "average",
+                  "unitFamily": "currency_per_energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+                "label": "Clean electricity share",
+                "matchedFacets": [
+                  "domainObject"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "demand",
+                      "share"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "price",
+                      "share"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 4,
+                "semanticPartial": {
+                  "measuredProperty": "share",
+                  "domainObject": "electricity",
+                  "statisticType": "share",
+                  "unitFamily": "dimensionless"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+                "label": "Coal electricity generation",
+                "matchedFacets": [
+                  "domainObject"
+                ],
+                "mismatchedFacets": [
+                  {
+                    "facet": "measuredProperty",
+                    "values": [
+                      "demand",
+                      "generation"
+                    ]
+                  },
+                  {
+                    "facet": "statisticType",
+                    "values": [
+                      "flow",
+                      "price"
+                    ]
+                  }
+                ],
+                "subsumptionRatio": 0,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "coal",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "reason": "no-candidates"
+          }
+        ],
+        "gap": {
+          "partial": {
+            "measuredProperty": "demand",
+            "domainObject": "electricity",
+            "statisticType": "price"
+          },
+          "candidates": [
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+              "label": "Electricity demand",
+              "matchedFacets": [
+                "measuredProperty",
+                "domainObject"
+              ],
+              "mismatchedFacets": [
+                {
+                  "facet": "statisticType",
+                  "values": [
+                    "flow",
+                    "price"
+                  ]
+                }
+              ],
+              "subsumptionRatio": 0,
+              "partialSpecificity": 5,
+              "semanticPartial": {
+                "measuredProperty": "demand",
+                "domainObject": "electricity",
+                "statisticType": "flow",
+                "aggregation": "sum",
+                "unitFamily": "energy"
+              }
+            },
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
+              "label": "Wholesale electricity price",
+              "matchedFacets": [
+                "domainObject",
+                "statisticType"
+              ],
+              "mismatchedFacets": [
+                {
+                  "facet": "measuredProperty",
+                  "values": [
+                    "demand",
+                    "price"
+                  ]
+                }
+              ],
+              "subsumptionRatio": 0,
+              "partialSpecificity": 5,
+              "semanticPartial": {
+                "measuredProperty": "price",
+                "domainObject": "electricity",
+                "statisticType": "price",
+                "aggregation": "average",
+                "unitFamily": "currency_per_energy"
+              }
+            },
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN52GGSKRQ0PP5V8V4",
+              "label": "Battery pack price",
+              "matchedFacets": [
+                "statisticType"
+              ],
+              "mismatchedFacets": [
+                {
+                  "facet": "measuredProperty",
+                  "values": [
+                    "demand",
+                    "price"
+                  ]
+                },
+                {
+                  "facet": "domainObject",
+                  "values": [
+                    "electricity",
+                    "lithium-ion battery pack"
+                  ]
+                }
+              ],
+              "subsumptionRatio": 0,
+              "partialSpecificity": 6,
+              "semanticPartial": {
+                "measuredProperty": "price",
+                "domainObject": "lithium-ion battery pack",
+                "technologyOrFuel": "battery",
+                "statisticType": "price",
+                "aggregation": "average",
+                "unitFamily": "currency_per_energy"
+              }
+            },
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+              "label": "Clean electricity share",
+              "matchedFacets": [
+                "domainObject"
+              ],
+              "mismatchedFacets": [
+                {
+                  "facet": "measuredProperty",
+                  "values": [
+                    "demand",
+                    "share"
+                  ]
+                },
+                {
+                  "facet": "statisticType",
+                  "values": [
+                    "price",
+                    "share"
+                  ]
+                }
+              ],
+              "subsumptionRatio": 0,
+              "partialSpecificity": 4,
+              "semanticPartial": {
+                "measuredProperty": "share",
+                "domainObject": "electricity",
+                "statisticType": "share",
+                "unitFamily": "dimensionless"
+              }
+            },
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+              "label": "Coal electricity generation",
+              "matchedFacets": [
+                "domainObject"
+              ],
+              "mismatchedFacets": [
+                {
+                  "facet": "measuredProperty",
+                  "values": [
+                    "demand",
+                    "generation"
+                  ]
+                },
+                {
+                  "facet": "statisticType",
+                  "values": [
+                    "flow",
+                    "price"
+                  ]
+                }
+              ],
+              "subsumptionRatio": 0,
+              "partialSpecificity": 6,
+              "semanticPartial": {
+                "measuredProperty": "generation",
+                "domainObject": "electricity",
+                "technologyOrFuel": "coal",
+                "statisticType": "flow",
+                "aggregation": "sum",
+                "unitFamily": "energy"
+              }
+            }
+          ],
+          "reason": "no-candidates",
+          "context": {
+            "agentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+            "attachedContext": {}
+          }
+        }
+      }
+    }
+  },
+  "checks": [
+    {
+      "kind": "outcome-tag",
+      "pass": false,
+      "expected": "Resolved",
+      "actual": "OutOfRegistry"
+    },
+    {
+      "kind": "variable-ids",
+      "pass": false,
+      "expected": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71"
+      ],
+      "missing": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71"
+      ],
+      "unexpected": []
+    },
+    {
+      "kind": "agent-scope",
+      "pass": true,
+      "expected": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+      "actual": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB"
+    }
+  ],
+  "hasFindings": true,
+  "error": null
+}

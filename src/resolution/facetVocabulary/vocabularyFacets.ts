@@ -11,9 +11,11 @@ import {
 import { makeSurfaceFormEntry } from "../../domain/surfaceForm";
 import {
   decodeJsonStringEitherWith,
-  formatSchemaParseError
+  formatSchemaParseError,
+  stringifyUnknown
 } from "../../platform/Json";
 import { normalizeLookupText } from "../normalize";
+import { CompoundSurfaceFormEntry } from "./compoundConcepts";
 import { buildVocabularyIndex } from "./SurfaceFormEntry";
 
 type VocabularyEntryCodec = Schema.Codec<any, any, never, never>;
@@ -59,6 +61,17 @@ export const VOCABULARY_FACETS: ReadonlyArray<VocabularyFacetDescriptor> = [
     facet: "policy-instrument",
     filename: "policy-instrument.json",
     codec: makeSurfaceFormEntry(Schema.String)
+  },
+  // Compound concepts use a distinct entry shape (per-facet assignments
+  // object instead of a single `canonical`). They reuse the same validate →
+  // sync pipeline by exposing a compatible codec; the collision-detection
+  // step operates on the stringified assignments object which is the
+  // correct behaviour — two compound entries with the same normalized
+  // surface form but different facet assignments is a curation bug.
+  {
+    facet: "compound-concepts",
+    filename: "compound-concepts.json",
+    codec: CompoundSurfaceFormEntry
   }
 ];
 
@@ -112,7 +125,16 @@ export const validateVocabularyJson = (
     );
   }
 
-  const indexResult = buildVocabularyIndex(descriptor.facet, decoded.success);
+  // Compound entries expose their per-facet payload as `assignments`, not
+  // `canonical`. Project them into the shape the index builder expects so
+  // collision detection still runs (two entries with the same normalized
+  // surface form but different assignments is a curation bug).
+  const indexEntries = decoded.success.map((entry: any) => ({
+    normalizedSurfaceForm: entry.normalizedSurfaceForm,
+    canonical:
+      entry.canonical ?? stringifyUnknown(entry.assignments ?? entry)
+  }));
+  const indexResult = buildVocabularyIndex(descriptor.facet, indexEntries);
   if (Result.isFailure(indexResult)) {
     return Result.fail(indexResult.failure);
   }

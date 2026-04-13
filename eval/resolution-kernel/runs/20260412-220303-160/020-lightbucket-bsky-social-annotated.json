@@ -1,0 +1,1533 @@
+{
+  "kind": "annotated",
+  "slug": "020-lightbucket-bsky-social",
+  "postUri": "at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhngjqn5nc2b",
+  "expected": {
+    "postUri": "at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhngjqn5nc2b",
+    "outcomeTag": "Resolved",
+    "expectedVariableIds": [
+      "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H"
+    ],
+    "notes": "seed 020-lightbucket: 50 years electricity decarbonisation"
+  },
+  "selectedBundle": {
+    "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i",
+    "actual": {
+      "outcomeTag": "Underspecified",
+      "boundVariableIds": [],
+      "candidateVariableIds": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+        "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+        "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+        "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+        "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2"
+      ],
+      "gapReason": "missing-required",
+      "matchedFacetCounts": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "agentId": null,
+      "confidence": null,
+      "tier": "strong-heuristic"
+    },
+    "trace": {
+      "bundle": {
+        "postUri": "at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhngjqn5nc2b",
+        "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i",
+        "postText": [
+          "50 years of electricity decarbonisation, 1975–2025,\nfor the largest four European economies,\nGermany, UK, France and Italy.\n\nFrance rather sticks out as the main success story.\n\n⸻\nRef: Low Carbon Power lowcarbonpower.org/chart"
+        ],
+        "chartTitle": "Carbon Intensity of Electricity ( gCO2eq/kWh)",
+        "xAxis": {
+          "label": null,
+          "unit": null
+        },
+        "yAxis": {
+          "label": "gCO2eq/kWh",
+          "unit": "gCO2eq/kWh"
+        },
+        "series": [
+          {
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:0",
+            "legendLabel": "Italy",
+            "unit": "gCO2eq/kWh"
+          },
+          {
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:1",
+            "legendLabel": "Germany",
+            "unit": "gCO2eq/kWh"
+          },
+          {
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:2",
+            "legendLabel": "United Kingdom",
+            "unit": "gCO2eq/kWh"
+          },
+          {
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:3",
+            "legendLabel": "France",
+            "unit": "gCO2eq/kWh"
+          }
+        ],
+        "keyFindings": [
+          "France achieved a dramatic reduction in electricity carbon intensity between 1979 and 1987, falling from nearly 500 to 100 gCO2eq/kWh, and currently maintains the lowest level at approximately 40 gCO2eq/kWh.",
+          "The United Kingdom's carbon intensity has plummeted since 2012, falling from over 450 gCO2eq/kWh to roughly 230 gCO2eq/kWh by 2023.",
+          "Germany started with the highest carbon intensity in 1975 at approximately 660 gCO2eq/kWh and has reduced that figure to around 300 gCO2eq/kWh by 2023.",
+          "Italy's carbon intensity remained relatively high and stable between 400-500 gCO2eq/kWh for decades before trending downward to approximately 320 gCO2eq/kWh after 2010.",
+          "By 2023, the United Kingdom has overtaken Germany and Italy to become the country with the second-lowest carbon intensity of electricity in this group."
+        ],
+        "sourceLines": [],
+        "publisherHints": [],
+        "temporalCoverage": {
+          "startDate": "1975",
+          "endDate": "2023"
+        }
+      },
+      "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i",
+      "agentId": null,
+      "interpreted": {
+        "_tag": "Hypothesis",
+        "bundle": {
+          "postUri": "at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhngjqn5nc2b",
+          "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i",
+          "postText": [
+            "50 years of electricity decarbonisation, 1975–2025,\nfor the largest four European economies,\nGermany, UK, France and Italy.\n\nFrance rather sticks out as the main success story.\n\n⸻\nRef: Low Carbon Power lowcarbonpower.org/chart"
+          ],
+          "chartTitle": "Carbon Intensity of Electricity ( gCO2eq/kWh)",
+          "xAxis": {
+            "label": null,
+            "unit": null
+          },
+          "yAxis": {
+            "label": "gCO2eq/kWh",
+            "unit": "gCO2eq/kWh"
+          },
+          "series": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:0",
+              "legendLabel": "Italy",
+              "unit": "gCO2eq/kWh"
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:1",
+              "legendLabel": "Germany",
+              "unit": "gCO2eq/kWh"
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:2",
+              "legendLabel": "United Kingdom",
+              "unit": "gCO2eq/kWh"
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:3",
+              "legendLabel": "France",
+              "unit": "gCO2eq/kWh"
+            }
+          ],
+          "keyFindings": [
+            "France achieved a dramatic reduction in electricity carbon intensity between 1979 and 1987, falling from nearly 500 to 100 gCO2eq/kWh, and currently maintains the lowest level at approximately 40 gCO2eq/kWh.",
+            "The United Kingdom's carbon intensity has plummeted since 2012, falling from over 450 gCO2eq/kWh to roughly 230 gCO2eq/kWh by 2023.",
+            "Germany started with the highest carbon intensity in 1975 at approximately 660 gCO2eq/kWh and has reduced that figure to around 300 gCO2eq/kWh by 2023.",
+            "Italy's carbon intensity remained relatively high and stable between 400-500 gCO2eq/kWh for decades before trending downward to approximately 320 gCO2eq/kWh after 2010.",
+            "By 2023, the United Kingdom has overtaken Germany and Italy to become the country with the second-lowest carbon intensity of electricity in this group."
+          ],
+          "sourceLines": [],
+          "publisherHints": [],
+          "temporalCoverage": {
+            "startDate": "1975",
+            "endDate": "2023"
+          }
+        },
+        "hypothesis": {
+          "sharedPartial": {
+            "unitFamily": "energy",
+            "domainObject": "electricity"
+          },
+          "attachedContext": {
+            "time": {
+              "start": "1975",
+              "end": "2023"
+            }
+          },
+          "items": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:0",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "gCO2eq/kWh",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:0"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:1",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "gCO2eq/kWh",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:1"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:2",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "gCO2eq/kWh",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:2"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:3",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "gCO2eq/kWh",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:3"
+                }
+              ]
+            }
+          ],
+          "evidence": [
+            {
+              "source": "y-axis",
+              "text": "gCO2eq/kWh"
+            },
+            {
+              "source": "y-axis",
+              "text": "gCO2eq/kWh"
+            },
+            {
+              "source": "key-finding",
+              "text": "1987, falling from nearly 500 to 100 gCO2eq/kWh,"
+            },
+            {
+              "source": "key-finding",
+              "text": "currently maintains the lowest level at approximately 40 gCO2eq/kWh."
+            },
+            {
+              "source": "key-finding",
+              "text": "has reduced that figure to around 300 gCO2eq/kWh by 2023."
+            },
+            {
+              "source": "key-finding",
+              "text": "stable between 400-500 gCO2eq/kWh for decades before trending downward to approximately 320 gCO2eq/kWh after 2010."
+            },
+            {
+              "source": "post-text",
+              "text": "50 years of electricity decarbonisation, 1975–2025,"
+            },
+            {
+              "source": "post-text",
+              "text": "Ref: Low Carbon Power lowcarbonpower.org/chart"
+            },
+            {
+              "source": "series-label",
+              "text": "gCO2eq/kWh",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:0"
+            },
+            {
+              "source": "series-label",
+              "text": "gCO2eq/kWh",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:1"
+            },
+            {
+              "source": "series-label",
+              "text": "gCO2eq/kWh",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:2"
+            },
+            {
+              "source": "series-label",
+              "text": "gCO2eq/kWh",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:3"
+            }
+          ],
+          "tier": "strong-heuristic"
+        }
+      },
+      "bound": {
+        "hypothesis": {
+          "sharedPartial": {
+            "unitFamily": "energy",
+            "domainObject": "electricity"
+          },
+          "attachedContext": {
+            "time": {
+              "start": "1975",
+              "end": "2023"
+            }
+          },
+          "items": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:0",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "gCO2eq/kWh",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:0"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:1",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "gCO2eq/kWh",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:1"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:2",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "gCO2eq/kWh",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:2"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:3",
+              "partial": {
+                "unitFamily": "energy"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "gCO2eq/kWh",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:3"
+                }
+              ]
+            }
+          ],
+          "evidence": [
+            {
+              "source": "y-axis",
+              "text": "gCO2eq/kWh"
+            },
+            {
+              "source": "y-axis",
+              "text": "gCO2eq/kWh"
+            },
+            {
+              "source": "key-finding",
+              "text": "1987, falling from nearly 500 to 100 gCO2eq/kWh,"
+            },
+            {
+              "source": "key-finding",
+              "text": "currently maintains the lowest level at approximately 40 gCO2eq/kWh."
+            },
+            {
+              "source": "key-finding",
+              "text": "has reduced that figure to around 300 gCO2eq/kWh by 2023."
+            },
+            {
+              "source": "key-finding",
+              "text": "stable between 400-500 gCO2eq/kWh for decades before trending downward to approximately 320 gCO2eq/kWh after 2010."
+            },
+            {
+              "source": "post-text",
+              "text": "50 years of electricity decarbonisation, 1975–2025,"
+            },
+            {
+              "source": "post-text",
+              "text": "Ref: Low Carbon Power lowcarbonpower.org/chart"
+            },
+            {
+              "source": "series-label",
+              "text": "gCO2eq/kWh",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:0"
+            },
+            {
+              "source": "series-label",
+              "text": "gCO2eq/kWh",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:1"
+            },
+            {
+              "source": "series-label",
+              "text": "gCO2eq/kWh",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:2"
+            },
+            {
+              "source": "series-label",
+              "text": "gCO2eq/kWh",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:3"
+            }
+          ],
+          "tier": "strong-heuristic"
+        },
+        "items": [
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:0",
+            "semanticPartial": {
+              "unitFamily": "energy",
+              "domainObject": "electricity"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "1975",
+                "end": "2023"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "gCO2eq/kWh",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:0"
+              }
+            ],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                "label": "Electricity demand",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+                "label": "Electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+                "label": "Coal electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "coal",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+                "label": "Solar electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "solar PV",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+                "label": "Wind electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "wind",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "missingRequired": [
+              "measuredProperty",
+              "statisticType"
+            ],
+            "reason": "missing-required"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:1",
+            "semanticPartial": {
+              "unitFamily": "energy",
+              "domainObject": "electricity"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "1975",
+                "end": "2023"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "gCO2eq/kWh",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:1"
+              }
+            ],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                "label": "Electricity demand",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+                "label": "Electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+                "label": "Coal electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "coal",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+                "label": "Solar electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "solar PV",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+                "label": "Wind electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "wind",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "missingRequired": [
+              "measuredProperty",
+              "statisticType"
+            ],
+            "reason": "missing-required"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:2",
+            "semanticPartial": {
+              "unitFamily": "energy",
+              "domainObject": "electricity"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "1975",
+                "end": "2023"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "gCO2eq/kWh",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:2"
+              }
+            ],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                "label": "Electricity demand",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+                "label": "Electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+                "label": "Coal electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "coal",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+                "label": "Solar electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "solar PV",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+                "label": "Wind electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "wind",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "missingRequired": [
+              "measuredProperty",
+              "statisticType"
+            ],
+            "reason": "missing-required"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:3",
+            "semanticPartial": {
+              "unitFamily": "energy",
+              "domainObject": "electricity"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "1975",
+                "end": "2023"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "gCO2eq/kWh",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:3"
+              }
+            ],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                "label": "Electricity demand",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+                "label": "Electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+                "label": "Coal electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "coal",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+                "label": "Solar electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "solar PV",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+                "label": "Wind electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "wind",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "missingRequired": [
+              "measuredProperty",
+              "statisticType"
+            ],
+            "reason": "missing-required"
+          }
+        ]
+      },
+      "outcome": {
+        "_tag": "Underspecified",
+        "bundle": {
+          "postUri": "at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhngjqn5nc2b",
+          "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i",
+          "postText": [
+            "50 years of electricity decarbonisation, 1975–2025,\nfor the largest four European economies,\nGermany, UK, France and Italy.\n\nFrance rather sticks out as the main success story.\n\n⸻\nRef: Low Carbon Power lowcarbonpower.org/chart"
+          ],
+          "chartTitle": "Carbon Intensity of Electricity ( gCO2eq/kWh)",
+          "xAxis": {
+            "label": null,
+            "unit": null
+          },
+          "yAxis": {
+            "label": "gCO2eq/kWh",
+            "unit": "gCO2eq/kWh"
+          },
+          "series": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:0",
+              "legendLabel": "Italy",
+              "unit": "gCO2eq/kWh"
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:1",
+              "legendLabel": "Germany",
+              "unit": "gCO2eq/kWh"
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:2",
+              "legendLabel": "United Kingdom",
+              "unit": "gCO2eq/kWh"
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ii2yv4lw6nju7ynpwohqvvle/bafkreibolo5bd5qtdw5mxq3sbxie2ekq2smwo4zg3fy2uwaimy5fnurv7i:series:3",
+              "legendLabel": "France",
+              "unit": "gCO2eq/kWh"
+            }
+          ],
+          "keyFindings": [
+            "France achieved a dramatic reduction in electricity carbon intensity between 1979 and 1987, falling from nearly 500 to 100 gCO2eq/kWh, and currently maintains the lowest level at approximately 40 gCO2eq/kWh.",
+            "The United Kingdom's carbon intensity has plummeted since 2012, falling from over 450 gCO2eq/kWh to roughly 230 gCO2eq/kWh by 2023.",
+            "Germany started with the highest carbon intensity in 1975 at approximately 660 gCO2eq/kWh and has reduced that figure to around 300 gCO2eq/kWh by 2023.",
+            "Italy's carbon intensity remained relatively high and stable between 400-500 gCO2eq/kWh for decades before trending downward to approximately 320 gCO2eq/kWh after 2010.",
+            "By 2023, the United Kingdom has overtaken Germany and Italy to become the country with the second-lowest carbon intensity of electricity in this group."
+          ],
+          "sourceLines": [],
+          "publisherHints": [],
+          "temporalCoverage": {
+            "startDate": "1975",
+            "endDate": "2023"
+          }
+        },
+        "partial": {
+          "unitFamily": "energy",
+          "domainObject": "electricity"
+        },
+        "missingRequired": [
+          "measuredProperty",
+          "statisticType"
+        ],
+        "gap": {
+          "partial": {
+            "unitFamily": "energy",
+            "domainObject": "electricity"
+          },
+          "missingRequired": [
+            "measuredProperty",
+            "statisticType"
+          ],
+          "candidates": [
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+              "label": "Electricity demand",
+              "matchedFacets": [
+                "domainObject",
+                "unitFamily"
+              ],
+              "mismatchedFacets": [],
+              "subsumptionRatio": 0.4,
+              "partialSpecificity": 5,
+              "semanticPartial": {
+                "measuredProperty": "demand",
+                "domainObject": "electricity",
+                "statisticType": "flow",
+                "aggregation": "sum",
+                "unitFamily": "energy"
+              }
+            },
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+              "label": "Electricity generation",
+              "matchedFacets": [
+                "domainObject",
+                "unitFamily"
+              ],
+              "mismatchedFacets": [],
+              "subsumptionRatio": 0.4,
+              "partialSpecificity": 5,
+              "semanticPartial": {
+                "measuredProperty": "generation",
+                "domainObject": "electricity",
+                "statisticType": "flow",
+                "aggregation": "sum",
+                "unitFamily": "energy"
+              }
+            },
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+              "label": "Coal electricity generation",
+              "matchedFacets": [
+                "domainObject",
+                "unitFamily"
+              ],
+              "mismatchedFacets": [],
+              "subsumptionRatio": 0.3333333333333333,
+              "partialSpecificity": 6,
+              "semanticPartial": {
+                "measuredProperty": "generation",
+                "domainObject": "electricity",
+                "technologyOrFuel": "coal",
+                "statisticType": "flow",
+                "aggregation": "sum",
+                "unitFamily": "energy"
+              }
+            },
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+              "label": "Solar electricity generation",
+              "matchedFacets": [
+                "domainObject",
+                "unitFamily"
+              ],
+              "mismatchedFacets": [],
+              "subsumptionRatio": 0.3333333333333333,
+              "partialSpecificity": 6,
+              "semanticPartial": {
+                "measuredProperty": "generation",
+                "domainObject": "electricity",
+                "technologyOrFuel": "solar PV",
+                "statisticType": "flow",
+                "aggregation": "sum",
+                "unitFamily": "energy"
+              }
+            },
+            {
+              "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+              "label": "Wind electricity generation",
+              "matchedFacets": [
+                "domainObject",
+                "unitFamily"
+              ],
+              "mismatchedFacets": [],
+              "subsumptionRatio": 0.3333333333333333,
+              "partialSpecificity": 6,
+              "semanticPartial": {
+                "measuredProperty": "generation",
+                "domainObject": "electricity",
+                "technologyOrFuel": "wind",
+                "statisticType": "flow",
+                "aggregation": "sum",
+                "unitFamily": "energy"
+              }
+            }
+          ],
+          "reason": "missing-required",
+          "context": {
+            "attachedContext": {
+              "time": {
+                "start": "1975",
+                "end": "2023"
+              }
+            }
+          }
+        },
+        "gaps": [
+          {
+            "partial": {
+              "unitFamily": "energy",
+              "domainObject": "electricity"
+            },
+            "missingRequired": [
+              "measuredProperty",
+              "statisticType"
+            ],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                "label": "Electricity demand",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+                "label": "Electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+                "label": "Coal electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "coal",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+                "label": "Solar electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "solar PV",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+                "label": "Wind electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "wind",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "reason": "missing-required",
+            "context": {
+              "attachedContext": {
+                "time": {
+                  "start": "1975",
+                  "end": "2023"
+                }
+              }
+            }
+          },
+          {
+            "partial": {
+              "unitFamily": "energy",
+              "domainObject": "electricity"
+            },
+            "missingRequired": [
+              "measuredProperty",
+              "statisticType"
+            ],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                "label": "Electricity demand",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+                "label": "Electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+                "label": "Coal electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "coal",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+                "label": "Solar electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "solar PV",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+                "label": "Wind electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "wind",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "reason": "missing-required",
+            "context": {
+              "attachedContext": {
+                "time": {
+                  "start": "1975",
+                  "end": "2023"
+                }
+              }
+            }
+          },
+          {
+            "partial": {
+              "unitFamily": "energy",
+              "domainObject": "electricity"
+            },
+            "missingRequired": [
+              "measuredProperty",
+              "statisticType"
+            ],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                "label": "Electricity demand",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+                "label": "Electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+                "label": "Coal electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "coal",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+                "label": "Solar electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "solar PV",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+                "label": "Wind electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "wind",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "reason": "missing-required",
+            "context": {
+              "attachedContext": {
+                "time": {
+                  "start": "1975",
+                  "end": "2023"
+                }
+              }
+            }
+          },
+          {
+            "partial": {
+              "unitFamily": "energy",
+              "domainObject": "electricity"
+            },
+            "missingRequired": [
+              "measuredProperty",
+              "statisticType"
+            ],
+            "candidates": [
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG",
+                "label": "Electricity demand",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "demand",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH",
+                "label": "Electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.4,
+                "partialSpecificity": 5,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PX3N5HTEAWMF1BV",
+                "label": "Coal electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "coal",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+                "label": "Solar electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "solar PV",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              },
+              {
+                "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2",
+                "label": "Wind electricity generation",
+                "matchedFacets": [
+                  "domainObject",
+                  "unitFamily"
+                ],
+                "mismatchedFacets": [],
+                "subsumptionRatio": 0.3333333333333333,
+                "partialSpecificity": 6,
+                "semanticPartial": {
+                  "measuredProperty": "generation",
+                  "domainObject": "electricity",
+                  "technologyOrFuel": "wind",
+                  "statisticType": "flow",
+                  "aggregation": "sum",
+                  "unitFamily": "energy"
+                }
+              }
+            ],
+            "reason": "missing-required",
+            "context": {
+              "attachedContext": {
+                "time": {
+                  "start": "1975",
+                  "end": "2023"
+                }
+              }
+            }
+          }
+        ],
+        "tier": "strong-heuristic"
+      }
+    }
+  },
+  "checks": [
+    {
+      "kind": "outcome-tag",
+      "pass": false,
+      "expected": "Resolved",
+      "actual": "Underspecified"
+    },
+    {
+      "kind": "variable-ids",
+      "pass": false,
+      "expected": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H"
+      ],
+      "missing": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H"
+      ],
+      "unexpected": []
+    }
+  ],
+  "hasFindings": true,
+  "error": null
+}

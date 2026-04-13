@@ -1,0 +1,411 @@
+{
+  "kind": "unannotated",
+  "slug": "031-thierryaaron-bsky-social",
+  "postUri": "at://did:plc:yyjm6azqeob2dqgn47e4g6uf/app.bsky.feed.post/3mil6lnsrqc26",
+  "bundles": [
+    {
+      "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4",
+      "actual": {
+        "outcomeTag": "NoMatch",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": null,
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": null
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "at://did:plc:yyjm6azqeob2dqgn47e4g6uf/app.bsky.feed.post/3mil6lnsrqc26",
+          "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4",
+          "postText": [
+            "1/ Why is atmospheric CO₂ accelerating faster than fossil fuel emissions are growing? \n\nThe answer is buried in the data, and it's more worrying than most people realise. \n\nA thread. 🧵👇"
+          ],
+          "chartTitle": "Atmospheric CO₂ — Mauna Loa Observatory (1958–2024)\nSuper-exponential fit to the Keeling Curve",
+          "xAxis": {
+            "label": null,
+            "unit": "year"
+          },
+          "yAxis": {
+            "label": "CO₂",
+            "unit": "ppm"
+          },
+          "series": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:0",
+              "legendLabel": "Monthly CO₂ (raw)",
+              "unit": "ppm"
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:1",
+              "legendLabel": "Seasonally adjusted",
+              "unit": "ppm"
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:2",
+              "legendLabel": "Super-exponential fit: 314.29·exp(0.00264·t + 2.87e-05·t²)",
+              "unit": "ppm"
+            }
+          ],
+          "keyFindings": [
+            "Atmospheric CO2 levels have risen from approximately 315 ppm in 1958 to over 420 ppm by 2024.",
+            "The growth of CO2 concentrations is accelerating, with the annual rate increasing from 0.274%/yr in 1960 to 0.642%/yr in 2024.",
+            "A super-exponential model provides an extremely high correlation (R²=0.99945) for the Keeling Curve's long-term trend.",
+            "The raw data shows a consistent annual oscillation of roughly 5-7 ppm due to seasonal variations in plant photosynthesis and respiration."
+          ],
+          "sourceLines": [],
+          "publisherHints": [
+            {
+              "label": "Mauna Loa Observatory",
+              "confidence": 0.5
+            }
+          ],
+          "temporalCoverage": {
+            "startDate": "1958",
+            "endDate": "2024"
+          }
+        },
+        "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4",
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Hypothesis",
+          "bundle": {
+            "postUri": "at://did:plc:yyjm6azqeob2dqgn47e4g6uf/app.bsky.feed.post/3mil6lnsrqc26",
+            "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4",
+            "postText": [
+              "1/ Why is atmospheric CO₂ accelerating faster than fossil fuel emissions are growing? \n\nThe answer is buried in the data, and it's more worrying than most people realise. \n\nA thread. 🧵👇"
+            ],
+            "chartTitle": "Atmospheric CO₂ — Mauna Loa Observatory (1958–2024)\nSuper-exponential fit to the Keeling Curve",
+            "xAxis": {
+              "label": null,
+              "unit": "year"
+            },
+            "yAxis": {
+              "label": "CO₂",
+              "unit": "ppm"
+            },
+            "series": [
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:0",
+                "legendLabel": "Monthly CO₂ (raw)",
+                "unit": "ppm"
+              },
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:1",
+                "legendLabel": "Seasonally adjusted",
+                "unit": "ppm"
+              },
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:2",
+                "legendLabel": "Super-exponential fit: 314.29·exp(0.00264·t + 2.87e-05·t²)",
+                "unit": "ppm"
+              }
+            ],
+            "keyFindings": [
+              "Atmospheric CO2 levels have risen from approximately 315 ppm in 1958 to over 420 ppm by 2024.",
+              "The growth of CO2 concentrations is accelerating, with the annual rate increasing from 0.274%/yr in 1960 to 0.642%/yr in 2024.",
+              "A super-exponential model provides an extremely high correlation (R²=0.99945) for the Keeling Curve's long-term trend.",
+              "The raw data shows a consistent annual oscillation of roughly 5-7 ppm due to seasonal variations in plant photosynthesis and respiration."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "Mauna Loa Observatory",
+                "confidence": 0.5
+              }
+            ],
+            "temporalCoverage": {
+              "startDate": "1958",
+              "endDate": "2024"
+            }
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "measuredProperty": "emissions",
+              "policyInstrument": "feed-in tariff",
+              "technologyOrFuel": "fossil fuel"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "1958",
+                "end": "2024"
+              }
+            },
+            "items": [
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:0",
+                "partial": {
+                  "measuredProperty": "emissions"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Monthly CO₂ (raw)",
+                    "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:0"
+                  }
+                ]
+              },
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:1",
+                "partial": {},
+                "evidence": []
+              },
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:2",
+                "partial": {
+                  "policyInstrument": "feed-in tariff"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Super-exponential fit: 314.29·exp(0.00264·t + 2.87e-05·t²)",
+                    "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:2"
+                  }
+                ]
+              }
+            ],
+            "evidence": [
+              {
+                "source": "y-axis",
+                "text": "CO₂"
+              },
+              {
+                "source": "chart-title",
+                "text": "Atmospheric CO₂ — Mauna Loa Observatory (1958–2024)\nSuper-exponential fit to the Keeling Curve"
+              },
+              {
+                "source": "key-finding",
+                "text": "Atmospheric CO2 levels have risen from approximately 315 ppm in 1958 to over 420 ppm by 2024."
+              },
+              {
+                "source": "post-text",
+                "text": "1/ Why is atmospheric CO₂ accelerating faster than fossil fuel emissions are growing?"
+              },
+              {
+                "source": "series-label",
+                "text": "Monthly CO₂ (raw)",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:0"
+              },
+              {
+                "source": "series-label",
+                "text": "Super-exponential fit: 314.29·exp(0.00264·t + 2.87e-05·t²)",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:2"
+              }
+            ],
+            "tier": "weak-heuristic"
+          }
+        },
+        "bound": {
+          "hypothesis": {
+            "sharedPartial": {
+              "measuredProperty": "emissions",
+              "policyInstrument": "feed-in tariff",
+              "technologyOrFuel": "fossil fuel"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "1958",
+                "end": "2024"
+              }
+            },
+            "items": [
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:0",
+                "partial": {
+                  "measuredProperty": "emissions"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Monthly CO₂ (raw)",
+                    "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:0"
+                  }
+                ]
+              },
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:1",
+                "partial": {},
+                "evidence": []
+              },
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:2",
+                "partial": {
+                  "policyInstrument": "feed-in tariff"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Super-exponential fit: 314.29·exp(0.00264·t + 2.87e-05·t²)",
+                    "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:2"
+                  }
+                ]
+              }
+            ],
+            "evidence": [
+              {
+                "source": "y-axis",
+                "text": "CO₂"
+              },
+              {
+                "source": "chart-title",
+                "text": "Atmospheric CO₂ — Mauna Loa Observatory (1958–2024)\nSuper-exponential fit to the Keeling Curve"
+              },
+              {
+                "source": "key-finding",
+                "text": "Atmospheric CO2 levels have risen from approximately 315 ppm in 1958 to over 420 ppm by 2024."
+              },
+              {
+                "source": "post-text",
+                "text": "1/ Why is atmospheric CO₂ accelerating faster than fossil fuel emissions are growing?"
+              },
+              {
+                "source": "series-label",
+                "text": "Monthly CO₂ (raw)",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:0"
+              },
+              {
+                "source": "series-label",
+                "text": "Super-exponential fit: 314.29·exp(0.00264·t + 2.87e-05·t²)",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:2"
+              }
+            ],
+            "tier": "weak-heuristic"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:0",
+              "semanticPartial": {
+                "measuredProperty": "emissions",
+                "policyInstrument": "feed-in tariff",
+                "technologyOrFuel": "fossil fuel"
+              },
+              "attachedContext": {
+                "time": {
+                  "start": "1958",
+                  "end": "2024"
+                }
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Monthly CO₂ (raw)",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:0"
+                }
+              ],
+              "candidates": [],
+              "missingRequired": [
+                "statisticType"
+              ],
+              "reason": "missing-required"
+            },
+            {
+              "_tag": "gap",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:1",
+              "semanticPartial": {
+                "measuredProperty": "emissions",
+                "policyInstrument": "feed-in tariff",
+                "technologyOrFuel": "fossil fuel"
+              },
+              "attachedContext": {
+                "time": {
+                  "start": "1958",
+                  "end": "2024"
+                }
+              },
+              "evidence": [],
+              "candidates": [],
+              "missingRequired": [
+                "statisticType"
+              ],
+              "reason": "missing-required"
+            },
+            {
+              "_tag": "gap",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:2",
+              "semanticPartial": {
+                "measuredProperty": "emissions",
+                "policyInstrument": "feed-in tariff",
+                "technologyOrFuel": "fossil fuel"
+              },
+              "attachedContext": {
+                "time": {
+                  "start": "1958",
+                  "end": "2024"
+                }
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Super-exponential fit: 314.29·exp(0.00264·t + 2.87e-05·t²)",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:2"
+                }
+              ],
+              "candidates": [],
+              "missingRequired": [
+                "statisticType"
+              ],
+              "reason": "missing-required"
+            }
+          ]
+        },
+        "outcome": {
+          "_tag": "NoMatch",
+          "bundle": {
+            "postUri": "at://did:plc:yyjm6azqeob2dqgn47e4g6uf/app.bsky.feed.post/3mil6lnsrqc26",
+            "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4",
+            "postText": [
+              "1/ Why is atmospheric CO₂ accelerating faster than fossil fuel emissions are growing? \n\nThe answer is buried in the data, and it's more worrying than most people realise. \n\nA thread. 🧵👇"
+            ],
+            "chartTitle": "Atmospheric CO₂ — Mauna Loa Observatory (1958–2024)\nSuper-exponential fit to the Keeling Curve",
+            "xAxis": {
+              "label": null,
+              "unit": "year"
+            },
+            "yAxis": {
+              "label": "CO₂",
+              "unit": "ppm"
+            },
+            "series": [
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:0",
+                "legendLabel": "Monthly CO₂ (raw)",
+                "unit": "ppm"
+              },
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:1",
+                "legendLabel": "Seasonally adjusted",
+                "unit": "ppm"
+              },
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yyjm6azqeob2dqgn47e4g6uf/bafkreidobhklcv6wgmkqx4r6rubdu3xeauvxmdchjr6ibjjffqtn7w64h4:series:2",
+                "legendLabel": "Super-exponential fit: 314.29·exp(0.00264·t + 2.87e-05·t²)",
+                "unit": "ppm"
+              }
+            ],
+            "keyFindings": [
+              "Atmospheric CO2 levels have risen from approximately 315 ppm in 1958 to over 420 ppm by 2024.",
+              "The growth of CO2 concentrations is accelerating, with the annual rate increasing from 0.274%/yr in 1960 to 0.642%/yr in 2024.",
+              "A super-exponential model provides an extremely high correlation (R²=0.99945) for the Keeling Curve's long-term trend.",
+              "The raw data shows a consistent annual oscillation of roughly 5-7 ppm due to seasonal variations in plant photosynthesis and respiration."
+            ],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "Mauna Loa Observatory",
+                "confidence": 0.5
+              }
+            ],
+            "temporalCoverage": {
+              "startDate": "1958",
+              "endDate": "2024"
+            }
+          },
+          "reason": "Kernel could not bind an underspecified partial"
+        }
+      }
+    }
+  ],
+  "error": null
+}

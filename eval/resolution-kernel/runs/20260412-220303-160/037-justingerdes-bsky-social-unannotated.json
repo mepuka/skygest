@@ -1,0 +1,151 @@
+{
+  "kind": "unannotated",
+  "slug": "037-justingerdes-bsky-social",
+  "postUri": "at://did:plc:dw4r3ezs6vu7wkfqo2lczddn/app.bsky.feed.post/3mhjmcnprvk2j",
+  "bundles": [
+    {
+      "assetKey": null,
+      "actual": {
+        "outcomeTag": "NoMatch",
+        "boundVariableIds": [],
+        "candidateVariableIds": [],
+        "gapReason": null,
+        "matchedFacetCounts": [],
+        "agentId": null,
+        "confidence": null,
+        "tier": null
+      },
+      "trace": {
+        "bundle": {
+          "postUri": "at://did:plc:dw4r3ezs6vu7wkfqo2lczddn/app.bsky.feed.post/3mhjmcnprvk2j",
+          "postText": [
+            "\"Who, exactly, is making all of the solar panels, wind turbines, battery packs, and electric vehicles enabling this transition? In a word: China.\" www.canarymedia.com/articles/cle... via @danmccarthy.bsky.social 🔌💡"
+          ],
+          "series": [],
+          "keyFindings": [],
+          "sourceLines": [],
+          "publisherHints": [
+            {
+              "label": "canarymedia.com",
+              "confidence": 0.6
+            },
+            {
+              "label": "Where in the world is clean energy technology made?",
+              "confidence": 0.4
+            }
+          ]
+        },
+        "assetKey": null,
+        "agentId": null,
+        "interpreted": {
+          "_tag": "Hypothesis",
+          "bundle": {
+            "postUri": "at://did:plc:dw4r3ezs6vu7wkfqo2lczddn/app.bsky.feed.post/3mhjmcnprvk2j",
+            "postText": [
+              "\"Who, exactly, is making all of the solar panels, wind turbines, battery packs, and electric vehicles enabling this transition? In a word: China.\" www.canarymedia.com/articles/cle... via @danmccarthy.bsky.social 🔌💡"
+            ],
+            "series": [],
+            "keyFindings": [],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "canarymedia.com",
+                "confidence": 0.6
+              },
+              {
+                "label": "Where in the world is clean energy technology made?",
+                "confidence": 0.4
+              }
+            ]
+          },
+          "hypothesis": {
+            "sharedPartial": {
+              "domainObject": "wind turbine",
+              "technologyOrFuel": "battery"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "bundle",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "post-text",
+                "text": "\"Who, exactly, is making all of the solar panels, wind turbines, battery packs,"
+              }
+            ],
+            "tier": "strong-heuristic"
+          }
+        },
+        "bound": {
+          "hypothesis": {
+            "sharedPartial": {
+              "domainObject": "wind turbine",
+              "technologyOrFuel": "battery"
+            },
+            "attachedContext": {},
+            "items": [
+              {
+                "itemKey": "bundle",
+                "partial": {},
+                "evidence": []
+              }
+            ],
+            "evidence": [
+              {
+                "source": "post-text",
+                "text": "\"Who, exactly, is making all of the solar panels, wind turbines, battery packs,"
+              }
+            ],
+            "tier": "strong-heuristic"
+          },
+          "items": [
+            {
+              "_tag": "gap",
+              "itemKey": "bundle",
+              "semanticPartial": {
+                "domainObject": "wind turbine",
+                "technologyOrFuel": "battery"
+              },
+              "attachedContext": {},
+              "evidence": [],
+              "candidates": [],
+              "missingRequired": [
+                "measuredProperty",
+                "statisticType"
+              ],
+              "reason": "missing-required"
+            }
+          ]
+        },
+        "outcome": {
+          "_tag": "NoMatch",
+          "bundle": {
+            "postUri": "at://did:plc:dw4r3ezs6vu7wkfqo2lczddn/app.bsky.feed.post/3mhjmcnprvk2j",
+            "postText": [
+              "\"Who, exactly, is making all of the solar panels, wind turbines, battery packs, and electric vehicles enabling this transition? In a word: China.\" www.canarymedia.com/articles/cle... via @danmccarthy.bsky.social 🔌💡"
+            ],
+            "series": [],
+            "keyFindings": [],
+            "sourceLines": [],
+            "publisherHints": [
+              {
+                "label": "canarymedia.com",
+                "confidence": 0.6
+              },
+              {
+                "label": "Where in the world is clean energy technology made?",
+                "confidence": 0.4
+              }
+            ]
+          },
+          "reason": "Kernel could not bind an underspecified partial"
+        }
+      }
+    }
+  ],
+  "error": null
+}

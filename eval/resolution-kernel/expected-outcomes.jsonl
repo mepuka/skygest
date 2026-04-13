@@ -1,0 +1,35 @@
+// Ground-truth expectations for the resolution kernel.
+// One JSON object per line. Fields:
+//   postUri            — full PostUri string (x:// or at:// form)
+//   assetKey?          — optional; when set, entry targets one specific bundle
+//   outcomeTag         — one of: Resolved | Ambiguous | Underspecified | Conflicted | OutOfRegistry | NoMatch
+//   expectedVariableIds? — required for Resolved / OutOfRegistry
+//   expectedGapReason?   — for Ambiguous / Underspecified / Conflicted / OutOfRegistry
+//   expectedAgentId?     — optional agent-scope assertion
+//   notes?               — free-text; shows up in per-row JSON output
+//
+// When assetKey is omitted, the entry applies to the whole post ("at least one
+// bundle must satisfy the expectation"). Lines starting with "//" are ignored.
+//
+// Seeded from references/cold-start/candidates/ (partially_resolved state with
+// referencedVariableId). Grow iteratively as the kernel stabilizes.
+{"postUri":"x://1207638939277955072/status/2042135430498304378","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"],"expectedAgentId":"https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1","notes":"seed 001-ember-energy: wind+solar generation record"}
+{"postUri":"x://1521502626323574785/status/1978187907778359345","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71"],"expectedAgentId":"https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB","notes":"seed 002-1reluctantcog: LBNL study"}
+{"postUri":"x://982294921/status/2042172070218330174","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9"],"notes":"seed 003-janrosenow: heat pumps outsold gas boilers GB"}
+{"postUri":"at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhxfa7rf7k2n","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WNBVQ06R676YPBZRE2"],"notes":"seed 004-lightbucket: GB wind power record"}
+{"postUri":"at://did:plc:eokofv4mj6egxuhucqseamtz/app.bsky.feed.post/3mivx5mpnic2j","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"],"notes":"seed 005-klstone: DE public net electricity generation"}
+{"postUri":"x://1085245460825149443/status/2042159952765055188","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71"],"expectedAgentId":"https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9","notes":"seed 006-edcporter: gas prices since Iran war"}
+{"postUri":"x://16933019/status/2042127910006354319","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB"],"notes":"seed 007-aukehoekstra: solar power per kg"}
+{"postUri":"x://2687569825/status/2042291388335694128","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG"],"notes":"seed 008-ben-inskeep: Amazon data center sanitary sewer"}
+{"postUri":"x://1926360631/status/2042231599429746849","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71"],"expectedAgentId":"https://id.skygest.io/agent/ag_01KNQEZ5VFCSDF9WTNRJ2JSMEN","notes":"seed 009-irena: solar module cost projection"}
+{"postUri":"at://did:plc:yoeonndfygr7ilq5scih6rtx/app.bsky.feed.post/3miqz2vxlos27","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H"],"notes":"seed 010-earthsciinfo: emissions bar chart"}
+{"postUri":"at://did:plc:r5ofoghdcbtjqiujqpvja4uh/app.bsky.feed.post/3mieyegruoz2h","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H"],"notes":"seed 012-hausfath"}
+{"postUri":"at://did:plc:iczg6a2i3etk5bscga6uv6od/app.bsky.feed.post/3mhrm4736gs2y","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H"],"notes":"seed 013-weatherprof: earth energy imbalance"}
+{"postUri":"x://223416400/status/2042214198491422952","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"],"notes":"seed 014-carbonbrief: UK wind+solar vs gas"}
+{"postUri":"at://did:plc:giacpvcstwwynvst6rrcm5zd/app.bsky.feed.post/3mim3lxkme22c","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"],"notes":"seed 016-energy-charts: EU-27 solar+wind Stromerzeugung"}
+{"postUri":"x://1886502618/status/2042240974177325165","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WMARTRPG4KZMWMZ82Y"],"notes":"seed 018-simonmahan: nuclear cooling reservoir"}
+{"postUri":"x://777116516357726208/status/2042196391292817787","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"],"expectedAgentId":"https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1","notes":"seed 019-nicolasfulghum: UK high gas prices"}
+{"postUri":"at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhngjqn5nc2b","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H"],"notes":"seed 020-lightbucket: 50 years electricity decarbonisation"}
+{"postUri":"at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhnvtgx52k2e","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WNXB2JR47T4ZEV0VQG"],"notes":"seed 021-lightbucket: per capita natural gas EU"}
+{"postUri":"at://did:plc:eokofv4mj6egxuhucqseamtz/app.bsky.feed.post/3mitdstlgtc2q","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"],"notes":"seed 022-klstone: DE Stromerzeugung"}
+{"postUri":"at://did:plc:ii2yv4lw6nju7ynpwohqvvle/app.bsky.feed.post/3mhxnfgkqjs27","outcomeTag":"Resolved","expectedVariableIds":["https://id.skygest.io/variable/var_01KNQEZ5WN5TNH2HCGMHA2T3YH"],"notes":"seed 024-lightbucket: Germany numerical coincidence"}

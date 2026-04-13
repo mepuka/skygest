@@ -9,6 +9,7 @@ import type {
   VariableCandidateScore
 } from "../../domain/resolutionKernel";
 import {
+  type FacetKey,
   type PartialVariableShape,
   joinPartials,
   matched,
@@ -112,6 +113,23 @@ const narrowCandidatesByAgent = (
   return candidates.filter((candidate) => allowedVariableIds.has(candidate.variableId));
 };
 
+// Shared↔item retraction join: series-label items are strictly more
+// specific than the chart-level shared partial on any facet they define.
+// Before joining, we strip those facets from the shared partial so the
+// item can win without producing a spurious required-facet-conflict.
+// See docs/plans/2026-04-12-sky-314-resolution-kernel-ontology-fixes.md
+// §Task 4 for the algebra rationale.
+const retractedShared = (
+  shared: PartialVariableShape,
+  overrideKeys: ReadonlyArray<FacetKey>
+): PartialVariableShape => {
+  const result: Record<string, unknown> = { ...shared };
+  for (const key of overrideKeys) {
+    delete result[key];
+  }
+  return result as PartialVariableShape;
+};
+
 const mergeAttachedContext = (
   hypothesis: ResolutionHypothesis,
   item: ResolutionHypothesis["items"][number]
@@ -172,8 +190,10 @@ export const bindHypothesis = (
   const items: Array<BoundResolutionItem> = [];
 
   for (const hypothesisItem of hypothesis.items) {
+    const itemKeys = Object.keys(hypothesisItem.partial) as Array<FacetKey>;
+    const narrowedShared = retractedShared(hypothesis.sharedPartial, itemKeys);
     const semanticPartialResult = joinPartials(
-      hypothesis.sharedPartial,
+      narrowedShared,
       hypothesisItem.partial
     );
 

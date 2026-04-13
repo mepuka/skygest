@@ -1,0 +1,552 @@
+{
+  "kind": "annotated",
+  "slug": "010-earthsciinfo-bsky-social",
+  "postUri": "at://did:plc:yoeonndfygr7ilq5scih6rtx/app.bsky.feed.post/3miqz2vxlos27",
+  "expected": {
+    "postUri": "at://did:plc:yoeonndfygr7ilq5scih6rtx/app.bsky.feed.post/3miqz2vxlos27",
+    "outcomeTag": "Resolved",
+    "expectedVariableIds": [
+      "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H"
+    ],
+    "notes": "seed 010-earthsciinfo: emissions bar chart"
+  },
+  "selectedBundle": {
+    "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq",
+    "actual": {
+      "outcomeTag": "Ambiguous",
+      "boundVariableIds": [],
+      "candidateVariableIds": [],
+      "gapReason": "required-facet-conflict",
+      "matchedFacetCounts": [],
+      "agentId": null,
+      "confidence": null,
+      "tier": "weak-heuristic"
+    },
+    "trace": {
+      "bundle": {
+        "postUri": "at://did:plc:yoeonndfygr7ilq5scih6rtx/app.bsky.feed.post/3miqz2vxlos27",
+        "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq",
+        "postText": [
+          "This bar chart shows that our emissions are just ~8 lbs/day or 75% reduction in emissions. 🧪🔌💡☀️💨💧🔋"
+        ],
+        "chartTitle": "Monthly gas emissions & reduction due to electrification",
+        "xAxis": {
+          "label": "Month",
+          "unit": null
+        },
+        "yAxis": {
+          "label": "Gas CO2e emissions",
+          "unit": "pounds/day"
+        },
+        "series": [
+          {
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0",
+            "legendLabel": "After Hybrid heat pump Gas CO2e Emissions (pounds/day)",
+            "unit": "pounds/day"
+          },
+          {
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1",
+            "legendLabel": "Reduction in Gas emissions (%)",
+            "unit": "%"
+          }
+        ],
+        "keyFindings": [
+          "Gas emissions reached 0 pounds/day from May 2025 through November 2025, achieving a 100% reduction in gas usage through electrification during these months.",
+          "The maximum observed gas emissions after hybrid heat pump installation occurred in February 2026 at 37.7 pounds/day, which coincided with the lowest reduction rate of 43%.",
+          "Emissions exhibit clear seasonality, with higher gas usage in winter months (December-February) and zero usage in summer and autumn months (May-November).",
+          "The reduction in gas emissions remained above 40% throughout the entire monitoring period, demonstrating the effectiveness of the hybrid heat pump system even in peak heating months.",
+          "Post-installation emissions in January 2026 (35.2 lbs/day) were more than double those of January 2024 (16.3 lbs/day), indicating significant year-over-year variability in winter heating demand."
+        ],
+        "sourceLines": [],
+        "publisherHints": [],
+        "temporalCoverage": {
+          "startDate": "2023-11",
+          "endDate": "2026-03"
+        }
+      },
+      "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq",
+      "agentId": null,
+      "interpreted": {
+        "_tag": "Hypothesis",
+        "bundle": {
+          "postUri": "at://did:plc:yoeonndfygr7ilq5scih6rtx/app.bsky.feed.post/3miqz2vxlos27",
+          "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq",
+          "postText": [
+            "This bar chart shows that our emissions are just ~8 lbs/day or 75% reduction in emissions. 🧪🔌💡☀️💨💧🔋"
+          ],
+          "chartTitle": "Monthly gas emissions & reduction due to electrification",
+          "xAxis": {
+            "label": "Month",
+            "unit": null
+          },
+          "yAxis": {
+            "label": "Gas CO2e emissions",
+            "unit": "pounds/day"
+          },
+          "series": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0",
+              "legendLabel": "After Hybrid heat pump Gas CO2e Emissions (pounds/day)",
+              "unit": "pounds/day"
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1",
+              "legendLabel": "Reduction in Gas emissions (%)",
+              "unit": "%"
+            }
+          ],
+          "keyFindings": [
+            "Gas emissions reached 0 pounds/day from May 2025 through November 2025, achieving a 100% reduction in gas usage through electrification during these months.",
+            "The maximum observed gas emissions after hybrid heat pump installation occurred in February 2026 at 37.7 pounds/day, which coincided with the lowest reduction rate of 43%.",
+            "Emissions exhibit clear seasonality, with higher gas usage in winter months (December-February) and zero usage in summer and autumn months (May-November).",
+            "The reduction in gas emissions remained above 40% throughout the entire monitoring period, demonstrating the effectiveness of the hybrid heat pump system even in peak heating months.",
+            "Post-installation emissions in January 2026 (35.2 lbs/day) were more than double those of January 2024 (16.3 lbs/day), indicating significant year-over-year variability in winter heating demand."
+          ],
+          "sourceLines": [],
+          "publisherHints": [],
+          "temporalCoverage": {
+            "startDate": "2023-11",
+            "endDate": "2026-03"
+          }
+        },
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "emissions",
+            "domainObject": "natural gas",
+            "technologyOrFuel": "natural gas"
+          },
+          "attachedContext": {
+            "time": {
+              "start": "2023-11",
+              "end": "2026-03"
+            }
+          },
+          "items": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0",
+              "partial": {
+                "measuredProperty": "emissions",
+                "domainObject": "heat pump",
+                "technologyOrFuel": "heat pump"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "After Hybrid heat pump Gas CO2e Emissions (pounds/day)",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1",
+              "partial": {
+                "measuredProperty": "emissions",
+                "domainObject": "natural gas",
+                "technologyOrFuel": "natural gas"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Reduction in Gas emissions (%)",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1"
+                }
+              ]
+            }
+          ],
+          "evidence": [
+            {
+              "source": "y-axis",
+              "text": "Gas CO2e emissions"
+            },
+            {
+              "source": "key-finding",
+              "text": "Emissions exhibit clear seasonality, with higher gas usage in winter months (December-February)"
+            },
+            {
+              "source": "post-text",
+              "text": "This bar chart shows that our emissions are just ~8 lbs/day"
+            },
+            {
+              "source": "post-text",
+              "text": "75% reduction in emissions. 🧪🔌💡☀️💨💧🔋"
+            },
+            {
+              "source": "series-label",
+              "text": "After Hybrid heat pump Gas CO2e Emissions (pounds/day)",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0"
+            },
+            {
+              "source": "series-label",
+              "text": "Reduction in Gas emissions (%)",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1"
+            }
+          ],
+          "tier": "weak-heuristic"
+        }
+      },
+      "bound": {
+        "hypothesis": {
+          "sharedPartial": {
+            "measuredProperty": "emissions",
+            "domainObject": "natural gas",
+            "technologyOrFuel": "natural gas"
+          },
+          "attachedContext": {
+            "time": {
+              "start": "2023-11",
+              "end": "2026-03"
+            }
+          },
+          "items": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0",
+              "partial": {
+                "measuredProperty": "emissions",
+                "domainObject": "heat pump",
+                "technologyOrFuel": "heat pump"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "After Hybrid heat pump Gas CO2e Emissions (pounds/day)",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0"
+                }
+              ]
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1",
+              "partial": {
+                "measuredProperty": "emissions",
+                "domainObject": "natural gas",
+                "technologyOrFuel": "natural gas"
+              },
+              "evidence": [
+                {
+                  "source": "series-label",
+                  "text": "Reduction in Gas emissions (%)",
+                  "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1"
+                }
+              ]
+            }
+          ],
+          "evidence": [
+            {
+              "source": "y-axis",
+              "text": "Gas CO2e emissions"
+            },
+            {
+              "source": "key-finding",
+              "text": "Emissions exhibit clear seasonality, with higher gas usage in winter months (December-February)"
+            },
+            {
+              "source": "post-text",
+              "text": "This bar chart shows that our emissions are just ~8 lbs/day"
+            },
+            {
+              "source": "post-text",
+              "text": "75% reduction in emissions. 🧪🔌💡☀️💨💧🔋"
+            },
+            {
+              "source": "series-label",
+              "text": "After Hybrid heat pump Gas CO2e Emissions (pounds/day)",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0"
+            },
+            {
+              "source": "series-label",
+              "text": "Reduction in Gas emissions (%)",
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1"
+            }
+          ],
+          "tier": "weak-heuristic"
+        },
+        "items": [
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0",
+            "semanticPartial": {
+              "measuredProperty": "emissions",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "natural gas"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2023-11",
+                "end": "2026-03"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "After Hybrid heat pump Gas CO2e Emissions (pounds/day)",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1",
+            "semanticPartial": {
+              "measuredProperty": "emissions",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "natural gas"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2023-11",
+                "end": "2026-03"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Reduction in Gas emissions (%)",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1"
+              }
+            ],
+            "candidates": [],
+            "missingRequired": [
+              "statisticType"
+            ],
+            "reason": "missing-required"
+          }
+        ]
+      },
+      "outcome": {
+        "_tag": "Ambiguous",
+        "bundle": {
+          "postUri": "at://did:plc:yoeonndfygr7ilq5scih6rtx/app.bsky.feed.post/3miqz2vxlos27",
+          "assetKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq",
+          "postText": [
+            "This bar chart shows that our emissions are just ~8 lbs/day or 75% reduction in emissions. 🧪🔌💡☀️💨💧🔋"
+          ],
+          "chartTitle": "Monthly gas emissions & reduction due to electrification",
+          "xAxis": {
+            "label": "Month",
+            "unit": null
+          },
+          "yAxis": {
+            "label": "Gas CO2e emissions",
+            "unit": "pounds/day"
+          },
+          "series": [
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0",
+              "legendLabel": "After Hybrid heat pump Gas CO2e Emissions (pounds/day)",
+              "unit": "pounds/day"
+            },
+            {
+              "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1",
+              "legendLabel": "Reduction in Gas emissions (%)",
+              "unit": "%"
+            }
+          ],
+          "keyFindings": [
+            "Gas emissions reached 0 pounds/day from May 2025 through November 2025, achieving a 100% reduction in gas usage through electrification during these months.",
+            "The maximum observed gas emissions after hybrid heat pump installation occurred in February 2026 at 37.7 pounds/day, which coincided with the lowest reduction rate of 43%.",
+            "Emissions exhibit clear seasonality, with higher gas usage in winter months (December-February) and zero usage in summer and autumn months (May-November).",
+            "The reduction in gas emissions remained above 40% throughout the entire monitoring period, demonstrating the effectiveness of the hybrid heat pump system even in peak heating months.",
+            "Post-installation emissions in January 2026 (35.2 lbs/day) were more than double those of January 2024 (16.3 lbs/day), indicating significant year-over-year variability in winter heating demand."
+          ],
+          "sourceLines": [],
+          "publisherHints": [],
+          "temporalCoverage": {
+            "startDate": "2023-11",
+            "endDate": "2026-03"
+          }
+        },
+        "hypotheses": [
+          {
+            "sharedPartial": {
+              "measuredProperty": "emissions",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "natural gas"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2023-11",
+                "end": "2026-03"
+              }
+            },
+            "items": [
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0",
+                "partial": {
+                  "measuredProperty": "emissions",
+                  "domainObject": "heat pump",
+                  "technologyOrFuel": "heat pump"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "After Hybrid heat pump Gas CO2e Emissions (pounds/day)",
+                    "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0"
+                  }
+                ]
+              },
+              {
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1",
+                "partial": {
+                  "measuredProperty": "emissions",
+                  "domainObject": "natural gas",
+                  "technologyOrFuel": "natural gas"
+                },
+                "evidence": [
+                  {
+                    "source": "series-label",
+                    "text": "Reduction in Gas emissions (%)",
+                    "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1"
+                  }
+                ]
+              }
+            ],
+            "evidence": [
+              {
+                "source": "y-axis",
+                "text": "Gas CO2e emissions"
+              },
+              {
+                "source": "key-finding",
+                "text": "Emissions exhibit clear seasonality, with higher gas usage in winter months (December-February)"
+              },
+              {
+                "source": "post-text",
+                "text": "This bar chart shows that our emissions are just ~8 lbs/day"
+              },
+              {
+                "source": "post-text",
+                "text": "75% reduction in emissions. 🧪🔌💡☀️💨💧🔋"
+              },
+              {
+                "source": "series-label",
+                "text": "After Hybrid heat pump Gas CO2e Emissions (pounds/day)",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0"
+              },
+              {
+                "source": "series-label",
+                "text": "Reduction in Gas emissions (%)",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1"
+              }
+            ],
+            "tier": "weak-heuristic"
+          }
+        ],
+        "items": [
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0",
+            "semanticPartial": {
+              "measuredProperty": "emissions",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "natural gas"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2023-11",
+                "end": "2026-03"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "After Hybrid heat pump Gas CO2e Emissions (pounds/day)",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:0"
+              }
+            ],
+            "candidates": [],
+            "reason": "required-facet-conflict"
+          },
+          {
+            "_tag": "gap",
+            "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1",
+            "semanticPartial": {
+              "measuredProperty": "emissions",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "natural gas"
+            },
+            "attachedContext": {
+              "time": {
+                "start": "2023-11",
+                "end": "2026-03"
+              }
+            },
+            "evidence": [
+              {
+                "source": "series-label",
+                "text": "Reduction in Gas emissions (%)",
+                "itemKey": "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:yoeonndfygr7ilq5scih6rtx/bafkreienrzpdeuowak6udeoikbcbz564eyygfrsaxz34efx3rhsdeot7yq:series:1"
+              }
+            ],
+            "candidates": [],
+            "missingRequired": [
+              "statisticType"
+            ],
+            "reason": "missing-required"
+          }
+        ],
+        "gaps": [
+          {
+            "partial": {
+              "measuredProperty": "emissions",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "natural gas"
+            },
+            "candidates": [],
+            "reason": "required-facet-conflict",
+            "context": {
+              "attachedContext": {
+                "time": {
+                  "start": "2023-11",
+                  "end": "2026-03"
+                }
+              }
+            }
+          },
+          {
+            "partial": {
+              "measuredProperty": "emissions",
+              "domainObject": "natural gas",
+              "technologyOrFuel": "natural gas"
+            },
+            "missingRequired": [
+              "statisticType"
+            ],
+            "candidates": [],
+            "reason": "missing-required",
+            "context": {
+              "attachedContext": {
+                "time": {
+                  "start": "2023-11",
+                  "end": "2026-03"
+                }
+              }
+            }
+          }
+        ],
+        "tier": "weak-heuristic"
+      }
+    }
+  },
+  "checks": [
+    {
+      "kind": "outcome-tag",
+      "pass": false,
+      "expected": "Resolved",
+      "actual": "Ambiguous"
+    },
+    {
+      "kind": "variable-ids",
+      "pass": false,
+      "expected": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H"
+      ],
+      "missing": [
+        "https://id.skygest.io/variable/var_01KNQEZ5WN7HAKBFJ3TZ09VA4H"
+      ],
+      "unexpected": []
+    }
+  ],
+  "hasFindings": true,
+  "error": null
+}

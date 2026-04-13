@@ -20,6 +20,28 @@ import type { FacetVocabularyShape } from "../facetVocabulary";
 const DEFAULT_BUNDLE_ITEM_KEY = "bundle";
 const SEGMENT_DELIMITER = /(?:\s+\band\b\s+)|(?:\s+\bor\b\s+)|[;\n]+/giu;
 
+// Identity sources witness the variable's identity directly: chart/axis/series
+// text names what the chart is measuring. These feed the shared partial via
+// `foldAssignments`.
+const IDENTITY_SOURCES: ReadonlySet<ResolutionEvidenceSource> = new Set([
+  "series-label",
+  "x-axis",
+  "y-axis",
+  "chart-title"
+]);
+
+// Narrative sources are commentary about the observation, not witnesses for
+// its identity. They must never project onto the shared partial because the
+// algebra's join operator is only valid over co-referential projections of
+// the same variable. Narrative matches are still surfaced in the hypothesis
+// `evidence[]` for downstream trace output.
+const NARRATIVE_SOURCES: ReadonlySet<ResolutionEvidenceSource> = new Set([
+  "key-finding",
+  "post-text",
+  "source-line",
+  "publisher-hint"
+]);
+
 type EvidenceSite = {
   readonly source: ResolutionEvidenceSource;
   readonly text: string;
@@ -93,10 +115,63 @@ const hasRequiredConflict = (
   conflicts: ReadonlyArray<PartialVariableFacetConflict>
 ): boolean => conflicts.some((conflict) => REQUIRED_FACET_KEY_SET.has(conflict.facet));
 
+// Compound concepts (see compoundConcepts.ts) run BEFORE per-facet matchers.
+// When one or more compounds fire on a site, their assignments are unioned
+// together into the site's partial and per-facet matching is short-circuited
+// — the compound is authoritative for that site.
+//
+// Short-circuit rationale:
+//   - Compounds are curated phrases whose very existence asserts that the
+//     per-facet lexicon is structurally unable to represent the phrase's
+//     semantics (one canonical per facet per entry). Letting per-facet
+//     matchers run alongside would re-introduce exactly the Gap-2 false
+//     positives (e.g. `spot price` firing measuredProperty=price AND
+//     statisticType=price via CD-008 indirection) that the compound lexicon
+//     is designed to replace with explicit intent.
+//   - Short-circuit is also simpler to reason about and cheaper at runtime:
+//     one loop of surface-form lookups instead of eight.
+//
+// When multiple distinct compounds match the same text, their assignments
+// are joined through the same `joinPartials` fold used downstream — this
+// produces a principled conflict signal if the curated compounds disagree,
+// rather than silently picking one.
+const foldCompoundAssignments = (
+  matches: ReadonlyArray<{ readonly assignments: PartialVariableShape }>
+): PartialVariableShape => {
+  let partial: PartialVariableShape = {};
+  for (const match of matches) {
+    const joined = joinPartials(partial, match.assignments);
+    // Compound-vs-compound conflicts on the same site are curation bugs, not
+    // runtime conditions we can recover from. Keep the earlier (longer-match)
+    // contribution and drop the later one silently; the eval harness will
+    // flag any such curation mistake through gold-set regressions.
+    if (Result.isSuccess(joined)) {
+      partial = joined.success;
+    }
+  }
+  return partial;
+};
+
 const matchSite = (
   site: EvidenceSite,
   vocabulary: FacetVocabularyShape
 ): SiteAssignment | null => {
+  const compoundMatches = vocabulary.matchCompoundConcepts(site.text);
+  if (compoundMatches.length > 0) {
+    const compoundPartial = foldCompoundAssignments(compoundMatches);
+    if (Object.keys(compoundPartial).length === 0) {
+      return null;
+    }
+    return {
+      partial: compoundPartial,
+      evidence: stripUndefined({
+        source: site.source,
+        text: site.text,
+        itemKey: site.itemKey
+      })
+    };
+  }
+
   // Full cartesian fanout for multi-match series labels has not landed yet.
   // Keep the strongest technology/fuel match explicit until that deeper
   // interpret-stage expansion exists.
@@ -141,22 +216,66 @@ const matchSite = (
   };
 };
 
+const sourcePrecedenceIndex = (source: ResolutionEvidenceSource): number =>
+  EVIDENCE_PRECEDENCE.indexOf(source);
+
+const downgradeTier = (
+  current: ResolutionEvidenceTier,
+  next: ResolutionEvidenceTier
+): ResolutionEvidenceTier => {
+  if (current === "weak-heuristic" || next === "weak-heuristic") {
+    return "weak-heuristic";
+  }
+  if (current === "strong-heuristic" || next === "strong-heuristic") {
+    return "strong-heuristic";
+  }
+  return "entailment";
+};
+
 const foldAssignments = (
   assignments: ReadonlyArray<SiteAssignment>
 ): Result.Result<FoldedAssignments, FoldConflict> => {
   let partial: PartialVariableShape = {};
   let evidence: Array<ResolutionEvidenceReference> = [];
   let tier: ResolutionEvidenceTier = "entailment";
+  // Track the strongest (lowest-index) source folded so far. Assignments are
+  // iterated in precedence order, so a later assignment whose source index is
+  // strictly greater than `strongestSourceIndex` is from a weaker band and
+  // should yield to the already-accumulated partial on required-facet conflict.
+  let strongestSourceIndex: number | null = null;
 
   for (const assignment of assignments) {
+    const assignmentSourceIndex = sourcePrecedenceIndex(
+      assignment.evidence.source
+    );
     const joined = joinPartials(partial, assignment.partial);
     if (Result.isSuccess(joined)) {
       partial = joined.success;
       evidence.push(assignment.evidence);
+      strongestSourceIndex =
+        strongestSourceIndex === null
+          ? assignmentSourceIndex
+          : Math.min(strongestSourceIndex, assignmentSourceIndex);
       continue;
     }
 
-    if (hasRequiredConflict(joined.failure.conflicts)) {
+    const isRequiredConflict = hasRequiredConflict(joined.failure.conflicts);
+
+    // Weaker-precedence assignments never win a required-facet conflict: the
+    // earlier, stronger-precedence partial stays put and the fold downgrades
+    // to `weak-heuristic`. This is the common case on real posts where
+    // chart-title / post-text mention secondary measurements (e.g. "share",
+    // "curtailment") alongside the chart's actual measuredProperty.
+    if (
+      isRequiredConflict &&
+      strongestSourceIndex !== null &&
+      assignmentSourceIndex > strongestSourceIndex
+    ) {
+      tier = downgradeTier(tier, "weak-heuristic");
+      continue;
+    }
+
+    if (isRequiredConflict) {
       return Result.fail({
         left: {
           partial,
@@ -170,7 +289,7 @@ const foldAssignments = (
 
     // Non-required facet conflicts keep the earlier higher-precedence value and
     // downgrade the interpretation tier without losing the accumulated fold.
-    tier = "strong-heuristic";
+    tier = downgradeTier(tier, "strong-heuristic");
   }
 
   return Result.succeed({
@@ -181,21 +300,26 @@ const foldAssignments = (
 };
 
 const buildSharedSites = (bundle: ResolutionEvidenceBundle): ReadonlyArray<EvidenceSite> => {
-  const sitesBySource = new Map<ResolutionEvidenceSource, Array<EvidenceSite>>();
+  // Push order is intentionally precedence-ordered (x-axis -> y-axis ->
+  // chart-title). Series-label is an item-level signal handled in
+  // buildItemSites, not a shared-partial signal, so it is not collected here.
+  const sites: Array<EvidenceSite> = [];
 
   const push = (
     source: ResolutionEvidenceSource,
     text: string | null | undefined
   ) => {
+    if (!IDENTITY_SOURCES.has(source)) {
+      return;
+    }
+
     const value = asOptionalString(text);
     if (value === undefined) {
       return;
     }
 
     for (const segment of segmentText(source, value)) {
-      const entries = sitesBySource.get(source) ?? [];
-      entries.push({ source, text: segment });
-      sitesBySource.set(source, entries);
+      sites.push({ source, text: segment });
     }
   };
 
@@ -205,26 +329,59 @@ const buildSharedSites = (bundle: ResolutionEvidenceBundle): ReadonlyArray<Evide
   push("y-axis", bundle.yAxis?.unit);
   push("chart-title", bundle.chartTitle);
 
+  return sites;
+};
+
+// Collects narrative evidence matches purely for trace output. These never
+// participate in the shared-partial fold — they exist so downstream consumers
+// can see what narrative signals were observed alongside the identity
+// partial.
+const buildNarrativeTraceEvidence = (
+  bundle: ResolutionEvidenceBundle,
+  vocabulary: FacetVocabularyShape
+): ReadonlyArray<ResolutionEvidenceReference> => {
+  const sites: Array<EvidenceSite> = [];
+
+  const push = (
+    source: ResolutionEvidenceSource,
+    text: string | null | undefined
+  ) => {
+    if (!NARRATIVE_SOURCES.has(source)) {
+      return;
+    }
+
+    const value = asOptionalString(text);
+    if (value === undefined) {
+      return;
+    }
+
+    for (const segment of segmentText(source, value)) {
+      sites.push({ source, text: segment });
+    }
+  };
+
   for (const finding of bundle.keyFindings) {
     push("key-finding", finding);
   }
-
   for (const text of bundle.postText) {
     push("post-text", text);
   }
-
   for (const sourceLine of bundle.sourceLines) {
     push("source-line", sourceLine.sourceText);
     push("source-line", sourceLine.datasetName);
   }
-
   for (const hint of bundle.publisherHints) {
     push("publisher-hint", hint.label);
   }
 
-  return EVIDENCE_PRECEDENCE.flatMap((source) =>
-    source === "series-label" ? [] : (sitesBySource.get(source) ?? [])
-  );
+  const references: Array<ResolutionEvidenceReference> = [];
+  for (const site of sites) {
+    const assignment = matchSite(site, vocabulary);
+    if (assignment !== null) {
+      references.push(assignment.evidence);
+    }
+  }
+  return references;
 };
 
 const buildItemSites = (
@@ -328,6 +485,7 @@ export const interpretBundle = (
     .map((site) => matchSite(site, vocabulary))
     .filter((assignment): assignment is SiteAssignment => assignment !== null);
   const itemAssignments = buildItemSites(bundle);
+  const narrativeTraceEvidence = buildNarrativeTraceEvidence(bundle, vocabulary);
 
   const foldedShared = foldAssignments(sharedAssignments);
   if (Result.isFailure(foldedShared)) {
@@ -386,9 +544,7 @@ export const interpretBundle = (
       };
     }
 
-    if (folded.success.tier === "strong-heuristic") {
-      itemTier = "strong-heuristic";
-    }
+    itemTier = downgradeTier(itemTier, folded.success.tier);
 
     items.push(
       stripUndefined({
@@ -405,7 +561,8 @@ export const interpretBundle = (
 
   const evidence = [
     ...foldedShared.success.evidence,
-    ...items.flatMap((item) => item.evidence)
+    ...items.flatMap((item) => item.evidence),
+    ...narrativeTraceEvidence
   ];
 
   if (
@@ -427,11 +584,7 @@ export const interpretBundle = (
       attachedContext,
       items,
       evidence,
-      tier:
-        foldedShared.success.tier === "strong-heuristic" ||
-        itemTier === "strong-heuristic"
-          ? "strong-heuristic"
-          : "entailment"
+      tier: downgradeTier(foldedShared.success.tier, itemTier)
     }
   };
 };
