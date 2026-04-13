@@ -271,6 +271,3 @@ export const WorkflowPromptsLayer = Layer.mergeAll(
   CurateSessionPrompt,
   AssembleStoriesPrompt
 );
-
-/** @deprecated Use ReadOnlyPromptsLayer or WorkflowPromptsLayer */
-export const PromptsLayer = ReadOnlyPromptsLayer;
