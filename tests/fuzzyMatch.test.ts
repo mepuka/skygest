@@ -28,6 +28,12 @@ describe("jaccardTokenSet", () => {
     ).toBe(1);
   });
 
+  it("treats slug separators and apostrophes as equivalent word boundaries", () => {
+    expect(
+      jaccardTokenSet("CAISO Today's Outlook", "caiso-todays-outlook")
+    ).toBe(1);
+  });
+
   it("exports the locked Stage 2 thresholds", () => {
     expect(FUZZY_CANDIDATE_THRESHOLD).toBe(0.6);
     expect(FUZZY_CONFIDENT_THRESHOLD).toBe(0.85);

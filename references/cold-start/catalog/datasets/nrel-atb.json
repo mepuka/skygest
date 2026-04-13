@@ -3,7 +3,18 @@
   "id": "https://id.skygest.io/dataset/ds_01KNQEZ5VR93RKRK0PV4CNP67M",
   "title": "NREL Annual Technology Baseline",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF3G335NSS1773RWDH",
-  "aliases": [],
+  "aliases": [
+    {
+      "scheme": "other",
+      "value": "NREL ATB",
+      "relation": "closeMatch"
+    },
+    {
+      "scheme": "other",
+      "value": "Annual Technology Baseline",
+      "relation": "closeMatch"
+    }
+  ],
   "createdAt": "2026-04-08T00:00:00.000Z",
   "updatedAt": "2026-04-08T00:00:00.000Z",
   "description": "Cost and performance projections for electricity generation technologies",

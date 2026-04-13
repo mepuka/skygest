@@ -32,6 +32,16 @@
       "scheme": "eia-bulk-id",
       "value": "EBA",
       "relation": "exactMatch"
+    },
+    {
+      "scheme": "other",
+      "value": "EIA Hourly Electric Grid Monitor",
+      "relation": "closeMatch"
+    },
+    {
+      "scheme": "other",
+      "value": "Hourly Electric Grid Monitor",
+      "relation": "closeMatch"
     }
   ]
 }

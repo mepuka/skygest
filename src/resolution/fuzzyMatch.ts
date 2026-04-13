@@ -4,11 +4,13 @@ export const FUZZY_CANDIDATE_THRESHOLD = 0.6;
 export const FUZZY_CONFIDENT_THRESHOLD = 0.85;
 
 // Fuzzy Jaccard compares normalized word bags, so we keep the whitespace-based
-// phrase boundaries from `normalizeLookupText`. Stage 2's unmatched-token helper
-// intentionally uses a stricter splitter because it is surfacing leftover text,
-// not similarity candidates.
+// phrase boundaries from `normalizeLookupText`, but we also split common slug
+// separators and strip apostrophes so dataset titles like `caiso-todays-outlook`
+// and `CAISO Today's Outlook` compare on the same token set.
 const tokenize = (value: string) =>
   normalizeLookupText(value)
+    .replace(/['’]/gu, "")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
     .split(/\s+/u)
     .map((token) => token.trim())
     .filter((token) => token.length > 0);
