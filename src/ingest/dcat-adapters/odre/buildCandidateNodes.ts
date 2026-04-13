@@ -3,9 +3,11 @@ import {
   CatalogRecord,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution,
   mintCatalogRecordId,
   mintDatasetId,
+  mintDatasetSeriesId,
   mintDistributionId,
   type ExternalIdentifier
 } from "../../../domain/data-layer";
@@ -33,6 +35,7 @@ const ODRE_HARVEST_SOURCE = `${ODRE_API_BASE}/catalog/datasets`;
 // ---------------------------------------------------------------------------
 
 const decodeDataset = stripUndefinedAndDecodeWith(Dataset);
+const decodeDatasetSeries = stripUndefinedAndDecodeWith(DatasetSeries);
 const decodeDistribution = stripUndefinedAndDecodeWith(Distribution);
 const decodeCatalogRecord = stripUndefinedAndDecodeWith(CatalogRecord);
 const decodeDataService = stripUndefinedAndDecodeWith(DataService);
@@ -43,6 +46,9 @@ const decodeDataService = stripUndefinedAndDecodeWith(DataService);
 
 const odreDatasetSlug = (datasetId: string): string =>
   `odre-${datasetId.replace(/[_/]+/gu, "-")}`;
+
+export const odreDatasetSeriesSlug = (datasetId: string): string =>
+  `${odreDatasetSlug(datasetId)}-series`;
 
 const odreDistributionSlug = (datasetId: string): string =>
   `${odreDatasetSlug(datasetId)}-api`;
@@ -70,6 +76,16 @@ const freshDatasetAliases = (
   }
 ];
 
+const freshDatasetSeriesAliases = (
+  datasetId: string
+): ReadonlyArray<ExternalIdentifier> => [
+  {
+    scheme: ODRE_DATASET_ALIAS_SCHEME,
+    value: `series:${datasetId}`,
+    relation: "exactMatch"
+  }
+];
+
 const freshDistributionAliases = (
   datasetId: string
 ): ReadonlyArray<ExternalIdentifier> => [
@@ -89,6 +105,51 @@ const existingDatasetForInfo = (
   datasetId: string
 ): Dataset | null => idx.datasetsByMergeKey.get(datasetId) ?? null;
 
+const YEAR_OR_DATE_TOKEN = /^(?:19|20)\d{2}|\d{8}$/u;
+
+const datasetSeriesKeyForInfo = (info: OdreDatasetInfo): string =>
+  info.dataset_id
+    .split("-")
+    .filter((token) => token.length > 0 && !YEAR_OR_DATE_TOKEN.test(token))
+    .join("-");
+
+const stripYearMarkers = (value: string): string =>
+  value
+    .replace(/\b(?:19|20)\d{2}(?:[-/](?:19|20)\d{2})?\b/gu, "")
+    .replace(/\b\d{2}\/\d{2}\/(?:19|20)\d{2}\b/gu, "")
+    .replace(/\s{2,}/gu, " ")
+    .trim();
+
+const buildDatasetSeriesTitle = (
+  familyKey: string,
+  members: ReadonlyArray<OdreDatasetInfo>
+): string =>
+  members.find((member) => member.dataset_id === familyKey)?.metas.default.title ??
+  stripYearMarkers(members[0]!.metas.default.title ?? familyKey) ??
+  familyKey;
+
+const buildDatasetSeriesDescription = (
+  familyKey: string
+): string =>
+  `Collection of ODRÉ ${familyKey.replace(/-/gu, " ")} datasets published as separate annual or dated releases.`;
+
+const existingDatasetSeriesForKey = (
+  idx: CatalogIndex,
+  ctx: BuildContext,
+  familyKey: string,
+  members: ReadonlyArray<OdreDatasetInfo>
+): DatasetSeries | null =>
+  idx.allDatasetSeries.find(
+    (series) =>
+      series.aliases.some(
+        (alias) =>
+          alias.scheme === ODRE_DATASET_ALIAS_SCHEME &&
+          alias.value === `series:${familyKey}`
+      ) ||
+      (series.title === buildDatasetSeriesTitle(familyKey, members) &&
+        (series.publisherAgentId ?? ctx.agent.id) === ctx.agent.id)
+  ) ?? null;
+
 // ---------------------------------------------------------------------------
 // Entity builders
 // ---------------------------------------------------------------------------
@@ -98,7 +159,8 @@ const buildDatasetCandidate = (
   datasetId: Dataset["id"],
   ctx: BuildContext,
   existing: Dataset | null,
-  distributionIds: ReadonlyArray<Distribution["id"]>
+  distributionIds: ReadonlyArray<Distribution["id"]>,
+  datasetSeriesId: DatasetSeries["id"] | undefined
 ): Dataset => {
   const meta = info.metas.default;
   const dcat = info.metas.dcat;
@@ -120,7 +182,7 @@ const buildDatasetCandidate = (
     themes: existing?.themes ?? meta.theme ?? undefined,
     distributionIds,
     dataServiceIds: [ctx.dataService.id],
-    inSeries: existing?.inSeries,
+    inSeries: existing?.inSeries ?? datasetSeriesId,
     aliases: unionAliases(
       existing?.aliases ?? [],
       freshDatasetAliases(info.dataset_id)
@@ -129,6 +191,31 @@ const buildDatasetCandidate = (
     updatedAt: ctx.nowIso
   });
 };
+
+const buildDatasetSeriesCandidate = (input: {
+  readonly familyKey: string;
+  readonly members: ReadonlyArray<OdreDatasetInfo>;
+  readonly ctx: BuildContext;
+  readonly existing: DatasetSeries | null;
+}): DatasetSeries =>
+  decodeDatasetSeries({
+    _tag: "DatasetSeries" as const,
+    id: input.existing?.id ?? mintDatasetSeriesId(),
+    title:
+      input.existing?.title ??
+      buildDatasetSeriesTitle(input.familyKey, input.members),
+    description:
+      input.existing?.description ??
+      buildDatasetSeriesDescription(input.familyKey),
+    publisherAgentId: input.existing?.publisherAgentId ?? input.ctx.agent.id,
+    cadence: input.existing?.cadence ?? "annual",
+    aliases: unionAliases(
+      input.existing?.aliases ?? [],
+      freshDatasetSeriesAliases(input.familyKey)
+    ),
+    createdAt: input.existing?.createdAt ?? input.ctx.nowIso,
+    updatedAt: input.ctx.nowIso
+  });
 
 const buildDistributionCandidate = (
   info: OdreDatasetInfo,
@@ -190,6 +277,9 @@ export const buildCandidateNodes = (
   idx: CatalogIndex,
   ctx: BuildContext
 ): ReadonlyArray<IngestNode> => {
+  const datasetSeriesNodes: Array<
+    Extract<IngestNode, { _tag: "dataset-series" }>
+  > = [];
   const datasetNodes: Array<Extract<IngestNode, { _tag: "dataset" }>> = [];
   const distributionNodes: Array<
     Extract<IngestNode, { _tag: "distribution" }>
@@ -197,6 +287,50 @@ export const buildCandidateNodes = (
   const catalogRecordNodes: Array<
     Extract<IngestNode, { _tag: "catalog-record" }>
   > = [];
+
+  const datasetsBySeriesKey = new Map<string, Array<OdreDatasetInfo>>();
+  for (const info of datasets) {
+    const key = datasetSeriesKeyForInfo(info);
+    const bucket = datasetsBySeriesKey.get(key);
+    if (bucket === undefined) {
+      datasetsBySeriesKey.set(key, [info]);
+    } else {
+      bucket.push(info);
+    }
+  }
+
+  const datasetSeriesIdByKey = new Map<string, DatasetSeries["id"]>();
+  for (const [familyKey, members] of datasetsBySeriesKey) {
+    if (members.length < 2) {
+      continue;
+    }
+
+    const existingDatasetSeries = existingDatasetSeriesForKey(
+      idx,
+      ctx,
+      familyKey,
+      members
+    );
+    const datasetSeries = buildDatasetSeriesCandidate({
+      familyKey,
+      members,
+      ctx,
+      existing: existingDatasetSeries
+    });
+
+    datasetSeriesIdByKey.set(familyKey, datasetSeries.id);
+    datasetSeriesNodes.push({
+      _tag: "dataset-series",
+      slug: stableSlug(
+        existingDatasetSeries === null
+          ? undefined
+          : idx.datasetSeriesFileSlugById.get(existingDatasetSeries.id),
+        () => odreDatasetSeriesSlug(familyKey)
+      ),
+      data: datasetSeries,
+      merged: existingDatasetSeries !== null
+    });
+  }
 
   for (const info of datasets) {
     const existingDataset = existingDatasetForInfo(idx, info.dataset_id);
@@ -225,7 +359,8 @@ export const buildCandidateNodes = (
       datasetId,
       ctx,
       existingDataset,
-      [...preservedDistributionIds, apiDistribution.id]
+      [...preservedDistributionIds, apiDistribution.id],
+      datasetSeriesIdByKey.get(datasetSeriesKeyForInfo(info))
     );
 
     const existingCatalogRecord =
@@ -303,6 +438,7 @@ export const buildCandidateNodes = (
       data: ctx.catalog,
       merged: ctx.catalogMerged
     },
+    ...datasetSeriesNodes,
     ...datasetNodes,
     ...distributionNodes,
     ...catalogRecordNodes,

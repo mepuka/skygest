@@ -19,6 +19,9 @@ export const GRIDSTATUS_DATA_SERVICE_CONFORMS_TO = "GridStatus REST API";
 export const gridstatusDatasetSlug = (datasetId: string): string =>
   `gridstatus-${datasetId.replace(/[_/]+/gu, "-")}`;
 
+export const gridstatusDatasetSeriesSlug = (datasetId: string): string =>
+  `${gridstatusDatasetSlug(datasetId)}-series`;
+
 export const gridstatusApiDistributionSlug = (datasetId: string): string =>
   `${gridstatusDatasetSlug(datasetId)}-api`;
 

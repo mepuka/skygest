@@ -29,6 +29,7 @@ type FixtureSpec = Partial<{
   readonly agents: ReadonlyArray<FixtureFile>;
   readonly catalogs: ReadonlyArray<FixtureFile>;
   readonly datasets: ReadonlyArray<FixtureFile>;
+  readonly datasetSeries: ReadonlyArray<FixtureFile>;
   readonly distributions: ReadonlyArray<FixtureFile>;
   readonly catalogRecords: ReadonlyArray<FixtureFile>;
   readonly dataServices: ReadonlyArray<FixtureFile>;
@@ -38,6 +39,7 @@ const FIXTURE_SUBDIRS = [
   ["agents", "agents"],
   ["catalogs", "catalogs"],
   ["datasets", "datasets"],
+  ["datasetSeries", "dataset-series"],
   ["distributions", "distributions"],
   ["catalogRecords", "catalog-records"],
   ["dataServices", "data-services"]
@@ -97,6 +99,22 @@ const validDistributionBody = (
   id: `https://id.skygest.io/distribution/dist_${ulid}`,
   datasetId,
   kind: "api-access",
+  createdAt: FIXTURE_NOW,
+  updatedAt: FIXTURE_NOW,
+  aliases
+});
+
+const validDatasetSeriesBody = (
+  title: string,
+  ulid: string,
+  publisherAgentId: string,
+  aliases: ReadonlyArray<FixtureAlias>
+) => ({
+  _tag: "DatasetSeries",
+  id: `https://id.skygest.io/dataset-series/dser_${ulid}`,
+  title,
+  publisherAgentId,
+  cadence: "annual",
   createdAt: FIXTURE_NOW,
   updatedAt: FIXTURE_NOW,
   aliases
@@ -262,11 +280,60 @@ describe("loadCatalogIndexWith", () => {
         result.index.dataServicesById.get(dataServiceId as never)?.title
       ).toBe("EIA API v2");
       expect(result.index.allDatasets).toHaveLength(1);
+      expect(result.index.allDatasetSeries).toHaveLength(0);
       expect(result.index.allCatalogs).toHaveLength(1);
       expect(result.index.allDataServices).toHaveLength(1);
       expect(result.skippedDatasets).toEqual([]);
       expect("catalog" in result.index).toBe(false);
       expect("dataService" in result.index).toBe(false);
+    }).pipe(Effect.provide(bunFsLayer))
+  );
+
+  it.effect("loads checked-in dataset-series records into the shared catalog index", () =>
+    Effect.gen(function* () {
+      const agentUlid = "01KNQEZ5V57VJJJFYV6HWM03VB";
+      const seriesUlid = "01KNQEZ5V57VJJJFYV6HWM03VD";
+      const agentId = `https://id.skygest.io/agent/ag_${agentUlid}`;
+      const seriesId = `https://id.skygest.io/dataset-series/dser_${seriesUlid}`;
+
+      const tmp = yield* Effect.promise(() =>
+        makeTmpFixture({
+          agents: [
+            {
+              slug: "eia",
+              body: validAgentBody(
+                "U.S. Energy Information Administration",
+                agentUlid,
+                []
+              )
+            }
+          ],
+          datasetSeries: [
+            {
+              slug: "eia-mer",
+              body: validDatasetSeriesBody(
+                "EIA Monthly Energy Review",
+                seriesUlid,
+                agentId,
+                []
+              )
+            }
+          ]
+        })
+      );
+
+      const result = yield* loadCatalogIndexWith({
+        rootDir: tmp,
+        mergeAliasScheme: AliasSchemeValues.eiaRoute
+      }).pipe(Effect.ensuring(Effect.promise(() => cleanup(tmp))));
+
+      expect(result.index.allDatasetSeries).toHaveLength(1);
+      expect(result.index.datasetSeriesById.get(seriesId as never)?.title).toBe(
+        "EIA Monthly Energy Review"
+      );
+      expect(
+        result.index.datasetSeriesFileSlugById.get(seriesId as never)
+      ).toBe("eia-mer");
     }).pipe(Effect.provide(bunFsLayer))
   );
 

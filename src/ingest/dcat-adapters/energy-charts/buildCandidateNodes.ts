@@ -3,9 +3,11 @@ import {
   CatalogRecord,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution,
   mintCatalogRecordId,
   mintDatasetId,
+  mintDatasetSeriesId,
   mintDistributionId,
   type ExternalIdentifier
 } from "../../../domain/data-layer";
@@ -21,11 +23,14 @@ import {
   ENERGY_CHARTS_DATASET_ALIAS_SCHEME,
   ENERGY_CHARTS_LICENSE_URL,
   ENERGY_CHARTS_OPENAPI_URL,
+  energyChartsDatasetSeriesSlug,
+  energyChartsFamilyTitle,
   type EndpointFamily
 } from "./endpointCatalog";
 import type { BuildContext } from "./buildContext";
 
 const decodeDataset = stripUndefinedAndDecodeWith(Dataset);
+const decodeDatasetSeries = stripUndefinedAndDecodeWith(DatasetSeries);
 const decodeDistribution = stripUndefinedAndDecodeWith(Distribution);
 const decodeCatalogRecord = stripUndefinedAndDecodeWith(CatalogRecord);
 const decodeDataService = stripUndefinedAndDecodeWith(DataService);
@@ -36,6 +41,16 @@ const freshDatasetAliases = (
   {
     scheme: ENERGY_CHARTS_DATASET_ALIAS_SCHEME,
     value: family.endpointKey,
+    relation: "exactMatch"
+  }
+];
+
+const freshDatasetSeriesAliases = (
+  endpointKey: string
+): ReadonlyArray<ExternalIdentifier> => [
+  {
+    scheme: ENERGY_CHARTS_DATASET_ALIAS_SCHEME,
+    value: `series:${endpointKey}`,
     relation: "exactMatch"
   }
 ];
@@ -55,12 +70,37 @@ const existingDatasetForFamily = (
   family: EndpointFamily
 ): Dataset | null => idx.datasetsByMergeKey.get(family.endpointKey) ?? null;
 
+const datasetSeriesKeyForFamily = (family: EndpointFamily): string =>
+  family.endpointKey
+    .replace(/_forecast$/u, "")
+    .replace(/_daily_avg$/u, "");
+
+const existingDatasetSeriesForKey = (
+  idx: CatalogIndex,
+  ctx: BuildContext,
+  endpointKey: string
+): DatasetSeries | null =>
+  idx.allDatasetSeries.find(
+    (series) =>
+      series.aliases.some(
+        (alias) =>
+          alias.scheme === ENERGY_CHARTS_DATASET_ALIAS_SCHEME &&
+          alias.value === `series:${endpointKey}`
+      ) ||
+      (series.title === energyChartsFamilyTitle(endpointKey) &&
+        (series.publisherAgentId ?? ctx.agent.id) === ctx.agent.id)
+  ) ?? null;
+
+const buildDatasetSeriesDescription = (endpointKey: string): string =>
+  `Collection of Energy Charts ${endpointKey.replace(/_/gu, " ")} endpoints published as separate but related feeds.`;
+
 const buildDatasetCandidate = (
   family: EndpointFamily,
   datasetId: Dataset["id"],
   ctx: BuildContext,
   existing: Dataset | null,
-  distributionIds: ReadonlyArray<Distribution["id"]>
+  distributionIds: ReadonlyArray<Distribution["id"]>,
+  datasetSeriesId: DatasetSeries["id"] | undefined
 ): Dataset =>
   decodeDataset({
     _tag: "Dataset" as const,
@@ -76,8 +116,29 @@ const buildDatasetCandidate = (
     themes: existing?.themes,
     distributionIds,
     dataServiceIds: [ctx.dataService.id],
-    inSeries: existing?.inSeries,
+    inSeries: existing?.inSeries ?? datasetSeriesId,
     aliases: unionAliases(existing?.aliases ?? [], freshDatasetAliases(family)),
+    createdAt: existing?.createdAt ?? ctx.nowIso,
+    updatedAt: ctx.nowIso
+  });
+
+const buildDatasetSeriesCandidate = (
+  endpointKey: string,
+  ctx: BuildContext,
+  existing: DatasetSeries | null
+): DatasetSeries =>
+  decodeDatasetSeries({
+    _tag: "DatasetSeries" as const,
+    id: existing?.id ?? mintDatasetSeriesId(),
+    title: existing?.title ?? energyChartsFamilyTitle(endpointKey),
+    description:
+      existing?.description ?? buildDatasetSeriesDescription(endpointKey),
+    publisherAgentId: existing?.publisherAgentId ?? ctx.agent.id,
+    cadence: existing?.cadence ?? "irregular",
+    aliases: unionAliases(
+      existing?.aliases ?? [],
+      freshDatasetSeriesAliases(endpointKey)
+    ),
     createdAt: existing?.createdAt ?? ctx.nowIso,
     updatedAt: ctx.nowIso
   });
@@ -136,12 +197,57 @@ export const buildCandidateNodes = (
   idx: CatalogIndex,
   ctx: BuildContext
 ): ReadonlyArray<IngestNode> => {
+  const datasetSeriesNodes: Array<
+    Extract<IngestNode, { _tag: "dataset-series" }>
+  > = [];
   const datasetNodes: Array<Extract<IngestNode, { _tag: "dataset" }>> = [];
   const distributionNodes: Array<Extract<IngestNode, { _tag: "distribution" }>> =
     [];
   const catalogRecordNodes: Array<
     Extract<IngestNode, { _tag: "catalog-record" }>
   > = [];
+
+  const familiesBySeriesKey = new Map<string, Array<EndpointFamily>>();
+  for (const family of families) {
+    const key = datasetSeriesKeyForFamily(family);
+    const bucket = familiesBySeriesKey.get(key);
+    if (bucket === undefined) {
+      familiesBySeriesKey.set(key, [family]);
+    } else {
+      bucket.push(family);
+    }
+  }
+
+  const datasetSeriesIdByKey = new Map<string, DatasetSeries["id"]>();
+  for (const [endpointKey, members] of familiesBySeriesKey) {
+    if (members.length < 2) {
+      continue;
+    }
+
+    const existingDatasetSeries = existingDatasetSeriesForKey(
+      idx,
+      ctx,
+      endpointKey
+    );
+    const datasetSeries = buildDatasetSeriesCandidate(
+      endpointKey,
+      ctx,
+      existingDatasetSeries
+    );
+
+    datasetSeriesIdByKey.set(endpointKey, datasetSeries.id);
+    datasetSeriesNodes.push({
+      _tag: "dataset-series",
+      slug: stableSlug(
+        existingDatasetSeries === null
+          ? undefined
+          : idx.datasetSeriesFileSlugById.get(existingDatasetSeries.id),
+        () => energyChartsDatasetSeriesSlug(endpointKey)
+      ),
+      data: datasetSeries,
+      merged: existingDatasetSeries !== null
+    });
+  }
 
   for (const family of families) {
     const existingDataset = existingDatasetForFamily(idx, family);
@@ -165,7 +271,8 @@ export const buildCandidateNodes = (
       datasetId,
       ctx,
       existingDataset,
-      [...preservedDistributionIds, apiDistribution.id]
+      [...preservedDistributionIds, apiDistribution.id],
+      datasetSeriesIdByKey.get(datasetSeriesKeyForFamily(family))
     );
     const existingCatalogRecord =
       idx.catalogRecordsByCatalogAndPrimaryTopic.get(
@@ -238,6 +345,7 @@ export const buildCandidateNodes = (
       data: ctx.catalog,
       merged: ctx.catalogMerged
     },
+    ...datasetSeriesNodes,
     ...datasetNodes,
     ...distributionNodes,
     ...catalogRecordNodes,

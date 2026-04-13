@@ -24,6 +24,7 @@ import type {
   CatalogRecord,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution
 } from "../src/domain/data-layer";
 import {
@@ -50,6 +51,7 @@ import {
   loadLedger,
   saveLedger,
   slugifyRoute,
+  slugifySeriesRoute,
   unionAliases,
   validateCandidates,
   validateNode,
@@ -755,7 +757,8 @@ const fakeCatalog = (
 const fakeDataset = (
   slug: string,
   ulid: string,
-  publisherId: Agent["id"]
+  publisherId: Agent["id"],
+  inSeries?: DatasetSeries["id"]
 ): IngestNode => ({
   _tag: "dataset",
   slug,
@@ -765,6 +768,27 @@ const fakeDataset = (
     id: `https://id.skygest.io/dataset/ds_${ulid}` as unknown as Dataset["id"],
     title: slug,
     publisherAgentId: publisherId,
+    ...(inSeries === undefined ? {} : { inSeries }),
+    aliases: [],
+    createdAt: NOW,
+    updatedAt: NOW
+  }
+});
+
+const fakeDatasetSeries = (
+  slug: string,
+  ulid: string,
+  publisherId: Agent["id"]
+): IngestNode => ({
+  _tag: "dataset-series",
+  slug,
+  merged: false,
+  data: {
+    _tag: "DatasetSeries",
+    id: `https://id.skygest.io/dataset-series/dser_${ulid}` as unknown as DatasetSeries["id"],
+    title: slug,
+    publisherAgentId: publisherId,
+    cadence: "annual",
     aliases: [],
     createdAt: NOW,
     updatedAt: NOW
@@ -880,6 +904,33 @@ describe("buildIngestGraph", () => {
     expect(Graph.isAcyclic(graph)).toBe(true);
   });
 
+  it("orders dataset-series before its member dataset when Dataset.inSeries is set", () => {
+    const agent = fakeAgent("eia", "01KNQEZ5V57VJJJFYV6HWM03VB");
+    const datasetSeries = fakeDatasetSeries(
+      "eia-mer",
+      "01KNQEZ5V57VJJJFYV6HWM03VD",
+      (agent.data as Agent).id
+    );
+    const dataset = fakeDataset(
+      "eia-monthly-energy-review-2026-01",
+      "01KNQSXEPQHNVM0AVMA3SQRNK3",
+      (agent.data as Agent).id,
+      (datasetSeries.data as DatasetSeries).id
+    );
+
+    const graph = buildIngestGraph([dataset, datasetSeries, agent]);
+    const topoOrder = Array.from(Graph.values(Graph.topo(graph)));
+    const positions = new Map<string, number>();
+    topoOrder.forEach((node, idx) => positions.set(node.slug, idx));
+
+    expect(Graph.isAcyclic(graph)).toBe(true);
+    expect(positions.get("eia")! < positions.get("eia-mer")!).toBe(true);
+    expect(
+      positions.get("eia-mer")! <
+        positions.get("eia-monthly-energy-review-2026-01")!
+    ).toBe(true);
+  });
+
   it("emits Agent before Catalog before Dataset before {Distribution, CR, DataService} in topological order", () => {
     const agent = fakeAgent("eia", "01KNQEZ5V57VJJJFYV6HWM03VB");
     const catalog = fakeCatalog(
@@ -964,6 +1015,7 @@ interface FixtureEntity {
 
 interface FixtureSpec {
   readonly datasets?: ReadonlyArray<FixtureEntity>;
+  readonly datasetSeries?: ReadonlyArray<FixtureEntity>;
   readonly distributions?: ReadonlyArray<FixtureEntity>;
   readonly catalogRecords?: ReadonlyArray<FixtureEntity>;
   readonly dataServices?: ReadonlyArray<FixtureEntity>;
@@ -978,6 +1030,7 @@ const FIXTURE_SUBDIRS: ReadonlyArray<
   readonly [keyof FixtureSpec, string]
 > = [
   ["datasets", "datasets"],
+  ["datasetSeries", "dataset-series"],
   ["distributions", "distributions"],
   ["catalogRecords", "catalog-records"],
   ["dataServices", "data-services"],
@@ -1511,6 +1564,8 @@ const emptyIndex = (): Parameters<typeof buildDistributionCandidates>[3] => {
     datasetsByRoute: datasetsByMergeKey,
     datasetsByMergeKey,
     datasetFileSlugById: new Map(),
+    datasetSeriesById: new Map(),
+    datasetSeriesFileSlugById: new Map(),
     distributionsByDatasetIdKind: new Map(),
     distributionFileSlugById: new Map(),
     catalogRecordsByCatalogAndPrimaryTopic: new Map(),
@@ -1523,6 +1578,7 @@ const emptyIndex = (): Parameters<typeof buildDistributionCandidates>[3] => {
     catalog: null,
     dataService: null,
     allDatasets: [],
+    allDatasetSeries: [],
     allDistributions: [],
     allCatalogRecords: [],
     allCatalogs: [],
@@ -1627,7 +1683,7 @@ describe("buildDatasetCandidate", () => {
 
   it("mints a fresh dataset candidate with title, themes, alias, and keywords", () => {
     const ctx = makeBuilderCtx(FIXTURE_NOW);
-    const ds = buildDatasetCandidate(leaf, ctx, null);
+    const ds = buildDatasetCandidate(leaf, ctx, null, undefined);
 
     // title comes from response.name
     expect(ds.title).toBe("Retail Sales of Electricity");
@@ -1698,7 +1754,7 @@ describe("buildDatasetCandidate", () => {
       updatedAt: "2025-01-01T00:00:00.000Z" as unknown as Dataset["updatedAt"]
     } as unknown as Dataset;
 
-    const ds = buildDatasetCandidate(leaf, ctx, existing);
+    const ds = buildDatasetCandidate(leaf, ctx, existing, undefined);
 
     // ID + createdAt preserved; updatedAt bumped.
     expect(ds.id).toBe(existing.id);
@@ -1758,12 +1814,59 @@ describe("buildDatasetCandidate", () => {
       updatedAt: FIXTURE_NOW as unknown as Dataset["updatedAt"]
     } as unknown as Dataset;
 
-    const ds = buildDatasetCandidate(leafWithNullName, ctx, existing);
+    const ds = buildDatasetCandidate(leafWithNullName, ctx, existing, undefined);
     expect(ds.title).toBe("Retail Sales of Electricity");
     // And sanity: a fresh build with null name still falls through to
     // the raw route id, since there's no existing title to fall back to.
-    const fresh = buildDatasetCandidate(leafWithNullName, ctx, null);
+    const fresh = buildDatasetCandidate(leafWithNullName, ctx, null, undefined);
     expect(fresh.title).toBe("retail-sales");
+  });
+
+  it("synthesizes title from path segments when API v2 echoes the top-level route id", () => {
+    // EIA's v2 API returns `response.id = <top-level route>` and
+    // `response.name = null` for many deep leaf routes (e.g.
+    // `natural-gas/sum/sndm`). Falling back to `response.id` would yield
+    // generic titles like "natural-gas" for ~71% of deep datasets. Detect
+    // the stale-id case and synthesize from path segments instead.
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const staleLeaf = {
+      path: "natural-gas/sum/sndm",
+      parents: ["natural-gas", "sum"],
+      response: {
+        id: "natural-gas", // <- echoes top-level parent, not the leaf
+        name: null,
+        description: "EIA natural gas survey data",
+        facets: [],
+        defaultFrequency: "monthly"
+      } as unknown as EiaApiResponse["response"]
+    };
+    const ds = buildDatasetCandidate(staleLeaf, ctx, null, undefined);
+    // Not the stale top-level segment
+    expect(ds.title).not.toBe("natural-gas");
+    // Includes all path segments for disambiguation (so
+    // `natural-gas/sum/sndm` and `natural-gas/sum/lsum` get distinct titles)
+    expect(ds.title).toContain("Natural Gas");
+    expect(ds.title).toContain("Sum");
+    expect(ds.title).toContain("Sndm");
+  });
+
+  it("does NOT synthesize from path when response.id differs from top segment (aeo/2026)", () => {
+    // Regression guard: `aeo/2026` returns `id: "AEO2026"` which is a
+    // distinctive leaf identifier, not a stale top-level echo. The title
+    // should be the raw `AEO2026`, not a synthesized "Aeo 2026".
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const aeoLeaf = {
+      path: "aeo/2026",
+      parents: ["aeo"],
+      response: {
+        id: "AEO2026",
+        name: null,
+        facets: [],
+        defaultFrequency: null
+      } as unknown as EiaApiResponse["response"]
+    };
+    const ds = buildDatasetCandidate(aeoLeaf, ctx, null, undefined);
+    expect(ds.title).toBe("AEO2026");
   });
 
   it("falls back to parent route segments for themes when existing themes are empty", () => {
@@ -1779,7 +1882,7 @@ describe("buildDatasetCandidate", () => {
       createdAt: FIXTURE_NOW as unknown as Dataset["createdAt"],
       updatedAt: FIXTURE_NOW as unknown as Dataset["updatedAt"]
     } as unknown as Dataset;
-    const ds = buildDatasetCandidate(leaf, ctx, existing);
+    const ds = buildDatasetCandidate(leaf, ctx, existing, undefined);
     expect(ds.themes).toEqual(["electricity"]);
   });
 });
@@ -1884,6 +1987,8 @@ describe("buildDistributionCandidates", () => {
       datasetsByRoute: datasetsByMergeKey,
       datasetsByMergeKey,
       datasetFileSlugById: new Map(),
+      datasetSeriesById: new Map(),
+      datasetSeriesFileSlugById: new Map(),
       distributionsByDatasetIdKind: new Map(),
       distributionFileSlugById: new Map(),
       catalogRecordsByCatalogAndPrimaryTopic: new Map(),
@@ -1896,6 +2001,7 @@ describe("buildDistributionCandidates", () => {
       catalog: null,
       dataService: null,
       allDatasets: [],
+      allDatasetSeries: [],
       allDistributions: [existingLanding, existingDownload],
       allCatalogRecords: [],
       allCatalogs: [],
@@ -2007,6 +2113,104 @@ describe("buildCandidateNodes", () => {
     return walk;
   };
 
+  const makeYearIndexedSeriesWalk = (): ReadonlyMap<string, EiaApiResponse> => {
+    const walk = new Map<string, EiaApiResponse>();
+    walk.set("", {
+      response: {
+        id: "root",
+        name: "EIA API",
+        routes: [{ id: "aeo", name: "Annual Energy Outlook" }]
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("aeo", {
+      response: {
+        id: "aeo",
+        name: "Annual Energy Outlook",
+        description: "Parent route for Annual Energy Outlook editions",
+        routes: [
+          { id: "2022", name: "AEO 2022" },
+          { id: "2023", name: "AEO 2023" },
+          { id: "2024", name: "AEO 2024" }
+        ]
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("aeo/2022", {
+      response: {
+        id: "2022",
+        name: "Annual Energy Outlook 2022",
+        facets: [{ id: "seriesId", description: null }],
+        defaultFrequency: "annual"
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("aeo/2023", {
+      response: {
+        id: "2023",
+        name: "Annual Energy Outlook 2023",
+        facets: [{ id: "seriesId", description: null }],
+        defaultFrequency: "annual"
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("aeo/2024", {
+      response: {
+        id: "2024",
+        name: "Annual Energy Outlook 2024",
+        facets: [{ id: "seriesId", description: null }],
+        defaultFrequency: "annual"
+      }
+    } as unknown as EiaApiResponse);
+    return walk;
+  };
+
+  // Negative fixture: a parent whose children are named by cadence
+  // (monthly/annual) rather than year-indexed. These are topically related
+  // but structurally distinct datasets, NOT editions of a single
+  // publication series, so no DatasetSeries must be synthesized.
+  const makeNonYearIndexedChildrenWalk = (): ReadonlyMap<string, EiaApiResponse> => {
+    const walk = new Map<string, EiaApiResponse>();
+    walk.set("", {
+      response: {
+        id: "root",
+        name: "EIA API",
+        routes: [{ id: "electricity", name: "Electricity" }]
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("electricity", {
+      response: {
+        id: "electricity",
+        name: "Electricity",
+        routes: [{ id: "sales", name: "Sales" }]
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("electricity/sales", {
+      response: {
+        id: "sales",
+        name: "Electricity Sales",
+        description: "Parent route for electricity sales datasets",
+        routes: [
+          { id: "monthly", name: "Monthly" },
+          { id: "annual", name: "Annual" }
+        ]
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("electricity/sales/monthly", {
+      response: {
+        id: "monthly",
+        name: "Electricity Sales Monthly",
+        facets: [{ id: "stateid", description: null }],
+        defaultFrequency: "monthly"
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("electricity/sales/annual", {
+      response: {
+        id: "annual",
+        name: "Electricity Sales Annual",
+        facets: [{ id: "stateid", description: null }],
+        defaultFrequency: "annual"
+      }
+    } as unknown as EiaApiResponse);
+    return walk;
+  };
+
   it("produces a 6-node candidate set for one leaf (agent + catalog + data-service + dataset + api distribution + cr)", () => {
     const ctx = makeBuilderCtx(FIXTURE_NOW);
     const nodes = buildCandidateNodes(makeWalk(), emptyIndex(), ctx);
@@ -2104,6 +2308,93 @@ describe("buildCandidateNodes", () => {
       expect(datasetNode.merged).toBe(true);
       // Dataset ID reused from existing (not re-minted)
       expect(datasetNode.data.id).toBe(existing.id);
+    }
+  });
+
+  it("synthesizes an annual dataset-series for parent routes whose direct leaf children are year-indexed editions", () => {
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const nodes = buildCandidateNodes(
+      makeYearIndexedSeriesWalk(),
+      emptyIndex(),
+      ctx
+    );
+
+    const datasetSeriesNode = nodes.find(
+      (n): n is Extract<IngestNode, { _tag: "dataset-series" }> =>
+        n._tag === "dataset-series"
+    );
+    const aeo2022Node = nodes.find(
+      (n): n is Extract<IngestNode, { _tag: "dataset" }> =>
+        n._tag === "dataset" && n.slug === "eia-aeo-2022"
+    );
+    const aeo2023Node = nodes.find(
+      (n): n is Extract<IngestNode, { _tag: "dataset" }> =>
+        n._tag === "dataset" && n.slug === "eia-aeo-2023"
+    );
+    const aeo2024Node = nodes.find(
+      (n): n is Extract<IngestNode, { _tag: "dataset" }> =>
+        n._tag === "dataset" && n.slug === "eia-aeo-2024"
+    );
+
+    expect(datasetSeriesNode?.slug).toBe(slugifySeriesRoute("aeo"));
+    expect(datasetSeriesNode?.merged).toBe(false);
+    expect(datasetSeriesNode?.data.title).toBe("Annual Energy Outlook");
+    expect(datasetSeriesNode?.data.description).toBe(
+      "Parent route for Annual Energy Outlook editions"
+    );
+    // Year-indexed publications are annual by definition — the heuristic
+    // no longer guesses cadence from child IDs or defaultFrequency fields.
+    expect(datasetSeriesNode?.data.cadence).toBe("annual");
+    expect(datasetSeriesNode?.data.aliases).toEqual([
+      {
+        scheme: "eia-route",
+        value: "aeo",
+        relation: "exactMatch"
+      }
+    ]);
+    expect(aeo2022Node?.data.inSeries).toBe(datasetSeriesNode?.data.id);
+    expect(aeo2023Node?.data.inSeries).toBe(datasetSeriesNode?.data.id);
+    expect(aeo2024Node?.data.inSeries).toBe(datasetSeriesNode?.data.id);
+
+    const graph = buildIngestGraph(nodes);
+    const topo = Array.from(Graph.values(Graph.topo(graph)));
+    const positions = new Map(topo.map((node, index) => [node.slug, index]));
+    expect(
+      positions.get("eia-aeo-series")! < positions.get("eia-aeo-2022")!
+    ).toBe(true);
+    expect(
+      positions.get("eia-aeo-series")! < positions.get("eia-aeo-2023")!
+    ).toBe(true);
+    expect(
+      positions.get("eia-aeo-series")! < positions.get("eia-aeo-2024")!
+    ).toBe(true);
+  });
+
+  it("does not synthesize a series when children are not year-indexed", () => {
+    // Regression guard for the pre-fix heuristic that synthesized bogus
+    // series whenever all direct children happened to share a cadence
+    // word. `electricity/sales/{monthly,annual}` are structurally distinct
+    // datasets, NOT editions of a single publication — no DatasetSeries
+    // must be emitted.
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const nodes = buildCandidateNodes(
+      makeNonYearIndexedChildrenWalk(),
+      emptyIndex(),
+      ctx
+    );
+
+    const datasetSeriesNodes = nodes.filter(
+      (n) => n._tag === "dataset-series"
+    );
+    expect(datasetSeriesNodes).toHaveLength(0);
+
+    // And the underlying datasets must not carry an inSeries pointer.
+    const datasetNodes = nodes.filter(
+      (n): n is Extract<IngestNode, { _tag: "dataset" }> => n._tag === "dataset"
+    );
+    expect(datasetNodes.length).toBeGreaterThan(0);
+    for (const node of datasetNodes) {
+      expect(node.data.inSeries).toBeUndefined();
     }
   });
 
@@ -2632,7 +2923,14 @@ describe("entityFilePathForNode", () => {
   it.effect("routes each IngestNode tag to the right <rootDir>/catalog subdirectory", () =>
     Effect.gen(function* () {
       const path_ = yield* Path.Path;
-      const nodes = makePhaseBNodes();
+      const nodes = [
+        ...makePhaseBNodes(),
+        fakeDatasetSeries(
+          "eia-mer",
+          "01KNQEZ5V57VJJJFYV6HWM03VD",
+          "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB" as Agent["id"]
+        )
+      ];
       const rootDir = "/tmp/cold-start-test";
       const byTag = new Map<IngestNode["_tag"], string>();
       for (const n of nodes) {
@@ -2650,6 +2948,7 @@ describe("entityFilePathForNode", () => {
       expect(byTag.get("catalog")!.endsWith(".json")).toBe(true);
       expect(byTag.get("data-service")).toContain("/catalog/data-services/");
       expect(byTag.get("dataset")).toContain("/catalog/datasets/");
+      expect(byTag.get("dataset-series")).toContain("/catalog/dataset-series/");
       expect(byTag.get("distribution")).toContain("/catalog/distributions/");
       expect(byTag.get("catalog-record")).toContain(
         "/catalog/catalog-records/"
@@ -2660,7 +2959,14 @@ describe("entityFilePathForNode", () => {
 
 describe("ledgerKeyForNode", () => {
   it("prefixes each IngestNode with its canonical kind name", () => {
-    const nodes = makePhaseBNodes();
+    const nodes = [
+      ...makePhaseBNodes(),
+      fakeDatasetSeries(
+        "eia-mer",
+        "01KNQEZ5V57VJJJFYV6HWM03VD",
+        "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB" as Agent["id"]
+      )
+    ];
     const keys = nodes.map(ledgerKeyForNode).sort();
     // Exactly one of each kind for the single-leaf candidate set.
     expect(keys.map((k) => k.split(":")[0])).toEqual([
@@ -2669,6 +2975,7 @@ describe("ledgerKeyForNode", () => {
       "CatalogRecord",
       "DataService",
       "Dataset",
+      "DatasetSeries",
       "Distribution"
     ]);
     // Keys are unique — no two nodes collapse to the same ledger slot.
@@ -2684,7 +2991,14 @@ describe("ledgerKeyForNode", () => {
 
 describe("encodeIngestNodeData", () => {
   it("produces pretty-printed JSON for every IngestNode tag that round-trips through JSON.parse", () => {
-    const nodes = makePhaseBNodes();
+    const nodes = [
+      ...makePhaseBNodes(),
+      fakeDatasetSeries(
+        "eia-mer",
+        "01KNQEZ5V57VJJJFYV6HWM03VD",
+        "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB" as Agent["id"]
+      )
+    ];
     for (const node of nodes) {
       const encoded = encodeIngestNodeData(node);
       // Pretty-printed: 2-space indent, at least one newline.

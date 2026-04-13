@@ -96,7 +96,9 @@ const CkanLanguage = Schema.Struct({
  */
 export const DataEuropaDatasetInfo = Schema.Struct({
   id: Schema.String,
+  name: Schema.optionalKey(nullableString),
   type: Schema.optionalKey(nullableString),
+  url: Schema.optionalKey(ckanUrl),
   metadata_created: Schema.optionalKey(nullableString),
   metadata_modified: Schema.optionalKey(nullableString),
   translation: Schema.optionalKey(
@@ -115,6 +117,9 @@ export const DataEuropaDatasetInfo = Schema.Struct({
   ),
   tags: Schema.optionalKey(Schema.NullOr(Schema.Array(Schema.Unknown))),
   license_id: Schema.optionalKey(nullableString),
+  frequency: Schema.optionalKey(nullableString),
+  in_series: Schema.optionalKey(Schema.Unknown),
+  series_navigation: Schema.optionalKey(Schema.Unknown),
   language: Schema.optionalKey(
     Schema.NullOr(Schema.Array(CkanLanguage))
   )

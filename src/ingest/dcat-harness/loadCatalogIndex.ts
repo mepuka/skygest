@@ -5,6 +5,7 @@ import {
   CatalogRecord,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution,
   type AliasScheme,
   type ExternalIdentifier
@@ -26,6 +27,8 @@ export interface LoadedEntity<T> {
 export interface CatalogIndex {
   readonly datasetsByMergeKey: Map<string, Dataset>;
   readonly datasetFileSlugById: Map<Dataset["id"], string>;
+  readonly datasetSeriesById: Map<DatasetSeries["id"], DatasetSeries>;
+  readonly datasetSeriesFileSlugById: Map<DatasetSeries["id"], string>;
   readonly distributionsByDatasetIdKind: Map<string, Distribution>;
   readonly distributionFileSlugById: Map<Distribution["id"], string>;
   readonly catalogRecordsByCatalogAndPrimaryTopic: Map<string, CatalogRecord>;
@@ -36,6 +39,7 @@ export interface CatalogIndex {
   readonly catalogsById: Map<Catalog["id"], Catalog>;
   readonly dataServicesById: Map<DataService["id"], DataService>;
   readonly allDatasets: ReadonlyArray<Dataset>;
+  readonly allDatasetSeries: ReadonlyArray<DatasetSeries>;
   readonly allDistributions: ReadonlyArray<Distribution>;
   readonly allCatalogRecords: ReadonlyArray<CatalogRecord>;
   readonly allCatalogs: ReadonlyArray<Catalog>;
@@ -75,6 +79,7 @@ export interface LoadCatalogIndexOptions<
 
 interface LoadedCatalogEntities {
   readonly datasets: ReadonlyArray<LoadedEntity<Dataset>>;
+  readonly datasetSeries: ReadonlyArray<LoadedEntity<DatasetSeries>>;
   readonly distributions: ReadonlyArray<LoadedEntity<Distribution>>;
   readonly catalogRecords: ReadonlyArray<LoadedEntity<CatalogRecord>>;
   readonly dataServices: ReadonlyArray<LoadedEntity<DataService>>;
@@ -225,6 +230,11 @@ export const buildCatalogIndex = Effect.fn("DcatHarness.buildCatalogIndex")(
   ) {
     const datasetsByMergeKey = new Map<string, Dataset>();
     const datasetFileSlugById = new Map<Dataset["id"], string>();
+    const datasetSeriesById = new Map<DatasetSeries["id"], DatasetSeries>();
+    const datasetSeriesFileSlugById = new Map<
+      DatasetSeries["id"],
+      string
+    >();
     const distributionsByDatasetIdKind = new Map<string, Distribution>();
     const distributionFileSlugById = new Map<Distribution["id"], string>();
     const catalogRecordsByCatalogAndPrimaryTopic = new Map<
@@ -240,6 +250,7 @@ export const buildCatalogIndex = Effect.fn("DcatHarness.buildCatalogIndex")(
     const skippedDatasets: Array<SkippedDataset> = [];
 
     const allDatasets = entities.datasets.map(({ data }) => data);
+    const allDatasetSeries = entities.datasetSeries.map(({ data }) => data);
     const allDistributions = entities.distributions.map(({ data }) => data);
     const allCatalogRecords = entities.catalogRecords.map(({ data }) => data);
     const allCatalogs = entities.catalogs.map(({ data }) => data);
@@ -271,6 +282,11 @@ export const buildCatalogIndex = Effect.fn("DcatHarness.buildCatalogIndex")(
           mergeAliasValue: mergeAlias
         });
       }
+    }
+
+    for (const { slug, data: datasetSeries } of entities.datasetSeries) {
+      datasetSeriesFileSlugById.set(datasetSeries.id, slug);
+      datasetSeriesById.set(datasetSeries.id, datasetSeries);
     }
 
     for (const { slug, data: distribution } of entities.distributions) {
@@ -313,6 +329,8 @@ export const buildCatalogIndex = Effect.fn("DcatHarness.buildCatalogIndex")(
       index: {
         datasetsByMergeKey,
         datasetFileSlugById,
+        datasetSeriesById,
+        datasetSeriesFileSlugById,
         distributionsByDatasetIdKind,
         distributionFileSlugById,
         catalogRecordsByCatalogAndPrimaryTopic,
@@ -323,6 +341,7 @@ export const buildCatalogIndex = Effect.fn("DcatHarness.buildCatalogIndex")(
         catalogsById,
         dataServicesById,
         allDatasets,
+        allDatasetSeries,
         allDistributions,
         allCatalogRecords,
         allCatalogs,
@@ -344,6 +363,7 @@ export const loadCatalogIndexWith = <FsError = IngestFsError, SchemaError = Inge
   Effect.gen(function* () {
     const [
       datasets,
+      datasetSeries,
       distributions,
       catalogRecords,
       dataServices,
@@ -356,6 +376,13 @@ export const loadCatalogIndexWith = <FsError = IngestFsError, SchemaError = Inge
           "datasets",
           Dataset,
           "Dataset",
+          options
+        ),
+        loadEntitiesFromDir(
+          options.rootDir,
+          "dataset-series",
+          DatasetSeries,
+          "DatasetSeries",
           options
         ),
         loadEntitiesFromDir(
@@ -400,6 +427,7 @@ export const loadCatalogIndexWith = <FsError = IngestFsError, SchemaError = Inge
     return yield* buildCatalogIndex(
       {
         datasets,
+        datasetSeries,
         distributions,
         catalogRecords,
         dataServices,
