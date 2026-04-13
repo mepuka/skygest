@@ -841,7 +841,7 @@ describe("GeminiVisionService", () => {
           "High prices cluster in the central region",
           "Gas dominates the east balancing area mix"
         ]);
-        expect(result.visibleUrls).toEqual(["spp.org"]);
+        expect(result.visibleUrls).toEqual(["https://spp.org/"]);
         expect(result.organizationMentions).toEqual([
           { name: "SPP", location: "footer" }
         ]);
@@ -958,6 +958,46 @@ describe("GeminiVisionService", () => {
         expect(result.chartTypes).toEqual(["heatmap", "scatter-plot"]);
       }).pipe(runWith)
     );
+
+    it.effect("normalizes visible URLs, adds https to bare hosts, and drops obvious non-URL text", () =>
+      Effect.gen(function* () {
+        mockGenerateContent.mockReset();
+        mockGenerateContent.mockResolvedValueOnce({
+          text: encodeJsonString({
+            mediaType: "chart",
+            chartTypes: ["line-chart"],
+            altText: "Market update screenshot",
+            title: "Market Update",
+            xAxis: null,
+            yAxis: null,
+            series: [],
+            sourceLines: [],
+            temporalCoverage: null,
+            keyFindings: [],
+            visibleUrls: [
+              "woodmac.com",
+              "See https://gridstatus.io/live for details",
+              "Entergy Aims to Build More Gas in Wake of Meta's Big Data Center",
+              "https://OURWORLDINDATA.org/co2-and-greenhouse-gas-emissions"
+            ],
+            organizationMentions: [],
+            logoText: []
+          })
+        });
+
+        const svc = yield* GeminiVisionService;
+        const result = yield* svc.extractChartData(
+          "https://gemini.files/abc",
+          "image/png"
+        );
+
+        expect(result.visibleUrls).toEqual([
+          "https://woodmac.com/",
+          "https://gridstatus.io/live",
+          "https://ourworldindata.org/co2-and-greenhouse-gas-emissions"
+        ]);
+      }).pipe(runWith)
+    );
   });
 
   describe("extractImageSummary", () => {
@@ -990,10 +1030,41 @@ describe("GeminiVisionService", () => {
           expect(result.sourceLines).toEqual([
             { sourceText: "Source: EIA", datasetName: null }
           ]);
-          expect(result.visibleUrls).toEqual(["eia.gov"]);
+          expect(result.visibleUrls).toEqual(["https://eia.gov/"]);
           expect(result.organizationMentions).toEqual([
             { name: "EIA", location: "footer" }
           ]);
+        }).pipe(runWith)
+    );
+
+    it.effect(
+      "cleans lightweight visibleUrls the same way as full extraction",
+      () =>
+        Effect.gen(function* () {
+          mockGenerateContent.mockReset();
+          mockGenerateContent.mockResolvedValueOnce({
+            text: encodeJsonString({
+              chartTypes: [],
+              altText: "Screenshot of a dashboard footer",
+              title: "Dashboard",
+              keyFindings: [],
+              sourceLines: [],
+              visibleUrls: [
+                "www.gridstatus.io/live",
+                "Quarterly dashboard footer"
+              ],
+              organizationMentions: [],
+              logoText: []
+            })
+          });
+
+          const svc = yield* GeminiVisionService;
+          const result = yield* svc.extractImageSummary(
+            "https://gemini.files/abc",
+            "image/png"
+          );
+
+          expect(result.visibleUrls).toEqual(["https://www.gridstatus.io/live"]);
         }).pipe(runWith)
     );
   });

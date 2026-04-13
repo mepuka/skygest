@@ -251,6 +251,63 @@ const firstNonEmptyArray = <A>(
   return [];
 };
 
+const URLISH_FRAGMENT_PATTERN =
+  /(?:https?:\/\/)?[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}(?:\/[^\s<>()\]]*)?/giu;
+
+const URLISH_EXACT_PATTERN = new RegExp(
+  `^${URLISH_FRAGMENT_PATTERN.source}$`,
+  "iu"
+);
+
+const trimVisibleUrlBoundary = (value: string) =>
+  value
+    .trim()
+    .replace(/^[<([{'"`]+/u, "")
+    .replace(/[>)}\]'"`.,;:!?]+$/u, "");
+
+const ensureHttpUrl = (value: string) =>
+  /^[a-z][a-z0-9+.-]*:\/\//iu.test(value)
+    ? value
+    : `https://${value.replace(/^\/+/u, "")}`;
+
+const normalizeVisibleUrlCandidate = (value: string): string | null => {
+  const trimmed = trimVisibleUrlBoundary(value);
+  if (!URLISH_EXACT_PATTERN.test(trimmed)) {
+    return null;
+  }
+
+  try {
+    const url = new URL(ensureHttpUrl(trimmed));
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return null;
+    }
+
+    return url.toString();
+  } catch {
+    return null;
+  }
+};
+
+const normalizeVisibleUrls = (
+  values: ReadonlyArray<string>
+): ReadonlyArray<string> =>
+  Array.from(
+    new Set(
+      values.flatMap((value) => {
+        const exact = normalizeVisibleUrlCandidate(value);
+        if (exact !== null) {
+          return [exact];
+        }
+
+        const extracted = trimVisibleUrlBoundary(value).match(URLISH_FRAGMENT_PATTERN) ?? [];
+        return extracted.flatMap((candidate) => {
+          const normalized = normalizeVisibleUrlCandidate(candidate);
+          return normalized === null ? [] : [normalized];
+        });
+      })
+    )
+  );
+
 const uniqueBy = <A>(
   values: ReadonlyArray<A>,
   keyOf: (value: A) => string
@@ -315,10 +372,12 @@ const normalizeExtractionResponse = (
         )
       )
     ).slice(0, 5),
-    visibleUrls: Array.from(
-      new Set(
-        candidates.flatMap((candidate) =>
-          candidate.visibleUrls.filter(isNonEmptyString)
+    visibleUrls: normalizeVisibleUrls(
+      Array.from(
+        new Set(
+          candidates.flatMap((candidate) =>
+            candidate.visibleUrls.filter(isNonEmptyString)
+          )
         )
       )
     ),

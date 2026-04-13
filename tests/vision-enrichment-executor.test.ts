@@ -273,7 +273,7 @@ describe("VisionEnrichmentExecutor", () => {
           ])
         );
         expect(result.modelId).toBe("test-model");
-        expect(result.promptVersion).toBe("v3.1.0");
+        expect(result.promptVersion).toBe("v3.2.0");
         expect(result.processedAt).toBe(200);
       } finally {
         globalThis.fetch = originalFetch;

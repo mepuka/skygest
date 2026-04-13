@@ -40,7 +40,7 @@ Additional instructions:
 - sourceLines: Extract verbatim source/attribution text (e.g., "Source: EIA", "Data: AESO"). If a source line also names a dataset or report family, capture that as datasetName. Otherwise set datasetName to null.
 - temporalCoverage: Use ISO 8601 partial dates (e.g., "2020", "2024-Q3", "2024-01").
 - keyFindings: Energy-domain insights, not generic observations. Be specific about values and trends.
-- visibleUrls: Extract visible URLs or bare domains printed inside the image, especially in footers or watermarks.
+- visibleUrls: Extract only actual URL-shaped strings printed inside the image, especially in footers or watermarks. Prefer the full URL when visible. If only a bare domain or host/path is shown, return it in "https://..." form. Do NOT put headlines, captions, organization names, or other non-URL text in this field.
 - organizationMentions: Extract organization names visibly present in the image and label where they appear (title, subtitle, footer, watermark, or body).
 - logoText: Extract short organization or platform text that appears as a logo or watermark.
 - If the image is a dashboard, collage, or multi-panel screenshot, return one object for the whole image, not an array. Use chartTypes to list the visible panel types, choose the primary panel for single-value fields like title/xAxis/yAxis when panels differ, and aggregate shared source clues and key findings across panels.
@@ -87,7 +87,11 @@ Do not extract axis labels, data series, or temporal coverage. Focus on what the
   If there are no source attributions visible, return an empty array [].
   NEVER return a plain string — always return an object with both keys.
 
-**visibleUrls**: Array of URLs or bare domains printed in the image (footers, watermarks).
+**visibleUrls**: Array of actual URL-shaped strings printed in the image (footers, watermarks).
+  - Prefer the full visible URL including path when present.
+  - If only a bare domain or host/path is visible, convert it to "https://...".
+  - If the text is not clearly a URL, omit it.
+  - NEVER return headlines, captions, article titles, or organization names here.
 
 **organizationMentions**: Array of objects. Each entry MUST be a JSON object with two keys:
   - "name": the organization name
@@ -106,7 +110,7 @@ Do not extract axis labels, data series, or temporal coverage. Focus on what the
   "title": "US Gas Turbine Orders (GW)",
   "keyFindings": ["Global gas turbine orders reached 110 GW, driven by data center demand"],
   "sourceLines": [{"sourceText": "Source: Wood Mackenzie", "datasetName": "US gas turbine market report"}],
-  "visibleUrls": ["woodmac.com"],
+  "visibleUrls": ["https://woodmac.com"],
   "organizationMentions": [{"name": "Wood Mackenzie", "location": "footer"}],
   "logoText": ["WoodMac"]
 }`;
@@ -115,4 +119,4 @@ Do not extract axis labels, data series, or temporal coverage. Focus on what the
  * Prompt version identifier — bump when prompt text changes materially.
  * Stored alongside enrichment results for audit and quality tracking.
  */
-export const VISION_PROMPT_VERSION = "v3.1.0";
+export const VISION_PROMPT_VERSION = "v3.2.0";
