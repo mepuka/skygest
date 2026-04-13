@@ -967,6 +967,15 @@ const cadenceFromFrequencyValue = (
   return undefined;
 };
 
+// Year-indexed child-route IDs like `2014`, `2023`, or `2014-er`. Used to
+// detect legitimate EIA publication series (e.g. Annual Energy Outlook,
+// International Energy Outlook) whose direct children are annual editions
+// rather than structurally distinct datasets on a shared topic.
+const YEAR_INDEXED_CHILD_ID = /^(?:19|20)\d{2}(?:-[a-z0-9]+)?$/u;
+
+const isYearIndexedChildId = (value: string): boolean =>
+  YEAR_INDEXED_CHILD_ID.test(value.trim().toLowerCase());
+
 interface DatasetSeriesSpec {
   readonly parentPath: string;
   readonly parentResponse: EiaApiResponse["response"];
@@ -982,6 +991,13 @@ const collectDatasetSeriesSpecs = (
 ): ReadonlyArray<DatasetSeriesSpec> => {
   const specs: Array<DatasetSeriesSpec> = [];
 
+  // Strict rule: emit a DatasetSeries only when ALL direct children are
+  // year-indexed leaf routes (e.g. `2022`, `2023`, `2023-er`). This matches
+  // the EIA convention for publication series like AEO and IEO, while
+  // rejecting topical groupings (e.g. natural-gas/*, petroleum/*,
+  // densified-biomass, etc.) where children are structurally distinct
+  // datasets rather than editions of the same publication. Year-indexed
+  // EIA publications are annual by definition, so the cadence is fixed.
   for (const [path, response] of walkData) {
     if (path.length === 0) {
       continue;
@@ -992,47 +1008,31 @@ const collectDatasetSeriesSpecs = (
       continue;
     }
 
-    const childSpecs = childRoutes.map((child) => {
+    const childPaths: Array<string> = [];
+    let allYearIndexedLeaves = true;
+    for (const child of childRoutes) {
+      if (!isYearIndexedChildId(child.id)) {
+        allYearIndexedLeaves = false;
+        break;
+      }
       const childPath = childPathFromParent(path, child.id);
       const childResponse = walkData.get(childPath)?.response;
       if (childResponse === undefined || (childResponse.routes ?? []).length > 0) {
-        return null;
+        allYearIndexedLeaves = false;
+        break;
       }
-
-      const cadence =
-        cadenceFromFrequencyValue(child.id) ??
-        cadenceFromFrequencyValue(childResponse.defaultFrequency ?? undefined) ??
-        cadenceFromFrequencyValue(childResponse.name ?? undefined);
-
-      return cadence === undefined
-        ? null
-        : {
-            childPath,
-            cadence
-          };
-    });
-
-    if (childSpecs.some((spec) => spec === null)) {
-      continue;
+      childPaths.push(childPath);
     }
 
-    const concreteChildren = childSpecs as ReadonlyArray<{
-      readonly childPath: string;
-      readonly cadence: DatasetSeries["cadence"];
-    }>;
-    if (concreteChildren.length < 2) {
+    if (!allYearIndexedLeaves || childPaths.length < 2) {
       continue;
     }
-
-    const cadences = Array.from(
-      new Set(concreteChildren.map((child) => child.cadence))
-    );
 
     specs.push({
       parentPath: path,
       parentResponse: response.response,
-      childPaths: concreteChildren.map((child) => child.childPath),
-      cadence: cadences.length === 1 ? cadences[0]! : "irregular"
+      childPaths,
+      cadence: "annual"
     });
   }
 

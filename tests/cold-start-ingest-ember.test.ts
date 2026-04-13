@@ -308,7 +308,7 @@ describe("ember adapter", () => {
         relation: "exactMatch"
       }
     ]);
-    expect(generationSeries?.data.cadence).toBe("irregular");
+    expect(generationSeries?.data.cadence).toBe("monthly");
     expect(generationDataset?.data.inSeries).toBe(generationSeries?.data.id);
   });
 
@@ -417,7 +417,7 @@ describe("ember adapter", () => {
         expect(firstDataset.dataServiceIds).toEqual([firstDataService.id]);
         expect(firstDataset.inSeries).toBe(firstDatasetSeries.id);
         expect(firstYearlyDataset.inSeries).toBe(firstDatasetSeries.id);
-        expect(firstDatasetSeries.cadence).toBe("irregular");
+        expect(firstDatasetSeries.cadence).toBe("monthly");
         expect(firstDataset.aliases).toEqual([
           {
             scheme: "ember-route",

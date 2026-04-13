@@ -84,14 +84,18 @@ const existingDatasetSeriesForFamily = (
         (series.publisherAgentId ?? ctx.agent.id) === ctx.agent.id)
   ) ?? null;
 
+// DCAT `dcterms:accrualPeriodicity` describes the publication cadence of
+// the series itself, not the union of member temporal resolutions. Ember
+// publishes monthly updates, so a family that has any monthly member
+// inherits `monthly`; otherwise it falls back to `annual`. This keeps the
+// emitted cadence legible for downstream consumers while preserving the
+// "publication rhythm" semantics the DCAT field is designed for.
 const cadenceForFamilies = (
   families: ReadonlyArray<EndpointFamily>
 ): DatasetSeries["cadence"] =>
-  families.every((family) => family.resolution === "monthly")
+  families.some((family) => family.resolution === "monthly")
     ? "monthly"
-    : families.every((family) => family.resolution === "yearly")
-      ? "annual"
-      : "irregular";
+    : "annual";
 
 const buildDatasetSeriesTitle = (family: EndpointFamily): string =>
   `Ember ${emberFamilyTitle(family.family)}`;

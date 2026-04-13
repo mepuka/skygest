@@ -1683,7 +1683,7 @@ describe("buildDatasetCandidate", () => {
 
   it("mints a fresh dataset candidate with title, themes, alias, and keywords", () => {
     const ctx = makeBuilderCtx(FIXTURE_NOW);
-    const ds = buildDatasetCandidate(leaf, ctx, null);
+    const ds = buildDatasetCandidate(leaf, ctx, null, undefined);
 
     // title comes from response.name
     expect(ds.title).toBe("Retail Sales of Electricity");
@@ -1754,7 +1754,7 @@ describe("buildDatasetCandidate", () => {
       updatedAt: "2025-01-01T00:00:00.000Z" as unknown as Dataset["updatedAt"]
     } as unknown as Dataset;
 
-    const ds = buildDatasetCandidate(leaf, ctx, existing);
+    const ds = buildDatasetCandidate(leaf, ctx, existing, undefined);
 
     // ID + createdAt preserved; updatedAt bumped.
     expect(ds.id).toBe(existing.id);
@@ -1814,11 +1814,11 @@ describe("buildDatasetCandidate", () => {
       updatedAt: FIXTURE_NOW as unknown as Dataset["updatedAt"]
     } as unknown as Dataset;
 
-    const ds = buildDatasetCandidate(leafWithNullName, ctx, existing);
+    const ds = buildDatasetCandidate(leafWithNullName, ctx, existing, undefined);
     expect(ds.title).toBe("Retail Sales of Electricity");
     // And sanity: a fresh build with null name still falls through to
     // the raw route id, since there's no existing title to fall back to.
-    const fresh = buildDatasetCandidate(leafWithNullName, ctx, null);
+    const fresh = buildDatasetCandidate(leafWithNullName, ctx, null, undefined);
     expect(fresh.title).toBe("retail-sales");
   });
 
@@ -1835,7 +1835,7 @@ describe("buildDatasetCandidate", () => {
       createdAt: FIXTURE_NOW as unknown as Dataset["createdAt"],
       updatedAt: FIXTURE_NOW as unknown as Dataset["updatedAt"]
     } as unknown as Dataset;
-    const ds = buildDatasetCandidate(leaf, ctx, existing);
+    const ds = buildDatasetCandidate(leaf, ctx, existing, undefined);
     expect(ds.themes).toEqual(["electricity"]);
   });
 });
@@ -1940,6 +1940,8 @@ describe("buildDistributionCandidates", () => {
       datasetsByRoute: datasetsByMergeKey,
       datasetsByMergeKey,
       datasetFileSlugById: new Map(),
+      datasetSeriesById: new Map(),
+      datasetSeriesFileSlugById: new Map(),
       distributionsByDatasetIdKind: new Map(),
       distributionFileSlugById: new Map(),
       catalogRecordsByCatalogAndPrimaryTopic: new Map(),
@@ -1952,6 +1954,7 @@ describe("buildDistributionCandidates", () => {
       catalog: null,
       dataService: null,
       allDatasets: [],
+      allDatasetSeries: [],
       allDistributions: [existingLanding, existingDownload],
       allCatalogRecords: [],
       allCatalogs: [],
@@ -2063,7 +2066,59 @@ describe("buildCandidateNodes", () => {
     return walk;
   };
 
-  const makeFrequencySeriesWalk = (): ReadonlyMap<string, EiaApiResponse> => {
+  const makeYearIndexedSeriesWalk = (): ReadonlyMap<string, EiaApiResponse> => {
+    const walk = new Map<string, EiaApiResponse>();
+    walk.set("", {
+      response: {
+        id: "root",
+        name: "EIA API",
+        routes: [{ id: "aeo", name: "Annual Energy Outlook" }]
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("aeo", {
+      response: {
+        id: "aeo",
+        name: "Annual Energy Outlook",
+        description: "Parent route for Annual Energy Outlook editions",
+        routes: [
+          { id: "2022", name: "AEO 2022" },
+          { id: "2023", name: "AEO 2023" },
+          { id: "2024", name: "AEO 2024" }
+        ]
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("aeo/2022", {
+      response: {
+        id: "2022",
+        name: "Annual Energy Outlook 2022",
+        facets: [{ id: "seriesId", description: null }],
+        defaultFrequency: "annual"
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("aeo/2023", {
+      response: {
+        id: "2023",
+        name: "Annual Energy Outlook 2023",
+        facets: [{ id: "seriesId", description: null }],
+        defaultFrequency: "annual"
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("aeo/2024", {
+      response: {
+        id: "2024",
+        name: "Annual Energy Outlook 2024",
+        facets: [{ id: "seriesId", description: null }],
+        defaultFrequency: "annual"
+      }
+    } as unknown as EiaApiResponse);
+    return walk;
+  };
+
+  // Negative fixture: a parent whose children are named by cadence
+  // (monthly/annual) rather than year-indexed. These are topically related
+  // but structurally distinct datasets, NOT editions of a single
+  // publication series, so no DatasetSeries must be synthesized.
+  const makeNonYearIndexedChildrenWalk = (): ReadonlyMap<string, EiaApiResponse> => {
     const walk = new Map<string, EiaApiResponse>();
     walk.set("", {
       response: {
@@ -2209,53 +2264,91 @@ describe("buildCandidateNodes", () => {
     }
   });
 
-  it("synthesizes a dataset-series for parent routes whose direct leaf children are frequency splits", () => {
+  it("synthesizes an annual dataset-series for parent routes whose direct leaf children are year-indexed editions", () => {
     const ctx = makeBuilderCtx(FIXTURE_NOW);
-    const nodes = buildCandidateNodes(makeFrequencySeriesWalk(), emptyIndex(), ctx);
+    const nodes = buildCandidateNodes(
+      makeYearIndexedSeriesWalk(),
+      emptyIndex(),
+      ctx
+    );
 
     const datasetSeriesNode = nodes.find(
       (n): n is Extract<IngestNode, { _tag: "dataset-series" }> =>
         n._tag === "dataset-series"
     );
-    const monthlyDatasetNode = nodes.find(
+    const aeo2022Node = nodes.find(
       (n): n is Extract<IngestNode, { _tag: "dataset" }> =>
-        n._tag === "dataset" && n.slug === "eia-electricity-sales-monthly"
+        n._tag === "dataset" && n.slug === "eia-aeo-2022"
     );
-    const annualDatasetNode = nodes.find(
+    const aeo2023Node = nodes.find(
       (n): n is Extract<IngestNode, { _tag: "dataset" }> =>
-        n._tag === "dataset" && n.slug === "eia-electricity-sales-annual"
+        n._tag === "dataset" && n.slug === "eia-aeo-2023"
+    );
+    const aeo2024Node = nodes.find(
+      (n): n is Extract<IngestNode, { _tag: "dataset" }> =>
+        n._tag === "dataset" && n.slug === "eia-aeo-2024"
     );
 
-    expect(datasetSeriesNode?.slug).toBe(
-      slugifySeriesRoute("electricity/sales")
-    );
+    expect(datasetSeriesNode?.slug).toBe(slugifySeriesRoute("aeo"));
     expect(datasetSeriesNode?.merged).toBe(false);
-    expect(datasetSeriesNode?.data.title).toBe("Electricity Sales");
+    expect(datasetSeriesNode?.data.title).toBe("Annual Energy Outlook");
     expect(datasetSeriesNode?.data.description).toBe(
-      "Parent route for electricity sales datasets"
+      "Parent route for Annual Energy Outlook editions"
     );
-    expect(datasetSeriesNode?.data.cadence).toBe("irregular");
+    // Year-indexed publications are annual by definition — the heuristic
+    // no longer guesses cadence from child IDs or defaultFrequency fields.
+    expect(datasetSeriesNode?.data.cadence).toBe("annual");
     expect(datasetSeriesNode?.data.aliases).toEqual([
       {
         scheme: "eia-route",
-        value: "electricity/sales",
+        value: "aeo",
         relation: "exactMatch"
       }
     ]);
-    expect(monthlyDatasetNode?.data.inSeries).toBe(datasetSeriesNode?.data.id);
-    expect(annualDatasetNode?.data.inSeries).toBe(datasetSeriesNode?.data.id);
+    expect(aeo2022Node?.data.inSeries).toBe(datasetSeriesNode?.data.id);
+    expect(aeo2023Node?.data.inSeries).toBe(datasetSeriesNode?.data.id);
+    expect(aeo2024Node?.data.inSeries).toBe(datasetSeriesNode?.data.id);
 
     const graph = buildIngestGraph(nodes);
     const topo = Array.from(Graph.values(Graph.topo(graph)));
     const positions = new Map(topo.map((node, index) => [node.slug, index]));
     expect(
-      positions.get("eia-electricity-sales-series")! <
-        positions.get("eia-electricity-sales-monthly")!
+      positions.get("eia-aeo-series")! < positions.get("eia-aeo-2022")!
     ).toBe(true);
     expect(
-      positions.get("eia-electricity-sales-series")! <
-        positions.get("eia-electricity-sales-annual")!
+      positions.get("eia-aeo-series")! < positions.get("eia-aeo-2023")!
     ).toBe(true);
+    expect(
+      positions.get("eia-aeo-series")! < positions.get("eia-aeo-2024")!
+    ).toBe(true);
+  });
+
+  it("does not synthesize a series when children are not year-indexed", () => {
+    // Regression guard for the pre-fix heuristic that synthesized bogus
+    // series whenever all direct children happened to share a cadence
+    // word. `electricity/sales/{monthly,annual}` are structurally distinct
+    // datasets, NOT editions of a single publication — no DatasetSeries
+    // must be emitted.
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const nodes = buildCandidateNodes(
+      makeNonYearIndexedChildrenWalk(),
+      emptyIndex(),
+      ctx
+    );
+
+    const datasetSeriesNodes = nodes.filter(
+      (n) => n._tag === "dataset-series"
+    );
+    expect(datasetSeriesNodes).toHaveLength(0);
+
+    // And the underlying datasets must not carry an inSeries pointer.
+    const datasetNodes = nodes.filter(
+      (n): n is Extract<IngestNode, { _tag: "dataset" }> => n._tag === "dataset"
+    );
+    expect(datasetNodes.length).toBeGreaterThan(0);
+    for (const node of datasetNodes) {
+      expect(node.data.inSeries).toBeUndefined();
+    }
   });
 
   it("reuses existing dataset, distribution, and catalog-record slugs when merging", () => {
