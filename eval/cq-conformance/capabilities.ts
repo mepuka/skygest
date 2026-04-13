@@ -379,29 +379,34 @@ const C3_agentVariableShelf: CapabilityDefinition = {
 
   runtimeData: ({ prepared }) => {
     const totalDatasets = prepared.seed.datasets.length;
-    let datasetsWithVariableIds = 0;
+    // Series-backed shelf is the single source of truth: a dataset contributes
+    // to an agent's variable shelf iff either Dataset.variableIds is populated
+    // or a Series.datasetId points at it and its variableId resolves. The
+    // registry already union-merges both sources into variablesByDatasetId.
+    let datasetsWithShelf = 0;
     for (const dataset of prepared.seed.datasets) {
-      if (dataset.variableIds !== undefined && dataset.variableIds.length > 0) {
-        datasetsWithVariableIds++;
+      const shelf = prepared.variablesByDatasetId.get(dataset.id);
+      if (shelf !== undefined && Array.from(shelf).length > 0) {
+        datasetsWithShelf++;
       }
     }
 
-    if (datasetsWithVariableIds === 0) {
+    if (datasetsWithShelf === 0) {
       return {
         status: "fail",
-        summary: `0 of ${totalDatasets} datasets populate variableIds — Dataset → Variable edge is empty`,
+        summary: `0 of ${totalDatasets} datasets have a variable shelf — Dataset → Variable edge is empty`,
         detail:
           "Every Agent's variable shelf is empty in the runtime registry. " +
           "narrowCandidatesByAgent in Bind.ts is structurally a no-op until " +
-          "the SKY-313 hard blocker (Hard-Coding Inventory: variable membership edge) is fixed.",
+          "the series→dataset backfill (SKY-317) or Dataset.variableIds is populated.",
         metric: 0
       };
     }
 
     return {
-      status: datasetsWithVariableIds === totalDatasets ? "pass" : "amber",
-      summary: `${datasetsWithVariableIds} / ${totalDatasets} datasets carry variableIds`,
-      metric: datasetsWithVariableIds
+      status: datasetsWithShelf === totalDatasets ? "pass" : "amber",
+      summary: `${datasetsWithShelf} / ${totalDatasets} datasets carry a variable shelf (series-backed or Dataset.variableIds)`,
+      metric: datasetsWithShelf
     };
   },
 
