@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "source": "SKY-317 series→dataset backfill, derived from unanimous candidate evidence",
+  "generatedAt": "2026-04-13",
+  "explicit": {
+    "global-renewable-capacity-annual": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRV0G2XWPZD8NKXBMT",
+      "datasetFile": "irena-capacity-stats-dataset.json",
+      "evidence": "5 unanimous candidates, publisher IRENA"
+    },
+    "us-ca-solar-generation-daily": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",
+      "datasetFile": "caiso-todays-outlook.json",
+      "evidence": "4 unanimous candidates, publisher CAISO"
+    },
+    "us-co2-emissions-by-state-annual": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHGV1ZECFSTCKW0B2R",
+      "datasetFile": "eia-state-co2.json",
+      "evidence": "2 unanimous candidates, publisher EIA"
+    },
+    "us-pjm-capacity-auction-annual": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRA0G6PMJAY725QSPF",
+      "datasetFile": "pjm-capacity-auction.json",
+      "evidence": "1 unanimous candidate, publisher PJM"
+    },
+    "us-pjm-load-forecast": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRS8ZDD0YCERY6C64B",
+      "datasetFile": "pjm-load-forecast.json",
+      "evidence": "3 unanimous candidates, publisher PJM"
+    },
+    "us-tx-electricity-demand-hourly": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQFWFMC2WM23G1K793",
+      "datasetFile": "ercot-generation.json",
+      "evidence": "4 unanimous candidates, publisher ERCOT. NOTE: dataset title says 'Generation' but ERCOT's real-time dashboard exposes both generation and demand; the variableId is electricity-demand."
+    },
+    "us-tx-solar-generation-daily": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQJN53T6M83MN1XJFC",
+      "datasetFile": "ercot-solar-records.json",
+      "evidence": "6 unanimous candidates (+1 NONE), publisher ERCOT"
+    }
+  },
+  "deliberatelyOmitted": {
+    "de-wholesale-electricity-price": {
+      "reason": "Unanimous 3/3 candidates vote eia-electricity-data.json, but EIA does not publish German wholesale electricity prices. The candidates are a known corpus error. Fixing them is SKY-215 hygiene, not SKY-317 scope.",
+      "followUpTicket": null
+    },
+    "eu-solar-generation-annual": {
+      "reason": "Split 2/3 between entsoe-transparency and nrel-atb. Picking the majority would override the NREL candidate; fixing it is out of scope.",
+      "followUpTicket": null
+    },
+    "global-electricity-generation-annual": {
+      "reason": "Split 4/7 across ember-data-explorer, iea-data-portal, eia-electricity-data, bnef-datacenter. Multiple coherent choices.",
+      "followUpTicket": null
+    },
+    "us-ca-electricity-price-hourly": {
+      "reason": "14/17 for caiso-todays-outlook, 3/17 for iea-data-portal. Strong majority but not unanimous.",
+      "followUpTicket": null
+    },
+    "us-electricity-generation-annual": {
+      "reason": "3/5 for eia-electricity-data, 2/5 for ember-data-explorer. Both are plausible publishers of the same variable.",
+      "followUpTicket": null
+    }
+  },
+  "zeroEvidence": [
+    "eu-coal-generation-annual",
+    "global-battery-pack-price-annual",
+    "global-clean-energy-investment-annual",
+    "global-energy-transition-investment-annual",
+    "global-solar-pv-capacity-annual",
+    "tr-wholesale-electricity-price",
+    "us-ca-battery-discharge-daily",
+    "us-ca-clean-share-daily",
+    "us-ca-interconnection-queue",
+    "us-data-center-demand-forecast",
+    "us-interconnection-queue-annual",
+    "us-tx-wind-generation-daily",
+    "za-clean-electricity-share-monthly"
+  ]
+}
