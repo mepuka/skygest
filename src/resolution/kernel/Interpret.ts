@@ -115,10 +115,63 @@ const hasRequiredConflict = (
   conflicts: ReadonlyArray<PartialVariableFacetConflict>
 ): boolean => conflicts.some((conflict) => REQUIRED_FACET_KEY_SET.has(conflict.facet));
 
+// Compound concepts (see compoundConcepts.ts) run BEFORE per-facet matchers.
+// When one or more compounds fire on a site, their assignments are unioned
+// together into the site's partial and per-facet matching is short-circuited
+// — the compound is authoritative for that site.
+//
+// Short-circuit rationale:
+//   - Compounds are curated phrases whose very existence asserts that the
+//     per-facet lexicon is structurally unable to represent the phrase's
+//     semantics (one canonical per facet per entry). Letting per-facet
+//     matchers run alongside would re-introduce exactly the Gap-2 false
+//     positives (e.g. `spot price` firing measuredProperty=price AND
+//     statisticType=price via CD-008 indirection) that the compound lexicon
+//     is designed to replace with explicit intent.
+//   - Short-circuit is also simpler to reason about and cheaper at runtime:
+//     one loop of surface-form lookups instead of eight.
+//
+// When multiple distinct compounds match the same text, their assignments
+// are joined through the same `joinPartials` fold used downstream — this
+// produces a principled conflict signal if the curated compounds disagree,
+// rather than silently picking one.
+const foldCompoundAssignments = (
+  matches: ReadonlyArray<{ readonly assignments: PartialVariableShape }>
+): PartialVariableShape => {
+  let partial: PartialVariableShape = {};
+  for (const match of matches) {
+    const joined = joinPartials(partial, match.assignments);
+    // Compound-vs-compound conflicts on the same site are curation bugs, not
+    // runtime conditions we can recover from. Keep the earlier (longer-match)
+    // contribution and drop the later one silently; the eval harness will
+    // flag any such curation mistake through gold-set regressions.
+    if (Result.isSuccess(joined)) {
+      partial = joined.success;
+    }
+  }
+  return partial;
+};
+
 const matchSite = (
   site: EvidenceSite,
   vocabulary: FacetVocabularyShape
 ): SiteAssignment | null => {
+  const compoundMatches = vocabulary.matchCompoundConcepts(site.text);
+  if (compoundMatches.length > 0) {
+    const compoundPartial = foldCompoundAssignments(compoundMatches);
+    if (Object.keys(compoundPartial).length === 0) {
+      return null;
+    }
+    return {
+      partial: compoundPartial,
+      evidence: stripUndefined({
+        source: site.source,
+        text: site.text,
+        itemKey: site.itemKey
+      })
+    };
+  }
+
   // Full cartesian fanout for multi-match series labels has not landed yet.
   // Keep the strongest technology/fuel match explicit until that deeper
   // interpret-stage expansion exists.

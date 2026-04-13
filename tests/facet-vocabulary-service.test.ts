@@ -1,6 +1,7 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, Option } from "effect";
 import aggregationJson from "../references/vocabulary/aggregation.json";
+import compoundConceptsJson from "../references/vocabulary/compound-concepts.json";
 import domainObjectJson from "../references/vocabulary/domain-object.json";
 import measuredPropertyJson from "../references/vocabulary/measured-property.json";
 import policyInstrumentJson from "../references/vocabulary/policy-instrument.json";
@@ -60,7 +61,8 @@ describe("FacetVocabulary", () => {
             technologyOrFuel: technologyOrFuelJson,
             measuredProperty: measuredPropertyJson,
             domainObject: domainObjectJson,
-            policyInstrument: policyInstrumentJson
+            policyInstrument: policyInstrumentJson,
+            compoundConcepts: compoundConceptsJson
           })
         ),
         Effect.flip
@@ -102,7 +104,8 @@ describe("FacetVocabulary", () => {
             technologyOrFuel: technologyOrFuelJson,
             measuredProperty: measuredPropertyJson,
             domainObject: domainObjectJson,
-            policyInstrument: policyInstrumentJson
+            policyInstrument: policyInstrumentJson,
+            compoundConcepts: compoundConceptsJson
           })
         ),
         Effect.flip

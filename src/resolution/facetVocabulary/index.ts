@@ -1,5 +1,6 @@
 import { Effect, Layer, Result, Schema, ServiceMap } from "effect";
 import aggregationJson from "../../../references/vocabulary/aggregation.json";
+import compoundConceptsJson from "../../../references/vocabulary/compound-concepts.json";
 import domainObjectJson from "../../../references/vocabulary/domain-object.json";
 import measuredPropertyJson from "../../../references/vocabulary/measured-property.json";
 import statisticTypeJson from "../../../references/vocabulary/statistic-type.json";
@@ -22,6 +23,14 @@ import {
   parseAggregation,
   type AggregationLookup,
 } from "./aggregation";
+import {
+  buildCompoundConceptsLookup,
+  CompoundConceptsVocabulary,
+  CompoundSurfaceFormEntry,
+  matchCompoundConcepts,
+  type CompoundConceptMatch,
+  type CompoundConceptsLookup
+} from "./compoundConcepts";
 import {
   buildDomainObjectLookup,
   DomainObjectSurfaceForm,
@@ -79,7 +88,8 @@ const VOCABULARY_PATHS = {
   technologyOrFuel: "references/vocabulary/technology-or-fuel.json",
   measuredProperty: "references/vocabulary/measured-property.json",
   domainObject: "references/vocabulary/domain-object.json",
-  policyInstrument: "references/vocabulary/policy-instrument.json"
+  policyInstrument: "references/vocabulary/policy-instrument.json",
+  compoundConcepts: "references/vocabulary/compound-concepts.json"
 } as const;
 
 export type FacetVocabularyJsonSources = {
@@ -90,6 +100,7 @@ export type FacetVocabularyJsonSources = {
   readonly measuredProperty: unknown;
   readonly domainObject: unknown;
   readonly policyInstrument: unknown;
+  readonly compoundConcepts: unknown;
 };
 
 const DEFAULT_VOCABULARY_JSON_SOURCES: FacetVocabularyJsonSources = {
@@ -99,7 +110,8 @@ const DEFAULT_VOCABULARY_JSON_SOURCES: FacetVocabularyJsonSources = {
   technologyOrFuel: technologyOrFuelJson,
   measuredProperty: measuredPropertyJson,
   domainObject: domainObjectJson,
-  policyInstrument: policyInstrumentJson
+  policyInstrument: policyInstrumentJson,
+  compoundConcepts: compoundConceptsJson
 };
 
 const decodeVocabulary = <S extends Schema.Decoder<unknown>>(
@@ -167,6 +179,9 @@ export type FacetVocabularyShape = {
   readonly matchPolicyInstrument: (
     text: string
   ) => ReturnType<typeof matchPolicyInstrument>;
+  readonly matchCompoundConcepts: (
+    text: string
+  ) => ReadonlyArray<CompoundConceptMatch>;
 };
 
 type FacetVocabularyLookups = {
@@ -177,6 +192,7 @@ type FacetVocabularyLookups = {
   readonly measuredProperty: MeasuredPropertyLookup;
   readonly domainObject: DomainObjectLookup;
   readonly policyInstrument: PolicyInstrumentLookup;
+  readonly compoundConcepts: CompoundConceptsLookup;
 };
 
 export const makeFacetVocabulary = (
@@ -205,7 +221,9 @@ export const makeFacetVocabulary = (
   parsePolicyInstrument: (text) =>
     parsePolicyInstrument(lookups.policyInstrument, text),
   matchPolicyInstrument: (text) =>
-    matchPolicyInstrument(lookups.policyInstrument, text)
+    matchPolicyInstrument(lookups.policyInstrument, text),
+  matchCompoundConcepts: (text) =>
+    matchCompoundConcepts(lookups.compoundConcepts, text)
 });
 
 export const loadFacetVocabularyLookups = (
@@ -257,6 +275,12 @@ export const loadFacetVocabularyLookups = (
       PolicyInstrumentVocabulary,
       sources.policyInstrument
     );
+    const compoundConceptEntries = yield* decodeVocabulary(
+      "compound-concepts",
+      VOCABULARY_PATHS.compoundConcepts,
+      CompoundConceptsVocabulary,
+      sources.compoundConcepts
+    );
 
     return {
       statisticType: yield* buildLookup(
@@ -279,6 +303,9 @@ export const loadFacetVocabularyLookups = (
       ),
       policyInstrument: yield* buildLookup(
         buildPolicyInstrumentLookup(policyInstrumentEntries)
+      ),
+      compoundConcepts: yield* buildLookup(
+        buildCompoundConceptsLookup(compoundConceptEntries)
       )
     };
   });
@@ -307,6 +334,8 @@ export const makeFacetVocabularyLayer = (
 
 export type {
   AggregationLookup,
+  CompoundConceptMatch,
+  CompoundConceptsLookup,
   DomainObjectLookup,
   MeasuredPropertyLookup,
   StatisticTypeLookup,
@@ -327,8 +356,11 @@ export {
   matchTechnologyOrFuel,
   parseUnitFamily,
   matchUnitFamily,
+  matchCompoundConcepts,
   AggregationSurfaceForm,
   AggregationVocabulary,
+  CompoundConceptsVocabulary,
+  CompoundSurfaceFormEntry,
   DomainObjectSurfaceForm,
   DomainObjectVocabulary,
   MeasuredPropertySurfaceForm,
