@@ -56,6 +56,7 @@ import {
 } from "./statisticType";
 import {
   buildTechnologyOrFuelLookup,
+  matchAllTechnologyOrFuel,
   matchTechnologyOrFuel,
   parseTechnologyOrFuel,
   TechnologyOrFuelSurfaceForm,
@@ -142,6 +143,9 @@ export type FacetVocabularyShape = {
   readonly parseTechnologyOrFuel: (
     text: string
   ) => ReturnType<typeof parseTechnologyOrFuel>;
+  readonly matchAllTechnologyOrFuel: (
+    text: string
+  ) => ReturnType<typeof matchAllTechnologyOrFuel>;
   readonly matchTechnologyOrFuel: (
     text: string
   ) => ReturnType<typeof matchTechnologyOrFuel>;
@@ -186,6 +190,8 @@ export const makeFacetVocabulary = (
   matchUnitFamily: (text) => matchUnitFamily(lookups.unitFamily, text),
   parseTechnologyOrFuel: (text) =>
     parseTechnologyOrFuel(lookups.technologyOrFuel, text),
+  matchAllTechnologyOrFuel: (text) =>
+    matchAllTechnologyOrFuel(lookups.technologyOrFuel, text),
   matchTechnologyOrFuel: (text) =>
     matchTechnologyOrFuel(lookups.technologyOrFuel, text),
   parseMeasuredProperty: (text) =>

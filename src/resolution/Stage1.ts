@@ -15,7 +15,7 @@ import type {
   DatasetAliasEvidence,
   DatasetMatch,
   DatasetTitleEvidence,
-  DeferredToStage2Residual,
+  DeferredToKernelResidual,
   DistributionHostnameEvidence,
   DistributionMatch,
   DistributionUrlPrefixEvidence,
@@ -174,7 +174,7 @@ const residualKey = (residual: Stage1Residual) => {
         String(residual.bestRank),
         residual.candidates.map((candidate) => candidate.entityId).join("|")
       ].join("\u0000");
-    case "DeferredToStage2Residual":
+    case "DeferredToKernelResidual":
       return [
         residual._tag,
         residual.source,
@@ -491,17 +491,17 @@ const pushAgentLabelMatch = (
 
 const pushDeferredResidual = (
   state: BuildState,
-  source: DeferredToStage2Residual["source"],
+  source: DeferredToKernelResidual["source"],
   text: string,
   assetKey?: string
 ) => {
   addResidual(
     state,
     stripUndefined({
-      _tag: "DeferredToStage2Residual" as const,
+      _tag: "DeferredToKernelResidual" as const,
       source,
       text,
-      reason: "requires stage 2 semantic interpretation",
+      reason: "requires kernel semantic interpretation",
       assetKey
     })
   );

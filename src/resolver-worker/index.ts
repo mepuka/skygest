@@ -11,7 +11,6 @@ import type { ResolverWorkerEnvBindings } from "../platform/Env";
 import { makeEffectRpc } from "../platform/Rpc";
 import { makeResolverLayer } from "../resolver/Layer";
 import { resolveBulkEffect, resolvePostEffect } from "../resolver/Router";
-import { DataRefResolverWorkflow } from "./DataRefResolverWorkflow";
 import {
   handleFetchWithBoundary,
   handleResolverWorkerRequest
@@ -78,8 +77,6 @@ export const fetch = (
   ctx?: ExecutionContext
 ): Promise<Response> =>
   handleFetchWithBoundary(request, env, ctx, handleResolverWorkerRequest);
-
-export { DataRefResolverWorkflow };
 
 export default {
   fetch

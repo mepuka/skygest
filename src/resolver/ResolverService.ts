@@ -10,39 +10,36 @@ import {
   EnrichmentPayloadMissingError,
   EnrichmentPostContextMissingError,
   EnrichmentSchemaDecodeError,
-  ResolverSourceAttributionMissingError,
-  ResolverWorkflowLaunchError
+  ResolverSourceAttributionMissingError
 } from "../domain/errors";
 import {
-  DataRefResolverRunParams,
   ResolveBulkResponse,
   ResolvePostRequest,
+  ResolvePostResponse,
   type ResolveBulkRequest,
   type ResolveBulkResponse as ResolveBulkResponseValue,
   type ResolvePostRequest as ResolvePostRequestValue,
   type ResolvePostResponse as ResolvePostResponseValue
 } from "../domain/resolution";
-import { type ResolverBulkItemError as ResolverBulkItemErrorValue } from "../domain/resolutionShared";
-import { Stage3Input } from "../domain/stage2Resolution";
+import {
+  ResolverBulkItemError,
+  type ResolverBulkItemError as ResolverBulkItemErrorValue
+} from "../domain/resolutionShared";
 import {
   type EnrichmentExecutionPlan,
   type EnrichmentPlannedExistingEnrichment
 } from "../domain/enrichmentPlan";
-import { Stage1Residual } from "../domain/stage1Resolution";
 import { PostUri } from "../domain/types";
 import { EnrichmentPlanner } from "../enrichment/EnrichmentPlanner";
-import { CloudflareEnv } from "../platform/Env";
 import {
   formatSchemaParseError,
-  stringifyUnknown,
-  stripUndefined
+  stringifyUnknown
 } from "../platform/Json";
+import { ResolutionKernel } from "../resolution/ResolutionKernel";
 import { Stage1Resolver } from "../resolution/Stage1Resolver";
-import { Stage2Resolver } from "../resolution/Stage2Resolver";
 import { buildStage1Input } from "./stage1Input";
-import { Logging } from "../platform/Logging";
 
-const RESOLVER_VERSION = "stage2-resolver@sky-306-307";
+const RESOLVER_VERSION = "resolution-kernel@sky-314";
 
 const selectLatestSourceAttribution = (
   enrichments: ReadonlyArray<EnrichmentPlannedExistingEnrichment>
@@ -97,8 +94,37 @@ export class ResolverService extends ServiceMap.Service<
     Effect.gen(function* () {
       const planner = yield* EnrichmentPlanner;
       const stage1Resolver = yield* Stage1Resolver;
-      const stage2Resolver = yield* Stage2Resolver;
-      const env = yield* CloudflareEnv;
+      const resolutionKernel = yield* ResolutionKernel;
+      const decodePostResponse = (input: unknown) =>
+        Schema.decodeUnknownEffect(ResolvePostResponse)(input).pipe(
+          Effect.mapError(
+            (decodeError) =>
+              new EnrichmentSchemaDecodeError({
+                message: formatSchemaParseError(decodeError),
+                operation: "ResolverService.resolvePost"
+              })
+          )
+        );
+      const decodeBulkResponse = (input: unknown) =>
+        Schema.decodeUnknownEffect(ResolveBulkResponse)(input).pipe(
+          Effect.mapError(
+            (decodeError) =>
+              new EnrichmentSchemaDecodeError({
+                message: formatSchemaParseError(decodeError),
+                operation: "ResolverService.resolveBulk"
+              })
+          )
+        );
+      const decodeBulkItemError = (input: unknown) =>
+        Schema.decodeUnknownEffect(ResolverBulkItemError)(input).pipe(
+          Effect.mapError(
+            (decodeError) =>
+              new EnrichmentSchemaDecodeError({
+                message: formatSchemaParseError(decodeError),
+                operation: "ResolverService.resolveBulk"
+              })
+          )
+        );
       const decodePostRequest = (input: unknown) =>
         Schema.decodeUnknownEffect(ResolvePostRequest)(input).pipe(
           Effect.mapError(
@@ -129,38 +155,6 @@ export class ResolverService extends ServiceMap.Service<
         return buildStage1Input(plan, sourceAttribution);
       });
 
-      const queueStage3 = Effect.fn("ResolverService.queueStage3")(function* (
-        postUri: Schema.Schema.Type<typeof PostUri>,
-        stage3Inputs: ReadonlyArray<Stage3Input>
-      ) {
-        const workflow = env.RESOLVER_RUN_WORKFLOW;
-        if (workflow == null) {
-          return yield* new ResolverWorkflowLaunchError({
-            message: "missing RESOLVER_RUN_WORKFLOW binding",
-            operation: "ResolverService.queueStage3"
-          });
-        }
-        const jobId = crypto.randomUUID();
-
-        yield* Effect.tryPromise({
-          try: () =>
-            workflow.create({
-              id: jobId,
-              params: {
-                postUri,
-                stage3Inputs: [...stage3Inputs]
-              } satisfies DataRefResolverRunParams
-            }),
-          catch: (cause) =>
-            new ResolverWorkflowLaunchError({
-              message: stringifyUnknown(cause),
-              operation: "ResolverService.queueStage3"
-            })
-        });
-
-        return jobId;
-      });
-
       const resolvePost = Effect.fn("ResolverService.resolvePost")(function* (
         input: ResolvePostRequestValue
       ) {
@@ -182,50 +176,23 @@ export class ResolverService extends ServiceMap.Service<
         const stage1StartedAt = yield* Clock.currentTimeMillis;
         const stage1 = yield* stage1Resolver.resolve(stage1Input);
         const stage1FinishedAt = yield* Clock.currentTimeMillis;
-        const stage2StartedAt = yield* Clock.currentTimeMillis;
-        const stage2 = yield* stage2Resolver.resolve(stage1Input.postContext, stage1);
-        const stage2FinishedAt = yield* Clock.currentTimeMillis;
-
-        const stage3 = yield* (
-          request.dispatchStage3 === true && stage2.escalations.length > 0
-            ? queueStage3(
-                request.postUri,
-                stage2.escalations
-              ).pipe(
-                Effect.tapError((error) =>
-                  Logging.logWarning("resolver stage3 dispatch failed", {
-                    postUri: request.postUri,
-                    errorTag: error._tag,
-                    operation: "ResolverService.resolvePost"
-                  })
-                ),
-                Effect.result,
-                Effect.map((result) =>
-                  Result.isSuccess(result)
-                    ? ({
-                        status: "queued" as const,
-                        jobId: result.success
-                      })
-                    : undefined
-                )
-              )
-            : Effect.void.pipe(Effect.as(undefined))
-        );
+        const kernelStartedAt = yield* Clock.currentTimeMillis;
+        const kernel = yield* resolutionKernel.resolve(stage1Input);
+        const kernelFinishedAt = yield* Clock.currentTimeMillis;
 
         const finishedAt = yield* Clock.currentTimeMillis;
 
-        return stripUndefined({
+        return yield* decodePostResponse({
           postUri: request.postUri,
           stage1,
-          stage2,
-          stage3,
+          kernel,
           resolverVersion: RESOLVER_VERSION,
           latencyMs: {
             stage1: stage1FinishedAt - stage1StartedAt,
-            stage2: stage2FinishedAt - stage2StartedAt,
+            kernel: kernelFinishedAt - kernelStartedAt,
             total: finishedAt - startedAt
           }
-        }) as ResolvePostResponseValue;
+        });
       });
 
       const resolveBulk = Effect.fn("ResolverService.resolveBulk")(function* (
@@ -256,7 +223,7 @@ export class ResolverService extends ServiceMap.Service<
           }
 
           const error = item.result.failure;
-          errors[item.postUri] = {
+          errors[item.postUri] = yield* decodeBulkItemError({
             tag:
               typeof error === "object" &&
               error !== null &&
@@ -271,13 +238,13 @@ export class ResolverService extends ServiceMap.Service<
               typeof error.message === "string"
                 ? error.message
                 : stringifyUnknown(error)
-          };
+          });
         }
 
-        return {
+        return yield* decodeBulkResponse({
           results,
           errors
-        } as ResolveBulkResponseValue;
+        });
       });
 
       return {

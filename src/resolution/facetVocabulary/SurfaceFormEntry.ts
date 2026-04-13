@@ -141,6 +141,26 @@ export const matchSurfaceForm = <
   );
 };
 
+export const matchAllSurfaceForms = <
+  Entry extends {
+    readonly normalizedSurfaceForm: string;
+    readonly canonical: unknown;
+  }
+>(
+  lookup: SurfaceFormLookup<Entry>,
+  text: string
+): ReadonlyArray<Entry> => {
+  const normalizedText = normalizeLookupText(text);
+  const exact = lookup.entryByNormalizedSurfaceForm.get(normalizedText);
+  if (exact !== undefined) {
+    return [exact];
+  }
+
+  return lookup.orderedMatchers
+    .filter((matcher) => matcher.matches(normalizedText))
+    .map((matcher) => matcher.entry);
+};
+
 export const parseSurfaceForm = <
   Entry extends {
     readonly normalizedSurfaceForm: string;

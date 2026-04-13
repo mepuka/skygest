@@ -1,14 +1,16 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Match, Schema } from "effect";
-import { makeVariableId } from "../src/domain/data-layer/ids";
+import { makeAgentId, makeVariableId } from "../src/domain/data-layer/ids";
 import {
   AttachedContext,
   BoundResolutionItem,
   EVIDENCE_PRECEDENCE,
   ResolutionEvidenceBundle,
   ResolutionEvidenceReference,
+  ResolutionGap,
   ResolutionHypothesis,
-  ResolutionOutcome
+  ResolutionOutcome,
+  VariableCandidateScore
 } from "../src/domain/resolutionKernel";
 
 const decodeBundle = Schema.decodeUnknownSync(ResolutionEvidenceBundle);
@@ -16,6 +18,8 @@ const encodeBundle = Schema.encodeSync(ResolutionEvidenceBundle);
 const decodeContext = Schema.decodeUnknownSync(AttachedContext);
 const decodeEvidence = Schema.decodeUnknownSync(ResolutionEvidenceReference);
 const decodeHypothesis = Schema.decodeUnknownSync(ResolutionHypothesis);
+const decodeGap = Schema.decodeUnknownSync(ResolutionGap);
+const decodeCandidate = Schema.decodeUnknownSync(VariableCandidateScore);
 const decodeItem = Schema.decodeUnknownSync(BoundResolutionItem);
 const decodeOutcome = Schema.decodeUnknownSync(ResolutionOutcome);
 const encodeOutcome = Schema.encodeSync(ResolutionOutcome);
@@ -93,6 +97,83 @@ describe("resolutionKernel domain contract", () => {
     expect(context.extra?.scenario).toBe("baseline");
   });
 
+  it("round-trips bound and gap items with exhaustive tag matching", () => {
+    const context = decodeContext({
+      place: "Europe"
+    });
+    const evidence = decodeEvidence({
+      source: "series-label",
+      text: "Solar",
+      itemKey: "solar"
+    });
+    const candidate = decodeCandidate({
+      variableId: makeVariableId("https://id.skygest.io/variable/var_1234567890AB"),
+      label: "Solar generation",
+      matchedFacets: [
+        "measuredProperty",
+        "technologyOrFuel",
+        "statisticType",
+        "unitFamily"
+      ],
+      mismatchedFacets: [],
+      subsumptionRatio: 1,
+      partialSpecificity: 4,
+      semanticPartial: {
+        measuredProperty: "generation",
+        technologyOrFuel: "solar",
+        statisticType: "flow",
+        unitFamily: "energy"
+      }
+    });
+    const boundItem = decodeItem({
+      _tag: "bound",
+      itemKey: "solar",
+      semanticPartial: {
+        measuredProperty: "generation",
+        technologyOrFuel: "solar",
+        statisticType: "flow",
+        unitFamily: "energy"
+      },
+      attachedContext: context,
+      evidence: [evidence],
+      variableId: makeVariableId("https://id.skygest.io/variable/var_1234567890AB"),
+      label: "Solar generation"
+    });
+    const gapItem = decodeItem({
+      _tag: "gap",
+      itemKey: "hydro",
+      semanticPartial: {
+        measuredProperty: "generation",
+        technologyOrFuel: "hydro",
+        statisticType: "flow",
+        unitFamily: "energy"
+      },
+      attachedContext: context,
+      evidence: [
+        decodeEvidence({
+          source: "series-label",
+          text: "Hydro",
+          itemKey: "hydro"
+        })
+      ],
+      candidates: [candidate],
+      reason: "no-candidates"
+    });
+
+    expect(
+      Match.valueTags(boundItem, {
+        bound: (item) => item.variableId,
+        gap: () => null
+      })
+    ).toBe(makeVariableId("https://id.skygest.io/variable/var_1234567890AB"));
+    expect(
+      Match.valueTags(gapItem, {
+        bound: () => null,
+        gap: (item) => item.reason
+      })
+    ).toBe("no-candidates");
+  });
+
   it("round-trips all outcome variants and stays exhaustively matchable", () => {
     const bundle = decodeBundle({
       postText: ["Solar and wind generation rose"],
@@ -133,7 +214,40 @@ describe("resolutionKernel domain contract", () => {
       confidence: 0.9,
       tier: "strong-heuristic"
     });
-    const item = decodeItem({
+    const candidate = decodeCandidate({
+      variableId: makeVariableId("https://id.skygest.io/variable/var_1234567890AB"),
+      label: "Solar generation",
+      matchedFacets: [
+        "measuredProperty",
+        "technologyOrFuel",
+        "statisticType",
+        "unitFamily"
+      ],
+      mismatchedFacets: [],
+      subsumptionRatio: 1,
+      partialSpecificity: 4,
+      semanticPartial: {
+        measuredProperty: "generation",
+        technologyOrFuel: "solar",
+        statisticType: "flow",
+        unitFamily: "energy"
+      }
+    });
+    const gap = decodeGap({
+      partial: {
+        measuredProperty: "generation",
+        statisticType: "flow",
+        unitFamily: "energy"
+      },
+      candidates: [candidate],
+      reason: "ambiguous-candidates",
+      context: {
+        agentId: makeAgentId("https://id.skygest.io/agent/ag_1234567890AB"),
+        attachedContext: context
+      }
+    });
+    const boundItem = decodeItem({
+      _tag: "bound",
       itemKey: "solar",
       semanticPartial: {
         measuredProperty: "generation",
@@ -146,7 +260,8 @@ describe("resolutionKernel domain contract", () => {
       variableId: makeVariableId("https://id.skygest.io/variable/var_1234567890AB"),
       label: "Solar generation"
     });
-    const outOfRegistryItem = decodeItem({
+    const gapItem = decodeItem({
+      _tag: "gap",
       itemKey: "solar",
       semanticPartial: {
         measuredProperty: "generation",
@@ -156,7 +271,8 @@ describe("resolutionKernel domain contract", () => {
       },
       attachedContext: context,
       evidence: [evidence],
-      label: "Solar generation"
+      candidates: [candidate],
+      reason: "ambiguous-candidates"
     });
 
     const cases = [
@@ -169,7 +285,7 @@ describe("resolutionKernel domain contract", () => {
           unitFamily: "energy"
         },
         attachedContext: context,
-        items: [item],
+        items: [boundItem],
         confidence: 0.95,
         tier: "entailment"
       }),
@@ -177,6 +293,8 @@ describe("resolutionKernel domain contract", () => {
         _tag: "Ambiguous" as const,
         bundle,
         hypotheses: [hypothesis],
+        items: [gapItem],
+        gaps: [gap],
         confidence: 0.7,
         tier: "weak-heuristic"
       }),
@@ -187,6 +305,24 @@ describe("resolutionKernel domain contract", () => {
           measuredProperty: "generation"
         },
         missingRequired: ["statisticType"],
+        gap: decodeGap({
+          partial: {
+            measuredProperty: "generation"
+          },
+          missingRequired: ["statisticType"],
+          candidates: [candidate],
+          reason: "missing-required"
+        }),
+        gaps: [
+          decodeGap({
+            partial: {
+              measuredProperty: "generation"
+            },
+            missingRequired: ["statisticType"],
+            candidates: [candidate],
+            reason: "missing-required"
+          })
+        ],
         confidence: 0.6,
         tier: "weak-heuristic"
       }),
@@ -201,13 +337,32 @@ describe("resolutionKernel domain contract", () => {
             facet: "measuredProperty",
             values: ["capacity", "generation"]
           }
+        ],
+        gaps: [
+          decodeGap({
+            partial: {
+              measuredProperty: "generation"
+            },
+            candidates: [],
+            reason: "required-facet-conflict"
+          })
         ]
       }),
       decodeOutcome({
         _tag: "OutOfRegistry" as const,
         bundle,
         hypothesis,
-        items: [outOfRegistryItem]
+        items: [gapItem],
+        gap: decodeGap({
+          partial: {
+            measuredProperty: "generation",
+            technologyOrFuel: "hydro",
+            statisticType: "flow",
+            unitFamily: "energy"
+          },
+          candidates: [],
+          reason: "no-candidates"
+        })
       }),
       decodeOutcome({
         _tag: "NoMatch" as const,
@@ -263,6 +418,8 @@ describe("resolutionKernel domain contract", () => {
             _tag: "Ambiguous" as const,
             bundle,
             hypotheses: [],
+            items: [],
+            gaps: [],
             confidence: 0.5,
             tier: "weak-heuristic"
           })
@@ -275,6 +432,24 @@ describe("resolutionKernel domain contract", () => {
               measuredProperty: "price"
             },
             missingRequired: ["statisticType"],
+            gap: {
+              partial: {
+                measuredProperty: "price"
+              },
+              missingRequired: ["statisticType"],
+              candidates: [],
+              reason: "missing-required"
+            },
+            gaps: [
+              {
+                partial: {
+                  measuredProperty: "price"
+                },
+                missingRequired: ["statisticType"],
+                candidates: [],
+                reason: "missing-required"
+              }
+            ],
             confidence: 0.4,
             tier: "weak-heuristic"
           })
@@ -288,6 +463,15 @@ describe("resolutionKernel domain contract", () => {
               {
                 facet: "measuredProperty",
                 values: ["capacity", "price"]
+              }
+            ],
+            gaps: [
+              {
+                partial: {
+                  measuredProperty: "price"
+                },
+                candidates: [],
+                reason: "required-facet-conflict"
               }
             ],
             confidence: 0.3,
@@ -309,7 +493,15 @@ describe("resolutionKernel domain contract", () => {
               confidence: 0.8,
               tier: "strong-heuristic"
             },
-            items: []
+            items: [],
+            gap: {
+              partial: {
+                measuredProperty: "price",
+                statisticType: "price"
+              },
+              candidates: [],
+              reason: "no-candidates"
+            }
           })
         ),
         encodeOutcome(
@@ -354,7 +546,9 @@ describe("resolutionKernel domain contract", () => {
             "sourceLines": [],
           },
           "confidence": 0.5,
+          "gaps": [],
           "hypotheses": [],
+          "items": [],
           "tier": "weak-heuristic",
         },
         {
@@ -369,6 +563,28 @@ describe("resolutionKernel domain contract", () => {
             "sourceLines": [],
           },
           "confidence": 0.4,
+          "gap": {
+            "candidates": [],
+            "missingRequired": [
+              "statisticType",
+            ],
+            "partial": {
+              "measuredProperty": "price",
+            },
+            "reason": "missing-required",
+          },
+          "gaps": [
+            {
+              "candidates": [],
+              "missingRequired": [
+                "statisticType",
+              ],
+              "partial": {
+                "measuredProperty": "price",
+              },
+              "reason": "missing-required",
+            },
+          ],
           "missingRequired": [
             "statisticType",
           ],
@@ -398,6 +614,15 @@ describe("resolutionKernel domain contract", () => {
               ],
             },
           ],
+          "gaps": [
+            {
+              "candidates": [],
+              "partial": {
+                "measuredProperty": "price",
+              },
+              "reason": "required-facet-conflict",
+            },
+          ],
           "hypotheses": [],
           "tier": "strong-heuristic",
         },
@@ -411,6 +636,14 @@ describe("resolutionKernel domain contract", () => {
             "publisherHints": [],
             "series": [],
             "sourceLines": [],
+          },
+          "gap": {
+            "candidates": [],
+            "partial": {
+              "measuredProperty": "price",
+              "statisticType": "price",
+            },
+            "reason": "no-candidates",
           },
           "hypothesis": {
             "attachedContext": {},

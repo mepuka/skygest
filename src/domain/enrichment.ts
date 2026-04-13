@@ -32,11 +32,10 @@ import {
   VisionSourceLineAttribution
 } from "./sourceMatching";
 import {
-  ResolverVersion,
-  ResolveStage3Queued
+  ResolverVersion
 } from "./resolutionShared";
 import { Stage1Result } from "./stage1Resolution";
-import { Stage2Result } from "./stage2Resolution";
+import { ResolutionOutcome } from "./resolutionKernel";
 
 const DeferredStage1Result = Schema.suspend(() => Stage1Result);
 
@@ -216,6 +215,9 @@ const LegacySourceAttributionEnrichment = Schema.Struct({
   socialProvenance: Schema.NullOr(SocialProvenance),
   processedAt: Schema.Number
 });
+const decodeLegacySourceAttributionEnrichment = Schema.decodeUnknownSync(
+  LegacySourceAttributionEnrichment
+);
 const LegacySourceAttributionEnrichmentNormalized = LegacySourceAttributionEnrichment.pipe(
   Schema.decodeTo(SourceAttributionEnrichmentV2, {
     decode: SchemaGetter.transform((
@@ -232,20 +234,15 @@ const LegacySourceAttributionEnrichmentNormalized = LegacySourceAttributionEnric
       };
     }),
     encode: SchemaGetter.transform((
-      value: Schema.Schema.Type<typeof SourceAttributionEnrichmentV2>
-    ) => ({
+      value: (typeof SourceAttributionEnrichmentV2)["Encoded"]
+    ) =>
+      decodeLegacySourceAttributionEnrichment({
         kind: value.kind,
-        provider:
-          value.provider as Schema.Schema.Type<
-            typeof LegacySourceAttributionEnrichment
-          >["provider"],
+        provider: value.provider,
         contentSource: value.contentSource,
-        socialProvenance:
-          value.socialProvenance as Schema.Schema.Type<
-            typeof LegacySourceAttributionEnrichment
-          >["socialProvenance"],
+        socialProvenance: value.socialProvenance,
         processedAt: value.processedAt
-      })) as any
+      }))
   })
 );
 export const SourceAttributionEnrichment = Schema.Union([
@@ -275,19 +272,13 @@ export const GroundingEnrichment = Schema.Struct({
 export type GroundingEnrichment = Schema.Schema.Type<typeof GroundingEnrichment>;
 
 // ---------------------------------------------------------------------------
-// Data-ref resolution enrichment (SKY-238: persisted Stage 1 resolver result)
+// Data-ref resolution enrichment (SKY-314: persisted Stage 1 + kernel result)
 // ---------------------------------------------------------------------------
-
-export const DataRefResolutionStage3 = ResolveStage3Queued;
-export type DataRefResolutionStage3 = Schema.Schema.Type<
-  typeof DataRefResolutionStage3
->;
 
 export const DataRefResolutionEnrichment = Schema.Struct({
   kind: Schema.Literal("data-ref-resolution"),
   stage1: DeferredStage1Result,
-  stage2: Schema.optionalKey(Stage2Result),
-  stage3: Schema.optionalKey(DataRefResolutionStage3),
+  kernel: Schema.Array(ResolutionOutcome),
   resolverVersion: ResolverVersion,
   processedAt: Schema.Number
 });

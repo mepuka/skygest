@@ -1,28 +1,26 @@
-import { Effect, Layer, Schema } from "effect";
+import { Effect, Layer } from "effect";
 import { describe, expect, it } from "@effect/vitest";
-import type { EnrichmentExecutionPlan } from "../src/domain/enrichmentPlan";
 import type { SourceAttributionEnrichment } from "../src/domain/enrichment";
+import type { EnrichmentExecutionPlan } from "../src/domain/enrichmentPlan";
 import {
   EnrichmentSchemaDecodeError,
   ResolverSourceAttributionMissingError
 } from "../src/domain/errors";
+import type { ResolutionOutcome } from "../src/domain/resolutionKernel";
 import type { ResolveBulkRequest, ResolvePostRequest } from "../src/domain/resolution";
+import type { Stage1Input, Stage1Result } from "../src/domain/stage1Resolution";
 import type { PostUri } from "../src/domain/types";
 import { EnrichmentPlanner } from "../src/enrichment/EnrichmentPlanner";
-import {
-  CloudflareEnv,
-  type EnvBindings,
-  type ResolverWorkerEnvBindings
-} from "../src/platform/Env";
-import type { Stage1Input, Stage1Result } from "../src/domain/stage1Resolution";
-import type { Stage2Result, Stage3Input } from "../src/domain/stage2Resolution";
+import { CloudflareEnv, type EnvBindings } from "../src/platform/Env";
+import { ResolutionKernel } from "../src/resolution/ResolutionKernel";
 import { Stage1Resolver } from "../src/resolution/Stage1Resolver";
-import { Stage2Resolver } from "../src/resolution/Stage2Resolver";
 import { ResolverService } from "../src/resolver/ResolverService";
 
 const asPostUri = (value: string) => value as PostUri;
 
-const makeSourceAttribution = (processedAt: number): SourceAttributionEnrichment => ({
+const makeSourceAttribution = (
+  processedAt: number
+): SourceAttributionEnrichment => ({
   kind: "source-attribution",
   provider: null,
   resolution: "unmatched",
@@ -81,54 +79,37 @@ const makeStage1Result = (
   residuals
 });
 
-const makeStage2Result = (
-  overrides: Partial<Stage2Result> = {}
-): Stage2Result => ({
-  matches: [],
-  corroborations: [],
-  escalations: [],
-  ...overrides
-});
-
-const makeStage3Input = (
+const makeKernelOutcome = (
   postUri = "at://did:plc:test/app.bsky.feed.post/post-1"
-): Stage3Input => ({
-  _tag: "Stage3Input",
-  postUri: asPostUri(postUri),
-  originalResidual: {
-    _tag: "UnmatchedTextResidual",
-    source: "post-text",
-    text: "ERCOT",
-    normalizedText: "ercot"
+): ResolutionOutcome => ({
+  _tag: "NoMatch",
+  bundle: {
+    postUri: asPostUri(postUri),
+    postText: ["Stored post text"],
+    series: [],
+    keyFindings: [],
+    sourceLines: [],
+    publisherHints: []
   },
-  stage2Lane: "fuzzy-agent-label",
-  candidateSet: [],
-  matchedSurfaceForms: [],
-  unmatchedSurfaceForms: ["ercot"],
-  reason: "best fuzzy score 0.20 below 0.60 threshold"
+  reason: "no checked-in registry match"
 });
 
-const makeEnv = (
-  overrides: Partial<EnvBindings> = {}
-): EnvBindings => ({
+const makeEnv = (): EnvBindings => ({
   DB: {} as D1Database,
-  OPERATOR_SECRET: "resolver-secret",
-  ...overrides
+  OPERATOR_SECRET: "resolver-secret"
 });
 
 const makeServiceLayer = (options?: {
-  readonly env?: Partial<EnvBindings>;
   readonly plan?: EnrichmentExecutionPlan;
   readonly resolveStage1?: (input: Stage1Input) => Effect.Effect<Stage1Result>;
-  readonly resolveStage2?: (
-    postContext: Stage1Input["postContext"],
-    stage1: Stage1Result
-  ) => Effect.Effect<Stage2Result>;
+  readonly resolveKernel?: (
+    input: Stage1Input
+  ) => Effect.Effect<ReadonlyArray<ResolutionOutcome>>;
 }) =>
   ResolverService.layer.pipe(
     Layer.provideMerge(
       Layer.mergeAll(
-        CloudflareEnv.layer(makeEnv(options?.env)),
+        CloudflareEnv.layer(makeEnv()),
         Layer.succeed(EnrichmentPlanner, {
           plan: () => Effect.succeed(options?.plan ?? makePlan())
         }),
@@ -137,12 +118,10 @@ const makeServiceLayer = (options?: {
             options?.resolveStage1?.(input as Stage1Input) ??
             Effect.succeed(makeStage1Result())
         }),
-        Layer.succeed(Stage2Resolver, {
-          resolve: (postContext, stage1) =>
-            options?.resolveStage2?.(
-              postContext as Stage1Input["postContext"],
-              stage1 as Stage1Result
-            ) ?? Effect.succeed(makeStage2Result())
+        Layer.succeed(ResolutionKernel, {
+          resolve: (input) =>
+            options?.resolveKernel?.(input as Stage1Input) ??
+            Effect.succeed([makeKernelOutcome()])
         })
       )
     )
@@ -178,6 +157,7 @@ describe("ResolverService", () => {
         });
 
         expect(result.stage1.matches).toEqual([]);
+        expect(result.kernel[0]?._tag).toBe("NoMatch");
         expect(resolvedInputs).toHaveLength(1);
         expect(resolvedInputs[0]?.sourceAttribution?.processedAt).toBe(30);
         expect(resolvedInputs[0]?.postContext.postUri).toBe(
@@ -211,105 +191,20 @@ describe("ResolverService", () => {
     })()
   );
 
-  it.effect("queues stage3 when requested and residuals remain", () =>
-    (() => {
-      const createdJobs: Array<{ readonly id: string; readonly params: unknown }> = [];
-      const workflow = {
-        create: async (input: any) => {
-          createdJobs.push(input);
-          return { id: input.id } as any;
-        },
-        get: async () => ({ id: "unused" } as any),
-        createBatch: async () => []
-      } as unknown as ResolverWorkerEnvBindings["RESOLVER_RUN_WORKFLOW"];
-
-      return Effect.gen(function* () {
-        const service = yield* ResolverService;
-
-        const result = yield* service.resolvePost({
-          postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
-          stage1Input: makeStage1Input(),
-          dispatchStage3: true
-        });
-
-        expect(result.stage3?.status).toBe("queued");
-        expect(result.stage2?.escalations).toHaveLength(1);
-        expect(createdJobs).toHaveLength(1);
-        expect(createdJobs[0]?.params).toEqual({
-          postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
-          stage3Inputs: [makeStage3Input()]
-        });
-      }).pipe(
-        Effect.provide(
-          makeServiceLayer({
-            env: {
-              RESOLVER_RUN_WORKFLOW: workflow
-            },
-            resolveStage1: () =>
-              Effect.succeed(
-                makeStage1Result([
-                  {
-                    _tag: "UnmatchedTextResidual",
-                    source: "post-text",
-                    text: "ERCOT",
-                    normalizedText: "ercot"
-                  }
-                ])
-              )
-            ,
-            resolveStage2: () =>
-              Effect.succeed(
-                makeStage2Result({
-                  escalations: [makeStage3Input()]
-                })
-              )
-          })
-        )
-      );
-    })()
-  );
-
-  it.effect("keeps the fast response intact when stage3 dispatch fails", () =>
+  it.effect("returns kernel outcomes and kernel latency in the live response", () =>
     Effect.gen(function* () {
       const service = yield* ResolverService;
       const result = yield* service.resolvePost({
         postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
-        stage1Input: makeStage1Input(),
-        dispatchStage3: true
+        stage1Input: makeStage1Input()
       });
 
-      expect(result.stage1.residuals).toHaveLength(1);
-      expect(result.stage2?.escalations).toHaveLength(1);
-      expect(result.stage3).toBeUndefined();
+      expect(result.kernel).toEqual([makeKernelOutcome()]);
+      expect(result.latencyMs.kernel).toBeGreaterThanOrEqual(0);
     }).pipe(
       Effect.provide(
         makeServiceLayer({
-          env: {
-            RESOLVER_RUN_WORKFLOW: {
-              create: async () => {
-                throw new Error("workflow unavailable");
-              },
-              get: async () => ({ id: "unused" } as any),
-              createBatch: async () => []
-            } as unknown as ResolverWorkerEnvBindings["RESOLVER_RUN_WORKFLOW"]
-          },
-          resolveStage1: () =>
-            Effect.succeed(
-              makeStage1Result([
-                {
-                  _tag: "UnmatchedTextResidual",
-                  source: "post-text",
-                  text: "ERCOT",
-                  normalizedText: "ercot"
-                }
-              ])
-            ),
-          resolveStage2: () =>
-            Effect.succeed(
-              makeStage2Result({
-                escalations: [makeStage3Input()]
-              })
-            )
+          resolveKernel: () => Effect.succeed([makeKernelOutcome()])
         })
       )
     )

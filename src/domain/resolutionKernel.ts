@@ -1,10 +1,11 @@
 import { Schema } from "effect";
 import { ZeroToOneScore } from "./confidence";
-import { VariableId } from "./data-layer/ids";
+import { AgentId, VariableId } from "./data-layer/ids";
 import { TimePeriod } from "./data-layer/variable";
 import { PartialVariableFacetConflict } from "./errors";
 import { ChartAxis, TemporalCoverage } from "./media";
 import {
+  FacetKey,
   PartialVariableShape,
   RequiredFacetKey
 } from "./partialVariableAlgebra";
@@ -146,16 +147,91 @@ export const ResolutionHypothesis = Schema.Struct({
 });
 export type ResolutionHypothesis = Schema.Schema.Type<typeof ResolutionHypothesis>;
 
-export const BoundResolutionItem = Schema.Struct({
+export const VariableCandidateScore = Schema.Struct({
+  variableId: VariableId,
+  label: Schema.String,
+  matchedFacets: Schema.Array(FacetKey),
+  mismatchedFacets: Schema.Array(PartialVariableFacetConflict),
+  subsumptionRatio: Schema.Number.pipe(
+    Schema.check(Schema.isGreaterThanOrEqualTo(0))
+  ),
+  partialSpecificity: Schema.Int.pipe(
+    Schema.check(Schema.isGreaterThanOrEqualTo(0))
+  ),
+  semanticPartial: PartialVariableShape
+}).annotate({
+  description:
+    "Ranked registry variable candidate with facet-level match diagnostics"
+});
+export type VariableCandidateScore = Schema.Schema.Type<
+  typeof VariableCandidateScore
+>;
+
+export const ResolutionGapReason = Schema.Literals([
+  "missing-required",
+  "no-candidates",
+  "agent-scope-empty",
+  "ambiguous-candidates",
+  "required-facet-conflict"
+]);
+export type ResolutionGapReason = Schema.Schema.Type<
+  typeof ResolutionGapReason
+>;
+
+export const ResolutionGap = Schema.Struct({
+  partial: PartialVariableShape,
+  missingRequired: Schema.optionalKey(Schema.Array(RequiredFacetKey)),
+  candidates: Schema.Array(VariableCandidateScore),
+  reason: ResolutionGapReason,
+  context: Schema.optionalKey(
+    Schema.Struct({
+      agentId: Schema.optionalKey(AgentId),
+      attachedContext: Schema.optionalKey(AttachedContext)
+    })
+  )
+}).annotate({
+  description:
+    "Preserved unresolved state emitted when the kernel cannot choose one variable"
+});
+export type ResolutionGap = Schema.Schema.Type<typeof ResolutionGap>;
+
+export const BoundResolutionBoundItem = Schema.TaggedStruct("bound", {
   itemKey: Schema.optionalKey(Schema.String),
   semanticPartial: PartialVariableShape,
   attachedContext: AttachedContext,
   evidence: Schema.Array(ResolutionEvidenceReference),
-  variableId: Schema.optionalKey(VariableId),
+  variableId: VariableId,
   label: Schema.optionalKey(Schema.String)
 }).annotate({
   description:
-    "Item-level resolution candidate after registry binding has been attempted"
+    "Item-level resolution that successfully bound to one registry variable"
+});
+export type BoundResolutionBoundItem = Schema.Schema.Type<
+  typeof BoundResolutionBoundItem
+>;
+
+export const BoundResolutionGapItem = Schema.TaggedStruct("gap", {
+  itemKey: Schema.optionalKey(Schema.String),
+  semanticPartial: PartialVariableShape,
+  attachedContext: AttachedContext,
+  evidence: Schema.Array(ResolutionEvidenceReference),
+  candidates: Schema.Array(VariableCandidateScore),
+  missingRequired: Schema.optionalKey(Schema.Array(RequiredFacetKey)),
+  reason: ResolutionGapReason
+}).annotate({
+  description:
+    "Item-level unresolved state preserved for ambiguous, underspecified, or out-of-registry branches"
+});
+export type BoundResolutionGapItem = Schema.Schema.Type<
+  typeof BoundResolutionGapItem
+>;
+
+export const BoundResolutionItem = Schema.Union([
+  BoundResolutionBoundItem,
+  BoundResolutionGapItem
+]).annotate({
+  description:
+    "Tagged item-level kernel result preserving either a bound variable or an unresolved gap"
 });
 export type BoundResolutionItem = Schema.Schema.Type<typeof BoundResolutionItem>;
 
@@ -172,6 +248,8 @@ export type Resolved = Schema.Schema.Type<typeof Resolved>;
 export const Ambiguous = Schema.TaggedStruct("Ambiguous", {
   bundle: ResolutionEvidenceBundle,
   hypotheses: Schema.Array(ResolutionHypothesis),
+  items: Schema.Array(BoundResolutionItem),
+  gaps: Schema.Array(ResolutionGap),
   confidence: Schema.optionalKey(ZeroToOneScore),
   tier: Schema.optionalKey(ResolutionEvidenceTier)
 });
@@ -181,6 +259,8 @@ export const Underspecified = Schema.TaggedStruct("Underspecified", {
   bundle: ResolutionEvidenceBundle,
   partial: PartialVariableShape,
   missingRequired: Schema.Array(RequiredFacetKey),
+  gap: ResolutionGap,
+  gaps: Schema.Array(ResolutionGap),
   confidence: Schema.optionalKey(ZeroToOneScore),
   tier: Schema.optionalKey(ResolutionEvidenceTier)
 });
@@ -190,6 +270,7 @@ export const Conflicted = Schema.TaggedStruct("Conflicted", {
   bundle: ResolutionEvidenceBundle,
   hypotheses: Schema.Array(ResolutionHypothesis),
   conflicts: Schema.Array(PartialVariableFacetConflict),
+  gaps: Schema.Array(ResolutionGap),
   confidence: Schema.optionalKey(ZeroToOneScore),
   tier: Schema.optionalKey(ResolutionEvidenceTier)
 });
@@ -198,7 +279,8 @@ export type Conflicted = Schema.Schema.Type<typeof Conflicted>;
 export const OutOfRegistry = Schema.TaggedStruct("OutOfRegistry", {
   bundle: ResolutionEvidenceBundle,
   hypothesis: ResolutionHypothesis,
-  items: Schema.Array(BoundResolutionItem)
+  items: Schema.Array(BoundResolutionItem),
+  gap: ResolutionGap
 });
 export type OutOfRegistry = Schema.Schema.Type<typeof OutOfRegistry>;
 

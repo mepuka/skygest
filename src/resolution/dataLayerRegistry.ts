@@ -66,7 +66,9 @@ export type PreparedDataLayerRegistry = {
   readonly datasetByTitle: ReadonlyMap<string, Dataset>;
   readonly datasetByAlias: ReadonlyMap<string, Dataset>;
   readonly variableByAlias: ReadonlyMap<string, Variable>;
+  readonly datasetIdsByAgentId: ReadonlyMap<string, Chunk.Chunk<Dataset>>;
   readonly datasetsByVariableId: ReadonlyMap<string, Chunk.Chunk<Dataset>>;
+  readonly variablesByAgentId: ReadonlyMap<string, Chunk.Chunk<Variable>>;
   readonly variablesByDatasetId: ReadonlyMap<string, Chunk.Chunk<Variable>>;
   readonly distributionByUrl: ReadonlyMap<string, Distribution>;
   readonly distributionsByHostname: ReadonlyMap<string, Chunk.Chunk<Distribution>>;
@@ -88,7 +90,9 @@ export type DataLayerRegistryLookup = {
     scheme: AliasScheme,
     value: string
   ) => Option.Option<Dataset>;
+  readonly findDatasetsByAgentId: (agentId: string) => Chunk.Chunk<Dataset>;
   readonly findDatasetsByVariableId: (variableId: string) => Chunk.Chunk<Dataset>;
+  readonly findVariablesByAgentId: (agentId: string) => Chunk.Chunk<Variable>;
   readonly findVariablesByDatasetId: (datasetId: string) => Chunk.Chunk<Variable>;
   readonly findDistributionByUrl: (
     url: string
@@ -495,6 +499,7 @@ const buildPreparedRegistry = (
   const datasetByTitle = new Map<string, Dataset>();
   const datasetByAlias = new Map<string, Dataset>();
   const variableByAlias = new Map<string, Variable>();
+  const datasetsByAgentId = new Map<string, Array<Dataset>>();
   const datasetsByVariableId = new Map<string, Array<Dataset>>();
   const variablesByDatasetId = new Map<string, Array<Variable>>();
   const distributionByUrl = new Map<string, Distribution>();
@@ -536,6 +541,10 @@ const buildPreparedRegistry = (
   }
 
   for (const dataset of seed.datasets) {
+    if (dataset.publisherAgentId !== undefined) {
+      registerManyLookup(datasetsByAgentId, dataset.publisherAgentId, dataset);
+    }
+
     registerExactLookup(
       issues,
       "dataset-title",
@@ -624,6 +633,35 @@ const buildPreparedRegistry = (
     }
   );
 
+  const sortedDatasetsByAgentId = new Map(
+    [...datasetsByAgentId.entries()].map(([key, value]) => [key, sortDatasets(value)])
+  );
+  const sortedDatasetsByVariableId = new Map(
+    [...datasetsByVariableId.entries()].map(([key, value]) => [key, sortDatasets(value)])
+  );
+  const sortedVariablesByDatasetId = new Map(
+    [...variablesByDatasetId.entries()].map(([key, value]) => [key, sortVariables(value)])
+  );
+  const sortedVariablesByAgentId = new Map(
+    [...sortedDatasetsByAgentId.entries()].map(([agentId, datasets]) => {
+      const seen = new Set<string>();
+      const variables: Array<Variable> = [];
+
+      for (const dataset of datasets) {
+        for (const variable of sortedVariablesByDatasetId.get(dataset.id) ?? Chunk.empty()) {
+          if (seen.has(variable.id)) {
+            continue;
+          }
+
+          seen.add(variable.id);
+          variables.push(variable);
+        }
+      }
+
+      return [agentId, sortVariables(variables)] as const;
+    })
+  );
+
   return Result.succeed({
     seed,
     entities: Chunk.fromIterable([...entityById.values()]),
@@ -634,18 +672,10 @@ const buildPreparedRegistry = (
     datasetByTitle,
     datasetByAlias,
     variableByAlias,
-    datasetsByVariableId: new Map(
-      [...datasetsByVariableId.entries()].map(([key, value]) => [
-        key,
-        sortDatasets(value)
-      ])
-    ),
-    variablesByDatasetId: new Map(
-      [...variablesByDatasetId.entries()].map(([key, value]) => [
-        key,
-        sortVariables(value)
-      ])
-    ),
+    datasetIdsByAgentId: sortedDatasetsByAgentId,
+    datasetsByVariableId: sortedDatasetsByVariableId,
+    variablesByAgentId: sortedVariablesByAgentId,
+    variablesByDatasetId: sortedVariablesByDatasetId,
     distributionByUrl,
     distributionsByHostname: new Map(
       [...distributionsByHostname.entries()].map(([key, value]) => [
@@ -687,8 +717,12 @@ export const toDataLayerRegistryLookup = (
     Option.fromNullishOr(
       prepared.datasetByAlias.get(aliasLookupKey(scheme, value))
     ),
+  findDatasetsByAgentId: (agentId) =>
+    prepared.datasetIdsByAgentId.get(agentId) ?? Chunk.empty(),
   findDatasetsByVariableId: (variableId) =>
     prepared.datasetsByVariableId.get(variableId) ?? Chunk.empty(),
+  findVariablesByAgentId: (agentId) =>
+    prepared.variablesByAgentId.get(agentId) ?? Chunk.empty(),
   findVariablesByDatasetId: (datasetId) =>
     prepared.variablesByDatasetId.get(datasetId) ?? Chunk.empty(),
   findDistributionByUrl: (url) => {

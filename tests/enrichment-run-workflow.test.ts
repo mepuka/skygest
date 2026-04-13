@@ -15,6 +15,7 @@ import type {
   EnrichmentRunParams,
   EnrichmentRunRecord
 } from "../src/domain/enrichmentRun";
+import type { ResolutionOutcome } from "../src/domain/resolutionKernel";
 import type { PostUri } from "../src/domain/types";
 import { EnrichmentPlanner } from "../src/enrichment/EnrichmentPlanner";
 import { EnrichmentWorkflowLauncher } from "../src/enrichment/EnrichmentWorkflowLauncher";
@@ -190,6 +191,21 @@ const makeSourceAttributionEnrichment = (): SourceAttributionEnrichment => ({
   contentSource: null,
   socialProvenance: null,
   processedAt: 20
+});
+
+const makeKernelOutcome = (
+  postUri = "at://did:plc:test/app.bsky.feed.post/post-1"
+): ResolutionOutcome => ({
+  _tag: "NoMatch",
+  bundle: {
+    postUri: asPostUri(postUri),
+    postText: ["Stored post text"],
+    series: [],
+    keyFindings: [],
+    sourceLines: [],
+    publisherHints: []
+  },
+  reason: "no checked-in registry match"
 });
 
 describe("EnrichmentRunWorkflow", () => {
@@ -400,30 +416,11 @@ describe("EnrichmentRunWorkflow", () => {
                       matches: [],
                       residuals: []
                     },
-                    stage2: {
-                      matches: [],
-                      corroborations: [],
-                      escalations: [
-                        {
-                          _tag: "Stage3Input",
-                          postUri: input.postUri,
-                          originalResidual: {
-                            _tag: "DeferredToStage2Residual",
-                            source: "post-text",
-                            text: "ERCOT annual load",
-                            reason: "needs stage 2"
-                          },
-                          stage2Lane: "pending",
-                          candidateSet: [],
-                          matchedSurfaceForms: [],
-                          unmatchedSurfaceForms: [],
-                          reason: "Stage 2 kernel not yet executed"
-                        }
-                      ]
-                    },
-                    resolverVersion: "stage1-resolver@sky-238",
+                    kernel: [makeKernelOutcome(input.postUri)],
+                    resolverVersion: "resolution-kernel@sky-314",
                     latencyMs: {
                       stage1: 3,
+                      kernel: 2,
                       total: 5
                     }
                   };
@@ -496,8 +493,7 @@ describe("EnrichmentRunWorkflow", () => {
               },
               vision: makeVisionEnrichment(),
               sourceAttribution: makeSourceAttributionEnrichment()
-            },
-            dispatchStage3: true
+            }
           },
           options: {
             requestId: "run-1"
@@ -519,17 +515,8 @@ describe("EnrichmentRunWorkflow", () => {
               matches: [],
               residuals: []
             },
-            stage2: {
-              matches: [],
-              corroborations: [],
-              escalations: [
-                expect.objectContaining({
-                  _tag: "Stage3Input",
-                  stage2Lane: "pending"
-                })
-              ]
-            },
-            resolverVersion: "stage1-resolver@sky-238"
+            kernel: [expect.objectContaining({ _tag: "NoMatch" })],
+            resolverVersion: "resolution-kernel@sky-314"
           })
         }
       ]);
@@ -590,9 +577,11 @@ describe("EnrichmentRunWorkflow", () => {
                       matches: [],
                       residuals: []
                     },
-                    resolverVersion: "stage1-resolver@sky-238",
+                    kernel: [makeKernelOutcome(input.postUri)],
+                    resolverVersion: "resolution-kernel@sky-314",
                     latencyMs: {
                       stage1: 1,
+                      kernel: 1,
                       total: 2
                     }
                   };

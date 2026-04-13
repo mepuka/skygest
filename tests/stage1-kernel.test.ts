@@ -204,8 +204,8 @@ describe("runStage1", () => {
     expect("datasetId" in distributionMatch).toBe(false);
 
     expect(result.residuals.map((residual) => residual._tag)).toEqual([
-      "DeferredToStage2Residual",
-      "DeferredToStage2Residual",
+      "DeferredToKernelResidual",
+      "DeferredToKernelResidual",
       "UnmatchedUrlResidual",
       "UnmatchedUrlResidual"
     ]);

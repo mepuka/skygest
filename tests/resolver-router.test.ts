@@ -11,6 +11,18 @@ import { encodeJsonString } from "../src/platform/Json";
 import { PostUri } from "../src/domain/types";
 
 const asPostUri = Schema.decodeUnknownSync(PostUri);
+const makeKernelOutcome = (postUri: string) => ({
+  _tag: "NoMatch" as const,
+  bundle: {
+    postUri: asPostUri(postUri),
+    postText: ["Stored post text"],
+    series: [],
+    keyFindings: [],
+    sourceLines: [],
+    publisherHints: []
+  },
+  reason: "no checked-in registry match"
+});
 
 const resolveBulkSuccess = () =>
   Effect.succeed({
@@ -21,9 +33,13 @@ const resolveBulkSuccess = () =>
           matches: [],
           residuals: []
         },
-        resolverVersion: "stage1-resolver@sky-238",
+        kernel: [
+          makeKernelOutcome("at://did:plc:test/app.bsky.feed.post/post-1")
+        ],
+        resolverVersion: "resolution-kernel@sky-314",
         latencyMs: {
           stage1: 2,
+          kernel: 1,
           total: 4
         }
       }
@@ -52,9 +68,11 @@ const successLayer = Layer.succeed(ResolverService, {
         matches: [],
         residuals: []
       },
-      resolverVersion: "stage1-resolver@sky-238",
+      kernel: [makeKernelOutcome("at://did:plc:test/app.bsky.feed.post/post-1")],
+      resolverVersion: "resolution-kernel@sky-314",
       latencyMs: {
         stage1: 2,
+        kernel: 1,
         total: 4
       }
     }),
