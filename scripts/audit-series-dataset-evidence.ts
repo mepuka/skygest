@@ -8,8 +8,13 @@
  * list of zero-evidence series. Treats the candidate corpus as ground truth
  * — never invents pairings.
  */
+// Expected footer at plan-freeze time: UNANIMOUS 8  SPLIT 4  NONE 13 (see docs/plans/2026-04-13-sky-317-series-dataset-backfill.md §0.2)
 import { Command } from "effect/unstable/cli";
 import { Console, Effect, FileSystem, Path, Result, Schema } from "effect";
+import {
+  SeriesDatasetAuditDecodeError,
+  SeriesDatasetAuditIoError
+} from "../src/domain/errors";
 import {
   decodeJsonStringEitherWith,
   formatSchemaParseError
@@ -36,7 +41,49 @@ type DecisionRow = {
 
 const SeriesIdMap = Schema.Record(Schema.String, Schema.String);
 
-const decodeSeriesIdMap = decodeJsonStringEitherWith(SeriesIdMap);
+const AgentInput = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String
+});
+
+const DatasetInput = Schema.Struct({
+  id: Schema.String,
+  title: Schema.String,
+  publisherAgentId: Schema.optionalKey(Schema.String)
+});
+
+const CandidateInput = Schema.Struct({
+  referencedSeriesId: Schema.optionalKey(Schema.String),
+  referencedDatasetId: Schema.optionalKey(Schema.String),
+  referencedAgentId: Schema.optionalKey(Schema.String)
+});
+
+const ioError = (operation: string, path: string, cause: unknown) =>
+  new SeriesDatasetAuditIoError({
+    operation,
+    path,
+    message: String(cause)
+  });
+
+const loadAndDecode = Effect.fn("audit-series-dataset-evidence.loadAndDecode")(
+  function* <A, I>(path: string, schema: Schema.Schema<A, I>) {
+    const fs = yield* FileSystem.FileSystem;
+    const text = yield* fs
+      .readFileString(path)
+      .pipe(Effect.mapError((cause) => ioError("readFileString", path, cause)));
+
+    const decoded = decodeJsonStringEitherWith(schema)(text);
+    if (Result.isFailure(decoded)) {
+      return yield* new SeriesDatasetAuditDecodeError({
+        path,
+        message: `failed to decode ${path}`,
+        issues: [formatSchemaParseError(decoded.failure)]
+      });
+    }
+
+    return decoded.success;
+  }
+);
 
 const runAudit = Effect.fn("audit-series-dataset-evidence.run")(function* () {
   const fs = yield* FileSystem.FileSystem;
@@ -45,21 +92,7 @@ const runAudit = Effect.fn("audit-series-dataset-evidence.run")(function* () {
 
   // 1. Load series slug → id map
   const seriesIdsPath = path.join(root, "series", ".series-ids.json");
-  const seriesIdsText = yield* fs.readFileString(seriesIdsPath).pipe(
-    Effect.mapError(
-      (cause) =>
-        new Error(`failed to read ${seriesIdsPath}: ${String(cause)}`)
-    )
-  );
-  const decodedSeriesIds = decodeSeriesIdMap(seriesIdsText);
-  if (Result.isFailure(decodedSeriesIds)) {
-    return yield* Effect.fail(
-      new Error(
-        `invalid series id map at ${seriesIdsPath}: ${formatSchemaParseError(decodedSeriesIds.failure)}`
-      )
-    );
-  }
-  const seriesIds = decodedSeriesIds.success;
+  const seriesIds = yield* loadAndDecode(seriesIdsPath, SeriesIdMap);
 
   const slugById = new Map<string, string>();
   for (const [slug, id] of Object.entries(seriesIds)) {
@@ -68,31 +101,24 @@ const runAudit = Effect.fn("audit-series-dataset-evidence.run")(function* () {
 
   // 2. Load agents (id → name)
   const agentsDir = path.join(root, "catalog", "agents");
-  const agentFiles = yield* fs.readDirectory(agentsDir).pipe(
-    Effect.mapError(
-      (cause) => new Error(`failed to list ${agentsDir}: ${String(cause)}`)
-    )
-  );
+  const agentFiles = yield* fs
+    .readDirectory(agentsDir)
+    .pipe(Effect.mapError((cause) => ioError("readDirectory", agentsDir, cause)));
   const agentById = new Map<string, string>();
   for (const file of agentFiles) {
     if (!file.endsWith(".json")) continue;
     const agentPath = path.join(agentsDir, file);
-    const text = yield* fs.readFileString(agentPath).pipe(
-      Effect.mapError(
-        (cause) => new Error(`failed to read ${agentPath}: ${String(cause)}`)
-      )
-    );
-    const parsed = JSON.parse(text) as { id: string; name: string };
+    const parsed = yield* loadAndDecode(agentPath, AgentInput);
     agentById.set(parsed.id, parsed.name);
   }
 
   // 3. Load datasets (id → { file, title, publisher })
   const datasetsDir = path.join(root, "catalog", "datasets");
-  const datasetFiles = yield* fs.readDirectory(datasetsDir).pipe(
-    Effect.mapError(
-      (cause) => new Error(`failed to list ${datasetsDir}: ${String(cause)}`)
-    )
-  );
+  const datasetFiles = yield* fs
+    .readDirectory(datasetsDir)
+    .pipe(
+      Effect.mapError((cause) => ioError("readDirectory", datasetsDir, cause))
+    );
   const datasetById = new Map<
     string,
     { file: string; title: string; publisherAgentId?: string }
@@ -100,16 +126,7 @@ const runAudit = Effect.fn("audit-series-dataset-evidence.run")(function* () {
   for (const file of datasetFiles) {
     if (!file.endsWith(".json")) continue;
     const datasetPath = path.join(datasetsDir, file);
-    const text = yield* fs.readFileString(datasetPath).pipe(
-      Effect.mapError(
-        (cause) => new Error(`failed to read ${datasetPath}: ${String(cause)}`)
-      )
-    );
-    const parsed = JSON.parse(text) as {
-      id: string;
-      title: string;
-      publisherAgentId?: string;
-    };
+    const parsed = yield* loadAndDecode(datasetPath, DatasetInput);
     datasetById.set(parsed.id, {
       file,
       title: parsed.title,
@@ -119,27 +136,17 @@ const runAudit = Effect.fn("audit-series-dataset-evidence.run")(function* () {
 
   // 4. Walk candidates, collect series votes
   const candidatesDir = path.join(root, "candidates");
-  const candidateFiles = yield* fs.readDirectory(candidatesDir).pipe(
-    Effect.mapError(
-      (cause) => new Error(`failed to list ${candidatesDir}: ${String(cause)}`)
-    )
-  );
+  const candidateFiles = yield* fs
+    .readDirectory(candidatesDir)
+    .pipe(
+      Effect.mapError((cause) => ioError("readDirectory", candidatesDir, cause))
+    );
   const votesBySlug = new Map<string, Array<SeriesVote>>();
 
   for (const file of candidateFiles) {
     if (!file.endsWith(".json") || file.startsWith(".")) continue;
     const candidatePath = path.join(candidatesDir, file);
-    const text = yield* fs.readFileString(candidatePath).pipe(
-      Effect.mapError(
-        (cause) =>
-          new Error(`failed to read ${candidatePath}: ${String(cause)}`)
-      )
-    );
-    const parsed = JSON.parse(text) as {
-      referencedSeriesId?: string;
-      referencedDatasetId?: string;
-      referencedAgentId?: string;
-    };
+    const parsed = yield* loadAndDecode(candidatePath, CandidateInput);
     if (typeof parsed.referencedSeriesId !== "string") continue;
     const slug = slugById.get(parsed.referencedSeriesId);
     if (slug === undefined) continue;
