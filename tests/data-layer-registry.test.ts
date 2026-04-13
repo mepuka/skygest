@@ -1,7 +1,9 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Chunk, Option, Result } from "effect";
+import { Chunk, Effect, Option, Result } from "effect";
+import { loadCheckedInDataLayerRegistry } from "../src/bootstrap/CheckedInDataLayerRegistry";
 import type { DataLayerRegistrySeed } from "../src/domain/data-layer";
 import { prepareDataLayerRegistry, toDataLayerRegistryLookup } from "../src/resolution/dataLayerRegistry";
+import { layer as localFileSystemLayer } from "./helpers/LocalFileSystem";
 
 const iso = "2026-04-09T00:00:00.000Z" as const;
 const agentId = "https://id.skygest.io/agent/ag_1234567890AB" as any;
@@ -292,4 +294,62 @@ describe("data layer registry prep", () => {
       )?.id
     ).toBe("https://id.skygest.io/distribution/dist_ABCDEFGHIJKL");
   });
+});
+
+describe("SKY-317 series-backed agent shelf", () => {
+  const BACKFILLED_PUBLISHERS: ReadonlyArray<{ readonly label: string; readonly minVariables: number }> = [
+    { label: "International Renewable Energy Agency", minVariables: 1 },
+    { label: "California Independent System Operator", minVariables: 1 },
+    { label: "U.S. Energy Information Administration", minVariables: 1 },
+    { label: "PJM Interconnection", minVariables: 1 },
+    { label: "Electric Reliability Council of Texas", minVariables: 1 }
+  ];
+
+  it.effect(
+    "findVariablesByAgentId is non-empty for each backfilled publisher",
+    () =>
+      Effect.gen(function* () {
+        const prepared = yield* loadCheckedInDataLayerRegistry().pipe(
+          Effect.provide(localFileSystemLayer)
+        );
+
+        const agentIdByLabel = new Map<string, string>();
+        for (const agent of prepared.seed.agents) {
+          agentIdByLabel.set(agent.name, agent.id);
+          for (const alt of agent.alternateNames ?? []) {
+            agentIdByLabel.set(alt, agent.id);
+          }
+        }
+
+        for (const publisher of BACKFILLED_PUBLISHERS) {
+          const agentId = agentIdByLabel.get(publisher.label);
+          expect(agentId, `publisher ${publisher.label} missing from agents`).toBeDefined();
+          const shelf = prepared.variablesByAgentId.get(agentId!);
+          const size = shelf === undefined ? 0 : Chunk.size(shelf);
+          expect(
+            size,
+            `publisher ${publisher.label} should have at least ${publisher.minVariables} variable(s) in shelf`
+          ).toBeGreaterThanOrEqual(publisher.minVariables);
+        }
+      }),
+    30_000
+  );
+
+  it.effect(
+    "duplicate series for the same variable do not double-count the agent shelf",
+    () =>
+      Effect.gen(function* () {
+        const prepared = yield* loadCheckedInDataLayerRegistry().pipe(
+          Effect.provide(localFileSystemLayer)
+        );
+        for (const agent of prepared.seed.agents) {
+          const shelf = prepared.variablesByAgentId.get(agent.id);
+          if (shelf === undefined) continue;
+          const ids = Array.from(shelf, (v) => v.id);
+          const unique = new Set(ids);
+          expect(ids.length, `agent ${agent.name} has duplicate variables in shelf`).toBe(unique.size);
+        }
+      }),
+    30_000
+  );
 });

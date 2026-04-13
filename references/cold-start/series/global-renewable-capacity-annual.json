@@ -3,6 +3,7 @@
   "id": "https://id.skygest.io/series/ser_01KNQEZ5XBN5CJ6XA9MTF6SE4K",
   "label": "Global renewable capacity (annual)",
   "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WMZSP4FHM71ZK9YMF9",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRV0G2XWPZD8NKXBMT",
   "fixedDims": {
     "place": "GLOBAL",
     "frequency": "annual"

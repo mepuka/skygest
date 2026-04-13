@@ -1,25 +1,13 @@
 import { Schema } from "effect";
 import { DesignDecision, SchemaOrgType, SdmxConcept } from "./annotations";
 import { DateLike, TimestampedAliasedFields } from "./base";
-import { DistributionId, ObservationId, SeriesId, VariableId } from "./ids";
 import {
-  AggregationMembers,
-  StatisticTypeMembers,
-  UnitFamilyMembers
-} from "../generated/energyVariableProfile";
+  SeriesOntologyFields,
+  VariableOntologyFields
+} from "../generated/dataLayerSpine";
+import { DistributionId, ObservationId, SeriesId, VariableId } from "./ids";
 
-// ---------------------------------------------------------------------------
-// Enums
-// ---------------------------------------------------------------------------
-
-export const StatisticType = Schema.Literals(StatisticTypeMembers).annotate({ description: "Statistical measure type (SDMX-aligned)" });
-export type StatisticType = Schema.Schema.Type<typeof StatisticType>;
-
-export const Aggregation = Schema.Literals(AggregationMembers).annotate({ description: "Temporal aggregation method" });
-export type Aggregation = Schema.Schema.Type<typeof Aggregation>;
-
-export const UnitFamily = Schema.Literals(UnitFamilyMembers).annotate({ description: "Unit family grouping for dimensional analysis" });
-export type UnitFamily = Schema.Schema.Type<typeof UnitFamily>;
+export { Aggregation, StatisticType, UnitFamily } from "./variable-enums";
 
 export const TimePeriod = Schema.Struct({
   start: DateLike,
@@ -44,15 +32,7 @@ export const Variable = Schema.Struct({
   ...TimestampedAliasedFields,
   _tag: Schema.Literal("Variable"),
   id: VariableId,
-  label: Schema.String,
-  definition: Schema.optionalKey(Schema.String),
-  measuredProperty: Schema.optionalKey(Schema.String),
-  domainObject: Schema.optionalKey(Schema.String),
-  technologyOrFuel: Schema.optionalKey(Schema.String),
-  statisticType: Schema.optionalKey(StatisticType),
-  aggregation: Schema.optionalKey(Aggregation),
-  unitFamily: Schema.optionalKey(UnitFamily),
-  policyInstrument: Schema.optionalKey(Schema.String)
+  ...VariableOntologyFields
 }).annotate({
   description: "Statistical variable defined by up to seven semantic facets (D1, D2)",
   [SchemaOrgType]: "https://schema.org/StatisticalVariable",
@@ -69,8 +49,7 @@ export const Series = Schema.Struct({
   ...TimestampedAliasedFields,
   _tag: Schema.Literal("Series"),
   id: SeriesId,
-  label: Schema.String,
-  variableId: VariableId,
+  ...SeriesOntologyFields,
   fixedDims: FixedDims
 }).annotate({
   description: "A Variable locked to a specific reporting context via fixed dimensions (D1)",

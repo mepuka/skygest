@@ -308,6 +308,42 @@ export class EnergyProfilePipelineError extends Schema.TaggedErrorClass<EnergyPr
   }
 ) {}
 
+export class DataLayerSpineManifestLoadError extends Schema.TaggedErrorClass<DataLayerSpineManifestLoadError>()(
+  "DataLayerSpineManifestLoadError",
+  {
+    message: Schema.String,
+    path: Schema.String,
+    issues: Schema.Array(Schema.String)
+  }
+) {}
+
+export class DataLayerSpineGenerationError extends Schema.TaggedErrorClass<DataLayerSpineGenerationError>()(
+  "DataLayerSpineGenerationError",
+  {
+    operation: Schema.String,
+    path: Schema.String,
+    message: Schema.String
+  }
+) {}
+
+export class SeriesDatasetAuditIoError extends Schema.TaggedErrorClass<SeriesDatasetAuditIoError>()(
+  "SeriesDatasetAuditIoError",
+  {
+    operation: Schema.String,
+    path: Schema.String,
+    message: Schema.String
+  }
+) {}
+
+export class SeriesDatasetAuditDecodeError extends Schema.TaggedErrorClass<SeriesDatasetAuditDecodeError>()(
+  "SeriesDatasetAuditDecodeError",
+  {
+    path: Schema.String,
+    message: Schema.String,
+    issues: Schema.Array(Schema.String)
+  }
+) {}
+
 export class FacetDecompositionError extends Schema.TaggedErrorClass<FacetDecompositionError>()(
   "FacetDecompositionError",
   {

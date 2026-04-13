@@ -386,6 +386,7 @@ const validateReferences = (
         break;
       case "Series":
         checkReference(issues, path, "variableId", entity.variableId, "Variable", entityById);
+        checkReference(issues, path, "datasetId", entity.datasetId, "Dataset", entityById);
         break;
     }
   }
@@ -584,6 +585,21 @@ const buildPreparedRegistry = (
         aliasLookupKey(alias.scheme, alias.value),
         variable
       );
+    }
+  }
+
+  for (const series of seed.series) {
+    if (series.datasetId === undefined) {
+      continue;
+    }
+
+    const dataset = entityById.get(series.datasetId);
+    const variable = entityById.get(series.variableId);
+    if (dataset !== undefined && dataset._tag === "Dataset") {
+      registerManyLookup(datasetsByVariableId, series.variableId, dataset);
+    }
+    if (variable !== undefined && variable._tag === "Variable") {
+      registerManyLookup(variablesByDatasetId, series.datasetId, variable);
     }
   }
 

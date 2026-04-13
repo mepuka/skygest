@@ -157,4 +157,37 @@ describe("Cold-start validation", () => {
       throw new Error(`Candidate semantic consistency errors:\n${errors.join("\n")}`);
     }
   }, coldStartValidationTimeoutMs);
+
+  it("reports series→dataset backfill coverage", async () => {
+    const registry = await Effect.runPromise(
+      loadCheckedInDataLayerRegistry().pipe(Effect.provide(localFileSystemLayer))
+    );
+    const seriesEntities = registry.seed.series;
+    const total = seriesEntities.length;
+    const linked = seriesEntities.filter((s) => s.datasetId !== undefined).length;
+    const unlinked = seriesEntities.filter((s) => s.datasetId === undefined).length;
+
+    const manifestRaw = await readFile(
+      join(ROOT, "series", ".series-dataset-backfill.json"),
+      "utf-8"
+    );
+    const manifest = JSON.parse(manifestRaw) as {
+      explicit: Record<string, unknown>;
+      deliberatelyOmitted: Record<string, unknown>;
+      zeroEvidence: ReadonlyArray<string>;
+    };
+
+    const expectedLinked = Object.keys(manifest.explicit).length;
+    const expectedUnlinked =
+      Object.keys(manifest.deliberatelyOmitted).length + manifest.zeroEvidence.length;
+
+    expect(total).toBe(expectedLinked + expectedUnlinked);
+    expect(linked).toBe(expectedLinked);
+    expect(unlinked).toBe(expectedUnlinked);
+
+    console.log(
+      `[SKY-317 coverage] series.datasetId: ${linked}/${total} linked, ${unlinked} unlinked ` +
+        `(${Object.keys(manifest.deliberatelyOmitted).length} deliberately omitted, ${manifest.zeroEvidence.length} zero-evidence)`
+    );
+  }, coldStartValidationTimeoutMs);
 });

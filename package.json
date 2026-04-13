@@ -20,6 +20,7 @@
     "sync:vocabulary": "bun run scripts/sync-vocabulary.ts",
     "sync:energy-profile": "bun run scripts/sync-energy-profile.ts",
     "gen:energy-profile": "bun run scripts/generate-energy-profile.ts",
+    "gen:data-layer-spine": "bun run scripts/generate-data-layer-spine.ts",
     "ops": "bun run src/scripts/ops.ts"
   },
   "devDependencies": {

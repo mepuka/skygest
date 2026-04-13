@@ -1,19 +1,43 @@
 /**
  * Generate Series JSON files for SKY-215 cold-start.
  * Usage: bun scripts/generate-series.ts
+ *
+ * Idempotent as of SKY-317: reuses IDs from .series-ids.json and emits
+ * datasetId from .series-dataset-backfill.json. Rerunning is a no-op against
+ * the current checked-in state.
  */
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ulid } from "ulid";
 
-const ROOT = join(import.meta.dirname, "..", "references", "cold-start", "series");
+const ROOT =
+  process.env.SERIES_SCRIPT_ROOT ??
+  join(import.meta.dirname, "..", "references", "cold-start", "series");
 const TS = "2026-04-08T00:00:00.000Z";
 
 const varIds: Record<string, string> = JSON.parse(
   readFileSync(join(import.meta.dirname, "..", "references", "cold-start", "variables", ".variable-ids.json"), "utf-8")
 );
 
-function mintId(): string {
+const existingSeriesIds: Record<string, string> = existsSync(
+  join(ROOT, ".series-ids.json")
+)
+  ? JSON.parse(readFileSync(join(ROOT, ".series-ids.json"), "utf-8"))
+  : {};
+
+const backfillPath = join(ROOT, ".series-dataset-backfill.json");
+const backfillManifest: {
+  explicit: Record<
+    string,
+    { datasetId: string; datasetFile: string; evidence: string }
+  >;
+} = existsSync(backfillPath)
+  ? JSON.parse(readFileSync(backfillPath, "utf-8"))
+  : { explicit: {} };
+
+function idFor(slug: string): string {
+  const existing = existingSeriesIds[slug];
+  if (existing !== undefined) return existing;
   return `https://id.skygest.io/series/ser_${ulid()}`;
 }
 
@@ -90,7 +114,7 @@ for (const s of SERIES) {
     process.exit(1);
   }
 
-  const id = mintId();
+  const id = idFor(s.slug);
   idMap[s.slug] = id;
 
   const fixedDims: Record<string, any> = {};
@@ -100,16 +124,22 @@ for (const s of SERIES) {
   if (s.frequency) fixedDims.frequency = s.frequency;
   if (s.extra) fixedDims.extra = s.extra;
 
-  writeFileSync(join(ROOT, `${s.slug}.json`), JSON.stringify({
+  const datasetId = backfillManifest.explicit[s.slug]?.datasetId;
+  const out: Record<string, unknown> = {
     _tag: "Series",
     id,
     label: s.label,
     variableId: varId,
-    fixedDims,
-    aliases: [],
-    createdAt: TS,
-    updatedAt: TS,
-  }, null, 2) + "\n");
+  };
+  if (datasetId !== undefined) {
+    out.datasetId = datasetId;
+  }
+  out.fixedDims = fixedDims;
+  out.aliases = [];
+  out.createdAt = TS;
+  out.updatedAt = TS;
+
+  writeFileSync(join(ROOT, `${s.slug}.json`), JSON.stringify(out, null, 2) + "\n");
 }
 
 writeFileSync(join(ROOT, ".series-ids.json"), JSON.stringify(idMap, null, 2) + "\n");

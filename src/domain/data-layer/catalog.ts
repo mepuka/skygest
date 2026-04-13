@@ -2,6 +2,10 @@ import { Schema } from "effect";
 import { DcatClass, DcatProperty, DesignDecision, SchemaOrgType } from "./annotations";
 import { DateLike, TimestampedAliasedFields, WebUrl } from "./base";
 import {
+  AgentOntologyFields,
+  DatasetOntologyFields
+} from "../generated/dataLayerSpine";
+import {
   AgentId,
   CatalogId,
   CatalogRecordId,
@@ -45,13 +49,7 @@ export const Agent = Schema.Struct({
   _tag: Schema.Literal("Agent"),
   id: AgentId,
   kind: AgentKind,
-  name: Schema.String.annotate({
-    [DcatProperty]: "http://xmlns.com/foaf/0.1/name"
-  }),
-  alternateNames: Schema.optionalKey(Schema.Array(Schema.String)),
-  homepage: Schema.optionalKey(WebUrl.annotate({
-    [DcatProperty]: "http://xmlns.com/foaf/0.1/homepage"
-  })),
+  ...AgentOntologyFields,
   parentAgentId: Schema.optionalKey(AgentId),
   ...TimestampedAliasedFields
 }).annotate({
@@ -142,49 +140,9 @@ export type CatalogRecord = Schema.Schema.Type<typeof CatalogRecord>;
 export const Dataset = Schema.Struct({
   _tag: Schema.Literal("Dataset"),
   id: DatasetId,
-  title: Schema.String.annotate({
-    [DcatProperty]: "http://purl.org/dc/terms/title"
-  }),
-  description: Schema.optionalKey(Schema.String.annotate({
-    [DcatProperty]: "http://purl.org/dc/terms/description"
-  })),
-  creatorAgentId: Schema.optionalKey(AgentId.annotate({
-    [DcatProperty]: "http://purl.org/dc/terms/creator"
-  })),
-  wasDerivedFrom: Schema.optionalKey(
-    Schema.Array(AgentId).annotate({
-      [DcatProperty]: "http://www.w3.org/ns/prov#wasDerivedFrom"
-    })
-  ),
-  publisherAgentId: Schema.optionalKey(AgentId.annotate({
-    [DcatProperty]: "http://purl.org/dc/terms/publisher"
-  })),
-  landingPage: Schema.optionalKey(WebUrl.annotate({
-    [DcatProperty]: "http://www.w3.org/ns/dcat#landingPage"
-  })),
+  ...DatasetOntologyFields,
   accessRights: Schema.optionalKey(AccessRights),
-  license: Schema.optionalKey(Schema.String.annotate({
-    [DcatProperty]: "http://purl.org/dc/terms/license"
-  })),
-  temporal: Schema.optionalKey(Schema.String.annotate({
-    [DcatProperty]: "http://purl.org/dc/terms/temporal"
-  })),
-  keywords: Schema.optionalKey(Schema.Array(Schema.String).annotate({
-    [DcatProperty]: "http://www.w3.org/ns/dcat#keyword"
-  })),
-  themes: Schema.optionalKey(Schema.Array(Schema.String).annotate({
-    [DcatProperty]: "http://www.w3.org/ns/dcat#theme"
-  })),
-  variableIds: Schema.optionalKey(Schema.Array(VariableId).annotate({
-    [DcatProperty]: "https://skygest.dev/vocab/energy/hasVariable"
-  })),
-  distributionIds: Schema.optionalKey(Schema.Array(DistributionId).annotate({
-    [DcatProperty]: "http://www.w3.org/ns/dcat#distribution"
-  })),
   dataServiceIds: Schema.optionalKey(Schema.Array(DataServiceId)),
-  inSeries: Schema.optionalKey(DatasetSeriesId.annotate({
-    [DcatProperty]: "http://www.w3.org/ns/dcat#inSeries"
-  })),
   ...TimestampedAliasedFields
 }).annotate({
   description: "Collection of data published or curated by a single source (D5)",
