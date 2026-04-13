@@ -51,3 +51,37 @@ describe("CD-008 price/share/count surface-form routing", () => {
     }).pipe(Effect.provide(FacetVocabulary.layer))
   );
 });
+
+describe("domain-object and aggregation lexicon tightening", () => {
+  it.effect("does not fire domainObject=heat on bare narrative 'heat'", () =>
+    Effect.gen(function* () {
+      const vocab = yield* FacetVocabulary;
+      const mp = vocab.matchDomainObject("Earth is retaining heat at an accelerating rate");
+      expect(Option.isNone(mp)).toBe(true);
+    }).pipe(Effect.provide(FacetVocabulary.layer))
+  );
+
+  it.effect("still fires domainObject=heat on 'district heating'", () =>
+    Effect.gen(function* () {
+      const vocab = yield* FacetVocabulary;
+      const mp = vocab.matchDomainObject("district heating grid expansion");
+      expect(Option.getOrUndefined(mp)?.canonical).toBe("heat");
+    }).pipe(Effect.provide(FacetVocabulary.layer))
+  );
+
+  it.effect("does not fire aggregation=max on bare 'peak values'", () =>
+    Effect.gen(function* () {
+      const vocab = yield* FacetVocabulary;
+      const agg = vocab.matchAggregation("peak values have been rising");
+      expect(Option.isNone(agg)).toBe(true);
+    }).pipe(Effect.provide(FacetVocabulary.layer))
+  );
+
+  it.effect("still fires aggregation=max on 'peak demand'", () =>
+    Effect.gen(function* () {
+      const vocab = yield* FacetVocabulary;
+      const agg = vocab.matchAggregation("peak demand during heat waves");
+      expect(Option.getOrUndefined(agg)?.canonical).toBe("max");
+    }).pipe(Effect.provide(FacetVocabulary.layer))
+  );
+});
