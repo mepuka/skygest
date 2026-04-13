@@ -431,6 +431,70 @@ describe("resolveBundle", () => {
     15_000
   );
 
+  it.effect("retracts shared-level facets when an item specifies them", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+      const prepared = yield* loadCheckedInDataLayerRegistry(
+        checkedInDataLayerRegistryRoot
+      );
+      const lookup = toDataLayerRegistryLookup(prepared);
+
+      // Shared partial (from chart title "Wind generation") carries
+      // technologyOrFuel=wind. The series label "Offshore wind" resolves to
+      // technologyOrFuel=offshore_wind, which conflicts with the shared value.
+      // Under the retraction join, the item is strictly more specific, so the
+      // shared value is retracted before the join and no conflict is produced.
+      const outcome = decodeOutcome(
+        resolveBundle(
+          decodeBundle({
+            postText: [],
+            chartTitle: "Wind generation",
+            series: [
+              {
+                itemKey: "offshore",
+                legendLabel: "Offshore wind",
+                unit: "GW"
+              }
+            ],
+            keyFindings: [],
+            sourceLines: [],
+            publisherHints: []
+          }),
+          lookup,
+          vocabulary
+        )
+      );
+
+      // Retraction must prevent the shared↔item join from failing, so the
+      // outcome cannot be Conflicted on this input, and no item gap can
+      // report required-facet-conflict.
+      expect(outcome._tag).not.toBe("Conflicted");
+
+      const items =
+        outcome._tag === "Resolved"
+          ? outcome.items
+          : outcome._tag === "Ambiguous"
+            ? outcome.items
+            : outcome._tag === "OutOfRegistry"
+              ? outcome.items
+              : [];
+      expect(items.length).toBeGreaterThan(0);
+      for (const item of items) {
+        if (item._tag === "gap") {
+          expect(item.reason).not.toBe("required-facet-conflict");
+        }
+      }
+      // The retracted shared partial (generation, flow) joined with the
+      // item partial (offshore wind, power) must yield a semantic partial
+      // carrying the more-specific technologyOrFuel value.
+      expect(items[0]?.semanticPartial.technologyOrFuel).toBe("offshore wind");
+    }).pipe(
+      Effect.provide(FacetVocabulary.layer),
+      Effect.provide(localFileSystemLayer)
+    ),
+    15_000
+  );
+
   it.effect("ignores a disagreeing publisher hint because narrative sources do not project onto identity", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;
