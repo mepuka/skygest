@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { ZeroToOneScore } from "./confidence";
-import { AgentId, VariableId } from "./data-layer/ids";
+import { AgentId, DatasetId, VariableId } from "./data-layer/ids";
 import { TimePeriod } from "./data-layer/variable";
 import { PartialVariableFacetConflict } from "./errors";
 import { ChartAxis, TemporalCoverage } from "./media";
@@ -170,6 +170,7 @@ export type VariableCandidateScore = Schema.Schema.Type<
 export const ResolutionGapReason = Schema.Literals([
   "missing-required",
   "no-candidates",
+  "dataset-scope-empty",
   "agent-scope-empty",
   "ambiguous-candidates",
   "required-facet-conflict"
@@ -186,6 +187,7 @@ export const ResolutionGap = Schema.Struct({
   context: Schema.optionalKey(
     Schema.Struct({
       agentId: Schema.optionalKey(AgentId),
+      datasetIds: Schema.optionalKey(Schema.Array(DatasetId)),
       attachedContext: Schema.optionalKey(AttachedContext)
     })
   )
@@ -241,6 +243,7 @@ export const Resolved = Schema.TaggedStruct("Resolved", {
   attachedContext: AttachedContext,
   items: Schema.Array(BoundResolutionItem),
   agentId: Schema.optionalKey(AgentId),
+  datasetIds: Schema.optionalKey(Schema.Array(DatasetId)),
   confidence: Schema.optionalKey(ZeroToOneScore),
   tier: Schema.optionalKey(ResolutionEvidenceTier)
 });

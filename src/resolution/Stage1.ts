@@ -6,7 +6,6 @@ import type {
   Distribution,
   Variable
 } from "../domain/data-layer";
-import type { VisionAssetEnrichment } from "../domain/enrichment";
 import type {
   AgentHomepageEvidence,
   AgentLabelEvidence,
@@ -43,7 +42,10 @@ import {
   normalizeDistributionUrl,
   normalizeLookupText
 } from "./normalize";
-import { jaccardTokenSet } from "./fuzzyMatch";
+import {
+  findDatasetMatchesForName,
+  listPreferredDatasetAgentIds
+} from "./datasetNameMatch";
 
 type MatchEntity = Distribution | Dataset | Agent | Variable;
 
@@ -68,8 +70,6 @@ class MatchKey extends Data.Class<{
 const structuredAliasSchemes = aliasSchemes.filter(
   (scheme): scheme is AliasScheme => scheme !== "url"
 );
-const DATASET_TITLE_FUZZY_THRESHOLD = 0.75;
-const DATASET_TITLE_SCORE_EPSILON = 0.000_001;
 
 const grainPriority: Record<Stage1MatchGrain, number> = {
   Distribution: 0,
@@ -104,170 +104,6 @@ const toNonEmpty = (value: string | null | undefined) => {
 
   const trimmed = value.trim();
   return trimmed.length === 0 ? null : trimmed;
-};
-
-const stripPeripheralYear = (value: string) => {
-  const trimmed = value.trim();
-  const stripped = trimmed
-    .replace(/^\s*[\(\[]?(?:19|20)\d{2}[\)\]]?[\s:–-]*/u, "")
-    .replace(/\s*[\(\[]?(?:19|20)\d{2}[\)\]]?\s*$/u, "")
-    .replace(/\s*[-–,:/]\s*$/u, "")
-    .trim();
-
-  return stripped.length > 0 ? stripped : trimmed;
-};
-
-const listDatasetTitleCandidates = (datasetName: string): ReadonlyArray<string> => {
-  const candidates = new Set<string>();
-  const base = toNonEmpty(datasetName);
-  if (base === null) {
-    return [];
-  }
-
-  candidates.add(base);
-  candidates.add(stripPeripheralYear(base));
-  return [...candidates];
-};
-
-const listAllDatasets = (
-  lookup: DataLayerRegistryLookup
-): ReadonlyArray<Dataset> =>
-  Array.from(lookup.entities).flatMap((entity) =>
-    entity._tag === "Dataset" ? [entity] : []
-  );
-
-const dedupeDatasets = (
-  datasets: ReadonlyArray<Dataset>
-): ReadonlyArray<Dataset> => {
-  const seen = new Set<string>();
-  const deduped: Array<Dataset> = [];
-
-  for (const dataset of datasets) {
-    if (seen.has(dataset.id)) {
-      continue;
-    }
-
-    seen.add(dataset.id);
-    deduped.push(dataset);
-  }
-
-  return deduped;
-};
-
-const listPreferredDatasetAgents = (
-  input: Stage1Input,
-  asset: VisionAssetEnrichment,
-  lookup: DataLayerRegistryLookup
-): ReadonlyArray<Agent["id"]> => {
-  const agentIds = new Set<Agent["id"]>();
-
-  const addAgentLabel = (label: string | null | undefined) => {
-    const value = toNonEmpty(label);
-    if (value === null) {
-      return;
-    }
-
-    const match = lookup.findAgentByLabel(value);
-    if (Option.isSome(match)) {
-      agentIds.add(match.value.id);
-    }
-  };
-
-  const addHomepageHint = (value: string | null | undefined) => {
-    const hint = toNonEmpty(value);
-    if (hint === null) {
-      return;
-    }
-
-    const match = lookup.findAgentByHomepageDomain(hint);
-    if (Option.isSome(match)) {
-      agentIds.add(match.value.id);
-    }
-  };
-
-  addAgentLabel(input.sourceAttribution?.provider?.providerLabel);
-  addAgentLabel(input.sourceAttribution?.contentSource?.publication);
-  addHomepageHint(input.sourceAttribution?.contentSource?.domain);
-  addHomepageHint(input.sourceAttribution?.contentSource?.url);
-
-  for (const mention of asset.analysis.organizationMentions) {
-    addAgentLabel(mention.name);
-  }
-
-  for (const logoText of asset.analysis.logoText) {
-    addAgentLabel(logoText);
-  }
-
-  return [...agentIds];
-};
-
-const scoreDatasetTitle = (
-  datasetName: string,
-  dataset: Dataset
-): number => {
-  const haystacks = [
-    dataset.title,
-    ...dataset.aliases
-      .filter((alias) => alias.scheme === "other")
-      .map((alias) => alias.value)
-  ];
-
-  let bestScore = 0;
-  for (const candidate of listDatasetTitleCandidates(datasetName)) {
-    for (const haystack of haystacks) {
-      for (const comparison of listDatasetTitleCandidates(haystack)) {
-        bestScore = Math.max(bestScore, jaccardTokenSet(candidate, comparison));
-      }
-    }
-  }
-
-  return bestScore;
-};
-
-const compareDatasetTitleScores = (
-  left: { readonly dataset: Dataset; readonly score: number },
-  right: { readonly dataset: Dataset; readonly score: number }
-) =>
-  right.score - left.score ||
-  left.dataset.title.localeCompare(right.dataset.title) ||
-  left.dataset.id.localeCompare(right.dataset.id);
-
-const findFuzzyDatasetTitleMatches = (
-  datasetName: string,
-  lookup: DataLayerRegistryLookup,
-  preferredAgentIds: ReadonlyArray<Agent["id"]>
-): ReadonlyArray<Dataset> => {
-  const preferredDatasets = dedupeDatasets(
-    preferredAgentIds.flatMap((agentId) => [...lookup.findDatasetsByAgentId(agentId)])
-  );
-  const searchPools =
-    preferredDatasets.length > 0
-      ? [preferredDatasets, listAllDatasets(lookup)]
-      : [listAllDatasets(lookup)];
-
-  for (const pool of searchPools) {
-    const scored = pool
-      .map((dataset) => ({
-        dataset,
-        score: scoreDatasetTitle(datasetName, dataset)
-      }))
-      .filter((candidate) => candidate.score >= DATASET_TITLE_FUZZY_THRESHOLD)
-      .sort(compareDatasetTitleScores);
-
-    const bestScore = scored[0]?.score;
-    if (bestScore === undefined) {
-      continue;
-    }
-
-    return scored
-      .filter(
-        (candidate) =>
-          Math.abs(candidate.score - bestScore) <= DATASET_TITLE_SCORE_EPSILON
-      )
-      .map((candidate) => candidate.dataset);
-  }
-
-  return [];
 };
 
 const matchGrain = (match: Stage1Match): Stage1MatchGrain => {
@@ -482,35 +318,43 @@ const pushDatasetTitleMatch = (
     readonly emitResidualOnMiss?: boolean;
   } = {}
 ) => {
-  const exactMatches = dedupeDatasets(
-    listDatasetTitleCandidates(datasetName)
-      .map((candidate) => lookup.findDatasetByTitle(candidate))
-      .flatMap((match) => (Option.isSome(match) ? [match.value] : []))
+  const matches = findDatasetMatchesForName(
+    datasetName,
+    lookup,
+    options.preferredAgentIds === undefined
+      ? {}
+      : { preferredAgentIds: options.preferredAgentIds }
   );
-  const matches =
-    exactMatches.length > 0
-      ? exactMatches.map((dataset) => ({ dataset, rank: 1 }))
-      : findFuzzyDatasetTitleMatches(
-          datasetName,
-          lookup,
-          options.preferredAgentIds ?? []
-        ).map((dataset) => ({ dataset, rank: 2 }));
-
   if (matches.length > 0) {
     for (const match of matches) {
-      addEvidence(
-        state,
-        "Dataset",
-        match.dataset,
-        stripUndefined({
-          _tag: "DatasetTitleEvidence" as const,
-          signal: "dataset-title" as const,
-          rank: match.rank,
-          assetKey,
-          datasetName,
-          normalizedTitle: normalizeLookupText(datasetName)
-        })
-      );
+      switch (match._tag) {
+        case "DatasetTitleExactMatch":
+        case "DatasetTitleFuzzyMatch":
+          addEvidence(
+            state,
+            "Dataset",
+            match.dataset,
+            stripUndefined({
+              _tag: "DatasetTitleEvidence" as const,
+              signal: "dataset-title" as const,
+              rank: match._tag === "DatasetTitleExactMatch" ? 1 : 2,
+              assetKey,
+              datasetName,
+              normalizedTitle: normalizeLookupText(datasetName)
+            })
+          );
+          break;
+        case "DatasetAliasMatch":
+          addEvidence(state, "Dataset", match.dataset, {
+            _tag: "DatasetAliasEvidence",
+            signal: "dataset-alias",
+            rank: 2,
+            aliasScheme: match.aliasScheme,
+            aliasValue: match.aliasValue,
+            source: "source-line:dataset-name"
+          });
+          break;
+      }
     }
 
     return true;
@@ -835,7 +679,7 @@ export const runStage1 = (
 
         const datasetName = toNonEmpty(sourceLine.datasetName);
         if (datasetName !== null) {
-          const preferredAgentIds = listPreferredDatasetAgents(
+          const preferredAgentIds = listPreferredDatasetAgentIds(
             input,
             asset,
             lookup
@@ -844,13 +688,7 @@ export const runStage1 = (
             pushDatasetTitleMatch(state, datasetName, asset.assetKey, lookup, {
               preferredAgentIds,
               emitResidualOnMiss: false
-            }) ||
-            pushStructuredAliasMatches(
-              state,
-              datasetName,
-              "source-line:dataset-name",
-              lookup
-            );
+            });
           if (!matchedDatasetName) {
             addResidual(
               state,

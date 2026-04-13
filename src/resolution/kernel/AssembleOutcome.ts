@@ -17,7 +17,10 @@ import type { InterpretedBundle } from "./Interpret";
 
 const asGap = (
   item: BoundResolutionGapItem,
-  agentId?: BoundHypothesis["agentId"]
+  options: {
+    readonly agentId?: BoundHypothesis["agentId"];
+    readonly datasetIds?: BoundHypothesis["datasetIds"];
+  } = {}
 ): ResolutionGap =>
   stripUndefined({
     partial: item.semanticPartial,
@@ -25,7 +28,9 @@ const asGap = (
     candidates: [...item.candidates],
     reason: item.reason,
     context: stripUndefined({
-      agentId,
+      agentId: options.agentId,
+      datasetIds:
+        options.datasetIds === undefined ? undefined : [...options.datasetIds],
       attachedContext: item.attachedContext
     })
   });
@@ -94,7 +99,11 @@ export const assembleOutcome = (
 
   const boundItems = bound.items.filter((item) => item._tag === "bound");
   const gapItems = bound.items.filter((item) => item._tag === "gap");
-  const gaps = gapItems.map((item) => asGap(item, bound.agentId));
+  const gapOptions = {
+    agentId: bound.agentId,
+    datasetIds: bound.datasetIds
+  };
+  const gaps = gapItems.map((item) => asGap(item, gapOptions));
 
   if (boundItems.length === bound.items.length && boundItems.length > 0) {
     return stripUndefined({
@@ -104,6 +113,8 @@ export const assembleOutcome = (
       attachedContext: bound.hypothesis.attachedContext,
       items: [...bound.items],
       agentId: bound.agentId,
+      datasetIds:
+        bound.datasetIds === undefined ? undefined : [...bound.datasetIds],
       confidence: bound.hypothesis.confidence,
       tier: bound.hypothesis.tier
     });
@@ -133,7 +144,7 @@ export const assembleOutcome = (
       bundle: interpreted.bundle,
       partial,
       missingRequired: [...missing],
-      gap: asGap(firstGap, bound.agentId),
+      gap: asGap(firstGap, gapOptions),
       gaps,
       confidence: bound.hypothesis.confidence,
       tier: bound.hypothesis.tier
@@ -144,7 +155,9 @@ export const assembleOutcome = (
     gapItems.length === bound.items.length &&
     gapItems.every(
       (item) =>
-        item.reason === "no-candidates" || item.reason === "agent-scope-empty"
+        item.reason === "no-candidates" ||
+        item.reason === "dataset-scope-empty" ||
+        item.reason === "agent-scope-empty"
     );
   if (allOutOfRegistry) {
     const firstGap = gapItems[0]!;
@@ -153,7 +166,7 @@ export const assembleOutcome = (
       bundle: interpreted.bundle,
       hypothesis: bound.hypothesis,
       items: [...bound.items],
-      gap: asGap(firstGap, bound.agentId)
+      gap: asGap(firstGap, gapOptions)
     };
   }
 

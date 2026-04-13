@@ -1,4 +1,4 @@
-import type { AgentId } from "../../domain/data-layer/ids";
+import type { AgentId, DatasetId } from "../../domain/data-layer/ids";
 import type { ResolutionEvidenceBundle } from "../../domain/resolutionKernel";
 import type { DataLayerRegistryLookup } from "../dataLayerRegistry";
 import type { FacetVocabularyShape } from "../facetVocabulary";
@@ -12,6 +12,7 @@ export const resolveBundle = (
   vocabulary: FacetVocabularyShape,
   options: {
     readonly agentId?: AgentId;
+    readonly datasetIds?: ReadonlyArray<DatasetId>;
   } = {}
 ) => {
   const interpreted = interpretBundle(bundle, vocabulary);
