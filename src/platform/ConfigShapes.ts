@@ -161,6 +161,10 @@ export const EntsoeIngestKeys = {
   ...ColdStartCommonKeys
 } as const;
 
+export const EnergyInstituteIngestKeys = {
+  ...ColdStartCommonKeys
+} as const;
+
 export const OdreIngestKeys = {
   ...ColdStartCommonKeys,
   baseUrl: Config.withDefault(
@@ -178,6 +182,17 @@ export const DataEuropaIngestKeys = {
   ),
   minIntervalMs: Config.withDefault(Config.int("DATA_EUROPA_MIN_INTERVAL_MS"), 500),
   maxDatasets: Config.withDefault(Config.int("DATA_EUROPA_MAX_DATASETS"), 500)
+} as const;
+
+export const NesoIngestKeys = {
+  ...ColdStartCommonKeys,
+  baseUrl: Config.withDefault(
+    Config.string("NESO_BASE_URL"),
+    "https://api.neso.energy/api/3/action"
+  ),
+  minIntervalMs: Config.withDefault(Config.int("NESO_MIN_INTERVAL_MS"), 1000),
+  maxDatasets: Config.withDefault(Config.int("NESO_MAX_DATASETS"), 500),
+  onlyDataset: optionalTrimmedString("NESO_ONLY_DATASET")
 } as const;
 
 // ── Twitter / editorial ingestion keys ────────────────────────────────

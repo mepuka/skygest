@@ -1,14 +1,20 @@
 import {
   Agent,
-  AliasSchemeValues,
   Catalog,
   DataService,
   mintCatalogId,
   mintDataServiceId,
-  type ExternalIdentifier
 } from "../../../domain/data-layer";
 import { stripUndefinedAndDecodeWith } from "../../../platform/Json";
 import { type CatalogIndex, unionAliases } from "../../dcat-harness";
+import {
+  asWebUrl,
+  freshUrlAliases,
+  resolveExistingAgentBySlug,
+  resolveExistingCatalogByPublisher,
+  resolveExistingDataServiceByPublisher,
+  type DcatBuildContextWithDataService
+} from "../common/context";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -18,12 +24,13 @@ const RTE_AGENT_FILE_SLUG = "rte";
 
 const ODRE_CATALOG_SLUG = "odre";
 const ODRE_CATALOG_TITLE = "ODRÉ Open Data Catalog";
-const ODRE_SITE_URL = "https://odre.opendatasoft.com/";
+const ODRE_SITE_URL = asWebUrl("https://odre.opendatasoft.com/");
 
 const ODRE_DATA_SERVICE_SLUG = "odre-api";
 const ODRE_DATA_SERVICE_TITLE = "ODRÉ OpenDataSoft API";
-const ODRE_ENDPOINT_URL =
-  "https://odre.opendatasoft.com/api/explore/v2.1/";
+const ODRE_ENDPOINT_URL = asWebUrl(
+  "https://odre.opendatasoft.com/api/explore/v2.1/"
+);
 const ODRE_DATA_SERVICE_CONFORMS_TO = "OpenDataSoft Explore API v2.1";
 
 // ---------------------------------------------------------------------------
@@ -37,30 +44,6 @@ const decodeDataService = stripUndefinedAndDecodeWith(DataService);
 // Alias helpers
 // ---------------------------------------------------------------------------
 
-const hasUrlAlias = (
-  aliases: ReadonlyArray<ExternalIdentifier>,
-  value: string
-): boolean =>
-  aliases.some(
-    (alias) => alias.scheme === AliasSchemeValues.url && alias.value === value
-  );
-
-const freshCatalogAliases: ReadonlyArray<ExternalIdentifier> = [
-  {
-    scheme: AliasSchemeValues.url,
-    value: ODRE_SITE_URL,
-    relation: "exactMatch"
-  }
-];
-
-const freshDataServiceAliases: ReadonlyArray<ExternalIdentifier> = [
-  {
-    scheme: AliasSchemeValues.url,
-    value: ODRE_ENDPOINT_URL,
-    relation: "exactMatch"
-  }
-];
-
 // ---------------------------------------------------------------------------
 // Resolve existing entities
 // ---------------------------------------------------------------------------
@@ -70,47 +53,23 @@ const freshDataServiceAliases: ReadonlyArray<ExternalIdentifier> = [
  * (cold-started from `references/cold-start/catalog/agents/rte.json`).
  * We resolve it by its file slug rather than minting a new agent.
  */
-const resolveExistingRteAgent = (idx: CatalogIndex): Agent | null => {
-  for (const agent of idx.allAgents) {
-    if (idx.agentFileSlugById.get(agent.id) === RTE_AGENT_FILE_SLUG) {
-      return agent;
-    }
-  }
-
-  return null;
-};
-
 const resolveExistingCatalog = (
   idx: CatalogIndex,
   agent: Agent
 ): Catalog | null =>
-  idx.allCatalogs.find(
-    (catalog) =>
-      catalog.publisherAgentId === agent.id &&
-      (catalog.title === ODRE_CATALOG_TITLE ||
-        catalog.homepage === ODRE_SITE_URL ||
-        hasUrlAlias(catalog.aliases, ODRE_SITE_URL))
-  ) ??
-  idx.allCatalogs.find(
-    (catalog) => catalog.title === ODRE_CATALOG_TITLE
-  ) ??
-  null;
+  resolveExistingCatalogByPublisher(idx, agent, {
+    title: ODRE_CATALOG_TITLE,
+    homepages: ODRE_SITE_URL
+  });
 
 const resolveExistingDataService = (
   idx: CatalogIndex,
   agent: Agent
 ): DataService | null =>
-  idx.allDataServices.find(
-    (dataService) =>
-      dataService.publisherAgentId === agent.id &&
-      (dataService.title === ODRE_DATA_SERVICE_TITLE ||
-        dataService.endpointURLs.includes(ODRE_ENDPOINT_URL) ||
-        hasUrlAlias(dataService.aliases, ODRE_ENDPOINT_URL))
-  ) ??
-  idx.allDataServices.find((dataService) =>
-    dataService.endpointURLs.includes(ODRE_ENDPOINT_URL)
-  ) ??
-  null;
+  resolveExistingDataServiceByPublisher(idx, agent, {
+    title: ODRE_DATA_SERVICE_TITLE,
+    endpointUrl: ODRE_ENDPOINT_URL
+  });
 
 // ---------------------------------------------------------------------------
 // Build candidates
@@ -130,7 +89,7 @@ const buildCatalogCandidate = (
       "Open Data Réseaux Énergies — open datasets on French energy networks published by RTE, GRTgaz, Teréga, and others",
     publisherAgentId: agent.id,
     homepage: existing?.homepage ?? ODRE_SITE_URL,
-    aliases: unionAliases(existing?.aliases ?? [], freshCatalogAliases),
+    aliases: unionAliases(existing?.aliases ?? [], freshUrlAliases(ODRE_SITE_URL)),
     createdAt: existing?.createdAt ?? nowIso,
     updatedAt: nowIso
   });
@@ -153,7 +112,10 @@ const buildDataServiceCandidate = (
     conformsTo: existing?.conformsTo ?? ODRE_DATA_SERVICE_CONFORMS_TO,
     servesDatasetIds: existing?.servesDatasetIds ?? [],
     accessRights: existing?.accessRights ?? "public",
-    aliases: unionAliases(existing?.aliases ?? [], freshDataServiceAliases),
+    aliases: unionAliases(
+      existing?.aliases ?? [],
+      freshUrlAliases(ODRE_ENDPOINT_URL)
+    ),
     createdAt: existing?.createdAt ?? nowIso,
     updatedAt: nowIso
   });
@@ -162,24 +124,13 @@ const buildDataServiceCandidate = (
 // Public API
 // ---------------------------------------------------------------------------
 
-export interface BuildContext {
-  readonly nowIso: string;
-  readonly agentSlug: string;
-  readonly catalogSlug: string;
-  readonly dataServiceSlug: string;
-  readonly agentMerged: boolean;
-  readonly catalogMerged: boolean;
-  readonly dataServiceMerged: boolean;
-  readonly agent: Agent;
-  readonly catalog: Catalog;
-  readonly dataService: DataService;
-}
+export type BuildContext = DcatBuildContextWithDataService;
 
 export const buildContextFromIndex = (
   idx: CatalogIndex,
   nowIso: string
 ): BuildContext => {
-  const existingAgent = resolveExistingRteAgent(idx);
+  const existingAgent = resolveExistingAgentBySlug(idx, RTE_AGENT_FILE_SLUG);
   if (existingAgent === null) {
     throw new Error(
       `RTE agent not found in catalog index (expected file slug "${RTE_AGENT_FILE_SLUG}"). ` +
