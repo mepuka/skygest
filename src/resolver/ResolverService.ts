@@ -115,7 +115,16 @@ export class ResolverService extends ServiceMap.Service<
               })
           )
         );
-      const decodeBulkItemError = Schema.decodeUnknownSync(ResolverBulkItemError);
+      const decodeBulkItemError = (input: unknown) =>
+        Schema.decodeUnknownEffect(ResolverBulkItemError)(input).pipe(
+          Effect.mapError(
+            (decodeError) =>
+              new EnrichmentSchemaDecodeError({
+                message: formatSchemaParseError(decodeError),
+                operation: "ResolverService.resolveBulk"
+              })
+          )
+        );
       const decodePostRequest = (input: unknown) =>
         Schema.decodeUnknownEffect(ResolvePostRequest)(input).pipe(
           Effect.mapError(
@@ -214,7 +223,7 @@ export class ResolverService extends ServiceMap.Service<
           }
 
           const error = item.result.failure;
-          errors[item.postUri] = decodeBulkItemError({
+          errors[item.postUri] = yield* decodeBulkItemError({
             tag:
               typeof error === "object" &&
               error !== null &&

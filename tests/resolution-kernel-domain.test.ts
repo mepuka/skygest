@@ -313,6 +313,16 @@ describe("resolutionKernel domain contract", () => {
           candidates: [candidate],
           reason: "missing-required"
         }),
+        gaps: [
+          decodeGap({
+            partial: {
+              measuredProperty: "generation"
+            },
+            missingRequired: ["statisticType"],
+            candidates: [candidate],
+            reason: "missing-required"
+          })
+        ],
         confidence: 0.6,
         tier: "weak-heuristic"
       }),
@@ -430,6 +440,16 @@ describe("resolutionKernel domain contract", () => {
               candidates: [],
               reason: "missing-required"
             },
+            gaps: [
+              {
+                partial: {
+                  measuredProperty: "price"
+                },
+                missingRequired: ["statisticType"],
+                candidates: [],
+                reason: "missing-required"
+              }
+            ],
             confidence: 0.4,
             tier: "weak-heuristic"
           })
@@ -553,6 +573,18 @@ describe("resolutionKernel domain contract", () => {
             },
             "reason": "missing-required",
           },
+          "gaps": [
+            {
+              "candidates": [],
+              "missingRequired": [
+                "statisticType",
+              ],
+              "partial": {
+                "measuredProperty": "price",
+              },
+              "reason": "missing-required",
+            },
+          ],
           "missingRequired": [
             "statisticType",
           ],

@@ -8,7 +8,8 @@ import {
 import {
   joinPartials,
   missingRequired,
-  type PartialVariableShape
+  type PartialVariableShape,
+  type RequiredFacetKey
 } from "../../domain/partialVariableAlgebra";
 import { stripUndefined } from "../../platform/Json";
 import type { BoundHypothesis } from "./Bind";
@@ -40,16 +41,24 @@ const hypothesisPartial = (hypothesis: ResolutionHypothesis): PartialVariableSha
 
 const gapFromConflictHypothesis = (
   hypothesis: ResolutionHypothesis
-): ResolutionGap =>
-  stripUndefined({
-    partial: hypothesisPartial(hypothesis),
-    missingRequired: missingRequired(hypothesisPartial(hypothesis)),
+): ResolutionGap => {
+  const partial = hypothesisPartial(hypothesis);
+
+  return stripUndefined({
+    partial,
+    missingRequired: missingRequired(partial),
     candidates: [],
     reason: "required-facet-conflict" as const,
     context: {
       attachedContext: hypothesis.attachedContext
     }
   });
+};
+
+const collectMissingRequired = (
+  items: ReadonlyArray<BoundResolutionGapItem>
+): ReadonlyArray<RequiredFacetKey> =>
+  [...new Set(items.flatMap((item) => item.missingRequired ?? []))];
 
 export const assembleOutcome = (
   interpreted: InterpretedBundle,
@@ -104,6 +113,12 @@ export const assembleOutcome = (
     gapItems.every((item) => item.reason === "missing-required");
   if (allMissingRequired) {
     const firstGap = gapItems[0]!;
+    const missing = collectMissingRequired(gapItems);
+    const partial =
+      gapItems.length === 1
+        ? firstGap.semanticPartial
+        : bound.hypothesis.sharedPartial;
+
     if (gapItems.every((item) => item.candidates.length === 0)) {
       return {
         _tag: "NoMatch",
@@ -115,9 +130,10 @@ export const assembleOutcome = (
     return stripUndefined({
       _tag: "Underspecified",
       bundle: interpreted.bundle,
-      partial: firstGap.semanticPartial,
-      missingRequired: [...(firstGap.missingRequired ?? [])],
+      partial,
+      missingRequired: [...missing],
       gap: asGap(firstGap, bound.agentId),
+      gaps,
       confidence: bound.hypothesis.confidence,
       tier: bound.hypothesis.tier
     });

@@ -121,7 +121,7 @@ const kernelLayer = ResolutionKernel.layer.pipe(
 );
 
 describe("ResolutionKernel service", () => {
-  it.effect("uses source attribution to narrow an ambiguous candidate set", () =>
+  it.effect("uses providerId to narrow an ambiguous candidate set when the provider label is noisy", () =>
     Effect.gen(function* () {
       const kernel = yield* ResolutionKernel;
 
@@ -138,7 +138,7 @@ describe("ResolutionKernel service", () => {
           kind: "source-attribution",
           provider: {
             providerId: "eia" as any,
-            providerLabel: "EIA",
+            providerLabel: "U.S. EIA",
             sourceFamily: null
           },
           resolution: "matched",
@@ -147,7 +147,7 @@ describe("ResolutionKernel service", () => {
             url: "https://www.eia.gov/electricity/",
             title: "EIA electricity",
             domain: "eia.gov",
-            publication: "EIA"
+            publication: "U.S. EIA"
           },
           socialProvenance: null,
           processedAt: 1

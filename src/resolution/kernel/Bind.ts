@@ -70,6 +70,7 @@ const compareCompatibleCandidates = (
   right: VariableCandidateScore
 ): number =>
   right.matchedFacets.length - left.matchedFacets.length ||
+  right.subsumptionRatio - left.subsumptionRatio ||
   left.label.localeCompare(right.label);
 
 const compareNearestMisses = (
@@ -221,15 +222,11 @@ export const bindHypothesis = (
     }
 
     const narrowedCandidates =
-      options.agentId !== undefined && compatibleCandidates.length > 1
-        ? narrowCandidatesByAgent(compatibleCandidates, options.agentId, lookup)
-        : compatibleCandidates;
+      options.agentId === undefined
+        ? compatibleCandidates
+        : narrowCandidatesByAgent(compatibleCandidates, options.agentId, lookup);
 
-    if (
-      options.agentId !== undefined &&
-      compatibleCandidates.length > 1 &&
-      narrowedCandidates.length === 0
-    ) {
+    if (options.agentId !== undefined && narrowedCandidates.length === 0) {
       items.push(
         makeGapItem(
           hypothesis,

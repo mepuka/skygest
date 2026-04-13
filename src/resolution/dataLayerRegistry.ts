@@ -68,6 +68,7 @@ export type PreparedDataLayerRegistry = {
   readonly variableByAlias: ReadonlyMap<string, Variable>;
   readonly datasetIdsByAgentId: ReadonlyMap<string, Chunk.Chunk<Dataset>>;
   readonly datasetsByVariableId: ReadonlyMap<string, Chunk.Chunk<Dataset>>;
+  readonly variablesByAgentId: ReadonlyMap<string, Chunk.Chunk<Variable>>;
   readonly variablesByDatasetId: ReadonlyMap<string, Chunk.Chunk<Variable>>;
   readonly distributionByUrl: ReadonlyMap<string, Distribution>;
   readonly distributionsByHostname: ReadonlyMap<string, Chunk.Chunk<Distribution>>;
@@ -632,6 +633,35 @@ const buildPreparedRegistry = (
     }
   );
 
+  const sortedDatasetsByAgentId = new Map(
+    [...datasetsByAgentId.entries()].map(([key, value]) => [key, sortDatasets(value)])
+  );
+  const sortedDatasetsByVariableId = new Map(
+    [...datasetsByVariableId.entries()].map(([key, value]) => [key, sortDatasets(value)])
+  );
+  const sortedVariablesByDatasetId = new Map(
+    [...variablesByDatasetId.entries()].map(([key, value]) => [key, sortVariables(value)])
+  );
+  const sortedVariablesByAgentId = new Map(
+    [...sortedDatasetsByAgentId.entries()].map(([agentId, datasets]) => {
+      const seen = new Set<string>();
+      const variables: Array<Variable> = [];
+
+      for (const dataset of datasets) {
+        for (const variable of sortedVariablesByDatasetId.get(dataset.id) ?? Chunk.empty()) {
+          if (seen.has(variable.id)) {
+            continue;
+          }
+
+          seen.add(variable.id);
+          variables.push(variable);
+        }
+      }
+
+      return [agentId, sortVariables(variables)] as const;
+    })
+  );
+
   return Result.succeed({
     seed,
     entities: Chunk.fromIterable([...entityById.values()]),
@@ -642,24 +672,10 @@ const buildPreparedRegistry = (
     datasetByTitle,
     datasetByAlias,
     variableByAlias,
-    datasetIdsByAgentId: new Map(
-      [...datasetsByAgentId.entries()].map(([key, value]) => [
-        key,
-        sortDatasets(value)
-      ])
-    ),
-    datasetsByVariableId: new Map(
-      [...datasetsByVariableId.entries()].map(([key, value]) => [
-        key,
-        sortDatasets(value)
-      ])
-    ),
-    variablesByDatasetId: new Map(
-      [...variablesByDatasetId.entries()].map(([key, value]) => [
-        key,
-        sortVariables(value)
-      ])
-    ),
+    datasetIdsByAgentId: sortedDatasetsByAgentId,
+    datasetsByVariableId: sortedDatasetsByVariableId,
+    variablesByAgentId: sortedVariablesByAgentId,
+    variablesByDatasetId: sortedVariablesByDatasetId,
     distributionByUrl,
     distributionsByHostname: new Map(
       [...distributionsByHostname.entries()].map(([key, value]) => [
@@ -705,23 +721,8 @@ export const toDataLayerRegistryLookup = (
     prepared.datasetIdsByAgentId.get(agentId) ?? Chunk.empty(),
   findDatasetsByVariableId: (variableId) =>
     prepared.datasetsByVariableId.get(variableId) ?? Chunk.empty(),
-  findVariablesByAgentId: (agentId) => {
-    const seen = new Set<string>();
-    const variables: Array<Variable> = [];
-
-    for (const dataset of prepared.datasetIdsByAgentId.get(agentId) ?? Chunk.empty()) {
-      for (const variable of prepared.variablesByDatasetId.get(dataset.id) ?? Chunk.empty()) {
-        if (seen.has(variable.id)) {
-          continue;
-        }
-
-        seen.add(variable.id);
-        variables.push(variable);
-      }
-    }
-
-    return sortVariables(variables);
-  },
+  findVariablesByAgentId: (agentId) =>
+    prepared.variablesByAgentId.get(agentId) ?? Chunk.empty(),
   findVariablesByDatasetId: (datasetId) =>
     prepared.variablesByDatasetId.get(datasetId) ?? Chunk.empty(),
   findDistributionByUrl: (url) => {

@@ -17,6 +17,8 @@ jobs:
           bun-version: latest
 
       - name: Checkout ontology reference
+        id: ontology_reference
+        continue-on-error: true
         uses: actions/checkout@v4
         with:
           repository: mepuka/ontology_skill
@@ -38,10 +40,15 @@ jobs:
           git diff --exit-code -- worker-configuration.d.ts worker-runtime.d.ts
 
       - name: Verify generated energy profile
+        if: steps.ontology_reference.outcome == 'success'
         run: |
           bun run sync:energy-profile --source ontology_skill/ontologies/skygest-energy-vocab/build/shacl-manifest.json --ontology-vocabulary-root ontology_skill/ontologies/skygest-energy-vocab/data/vocabulary
           bun run gen:energy-profile
           git diff --exit-code -- references/energy-profile/shacl-manifest.json src/domain/generated/energyVariableProfile.ts
+
+      - name: Note skipped energy profile verification
+        if: steps.ontology_reference.outcome != 'success'
+        run: echo "Skipping generated energy profile verification because the ontology reference checkout was unavailable."
 
       # Cache the tsgo incremental build info so warm runs on the same source
       # tree can skip most of the typecheck work. actions/checkout rewrites

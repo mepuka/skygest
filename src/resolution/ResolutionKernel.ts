@@ -23,9 +23,18 @@ const resolveAgentIdFromStage1Input = (
   input: typeof Stage1Input.Type,
   lookup: DataLayerRegistryLookup
 ) => {
-  const providerLabel = input.sourceAttribution?.provider?.providerLabel;
-  if (providerLabel !== undefined) {
-    const agentByLabel = lookup.findAgentByLabel(providerLabel);
+  const providerHints = [
+    input.sourceAttribution?.provider?.providerId,
+    input.sourceAttribution?.provider?.providerLabel,
+    input.sourceAttribution?.contentSource?.publication
+  ];
+
+  for (const providerHint of providerHints) {
+    if (providerHint === null || providerHint === undefined) {
+      continue;
+    }
+
+    const agentByLabel = lookup.findAgentByLabel(providerHint);
     if (agentByLabel._tag === "Some") {
       return agentByLabel.value.id;
     }

@@ -260,6 +260,7 @@ export const Underspecified = Schema.TaggedStruct("Underspecified", {
   partial: PartialVariableShape,
   missingRequired: Schema.Array(RequiredFacetKey),
   gap: ResolutionGap,
+  gaps: Schema.Array(ResolutionGap),
   confidence: Schema.optionalKey(ZeroToOneScore),
   tier: Schema.optionalKey(ResolutionEvidenceTier)
 });

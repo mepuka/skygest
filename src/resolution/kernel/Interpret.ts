@@ -97,6 +97,9 @@ const matchSite = (
   site: EvidenceSite,
   vocabulary: FacetVocabularyShape
 ): SiteAssignment | null => {
+  // Full cartesian fanout for multi-match series labels has not landed yet.
+  // Keep the strongest technology/fuel match explicit until that deeper
+  // interpret-stage expansion exists.
   const technologyOrFuel =
     site.source === "series-label"
       ? vocabulary.matchAllTechnologyOrFuel(site.text)[0]?.canonical

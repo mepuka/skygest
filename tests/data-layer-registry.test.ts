@@ -119,6 +119,9 @@ describe("data layer registry prep", () => {
     expect([...lookup.findDatasetsByAgentId(agentId)]).toEqual([
       prepared.success.seed.datasets[0]
     ]);
+    expect([
+      ...(prepared.success.variablesByAgentId.get(agentId) ?? Chunk.empty())
+    ]).toEqual([prepared.success.seed.variables[0]]);
     expect([...lookup.findVariablesByAgentId(agentId)]).toEqual([
       prepared.success.seed.variables[0]
     ]);

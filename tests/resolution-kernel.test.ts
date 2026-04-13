@@ -16,6 +16,7 @@ import {
 } from "../src/domain/resolutionKernel";
 import { prepareDataLayerRegistry, toDataLayerRegistryLookup } from "../src/resolution/dataLayerRegistry";
 import { FacetVocabulary } from "../src/resolution/facetVocabulary";
+import { bindHypothesis } from "../src/resolution/kernel/Bind";
 import { resolveBundle } from "../src/resolution/kernel/ResolutionKernel";
 import { layer as localFileSystemLayer } from "./helpers/LocalFileSystem";
 
@@ -33,6 +34,10 @@ const datasetCId = makeDatasetId("https://id.skygest.io/dataset/ds_MNOPQRSTUVWX"
 const windVariableAId = makeVariableId("https://id.skygest.io/variable/var_1234567890AB");
 const windVariableBId = makeVariableId("https://id.skygest.io/variable/var_ABCDEFGHIJKL");
 const solarVariableId = makeVariableId("https://id.skygest.io/variable/var_MNOPQRSTUVWX");
+const datasetDId = makeDatasetId("https://id.skygest.io/dataset/ds_QRSTUVWXYZ12");
+const datasetEId = makeDatasetId("https://id.skygest.io/dataset/ds_ZYXWVUTSRQ98");
+const specificWindVariableId = makeVariableId("https://id.skygest.io/variable/var_QRSTUVWXYZ12");
+const genericWindVariableId = makeVariableId("https://id.skygest.io/variable/var_ZYXWVUTSRQ98");
 
 const makeCustomLookup = (seed: DataLayerRegistrySeed) => {
   const prepared = prepareDataLayerRegistry(seed);
@@ -237,6 +242,78 @@ const mixedRegistryLookup = makeCustomLookup({
   series: []
 });
 
+const rankingRegistryLookup = makeCustomLookup({
+  agents: [
+    {
+      _tag: "Agent",
+      id: agentAId,
+      kind: "organization",
+      name: "Energy Information Administration",
+      alternateNames: ["EIA"],
+      homepage: "https://www.eia.gov/" as any,
+      aliases: [],
+      createdAt: ISO as any,
+      updatedAt: ISO as any
+    }
+  ],
+  catalogs: [],
+  catalogRecords: [],
+  datasets: [
+    {
+      _tag: "Dataset",
+      id: datasetDId,
+      title: "Specific wind generation",
+      publisherAgentId: agentAId,
+      aliases: [],
+      distributionIds: [],
+      variableIds: [specificWindVariableId],
+      createdAt: ISO as any,
+      updatedAt: ISO as any
+    },
+    {
+      _tag: "Dataset",
+      id: datasetEId,
+      title: "Generic wind flow",
+      publisherAgentId: agentAId,
+      aliases: [],
+      distributionIds: [],
+      variableIds: [genericWindVariableId],
+      createdAt: ISO as any,
+      updatedAt: ISO as any
+    }
+  ],
+  distributions: [],
+  dataServices: [],
+  datasetSeries: [],
+  variables: [
+    {
+      _tag: "Variable",
+      id: specificWindVariableId,
+      label: "A specific wind electricity generation variable",
+      aliases: [],
+      measuredProperty: "generation",
+      domainObject: "electricity",
+      technologyOrFuel: "wind",
+      statisticType: "flow",
+      unitFamily: "energy",
+      createdAt: ISO as any,
+      updatedAt: ISO as any
+    },
+    {
+      _tag: "Variable",
+      id: genericWindVariableId,
+      label: "Z generic wind flow variable",
+      aliases: [],
+      measuredProperty: "generation",
+      technologyOrFuel: "wind",
+      statisticType: "flow",
+      createdAt: ISO as any,
+      updatedAt: ISO as any
+    }
+  ],
+  series: []
+});
+
 const customAmbiguousBundle = decodeBundle({
   postText: [],
   chartTitle: "Wind electricity generation",
@@ -251,6 +328,45 @@ const customAmbiguousBundle = decodeBundle({
 });
 
 describe("resolveBundle", () => {
+  it.effect("keeps research trace Example 1 underspecified instead of falsely binding the heat-pump post", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+      const prepared = yield* loadCheckedInDataLayerRegistry(
+        checkedInDataLayerRegistryRoot
+      );
+      const lookup = toDataLayerRegistryLookup(prepared);
+
+      const outcome = decodeOutcome(
+        resolveBundle(
+          decodeBundle({
+            postText: ["Heat pumps overtake gas in Germany's heating market"],
+            series: [],
+            keyFindings: [],
+            sourceLines: [],
+            publisherHints: []
+          }),
+          lookup,
+          vocabulary
+        )
+      );
+
+      expect(outcome._tag).toBe("Underspecified");
+      if (outcome._tag !== "Underspecified") {
+        return;
+      }
+
+      expect(outcome.missingRequired).toEqual(
+        expect.arrayContaining(["measuredProperty", "statisticType"])
+      );
+      expect(outcome.gap.reason).toBe("missing-required");
+      expect(outcome.gaps).toHaveLength(1);
+    }).pipe(
+      Effect.provide(FacetVocabulary.layer),
+      Effect.provide(localFileSystemLayer)
+    ),
+    15_000
+  );
+
   it.effect("resolves a trace-style offshore wind bundle from the checked-in registry", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;
@@ -403,11 +519,60 @@ describe("resolveBundle", () => {
       expect(outcome.partial.technologyOrFuel).toBe("offshore wind");
       expect(outcome.missingRequired).toContain("measuredProperty");
       expect(outcome.gap.reason).toBe("missing-required");
+      expect(outcome.gaps).toHaveLength(1);
       expect(outcome.gap.candidates.length).toBeGreaterThan(0);
     }).pipe(
       Effect.provide(FacetVocabulary.layer),
       Effect.provide(localFileSystemLayer)
     ),
+    15_000
+  );
+
+  it.effect("preserves every underspecified item gap instead of collapsing to the first series", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+
+      const outcome = decodeOutcome(
+        resolveBundle(
+          decodeBundle({
+            postText: [],
+            chartTitle: "Electricity",
+            series: [
+              {
+                itemKey: "solar",
+                legendLabel: "Solar"
+              },
+              {
+                itemKey: "wind",
+                legendLabel: "Wind"
+              }
+            ],
+            keyFindings: [],
+            sourceLines: [],
+            publisherHints: []
+          }),
+          mixedRegistryLookup,
+          vocabulary
+        )
+      );
+
+      expect(outcome._tag).toBe("Underspecified");
+      if (outcome._tag !== "Underspecified") {
+        return;
+      }
+
+      expect(outcome.partial).toEqual({
+        domainObject: "electricity"
+      });
+      expect(outcome.missingRequired).toEqual([
+        "measuredProperty",
+        "statisticType"
+      ]);
+      expect(outcome.gaps).toHaveLength(2);
+      expect(
+        outcome.gaps.map((gap) => gap.partial.technologyOrFuel).sort()
+      ).toEqual(["solar PV", "wind"]);
+    }).pipe(Effect.provide(FacetVocabulary.layer)),
     15_000
   );
 
@@ -599,6 +764,39 @@ describe("resolveBundle", () => {
     15_000
   );
 
+  it("prefers the better subsumption ratio before falling back to label order", () => {
+    const bound = bindHypothesis(
+      {
+        sharedPartial: {
+          measuredProperty: "generation",
+          technologyOrFuel: "wind",
+          statisticType: "flow"
+        },
+        attachedContext: {},
+        items: [
+          {
+            itemKey: "wind",
+            partial: {},
+            evidence: []
+          }
+        ],
+        evidence: []
+      },
+      rankingRegistryLookup
+    );
+
+    expect(bound.items[0]?._tag).toBe("gap");
+    if (bound.items[0]?._tag !== "gap") {
+      return;
+    }
+
+    expect(bound.items[0].reason).toBe("ambiguous-candidates");
+    expect(bound.items[0].candidates.map((candidate) => candidate.label)).toEqual([
+      "Z generic wind flow variable",
+      "A specific wind electricity generation variable"
+    ]);
+  });
+
   it.effect("uses agent narrowing to resolve an otherwise ambiguous candidate set", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;
@@ -624,6 +822,45 @@ describe("resolveBundle", () => {
     15_000
   );
 
+  it.effect("applies agent narrowing even when only one compatible candidate remains", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+
+      const outcome = decodeOutcome(
+        resolveBundle(
+          decodeBundle({
+            postText: [],
+            chartTitle: "Solar electricity generation",
+            yAxis: {
+              label: "Generation",
+              unit: "TWh"
+            },
+            series: [],
+            keyFindings: [],
+            sourceLines: [],
+            publisherHints: []
+          }),
+          customRegistryLookup,
+          vocabulary,
+          {
+            agentId: agentBId
+          }
+        )
+      );
+
+      expect(outcome._tag).toBe("OutOfRegistry");
+      if (outcome._tag !== "OutOfRegistry") {
+        return;
+      }
+
+      expect(outcome.gap.reason).toBe("agent-scope-empty");
+      expect(outcome.gap.candidates.map((candidate) => candidate.label)).toEqual([
+        "Solar electricity generation"
+      ]);
+    }).pipe(Effect.provide(FacetVocabulary.layer)),
+    15_000
+  );
+
   it.effect("returns OutOfRegistry with an agent-scope-empty gap when narrowing removes every candidate", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;
@@ -644,6 +881,50 @@ describe("resolveBundle", () => {
         "EIA wind electricity generation",
         "IEA wind electricity generation"
       ]);
+    }).pipe(Effect.provide(FacetVocabulary.layer)),
+    15_000
+  );
+
+  it.effect("keeps the strongest series-label technology match explicit until cartesian fanout lands", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+
+      const outcome = decodeOutcome(
+        resolveBundle(
+          decodeBundle({
+            postText: [],
+            chartTitle: "Electricity generation",
+            yAxis: {
+              label: "Generation",
+              unit: "TWh"
+            },
+            series: [
+              {
+                itemKey: "hybrid",
+                legendLabel: "Wind and solar",
+                unit: "TWh"
+              }
+            ],
+            keyFindings: [],
+            sourceLines: [],
+            publisherHints: []
+          }),
+          mixedRegistryLookup,
+          vocabulary
+        )
+      );
+
+      expect(outcome._tag).toBe("Resolved");
+      if (outcome._tag !== "Resolved") {
+        return;
+      }
+
+      expect(outcome.items[0]?._tag).toBe("bound");
+      if (outcome.items[0]?._tag !== "bound") {
+        return;
+      }
+
+      expect(outcome.items[0].variableId).toBe(solarVariableId);
     }).pipe(Effect.provide(FacetVocabulary.layer)),
     15_000
   );
