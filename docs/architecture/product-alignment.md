@@ -1,102 +1,159 @@
 # Product Alignment Matrix
 
-This document maps Skygest's actor-facing experiences to the subsystems and seams they depend on. It is the bridge between product language and the Effect-flavored architecture documented in `system-context.md` (subsystem map), `resolution-trace.md` (one-post walkthrough), and `seams.md` (seam inventory + stability heat map). Section 1 is deliberately free of Effect vocabulary — features are described as the actor encounters them. Sections 2–4 cross back over into the architectural names when bridging.
+This document maps actor-facing experiences to the subsystems and seams they depend on. It is the bridge between product language and the architecture described in:
+
+- `system-context.md` for the subsystem map
+- `resolution-trace.md` for the one-post walkthrough
+- `seams.md` for the seam inventory
+
+The key update in this refresh is that the resolver is no longer hypothetical infrastructure. The runtime write path is shipped. The remaining product question is how quickly that shipped runtime becomes usable in the editorial loop.
 
 ## 1. Actors and their core experiences
 
 ### Reader
 
-1. **R1 — Headline names the question.** Opens a published edition and encounters a story headline that frames the implicit question being debated, not a generic topic roundup. The Blake Shaffer hydro thread becomes "Is Canada's hydro buffer for US grid stability holding up?", not "Energy news: hydro".
-2. **R2 — Chart with provenance.** Sees a chart pulled from a post, captioned with the expert who chose it, the original post URI, and the dataset provider underneath. No chart appears without its source.
-3. **R3 — Expert-data-argument link.** Reads "Expert voices" and can follow, in the body copy, how a named expert's claim ties back to a specific variable, series, or distribution from a real data provider — not a hand-written attribution.
-4. **R4 — Temporal grounding.** Sees a recency signal on each story that makes it obvious whether the debate is this week's news or a long-running arc, so downstream LLM consumers (and the reader) can reason about whether the take is current.
+1. **R1 - Headline names the question.** Opens a published edition and gets a story shaped around a real question, not a generic roundup.
+2. **R2 - Chart with provenance.** Sees a chart with the expert, original post, and source/provider context attached.
+3. **R3 - Expert-data-argument link.** Can follow a named expert's claim back to a concrete data reference, not just a hand-written source note.
+4. **R4 - Temporal grounding.** Can tell whether a story is about a new event or a longer-running arc.
 
-### Editor (Mepuka, voice-driven, via the Discussion Skill)
+### Editor
 
-1. **E1 — Voice-drops into a hydrated story.** Says "open the Shaffer hydro pick" and lands inside a story scaffold that already carries the post, the expert, the provider attributions, and the data references — without hand-typing any of it.
-2. **E2 — Cross-expert join on a dataset.** Mid-conversation, asks "who else has talked about this Ember series?" and the Skill answers in one tool call, returning candidate posts from other experts who cited the same underlying data reference.
-3. **E3 — Curate without losing hand-edits.** Commits an editorial pick on a post, re-runs hydration against the same story, and the prior narrative body, arc link, and editor notes survive intact.
-4. **E4 — Arc evolution against a novel frame.** When a story strains the existing narrative arc taxonomy, proposes a new arc shape and spawns it without leaving the voice loop.
+1. **E1 - Voice-drops into a hydrated story.** Opens a story scaffold that already carries the post, expert, provider context, and eventually the relevant data refs.
+2. **E2 - Cross-expert join on a data reference.** Asks "who else talked about this series or variable?" and gets the answer in one tool call.
+3. **E3 - Curate without losing hand-edits.** Re-hydrates or refreshes a story without blowing away the editor's own notes and body copy.
+4. **E4 - Arc evolution against a novel frame.** When the current narrative taxonomy is not enough, spawns or reshapes an arc without leaving the discussion workflow.
 
-### MCP-calling model (the LLM inside the Discussion Skill, and future agentic bundles)
+### MCP-calling model
 
-1. **M1 — Resolve a single data ref.** Receives a candidate URI or dataset hint from the Editor's voice prompt and calls a single tool to get back a typed registry record (variable, series, distribution, dataset, agent) it can cite in-line.
-2. **M2 — Cross-expert join as a tool.** Calls a join tool on a resolved data reference and gets back the set of posts (across experts) that cite the same underlying variable or series. This is the join that answers "do these experts agree on the number?"
-3. **M3 — Typed residuals on partial resolution.** When resolution is partial, receives structured residuals naming what was ambiguous, rather than an opaque error string it has to parse.
-4. **M4 — Rich post context in a single call.** Pulls vision output, source-attribution candidates, thread context, and editorial pick state for a post in one round-trip, so the response to the Editor doesn't stall on repeated tool calls.
+1. **M1 - Resolve a single data ref.** Takes a URI or hint and returns one typed registry entity it can reason over.
+2. **M2 - Cross-expert join as a tool.** Looks up the set of posts that cite the same underlying data reference.
+3. **M3 - Inspect structured kernel gaps for a post.** Reads a post's resolver outcome and can tell whether the system found a match, preserved an ambiguity, or fell out of the registry.
+4. **M4 - Rich post context in one call.** Pulls the post, enrichments, resolver row, and editorial state without repeated round-trips.
 
 ### Operator
 
-1. **O1 — Flip the resolver flag in staging.** Enables the data-ref resolver feature flag in staging, runs real posts through the existing cron sweep, inspects the resulting `data-ref-resolution` enrichments, and makes a production go/no-go decision.
-2. **O2 — Single pipeline-health read.** Asks "is the pipeline healthy?" and gets back one aggregated status across ingest, enrichment, and resolution without stitching together five admin endpoints.
-3. **O3 — Gap triage loop.** Lists posts with missing or failed enrichments, retries a batch, and sees the gaps close — all without manually opening D1.
-4. **O4 — Deploy without breaking the editorial repo.** Ships a schema change to `src/domain/` and knows within one build-graph run whether `skygest-editorial` still typechecks against the new Schemas.
+1. **O1 - Enable and inspect the resolver lane in staging.** Turn the lane on, run real posts, and inspect the stored outputs.
+2. **O2 - Single pipeline-health read.** Ask "is the system healthy?" without stitching together five separate endpoints.
+3. **O3 - Quality loop from stored rows to eval harness.** Compare what production is storing with what the kernel eval harness says should happen.
+4. **O4 - Deploy without breaking editorial.** Change shared schemas and know quickly whether the editorial repo still works.
 
 ## 2. The matrix
 
-Columns use the subsystem names from `system-context.md`. Cells: ✅ shipped and load-bearing, 🚧 in-progress blocker (with SKY ticket), 📋 planned blocker (with SKY ticket), ⚪ not required.
+Legend:
 
-| # | Experience | Post Ingest | Vision Lane | Source-Attr Lane | Stage 1 Resolver | Data Layer Registry | Resolver Worker | Stage 2/3 Resolvers | data-ref-resolution Enrichment | MCP Surface | HTTP API | Editorial Caches | hydrate-story | Discussion Skill | Story Files | Build-graph Validator | Editions |
+- `✅` shipped and load-bearing
+- `🚧` shipped but quality-limited
+- `📋` planned blocker
+- `⚪` not required
+
+Columns use the current subsystem names from `system-context.md`. `Resolution Stack` means Stage 1 matching plus the kernel inside `skygest-resolver`. `Stored Row` means `post_enrichments(kind = data-ref-resolution)`. `Kernel Eval` is operator-only and is not part of the reader/editor runtime path.
+
+| # | Experience | Ingest | Vision | Source | Resolver | Resolution Stack | Registry | Stored Row | Kernel Eval | MCP | HTTP | Caches | hydrate-story | Discussion | Story Files | build-graph | Editions |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | R1 | Headline names the question | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ✅ | 🚧 |
 | R2 | Chart with provenance | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ✅ | 🚧 |
-| R3 | Expert-data-argument link | ✅ | ✅ | ✅ | ✅ | ✅ | 📋 SKY-238 | ⚪ | 📋 SKY-238 | ✅ | ⚪ | ✅ | 📋 SKY-242 | ✅ | ✅ | ✅ | 🚧 |
+| R3 | Expert-data-argument link | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ⚪ | ✅ | ⚪ | ✅ | 📋 SKY-242 | ✅ | ✅ | 📋 SKY-243 | 🚧 |
 | R4 | Temporal grounding | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ✅ | 🚧 |
-| E1 | Voice-drops into hydrated story | ✅ | ✅ | ✅ | ✅ | ✅ | 📋 SKY-238 | ⚪ | 📋 SKY-238 | ✅ | ⚪ | ✅ | 📋 SKY-242 | ✅ | ✅ | ✅ | ⚪ |
-| E2 | Cross-expert join on a dataset | ✅ | ✅ | ✅ | ✅ | ✅ | 📋 SKY-238 | ⚪ | 📋 SKY-238 | 📋 SKY-241/244 | ⚪ | ✅ | ⚪ | ✅ | ✅ | ⚪ | ⚪ |
+| E1 | Voice-drops into a hydrated story | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ⚪ | ✅ | ⚪ | ✅ | 📋 SKY-242 | ✅ | ✅ | 📋 SKY-243 | ⚪ |
+| E2 | Cross-expert join on a data reference | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ⚪ | 📋 SKY-241/244 | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ |
 | E3 | Curate without losing hand-edits | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ✅ | ⚪ |
-| E4 | Arc evolution against novel frame | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ⚪ |
-| M1 | Resolve a single data ref | ⚪ | ⚪ | ⚪ | ✅ | ✅ | 📋 SKY-238 | ⚪ | ⚪ | 📋 SKY-241 | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
-| M2 | Cross-expert join as a tool | ✅ | ✅ | ✅ | ✅ | ✅ | 📋 SKY-238 | ⚪ | 📋 SKY-238 | 📋 SKY-241/244 | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ |
-| M3 | Typed residuals on partial resolution | ⚪ | ⚪ | ⚪ | ✅ | ✅ | 📋 SKY-238 | ⚪ | 📋 SKY-238 | 📋 SKY-241 | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
-| M4 | Rich post context in one call | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ |
-| O1 | Flip resolver flag in staging | ✅ | ✅ | ✅ | ✅ | ✅ | 📋 SKY-238 | ⚪ | 📋 SKY-238 | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
-| O2 | Single pipeline-health read | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
-| O3 | Gap triage loop | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
+| E4 | Arc evolution against a novel frame | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ⚪ |
+| M1 | Resolve a single data ref | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ⚪ | ⚪ | 📋 SKY-241 | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
+| M2 | Cross-expert join as a tool | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ⚪ | 📋 SKY-244 | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
+| M3 | Inspect structured kernel gaps for a post | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ✅ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
+| M4 | Rich post context in one call | ✅ | ✅ | ✅ | ✅ | ✅ | ⚪ | ✅ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ |
+| O1 | Enable and inspect the resolver lane in staging | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
+| O2 | Single pipeline-health read | ✅ | ✅ | ✅ | ✅ | 🚧 | ⚪ | ✅ | ⚪ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
+| O3 | Quality loop from stored rows to eval harness | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
 | O4 | Deploy without breaking editorial | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ⚪ | ✅ | ✅ | ⚪ |
 
-Assumption note: `Editorial Caches` is now the shipped `SKY-232` substrate. The remaining editorial-side guardrail is `SKY-243` (build-graph warnings over unresolved data-layer refs), which matters as a publish-time quality layer and is discussed below rather than getting its own column.
-
-Two experiences — **E4 (arc evolution)** and **O4 (deploy without breaking editorial)** — have zero dependencies on the resolution column stack and on the write-side enrichment lanes. E4 runs entirely inside the Discussion Skill + Story Files + MCP read path. O4 runs inside the `@skygest/domain` bridge described in `system-context.md` and the `build-graph` validator. That's worth saying out loud: the voice-driven editorial loop and the cross-repo Schema contract are the two experiences that are already whole today.
+Assumption note: `Resolution Stack` is marked `🚧` for the product-facing rows because the runtime is shipped but the kernel still has active quality gaps and registry completeness limits, especially around agent-based narrowing (`SKY-317`).
 
 ## 3. Three analyses
 
-### (a) Critical-path experiences: what SKY-238 alone unlocks
+### (a) What the resolver cutover already changed
 
-SKY-238 ships five things (per `resolution-trace.md` Stage 7 and `seams.md` row `RESOLVER` binding): the standalone `skygest-resolver` Worker, the `RESOLVER` Service Binding from both `skygest-bi-ingest` and `skygest-bi-agent`, the `data-ref-resolution` variant on the `post_enrichments` discriminated union, the `EnrichmentRunWorkflow` `step.do("call resolver service binding")` gated by `enableDataRefResolution`, and the `DataRefResolverWorkflow` stub. It builds on Stage 1 logic already shipped in `SKY-235`, the D1 registry already shipped in `SKY-237`, the editorial caches already shipped in `SKY-232`, and a materially stronger cold-start corpus from `SKY-254`, `SKY-257`, `SKY-261`, `SKY-265`, and `SKY-266` plus the staging snapshot loop from `SKY-248` / `SKY-249`. It does **not** ship `SKY-242` (`hydrate-story` `dataRefs:` block), `SKY-243` (build-graph data-layer warnings), Stage 2 (`SKY-239`), Stage 3 LLM body (`SKY-240`), or the resolver MCP tools (`SKY-241`, `SKY-244`).
+The important shift is that the system no longer needs a hypothetical resolver story in order to talk about product outcomes. The resolver Worker, the `RESOLVER` binding, and the stored `data-ref-resolution` row are real.
 
-The day SKY-238 ships in staging, the **only** experience fully unlocked is **O1 — Flip the resolver flag in staging**. The Operator can enable the flag, watch `data-ref-resolution` rows accumulate on `post_enrichments`, and decide on production. The existing MCP tool `get_post_enrichments` already surfaces the new enrichment variant by virtue of the discriminated union described in `seams.md` row 2 — the Operator reads the rows through a shipped seam.
+That immediately changes three experiences:
 
-**M2 (cross-expert join as a tool)** and **E2 (cross-expert join in voice)** both require the MCP lookup pair — `SKY-241` (`resolve_data_ref`) plus `SKY-244` (`find_candidates_by_data_ref`). They are **not** unlocked by SKY-238 alone — the `data-ref-resolution` rows will be present in D1, but the cross-expert join is not yet callable from the MCP Surface. An agent could in principle scan `post_enrichments` by hand, but the seam isn't exposed as a tool.
+1. **O1 is now a real operating loop.** The operator can enable or inspect the resolver lane in staging and look at actual stored outputs.
+2. **M3 is now substantially real.** The model can already inspect structured resolver outcomes for posts that have been through the lane because `get_post_enrichments` can surface the stored row.
+3. **M4 is stronger than before.** Rich post context can now include the stored resolver result, not just vision and source attribution.
 
-**R3 (expert-data-argument link)** and **E1 (voice-drops into hydrated story with data refs visible in frontmatter)** are blocked on a shorter chain than the earlier doc family assumed: `SKY-241` for direct lookup, then `SKY-242` for the `hydrate-story` `dataRefs:` block. The cache substrate is already done, so the remaining editorial-side quality layer is `SKY-243` — important before publish time, but not the transport blocker it would have been before `SKY-232` shipped.
+What did **not** finish with the cutover:
 
-So SKY-238 in isolation still unlocks exactly one experience (O1) and moves the ball on six others (R3, E1, E2, M1, M2, M3) without finishing any of them. The difference versus the March snapshot is that the storage, cache, and seed-data groundwork is now in place; the remaining blockers are mostly interface and hydration slices, not missing substrate.
+- **R3** still needs those data refs projected into story files (`SKY-242`) and guarded by build-graph warnings (`SKY-243`).
+- **E1** still needs the same projection step before the editor sees resolver-backed data refs on disk by default.
+- **E2**, **M1**, and **M2** still need the dedicated lookup and join tools (`SKY-241`, `SKY-244`).
 
-### (b) MCP-calling model gap
+So the cutover moved the runtime from "planned" to "real," but the editorial product still needs the last-mile surfaces.
 
-The MCP-calling model has **M4 (rich post context in one call)** fully shipped today — `get_post_enrichments`, `get_post_thread`, `get_editorial_pick_bundle`, `search_posts` are all listed in the `seams.md` actor-exposure section and cover the Editor's mid-conversation context needs for shipped lanes.
+### (b) The remaining MCP gap
 
-But **M1 (resolve a single data ref)**, **M2 (cross-expert join as a tool)**, and **M3 (typed residuals on partial resolution)** are still blocked on the same missing pair: `SKY-241` (`resolve_data_ref`) and `SKY-244` (`find_candidates_by_data_ref`). The `seams.md` row for these tools is now explicitly ticketed, which is progress. The actor-exposure analysis already made the call: "Reads are wide, writes are reasonably wide. The gap is on the data-ref side … Acceptable for cand-284; thin for arbitrary mid-conversation lookups."
+The old version of this document treated the model's data-ref gap as mostly a missing resolver runtime. That is no longer accurate.
 
-The honest judgment: the gap is no longer untracked; it is split cleanly into `SKY-241` and `SKY-244`. That is the right shape. But the product truth is unchanged: the moment the Resolver Worker ships rows into `post_enrichments`, those rows still stop at D1 until the MCP lookup surface lands. The single biggest remaining distance between "resolver exists" and "editor can use it in the voice loop" is still the missing tool pair.
+The model already has:
 
-### (c) Unjustified work
+- post search and thread tools
+- `get_post_enrichments`
+- `get_editorial_pick_bundle`
+- stored resolver rows for posts that have run through the lane
 
-Scanning every column and every 📋 cell against the experiences in Section 1:
+The remaining gap is narrower and clearer:
 
-**Stage 2/3 Resolvers (SKY-239, SKY-240) — do not block any listed experience.** Stage 1 alone, per the gold file trace for cand-284 in `resolution-trace.md` Stage 4, already produces the four Ember matches (agent, dataset, distribution, variable) via `AgentHomepageEvidence`, `DatasetTitleEvidence`, `DistributionHostnameEvidence`, and `VariableAliasEvidence`. The residual on cand-284 is a single `DeferredToStage2Residual` covering the "25 years" temporal frame — which is not part of any experience in Section 1. R3 (expert-data-argument link), E1 (voice-drops into hydrated story), and E2 (cross-expert join) all resolve against direct-grain matches that Stage 1 produces. Stage 2 facet decomposition is a refinement, not an unblock. Stage 3 LLM reranking only fires on residuals that Stage 2 couldn't narrow — and none of the listed experiences depend on it. **Recommendation: defer `SKY-239` and `SKY-240` behind `SKY-241`, `SKY-242`, and `SKY-244`**. If cand-284-class posts resolve cleanly on Stage 1 alone, Stage 2/3 should wait until a real post produces an ambiguous residual that blocks a real editorial session.
+1. **Ad-hoc direct lookup** is missing (`SKY-241`).
+2. **Cross-expert join lookup** is missing (`SKY-244`).
 
-**`find_candidates_by_data_ref` vs `resolve_data_ref` priority.** The split is now explicit in Linear, and that is fine; the key is sequencing, not recombining. `resolve_data_ref` (`SKY-241`) alone unblocks M1 and M3 and is the prerequisite for `SKY-242` (`hydrate-story` `dataRefs:`). `find_candidates_by_data_ref` (`SKY-244`) is what unblocks M2 and E2, and the April 8 D10 still calls that join "the actual product value of the resolution layer exposed as a callable." So the right move is: land `SKY-241` first, then keep `SKY-244` immediately adjacent in the plan rather than letting it drift behind Stage 2/3 work.
+That is a better product situation than before because the missing surface is now concentrated in two explicit tool seams instead of being mixed up with missing runtime plumbing.
 
-**Editions subsystem (in-progress per `system-context.md`).** R1, R2, R3, and R4 all mark Editions as 🚧, because today `editions/published/*.md` is the only Reader touchpoint per `seams.md` actor exposure. But the SKY-188 brief explicitly says weekly compilations are **deferred until the core flow works end-to-end**, and SKY-192 says "the discussion skill is the product". That tension is real. The honest read: Editions is not unjustified — R1/R2/R3/R4 do need a published-artifact seam — but the compile workflow should **not** be on the critical path before `SKY-238`, `SKY-241`, `SKY-242`, and ideally `SKY-244` land. If the Editor can't yet pin and join data refs inside the voice loop, polishing the edition compile pipeline is premature. **Recommendation: hold Editions in its current 🚧 state and do not allocate further work there until R3's upstream chain is unblocked.**
+### (c) What is justified next, and what should wait
 
-No other unjustified work found. Every other planned subsystem in the matrix is a direct blocker of at least one named experience.
+Two tracks are justified now.
+
+**Track 1: product surface completion**
+
+- `SKY-241` (`resolve_data_ref`)
+- `SKY-242` (project data refs into story files)
+- `SKY-243` (warn on unresolved refs in build-graph)
+- `SKY-244` (cross-expert join tool)
+
+This is the shortest path from "resolver writes good rows" to "editor can actually use them."
+
+**Track 2: resolver quality and registry completeness**
+
+- `SKY-317` (restore real agent-based narrowing)
+- related registry and coverage work such as `SKY-322`, `SKY-323`, `SKY-324`
+- eval-driven kernel follow-ups under the `SKY-314` umbrella
+
+This track is justified because the kernel eval harness already shows that the shipped runtime still has meaningful misses. The resolver exists; now it needs to become more trustworthy.
+
+What should wait:
+
+- a revived "runtime Stage 3" story
+- any documentation that implies agent narrowing is already complete
+- extra editions polish before resolver-backed story files and lookup tools exist
 
 ## 4. What we should build next
 
-The matrix points to one ordering. SKY-238 unlocks O1 and nothing else. The experiences that matter for the product — **R3 (expert-data-argument link)**, **E1 (voice-drops into hydrated story with data refs)**, **E2 (cross-expert join in voice)** — now sit on a shorter, clearer chain than before: `SKY-238` for the runtime write, `SKY-241` for direct lookup, `SKY-242` for hydrate-story projection, and `SKY-244` for the join itself. The cache substrate (`SKY-232`) is already there; `SKY-243` is the publish-time warning layer that keeps the loop fail-loud once the data refs hit disk.
+The architecture family now points to one clean ordering.
 
-**After SKY-238, land the MCP-facing lookup pair before deeper resolver work.** Start with `SKY-241` so the editorial repo can call `resolve_data_ref` at all and `SKY-242` can unblock. Keep `SKY-244` immediately adjacent, because the cross-expert join is still the distinctive product move. The seam being crossed is the MCP tool surface row in `seams.md` currently marked planned; this is the single highest-leverage cell in the matrix because it lights up three model/editor experiences without requiring Stage 2 or Stage 3.
+**First, finish the editorial surfaces for the resolver we already shipped.**
 
-**Then ship `SKY-242` and `SKY-243` as the editorial-side finish.** The `StoryFrontmatter` + `PostAnnotationFrontmatter` seams described in `seams.md` are already stable at the base level; `SKY-242` is the additive `dataRefs:` projection, and `SKY-243` is the fail-loud warning pass over the now-shipped caches. That pairing gives the Editor E1 immediately and gives R3 a believable path into the reader artifact without asking build-graph to stay blind. The tiebreaker from SKY-192 — *does this tighten the voice-driven editorial loop for @mepuka in a real session?* — still picks this ordering unambiguously. Stage 2, Stage 3, and additional Editions polish stay on the shelf until a real session produces a residual or a reader artifact gap they alone can fix.
+That means `SKY-241`, `SKY-242`, `SKY-243`, and `SKY-244`. Without them, the runtime writes resolver rows that the editor can mostly inspect only indirectly.
+
+**In parallel, improve the quality of the shipped kernel instead of inventing a new runtime stage.**
+
+That means `SKY-317` plus the registry and coverage follow-ons the eval harness is already pointing at. This is the honest next quality loop.
+
+**Hold future reranking or workflow escalation behind those two tracks.**
+
+The system already has the right runtime shape. It now needs better data behind that shape and better editorial surfaces on top of it.
+
+## What changed in this refresh
+
+1. The matrix now treats the resolver runtime as shipped, not planned.
+2. The model's structured-gap experience is now counted as real for posts that have run through the lane.
+3. The remaining editor/model blockers are now framed as missing lookup and projection surfaces.
+4. The recommended next work is split into a product-surface track and a quality track.
