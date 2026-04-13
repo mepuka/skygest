@@ -6,6 +6,7 @@ import {
   Dataset as DatasetSchema,
   Variable as VariableSchema
 } from "../src/domain/data-layer";
+import { InvalidObservationWindowError } from "../src/domain/errors";
 import {
   DataRefEntityId,
   FindCandidatesByDataRefCursor,
@@ -550,5 +551,35 @@ describe("DataRefQueryService.findCandidatesByDataRef", () => {
         );
       })
     )
+  );
+
+  it.live("rejects inverted observation windows", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeBiLayer({ filename });
+        const queryLayer = withDataRefQueryService(layer);
+
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        await Effect.runPromise(
+          Effect.gen(function* () {
+            const service = yield* DataRefQueryService;
+            const error = yield* service.findCandidatesByDataRef({
+              entityId: supportedEntityIds.variable,
+              observedSince: "2024-04",
+              observedUntil: "2024-01"
+            }).pipe(Effect.flip);
+
+            expect(error).toBeInstanceOf(InvalidObservationWindowError);
+            if (error instanceof InvalidObservationWindowError) {
+              expect(error.message).toBe(
+                "observedSince must be on or before observedUntil."
+              );
+            }
+          }).pipe(Effect.provide(queryLayer))
+        );
+      })
+    ),
+    10_000
   );
 });

@@ -107,7 +107,7 @@ export const CandidatePayloadRepoD1 = {
               const citations = buildDataRefCandidateCitations(enrichment);
               const citationKeys = citations.map((citation) => sql`${citation.citationKey}`);
 
-              const deleteStaleCitations =
+              const deleteStaleCitations = () =>
                 citations.length === 0
                   ? sql`
                       DELETE FROM data_ref_candidate_citations
@@ -119,64 +119,63 @@ export const CandidatePayloadRepoD1 = {
                         AND citation_key NOT IN (${sql.join(", ", false)(citationKeys)})
                     `.pipe(Effect.asVoid);
 
-              return deleteStaleCitations.pipe(
-                Effect.asVoid,
-                Effect.flatMap(() =>
-                  Effect.forEach(
-                    citations,
-                    (citation) =>
-                      sql`
-                        INSERT INTO data_ref_candidate_citations (
-                          source_post_uri,
-                          entity_id,
-                          citation_source,
-                          citation_key,
-                          resolution_state,
-                          asserted_value_json,
-                          asserted_unit,
-                          observation_start,
-                          observation_end,
-                          observation_label,
-                          normalized_observation_start,
-                          normalized_observation_end,
-                          observation_sort_key,
-                          has_observation_time,
-                          updated_at
-                        ) VALUES (
-                          ${input.postUri},
-                          ${citation.entityId},
-                          ${citation.citationSource},
-                          ${citation.citationKey},
-                          ${citation.resolutionState},
-                          ${citation.assertedValueJson},
-                          ${citation.assertedUnit},
-                          ${citation.observationStart},
-                          ${citation.observationEnd},
-                          ${citation.observationLabel},
-                          ${citation.normalizedObservationStart},
-                          ${citation.normalizedObservationEnd},
-                          ${citation.observationSortKey},
-                          ${citation.hasObservationTime ? 1 : 0},
-                          ${updatedAt}
-                        )
-                        ON CONFLICT(source_post_uri, citation_key) DO UPDATE SET
-                          entity_id = excluded.entity_id,
-                          citation_source = excluded.citation_source,
-                          resolution_state = excluded.resolution_state,
-                          asserted_value_json = excluded.asserted_value_json,
-                          asserted_unit = excluded.asserted_unit,
-                          observation_start = excluded.observation_start,
-                          observation_end = excluded.observation_end,
-                          observation_label = excluded.observation_label,
-                          normalized_observation_start = excluded.normalized_observation_start,
-                          normalized_observation_end = excluded.normalized_observation_end,
-                          observation_sort_key = excluded.observation_sort_key,
-                          has_observation_time = excluded.has_observation_time,
-                          updated_at = excluded.updated_at
-                      `.pipe(Effect.asVoid),
-                    { discard: true }
-                  )
-                )
+              const upsertCurrentCitations = Effect.forEach(
+                citations,
+                (citation) =>
+                  sql`
+                    INSERT INTO data_ref_candidate_citations (
+                      source_post_uri,
+                      entity_id,
+                      citation_source,
+                      citation_key,
+                      resolution_state,
+                      asserted_value_json,
+                      asserted_unit,
+                      observation_start,
+                      observation_end,
+                      observation_label,
+                      normalized_observation_start,
+                      normalized_observation_end,
+                      observation_sort_key,
+                      has_observation_time,
+                      updated_at
+                    ) VALUES (
+                      ${input.postUri},
+                      ${citation.entityId},
+                      ${citation.citationSource},
+                      ${citation.citationKey},
+                      ${citation.resolutionState},
+                      ${citation.assertedValueJson},
+                      ${citation.assertedUnit},
+                      ${citation.observationStart},
+                      ${citation.observationEnd},
+                      ${citation.observationLabel},
+                      ${citation.normalizedObservationStart},
+                      ${citation.normalizedObservationEnd},
+                      ${citation.observationSortKey},
+                      ${citation.hasObservationTime ? 1 : 0},
+                      ${updatedAt}
+                    )
+                    ON CONFLICT(source_post_uri, citation_key) DO UPDATE SET
+                      entity_id = excluded.entity_id,
+                      citation_source = excluded.citation_source,
+                      resolution_state = excluded.resolution_state,
+                      asserted_value_json = excluded.asserted_value_json,
+                      asserted_unit = excluded.asserted_unit,
+                      observation_start = excluded.observation_start,
+                      observation_end = excluded.observation_end,
+                      observation_label = excluded.observation_label,
+                      normalized_observation_start = excluded.normalized_observation_start,
+                      normalized_observation_end = excluded.normalized_observation_end,
+                      observation_sort_key = excluded.observation_sort_key,
+                      has_observation_time = excluded.has_observation_time,
+                      updated_at = excluded.updated_at
+                  `.pipe(Effect.asVoid),
+                { discard: true }
+              );
+
+              return upsertCurrentCitations.pipe(
+                Effect.flatMap(() => deleteStaleCitations())
               );
             })
           );

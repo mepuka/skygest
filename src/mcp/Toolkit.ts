@@ -1,8 +1,10 @@
 import { SqlError } from "effect/unstable/sql/SqlError";
-import type { DbError } from "../domain/errors";
 import { Tool, Toolkit } from "effect/unstable/ai";
 import { Duration, Effect, Layer, Option, Result, Schedule, Schema } from "effect";
 import { ImportPostsInput } from "../domain/api";
+import {
+  InvalidObservationWindowError
+} from "../domain/errors";
 import {
   FindCandidatesByDataRefCursor,
   FindCandidatesByDataRefInput,
@@ -1186,6 +1188,17 @@ const makeReadOnlyHandlers = (
         })
       };
     }).pipe(
+      Effect.catchTag(
+        "InvalidObservationWindowError",
+        (error: InvalidObservationWindowError) =>
+          Effect.fail(
+            invalidMcpInputError(
+              "find_candidates_by_data_ref",
+              error.message,
+              error
+            )
+          )
+      ),
       Effect.mapError(passThroughMcpToolError("find_candidates_by_data_ref"))
     ),
   list_enrichment_gaps: (input: typeof ListEnrichmentGapsInput.Type) =>

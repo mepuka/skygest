@@ -7,10 +7,58 @@ import type {
   ResolveDataRefInput,
   ResolveDataRefOutput
 } from "../domain/data-layer/query";
-import type { DbError } from "../domain/errors";
+import {
+  InvalidObservationWindowError,
+  type DbError
+} from "../domain/errors";
 import { AppConfig } from "../platform/Config";
+import { clampLimit } from "../platform/Limit";
 import { DataRefCandidateReadRepo } from "./DataRefCandidateReadRepo";
 import { DataLayerRegistry } from "./DataLayerRegistry";
+
+const YEAR_PATTERN = /^\d{4}$/u;
+const YEAR_MONTH_PATTERN = /^\d{4}-\d{2}$/u;
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/u;
+
+const padNumber = (value: number) => String(value).padStart(2, "0");
+
+const lastDayOfMonth = (year: number, month: number) =>
+  new Date(Date.UTC(year, month, 0)).getUTCDate();
+
+const normalizeDateLikeLowerBound = (value: string): string => {
+  if (YEAR_PATTERN.test(value)) {
+    return `${value}-01-01T00:00:00.000Z`;
+  }
+
+  if (YEAR_MONTH_PATTERN.test(value)) {
+    return `${value}-01T00:00:00.000Z`;
+  }
+
+  if (DATE_PATTERN.test(value)) {
+    return `${value}T00:00:00.000Z`;
+  }
+
+  return new Date(value).toISOString();
+};
+
+const normalizeDateLikeUpperBound = (value: string): string => {
+  if (YEAR_PATTERN.test(value)) {
+    return `${value}-12-31T23:59:59.999Z`;
+  }
+
+  if (YEAR_MONTH_PATTERN.test(value)) {
+    const [yearPart, monthPart] = value.split("-");
+    const year = Number(yearPart);
+    const month = Number(monthPart);
+    return `${value}-${padNumber(lastDayOfMonth(year, month))}T23:59:59.999Z`;
+  }
+
+  if (DATE_PATTERN.test(value)) {
+    return `${value}T23:59:59.999Z`;
+  }
+
+  return new Date(value).toISOString();
+};
 
 export class DataRefQueryService extends ServiceMap.Service<
   DataRefQueryService,
@@ -20,7 +68,10 @@ export class DataRefQueryService extends ServiceMap.Service<
     ) => Effect.Effect<ResolveDataRefOutput, SqlError | DbError>;
     readonly findCandidatesByDataRef: (
       input: FindCandidatesByDataRefInput
-    ) => Effect.Effect<FindCandidatesByDataRefOutput, SqlError | DbError>;
+    ) => Effect.Effect<
+      FindCandidatesByDataRefOutput,
+      SqlError | DbError | InvalidObservationWindowError
+    >;
   }
 >()("@skygest/DataRefQueryService") {
   static readonly layer = Layer.effect(
@@ -29,15 +80,6 @@ export class DataRefQueryService extends ServiceMap.Service<
       const config = yield* AppConfig;
       const readRepo = yield* DataRefCandidateReadRepo;
       const registry = yield* DataLayerRegistry;
-
-      const clampLimit = (limit: number | undefined) =>
-        Math.max(
-          1,
-          Math.min(
-            limit ?? config.mcpLimitDefault,
-            config.mcpLimitMax
-          )
-        );
 
       const resolveDataRef = Effect.fn("DataRefQueryService.resolveDataRef")(
         function* (input: ResolveDataRefInput) {
@@ -59,7 +101,24 @@ export class DataRefQueryService extends ServiceMap.Service<
       const findCandidatesByDataRef = Effect.fn(
         "DataRefQueryService.findCandidatesByDataRef"
       )(function* (input: FindCandidatesByDataRefInput) {
-        const limit = clampLimit(input.limit);
+        if (
+          input.observedSince !== undefined &&
+          input.observedUntil !== undefined &&
+          normalizeDateLikeLowerBound(input.observedSince) >
+            normalizeDateLikeUpperBound(input.observedUntil)
+        ) {
+          return yield* new InvalidObservationWindowError({
+            message: "observedSince must be on or before observedUntil.",
+            observedSince: input.observedSince,
+            observedUntil: input.observedUntil
+          });
+        }
+
+        const limit = clampLimit(
+          input.limit,
+          config.mcpLimitDefault,
+          config.mcpLimitMax
+        );
         const rows = yield* readRepo.listByEntityId({
           entityId: input.entityId,
           ...(input.observedSince === undefined
