@@ -1,5 +1,6 @@
 import { Duration, Effect, Option, Schema } from "effect";
 import {
+  HttpClientError,
   HttpClient,
   HttpClientResponse
 } from "effect/unstable/http";
@@ -13,7 +14,6 @@ import {
 } from "../../../platform/HttpErrors";
 import {
   formatSchemaParseError,
-  stringifyUnknown
 } from "../../../platform/Json";
 
 const REQUEST_TIMEOUT = Duration.seconds(30);
@@ -140,6 +140,23 @@ export const makeNesoHttpClient = Effect.fn("Neso.makeHttpClient")(function* (
   });
 });
 
+const decodeErrorMessage = (cause: unknown): string => {
+  if (Schema.isSchemaError(cause)) {
+    return formatSchemaParseError(cause);
+  }
+
+  if (
+    HttpClientError.isHttpClientError(cause) &&
+    cause.reason._tag === "DecodeError"
+  ) {
+    return formatSchemaParseError(
+      cause.reason.cause as Parameters<typeof formatSchemaParseError>[0]
+    );
+  }
+
+  return "NESO catalog response could not be decoded";
+};
+
 const fetchCatalogPage = Effect.fn("Neso.fetchCatalogPage")(function* <E, R>(
   client: HttpClient.HttpClient.With<E, R>,
   baseUrl: string,
@@ -153,10 +170,10 @@ const fetchCatalogPage = Effect.fn("Neso.fetchCatalogPage")(function* <E, R>(
     retryTransientHttpEffect,
     Effect.flatMap(HttpClientResponse.schemaBodyJson(RawNesoSearchResponse)),
     Effect.mapError((cause) =>
-      isDecodeError(cause)
+      isDecodeError(cause) || Schema.isSchemaError(cause)
         ? new NesoCatalogDecodeError({
             url,
-            message: stringifyUnknown(cause)
+            message: decodeErrorMessage(cause)
           })
         : new NesoCatalogFetchError(
             getResponseStatus(cause) === undefined

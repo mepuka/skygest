@@ -3,8 +3,10 @@ import { Config, ConfigProvider, Effect, Redacted } from "effect";
 import {
   ColdStartCommonKeys,
   EmberIngestKeys,
+  EnergyInstituteIngestKeys,
   EiaIngestKeys,
   GridStatusIngestKeys,
+  NesoIngestKeys,
   OperatorKeys,
   WorkerKeys,
   WorkerDeployKeys,
@@ -228,6 +230,34 @@ describe("ConfigShapes", () => {
           Config.all(EmberIngestKeys).parse(provider)
         );
         expect(result._tag).toBe("Failure");
+      })
+    );
+  });
+
+  describe("NesoIngestKeys", () => {
+    it.effect("parses NESO config with defaults and optional dataset filter", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({
+          NESO_ONLY_DATASET: "historic-demand-data"
+        });
+        const result = yield* Config.all(NesoIngestKeys).parse(provider);
+        expect(result.rootDir).toBe("references/cold-start");
+        expect(result.baseUrl).toBe("https://api.neso.energy/api/3/action");
+        expect(result.minIntervalMs).toBe(1000);
+        expect(result.maxDatasets).toBe(500);
+        expect(result.onlyDataset._tag).toBe("Some");
+      })
+    );
+  });
+
+  describe("EnergyInstituteIngestKeys", () => {
+    it.effect("uses the shared cold-start defaults unchanged", () =>
+      Effect.gen(function* () {
+        const provider = ConfigProvider.fromUnknown({});
+        const result = yield* Config.all(EnergyInstituteIngestKeys).parse(provider);
+        expect(result.rootDir).toBe("references/cold-start");
+        expect(result.dryRun).toBe(false);
+        expect(result.noCache).toBe(false);
       })
     );
   });

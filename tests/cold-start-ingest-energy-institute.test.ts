@@ -261,6 +261,36 @@ describe("energy institute adapter", () => {
     expect(trackerWebNode?.data.accessURL).toBe(ENERGY_INSTITUTE_TRACKER_APP_URL);
   });
 
+  it("falls back to publisher plus title when the existing dataset has no merge alias match", () => {
+    const titleOnlyDataset = Schema.decodeUnknownSync(Dataset)({
+      ...REVIEW_DATASET,
+      aliases: [],
+      landingPage: "https://example.com/older-energy-institute-page"
+    });
+    const idx: CatalogIndex = {
+      ...seededIndex(),
+      datasetsByMergeKey: new Map(),
+      datasetFileSlugById: new Map([
+        [titleOnlyDataset.id, "ei-statistical-review-dataset"]
+      ]),
+      allDatasets: [titleOnlyDataset]
+    };
+    const ctx = buildContextFromIndex(idx, FIXTURE_NOW);
+    const candidates = buildCandidateNodes(ENERGY_INSTITUTE_MANIFEST, idx, ctx);
+
+    const reviewDatasetNode = candidates.find(
+      (candidate): candidate is Extract<typeof candidates[number], { _tag: "dataset" }> =>
+        candidate._tag === "dataset" &&
+        candidate.slug === "ei-statistical-review-dataset"
+    );
+
+    expect(reviewDatasetNode?.merged).toBe(true);
+    expect(reviewDatasetNode?.data.id).toBe(titleOnlyDataset.id);
+    expect(reviewDatasetNode?.data.aliases.some((alias) => alias.value === ENERGY_INSTITUTE_REVIEW_HOME_URL)).toBe(
+      true
+    );
+  });
+
   it.effect("writes repeatable review and tracker entities without duplicating ids", () =>
     Effect.gen(function* () {
       const tmp = yield* Effect.promise(makeSeededColdStartRoot);

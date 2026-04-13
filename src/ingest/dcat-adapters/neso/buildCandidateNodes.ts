@@ -16,12 +16,17 @@ import {
   type IngestNode,
   unionAliases
 } from "../../dcat-harness";
+import { cleanHtmlishText } from "../../../platform/Text";
 import type { NesoPackageInfo } from "./api";
 import type { BuildContext } from "./buildContext";
 
 const NESO_SITE_BASE = "https://www.neso.energy/data-portal";
 const NESO_HARVEST_SOURCE = "https://api.neso.energy/api/3/action/package_search";
 type NesoResource = NonNullable<NesoPackageInfo["resources"]>[number];
+interface NesoSelectedResource {
+  readonly resource: NesoResource;
+  readonly url: string;
+}
 
 const FORMAT_TO_MEDIA_TYPE: Record<string, string> = {
   csv: "text/csv",
@@ -59,28 +64,8 @@ const trimmedString = (value: string | null | undefined): string | undefined => 
   return trimmed.length > 0 ? trimmed : undefined;
 };
 
-const decodeHtmlEntities = (value: string): string =>
-  value
-    .replace(/&nbsp;/giu, " ")
-    .replace(/&amp;/giu, "&")
-    .replace(/&quot;/giu, "\"")
-    .replace(/&#0?39;/giu, "'")
-    .replace(/&lt;/giu, "<")
-    .replace(/&gt;/giu, ">");
-
 const cleanText = (value: string | null | undefined): string | undefined => {
-  const trimmed = trimmedString(value);
-  if (trimmed === undefined) {
-    return undefined;
-  }
-
-  const withoutBreaks = trimmed
-    .replace(/<br\s*\/?>/giu, "\n")
-    .replace(/<\/p>/giu, "\n")
-    .replace(/<[^>]+>/gu, " ");
-  const decoded = decodeHtmlEntities(withoutBreaks);
-  const collapsed = decoded.replace(/\s+/gu, " ").trim();
-  return collapsed.length > 0 ? collapsed : undefined;
+  return cleanHtmlishText(value);
 };
 
 const uniqueStrings = (
@@ -186,7 +171,13 @@ const compareResourcePriority = (
 
   const leftDatastore = isDatastoreResource(left) ? 1 : 0;
   const rightDatastore = isDatastoreResource(right) ? 1 : 0;
-  return rightDatastore - leftDatastore;
+  if (rightDatastore !== leftDatastore) {
+    return rightDatastore - leftDatastore;
+  }
+
+  const leftIdentity = `${resourceUrl(left) ?? ""}::${left.id}`;
+  const rightIdentity = `${resourceUrl(right) ?? ""}::${right.id}`;
+  return leftIdentity.localeCompare(rightIdentity);
 };
 
 const isDatastoreResource = (resource: NesoResource): boolean =>
@@ -264,24 +255,35 @@ const existingDatasetForPackage = (
   dataset: NesoPackageInfo
 ): Dataset | null => idx.datasetsByMergeKey.get(nesoDatasetLandingPage(dataset.name)) ?? null;
 
+const selectedResources = (
+  dataset: NesoPackageInfo
+): ReadonlyArray<NesoSelectedResource> =>
+  (dataset.resources ?? [])
+    .filter(isActiveResource)
+    .map((resource) => {
+      const url = resourceUrl(resource);
+      return url === undefined ? null : { resource, url };
+    })
+    .filter(
+      (resource): resource is NesoSelectedResource => resource !== null
+    );
+
 const selectPrimaryDownload = (
   dataset: NesoPackageInfo
-): NesoResource | null => {
-  const resources = (dataset.resources ?? [])
-    .filter(isActiveResource)
-    .filter((resource) => !isDocumentationResource(resource))
-    .sort(compareResourcePriority);
+): NesoSelectedResource | null => {
+  const resources = selectedResources(dataset)
+    .filter(({ resource }) => !isDocumentationResource(resource))
+    .sort((left, right) => compareResourcePriority(left.resource, right.resource));
 
   return resources[0] ?? null;
 };
 
 const selectDocumentationResource = (
   dataset: NesoPackageInfo
-): NesoResource | null => {
-  const resources = (dataset.resources ?? [])
-    .filter(isActiveResource)
-    .filter(isDocumentationResource)
-    .sort(compareResourcePriority);
+): NesoSelectedResource | null => {
+  const resources = selectedResources(dataset)
+    .filter(({ resource }) => isDocumentationResource(resource))
+    .sort((left, right) => compareResourcePriority(left.resource, right.resource));
 
   return resources[0] ?? null;
 };
@@ -368,15 +370,12 @@ const buildDatasetCandidate = (
 
 const buildDownloadDistributionCandidate = (
   source: NesoPackageInfo,
-  resource: NesoResource,
+  selected: NesoSelectedResource,
   datasetId: Dataset["id"],
   ctx: BuildContext,
   existing: Distribution | null
 ): Distribution => {
-  const url = resourceUrl(resource);
-  if (url === undefined) {
-    throw new Error(`NESO resource ${resource.id} missing URL`);
-  }
+  const { resource, url } = selected;
 
   return decodeDistribution({
     _tag: "Distribution" as const,
@@ -384,22 +383,22 @@ const buildDownloadDistributionCandidate = (
     datasetId,
     kind: "download" as const,
     title:
-      existing?.title ??
       cleanText(resource.name ?? undefined) ??
+      existing?.title ??
       `${cleanText(source.title ?? undefined) ?? source.name} download`,
     description:
-      existing?.description ??
       cleanText(resource.description ?? undefined) ??
+      existing?.description ??
       packageDescription(source),
-    downloadURL: existing?.downloadURL ?? url,
-    mediaType: existing?.mediaType ?? deriveMediaType(resource),
-    format: existing?.format ?? normalizedFormat(resource.format ?? undefined),
-    byteSize: existing?.byteSize ?? parseByteSize(resource.size),
+    downloadURL: url,
+    mediaType: deriveMediaType(resource) ?? existing?.mediaType,
+    format: normalizedFormat(resource.format ?? undefined) ?? existing?.format,
+    byteSize: parseByteSize(resource.size) ?? existing?.byteSize,
     accessRights: existing?.accessRights ?? "public",
-    license: existing?.license ?? packageLicense(source),
-    accessServiceId:
-      existing?.accessServiceId ??
-      (isDatastoreResource(resource) ? ctx.dataService.id : undefined),
+    license: packageLicense(source) ?? existing?.license,
+    accessServiceId: isDatastoreResource(resource)
+      ? ctx.dataService.id
+      : undefined,
     aliases: unionAliases(existing?.aliases ?? [], freshDistributionAliases(url)),
     createdAt: existing?.createdAt ?? ctx.nowIso,
     updatedAt: ctx.nowIso
@@ -408,15 +407,12 @@ const buildDownloadDistributionCandidate = (
 
 const buildDocumentationDistributionCandidate = (
   source: NesoPackageInfo,
-  resource: NesoResource,
+  selected: NesoSelectedResource,
   datasetId: Dataset["id"],
   ctx: BuildContext,
   existing: Distribution | null
 ): Distribution => {
-  const url = resourceUrl(resource);
-  if (url === undefined) {
-    throw new Error(`NESO resource ${resource.id} missing URL`);
-  }
+  const { resource, url } = selected;
 
   return decodeDistribution({
     _tag: "Distribution" as const,
@@ -424,19 +420,19 @@ const buildDocumentationDistributionCandidate = (
     datasetId,
     kind: "documentation" as const,
     title:
-      existing?.title ??
       cleanText(resource.name ?? undefined) ??
+      existing?.title ??
       `${cleanText(source.title ?? undefined) ?? source.name} documentation`,
     description:
-      existing?.description ??
       cleanText(resource.description ?? undefined) ??
+      existing?.description ??
       packageDescription(source),
-    accessURL: existing?.accessURL ?? url,
-    mediaType: existing?.mediaType ?? deriveMediaType(resource),
-    format: existing?.format ?? normalizedFormat(resource.format ?? undefined),
-    byteSize: existing?.byteSize ?? parseByteSize(resource.size),
+    accessURL: url,
+    mediaType: deriveMediaType(resource) ?? existing?.mediaType,
+    format: normalizedFormat(resource.format ?? undefined) ?? existing?.format,
+    byteSize: parseByteSize(resource.size) ?? existing?.byteSize,
     accessRights: existing?.accessRights ?? "public",
-    license: existing?.license ?? packageLicense(source),
+    license: packageLicense(source) ?? existing?.license,
     aliases: unionAliases(existing?.aliases ?? [], freshDistributionAliases(url)),
     createdAt: existing?.createdAt ?? ctx.nowIso,
     updatedAt: ctx.nowIso

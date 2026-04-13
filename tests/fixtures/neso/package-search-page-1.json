@@ -1,0 +1,695 @@
+{
+  "help": "https://api.neso.energy/api/3/action/help_show?name=package_search",
+  "success": true,
+  "result": {
+    "count": 128,
+    "sort": "metadata_modified desc",
+    "facets": {},
+    "results": [
+      {
+        "license_title": "NESO Open Data Licence",
+        "maintainer": "",
+        "relationships_as_object": [],
+        "private": false,
+        "maintainer_email": "",
+        "num_tags": 10,
+        "id": "769ec53a-9940-4df3-a867-6fa62d483097",
+        "metadata_created": "2025-09-29T14:03:32.861910",
+        "metadata_modified": "2026-04-13T23:31:29.381897",
+        "author": "",
+        "author_email": "",
+        "state": "active",
+        "version": "",
+        "creator_user_id": "1abec7e0-65fd-477f-aa48-e8b358e810af",
+        "type": "dataset",
+        "resources": [
+          {
+            "cache_last_updated": null,
+            "package_id": "769ec53a-9940-4df3-a867-6fa62d483097",
+            "datastore_active": true,
+            "id": "6bfe7df0-60aa-462d-94cd-44ac0a4abb2c",
+            "size": null,
+            "metadata_modified": "2026-04-13T23:31:28.777017",
+            "state": "active",
+            "hash": "",
+            "description": "This Data File contains Non-BM Quick Reserve Availability MW and Utilisation Price data declared by Service Providers, once declarations have been accepted and validated by OBP system by gate closure. \r\nThis information is continuously published throughout the day on this platform. Non-BM Slow Reserve Service Availability MW and Utilisation Price will be added to this Data File when the service goes live.",
+            "format": "CSV",
+            "mimetype_inner": null,
+            "url_type": "upload",
+            "datastore_unique_keys": [
+              "Unit ID",
+              "Time From",
+              "Service ID"
+            ],
+            "mimetype": null,
+            "cache_url": null,
+            "name": " Non-BM Reserve Availability MW and Utilisation Price",
+            "created": "2025-09-29T14:04:24.644678",
+            "url": "https://api.neso.energy/dataset/769ec53a-9940-4df3-a867-6fa62d483097/resource/6bfe7df0-60aa-462d-94cd-44ac0a4abb2c/download/av_20260414_04_qr_sr_nbm.csv",
+            "datastore_append_or_update": true,
+            "last_modified": "2026-04-13T23:31:29.309760",
+            "position": 0,
+            "revision_id": "83e53826-a8e4-4ebc-849e-1ea410d6f474",
+            "resource_type": null
+          }
+        ],
+        "num_resources": 1,
+        "tags": [
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Ancillary",
+            "id": "0e1bf523-6bfe-4bff-990c-a8fd2e528f4d",
+            "name": "Ancillary"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Dispatch",
+            "id": "4c07dc51-62a1-49b8-8ad9-fd61532833f2",
+            "name": "Dispatch"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Instructions",
+            "id": "e4351dbf-1b32-4ebe-af2b-e02546cd1ed3",
+            "name": "Instructions"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "MW Dispatch",
+            "id": "eefb6433-6774-42e4-90c3-9df209477dee",
+            "name": "MW Dispatch"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Non-BM",
+            "id": "66f8b3a2-4c62-42ba-9f0b-031305f28a95",
+            "name": "Non-BM"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Quick Reserve",
+            "id": "4e6f1a12-8fbe-4671-84cf-78853ff2e2f2",
+            "name": "Quick Reserve"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Reserve",
+            "id": "98684d4e-c1aa-4af3-82a5-7de2ade67455",
+            "name": "Reserve"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Service",
+            "id": "14868e37-0064-49c8-9be8-5a31626c82ba",
+            "name": "Service"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Slow Reserve",
+            "id": "4ce3a204-a532-4e63-b0f1-a4c87e27b465",
+            "name": "Slow Reserve"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Subscribable",
+            "id": "fb80a4a5-bda6-4679-9c06-4decec4a0917",
+            "name": "Subscribable"
+          }
+        ],
+        "groups": [],
+        "license_id": "ESO",
+        "relationships_as_subject": [],
+        "organization": {
+          "description": "Data on services that balance demand and supply including Fast Reserve, Firm Frequency Response and STOR.",
+          "created": "2019-10-12T12:19:45.791918",
+          "title": "Ancillary services",
+          "name": "ancillary-services",
+          "is_organization": true,
+          "state": "active",
+          "image_url": "2024-09-30-075648.819270Ancillary-services.svg",
+          "revision_id": "d784da8d-7052-4133-aa15-7ac316347d06",
+          "type": "organization",
+          "id": "487b7d6e-ddc8-47bf-8746-425ad687e768",
+          "approval_status": "approved"
+        },
+        "name": "obp-reserve-availability-utilisation-price",
+        "isopen": false,
+        "url": "",
+        "notes": "NESO publishes non-BM Reserve Availability MW and Utilisation Price data declared by Service Providers to Open Balancing Platform (OBP) system. This information is continuously published throughout the day on this platform. As of today, this page hosts Non-BM Quick Reserve Service Availability MW and Utilisation Price data, and non-BM Slow Reserve Service Availability MW and Utilisation Price data will be added here when the service goes live. \r\n\r\nAdditional transparency data for Non-BM Reserve services mastered by OBP can be found in <u><font color=rgb(176,74,42)><a href=\"https://www.neso.energy/data-portal/obp-non-bm-reserve-instructions\">Non-BM Instructions</a></font></u> and <u><font color=rgb(176,74,42)><a href=\"https://www.neso.energy/data-portal/obp-non-bm-physical-notifications\">Non-BM Physical Notifications</a></font></u>.\r\n",
+        "owner_org": "487b7d6e-ddc8-47bf-8746-425ad687e768",
+        "extras": [
+          {
+            "key": "Update frequency",
+            "value": "Ad hoc"
+          }
+        ],
+        "license_url": "https://www.neso.energy/data-portal/ngeso-open-licence",
+        "title": "Open Balancing Platform (OBP) - Reserve Availability MW and Utilisation Price",
+        "revision_id": "31f79b87-8280-4507-8a3c-ef011b4b9b3f"
+      },
+      {
+        "license_title": "NESO Open Data Licence",
+        "maintainer": "",
+        "relationships_as_object": [],
+        "private": false,
+        "maintainer_email": "",
+        "num_tags": 10,
+        "id": "73edf630-fe9e-45a6-a2be-fa0d31a8ec1d",
+        "metadata_created": "2025-09-29T14:11:31.364555",
+        "metadata_modified": "2026-04-13T23:31:29.379906",
+        "author": "",
+        "author_email": "",
+        "state": "active",
+        "version": "",
+        "creator_user_id": "1abec7e0-65fd-477f-aa48-e8b358e810af",
+        "type": "dataset",
+        "resources": [
+          {
+            "cache_last_updated": null,
+            "package_id": "73edf630-fe9e-45a6-a2be-fa0d31a8ec1d",
+            "datastore_active": true,
+            "id": "dfe1d229-e973-43c6-b5eb-c28ad59d7136",
+            "size": null,
+            "metadata_modified": "2026-04-13T23:31:28.790918",
+            "state": "active",
+            "hash": "",
+            "description": "This Data File contains Non-BM Physical Notifications (PN) data declared to OBP by Service Providers, once declarations have been accepted and validated by OBP system by gate closure.\r\nThis information is continuously published throughout the day on this platform.",
+            "format": "CSV",
+            "mimetype_inner": null,
+            "url_type": "upload",
+            "datastore_unique_keys": [
+              "Unit ID",
+              "Time From"
+            ],
+            "mimetype": null,
+            "cache_url": null,
+            "name": "Non-BM Physical Notifications",
+            "created": "2025-09-29T14:12:07.949772",
+            "url": "https://api.neso.energy/dataset/73edf630-fe9e-45a6-a2be-fa0d31a8ec1d/resource/dfe1d229-e973-43c6-b5eb-c28ad59d7136/download/pn_20260414_04_nbm.csv",
+            "datastore_append_or_update": true,
+            "last_modified": "2026-04-13T23:31:29.317048",
+            "position": 0,
+            "revision_id": "b4f6a4dd-a9ca-4b12-a285-3d70b433fe90",
+            "resource_type": null
+          }
+        ],
+        "num_resources": 1,
+        "tags": [
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Ancillary",
+            "id": "0e1bf523-6bfe-4bff-990c-a8fd2e528f4d",
+            "name": "Ancillary"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Dispatch",
+            "id": "4c07dc51-62a1-49b8-8ad9-fd61532833f2",
+            "name": "Dispatch"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Instructions",
+            "id": "e4351dbf-1b32-4ebe-af2b-e02546cd1ed3",
+            "name": "Instructions"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "MW Dispatch",
+            "id": "eefb6433-6774-42e4-90c3-9df209477dee",
+            "name": "MW Dispatch"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Non-BM",
+            "id": "66f8b3a2-4c62-42ba-9f0b-031305f28a95",
+            "name": "Non-BM"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Quick Reserve",
+            "id": "4e6f1a12-8fbe-4671-84cf-78853ff2e2f2",
+            "name": "Quick Reserve"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Reserve",
+            "id": "98684d4e-c1aa-4af3-82a5-7de2ade67455",
+            "name": "Reserve"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Service",
+            "id": "14868e37-0064-49c8-9be8-5a31626c82ba",
+            "name": "Service"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Slow Reserve",
+            "id": "4ce3a204-a532-4e63-b0f1-a4c87e27b465",
+            "name": "Slow Reserve"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Subscribable",
+            "id": "fb80a4a5-bda6-4679-9c06-4decec4a0917",
+            "name": "Subscribable"
+          }
+        ],
+        "groups": [],
+        "license_id": "ESO",
+        "relationships_as_subject": [],
+        "organization": {
+          "description": "Data on services that balance demand and supply including Fast Reserve, Firm Frequency Response and STOR.",
+          "created": "2019-10-12T12:19:45.791918",
+          "title": "Ancillary services",
+          "name": "ancillary-services",
+          "is_organization": true,
+          "state": "active",
+          "image_url": "2024-09-30-075648.819270Ancillary-services.svg",
+          "revision_id": "d784da8d-7052-4133-aa15-7ac316347d06",
+          "type": "organization",
+          "id": "487b7d6e-ddc8-47bf-8746-425ad687e768",
+          "approval_status": "approved"
+        },
+        "name": "obp-non-bm-physical-notifications",
+        "isopen": false,
+        "url": "",
+        "notes": "NESO publishes Non-BM Physical Notifications (PN) data declared by Service Providers to Open Balancing Platform (OBP) system. This information is continuously published throughout the day on this platform. As of today, this page hosts Non-BM Quick Reserve Service PN data, and non-BM Slow Reserve & non-BM Dynamic Response PN data will be added here as the services goes live/cut-over. \r\n\r\nAdditional transparency data for Non-BM Reserve services mastered by OBP can be found in <u><font color=rgb(176,74,42)><a href=\"https://www.neso.energy/data-portal/obp-non-bm-reserve-instructions\">Non-BM Instructions</a></font></u> and <u><font color=rgb(176,74,42)><a href=\"https://www.neso.energy/data-portal/obp-reserve-availability-utilisation-price\">Non-BM Reserve Availability and Utilisation price</a></font></u>.\r\n",
+        "owner_org": "487b7d6e-ddc8-47bf-8746-425ad687e768",
+        "extras": [
+          {
+            "key": "Update frequency",
+            "value": "Ad hoc"
+          }
+        ],
+        "license_url": "https://www.neso.energy/data-portal/ngeso-open-licence",
+        "title": "Open Balancing Platform (OBP) - Non-BM Physical Notifications (PN)",
+        "revision_id": "11aa2927-282a-4552-a970-9373d4321f44"
+      },
+      {
+        "license_title": "NESO Open Data Licence",
+        "maintainer": "",
+        "relationships_as_object": [],
+        "private": false,
+        "maintainer_email": "",
+        "num_tags": 5,
+        "id": "932245c1-2322-4515-bf5e-ea2093ba1333",
+        "metadata_created": "2019-11-13T07:53:53.901470",
+        "metadata_modified": "2026-04-13T23:30:11.960459",
+        "author": "National Grid Electricity System Operator",
+        "author_email": "",
+        "state": "active",
+        "version": "",
+        "creator_user_id": "91aeb31f-299c-46dc-b289-966044bbfdcd",
+        "type": "dataset",
+        "resources": [
+          {
+            "force": "true",
+            "cache_last_updated": null,
+            "package_id": "932245c1-2322-4515-bf5e-ea2093ba1333",
+            "datastore_active": true,
+            "id": "0b7e84ec-eded-4458-b111-d29ba4508e85",
+            "size": null,
+            "metadata_modified": "2026-04-13T23:30:11.207432",
+            "state": "active",
+            "hash": "",
+            "description": "This dataset displays all upcoming GTMA (Grid Trade Master Agreement) trades due to be delivered. The data is refreshed every ten minutes.",
+            "format": "CSV",
+            "mimetype_inner": null,
+            "url_type": "datastore",
+            "mimetype": null,
+            "cache_url": null,
+            "name": "Upcoming Trades",
+            "created": "2021-05-07T10:19:54.222055",
+            "url": "https://api.neso.energy/datastore/dump/0b7e84ec-eded-4458-b111-d29ba4508e85",
+            "last_modified": "2026-04-13T22:00:13",
+            "position": 0,
+            "revision_id": "a37f5000-12d6-4fd8-ba70-0f6a036f24f3",
+            "resource_type": null
+          }
+        ],
+        "num_resources": 1,
+        "tags": [
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Balancing",
+            "id": "0398cefd-1d64-41d9-b4ed-0252b97eef62",
+            "name": "Balancing"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Energy",
+            "id": "70ebd17f-5bec-425c-a837-8d8617ac6104",
+            "name": "Energy"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Subscribable",
+            "id": "fb80a4a5-bda6-4679-9c06-4decec4a0917",
+            "name": "Subscribable"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "System",
+            "id": "9ca0a2ec-480d-4ae3-9425-41faed1b0651",
+            "name": "System"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Trades",
+            "id": "6e65b46a-4450-4cc4-88c2-87fd0cc0e603",
+            "name": "Trades"
+          }
+        ],
+        "groups": [],
+        "license_id": "ESO",
+        "relationships_as_subject": [],
+        "organization": {
+          "description": "We trade power exchange, forward energy, and balancing contracts to meet forecast energy needs, in advance of the balancing mechanism.",
+          "created": "2019-10-31T16:54:44.487635",
+          "title": "Trading",
+          "name": "trade-data",
+          "is_organization": true,
+          "state": "active",
+          "image_url": "2024-09-30-082921.286460Trading.svg",
+          "revision_id": "d479bf8d-8b83-43ca-a8cf-3ff5c59bf12a",
+          "type": "organization",
+          "id": "16468228-f545-4fdc-b6d7-31013e5bf568",
+          "approval_status": "approved"
+        },
+        "name": "upcoming-trades",
+        "isopen": false,
+        "url": "",
+        "notes": "This dataset displays all upcoming electricity trades due to be delivered.<br>\r\nTo meet our forecast balancing requirements at minimum cost, we trade energy-related products. The data is refreshed every ten minutes.<br>\r\nThe trade details should be considered provisional and subject to correction in particular following the usual trade confirmation process with the counterparty, and should not therefore be relied upon. We draw your attention to the disclaimers in our <u><font color=rgb(176,74,42)><a href=\"https://trades.nationalgrid.co.uk/terms-and-conditions\">terms and conditions</a></font></u>.<br>",
+        "owner_org": "16468228-f545-4fdc-b6d7-31013e5bf568",
+        "extras": [
+          {
+            "key": "Status",
+            "value": "Live"
+          }
+        ],
+        "license_url": "https://www.neso.energy/data-portal/ngeso-open-licence",
+        "title": "Upcoming trades",
+        "revision_id": "bdea9493-435f-41e4-98bd-582476e1bd09"
+      },
+      {
+        "license_title": "NESO Open Data Licence",
+        "maintainer": "",
+        "relationships_as_object": [],
+        "private": false,
+        "maintainer_email": "",
+        "num_tags": 7,
+        "id": "ca6fc361-9099-4ab2-ac02-c959431e84bc",
+        "metadata_created": "2024-07-16T12:40:14.962115",
+        "metadata_modified": "2026-04-13T23:29:19.316207",
+        "author": "",
+        "author_email": "",
+        "state": "active",
+        "version": "",
+        "creator_user_id": "059c32b8-4f6d-409a-9385-656238f7650a",
+        "type": "dataset",
+        "resources": [
+          {
+            "mimetype": null,
+            "cache_url": null,
+            "name": "14 Day Ahead Operational Metered Wind Forecast",
+            "hash": "",
+            "description": "This resource contains the national 0-14 day ahead wind forecasts for all the windfarms which provide real-time operational metering (SCADA telemetry) to the NESO.",
+            "metadata_modified": "2026-04-13T23:29:04.933945",
+            "cache_last_updated": null,
+            "url": "https://api.neso.energy/dataset/ca6fc361-9099-4ab2-ac02-c959431e84bc/resource/b1ae17c2-cc5e-4254-9bbf-3eddcf30d033/download/14da_wind_forecast_all.csv",
+            "datastore_active": true,
+            "format": "CSV",
+            "package_id": "ca6fc361-9099-4ab2-ac02-c959431e84bc",
+            "created": "2024-07-16T12:40:56.835385",
+            "state": "active",
+            "mimetype_inner": null,
+            "last_modified": "2026-04-13T23:29:05.313350",
+            "position": 0,
+            "revision_id": "5d03762f-4c57-4f6e-9de6-c863203b7cf5",
+            "url_type": "upload",
+            "id": "b1ae17c2-cc5e-4254-9bbf-3eddcf30d033",
+            "resource_type": null,
+            "size": null
+          },
+          {
+            "mimetype": null,
+            "cache_url": null,
+            "name": "14 Day Ahead Operational Metered Windfarm-Level Wind Forecast",
+            "hash": "",
+            "description": "This resource contains the windfarm-level 0-14 day ahead wind forecasts for all the windfarms which provide real-time operational metering (SCADA telemetry) to the NESO.\r\n\r\nThe regions used in this resource are defined using the ITL 1 regions for England alongside the DNO Licence areas for Wales and Scotland extended to their national borders. Offshore wind regions use the IHO Sea Areas split by which land area their connection to the mainland is in.",
+            "metadata_modified": "2026-04-13T23:29:18.665608",
+            "cache_last_updated": null,
+            "url": "https://api.neso.energy/dataset/ca6fc361-9099-4ab2-ac02-c959431e84bc/resource/31e6d895-af48-41bd-a4db-28a78c7e9c4b/download/14da_windunit_forecast_20260414_0028.csv",
+            "datastore_active": true,
+            "format": "CSV",
+            "package_id": "ca6fc361-9099-4ab2-ac02-c959431e84bc",
+            "created": "2024-07-16T12:44:20.904525",
+            "state": "active",
+            "mimetype_inner": null,
+            "last_modified": "2026-04-13T23:29:19.250802",
+            "position": 1,
+            "revision_id": "d8e5071b-7564-4ed1-9660-d1e78587853e",
+            "url_type": "upload",
+            "id": "31e6d895-af48-41bd-a4db-28a78c7e9c4b",
+            "resource_type": null,
+            "size": null
+          }
+        ],
+        "num_resources": 2,
+        "tags": [
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Forecast",
+            "id": "a80fd9ab-653a-4218-bf7b-aa78ebd0c6ac",
+            "name": "Forecast"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Medium-term",
+            "id": "52709061-db6f-4e71-8025-807cf1c17697",
+            "name": "Medium-term"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "National",
+            "id": "80fcb541-0848-4cde-9574-8e8e52907481",
+            "name": "National"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Operational-Metering",
+            "id": "517f4f4d-dbac-4781-86bf-392dcef34026",
+            "name": "Operational-Metering"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Subscribable",
+            "id": "fb80a4a5-bda6-4679-9c06-4decec4a0917",
+            "name": "Subscribable"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Wind",
+            "id": "a3db9c7a-931f-4e5a-a39a-8bed98e50072",
+            "name": "Wind"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Windfarm",
+            "id": "43ba24f8-1393-4a6f-81b6-7013ee525e4c",
+            "name": "Windfarm"
+          }
+        ],
+        "groups": [],
+        "license_id": "ESO",
+        "relationships_as_subject": [],
+        "organization": {
+          "description": "Forecast volumes and cost for reserve margin, wind generation, and generation by fuel type.",
+          "created": "2019-10-31T14:05:28.005545",
+          "title": "Generation",
+          "name": "generation",
+          "is_organization": true,
+          "state": "active",
+          "image_url": "2024-09-30-082745.732066Generation.svg",
+          "revision_id": "33d0b8f7-c74b-4230-bc54-ff8d37dfbdd4",
+          "type": "organization",
+          "id": "b4167cc5-1a14-4aa3-8fa2-9901fa66b06c",
+          "approval_status": "approved"
+        },
+        "name": "14-days-ahead-operational-metered-wind-forecasts",
+        "isopen": false,
+        "url": "",
+        "notes": "The dataset contains national and windfarm-level 0-14 Day Ahead wind forecasts for all the windfarms which provide real-time operational metering (SCADA telemetry) to the NESO. The forecasts are based on evaluated Operational Capacity, which is a deterministic value based on recent actual production levels of that windfarm, captured from SCADA telemetry.",
+        "owner_org": "b4167cc5-1a14-4aa3-8fa2-9901fa66b06c",
+        "extras": [
+          {
+            "key": "Update frequency",
+            "value": "Daily"
+          }
+        ],
+        "license_url": "https://www.neso.energy/data-portal/ngeso-open-licence",
+        "title": "14 Days Ahead Operational Metered Wind Forecasts",
+        "revision_id": "5084a0bd-d6d8-4f39-a1aa-762ca6999993"
+      },
+      {
+        "license_title": "NESO Open Data Licence",
+        "maintainer": "",
+        "relationships_as_object": [],
+        "private": false,
+        "maintainer_email": "",
+        "num_tags": 7,
+        "id": "025b9417-83a0-445b-a818-414ea49cf7c3",
+        "metadata_created": "2019-12-10T16:08:00.516804",
+        "metadata_modified": "2026-04-13T23:20:35.538490",
+        "author": "National Grid Electricity System Operator",
+        "author_email": "",
+        "state": "active",
+        "version": "",
+        "creator_user_id": "a5f13177-b398-4489-9e34-0447dc6a2dab",
+        "type": "dataset",
+        "resources": [
+          {
+            "mimetype": null,
+            "cache_url": null,
+            "name": "Weekly Operational Planning Margin Requirement (OPMR)",
+            "hash": "",
+            "description": "The weekly Operational Planning Margin Requirement (OPMR) is published on a weekly basis and contains a view of 2-52 weeks ahead forecast for the OPMR. ",
+            "metadata_modified": "2026-04-13T23:20:34.636943",
+            "cache_last_updated": null,
+            "url": "https://api.neso.energy/dataset/025b9417-83a0-445b-a818-414ea49cf7c3/resource/c08419f5-a28d-4e35-87a4-676d7eb05713/download/csv_opmr_weekly.csv",
+            "datastore_active": true,
+            "format": "CSV",
+            "package_id": "025b9417-83a0-445b-a818-414ea49cf7c3",
+            "created": "2024-11-21T15:53:29.384919",
+            "state": "active",
+            "mimetype_inner": null,
+            "last_modified": "2026-04-13T23:20:35.461964",
+            "position": 0,
+            "revision_id": "74d51b29-6825-4079-a8ec-2919415fb7e5",
+            "url_type": "upload",
+            "id": "c08419f5-a28d-4e35-87a4-676d7eb05713",
+            "resource_type": null,
+            "size": null
+          }
+        ],
+        "num_resources": 1,
+        "tags": [
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Forecast",
+            "id": "a80fd9ab-653a-4218-bf7b-aa78ebd0c6ac",
+            "name": "Forecast"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Generation",
+            "id": "87d6fc4f-dce1-4cc2-8858-b9e839301cac",
+            "name": "Generation"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Margin",
+            "id": "b5539e83-d54a-45f7-8436-5149d562f506",
+            "name": "Margin"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "OPMR",
+            "id": "2886018b-c932-4a75-9202-7b141b62a620",
+            "name": "OPMR"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Reserve",
+            "id": "98684d4e-c1aa-4af3-82a5-7de2ade67455",
+            "name": "Reserve"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Subscribable",
+            "id": "fb80a4a5-bda6-4679-9c06-4decec4a0917",
+            "name": "Subscribable"
+          },
+          {
+            "vocabulary_id": null,
+            "state": "active",
+            "display_name": "Weekly",
+            "id": "60d89784-b946-4f8e-8a49-ca6ea79f8145",
+            "name": "Weekly"
+          }
+        ],
+        "groups": [],
+        "license_id": "ESO",
+        "relationships_as_subject": [],
+        "organization": {
+          "description": "Forecast volumes and cost for reserve margin, wind generation, and generation by fuel type.",
+          "created": "2019-10-31T14:05:28.005545",
+          "title": "Generation",
+          "name": "generation",
+          "is_organization": true,
+          "state": "active",
+          "image_url": "2024-09-30-082745.732066Generation.svg",
+          "revision_id": "33d0b8f7-c74b-4230-bc54-ff8d37dfbdd4",
+          "type": "organization",
+          "id": "b4167cc5-1a14-4aa3-8fa2-9901fa66b06c",
+          "approval_status": "approved"
+        },
+        "name": "weekly-opmr",
+        "isopen": false,
+        "url": "National Grid Electricity System Operator",
+        "notes": "OPMR is the amount of generation exceeding the demand forecast needed to meet our reserve requirement.<br>\r\nWhen assessing and publishing generation availability information against system requirements, the ESO includes an OPMR above demand forecast for 2-52 weeks ahead.<br><br>",
+        "owner_org": "b4167cc5-1a14-4aa3-8fa2-9901fa66b06c",
+        "extras": [
+          {
+            "key": "Update Frequency",
+            "value": "Weekly"
+          }
+        ],
+        "license_url": "https://www.neso.energy/data-portal/ngeso-open-licence",
+        "title": "Weekly operational planning margin requirement (OPMR)",
+        "revision_id": "c2494935-7866-46cd-955f-c8850deb9514"
+      }
+    ],
+    "search_facets": {}
+  }
+}

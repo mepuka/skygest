@@ -288,7 +288,7 @@ const adapter: DcatAdapter<
     rowFailureCount: fetched.rowFailures.length
   }),
   buildContextFromIndex: (idx, nowIso) =>
-    Effect.succeed(buildContextFromIndex(idx, nowIso)),
+    Effect.sync(() => buildContextFromIndex(idx, nowIso)),
   buildCandidateNodes: (fetched, idx, context) =>
     buildCandidateNodes(fetched.datasets, idx, context),
   onValidationFailure,

@@ -1,21 +1,37 @@
-import { AliasSchemeValues, type DistributionKind, type ExternalIdentifier } from "../../../domain/data-layer";
+import {
+  AliasSchemeValues,
+  type DistributionKind,
+  type ExternalIdentifier,
+  type WebUrl
+} from "../../../domain/data-layer";
+import { asWebUrl } from "../common/context";
 
 export const ENERGY_INSTITUTE_AGENT_FILE_SLUG = "energy-institute";
 export const ENERGY_INSTITUTE_CATALOG_SLUG = "energy-institute";
 
-export const ENERGY_INSTITUTE_SITE_URL = "https://www.energyinst.org";
+export const ENERGY_INSTITUTE_SITE_URL: WebUrl = asWebUrl(
+  "https://www.energyinst.org"
+);
 export const ENERGY_INSTITUTE_REVIEW_HOME_URL =
-  "https://www.energyinst.org/statistical-review";
+  asWebUrl("https://www.energyinst.org/statistical-review");
 export const ENERGY_INSTITUTE_REVIEW_RESOURCES_URL =
-  "https://www.energyinst.org/statistical-review/resources-and-data-downloads";
+  asWebUrl(
+    "https://www.energyinst.org/statistical-review/resources-and-data-downloads"
+  );
 export const ENERGY_INSTITUTE_REVIEW_CHARTING_PAGE_URL =
-  "https://www.energyinst.org/statistical-review/energy-charting-tool";
+  asWebUrl("https://www.energyinst.org/statistical-review/energy-charting-tool");
 export const ENERGY_INSTITUTE_REVIEW_CHARTING_APP_URL =
-  "https://www.energyinst.org/statistical-review/energy-charting-tool/energy-charting-tool";
+  asWebUrl(
+    "https://www.energyinst.org/statistical-review/energy-charting-tool/energy-charting-tool"
+  );
 export const ENERGY_INSTITUTE_TRACKER_PAGE_URL =
-  "https://www.energyinst.org/statistical-review/energy-transition-tracker";
+  asWebUrl(
+    "https://www.energyinst.org/statistical-review/energy-transition-tracker"
+  );
 export const ENERGY_INSTITUTE_TRACKER_APP_URL =
-  "https://www.energyinst.org/statistical-review/energy-transition-tracker/energy-transition-tracker";
+  asWebUrl(
+    "https://www.energyinst.org/statistical-review/energy-transition-tracker/energy-transition-tracker"
+  );
 
 export const ENERGY_INSTITUTE_CATALOG_TITLE = "Energy Institute Data Catalog";
 
@@ -24,7 +40,7 @@ export interface EnergyInstituteDistributionSpec {
   readonly kind: DistributionKind;
   readonly title: string;
   readonly description?: string | undefined;
-  readonly accessURL: string;
+  readonly accessURL: WebUrl;
   readonly format?: string | undefined;
   readonly mediaType?: string | undefined;
 }
@@ -35,16 +51,16 @@ export interface EnergyInstituteSeriesSpec {
   readonly title: string;
   readonly description: string;
   readonly cadence: "annual" | "irregular";
-  readonly seriesUrl: string;
+  readonly seriesUrl: WebUrl;
 }
 
 export interface EnergyInstituteDatasetManifestEntry {
   readonly key: string;
   readonly slug: string;
-  readonly mergeKey: string;
+  readonly mergeKey: WebUrl;
   readonly title: string;
   readonly description: string;
-  readonly landingPage: string;
+  readonly landingPage: WebUrl;
   readonly keywords: ReadonlyArray<string>;
   readonly themes: ReadonlyArray<string>;
   readonly series: EnergyInstituteSeriesSpec;
