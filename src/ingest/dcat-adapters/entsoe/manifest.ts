@@ -38,6 +38,12 @@ export interface EntsoeManifestEntry {
   readonly regulationArticle: string;
 }
 
+export interface EntsoeDatasetSeriesSpec {
+  readonly documentType: string;
+  readonly title: string;
+  readonly description: string;
+}
+
 // ---------------------------------------------------------------------------
 // Merge key helper
 // ---------------------------------------------------------------------------
@@ -67,6 +73,41 @@ export const entsoeDistributionSlug = (entry: EntsoeManifestEntry): string =>
 
 export const entsoeCatalogRecordSlug = (entry: EntsoeManifestEntry): string =>
   `${entsoeDatasetSlug(entry)}-cr`;
+
+export const entsoeDatasetSeriesSlug = (documentType: string): string =>
+  `entsoe-${documentType.toLowerCase()}-series`;
+
+const ENTSOE_DATASET_SERIES_SPECS: ReadonlyArray<EntsoeDatasetSeriesSpec> = [
+  {
+    documentType: "A09",
+    title: "ENTSO-E Scheduled Exchanges",
+    description:
+      "Day-ahead and realised scheduled exchange datasets on the ENTSO-E Transparency Platform."
+  },
+  {
+    documentType: "A61",
+    title: "ENTSO-E Net Transfer Capacity",
+    description:
+      "Day-ahead, week-ahead, month-ahead, and year-ahead net transfer capacity datasets on the ENTSO-E Transparency Platform."
+  },
+  {
+    documentType: "A65",
+    title: "ENTSO-E Total Load",
+    description:
+      "Actual and forecast total load datasets on the ENTSO-E Transparency Platform."
+  },
+  {
+    documentType: "A69",
+    title: "ENTSO-E Wind and Solar Forecast",
+    description:
+      "Day-ahead and intraday wind and solar forecast datasets on the ENTSO-E Transparency Platform."
+  }
+];
+
+export const entsoeDatasetSeriesSpecFor = (
+  documentType: string
+): EntsoeDatasetSeriesSpec | undefined =>
+  ENTSOE_DATASET_SERIES_SPECS.find((spec) => spec.documentType === documentType);
 
 // ---------------------------------------------------------------------------
 // Static manifest (~30 core datasets)

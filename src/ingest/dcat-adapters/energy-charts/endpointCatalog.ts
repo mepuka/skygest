@@ -43,11 +43,17 @@ export const endpointKeyFromPath = (path: string): string => trimPath(path);
 export const energyChartsDatasetSlug = (endpointKey: string): string =>
   `energy-charts-${endpointKey.replace(/[\/_]+/gu, "-")}`;
 
+export const energyChartsDatasetSeriesSlug = (endpointKey: string): string =>
+  `${energyChartsDatasetSlug(endpointKey)}-series`;
+
 export const energyChartsDistributionSlug = (endpointKey: string): string =>
   `${energyChartsDatasetSlug(endpointKey)}-api`;
 
 export const energyChartsCatalogRecordSlug = (endpointKey: string): string =>
   `${energyChartsDatasetSlug(endpointKey)}-cr`;
+
+export const energyChartsFamilyTitle = (endpointKey: string): string =>
+  `Energy Charts ${humanizeEndpointKey(endpointKey)}`;
 
 export const listEndpointFamilies = (
   document: EnergyChartsOpenApiDocument
@@ -64,7 +70,7 @@ export const listEndpointFamilies = (
         datasetSlug: energyChartsDatasetSlug(endpointKey),
         distributionSlug: energyChartsDistributionSlug(endpointKey),
         catalogRecordSlug: energyChartsCatalogRecordSlug(endpointKey),
-        title: `Energy Charts ${humanizeEndpointKey(endpointKey)}`,
+        title: energyChartsFamilyTitle(endpointKey),
         ...(getOperation.summary === undefined
           ? {}
           : { summary: getOperation.summary }),

@@ -12,11 +12,13 @@ import {
   Catalog,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution
 } from "../src/domain/data-layer";
 import {
   type CatalogIndex,
-  EntityIdLedger
+  EntityIdLedger,
+  loadCatalogIndexWith
 } from "../src/ingest/dcat-harness";
 import {
   buildCandidateNodes,
@@ -24,6 +26,7 @@ import {
   endpointKeyFromPath,
   energyChartsCatalogRecordSlug,
   energyChartsDatasetSlug,
+  energyChartsDatasetSeriesSlug,
   energyChartsDistributionSlug,
   ENERGY_CHARTS_AGENT_NAME,
   ENERGY_CHARTS_AGENT_SLUG,
@@ -52,6 +55,12 @@ const OPENAPI_FIXTURE = {
       get: {
         summary: "Public power generation",
         description: "Generation by source and time interval"
+      }
+    },
+    "/public_power_forecast": {
+      get: {
+        summary: "Public power forecast",
+        description: "Forecast generation by source and time interval"
       }
     },
     "/price": {
@@ -133,6 +142,7 @@ const emptyIndex = (): CatalogIndex => ({
 const readAgent = decodeJsonStringWith(Agent);
 const readCatalog = decodeJsonStringWith(Catalog);
 const readDataset = decodeJsonStringWith(Dataset);
+const readDatasetSeries = decodeJsonStringWith(DatasetSeries);
 const readDistribution = decodeJsonStringWith(Distribution);
 const readDataService = decodeJsonStringWith(DataService);
 const readLedger = decodeJsonStringWith(EntityIdLedger);
@@ -161,6 +171,7 @@ describe("energy-charts adapter", () => {
       const spec = yield* fetchSpec();
       expect(Object.keys(spec.paths)).toEqual([
         "/public_power",
+        "/public_power_forecast",
         "/price",
         "/",
         "/health"
@@ -209,13 +220,23 @@ describe("energy-charts adapter", () => {
         title: "Energy Charts Public Power",
         summary: "Public power generation",
         description: "Generation by source and time interval"
+      },
+      {
+        path: "/public_power_forecast",
+        endpointKey: "public_power_forecast",
+        datasetSlug: "energy-charts-public-power-forecast",
+        distributionSlug: "energy-charts-public-power-forecast-api",
+        catalogRecordSlug: "energy-charts-public-power-forecast-cr",
+        title: "Energy Charts Public Power Forecast",
+        summary: "Public power forecast",
+        description: "Forecast generation by source and time interval"
       }
     ]);
 
     const ctx = buildContextFromIndex(emptyIndex(), FIXTURE_NOW);
     const candidates = buildCandidateNodes(families, emptyIndex(), ctx);
 
-    expect(candidates).toHaveLength(9);
+    expect(candidates).toHaveLength(13);
     expect(candidates[0]).toMatchObject({
       _tag: "agent",
       slug: "fraunhofer-ise"
@@ -251,13 +272,36 @@ describe("energy-charts adapter", () => {
       "https://api.energy-charts.info/price"
     );
 
+    const publicPowerSeries = candidates.find(
+      (node): node is Extract<
+        (typeof candidates)[number],
+        { _tag: "dataset-series" }
+      > =>
+        node._tag === "dataset-series" &&
+        node.slug === energyChartsDatasetSeriesSlug("public_power")
+    );
+    const publicPowerDataset = candidates.find(
+      (node): node is Extract<(typeof candidates)[number], { _tag: "dataset" }> =>
+        node._tag === "dataset" && node.slug === "energy-charts-public-power"
+    );
+    const publicPowerForecastDataset = candidates.find(
+      (node): node is Extract<(typeof candidates)[number], { _tag: "dataset" }> =>
+        node._tag === "dataset" &&
+        node.slug === "energy-charts-public-power-forecast"
+    );
+    expect(publicPowerSeries?.data.title).toBe("Energy Charts Public Power");
+    expect(publicPowerDataset?.data.inSeries).toBe(publicPowerSeries?.data.id);
+    expect(publicPowerForecastDataset?.data.inSeries).toBe(
+      publicPowerSeries?.data.id
+    );
+
     const dataService = candidates.find(
       (node): node is Extract<
         (typeof candidates)[number],
         { _tag: "data-service" }
       > => node._tag === "data-service"
     );
-    expect(dataService?.data.servesDatasetIds).toHaveLength(2);
+    expect(dataService?.data.servesDatasetIds).toHaveLength(3);
   });
 
   it.effect("writes the first Fraunhofer run and reuses the same ids on rerun", () =>
@@ -302,17 +346,29 @@ describe("energy-charts adapter", () => {
         "data-services",
         "energy-charts-api.json"
       );
+      const datasetSeriesPath = nodePath.join(
+        tmp,
+        "catalog",
+        "dataset-series",
+        "energy-charts-public-power-series.json"
+      );
       const datasetPath = nodePath.join(
         tmp,
         "catalog",
         "datasets",
-        "energy-charts-price.json"
+        "energy-charts-public-power.json"
+      );
+      const forecastDatasetPath = nodePath.join(
+        tmp,
+        "catalog",
+        "datasets",
+        "energy-charts-public-power-forecast.json"
       );
       const distributionPath = nodePath.join(
         tmp,
         "catalog",
         "distributions",
-        "energy-charts-price-api.json"
+        "energy-charts-public-power-api.json"
       );
       const ledgerPath = nodePath.join(tmp, ".entity-ids.json");
 
@@ -325,8 +381,14 @@ describe("energy-charts adapter", () => {
       const firstDataService = yield* Effect.promise(() =>
         fsp.readFile(dataServicePath, "utf8").then(readDataService)
       );
+      const firstDatasetSeries = yield* Effect.promise(() =>
+        fsp.readFile(datasetSeriesPath, "utf8").then(readDatasetSeries)
+      );
       const firstDataset = yield* Effect.promise(() =>
         fsp.readFile(datasetPath, "utf8").then(readDataset)
+      );
+      const firstForecastDataset = yield* Effect.promise(() =>
+        fsp.readFile(forecastDatasetPath, "utf8").then(readDataset)
       );
       const firstDistribution = yield* Effect.promise(() =>
         fsp.readFile(distributionPath, "utf8").then(readDistribution)
@@ -338,10 +400,12 @@ describe("energy-charts adapter", () => {
       expect(firstCatalog.publisherAgentId).toBe(firstAgent.id);
       expect(firstDataService.publisherAgentId).toBe(firstAgent.id);
       expect(firstDataset.dataServiceIds).toEqual([firstDataService.id]);
+      expect(firstDataset.inSeries).toBe(firstDatasetSeries.id);
+      expect(firstForecastDataset.inSeries).toBe(firstDatasetSeries.id);
       expect(firstDataset.aliases).toEqual([
         {
           scheme: "energy-charts-endpoint",
-          value: "price",
+          value: "public_power",
           relation: "exactMatch"
         }
       ]);
@@ -363,6 +427,9 @@ describe("energy-charts adapter", () => {
       const secondDataService = yield* Effect.promise(() =>
         fsp.readFile(dataServicePath, "utf8").then(readDataService)
       );
+      const secondDatasetSeries = yield* Effect.promise(() =>
+        fsp.readFile(datasetSeriesPath, "utf8").then(readDatasetSeries)
+      );
       const secondDataset = yield* Effect.promise(() =>
         fsp.readFile(datasetPath, "utf8").then(readDataset)
       );
@@ -373,9 +440,16 @@ describe("energy-charts adapter", () => {
       expect(secondAgent.id).toBe(firstAgent.id);
       expect(secondCatalog.id).toBe(firstCatalog.id);
       expect(secondDataService.id).toBe(firstDataService.id);
+      expect(secondDatasetSeries.id).toBe(firstDatasetSeries.id);
       expect(secondDataset.id).toBe(firstDataset.id);
-      expect(secondDataService.servesDatasetIds).toHaveLength(2);
+      expect(secondDataService.servesDatasetIds).toHaveLength(3);
       expect(secondLedger).toEqual(firstLedger);
+
+      const reloaded = yield* loadCatalogIndexWith({
+        rootDir: tmp,
+        mergeAliasScheme: "energy-charts-endpoint"
+      }).pipe(Effect.provide(bunFsLayer));
+      expect(reloaded.index.allDatasetSeries).toHaveLength(1);
 
       yield* Effect.promise(() => cleanup(tmp));
     })

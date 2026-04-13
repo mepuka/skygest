@@ -3,9 +3,11 @@ import {
   CatalogRecord,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution,
   mintCatalogRecordId,
   mintDatasetId,
+  mintDatasetSeriesId,
   mintDistributionId,
   type ExternalIdentifier
 } from "../../../domain/data-layer";
@@ -20,6 +22,8 @@ import type { EntsoeManifestEntry } from "./manifest";
 import {
   entsoeCatalogRecordSlug,
   entsoeDatasetSlug,
+  entsoeDatasetSeriesSlug,
+  entsoeDatasetSeriesSpecFor,
   entsoeDistributionSlug,
   manifestMergeKey
 } from "./manifest";
@@ -38,6 +42,7 @@ const ENTSOE_API_BASE = "https://web-api.tp.entsoe.eu/api";
 // ---------------------------------------------------------------------------
 
 const decodeDataset = stripUndefinedAndDecodeWith(Dataset);
+const decodeDatasetSeries = stripUndefinedAndDecodeWith(DatasetSeries);
 const decodeDistribution = stripUndefinedAndDecodeWith(Distribution);
 const decodeCatalogRecord = stripUndefinedAndDecodeWith(CatalogRecord);
 const decodeDataService = stripUndefinedAndDecodeWith(DataService);
@@ -52,6 +57,16 @@ const freshDatasetAliases = (
   {
     scheme: ENTSOE_DATASET_ALIAS_SCHEME,
     value: manifestMergeKey(entry),
+    relation: "exactMatch"
+  }
+];
+
+const freshDatasetSeriesAliases = (
+  documentType: string
+): ReadonlyArray<ExternalIdentifier> => [
+  {
+    scheme: ENTSOE_DATASET_ALIAS_SCHEME,
+    value: `series:${documentType}`,
     relation: "exactMatch"
   }
 ];
@@ -87,6 +102,28 @@ const existingDatasetForEntry = (
   entry: EntsoeManifestEntry
 ): Dataset | null => idx.datasetsByMergeKey.get(manifestMergeKey(entry)) ?? null;
 
+const existingDatasetSeriesForDocumentType = (
+  idx: CatalogIndex,
+  ctx: BuildContext,
+  documentType: string
+): DatasetSeries | null => {
+  const spec = entsoeDatasetSeriesSpecFor(documentType);
+  if (spec === undefined) {
+    return null;
+  }
+
+  return idx.allDatasetSeries.find(
+    (series) =>
+      series.aliases.some(
+        (alias) =>
+          alias.scheme === ENTSOE_DATASET_ALIAS_SCHEME &&
+          alias.value === `series:${documentType}`
+      ) ||
+      (series.title === spec.title &&
+        (series.publisherAgentId ?? ctx.agent.id) === ctx.agent.id)
+  ) ?? null;
+};
+
 // ---------------------------------------------------------------------------
 // Entity builders
 // ---------------------------------------------------------------------------
@@ -96,7 +133,8 @@ const buildDatasetCandidate = (
   datasetId: Dataset["id"],
   ctx: BuildContext,
   existing: Dataset | null,
-  distributionIds: ReadonlyArray<Distribution["id"]>
+  distributionIds: ReadonlyArray<Distribution["id"]>,
+  datasetSeriesId: DatasetSeries["id"] | undefined
 ): Dataset =>
   decodeDataset({
     _tag: "Dataset" as const,
@@ -110,7 +148,7 @@ const buildDatasetCandidate = (
     themes: existing?.themes ?? [entry.category],
     distributionIds,
     dataServiceIds: [ctx.dataService.id],
-    inSeries: existing?.inSeries,
+    inSeries: existing?.inSeries ?? datasetSeriesId,
     aliases: unionAliases(
       existing?.aliases ?? [],
       freshDatasetAliases(entry)
@@ -118,6 +156,32 @@ const buildDatasetCandidate = (
     createdAt: existing?.createdAt ?? ctx.nowIso,
     updatedAt: ctx.nowIso
   });
+
+const buildDatasetSeriesCandidate = (
+  documentType: string,
+  ctx: BuildContext,
+  existing: DatasetSeries | null
+): DatasetSeries => {
+  const spec = entsoeDatasetSeriesSpecFor(documentType);
+  if (spec === undefined) {
+    throw new Error(`Missing ENTSO-E dataset-series spec for ${documentType}`);
+  }
+
+  return decodeDatasetSeries({
+    _tag: "DatasetSeries" as const,
+    id: existing?.id ?? mintDatasetSeriesId(),
+    title: existing?.title ?? spec.title,
+    description: existing?.description ?? spec.description,
+    publisherAgentId: existing?.publisherAgentId ?? ctx.agent.id,
+    cadence: existing?.cadence ?? "irregular",
+    aliases: unionAliases(
+      existing?.aliases ?? [],
+      freshDatasetSeriesAliases(documentType)
+    ),
+    createdAt: existing?.createdAt ?? ctx.nowIso,
+    updatedAt: ctx.nowIso
+  });
+};
 
 const buildDistributionCandidate = (
   entry: EntsoeManifestEntry,
@@ -175,6 +239,9 @@ export const buildCandidateNodes = (
   idx: CatalogIndex,
   ctx: BuildContext
 ): ReadonlyArray<IngestNode> => {
+  const datasetSeriesNodes: Array<
+    Extract<IngestNode, { _tag: "dataset-series" }>
+  > = [];
   const datasetNodes: Array<Extract<IngestNode, { _tag: "dataset" }>> = [];
   const distributionNodes: Array<
     Extract<IngestNode, { _tag: "distribution" }>
@@ -182,6 +249,47 @@ export const buildCandidateNodes = (
   const catalogRecordNodes: Array<
     Extract<IngestNode, { _tag: "catalog-record" }>
   > = [];
+
+  const entriesByDocumentType = new Map<string, Array<EntsoeManifestEntry>>();
+  for (const entry of entries) {
+    const bucket = entriesByDocumentType.get(entry.documentType);
+    if (bucket === undefined) {
+      entriesByDocumentType.set(entry.documentType, [entry]);
+    } else {
+      bucket.push(entry);
+    }
+  }
+
+  const datasetSeriesIdByDocumentType = new Map<string, DatasetSeries["id"]>();
+  for (const [documentType, members] of entriesByDocumentType) {
+    if (members.length < 2 || entsoeDatasetSeriesSpecFor(documentType) === undefined) {
+      continue;
+    }
+
+    const existingDatasetSeries = existingDatasetSeriesForDocumentType(
+      idx,
+      ctx,
+      documentType
+    );
+    const datasetSeries = buildDatasetSeriesCandidate(
+      documentType,
+      ctx,
+      existingDatasetSeries
+    );
+
+    datasetSeriesIdByDocumentType.set(documentType, datasetSeries.id);
+    datasetSeriesNodes.push({
+      _tag: "dataset-series",
+      slug: stableSlug(
+        existingDatasetSeries === null
+          ? undefined
+          : idx.datasetSeriesFileSlugById.get(existingDatasetSeries.id),
+        () => entsoeDatasetSeriesSlug(documentType)
+      ),
+      data: datasetSeries,
+      merged: existingDatasetSeries !== null
+    });
+  }
 
   for (const entry of entries) {
     const existingDataset = existingDatasetForEntry(idx, entry);
@@ -210,7 +318,8 @@ export const buildCandidateNodes = (
       datasetId,
       ctx,
       existingDataset,
-      [...preservedDistributionIds, apiDistribution.id]
+      [...preservedDistributionIds, apiDistribution.id],
+      datasetSeriesIdByDocumentType.get(entry.documentType)
     );
 
     const existingCatalogRecord =
@@ -288,6 +397,7 @@ export const buildCandidateNodes = (
       data: ctx.catalog,
       merged: ctx.catalogMerged
     },
+    ...datasetSeriesNodes,
     ...datasetNodes,
     ...distributionNodes,
     ...catalogRecordNodes,

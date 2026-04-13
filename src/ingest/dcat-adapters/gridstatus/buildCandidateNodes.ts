@@ -5,9 +5,11 @@ import {
   CatalogRecord,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution,
   mintCatalogRecordId,
   mintDatasetId,
+  mintDatasetSeriesId,
   mintDistributionId,
   type ExternalIdentifier
 } from "../../../domain/data-layer";
@@ -27,10 +29,12 @@ import {
   gridstatusCsvDistributionSlug,
   gridstatusDatasetLandingPage,
   gridstatusDatasetQueryUrl,
+  gridstatusDatasetSeriesSlug,
   gridstatusDatasetSlug
 } from "./endpointCatalog";
 
 const decodeDataset = stripUndefinedAndDecodeWith(Dataset);
+const decodeDatasetSeries = stripUndefinedAndDecodeWith(DatasetSeries);
 const decodeDistribution = stripUndefinedAndDecodeWith(Distribution);
 const decodeCatalogRecord = stripUndefinedAndDecodeWith(CatalogRecord);
 const decodeDataService = stripUndefinedAndDecodeWith(DataService);
@@ -124,7 +128,17 @@ const freshDatasetAliases = (
           value: dataset.source_url,
           relation: "closeMatch" as const
         }
-      ])
+  ])
+];
+
+const freshDatasetSeriesAliases = (
+  datasetId: string
+): ReadonlyArray<ExternalIdentifier> => [
+  {
+    scheme: GRIDSTATUS_DATASET_ALIAS_SCHEME,
+    value: `series:${datasetId}`,
+    relation: "exactMatch"
+  }
 ];
 
 const buildApiDistributionAliases = (
@@ -153,6 +167,226 @@ const existingDatasetForInfo = (
   idx: CatalogIndex,
   dataset: GridStatusDatasetInfo
 ): Dataset | null => idx.datasetsByMergeKey.get(dataset.id) ?? null;
+
+const CADENCE_TOKENS = new Set([
+  "hourly",
+  "daily",
+  "weekly",
+  "monthly",
+  "annual",
+  "yearly"
+]);
+
+const NUMERIC_UNIT_TOKENS = new Set([
+  "second",
+  "seconds",
+  "min",
+  "minute",
+  "minutes",
+  "hour",
+  "hours",
+  "day",
+  "days"
+]);
+
+const MARKET_STAGE_SUFFIXES: ReadonlyArray<ReadonlyArray<string>> = [
+  ["day", "ahead"],
+  ["real", "time"],
+  ["intraday"],
+  ["dam"],
+  ["hasp"],
+  ["ruc"],
+  ["sced"],
+  ["rtd"],
+  ["rtpd"],
+  ["fmm"],
+  ["ifm"],
+  ["ex", "post", "final"]
+];
+
+const GRIDSTATUS_TOKEN_DISPLAY: Record<string, string> = {
+  aeso: "AESO",
+  caiso: "CAISO",
+  eia: "EIA",
+  ercot: "ERCOT",
+  ieso: "IESO",
+  isone: "ISO-NE",
+  miso: "MISO",
+  nyiso: "NYISO",
+  pjm: "PJM",
+  spp: "SPP",
+  lmp: "LMP",
+  btm: "BTM",
+  as: "AS",
+  dam: "DAM",
+  hasp: "HASP",
+  ruc: "RUC",
+  sced: "SCED",
+  rtd: "RTD",
+  rtpd: "RTPD",
+  ifm: "IFM",
+  fmm: "FMM"
+};
+
+const stripCadenceSuffixTokens = (
+  tokens: ReadonlyArray<string>
+): ReadonlyArray<string> => {
+  const out = [...tokens];
+
+  while (out.length > 0) {
+    const last = out[out.length - 1]!;
+    const previous = out.length >= 2 ? out[out.length - 2]! : undefined;
+
+    if (CADENCE_TOKENS.has(last)) {
+      out.pop();
+      continue;
+    }
+
+    if (
+      previous !== undefined &&
+      /^\d+$/u.test(previous) &&
+      NUMERIC_UNIT_TOKENS.has(last)
+    ) {
+      out.splice(out.length - 2, 2);
+      continue;
+    }
+
+    break;
+  }
+
+  return out;
+};
+
+const endsWithTokens = (
+  tokens: ReadonlyArray<string>,
+  suffix: ReadonlyArray<string>
+): boolean =>
+  tokens.length >= suffix.length &&
+  suffix.every(
+    (token, index) => tokens[tokens.length - suffix.length + index] === token
+  );
+
+const stripMarketStageSuffixTokens = (
+  tokens: ReadonlyArray<string>,
+  knownIds: ReadonlySet<string>
+): ReadonlyArray<string> => {
+  let out = [...tokens];
+
+  while (true) {
+    let changed = false;
+
+    for (const suffix of MARKET_STAGE_SUFFIXES) {
+      if (!endsWithTokens(out, suffix)) {
+        continue;
+      }
+
+      const candidate = out.slice(0, out.length - suffix.length).join("_");
+      if (candidate.length === 0 || !knownIds.has(candidate)) {
+        continue;
+      }
+
+      out = out.slice(0, out.length - suffix.length);
+      changed = true;
+      break;
+    }
+
+    if (!changed) {
+      return out;
+    }
+  }
+};
+
+const gridstatusSeriesKeyForDataset = (
+  datasetId: string,
+  knownIds: ReadonlySet<string>
+): string => {
+  const cadenceStripped = stripCadenceSuffixTokens(
+    datasetId.split("_").filter((token) => token.length > 0)
+  );
+  return stripMarketStageSuffixTokens(cadenceStripped, knownIds).join("_");
+};
+
+const titleToken = (token: string): string =>
+  GRIDSTATUS_TOKEN_DISPLAY[token] ??
+  token[0]!.toUpperCase() + token.slice(1);
+
+const humanizeSeriesKey = (datasetId: string): string =>
+  datasetId
+    .split("_")
+    .filter((token) => token.length > 0)
+    .map(titleToken)
+    .join(" ");
+
+const cadenceFromPublicationFrequency = (
+  datasetInfo: GridStatusDatasetInfo
+): DatasetSeries["cadence"] | undefined => {
+  const frequency = datasetInfo.publication_frequency;
+  if (frequency === null || frequency === undefined) {
+    return undefined;
+  }
+
+  const normalized = frequency.trim().toLowerCase();
+  if (normalized.includes("annual") || normalized.includes("yearly")) {
+    return "annual";
+  }
+  if (normalized.includes("quarter")) {
+    return "quarterly";
+  }
+  if (normalized.includes("month")) {
+    return "monthly";
+  }
+  if (normalized.includes("week")) {
+    return "weekly";
+  }
+  if (normalized.includes("day") || normalized.includes("daily")) {
+    return "daily";
+  }
+
+  return undefined;
+};
+
+const cadenceForDatasetSeries = (
+  members: ReadonlyArray<GridStatusDatasetInfo>
+): DatasetSeries["cadence"] => {
+  const cadences = Array.from(
+    new Set(
+      members
+        .map(cadenceFromPublicationFrequency)
+        .filter((value): value is DatasetSeries["cadence"] => value !== undefined)
+    )
+  );
+
+  return cadences.length === 1 ? cadences[0]! : "irregular";
+};
+
+const buildDatasetSeriesTitle = (
+  familyKey: string,
+  members: ReadonlyArray<GridStatusDatasetInfo>
+): string =>
+  gridstatusDatasetTitle(
+    members.find((member) => member.id === familyKey)?.name ??
+      humanizeSeriesKey(familyKey)
+  );
+
+const buildDatasetSeriesDescription = (familyKey: string): string =>
+  `Collection of GridStatus ${humanizeSeriesKey(familyKey).toLowerCase()} datasets published as separate but related feeds.`;
+
+const existingDatasetSeriesForKey = (
+  idx: CatalogIndex,
+  ctx: BuildContext,
+  familyKey: string,
+  members: ReadonlyArray<GridStatusDatasetInfo>
+): DatasetSeries | null =>
+  idx.allDatasetSeries.find(
+    (series) =>
+      series.aliases.some(
+        (alias) =>
+          alias.scheme === GRIDSTATUS_DATASET_ALIAS_SCHEME &&
+          alias.value === `series:${familyKey}`
+      ) ||
+      (series.title === buildDatasetSeriesTitle(familyKey, members) &&
+        (series.publisherAgentId ?? ctx.agent.id) === ctx.agent.id)
+  ) ?? null;
 
 const existingGridStatusServedDatasetIds = (
   idx: CatalogIndex,
@@ -267,6 +501,7 @@ const buildDatasetCandidate = (input: {
   readonly idx: CatalogIndex;
   readonly existing: Dataset | null;
   readonly distributionIds: ReadonlyArray<Distribution["id"]>;
+  readonly datasetSeriesId: DatasetSeries["id"] | undefined;
 }): {
   readonly dataset: Dataset;
   readonly provenanceWarning: GridStatusProvenanceWarning | undefined;
@@ -309,7 +544,7 @@ const buildDatasetCandidate = (input: {
       themes: input.existing?.themes ?? ["grid operations"],
       distributionIds: input.distributionIds,
       dataServiceIds: [input.ctx.dataService.id],
-      inSeries: input.existing?.inSeries,
+      inSeries: input.existing?.inSeries ?? input.datasetSeriesId,
       aliases: unionAliases(
         input.existing?.aliases ?? [],
         freshDatasetAliases(input.datasetInfo)
@@ -321,6 +556,32 @@ const buildDatasetCandidate = (input: {
       resolution._tag === "warning" ? resolution.warning : undefined
   };
 };
+
+const buildDatasetSeriesCandidate = (input: {
+  readonly familyKey: string;
+  readonly members: ReadonlyArray<GridStatusDatasetInfo>;
+  readonly ctx: BuildContext;
+  readonly existing: DatasetSeries | null;
+}): DatasetSeries =>
+  decodeDatasetSeries({
+    _tag: "DatasetSeries" as const,
+    id: input.existing?.id ?? mintDatasetSeriesId(),
+    title:
+      input.existing?.title ??
+      buildDatasetSeriesTitle(input.familyKey, input.members),
+    description:
+      input.existing?.description ??
+      buildDatasetSeriesDescription(input.familyKey),
+    publisherAgentId: input.existing?.publisherAgentId ?? input.ctx.agent.id,
+    cadence:
+      input.existing?.cadence ?? cadenceForDatasetSeries(input.members),
+    aliases: unionAliases(
+      input.existing?.aliases ?? [],
+      freshDatasetSeriesAliases(input.familyKey)
+    ),
+    createdAt: input.existing?.createdAt ?? input.ctx.nowIso,
+    updatedAt: input.ctx.nowIso
+  });
 
 const buildApiDistributionCandidate = (
   datasetInfo: GridStatusDatasetInfo,
@@ -429,6 +690,9 @@ export const buildCandidateNodes = (
   ctx: BuildContext,
   baseUrl: string
 ): BuildCandidateNodesResult => {
+  const datasetSeriesNodes: Array<
+    Extract<IngestNode, { _tag: "dataset-series" }>
+  > = [];
   const datasetNodes: Array<Extract<IngestNode, { _tag: "dataset" }>> = [];
   const distributionNodes: Array<Extract<IngestNode, { _tag: "distribution" }>> =
     [];
@@ -436,6 +700,51 @@ export const buildCandidateNodes = (
     Extract<IngestNode, { _tag: "catalog-record" }>
   > = [];
   const provenanceWarnings: Array<GridStatusProvenanceWarning> = [];
+
+  const knownIds = new Set(datasets.map((dataset) => dataset.id));
+  const datasetsBySeriesKey = new Map<string, Array<GridStatusDatasetInfo>>();
+  for (const datasetInfo of datasets) {
+    const key = gridstatusSeriesKeyForDataset(datasetInfo.id, knownIds);
+    const bucket = datasetsBySeriesKey.get(key);
+    if (bucket === undefined) {
+      datasetsBySeriesKey.set(key, [datasetInfo]);
+    } else {
+      bucket.push(datasetInfo);
+    }
+  }
+
+  const datasetSeriesIdByKey = new Map<string, DatasetSeries["id"]>();
+  for (const [familyKey, members] of datasetsBySeriesKey) {
+    if (members.length < 2) {
+      continue;
+    }
+
+    const existingDatasetSeries = existingDatasetSeriesForKey(
+      idx,
+      ctx,
+      familyKey,
+      members
+    );
+    const datasetSeries = buildDatasetSeriesCandidate({
+      familyKey,
+      members,
+      ctx,
+      existing: existingDatasetSeries
+    });
+
+    datasetSeriesIdByKey.set(familyKey, datasetSeries.id);
+    datasetSeriesNodes.push({
+      _tag: "dataset-series",
+      slug: stableSlug(
+        existingDatasetSeries === null
+          ? undefined
+          : idx.datasetSeriesFileSlugById.get(existingDatasetSeries.id),
+        () => gridstatusDatasetSeriesSlug(familyKey)
+      ),
+      data: datasetSeries,
+      merged: existingDatasetSeries !== null
+    });
+  }
 
   for (const datasetInfo of datasets) {
     const existingDataset = existingDatasetForInfo(idx, datasetInfo);
@@ -476,7 +785,10 @@ export const buildCandidateNodes = (
         ...preservedDistributionIds,
         apiDistribution.id,
         csvDistribution.id
-      ]
+      ],
+      datasetSeriesId: datasetSeriesIdByKey.get(
+        gridstatusSeriesKeyForDataset(datasetInfo.id, knownIds)
+      )
     });
     if (provenanceWarning !== undefined) {
       provenanceWarnings.push(provenanceWarning);
@@ -561,6 +873,7 @@ export const buildCandidateNodes = (
         data: ctx.catalog,
         merged: ctx.catalogMerged
       },
+      ...datasetSeriesNodes,
       ...datasetNodes,
       ...distributionNodes,
       ...catalogRecordNodes,

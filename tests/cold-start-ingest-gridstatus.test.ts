@@ -13,11 +13,13 @@ import {
   CatalogRecord,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution
 } from "../src/domain/data-layer";
 import {
   type CatalogIndex,
-  EntityIdLedger
+  EntityIdLedger,
+  loadCatalogIndexWith
 } from "../src/ingest/dcat-harness";
 import {
   buildCandidateNodes,
@@ -35,6 +37,7 @@ import {
   gridstatusApiDistributionSlug,
   gridstatusCatalogRecordSlug,
   gridstatusCsvDistributionSlug,
+  gridstatusDatasetSeriesSlug,
   gridstatusDatasetSlug
 } from "../src/ingest/dcat-adapters/gridstatus";
 import { decodeJsonStringWith } from "../src/platform/Json";
@@ -95,7 +98,7 @@ const DATASET_FIXTURE = {
       is_in_snowflake: true,
       data_frequency: "1_HOUR",
       source_url: "https://services.pjm.com/",
-      publication_frequency: null,
+      publication_frequency: "daily",
       is_published: true,
       created_at_utc: "2025-06-26T18:52:17+00:00",
       status: "active"
@@ -127,6 +130,44 @@ const DATASET_FIXTURE = {
       data_frequency: "1_HOUR",
       source_url: null,
       publication_frequency: null,
+      is_published: true,
+      created_at_utc: "2025-06-26T18:52:17+00:00",
+      status: "active"
+    },
+    {
+      id: "pjm_load_forecast_7_day",
+      name: "PJM Load Forecast 7 Day",
+      description: "Seven-day PJM load forecast dataset",
+      earliest_available_time_utc: "2020-01-01T00:00:00+00:00",
+      latest_available_time_utc: "2026-04-09T00:00:00+00:00",
+      source: "pjm",
+      last_checked_time_utc: "2026-04-11T02:15:53+00:00",
+      primary_key_columns: ["interval_start_utc"],
+      publish_time_column: null,
+      time_index_column: "interval_start_utc",
+      subseries_index_column: null,
+      all_columns: [
+        {
+          name: "interval_start_utc",
+          type: "TIMESTAMP",
+          is_date: false,
+          is_numeric: false,
+          is_datetime: true
+        },
+        {
+          name: "load_mw",
+          type: "DOUBLE PRECISION",
+          is_date: false,
+          is_numeric: true,
+          is_datetime: false
+        }
+      ],
+      number_of_rows_approximate: 1000,
+      table_type: "table",
+      is_in_snowflake: true,
+      data_frequency: "1_HOUR",
+      source_url: "https://services.pjm.com/forecast",
+      publication_frequency: "daily",
       is_published: true,
       created_at_utc: "2025-06-26T18:52:17+00:00",
       status: "active"
@@ -355,6 +396,7 @@ const emptyIndex = (): CatalogIndex => ({
 const readAgent = decodeJsonStringWith(Agent);
 const readCatalog = decodeJsonStringWith(Catalog);
 const readDataset = decodeJsonStringWith(Dataset);
+const readDatasetSeries = decodeJsonStringWith(DatasetSeries);
 const readDistribution = decodeJsonStringWith(Distribution);
 const readDataService = decodeJsonStringWith(DataService);
 const readLedger = decodeJsonStringWith(EntityIdLedger);
@@ -380,7 +422,7 @@ describe("gridstatus adapter", () => {
         Redacted.make("gridstatus-secret"),
         GRIDSTATUS_BASE_URL
       );
-      expect(response.datasets).toHaveLength(2);
+      expect(response.datasets).toHaveLength(3);
       expect(response.datasets[0]?.id).toBe("pjm_load_forecast");
     }).pipe(
       Effect.provide(
@@ -433,7 +475,8 @@ describe("gridstatus adapter", () => {
       expect(response.pageCount).toBe(2);
       expect(response.datasets.map((dataset) => dataset.id)).toEqual([
         "pjm_load_forecast",
-        "gridstatus_status"
+        "gridstatus_status",
+        "pjm_load_forecast_7_day"
       ]);
       expect(response.rowFailures).toEqual([]);
     }).pipe(
@@ -448,7 +491,7 @@ describe("gridstatus adapter", () => {
               request,
               cursor === "page-2"
                 ? {
-                    data: [DATASET_FIXTURE.data[1]],
+                    data: [DATASET_FIXTURE.data[1], DATASET_FIXTURE.data[2]],
                     meta: {
                       page: 2,
                       limit: null,
@@ -527,6 +570,9 @@ describe("gridstatus adapter", () => {
     expect(gridstatusCatalogRecordSlug("pjm_load_forecast")).toBe(
       "gridstatus-pjm-load-forecast-cr"
     );
+    expect(gridstatusDatasetSeriesSlug("pjm_load_forecast")).toBe(
+      "gridstatus-pjm-load-forecast-series"
+    );
 
     const ctx = buildContextFromIndex(emptyIndex(), FIXTURE_NOW);
     const result = buildCandidateNodes(
@@ -537,11 +583,9 @@ describe("gridstatus adapter", () => {
     );
     const candidates = result.candidates;
 
-    expect(candidates).toHaveLength(11);
-    expect(result.provenanceWarnings).toHaveLength(1);
-    expect(result.provenanceWarnings[0]?.reason).toBe(
-      "missingRegistryAgent"
-    );
+    expect(candidates).toHaveLength(16);
+    expect(result.provenanceWarnings).toHaveLength(2);
+    expect(result.provenanceWarnings.every((warning) => warning.reason === "missingRegistryAgent")).toBe(true);
     expect(candidates[0]).toMatchObject({
       _tag: "agent",
       slug: "gridstatus"
@@ -554,6 +598,21 @@ describe("gridstatus adapter", () => {
       _tag: "data-service",
       slug: "gridstatus-api"
     });
+    const datasetSeriesNode = candidates.find(
+      (candidate): candidate is Extract<
+        typeof candidates[number],
+        { _tag: "dataset-series" }
+      > =>
+        candidate._tag === "dataset-series" &&
+        candidate.slug === "gridstatus-pjm-load-forecast-series"
+    );
+    const forecastDatasetNode = candidates.find(
+      (candidate): candidate is Extract<typeof candidates[number], { _tag: "dataset" }> =>
+        candidate._tag === "dataset" &&
+        candidate.slug === "gridstatus-pjm-load-forecast-7-day"
+    );
+    expect(datasetSeriesNode?.data.cadence).toBe("daily");
+    expect(forecastDatasetNode?.data.inSeries).toBe(datasetSeriesNode?.data.id);
   });
 
   it("emits an unknown-source warning without inventing provenance", () => {
@@ -684,11 +743,23 @@ describe("gridstatus adapter", () => {
           "data-services",
           "gridstatus-api.json"
         );
+        const datasetSeriesPath = nodePath.join(
+          tmp,
+          "catalog",
+          "dataset-series",
+          "gridstatus-pjm-load-forecast-series.json"
+        );
         const datasetPath = nodePath.join(
           tmp,
           "catalog",
           "datasets",
           "gridstatus-pjm-load-forecast.json"
+        );
+        const forecastDatasetPath = nodePath.join(
+          tmp,
+          "catalog",
+          "datasets",
+          "gridstatus-pjm-load-forecast-7-day.json"
         );
         const apiDistributionPath = nodePath.join(
           tmp,
@@ -713,8 +784,14 @@ describe("gridstatus adapter", () => {
         const firstDataService = yield* Effect.promise(() =>
           fsp.readFile(dataServicePath, "utf8").then(readDataService)
         );
+        const firstDatasetSeries = yield* Effect.promise(() =>
+          fsp.readFile(datasetSeriesPath, "utf8").then(readDatasetSeries)
+        );
         const firstDataset = yield* Effect.promise(() =>
           fsp.readFile(datasetPath, "utf8").then(readDataset)
+        );
+        const firstForecastDataset = yield* Effect.promise(() =>
+          fsp.readFile(forecastDatasetPath, "utf8").then(readDataset)
         );
         const firstApiDistribution = yield* Effect.promise(() =>
           fsp.readFile(apiDistributionPath, "utf8").then(readDistribution)
@@ -728,9 +805,12 @@ describe("gridstatus adapter", () => {
 
         expect(firstCatalog.publisherAgentId).toBe(firstAgent.id);
         expect(firstDataService.publisherAgentId).toBe(firstAgent.id);
-        expect(firstDataService.servesDatasetIds).toHaveLength(2);
+        expect(firstDataService.servesDatasetIds).toHaveLength(3);
+        expect(firstDatasetSeries.cadence).toBe("daily");
         expect(firstDataset.wasDerivedFrom).toEqual([PLACEHOLDER_AGENT_ID]);
         expect(firstDataset.publisherAgentId).toBe(firstAgent.id);
+        expect(firstDataset.inSeries).toBe(firstDatasetSeries.id);
+        expect(firstForecastDataset.inSeries).toBe(firstDatasetSeries.id);
         expect(firstDataset.aliases).toEqual([
           {
             scheme: "gridstatus-dataset-id",
@@ -791,6 +871,9 @@ describe("gridstatus adapter", () => {
         const secondDataService = yield* Effect.promise(() =>
           fsp.readFile(dataServicePath, "utf8").then(readDataService)
         );
+        const secondDatasetSeries = yield* Effect.promise(() =>
+          fsp.readFile(datasetSeriesPath, "utf8").then(readDatasetSeries)
+        );
         const secondDataset = yield* Effect.promise(() =>
           fsp.readFile(datasetPath, "utf8").then(readDataset)
         );
@@ -802,9 +885,16 @@ describe("gridstatus adapter", () => {
         );
 
         expect(secondDataService.id).toBe(firstDataService.id);
+        expect(secondDatasetSeries.id).toBe(firstDatasetSeries.id);
         expect(secondDataset.id).toBe(firstDataset.id);
         expect(secondApiDistribution.id).toBe(firstApiDistribution.id);
         expect(secondLedger).toEqual(firstLedger);
+
+        const reloaded = yield* loadCatalogIndexWith({
+          rootDir: tmp,
+          mergeAliasScheme: "gridstatus-dataset-id"
+        }).pipe(Effect.provide(bunFsLayer));
+        expect(reloaded.index.allDatasetSeries).toHaveLength(1);
 
         yield* Effect.promise(() => cleanup(tmp));
       })
