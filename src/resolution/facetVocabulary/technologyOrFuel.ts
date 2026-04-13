@@ -3,6 +3,7 @@ import type { VocabularyCollisionError } from "../../domain/errors";
 import {
   buildSurfaceFormLookup,
   makeSurfaceFormEntry,
+  matchAllSurfaceForms,
   matchSurfaceForm,
   parseSurfaceForm,
   type SurfaceFormLookup
@@ -33,6 +34,12 @@ export const matchTechnologyOrFuel = (
   text: string
 ): Option.Option<TechnologyOrFuelSurfaceForm> =>
   matchSurfaceForm(lookup, text);
+
+export const matchAllTechnologyOrFuel = (
+  lookup: TechnologyOrFuelLookup,
+  text: string
+): ReadonlyArray<TechnologyOrFuelSurfaceForm> =>
+  matchAllSurfaceForms(lookup, text);
 
 export const parseTechnologyOrFuel = (
   lookup: TechnologyOrFuelLookup,

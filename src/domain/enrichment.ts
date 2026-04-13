@@ -215,6 +215,9 @@ const LegacySourceAttributionEnrichment = Schema.Struct({
   socialProvenance: Schema.NullOr(SocialProvenance),
   processedAt: Schema.Number
 });
+const decodeLegacySourceAttributionEnrichment = Schema.decodeUnknownSync(
+  LegacySourceAttributionEnrichment
+);
 const LegacySourceAttributionEnrichmentNormalized = LegacySourceAttributionEnrichment.pipe(
   Schema.decodeTo(SourceAttributionEnrichmentV2, {
     decode: SchemaGetter.transform((
@@ -231,20 +234,15 @@ const LegacySourceAttributionEnrichmentNormalized = LegacySourceAttributionEnric
       };
     }),
     encode: SchemaGetter.transform((
-      value: Schema.Schema.Type<typeof SourceAttributionEnrichmentV2>
-    ) => ({
+      value: (typeof SourceAttributionEnrichmentV2)["Encoded"]
+    ) =>
+      decodeLegacySourceAttributionEnrichment({
         kind: value.kind,
-        provider:
-          value.provider as Schema.Schema.Type<
-            typeof LegacySourceAttributionEnrichment
-          >["provider"],
+        provider: value.provider,
         contentSource: value.contentSource,
-        socialProvenance:
-          value.socialProvenance as Schema.Schema.Type<
-            typeof LegacySourceAttributionEnrichment
-          >["socialProvenance"],
+        socialProvenance: value.socialProvenance,
         processedAt: value.processedAt
-      })) as any
+      }))
   })
 );
 export const SourceAttributionEnrichment = Schema.Union([

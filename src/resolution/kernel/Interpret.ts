@@ -1,8 +1,5 @@
 import { Option, Result } from "effect";
-import {
-  type PartialVariableFacetConflict,
-  PartialVariableJoinConflictError
-} from "../../domain/errors";
+import type { PartialVariableFacetConflict } from "../../domain/errors";
 import {
   EVIDENCE_PRECEDENCE,
   type ResolutionEvidenceBundle,
@@ -20,6 +17,9 @@ import {
 import { stripUndefined } from "../../platform/Json";
 import type { FacetVocabularyShape } from "../facetVocabulary";
 
+const DEFAULT_BUNDLE_ITEM_KEY = "bundle";
+const SEGMENT_DELIMITER = /(?:\s+\band\b\s+)|(?:\s+\bor\b\s+)|[;\n]+/giu;
+
 type EvidenceSite = {
   readonly source: ResolutionEvidenceSource;
   readonly text: string;
@@ -35,6 +35,12 @@ type FoldedAssignments = {
   readonly partial: PartialVariableShape;
   readonly evidence: ReadonlyArray<ResolutionEvidenceReference>;
   readonly tier: ResolutionEvidenceTier;
+};
+
+type FoldConflict = {
+  readonly left: FoldedAssignments;
+  readonly right: SiteAssignment;
+  readonly conflicts: ReadonlyArray<PartialVariableFacetConflict>;
 };
 
 export type InterpretedBundle =
@@ -56,7 +62,7 @@ export type InterpretedBundle =
       readonly tier: ResolutionEvidenceTier;
     };
 
-const REQUIRED_FACET_KEY_SET = new Set(REQUIRED_FACET_KEYS);
+const REQUIRED_FACET_KEY_SET: ReadonlySet<string> = new Set(REQUIRED_FACET_KEYS);
 
 const asOptionalString = (value: string | null | undefined): string | undefined => {
   if (value === null || value === undefined) {
@@ -67,15 +73,35 @@ const asOptionalString = (value: string | null | undefined): string | undefined 
   return trimmed.length > 0 ? trimmed : undefined;
 };
 
+const segmentText = (
+  source: ResolutionEvidenceSource,
+  text: string
+): ReadonlyArray<string> => {
+  if (source !== "post-text" && source !== "key-finding") {
+    return [text];
+  }
+
+  const segments = text
+    .split(SEGMENT_DELIMITER)
+    .map((segment) => segment.trim())
+    .filter((segment) => segment.length > 0);
+
+  return segments.length > 0 ? segments : [text];
+};
+
 const hasRequiredConflict = (
   conflicts: ReadonlyArray<PartialVariableFacetConflict>
-): boolean =>
-  conflicts.some((conflict) => REQUIRED_FACET_KEY_SET.has(conflict.facet as any));
+): boolean => conflicts.some((conflict) => REQUIRED_FACET_KEY_SET.has(conflict.facet));
 
 const matchSite = (
   site: EvidenceSite,
   vocabulary: FacetVocabularyShape
 ): SiteAssignment | null => {
+  const technologyOrFuel =
+    site.source === "series-label"
+      ? vocabulary.matchAllTechnologyOrFuel(site.text)[0]?.canonical
+      : Option.getOrUndefined(vocabulary.matchTechnologyOrFuel(site.text))?.canonical;
+
   const partial = stripUndefined({
     measuredProperty: Option.getOrUndefined(
       vocabulary.matchMeasuredProperty(site.text)
@@ -83,9 +109,7 @@ const matchSite = (
     domainObject: Option.getOrUndefined(
       vocabulary.matchDomainObject(site.text)
     )?.canonical,
-    technologyOrFuel: Option.getOrUndefined(
-      vocabulary.matchTechnologyOrFuel(site.text)
-    )?.canonical,
+    technologyOrFuel,
     statisticType: Option.getOrUndefined(
       vocabulary.matchStatisticType(site.text)
     )?.canonical,
@@ -116,7 +140,7 @@ const matchSite = (
 
 const foldAssignments = (
   assignments: ReadonlyArray<SiteAssignment>
-): Result.Result<FoldedAssignments, PartialVariableJoinConflictError> => {
+): Result.Result<FoldedAssignments, FoldConflict> => {
   let partial: PartialVariableShape = {};
   let evidence: Array<ResolutionEvidenceReference> = [];
   let tier: ResolutionEvidenceTier = "entailment";
@@ -130,11 +154,19 @@ const foldAssignments = (
     }
 
     if (hasRequiredConflict(joined.failure.conflicts)) {
-      return Result.fail(joined.failure);
+      return Result.fail({
+        left: {
+          partial,
+          evidence,
+          tier
+        },
+        right: assignment,
+        conflicts: joined.failure.conflicts
+      });
     }
 
-    // Non-required facet conflicts keep the higher-precedence assignment and
-    // downgrade the interpretation tier without failing the whole bundle.
+    // Non-required facet conflicts keep the earlier higher-precedence value and
+    // downgrade the interpretation tier without losing the accumulated fold.
     tier = "strong-heuristic";
   }
 
@@ -146,15 +178,21 @@ const foldAssignments = (
 };
 
 const buildSharedSites = (bundle: ResolutionEvidenceBundle): ReadonlyArray<EvidenceSite> => {
-  const sites: Array<EvidenceSite> = [];
+  const sitesBySource = new Map<ResolutionEvidenceSource, Array<EvidenceSite>>();
 
   const push = (
     source: ResolutionEvidenceSource,
     text: string | null | undefined
   ) => {
     const value = asOptionalString(text);
-    if (value !== undefined) {
-      sites.push({ source, text: value });
+    if (value === undefined) {
+      return;
+    }
+
+    for (const segment of segmentText(source, value)) {
+      const entries = sitesBySource.get(source) ?? [];
+      entries.push({ source, text: segment });
+      sitesBySource.set(source, entries);
     }
   };
 
@@ -181,7 +219,9 @@ const buildSharedSites = (bundle: ResolutionEvidenceBundle): ReadonlyArray<Evide
     push("publisher-hint", hint.label);
   }
 
-  return sites;
+  return EVIDENCE_PRECEDENCE.flatMap((source) =>
+    source === "series-label" ? [] : (sitesBySource.get(source) ?? [])
+  );
 };
 
 const buildItemSites = (
@@ -215,7 +255,10 @@ const buildItemSites = (
   return groups;
 };
 
-const buildDefaultItem = (): ResolutionHypothesisItem => ({
+const buildDefaultItem = (
+  bundle: ResolutionEvidenceBundle
+): ResolutionHypothesisItem => ({
+  itemKey: bundle.assetKey ?? DEFAULT_BUNDLE_ITEM_KEY,
   partial: {},
   evidence: []
 });
@@ -234,23 +277,43 @@ const buildAttachedContext = (bundle: ResolutionEvidenceBundle) =>
           })
   });
 
-const buildConflictHypothesis = (
-  sharedPartial: PartialVariableShape,
+const buildSharedConflictHypothesis = (
+  partial: PartialVariableShape,
   attachedContext: ReturnType<typeof buildAttachedContext>,
   evidence: ReadonlyArray<ResolutionEvidenceReference>,
-  itemKey?: string
+  tier: ResolutionEvidenceTier
 ): ResolutionHypothesis => ({
-  sharedPartial,
+  sharedPartial: partial,
   attachedContext,
   items: [
-    stripUndefined({
-      itemKey,
+    {
+      itemKey: DEFAULT_BUNDLE_ITEM_KEY,
       partial: {},
-      evidence: [...evidence]
-    })
+      evidence: []
+    }
   ],
   evidence: [...evidence],
-  tier: "strong-heuristic"
+  tier
+});
+
+const buildItemConflictHypothesis = (
+  partial: PartialVariableShape,
+  attachedContext: ReturnType<typeof buildAttachedContext>,
+  evidence: ReadonlyArray<ResolutionEvidenceReference>,
+  itemKey: string,
+  tier: ResolutionEvidenceTier
+): ResolutionHypothesis => ({
+  sharedPartial: {},
+  attachedContext,
+  items: [
+    {
+      itemKey,
+      partial,
+      evidence: [...evidence]
+    }
+  ],
+  evidence: [...evidence],
+  tier
 });
 
 export const interpretBundle = (
@@ -258,7 +321,6 @@ export const interpretBundle = (
   vocabulary: FacetVocabularyShape
 ): InterpretedBundle => {
   const attachedContext = buildAttachedContext(bundle);
-
   const sharedAssignments = buildSharedSites(bundle)
     .map((site) => matchSite(site, vocabulary))
     .filter((assignment): assignment is SiteAssignment => assignment !== null);
@@ -271,11 +333,17 @@ export const interpretBundle = (
       bundle,
       conflicts: foldedShared.failure.conflicts,
       hypotheses: [
-        buildConflictHypothesis({}, attachedContext, []),
-        buildConflictHypothesis(
-          sharedAssignments.at(-1)?.partial ?? {},
+        buildSharedConflictHypothesis(
+          foldedShared.failure.left.partial,
           attachedContext,
-          sharedAssignments.at(-1) === undefined ? [] : [sharedAssignments.at(-1)!.evidence]
+          foldedShared.failure.left.evidence,
+          foldedShared.failure.left.tier
+        ),
+        buildSharedConflictHypothesis(
+          foldedShared.failure.right.partial,
+          attachedContext,
+          [foldedShared.failure.right.evidence],
+          "strong-heuristic"
         )
       ],
       tier: "strong-heuristic"
@@ -297,16 +365,18 @@ export const interpretBundle = (
         bundle,
         conflicts: folded.failure.conflicts,
         hypotheses: [
-          buildConflictHypothesis(
+          buildSharedConflictHypothesis(
             foldedShared.success.partial,
             attachedContext,
-            foldedShared.success.evidence
+            foldedShared.success.evidence,
+            foldedShared.success.tier
           ),
-          buildConflictHypothesis(
-            assignments.at(-1)?.partial ?? {},
+          buildItemConflictHypothesis(
+            folded.failure.right.partial,
             attachedContext,
-            assignments.at(-1) === undefined ? [] : [assignments.at(-1)!.evidence],
-            itemKey
+            [folded.failure.right.evidence],
+            itemKey,
+            "strong-heuristic"
           )
         ],
         tier: "strong-heuristic"
@@ -327,7 +397,7 @@ export const interpretBundle = (
   }
 
   if (items.length === 0) {
-    items.push(buildDefaultItem());
+    items.push(buildDefaultItem(bundle));
   }
 
   const evidence = [
@@ -361,18 +431,4 @@ export const interpretBundle = (
           : "entailment"
     }
   };
-};
-
-export const buildEvidenceSitesInPrecedenceOrder = (
-  bundle: ResolutionEvidenceBundle
-): ReadonlyArray<EvidenceSite> => {
-  const itemSites = buildItemSites(bundle);
-  const sharedSites = buildSharedSites(bundle);
-
-  return EVIDENCE_PRECEDENCE.flatMap((source) => [
-    ...[...itemSites.values()].flatMap((sites) =>
-      sites.filter((site) => site.source === source)
-    ),
-    ...sharedSites.filter((site) => site.source === source)
-  ]);
 };

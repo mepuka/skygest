@@ -15,12 +15,16 @@ import {
 import {
   ResolveBulkResponse,
   ResolvePostRequest,
+  ResolvePostResponse,
   type ResolveBulkRequest,
   type ResolveBulkResponse as ResolveBulkResponseValue,
   type ResolvePostRequest as ResolvePostRequestValue,
   type ResolvePostResponse as ResolvePostResponseValue
 } from "../domain/resolution";
-import { type ResolverBulkItemError as ResolverBulkItemErrorValue } from "../domain/resolutionShared";
+import {
+  ResolverBulkItemError,
+  type ResolverBulkItemError as ResolverBulkItemErrorValue
+} from "../domain/resolutionShared";
 import {
   type EnrichmentExecutionPlan,
   type EnrichmentPlannedExistingEnrichment
@@ -91,6 +95,27 @@ export class ResolverService extends ServiceMap.Service<
       const planner = yield* EnrichmentPlanner;
       const stage1Resolver = yield* Stage1Resolver;
       const resolutionKernel = yield* ResolutionKernel;
+      const decodePostResponse = (input: unknown) =>
+        Schema.decodeUnknownEffect(ResolvePostResponse)(input).pipe(
+          Effect.mapError(
+            (decodeError) =>
+              new EnrichmentSchemaDecodeError({
+                message: formatSchemaParseError(decodeError),
+                operation: "ResolverService.resolvePost"
+              })
+          )
+        );
+      const decodeBulkResponse = (input: unknown) =>
+        Schema.decodeUnknownEffect(ResolveBulkResponse)(input).pipe(
+          Effect.mapError(
+            (decodeError) =>
+              new EnrichmentSchemaDecodeError({
+                message: formatSchemaParseError(decodeError),
+                operation: "ResolverService.resolveBulk"
+              })
+          )
+        );
+      const decodeBulkItemError = Schema.decodeUnknownSync(ResolverBulkItemError);
       const decodePostRequest = (input: unknown) =>
         Schema.decodeUnknownEffect(ResolvePostRequest)(input).pipe(
           Effect.mapError(
@@ -148,7 +173,7 @@ export class ResolverService extends ServiceMap.Service<
 
         const finishedAt = yield* Clock.currentTimeMillis;
 
-        return {
+        return yield* decodePostResponse({
           postUri: request.postUri,
           stage1,
           kernel,
@@ -158,7 +183,7 @@ export class ResolverService extends ServiceMap.Service<
             kernel: kernelFinishedAt - kernelStartedAt,
             total: finishedAt - startedAt
           }
-        } as ResolvePostResponseValue;
+        });
       });
 
       const resolveBulk = Effect.fn("ResolverService.resolveBulk")(function* (
@@ -189,7 +214,7 @@ export class ResolverService extends ServiceMap.Service<
           }
 
           const error = item.result.failure;
-          errors[item.postUri] = {
+          errors[item.postUri] = decodeBulkItemError({
             tag:
               typeof error === "object" &&
               error !== null &&
@@ -204,13 +229,13 @@ export class ResolverService extends ServiceMap.Service<
               typeof error.message === "string"
                 ? error.message
                 : stringifyUnknown(error)
-          };
+          });
         }
 
-        return {
+        return yield* decodeBulkResponse({
           results,
           errors
-        } as ResolveBulkResponseValue;
+        });
       });
 
       return {

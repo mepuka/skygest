@@ -312,7 +312,14 @@ export class FacetDecompositionError extends Schema.TaggedErrorClass<FacetDecomp
   "FacetDecompositionError",
   {
     postUri: PostUri,
-    lane: Schema.optionalKey(Schema.String),
+    lane: Schema.optionalKey(
+      Schema.Literals([
+        "shared-evidence",
+        "item-evidence",
+        "item-bind",
+        "agent-narrowing"
+      ])
+    ),
     facet: Schema.optionalKey(Schema.String),
     reason: Schema.String
   }

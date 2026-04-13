@@ -1,7 +1,55 @@
-import type { ResolutionOutcome } from "../../domain/resolutionKernel";
+import { Result } from "effect";
+import {
+  type BoundResolutionGapItem,
+  type ResolutionGap,
+  type ResolutionHypothesis,
+  type ResolutionOutcome
+} from "../../domain/resolutionKernel";
+import {
+  joinPartials,
+  missingRequired,
+  type PartialVariableShape
+} from "../../domain/partialVariableAlgebra";
 import { stripUndefined } from "../../platform/Json";
 import type { BoundHypothesis } from "./Bind";
 import type { InterpretedBundle } from "./Interpret";
+
+const asGap = (
+  item: BoundResolutionGapItem,
+  agentId?: BoundHypothesis["agentId"]
+): ResolutionGap =>
+  stripUndefined({
+    partial: item.semanticPartial,
+    missingRequired: item.missingRequired,
+    candidates: [...item.candidates],
+    reason: item.reason,
+    context: stripUndefined({
+      agentId,
+      attachedContext: item.attachedContext
+    })
+  });
+
+const hypothesisPartial = (hypothesis: ResolutionHypothesis): PartialVariableShape => {
+  const joined = joinPartials(
+    hypothesis.sharedPartial,
+    hypothesis.items[0]?.partial ?? {}
+  );
+
+  return Result.isSuccess(joined) ? joined.success : hypothesis.sharedPartial;
+};
+
+const gapFromConflictHypothesis = (
+  hypothesis: ResolutionHypothesis
+): ResolutionGap =>
+  stripUndefined({
+    partial: hypothesisPartial(hypothesis),
+    missingRequired: missingRequired(hypothesisPartial(hypothesis)),
+    candidates: [],
+    reason: "required-facet-conflict" as const,
+    context: {
+      attachedContext: hypothesis.attachedContext
+    }
+  });
 
 export const assembleOutcome = (
   interpreted: InterpretedBundle,
@@ -20,6 +68,7 @@ export const assembleOutcome = (
         bundle: interpreted.bundle,
         hypotheses: [...interpreted.hypotheses],
         conflicts: [...interpreted.conflicts],
+        gaps: interpreted.hypotheses.map(gapFromConflictHypothesis),
         tier: interpreted.tier
       });
     case "Hypothesis":
@@ -34,69 +83,70 @@ export const assembleOutcome = (
     };
   }
 
-  if (bound._tag === "Conflicted") {
-    return stripUndefined({
-      _tag: "Conflicted",
-      bundle: interpreted.bundle,
-      hypotheses: [bound.hypothesis],
-      conflicts: [...bound.conflicts],
-      tier: bound.hypothesis.tier
-    });
-  }
+  const boundItems = bound.items.filter((item) => item._tag === "bound");
+  const gapItems = bound.items.filter((item) => item._tag === "gap");
+  const gaps = gapItems.map((item) => asGap(item, bound.agentId));
 
-  const allMissingRequired =
-    bound.items.length > 0 &&
-    bound.items.every((item) => item.missingRequired.length > 0);
-  if (allMissingRequired) {
-    return stripUndefined({
-      _tag: "Underspecified",
-      bundle: interpreted.bundle,
-      partial: bound.items[0]?.semanticPartial ?? {},
-      missingRequired: [...(bound.items[0]?.missingRequired ?? [])],
-      tier: bound.hypothesis.tier
-    });
-  }
-
-  const allOutOfRegistry =
-    bound.items.length > 0 &&
-    bound.items.every(
-      (item) =>
-        item.missingRequired.length === 0 && item.candidates.length === 0
-    );
-  if (allOutOfRegistry) {
-    return {
-      _tag: "OutOfRegistry",
-      bundle: interpreted.bundle,
-      hypothesis: bound.hypothesis,
-      items: bound.items.map((item) => item.item)
-    };
-  }
-
-  const allResolved =
-    bound.items.length > 0 &&
-    bound.items.every((item) => item.candidates.length === 1);
-  if (allResolved) {
+  if (boundItems.length === bound.items.length && boundItems.length > 0) {
     return stripUndefined({
       _tag: "Resolved",
       bundle: interpreted.bundle,
       sharedPartial: bound.hypothesis.sharedPartial,
       attachedContext: bound.hypothesis.attachedContext,
-      items: bound.items.map((item) => {
-        const candidate = item.candidates[0]!;
-        return stripUndefined({
-          ...item.item,
-          variableId: candidate.variableId,
-          label: candidate.label
-        });
-      }),
+      items: [...bound.items],
+      confidence: bound.hypothesis.confidence,
       tier: bound.hypothesis.tier
     });
+  }
+
+  const allMissingRequired =
+    gapItems.length === bound.items.length &&
+    gapItems.every((item) => item.reason === "missing-required");
+  if (allMissingRequired) {
+    const firstGap = gapItems[0]!;
+    if (gapItems.every((item) => item.candidates.length === 0)) {
+      return {
+        _tag: "NoMatch",
+        bundle: interpreted.bundle,
+        reason: "Kernel could not bind an underspecified partial"
+      };
+    }
+
+    return stripUndefined({
+      _tag: "Underspecified",
+      bundle: interpreted.bundle,
+      partial: firstGap.semanticPartial,
+      missingRequired: [...(firstGap.missingRequired ?? [])],
+      gap: asGap(firstGap, bound.agentId),
+      confidence: bound.hypothesis.confidence,
+      tier: bound.hypothesis.tier
+    });
+  }
+
+  const allOutOfRegistry =
+    gapItems.length === bound.items.length &&
+    gapItems.every(
+      (item) =>
+        item.reason === "no-candidates" || item.reason === "agent-scope-empty"
+    );
+  if (allOutOfRegistry) {
+    const firstGap = gapItems[0]!;
+    return {
+      _tag: "OutOfRegistry",
+      bundle: interpreted.bundle,
+      hypothesis: bound.hypothesis,
+      items: [...bound.items],
+      gap: asGap(firstGap, bound.agentId)
+    };
   }
 
   return stripUndefined({
     _tag: "Ambiguous",
     bundle: interpreted.bundle,
     hypotheses: [bound.hypothesis],
+    items: [...bound.items],
+    gaps,
+    confidence: bound.hypothesis.confidence,
     tier: bound.hypothesis.tier
   });
 };
