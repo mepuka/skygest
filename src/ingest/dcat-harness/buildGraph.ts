@@ -40,6 +40,9 @@ export const buildIngestGraph = (
       Extract<IngestNode, { _tag: "data-service" }>
     > = [];
     const datasetNodes: Array<Extract<IngestNode, { _tag: "dataset" }>> = [];
+    const datasetSeriesNodes: Array<
+      Extract<IngestNode, { _tag: "dataset-series" }>
+    > = [];
     const distNodes: Array<Extract<IngestNode, { _tag: "distribution" }>> = [];
     const crNodes: Array<Extract<IngestNode, { _tag: "catalog-record" }>> = [];
 
@@ -57,6 +60,9 @@ export const buildIngestGraph = (
           break;
         case "dataset":
           datasetNodes.push(node);
+          break;
+        case "dataset-series":
+          datasetSeriesNodes.push(node);
           break;
         case "distribution":
           distNodes.push(node);
@@ -89,6 +95,16 @@ export const buildIngestGraph = (
           );
         }
       }
+      for (const datasetSeries of datasetSeriesNodes) {
+        if (datasetSeries.data.publisherAgentId === agent.data.id) {
+          Graph.addEdge(
+            mutable,
+            agentIdx,
+            nodeIndex(indexById, datasetSeries),
+            "publishes"
+          );
+        }
+      }
       for (const dataService of dataServiceNodes) {
         if (dataService.data.publisherAgentId === agent.data.id) {
           Graph.addEdge(
@@ -117,6 +133,16 @@ export const buildIngestGraph = (
 
     for (const dataset of datasetNodes) {
       const datasetIdx = nodeIndex(indexById, dataset);
+      for (const datasetSeries of datasetSeriesNodes) {
+        if (dataset.data.inSeries === datasetSeries.data.id) {
+          Graph.addEdge(
+            mutable,
+            nodeIndex(indexById, datasetSeries),
+            datasetIdx,
+            "has-series-member"
+          );
+        }
+      }
       for (const distribution of distNodes) {
         if (distribution.data.datasetId === dataset.data.id) {
           Graph.addEdge(

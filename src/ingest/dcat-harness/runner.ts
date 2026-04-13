@@ -107,6 +107,7 @@ const catalogIndexCounts = (idx: CatalogIndex) => ({
   catalogCount: idx.allCatalogs.length,
   dataServiceCount: idx.allDataServices.length,
   datasetCount: idx.allDatasets.length,
+  datasetSeriesCount: idx.allDatasetSeries.length,
   distributionCount: idx.allDistributions.length,
   catalogRecordCount: idx.allCatalogRecords.length
 });
@@ -117,6 +118,7 @@ const candidateCountsByKind = (candidates: ReadonlyArray<IngestNode>) => {
     catalog: 0,
     dataService: 0,
     dataset: 0,
+    datasetSeries: 0,
     distribution: 0,
     catalogRecord: 0
   };
@@ -134,6 +136,9 @@ const candidateCountsByKind = (candidates: ReadonlyArray<IngestNode>) => {
         break;
       case "dataset":
         byKind.dataset += 1;
+        break;
+      case "dataset-series":
+        byKind.datasetSeries += 1;
         break;
       case "distribution":
         byKind.distribution += 1;

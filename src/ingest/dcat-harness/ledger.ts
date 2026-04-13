@@ -20,6 +20,7 @@ const ledgerKindByTag: Record<IngestNode["_tag"], string> = {
   catalog: "Catalog",
   "data-service": "DataService",
   dataset: "Dataset",
+  "dataset-series": "DatasetSeries",
   distribution: "Distribution",
   "catalog-record": "CatalogRecord"
 };

@@ -3,9 +3,11 @@ import {
   CatalogRecord,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution,
   mintCatalogRecordId,
   mintDatasetId,
+  mintDatasetSeriesId,
   mintDistributionId,
   type ExternalIdentifier
 } from "../../../domain/data-layer";
@@ -34,6 +36,7 @@ const EUROPA_HARVEST_SOURCE = `${EUROPA_API_BASE}/ckan/package_search`;
 // ---------------------------------------------------------------------------
 
 const decodeDataset = stripUndefinedAndDecodeWith(Dataset);
+const decodeDatasetSeries = stripUndefinedAndDecodeWith(DatasetSeries);
 const decodeDistribution = stripUndefinedAndDecodeWith(Distribution);
 const decodeCatalogRecord = stripUndefinedAndDecodeWith(CatalogRecord);
 const decodeDataService = stripUndefinedAndDecodeWith(DataService);
@@ -101,8 +104,17 @@ const deriveDistributionKind = (
 // Slug helpers
 // ---------------------------------------------------------------------------
 
+const europaSlugPart = (value: string): string =>
+  value
+    .replace(/[^a-z0-9-]/giu, "-")
+    .replace(/-+/gu, "-")
+    .replace(/^-|-$/gu, "");
+
 const europaDatasetSlug = (datasetId: string): string =>
-  `europa-${datasetId.replace(/[^a-z0-9-]/giu, "-").replace(/-+/gu, "-").replace(/^-|-$/gu, "")}`;
+  `europa-${europaSlugPart(datasetId)}`;
+
+export const europaDatasetSeriesSlug = (datasetId: string): string =>
+  `europa-series-${europaSlugPart(datasetId)}`;
 
 const europaDistributionSlug = (
   datasetId: string,
@@ -157,6 +169,164 @@ const extractTranslationField = (
   return undefined;
 };
 
+const trimmedString = (value: string | null | undefined): string | undefined => {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const normalizeDatasetType = (
+  value: string | null | undefined
+): string | undefined =>
+  trimmedString(value)?.toLowerCase().replace(/-/gu, "_");
+
+const isDatasetSeriesInfo = (info: DataEuropaDatasetInfo): boolean =>
+  normalizeDatasetType(info.type) === "dataset_series";
+
+const rememberSeriesReference = <Id extends string>(
+  map: Map<string, Id>,
+  key: string | undefined,
+  id: Id
+) => {
+  if (key === undefined) {
+    return;
+  }
+
+  map.set(key, id);
+};
+
+const appendSeriesReference = (
+  out: Array<string>,
+  seen: Set<string>,
+  value: string | undefined
+) => {
+  if (value === undefined || seen.has(value)) {
+    return;
+  }
+
+  seen.add(value);
+  out.push(value);
+};
+
+const extractSeriesReferenceKeys = (value: unknown): ReadonlyArray<string> => {
+  const out: Array<string> = [];
+  const seen = new Set<string>();
+
+  const visit = (input: unknown): void => {
+    if (typeof input === "string") {
+      appendSeriesReference(out, seen, trimmedString(input));
+      return;
+    }
+
+    if (Array.isArray(input)) {
+      for (const item of input) {
+        visit(item);
+      }
+      return;
+    }
+
+    if (typeof input !== "object" || input === null) {
+      return;
+    }
+
+    if ("id" in input && typeof input.id === "string") {
+      appendSeriesReference(out, seen, trimmedString(input.id));
+    }
+
+    if ("name" in input && typeof input.name === "string") {
+      appendSeriesReference(out, seen, trimmedString(input.name));
+    }
+
+    if ("url" in input && typeof input.url === "string") {
+      appendSeriesReference(out, seen, trimmedString(input.url));
+    }
+
+    if ("uri" in input && typeof input.uri === "string") {
+      appendSeriesReference(out, seen, trimmedString(input.uri));
+    }
+  };
+
+  visit(value);
+  return out;
+};
+
+const seriesSourceKeys = (
+  info: DataEuropaDatasetInfo
+): ReadonlyArray<string> => {
+  const out: Array<string> = [];
+  const seen = new Set<string>();
+
+  appendSeriesReference(out, seen, trimmedString(info.id));
+  appendSeriesReference(out, seen, trimmedString(info.name ?? undefined));
+  appendSeriesReference(out, seen, trimmedString(info.url ?? undefined));
+
+  return out;
+};
+
+const extractDatasetSeriesReferences = (
+  info: DataEuropaDatasetInfo
+): ReadonlyArray<string> => {
+  const out: Array<string> = [];
+  const seen = new Set<string>();
+
+  for (const key of extractSeriesReferenceKeys(info.in_series)) {
+    appendSeriesReference(out, seen, key);
+  }
+
+  for (const key of extractSeriesReferenceKeys(info.series_navigation)) {
+    appendSeriesReference(out, seen, key);
+  }
+
+  return out;
+};
+
+const deriveCadence = (
+  frequency: string | null | undefined
+): DatasetSeries["cadence"] | undefined => {
+  const normalized = trimmedString(frequency)?.toLowerCase();
+  if (normalized === undefined) {
+    return undefined;
+  }
+
+  if (
+    normalized.includes("annual") ||
+    normalized.includes("yearly") ||
+    normalized.includes("annually")
+  ) {
+    return "annual";
+  }
+
+  if (normalized.includes("quarter")) {
+    return "quarterly";
+  }
+
+  if (normalized.includes("month")) {
+    return "monthly";
+  }
+
+  if (normalized.includes("week")) {
+    return "weekly";
+  }
+
+  if (normalized.includes("day") || normalized.includes("daily")) {
+    return "daily";
+  }
+
+  if (
+    normalized.includes("irregular") ||
+    normalized.includes("adhoc") ||
+    normalized.includes("ad hoc") ||
+    normalized.includes("as-needed")
+  ) {
+    return "irregular";
+  }
+
+  return undefined;
+};
+
 // ---------------------------------------------------------------------------
 // Alias builders
 // ---------------------------------------------------------------------------
@@ -169,6 +339,25 @@ const freshDatasetAliases = (
     value: datasetId,
     relation: "exactMatch"
   }
+];
+
+const freshDatasetSeriesAliases = (
+  info: DataEuropaDatasetInfo
+): ReadonlyArray<ExternalIdentifier> => [
+  {
+    scheme: EUROPA_DATASET_ALIAS_SCHEME,
+    value: info.id,
+    relation: "exactMatch"
+  },
+  ...(trimmedString(info.url ?? undefined) === undefined
+    ? []
+    : [
+        {
+          scheme: AliasSchemeValues.url,
+          value: trimmedString(info.url ?? undefined)!,
+          relation: "exactMatch" as const
+        }
+      ])
 ];
 
 // No URL aliases for EU federated catalog distributions — WMS/WFS endpoints
@@ -186,6 +375,32 @@ const existingDatasetForInfo = (
   idx: CatalogIndex,
   datasetId: string
 ): Dataset | null => idx.datasetsByMergeKey.get(datasetId) ?? null;
+
+const existingDatasetSeriesForInfo = (
+  idx: CatalogIndex,
+  ctx: BuildContext,
+  info: DataEuropaDatasetInfo
+): DatasetSeries | null => {
+  const title = buildDatasetSeriesTitle(info);
+  const url = trimmedString(info.url ?? undefined);
+
+  return idx.allDatasetSeries.find((series) =>
+    series.aliases.some(
+      (alias) =>
+        (alias.scheme === EUROPA_DATASET_ALIAS_SCHEME &&
+          alias.value === info.id) ||
+        (url !== undefined &&
+          alias.scheme === AliasSchemeValues.url &&
+          alias.value === url)
+    )
+  ) ??
+    idx.allDatasetSeries.find(
+      (series) =>
+        series.title === title &&
+        (series.publisherAgentId ?? ctx.agent.id) === ctx.agent.id
+    ) ??
+    null;
+};
 
 // ---------------------------------------------------------------------------
 // Dataset builder helpers
@@ -221,6 +436,15 @@ const buildDatasetDescription = (info: DataEuropaDatasetInfo): string | undefine
     ? `[Publisher: ${publisherName}] ${notes}`
     : notes;
 };
+
+const buildDatasetSeriesTitle = (info: DataEuropaDatasetInfo): string =>
+  extractTranslationField(info, "title") ??
+  trimmedString(info.name ?? undefined) ??
+  info.id;
+
+const buildDatasetSeriesDescription = (
+  info: DataEuropaDatasetInfo
+): string | undefined => extractTranslationField(info, "notes");
 
 const buildDatasetKeywords = (info: DataEuropaDatasetInfo): ReadonlyArray<string> | undefined => {
   const tags = info.tags;
@@ -300,7 +524,8 @@ const buildDatasetCandidate = (
   datasetId: Dataset["id"],
   ctx: BuildContext,
   existing: Dataset | null,
-  distributionIds: ReadonlyArray<Distribution["id"]>
+  distributionIds: ReadonlyArray<Distribution["id"]>,
+  resolvedSeriesId: DatasetSeries["id"] | undefined
 ): Dataset =>
   decodeDataset({
     _tag: "Dataset" as const,
@@ -317,7 +542,7 @@ const buildDatasetCandidate = (
     themes: existing?.themes ?? buildDatasetThemes(info),
     distributionIds,
     dataServiceIds: [ctx.dataService.id],
-    inSeries: existing?.inSeries,
+    inSeries: existing?.inSeries ?? resolvedSeriesId,
     aliases: unionAliases(
       existing?.aliases ?? [],
       freshDatasetAliases(info.id)
@@ -325,6 +550,33 @@ const buildDatasetCandidate = (
     createdAt: existing?.createdAt ?? ctx.nowIso,
     updatedAt: ctx.nowIso
   });
+
+const buildDatasetSeriesCandidate = (
+  info: DataEuropaDatasetInfo,
+  ctx: BuildContext,
+  existing: DatasetSeries | null
+): DatasetSeries | null => {
+  const cadence = existing?.cadence ?? deriveCadence(info.frequency ?? undefined);
+  if (cadence === undefined) {
+    return null;
+  }
+
+  return decodeDatasetSeries({
+    _tag: "DatasetSeries" as const,
+    id: existing?.id ?? mintDatasetSeriesId(),
+    title: existing?.title ?? buildDatasetSeriesTitle(info),
+    description:
+      existing?.description ?? buildDatasetSeriesDescription(info),
+    publisherAgentId: existing?.publisherAgentId ?? ctx.agent.id,
+    cadence,
+    aliases: unionAliases(
+      existing?.aliases ?? [],
+      freshDatasetSeriesAliases(info)
+    ),
+    createdAt: existing?.createdAt ?? ctx.nowIso,
+    updatedAt: ctx.nowIso
+  });
+};
 
 const buildDistributionCandidate = (
   resource: {
@@ -421,6 +673,9 @@ export const buildCandidateNodes = (
   idx: CatalogIndex,
   ctx: BuildContext
 ): ReadonlyArray<IngestNode> => {
+  const datasetSeriesNodes: Array<
+    Extract<IngestNode, { _tag: "dataset-series" }>
+  > = [];
   const datasetNodes: Array<Extract<IngestNode, { _tag: "dataset" }>> = [];
   const distributionNodes: Array<
     Extract<IngestNode, { _tag: "distribution" }>
@@ -431,8 +686,56 @@ export const buildCandidateNodes = (
 
   const seenTitles = new Set<string>();
   const seenDistributionUrls = new Set<string>();
+  const datasetSeriesIdBySourceKey = new Map<string, DatasetSeries["id"]>();
+
+  for (const existingSeries of idx.allDatasetSeries) {
+    for (const alias of existingSeries.aliases) {
+      if (
+        alias.scheme === EUROPA_DATASET_ALIAS_SCHEME ||
+        alias.scheme === AliasSchemeValues.url
+      ) {
+        rememberSeriesReference(
+          datasetSeriesIdBySourceKey,
+          alias.value,
+          existingSeries.id
+        );
+      }
+    }
+  }
 
   for (const info of datasets) {
+    if (!isDatasetSeriesInfo(info)) {
+      continue;
+    }
+
+    const existingSeries = existingDatasetSeriesForInfo(idx, ctx, info);
+    const datasetSeries = buildDatasetSeriesCandidate(info, ctx, existingSeries);
+    if (datasetSeries === null) {
+      continue;
+    }
+
+    for (const key of seriesSourceKeys(info)) {
+      rememberSeriesReference(datasetSeriesIdBySourceKey, key, datasetSeries.id);
+    }
+
+    datasetSeriesNodes.push({
+      _tag: "dataset-series",
+      slug: stableSlug(
+        existingSeries === null
+          ? undefined
+          : idx.datasetSeriesFileSlugById.get(existingSeries.id),
+        () => europaDatasetSeriesSlug(info.id)
+      ),
+      data: datasetSeries,
+      merged: existingSeries !== null
+    });
+  }
+
+  for (const info of datasets) {
+    if (isDatasetSeriesInfo(info)) {
+      continue;
+    }
+
     const title = buildDatasetTitle(info).toLowerCase();
     if (seenTitles.has(title)) continue;
     seenTitles.add(title);
@@ -492,12 +795,19 @@ export const buildCandidateNodes = (
       ...builtDistributions.map((built) => built.distribution.id)
     ];
 
+    const seriesReferences = extractDatasetSeriesReferences(info);
+    const resolvedSeriesId =
+      seriesReferences.length === 1
+        ? datasetSeriesIdBySourceKey.get(seriesReferences[0]!)
+        : undefined;
+
     const dataset = buildDatasetCandidate(
       info,
       datasetId,
       ctx,
       existingDataset,
-      distributionIds
+      distributionIds,
+      resolvedSeriesId
     );
 
     const existingCatalogRecord =
@@ -572,6 +882,7 @@ export const buildCandidateNodes = (
       data: ctx.catalog,
       merged: ctx.catalogMerged
     },
+    ...datasetSeriesNodes,
     ...datasetNodes,
     ...distributionNodes,
     ...catalogRecordNodes,

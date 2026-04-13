@@ -12,6 +12,7 @@ import {
   Catalog,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution
 } from "../src/domain/data-layer";
 import {
@@ -34,6 +35,7 @@ import {
   listEndpointFamilies,
   emberCatalogRecordSlug,
   emberDatasetSlug,
+  emberDatasetSeriesSlug,
   emberDistributionSlug,
   routeFromPath
 } from "../src/ingest/dcat-adapters/ember";
@@ -52,6 +54,12 @@ const OPENAPI_FIXTURE = {
       get: {
         summary: "Electricity generation by month",
         description: "Monthly generation by entity and series"
+      }
+    },
+    "/v1/electricity-generation/yearly": {
+      get: {
+        summary: "Electricity generation by year",
+        description: "Yearly generation by entity and series"
       }
     },
     "/v1/power-sector-emissions/yearly": {
@@ -92,6 +100,7 @@ const FIXTURE_SUBDIRS = [
   "agents",
   "catalogs",
   "datasets",
+  "dataset-series",
   "distributions",
   "catalog-records",
   "data-services"
@@ -131,6 +140,8 @@ const cleanup = (tmp: string) => fsp.rm(tmp, { recursive: true, force: true });
 const emptyIndex = (): CatalogIndex => ({
   datasetsByMergeKey: new Map(),
   datasetFileSlugById: new Map(),
+  datasetSeriesById: new Map(),
+  datasetSeriesFileSlugById: new Map(),
   distributionsByDatasetIdKind: new Map(),
   distributionFileSlugById: new Map(),
   catalogRecordsByCatalogAndPrimaryTopic: new Map(),
@@ -141,6 +152,7 @@ const emptyIndex = (): CatalogIndex => ({
   catalogsById: new Map(),
   dataServicesById: new Map(),
   allDatasets: [],
+  allDatasetSeries: [],
   allDistributions: [],
   allCatalogRecords: [],
   allCatalogs: [],
@@ -151,6 +163,7 @@ const emptyIndex = (): CatalogIndex => ({
 const readAgent = decodeJsonStringWith(Agent);
 const readCatalog = decodeJsonStringWith(Catalog);
 const readDataset = decodeJsonStringWith(Dataset);
+const readDatasetSeries = decodeJsonStringWith(DatasetSeries);
 const readDistribution = decodeJsonStringWith(Distribution);
 const readDataService = decodeJsonStringWith(DataService);
 const readLedger = decodeJsonStringWith(EntityIdLedger);
@@ -173,6 +186,7 @@ describe("ember adapter", () => {
       const spec = yield* fetchSpec(Redacted.make("ember-secret"));
       expect(Object.keys(spec.paths)).toEqual([
         "/v1/electricity-generation/monthly",
+        "/v1/electricity-generation/yearly",
         "/v1/power-sector-emissions/yearly",
         "/v1/options/electricity-generation/monthly/entity",
         "/health"
@@ -200,6 +214,9 @@ describe("ember adapter", () => {
     expect(emberDatasetSlug("electricity-generation/monthly")).toBe(
       "ember-electricity-generation-monthly"
     );
+    expect(emberDatasetSeriesSlug("electricity-generation")).toBe(
+      "ember-electricity-generation-series"
+    );
     expect(emberDistributionSlug("electricity-generation/monthly")).toBe(
       "ember-electricity-generation-monthly-api"
     );
@@ -215,6 +232,7 @@ describe("ember adapter", () => {
         resolution: "monthly",
         route: "electricity-generation/monthly",
         datasetSlug: "ember-electricity-generation-monthly",
+        datasetSeriesSlug: "ember-electricity-generation-series",
         distributionSlug: "ember-electricity-generation-monthly-api",
         catalogRecordSlug: "ember-electricity-generation-monthly-cr",
         title: "Ember Electricity Generation Monthly",
@@ -222,11 +240,25 @@ describe("ember adapter", () => {
         description: "Monthly generation by entity and series"
       },
       {
+        path: "/v1/electricity-generation/yearly",
+        family: "electricity-generation",
+        resolution: "yearly",
+        route: "electricity-generation/yearly",
+        datasetSlug: "ember-electricity-generation-yearly",
+        datasetSeriesSlug: "ember-electricity-generation-series",
+        distributionSlug: "ember-electricity-generation-yearly-api",
+        catalogRecordSlug: "ember-electricity-generation-yearly-cr",
+        title: "Ember Electricity Generation Yearly",
+        summary: "Electricity generation by year",
+        description: "Yearly generation by entity and series"
+      },
+      {
         path: "/v1/power-sector-emissions/yearly",
         family: "power-sector-emissions",
         resolution: "yearly",
         route: "power-sector-emissions/yearly",
         datasetSlug: "ember-power-sector-emissions-yearly",
+        datasetSeriesSlug: "ember-power-sector-emissions-series",
         distributionSlug: "ember-power-sector-emissions-yearly-api",
         catalogRecordSlug: "ember-power-sector-emissions-yearly-cr",
         title: "Ember Power Sector Emissions Yearly",
@@ -236,7 +268,7 @@ describe("ember adapter", () => {
 
     const ctx = buildContextFromIndex(emptyIndex(), FIXTURE_NOW);
     const candidates = buildCandidateNodes(families, emptyIndex(), ctx);
-    expect(candidates).toHaveLength(9);
+    expect(candidates).toHaveLength(13);
     expect(candidates[0]).toMatchObject({
       _tag: "agent",
       slug: "ember"
@@ -255,6 +287,13 @@ describe("ember adapter", () => {
         node._tag === "dataset" &&
         node.slug === "ember-electricity-generation-monthly"
     );
+    const generationSeries = candidates.find(
+      (
+        node
+      ): node is Extract<(typeof candidates)[number], { _tag: "dataset-series" }> =>
+        node._tag === "dataset-series" &&
+        node.slug === "ember-electricity-generation-series"
+    );
     expect(generationDataset?.data.aliases).toEqual([
       {
         scheme: "ember-route",
@@ -262,6 +301,15 @@ describe("ember adapter", () => {
         relation: "exactMatch"
       }
     ]);
+    expect(generationSeries?.data.aliases).toEqual([
+      {
+        scheme: "ember-route",
+        value: "electricity-generation",
+        relation: "exactMatch"
+      }
+    ]);
+    expect(generationSeries?.data.cadence).toBe("irregular");
+    expect(generationDataset?.data.inSeries).toBe(generationSeries?.data.id);
   });
 
   it.effect(
@@ -314,6 +362,18 @@ describe("ember adapter", () => {
           "datasets",
           "ember-electricity-generation-monthly.json"
         );
+        const datasetYearlyPath = nodePath.join(
+          tmp,
+          "catalog",
+          "datasets",
+          "ember-electricity-generation-yearly.json"
+        );
+        const datasetSeriesPath = nodePath.join(
+          tmp,
+          "catalog",
+          "dataset-series",
+          "ember-electricity-generation-series.json"
+        );
         const distributionPath = nodePath.join(
           tmp,
           "catalog",
@@ -334,6 +394,12 @@ describe("ember adapter", () => {
         const firstDataset = yield* Effect.promise(() =>
           fsp.readFile(datasetPath, "utf8").then(readDataset)
         );
+        const firstYearlyDataset = yield* Effect.promise(() =>
+          fsp.readFile(datasetYearlyPath, "utf8").then(readDataset)
+        );
+        const firstDatasetSeries = yield* Effect.promise(() =>
+          fsp.readFile(datasetSeriesPath, "utf8").then(readDatasetSeries)
+        );
         const firstDistribution = yield* Effect.promise(() =>
           fsp.readFile(distributionPath, "utf8").then(readDistribution)
         );
@@ -349,6 +415,9 @@ describe("ember adapter", () => {
         expect(firstCatalog.homepage).toBe("https://ember-energy.org/");
         expect(firstDataService.publisherAgentId).toBe(firstAgent.id);
         expect(firstDataset.dataServiceIds).toEqual([firstDataService.id]);
+        expect(firstDataset.inSeries).toBe(firstDatasetSeries.id);
+        expect(firstYearlyDataset.inSeries).toBe(firstDatasetSeries.id);
+        expect(firstDatasetSeries.cadence).toBe("irregular");
         expect(firstDataset.aliases).toEqual([
           {
             scheme: "ember-route",
@@ -364,6 +433,9 @@ describe("ember adapter", () => {
         expect(firstLedger["Catalog:ember"]).toBe(firstCatalog.id);
         expect(firstLedger["DataService:ember-energy-api"]).toBe(
           firstDataService.id
+        );
+        expect(firstLedger["DatasetSeries:ember-electricity-generation-series"]).toBe(
+          firstDatasetSeries.id
         );
         expect(emberTurkiyeAfter).toBe(emberTurkiyeBefore);
 
@@ -381,6 +453,12 @@ describe("ember adapter", () => {
         const secondDataset = yield* Effect.promise(() =>
           fsp.readFile(datasetPath, "utf8").then(readDataset)
         );
+        const secondYearlyDataset = yield* Effect.promise(() =>
+          fsp.readFile(datasetYearlyPath, "utf8").then(readDataset)
+        );
+        const secondDatasetSeries = yield* Effect.promise(() =>
+          fsp.readFile(datasetSeriesPath, "utf8").then(readDatasetSeries)
+        );
         const secondLedger = yield* Effect.promise(() =>
           fsp.readFile(ledgerPath, "utf8").then(readLedger)
         );
@@ -389,7 +467,9 @@ describe("ember adapter", () => {
         expect(secondCatalog.id).toBe(firstCatalog.id);
         expect(secondDataService.id).toBe(firstDataService.id);
         expect(secondDataset.id).toBe(firstDataset.id);
-        expect(secondDataService.servesDatasetIds).toHaveLength(2);
+        expect(secondYearlyDataset.id).toBe(firstYearlyDataset.id);
+        expect(secondDatasetSeries.id).toBe(firstDatasetSeries.id);
+        expect(secondDataService.servesDatasetIds).toHaveLength(3);
         expect(secondLedger).toEqual(firstLedger);
 
         yield* Effect.promise(() => cleanup(tmp));

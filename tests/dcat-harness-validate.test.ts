@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect } from "effect";
-import type { Agent, Dataset } from "../src/domain/data-layer";
+import type { Agent, Dataset, DatasetSeries } from "../src/domain/data-layer";
 import {
   type IngestNode,
   validateCandidatesWith,
@@ -40,6 +40,22 @@ const validDatasetBody = (
   title,
   publisherAgentId,
   accessRights: "public",
+  createdAt: FIXTURE_NOW,
+  updatedAt: FIXTURE_NOW,
+  aliases
+});
+
+const validDatasetSeriesBody = (
+  title: string,
+  ulid: string,
+  aliases: ReadonlyArray<FixtureAlias>,
+  publisherAgentId: string = "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB"
+) => ({
+  _tag: "DatasetSeries",
+  id: `https://id.skygest.io/dataset-series/dser_${ulid}`,
+  title,
+  publisherAgentId,
+  cadence: "annual",
   createdAt: FIXTURE_NOW,
   updatedAt: FIXTURE_NOW,
   aliases
@@ -119,6 +135,25 @@ describe("dcat-harness validate", () => {
       expect(successes).toHaveLength(1);
       expect(successes[0]!._tag).toBe("agent");
       expect(successes[0]!.slug).toBe("eia");
+    })
+  );
+
+  it.effect("validates dataset-series nodes through the shared harness path", () =>
+    Effect.gen(function* () {
+      const node: IngestNode = {
+        _tag: "dataset-series",
+        slug: "eia-mer",
+        merged: false,
+        data: validDatasetSeriesBody(
+          "EIA Monthly Energy Review",
+          "01KNQEZ5V57VJJJFYV6HWM03VD",
+          []
+        ) as unknown as DatasetSeries
+      };
+
+      const validated = yield* validateNodeWith(node, mapError);
+      expect(validated._tag).toBe("dataset-series");
+      expect(validated.data.id).toBe(node.data.id);
     })
   );
 });

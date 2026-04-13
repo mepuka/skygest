@@ -5,6 +5,7 @@ import {
   CatalogRecord,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution
 } from "../../domain/data-layer";
 import { formatSchemaParseError } from "../../platform/Json";
@@ -29,6 +30,10 @@ const decodeNode = (
       );
     case "dataset":
       return Schema.decodeUnknownEffect(Dataset)(node.data).pipe(
+        Effect.map((data) => ({ ...node, data }))
+      );
+    case "dataset-series":
+      return Schema.decodeUnknownEffect(DatasetSeries)(node.data).pipe(
         Effect.map((data) => ({ ...node, data }))
       );
     case "distribution":

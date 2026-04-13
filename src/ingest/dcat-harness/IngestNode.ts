@@ -4,6 +4,7 @@ import type {
   CatalogRecord,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution
 } from "../../domain/data-layer";
 
@@ -30,6 +31,12 @@ export type IngestNode =
       readonly _tag: "dataset";
       readonly slug: string;
       readonly data: Dataset;
+      readonly merged: boolean;
+    }
+  | {
+      readonly _tag: "dataset-series";
+      readonly slug: string;
+      readonly data: DatasetSeries;
       readonly merged: boolean;
     }
   | {

@@ -2,9 +2,11 @@ import {
   CatalogRecord,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution,
   mintCatalogRecordId,
   mintDatasetId,
+  mintDatasetSeriesId,
   mintDistributionId,
   type ExternalIdentifier
 } from "../../../domain/data-layer";
@@ -20,11 +22,13 @@ import {
   EMBER_DATASET_ALIAS_SCHEME,
   EMBER_LICENSE,
   EMBER_OPENAPI_URL,
+  emberFamilyTitle,
   type EndpointFamily
 } from "./endpointCatalog";
 import type { BuildContext } from "./buildContext";
 
 const decodeDataset = stripUndefinedAndDecodeWith(Dataset);
+const decodeDatasetSeries = stripUndefinedAndDecodeWith(DatasetSeries);
 const decodeDistribution = stripUndefinedAndDecodeWith(Distribution);
 const decodeCatalogRecord = stripUndefinedAndDecodeWith(CatalogRecord);
 const decodeDataService = stripUndefinedAndDecodeWith(DataService);
@@ -35,6 +39,16 @@ const freshDatasetAliases = (
   {
     scheme: EMBER_DATASET_ALIAS_SCHEME,
     value: family.route,
+    relation: "exactMatch"
+  }
+];
+
+const freshDatasetSeriesAliases = (
+  family: EndpointFamily
+): ReadonlyArray<ExternalIdentifier> => [
+  {
+    scheme: EMBER_DATASET_ALIAS_SCHEME,
+    value: family.family,
     relation: "exactMatch"
   }
 ];
@@ -54,12 +68,48 @@ const existingDatasetForFamily = (
   family: EndpointFamily
 ): Dataset | null => idx.datasetsByMergeKey.get(family.route) ?? null;
 
+const existingDatasetSeriesForFamily = (
+  idx: CatalogIndex,
+  ctx: BuildContext,
+  family: EndpointFamily
+): DatasetSeries | null =>
+  idx.allDatasetSeries.find(
+    (series) =>
+      series.aliases.some(
+        (alias) =>
+          alias.scheme === EMBER_DATASET_ALIAS_SCHEME &&
+          alias.value === family.family
+      ) ||
+      (series.title === buildDatasetSeriesTitle(family) &&
+        (series.publisherAgentId ?? ctx.agent.id) === ctx.agent.id)
+  ) ?? null;
+
+const cadenceForFamilies = (
+  families: ReadonlyArray<EndpointFamily>
+): DatasetSeries["cadence"] =>
+  families.every((family) => family.resolution === "monthly")
+    ? "monthly"
+    : families.every((family) => family.resolution === "yearly")
+      ? "annual"
+      : "irregular";
+
+const buildDatasetSeriesTitle = (family: EndpointFamily): string =>
+  `Ember ${emberFamilyTitle(family.family)}`;
+
+const buildDatasetSeriesDescription = (
+  families: ReadonlyArray<EndpointFamily>
+): string =>
+  families.length === 1
+    ? `Collection of Ember ${families[0]!.family.replace(/-/gu, " ")} datasets.`
+    : `Collection of Ember ${families[0]!.family.replace(/-/gu, " ")} datasets grouped by reporting resolution.`;
+
 const buildDatasetCandidate = (
   family: EndpointFamily,
   datasetId: Dataset["id"],
   ctx: BuildContext,
   existing: Dataset | null,
-  distributionIds: ReadonlyArray<Distribution["id"]>
+  distributionIds: ReadonlyArray<Distribution["id"]>,
+  datasetSeriesId: DatasetSeries["id"] | undefined
 ): Dataset =>
   decodeDataset({
     _tag: "Dataset" as const,
@@ -76,8 +126,30 @@ const buildDatasetCandidate = (
     temporal: existing?.temporal,
     distributionIds,
     dataServiceIds: [ctx.dataService.id],
-    inSeries: existing?.inSeries,
+    inSeries: existing?.inSeries ?? datasetSeriesId,
     aliases: unionAliases(existing?.aliases ?? [], freshDatasetAliases(family)),
+    createdAt: existing?.createdAt ?? ctx.nowIso,
+    updatedAt: ctx.nowIso
+  });
+
+const buildDatasetSeriesCandidate = (
+  family: EndpointFamily,
+  familyMembers: ReadonlyArray<EndpointFamily>,
+  ctx: BuildContext,
+  existing: DatasetSeries | null
+): DatasetSeries =>
+  decodeDatasetSeries({
+    _tag: "DatasetSeries" as const,
+    id: existing?.id ?? mintDatasetSeriesId(),
+    title: existing?.title ?? buildDatasetSeriesTitle(family),
+    description:
+      existing?.description ?? buildDatasetSeriesDescription(familyMembers),
+    publisherAgentId: existing?.publisherAgentId ?? ctx.agent.id,
+    cadence: existing?.cadence ?? cadenceForFamilies(familyMembers),
+    aliases: unionAliases(
+      existing?.aliases ?? [],
+      freshDatasetSeriesAliases(family)
+    ),
     createdAt: existing?.createdAt ?? ctx.nowIso,
     updatedAt: ctx.nowIso
   });
@@ -135,12 +207,59 @@ export const buildCandidateNodes = (
   idx: CatalogIndex,
   ctx: BuildContext
 ): ReadonlyArray<IngestNode> => {
+  const datasetSeriesNodes: Array<
+    Extract<IngestNode, { _tag: "dataset-series" }>
+  > = [];
   const datasetNodes: Array<Extract<IngestNode, { _tag: "dataset" }>> = [];
   const distributionNodes: Array<Extract<IngestNode, { _tag: "distribution" }>> =
     [];
   const catalogRecordNodes: Array<
     Extract<IngestNode, { _tag: "catalog-record" }>
   > = [];
+
+  const familiesByName = new Map<string, Array<EndpointFamily>>();
+  for (const family of families) {
+    const bucket = familiesByName.get(family.family);
+    if (bucket === undefined) {
+      familiesByName.set(family.family, [family]);
+    } else {
+      bucket.push(family);
+    }
+  }
+
+  const datasetSeriesIdByFamily = new Map<string, DatasetSeries["id"]>();
+
+  for (const [familyName, familyMembers] of familiesByName) {
+    if (familyMembers.length < 2) {
+      continue;
+    }
+
+    const representative = familyMembers[0]!;
+    const existingDatasetSeries = existingDatasetSeriesForFamily(
+      idx,
+      ctx,
+      representative
+    );
+    const datasetSeries = buildDatasetSeriesCandidate(
+      representative,
+      familyMembers,
+      ctx,
+      existingDatasetSeries
+    );
+
+    datasetSeriesIdByFamily.set(familyName, datasetSeries.id);
+    datasetSeriesNodes.push({
+      _tag: "dataset-series",
+      slug: stableSlug(
+        existingDatasetSeries === null
+          ? undefined
+          : idx.datasetSeriesFileSlugById.get(existingDatasetSeries.id),
+        () => representative.datasetSeriesSlug
+      ),
+      data: datasetSeries,
+      merged: existingDatasetSeries !== null
+    });
+  }
 
   for (const family of families) {
     const existingDataset = existingDatasetForFamily(idx, family);
@@ -165,7 +284,8 @@ export const buildCandidateNodes = (
       datasetId,
       ctx,
       existingDataset,
-      [...preservedDistributionIds, apiDistribution.id]
+      [...preservedDistributionIds, apiDistribution.id],
+      datasetSeriesIdByFamily.get(family.family)
     );
     const existingCatalogRecord =
       idx.catalogRecordsByCatalogAndPrimaryTopic.get(
@@ -238,6 +358,7 @@ export const buildCandidateNodes = (
       data: ctx.catalog,
       merged: ctx.catalogMerged
     },
+    ...datasetSeriesNodes,
     ...datasetNodes,
     ...distributionNodes,
     ...catalogRecordNodes,

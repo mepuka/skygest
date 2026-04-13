@@ -180,6 +180,7 @@ const FIXTURE_SUBDIRS = [
   "agents",
   "catalogs",
   "datasets",
+  "dataset-series",
   "distributions",
   "catalog-records",
   "data-services"
@@ -331,6 +332,8 @@ const cleanup = (tmp: string) => fsp.rm(tmp, { recursive: true, force: true });
 const emptyIndex = (): CatalogIndex => ({
   datasetsByMergeKey: new Map(),
   datasetFileSlugById: new Map(),
+  datasetSeriesById: new Map(),
+  datasetSeriesFileSlugById: new Map(),
   distributionsByDatasetIdKind: new Map(),
   distributionFileSlugById: new Map(),
   catalogRecordsByCatalogAndPrimaryTopic: new Map(),
@@ -341,6 +344,7 @@ const emptyIndex = (): CatalogIndex => ({
   catalogsById: new Map(),
   dataServicesById: new Map(),
   allDatasets: [],
+  allDatasetSeries: [],
   allDistributions: [],
   allCatalogRecords: [],
   allCatalogs: [],

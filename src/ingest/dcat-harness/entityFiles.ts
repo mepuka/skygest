@@ -5,6 +5,7 @@ import {
   CatalogRecord,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution
 } from "../../domain/data-layer";
 import {
@@ -20,6 +21,7 @@ const encodeAgentPretty = encodeJsonStringPrettyWith(Agent);
 const encodeCatalogPretty = encodeJsonStringPrettyWith(Catalog);
 const encodeDataServicePretty = encodeJsonStringPrettyWith(DataService);
 const encodeDatasetPretty = encodeJsonStringPrettyWith(Dataset);
+const encodeDatasetSeriesPretty = encodeJsonStringPrettyWith(DatasetSeries);
 const encodeDistributionPretty = encodeJsonStringPrettyWith(Distribution);
 const encodeCatalogRecordPretty = encodeJsonStringPrettyWith(CatalogRecord);
 
@@ -42,6 +44,13 @@ export const entityFilePathForNode = (
       );
     case "dataset":
       return path_.resolve(rootDir, "catalog", "datasets", `${node.slug}.json`);
+    case "dataset-series":
+      return path_.resolve(
+        rootDir,
+        "catalog",
+        "dataset-series",
+        `${node.slug}.json`
+      );
     case "distribution":
       return path_.resolve(
         rootDir,
@@ -69,6 +78,8 @@ export const encodeNodeData = (node: IngestNode): string => {
       return encodeDataServicePretty(node.data);
     case "dataset":
       return encodeDatasetPretty(node.data);
+    case "dataset-series":
+      return encodeDatasetSeriesPretty(node.data);
     case "distribution":
       return encodeDistributionPretty(node.data);
     case "catalog-record":
@@ -112,6 +123,15 @@ const decodeExistingNodeData = Effect.fn(
       if (Result.isFailure(decoded)) {
         return yield* new IngestLedgerError({
           message: `Cannot decode existing dataset file for ${node.slug}: ${formatSchemaParseError(decoded.failure)}`
+        });
+      }
+      return decoded.success;
+    }
+    case "dataset-series": {
+      const decoded = decodeJsonStringEitherWith(DatasetSeries)(content);
+      if (Result.isFailure(decoded)) {
+        return yield* new IngestLedgerError({
+          message: `Cannot decode existing dataset-series file for ${node.slug}: ${formatSchemaParseError(decoded.failure)}`
         });
       }
       return decoded.success;

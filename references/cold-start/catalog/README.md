@@ -18,6 +18,11 @@ CatalogRecord and DataService are derived/auxiliary -- they are
 load-bearing for federation provenance but surface in downstream
 validation only when their parent Dataset is resolved.
 
+`dataset-series/` contains DCAT `DatasetSeries` publisher groupings such as
+annual report lines or recurring release families. This is distinct from the
+measurement-side `Series` records under `references/cold-start/series/`, which
+lock a Variable to fixed dimensions. The names collide; the semantics do not.
+
 Minted IDs follow `https://id.skygest.io/{entity-kind}/{prefix}_{ULID}`.
 The ID ledger is at `../.entity-ids.json`. Use
 `bun scripts/cold-start-id.ts <entity-kind>` to mint new IDs.

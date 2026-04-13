@@ -22,6 +22,7 @@ export interface EndpointFamily {
   readonly resolution: "monthly" | "yearly";
   readonly route: string;
   readonly datasetSlug: string;
+  readonly datasetSeriesSlug: string;
   readonly distributionSlug: string;
   readonly catalogRecordSlug: string;
   readonly title: string;
@@ -31,7 +32,7 @@ export interface EndpointFamily {
 
 const trimPath = (path: string): string => path.replace(/^\/+|\/+$/gu, "");
 
-const titleCase = (value: string): string =>
+export const emberFamilyTitle = (value: string): string =>
   value
     .split(/[-/]+/u)
     .filter((token) => token.length > 0)
@@ -62,6 +63,9 @@ export const routeFromPath = (path: string): string | null => {
 export const emberDatasetSlug = (route: string): string =>
   `ember-${route.replace(/[\/_]+/gu, "-")}`;
 
+export const emberDatasetSeriesSlug = (family: string): string =>
+  `ember-${family.replace(/[\/_]+/gu, "-")}-series`;
+
 export const emberDistributionSlug = (route: string): string =>
   `${emberDatasetSlug(route)}-api`;
 
@@ -87,9 +91,10 @@ export const listEndpointFamilies = (
           resolution: resolution as EndpointFamily["resolution"],
           route,
           datasetSlug: emberDatasetSlug(route),
+          datasetSeriesSlug: emberDatasetSeriesSlug(family!),
           distributionSlug: emberDistributionSlug(route),
           catalogRecordSlug: emberCatalogRecordSlug(route),
-          title: `Ember ${titleCase(family!)} ${titleCase(resolution!)}`,
+          title: `Ember ${emberFamilyTitle(family!)} ${emberFamilyTitle(resolution!)}`,
           ...(getOperation.summary === undefined
             ? {}
             : { summary: getOperation.summary }),

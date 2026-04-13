@@ -24,6 +24,7 @@ import type {
   CatalogRecord,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution
 } from "../src/domain/data-layer";
 import {
@@ -50,6 +51,7 @@ import {
   loadLedger,
   saveLedger,
   slugifyRoute,
+  slugifySeriesRoute,
   unionAliases,
   validateCandidates,
   validateNode,
@@ -755,7 +757,8 @@ const fakeCatalog = (
 const fakeDataset = (
   slug: string,
   ulid: string,
-  publisherId: Agent["id"]
+  publisherId: Agent["id"],
+  inSeries?: DatasetSeries["id"]
 ): IngestNode => ({
   _tag: "dataset",
   slug,
@@ -765,6 +768,27 @@ const fakeDataset = (
     id: `https://id.skygest.io/dataset/ds_${ulid}` as unknown as Dataset["id"],
     title: slug,
     publisherAgentId: publisherId,
+    ...(inSeries === undefined ? {} : { inSeries }),
+    aliases: [],
+    createdAt: NOW,
+    updatedAt: NOW
+  }
+});
+
+const fakeDatasetSeries = (
+  slug: string,
+  ulid: string,
+  publisherId: Agent["id"]
+): IngestNode => ({
+  _tag: "dataset-series",
+  slug,
+  merged: false,
+  data: {
+    _tag: "DatasetSeries",
+    id: `https://id.skygest.io/dataset-series/dser_${ulid}` as unknown as DatasetSeries["id"],
+    title: slug,
+    publisherAgentId: publisherId,
+    cadence: "annual",
     aliases: [],
     createdAt: NOW,
     updatedAt: NOW
@@ -880,6 +904,33 @@ describe("buildIngestGraph", () => {
     expect(Graph.isAcyclic(graph)).toBe(true);
   });
 
+  it("orders dataset-series before its member dataset when Dataset.inSeries is set", () => {
+    const agent = fakeAgent("eia", "01KNQEZ5V57VJJJFYV6HWM03VB");
+    const datasetSeries = fakeDatasetSeries(
+      "eia-mer",
+      "01KNQEZ5V57VJJJFYV6HWM03VD",
+      (agent.data as Agent).id
+    );
+    const dataset = fakeDataset(
+      "eia-monthly-energy-review-2026-01",
+      "01KNQSXEPQHNVM0AVMA3SQRNK3",
+      (agent.data as Agent).id,
+      (datasetSeries.data as DatasetSeries).id
+    );
+
+    const graph = buildIngestGraph([dataset, datasetSeries, agent]);
+    const topoOrder = Array.from(Graph.values(Graph.topo(graph)));
+    const positions = new Map<string, number>();
+    topoOrder.forEach((node, idx) => positions.set(node.slug, idx));
+
+    expect(Graph.isAcyclic(graph)).toBe(true);
+    expect(positions.get("eia")! < positions.get("eia-mer")!).toBe(true);
+    expect(
+      positions.get("eia-mer")! <
+        positions.get("eia-monthly-energy-review-2026-01")!
+    ).toBe(true);
+  });
+
   it("emits Agent before Catalog before Dataset before {Distribution, CR, DataService} in topological order", () => {
     const agent = fakeAgent("eia", "01KNQEZ5V57VJJJFYV6HWM03VB");
     const catalog = fakeCatalog(
@@ -964,6 +1015,7 @@ interface FixtureEntity {
 
 interface FixtureSpec {
   readonly datasets?: ReadonlyArray<FixtureEntity>;
+  readonly datasetSeries?: ReadonlyArray<FixtureEntity>;
   readonly distributions?: ReadonlyArray<FixtureEntity>;
   readonly catalogRecords?: ReadonlyArray<FixtureEntity>;
   readonly dataServices?: ReadonlyArray<FixtureEntity>;
@@ -978,6 +1030,7 @@ const FIXTURE_SUBDIRS: ReadonlyArray<
   readonly [keyof FixtureSpec, string]
 > = [
   ["datasets", "datasets"],
+  ["datasetSeries", "dataset-series"],
   ["distributions", "distributions"],
   ["catalogRecords", "catalog-records"],
   ["dataServices", "data-services"],
@@ -1511,6 +1564,8 @@ const emptyIndex = (): Parameters<typeof buildDistributionCandidates>[3] => {
     datasetsByRoute: datasetsByMergeKey,
     datasetsByMergeKey,
     datasetFileSlugById: new Map(),
+    datasetSeriesById: new Map(),
+    datasetSeriesFileSlugById: new Map(),
     distributionsByDatasetIdKind: new Map(),
     distributionFileSlugById: new Map(),
     catalogRecordsByCatalogAndPrimaryTopic: new Map(),
@@ -1523,6 +1578,7 @@ const emptyIndex = (): Parameters<typeof buildDistributionCandidates>[3] => {
     catalog: null,
     dataService: null,
     allDatasets: [],
+    allDatasetSeries: [],
     allDistributions: [],
     allCatalogRecords: [],
     allCatalogs: [],
@@ -2007,6 +2063,52 @@ describe("buildCandidateNodes", () => {
     return walk;
   };
 
+  const makeFrequencySeriesWalk = (): ReadonlyMap<string, EiaApiResponse> => {
+    const walk = new Map<string, EiaApiResponse>();
+    walk.set("", {
+      response: {
+        id: "root",
+        name: "EIA API",
+        routes: [{ id: "electricity", name: "Electricity" }]
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("electricity", {
+      response: {
+        id: "electricity",
+        name: "Electricity",
+        routes: [{ id: "sales", name: "Sales" }]
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("electricity/sales", {
+      response: {
+        id: "sales",
+        name: "Electricity Sales",
+        description: "Parent route for electricity sales datasets",
+        routes: [
+          { id: "monthly", name: "Monthly" },
+          { id: "annual", name: "Annual" }
+        ]
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("electricity/sales/monthly", {
+      response: {
+        id: "monthly",
+        name: "Electricity Sales Monthly",
+        facets: [{ id: "stateid", description: null }],
+        defaultFrequency: "monthly"
+      }
+    } as unknown as EiaApiResponse);
+    walk.set("electricity/sales/annual", {
+      response: {
+        id: "annual",
+        name: "Electricity Sales Annual",
+        facets: [{ id: "stateid", description: null }],
+        defaultFrequency: "annual"
+      }
+    } as unknown as EiaApiResponse);
+    return walk;
+  };
+
   it("produces a 6-node candidate set for one leaf (agent + catalog + data-service + dataset + api distribution + cr)", () => {
     const ctx = makeBuilderCtx(FIXTURE_NOW);
     const nodes = buildCandidateNodes(makeWalk(), emptyIndex(), ctx);
@@ -2105,6 +2207,55 @@ describe("buildCandidateNodes", () => {
       // Dataset ID reused from existing (not re-minted)
       expect(datasetNode.data.id).toBe(existing.id);
     }
+  });
+
+  it("synthesizes a dataset-series for parent routes whose direct leaf children are frequency splits", () => {
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const nodes = buildCandidateNodes(makeFrequencySeriesWalk(), emptyIndex(), ctx);
+
+    const datasetSeriesNode = nodes.find(
+      (n): n is Extract<IngestNode, { _tag: "dataset-series" }> =>
+        n._tag === "dataset-series"
+    );
+    const monthlyDatasetNode = nodes.find(
+      (n): n is Extract<IngestNode, { _tag: "dataset" }> =>
+        n._tag === "dataset" && n.slug === "eia-electricity-sales-monthly"
+    );
+    const annualDatasetNode = nodes.find(
+      (n): n is Extract<IngestNode, { _tag: "dataset" }> =>
+        n._tag === "dataset" && n.slug === "eia-electricity-sales-annual"
+    );
+
+    expect(datasetSeriesNode?.slug).toBe(
+      slugifySeriesRoute("electricity/sales")
+    );
+    expect(datasetSeriesNode?.merged).toBe(false);
+    expect(datasetSeriesNode?.data.title).toBe("Electricity Sales");
+    expect(datasetSeriesNode?.data.description).toBe(
+      "Parent route for electricity sales datasets"
+    );
+    expect(datasetSeriesNode?.data.cadence).toBe("irregular");
+    expect(datasetSeriesNode?.data.aliases).toEqual([
+      {
+        scheme: "eia-route",
+        value: "electricity/sales",
+        relation: "exactMatch"
+      }
+    ]);
+    expect(monthlyDatasetNode?.data.inSeries).toBe(datasetSeriesNode?.data.id);
+    expect(annualDatasetNode?.data.inSeries).toBe(datasetSeriesNode?.data.id);
+
+    const graph = buildIngestGraph(nodes);
+    const topo = Array.from(Graph.values(Graph.topo(graph)));
+    const positions = new Map(topo.map((node, index) => [node.slug, index]));
+    expect(
+      positions.get("eia-electricity-sales-series")! <
+        positions.get("eia-electricity-sales-monthly")!
+    ).toBe(true);
+    expect(
+      positions.get("eia-electricity-sales-series")! <
+        positions.get("eia-electricity-sales-annual")!
+    ).toBe(true);
   });
 
   it("reuses existing dataset, distribution, and catalog-record slugs when merging", () => {
@@ -2632,7 +2783,14 @@ describe("entityFilePathForNode", () => {
   it.effect("routes each IngestNode tag to the right <rootDir>/catalog subdirectory", () =>
     Effect.gen(function* () {
       const path_ = yield* Path.Path;
-      const nodes = makePhaseBNodes();
+      const nodes = [
+        ...makePhaseBNodes(),
+        fakeDatasetSeries(
+          "eia-mer",
+          "01KNQEZ5V57VJJJFYV6HWM03VD",
+          "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB" as Agent["id"]
+        )
+      ];
       const rootDir = "/tmp/cold-start-test";
       const byTag = new Map<IngestNode["_tag"], string>();
       for (const n of nodes) {
@@ -2650,6 +2808,7 @@ describe("entityFilePathForNode", () => {
       expect(byTag.get("catalog")!.endsWith(".json")).toBe(true);
       expect(byTag.get("data-service")).toContain("/catalog/data-services/");
       expect(byTag.get("dataset")).toContain("/catalog/datasets/");
+      expect(byTag.get("dataset-series")).toContain("/catalog/dataset-series/");
       expect(byTag.get("distribution")).toContain("/catalog/distributions/");
       expect(byTag.get("catalog-record")).toContain(
         "/catalog/catalog-records/"
@@ -2660,7 +2819,14 @@ describe("entityFilePathForNode", () => {
 
 describe("ledgerKeyForNode", () => {
   it("prefixes each IngestNode with its canonical kind name", () => {
-    const nodes = makePhaseBNodes();
+    const nodes = [
+      ...makePhaseBNodes(),
+      fakeDatasetSeries(
+        "eia-mer",
+        "01KNQEZ5V57VJJJFYV6HWM03VD",
+        "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB" as Agent["id"]
+      )
+    ];
     const keys = nodes.map(ledgerKeyForNode).sort();
     // Exactly one of each kind for the single-leaf candidate set.
     expect(keys.map((k) => k.split(":")[0])).toEqual([
@@ -2669,6 +2835,7 @@ describe("ledgerKeyForNode", () => {
       "CatalogRecord",
       "DataService",
       "Dataset",
+      "DatasetSeries",
       "Distribution"
     ]);
     // Keys are unique — no two nodes collapse to the same ledger slot.
@@ -2684,7 +2851,14 @@ describe("ledgerKeyForNode", () => {
 
 describe("encodeIngestNodeData", () => {
   it("produces pretty-printed JSON for every IngestNode tag that round-trips through JSON.parse", () => {
-    const nodes = makePhaseBNodes();
+    const nodes = [
+      ...makePhaseBNodes(),
+      fakeDatasetSeries(
+        "eia-mer",
+        "01KNQEZ5V57VJJJFYV6HWM03VD",
+        "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB" as Agent["id"]
+      )
+    ];
     for (const node of nodes) {
       const encoded = encodeIngestNodeData(node);
       // Pretty-printed: 2-space indent, at least one newline.

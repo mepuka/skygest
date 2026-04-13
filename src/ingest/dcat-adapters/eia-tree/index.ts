@@ -4,7 +4,7 @@
  * Effect-native, schema-validated, idempotent ingestion of the EIA API v2
  * catalog tree into the cold-start registry under references/cold-start/.
  * The script walks api.eia.gov/v2/, builds an IngestGraph of typed nodes
- * (Agent | Catalog | DataService | Dataset | Distribution | CatalogRecord),
+ * (Agent | Catalog | DataService | DatasetSeries | Dataset | Distribution | CatalogRecord),
  * validates every candidate via Effect.partition, and emits files in
  * topological order so dependencies are written before dependents.
  *
@@ -47,9 +47,11 @@ import {
   CatalogRecord,
   DataService,
   Dataset,
+  DatasetSeries,
   Distribution,
   mintCatalogRecordId,
   mintDatasetId,
+  mintDatasetSeriesId,
   mintDistributionId,
   type ExternalIdentifier
 } from "../../../domain/data-layer";
@@ -820,7 +822,7 @@ const eiaSkipReason = (
 
 /**
  * Loads the on-disk cold-start catalog into alias-keyed lookup maps.
- * Every one of the six subdirectories must exist — missing directories
+ * Every one of the seven subdirectories must exist — missing directories
  * surface as `EiaIngestFsError { operation: "readDirectory" }` rather
  * than silently producing an empty index, which would let a stale run
  * mis-report "no existing Datasets" and duplicate-create everything.
@@ -885,7 +887,7 @@ export const loadCatalogIndex = Effect.fn("EiaIngest.loadCatalogIndex")(
 //   - temporal:           preserve existing (API v2 dates are coarser)
 //   - keywords:           UNION(existing, facet ids, defaultFrequency)
 //   - themes:             preserve existing if non-empty, else parents
-//   - inSeries:           preserve existing (curated link)
+//   - inSeries:           preserve existing curated link, else synthesize from frequency-split parent routes
 //   - aliases:            union by (scheme, value); only ever mint eia-route
 //   - distributionIds:    re-stitched after distributions are minted
 //
@@ -911,6 +913,7 @@ export interface BuildContext {
 }
 
 const decodeDatasetCandidate = stripUndefinedAndDecodeWith(Dataset);
+const decodeDatasetSeriesCandidate = stripUndefinedAndDecodeWith(DatasetSeries);
 const decodeDistributionCandidate = stripUndefinedAndDecodeWith(Distribution);
 const decodeCatalogRecordCandidate = stripUndefinedAndDecodeWith(CatalogRecord);
 
@@ -923,9 +926,118 @@ const EIA_LICENSE_URL = "https://www.eia.gov/about/copyrights_reuse.php";
 export const slugifyRoute = (route: string): string =>
   `eia-${route.replace(/\//gu, "-")}`;
 
+export const slugifySeriesRoute = (route: string): string =>
+  `${slugifyRoute(route)}-series`;
+
 const datasetIdFromUlid = () => mintDatasetId();
+const datasetSeriesIdFromUlid = () => mintDatasetSeriesId();
 const distIdFromUlid = () => mintDistributionId();
 const crIdFromUlid = () => mintCatalogRecordId();
+
+const titleCaseSegment = (value: string): string =>
+  value
+    .split(/[-_]+/u)
+    .filter((token) => token.length > 0)
+    .map((token) => token[0]!.toUpperCase() + token.slice(1))
+    .join(" ");
+
+const cadenceFromFrequencyValue = (
+  value: string | null | undefined
+): DatasetSeries["cadence"] | undefined => {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === undefined || normalized.length === 0) {
+    return undefined;
+  }
+
+  if (normalized.includes("annual") || normalized.includes("year")) {
+    return "annual";
+  }
+  if (normalized.includes("quarter")) {
+    return "quarterly";
+  }
+  if (normalized.includes("month")) {
+    return "monthly";
+  }
+  if (normalized.includes("week")) {
+    return "weekly";
+  }
+  if (normalized.includes("day")) {
+    return "daily";
+  }
+  return undefined;
+};
+
+interface DatasetSeriesSpec {
+  readonly parentPath: string;
+  readonly parentResponse: EiaApiResponse["response"];
+  readonly childPaths: ReadonlyArray<string>;
+  readonly cadence: DatasetSeries["cadence"];
+}
+
+const childPathFromParent = (parentPath: string, childId: string): string =>
+  parentPath.length === 0 ? childId : `${parentPath}/${childId}`;
+
+const collectDatasetSeriesSpecs = (
+  walkData: ReadonlyMap<string, EiaApiResponse>
+): ReadonlyArray<DatasetSeriesSpec> => {
+  const specs: Array<DatasetSeriesSpec> = [];
+
+  for (const [path, response] of walkData) {
+    if (path.length === 0) {
+      continue;
+    }
+
+    const childRoutes = response.response.routes ?? [];
+    if (childRoutes.length < 2) {
+      continue;
+    }
+
+    const childSpecs = childRoutes.map((child) => {
+      const childPath = childPathFromParent(path, child.id);
+      const childResponse = walkData.get(childPath)?.response;
+      if (childResponse === undefined || (childResponse.routes ?? []).length > 0) {
+        return null;
+      }
+
+      const cadence =
+        cadenceFromFrequencyValue(child.id) ??
+        cadenceFromFrequencyValue(childResponse.defaultFrequency ?? undefined) ??
+        cadenceFromFrequencyValue(childResponse.name ?? undefined);
+
+      return cadence === undefined
+        ? null
+        : {
+            childPath,
+            cadence
+          };
+    });
+
+    if (childSpecs.some((spec) => spec === null)) {
+      continue;
+    }
+
+    const concreteChildren = childSpecs as ReadonlyArray<{
+      readonly childPath: string;
+      readonly cadence: DatasetSeries["cadence"];
+    }>;
+    if (concreteChildren.length < 2) {
+      continue;
+    }
+
+    const cadences = Array.from(
+      new Set(concreteChildren.map((child) => child.cadence))
+    );
+
+    specs.push({
+      parentPath: path,
+      parentResponse: response.response,
+      childPaths: concreteChildren.map((child) => child.childPath),
+      cadence: cadences.length === 1 ? cadences[0]! : "irregular"
+    });
+  }
+
+  return specs;
+};
 
 /**
  * Copy the listed optional keys from `source` to `target` when the value
@@ -994,7 +1106,8 @@ export const buildContextFromIndex = Effect.fn(
 export const buildDatasetCandidate = (
   leaf: LeafRoute,
   ctx: BuildContext,
-  existing: Dataset | null
+  existing: Dataset | null,
+  datasetSeriesId: DatasetSeries["id"] | undefined
 ): Dataset => {
   const id = existing?.id ?? datasetIdFromUlid();
   const createdAt = existing?.createdAt ?? (ctx.nowIso as Dataset["createdAt"]);
@@ -1061,7 +1174,12 @@ export const buildDatasetCandidate = (
   // Pure-preservation fields: keep existing value if set, otherwise leave
   // the key off entirely. No fresh-value merge logic, so the helper
   // applies cleanly.
-  preserveOptionalKeys(base, existing, ["landingPage", "inSeries"] as const);
+  preserveOptionalKeys(base, existing, ["landingPage"] as const);
+  if (existing?.inSeries !== undefined) {
+    base.inSeries = existing.inSeries;
+  } else if (datasetSeriesId !== undefined) {
+    base.inSeries = datasetSeriesId;
+  }
 
   // Temporal: preserve curated value; only synthesize from start/end
   // period when neither existing record nor API response has it.
@@ -1073,6 +1191,63 @@ export const buildDatasetCandidate = (
   if (mergedTemporal !== undefined) base.temporal = mergedTemporal;
 
   return decodeDatasetCandidate(base);
+};
+
+const resolveExistingDatasetSeries = (
+  idx: CatalogIndex,
+  ctx: BuildContext,
+  spec: DatasetSeriesSpec
+): DatasetSeries | null => {
+  const title =
+    spec.parentResponse.name ?? titleCaseSegment(spec.parentResponse.id);
+
+  return idx.allDatasetSeries.find((series) =>
+    series.aliases.some(
+      (alias) =>
+        alias.scheme === AliasSchemeValues.eiaRoute &&
+        alias.value === spec.parentPath
+    )
+  ) ??
+    idx.allDatasetSeries.find(
+      (series) =>
+        series.title === title &&
+        (series.publisherAgentId ?? ctx.eiaAgent.id) === ctx.eiaAgent.id
+    ) ??
+    null;
+};
+
+const buildDatasetSeriesCandidate = (
+  spec: DatasetSeriesSpec,
+  ctx: BuildContext,
+  existing: DatasetSeries | null
+): DatasetSeries => {
+  const title =
+    existing?.title ??
+    spec.parentResponse.name ??
+    titleCaseSegment(spec.parentResponse.id);
+  const description =
+    existing?.description ??
+    spec.parentResponse.description ??
+    `Collection of EIA datasets grouped under ${title}.`;
+
+  return decodeDatasetSeriesCandidate({
+    _tag: "DatasetSeries",
+    id: existing?.id ?? datasetSeriesIdFromUlid(),
+    title,
+    description,
+    publisherAgentId: existing?.publisherAgentId ?? ctx.eiaAgent.id,
+    cadence: existing?.cadence ?? spec.cadence,
+    aliases: unionAliases(existing?.aliases ?? [], [
+      {
+        scheme: AliasSchemeValues.eiaRoute,
+        value: spec.parentPath,
+        relation: "exactMatch"
+      } as ExternalIdentifier
+    ]),
+    createdAt:
+      existing?.createdAt ?? (ctx.nowIso as DatasetSeries["createdAt"]),
+    updatedAt: ctx.nowIso as DatasetSeries["updatedAt"]
+  });
 };
 
 /**
@@ -1179,6 +1354,7 @@ export const buildCatalogRecord = (
  *   - 1 Catalog (EIA catalog, bumped updatedAt)
  *   - 1 DataService (EIA API v2, bumped updatedAt, servesDatasetIds
  *     unioned with every dataset id we're about to mint/merge)
+ *   - S DatasetSeries nodes (one per frequency-split parent route)
  *   - N Dataset nodes (one per leaf route)
  *   - M Distribution nodes (api-access + preserved curated)
  *   - N CatalogRecord nodes (one per dataset)
@@ -1199,6 +1375,35 @@ export const buildCandidateNodes = (
 
   // Pure sync loop over already-fetched walk data. `for ... of` is
   // permitted here by the same CLAUDE.md carve-out used in loadCatalogIndex.
+  const datasetSeriesSpecs = collectDatasetSeriesSpecs(walkData);
+  const datasetSeriesNodes: Array<
+    Extract<IngestNode, { readonly _tag: "dataset-series" }>
+  > = [];
+  const datasetSeriesIdByLeafPath = new Map<string, DatasetSeries["id"]>();
+
+  for (const spec of datasetSeriesSpecs) {
+    const existingDatasetSeries = resolveExistingDatasetSeries(idx, ctx, spec);
+    const datasetSeries = buildDatasetSeriesCandidate(
+      spec,
+      ctx,
+      existingDatasetSeries
+    );
+
+    for (const childPath of spec.childPaths) {
+      datasetSeriesIdByLeafPath.set(childPath, datasetSeries.id);
+    }
+
+    datasetSeriesNodes.push({
+      _tag: "dataset-series",
+      slug: stableSlug(
+        idx.datasetSeriesFileSlugById.get(datasetSeries.id),
+        () => slugifySeriesRoute(spec.parentPath)
+      ),
+      data: datasetSeries,
+      merged: existingDatasetSeries !== null
+    });
+  }
+
   const leafCandidates: Array<LeafCandidate> = [];
   for (const [path, resp] of walkData) {
     if (path === "") continue; // skip the root (no dataset)
@@ -1211,7 +1416,8 @@ export const buildCandidateNodes = (
     const datasetCandidate = buildDatasetCandidate(
       { path, parents, response: resp.response },
       ctx,
-      existingDataset
+      existingDataset,
+      datasetSeriesIdByLeafPath.get(path)
     );
     const distCandidates = buildDistributionCandidates(
       { path, parents, response: resp.response },
@@ -1315,6 +1521,7 @@ export const buildCandidateNodes = (
     agentNode,
     catalogNode,
     dataServiceNode,
+    ...datasetSeriesNodes,
     ...datasetNodes,
     ...distNodes,
     ...crNodes
@@ -1475,6 +1682,10 @@ export const IngestReport = Schema.Struct({
     created: Schema.Array(Schema.String),
     merged: Schema.Array(Schema.String)
   }),
+  datasetSeries: Schema.Struct({
+    created: Schema.Array(Schema.String),
+    merged: Schema.Array(Schema.String)
+  }),
   distributions: Schema.Struct({ count: Schema.Number }),
   catalogRecords: Schema.Struct({ count: Schema.Number }),
   mermaidPath: Schema.String,
@@ -1500,6 +1711,8 @@ const buildIngestReport = (input: {
   readonly edgeCount: number;
   readonly datasetsCreated: ReadonlyArray<string>;
   readonly datasetsMerged: ReadonlyArray<string>;
+  readonly datasetSeriesCreated: ReadonlyArray<string>;
+  readonly datasetSeriesMerged: ReadonlyArray<string>;
   readonly distributionCount: number;
   readonly catalogRecordCount: number;
   readonly validationFailures?: ReadonlyArray<EiaIngestSchemaError>;
@@ -1511,6 +1724,10 @@ const buildIngestReport = (input: {
   datasets: {
     created: [...input.datasetsCreated],
     merged: [...input.datasetsMerged]
+  },
+  datasetSeries: {
+    created: [...input.datasetSeriesCreated],
+    merged: [...input.datasetSeriesMerged]
   },
   distributions: { count: input.distributionCount },
   catalogRecords: { count: input.catalogRecordCount },
@@ -1541,6 +1758,7 @@ const writeIngestReport = Effect.fn("EiaIngest.writeIngestReport")(
 const catalogIndexCounts = (idx: CatalogIndex) => ({
   agentCount: idx.agentsByName.size,
   datasetCount: idx.allDatasets.length,
+  datasetSeriesCount: idx.allDatasetSeries.length,
   distributionCount: idx.allDistributions.length,
   catalogRecordCount: idx.allCatalogRecords.length
 });
@@ -1550,6 +1768,7 @@ const candidateCountsByKind = (candidates: ReadonlyArray<IngestNode>) => {
     agent: 0,
     catalog: 0,
     dataService: 0,
+    datasetSeries: 0,
     dataset: 0,
     distribution: 0,
     catalogRecord: 0
@@ -1565,6 +1784,9 @@ const candidateCountsByKind = (candidates: ReadonlyArray<IngestNode>) => {
         break;
       case "data-service":
         byKind.dataService += 1;
+        break;
+      case "dataset-series":
+        byKind.datasetSeries += 1;
         break;
       case "dataset":
         byKind.dataset += 1;
@@ -1583,6 +1805,8 @@ const candidateCountsByKind = (candidates: ReadonlyArray<IngestNode>) => {
 
 const nodeWriteOutcome = (node: IngestNode): "created" | "merged" => {
   switch (node._tag) {
+    case "dataset-series":
+      return node.merged ? "merged" : "created";
     case "dataset":
       return node.merged ? "merged" : "created";
     case "distribution":
@@ -1648,6 +1872,12 @@ export const runEiaIngest = Effect.fn("EiaIngest.main")(function* () {
   const candidateDatasetNodes = candidates.filter(
     (n): n is Extract<IngestNode, { _tag: "dataset" }> => n._tag === "dataset"
   );
+  const candidateDatasetSeriesNodes = candidates.filter(
+    (
+      n
+    ): n is Extract<IngestNode, { _tag: "dataset-series" }> =>
+      n._tag === "dataset-series"
+  );
   const candidateDistributionCount = candidates.filter(
     (n) => n._tag === "distribution"
   ).length;
@@ -1658,6 +1888,12 @@ export const runEiaIngest = Effect.fn("EiaIngest.main")(function* () {
     .filter((n) => !n.merged)
     .map((n) => n.slug);
   const candidateDatasetsMerged = candidateDatasetNodes
+    .filter((n) => n.merged)
+    .map((n) => n.slug);
+  const candidateDatasetSeriesCreated = candidateDatasetSeriesNodes
+    .filter((n) => !n.merged)
+    .map((n) => n.slug);
+  const candidateDatasetSeriesMerged = candidateDatasetSeriesNodes
     .filter((n) => n.merged)
     .map((n) => n.slug);
 
@@ -1684,6 +1920,8 @@ export const runEiaIngest = Effect.fn("EiaIngest.main")(function* () {
         edgeCount: 0,
         datasetsCreated: candidateDatasetsCreated,
         datasetsMerged: candidateDatasetsMerged,
+        datasetSeriesCreated: candidateDatasetSeriesCreated,
+        datasetSeriesMerged: candidateDatasetSeriesMerged,
         distributionCount: candidateDistributionCount,
         catalogRecordCount: candidateCatalogRecordCount,
         validationFailures: failures
@@ -1729,6 +1967,12 @@ export const runEiaIngest = Effect.fn("EiaIngest.main")(function* () {
   const datasetNodes = topoOrder.filter(
     (n): n is Extract<IngestNode, { _tag: "dataset" }> => n._tag === "dataset"
   );
+  const datasetSeriesNodes = topoOrder.filter(
+    (
+      n
+    ): n is Extract<IngestNode, { _tag: "dataset-series" }> =>
+      n._tag === "dataset-series"
+  );
   const distributionCount = topoOrder.filter(
     (n) => n._tag === "distribution"
   ).length;
@@ -1737,6 +1981,12 @@ export const runEiaIngest = Effect.fn("EiaIngest.main")(function* () {
   ).length;
   const datasetsCreated = datasetNodes.filter((n) => !n.merged).map((n) => n.slug);
   const datasetsMerged = datasetNodes.filter((n) => n.merged).map((n) => n.slug);
+  const datasetSeriesCreated = datasetSeriesNodes
+    .filter((n) => !n.merged)
+    .map((n) => n.slug);
+  const datasetSeriesMerged = datasetSeriesNodes
+    .filter((n) => n.merged)
+    .map((n) => n.slug);
 
   if (config.dryRun) {
     const completedAt = yield* Clock.currentTimeMillis;
@@ -1744,6 +1994,8 @@ export const runEiaIngest = Effect.fn("EiaIngest.main")(function* () {
       routesWalked: walkData.size,
       nodeCount,
       edgeCount,
+      datasetSeriesCreated: datasetSeriesCreated.length,
+      datasetSeriesMerged: datasetSeriesMerged.length,
       datasetsCreated: datasetsCreated.length,
       datasetsMerged: datasetsMerged.length,
       distributionCount,
@@ -1799,6 +2051,8 @@ export const runEiaIngest = Effect.fn("EiaIngest.main")(function* () {
     edgeCount,
     datasetsCreated,
     datasetsMerged,
+    datasetSeriesCreated,
+    datasetSeriesMerged,
     distributionCount,
     catalogRecordCount
   });
@@ -1823,6 +2077,8 @@ export const runEiaIngest = Effect.fn("EiaIngest.main")(function* () {
     routesWalked: walkData.size,
     nodeCount,
     edgeCount,
+    datasetSeriesCreated: datasetSeriesCreated.length,
+    datasetSeriesMerged: datasetSeriesMerged.length,
     datasetsCreated: datasetsCreated.length,
     datasetsMerged: datasetsMerged.length,
     distributionCount,
