@@ -1,0 +1,442 @@
+{
+  "manifestVersion": 1,
+  "sourceCommit": "458c5e416c589dff1c2b6e29dc0e4e4529fb5492",
+  "generatedAt": "2026-04-13T12:00:00.000Z",
+  "inputHash": "sha256:54280c2f3ec10cf4f6f70602418926839486fa19c5a8d6f4162f8fd4c7fb5627",
+  "ontologyIri": "https://skygest.dev/vocab/energy",
+  "ontologyVersion": "0.2.0",
+  "classes": {
+    "Agent": {
+      "runtimeName": "Agent",
+      "ontologyIri": "https://skygest.dev/vocab/energy/EnergyAgent",
+      "classComment": "A FOAF agent that publishes one or more energy datasets. Hand-written wrapper composes AgentOntologyFields with runtime-local id, kind, parentAgentId, and TimestampedAliasedFields.",
+      "fields": [
+        {
+          "runtimeName": "_tag",
+          "ontologyIri": null,
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": false,
+          "generation": "handWritten",
+          "description": "Runtime tag discriminant."
+        },
+        {
+          "runtimeName": "id",
+          "ontologyIri": null,
+          "type": { "_tag": "brandedId", "ref": "AgentId" },
+          "optional": false,
+          "generation": "handWritten",
+          "description": "Branded AgentId minted with ulid prefix ag_."
+        },
+        {
+          "runtimeName": "kind",
+          "ontologyIri": null,
+          "type": { "_tag": "closedEnum", "enumName": "AgentKind" },
+          "optional": false,
+          "generation": "handWritten",
+          "description": "Runtime-local closed enum (organization, person, consortium, program, other) — not owned by the sevocab ontology."
+        },
+        {
+          "runtimeName": "name",
+          "ontologyIri": "http://xmlns.com/foaf/0.1/name",
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": false,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "alternateNames",
+          "ontologyIri": null,
+          "type": { "_tag": "literalArray", "literalKind": "string" },
+          "optional": true,
+          "generation": "generated",
+          "description": "Runtime-local but emitted into the Agent fragment for symmetry with name."
+        },
+        {
+          "runtimeName": "homepage",
+          "ontologyIri": "http://xmlns.com/foaf/0.1/homepage",
+          "type": { "_tag": "webUrl" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "parentAgentId",
+          "ontologyIri": null,
+          "type": { "_tag": "brandedId", "ref": "AgentId" },
+          "optional": true,
+          "generation": "handWritten",
+          "description": "Runtime-local parent agent reference — not modelled on sevocab:EnergyAgent in this slice."
+        },
+        {
+          "runtimeName": "createdAt",
+          "ontologyIri": null,
+          "type": { "_tag": "isoTimestamp" },
+          "optional": false,
+          "generation": "handWritten",
+          "description": "From TimestampedAliasedFields."
+        },
+        {
+          "runtimeName": "updatedAt",
+          "ontologyIri": null,
+          "type": { "_tag": "isoTimestamp" },
+          "optional": false,
+          "generation": "handWritten",
+          "description": "From TimestampedAliasedFields."
+        },
+        {
+          "runtimeName": "aliases",
+          "ontologyIri": null,
+          "type": { "_tag": "struct", "structName": "Aliases" },
+          "optional": false,
+          "generation": "handWritten",
+          "description": "From TimestampedAliasedFields."
+        }
+      ]
+    },
+    "Dataset": {
+      "runtimeName": "Dataset",
+      "ontologyIri": "https://skygest.dev/vocab/energy/EnergyDataset",
+      "classComment": "A DCAT Dataset published by an EnergyAgent. Hand-written wrapper composes DatasetOntologyFields with runtime-local id, accessRights, dataServiceIds, and TimestampedAliasedFields.",
+      "fields": [
+        {
+          "runtimeName": "_tag",
+          "ontologyIri": null,
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": false,
+          "generation": "handWritten",
+          "description": "Runtime tag discriminant."
+        },
+        {
+          "runtimeName": "id",
+          "ontologyIri": null,
+          "type": { "_tag": "brandedId", "ref": "DatasetId" },
+          "optional": false,
+          "generation": "handWritten",
+          "description": "Branded DatasetId minted with ulid prefix ds_."
+        },
+        {
+          "runtimeName": "title",
+          "ontologyIri": "http://purl.org/dc/terms/title",
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": false,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "description",
+          "ontologyIri": "http://purl.org/dc/terms/description",
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "creatorAgentId",
+          "ontologyIri": "http://purl.org/dc/terms/creator",
+          "type": { "_tag": "brandedId", "ref": "AgentId" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "wasDerivedFrom",
+          "ontologyIri": "http://www.w3.org/ns/prov#wasDerivedFrom",
+          "type": { "_tag": "brandedIdArray", "ref": "AgentId" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "publisherAgentId",
+          "ontologyIri": "http://purl.org/dc/terms/publisher",
+          "type": { "_tag": "brandedId", "ref": "AgentId" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "landingPage",
+          "ontologyIri": "http://www.w3.org/ns/dcat#landingPage",
+          "type": { "_tag": "webUrl" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "accessRights",
+          "ontologyIri": null,
+          "type": { "_tag": "closedEnum", "enumName": "AccessRights" },
+          "optional": true,
+          "generation": "handWritten",
+          "description": "Runtime-local closed enum (public, restricted, nonPublic, unknown) — not owned by the sevocab ontology."
+        },
+        {
+          "runtimeName": "license",
+          "ontologyIri": "http://purl.org/dc/terms/license",
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "temporal",
+          "ontologyIri": "http://purl.org/dc/terms/temporal",
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "keywords",
+          "ontologyIri": "http://www.w3.org/ns/dcat#keyword",
+          "type": { "_tag": "literalArray", "literalKind": "string" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "themes",
+          "ontologyIri": "http://www.w3.org/ns/dcat#theme",
+          "type": { "_tag": "literalArray", "literalKind": "string" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "variableIds",
+          "ontologyIri": "https://skygest.dev/vocab/energy/hasVariable",
+          "type": { "_tag": "brandedIdArray", "ref": "VariableId" },
+          "optional": true,
+          "generation": "generated",
+          "description": "Retained as the higher-level dataset-to-variable view. Structural source of truth is Series.datasetId + Series.variableId after SKY-317.",
+          "deferredTightening": "SKY-317 / follow-up: deprecate in favor of Series-derived membership and eventually remove from the schema."
+        },
+        {
+          "runtimeName": "distributionIds",
+          "ontologyIri": "http://www.w3.org/ns/dcat#distribution",
+          "type": { "_tag": "brandedIdArray", "ref": "DistributionId" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "dataServiceIds",
+          "ontologyIri": null,
+          "type": { "_tag": "brandedIdArray", "ref": "DataServiceId" },
+          "optional": true,
+          "generation": "handWritten",
+          "description": "Runtime-local DataService reference list — no explicit ontology property in this slice."
+        },
+        {
+          "runtimeName": "inSeries",
+          "ontologyIri": "http://www.w3.org/ns/dcat#inSeries",
+          "type": { "_tag": "brandedId", "ref": "DatasetSeriesId" },
+          "optional": true,
+          "generation": "generated",
+          "description": "Points to a dcat:DatasetSeries (collection of dataset editions) via DatasetSeriesId (dser_). DISTINCT from sevocab:Series — see the Series class spec below."
+        },
+        {
+          "runtimeName": "createdAt",
+          "ontologyIri": null,
+          "type": { "_tag": "isoTimestamp" },
+          "optional": false,
+          "generation": "handWritten"
+        },
+        {
+          "runtimeName": "updatedAt",
+          "ontologyIri": null,
+          "type": { "_tag": "isoTimestamp" },
+          "optional": false,
+          "generation": "handWritten"
+        },
+        {
+          "runtimeName": "aliases",
+          "ontologyIri": null,
+          "type": { "_tag": "struct", "structName": "Aliases" },
+          "optional": false,
+          "generation": "handWritten"
+        }
+      ]
+    },
+    "Variable": {
+      "runtimeName": "Variable",
+      "ontologyIri": "https://skygest.dev/vocab/energy/EnergyVariable",
+      "classComment": "Statistical variable composed of up to seven facet dimensions. Hand-written wrapper composes VariableOntologyFields with runtime-local id and TimestampedAliasedFields.",
+      "fields": [
+        {
+          "runtimeName": "createdAt",
+          "ontologyIri": null,
+          "type": { "_tag": "isoTimestamp" },
+          "optional": false,
+          "generation": "handWritten"
+        },
+        {
+          "runtimeName": "updatedAt",
+          "ontologyIri": null,
+          "type": { "_tag": "isoTimestamp" },
+          "optional": false,
+          "generation": "handWritten"
+        },
+        {
+          "runtimeName": "aliases",
+          "ontologyIri": null,
+          "type": { "_tag": "struct", "structName": "Aliases" },
+          "optional": false,
+          "generation": "handWritten"
+        },
+        {
+          "runtimeName": "_tag",
+          "ontologyIri": null,
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": false,
+          "generation": "handWritten"
+        },
+        {
+          "runtimeName": "id",
+          "ontologyIri": null,
+          "type": { "_tag": "brandedId", "ref": "VariableId" },
+          "optional": false,
+          "generation": "handWritten"
+        },
+        {
+          "runtimeName": "label",
+          "ontologyIri": "http://www.w3.org/2000/01/rdf-schema#label",
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": false,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "definition",
+          "ontologyIri": "http://www.w3.org/2004/02/skos/core#definition",
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "measuredProperty",
+          "ontologyIri": "https://skygest.dev/vocab/energy/measuredProperty",
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "domainObject",
+          "ontologyIri": "https://skygest.dev/vocab/energy/domainObject",
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "technologyOrFuel",
+          "ontologyIri": "https://skygest.dev/vocab/energy/technologyOrFuel",
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": true,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "statisticType",
+          "ontologyIri": "https://skygest.dev/vocab/energy/statisticType",
+          "type": { "_tag": "closedEnum", "enumName": "StatisticType" },
+          "optional": true,
+          "generation": "generated",
+          "description": "Closed enum whose members are sourced from StatisticTypeMembers in src/domain/generated/energyVariableProfile.ts (owned by the existing energy-profile generator)."
+        },
+        {
+          "runtimeName": "aggregation",
+          "ontologyIri": "https://skygest.dev/vocab/energy/aggregation",
+          "type": { "_tag": "closedEnum", "enumName": "Aggregation" },
+          "optional": true,
+          "generation": "generated",
+          "description": "Closed enum sourced from AggregationMembers in the existing energy-profile generator."
+        },
+        {
+          "runtimeName": "unitFamily",
+          "ontologyIri": "https://skygest.dev/vocab/energy/unitFamily",
+          "type": { "_tag": "closedEnum", "enumName": "UnitFamily" },
+          "optional": true,
+          "generation": "generated",
+          "description": "Closed enum sourced from UnitFamilyMembers in the existing energy-profile generator."
+        },
+        {
+          "runtimeName": "policyInstrument",
+          "ontologyIri": "https://skygest.dev/vocab/energy/policyInstrument",
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": true,
+          "generation": "generated"
+        }
+      ]
+    },
+    "Series": {
+      "runtimeName": "Series",
+      "ontologyIri": "https://skygest.dev/vocab/energy/Series",
+      "classComment": "A concrete published series that implements exactly one EnergyVariable within exactly one EnergyDataset's reporting context. NOT the same as dcat:DatasetSeries — that class names publisher-side dataset groupings (DatasetSeriesId dser_) and is exposed via Dataset.inSeries. sevocab:Series names the Variable-implementing record a dataset exposes (SeriesId ser_). Hand-written wrapper composes SeriesOntologyFields with runtime-local id, fixedDims, and TimestampedAliasedFields.",
+      "fields": [
+        {
+          "runtimeName": "createdAt",
+          "ontologyIri": null,
+          "type": { "_tag": "isoTimestamp" },
+          "optional": false,
+          "generation": "handWritten"
+        },
+        {
+          "runtimeName": "updatedAt",
+          "ontologyIri": null,
+          "type": { "_tag": "isoTimestamp" },
+          "optional": false,
+          "generation": "handWritten"
+        },
+        {
+          "runtimeName": "aliases",
+          "ontologyIri": null,
+          "type": { "_tag": "struct", "structName": "Aliases" },
+          "optional": false,
+          "generation": "handWritten"
+        },
+        {
+          "runtimeName": "_tag",
+          "ontologyIri": null,
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": false,
+          "generation": "handWritten"
+        },
+        {
+          "runtimeName": "id",
+          "ontologyIri": null,
+          "type": { "_tag": "brandedId", "ref": "SeriesId" },
+          "optional": false,
+          "generation": "handWritten"
+        },
+        {
+          "runtimeName": "label",
+          "ontologyIri": "http://www.w3.org/2000/01/rdf-schema#label",
+          "type": { "_tag": "literal", "literalKind": "string" },
+          "optional": false,
+          "generation": "generated"
+        },
+        {
+          "runtimeName": "variableId",
+          "ontologyIri": "https://skygest.dev/vocab/energy/implementsVariable",
+          "type": { "_tag": "brandedId", "ref": "VariableId" },
+          "optional": false,
+          "generation": "generated",
+          "description": "Required in v1. Backed by sevocab:implementsVariable (owl:FunctionalProperty). Runtime currently has 1430+ Series rows with this field populated."
+        },
+        {
+          "runtimeName": "datasetId",
+          "ontologyIri": "https://skygest.dev/vocab/energy/publishedInDataset",
+          "type": { "_tag": "brandedId", "ref": "DatasetId" },
+          "optional": true,
+          "generation": "generated",
+          "description": "Backed by sevocab:publishedInDataset (owl:FunctionalProperty, owl:inverseOf sevocab:hasSeries). Intentionally optional in manifest v1 — 0 of 1430 checked-in Series files currently have this field, so a required-from-day-one migration would fail schema decode.",
+          "deferredTightening": "SKY-317 wires the field into the runtime registry and backfills it on eval-relevant publishers; a follow-up ticket will tighten to required once the backfill is complete and registry-prepare treats dangling links as checked-in validation failures."
+        },
+        {
+          "runtimeName": "fixedDims",
+          "ontologyIri": null,
+          "type": { "_tag": "struct", "structName": "FixedDims" },
+          "optional": false,
+          "generation": "handWritten",
+          "description": "Reporting-context dimensions (place, market, frequency, etc.). Deliberately NOT modelled on sevocab:Series in SKY-316 — fixed-dimension bag semantics are deferred."
+        }
+      ]
+    }
+  },
+  "derivedRelationships": [
+    {
+      "ontologyIri": "https://skygest.dev/vocab/energy/hasVariable",
+      "runtimeName": "hasVariable",
+      "description": "Higher-level dataset-to-variable view. Preserved in the ontology as a denormalized convenience, but SPARQL consumers should traverse hasSeries + implementsVariable explicitly because simple entailment does not compute OWL property chains. The runtime derives variable membership from Series.datasetId + Series.variableId after SKY-317 lands — it does not compute the view via OWL reasoning.",
+      "derivedFrom": [
+        "https://skygest.dev/vocab/energy/hasSeries",
+        "https://skygest.dev/vocab/energy/implementsVariable"
+      ]
+    }
+  ]
+}
