@@ -1,33 +1,28 @@
 import { Option } from "effect";
-import { aliasSchemes, type AliasScheme } from "../domain/data-layer/alias";
+import {
+  AliasSchemeValues,
+  aliasSchemes,
+  type AliasScheme
+} from "../domain/data-layer/alias";
 import type { Agent, Dataset } from "../domain/data-layer";
+import type { AgentId } from "../domain/data-layer/ids";
 import type { VisionAssetEnrichment } from "../domain/enrichment";
+import type { DatasetNameMatch } from "../domain/resolutionKernel";
 import type { Stage1Input } from "../domain/stage1Resolution";
 import type { DataLayerRegistryLookup } from "./dataLayerRegistry";
 import { jaccardTokenSet } from "./fuzzyMatch";
 import { extractStructuredIdentifierCandidates } from "./normalize";
 
 const structuredAliasSchemes = aliasSchemes.filter(
-  (scheme): scheme is AliasScheme => scheme !== "url"
+  (scheme): scheme is AliasScheme =>
+    scheme !== "url" && scheme !== AliasSchemeValues.displayAlias
 );
-const DATASET_TITLE_FUZZY_THRESHOLD = 0.75;
+// Dataset-title matching keeps three load-bearing policies together:
+// strip peripheral years, require a 0.75 fuzzy floor, and let publisher
+// preference break ties without ever outranking a better global score.
+export const DATASET_TITLE_FUZZY_THRESHOLD = 0.75;
+export const DATASET_TITLE_CONFIDENT_THRESHOLD = 0.9;
 const DATASET_TITLE_SCORE_EPSILON = 0.000_001;
-
-export type DatasetNameMatch =
-  | {
-      readonly _tag: "DatasetTitleExactMatch";
-      readonly dataset: Dataset;
-    }
-  | {
-      readonly _tag: "DatasetTitleFuzzyMatch";
-      readonly dataset: Dataset;
-    }
-  | {
-      readonly _tag: "DatasetAliasMatch";
-      readonly dataset: Dataset;
-      readonly aliasScheme: AliasScheme;
-      readonly aliasValue: string;
-    };
 
 const toNonEmpty = (value: string | null | undefined) => {
   if (value == null) {
@@ -89,7 +84,7 @@ const listAllDatasets = (
 const dedupeDatasets = (
   datasets: ReadonlyArray<Dataset>
 ): ReadonlyArray<Dataset> => {
-  const seen = new Set<string>();
+  const seen = new Set<Dataset["id"]>();
   const deduped: Array<Dataset> = [];
 
   for (const dataset of datasets) {
@@ -108,8 +103,8 @@ export const listPreferredDatasetAgentIds = (
   input: Stage1Input,
   asset: VisionAssetEnrichment,
   lookup: DataLayerRegistryLookup
-): ReadonlyArray<Agent["id"]> => {
-  const agentIds = new Set<Agent["id"]>();
+): ReadonlyArray<AgentId> => {
+  const agentIds = new Set<AgentId>();
 
   const addAgentLabel = (label: string | null | undefined) => {
     const value = toNonEmpty(label);
@@ -158,7 +153,7 @@ const scoreDatasetTitle = (
   const haystacks = [
     dataset.title,
     ...dataset.aliases
-      .filter((alias) => alias.scheme === "other")
+      .filter((alias) => alias.scheme === AliasSchemeValues.displayAlias)
       .map((alias) => alias.value)
   ];
 
@@ -175,49 +170,59 @@ const scoreDatasetTitle = (
 };
 
 const compareDatasetTitleScores = (
-  left: { readonly dataset: Dataset; readonly score: number },
-  right: { readonly dataset: Dataset; readonly score: number }
+  left: {
+    readonly dataset: Dataset;
+    readonly score: number;
+    readonly preferred: boolean;
+  },
+  right: {
+    readonly dataset: Dataset;
+    readonly score: number;
+    readonly preferred: boolean;
+  }
 ) =>
   right.score - left.score ||
+  Number(right.preferred) - Number(left.preferred) ||
   left.dataset.title.localeCompare(right.dataset.title) ||
   left.dataset.id.localeCompare(right.dataset.id);
 
 const findFuzzyDatasetTitleMatches = (
   datasetName: string,
   lookup: DataLayerRegistryLookup,
-  preferredAgentIds: ReadonlyArray<Agent["id"]>
-): ReadonlyArray<Dataset> => {
-  const preferredDatasets = dedupeDatasets(
-    preferredAgentIds.flatMap((agentId) => [...lookup.findDatasetsByAgentId(agentId)])
+  preferredAgentIds: ReadonlyArray<AgentId>
+): ReadonlyArray<{
+  readonly dataset: Dataset;
+  readonly score: number;
+}> => {
+  const preferredDatasetIds = new Set(
+    dedupeDatasets(
+      preferredAgentIds.flatMap((agentId) => [...lookup.findDatasetsByAgentId(agentId)])
+    ).map((dataset) => dataset.id)
   );
-  const searchPools =
-    preferredDatasets.length > 0
-      ? [preferredDatasets, listAllDatasets(lookup)]
-      : [listAllDatasets(lookup)];
+  const scored = dedupeDatasets(listAllDatasets(lookup))
+    .map((dataset) => ({
+      dataset,
+      score: scoreDatasetTitle(datasetName, dataset),
+      preferred: preferredDatasetIds.has(dataset.id)
+    }))
+    .filter((candidate) => candidate.score >= DATASET_TITLE_FUZZY_THRESHOLD)
+    .sort(compareDatasetTitleScores);
 
-  for (const pool of searchPools) {
-    const scored = pool
-      .map((dataset) => ({
-        dataset,
-        score: scoreDatasetTitle(datasetName, dataset)
-      }))
-      .filter((candidate) => candidate.score >= DATASET_TITLE_FUZZY_THRESHOLD)
-      .sort(compareDatasetTitleScores);
-
-    const bestScore = scored[0]?.score;
-    if (bestScore === undefined) {
-      continue;
-    }
-
-    return scored
-      .filter(
-        (candidate) =>
-          Math.abs(candidate.score - bestScore) <= DATASET_TITLE_SCORE_EPSILON
-      )
-      .map((candidate) => candidate.dataset);
+  const best = scored[0];
+  if (best === undefined) {
+    return [];
   }
 
-  return [];
+  return scored
+    .filter(
+      (candidate) =>
+        Math.abs(candidate.score - best.score) <= DATASET_TITLE_SCORE_EPSILON &&
+        candidate.preferred === best.preferred
+    )
+    .map(({ dataset, score }) => ({
+      dataset,
+      score
+    }));
 };
 
 const findDatasetAliasMatches = (
@@ -249,7 +254,7 @@ export const findDatasetMatchesForName = (
   datasetName: string,
   lookup: DataLayerRegistryLookup,
   options: {
-    readonly preferredAgentIds?: ReadonlyArray<Agent["id"]>;
+    readonly preferredAgentIds?: ReadonlyArray<AgentId>;
   } = {}
 ): ReadonlyArray<DatasetNameMatch> => {
   const value = toNonEmpty(datasetName);
@@ -275,9 +280,10 @@ export const findDatasetMatchesForName = (
     options.preferredAgentIds ?? []
   );
   if (fuzzyMatches.length > 0) {
-    return fuzzyMatches.map((dataset) => ({
+    return fuzzyMatches.map(({ dataset, score }) => ({
       _tag: "DatasetTitleFuzzyMatch" as const,
-      dataset
+      dataset,
+      score
     }));
   }
 

@@ -5,12 +5,12 @@
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VF3G335NSS1773RWDH",
   "aliases": [
     {
-      "scheme": "other",
+      "scheme": "display-alias",
       "value": "NREL ATB",
       "relation": "closeMatch"
     },
     {
-      "scheme": "other",
+      "scheme": "display-alias",
       "value": "Annual Technology Baseline",
       "relation": "closeMatch"
     }

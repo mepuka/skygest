@@ -6,6 +6,7 @@ import type {
   BoundResolutionGapItem,
   BoundResolutionItem,
   ResolutionHypothesis,
+  ResolutionScopeOptions,
   VariableCandidateScore
 } from "../../domain/resolutionKernel";
 import {
@@ -28,9 +29,7 @@ const NEAREST_MISS_LIMIT = 5;
 export type BoundHypothesis = {
   readonly hypothesis: ResolutionHypothesis;
   readonly items: ReadonlyArray<BoundResolutionItem>;
-  readonly agentId?: AgentId;
-  readonly datasetIds?: ReadonlyArray<DatasetId>;
-};
+} & ResolutionScopeOptions;
 
 const variableToPartial = (variable: Variable): PartialVariableShape =>
   stripUndefined({
@@ -199,10 +198,7 @@ const makeGapItem = (
 export const bindHypothesis = (
   hypothesis: ResolutionHypothesis,
   lookup: DataLayerRegistryLookup,
-  options: {
-    readonly agentId?: AgentId;
-    readonly datasetIds?: ReadonlyArray<DatasetId>;
-  } = {}
+  options: ResolutionScopeOptions = {}
 ): BoundHypothesis => {
   const variables = listVariables(lookup);
   const items: Array<BoundResolutionItem> = [];

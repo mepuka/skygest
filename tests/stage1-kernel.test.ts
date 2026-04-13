@@ -3,6 +3,11 @@ import { Result } from "effect";
 import type { DataLayerRegistrySeed } from "../src/domain/data-layer";
 import type { VisionOrganizationMention } from "../src/domain/sourceMatching";
 import { runStage1 } from "../src/resolution/Stage1";
+import {
+  DATASET_TITLE_FUZZY_THRESHOLD,
+  findDatasetMatchesForName,
+  stripPeripheralYear
+} from "../src/resolution/datasetNameMatch";
 import { prepareDataLayerRegistry, toDataLayerRegistryLookup } from "../src/resolution/dataLayerRegistry";
 
 const iso = "2026-04-09T00:00:00.000Z" as const;
@@ -361,6 +366,243 @@ describe("runStage1", () => {
     ).toBe(true);
   });
 
+  it("strips peripheral years without changing embedded year-like text", () => {
+    expect(stripPeripheralYear("World Energy Outlook (2024)")).toBe(
+      "World Energy Outlook"
+    );
+    expect(stripPeripheralYear("[2024] NREL ATB")).toBe("NREL ATB");
+    expect(stripPeripheralYear("World Energy Outlook - 2024")).toBe(
+      "World Energy Outlook"
+    );
+    expect(stripPeripheralYear("World Energy Outlook, 2024")).toBe(
+      "World Energy Outlook"
+    );
+    expect(stripPeripheralYear("2024: NREL ATB")).toBe("NREL ATB");
+    expect(stripPeripheralYear("Hydrogen Roadmap 2035 Edition")).toBe(
+      "Hydrogen Roadmap 2035 Edition"
+    );
+  });
+
+  it("keeps fuzzy dataset title matches at the 0.75 boundary and rejects lower scores", () => {
+    const seed = makeSeed();
+    const lookup = makeLookup({
+      ...seed,
+      datasets: [
+        ...seed.datasets,
+        {
+          _tag: "Dataset",
+          id: "https://id.skygest.io/dataset/ds_AEOREPORTBOUND" as any,
+          title: "Annual Energy Outlook Report",
+          publisherAgentId: "https://id.skygest.io/agent/ag_1234567890AB" as any,
+          aliases: [],
+          createdAt: iso as any,
+          updatedAt: iso as any,
+          distributionIds: []
+        },
+        {
+          _tag: "Dataset",
+          id: "https://id.skygest.io/dataset/ds_AEOARCHIVELOW" as any,
+          title: "Annual Energy Outlook Report Archive",
+          publisherAgentId: "https://id.skygest.io/agent/ag_1234567890AB" as any,
+          aliases: [],
+          createdAt: iso as any,
+          updatedAt: iso as any,
+          distributionIds: []
+        }
+      ]
+    });
+
+    const matches = findDatasetMatchesForName("Annual Energy Outlook", lookup);
+
+    expect(matches).toHaveLength(1);
+    expect(matches[0]?._tag).toBe("DatasetTitleFuzzyMatch");
+    expect(matches[0]?.dataset.title).toBe("Annual Energy Outlook Report");
+    if (matches[0]?._tag !== "DatasetTitleFuzzyMatch") {
+      throw new Error("expected fuzzy dataset title match at the threshold");
+    }
+    expect(matches[0].score).toBeCloseTo(DATASET_TITLE_FUZZY_THRESHOLD);
+  });
+
+  it("falls back to the full registry when no preferred agents are available", () => {
+    const seed = makeSeed();
+
+    const matches = findDatasetMatchesForName(
+      "Annual Energy Outlook Report Dataset",
+      makeLookup({
+        ...seed,
+        datasets: [
+          ...seed.datasets,
+          {
+            _tag: "Dataset",
+            id: "https://id.skygest.io/dataset/ds_FALLBACKMATCH01" as any,
+            title: "Annual Energy Outlook Report Dataset Archive",
+            publisherAgentId: "https://id.skygest.io/agent/ag_1234567890AB" as any,
+            aliases: [],
+            createdAt: iso as any,
+            updatedAt: iso as any,
+            distributionIds: []
+          }
+        ]
+      }),
+      { preferredAgentIds: [] }
+    );
+
+    expect(matches).toHaveLength(1);
+    expect(matches[0]?.dataset.title).toBe(
+      "Annual Energy Outlook Report Dataset Archive"
+    );
+  });
+
+  it("uses preferred publishers only as a tie-breaker, not a hard fuzzy shortcut", () => {
+    const seed = makeSeed();
+    const preferredAgentId =
+      "https://id.skygest.io/agent/ag_1234567890AB" as any;
+    const otherAgentId = "https://id.skygest.io/agent/ag_OTHERSOURCE01" as any;
+
+    const matches = findDatasetMatchesForName(
+      "Annual Energy Outlook Report Dataset",
+      makeLookup({
+        ...seed,
+        agents: [
+          ...seed.agents,
+          {
+            _tag: "Agent",
+            id: otherAgentId,
+            kind: "organization",
+            name: "Independent Outlook Lab",
+            alternateNames: ["IOL"],
+            homepage: "https://www.example.com" as any,
+            aliases: [],
+            createdAt: iso as any,
+            updatedAt: iso as any
+          }
+        ],
+        datasets: [
+          ...seed.datasets,
+          {
+            _tag: "Dataset",
+            id: "https://id.skygest.io/dataset/ds_PREFERREDWEAK1" as any,
+            title: "Annual Energy Outlook Report",
+            publisherAgentId: preferredAgentId,
+            aliases: [],
+            createdAt: iso as any,
+            updatedAt: iso as any,
+            distributionIds: []
+          },
+          {
+            _tag: "Dataset",
+            id: "https://id.skygest.io/dataset/ds_GLOBALBETTER01" as any,
+            title: "Annual Energy Outlook Report Dataset Archive",
+            publisherAgentId: otherAgentId,
+            aliases: [],
+            createdAt: iso as any,
+            updatedAt: iso as any,
+            distributionIds: []
+          }
+        ]
+      }),
+      { preferredAgentIds: [preferredAgentId] }
+    );
+
+    expect(matches).toHaveLength(1);
+    expect(matches[0]?._tag).toBe("DatasetTitleFuzzyMatch");
+    expect(matches[0]?.dataset.title).toBe(
+      "Annual Energy Outlook Report Dataset Archive"
+    );
+    if (matches[0]?._tag !== "DatasetTitleFuzzyMatch") {
+      throw new Error("expected fuzzy dataset title match");
+    }
+    expect(matches[0].score).toBeGreaterThan(0.8);
+  });
+
+  it("returns tied fuzzy matches in deterministic order", () => {
+    const seed = makeSeed();
+
+    const matches = findDatasetMatchesForName(
+      "Annual Energy Outlook",
+      makeLookup({
+        ...seed,
+        datasets: [
+          ...seed.datasets,
+          {
+            _tag: "Dataset",
+            id: "https://id.skygest.io/dataset/ds_ARCHIVETIE001" as any,
+            title: "Annual Energy Outlook Archive",
+            publisherAgentId: "https://id.skygest.io/agent/ag_1234567890AB" as any,
+            aliases: [],
+            createdAt: iso as any,
+            updatedAt: iso as any,
+            distributionIds: []
+          },
+          {
+            _tag: "Dataset",
+            id: "https://id.skygest.io/dataset/ds_REPORTTIE0001" as any,
+            title: "Annual Energy Outlook Report",
+            publisherAgentId: "https://id.skygest.io/agent/ag_1234567890AB" as any,
+            aliases: [],
+            createdAt: iso as any,
+            updatedAt: iso as any,
+            distributionIds: []
+          }
+        ]
+      })
+    );
+
+    expect(matches.map((match) => match.dataset.title)).toEqual([
+      "Annual Energy Outlook Archive",
+      "Annual Energy Outlook Report"
+    ]);
+    expect(matches.every((match) => match._tag === "DatasetTitleFuzzyMatch")).toBe(
+      true
+    );
+  });
+
+  it("keeps the fuzzy dataset title score in Stage 1 evidence", () => {
+    const seed = makeSeed();
+
+    const result = runStage1(
+      makeSourceLineInput("Annual Energy Outlook", {
+        providerLabel: "EIA",
+        providerDomain: "www.eia.gov"
+      }),
+      makeLookup({
+        ...seed,
+        datasets: [
+          ...seed.datasets,
+          {
+            _tag: "Dataset",
+            id: "https://id.skygest.io/dataset/ds_STAGE1FUZZY01" as any,
+            title: "Annual Energy Outlook Report",
+            publisherAgentId: "https://id.skygest.io/agent/ag_1234567890AB" as any,
+            aliases: [],
+            createdAt: iso as any,
+            updatedAt: iso as any,
+            distributionIds: []
+          }
+        ]
+      })
+    );
+
+    const datasetMatch = result.matches.find(
+      (match) =>
+        match._tag === "DatasetMatch" &&
+        match.title === "Annual Energy Outlook Report"
+    );
+
+    expect(datasetMatch?._tag).toBe("DatasetMatch");
+    expect(datasetMatch?.bestRank).toBe(3);
+    if (datasetMatch?._tag !== "DatasetMatch") {
+      throw new Error("expected dataset match");
+    }
+    expect(datasetMatch.evidence).toContainEqual(
+      expect.objectContaining({
+        _tag: "DatasetTitleEvidence",
+        rank: 3,
+        fuzzyScore: DATASET_TITLE_FUZZY_THRESHOLD
+      })
+    );
+  });
+
   it("matches dataset titles when the catalog title carries a publisher prefix", () => {
     const seed = makeSeed();
 
@@ -488,7 +730,7 @@ describe("runStage1", () => {
             publisherAgentId: "https://id.skygest.io/agent/ag_NRELNRELNREL" as any,
             aliases: [
               {
-                scheme: "other",
+                scheme: "display-alias",
                 value: "NREL ATB",
                 relation: "closeMatch"
               }

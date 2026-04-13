@@ -34,12 +34,12 @@
       "relation": "exactMatch"
     },
     {
-      "scheme": "other",
+      "scheme": "display-alias",
       "value": "EIA Hourly Electric Grid Monitor",
       "relation": "closeMatch"
     },
     {
-      "scheme": "other",
+      "scheme": "display-alias",
       "value": "Hourly Electric Grid Monitor",
       "relation": "closeMatch"
     }

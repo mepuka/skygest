@@ -1,5 +1,7 @@
-import type { AgentId, DatasetId } from "../../domain/data-layer/ids";
-import type { ResolutionEvidenceBundle } from "../../domain/resolutionKernel";
+import type {
+  ResolutionEvidenceBundle,
+  ResolutionScopeOptions
+} from "../../domain/resolutionKernel";
 import type { DataLayerRegistryLookup } from "../dataLayerRegistry";
 import type { FacetVocabularyShape } from "../facetVocabulary";
 import { assembleOutcome } from "./AssembleOutcome";
@@ -10,10 +12,7 @@ export const resolveBundle = (
   bundle: ResolutionEvidenceBundle,
   lookup: DataLayerRegistryLookup,
   vocabulary: FacetVocabularyShape,
-  options: {
-    readonly agentId?: AgentId;
-    readonly datasetIds?: ReadonlyArray<DatasetId>;
-  } = {}
+  options: ResolutionScopeOptions = {}
 ) => {
   const interpreted = interpretBundle(bundle, vocabulary);
   if (interpreted._tag !== "Hypothesis") {

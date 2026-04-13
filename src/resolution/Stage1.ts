@@ -1,11 +1,16 @@
 import { Chunk, Data, HashMap, Option, Order } from "effect";
-import { aliasSchemes, type AliasScheme } from "../domain/data-layer/alias";
+import {
+  AliasSchemeValues,
+  aliasSchemes,
+  type AliasScheme
+} from "../domain/data-layer/alias";
 import type {
   Agent,
   Dataset,
   Distribution,
   Variable
 } from "../domain/data-layer";
+import type { AgentId } from "../domain/data-layer/ids";
 import type {
   AgentHomepageEvidence,
   AgentLabelEvidence,
@@ -43,6 +48,7 @@ import {
   normalizeLookupText
 } from "./normalize";
 import {
+  DATASET_TITLE_CONFIDENT_THRESHOLD,
   findDatasetMatchesForName,
   listPreferredDatasetAgentIds
 } from "./datasetNameMatch";
@@ -68,7 +74,8 @@ class MatchKey extends Data.Class<{
 }> {}
 
 const structuredAliasSchemes = aliasSchemes.filter(
-  (scheme): scheme is AliasScheme => scheme !== "url"
+  (scheme): scheme is AliasScheme =>
+    scheme !== "url" && scheme !== AliasSchemeValues.displayAlias
 );
 
 const grainPriority: Record<Stage1MatchGrain, number> = {
@@ -314,7 +321,7 @@ const pushDatasetTitleMatch = (
   assetKey: string | undefined,
   lookup: DataLayerRegistryLookup,
   options: {
-    readonly preferredAgentIds?: ReadonlyArray<Agent["id"]>;
+    readonly preferredAgentIds?: ReadonlyArray<AgentId>;
     readonly emitResidualOnMiss?: boolean;
   } = {}
 ) => {
@@ -337,10 +344,19 @@ const pushDatasetTitleMatch = (
             stripUndefined({
               _tag: "DatasetTitleEvidence" as const,
               signal: "dataset-title" as const,
-              rank: match._tag === "DatasetTitleExactMatch" ? 1 : 2,
+              rank:
+                match._tag === "DatasetTitleExactMatch"
+                  ? 1
+                  : match.score >= DATASET_TITLE_CONFIDENT_THRESHOLD
+                    ? 2
+                    : 3,
               assetKey,
               datasetName,
-              normalizedTitle: normalizeLookupText(datasetName)
+              normalizedTitle: normalizeLookupText(datasetName),
+              fuzzyScore:
+                match._tag === "DatasetTitleFuzzyMatch"
+                  ? match.score
+                  : undefined
             })
           );
           break;

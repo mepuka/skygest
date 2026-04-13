@@ -998,6 +998,37 @@ describe("GeminiVisionService", () => {
         ]);
       }).pipe(runWith)
     );
+
+    it.effect("treats bare hosts as valid visible URLs but ignores dotted non-URL prose", () =>
+      Effect.gen(function* () {
+        mockGenerateContent.mockReset();
+        mockGenerateContent.mockResolvedValueOnce({
+          text: encodeJsonString({
+            mediaType: "chart",
+            chartTypes: ["line-chart"],
+            altText: "Publisher footer screenshot",
+            title: "Footer",
+            xAxis: null,
+            yAxis: null,
+            series: [],
+            sourceLines: [],
+            temporalCoverage: null,
+            keyFindings: [],
+            visibleUrls: ["bloomberg.com", "U.S. Energy Information Admin"],
+            organizationMentions: [],
+            logoText: []
+          })
+        });
+
+        const svc = yield* GeminiVisionService;
+        const result = yield* svc.extractChartData(
+          "https://gemini.files/abc",
+          "image/png"
+        );
+
+        expect(result.visibleUrls).toEqual(["https://bloomberg.com/"]);
+      }).pipe(runWith)
+    );
   });
 
   describe("extractImageSummary", () => {

@@ -5,7 +5,7 @@
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
   "aliases": [
     {
-      "scheme": "other",
+      "scheme": "display-alias",
       "value": "Ember Electricity Data Explorer",
       "relation": "closeMatch"
     }

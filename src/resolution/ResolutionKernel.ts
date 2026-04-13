@@ -1,9 +1,12 @@
-import { Effect, Layer, Schema, ServiceMap } from "effect";
-import type { AgentId, DatasetId } from "../domain/data-layer/ids";
+import { Effect, Layer, Option, Schema, ServiceMap } from "effect";
+import type { DatasetId } from "../domain/data-layer/ids";
 import type { VisionAssetEnrichment } from "../domain/enrichment";
-import { type ResolutionOutcome } from "../domain/resolutionKernel";
+import type {
+  ResolutionOutcome,
+  ResolutionScopeOptions
+} from "../domain/resolutionKernel";
 import { EnrichmentSchemaDecodeError } from "../domain/errors";
-import { Stage1Input, type Stage1Input as Stage1InputValue } from "../domain/stage1Resolution";
+import { Stage1Input } from "../domain/stage1Resolution";
 import { formatSchemaParseError } from "../platform/Json";
 import { DataLayerRegistry } from "../services/DataLayerRegistry";
 import type { DataLayerRegistryLookup } from "./dataLayerRegistry";
@@ -14,11 +17,6 @@ import {
 import { FacetVocabulary } from "./facetVocabulary";
 import { buildResolutionEvidenceBundles } from "./kernel/BundleAdapter";
 import { resolveBundle } from "./kernel/ResolutionKernel";
-
-type ResolutionScopeOptions = {
-  agentId?: AgentId;
-  datasetIds?: ReadonlyArray<DatasetId>;
-};
 
 const decodeStage1Input = (input: unknown) =>
   Schema.decodeUnknownEffect(Stage1Input)(input).pipe(
@@ -31,7 +29,7 @@ const decodeStage1Input = (input: unknown) =>
   );
 
 export const resolveAgentIdFromStage1Input = (
-  input: typeof Stage1Input.Type,
+  input: Schema.Schema.Type<typeof Stage1Input>,
   lookup: DataLayerRegistryLookup
 ) => {
   const providerHints = [
@@ -46,7 +44,7 @@ export const resolveAgentIdFromStage1Input = (
     }
 
     const agentByLabel = lookup.findAgentByLabel(providerHint);
-    if (agentByLabel._tag === "Some") {
+    if (Option.isSome(agentByLabel)) {
       return agentByLabel.value.id;
     }
   }
@@ -62,7 +60,7 @@ export const resolveAgentIdFromStage1Input = (
     }
 
     const homepageAgent = lookup.findAgentByHomepageDomain(homepageHint);
-    if (homepageAgent._tag === "Some") {
+    if (Option.isSome(homepageAgent)) {
       return homepageAgent.value.id;
     }
   }
@@ -71,7 +69,7 @@ export const resolveAgentIdFromStage1Input = (
 };
 
 const resolveDatasetIdsForAsset = (
-  input: Stage1InputValue,
+  input: Schema.Schema.Type<typeof Stage1Input>,
   asset: VisionAssetEnrichment,
   lookup: DataLayerRegistryLookup
 ): ReadonlyArray<DatasetId> => {
@@ -94,7 +92,7 @@ const resolveDatasetIdsForAsset = (
 };
 
 const resolveDatasetIdsByAssetKey = (
-  input: Stage1InputValue,
+  input: Schema.Schema.Type<typeof Stage1Input>,
   lookup: DataLayerRegistryLookup
 ): ReadonlyMap<string, ReadonlyArray<DatasetId>> => {
   const datasetIdsByAssetKey = new Map<string, ReadonlyArray<DatasetId>>();
@@ -146,13 +144,10 @@ export class ResolutionKernel extends ServiceMap.Service<
             bundle.assetKey === undefined
               ? undefined
               : datasetIdsByAssetKey.get(bundle.assetKey);
-          const resolutionOptions: ResolutionScopeOptions = {};
-          if (agentId !== undefined) {
-            resolutionOptions.agentId = agentId;
-          }
-          if (datasetIds !== undefined) {
-            resolutionOptions.datasetIds = datasetIds;
-          }
+          const resolutionOptions: ResolutionScopeOptions = {
+            ...(agentId === undefined ? {} : { agentId }),
+            ...(datasetIds === undefined ? {} : { datasetIds })
+          };
 
           return resolveBundle(
             bundle,

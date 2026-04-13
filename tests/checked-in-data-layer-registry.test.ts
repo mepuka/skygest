@@ -147,12 +147,10 @@ describe("checked-in data layer registry loader", () => {
           lookup
         );
         expect(
-          emberResult.matches.some(
-            (match) =>
-              match._tag === "DatasetMatch" &&
-              match.title === "Ember Data Explorer"
+          emberResult.matches.flatMap((match) =>
+            match._tag === "DatasetMatch" ? [match.title] : []
           )
-        ).toBe(true);
+        ).toEqual(["Ember Data Explorer"]);
 
         const eiaResult = runStage1(
           makeInput(
@@ -163,12 +161,10 @@ describe("checked-in data layer registry loader", () => {
           lookup
         );
         expect(
-          eiaResult.matches.some(
-            (match) =>
-              match._tag === "DatasetMatch" &&
-              match.title === "EIA U.S. Electric System Operating Data"
+          eiaResult.matches.flatMap((match) =>
+            match._tag === "DatasetMatch" ? [match.title] : []
           )
-        ).toBe(true);
+        ).toEqual(["EIA U.S. Electric System Operating Data"]);
 
         const nrelResult = runStage1(
           makeInput(
@@ -179,12 +175,10 @@ describe("checked-in data layer registry loader", () => {
           lookup
         );
         expect(
-          nrelResult.matches.some(
-            (match) =>
-              match._tag === "DatasetMatch" &&
-              match.title === "NREL Annual Technology Baseline"
+          nrelResult.matches.flatMap((match) =>
+            match._tag === "DatasetMatch" ? [match.title] : []
           )
-        ).toBe(true);
+        ).toEqual(["NREL Annual Technology Baseline"]);
       }),
     registryLoadTimeoutMs
   );
