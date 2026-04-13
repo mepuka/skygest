@@ -1822,6 +1822,53 @@ describe("buildDatasetCandidate", () => {
     expect(fresh.title).toBe("retail-sales");
   });
 
+  it("synthesizes title from path segments when API v2 echoes the top-level route id", () => {
+    // EIA's v2 API returns `response.id = <top-level route>` and
+    // `response.name = null` for many deep leaf routes (e.g.
+    // `natural-gas/sum/sndm`). Falling back to `response.id` would yield
+    // generic titles like "natural-gas" for ~71% of deep datasets. Detect
+    // the stale-id case and synthesize from path segments instead.
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const staleLeaf = {
+      path: "natural-gas/sum/sndm",
+      parents: ["natural-gas", "sum"],
+      response: {
+        id: "natural-gas", // <- echoes top-level parent, not the leaf
+        name: null,
+        description: "EIA natural gas survey data",
+        facets: [],
+        defaultFrequency: "monthly"
+      } as unknown as EiaApiResponse["response"]
+    };
+    const ds = buildDatasetCandidate(staleLeaf, ctx, null, undefined);
+    // Not the stale top-level segment
+    expect(ds.title).not.toBe("natural-gas");
+    // Includes all path segments for disambiguation (so
+    // `natural-gas/sum/sndm` and `natural-gas/sum/lsum` get distinct titles)
+    expect(ds.title).toContain("Natural Gas");
+    expect(ds.title).toContain("Sum");
+    expect(ds.title).toContain("Sndm");
+  });
+
+  it("does NOT synthesize from path when response.id differs from top segment (aeo/2026)", () => {
+    // Regression guard: `aeo/2026` returns `id: "AEO2026"` which is a
+    // distinctive leaf identifier, not a stale top-level echo. The title
+    // should be the raw `AEO2026`, not a synthesized "Aeo 2026".
+    const ctx = makeBuilderCtx(FIXTURE_NOW);
+    const aeoLeaf = {
+      path: "aeo/2026",
+      parents: ["aeo"],
+      response: {
+        id: "AEO2026",
+        name: null,
+        facets: [],
+        defaultFrequency: null
+      } as unknown as EiaApiResponse["response"]
+    };
+    const ds = buildDatasetCandidate(aeoLeaf, ctx, null, undefined);
+    expect(ds.title).toBe("AEO2026");
+  });
+
   it("falls back to parent route segments for themes when existing themes are empty", () => {
     const ctx = makeBuilderCtx(FIXTURE_NOW);
     const existing = {

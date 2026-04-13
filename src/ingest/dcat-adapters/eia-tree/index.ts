@@ -941,6 +941,38 @@ const titleCaseSegment = (value: string): string =>
     .map((token) => token[0]!.toUpperCase() + token.slice(1))
     .join(" ");
 
+/**
+ * EIA's v2 API returns `response.id` = the top-level route segment (and
+ * `response.name === null`) for many deep leaf routes — e.g. for
+ * `natural-gas/sum/sndm` the response echoes `id: "natural-gas"`. Detect that
+ * case and synthesize a human-readable title from the URL path segments
+ * instead, preserving disambiguation via the leaf segment.
+ *
+ * Pure. Never used when a real `response.name` is available or when the API
+ * returns a distinctive `id` like `AEO2026`.
+ */
+const synthesizeLeafTitleFromPath = (leaf: LeafRoute): string => {
+  const segments = leaf.path.split("/").filter((s) => s.length > 0);
+  if (segments.length === 0) return leaf.response.id;
+  return segments.map(titleCaseSegment).join(" \u00B7 ");
+};
+
+/**
+ * True when the API response is returning the stale top-level route id
+ * instead of a real leaf identifier. Used to decide whether to fall back
+ * to synthesized titles.
+ */
+const isStaleTopLevelId = (leaf: LeafRoute): boolean => {
+  if (leaf.response.name != null && leaf.response.name.length > 0) return false;
+  const topSegment =
+    leaf.parents.length > 0 ? leaf.parents[0]! : leaf.path.split("/")[0]!;
+  return (
+    leaf.parents.length > 0 &&
+    leaf.response.id != null &&
+    leaf.response.id === topSegment
+  );
+};
+
 const cadenceFromFrequencyValue = (
   value: string | null | undefined
 ): DatasetSeries["cadence"] | undefined => {
@@ -1143,11 +1175,23 @@ export const buildDatasetCandidate = (
       ? existing.themes
       : leaf.parents;
 
-  // Title: prefer API v2 (canonical), but fall back to existing curated
-  // title when the API returns `name === null`. Only use the raw route id
-  // as a last resort — otherwise a merge would overwrite a curated title
-  // like "Retail Sales of Electricity" with the raw slug "retail-sales".
-  const title = leaf.response.name ?? existing?.title ?? leaf.response.id;
+  // Title selection precedence:
+  //   1. `response.name` when the API actually provides one (canonical
+  //      structural source — a merged refresh rewrites curated titles to
+  //      match API).
+  //   2. Existing curated title (preserves human-curated titles when the
+  //      API returns `name: null`).
+  //   3. For deep leaf routes where the EIA v2 API echoes the top-level
+  //      route id (e.g. `natural-gas/sum/sndm` → `id: "natural-gas"`,
+  //      `name: null`), synthesize a title from the URL path segments.
+  //      Detected via `isStaleTopLevelId` — never triggered for shallow
+  //      routes like `aeo/2026` (id=`AEO2026`) or `electricity/retail-sales`
+  //      (name=`Electricity Sales to Ultimate Customers`).
+  //   4. Raw `response.id` as an absolute last resort.
+  const title =
+    leaf.response.name ??
+    existing?.title ??
+    (isStaleTopLevelId(leaf) ? synthesizeLeafTitleFromPath(leaf) : leaf.response.id);
 
   const base: Record<string, unknown> = {
     _tag: "Dataset",
