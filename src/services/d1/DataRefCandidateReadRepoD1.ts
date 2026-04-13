@@ -6,6 +6,9 @@ import {
   ResolutionState
 } from "../../domain/data-layer/candidate";
 import {
+  AssertedValue,
+  DataRefCitationKey,
+  DataRefCitationSource,
   FindCandidatesByDataRefHit as FindCandidatesByDataRefHitSchema
 } from "../../domain/data-layer/query";
 import { Did, PostUri } from "../../domain/types";
@@ -20,14 +23,13 @@ import { stripUndefined } from "../../platform/Json";
 
 const isDefined = <A>(value: A | null): value is A => value !== null;
 
-const AssertedValueSchema = Schema.NullOr(Schema.Union([Schema.Number, Schema.String]));
-
 const RawDataRefCandidateRowSchema = Schema.Struct({
-  rowId: Schema.Number,
+  citationKey: DataRefCitationKey,
   sourcePostUri: PostUri,
   did: Did,
   handle: Schema.NullOr(Schema.String),
   displayName: Schema.NullOr(Schema.String),
+  citationSource: DataRefCitationSource,
   resolutionState: ResolutionState,
   assertedValueJson: Schema.NullOr(Schema.String),
   assertedUnit: Schema.NullOr(Schema.String),
@@ -50,7 +52,7 @@ const toReadRow = (
     ).pipe(
       Effect.flatMap((decoded) =>
         decodeWithDbError(
-          AssertedValueSchema,
+          AssertedValue,
           decoded,
           `Failed to normalize asserted value for ${row.sourcePostUri}`
         )
@@ -71,9 +73,12 @@ const toReadRow = (
           );
 
     return {
-      rowId: row.rowId,
-      hasObservationTime: row.hasObservationTime > 0,
-      observationSortKey: row.observationSortKey,
+      cursor: {
+        hasObservationTime: row.hasObservationTime > 0,
+        observationSortKey: row.observationSortKey,
+        sourcePostUri: row.sourcePostUri,
+        citationKey: row.citationKey
+      },
       hit: yield* decodeWithDbError(
         FindCandidatesByDataRefHitSchema,
         {
@@ -83,6 +88,7 @@ const toReadRow = (
             handle: row.handle,
             displayName: row.displayName
           },
+          citationSource: row.citationSource,
           resolutionState: row.resolutionState,
           assertedValue,
           assertedUnit: row.assertedUnit,
@@ -98,21 +104,23 @@ export const DataRefCandidateReadRepoD1 = {
     const sql = yield* SqlClient.SqlClient;
 
     const listByEntityId = (input: ListDataRefCandidateRowsRepoInput) => {
+      const observedSince = input.observedSince ?? undefined;
+      const observedUntil = input.observedUntil ?? undefined;
       const conditions = [
         sql`c.entity_id = ${input.entityId}`,
         sql`p.status = 'active'`,
-        input.observedSince === undefined || input.observedSince === null
+        observedSince === undefined
           ? null
           : sql`c.has_observation_time = 1`,
-        input.observedUntil === undefined || input.observedUntil === null
+        observedUntil === undefined
           ? null
           : sql`c.has_observation_time = 1`,
-        input.observedSince === undefined
+        observedSince === undefined
           ? null
-          : sql`c.normalized_observation_end >= ${input.observedSince}`,
-        input.observedUntil === undefined
+          : sql`c.normalized_observation_end >= ${observedSince}`,
+        observedUntil === undefined
           ? null
-          : sql`c.normalized_observation_start <= ${input.observedUntil}`,
+          : sql`c.normalized_observation_start <= ${observedUntil}`,
         input.cursor === undefined
           ? null
           : sql`(
@@ -130,18 +138,19 @@ export const DataRefCandidateReadRepoD1 = {
                 c.has_observation_time = ${input.cursor.hasObservationTime ? 1 : 0}
                 AND c.observation_sort_key = ${input.cursor.observationSortKey}
                 AND c.source_post_uri = ${input.cursor.sourcePostUri}
-                AND c.id > ${input.cursor.rowId}
+                AND c.citation_key > ${input.cursor.citationKey}
               )
             )`
       ].filter(isDefined);
 
-      return sql<any>`
+      return sql`
         SELECT
-          c.id as rowId,
+          c.citation_key as citationKey,
           c.source_post_uri as sourcePostUri,
           p.did as did,
           e.handle as handle,
           e.display_name as displayName,
+          c.citation_source as citationSource,
           c.resolution_state as resolutionState,
           c.asserted_value_json as assertedValueJson,
           c.asserted_unit as assertedUnit,
@@ -158,7 +167,7 @@ export const DataRefCandidateReadRepoD1 = {
           c.has_observation_time DESC,
           c.observation_sort_key DESC,
           c.source_post_uri ASC,
-          c.id ASC
+          c.citation_key ASC
         LIMIT ${input.limit}
       `.pipe(
         Effect.flatMap((rows) =>

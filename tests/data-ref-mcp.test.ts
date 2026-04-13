@@ -195,6 +195,8 @@ const seedExpertAndPosts = (
 const insertCitation = (input: {
   readonly sourcePostUri: string;
   readonly entityId: string;
+  readonly citationSource?: "kernel" | "stage1";
+  readonly citationKey?: string;
   readonly resolutionState: "source_only" | "partially_resolved" | "resolved";
   readonly assertedValueJson?: string | null;
   readonly assertedUnit?: string | null;
@@ -210,6 +212,8 @@ const insertCitation = (input: {
       INSERT INTO data_ref_candidate_citations (
         source_post_uri,
         entity_id,
+        citation_source,
+        citation_key,
         resolution_state,
         asserted_value_json,
         asserted_unit,
@@ -224,6 +228,16 @@ const insertCitation = (input: {
       ) VALUES (
         ${input.sourcePostUri},
         ${input.entityId},
+        ${input.citationSource ?? "kernel"},
+        ${input.citationKey ??
+          [
+            input.citationSource ?? "kernel",
+            input.resolutionState,
+            input.entityId,
+            input.observationStart ?? input.observationEnd ?? "",
+            input.observationEnd ?? input.observationStart ?? "",
+            ""
+          ].join("\u0000")},
         ${input.resolutionState},
         ${input.assertedValueJson ?? null},
         ${input.assertedUnit ?? null},
@@ -232,7 +246,7 @@ const insertCitation = (input: {
         NULL,
         ${input.observationStart ?? input.observationEnd ?? ""},
         ${input.observationEnd ?? input.observationStart ?? ""},
-        ${input.observationSortKey ?? input.observationStart ?? input.observationEnd ?? ""},
+        ${input.observationSortKey ?? input.observationEnd ?? input.observationStart ?? ""},
         ${input.hasObservationTime === true ? 1 : 0},
         ${1_710_000_000_000}
       )

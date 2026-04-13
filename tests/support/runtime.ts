@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { SqliteClient } from "@effect/sql-sqlite-node";
 import { Effect, Layer, Redacted, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
+import { d1DataLayerRegistryLayer } from "../../src/bootstrap/D1DataLayerRegistry";
 import { energySeedDid, energySeedManifest } from "../../src/bootstrap/CheckedInExpertSeeds";
 import { bootstrapExperts } from "../../src/bootstrap/ExpertSeeds";
 import { BlueskyClient, layer as BlueskyClientLayer } from "../../src/bluesky/BlueskyClient";
@@ -121,7 +122,7 @@ export const makeBiLayer = (options?: {
   readonly filename?: string;
   readonly config?: Partial<AppConfigShape>;
   readonly blueskyClient?: Layer.Layer<BlueskyClient>;
-}) => {
+}): Layer.Layer<any, any, never> => {
   const sqliteLayer = makeSqliteLayer(options?.filename);
   const configLayer = Layer.succeed(AppConfig, testConfig(options?.config));
   const expertsLayer = ExpertsRepoD1.layer.pipe(Layer.provideMerge(sqliteLayer));
@@ -230,12 +231,6 @@ export const makeBiLayer = (options?: {
   const pipelineStatusServiceLayer = PipelineStatusService.layer.pipe(
     Layer.provideMerge(pipelineStatusRepoLayer)
   );
-  const dataRefQueryServiceLayer = DataRefQueryService.layer.pipe(
-    Layer.provideMerge(
-      Layer.mergeAll(configLayer, dataLayerReposLayer, dataRefCandidateReadRepoLayer)
-    )
-  );
-
   return Layer.mergeAll(
     baseLayer,
     postHydrationLayer,
@@ -247,10 +242,22 @@ export const makeBiLayer = (options?: {
     blueskyLayer,
     enrichmentReadServiceLayer,
     pipelineStatusServiceLayer,
-    dataRefQueryServiceLayer,
     postImportServiceLayer,
     registryLayer
   );
+};
+
+export const withDataRefQueryService = (
+  layer: Layer.Layer<any, any, never>
+): Layer.Layer<any, any, never> => {
+  const dataLayerRegistryLayer = d1DataLayerRegistryLayer().pipe(
+    Layer.provideMerge(layer)
+  );
+  const dataRefQueryServiceLayer = DataRefQueryService.layer.pipe(
+    Layer.provideMerge(Layer.mergeAll(layer, dataLayerRegistryLayer))
+  );
+
+  return Layer.mergeAll(layer, dataRefQueryServiceLayer);
 };
 
 export const makeSampleBatch = (did = sampleDid) =>
@@ -445,7 +452,10 @@ export const createMcpClient = async (
   identity: AccessIdentity = readOnlyIdentity
 ) => {
   const baseUrl = new URL("https://skygest.local");
-  const webHandler = createPersistentMcpHandler(layer, identity);
+  const webHandler = createPersistentMcpHandler(
+    withDataRefQueryService(layer),
+    identity
+  );
   const localFetch = ((input, init) => {
     const request = input instanceof Request
       ? new Request(input, init)

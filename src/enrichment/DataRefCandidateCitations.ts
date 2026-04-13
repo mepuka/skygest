@@ -1,24 +1,13 @@
 import type {
   ResolutionOutcome,
-  ResolutionEvidenceBundle
+  ResolutionEvidenceBundle,
+  BoundResolutionBoundItem
 } from "../domain/resolutionKernel";
 import type {
   DataRefResolutionEnrichment
 } from "../domain/enrichment";
 import type { ResolutionState } from "../domain/data-layer/candidate";
-
-export type PreparedDataRefCandidateCitation = {
-  readonly entityId: string;
-  readonly resolutionState: ResolutionState;
-  readonly assertedValueJson: string | null;
-  readonly assertedUnit: string | null;
-  readonly observationStart: string | null;
-  readonly observationEnd: string | null;
-  readonly observationLabel: string | null;
-  readonly normalizedObservationStart: string;
-  readonly normalizedObservationEnd: string;
-  readonly hasObservationTime: boolean;
-};
+import type { PreparedDataRefCandidateCitation } from "../domain/data-layer/query";
 
 const resolutionStatePriority = (
   value: ResolutionState
@@ -33,6 +22,26 @@ const resolutionStatePriority = (
   }
 };
 
+const toCitationKey = (
+  row: Pick<
+    PreparedDataRefCandidateCitation,
+    | "citationSource"
+    | "resolutionState"
+    | "entityId"
+    | "normalizedObservationStart"
+    | "normalizedObservationEnd"
+    | "observationLabel"
+  >
+) =>
+  [
+    row.citationSource,
+    row.resolutionState,
+    row.entityId,
+    row.normalizedObservationStart,
+    row.normalizedObservationEnd,
+    row.observationLabel ?? ""
+  ].join("\u0000");
+
 const observationWindowFromBundle = (bundle: ResolutionEvidenceBundle) => {
   const start = bundle.temporalCoverage?.startDate ?? null;
   const end = bundle.temporalCoverage?.endDate ?? null;
@@ -44,6 +53,7 @@ const observationWindowFromBundle = (bundle: ResolutionEvidenceBundle) => {
     observationLabel: null,
     normalizedObservationStart: start ?? end ?? "",
     normalizedObservationEnd: end ?? start ?? "",
+    observationSortKey: end ?? start ?? "",
     hasObservationTime
   };
 };
@@ -78,7 +88,7 @@ const upsertCitation = (
 
 const stage1EntityId = (
   match: DataRefResolutionEnrichment["stage1"]["matches"][number]
-) => {
+): PreparedDataRefCandidateCitation["entityId"] => {
   switch (match._tag) {
     case "AgentMatch":
       return match.agentId;
@@ -93,10 +103,24 @@ const stage1EntityId = (
 
 const stage1ResolutionState = (
   match: DataRefResolutionEnrichment["stage1"]["matches"][number]
-): ResolutionState =>
-  match._tag === "VariableMatch"
-    ? "partially_resolved"
-    : "source_only";
+): ResolutionState => {
+  switch (match._tag) {
+    case "VariableMatch":
+      return "partially_resolved";
+    case "AgentMatch":
+    case "DatasetMatch":
+    case "DistributionMatch":
+      return "source_only";
+  }
+};
+
+const assertedUnitForItem = (
+  bundle: ResolutionEvidenceBundle,
+  item: BoundResolutionBoundItem
+) =>
+  bundle.series.find((series) => series.itemKey === item.itemKey)?.unit ??
+  bundle.yAxis?.unit ??
+  null;
 
 const kernelRowsForOutcome = (
   outcome: ResolutionOutcome
@@ -109,36 +133,60 @@ const kernelRowsForOutcome = (
         ...outcome.items.flatMap((item) =>
           item._tag !== "bound"
             ? []
-            : [{
-                entityId: item.variableId,
-                resolutionState: "resolved" as const,
-                assertedValueJson: null,
-                assertedUnit: outcome.bundle.yAxis?.unit ?? null,
-                ...observation
-              }]
+            : [(() => {
+                const baseRow = {
+                  entityId: item.variableId,
+                  citationSource: "kernel" as const,
+                  resolutionState: "resolved" as const,
+                  assertedValueJson: null,
+                  assertedUnit: assertedUnitForItem(outcome.bundle, item),
+                  ...observation
+                };
+
+                return {
+                  ...baseRow,
+                  citationKey: toCitationKey(baseRow)
+                };
+              })()]
         ),
         ...(outcome.agentId === undefined
           ? []
-          : [{
-              entityId: outcome.agentId,
-              resolutionState: "resolved" as const,
-              assertedValueJson: null,
-              assertedUnit: null,
-              ...observation
-            }])
+          : [(() => {
+              const baseRow = {
+                entityId: outcome.agentId,
+                citationSource: "kernel" as const,
+                resolutionState: "resolved" as const,
+                assertedValueJson: null,
+                assertedUnit: null,
+                ...observation
+              };
+
+              return {
+                ...baseRow,
+                citationKey: toCitationKey(baseRow)
+              };
+            })()])
       ];
     case "Ambiguous":
     case "OutOfRegistry":
       return outcome.items.flatMap((item) =>
         item._tag !== "bound"
           ? []
-          : [{
-              entityId: item.variableId,
-              resolutionState: "partially_resolved" as const,
-              assertedValueJson: null,
-              assertedUnit: outcome.bundle.yAxis?.unit ?? null,
-              ...observation
-            }]
+          : [(() => {
+              const baseRow = {
+                entityId: item.variableId,
+                citationSource: "kernel" as const,
+                resolutionState: "partially_resolved" as const,
+                assertedValueJson: null,
+                assertedUnit: assertedUnitForItem(outcome.bundle, item),
+                ...observation
+              };
+
+              return {
+                ...baseRow,
+                citationKey: toCitationKey(baseRow)
+              };
+            })()]
       );
     case "Underspecified":
     case "Conflicted":
@@ -155,35 +203,36 @@ export const buildDataRefCandidateCitations = (
   const kernelEntityIds = new Set(kernelRows.map((row) => row.entityId));
 
   for (const row of kernelRows) {
-    const key = [
-      row.entityId,
-      row.normalizedObservationStart,
-      row.normalizedObservationEnd,
-      row.observationLabel ?? ""
-    ].join("\u0000");
-    upsertCitation(citations, key, row);
+    upsertCitation(citations, row.citationKey, row);
   }
 
-  enrichment.stage1.matches.forEach((match, index) => {
+  enrichment.stage1.matches.forEach((match) => {
     const entityId = stage1EntityId(match);
     if (kernelEntityIds.has(entityId)) {
       return;
     }
 
+    const baseRow = {
+      entityId,
+      citationSource: "stage1" as const,
+      resolutionState: stage1ResolutionState(match),
+      assertedValueJson: null,
+      assertedUnit: null,
+      observationStart: null,
+      observationEnd: null,
+      observationLabel: null,
+      normalizedObservationStart: "",
+      normalizedObservationEnd: "",
+      observationSortKey: "",
+      hasObservationTime: false
+    };
+
     upsertCitation(
       citations,
-      `stage1\u0000${entityId}\u0000${index}`,
+      toCitationKey(baseRow),
       {
-        entityId,
-        resolutionState: stage1ResolutionState(match),
-        assertedValueJson: null,
-        assertedUnit: null,
-        observationStart: null,
-        observationEnd: null,
-        observationLabel: null,
-        normalizedObservationStart: "",
-        normalizedObservationEnd: "",
-        hasObservationTime: false
+        ...baseRow,
+        citationKey: toCitationKey(baseRow)
       }
     );
   });

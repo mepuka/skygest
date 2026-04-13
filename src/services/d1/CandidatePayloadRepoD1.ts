@@ -105,11 +105,21 @@ export const CandidatePayloadRepoD1 = {
           ).pipe(
             Effect.flatMap((enrichment) => {
               const citations = buildDataRefCandidateCitations(enrichment);
+              const citationKeys = citations.map((citation) => sql`${citation.citationKey}`);
 
-              return sql`
-                DELETE FROM data_ref_candidate_citations
-                WHERE source_post_uri = ${input.postUri}
-              `.pipe(
+              const deleteStaleCitations =
+                citations.length === 0
+                  ? sql`
+                      DELETE FROM data_ref_candidate_citations
+                      WHERE source_post_uri = ${input.postUri}
+                    `.pipe(Effect.asVoid)
+                  : sql`
+                      DELETE FROM data_ref_candidate_citations
+                      WHERE source_post_uri = ${input.postUri}
+                        AND citation_key NOT IN (${sql.join(", ", false)(citationKeys)})
+                    `.pipe(Effect.asVoid);
+
+              return deleteStaleCitations.pipe(
                 Effect.asVoid,
                 Effect.flatMap(() =>
                   Effect.forEach(
@@ -119,6 +129,8 @@ export const CandidatePayloadRepoD1 = {
                         INSERT INTO data_ref_candidate_citations (
                           source_post_uri,
                           entity_id,
+                          citation_source,
+                          citation_key,
                           resolution_state,
                           asserted_value_json,
                           asserted_unit,
@@ -133,6 +145,8 @@ export const CandidatePayloadRepoD1 = {
                         ) VALUES (
                           ${input.postUri},
                           ${citation.entityId},
+                          ${citation.citationSource},
+                          ${citation.citationKey},
                           ${citation.resolutionState},
                           ${citation.assertedValueJson},
                           ${citation.assertedUnit},
@@ -141,10 +155,24 @@ export const CandidatePayloadRepoD1 = {
                           ${citation.observationLabel},
                           ${citation.normalizedObservationStart},
                           ${citation.normalizedObservationEnd},
-                          ${citation.normalizedObservationStart},
+                          ${citation.observationSortKey},
                           ${citation.hasObservationTime ? 1 : 0},
                           ${updatedAt}
                         )
+                        ON CONFLICT(source_post_uri, citation_key) DO UPDATE SET
+                          entity_id = excluded.entity_id,
+                          citation_source = excluded.citation_source,
+                          resolution_state = excluded.resolution_state,
+                          asserted_value_json = excluded.asserted_value_json,
+                          asserted_unit = excluded.asserted_unit,
+                          observation_start = excluded.observation_start,
+                          observation_end = excluded.observation_end,
+                          observation_label = excluded.observation_label,
+                          normalized_observation_start = excluded.normalized_observation_start,
+                          normalized_observation_end = excluded.normalized_observation_end,
+                          observation_sort_key = excluded.observation_sort_key,
+                          has_observation_time = excluded.has_observation_time,
+                          updated_at = excluded.updated_at
                       `.pipe(Effect.asVoid),
                     { discard: true }
                   )
@@ -323,40 +351,38 @@ export const CandidatePayloadRepoD1 = {
                 `enrichment payload for ${validated.postUri}`
               ).pipe(
                 Effect.flatMap((enrichmentPayloadJson) =>
-                  sql.withTransaction(
-                    sql`
-                      INSERT INTO post_enrichments (
-                        post_uri,
-                        enrichment_type,
-                        enrichment_payload_json,
-                        updated_at,
-                        enriched_at
-                      ) VALUES (
-                        ${validated.postUri},
-                        ${validated.enrichmentType},
-                        ${enrichmentPayloadJson},
-                        ${updatedAt},
-                        ${enrichedAt}
-                      )
-                      ON CONFLICT(post_uri, enrichment_type) DO UPDATE SET
-                        enrichment_payload_json = excluded.enrichment_payload_json,
-                        updated_at = excluded.updated_at,
-                        enriched_at = excluded.enriched_at
-                    `.pipe(
-                      Effect.asVoid,
-                      Effect.flatMap(() =>
-                        replaceDataRefCandidateCitations(validated, updatedAt)
-                      ),
-                      Effect.flatMap(() =>
-                        sql`
-                          UPDATE post_payloads
-                          SET enriched_at = ${enrichedAt},
-                              updated_at = ${updatedAt}
-                          WHERE post_uri = ${validated.postUri}
-                            AND capture_stage = ${"picked"}
-                        `.pipe(
-                          Effect.as(true)
-                        )
+                  sql`
+                    INSERT INTO post_enrichments (
+                      post_uri,
+                      enrichment_type,
+                      enrichment_payload_json,
+                      updated_at,
+                      enriched_at
+                    ) VALUES (
+                      ${validated.postUri},
+                      ${validated.enrichmentType},
+                      ${enrichmentPayloadJson},
+                      ${updatedAt},
+                      ${enrichedAt}
+                    )
+                    ON CONFLICT(post_uri, enrichment_type) DO UPDATE SET
+                      enrichment_payload_json = excluded.enrichment_payload_json,
+                      updated_at = excluded.updated_at,
+                      enriched_at = excluded.enriched_at
+                  `.pipe(
+                    Effect.asVoid,
+                    Effect.flatMap(() =>
+                      replaceDataRefCandidateCitations(validated, updatedAt)
+                    ),
+                    Effect.flatMap(() =>
+                      sql`
+                        UPDATE post_payloads
+                        SET enriched_at = ${enrichedAt},
+                            updated_at = ${updatedAt}
+                        WHERE post_uri = ${validated.postUri}
+                          AND capture_stage = ${"picked"}
+                      `.pipe(
+                        Effect.as(true)
                       )
                     )
                   )

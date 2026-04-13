@@ -1,6 +1,6 @@
 import { Schema } from "effect";
-import { FlexibleNumber } from "../bi";
-import { Did, PostUri } from "../types";
+import { ExpertListItem, FlexibleNumber } from "../bi";
+import { PostUri } from "../types";
 import { AliasScheme } from "./alias";
 import { AssertedTime, ResolutionState } from "./candidate";
 import {
@@ -68,19 +68,30 @@ export const DataRefEntityId = Schema.Union([
   AgentId,
   DatasetId,
   DistributionId,
-  SeriesId,
   VariableId
 ]).annotate({
   description:
-    "Data-layer entity URI accepted by reverse lookup (Agent, Dataset, Distribution, Series, or Variable)."
+    "Data-layer entity URI accepted by reverse lookup (Agent, Dataset, Distribution, or Variable)."
 });
 export type DataRefEntityId = Schema.Schema.Type<typeof DataRefEntityId>;
+
+export const DataRefCitationKey = Schema.String.pipe(
+  Schema.check(Schema.isMinLength(1))
+).annotate({
+  description: "Stable citation identity used for reverse-lookup pagination"
+});
+export type DataRefCitationKey = Schema.Schema.Type<typeof DataRefCitationKey>;
+
+export const DataRefCitationSource = Schema.Literals(["kernel", "stage1"]).annotate({
+  description: "How the citation row was produced"
+});
+export type DataRefCitationSource = Schema.Schema.Type<typeof DataRefCitationSource>;
 
 export const FindCandidatesByDataRefCursor = Schema.Struct({
   hasObservationTime: Schema.Boolean,
   observationSortKey: Schema.String,
   sourcePostUri: PostUri,
-  rowId: Schema.Number.pipe(Schema.check(Schema.isInt()))
+  citationKey: DataRefCitationKey
 }).annotate({
   description: "Opaque cursor payload for stable reverse-lookup pagination"
 });
@@ -120,19 +131,25 @@ export type FindCandidatesByDataRefInput = Schema.Schema.Type<
 >;
 
 export const FindCandidatesByDataRefExpert = Schema.Struct({
-  did: Did,
-  handle: Schema.NullOr(Schema.String),
-  displayName: Schema.NullOr(Schema.String)
+  did: ExpertListItem.fields.did,
+  handle: ExpertListItem.fields.handle,
+  displayName: ExpertListItem.fields.displayName
 });
 export type FindCandidatesByDataRefExpert = Schema.Schema.Type<
   typeof FindCandidatesByDataRefExpert
 >;
 
+export const AssertedValue = Schema.NullOr(
+  Schema.Union([Schema.Number, Schema.String])
+);
+export type AssertedValue = Schema.Schema.Type<typeof AssertedValue>;
+
 export const FindCandidatesByDataRefHit = Schema.Struct({
   sourcePostUri: PostUri,
   expert: FindCandidatesByDataRefExpert,
+  citationSource: DataRefCitationSource,
   resolutionState: ResolutionState,
-  assertedValue: Schema.NullOr(Schema.Union([Schema.Number, Schema.String])),
+  assertedValue: AssertedValue,
   assertedUnit: Schema.NullOr(Schema.String),
   observationTime: Schema.NullOr(AssertedTime)
 }).annotate({
@@ -141,6 +158,27 @@ export const FindCandidatesByDataRefHit = Schema.Struct({
 });
 export type FindCandidatesByDataRefHit = Schema.Schema.Type<
   typeof FindCandidatesByDataRefHit
+>;
+
+export const PreparedDataRefCandidateCitation = Schema.Struct({
+  entityId: DataRefEntityId,
+  citationKey: DataRefCitationKey,
+  citationSource: DataRefCitationSource,
+  resolutionState: ResolutionState,
+  assertedValueJson: Schema.NullOr(Schema.String),
+  assertedUnit: Schema.NullOr(Schema.String),
+  observationStart: Schema.NullOr(Schema.String),
+  observationEnd: Schema.NullOr(Schema.String),
+  observationLabel: Schema.NullOr(Schema.String),
+  normalizedObservationStart: Schema.String,
+  normalizedObservationEnd: Schema.String,
+  observationSortKey: Schema.String,
+  hasObservationTime: Schema.Boolean
+}).annotate({
+  description: "Projected citation row ready for persistence in the data-ref citation table."
+});
+export type PreparedDataRefCandidateCitation = Schema.Schema.Type<
+  typeof PreparedDataRefCandidateCitation
 >;
 
 export const FindCandidatesByDataRefOutput = Schema.Struct({

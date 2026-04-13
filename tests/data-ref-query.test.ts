@@ -22,6 +22,7 @@ import { VariablesRepo } from "../src/services/VariablesRepo";
 import {
   makeBiLayer,
   sampleDid,
+  withDataRefQueryService,
   withTempSqliteFile
 } from "./support/runtime";
 
@@ -105,7 +106,6 @@ const supportedEntityIds = {
   agent: decodeEntityId("https://id.skygest.io/agent/ag_TESTLOOKUP01"),
   dataset: decodeEntityId("https://id.skygest.io/dataset/ds_TESTLOOKUP01"),
   distribution: decodeEntityId("https://id.skygest.io/distribution/dist_TESTLOOKUP01"),
-  series: decodeEntityId("https://id.skygest.io/series/ser_TESTLOOKUP01"),
   variable: decodeEntityId("https://id.skygest.io/variable/var_TESTLOOKUP01")
 } as const;
 
@@ -197,6 +197,8 @@ const seedExpertAndPosts = (
 const insertCitation = (input: {
   readonly sourcePostUri: string;
   readonly entityId: string;
+  readonly citationSource?: "kernel" | "stage1";
+  readonly citationKey?: string;
   readonly resolutionState: "source_only" | "partially_resolved" | "resolved";
   readonly assertedValueJson?: string | null;
   readonly assertedUnit?: string | null;
@@ -212,6 +214,8 @@ const insertCitation = (input: {
       INSERT INTO data_ref_candidate_citations (
         source_post_uri,
         entity_id,
+        citation_source,
+        citation_key,
         resolution_state,
         asserted_value_json,
         asserted_unit,
@@ -226,6 +230,16 @@ const insertCitation = (input: {
       ) VALUES (
         ${input.sourcePostUri},
         ${input.entityId},
+        ${input.citationSource ?? "kernel"},
+        ${input.citationKey ??
+          [
+            input.citationSource ?? "kernel",
+            input.resolutionState,
+            input.entityId,
+            input.observationStart ?? input.observationEnd ?? "",
+            input.observationEnd ?? input.observationStart ?? "",
+            ""
+          ].join("\u0000")},
         ${input.resolutionState},
         ${input.assertedValueJson ?? null},
         ${input.assertedUnit ?? null},
@@ -234,7 +248,7 @@ const insertCitation = (input: {
         ${input.observationLabel ?? null},
         ${input.observationStart ?? input.observationEnd ?? ""},
         ${input.observationEnd ?? input.observationStart ?? ""},
-        ${input.observationSortKey ?? input.observationStart ?? input.observationEnd ?? ""},
+        ${input.observationSortKey ?? input.observationEnd ?? input.observationStart ?? ""},
         ${input.hasObservationTime === true ? 1 : 0},
         ${1_710_000_000_000}
       )
@@ -264,7 +278,8 @@ describe("data-ref query schemas", () => {
       hasObservationTime: true,
       observationSortKey: "2024-03",
       sourcePostUri: `at://${sampleDid}/app.bsky.feed.post/round-trip`,
-      rowId: 7
+      citationKey:
+        `kernel\u0000resolved\u0000${supportedEntityIds.variable}\u00002024-01\u00002024-03\u0000`
     });
     const roundTripCursor = decodeCursor(encodeCursor(typedCursor));
 
@@ -286,6 +301,7 @@ describe("data-ref query schemas", () => {
             handle: "seed.example.com",
             displayName: "Seed Example"
           },
+          citationSource: "kernel",
           resolutionState: "resolved",
           assertedValue: 42,
           assertedUnit: "USD/MWh",
@@ -314,6 +330,7 @@ describe("DataRefQueryService.resolveDataRef", () => {
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const layer = makeBiLayer({ filename });
+        const queryLayer = withDataRefQueryService(layer);
 
         await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
         await Effect.runPromise(seedRegistryEntities().pipe(Effect.provide(layer)));
@@ -348,7 +365,7 @@ describe("DataRefQueryService.resolveDataRef", () => {
             expect(variableAlias.entity).toEqual(registryVariable);
             expect(datasetAlias.entity).toEqual(registryDataset);
             expect(miss.entity).toBeNull();
-          }).pipe(Effect.provide(layer))
+          }).pipe(Effect.provide(queryLayer))
         );
       })
     )
@@ -360,11 +377,11 @@ describe("DataRefQueryService.findCandidatesByDataRef", () => {
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const layer = makeBiLayer({ filename });
+        const queryLayer = withDataRefQueryService(layer);
         const postUris = [
           `at://${sampleDid}/app.bsky.feed.post/entity-agent`,
           `at://${sampleDid}/app.bsky.feed.post/entity-dataset`,
           `at://${sampleDid}/app.bsky.feed.post/entity-distribution`,
-          `at://${sampleDid}/app.bsky.feed.post/entity-series`,
           `at://${sampleDid}/app.bsky.feed.post/entity-variable`
         ] as const;
 
@@ -374,8 +391,7 @@ describe("DataRefQueryService.findCandidatesByDataRef", () => {
             { uri: postUris[0], createdAt: 10 },
             { uri: postUris[1], createdAt: 11 },
             { uri: postUris[2], createdAt: 12 },
-            { uri: postUris[3], createdAt: 13 },
-            { uri: postUris[4], createdAt: 14 }
+            { uri: postUris[3], createdAt: 13 }
           ]).pipe(Effect.provide(layer))
         );
         await Effect.runPromise(
@@ -389,20 +405,17 @@ describe("DataRefQueryService.findCandidatesByDataRef", () => {
               insertCitation({
                 sourcePostUri: postUris[1],
                 entityId: supportedEntityIds.dataset,
+                citationSource: "stage1",
                 resolutionState: "source_only"
               }),
               insertCitation({
                 sourcePostUri: postUris[2],
                 entityId: supportedEntityIds.distribution,
+                citationSource: "stage1",
                 resolutionState: "source_only"
               }),
               insertCitation({
                 sourcePostUri: postUris[3],
-                entityId: supportedEntityIds.series,
-                resolutionState: "partially_resolved"
-              }),
-              insertCitation({
-                sourcePostUri: postUris[4],
                 entityId: supportedEntityIds.variable,
                 resolutionState: "resolved"
               })
@@ -424,19 +437,19 @@ describe("DataRefQueryService.findCandidatesByDataRef", () => {
             const distributionRows = yield* service.findCandidatesByDataRef({
               entityId: supportedEntityIds.distribution
             });
-            const seriesRows = yield* service.findCandidatesByDataRef({
-              entityId: supportedEntityIds.series
-            });
             const variableRows = yield* service.findCandidatesByDataRef({
               entityId: supportedEntityIds.variable
             });
 
             expect(agentRows.items[0]?.sourcePostUri).toBe(postUris[0]);
+            expect(agentRows.items[0]?.citationSource).toBe("kernel");
             expect(datasetRows.items[0]?.sourcePostUri).toBe(postUris[1]);
+            expect(datasetRows.items[0]?.citationSource).toBe("stage1");
             expect(distributionRows.items[0]?.sourcePostUri).toBe(postUris[2]);
-            expect(seriesRows.items[0]?.sourcePostUri).toBe(postUris[3]);
-            expect(variableRows.items[0]?.sourcePostUri).toBe(postUris[4]);
-          }).pipe(Effect.provide(layer))
+            expect(distributionRows.items[0]?.citationSource).toBe("stage1");
+            expect(variableRows.items[0]?.sourcePostUri).toBe(postUris[3]);
+            expect(variableRows.items[0]?.citationSource).toBe("kernel");
+          }).pipe(Effect.provide(queryLayer))
         );
       })
     )
@@ -446,6 +459,7 @@ describe("DataRefQueryService.findCandidatesByDataRef", () => {
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const layer = makeBiLayer({ filename });
+        const queryLayer = withDataRefQueryService(layer);
         const latePostUri = `at://${sampleDid}/app.bsky.feed.post/obs-late`;
         const earlyPostUri = `at://${sampleDid}/app.bsky.feed.post/obs-early`;
         const untimedPostUri = `at://${sampleDid}/app.bsky.feed.post/obs-untimed`;
@@ -532,7 +546,7 @@ describe("DataRefQueryService.findCandidatesByDataRef", () => {
             ]);
             expect(filtered.items.every((item) => item.observationTime !== null)).toBe(true);
             expect(filtered.nextCursor).toBeNull();
-          }).pipe(Effect.provide(layer))
+          }).pipe(Effect.provide(queryLayer))
         );
       })
     )

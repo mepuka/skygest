@@ -309,7 +309,7 @@ export const formatFindCandidatesByDataRef = (
         : `${item.assertedValue}${item.assertedUnit === null ? "" : ` ${item.assertedUnit}`}`;
 
     return [
-      `[C${index + 1}] ${expert} | ${item.resolutionState} | Observation: ${formatObservationWindow(item.observationTime)}`,
+      `[C${index + 1}] ${expert} | ${item.citationSource} | ${item.resolutionState} | Observation: ${formatObservationWindow(item.observationTime)}`,
       `     Post: ${item.sourcePostUri}`,
       `     Value: ${assertedValue}`
     ].join("\n");

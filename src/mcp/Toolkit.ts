@@ -458,7 +458,7 @@ export const ResolveDataRefTool = Tool.make("resolve_data_ref", {
   .annotate(Tool.OpenWorld, false);
 
 export const FindCandidatesByDataRefTool = Tool.make("find_candidates_by_data_ref", {
-  description: "Reverse lookup over stored candidate citations for one data-layer entity. Returns source post URI, expert attribution, resolution state, nullable asserted value/unit, and nullable observation time. Time filters apply to observation time, not post timestamp.",
+  description: "Reverse lookup over stored candidate citations for one Agent, Dataset, Distribution, or Variable entity. Returns source post URI, expert attribution, citation source, resolution state, nullable asserted value/unit, and nullable observation time. Time filters apply to observation time, not post timestamp.",
   parameters: FindCandidatesByDataRefMcpInput,
   success: FindCandidatesByDataRefMcpOutput,
   failure: McpToolQueryError

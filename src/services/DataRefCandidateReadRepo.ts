@@ -8,9 +8,7 @@ import type {
 } from "../domain/data-layer/query";
 
 export type DataRefCandidateReadRow = {
-  readonly rowId: number;
-  readonly hasObservationTime: boolean;
-  readonly observationSortKey: string;
+  readonly cursor: FindCandidatesByDataRefCursor;
   readonly hit: FindCandidatesByDataRefHit;
 };
 

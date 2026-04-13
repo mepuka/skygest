@@ -33,6 +33,7 @@ import {
   createMcpClient,
   expertsWriteIdentity,
   makeBiLayer,
+  withDataRefQueryService,
   opsCurationWriteIdentity,
   opsEditorialWriteIdentity,
   opsExpertsWriteIdentity,
@@ -154,7 +155,10 @@ const makeThreadBlueskyLayer = (focusUri: string) => {
 const initializePersistentPromptSession = async (
   layer: ReturnType<typeof makeBiLayer>
 ) => {
-  const webHandler = createPersistentMcpHandler(layer, readOnlyIdentity);
+  const webHandler = createPersistentMcpHandler(
+    withDataRefQueryService(layer),
+    readOnlyIdentity
+  );
 
   const post = async (
     body: unknown,

@@ -1,6 +1,7 @@
 import { D1Client } from "@effect/sql-d1";
 import { Layer } from "effect";
 import { AuthService } from "../auth/AuthService";
+import { d1DataLayerRegistryLayer } from "../bootstrap/D1DataLayerRegistry";
 import { BlueskyClient, layer as BlueskyClientLayer } from "../bluesky/BlueskyClient";
 import { RepoRecordsClient } from "../bluesky/RepoRecordsClient";
 import { ExpertPollExecutor } from "../ingest/ExpertPollExecutor";
@@ -120,12 +121,15 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const dataLayerReposLayer = DataLayerReposD1.layer.pipe(
     Layer.provideMerge(baseLayer)
   );
+  const dataLayerRegistryLayer = d1DataLayerRegistryLayer().pipe(
+    Layer.provideMerge(dataLayerReposLayer)
+  );
   const dataRefCandidateReadRepoLayer = DataRefCandidateReadRepoD1.layer.pipe(
     Layer.provideMerge(baseLayer)
   );
   const dataRefQueryServiceLayer = DataRefQueryService.layer.pipe(
     Layer.provideMerge(
-      Layer.mergeAll(configLayer, dataLayerReposLayer, dataRefCandidateReadRepoLayer)
+      Layer.mergeAll(configLayer, dataLayerRegistryLayer, dataRefCandidateReadRepoLayer)
     )
   );
   const queryRepositoriesLayer = Layer.mergeAll(
