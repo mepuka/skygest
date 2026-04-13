@@ -12,6 +12,8 @@ import {
   type SaveCandidateEnrichmentInput
 } from "../../domain/candidatePayload";
 import { isPickedCandidatePayloadStage } from "../../domain/CandidatePayloadPredicates";
+import { DataRefResolutionEnrichment } from "../../domain/enrichment";
+import { buildDataRefCandidateCitations } from "../../enrichment/DataRefCandidateCitations";
 import { CandidatePayloadRepo } from "../CandidatePayloadRepo";
 import {
   decodeJsonColumnWithDbError,
@@ -89,6 +91,94 @@ export const CandidatePayloadRepoD1 = {
           )
         )
       );
+
+    const replaceDataRefCandidateCitations = (
+      input: SaveCandidateEnrichmentInput,
+      updatedAt: number
+    ): Effect.Effect<void, DbError | SqlError> =>
+      input.enrichmentType !== "data-ref-resolution"
+        ? Effect.void
+        : decodeWithDbError(
+            DataRefResolutionEnrichment,
+            input.enrichmentPayload,
+            `Invalid data-ref-resolution payload for ${input.postUri}`
+          ).pipe(
+            Effect.flatMap((enrichment) => {
+              const citations = buildDataRefCandidateCitations(enrichment);
+              const citationKeys = citations.map((citation) => sql`${citation.citationKey}`);
+
+              const deleteStaleCitations = () =>
+                citations.length === 0
+                  ? sql`
+                      DELETE FROM data_ref_candidate_citations
+                      WHERE source_post_uri = ${input.postUri}
+                    `.pipe(Effect.asVoid)
+                  : sql`
+                      DELETE FROM data_ref_candidate_citations
+                      WHERE source_post_uri = ${input.postUri}
+                        AND citation_key NOT IN (${sql.join(", ", false)(citationKeys)})
+                    `.pipe(Effect.asVoid);
+
+              const upsertCurrentCitations = Effect.forEach(
+                citations,
+                (citation) =>
+                  sql`
+                    INSERT INTO data_ref_candidate_citations (
+                      source_post_uri,
+                      entity_id,
+                      citation_source,
+                      citation_key,
+                      resolution_state,
+                      asserted_value_json,
+                      asserted_unit,
+                      observation_start,
+                      observation_end,
+                      observation_label,
+                      normalized_observation_start,
+                      normalized_observation_end,
+                      observation_sort_key,
+                      has_observation_time,
+                      updated_at
+                    ) VALUES (
+                      ${input.postUri},
+                      ${citation.entityId},
+                      ${citation.citationSource},
+                      ${citation.citationKey},
+                      ${citation.resolutionState},
+                      ${citation.assertedValueJson},
+                      ${citation.assertedUnit},
+                      ${citation.observationStart},
+                      ${citation.observationEnd},
+                      ${citation.observationLabel},
+                      ${citation.normalizedObservationStart},
+                      ${citation.normalizedObservationEnd},
+                      ${citation.observationSortKey},
+                      ${citation.hasObservationTime ? 1 : 0},
+                      ${updatedAt}
+                    )
+                    ON CONFLICT(source_post_uri, citation_key) DO UPDATE SET
+                      entity_id = excluded.entity_id,
+                      citation_source = excluded.citation_source,
+                      resolution_state = excluded.resolution_state,
+                      asserted_value_json = excluded.asserted_value_json,
+                      asserted_unit = excluded.asserted_unit,
+                      observation_start = excluded.observation_start,
+                      observation_end = excluded.observation_end,
+                      observation_label = excluded.observation_label,
+                      normalized_observation_start = excluded.normalized_observation_start,
+                      normalized_observation_end = excluded.normalized_observation_end,
+                      observation_sort_key = excluded.observation_sort_key,
+                      has_observation_time = excluded.has_observation_time,
+                      updated_at = excluded.updated_at
+                  `.pipe(Effect.asVoid),
+                { discard: true }
+              );
+
+              return upsertCurrentCitations.pipe(
+                Effect.flatMap(() => deleteStaleCitations())
+              );
+            })
+          );
 
     const toCandidatePayloadRecord = (row: CandidatePayloadRow) =>
       Effect.all({
@@ -280,6 +370,9 @@ export const CandidatePayloadRepoD1 = {
                       enriched_at = excluded.enriched_at
                   `.pipe(
                     Effect.asVoid,
+                    Effect.flatMap(() =>
+                      replaceDataRefCandidateCitations(validated, updatedAt)
+                    ),
                     Effect.flatMap(() =>
                       sql`
                         UPDATE post_payloads

@@ -1,10 +1,11 @@
 import { SqlClient } from "effect/unstable/sql";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Schema } from "effect";
 import { TestClock } from "effect/testing";
 import { describe, expect, it } from "@effect/vitest";
 import {
   CandidatePayloadNotPickedError
 } from "../src/domain/candidatePayload";
+import { DataRefResolutionEnrichment } from "../src/domain/enrichment";
 import { runMigrations } from "../src/db/migrate";
 import { CandidatePayloadService } from "../src/services/CandidatePayloadService";
 import { CandidatePayloadRepo } from "../src/services/CandidatePayloadRepo";
@@ -19,6 +20,121 @@ import {
 import type { PostUri } from "../src/domain/types";
 
 const solarUri = `at://${sampleDid}/app.bsky.feed.post/post-solar` as PostUri;
+const decodeDataRefResolutionEnrichment = Schema.decodeUnknownSync(
+  DataRefResolutionEnrichment
+);
+const dataRefAgentId = "https://id.skygest.io/agent/ag_TESTDATAREF01";
+const dataRefDatasetId = "https://id.skygest.io/dataset/ds_TESTDATAREF01";
+const dataRefVariableId = "https://id.skygest.io/variable/var_TESTDATAREF01";
+const dataRefVariableIdUpdated = "https://id.skygest.io/variable/var_TESTDATAREF02";
+
+const makeDataRefResolutionPayload = (options?: {
+  readonly includeDatasetMatch?: boolean;
+  readonly agentId?: string;
+  readonly variableId?: string;
+  readonly startDate?: string;
+  readonly endDate?: string;
+  readonly yAxisUnit?: string | null;
+  readonly seriesUnit?: string | null;
+}) =>
+  decodeDataRefResolutionEnrichment({
+    kind: "data-ref-resolution",
+    stage1: {
+      matches:
+        options?.includeDatasetMatch === false
+          ? []
+          : [
+              {
+                _tag: "DatasetMatch",
+                datasetId: dataRefDatasetId,
+                title: "Average retail electricity price",
+                bestRank: 1,
+                evidence: [
+                  {
+                    _tag: "DatasetTitleEvidence",
+                    signal: "dataset-title",
+                    rank: 1,
+                    datasetName: "Average retail electricity price",
+                    normalizedTitle: "average retail electricity price"
+                  }
+                ]
+              }
+            ],
+      residuals: []
+    },
+    kernel: [
+      {
+        _tag: "Resolved",
+        bundle: {
+          postUri: solarUri,
+          postText: ["Average retail electricity prices rose in Q1 2024."],
+          chartTitle: "Average retail electricity price",
+          xAxis: {
+            label: "Quarter",
+            unit: null
+          },
+          yAxis: {
+            label: "Price",
+            unit: options?.yAxisUnit ?? "USD"
+          },
+          series: [
+            {
+              itemKey: "price",
+              legendLabel: "Retail price",
+              unit: options?.seriesUnit ?? "USD/MWh"
+            }
+          ],
+          keyFindings: [],
+          sourceLines: [],
+          publisherHints: [],
+          temporalCoverage: {
+            startDate: options?.startDate ?? "2024-01",
+            endDate: options?.endDate ?? "2024-03"
+          }
+        },
+        sharedPartial: {
+          measuredProperty: "price",
+          domainObject: "electricity",
+          statisticType: "price",
+          aggregation: "average",
+          unitFamily: "currency_per_energy"
+        },
+        attachedContext: {
+          place: "United States"
+        },
+        items: [
+          {
+            _tag: "bound",
+            itemKey: "price",
+            semanticPartial: {
+              measuredProperty: "price",
+              domainObject: "electricity",
+              statisticType: "price",
+              aggregation: "average",
+              unitFamily: "currency_per_energy"
+            },
+            attachedContext: {
+              place: "United States"
+            },
+            evidence: [
+              {
+                source: "series-label",
+                text: "Retail price",
+                itemKey: "price"
+              }
+            ],
+            variableId: options?.variableId ?? dataRefVariableId,
+            label: "Retail electricity price"
+          }
+        ],
+        agentId: options?.agentId ?? dataRefAgentId,
+        confidence: 0.95,
+        tier: "entailment"
+      }
+    ],
+    resolverVersion: "test-resolver-v1",
+    processedAt: 60
+  });
 
 const makeLayer = () => {
   const baseLayer = makeBiLayer();
@@ -303,6 +419,183 @@ describe("CandidatePayloadRepoD1", () => {
       if (error instanceof CandidatePayloadNotPickedError) {
         expect(error.captureStage).toBe("candidate");
       }
+    }).pipe(Effect.provide(makeLayer()))
+  );
+
+  it.effect("saveEnrichment persists data-ref candidate citations for resolver output", () =>
+    Effect.gen(function* () {
+      yield* seedKnowledgeBase();
+      const repo = yield* CandidatePayloadRepo;
+      const sql = yield* SqlClient.SqlClient;
+
+      yield* repo.upsertCapture({
+        postUri: solarUri,
+        captureStage: "candidate",
+        embedType: "img",
+        embedPayload: {
+          kind: "img",
+          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null }]
+        },
+        enrichments: [],
+        capturedAt: 10,
+        updatedAt: 10,
+        enrichedAt: null
+      });
+      yield* repo.markPicked(solarUri, 20);
+
+      yield* repo.saveEnrichment(
+        {
+          postUri: solarUri,
+          enrichmentType: "data-ref-resolution",
+          enrichmentPayload: makeDataRefResolutionPayload()
+        },
+        60,
+        60
+      );
+
+      const rows = yield* sql<{
+        entityId: string;
+        citationSource: string;
+        citationKey: string;
+        resolutionState: string;
+        assertedUnit: string | null;
+        observationStart: string | null;
+        observationEnd: string | null;
+        observationSortKey: string;
+        hasObservationTime: number;
+      }>`
+        SELECT
+          entity_id as entityId,
+          citation_source as citationSource,
+          citation_key as citationKey,
+          resolution_state as resolutionState,
+          asserted_unit as assertedUnit,
+          observation_start as observationStart,
+          observation_end as observationEnd,
+          observation_sort_key as observationSortKey,
+          has_observation_time as hasObservationTime
+        FROM data_ref_candidate_citations
+        WHERE source_post_uri = ${solarUri}
+        ORDER BY entity_id ASC
+      `;
+
+      expect(rows).toEqual([
+        {
+          entityId: dataRefAgentId,
+          citationSource: "kernel",
+          citationKey:
+            `kernel\u0000resolved\u0000${dataRefAgentId}\u00002024-01\u00002024-03\u0000`,
+          resolutionState: "resolved",
+          assertedUnit: null,
+          observationStart: "2024-01",
+          observationEnd: "2024-03",
+          observationSortKey: "2024-03",
+          hasObservationTime: 1
+        },
+        {
+          entityId: dataRefDatasetId,
+          citationSource: "stage1",
+          citationKey:
+            `stage1\u0000source_only\u0000${dataRefDatasetId}\u0000\u0000\u0000`,
+          resolutionState: "source_only",
+          assertedUnit: null,
+          observationStart: null,
+          observationEnd: null,
+          observationSortKey: "",
+          hasObservationTime: 0
+        },
+        {
+          entityId: dataRefVariableId,
+          citationSource: "kernel",
+          citationKey:
+            `kernel\u0000resolved\u0000${dataRefVariableId}\u00002024-01\u00002024-03\u0000`,
+          resolutionState: "resolved",
+          assertedUnit: "USD/MWh",
+          observationStart: "2024-01",
+          observationEnd: "2024-03",
+          observationSortKey: "2024-03",
+          hasObservationTime: 1
+        }
+      ]);
+    }).pipe(Effect.provide(makeLayer()))
+  );
+
+  it.effect("saveEnrichment rewrites data-ref citation rows without leaving stale entries behind", () =>
+    Effect.gen(function* () {
+      yield* seedKnowledgeBase();
+      const repo = yield* CandidatePayloadRepo;
+      const sql = yield* SqlClient.SqlClient;
+
+      yield* repo.upsertCapture({
+        postUri: solarUri,
+        captureStage: "candidate",
+        embedType: "img",
+        embedPayload: {
+          kind: "img",
+          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null }]
+        },
+        enrichments: [],
+        capturedAt: 10,
+        updatedAt: 10,
+        enrichedAt: null
+      });
+      yield* repo.markPicked(solarUri, 20);
+
+      yield* repo.saveEnrichment(
+        {
+          postUri: solarUri,
+          enrichmentType: "data-ref-resolution",
+          enrichmentPayload: makeDataRefResolutionPayload()
+        },
+        60,
+        60
+      );
+
+      yield* repo.saveEnrichment(
+        {
+          postUri: solarUri,
+          enrichmentType: "data-ref-resolution",
+          enrichmentPayload: makeDataRefResolutionPayload({
+            includeDatasetMatch: false,
+            variableId: dataRefVariableIdUpdated,
+            endDate: "2024-06",
+            seriesUnit: "cents/kWh"
+          })
+        },
+        70,
+        70
+      );
+
+      const rows = yield* sql<{
+        entityId: string;
+        citationSource: string;
+        assertedUnit: string | null;
+        observationSortKey: string;
+      }>`
+        SELECT
+          entity_id as entityId,
+          citation_source as citationSource,
+          asserted_unit as assertedUnit,
+          observation_sort_key as observationSortKey
+        FROM data_ref_candidate_citations
+        WHERE source_post_uri = ${solarUri}
+        ORDER BY entity_id ASC
+      `;
+
+      expect(rows).toEqual([
+        {
+          entityId: dataRefAgentId,
+          citationSource: "kernel",
+          assertedUnit: null,
+          observationSortKey: "2024-06"
+        },
+        {
+          entityId: dataRefVariableIdUpdated,
+          citationSource: "kernel",
+          assertedUnit: "cents/kWh",
+          observationSortKey: "2024-06"
+        }
+      ]);
     }).pipe(Effect.provide(makeLayer()))
   );
 });

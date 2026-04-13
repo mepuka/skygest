@@ -2,7 +2,7 @@ import { Result, Schema } from "effect";
 import { CandidatePayloadStage } from "./candidatePayload";
 import { DataLayerRegistryDiagnostic } from "./data-layer/registry";
 import { Stage1EvalSnapshotBuildReport } from "./stage1EvalBuild";
-import { Did, PostUri, TranscriptR2Key } from "./types";
+import { DateLike, Did, PostUri, TranscriptR2Key } from "./types";
 import {
   decodeJsonStringEitherWith,
   encodeJsonStringWith
@@ -94,6 +94,15 @@ export class DataLayerRegistryLoadError extends Schema.TaggedErrorClass<DataLaye
     message: Schema.String,
     root: Schema.String,
     diagnostic: DataLayerRegistryDiagnostic
+  }
+) {}
+
+export class InvalidObservationWindowError extends Schema.TaggedErrorClass<InvalidObservationWindowError>()(
+  "InvalidObservationWindowError",
+  {
+    message: Schema.String,
+    observedSince: DateLike,
+    observedUntil: DateLike
   }
 ) {}
 

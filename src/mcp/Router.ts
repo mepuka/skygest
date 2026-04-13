@@ -11,6 +11,7 @@ import {
   encodeJsonStringWith
 } from "../platform/Json";
 import { CurationService } from "../services/CurationService";
+import { DataRefQueryService } from "../services/DataRefQueryService";
 import { EditorialPickBundleReadService } from "../services/EditorialPickBundleReadService";
 import { EditorialService } from "../services/EditorialService";
 import { EnrichmentTriggerClient } from "../services/EnrichmentTriggerClient";
@@ -41,6 +42,7 @@ type QueryLayer = Layer.Layer<
   EditorialService |
   EditorialPickBundleReadService |
   CurationService |
+  DataRefQueryService |
   ExpertRegistryService |
   BlueskyClient |
   PostEnrichmentReadService |
