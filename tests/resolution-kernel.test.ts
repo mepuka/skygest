@@ -929,7 +929,7 @@ describe("resolveBundle", () => {
     15_000
   );
 
-  it.effect("returns Conflicted with preserved conflict gaps when required evidence disagrees", () =>
+  it.effect("lets stronger-precedence evidence dominate a weaker-precedence required-facet conflict", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;
       const prepared = yield* loadCheckedInDataLayerRegistry(
@@ -937,6 +937,12 @@ describe("resolveBundle", () => {
       );
       const lookup = toDataLayerRegistryLookup(prepared);
 
+      // y-axis (precedence 2) fires first with measuredProperty=capacity, while
+      // chart-title (precedence 3) would emit measuredProperty=generation. Under
+      // the evidence-precedence rule the weaker chart-title assignment is
+      // dropped with a tier downgrade rather than hard-conflicting — the eval
+      // gold set relies on this because real posts routinely mention a
+      // secondary measuredProperty in lower-precedence evidence.
       const outcome = decodeOutcome(
         resolveBundle(
           decodeBundle({
@@ -948,6 +954,61 @@ describe("resolveBundle", () => {
             },
             series: [],
             keyFindings: [],
+            sourceLines: [],
+            publisherHints: []
+          }),
+          lookup,
+          vocabulary
+        )
+      );
+
+      expect(outcome._tag).not.toBe("Conflicted");
+      if (outcome._tag === "Conflicted") {
+        return;
+      }
+
+      // The fold keeps y-axis's capacity and drops chart-title's generation.
+      // The expected outcome depends on whether the registry has a variable
+      // compatible with {measuredProperty=capacity, unitFamily=power}, but
+      // regardless the fold must NOT fork into hypotheses.
+      if (outcome._tag === "Resolved") {
+        for (const item of outcome.items) {
+          if (item._tag !== "bound") {
+            continue;
+          }
+          expect(item.semanticPartial.measuredProperty).toBe("capacity");
+        }
+      }
+
+      if (outcome._tag === "Underspecified" || outcome._tag === "Ambiguous") {
+        expect(outcome.tier).toBe("weak-heuristic");
+      }
+    }).pipe(
+      Effect.provide(FacetVocabulary.layer),
+      Effect.provide(localFileSystemLayer)
+    ),
+    15_000
+  );
+
+  it.effect("returns Conflicted when same-precedence evidence disagrees on a required facet", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+      const prepared = yield* loadCheckedInDataLayerRegistry(
+        checkedInDataLayerRegistryRoot
+      );
+      const lookup = toDataLayerRegistryLookup(prepared);
+
+      // Both key-findings are from the same precedence tier (key-finding),
+      // so neither can dominate. The fold must surface the real conflict.
+      const outcome = decodeOutcome(
+        resolveBundle(
+          decodeBundle({
+            postText: [],
+            series: [],
+            keyFindings: [
+              "Electricity generation",
+              "Capacity in MW"
+            ],
             sourceLines: [],
             publisherHints: []
           }),

@@ -141,22 +141,66 @@ const matchSite = (
   };
 };
 
+const sourcePrecedenceIndex = (source: ResolutionEvidenceSource): number =>
+  EVIDENCE_PRECEDENCE.indexOf(source);
+
+const downgradeTier = (
+  current: ResolutionEvidenceTier,
+  next: ResolutionEvidenceTier
+): ResolutionEvidenceTier => {
+  if (current === "weak-heuristic" || next === "weak-heuristic") {
+    return "weak-heuristic";
+  }
+  if (current === "strong-heuristic" || next === "strong-heuristic") {
+    return "strong-heuristic";
+  }
+  return "entailment";
+};
+
 const foldAssignments = (
   assignments: ReadonlyArray<SiteAssignment>
 ): Result.Result<FoldedAssignments, FoldConflict> => {
   let partial: PartialVariableShape = {};
   let evidence: Array<ResolutionEvidenceReference> = [];
   let tier: ResolutionEvidenceTier = "entailment";
+  // Track the strongest (lowest-index) source folded so far. Assignments are
+  // iterated in precedence order, so a later assignment whose source index is
+  // strictly greater than `strongestSourceIndex` is from a weaker band and
+  // should yield to the already-accumulated partial on required-facet conflict.
+  let strongestSourceIndex: number | null = null;
 
   for (const assignment of assignments) {
+    const assignmentSourceIndex = sourcePrecedenceIndex(
+      assignment.evidence.source
+    );
     const joined = joinPartials(partial, assignment.partial);
     if (Result.isSuccess(joined)) {
       partial = joined.success;
       evidence.push(assignment.evidence);
+      strongestSourceIndex =
+        strongestSourceIndex === null
+          ? assignmentSourceIndex
+          : Math.min(strongestSourceIndex, assignmentSourceIndex);
       continue;
     }
 
-    if (hasRequiredConflict(joined.failure.conflicts)) {
+    const isRequiredConflict = hasRequiredConflict(joined.failure.conflicts);
+
+    // Weaker-precedence assignments never win a required-facet conflict: the
+    // earlier, stronger-precedence partial stays put and the fold downgrades
+    // to `weak-heuristic`. This is the common case on real posts where
+    // chart-title / post-text mention secondary measurements (e.g. "share",
+    // "curtailment") alongside the chart's actual measuredProperty.
+    if (
+      isRequiredConflict &&
+      strongestSourceIndex !== null &&
+      assignmentSourceIndex > strongestSourceIndex
+    ) {
+      tier = downgradeTier(tier, "weak-heuristic");
+      continue;
+    }
+
+    if (isRequiredConflict) {
       return Result.fail({
         left: {
           partial,
@@ -170,7 +214,7 @@ const foldAssignments = (
 
     // Non-required facet conflicts keep the earlier higher-precedence value and
     // downgrade the interpretation tier without losing the accumulated fold.
-    tier = "strong-heuristic";
+    tier = downgradeTier(tier, "strong-heuristic");
   }
 
   return Result.succeed({
@@ -386,9 +430,7 @@ export const interpretBundle = (
       };
     }
 
-    if (folded.success.tier === "strong-heuristic") {
-      itemTier = "strong-heuristic";
-    }
+    itemTier = downgradeTier(itemTier, folded.success.tier);
 
     items.push(
       stripUndefined({
@@ -427,11 +469,7 @@ export const interpretBundle = (
       attachedContext,
       items,
       evidence,
-      tier:
-        foldedShared.success.tier === "strong-heuristic" ||
-        itemTier === "strong-heuristic"
-          ? "strong-heuristic"
-          : "entailment"
+      tier: downgradeTier(foldedShared.success.tier, itemTier)
     }
   };
 };
