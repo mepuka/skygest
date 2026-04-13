@@ -20,6 +20,7 @@ describe("phase-one migrations", () => {
             'catalog_records',
             'catalogs',
             'data_layer_audit',
+            'data_ref_candidate_citations',
             'data_services',
             'dataset_series',
             'datasets',
@@ -58,6 +59,7 @@ describe("phase-one migrations", () => {
         "catalog_records",
         "catalogs",
         "data_layer_audit",
+        "data_ref_candidate_citations",
         "data_services",
         "dataset_series",
         "datasets",
@@ -108,7 +110,8 @@ describe("phase-one migrations", () => {
         { id: 21, name: "podcast_schema" },
         { id: 22, name: "data_layer_registry" },
         { id: 23, name: "runtime_variable_profile_alignment" },
-        { id: 24, name: "series_dataset_alignment" }
+        { id: 24, name: "series_dataset_alignment" },
+        { id: 25, name: "data_ref_candidate_citations" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );

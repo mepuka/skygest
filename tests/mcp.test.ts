@@ -250,6 +250,7 @@ describe("read-only MCP server", () => {
           expect(tools.tools.map((tool) => tool.name).sort()).toEqual([
             "expand_topics",
             "explain_post_topics",
+            "find_candidates_by_data_ref",
             "get_editorial_pick_bundle",
             "get_post_enrichments",
             "get_post_links",
@@ -263,6 +264,7 @@ describe("read-only MCP server", () => {
             "list_enrichment_issues",
             "list_experts",
             "list_topics",
+            "resolve_data_ref",
             "search_posts"
           ]);
 

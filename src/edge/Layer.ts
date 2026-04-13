@@ -19,6 +19,7 @@ import { Logging } from "../platform/Logging";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { CandidatePayloadService } from "../services/CandidatePayloadService";
 import { CurationService } from "../services/CurationService";
+import { DataRefQueryService } from "../services/DataRefQueryService";
 import { PostHydrationService } from "../services/PostHydrationService";
 import { CurationRepoD1 } from "../services/d1/CurationRepoD1";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
@@ -26,6 +27,7 @@ import { OntologyCatalog } from "../services/OntologyCatalog";
 import { PostImportService } from "../services/PostImportService";
 import { StagingOpsService } from "../services/StagingOpsService";
 import { CandidatePayloadRepoD1 } from "../services/d1/CandidatePayloadRepoD1";
+import { DataRefCandidateReadRepoD1 } from "../services/d1/DataRefCandidateReadRepoD1";
 import { DataLayerReposD1 } from "../services/d1/DataLayerReposD1";
 import { EnrichmentRunsRepoD1 } from "../services/d1/EnrichmentRunsRepoD1";
 import { ExpertSyncStateRepoD1 } from "../services/d1/ExpertSyncStateRepoD1";
@@ -118,13 +120,23 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const dataLayerReposLayer = DataLayerReposD1.layer.pipe(
     Layer.provideMerge(baseLayer)
   );
+  const dataRefCandidateReadRepoLayer = DataRefCandidateReadRepoD1.layer.pipe(
+    Layer.provideMerge(baseLayer)
+  );
+  const dataRefQueryServiceLayer = DataRefQueryService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(configLayer, dataLayerReposLayer, dataRefCandidateReadRepoLayer)
+    )
+  );
   const queryRepositoriesLayer = Layer.mergeAll(
     ontologyLayer,
     expertsLayer,
     knowledgeLayer,
     publicationsLayer,
     editorialRepoLayer,
-    candidatePayloadRepoLayer
+    candidatePayloadRepoLayer,
+    dataLayerReposLayer,
+    dataRefCandidateReadRepoLayer
   );
   const editorialServiceLayer = EditorialService.layer.pipe(
     Layer.provideMerge(Layer.mergeAll(editorialRepoLayer, configLayer, ontologyLayer))
@@ -198,6 +210,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     KnowledgeQueryService.layer.pipe(
       Layer.provideMerge(Layer.mergeAll(queryRepositoriesLayer, configLayer))
     ),
+    dataRefQueryServiceLayer,
     editorialServiceLayer,
     editorialPickBundleReadServiceLayer,
     curationServiceLayer
@@ -284,6 +297,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     postImportServiceLayer,
     curationRepoLayer,
     dataLayerReposLayer,
+    dataRefCandidateReadRepoLayer,
+    dataRefQueryServiceLayer,
     curationServiceLayer,
     queryLayer,
     blueskyLayer,

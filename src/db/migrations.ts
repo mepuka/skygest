@@ -949,6 +949,45 @@ const migration24: D1Migration = {
   run: runSeriesDatasetAlignmentMigration
 };
 
+const migration25: D1Migration = {
+  id: 25,
+  name: "data_ref_candidate_citations",
+  statements: [
+    `CREATE TABLE IF NOT EXISTS data_ref_candidate_citations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      source_post_uri TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
+      resolution_state TEXT NOT NULL CHECK (resolution_state IN ('source_only', 'partially_resolved', 'resolved')),
+      asserted_value_json TEXT,
+      asserted_unit TEXT,
+      observation_start TEXT,
+      observation_end TEXT,
+      observation_label TEXT,
+      normalized_observation_start TEXT NOT NULL DEFAULT '',
+      normalized_observation_end TEXT NOT NULL DEFAULT '',
+      observation_sort_key TEXT NOT NULL DEFAULT '',
+      has_observation_time INTEGER NOT NULL DEFAULT 0 CHECK (has_observation_time IN (0, 1)),
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY (source_post_uri) REFERENCES posts(uri) ON DELETE CASCADE
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_data_ref_candidate_citations_entity_cursor
+      ON data_ref_candidate_citations(
+        entity_id,
+        has_observation_time DESC,
+        observation_sort_key DESC,
+        source_post_uri ASC,
+        id ASC
+      )`,
+    `CREATE INDEX IF NOT EXISTS idx_data_ref_candidate_citations_entity_end
+      ON data_ref_candidate_citations(
+        entity_id,
+        normalized_observation_end DESC
+      )`,
+    `CREATE INDEX IF NOT EXISTS idx_data_ref_candidate_citations_post
+      ON data_ref_candidate_citations(source_post_uri)`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -973,5 +1012,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration21,
   migration22,
   migration23,
-  migration24
+  migration24,
+  migration25
 ];

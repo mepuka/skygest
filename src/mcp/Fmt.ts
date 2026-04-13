@@ -41,9 +41,14 @@ import type {
 } from "../domain/enrichment.ts";
 import type { ImportPostsOutput } from "../domain/api.ts";
 import type {
+  FindCandidatesByDataRefHit,
+  ResolveDataRefOutput
+} from "../domain/data-layer/query.ts";
+import type {
   PipelineStatusDetail,
   PipelineStatusOutput
 } from "../domain/pipeline.ts";
+import type { DataLayerRegistryEntity } from "../domain/data-layer/registry.ts";
 
 // ---------------------------------------------------------------------------
 // Internal helpers (not exported)
@@ -240,6 +245,82 @@ export const formatSetExpertActiveResult = (result: SetExpertActiveResult): stri
     `Expert ${result.did} is now ${result.active ? "active" : "inactive"}.`,
     `Shard: ${result.shard}`
   ].join("\n");
+
+const dataLayerEntityLabel = (entity: DataLayerRegistryEntity): string => {
+  switch (entity._tag) {
+    case "Agent":
+      return entity.name;
+    case "Catalog":
+    case "DataService":
+    case "Dataset":
+    case "DatasetSeries":
+      return entity.title;
+    case "CatalogRecord":
+      return entity.primaryTopicId;
+    case "Distribution":
+      return entity.title ?? entity.downloadURL ?? entity.accessURL ?? entity.id;
+    case "Series":
+    case "Variable":
+      return entity.label;
+  }
+};
+
+export const formatResolveDataRef = (result: ResolveDataRefOutput): string =>
+  result.entity === null
+    ? "No data-layer entity found."
+    : [
+        `${result.entity._tag}: ${dataLayerEntityLabel(result.entity)}`,
+        `ID: ${result.entity.id}`
+      ].join("\n");
+
+const formatObservationWindow = (
+  value: FindCandidatesByDataRefHit["observationTime"]
+): string => {
+  if (value === null) {
+    return "unknown";
+  }
+
+  if (value.start !== undefined && value.end !== undefined) {
+    return `${value.start} -> ${value.end}`;
+  }
+
+  return value.start ?? value.end ?? value.label ?? "unknown";
+};
+
+export const formatFindCandidatesByDataRef = (
+  result: {
+    readonly items: ReadonlyArray<FindCandidatesByDataRefHit>;
+    readonly nextCursor: unknown;
+  }
+): string => {
+  if (result.items.length === 0) {
+    return "No candidate citations found.";
+  }
+
+  const rows = result.items.map((item, index) => {
+    const expert = personLabel(
+      item.expert.handle,
+      item.expert.displayName,
+      item.expert.did
+    );
+    const assertedValue =
+      item.assertedValue === null
+        ? "n/a"
+        : `${item.assertedValue}${item.assertedUnit === null ? "" : ` ${item.assertedUnit}`}`;
+
+    return [
+      `[C${index + 1}] ${expert} | ${item.resolutionState} | Observation: ${formatObservationWindow(item.observationTime)}`,
+      `     Post: ${item.sourcePostUri}`,
+      `     Value: ${assertedValue}`
+    ].join("\n");
+  });
+
+  if (result.nextCursor !== null) {
+    rows.push("More results are available.");
+  }
+
+  return rows.join("\n");
+};
 
 /**
  * Format a list of ontology topics for MCP display.

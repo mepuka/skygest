@@ -4,6 +4,11 @@ import { Tool, Toolkit } from "effect/unstable/ai";
 import { Duration, Effect, Layer, Option, Result, Schedule, Schema } from "effect";
 import { ImportPostsInput } from "../domain/api";
 import {
+  FindCandidatesByDataRefCursor,
+  FindCandidatesByDataRefInput,
+  ResolveDataRefInput
+} from "../domain/data-layer/query";
+import {
   decodeJsonStringEitherWith,
   encodeJsonStringWith,
   formatSchemaParseError,
@@ -51,6 +56,7 @@ import {
   AddExpertMcpOutput,
   BulkCurateMcpOutput,
   BulkStartEnrichmentMcpOutput,
+  FindCandidatesByDataRefMcpOutput,
   KnowledgePostsMcpOutput,
   KnowledgeLinksMcpOutput,
   EnrichmentGapsMcpOutput,
@@ -71,12 +77,14 @@ import {
   PostEnrichmentsMcpOutput,
   StartEnrichmentMcpOutput,
   PipelineStatusMcpOutput,
+  ResolveDataRefMcpOutput,
   ImportPostsMcpOutput
 } from "./OutputSchemas.ts";
 import {
   formatAddExpertResult,
   formatBulkCurateResult,
   formatBulkStartEnrichmentResult,
+  formatFindCandidatesByDataRef,
   formatCurationCandidateCounts,
   formatCurationCandidateExportPage,
   formatCurationCandidatePage,
@@ -86,6 +94,7 @@ import {
   formatLinks,
   formatExperts,
   formatSetExpertActiveResult,
+  formatResolveDataRef,
   formatTopics,
   formatTopic,
   formatExpandedTopics,
@@ -102,6 +111,7 @@ import {
 import { EditorialService } from "../services/EditorialService";
 import { CurationService } from "../services/CurationService";
 import { CurationRepo } from "../services/CurationRepo";
+import { DataRefQueryService } from "../services/DataRefQueryService";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
@@ -178,8 +188,24 @@ const ListCurationCandidatesMcpInput = Schema.Struct({
   }))
 });
 
+const FindCandidatesByDataRefMcpInput = Schema.Struct({
+  entityId: FindCandidatesByDataRefInput.fields.entityId,
+  observedSince: FindCandidatesByDataRefInput.fields.observedSince,
+  observedUntil: FindCandidatesByDataRefInput.fields.observedUntil,
+  limit: FindCandidatesByDataRefInput.fields.limit,
+  cursor: Schema.optionalKey(Schema.String.annotate({
+    description: "Opaque pagination cursor returned by a previous find_candidates_by_data_ref call."
+  }))
+});
+
 const decodeCurationCandidateCursor = decodeJsonStringEitherWith(CurationCandidateCursor);
 const encodeCurationCandidateCursor = encodeJsonStringWith(CurationCandidateCursor);
+const decodeFindCandidatesByDataRefCursor = decodeJsonStringEitherWith(
+  FindCandidatesByDataRefCursor
+);
+const encodeFindCandidatesByDataRefCursor = encodeJsonStringWith(
+  FindCandidatesByDataRefCursor
+);
 const ENRICHMENT_TRIGGER_RETRY_SCHEDULE = Schedule.exponential(Duration.millis(250)).pipe(
   Schedule.jittered,
   Schedule.both(Schedule.recurs(2))
@@ -419,6 +445,30 @@ export const ListEnrichmentIssuesTool = Tool.make("list_enrichment_issues", {
   .annotate(Tool.Idempotent, true)
   .annotate(Tool.OpenWorld, false);
 
+export const ResolveDataRefTool = Tool.make("resolve_data_ref", {
+  description: "Resolve one canonical Skygest URI or one external alias pair to the exact data-layer registry entity. Returns the full registry entity when an exact match exists, or null otherwise.",
+  parameters: ResolveDataRefInput,
+  success: ResolveDataRefMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Resolve Data Ref")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
+
+export const FindCandidatesByDataRefTool = Tool.make("find_candidates_by_data_ref", {
+  description: "Reverse lookup over stored candidate citations for one data-layer entity. Returns source post URI, expert attribution, resolution state, nullable asserted value/unit, and nullable observation time. Time filters apply to observation time, not post timestamp.",
+  parameters: FindCandidatesByDataRefMcpInput,
+  success: FindCandidatesByDataRefMcpOutput,
+  failure: McpToolQueryError
+})
+  .annotate(Tool.Title, "Find Candidates By Data Ref")
+  .annotate(Tool.Readonly, true)
+  .annotate(Tool.Destructive, false)
+  .annotate(Tool.Idempotent, true)
+  .annotate(Tool.OpenWorld, false);
+
 export const GetPipelineStatusTool = Tool.make("get_pipeline_status", {
   description: "Get an operator snapshot of the ingestion, curation, and enrichment pipeline. Returns aggregate counts for active experts, active posts, curation status, enrichment storage, enrichment runs, and the latest finished head sweep.",
   parameters: GetPipelineStatusMcpInput,
@@ -531,7 +581,9 @@ const ReadOnlyTools = [
   ListCurationCandidatesTool,
   GetPostEnrichmentsTool,
   ListEnrichmentGapsTool,
-  ListEnrichmentIssuesTool
+  ListEnrichmentIssuesTool,
+  ResolveDataRefTool,
+  FindCandidatesByDataRefTool
  ] as const;
 
 const OpsReadTools = [GetPipelineStatusTool] as const;
@@ -583,6 +635,7 @@ const extractCreatedAt = (record: unknown, fallbackIndexedAt: string): string =>
 type KnowledgeQueryServiceI = (typeof KnowledgeQueryService)["Service"];
 type EditorialServiceI = (typeof EditorialService)["Service"];
 type CurationServiceI = (typeof CurationService)["Service"];
+type DataRefQueryServiceI = (typeof DataRefQueryService)["Service"];
 type ExpertRegistryServiceI = (typeof ExpertRegistryService)["Service"];
 type BlueskyClientI = (typeof BlueskyClient)["Service"];
 type PostEnrichmentReadServiceI = (typeof PostEnrichmentReadService)["Service"];
@@ -619,6 +672,27 @@ const decodeListCurationCursor = (
     return yield* invalidMcpInputError(
       tool,
       `Invalid curation cursor: ${formatSchemaParseError(result.failure)}`,
+      result.failure
+    );
+  });
+
+const decodeFindCandidatesCursor = (
+  tool: string,
+  cursor: string | undefined
+) =>
+  Effect.gen(function* () {
+    if (cursor === undefined) {
+      return undefined;
+    }
+
+    const result = decodeFindCandidatesByDataRefCursor(cursor);
+    if (Result.isSuccess(result)) {
+      return result.success;
+    }
+
+    return yield* invalidMcpInputError(
+      tool,
+      "Invalid data-ref candidate cursor. Use the nextCursor value returned by a previous call.",
       result.failure
     );
   });
@@ -784,6 +858,7 @@ const makeExpertWriteHandlers = (
 
 const makeReadOnlyHandlers = (
   queryService: KnowledgeQueryServiceI,
+  dataRefQueryService: DataRefQueryServiceI,
   editorialService: EditorialServiceI,
   curationService: CurationServiceI,
   bskyClient: BlueskyClientI,
@@ -1074,6 +1149,44 @@ const makeReadOnlyHandlers = (
         _display: formatEnrichments(result)
       })),
       Effect.mapError(toQueryError("get_post_enrichments"))
+    ),
+  resolve_data_ref: (input: typeof ResolveDataRefInput.Type) =>
+    dataRefQueryService.resolveDataRef(input).pipe(
+      Effect.map((result) => ({
+        ...result,
+        _display: formatResolveDataRef(result)
+      })),
+      Effect.mapError(toQueryError("resolve_data_ref"))
+    ),
+  find_candidates_by_data_ref: (input: typeof FindCandidatesByDataRefMcpInput.Type) =>
+    Effect.gen(function* () {
+      const cursor = yield* decodeFindCandidatesCursor(
+        "find_candidates_by_data_ref",
+        input.cursor
+      );
+      const result = yield* dataRefQueryService.findCandidatesByDataRef(
+        stripUndefined({
+          entityId: input.entityId,
+          observedSince: input.observedSince,
+          observedUntil: input.observedUntil,
+          cursor,
+          limit: input.limit
+        })
+      );
+      const nextCursor = result.nextCursor === null
+        ? null
+        : encodeFindCandidatesByDataRefCursor(result.nextCursor);
+
+      return {
+        items: result.items,
+        nextCursor,
+        _display: formatFindCandidatesByDataRef({
+          items: result.items,
+          nextCursor
+        })
+      };
+    }).pipe(
+      Effect.mapError(passThroughMcpToolError("find_candidates_by_data_ref"))
     ),
   list_enrichment_gaps: (input: typeof ListEnrichmentGapsInput.Type) =>
     enrichmentReadService.listGaps(input).pipe(
@@ -1376,6 +1489,7 @@ const makeCapabilityHandlers = <
   toolkit.toLayer(
     Effect.gen(function* () {
       const queryService = yield* KnowledgeQueryService;
+      const dataRefQueryService = yield* DataRefQueryService;
       const editorialService = yield* EditorialService;
       const curationService = yield* CurationService;
       const expertRegistryService = yield* ExpertRegistryService;
@@ -1388,6 +1502,7 @@ const makeCapabilityHandlers = <
       return toolkit.of({
         ...makeReadOnlyHandlers(
           queryService,
+          dataRefQueryService,
           editorialService,
           curationService,
           bskyClient,
