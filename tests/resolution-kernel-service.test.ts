@@ -212,6 +212,83 @@ describe("ResolutionKernel service", () => {
     }).pipe(Effect.provide(kernelLayer))
   );
 
+  it.effect("uses source-line dataset names to narrow an ambiguous candidate set before publisher scoping", () =>
+    Effect.gen(function* () {
+      const kernel = yield* ResolutionKernel;
+
+      const outcomes = yield* kernel.resolve({
+        postContext: {
+          postUri: "at://did:plc:test/app.bsky.feed.post/kernel-service-dataset-scope",
+          text: "Wind electricity generation",
+          links: [],
+          linkCards: [],
+          threadCoverage: "focus-only"
+        },
+        vision: {
+          kind: "vision",
+          summary: {
+            text: "Wind chart",
+            mediaTypes: ["chart"],
+            chartTypes: ["line-chart"],
+            titles: [],
+            keyFindings: []
+          },
+          assets: [
+            {
+              assetKey: "asset:1",
+              assetType: "image",
+              source: "embed",
+              index: 0,
+              originalAltText: null,
+              extractionRoute: "full",
+              analysis: {
+                mediaType: "chart",
+                chartTypes: ["line-chart"],
+                altText: "Wind generation",
+                altTextProvenance: "synthetic",
+                xAxis: null,
+                yAxis: { label: "Generation", unit: "TWh" },
+                series: [{ legendLabel: "Wind", unit: "TWh" }],
+                sourceLines: [
+                  {
+                    sourceText: "Source: Energy data portal",
+                    datasetName: "EIA wind generation"
+                  }
+                ],
+                temporalCoverage: null,
+                keyFindings: [],
+                visibleUrls: [],
+                organizationMentions: [],
+                logoText: [],
+                title: "Wind electricity generation",
+                modelId: "gemini-2.5-flash",
+                processedAt: 1
+              }
+            }
+          ],
+          modelId: "gemini-2.5-flash",
+          promptVersion: "v2",
+          processedAt: 1
+        },
+        sourceAttribution: null
+      });
+
+      expect(outcomes).toHaveLength(1);
+      expect(outcomes[0]?._tag).toBe("Resolved");
+      if (outcomes[0]?._tag !== "Resolved") {
+        return;
+      }
+
+      expect(outcomes[0].datasetIds).toEqual([datasetAId]);
+      expect(outcomes[0].items[0]?._tag).toBe("bound");
+      if (outcomes[0].items[0]?._tag !== "bound") {
+        return;
+      }
+
+      expect(outcomes[0].items[0].variableId).toBe(variableAId);
+    }).pipe(Effect.provide(kernelLayer))
+  );
+
   it.effect("returns one outcome per vision asset bundle", () =>
     Effect.gen(function* () {
       const kernel = yield* ResolutionKernel;

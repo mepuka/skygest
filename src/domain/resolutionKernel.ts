@@ -1,6 +1,8 @@
 import { Schema } from "effect";
 import { ZeroToOneScore } from "./confidence";
-import { AgentId, VariableId } from "./data-layer/ids";
+import { AliasScheme } from "./data-layer/alias";
+import { Dataset } from "./data-layer/catalog";
+import { AgentId, DatasetId, VariableId } from "./data-layer/ids";
 import { TimePeriod } from "./data-layer/variable";
 import { PartialVariableFacetConflict } from "./errors";
 import { ChartAxis, TemporalCoverage } from "./media";
@@ -91,6 +93,41 @@ export type ResolutionPublisherHint = Schema.Schema.Type<
   typeof ResolutionPublisherHint
 >;
 
+export const DatasetTitleExactMatch = Schema.TaggedStruct(
+  "DatasetTitleExactMatch",
+  {
+    dataset: Dataset
+  }
+);
+export type DatasetTitleExactMatch = Schema.Schema.Type<
+  typeof DatasetTitleExactMatch
+>;
+
+export const DatasetTitleFuzzyMatch = Schema.TaggedStruct(
+  "DatasetTitleFuzzyMatch",
+  {
+    dataset: Dataset,
+    score: ZeroToOneScore
+  }
+);
+export type DatasetTitleFuzzyMatch = Schema.Schema.Type<
+  typeof DatasetTitleFuzzyMatch
+>;
+
+export const DatasetAliasMatch = Schema.TaggedStruct("DatasetAliasMatch", {
+  dataset: Dataset,
+  aliasScheme: AliasScheme,
+  aliasValue: Schema.String
+});
+export type DatasetAliasMatch = Schema.Schema.Type<typeof DatasetAliasMatch>;
+
+export const DatasetNameMatch = Schema.Union([
+  DatasetTitleExactMatch,
+  DatasetTitleFuzzyMatch,
+  DatasetAliasMatch
+]);
+export type DatasetNameMatch = Schema.Schema.Type<typeof DatasetNameMatch>;
+
 export const ResolutionEvidenceBundle = Schema.Struct({
   postUri: Schema.optionalKey(PostUri),
   assetKey: Schema.optionalKey(Schema.String),
@@ -167,9 +204,20 @@ export type VariableCandidateScore = Schema.Schema.Type<
   typeof VariableCandidateScore
 >;
 
+export const ResolutionScopeOptions = Schema.Struct({
+  agentId: Schema.optionalKey(AgentId),
+  datasetIds: Schema.optionalKey(Schema.Array(DatasetId))
+}).annotate({
+  description: "Optional registry scope applied during binding"
+});
+export type ResolutionScopeOptions = Schema.Schema.Type<
+  typeof ResolutionScopeOptions
+>;
+
 export const ResolutionGapReason = Schema.Literals([
   "missing-required",
   "no-candidates",
+  "dataset-scope-empty",
   "agent-scope-empty",
   "ambiguous-candidates",
   "required-facet-conflict"
@@ -186,6 +234,7 @@ export const ResolutionGap = Schema.Struct({
   context: Schema.optionalKey(
     Schema.Struct({
       agentId: Schema.optionalKey(AgentId),
+      datasetIds: Schema.optionalKey(Schema.Array(DatasetId)),
       attachedContext: Schema.optionalKey(AttachedContext)
     })
   )
@@ -241,6 +290,7 @@ export const Resolved = Schema.TaggedStruct("Resolved", {
   attachedContext: AttachedContext,
   items: Schema.Array(BoundResolutionItem),
   agentId: Schema.optionalKey(AgentId),
+  datasetIds: Schema.optionalKey(Schema.Array(DatasetId)),
   confidence: Schema.optionalKey(ZeroToOneScore),
   tier: Schema.optionalKey(ResolutionEvidenceTier)
 });

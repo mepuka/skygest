@@ -1,10 +1,19 @@
-import { Effect, Layer, Schema, ServiceMap } from "effect";
-import { type ResolutionOutcome } from "../domain/resolutionKernel";
+import { Effect, Layer, Option, Schema, ServiceMap } from "effect";
+import type { DatasetId } from "../domain/data-layer/ids";
+import type { VisionAssetEnrichment } from "../domain/enrichment";
+import type {
+  ResolutionOutcome,
+  ResolutionScopeOptions
+} from "../domain/resolutionKernel";
 import { EnrichmentSchemaDecodeError } from "../domain/errors";
 import { Stage1Input } from "../domain/stage1Resolution";
 import { formatSchemaParseError } from "../platform/Json";
 import { DataLayerRegistry } from "../services/DataLayerRegistry";
 import type { DataLayerRegistryLookup } from "./dataLayerRegistry";
+import {
+  findDatasetMatchesForName,
+  listPreferredDatasetAgentIds
+} from "./datasetNameMatch";
 import { FacetVocabulary } from "./facetVocabulary";
 import { buildResolutionEvidenceBundles } from "./kernel/BundleAdapter";
 import { resolveBundle } from "./kernel/ResolutionKernel";
@@ -20,7 +29,7 @@ const decodeStage1Input = (input: unknown) =>
   );
 
 export const resolveAgentIdFromStage1Input = (
-  input: typeof Stage1Input.Type,
+  input: Schema.Schema.Type<typeof Stage1Input>,
   lookup: DataLayerRegistryLookup
 ) => {
   const providerHints = [
@@ -35,7 +44,7 @@ export const resolveAgentIdFromStage1Input = (
     }
 
     const agentByLabel = lookup.findAgentByLabel(providerHint);
-    if (agentByLabel._tag === "Some") {
+    if (Option.isSome(agentByLabel)) {
       return agentByLabel.value.id;
     }
   }
@@ -51,12 +60,55 @@ export const resolveAgentIdFromStage1Input = (
     }
 
     const homepageAgent = lookup.findAgentByHomepageDomain(homepageHint);
-    if (homepageAgent._tag === "Some") {
+    if (Option.isSome(homepageAgent)) {
       return homepageAgent.value.id;
     }
   }
 
   return undefined;
+};
+
+const resolveDatasetIdsForAsset = (
+  input: Schema.Schema.Type<typeof Stage1Input>,
+  asset: VisionAssetEnrichment,
+  lookup: DataLayerRegistryLookup
+): ReadonlyArray<DatasetId> => {
+  const datasetIds = new Set<DatasetId>();
+  const preferredAgentIds = listPreferredDatasetAgentIds(input, asset, lookup);
+
+  for (const sourceLine of asset.analysis.sourceLines) {
+    if (sourceLine.datasetName === null) {
+      continue;
+    }
+
+    for (const match of findDatasetMatchesForName(sourceLine.datasetName, lookup, {
+      preferredAgentIds
+    })) {
+      datasetIds.add(match.dataset.id);
+    }
+  }
+
+  return [...datasetIds];
+};
+
+const resolveDatasetIdsByAssetKey = (
+  input: Schema.Schema.Type<typeof Stage1Input>,
+  lookup: DataLayerRegistryLookup
+): ReadonlyMap<string, ReadonlyArray<DatasetId>> => {
+  const datasetIdsByAssetKey = new Map<string, ReadonlyArray<DatasetId>>();
+
+  if (input.vision === null) {
+    return datasetIdsByAssetKey;
+  }
+
+  for (const asset of input.vision.assets) {
+    const datasetIds = resolveDatasetIdsForAsset(input, asset, lookup);
+    if (datasetIds.length > 0) {
+      datasetIdsByAssetKey.set(asset.assetKey, datasetIds);
+    }
+  }
+
+  return datasetIdsByAssetKey;
 };
 
 export class ResolutionKernel extends ServiceMap.Service<
@@ -82,11 +134,28 @@ export class ResolutionKernel extends ServiceMap.Service<
         const decoded = yield* decodeStage1Input(input);
         const bundles = buildResolutionEvidenceBundles(decoded);
         const agentId = resolveAgentIdFromStage1Input(decoded, registry.lookup);
-        const resolutionOptions = agentId === undefined ? {} : { agentId };
-
-        return bundles.map((bundle) =>
-          resolveBundle(bundle, registry.lookup, vocabulary, resolutionOptions)
+        const datasetIdsByAssetKey = resolveDatasetIdsByAssetKey(
+          decoded,
+          registry.lookup
         );
+
+        return bundles.map((bundle) => {
+          const datasetIds =
+            bundle.assetKey === undefined
+              ? undefined
+              : datasetIdsByAssetKey.get(bundle.assetKey);
+          const resolutionOptions: ResolutionScopeOptions = {
+            ...(agentId === undefined ? {} : { agentId }),
+            ...(datasetIds === undefined ? {} : { datasetIds })
+          };
+
+          return resolveBundle(
+            bundle,
+            registry.lookup,
+            vocabulary,
+            resolutionOptions
+          );
+        });
       });
 
       return ResolutionKernel.of({ resolve });

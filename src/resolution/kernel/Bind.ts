@@ -1,11 +1,12 @@
 import { Result } from "effect";
 import type { Variable } from "../../domain/data-layer";
-import type { AgentId } from "../../domain/data-layer/ids";
+import type { AgentId, DatasetId } from "../../domain/data-layer/ids";
 import type {
   BoundResolutionBoundItem,
   BoundResolutionGapItem,
   BoundResolutionItem,
   ResolutionHypothesis,
+  ResolutionScopeOptions,
   VariableCandidateScore
 } from "../../domain/resolutionKernel";
 import {
@@ -28,8 +29,7 @@ const NEAREST_MISS_LIMIT = 5;
 export type BoundHypothesis = {
   readonly hypothesis: ResolutionHypothesis;
   readonly items: ReadonlyArray<BoundResolutionItem>;
-  readonly agentId?: AgentId;
-};
+} & ResolutionScopeOptions;
 
 const variableToPartial = (variable: Variable): PartialVariableShape =>
   stripUndefined({
@@ -113,6 +113,22 @@ const narrowCandidatesByAgent = (
   return candidates.filter((candidate) => allowedVariableIds.has(candidate.variableId));
 };
 
+const narrowCandidatesByDatasets = (
+  candidates: ReadonlyArray<VariableCandidateScore>,
+  datasetIds: ReadonlyArray<DatasetId>,
+  lookup: DataLayerRegistryLookup
+): ReadonlyArray<VariableCandidateScore> => {
+  const allowedVariableIds = new Set(
+    datasetIds.flatMap((datasetId) =>
+      Array.from(lookup.findVariablesByDatasetId(datasetId)).map(
+        (variable) => variable.id
+      )
+    )
+  );
+
+  return candidates.filter((candidate) => allowedVariableIds.has(candidate.variableId));
+};
+
 // Shared↔item retraction join: series-label items are strictly more
 // specific than the chart-level shared partial on any facet they define.
 // Before joining, we strip those facets from the shared partial so the
@@ -182,9 +198,7 @@ const makeGapItem = (
 export const bindHypothesis = (
   hypothesis: ResolutionHypothesis,
   lookup: DataLayerRegistryLookup,
-  options: {
-    readonly agentId?: AgentId;
-  } = {}
+  options: ResolutionScopeOptions = {}
 ): BoundHypothesis => {
   const variables = listVariables(lookup);
   const items: Array<BoundResolutionItem> = [];
@@ -241,10 +255,39 @@ export const bindHypothesis = (
       continue;
     }
 
+    const datasetNarrowedCandidates =
+      options.datasetIds === undefined
+        ? compatibleCandidates
+        : narrowCandidatesByDatasets(
+            compatibleCandidates,
+            options.datasetIds,
+            lookup
+          );
+
+    if (
+      options.datasetIds !== undefined &&
+      datasetNarrowedCandidates.length === 0
+    ) {
+      items.push(
+        makeGapItem(
+          hypothesis,
+          hypothesisItem,
+          semanticPartial,
+          compatibleCandidates,
+          "dataset-scope-empty"
+        )
+      );
+      continue;
+    }
+
     const narrowedCandidates =
       options.agentId === undefined
-        ? compatibleCandidates
-        : narrowCandidatesByAgent(compatibleCandidates, options.agentId, lookup);
+        ? datasetNarrowedCandidates
+        : narrowCandidatesByAgent(
+            datasetNarrowedCandidates,
+            options.agentId,
+            lookup
+          );
 
     if (options.agentId !== undefined && narrowedCandidates.length === 0) {
       items.push(
@@ -252,7 +295,7 @@ export const bindHypothesis = (
           hypothesis,
           hypothesisItem,
           semanticPartial,
-          compatibleCandidates,
+          datasetNarrowedCandidates,
           "agent-scope-empty"
         )
       );
@@ -285,6 +328,8 @@ export const bindHypothesis = (
   return stripUndefined({
     hypothesis,
     items,
-    agentId: options.agentId
+    agentId: options.agentId,
+    datasetIds:
+      options.datasetIds === undefined ? undefined : [...options.datasetIds]
   });
 };

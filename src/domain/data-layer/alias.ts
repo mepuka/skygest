@@ -8,13 +8,14 @@ export const aliasSchemes = [
   "ember-route", "gridstatus-dataset-id", "odre-dataset-id",
   "eurostat-code", "europa-dataset-id",
   "ror", "wikidata", "doi",
-  "iso3166", "url", "other"
+  "iso3166", "url", "display-alias", "other"
  ] as const;
 
 export const AliasSchemeValues = {
   emberRoute: "ember-route",
   eiaBulkId: "eia-bulk-id",
   eiaRoute: "eia-route",
+  displayAlias: "display-alias",
   energyChartsEndpoint: "energy-charts-endpoint",
   entsoeDocumentType: "entsoe-document-type",
   gridstatusDatasetId: "gridstatus-dataset-id",
@@ -24,7 +25,8 @@ export const AliasSchemeValues = {
 } as const;
 
 export const AliasScheme = Schema.Literals(aliasSchemes).annotate({
-  description: "External identifier namespace"
+  description:
+    "Alias namespace used for external identifiers plus display-alias title variants"
 });
 export type AliasScheme = Schema.Schema.Type<typeof AliasScheme>;
 
@@ -45,7 +47,7 @@ export const ExternalIdentifier = Schema.Struct({
   uri: Schema.optionalKey(Schema.String),
   relation: AliasRelation
 }).annotate({
-  description: "Typed external identifier with SKOS-aligned relation strength (D3, D4)",
+  description: "Typed alias with SKOS-aligned relation strength (D3, D4)",
   [DesignDecision]: "D3, D4"
 });
 export type ExternalIdentifier = Schema.Schema.Type<typeof ExternalIdentifier>;

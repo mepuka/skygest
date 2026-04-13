@@ -1,4 +1,5 @@
 import { Schema } from "effect";
+import { ZeroToOneScore } from "./confidence";
 import { AliasScheme } from "./data-layer/alias";
 import { MatchTextSource, Stage1Rank, UrlSource } from "./stage1Shared";
 
@@ -49,7 +50,8 @@ export const DatasetTitleEvidence = Schema.TaggedStruct("DatasetTitleEvidence", 
   rank: Stage1Rank,
   assetKey: Schema.optionalKey(Schema.String),
   datasetName: Schema.String,
-  normalizedTitle: Schema.String
+  normalizedTitle: Schema.String,
+  fuzzyScore: Schema.optionalKey(ZeroToOneScore)
 });
 export type DatasetTitleEvidence = Schema.Schema.Type<typeof DatasetTitleEvidence>;
 

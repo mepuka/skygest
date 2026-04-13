@@ -924,6 +924,32 @@ describe("resolveBundle", () => {
     15_000
   );
 
+  it.effect("uses dataset narrowing to resolve an otherwise ambiguous candidate set", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+
+      const outcome = decodeOutcome(
+        resolveBundle(customAmbiguousBundle, customRegistryLookup, vocabulary, {
+          datasetIds: [datasetAId]
+        })
+      );
+
+      expect(outcome._tag).toBe("Resolved");
+      if (outcome._tag !== "Resolved") {
+        return;
+      }
+
+      expect(outcome.datasetIds).toEqual([datasetAId]);
+      expect(outcome.items[0]?._tag).toBe("bound");
+      if (outcome.items[0]?._tag !== "bound") {
+        return;
+      }
+
+      expect(outcome.items[0].variableId).toBe(windVariableAId);
+    }).pipe(Effect.provide(FacetVocabulary.layer)),
+    15_000
+  );
+
   it.effect("applies agent narrowing even when only one compatible candidate remains", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;
@@ -958,6 +984,31 @@ describe("resolveBundle", () => {
       expect(outcome.gap.reason).toBe("agent-scope-empty");
       expect(outcome.gap.candidates.map((candidate) => candidate.label)).toEqual([
         "Solar electricity generation"
+      ]);
+    }).pipe(Effect.provide(FacetVocabulary.layer)),
+    15_000
+  );
+
+  it.effect("returns OutOfRegistry with a dataset-scope-empty gap when dataset narrowing removes every candidate", () =>
+    Effect.gen(function* () {
+      const vocabulary = yield* FacetVocabulary;
+
+      const outcome = decodeOutcome(
+        resolveBundle(customAmbiguousBundle, customRegistryLookup, vocabulary, {
+          datasetIds: [datasetCId]
+        })
+      );
+
+      expect(outcome._tag).toBe("OutOfRegistry");
+      if (outcome._tag !== "OutOfRegistry") {
+        return;
+      }
+
+      expect(outcome.gap.reason).toBe("dataset-scope-empty");
+      expect(outcome.gap.context?.datasetIds).toEqual([datasetCId]);
+      expect(outcome.gap.candidates.map((candidate) => candidate.label)).toEqual([
+        "EIA wind electricity generation",
+        "IEA wind electricity generation"
       ]);
     }).pipe(Effect.provide(FacetVocabulary.layer)),
     15_000
