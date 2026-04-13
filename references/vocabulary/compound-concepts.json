@@ -170,5 +170,63 @@
     "provenance": "hand-curated",
     "addedAt": "2026-04-12T00:00:00.000Z",
     "notes": "Share of electricity — share statistic over electricity domain."
+  },
+  {
+    "surfaceForm": "retail electricity price",
+    "normalizedSurfaceForm": "retail electricity price",
+    "assignments": {
+      "statisticType": "price",
+      "domainObject": "electricity"
+    },
+    "provenance": "hand-curated",
+    "addedAt": "2026-04-13T00:00:00.000Z",
+    "notes": "Retail electricity price — mirrors wholesale electricity price pattern for end-user rates."
+  },
+  {
+    "surfaceForm": "retail electricity prices",
+    "normalizedSurfaceForm": "retail electricity prices",
+    "assignments": {
+      "statisticType": "price",
+      "domainObject": "electricity"
+    },
+    "provenance": "hand-curated",
+    "addedAt": "2026-04-13T00:00:00.000Z",
+    "notes": "Plural of retail electricity price — multi-word compounds need explicit plural entries (matcher only auto-pluralises single-word forms)."
+  },
+  {
+    "surfaceForm": "carbon intensity of electricity",
+    "normalizedSurfaceForm": "carbon intensity of electricity",
+    "assignments": {
+      "measuredProperty": "emissions",
+      "domainObject": "electricity",
+      "unitFamily": "intensity"
+    },
+    "provenance": "hand-curated",
+    "addedAt": "2026-04-13T00:00:00.000Z",
+    "notes": "Carbon intensity of electricity — three-facet pin covering emissions measured property, electricity domain, and intensity unit family (gCO2eq/kWh). Paired with unit-family surface-form additions for gCO2eq/kWh."
+  },
+  {
+    "surfaceForm": "wind power record",
+    "normalizedSurfaceForm": "wind power record",
+    "assignments": {
+      "measuredProperty": "generation",
+      "aggregation": "max",
+      "technologyOrFuel": "wind"
+    },
+    "provenance": "hand-curated",
+    "addedAt": "2026-04-13T00:00:00.000Z",
+    "notes": "Wind power record — record phrasing implies aggregation=max; pins wind technology and generation measured property."
+  },
+  {
+    "surfaceForm": "wind power records",
+    "normalizedSurfaceForm": "wind power records",
+    "assignments": {
+      "measuredProperty": "generation",
+      "aggregation": "max",
+      "technologyOrFuel": "wind"
+    },
+    "provenance": "hand-curated",
+    "addedAt": "2026-04-13T00:00:00.000Z",
+    "notes": "Plural of wind power record."
   }
 ]
