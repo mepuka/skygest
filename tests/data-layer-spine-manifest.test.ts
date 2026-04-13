@@ -13,22 +13,6 @@ import {
 const decodeManifest = Schema.decodeUnknownResult(DataLayerSpineManifest);
 const decodeManifestSync = Schema.decodeUnknownSync(DataLayerSpineManifest);
 
-/**
- * Runtime fields that the manifest intentionally describes before the
- * runtime schema grows them. Each entry MUST carry a ticket reference so
- * the test catches unexpected drift.
- */
-const FORWARD_LOOKING_MANIFEST_FIELDS: {
-  readonly [K in SpineClassKey]?: ReadonlyArray<{ readonly name: string; readonly reason: string }>;
-} = {
-  Series: [
-    {
-      name: "datasetId",
-      reason: "SKY-317 will add datasetId to the runtime Series struct; manifest records it as optional in v1."
-    }
-  ]
-};
-
 const runtimeFieldKeys = {
   Agent: Object.keys(Agent.fields),
   Dataset: Object.keys(Dataset.fields),
@@ -77,17 +61,14 @@ describe("data layer spine manifest", () => {
     expect(drift).toEqual([]);
   });
 
-  it("every manifest field exists on the runtime struct OR is an approved forward-looking entry", () => {
+  it("every manifest field exists on the runtime struct", () => {
     const manifest = decodeManifestSync(manifestJson);
     const unexpected: Array<{ class: SpineClassKey; extra: string }> = [];
 
     for (const key of ["Agent", "Dataset", "Variable", "Series"] as const) {
       const runtimeSet = new Set<string>(runtimeFieldKeys[key]);
-      const forwardSet = new Set<string>(
-        (FORWARD_LOOKING_MANIFEST_FIELDS[key] ?? []).map((f) => f.name)
-      );
       for (const field of manifest.classes[key].fields) {
-        if (!runtimeSet.has(field.runtimeName) && !forwardSet.has(field.runtimeName)) {
+        if (!runtimeSet.has(field.runtimeName)) {
           unexpected.push({ class: key, extra: field.runtimeName });
         }
       }

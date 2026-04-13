@@ -226,6 +226,15 @@ const dataset = decodeDataset({
   updatedAt
 });
 
+const datasetWithoutVariableIds = decodeDataset({
+  _tag: "Dataset",
+  id: "https://id.skygest.io/dataset/ds_TESTDATASET02",
+  title: "Dataset linked only through Series.datasetId",
+  aliases: [],
+  createdAt,
+  updatedAt
+});
+
 const distribution = decodeDistribution({
   _tag: "Distribution",
   id: "https://id.skygest.io/distribution/dist_TESTDIST01",
@@ -279,6 +288,7 @@ const series = decodeSeries({
   id: "https://id.skygest.io/series/ser_TESTSERIES01",
   label: "U.S. average retail electricity price",
   variableId: variable.id,
+  datasetId: dataset.id,
   fixedDims: {
     place: "us",
     frequency: "monthly"
@@ -290,6 +300,21 @@ const series = decodeSeries({
       relation: "exactMatch"
     }
   ],
+  createdAt,
+  updatedAt
+});
+
+const seriesLinkedOnlyByDatasetId = decodeSeries({
+  _tag: "Series",
+  id: "https://id.skygest.io/series/ser_TESTSERIES02",
+  label: "Series linked through published dataset",
+  variableId: variable.id,
+  datasetId: datasetWithoutVariableIds.id,
+  fixedDims: {
+    place: "us",
+    frequency: "monthly"
+  },
+  aliases: [],
   createdAt,
   updatedAt
 });
@@ -415,14 +440,24 @@ describe("data layer registry repos", () => {
     Effect.gen(function* () {
       yield* runMigrations;
 
-      const variables = yield* VariablesRepo;
+      const datasets = yield* DatasetsRepo;
       const repo = yield* SeriesRepo;
+      const variables = yield* VariablesRepo;
 
+      yield* datasets.insert(dataset, { updatedBy });
       yield* variables.insert(variable, { updatedBy });
       yield* repo.insert(series, { updatedBy });
 
       const stored = yield* repo.findByUri(series.id);
+      const sql = yield* SqlClient.SqlClient;
+      const [persisted] = yield* sql<{ datasetId: string | null }>`
+        SELECT dataset_id as datasetId
+        FROM series
+        WHERE id = ${series.id}
+      `;
+
       expect(stored).toEqual(series);
+      expect(persisted).toEqual({ datasetId: dataset.id });
 
       yield* repo.delete(series.id, deletedAt, updatedBy);
 
@@ -577,6 +612,34 @@ describe("data layer registry repos", () => {
       expect(
         [...registry.lookup.findDistributionsByHostname("www.eia.gov")]
       ).toEqual([distribution]);
+    }).pipe(Effect.provide(baseLayer));
+  });
+
+  it.effect("builds dataset-variable lookups from Series.datasetId when Dataset.variableIds is absent", () => {
+    const baseLayer = makeLayer();
+
+    return Effect.gen(function* () {
+      yield* runMigrations;
+
+      const datasets = yield* DatasetsRepo;
+      const seriesRepo = yield* SeriesRepo;
+      const variables = yield* VariablesRepo;
+
+      yield* datasets.insert(datasetWithoutVariableIds, { updatedBy });
+      yield* variables.insert(variable, { updatedBy });
+      yield* seriesRepo.insert(seriesLinkedOnlyByDatasetId, { updatedBy });
+
+      const registry = yield* Effect.provide(
+        Effect.service(DataLayerRegistry),
+        d1DataLayerRegistryLayer().pipe(Layer.provideMerge(baseLayer))
+      );
+
+      expect(
+        [...registry.lookup.findDatasetsByVariableId(variable.id)]
+      ).toEqual([datasetWithoutVariableIds]);
+      expect(
+        [...registry.lookup.findVariablesByDatasetId(datasetWithoutVariableIds.id)]
+      ).toEqual([variable]);
     }).pipe(Effect.provide(baseLayer));
   });
 });

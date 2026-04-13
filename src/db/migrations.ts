@@ -714,6 +714,7 @@ const migration22: D1Migration = {
       id TEXT PRIMARY KEY,
       label TEXT NOT NULL,
       variable_id TEXT NOT NULL,
+      dataset_id TEXT,
       fixed_dims_json TEXT NOT NULL,
       aliases_json TEXT NOT NULL,
       created_at TEXT NOT NULL,
@@ -723,6 +724,8 @@ const migration22: D1Migration = {
     )`,
     `CREATE INDEX IF NOT EXISTS idx_series_variable_id
       ON series(variable_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_series_dataset_id
+      ON series(dataset_id)`,
     `CREATE TABLE IF NOT EXISTS agents (
       id TEXT PRIMARY KEY,
       kind TEXT NOT NULL,
@@ -916,6 +919,36 @@ const migration23: D1Migration = {
   run: runRuntimeVariableProfileAlignmentMigration
 };
 
+const runSeriesDatasetAlignmentMigration = (
+  sql: SqlClient.SqlClient
+) =>
+  Effect.gen(function* () {
+    const hasSeries = yield* tableExists(sql, "series");
+    if (!hasSeries) {
+      return;
+    }
+
+    const hasDatasetId = yield* columnExists(sql, "series", "dataset_id");
+    if (!hasDatasetId) {
+      yield* executeUnsafeStatement(
+        sql,
+        `ALTER TABLE series ADD COLUMN dataset_id TEXT`
+      );
+    }
+
+    yield* executeUnsafeStatement(
+      sql,
+      `CREATE INDEX IF NOT EXISTS idx_series_dataset_id
+        ON series(dataset_id)`
+    );
+  });
+
+const migration24: D1Migration = {
+  id: 24,
+  name: "series_dataset_alignment",
+  run: runSeriesDatasetAlignmentMigration
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -939,5 +972,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration20,
   migration21,
   migration22,
-  migration23
+  migration23,
+  migration24
 ];

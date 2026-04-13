@@ -107,7 +107,8 @@ describe("phase-one migrations", () => {
         { id: 20, name: "publication_registry_identity" },
         { id: 21, name: "podcast_schema" },
         { id: 22, name: "data_layer_registry" },
-        { id: 23, name: "runtime_variable_profile_alignment" }
+        { id: 23, name: "runtime_variable_profile_alignment" },
+        { id: 24, name: "series_dataset_alignment" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );
@@ -286,6 +287,87 @@ describe("phase-one migrations", () => {
       ]);
       expect(datasetColumns).toEqual([
         { name: "variable_ids_json", isNotNull: 0 }
+      ]);
+    }).pipe(Effect.provide(makeSqliteLayer()))
+  );
+
+  it.effect("adds the nullable series dataset column and index idempotently for upgraded databases", () =>
+    Effect.gen(function* () {
+      const sql = yield* SqlClient.SqlClient;
+
+      yield* sql`
+        CREATE TABLE IF NOT EXISTS _migrations (
+          id INTEGER PRIMARY KEY,
+          name TEXT NOT NULL,
+          applied_at INTEGER NOT NULL
+        )
+      `.pipe(Effect.asVoid);
+
+      for (let id = 1; id <= 23; id++) {
+        yield* sql`
+          INSERT INTO _migrations (id, name, applied_at)
+          VALUES (${id}, ${`migration-${String(id)}`}, ${1_710_000_200_000 + id})
+        `.pipe(Effect.asVoid);
+      }
+
+      yield* sql`
+        CREATE TABLE series (
+          id TEXT PRIMARY KEY,
+          label TEXT NOT NULL,
+          variable_id TEXT NOT NULL,
+          fixed_dims_json TEXT NOT NULL,
+          aliases_json TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          updated_by TEXT NOT NULL,
+          deleted_at TEXT
+        )
+      `.pipe(Effect.asVoid);
+
+      yield* runMigrations;
+      yield* runMigrations;
+
+      const seriesColumns = yield* sql<{ name: string; isNotNull: number }>`
+        SELECT name as name, [notnull] as isNotNull
+        FROM pragma_table_info('series')
+        WHERE name = 'dataset_id'
+      `;
+      const seriesIndexes = yield* sql<{ name: string; isUnique: number }>`
+        SELECT name as name, "unique" as isUnique
+        FROM pragma_index_list('series')
+        WHERE name = 'idx_series_dataset_id'
+      `;
+
+      expect(seriesColumns).toEqual([
+        { name: "dataset_id", isNotNull: 0 }
+      ]);
+      expect(seriesIndexes).toEqual([
+        { name: "idx_series_dataset_id", isUnique: 0 }
+      ]);
+    }).pipe(Effect.provide(makeSqliteLayer()))
+  );
+
+  it.effect("creates the nullable series dataset column and index on a fresh database", () =>
+    Effect.gen(function* () {
+      yield* runMigrations;
+      const sql = yield* SqlClient.SqlClient;
+
+      const seriesColumns = yield* sql<{ name: string; isNotNull: number }>`
+        SELECT name as name, [notnull] as isNotNull
+        FROM pragma_table_info('series')
+        WHERE name = 'dataset_id'
+      `;
+      const seriesIndexes = yield* sql<{ name: string; isUnique: number }>`
+        SELECT name as name, "unique" as isUnique
+        FROM pragma_index_list('series')
+        WHERE name = 'idx_series_dataset_id'
+      `;
+
+      expect(seriesColumns).toEqual([
+        { name: "dataset_id", isNotNull: 0 }
+      ]);
+      expect(seriesIndexes).toEqual([
+        { name: "idx_series_dataset_id", isUnique: 0 }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );
