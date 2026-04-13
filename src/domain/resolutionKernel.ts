@@ -240,6 +240,7 @@ export const Resolved = Schema.TaggedStruct("Resolved", {
   sharedPartial: PartialVariableShape,
   attachedContext: AttachedContext,
   items: Schema.Array(BoundResolutionItem),
+  agentId: Schema.optionalKey(AgentId),
   confidence: Schema.optionalKey(ZeroToOneScore),
   tier: Schema.optionalKey(ResolutionEvidenceTier)
 });

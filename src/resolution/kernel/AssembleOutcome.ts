@@ -103,6 +103,7 @@ export const assembleOutcome = (
       sharedPartial: bound.hypothesis.sharedPartial,
       attachedContext: bound.hypothesis.attachedContext,
       items: [...bound.items],
+      agentId: bound.agentId,
       confidence: bound.hypothesis.confidence,
       tier: bound.hypothesis.tier
     });
