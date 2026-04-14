@@ -14,7 +14,7 @@ The critical architectural update is that the runtime path is now:
 
 `vision -> source-attribution -> resolver worker -> Stage 1 matching -> resolution kernel -> stored data-ref-resolution row`
 
-There is no live runtime Stage 2 or Stage 3 flow in this branch.
+There is no live runtime Stage 2 or Stage 3 flow in this branch. The stored row now also feeds shipped MCP lookup tools, even though story-file projection is still pending.
 
 ## Snapshot note
 
@@ -125,8 +125,8 @@ This is the key replacement for the older staged runtime story. The live resolve
 
 Two caveats matter:
 
-1. `Resolved` outcomes can now carry `agentId`, which is the architectural hook for agent-aware narrowing.
-2. The live registry shelves that make that narrowing effective are still incomplete until `SKY-317`, so the code path exists before the data fully backs it up.
+1. `Resolved` outcomes can now carry `agentId`, and the series-backed dataset and agent shelves behind that narrowing are now live after the `Series.datasetId` backfill work.
+2. The remaining misses are now mostly about match quality and candidate generation quality: label coverage, dataset-title normalization, landing-page fallback, and binder behavior still decide how often those shelves get used well.
 
 ### 6. Resolver result -> stored `data-ref-resolution` enrichment
 
@@ -148,19 +148,25 @@ export const DataRefResolutionEnrichment = Schema.Struct({
 
 That is the new durable seam. The stored row does not carry a runtime Stage 2 or Stage 3 payload because those are not part of the shipped path anymore.
 
+### 6A. Stored resolver result -> candidate citation read model
+
+- **Component:** `buildDataRefCandidateCitations`, `CandidatePayloadRepoD1`, `DataRefCandidateReadRepoD1`
+- **Storage:** `data_ref_candidate_citations`
+- **Why it matters:** the reverse-lookup MCP tool does not rescan enrichments; it queries a dedicated citation table refreshed whenever a `data-ref-resolution` enrichment is saved
+
+This is the seam that made `find_candidates_by_data_ref` real. Join density is therefore coupled to resolver output quality and citation freshness, not just to registry lookup availability.
+
 ### 7. Editorial read path
 
-- **Current readers:** `get_post_enrichments`, `get_editorial_pick_bundle`
-- **Current gap:** `hydrate-story` does not yet project these data refs into story frontmatter
+- **Current readers:** `get_post_enrichments`, `get_editorial_pick_bundle`, `resolve_data_ref`, `find_candidates_by_data_ref`
+- **Current gap:** `hydrate-story` still does not project these data refs into story frontmatter
 
-This means the system already has real resolver output in D1 and on the MCP read surface, but the editorial repo still needs the follow-through steps:
+This means the system already has real resolver output in D1, exact entity lookup over canonical URIs or aliases, and reverse lookup over stored candidate citations. The editorial repo still needs the follow-through steps:
 
-- `SKY-241` for direct lookup on demand
 - `SKY-242` for story-frontmatter projection
 - `SKY-243` for build-graph warnings over unresolved refs
-- `SKY-244` for cross-expert join lookup
 
-That is the product gap now. The runtime write path exists; the editorial projection and lookup paths still need to catch up.
+That is the product gap now. The read surface exists; the on-disk editorial projection and warning paths still need to catch up.
 
 ## Feedback loop
 
@@ -172,16 +178,20 @@ That is the product gap now. The runtime write path exists; the editorial projec
 
 This is now the active quality loop for the resolver. It measures the same kernel contract that production writes to D1.
 
+The full-catalog registry guardrail moved as well: `scripts/validate-data-layer-registry.ts` now carries the on-disk registry invariants that were too heavy for the fast unit suite.
+
 Why this matters for the architecture family:
 
 1. It keeps the docs honest. The resolver is shipped infrastructure, but not finished quality work.
 2. It tells us what kind of work remains. The next fixes are not about inventing a new runtime stage; they are about improving the current kernel and the registry completeness that feeds it.
-3. It explains why `SKY-317` and related registry follow-ons matter. The kernel can only narrow on shelves the runtime registry actually contains.
+3. It explains why current follow-on work is about match quality, citation density, and editor projection, not about inventing missing runtime stages or missing shelf plumbing.
 
 ## What this trace means now
 
 1. The resolver infrastructure is no longer hypothetical. It is a shipped Worker and a shipped stored row.
 2. The durable resolver contract is now `stage1 + kernel`.
-3. The main product gaps are lookup and projection gaps, not missing runtime plumbing.
-4. The main quality gaps are kernel accuracy and registry completeness, especially around agent-aware narrowing.
-5. Any future LLM reranking or workflow-based follow-up should be described as future work, not as part of today's runtime path.
+3. Editor-facing exact lookup and cross-post reverse lookup are now real.
+4. The main product gaps are story-file projection and editor warning surfaces, not missing lookup tools.
+5. The main quality gaps are kernel accuracy and citation density, not missing agent shelves.
+6. Typed entity search exists in code, but it is not yet a deployed runtime dependency until `SEARCH_DB` is bound.
+7. Any future LLM reranking or workflow-based follow-up should be described as future work, not as part of today's runtime path.
