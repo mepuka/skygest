@@ -42,6 +42,7 @@ declare namespace WorkerConfiguration {
   	ONTOLOGY_KV: KVNamespace;
   	TRANSCRIPTS_BUCKET: R2Bucket;
   	DB: D1Database;
+  	SEARCH_DB: D1Database;
   	PUBLIC_BSKY_API: "https://public.api.bsky.app";
   	INGEST_SHARD_COUNT: "1";
   	DEFAULT_DOMAIN: "energy";
@@ -56,6 +57,7 @@ declare namespace WorkerConfiguration {
   	ONTOLOGY_KV: KVNamespace;
   	TRANSCRIPTS_BUCKET: R2Bucket;
   	DB: D1Database;
+  	SEARCH_DB?: D1Database;
   	PUBLIC_BSKY_API: "https://public.api.bsky.app";
   	INGEST_SHARD_COUNT: "1";
   	DEFAULT_DOMAIN: "energy";
@@ -68,10 +70,12 @@ declare namespace WorkerConfiguration {
 
   interface ResolverStagingEnv {
   	DB: D1Database;
+  	SEARCH_DB: D1Database;
   }
 
   interface ResolverEnv {
   	DB: D1Database;
+  	SEARCH_DB?: D1Database;
   }
 
 }
