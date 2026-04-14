@@ -4,120 +4,44 @@ import type {
   Dataset,
   Distribution,
   Series,
-  Variable
+  Variable,
 } from "../domain/data-layer";
 import type { ExternalIdentifier } from "../domain/data-layer/alias";
 import type {
   EntitySearchAlias,
-  EntitySearchDocument
+  EntitySearchDocument,
 } from "../domain/entitySearch";
 import { encodeJsonString, stripUndefined } from "../platform/Json";
 import {
   buildUrlPrefixes,
   normalizeDistributionHostname,
-  normalizeDistributionUrl,
-  normalizeLookupText
+  normalizeLookupText,
 } from "../platform/Normalize";
+import {
+  firstPredecessorNodeByKindsAndTag,
+  firstSuccessorNodeByKindsAndTag,
+  predecessorNodesByKindsAndTag,
+  successorNodesByKindsAndTag,
+} from "../data-layer/DataLayerGraphTraversal";
 import type { PreparedDataLayerRegistry } from "../resolution/dataLayerRegistry";
 import {
   collectNormalizedSearchUrls,
   collectUniqueSearchText,
-  joinSearchText
+  joinSearchText,
 } from "./searchSignals";
-
-type SearchGraph = {
-  readonly agentsById: ReadonlyMap<string, Agent>;
-  readonly datasetsById: ReadonlyMap<string, Dataset>;
-  readonly variablesById: ReadonlyMap<string, Variable>;
-  readonly datasetsByVariableId: ReadonlyMap<string, ReadonlyArray<Dataset>>;
-  readonly distributionsByDatasetId: ReadonlyMap<string, ReadonlyArray<Distribution>>;
-  readonly seriesByDatasetId: ReadonlyMap<string, ReadonlyArray<Series>>;
-  readonly seriesByVariableId: ReadonlyMap<string, ReadonlyArray<Series>>;
-};
 
 // Phase 1 mirrors the DCAT-facing spine in
 // `references/data-layer-spine/manifest.json`: index only the typed catalog
 // entities that participate in resolver lookup, and keep posts as
 // request-time evidence rather than part of this corpus.
 const isInScopeEntity = (
-  entity: DataLayerRegistryEntity
+  entity: DataLayerRegistryEntity,
 ): entity is Agent | Dataset | Distribution | Series | Variable =>
   entity._tag === "Agent" ||
   entity._tag === "Dataset" ||
   entity._tag === "Distribution" ||
   entity._tag === "Series" ||
   entity._tag === "Variable";
-
-const addToMultiMap = <A>(
-  map: Map<string, Array<A>>,
-  key: string | undefined,
-  value: A
-) => {
-  if (key === undefined) {
-    return;
-  }
-
-  const current = map.get(key);
-  if (current === undefined) {
-    map.set(key, [value]);
-    return;
-  }
-
-  current.push(value);
-};
-
-const finalizeMultiMap = <A>(
-  map: Map<string, Array<A>>
-): ReadonlyMap<string, ReadonlyArray<A>> =>
-  new Map(
-    [...map.entries()].map(([key, items]) => [key, [...items]])
-  );
-
-const buildSearchGraph = (prepared: PreparedDataLayerRegistry): SearchGraph => {
-  const agentsById = new Map<string, Agent>();
-  const datasetsById = new Map<string, Dataset>();
-  const variablesById = new Map<string, Variable>();
-  const datasetsByVariableId = new Map<string, Array<Dataset>>();
-  const distributionsByDatasetId = new Map<string, Array<Distribution>>();
-  const seriesByDatasetId = new Map<string, Array<Series>>();
-  const seriesByVariableId = new Map<string, Array<Series>>();
-
-  for (const entity of prepared.entities) {
-    switch (entity._tag) {
-      case "Agent":
-        agentsById.set(entity.id, entity);
-        break;
-      case "Dataset":
-        datasetsById.set(entity.id, entity);
-        for (const variableId of entity.variableIds ?? []) {
-          addToMultiMap(datasetsByVariableId, variableId, entity);
-        }
-        break;
-      case "Distribution":
-        addToMultiMap(distributionsByDatasetId, entity.datasetId, entity);
-        break;
-      case "Series":
-        addToMultiMap(seriesByDatasetId, entity.datasetId, entity);
-        addToMultiMap(seriesByVariableId, entity.variableId, entity);
-        break;
-      case "Variable":
-        variablesById.set(entity.id, entity);
-        break;
-      default:
-        break;
-    }
-  }
-
-  return {
-    agentsById,
-    datasetsById,
-    variablesById,
-    datasetsByVariableId: finalizeMultiMap(datasetsByVariableId),
-    distributionsByDatasetId: finalizeMultiMap(distributionsByDatasetId),
-    seriesByDatasetId: finalizeMultiMap(seriesByDatasetId),
-    seriesByVariableId: finalizeMultiMap(seriesByVariableId)
-  };
-};
 
 const firstDistinct = (
   primary: string,
@@ -143,7 +67,7 @@ const firstDistinct = (
 };
 
 const dedupeAliases = (
-  aliases: ReadonlyArray<ExternalIdentifier>
+  aliases: ReadonlyArray<ExternalIdentifier>,
 ): ReadonlyArray<EntitySearchAlias> => {
   const seen = new Set<string>();
   const deduped: Array<EntitySearchAlias> = [];
@@ -162,46 +86,37 @@ const dedupeAliases = (
 };
 
 const toDisplayAliases = (
-  values: ReadonlyArray<string> | undefined
+  values: ReadonlyArray<string> | undefined,
 ): ReadonlyArray<ExternalIdentifier> =>
   (values ?? []).map((value) => ({
     scheme: "display-alias",
     value,
-    relation: "exactMatch"
+    relation: "exactMatch",
   }));
 
 const toCanonicalUrls = (
   ...inputs: ReadonlyArray<string | undefined | null>
-): ReadonlyArray<string> =>
-  collectNormalizedSearchUrls(...inputs);
+): ReadonlyArray<string> => collectNormalizedSearchUrls(...inputs);
 
 const toOptionalHostname = (input: string | undefined): string | undefined =>
   input === undefined
     ? undefined
-    : normalizeDistributionHostname(input) ?? undefined;
+    : (normalizeDistributionHostname(input) ?? undefined);
 
 const prefixesForUrls = (urls: ReadonlyArray<string>) =>
   urls.flatMap((url) => buildUrlPrefixes(url));
 
-const agentLabels = (
-  graph: SearchGraph,
-  agentIds: ReadonlyArray<string | undefined>
-): ReadonlyArray<string> =>
+const agentLabels = (agents: ReadonlyArray<Agent>): ReadonlyArray<string> =>
   collectUniqueSearchText(
-    agentIds.flatMap((agentId) => {
-      if (agentId === undefined) {
-        return [];
-      }
-
-      const agent = graph.agentsById.get(agentId);
-      return agent === undefined
-        ? []
-        : [agent.name, ...(agent.alternateNames ?? []), ...agent.aliases.map((alias) => alias.value)];
-    })
+    agents.flatMap((agent) => [
+      agent.name,
+      ...(agent.alternateNames ?? []),
+      ...agent.aliases.map((alias) => alias.value),
+    ]),
   );
 
 const variableFacetTexts = (
-  variables: ReadonlyArray<Variable>
+  variables: ReadonlyArray<Variable>,
 ): ReadonlyArray<string> =>
   collectUniqueSearchText(
     variables.flatMap((variable) => [
@@ -213,12 +128,12 @@ const variableFacetTexts = (
       variable.statisticType,
       variable.aggregation,
       variable.unitFamily,
-      variable.policyInstrument
-    ])
+      variable.policyInstrument,
+    ]),
   );
 
 const singleDistinctValue = <A extends string>(
-  values: ReadonlyArray<A | undefined>
+  values: ReadonlyArray<A | undefined>,
 ): A | undefined => {
   const seen = new Map<string, A>();
 
@@ -241,34 +156,49 @@ const singleDistinctValue = <A extends string>(
 };
 
 const uniquePublisherId = (
-  datasets: ReadonlyArray<Dataset>
+  datasets: ReadonlyArray<Dataset>,
 ): Dataset["publisherAgentId"] =>
   singleDistinctValue(datasets.map((dataset) => dataset.publisherAgentId));
 
 const uniqueDatasetId = (
-  datasets: ReadonlyArray<Dataset>
+  datasets: ReadonlyArray<Dataset>,
 ): Dataset["id"] | undefined =>
   singleDistinctValue(datasets.map((dataset) => dataset.id));
 
 const projectAgent = (
   agent: Agent,
-  graph: SearchGraph
+  prepared: PreparedDataLayerRegistry,
 ): EntitySearchDocument => {
   const aliases = dedupeAliases([
     ...agent.aliases,
-    ...toDisplayAliases(agent.alternateNames)
+    ...toDisplayAliases(agent.alternateNames),
   ]);
   const canonicalUrls = toCanonicalUrls(
     agent.homepage,
-    ...aliases.filter((alias) => alias.scheme === "url").map((alias) => alias.value)
+    ...aliases
+      .filter((alias) => alias.scheme === "url")
+      .map((alias) => alias.value),
   );
   const homepageHostname = toOptionalHostname(agent.homepage);
   const aliasValues = aliases.map((alias) => alias.value);
-  const lineageValues = agent.parentAgentId === undefined
-    ? []
-    : agentLabels(graph, [agent.parentAgentId]);
-  const urlValues = collectUniqueSearchText(canonicalUrls, homepageHostname, prefixesForUrls(canonicalUrls));
-  const primaryText = joinSearchText(agent.name, agent.name, agent.alternateNames);
+  const lineageValues = agentLabels(
+    predecessorNodesByKindsAndTag(
+      prepared.graph,
+      agent.id,
+      ["parent-agent"],
+      "Agent",
+    ),
+  );
+  const urlValues = collectUniqueSearchText(
+    canonicalUrls,
+    homepageHostname,
+    prefixesForUrls(canonicalUrls),
+  );
+  const primaryText = joinSearchText(
+    agent.name,
+    agent.name,
+    agent.alternateNames,
+  );
   const aliasText = joinSearchText(agent.name, aliasValues);
   const lineageText = joinSearchText(agent.name, lineageValues);
   const ontologyText = joinSearchText(agent.name, agent.kind);
@@ -295,28 +225,48 @@ const projectAgent = (
       aliasText,
       lineageText,
       urlText,
-      ontologyText
+      ontologyText,
     ),
-    updatedAt: agent.updatedAt
+    updatedAt: agent.updatedAt,
   }) as EntitySearchDocument;
 };
 
 const projectDataset = (
   dataset: Dataset,
-  graph: SearchGraph
+  prepared: PreparedDataLayerRegistry,
 ): EntitySearchDocument => {
   const aliases = dedupeAliases(dataset.aliases);
-  const childVariables = (dataset.variableIds ?? [])
-    .map((variableId) => graph.variablesById.get(variableId))
-    .filter((variable): variable is Variable => variable !== undefined);
-  const childDistributions = graph.distributionsByDatasetId.get(dataset.id) ?? [];
-  const childSeries = graph.seriesByDatasetId.get(dataset.id) ?? [];
-  const publisherLabels = dataset.publisherAgentId === undefined
-    ? []
-    : agentLabels(graph, [dataset.publisherAgentId]);
+  const childVariables = successorNodesByKindsAndTag(
+    prepared.graph,
+    dataset.id,
+    ["has-variable"],
+    "Variable",
+  );
+  const childDistributions = successorNodesByKindsAndTag(
+    prepared.graph,
+    dataset.id,
+    ["has-distribution"],
+    "Distribution",
+  );
+  const childSeries = predecessorNodesByKindsAndTag(
+    prepared.graph,
+    dataset.id,
+    ["in-dataset"],
+    "Series",
+  );
+  const publisherLabels = agentLabels(
+    predecessorNodesByKindsAndTag(
+      prepared.graph,
+      dataset.id,
+      ["publishes"],
+      "Agent",
+    ),
+  );
   const canonicalUrls = toCanonicalUrls(
     dataset.landingPage,
-    ...aliases.filter((alias) => alias.scheme === "url").map((alias) => alias.value)
+    ...aliases
+      .filter((alias) => alias.scheme === "url")
+      .map((alias) => alias.value),
   );
   const landingPageHostname = toOptionalHostname(dataset.landingPage);
   const aliasValues = aliases.map((alias) => alias.value);
@@ -325,17 +275,21 @@ const projectDataset = (
     childDistributions.flatMap((distribution) => [
       distribution.title,
       toOptionalHostname(distribution.accessURL),
-      toOptionalHostname(distribution.downloadURL)
-    ])
+      toOptionalHostname(distribution.downloadURL),
+    ]),
   );
   const seriesLabels = childSeries.map((series) => series.label);
-  const urlValues = collectUniqueSearchText(canonicalUrls, landingPageHostname, prefixesForUrls(canonicalUrls));
+  const urlValues = collectUniqueSearchText(
+    canonicalUrls,
+    landingPageHostname,
+    prefixesForUrls(canonicalUrls),
+  );
   const primaryText = joinSearchText(
     dataset.title,
     dataset.title,
     dataset.description,
     dataset.keywords,
-    dataset.themes
+    dataset.themes,
   );
   const aliasText = joinSearchText(dataset.title, aliasValues);
   const lineageText = joinSearchText(
@@ -343,13 +297,13 @@ const projectDataset = (
     publisherLabels,
     childVariables.map((variable) => variable.label),
     seriesLabels,
-    distributionLineage
+    distributionLineage,
   );
   const ontologyText = joinSearchText(
     dataset.title,
     dataset.keywords,
     dataset.themes,
-    childVariableFacetValues
+    childVariableFacetValues,
   );
   const urlText = joinSearchText(dataset.title, urlValues);
 
@@ -363,13 +317,27 @@ const projectDataset = (
     datasetId: dataset.id,
     homepageHostname: undefined,
     landingPageHostname,
-    measuredProperty: singleDistinctValue(childVariables.map((variable) => variable.measuredProperty)),
-    domainObject: singleDistinctValue(childVariables.map((variable) => variable.domainObject)),
-    technologyOrFuel: singleDistinctValue(childVariables.map((variable) => variable.technologyOrFuel)),
-    statisticType: singleDistinctValue(childVariables.map((variable) => variable.statisticType)),
-    aggregation: singleDistinctValue(childVariables.map((variable) => variable.aggregation)),
-    unitFamily: singleDistinctValue(childVariables.map((variable) => variable.unitFamily)),
-    policyInstrument: singleDistinctValue(childVariables.map((variable) => variable.policyInstrument)),
+    measuredProperty: singleDistinctValue(
+      childVariables.map((variable) => variable.measuredProperty),
+    ),
+    domainObject: singleDistinctValue(
+      childVariables.map((variable) => variable.domainObject),
+    ),
+    technologyOrFuel: singleDistinctValue(
+      childVariables.map((variable) => variable.technologyOrFuel),
+    ),
+    statisticType: singleDistinctValue(
+      childVariables.map((variable) => variable.statisticType),
+    ),
+    aggregation: singleDistinctValue(
+      childVariables.map((variable) => variable.aggregation),
+    ),
+    unitFamily: singleDistinctValue(
+      childVariables.map((variable) => variable.unitFamily),
+    ),
+    policyInstrument: singleDistinctValue(
+      childVariables.map((variable) => variable.policyInstrument),
+    ),
     canonicalUrls,
     payloadJson: encodeJsonString(dataset),
     primaryText,
@@ -383,28 +351,58 @@ const projectDataset = (
       aliasText,
       lineageText,
       urlText,
-      ontologyText
+      ontologyText,
     ),
-    updatedAt: dataset.updatedAt
+    updatedAt: dataset.updatedAt,
   }) as EntitySearchDocument;
 };
 
 const projectDistribution = (
   distribution: Distribution,
-  graph: SearchGraph
+  prepared: PreparedDataLayerRegistry,
 ): EntitySearchDocument => {
   const aliases = dedupeAliases(distribution.aliases);
-  const dataset = graph.datasetsById.get(distribution.datasetId);
-  const childVariables = dataset?.variableIds?.map((variableId) => graph.variablesById.get(variableId))
-    .filter((variable): variable is Variable => variable !== undefined) ?? [];
-  const childSeries = graph.seriesByDatasetId.get(distribution.datasetId) ?? [];
-  const publisherLabels = dataset?.publisherAgentId === undefined
-    ? []
-    : agentLabels(graph, [dataset.publisherAgentId]);
+  const dataset = firstPredecessorNodeByKindsAndTag(
+    prepared.graph,
+    distribution.id,
+    ["has-distribution"],
+    "Dataset",
+  );
+  const childVariables =
+    dataset === undefined
+      ? []
+      : successorNodesByKindsAndTag(
+          prepared.graph,
+          dataset.id,
+          ["has-variable"],
+          "Variable",
+        );
+  const childSeries =
+    dataset === undefined
+      ? []
+      : predecessorNodesByKindsAndTag(
+          prepared.graph,
+          dataset.id,
+          ["in-dataset"],
+          "Series",
+        );
+  const publisherLabels =
+    dataset === undefined
+      ? []
+      : agentLabels(
+          predecessorNodesByKindsAndTag(
+            prepared.graph,
+            dataset.id,
+            ["publishes"],
+            "Agent",
+          ),
+        );
   const canonicalUrls = toCanonicalUrls(
     distribution.accessURL,
     distribution.downloadURL,
-    ...aliases.filter((alias) => alias.scheme === "url").map((alias) => alias.value)
+    ...aliases
+      .filter((alias) => alias.scheme === "url")
+      .map((alias) => alias.value),
   );
   const accessHostname = toOptionalHostname(distribution.accessURL);
   const downloadHostname = toOptionalHostname(distribution.downloadURL);
@@ -413,7 +411,7 @@ const projectDistribution = (
     canonicalUrls,
     accessHostname,
     downloadHostname,
-    prefixesForUrls(canonicalUrls)
+    prefixesForUrls(canonicalUrls),
   );
   const primaryLabel =
     distribution.title ??
@@ -426,7 +424,7 @@ const projectDistribution = (
     distribution.description,
     distribution.kind,
     distribution.mediaType,
-    distribution.format
+    distribution.format,
   );
   const aliasText = joinSearchText(primaryLabel, aliasValues);
   const lineageText = joinSearchText(
@@ -434,14 +432,14 @@ const projectDistribution = (
     dataset?.title,
     publisherLabels,
     childVariables.map((variable) => variable.label),
-    childSeries.map((series) => series.label)
+    childSeries.map((series) => series.label),
   );
   const ontologyText = joinSearchText(
     primaryLabel,
     distribution.kind,
     distribution.mediaType,
     distribution.format,
-    variableFacetTexts(childVariables)
+    variableFacetTexts(childVariables),
   );
   const urlText = joinSearchText(primaryLabel, urlValues);
 
@@ -449,17 +447,35 @@ const projectDistribution = (
     entityId: distribution.id,
     entityType: "Distribution" as const,
     primaryLabel,
-    secondaryLabel: firstDistinct(primaryLabel, distribution.description, dataset?.title),
+    secondaryLabel: firstDistinct(
+      primaryLabel,
+      distribution.description,
+      dataset?.title,
+    ),
     aliases,
     publisherAgentId: dataset?.publisherAgentId,
     datasetId: distribution.datasetId,
-    measuredProperty: singleDistinctValue(childVariables.map((variable) => variable.measuredProperty)),
-    domainObject: singleDistinctValue(childVariables.map((variable) => variable.domainObject)),
-    technologyOrFuel: singleDistinctValue(childVariables.map((variable) => variable.technologyOrFuel)),
-    statisticType: singleDistinctValue(childVariables.map((variable) => variable.statisticType)),
-    aggregation: singleDistinctValue(childVariables.map((variable) => variable.aggregation)),
-    unitFamily: singleDistinctValue(childVariables.map((variable) => variable.unitFamily)),
-    policyInstrument: singleDistinctValue(childVariables.map((variable) => variable.policyInstrument)),
+    measuredProperty: singleDistinctValue(
+      childVariables.map((variable) => variable.measuredProperty),
+    ),
+    domainObject: singleDistinctValue(
+      childVariables.map((variable) => variable.domainObject),
+    ),
+    technologyOrFuel: singleDistinctValue(
+      childVariables.map((variable) => variable.technologyOrFuel),
+    ),
+    statisticType: singleDistinctValue(
+      childVariables.map((variable) => variable.statisticType),
+    ),
+    aggregation: singleDistinctValue(
+      childVariables.map((variable) => variable.aggregation),
+    ),
+    unitFamily: singleDistinctValue(
+      childVariables.map((variable) => variable.unitFamily),
+    ),
+    policyInstrument: singleDistinctValue(
+      childVariables.map((variable) => variable.policyInstrument),
+    ),
     accessHostname,
     downloadHostname,
     canonicalUrls,
@@ -475,26 +491,75 @@ const projectDistribution = (
       aliasText,
       lineageText,
       urlText,
-      ontologyText
+      ontologyText,
     ),
-    updatedAt: distribution.updatedAt
+    updatedAt: distribution.updatedAt,
   }) as EntitySearchDocument;
 };
 
 const projectSeries = (
   series: Series,
-  graph: SearchGraph
+  prepared: PreparedDataLayerRegistry,
 ): EntitySearchDocument => {
   const aliases = dedupeAliases(series.aliases);
-  const variable = graph.variablesById.get(series.variableId);
-  const dataset = series.datasetId === undefined
-    ? undefined
-    : graph.datasetsById.get(series.datasetId);
-  const publisherLabels = dataset?.publisherAgentId === undefined
-    ? []
-    : agentLabels(graph, [dataset.publisherAgentId]);
+  const variable = firstSuccessorNodeByKindsAndTag(
+    prepared.graph,
+    series.id,
+    ["measures"],
+    "Variable",
+  );
+  const dataset = firstSuccessorNodeByKindsAndTag(
+    prepared.graph,
+    series.id,
+    ["in-dataset"],
+    "Dataset",
+  );
+  const childDistributions =
+    dataset === undefined
+      ? []
+      : successorNodesByKindsAndTag(
+          prepared.graph,
+          dataset.id,
+          ["has-distribution"],
+          "Distribution",
+        );
+  const publisherLabels =
+    dataset === undefined
+      ? []
+      : agentLabels(
+          predecessorNodesByKindsAndTag(
+            prepared.graph,
+            dataset.id,
+            ["publishes"],
+            "Agent",
+          ),
+        );
   const canonicalUrls = toCanonicalUrls(
-    ...aliases.filter((alias) => alias.scheme === "url").map((alias) => alias.value)
+    ...aliases
+      .filter((alias) => alias.scheme === "url")
+      .map((alias) => alias.value),
+    dataset?.landingPage,
+    ...(dataset?.aliases
+      .filter((alias) => alias.scheme === "url")
+      .map((alias) => alias.value) ?? []),
+    ...childDistributions.flatMap((distribution) => [
+      distribution.accessURL,
+      distribution.downloadURL,
+      ...distribution.aliases
+        .filter((alias) => alias.scheme === "url")
+        .map((alias) => alias.value),
+    ]),
+  );
+  const landingPageHostname = toOptionalHostname(dataset?.landingPage);
+  const accessHostname = singleDistinctValue(
+    childDistributions.map((distribution) =>
+      toOptionalHostname(distribution.accessURL),
+    ),
+  );
+  const downloadHostname = singleDistinctValue(
+    childDistributions.map((distribution) =>
+      toOptionalHostname(distribution.downloadURL),
+    ),
   );
   const aliasValues = aliases.map((alias) => alias.value);
   const fixedDimValues = collectUniqueSearchText(
@@ -502,7 +567,14 @@ const projectSeries = (
     series.fixedDims.market,
     series.fixedDims.frequency,
     series.fixedDims.sector,
-    series.fixedDims.extra
+    series.fixedDims.extra,
+  );
+  const distributionLineage = collectUniqueSearchText(
+    childDistributions.flatMap((distribution) => [
+      distribution.title,
+      toOptionalHostname(distribution.accessURL),
+      toOptionalHostname(distribution.downloadURL),
+    ]),
   );
   const primaryText = joinSearchText(series.label, series.label);
   const aliasText = joinSearchText(series.label, aliasValues);
@@ -512,7 +584,8 @@ const projectSeries = (
     publisherLabels,
     variable?.label,
     variable?.definition,
-    fixedDimValues
+    fixedDimValues,
+    distributionLineage,
   );
   const ontologyText = joinSearchText(
     series.label,
@@ -526,16 +599,24 @@ const projectSeries = (
           variable.statisticType,
           variable.aggregation,
           variable.unitFamily,
-          variable.policyInstrument
-        ]
+          variable.policyInstrument,
+        ],
   );
-  const urlText = joinSearchText(series.label, canonicalUrls, prefixesForUrls(canonicalUrls));
+  const urlText = joinSearchText(
+    series.label,
+    canonicalUrls,
+    prefixesForUrls(canonicalUrls),
+  );
 
   return stripUndefined({
     entityId: series.id,
     entityType: "Series" as const,
     primaryLabel: series.label,
-    secondaryLabel: firstDistinct(series.label, dataset?.title, variable?.label),
+    secondaryLabel: firstDistinct(
+      series.label,
+      dataset?.title,
+      variable?.label,
+    ),
     aliases,
     publisherAgentId: dataset?.publisherAgentId,
     datasetId: series.datasetId,
@@ -551,6 +632,9 @@ const projectSeries = (
     frequency: series.fixedDims.frequency,
     place: series.fixedDims.place,
     market: series.fixedDims.market,
+    landingPageHostname,
+    accessHostname,
+    downloadHostname,
     canonicalUrls,
     payloadJson: encodeJsonString(series),
     primaryText,
@@ -564,44 +648,71 @@ const projectSeries = (
       aliasText,
       lineageText,
       urlText,
-      ontologyText
+      ontologyText,
     ),
-    updatedAt: series.updatedAt
+    updatedAt: series.updatedAt,
   }) as EntitySearchDocument;
 };
 
 const projectVariable = (
   variable: Variable,
-  graph: SearchGraph
+  prepared: PreparedDataLayerRegistry,
 ): EntitySearchDocument => {
   const aliases = dedupeAliases(variable.aliases);
-  const datasets = graph.datasetsByVariableId.get(variable.id) ?? [];
-  const series = graph.seriesByVariableId.get(variable.id) ?? [];
-  const publisherLabels = agentLabels(
-    graph,
-    datasets.map((dataset) => dataset.publisherAgentId)
+  const datasets = predecessorNodesByKindsAndTag(
+    prepared.graph,
+    variable.id,
+    ["has-variable"],
+    "Dataset",
   );
-  const relatedDistributions = datasets.flatMap(
-    (dataset) => graph.distributionsByDatasetId.get(dataset.id) ?? []
+  const series = predecessorNodesByKindsAndTag(
+    prepared.graph,
+    variable.id,
+    ["measures"],
+    "Series",
+  );
+  const publisherLabels = agentLabels(
+    datasets.flatMap((dataset) =>
+      predecessorNodesByKindsAndTag(
+        prepared.graph,
+        dataset.id,
+        ["publishes"],
+        "Agent",
+      ),
+    ),
+  );
+  const relatedDistributions = datasets.flatMap((dataset) =>
+    successorNodesByKindsAndTag(
+      prepared.graph,
+      dataset.id,
+      ["has-distribution"],
+      "Distribution",
+    ),
   );
   const distributionHosts = collectUniqueSearchText(
     relatedDistributions.flatMap((distribution) => [
       toOptionalHostname(distribution.accessURL),
-      toOptionalHostname(distribution.downloadURL)
-    ])
+      toOptionalHostname(distribution.downloadURL),
+    ]),
   );
   const canonicalUrls = toCanonicalUrls(
-    ...aliases.filter((alias) => alias.scheme === "url").map((alias) => alias.value)
+    ...aliases
+      .filter((alias) => alias.scheme === "url")
+      .map((alias) => alias.value),
   );
   const aliasValues = aliases.map((alias) => alias.value);
-  const primaryText = joinSearchText(variable.label, variable.label, variable.definition);
+  const primaryText = joinSearchText(
+    variable.label,
+    variable.label,
+    variable.definition,
+  );
   const aliasText = joinSearchText(variable.label, aliasValues);
   const lineageText = joinSearchText(
     variable.label,
     datasets.map((dataset) => dataset.title),
     series.map((item) => item.label),
     publisherLabels,
-    distributionHosts
+    distributionHosts,
   );
   const ontologyText = joinSearchText(
     variable.label,
@@ -611,9 +722,13 @@ const projectVariable = (
     variable.statisticType,
     variable.aggregation,
     variable.unitFamily,
-    variable.policyInstrument
+    variable.policyInstrument,
   );
-  const urlText = joinSearchText(variable.label, canonicalUrls, prefixesForUrls(canonicalUrls));
+  const urlText = joinSearchText(
+    variable.label,
+    canonicalUrls,
+    prefixesForUrls(canonicalUrls),
+  );
 
   return stripUndefined({
     entityId: variable.id,
@@ -644,37 +759,35 @@ const projectVariable = (
       aliasText,
       lineageText,
       urlText,
-      ontologyText
+      ontologyText,
     ),
-    updatedAt: variable.updatedAt
+    updatedAt: variable.updatedAt,
   }) as EntitySearchDocument;
 };
 
 const projectEntitySearchDocument = (
   entity: Agent | Dataset | Distribution | Series | Variable,
-  graph: SearchGraph
+  prepared: PreparedDataLayerRegistry,
 ): EntitySearchDocument => {
   switch (entity._tag) {
     case "Agent":
-      return projectAgent(entity, graph);
+      return projectAgent(entity, prepared);
     case "Dataset":
-      return projectDataset(entity, graph);
+      return projectDataset(entity, prepared);
     case "Distribution":
-      return projectDistribution(entity, graph);
+      return projectDistribution(entity, prepared);
     case "Series":
-      return projectSeries(entity, graph);
+      return projectSeries(entity, prepared);
     case "Variable":
-      return projectVariable(entity, graph);
+      return projectVariable(entity, prepared);
   }
 };
 
 export const projectEntitySearchDocs = (
-  prepared: PreparedDataLayerRegistry
+  prepared: PreparedDataLayerRegistry,
 ): ReadonlyArray<EntitySearchDocument> => {
-  const graph = buildSearchGraph(prepared);
-
   return [...prepared.entities]
     .filter(isInScopeEntity)
-    .map((entity) => projectEntitySearchDocument(entity, graph))
+    .map((entity) => projectEntitySearchDocument(entity, prepared))
     .sort((left, right) => left.entityId.localeCompare(right.entityId));
 };
