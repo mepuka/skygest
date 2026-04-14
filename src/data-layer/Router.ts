@@ -7,42 +7,16 @@ import { DateTime, Effect, Layer, Result, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import type { AccessIdentity } from "../auth/AuthService";
 import {
-  Agent as AgentSchema,
-  AgentId,
   type Agent,
-  Catalog as CatalogSchema,
-  CatalogId,
   type Catalog,
-  CatalogRecord as CatalogRecordSchema,
-  CatalogRecordId,
   type CatalogRecord,
-  DataService as DataServiceSchema,
-  DataServiceId,
   type DataLayerRegistryEntity,
-  Dataset as DatasetSchema,
-  DatasetId,
+  dataLayerEntityKindSpecByApiKind,
   type DataService,
-  DatasetSeries as DatasetSeriesSchema,
-  DatasetSeriesId,
   type Dataset,
-  Distribution as DistributionSchema,
-  DistributionId,
   type DatasetSeries,
   type Distribution,
-  Series as SeriesSchema,
-  SeriesId,
   type Series,
-  Variable as VariableSchema,
-  VariableId,
-  mintAgentId,
-  mintCatalogId,
-  mintCatalogRecordId,
-  mintDataServiceId,
-  mintDatasetId,
-  mintDatasetSeriesId,
-  mintDistributionId,
-  mintSeriesId,
-  mintVariableId,
   type Variable
 } from "../domain/data-layer";
 import {
@@ -79,18 +53,6 @@ import { decodeWithDbError } from "../services/d1/schemaDecode";
 
 const DEFAULT_LIST_LIMIT = 50;
 const MAX_LIST_LIMIT = 250;
-
-const dataLayerKindToTag = {
-  agents: "Agent",
-  catalogs: "Catalog",
-  "catalog-records": "CatalogRecord",
-  datasets: "Dataset",
-  distributions: "Distribution",
-  "data-services": "DataService",
-  "dataset-series": "DatasetSeries",
-  variables: "Variable",
-  series: "Series"
-} as const satisfies Record<ApiDataLayerKind, DataLayerRegistryEntity["_tag"]>;
 
 type DataLayerRepoEntry = {
   readonly tag: DataLayerRegistryEntity["_tag"];
@@ -145,42 +107,6 @@ const decodeAuditEntity = (value: string | null, field: string) =>
 
 const getCurrentTimestamp = DateTime.now.pipe(Effect.map(DateTime.formatIso));
 
-const dataLayerEntitySchemas = {
-  agents: AgentSchema,
-  catalogs: CatalogSchema,
-  "catalog-records": CatalogRecordSchema,
-  datasets: DatasetSchema,
-  distributions: DistributionSchema,
-  "data-services": DataServiceSchema,
-  "dataset-series": DatasetSeriesSchema,
-  variables: VariableSchema,
-  series: SeriesSchema
-} as const;
-
-const dataLayerIdSchemas = {
-  agents: AgentId,
-  catalogs: CatalogId,
-  "catalog-records": CatalogRecordId,
-  datasets: DatasetId,
-  distributions: DistributionId,
-  "data-services": DataServiceId,
-  "dataset-series": DatasetSeriesId,
-  variables: VariableId,
-  series: SeriesId
-} as const;
-
-const mintDataLayerEntityId = {
-  agents: mintAgentId,
-  catalogs: mintCatalogId,
-  "catalog-records": mintCatalogRecordId,
-  datasets: mintDatasetId,
-  distributions: mintDistributionId,
-  "data-services": mintDataServiceId,
-  "dataset-series": mintDatasetSeriesId,
-  variables: mintVariableId,
-  series: mintSeriesId
-} as const;
-
 type DataLayerMutationInput = DataLayerCreateInput | DataLayerReplaceInput;
 
 const decodeRequest = <S extends Schema.Decoder<unknown>>(
@@ -201,7 +127,7 @@ const validateEntityIdForKind = (
   id: string
 ) =>
   decodeRequest(
-    dataLayerIdSchemas[kind],
+    dataLayerEntityKindSpecByApiKind[kind].idSchema,
     id,
     `invalid ${kind} entity id`
   );
@@ -221,7 +147,7 @@ const buildCreateEntityCandidate = (
   timestamp: string
 ) => {
   const base = input as Record<string, unknown>;
-  const id = mintDataLayerEntityId[kind]();
+  const id = dataLayerEntityKindSpecByApiKind[kind].mintId();
   switch (kind) {
     case "catalog-records":
       return { ...base, id };
@@ -255,7 +181,7 @@ const materializeCreateEntity = (
   timestamp: string
 ) =>
   decodeRequest(
-    dataLayerEntitySchemas[kind],
+    dataLayerEntityKindSpecByApiKind[kind].schema,
     buildCreateEntityCandidate(kind, input, timestamp),
     `invalid ${kind} create payload`
   );
@@ -267,7 +193,7 @@ const materializeReplaceEntity = (
   timestamp: string
 ) =>
   decodeRequest(
-    dataLayerEntitySchemas[kind],
+    dataLayerEntityKindSpecByApiKind[kind].schema,
     buildReplaceEntityCandidate(input, existing, timestamp),
     `invalid ${kind} replacement payload`
   );
@@ -286,7 +212,7 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
 
     const entries: Record<ApiDataLayerKind, DataLayerRepoEntry> = {
       agents: {
-        tag: "Agent",
+        tag: dataLayerEntityKindSpecByApiKind.agents.tag,
         listAll: () => agents.listAll(),
         findByUri: (uri) => agents.findByUri(uri),
         insert: (entity, options) =>
@@ -297,7 +223,7 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
           agents.delete(uri, deletedAt, updatedBy)
       },
       catalogs: {
-        tag: "Catalog",
+        tag: dataLayerEntityKindSpecByApiKind.catalogs.tag,
         listAll: () => catalogs.listAll(),
         findByUri: (uri) => catalogs.findByUri(uri),
         insert: (entity, options) =>
@@ -308,7 +234,7 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
           catalogs.delete(uri, deletedAt, updatedBy)
       },
       "catalog-records": {
-        tag: "CatalogRecord",
+        tag: dataLayerEntityKindSpecByApiKind["catalog-records"].tag,
         listAll: () => catalogRecords.listAll(),
         findByUri: (uri) => catalogRecords.findByUri(uri),
         insert: (entity, options) =>
@@ -319,7 +245,7 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
           catalogRecords.delete(uri, deletedAt, updatedBy)
       },
       datasets: {
-        tag: "Dataset",
+        tag: dataLayerEntityKindSpecByApiKind.datasets.tag,
         listAll: () => datasets.listAll(),
         findByUri: (uri) => datasets.findByUri(uri),
         insert: (entity, options) =>
@@ -330,7 +256,7 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
           datasets.delete(uri, deletedAt, updatedBy)
       },
       distributions: {
-        tag: "Distribution",
+        tag: dataLayerEntityKindSpecByApiKind.distributions.tag,
         listAll: () => distributions.listAll(),
         findByUri: (uri) => distributions.findByUri(uri),
         insert: (entity, options) =>
@@ -341,7 +267,7 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
           distributions.delete(uri, deletedAt, updatedBy)
       },
       "data-services": {
-        tag: "DataService",
+        tag: dataLayerEntityKindSpecByApiKind["data-services"].tag,
         listAll: () => dataServices.listAll(),
         findByUri: (uri) => dataServices.findByUri(uri),
         insert: (entity, options) =>
@@ -352,7 +278,7 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
           dataServices.delete(uri, deletedAt, updatedBy)
       },
       "dataset-series": {
-        tag: "DatasetSeries",
+        tag: dataLayerEntityKindSpecByApiKind["dataset-series"].tag,
         listAll: () => datasetSeries.listAll(),
         findByUri: (uri) => datasetSeries.findByUri(uri),
         insert: (entity, options) =>
@@ -363,7 +289,7 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
           datasetSeries.delete(uri, deletedAt, updatedBy)
       },
       variables: {
-        tag: "Variable",
+        tag: dataLayerEntityKindSpecByApiKind.variables.tag,
         listAll: () => variables.listAll(),
         findByUri: (uri) => variables.findByUri(uri),
         insert: (entity, options) =>
@@ -374,7 +300,7 @@ const getRepoEntry = (kind: ApiDataLayerKind) =>
           variables.delete(uri, deletedAt, updatedBy)
       },
       series: {
-        tag: "Series",
+        tag: dataLayerEntityKindSpecByApiKind.series.tag,
         listAll: () => series.listAll(),
         findByUri: (uri) => series.findByUri(uri),
         insert: (entity, options) =>
@@ -393,7 +319,7 @@ const ensureMatchingKind = (
   kind: ApiDataLayerKind,
   entity: { readonly _tag: DataLayerRegistryEntity["_tag"] }
 ) =>
-  entity._tag === dataLayerKindToTag[kind]
+  entity._tag === dataLayerEntityKindSpecByApiKind[kind].tag
     ? Effect.void
     : Effect.fail(
         badRequestError(

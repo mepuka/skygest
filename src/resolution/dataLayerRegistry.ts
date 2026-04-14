@@ -1,5 +1,11 @@
 import { Chunk, Option, Order, Result } from "effect";
-import type { Agent, Dataset, Distribution, Variable } from "../domain/data-layer";
+import {
+  dataLayerEntityKindSpecs,
+  type Agent,
+  type Dataset,
+  type Distribution,
+  type Variable
+} from "../domain/data-layer";
 import type { AliasScheme } from "../domain/data-layer/alias";
 import type {
   DataLayerRegistryDiagnostic,
@@ -61,6 +67,9 @@ export type PreparedDataLayerRegistry = {
   readonly entities: Chunk.Chunk<DataLayerRegistryEntity>;
   readonly entityById: ReadonlyMap<string, DataLayerRegistryEntity>;
   readonly pathById: ReadonlyMap<string, string>;
+};
+
+type PreparedResolverLookupTables = {
   readonly agentByLabel: ReadonlyMap<string, Agent>;
   readonly agentByHomepageDomain: ReadonlyMap<string, Agent>;
   readonly datasetByTitle: ReadonlyMap<string, Dataset>;
@@ -78,6 +87,9 @@ export type PreparedDataLayerRegistry = {
     readonly distribution: Distribution;
   }>;
 };
+
+export type PreparedDataLayerRegistryInternal = PreparedDataLayerRegistry &
+  PreparedResolverLookupTables;
 
 export type DataLayerRegistryLookup = {
   readonly entities: Chunk.Chunk<DataLayerRegistryEntity>;
@@ -130,15 +142,9 @@ const toRegistryRecords = (
     }
   };
 
-  push(seed.agents);
-  push(seed.catalogs);
-  push(seed.catalogRecords);
-  push(seed.datasets);
-  push(seed.distributions);
-  push(seed.dataServices);
-  push(seed.datasetSeries);
-  push(seed.variables);
-  push(seed.series);
+  for (const spec of dataLayerEntityKindSpecs) {
+    push(seed[spec.seedKey] as ReadonlyArray<DataLayerRegistryEntity>);
+  }
 
   return records;
 };
@@ -502,7 +508,7 @@ const buildPreparedRegistry = (
   seed: DataLayerRegistrySeed,
   records: ReadonlyArray<RegistryRecord>,
   root: string
-): Result.Result<PreparedDataLayerRegistry, DataLayerRegistryDiagnostic> => {
+): Result.Result<PreparedDataLayerRegistryInternal, DataLayerRegistryDiagnostic> => {
   const duplicateIdIssues = collectDuplicateIdIssues(records);
   if (duplicateIdIssues.length > 0) {
     return Result.fail({
@@ -745,15 +751,24 @@ const buildPreparedRegistry = (
 export const prepareDataLayerRegistry = (
   seed: DataLayerRegistrySeed,
   options: PrepareOptions = {}
-): Result.Result<PreparedDataLayerRegistry, DataLayerRegistryDiagnostic> => {
+): Result.Result<PreparedDataLayerRegistryInternal, DataLayerRegistryDiagnostic> => {
   const root = options.root ?? "manual-seed";
   const pathById = options.pathById ?? new Map<string, string>();
   const records = toRegistryRecords(seed, pathById);
   return buildPreparedRegistry(seed, records, root);
 };
 
+export const toPreparedDataLayerRegistryCore = (
+  prepared: PreparedDataLayerRegistryInternal
+): PreparedDataLayerRegistry => ({
+  seed: prepared.seed,
+  entities: prepared.entities,
+  entityById: prepared.entityById,
+  pathById: prepared.pathById
+});
+
 export const toDataLayerRegistryLookup = (
-  prepared: PreparedDataLayerRegistry
+  prepared: PreparedDataLayerRegistryInternal
 ): DataLayerRegistryLookup => ({
   entities: prepared.entities,
   findByCanonicalUri: (canonicalUri) =>

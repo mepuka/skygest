@@ -87,6 +87,15 @@ export const normalizeDistributionUrl = (input: string): string | null =>
 export const normalizeDistributionHostname = (input: string): string | null =>
   Option.getOrNull(Option.map(parseUrlLike(input), (url) => normalizeDomain(url.hostname)));
 
+export const normalizeLinkedHostname = (input: string): string | null =>
+  Option.getOrNull(
+    Option.flatMap(parseUrlLike(input), (url) =>
+      url.hostname.includes(".")
+        ? Option.some(normalizeDomain(url.hostname))
+        : Option.none()
+    )
+  );
+
 export const buildUrlPrefixes = (normalizedUrl: string): ReadonlyArray<string> => {
   const [hostname, ...segments] = normalizedUrl.split("/").filter((segment) => segment.length > 0);
   if (hostname === undefined) {

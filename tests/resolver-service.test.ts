@@ -15,6 +15,7 @@ import { CloudflareEnv, type EnvBindings } from "../src/platform/Env";
 import { ResolutionKernel } from "../src/resolution/ResolutionKernel";
 import { Stage1Resolver } from "../src/resolution/Stage1Resolver";
 import { ResolverService } from "../src/resolver/ResolverService";
+import { EntitySearchService } from "../src/services/EntitySearchService";
 
 const asPostUri = (value: string) => value as PostUri;
 
@@ -99,6 +100,23 @@ const makeEnv = (): EnvBindings => ({
   OPERATOR_SECRET: "resolver-secret"
 });
 
+const makeSearchCandidates = () => ({
+  plan: {
+    exactCanonicalUrls: [],
+    exactHostnames: [],
+    agentText: [],
+    datasetText: [],
+    distributionText: [],
+    seriesText: [],
+    variableText: []
+  },
+  agents: [],
+  datasets: [],
+  distributions: [],
+  series: [],
+  variables: []
+});
+
 const makeServiceLayer = (options?: {
   readonly plan?: EnrichmentExecutionPlan;
   readonly resolveStage1?: (input: Stage1Input) => Effect.Effect<Stage1Result>;
@@ -122,6 +140,15 @@ const makeServiceLayer = (options?: {
           resolve: (input) =>
             options?.resolveKernel?.(input as Stage1Input) ??
             Effect.succeed([makeKernelOutcome()])
+        }),
+        Layer.succeed(EntitySearchService, {
+          search: () => Effect.succeed([]),
+          searchAgents: () => Effect.succeed([]),
+          searchDatasets: () => Effect.succeed([]),
+          searchDistributions: () => Effect.succeed([]),
+          searchSeries: () => Effect.succeed([]),
+          searchVariables: () => Effect.succeed([]),
+          searchBundleCandidates: () => Effect.succeed(makeSearchCandidates())
         })
       )
     )
@@ -252,5 +279,18 @@ describe("ResolverService", () => {
         })
       )
     )
+  );
+
+  it.effect("returns grouped search candidates through the resolver-facing seam", () =>
+    Effect.gen(function* () {
+      const service = yield* ResolverService;
+      const result = yield* service.searchCandidates({
+        postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+        stage1Input: makeStage1Input()
+      });
+
+      expect(result.plan).toEqual(makeSearchCandidates().plan);
+      expect(result.datasets).toEqual([]);
+    }).pipe(Effect.provide(makeServiceLayer()))
   );
 });

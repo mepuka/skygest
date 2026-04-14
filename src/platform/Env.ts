@@ -18,6 +18,7 @@ interface AppConfigEnv {
 
 interface SharedRuntimeEnv {
   readonly DB: D1Database;
+  readonly SEARCH_DB?: D1Database;
   readonly ONTOLOGY_KV?: KVNamespace;
   readonly TRANSCRIPTS_BUCKET?: R2Bucket;
   readonly PUBLIC_BSKY_API?: string;
@@ -68,7 +69,14 @@ export type WorkflowEnrichmentEnvBindings =
   >;
 
 export type ResolverWorkerEnvBindings =
-  Simplify<EnvBindings>;
+  EnvBindings;
+
+export type SearchRuntimeEnvBindings =
+  Simplify<
+    EnvBindings & {
+      readonly SEARCH_DB: D1Database;
+    }
+  >;
 
 export type WorkflowFilterEnvBindings =
   Simplify<

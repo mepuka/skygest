@@ -1,15 +1,7 @@
-import { Effect, FileSystem, Layer, Path, Result, Schema } from "effect";
+import { Effect, FileSystem, Path, Result, Schema } from "effect";
 import {
-  Agent,
-  Catalog,
-  CatalogRecord,
+  dataLayerEntityKindSpecs,
   type DataLayerRegistryEntity,
-  DataService,
-  Dataset,
-  DatasetSeries,
-  Distribution,
-  Series,
-  Variable,
   type DataLayerRegistryIssue,
   type DataLayerRegistrySeed
 } from "../domain/data-layer";
@@ -20,26 +12,20 @@ import {
   decodeJsonStringEither,
   formatSchemaParseError
 } from "../platform/Json";
+import { formatDataLayerRegistryDiagnostic } from "../resolution/dataLayerRegistry";
 import {
-  formatDataLayerRegistryDiagnostic,
-  prepareDataLayerRegistry,
-  toDataLayerRegistryLookup
-} from "../resolution/dataLayerRegistry";
-import { DataLayerRegistry } from "../services/DataLayerRegistry";
+  loadPreparedDataLayerRegistry,
+  DataLayerRegistry
+} from "../services/DataLayerRegistry";
 
 export const checkedInDataLayerRegistryRoot = "references/cold-start";
 
-const directorySpecs = [
-  { key: "agents", dir: "catalog/agents", schema: Agent, expectedTag: "Agent" },
-  { key: "catalogs", dir: "catalog/catalogs", schema: Catalog, expectedTag: "Catalog" },
-  { key: "catalogRecords", dir: "catalog/catalog-records", schema: CatalogRecord, expectedTag: "CatalogRecord" },
-  { key: "datasets", dir: "catalog/datasets", schema: Dataset, expectedTag: "Dataset" },
-  { key: "distributions", dir: "catalog/distributions", schema: Distribution, expectedTag: "Distribution" },
-  { key: "dataServices", dir: "catalog/data-services", schema: DataService, expectedTag: "DataService" },
-  { key: "datasetSeries", dir: "catalog/dataset-series", schema: DatasetSeries, expectedTag: "DatasetSeries" },
-  { key: "variables", dir: "variables", schema: Variable, expectedTag: "Variable" },
-  { key: "series", dir: "series", schema: Series, expectedTag: "Series" }
-] as const;
+const directorySpecs = dataLayerEntityKindSpecs.map((spec) => ({
+  key: spec.seedKey,
+  dir: spec.directory,
+  schema: spec.schema,
+  expectedTag: spec.tag
+}));
 
 type DirectorySpec = (typeof directorySpecs)[number];
 
@@ -208,54 +194,30 @@ const loadDecodedSeed = (
 export const loadCheckedInDataLayerSeed = (
   root = checkedInDataLayerRegistryRoot
 ): Effect.Effect<DataLayerRegistrySeed, DataLayerRegistryLoadError, FileSystem.FileSystem | Path.Path> =>
-  Effect.gen(function* () {
-    const decoded = yield* loadDecodedSeed(root);
-    const prepared = prepareDataLayerRegistry(decoded.seed, {
-      root,
-      pathById: decoded.pathById
-    });
-
-    if (Result.isFailure(prepared)) {
-      return yield* new DataLayerRegistryLoadError({
-        root,
-        diagnostic: prepared.failure,
-        message: formatDataLayerRegistryDiagnostic(prepared.failure)
-      });
-    }
-
-    return decoded.seed;
-  });
+  loadPreparedDataLayerRegistry(
+    loadDecodedSeed(root).pipe(
+      Effect.map((decoded) => ({
+        seed: decoded.seed,
+        pathById: decoded.pathById,
+        root
+      }))
+    )
+  ).pipe(Effect.map((prepared) => prepared.seed));
 
 export const loadCheckedInDataLayerRegistry = (
   root = checkedInDataLayerRegistryRoot
 ) =>
-  Effect.gen(function* () {
-    const decoded = yield* loadDecodedSeed(root);
-    const prepared = prepareDataLayerRegistry(decoded.seed, {
-      root,
-      pathById: decoded.pathById
-    });
-    if (Result.isFailure(prepared)) {
-      return yield* new DataLayerRegistryLoadError({
-        root,
-        diagnostic: prepared.failure,
-        message: formatDataLayerRegistryDiagnostic(prepared.failure)
-      });
-    }
-
-    return prepared.success;
-  });
+  loadPreparedDataLayerRegistry(
+    loadDecodedSeed(root).pipe(
+      Effect.map((decoded) => ({
+        seed: decoded.seed,
+        pathById: decoded.pathById,
+        root
+      }))
+    )
+  );
 
 export const checkedInDataLayerRegistryLayer = (
   root = checkedInDataLayerRegistryRoot
 ) =>
-  Layer.effect(
-    DataLayerRegistry,
-    Effect.gen(function* () {
-      const prepared = yield* loadCheckedInDataLayerRegistry(root);
-      return {
-        prepared,
-        lookup: toDataLayerRegistryLookup(prepared)
-      };
-    })
-  );
+  DataLayerRegistry.layerFromEffect(loadCheckedInDataLayerRegistry(root));

@@ -432,6 +432,15 @@ describe("EnrichmentRunWorkflow", () => {
                     status: 500,
                     operation: "ResolverClient.resolveBulk"
                   })
+                ),
+              searchCandidates: () =>
+                Effect.fail(
+                  new ResolverClientError({
+                    message:
+                      "grouped search-candidates should not be called in this test",
+                    status: 500,
+                    operation: "ResolverClient.searchCandidates"
+                  })
                 )
             }),
             Layer.succeed(EnrichmentWorkflowLauncher, {
@@ -593,6 +602,15 @@ describe("EnrichmentRunWorkflow", () => {
                     status: 500,
                     operation: "ResolverClient.resolveBulk"
                   })
+                ),
+              searchCandidates: () =>
+                Effect.fail(
+                  new ResolverClientError({
+                    message:
+                      "grouped search-candidates should not be called in this test",
+                    status: 500,
+                    operation: "ResolverClient.searchCandidates"
+                  })
                 )
             }),
             Layer.succeed(EnrichmentWorkflowLauncher, {
@@ -712,6 +730,15 @@ describe("EnrichmentRunWorkflow", () => {
                     message: "bulk resolution should not be called in this test",
                     status: 500,
                     operation: "ResolverClient.resolveBulk"
+                  })
+                ),
+              searchCandidates: () =>
+                Effect.fail(
+                  new ResolverClientError({
+                    message:
+                      "grouped search-candidates should not be called in this test",
+                    status: 500,
+                    operation: "ResolverClient.searchCandidates"
                   })
                 )
             }),

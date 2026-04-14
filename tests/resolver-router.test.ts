@@ -47,6 +47,24 @@ const resolveBulkSuccess = () =>
     errors: {}
   });
 
+const searchCandidatesSuccess = () =>
+  Effect.succeed({
+    plan: {
+      exactCanonicalUrls: [],
+      exactHostnames: [],
+      agentText: [],
+      datasetText: [],
+      distributionText: [],
+      seriesText: [],
+      variableText: []
+    },
+    agents: [],
+    datasets: [],
+    distributions: [],
+    series: [],
+    variables: []
+  });
+
 const expectJsonResponse = async <A>(
   response: Response,
   expectedStatus = 200
@@ -77,7 +95,9 @@ const successLayer = Layer.succeed(ResolverService, {
       }
     }),
   resolveBulk: () =>
-    resolveBulkSuccess()
+    resolveBulkSuccess(),
+  searchCandidates: () =>
+    searchCandidatesSuccess()
 });
 
 describe("resolver router", () => {
@@ -139,6 +159,30 @@ describe("resolver router", () => {
     expect(body.errors).toEqual({});
   });
 
+  it("serves the grouped search-candidates endpoint", async () => {
+    const response = await handleResolverRequestWithLayer(
+      new Request("https://skygest.local/v1/resolve/search-candidates", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: encodeJsonString({
+          postUri: "at://did:plc:test/app.bsky.feed.post/post-1"
+        })
+      }),
+      successLayer
+    );
+
+    const body = await expectJsonResponse<{
+      readonly plan: {
+        readonly exactCanonicalUrls: ReadonlyArray<string>;
+      };
+      readonly datasets: ReadonlyArray<unknown>;
+    }>(response);
+    expect(body.plan.exactCanonicalUrls).toEqual([]);
+    expect(body.datasets).toEqual([]);
+  });
+
   it("maps decode errors to a 400 response", async () => {
     const layer = Layer.succeed(ResolverService, {
       resolvePost: () =>
@@ -148,7 +192,8 @@ describe("resolver router", () => {
             operation: "ResolverService.resolvePost"
           })
         ),
-      resolveBulk: () => resolveBulkSuccess()
+      resolveBulk: () => resolveBulkSuccess(),
+      searchCandidates: () => searchCandidatesSuccess()
     });
 
     const response = await handleResolverRequestWithLayer(
@@ -176,7 +221,8 @@ describe("resolver router", () => {
             postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1")
           })
         ),
-      resolveBulk: () => resolveBulkSuccess()
+      resolveBulk: () => resolveBulkSuccess(),
+      searchCandidates: () => searchCandidatesSuccess()
     });
 
     const response = await handleResolverRequestWithLayer(
@@ -202,7 +248,8 @@ describe("resolver router", () => {
         Effect.fail(new DbError({
           message: "boom"
         })),
-      resolveBulk: () => resolveBulkSuccess()
+      resolveBulk: () => resolveBulkSuccess(),
+      searchCandidates: () => searchCandidatesSuccess()
     });
 
     const response = await handleResolverRequestWithLayer(
