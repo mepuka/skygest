@@ -90,10 +90,13 @@ interface LoadedCatalogEntities {
   readonly agents: ReadonlyArray<LoadedEntity<Agent>>;
 }
 
-type DistributionLookup = Pick<
-  Distribution,
-  "datasetId" | "kind" | "accessURL" | "downloadURL" | "format"
->;
+type DistributionLookup = {
+  readonly datasetId: string;
+  readonly kind: Distribution["kind"];
+  readonly accessURL?: string | undefined;
+  readonly downloadURL?: string | undefined;
+  readonly format?: string | undefined;
+};
 
 const urlDisambiguatedDistributionKinds = new Set<
   Distribution["kind"]
@@ -233,7 +236,7 @@ const registerUnique = <T>(
 };
 
 const baseDistributionLookupKey = (
-  distribution: Pick<Distribution, "datasetId" | "kind">
+  distribution: { readonly datasetId: string; readonly kind: Distribution["kind"] }
 ): string => `${distribution.datasetId}::${distribution.kind}`;
 
 const normalizedDistributionFormat = (

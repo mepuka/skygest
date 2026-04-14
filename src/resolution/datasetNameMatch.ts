@@ -44,6 +44,13 @@ export const stripPeripheralYear = (value: string) => {
   return stripped.length > 0 ? stripped : trimmed;
 };
 
+// NFD decomposition splits accented characters into base + combining mark,
+// then the combining-mark unicode block is stripped. Produces "cote" from
+// "Côte", "fernwarme" from "Fernwärme", etc. — which makes slug-style and
+// cross-locale queries hit against canonical titles in the catalog.
+export const stripDiacritics = (value: string): string =>
+  value.normalize("NFD").replace(/[\u0300-\u036f]/gu, "");
+
 const listDatasetTitleCandidates = (datasetName: string): ReadonlyArray<string> => {
   const candidates = new Set<string>();
   const base = toNonEmpty(datasetName);
@@ -53,6 +60,8 @@ const listDatasetTitleCandidates = (datasetName: string): ReadonlyArray<string> 
 
   candidates.add(base);
   candidates.add(stripPeripheralYear(base));
+  candidates.add(stripDiacritics(base));
+  candidates.add(stripDiacritics(stripPeripheralYear(base)));
   return [...candidates];
 };
 
@@ -186,20 +195,15 @@ const compareDatasetTitleScores = (
   left.dataset.title.localeCompare(right.dataset.title) ||
   left.dataset.id.localeCompare(right.dataset.id);
 
-const findFuzzyDatasetTitleMatches = (
+const scoreAndRank = (
   datasetName: string,
-  lookup: DataLayerRegistryLookup,
-  preferredAgentIds: ReadonlyArray<AgentId>
+  datasets: ReadonlyArray<Dataset>,
+  preferredDatasetIds: ReadonlySet<string>
 ): ReadonlyArray<{
   readonly dataset: Dataset;
   readonly score: number;
 }> => {
-  const preferredDatasetIds = new Set(
-    dedupeDatasets(
-      preferredAgentIds.flatMap((agentId) => [...lookup.findDatasetsByAgentId(agentId)])
-    ).map((dataset) => dataset.id)
-  );
-  const scored = dedupeDatasets(listAllDatasets(lookup))
+  const scored = dedupeDatasets(datasets)
     .map((dataset) => ({
       dataset,
       score: scoreDatasetTitle(datasetName, dataset),
@@ -223,6 +227,44 @@ const findFuzzyDatasetTitleMatches = (
       dataset,
       score
     }));
+};
+
+// Separation of concerns: filtering (scope by preferredAgentIds) runs as a
+// pre-filter on the candidate set. Matching (Jaccard scoring + 0.75 floor)
+// runs on the pre-filtered set only. Falling back to the full registry is
+// a last resort when the scoped set produces no candidates at or above
+// the fuzzy threshold.
+const findFuzzyDatasetTitleMatches = (
+  datasetName: string,
+  lookup: DataLayerRegistryLookup,
+  preferredAgentIds: ReadonlyArray<AgentId>
+): ReadonlyArray<{
+  readonly dataset: Dataset;
+  readonly score: number;
+}> => {
+  const allDatasets = listAllDatasets(lookup);
+
+  if (preferredAgentIds.length === 0) {
+    return scoreAndRank(datasetName, allDatasets, new Set());
+  }
+
+  const scopedDatasets = dedupeDatasets(
+    preferredAgentIds.flatMap((agentId) => [
+      ...lookup.findDatasetsByAgentId(agentId)
+    ])
+  );
+  const preferredDatasetIds = new Set(scopedDatasets.map((dataset) => dataset.id));
+
+  const scopedMatches = scoreAndRank(
+    datasetName,
+    scopedDatasets,
+    preferredDatasetIds
+  );
+  if (scopedMatches.length > 0) {
+    return scopedMatches;
+  }
+
+  return scoreAndRank(datasetName, allDatasets, preferredDatasetIds);
 };
 
 const findDatasetAliasMatches = (
