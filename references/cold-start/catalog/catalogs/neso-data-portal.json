@@ -1,0 +1,17 @@
+{
+  "_tag": "Catalog",
+  "id": "https://id.skygest.io/catalog/cat_01KP4W1DWZDNKXKM052R1ESGW6",
+  "title": "NESO Data Portal",
+  "description": "NESO Data Portal — operational electricity system, market, and planning datasets published by the National Energy System Operator.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "homepage": "https://www.neso.energy/data-portal/",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/",
+      "relation": "exactMatch"
+    }
+  ]
+}
