@@ -18,7 +18,8 @@ import {
   ResolveBulkRequest,
   ResolveBulkResponse,
   ResolvePostRequest,
-  ResolvePostResponse
+  ResolvePostResponse,
+  ResolveSearchCandidatesResponse
 } from "../domain/resolution";
 import {
   getStringField,
@@ -60,6 +61,14 @@ const ResolverApi = HttpApi.make("resolver")
           disableCodecs: true,
           payload: ResolveBulkRequest,
           success: ResolveBulkResponse,
+          error: ApiErrorSchemas
+        })
+      )
+      .add(
+        HttpApiEndpoint.post("searchCandidates", "/v1/resolve/search-candidates", {
+          disableCodecs: true,
+          payload: ResolvePostRequest,
+          success: ResolveSearchCandidatesResponse,
           error: ApiErrorSchemas
         })
       )
@@ -116,6 +125,14 @@ export const resolveBulkEffect = (
     ResolverService.use((resolver) => resolver.resolveBulk(payload))
   );
 
+export const searchCandidatesEffect = (
+  payload: typeof ResolvePostRequest.Type
+) =>
+  withResolverErrors(
+    "/v1/resolve/search-candidates",
+    ResolverService.use((resolver) => resolver.searchCandidates(payload))
+  );
+
 const ResolverHandlers = Layer.mergeAll(
   HttpApiBuilder.group(ResolverApi, "health", (handlers) =>
     handlers.handle("get", () =>
@@ -128,6 +145,7 @@ const ResolverHandlers = Layer.mergeAll(
     handlers
       .handle("post", ({ payload }) => resolvePostEffect(payload))
       .handle("bulk", ({ payload }) => resolveBulkEffect(payload))
+      .handle("searchCandidates", ({ payload }) => searchCandidatesEffect(payload))
   )
 );
 

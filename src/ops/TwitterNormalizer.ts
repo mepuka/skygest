@@ -12,6 +12,7 @@ import type {
   ImportPostInput
 } from "../domain/api";
 import type { EmbedKind, EmbedPayload } from "../domain/embed";
+import { normalizeLinkedHostname } from "../platform/Normalize";
 
 // ---------------------------------------------------------------------------
 // Internal structural type for the fields normalizeTweet actually accesses.
@@ -36,11 +37,7 @@ interface NormalizableFields {
 // ---------------------------------------------------------------------------
 
 const extractDomain = (url: string): string | undefined => {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return undefined;
-  }
+  return normalizeLinkedHostname(url) ?? undefined;
 };
 
 const buildLinks = (urls: readonly string[]): ImportLinkInput[] =>

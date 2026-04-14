@@ -3,6 +3,7 @@ import { Option } from "effect";
 import type { GetPostThreadResponse } from "../bluesky/ThreadTypes";
 import type { ImportPostInput, ImportExpertInput } from "../domain/api";
 import type { PostUri, Did } from "../domain/types";
+import { normalizeLinkedHostname } from "../platform/Normalize";
 import { flattenThread } from "../bluesky/ThreadFlatten";
 import { buildTypedEmbed, extractEmbedKind } from "../bluesky/EmbedExtract";
 
@@ -39,9 +40,12 @@ export const normalizeBlueskyThread = (
     const features = Array.isArray(facet?.features) ? facet.features : [];
     for (const feature of features) {
       if (feature?.$type === "app.bsky.richtext.facet#link" && typeof feature.uri === "string") {
-        try {
-          links.push({ url: feature.uri, domain: new URL(feature.uri).hostname });
-        } catch { /* skip malformed */ }
+        const domain = normalizeLinkedHostname(feature.uri) ?? undefined;
+        links.push(
+          domain === undefined
+            ? { url: feature.uri }
+            : { url: feature.uri, domain }
+        );
       }
       if (feature?.$type === "app.bsky.richtext.facet#tag" && typeof feature.tag === "string") {
         hashtags.push(feature.tag);
@@ -56,9 +60,12 @@ export const normalizeBlueskyThread = (
     if (external && typeof external.uri === "string") {
       const alreadyInLinks = links.some((l) => l.url === external.uri);
       if (!alreadyInLinks) {
-        try {
-          links.push({ url: external.uri as string, domain: new URL(external.uri as string).hostname });
-        } catch { /* skip malformed */ }
+        const domain = normalizeLinkedHostname(external.uri) ?? undefined;
+        links.push(
+          domain === undefined
+            ? { url: external.uri as string }
+            : { url: external.uri as string, domain }
+        );
       }
     }
   }

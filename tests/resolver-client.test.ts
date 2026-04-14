@@ -138,6 +138,60 @@ describe("ResolverClient", () => {
     }).pipe(Effect.provide(layer));
   });
 
+  it.effect("decodes grouped search-candidates responses", () => {
+    let capturedOptions: Record<string, unknown> | undefined;
+    const mockBinding = {
+      searchCandidates: async (
+        _input: Record<string, unknown>,
+        options?: Record<string, unknown>
+      ) => {
+        capturedOptions = options;
+        return {
+          ok: true as const,
+          value: {
+            plan: {
+              exactCanonicalUrls: [],
+              exactHostnames: [],
+              agentText: [],
+              datasetText: [],
+              distributionText: [],
+              seriesText: [],
+              variableText: []
+            },
+            agents: [],
+            datasets: [],
+            distributions: [],
+            series: [],
+            variables: []
+          }
+        };
+      }
+    };
+
+    const layer = ResolverClient.layerFromBinding(
+      mockBinding as never
+    );
+
+    return Effect.gen(function* () {
+      const client = yield* ResolverClient;
+      const result = yield* client.searchCandidates(
+        {
+          postUri: asPostUri("at://did:plc:abc/app.bsky.feed.post/xyz")
+        },
+        {
+          requestId: "req-search-123"
+        }
+      );
+
+      expect(result.plan.seriesText).toEqual([]);
+      expect(result.variables).toEqual([]);
+      expect(capturedOptions).toEqual({
+        requestId: "req-search-123",
+        [RESOLVER_REQUEST_ID_HEADER]: "req-search-123"
+      });
+    }).pipe(Effect.provide(layer));
+  });
+
   it.effect("surfaces upstream resolver errors as ResolverClientError", () => {
     const mockBinding = {
       resolvePost: async () => ({

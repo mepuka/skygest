@@ -29,6 +29,7 @@ import {
   type EnrichmentExecutionPlan,
   type EnrichmentPlannedExistingEnrichment
 } from "../domain/enrichmentPlan";
+import type { EntitySearchBundleCandidates } from "../domain/entitySearch";
 import { PostUri } from "../domain/types";
 import { EnrichmentPlanner } from "../enrichment/EnrichmentPlanner";
 import {
@@ -37,6 +38,7 @@ import {
 } from "../platform/Json";
 import { ResolutionKernel } from "../resolution/ResolutionKernel";
 import { Stage1Resolver } from "../resolution/Stage1Resolver";
+import { EntitySearchService } from "../services/EntitySearchService";
 import { buildStage1Input } from "./stage1Input";
 
 const RESOLVER_VERSION = "resolution-kernel@sky-314";
@@ -87,6 +89,18 @@ export class ResolverService extends ServiceMap.Service<
       | ResolverSourceAttributionMissingError
       | SqlError
     >;
+    readonly searchCandidates: (
+      input: ResolvePostRequestValue
+    ) => Effect.Effect<
+      EntitySearchBundleCandidates,
+      | CandidatePayloadNotPickedError
+      | DbError
+      | EnrichmentPayloadMissingError
+      | EnrichmentPostContextMissingError
+      | EnrichmentSchemaDecodeError
+      | ResolverSourceAttributionMissingError
+      | SqlError
+    >;
   }
 >()("@skygest/ResolverService") {
   static readonly layer = Layer.effect(
@@ -95,6 +109,7 @@ export class ResolverService extends ServiceMap.Service<
       const planner = yield* EnrichmentPlanner;
       const stage1Resolver = yield* Stage1Resolver;
       const resolutionKernel = yield* ResolutionKernel;
+      const entitySearch = yield* EntitySearchService;
       const decodePostResponse = (input: unknown) =>
         Schema.decodeUnknownEffect(ResolvePostResponse)(input).pipe(
           Effect.mapError(
@@ -155,9 +170,9 @@ export class ResolverService extends ServiceMap.Service<
         return buildStage1Input(plan, sourceAttribution);
       });
 
-      const resolvePost = Effect.fn("ResolverService.resolvePost")(function* (
-        input: ResolvePostRequestValue
-      ) {
+      const loadValidatedStage1Input = Effect.fn(
+        "ResolverService.loadValidatedStage1Input"
+      )(function* (input: ResolvePostRequestValue) {
         const request = yield* decodePostRequest(input);
 
         if (
@@ -170,9 +185,20 @@ export class ResolverService extends ServiceMap.Service<
           });
         }
 
-        const startedAt = yield* Clock.currentTimeMillis;
         const stage1Input =
           request.stage1Input ?? (yield* loadStoredStage1Input(request.postUri));
+
+        return {
+          request,
+          stage1Input
+        };
+      });
+
+      const resolvePost = Effect.fn("ResolverService.resolvePost")(function* (
+        input: ResolvePostRequestValue
+      ) {
+        const { request, stage1Input } = yield* loadValidatedStage1Input(input);
+        const startedAt = yield* Clock.currentTimeMillis;
         const stage1StartedAt = yield* Clock.currentTimeMillis;
         const stage1 = yield* stage1Resolver.resolve(stage1Input);
         const stage1FinishedAt = yield* Clock.currentTimeMillis;
@@ -192,6 +218,18 @@ export class ResolverService extends ServiceMap.Service<
             kernel: kernelFinishedAt - kernelStartedAt,
             total: finishedAt - startedAt
           }
+        });
+      });
+
+      const searchCandidates = Effect.fn(
+        "ResolverService.searchCandidates"
+      )(function* (input: ResolvePostRequestValue) {
+        const { stage1Input } = yield* loadValidatedStage1Input(input);
+        const stage1 = yield* stage1Resolver.resolve(stage1Input);
+
+        return yield* entitySearch.searchBundleCandidates({
+          stage1Input,
+          stage1
         });
       });
 
@@ -249,7 +287,8 @@ export class ResolverService extends ServiceMap.Service<
 
       return {
         resolvePost,
-        resolveBulk
+        resolveBulk,
+        searchCandidates
       };
     })
   );

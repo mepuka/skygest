@@ -9,7 +9,7 @@
  * § Normalization Rules for the authoritative specification.
  */
 import { Option } from "effect";
-import { normalizeDomain } from "../domain/normalize";
+import { normalizeDomain, parseUrlLike } from "../platform/Normalize";
 
 // ---------------------------------------------------------------------------
 // Source-prefix stripping
@@ -90,9 +90,8 @@ export const extractDomainFromText = (text: string): string | null => {
   return normalizeDomain(match[1]);
 };
 
-export const parseHostname = Option.liftThrowable(
-  (url: string) => new URL(url).hostname
-);
+export const parseHostname = (url: string) =>
+  Option.map(parseUrlLike(url), (parsedUrl) => parsedUrl.hostname);
 
 export const parseNormalizedDomain = (
   url: string

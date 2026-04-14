@@ -129,7 +129,7 @@ describe("normalizeTweet", () => {
     const result = normalizeTweet(tweet);
     expect(result!.links).toEqual([
       { url: "https://reuters.com/article/energy", domain: "reuters.com" },
-      { url: "https://www.nytimes.com/solar", domain: "www.nytimes.com" }
+      { url: "https://www.nytimes.com/solar", domain: "nytimes.com" }
     ]);
   });
 

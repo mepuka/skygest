@@ -1,7 +1,8 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Chunk, Option, Result } from "effect";
+import { Chunk, Effect, Option, Result } from "effect";
 import type { DataLayerRegistrySeed } from "../src/domain/data-layer";
 import { prepareDataLayerRegistry, toDataLayerRegistryLookup } from "../src/resolution/dataLayerRegistry";
+import { DataLayerRegistry } from "../src/services/DataLayerRegistry";
 
 const iso = "2026-04-09T00:00:00.000Z" as const;
 const agentId = "https://id.skygest.io/agent/ag_1234567890AB" as any;
@@ -134,6 +135,31 @@ describe("data layer registry prep", () => {
       )?.id
     ).toBe(variableId);
   });
+
+  it.effect("exposes only the public prepared core through the service", () =>
+    (() => {
+      const prepared = prepareDataLayerRegistry(makeSeed());
+      expect(Result.isSuccess(prepared)).toBe(true);
+
+      if (Result.isFailure(prepared)) {
+        throw new Error("expected prepared registry");
+      }
+
+      return Effect.gen(function* () {
+        const registry = yield* DataLayerRegistry;
+
+        expect(registry.prepared.seed.datasets).toHaveLength(1);
+        expect(
+          "variablesByAgentId" in (registry.prepared as Record<string, unknown>)
+        ).toBe(false);
+        expect(
+          Option.getOrNull(registry.lookup.findAgentByLabel("EIA"))?.id
+        ).toBe(agentId);
+      }).pipe(
+        Effect.provide(DataLayerRegistry.layerFromPrepared(prepared.success))
+      );
+    })()
+  );
 
   it("rejects normalized exact-match collisions during preparation", () => {
     const seed = makeSeed();
@@ -325,4 +351,3 @@ describe("data layer registry prep", () => {
     ).toBe("https://id.skygest.io/distribution/dist_ABCDEFGHIJKL");
   });
 });
-
