@@ -14,8 +14,22 @@ import {
 import { VariablesRepo } from "../services/VariablesRepo";
 
 export const d1DataLayerRegistryRoot = "d1://data-layer-registry";
+export const dataLayerRegistrySourceTables = [
+  "agents",
+  "catalogs",
+  "catalog_records",
+  "datasets",
+  "distributions",
+  "data_services",
+  "dataset_series",
+  "variables",
+  "series"
+] as const;
+export const dataLayerRegistrySourceTableArgs =
+  dataLayerRegistrySourceTables.flatMap((name) => ["--table", name]);
+const dataLayerRegistryReadConcurrency = 1;
 
-export const loadD1DataLayerSeed = () =>
+export const loadRepoDataLayerSeed = () =>
   Effect.gen(function* () {
     const agents = yield* AgentsRepo;
     const catalogs = yield* CatalogsRepo;
@@ -39,15 +53,17 @@ export const loadD1DataLayerSeed = () =>
         variables: variables.listAll(),
         series: series.listAll()
       },
-      { concurrency: "unbounded" }
+      { concurrency: dataLayerRegistryReadConcurrency }
     );
   });
+
+export const loadD1DataLayerSeed = loadRepoDataLayerSeed;
 
 export const loadD1DataLayerRegistry = (
   root = d1DataLayerRegistryRoot
 ) =>
   loadPreparedDataLayerRegistry(
-    loadD1DataLayerSeed().pipe(
+    loadRepoDataLayerSeed().pipe(
       Effect.map((seed) => ({
         seed,
         root

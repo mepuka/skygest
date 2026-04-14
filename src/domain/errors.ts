@@ -20,6 +20,23 @@ export class DbError extends Schema.TaggedErrorClass<DbError>()("DbError", {
   message: Schema.String
 }) {}
 
+export class CommandExecutionError extends Schema.TaggedErrorClass<CommandExecutionError>()(
+  "CommandExecutionError",
+  {
+    command: Schema.String,
+    message: Schema.String,
+    exitCode: Schema.optionalKey(Schema.Number)
+  }
+) {}
+
+export class SearchDbScriptError extends Schema.TaggedErrorClass<SearchDbScriptError>()(
+  "SearchDbScriptError",
+  {
+    operation: Schema.String,
+    message: Schema.String
+  }
+) {}
+
 export class IngestRunNotFoundError extends Schema.TaggedErrorClass<IngestRunNotFoundError>()(
   "IngestRunNotFoundError",
   {

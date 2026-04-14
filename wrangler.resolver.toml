@@ -21,3 +21,8 @@ enabled = true
 binding = "DB"
 database_name = "skygest-staging"
 database_id = "29a612d3-67c9-429d-93af-6e976681e7c8"
+
+[[env.staging.d1_databases]]
+binding = "SEARCH_DB"
+database_name = "skygest-search-staging"
+database_id = "15f7cdc2-ba5f-4078-996a-7082dd27cf06"
