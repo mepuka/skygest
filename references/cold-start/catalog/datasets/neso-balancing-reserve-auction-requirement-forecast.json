@@ -1,0 +1,40 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E1TMPQ42WTV53J1Y7E0",
+  "title": "Balancing Reserve Auction Requirement Forecast",
+  "description": "The Balancing reserve service has been designed to secure firm positive and negative reserve on BM units at the day ahead stage. The service is procured via a daily auction at 08:15 for delivery between 23:00 and 23:00 D+1. For more details of the service and how to participate see this page: Balancing Reserve This data set contains the daily forecast of requirements for procurement via the Daily Balancing reserve auction. There are two separate datasets, a medium term forecast that gives an approximate requirement without detailed wind and solar forecasts, and the detailed daily forecast that refines the medium term figure with the latest short term features. The required volumes for both Positive Balancing Reserve and Negative Balancing reserve are given for each half-hour service window on each service day. The data sets are overwritten daily and the previous entries archived to the history file. >** NOTE: ** All forecasts published on this page after 27th February are Live Demand Forecasts.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/balancing-reserve-auction-requirement-forecast",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "BR Auction",
+    "Balancing Reserve",
+    "Day Ahead Forecast",
+    "Medium Term Forecast",
+    "Subscribable",
+    "Ancillary services",
+    "Daily"
+  ],
+  "themes": [
+    "electricity",
+    "market",
+    "planning"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E20KZBTAW32VV26QK7V",
+    "https://id.skygest.io/distribution/dist_01KP4W1E2088VM1AS14PYH8XZF"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/balancing-reserve-auction-requirement-forecast",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1DXQNG0RYF64WH6P28G0",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1DXJDDMC0ZVBTF3H6WKA",
+  "kind": "documentation",
+  "title": "14 Day Ahead Operational Metered Windfarm-Level Wind Forecast",
+  "description": "This resource contains the windfarm-level 0-14 day ahead wind forecasts for all the windfarms which provide real-time operational metering (SCADA telemetry) to the NESO. The regions used in this resource are defined using the ITL 1 regions for England alongside the DNO Licence areas for Wales and Scotland extended to their national borders. Offshore wind regions use the IHO Sea Areas split by which land area their connection to the mainland is in.",
+  "accessURL": "https://api.neso.energy/dataset/ca6fc361-9099-4ab2-ac02-c959431e84bc/resource/31e6d895-af48-41bd-a4db-28a78c7e9c4b/download/14da_windunit_forecast_20260414_0252.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/ca6fc361-9099-4ab2-ac02-c959431e84bc/resource/31e6d895-af48-41bd-a4db-28a78c7e9c4b/download/14da_windunit_forecast_20260414_0252.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

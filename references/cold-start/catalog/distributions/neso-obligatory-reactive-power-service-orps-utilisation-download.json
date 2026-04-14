@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E5RM004W5AMH94TM4XN",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E5M8C044KVAS7JVKMCH",
+  "kind": "download",
+  "title": "Reactive Utilisation Data",
+  "description": "Reactive power utilisation figures per Balancing Mechanism Unit per month. Lag and lead are separated out to show the volume of reactive absorption and generation per unit per month. This file is updated during the middle of each month, and holds data up until 2 months ago, e.g. in December 2024 there is data up until October 2024 Default/Market - D means this reactive power provision was obtained via ORPS, while M would mean it was obtained through Enhanced Reactive Power Service (ERPS) Location - A letter to denote where the unit is located (S = South, N = North, SC = Scotland, M = Midlands)",
+  "downloadURL": "https://api.neso.energy/dataset/7e142b03-8650-4f46-8420-7ce1e84e1e5b/resource/528b03d2-4008-4b65-a732-a001cd835a3b/download/reactive-utilisation-data.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/7e142b03-8650-4f46-8420-7ce1e84e1e5b/resource/528b03d2-4008-4b65-a732-a001cd835a3b/download/reactive-utilisation-data.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

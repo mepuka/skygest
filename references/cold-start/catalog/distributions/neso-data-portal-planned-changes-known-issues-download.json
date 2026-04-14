@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E6PJDJADHCQWP1K8RTS",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E6JVSGQDW5ECGJ292KA",
+  "kind": "download",
+  "title": "Planned Changes and Issues Log",
+  "description": "This table provides details of scheduled changes and known issues that we are currently working to address. If you are aware of any issues not captured in this table please report to box.OpenData.ESO@nationalgrideso.com >**NOTE:** The table has now been sorted in descending order meaning new planned changes or issues will now appear on the top.",
+  "downloadURL": "https://api.neso.energy/dataset/a10cb561-1be2-4567-880d-5bbac1ee9f4f/resource/23021dfa-a3b8-4f62-93bc-b60186c53fa4/download/23021dfa-a3b8-4f62-93bc-b60186c53fa4_02.04.2026.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/a10cb561-1be2-4567-880d-5bbac1ee9f4f/resource/23021dfa-a3b8-4f62-93bc-b60186c53fa4/download/23021dfa-a3b8-4f62-93bc-b60186c53fa4_02.04.2026.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

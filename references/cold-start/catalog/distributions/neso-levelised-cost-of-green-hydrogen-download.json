@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E9N16ERNV22QPZDTXJ5",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E9HSSMHZV94WYH3330E",
+  "kind": "download",
+  "title": "Levelised cost of green hydrogen modelling, 2025 to 2050",
+  "description": "The data represents the cost of producing green hydrogen under varying assumptions. It is not a forecast and does not provide a single view or a specific value for green hydrogen production costs. Instead, it takes as input the capex and opex assumptions presented in the first dataset and then computes the levelized cost of green hydrogen for a wide range of input parameters including the cost of financing (6-15% discount rates), the electrolyser capacity factor (5% - 95%), and the cost of electricity (£0-£150/MWh). All calculations assume a plant lifetime of 25 years and plant construction time of 1 year. ** NOTE: ** This dataset is currently unavailable while we complete an update of the underlying inputs and assumptions. It will be restored as soon as the updated data is finalised.",
+  "downloadURL": "https://api.neso.energy/dataset/36f600ae-56cb-41b4-adee-6dbd05df6668/resource/cc2dad0c-393c-4ae0-ae67-a98703169ad4/download/green_h2_lcoh_modelled_results_2025_to_2050.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/36f600ae-56cb-41b4-adee-6dbd05df6668/resource/cc2dad0c-393c-4ae0-ae67-a98703169ad4/download/green_h2_lcoh_modelled_results_2025_to_2050.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

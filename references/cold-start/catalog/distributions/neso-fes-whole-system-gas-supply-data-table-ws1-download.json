@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1EBJSA4G3DYTJQ80KQHR",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1EBFFF6P9D6DSDHT7C11",
+  "kind": "download",
+  "title": "Whole System & Gas Supply (WS1) 2025",
+  "description": "One of the FES outputs is an agreed set of data tables containing the GB FES values for whole system and gas supply which are included in this dataset. This file is the 2025 version of the dataset.",
+  "downloadURL": "https://api.neso.energy/dataset/8cbe76c7-6971-40ed-8e0c-2d8c8520cd0c/resource/ebf4f503-0a13-45e6-89ad-b707748613b6/download/fes2025_ws1_v006.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/8cbe76c7-6971-40ed-8e0c-2d8c8520cd0c/resource/ebf4f503-0a13-45e6-89ad-b707748613b6/download/fes2025_ws1_v006.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

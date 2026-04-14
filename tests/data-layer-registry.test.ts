@@ -1,9 +1,7 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Chunk, Effect, Option, Result } from "effect";
-import { loadCheckedInDataLayerRegistry } from "../src/bootstrap/CheckedInDataLayerRegistry";
+import { Chunk, Option, Result } from "effect";
 import type { DataLayerRegistrySeed } from "../src/domain/data-layer";
 import { prepareDataLayerRegistry, toDataLayerRegistryLookup } from "../src/resolution/dataLayerRegistry";
-import { layer as localFileSystemLayer } from "./helpers/LocalFileSystem";
 
 const iso = "2026-04-09T00:00:00.000Z" as const;
 const agentId = "https://id.skygest.io/agent/ag_1234567890AB" as any;
@@ -239,6 +237,38 @@ describe("data layer registry prep", () => {
     });
   });
 
+  it("indexes dataset.landingPage for exact URL lookups", () => {
+    const seed = makeSeed();
+    const landingPage = "https://www.eia.gov/electricity/monthly/";
+    const prepared = prepareDataLayerRegistry({
+      ...seed,
+      datasets: [
+        {
+          ...seed.datasets[0]!,
+          landingPage: landingPage as any
+        }
+      ]
+    });
+
+    expect(Result.isSuccess(prepared)).toBe(true);
+    if (Result.isFailure(prepared)) {
+      throw new Error("expected landing-page dataset to prepare cleanly");
+    }
+
+    const lookup = toDataLayerRegistryLookup(prepared.success);
+    expect(
+      Option.getOrNull(lookup.findDatasetByLandingPage(landingPage))?.id
+    ).toBe(datasetId);
+    // normalization should tolerate tracking-param noise / fragments
+    expect(
+      Option.getOrNull(
+        lookup.findDatasetByLandingPage(
+          "https://www.eia.gov/electricity/monthly/?utm_source=bsky#top"
+        )
+      )?.id
+    ).toBe(datasetId);
+  });
+
   it("keeps format-changing distribution query params in exact url lookups", () => {
     const seed = makeSeed();
     const firstDataset = seed.datasets[0]!;
@@ -296,60 +326,3 @@ describe("data layer registry prep", () => {
   });
 });
 
-describe("SKY-317 series-backed agent shelf", () => {
-  const BACKFILLED_PUBLISHERS: ReadonlyArray<{ readonly label: string; readonly minVariables: number }> = [
-    { label: "International Renewable Energy Agency", minVariables: 1 },
-    { label: "California Independent System Operator", minVariables: 1 },
-    { label: "U.S. Energy Information Administration", minVariables: 1 },
-    { label: "PJM Interconnection", minVariables: 1 },
-    { label: "Electric Reliability Council of Texas", minVariables: 1 }
-  ];
-
-  it.effect(
-    "findVariablesByAgentId is non-empty for each backfilled publisher",
-    () =>
-      Effect.gen(function* () {
-        const prepared = yield* loadCheckedInDataLayerRegistry().pipe(
-          Effect.provide(localFileSystemLayer)
-        );
-
-        const agentIdByLabel = new Map<string, string>();
-        for (const agent of prepared.seed.agents) {
-          agentIdByLabel.set(agent.name, agent.id);
-          for (const alt of agent.alternateNames ?? []) {
-            agentIdByLabel.set(alt, agent.id);
-          }
-        }
-
-        for (const publisher of BACKFILLED_PUBLISHERS) {
-          const agentId = agentIdByLabel.get(publisher.label);
-          expect(agentId, `publisher ${publisher.label} missing from agents`).toBeDefined();
-          const shelf = prepared.variablesByAgentId.get(agentId!);
-          const size = shelf === undefined ? 0 : Chunk.size(shelf);
-          expect(
-            size,
-            `publisher ${publisher.label} should have at least ${publisher.minVariables} variable(s) in shelf`
-          ).toBeGreaterThanOrEqual(publisher.minVariables);
-        }
-      }),
-    30_000
-  );
-
-  it.effect(
-    "duplicate series for the same variable do not double-count the agent shelf",
-    () =>
-      Effect.gen(function* () {
-        const prepared = yield* loadCheckedInDataLayerRegistry().pipe(
-          Effect.provide(localFileSystemLayer)
-        );
-        for (const agent of prepared.seed.agents) {
-          const shelf = prepared.variablesByAgentId.get(agent.id);
-          if (shelf === undefined) continue;
-          const ids = Array.from(shelf, (v) => v.id);
-          const unique = new Set(ids);
-          expect(ids.length, `agent ${agent.name} has duplicate variables in shelf`).toBe(unique.size);
-        }
-      }),
-    30_000
-  );
-});

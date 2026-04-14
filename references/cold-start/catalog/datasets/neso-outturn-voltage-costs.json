@@ -1,0 +1,40 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1ECQ90E7EWT86GS6PJEN",
+  "title": "Voltage System Costs",
+  "description": "To give greater insight on balancing decisions, this post monthly report provides outturn system costs for maintaining voltage levels on the network. Maintaining the electricity system at the correct voltages enables safe and efficient power transfer across the network. This requires the right balance of reactive power injection and absorption to be maintained in real time. > **Note:** Please note the utilisation costs presented here are only the ORPS payments, allocated per voltage constraint group. ** NOTE: ** The dataset update is currently paused whilst we work on improvements. We’re aware that the data is not displaying in full at present, but once the update is complete, data for all months will be available.Thank you for your patience during this time.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/outturn-voltage-costs",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Cost",
+    "Diagram",
+    "Network",
+    "Subscribable",
+    "System",
+    "Voltage",
+    "Constraint management",
+    "Monthly"
+  ],
+  "themes": [
+    "electricity",
+    "grid"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1ECV4E3Y0KR2JXM68XYS",
+    "https://id.skygest.io/distribution/dist_01KP4W1ECVF9N2S878W6XRHXVC"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/outturn-voltage-costs",
+      "relation": "exactMatch"
+    }
+  ]
+}

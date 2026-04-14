@@ -1,0 +1,42 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1EEKH3T257QGYC4ATR90",
+  "title": "Phase 2: FFR Auction Results Summary",
+  "description": "As part of our work on developing our balancing services we ran a weekly trial auction for Firm Frequency Response. The weekly auction trial results and order hash data are available here. Note: The 2 year trial of the procurement platform ended with the last LFS and DLH auctions being run on the 26th November 2021. After this date we have ceased procuring LFS and DLH services.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/phase-2-ffr-auction-results-summary",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Auction",
+    "Balancing",
+    "Balancing Services",
+    "DLH",
+    "FFR",
+    "LFS",
+    "Response",
+    "Subscribable",
+    "Trial",
+    "Ancillary services",
+    "Not Active"
+  ],
+  "themes": [
+    "electricity",
+    "market"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1EEQB82V4A3P6P7DE5PM"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/phase-2-ffr-auction-results-summary",
+      "relation": "exactMatch"
+    }
+  ]
+}

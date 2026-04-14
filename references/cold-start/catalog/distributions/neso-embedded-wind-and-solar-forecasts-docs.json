@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1DYYEMTQWHDDZ776E4E0",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1DYS5F8TG5QK1W84KHBA",
+  "kind": "documentation",
+  "title": "Embedded Definition",
+  "description": "This document contains the definition for embedded.",
+  "accessURL": "https://api.neso.energy/dataset/91c0c70e-0ef5-4116-b6fa-7ad084b5e0e8/resource/3808c680-b5c0-4eab-aac4-7abb6345e65b/download/definition-of-embedded.docx",
+  "mediaType": "application/msword",
+  "format": "doc",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/91c0c70e-0ef5-4116-b6fa-7ad084b5e0e8/resource/3808c680-b5c0-4eab-aac4-7abb6345e65b/download/definition-of-embedded.docx",
+      "relation": "exactMatch"
+    }
+  ]
+}

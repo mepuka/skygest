@@ -13,6 +13,7 @@ import {
 } from "../../../domain/data-layer";
 import { stripUndefinedAndDecodeWith } from "../../../platform/Json";
 import {
+  findDistributionInIndex,
   stableSlug,
   type CatalogIndex,
   type IngestNode,
@@ -95,14 +96,12 @@ const existingDistributionForKind = (
   datasetId: Dataset["id"],
   spec: EnergyInstituteDistributionSpec
 ): Distribution | null =>
-  idx.distributionsByDatasetIdKind.get(`${datasetId}::${spec.kind}`) ??
-  idx.allDistributions.find(
-    (distribution) =>
-      distribution.datasetId === datasetId &&
-      distribution.kind === spec.kind &&
-      distribution.accessURL === spec.accessURL
-  ) ??
-  null;
+  findDistributionInIndex(idx, {
+    datasetId,
+    kind: spec.kind,
+    accessURL: spec.accessURL,
+    format: spec.format ?? undefined
+  });
 
 const buildDatasetCandidate = (
   entry: EnergyInstituteDatasetManifestEntry,

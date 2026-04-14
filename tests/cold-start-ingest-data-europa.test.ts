@@ -6,7 +6,7 @@ import { HttpClient, HttpClientResponse } from "effect/unstable/http";
 import * as fsp from "node:fs/promises";
 import * as os from "node:os";
 import * as nodePath from "node:path";
-import { Dataset, DatasetSeries } from "../src/domain/data-layer";
+import { Dataset, DatasetSeries, Distribution } from "../src/domain/data-layer";
 import {
   type CatalogIndex,
   loadCatalogIndexWith
@@ -91,6 +91,7 @@ const emptyIndex = (): CatalogIndex => ({
 const decodeInfo = Schema.decodeUnknownSync(DataEuropaDatasetInfo);
 const readDataset = decodeJsonStringWith(Dataset);
 const readDatasetSeries = decodeJsonStringWith(DatasetSeries);
+const readDistribution = decodeJsonStringWith(Distribution);
 
 const makeSeriesInfo = (overrides?: Record<string, unknown>) =>
   decodeInfo({
@@ -133,6 +134,49 @@ const makeDatasetInfo = (
       }
     ],
     in_series: inSeries
+  });
+
+const makeMultiResourceDatasetInfo = (datasetId: string, title: string) =>
+  decodeInfo({
+    id: datasetId,
+    type: "dataset",
+    translation: {
+      en: {
+        title,
+        notes: `${title} notes`
+      }
+    },
+    publisher: { name: "Malmo stad" },
+    resources: [
+      {
+        id: `${datasetId}-json-a`,
+        access_url: `https://downloads.example/${datasetId}/json-a`,
+        format: "application/json",
+        size: 128
+      },
+      {
+        id: `${datasetId}-json-b`,
+        access_url: `https://downloads.example/${datasetId}/json-b`,
+        format: "application/json",
+        size: 256
+      },
+      {
+        id: `${datasetId}-geojson`,
+        access_url: `https://downloads.example/${datasetId}/geo`,
+        format: "application/geo+json",
+        size: 512
+      },
+      {
+        id: `${datasetId}-html-a`,
+        access_url: `https://downloads.example/${datasetId}/overview`,
+        format: "html"
+      },
+      {
+        id: `${datasetId}-html-b`,
+        access_url: `https://downloads.example/${datasetId}/methodology`,
+        format: "html"
+      }
+    ]
   });
 
 describe("data-europa adapter", () => {
@@ -279,6 +323,100 @@ describe("data-europa adapter", () => {
 
       expect(reloaded.index.allDatasetSeries).toHaveLength(1);
       expect(reloaded.index.allDatasets).toHaveLength(1);
+    }).pipe(
+      Effect.ensuring(
+        Effect.promise(() =>
+          tmp.length === 0 ? Promise.resolve() : cleanup(tmp)
+        )
+      )
+    );
+  });
+
+  it.effect("reuses distinct europa download ids when one dataset has multiple file resources", () => {
+    let tmp = "";
+
+    return Effect.gen(function* () {
+      tmp = yield* Effect.promise(makeEmptyColdStartRoot);
+      const config: ScriptConfigShape = {
+        rootDir: tmp,
+        dryRun: false,
+        baseUrl: FIXTURE_BASE_URL,
+        minIntervalMs: 0,
+        maxDatasets: 10,
+        noCache: false
+      };
+      const fetchedRows = [
+        makeMultiResourceDatasetInfo(
+          "malmo-solar-installations",
+          "Solar installations"
+        )
+      ];
+      const expectedUrl = catalogUrl(FIXTURE_BASE_URL, 100, 0);
+      const layer = Layer.mergeAll(
+        bunFsLayer,
+        makeHttpLayer((request, url) =>
+          Effect.gen(function* () {
+            expect(url.toString()).toBe(expectedUrl);
+            return jsonResponse(request, {
+              result: {
+                count: fetchedRows.length,
+                results: fetchedRows
+              }
+            });
+          })
+        )
+      );
+
+      const readWrittenDistributions = () =>
+        Effect.promise(() =>
+          fsp
+            .readdir(nodePath.join(tmp, "catalog", "distributions"))
+            .then((files) => files.sort())
+            .then((files) =>
+              Promise.all(
+                files.map((file) =>
+                  fsp
+                    .readFile(
+                      nodePath.join(tmp, "catalog", "distributions", file),
+                      "utf8"
+                    )
+                    .then(readDistribution)
+                )
+              )
+            )
+        );
+
+      yield* runDataEuropaIngest(config).pipe(Effect.provide(layer));
+      const firstRunDistributions = yield* readWrittenDistributions();
+
+      expect(firstRunDistributions).toHaveLength(5);
+      expect(
+        new Set(firstRunDistributions.map((distribution) => distribution.id)).size
+      ).toBe(5);
+
+      yield* runDataEuropaIngest(config).pipe(Effect.provide(layer));
+      const secondRunDistributions = yield* readWrittenDistributions();
+
+      expect(
+        secondRunDistributions
+          .map((distribution) => [distribution.accessURL, distribution.id] as const)
+          .sort(([leftUrl], [rightUrl]) =>
+            (leftUrl ?? "").localeCompare(rightUrl ?? "")
+          )
+      ).toEqual(
+        firstRunDistributions
+          .map((distribution) => [distribution.accessURL, distribution.id] as const)
+          .sort(([leftUrl], [rightUrl]) =>
+            (leftUrl ?? "").localeCompare(rightUrl ?? "")
+          )
+      );
+
+      const reloaded = yield* loadCatalogIndexWith({
+        rootDir: tmp,
+        mergeAliasScheme: "europa-dataset-id"
+      }).pipe(Effect.provide(bunFsLayer));
+
+      expect(reloaded.index.allDistributions).toHaveLength(5);
     }).pipe(
       Effect.ensuring(
         Effect.promise(() =>

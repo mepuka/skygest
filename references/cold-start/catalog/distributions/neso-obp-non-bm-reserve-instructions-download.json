@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E7TCTDA8AEBK9HGHWTC",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E7PPPX0VGRP5Q8KHWHM",
+  "kind": "download",
+  "title": "Non-BM Instructions from OBP",
+  "description": "This Data File contains Non-BM Instructions data from Open Balancing Platform (OBP) system once instructions have been confirmed by Service Providers (cease instructions are always published regardless of the instruction status). This information is continuously published throughout the day on this platform. The Data File currently contains Non-BM Quick Reserve Instructions. Non-BM Slow Reserve Service Instructions and Non-BM MW Dispatch Service Instructions will be added to the Data File as services go live in OBP/migrate from ASDP. ** NOTE: ** From March 16th onwards, the title of the data file \"Non-BM Reserve Instructions from OBP\" will be changed to \"Non-BM Instructions from OBP\". This data file currently contains Non-BM Quick Reserve Service Instructions data. Non-BM Slow Reserve Service and Non-BM MW Dispatch Service Instructions data will be added here when the service goes live in OBP/migrates from ASDP.",
+  "downloadURL": "https://api.neso.energy/dataset/0ba217bb-846b-470e-9717-ff152d97d009/resource/dad63c1b-8a8e-47de-9922-7880384ef104/download/instr_20260327123019_qr_sr_nbm.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/0ba217bb-846b-470e-9717-ff152d97d009/resource/dad63c1b-8a8e-47de-9922-7880384ef104/download/instr_20260327123019_qr_sr_nbm.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

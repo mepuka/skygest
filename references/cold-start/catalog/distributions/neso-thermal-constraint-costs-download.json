@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E3X2QHGCAFS8X3F3M8W",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E3SFH3K3SB3Z758CA5E",
+  "kind": "download",
+  "title": "Thermal Constraint Costs Data 26-27",
+  "description": "Outturn system costs for thermal constraints across a number of significant constraint boundaries for 25-26 financial year.",
+  "downloadURL": "https://api.neso.energy/dataset/f0055054-c55c-4068-a01c-61da4334e58f/resource/c730b788-4328-43dc-9f84-27fd3adeda59/download/outturn-system-costs-2026-2027.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/f0055054-c55c-4068-a01c-61da4334e58f/resource/c730b788-4328-43dc-9f84-27fd3adeda59/download/outturn-system-costs-2026-2027.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

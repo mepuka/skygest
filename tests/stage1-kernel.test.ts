@@ -453,7 +453,7 @@ describe("runStage1", () => {
     );
   });
 
-  it("uses preferred publishers only as a tie-breaker, not a hard fuzzy shortcut", () => {
+  it("pre-filters by preferredAgentIds when the preferred agent has any passing match", () => {
     const seed = makeSeed();
     const preferredAgentId =
       "https://id.skygest.io/agent/ag_1234567890AB" as any;
@@ -504,15 +504,75 @@ describe("runStage1", () => {
       { preferredAgentIds: [preferredAgentId] }
     );
 
+    // Even though "Annual Energy Outlook Report Dataset Archive" has a
+    // higher raw Jaccard against the query, publisher scope pre-filters the
+    // candidate set to the preferred agent's datasets, so the less-specific
+    // "Annual Energy Outlook Report" wins within that scope.
+    expect(matches).toHaveLength(1);
+    expect(matches[0]?._tag).toBe("DatasetTitleFuzzyMatch");
+    expect(matches[0]?.dataset.title).toBe("Annual Energy Outlook Report");
+  });
+
+  it("falls back to the full registry when the preferred agent has no passing match", () => {
+    const seed = makeSeed();
+    const preferredAgentId =
+      "https://id.skygest.io/agent/ag_EMPTYPREFERRED" as any;
+    const otherAgentId = "https://id.skygest.io/agent/ag_OTHERSOURCE01" as any;
+
+    const matches = findDatasetMatchesForName(
+      "Annual Energy Outlook Report Dataset",
+      makeLookup({
+        ...seed,
+        agents: [
+          ...seed.agents,
+          {
+            _tag: "Agent",
+            id: preferredAgentId,
+            kind: "organization",
+            name: "Sparse Publisher",
+            alternateNames: [],
+            homepage: "https://sparse.example" as any,
+            aliases: [],
+            createdAt: iso as any,
+            updatedAt: iso as any
+          },
+          {
+            _tag: "Agent",
+            id: otherAgentId,
+            kind: "organization",
+            name: "Independent Outlook Lab",
+            alternateNames: ["IOL"],
+            homepage: "https://www.example.com" as any,
+            aliases: [],
+            createdAt: iso as any,
+            updatedAt: iso as any
+          }
+        ],
+        // preferredAgentId owns no datasets; only otherAgentId does
+        datasets: [
+          ...seed.datasets,
+          {
+            _tag: "Dataset",
+            id: "https://id.skygest.io/dataset/ds_GLOBALONLY01" as any,
+            title: "Annual Energy Outlook Report Dataset Archive",
+            publisherAgentId: otherAgentId,
+            aliases: [],
+            createdAt: iso as any,
+            updatedAt: iso as any,
+            distributionIds: []
+          }
+        ]
+      }),
+      { preferredAgentIds: [preferredAgentId] }
+    );
+
+    // Preferred agent has no dataset clearing the threshold, so the matcher
+    // falls through to the unrestricted search.
     expect(matches).toHaveLength(1);
     expect(matches[0]?._tag).toBe("DatasetTitleFuzzyMatch");
     expect(matches[0]?.dataset.title).toBe(
       "Annual Energy Outlook Report Dataset Archive"
     );
-    if (matches[0]?._tag !== "DatasetTitleFuzzyMatch") {
-      throw new Error("expected fuzzy dataset title match");
-    }
-    expect(matches[0].score).toBeGreaterThan(0.8);
   });
 
   it("returns tied fuzzy matches in deterministic order", () => {

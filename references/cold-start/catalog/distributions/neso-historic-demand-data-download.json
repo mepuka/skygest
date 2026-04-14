@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E351X3KGTHJXD6DGKFC",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E30GJJ582Z7CJX1KNSG",
+  "kind": "download",
+  "title": "Historic Demand Data 2026",
+  "description": "Historic electricity demand, interconnector, wind and solar outturn data for 2026. Please find a brief summary of some of the columns in the dataset: ND = National Demand is the sum of metered generation, but excludes generation required to meet station load, hydro storage pumping and interconnector exports TSD = Transmission System Demand is equal to the ND plus the additional generation required to meet station load, pump storage pumping and interconnector exports",
+  "downloadURL": "https://api.neso.energy/dataset/8f2fe0af-871c-488d-8bad-960426f24601/resource/8a4a771c-3929-4e56-93ad-cdf13219dea5/download/demanddata_2026.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/8f2fe0af-871c-488d-8bad-960426f24601/resource/8a4a771c-3929-4e56-93ad-cdf13219dea5/download/demanddata_2026.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E26PXFG522Q493ZHVV3",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E20JXWM8C94A713AQT8",
+  "kind": "download",
+  "title": "2-14 Days Ahead Half Hourly Forecast",
+  "description": "This is our 2-14 days ahead national demand forecast, updated twice daily. National Demand is the Great Britain generation requirement and is the sum of metered generation based on the operational generation metering from the Transmission Network Operators, but excludes generation required to meet station load, pump storage pumping and interconnector exports.",
+  "downloadURL": "https://api.neso.energy/dataset/633daec6-3e70-444a-88b0-c4cef9419d40/resource/7c0411cd-2714-4bb5-a408-adb065edf34d/download/ng-demand-14da-hh.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/633daec6-3e70-444a-88b0-c4cef9419d40/resource/7c0411cd-2714-4bb5-a408-adb065edf34d/download/ng-demand-14da-hh.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

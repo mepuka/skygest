@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E39426PVN1T9NFZ37QP",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E35TJK3A8HCSMWXZN4P",
+  "kind": "download",
+  "title": "Demand Data Update",
+  "description": "Historic electricity demand, interconnector, wind and solar outturn data from the first day of the previous month up to the current day and forecast embedded wind and solar generation for 7 days ahead.",
+  "downloadURL": "https://api.neso.energy/dataset/7a12172a-939c-404c-b581-a6128b74f588/resource/177f6fa4-ae49-4182-81ea-0c6b35f26ca6/download/demanddataupdate.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/7a12172a-939c-404c-b581-a6128b74f588/resource/177f6fa4-ae49-4182-81ea-0c6b35f26ca6/download/demanddataupdate.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

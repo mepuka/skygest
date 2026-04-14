@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1DYC9MEA61D58NB2QFD7",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1DY7ZZKD46TH8SSZ00A7",
+  "kind": "download",
+  "title": "Weekly Operational Planning Margin Requirement (OPMR)",
+  "description": "The weekly Operational Planning Margin Requirement (OPMR) is published on a weekly basis and contains a view of 2-52 weeks ahead forecast for the OPMR.",
+  "downloadURL": "https://api.neso.energy/dataset/025b9417-83a0-445b-a818-414ea49cf7c3/resource/c08419f5-a28d-4e35-87a4-676d7eb05713/download/csv_opmr_weekly.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/025b9417-83a0-445b-a818-414ea49cf7c3/resource/c08419f5-a28d-4e35-87a4-676d7eb05713/download/csv_opmr_weekly.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E9CKHP8BNFZT2JP1EY0",
+  "title": "Monthly Balancing Services Use of System (BSUoS) Forecast Data",
+  "description": "The Balancing Services Use of System (BSUoS) costs are reported on a monthly basis with a forecast for the next month and a rolling 24 month period. Here you can find the data for the 24 month ahead forecast. **Disclaimer**: This forecast is published without prejudice and whilst every effort has been made to ensure the accuracy based on the assumptions and models used, it is subject to several estimations and forecasts and may not bear relation to either the indicative or actual tariffs Electricity system Operator will publish at a later date.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/bsuos-monthly-forecast",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Balancing",
+    "Bsuos",
+    "Cost",
+    "Forecast",
+    "Monthly",
+    "Subscribable",
+    "Balancing costs"
+  ],
+  "themes": [
+    "electricity",
+    "market",
+    "planning"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E9HCKR82XK31ZAYBWGE",
+    "https://id.skygest.io/distribution/dist_01KP4W1E9HX8ESP6GJZDK66RQ6"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/bsuos-monthly-forecast",
+      "relation": "exactMatch"
+    }
+  ]
+}

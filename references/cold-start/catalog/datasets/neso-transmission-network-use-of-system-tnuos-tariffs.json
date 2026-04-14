@@ -1,0 +1,45 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1EA9PT4X1MW3E7QG3PD3",
+  "title": "Transmission Network Use of System (TNUoS) Tariffs",
+  "description": "This dataset contains a breakdown of all the Transmission Network Use of System (TNUoS) tariff elements of which are forecasted and set by the revenue team at National Grid ESO. These files will be updated on a quarterly basis (when tariffs are published), to receive automatic updates please register and subscribe to this dataset.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/transmission-network-use-of-system-tnuos-tariffs",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Charging",
+    "Demand",
+    "Demand Residual Banded Charges",
+    "Embedded",
+    "Export",
+    "Generator",
+    "Revenue",
+    "Subscribable",
+    "TNUOS",
+    "Tarifs",
+    "Network charges",
+    "Quarterly"
+  ],
+  "themes": [
+    "electricity",
+    "market",
+    "grid",
+    "planning"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1EADJJ1RKV2YYT43GM6V"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/transmission-network-use-of-system-tnuos-tariffs",
+      "relation": "exactMatch"
+    }
+  ]
+}

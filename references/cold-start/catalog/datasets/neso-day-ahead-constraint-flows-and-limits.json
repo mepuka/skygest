@@ -1,0 +1,42 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E0F4W293ATZQ1XG53HN",
+  "title": "Day Ahead Constraint Flows and Limits",
+  "description": "A snapshot of the limits and flows at relevant boundaries at day ahead stage. These flow values are true for when the measurement was taken and will not reflect any changes in the flows following the publication of this data. The network diagrams show the constraint boundaries and arrows indicating the positive direction of power flow across each boundary.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/day-ahead-constraint-flows-and-limits",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Constraint",
+    "Day-Ahead",
+    "Diagrams",
+    "Flow",
+    "Forecast",
+    "Limit",
+    "Network",
+    "Subscribable",
+    "Constraint management",
+    "Daily (Weekdays)"
+  ],
+  "themes": [
+    "grid",
+    "planning"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E0K6RANBGQSX3Y13G31",
+    "https://id.skygest.io/distribution/dist_01KP4W1E0KSVXK3SKTP65TSZ8C"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/day-ahead-constraint-flows-and-limits",
+      "relation": "exactMatch"
+    }
+  ]
+}

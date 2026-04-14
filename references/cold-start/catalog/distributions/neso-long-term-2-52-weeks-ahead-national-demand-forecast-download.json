@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E76HTZA7NR06KD2YKC4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E728NQZ96VY8G8DMYBH",
+  "kind": "download",
+  "title": "Long term demand forecast",
+  "description": "This is our 2-52 weeks ahead national demand forecast, updated on an ad hoc basis. National Demand is Great Britain’s generation requirement and is the sum of metered generation based on the operational generation metering from the Transmission Network Operators, but excludes generation required to meet station load, pump storage pumping and interconnector exports.",
+  "downloadURL": "https://api.neso.energy/dataset/edd6190a-66d4-480d-a125-88d32bd11c91/resource/903302b4-b577-4228-a347-b9917568b4e1/download/year_ahead_weekly.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/edd6190a-66d4-480d-a125-88d32bd11c91/resource/903302b4-b577-4228-a347-b9917568b4e1/download/year_ahead_weekly.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

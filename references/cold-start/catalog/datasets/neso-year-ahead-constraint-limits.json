@@ -1,0 +1,40 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1EEQ7G24PG8J33K0X96R",
+  "title": "Year Ahead Constraint Limits",
+  "description": "This dataset contains a year ahead Mega Watt constraint limits for the main boundaries on the transmission system. >**NOTE:** This dataset has now been replaced by the \"24 Months Ahead Constraint Limits\" dataset ( \"https://www.nationalgrideso.com/data-portal/24-months-ahead-constraint-limits\" ). For updated data please visit the new dataset.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/year-ahead-constraint-limits",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "B6",
+    "Constraint",
+    "Constraints",
+    "Limit",
+    "Limits",
+    "Scotex",
+    "Sharn3",
+    "Subscribable",
+    "Constraint management",
+    "Not Active"
+  ],
+  "themes": [
+    "grid"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1EEV1MB5E7CW0ZNEAX4M"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/year-ahead-constraint-limits",
+      "relation": "exactMatch"
+    }
+  ]
+}

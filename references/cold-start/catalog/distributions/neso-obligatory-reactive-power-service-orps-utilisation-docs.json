@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E5S5JDAW559H9GR7C7S",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E5M8C044KVAS7JVKMCH",
+  "kind": "documentation",
+  "title": "Reactive Default Payment Rate - April - 2026",
+  "description": "Details on the methodology used to calculate Obligatory Reactive Power Service payment rates.",
+  "accessURL": "https://api.neso.energy/dataset/7e142b03-8650-4f46-8420-7ce1e84e1e5b/resource/e2e6f74c-ebca-48b3-b2ae-e4652d296dca/download/reactive-default-payment-rate-april-2026.pdf",
+  "mediaType": "application/pdf",
+  "format": "pdf",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/7e142b03-8650-4f46-8420-7ce1e84e1e5b/resource/e2e6f74c-ebca-48b3-b2ae-e4652d296dca/download/reactive-default-payment-rate-april-2026.pdf",
+      "relation": "exactMatch"
+    }
+  ]
+}

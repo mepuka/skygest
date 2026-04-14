@@ -5,8 +5,9 @@ import { Effect, Layer } from "effect";
 import * as fsp from "node:fs/promises";
 import * as os from "node:os";
 import * as nodePath from "node:path";
-import { AliasSchemeValues } from "../src/domain/data-layer";
+import { AliasSchemeValues, type DistributionKind } from "../src/domain/data-layer";
 import {
+  distributionLookupKey,
   IngestHarnessError,
   loadCatalogIndexWith
 } from "../src/ingest/dcat-harness";
@@ -93,12 +94,27 @@ const validCatalogBody = (
 const validDistributionBody = (
   ulid: string,
   datasetId: string,
-  aliases: ReadonlyArray<FixtureAlias>
+  aliases: ReadonlyArray<FixtureAlias>,
+  overrides?: Partial<{
+    readonly kind: DistributionKind;
+    readonly accessURL: string;
+    readonly downloadURL: string;
+    readonly format: string;
+  }>
 ) => ({
   _tag: "Distribution",
   id: `https://id.skygest.io/distribution/dist_${ulid}`,
   datasetId,
-  kind: "api-access",
+  kind: overrides?.kind ?? "api-access",
+  ...(overrides?.accessURL === undefined
+    ? {}
+    : { accessURL: overrides.accessURL }),
+  ...(overrides?.downloadURL === undefined
+    ? {}
+    : { downloadURL: overrides.downloadURL }),
+  ...(overrides?.format === undefined
+    ? {}
+    : { format: overrides.format }),
   createdAt: FIXTURE_NOW,
   updatedAt: FIXTURE_NOW,
   aliases
@@ -431,6 +447,124 @@ describe("loadCatalogIndexWith", () => {
 
       expect(error).toBeInstanceOf(IngestHarnessError);
       expect(error.message).toContain("Duplicate dataset merge key");
+    }).pipe(Effect.provide(bunFsLayer))
+  );
+
+  it.effect("keeps distinct download distributions for one dataset when their URLs differ", () =>
+    Effect.gen(function* () {
+      const datasetUlid = "01KQ3G4K21G6D4RNB87B8DME61";
+      const datasetId = `https://id.skygest.io/dataset/ds_${datasetUlid}`;
+      const firstDistribution = validDistributionBody(
+        "01KQ3G4K21R5Q6E6JS7DWEY511",
+        datasetId,
+        [],
+        {
+          kind: "download",
+          accessURL: "https://downloads.example.test/solar/2024-a.json",
+          format: "application/json"
+        }
+      );
+      const secondDistribution = validDistributionBody(
+        "01KQ3G4K21W7J7M9VAX7V4Y512",
+        datasetId,
+        [],
+        {
+          kind: "download",
+          accessURL: "https://downloads.example.test/solar/2024-b.json",
+          format: "application/json"
+        }
+      );
+
+      const tmp = yield* Effect.promise(() =>
+        makeTmpFixture({
+          distributions: [
+            {
+              slug: "solar-2024-json-a",
+              body: firstDistribution
+            },
+            {
+              slug: "solar-2024-json-b",
+              body: secondDistribution
+            }
+          ]
+        })
+      );
+
+      const result = yield* loadCatalogIndexWith({
+        rootDir: tmp,
+        mergeAliasScheme: AliasSchemeValues.eiaRoute
+      }).pipe(Effect.ensuring(Effect.promise(() => cleanup(tmp))));
+
+      expect(result.index.allDistributions).toHaveLength(2);
+      expect(
+        result.index.distributionsByDatasetIdKind.get(
+          distributionLookupKey(firstDistribution)
+        )?.id
+      ).toBe(firstDistribution.id);
+      expect(
+        result.index.distributionsByDatasetIdKind.get(
+          distributionLookupKey(secondDistribution)
+        )?.id
+      ).toBe(secondDistribution.id);
+    }).pipe(Effect.provide(bunFsLayer))
+  );
+
+  it.effect("keeps distinct landing pages for one dataset when their URLs differ", () =>
+    Effect.gen(function* () {
+      const datasetUlid = "01KQ3GG0F0W4Q5WQKXS4VYJ6X1";
+      const datasetId = `https://id.skygest.io/dataset/ds_${datasetUlid}`;
+      const firstLandingPage = validDistributionBody(
+        "01KQ3GG0F01V0ANQ56FYQKJ7X2",
+        datasetId,
+        [],
+        {
+          kind: "landing-page",
+          accessURL: "https://example.test/catalog/solar/overview",
+          format: "html"
+        }
+      );
+      const secondLandingPage = validDistributionBody(
+        "01KQ3GG0F0A68TV5D53D3KJ7X3",
+        datasetId,
+        [],
+        {
+          kind: "landing-page",
+          accessURL: "https://example.test/catalog/solar/methodology",
+          format: "html"
+        }
+      );
+
+      const tmp = yield* Effect.promise(() =>
+        makeTmpFixture({
+          distributions: [
+            {
+              slug: "solar-overview",
+              body: firstLandingPage
+            },
+            {
+              slug: "solar-methodology",
+              body: secondLandingPage
+            }
+          ]
+        })
+      );
+
+      const result = yield* loadCatalogIndexWith({
+        rootDir: tmp,
+        mergeAliasScheme: AliasSchemeValues.eiaRoute
+      }).pipe(Effect.ensuring(Effect.promise(() => cleanup(tmp))));
+
+      expect(result.index.allDistributions).toHaveLength(2);
+      expect(
+        result.index.distributionsByDatasetIdKind.get(
+          distributionLookupKey(firstLandingPage)
+        )?.id
+      ).toBe(firstLandingPage.id);
+      expect(
+        result.index.distributionsByDatasetIdKind.get(
+          distributionLookupKey(secondLandingPage)
+        )?.id
+      ).toBe(secondLandingPage.id);
     }).pipe(Effect.provide(bunFsLayer))
   );
 });

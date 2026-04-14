@@ -1,0 +1,37 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E1H897BKDVCA8GDQFK8",
+  "title": "Enduring Auction Capability (EAC) auction results",
+  "description": "The current suite of response services (DC, DM, and DR) and reserve services (BR, QR and SR) are now being procured via the EAC platform. The daily auction results will now be published below. Datetime values (for example, deliveryStart and deliveryEnd) are provided in UTC rather than local time. BR results pre September 2025 can be found here EAC BR Results Response results pre November 2023 can be found here Dynamic Containment Data ** Please Note: ** Some datasets may contain more rows than Excel can display (Excel supports up to 1,048,576 rows). If a file does not fully open in Excel, consider using Power BI, Power Query, or a database for analysis; Notepad may be used for basic viewing only. Selecting the right tool before downloading will help ensure full access to the data.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/eac-auction-results",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "DC",
+    "DM",
+    "DR Auction Results on EAC",
+    "EAC Auction Results",
+    "Subscribable",
+    "Ancillary services",
+    "Daily"
+  ],
+  "themes": [
+    "market"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E1PZ74V4PWNMBPSPSTV"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/eac-auction-results",
+      "relation": "exactMatch"
+    }
+  ]
+}

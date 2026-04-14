@@ -7,11 +7,19 @@
     "NESO",
     "National Energy System Operator"
   ],
-  "aliases": [
-    { "scheme": "url", "value": "https://www.neso.energy/", "relation": "exactMatch" },
-    { "scheme": "wikidata", "value": "Q130538498", "relation": "exactMatch" }
-  ],
   "homepage": "https://www.neso.energy/",
   "createdAt": "2026-04-12T00:00:00.000Z",
-  "updatedAt": "2026-04-12T00:00:00.000Z"
+  "updatedAt": "2026-04-12T00:00:00.000Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "wikidata",
+      "value": "Q130538498",
+      "relation": "exactMatch"
+    }
+  ]
 }

@@ -1,0 +1,39 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E76NW98SR40463Y5YDG",
+  "title": "Contract Transfer of Obligation",
+  "description": "The “Contract Transfer of Obligation” will be updated when ESO receives a Market Provider request to transfer a Balancing Service contract from a contracted unit to a non-contracted unit. ** NOTE: ** This file will be updated to reflect these changes only when a transfer request has been received.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/contract-transfer-of-obligation",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "BR Auction Results on EAC",
+    "Contract Transfers",
+    "EAC-BR Auction Results",
+    "Reserve Auction Results on EAC",
+    "Response Auction Results",
+    "Subscribable",
+    "Ancillary services",
+    "Ad hoc"
+  ],
+  "themes": [
+    "electricity",
+    "market"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E7AZN3SWN618T3G0WZG"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/contract-transfer-of-obligation",
+      "relation": "exactMatch"
+    }
+  ]
+}

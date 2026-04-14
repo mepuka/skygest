@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E3HY1A1B3N2ZHK5CHJ7",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E3DPBV1R680SZ550T64",
+  "kind": "download",
+  "title": "Wind BOA Volumes 2026/27",
+  "description": "This resource contains the volume of all BOAs taken on the BMU wind farms used in our wind incentive forecasts from April 2026 to March 2027.",
+  "downloadURL": "https://api.neso.energy/dataset/102638b9-6214-4db6-9115-86b5e879d1ce/resource/45598dcd-ea9c-4911-95f2-7946c5f3b034/download/boa_data_2026_27.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/102638b9-6214-4db6-9115-86b5e879d1ce/resource/45598dcd-ea9c-4911-95f2-7946c5f3b034/download/boa_data_2026_27.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

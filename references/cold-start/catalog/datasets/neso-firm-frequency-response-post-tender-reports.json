@@ -1,0 +1,42 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1ED76VVN200E19Y8H4XJ",
+  "title": "Firm Frequency Response (FFR) Post Tender Reports",
+  "description": "The Firm Frequency Response (FFR) post tender reports are published following each monthly tender. They indicate which tenders were accepted and rejected and the information submitted for these tenders. Reason codes, which explain why a given tender was rejected, can be found below the table in the data files, or in the FFR market information reports.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/firm-frequency-response-post-tender-reports",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Balancing",
+    "Contract",
+    "FFR",
+    "Firm",
+    "Frequency",
+    "Response",
+    "Service",
+    "Subscribable",
+    "Tender",
+    "Ancillary services",
+    "Not Active"
+  ],
+  "themes": [
+    "electricity",
+    "market"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1EDC60A27MZD9FW59AWD"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/firm-frequency-response-post-tender-reports",
+      "relation": "exactMatch"
+    }
+  ]
+}

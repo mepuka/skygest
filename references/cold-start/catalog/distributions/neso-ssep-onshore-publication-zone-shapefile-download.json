@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E9SG5B26X9004MX0QBS",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E9NFWV9P59XTZ4WCCD7",
+  "kind": "download",
+  "title": "Strategic Spatial Energy Plan (SSEP) Onshore Publication Zone Shapefile",
+  "description": "The 19 land publication zones for the publication of the draft and final Strategic Spatial Energy Plan (SSEP).",
+  "downloadURL": "https://api.neso.energy/dataset/dc958942-c5bf-428d-974d-24d7d1d1f370/resource/aa824951-880f-44cc-ac5c-7b5569dd1423/download/onshore_publication_zones_v4_master_simplified.zip",
+  "mediaType": "application/zip",
+  "format": "zip",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/dc958942-c5bf-428d-974d-24d7d1d1f370/resource/aa824951-880f-44cc-ac5c-7b5569dd1423/download/onshore_publication_zones_v4_master_simplified.zip",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E61XRFRBNHYK492A5W6",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E5XAG998GKG9BJ8KWQC",
+  "kind": "documentation",
+  "title": "Scotland network constraint diagram",
+  "description": "Scotland network constraint diagram",
+  "accessURL": "https://api.neso.energy/dataset/d515b4a9-60a1-489c-a126-004efc04f121/resource/bf4e1174-9aa7-4c0d-b444-5d22785053eb/download/scotland_network_constraint_diagram.pdf",
+  "mediaType": "application/pdf",
+  "format": "pdf",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/d515b4a9-60a1-489c-a126-004efc04f121/resource/bf4e1174-9aa7-4c0d-b444-5d22785053eb/download/scotland_network_constraint_diagram.pdf",
+      "relation": "exactMatch"
+    }
+  ]
+}

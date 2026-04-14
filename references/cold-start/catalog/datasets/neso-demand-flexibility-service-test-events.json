@@ -1,0 +1,37 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1EE0DE13MJEGT7GR636H",
+  "title": "Demand Flexibility Service 2022/23: Test Events",
+  "description": "**Winter 2022/23 Data** The Demand Flexibility Service (DFS) has been developed to allow the NESO to access additional flexibility when the national demand is at its highest – during peak winter days – which is not currently accessible to the NESO in real time. This new innovative service will allow consumers, as well as some industrial and commercial users (through suppliers/aggregators), to be incentivised for voluntarily flexing the time when they use their electricity. This dataset will contain updates regarding the use of the test service (not live events), to view data on live events please visit the following dataset: https://www.nationalgrideso.com/data-portal/demand-flexibility-service-live-events This dataset will contain the following files: - Utilisation Report Summary- TEST: This file will provide a summary of the utilisation report, it will be updated at around 16:30 GMT (only on days where there was a published requirement). - DFS Utilisation Report- TEST: This file will provide details of accepted and rejected bids for DFS and includes a breakdown by GSP, it will be updated at around 16:30 GMT (only on days where there was a published requirement) and at around 10:00 GMT on the day the service is required - Service Update Industry Notifications - TEST: This file will provide notice of test service updates related to the publication of requirements - DFS Service Requirement - TEST: This file will contain details of test service requirements.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/demand-flexibility-service-test-events",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Demand",
+    "Flexibility",
+    "Subscribable",
+    "Test",
+    "Demand Flexibility Service",
+    "Not Active"
+  ],
+  "themes": [
+    "electricity",
+    "grid"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1EE5V964FGS1PZMFC5GD"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/demand-flexibility-service-test-events",
+      "relation": "exactMatch"
+    }
+  ]
+}

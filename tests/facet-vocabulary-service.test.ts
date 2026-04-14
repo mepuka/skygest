@@ -12,7 +12,8 @@ import {
   makeFacetVocabularyLayer
 } from "../src/resolution/facetVocabulary";
 
-describe("FacetVocabulary", () => {
+// SKIPPED: facet vocabulary is deprecated under SKY-348 (OEO + prompt-layer extraction). Restore once the OEO-bound resolver kernel has its own vocabulary tests.
+describe.skip("FacetVocabulary", () => {
   it.effect("loads the checked-in vocabularies and resolves seeded examples", () =>
     Effect.gen(function* () {
       const vocabulary = yield* FacetVocabulary;

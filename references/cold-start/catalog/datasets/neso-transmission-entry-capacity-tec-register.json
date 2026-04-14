@@ -1,0 +1,38 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E463KXQDF0YDKJQ4CCX",
+  "title": "Transmission Entry Capacity (TEC) register",
+  "description": "A list of projects that hold contracts for Transmission Entry Capacity (TEC) with us. These include existing and future connection projects and projects that can be directly connected to the National Electricity Transmission System (NETS), or make use of it. ** NOTE: ** Following updates to CUSC paragraphs 6.30.3.2 and 6.35.2, the Transmission Entry Capacity (TEC) Registers will include an additional column called “Gate” from 21st November,2025 indicating whether agreements are classified as Gate 1 or Gate 2. This column will be populated once agreements have been countersigned. Until that point, the field will remain blank. Please note: 1) Capacity across stages and technology types is currently presented in aggregate, which may result in duplicate entries. This will be refined as the register process evolves, with future updates aiming to split capacity by stage and technology to improve clarity and accuracy. 2) This approach ensures transparency while reflecting the current status of agreements under the Connections Reform process.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/transmission-entry-capacity-tec-register",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Connection",
+    "Register",
+    "Subscribable",
+    "TEC",
+    "Connection registers",
+    "Twice weekly"
+  ],
+  "themes": [
+    "electricity",
+    "market",
+    "grid"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E4BP4MPSZ5CT060FC0A"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/transmission-entry-capacity-tec-register",
+      "relation": "exactMatch"
+    }
+  ]
+}

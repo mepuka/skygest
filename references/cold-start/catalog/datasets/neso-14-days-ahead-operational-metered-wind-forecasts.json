@@ -1,0 +1,42 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1DXJDDMC0ZVBTF3H6WKA",
+  "title": "14 Days Ahead Operational Metered Wind Forecasts",
+  "description": "The dataset contains national and windfarm-level 0-14 Day Ahead wind forecasts for all the windfarms which provide real-time operational metering (SCADA telemetry) to the NESO. The forecasts are based on evaluated Operational Capacity, which is a deterministic value based on recent actual production levels of that windfarm, captured from SCADA telemetry.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/14-days-ahead-operational-metered-wind-forecasts",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Forecast",
+    "Medium-term",
+    "National",
+    "Operational-Metering",
+    "Subscribable",
+    "Wind",
+    "Windfarm",
+    "Generation",
+    "Daily"
+  ],
+  "themes": [
+    "electricity",
+    "market",
+    "planning"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1DXQ769SSK1HM57Z48ZC",
+    "https://id.skygest.io/distribution/dist_01KP4W1DXQNG0RYF64WH6P28G0"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/14-days-ahead-operational-metered-wind-forecasts",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E3537BQM67GCPS56JM0",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E30GJJ582Z7CJX1KNSG",
+  "kind": "documentation",
+  "title": "Frequently Asked Questions (FAQ)",
+  "description": "This document contains useful FAQ's on the Historic Demand Data dataset.",
+  "accessURL": "https://api.neso.energy/dataset/8f2fe0af-871c-488d-8bad-960426f24601/resource/243ca76a-eefe-419d-a4b5-397073deb100/download/faq-neso.docx",
+  "mediaType": "application/msword",
+  "format": "doc",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/8f2fe0af-871c-488d-8bad-960426f24601/resource/243ca76a-eefe-419d-a4b5-397073deb100/download/faq-neso.docx",
+      "relation": "exactMatch"
+    }
+  ]
+}

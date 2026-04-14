@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E6JZGEXCJBXBENWX7VB",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E6CNQ3XVCM5HBC6PJ9R",
+  "kind": "download",
+  "title": "March 2026 – Historic Frequency Data",
+  "description": "Historic frequency data for Great Britain at a 1-second resolution. dtm - The date in a YYYY-MM-DD format, followed by the time in a HH:MM:SS format. f - The system frequency as measured at that second in time.",
+  "downloadURL": "https://api.neso.energy/dataset/cb1cc925-ecd8-4406-b021-3a3f368196e1/resource/e7023794-d9f8-43ed-bfee-31c6f36a87f2/download/fnew-2026-3.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/cb1cc925-ecd8-4406-b021-3a3f368196e1/resource/e7023794-d9f8-43ed-bfee-31c6f36a87f2/download/fnew-2026-3.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

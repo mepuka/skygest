@@ -1,0 +1,21 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1EDC60A27MZD9FW59AWD",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1ED76VVN200E19Y8H4XJ",
+  "kind": "download",
+  "title": "Post Tender Report TR166 October 2023 EXT",
+  "description": "The Firm Frequency Response (FFR) post tender reports are published following each monthly tender. They indicate which tenders were accepted and rejected and the information submitted for these tenders. Reason codes, which explain why a given tender was rejected, can be found below the table in the data files, or in the FFR market information reports.",
+  "downloadURL": "https://api.neso.energy/dataset/1162a519-b66d-48f6-96ae-1a69ff17951f/resource/8bb5bf74-8f5e-44c7-a231-42d1323bfa73/download/post-tender-report-tr166-october-2023-ext.xlsm",
+  "format": "xlsm",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/1162a519-b66d-48f6-96ae-1a69ff17951f/resource/8bb5bf74-8f5e-44c7-a231-42d1323bfa73/download/post-tender-report-tr166-october-2023-ext.xlsm",
+      "relation": "exactMatch"
+    }
+  ]
+}

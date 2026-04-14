@@ -1,0 +1,37 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E86MQVWPGBSA4ZT4VPT",
+  "title": "Transmission Losses",
+  "description": "There are a number of factors which influence transmission losses. These include variations in zonal generation patterns, growth in northern vs southern generation, level of Scottish exports to England and Wales, changes in interconnector flows, level of partly loaded plant, reduced flows directly out of concentrations of generation (e.g. Drax, South Humber Bank, Killingholme), the degree of geographic dispersal of plant and also levels of demand growth. The configuration of the Transmission System, the geographic profile of operating voltages, and the characteristics of individual items of transmission equipment also influence losses. It is difficult for NESO to forecast future losses because many of the above factors are outside its control. Generally losses are very sensitive to the geographic generation pattern, and small changes in the north / south balance can have a significant impact on the overall transmission loss volumes from day to day and year to year. Post event, NESO monitors transmission losses incurred as a result of operating the transmission system. Normally network configuration and voltage profile are dictated by security, quality and safety considerations and the resulting configuration may or may not act to reduce losses. We always aim to operate the GB transmission system as efficiently and economically as possible in accordance with our licence conditions. Wherever possible we will despatch plant to minimise the overall cost of operating the system. Decisions taken to achieve this in the optimal manner overall may also indirectly result in lower transmission losses, but generally, the optimisation of transmission losses will not result in the system being operated in the most economic way, and would be likely to increase costs significantly. An example of this would be dispatching more expensive out of merit plant in the south to back off high north to south flows and reduce loadings on heavily loaded circuits which are contributing to higher transmission losses.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/transmission-losses",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Losses",
+    "Subscribable",
+    "Transmission",
+    "Demand",
+    "Monthly"
+  ],
+  "themes": [
+    "electricity",
+    "grid",
+    "planning"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E8AB8DVHZEQRNS8D0NF"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/transmission-losses",
+      "relation": "exactMatch"
+    }
+  ]
+}

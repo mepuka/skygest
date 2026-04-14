@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1EBAQGT6CYNZDWXKY43C",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1EB76QYX51F7DWW2142M",
+  "kind": "download",
+  "title": "Flexibility data table (FLX1) 2025",
+  "description": "One of the FES outputs is an agreed set of data tables containing the GB FES values for the electricity system flexibility which are included in this dataset. The file is the 2025 version of the dataset.",
+  "downloadURL": "https://api.neso.energy/dataset/2e3275e2-dd6a-4c2e-8cfb-eeb9b4320dcb/resource/299bc6c8-7608-4946-ab0a-5bc22129c897/download/fes2025_flx1_v006.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/2e3275e2-dd6a-4c2e-8cfb-eeb9b4320dcb/resource/299bc6c8-7608-4946-ab0a-5bc22129c897/download/fes2025_flx1_v006.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

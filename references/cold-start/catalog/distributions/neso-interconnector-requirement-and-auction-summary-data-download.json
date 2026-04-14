@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1DZPYTJA04S4AQXS1EC4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1DZJW7GBDNKZEXF8YVRB",
+  "kind": "download",
+  "title": "Interconnector Requirements and Auction Summary",
+  "description": "This data set contains NESO interconnector trading requirement and auction summary. The data assist the industry to gain more visibility on the NESO interconnector trading actions.",
+  "downloadURL": "https://api.neso.energy/datastore/dump/6a928369-bed3-445f-af8a-69cdb2cc5089",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/datastore/dump/6a928369-bed3-445f-af8a-69cdb2cc5089",
+      "relation": "exactMatch"
+    }
+  ]
+}

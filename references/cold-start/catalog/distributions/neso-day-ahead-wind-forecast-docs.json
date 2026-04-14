@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E3CEMQK6CZXQ7H2AW2W",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E39BCFGZ6M6MWSGV995",
+  "kind": "documentation",
+  "title": "Day Ahead Wind BMU Forecast",
+  "description": "This resource contains the BMU-level day ahead wind forecasts for all the windfarms which are used to produce NESO's national day ahead wind forecast. This is not a complete list of BMU's within NESO systems and excludes licence-exempt windfarms. The regions used in this resource are defined using the ITL 1 regions for England alongside the DNO Licence areas for Wales and Scotland extended to their national borders. Offshore wind regions use the IHO Sea Areas split by which land area their connection to the mainland is in.",
+  "accessURL": "https://api.neso.energy/dataset/fbe3701d-1487-443e-abe9-47a6c01ecce2/resource/90e581e9-2d7f-4eaa-8fe0-6e323ee0f5f7/download/da_windunit_forecast_20260414.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/fbe3701d-1487-443e-abe9-47a6c01ecce2/resource/90e581e9-2d7f-4eaa-8fe0-6e323ee0f5f7/download/da_windunit_forecast_20260414.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

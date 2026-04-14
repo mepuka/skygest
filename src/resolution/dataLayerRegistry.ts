@@ -71,6 +71,7 @@ export type PreparedDataLayerRegistry = {
   readonly variablesByAgentId: ReadonlyMap<string, Chunk.Chunk<Variable>>;
   readonly variablesByDatasetId: ReadonlyMap<string, Chunk.Chunk<Variable>>;
   readonly distributionByUrl: ReadonlyMap<string, Distribution>;
+  readonly datasetByLandingPage: ReadonlyMap<string, Dataset>;
   readonly distributionsByHostname: ReadonlyMap<string, Chunk.Chunk<Distribution>>;
   readonly distributionUrlPrefixEntries: ReadonlyArray<{
     readonly prefix: string;
@@ -97,6 +98,7 @@ export type DataLayerRegistryLookup = {
   readonly findDistributionByUrl: (
     url: string
   ) => Option.Option<Distribution>;
+  readonly findDatasetByLandingPage: (url: string) => Option.Option<Dataset>;
   readonly findDistributionsByHostname: (
     hostname: string
   ) => Chunk.Chunk<Distribution>;
@@ -436,6 +438,32 @@ const registerExactLookup = <A extends { readonly id: string }>(
   map.set(key, entity);
 };
 
+// Non-rejecting variant: on collision, evict the key entirely rather than
+// raising a LookupCollisionIssue. Used for lookups where multi-owner URLs are
+// expected (dataset landing pages shared across siblings, landing-page
+// distributions that resolve to a portal). Callers tolerate ambiguity by
+// falling back to other lanes.
+const registerExactLookupTolerant = <A extends { readonly id: string }>(
+  map: Map<string, A>,
+  ambiguous: Set<string>,
+  key: string,
+  entity: A
+) => {
+  if (ambiguous.has(key)) {
+    return;
+  }
+  const existing = map.get(key);
+  if (existing === undefined) {
+    map.set(key, entity);
+    return;
+  }
+  if (existing.id === entity.id) {
+    return;
+  }
+  map.delete(key);
+  ambiguous.add(key);
+};
+
 const registerManyLookup = <A extends { readonly id: string }>(
   map: Map<string, Array<A>>,
   key: string,
@@ -467,11 +495,7 @@ const collectEntityUrls = (distribution: Distribution) => {
 const distributionPathSegmentCount = (normalizedUrl: string) =>
   normalizedUrl.split("/").filter((segment) => segment.length > 0).length - 1;
 
-const isExactDistributionUrl = (
-  distribution: Distribution,
-  normalizedUrl: string
-) =>
-  (distribution.kind === "api-access" || distribution.kind === "download") &&
+const isExactDistributionUrl = (normalizedUrl: string) =>
   distributionPathSegmentCount(normalizedUrl) >= 2;
 
 const buildPreparedRegistry = (
@@ -504,6 +528,9 @@ const buildPreparedRegistry = (
   const datasetsByVariableId = new Map<string, Array<Dataset>>();
   const variablesByDatasetId = new Map<string, Array<Variable>>();
   const distributionByUrl = new Map<string, Distribution>();
+  const distributionByUrlAmbiguous = new Set<string>();
+  const datasetByLandingPage = new Map<string, Dataset>();
+  const datasetByLandingPageAmbiguous = new Set<string>();
   const distributionsByHostname = new Map<string, Array<Distribution>>();
   const distributionUrlPrefixEntries: Array<{
     readonly prefix: string;
@@ -553,6 +580,18 @@ const buildPreparedRegistry = (
       normalizeLookupText(dataset.title),
       dataset
     );
+
+    if (dataset.landingPage !== undefined) {
+      const normalizedLandingPage = normalizeDistributionUrl(dataset.landingPage);
+      if (normalizedLandingPage !== null) {
+        registerExactLookupTolerant(
+          datasetByLandingPage,
+          datasetByLandingPageAmbiguous,
+          normalizedLandingPage,
+          dataset
+        );
+      }
+    }
     for (const alias of dataset.aliases) {
       if (alias.scheme === "url") {
         continue;
@@ -609,11 +648,10 @@ const buildPreparedRegistry = (
       const normalizedHostname = normalizeDistributionHostname(rawUrl);
 
       if (normalizedUrl !== null) {
-        if (isExactDistributionUrl(distribution, normalizedUrl)) {
-          registerExactLookup(
-            issues,
-            "distribution-url",
+        if (isExactDistributionUrl(normalizedUrl)) {
+          registerExactLookupTolerant(
             distributionByUrl,
+            distributionByUrlAmbiguous,
             normalizedUrl,
             distribution
           );
@@ -693,6 +731,7 @@ const buildPreparedRegistry = (
     variablesByAgentId: sortedVariablesByAgentId,
     variablesByDatasetId: sortedVariablesByDatasetId,
     distributionByUrl,
+    datasetByLandingPage,
     distributionsByHostname: new Map(
       [...distributionsByHostname.entries()].map(([key, value]) => [
         key,
@@ -746,6 +785,12 @@ export const toDataLayerRegistryLookup = (
     return normalized === null
       ? Option.none()
       : Option.fromNullishOr(prepared.distributionByUrl.get(normalized));
+  },
+  findDatasetByLandingPage: (url) => {
+    const normalized = normalizeDistributionUrl(url);
+    return normalized === null
+      ? Option.none()
+      : Option.fromNullishOr(prepared.datasetByLandingPage.get(normalized));
   },
   findDistributionsByHostname: (hostname) => {
     const normalized = normalizeDistributionHostname(hostname);

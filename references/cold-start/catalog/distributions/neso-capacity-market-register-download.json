@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E6C6851DEBF3GW1Z9J9",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E6888X7HSBG77GB0CSE",
+  "kind": "download",
+  "title": "Components",
+  "description": "Component level data for all capacity market registers. This is all auctions combined, including the name of the auction. Where a component is used in multiple auctions/deliver years the component has multiple entries.",
+  "downloadURL": "https://api.neso.energy/dataset/0b3ab475-5622-4465-8825-9d35d03bb28b/resource/790f5fa0-f8eb-4d82-b98d-0d34d3e404e8/download/component_20260408.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/0b3ab475-5622-4465-8825-9d35d03bb28b/resource/790f5fa0-f8eb-4d82-b98d-0d34d3e404e8/download/component_20260408.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import {
 } from "../../../domain/data-layer";
 import { stripUndefinedAndDecodeWith } from "../../../platform/Json";
 import {
+  findDistributionInIndex,
   stableSlug,
   type CatalogIndex,
   type IngestNode,
@@ -485,8 +486,17 @@ export const buildCandidateNodes = (
   for (const source of datasets) {
     const existingDataset = existingDatasetForPackage(idx, source);
     const datasetId = existingDataset?.id ?? mintDatasetId();
+    const primaryDownload = selectPrimaryDownload(source);
+    const documentation = selectDocumentationResource(source);
     const existingDownloadDistribution =
-      idx.distributionsByDatasetIdKind.get(`${datasetId}::download`) ?? null;
+      primaryDownload === null
+        ? null
+        : findDistributionInIndex(idx, {
+            datasetId,
+            kind: "download",
+            downloadURL: primaryDownload.url,
+            format: primaryDownload.resource.format ?? undefined
+          });
     const existingDocumentationDistribution =
       idx.distributionsByDatasetIdKind.get(`${datasetId}::documentation`) ?? null;
     const preservedDistributionIds = idx.allDistributions
@@ -497,9 +507,6 @@ export const buildCandidateNodes = (
           distribution.kind !== "documentation"
       )
       .map((distribution) => distribution.id);
-
-    const primaryDownload = selectPrimaryDownload(source);
-    const documentation = selectDocumentationResource(source);
 
     const managedDistributionIds: Array<Distribution["id"]> = [];
 

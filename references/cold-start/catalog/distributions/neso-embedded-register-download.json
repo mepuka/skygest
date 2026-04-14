@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E4KVQ8RERN6NN0DCKDA",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E4F716SRKXCJHN9QAHZ",
+  "kind": "download",
+  "title": "Embedded Register",
+  "description": "This data file contains the latest version of the Embedded Register including all changes up to publication. This file will be updated twice weekly on Tuesdays and Fridays. >**Please note:** **Project Nos:** We plan to phase out the use of Project IDs in favour of Project Nos which are now found included in the Dataset - we will continue to include Project IDs until the end of this year. If there is more than one Stage the Project No will be followed by a dash and the relevant stage number. **Project IDs:** are Case Sensitive i.e. a0l4L0000005iPb; a0l4L0000005ipb and a0l4L0000005ipB relate to different projects. **Staging:** If a project includes staged TEC there will be an associated number in the Stage column. Some projects have two separate lines without numbers - this usually indicates that the project is already built and the Customer is perhaps adding a different type of generation or building new generation to be connected at a future date. Once built the second line will fall away and the TEC incorporated into the overall project.",
+  "downloadURL": "https://api.neso.energy/dataset/4b0e109c-aa23-45ac-86c1-0bda557d1aab/resource/68b6f3a1-e1bf-403b-9062-0269fc758d77/download/embedded-register-10-april-2026.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/4b0e109c-aa23-45ac-86c1-0bda557d1aab/resource/68b6f3a1-e1bf-403b-9062-0269fc758d77/download/embedded-register-10-april-2026.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}
