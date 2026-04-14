@@ -21,12 +21,6 @@
       "evidence": "2 unanimous candidate votes, publisher EIA",
       "basis": "candidate-unanimous"
     },
-    "us-pjm-capacity-auction-annual": {
-      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRA0G6PMJAY725QSPF",
-      "datasetFile": "pjm-capacity-auction.json",
-      "evidence": "1 unanimous candidate vote, publisher PJM",
-      "basis": "candidate-unanimous"
-    },
     "us-pjm-load-forecast": {
       "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRS8ZDD0YCERY6C64B",
       "datasetFile": "pjm-load-forecast.json",

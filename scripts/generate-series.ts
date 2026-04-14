@@ -97,7 +97,6 @@ const SERIES: SeriesDef[] = [
   { slug: "us-ca-interconnection-queue", label: "CAISO interconnection queue", variableSlug: "interconnection-queue-backlog", place: "US-CA", market: "CAISO", frequency: "irregular" },
 
   // PJM
-  { slug: "us-pjm-capacity-auction-annual", label: "PJM capacity auction results (annual)", variableSlug: "installed-renewable-capacity", place: "US-PJM", market: "PJM", frequency: "annual", extra: { type: "auction" } },
   { slug: "us-pjm-load-forecast", label: "PJM load forecast", variableSlug: "electricity-demand", place: "US-PJM", market: "PJM", frequency: "annual", extra: { type: "forecast" } },
 
   // ENTSO-E

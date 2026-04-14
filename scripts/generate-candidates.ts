@@ -164,6 +164,9 @@ function clusterToDataset(cluster: string, pub: string): string | undefined {
 // Cluster key → Variable slug mapping
 // ---------------------------------------------------------------------------
 function clusterToVariable(cluster: string): string | undefined {
+  // SKY-324: the checked-in PJM capacity cluster has a dataset but no honest
+  // variable/series binding yet. Leave it partial instead of inventing one.
+  if (cluster === "pjm-capacity") return undefined;
   // Solar
   if (cluster.includes("solar") && !cluster.includes("price")) {
     if (cluster.includes("capacity")) return "installed-solar-pv-capacity";
@@ -240,7 +243,6 @@ function clusterToSeries(cluster: string, geo: string): string | undefined {
   }
   if (varSlug === "installed-renewable-capacity") {
     if (cluster.includes("irena") || geo === "global") return "global-renewable-capacity-annual";
-    if (cluster.includes("pjm")) return "us-pjm-capacity-auction-annual";
   }
   if (varSlug === "installed-solar-pv-capacity") {
     if (geo === "global" || cluster.includes("global")) return "global-solar-pv-capacity-annual";

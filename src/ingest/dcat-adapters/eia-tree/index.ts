@@ -88,6 +88,7 @@ import {
   stripUndefinedAndDecodeWith,
   stringifyUnknown
 } from "../../../platform/Json";
+import { normalizeLookupText } from "../../../platform/Normalize";
 import { EiaIngestKeys } from "../../../platform/ConfigShapes";
 import { localPersistenceLayer } from "../../../platform/LocalPersistence";
 import { Logging } from "../../../platform/Logging";
@@ -942,6 +943,48 @@ const titleCaseSegment = (value: string): string =>
     .map((token) => token[0]!.toUpperCase() + token.slice(1))
     .join(" ");
 
+const EIA_TITLE_PREFIX = /^eia\b[\s:-]*/iu;
+
+const titleTokens = (value: string): ReadonlyArray<string> =>
+  normalizeLookupText(value)
+    .split(" ")
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0);
+
+const stripEiaTitlePrefix = (value: string): string =>
+  value.replace(EIA_TITLE_PREFIX, "").trim();
+
+// Keep an existing curated EIA title when the API name is a weaker subset
+// of it (for example "International" vs "EIA International Energy Data").
+// This avoids clobbering user-facing labels with less informative route names
+// while still letting the API name flow into aliases for matching.
+const shouldPreserveExistingEiaTitle = (
+  existingTitle: string | undefined,
+  apiName: string | null | undefined
+): boolean => {
+  if (
+    existingTitle === undefined ||
+    apiName == null ||
+    apiName.trim().length === 0 ||
+    !EIA_TITLE_PREFIX.test(existingTitle)
+  ) {
+    return false;
+  }
+
+  const existingTokens = titleTokens(stripEiaTitlePrefix(existingTitle));
+  const apiTokens = titleTokens(apiName);
+  if (
+    existingTokens.length === 0 ||
+    apiTokens.length === 0 ||
+    apiTokens.length >= existingTokens.length
+  ) {
+    return false;
+  }
+
+  const existingTokenSet = new Set(existingTokens);
+  return apiTokens.every((token) => existingTokenSet.has(token));
+};
+
 /**
  * EIA's v2 API returns `response.id` = the top-level route segment (and
  * `response.name === null`) for many deep leaf routes — e.g. for
@@ -1149,12 +1192,25 @@ export const buildDatasetCandidate = (
   // The only alias ingestion ever mints is the API v2 route. Every other
   // scheme (eia-bulk-id, eia-series, ror, wikidata, doi, ...) is
   // hand-curated and preserved through unionAliases.
+  const preserveExistingTitle = shouldPreserveExistingEiaTitle(
+    existing?.title,
+    leaf.response.name
+  );
   const freshAliases: ReadonlyArray<ExternalIdentifier> = [
     {
       scheme: AliasSchemeValues.eiaRoute,
       value: leaf.path,
       relation: "exactMatch"
-    } as ExternalIdentifier
+    } as ExternalIdentifier,
+    ...(preserveExistingTitle && leaf.response.name != null
+      ? ([
+          {
+            scheme: AliasSchemeValues.displayAlias,
+            value: leaf.response.name,
+            relation: "closeMatch"
+          } satisfies ExternalIdentifier
+        ] as const)
+      : [])
   ];
   const aliases = unionAliases(existing?.aliases ?? [], freshAliases);
 
@@ -1177,19 +1233,19 @@ export const buildDatasetCandidate = (
       : leaf.parents;
 
   // Title selection precedence:
-  //   1. `response.name` when the API actually provides one (canonical
-  //      structural source — a merged refresh rewrites curated titles to
-  //      match API).
-  //   2. Existing curated title (preserves human-curated titles when the
-  //      API returns `name: null`).
-  //   3. For deep leaf routes where the EIA v2 API echoes the top-level
+  //   1. Existing curated title when the API name is clearly weaker than it
+  //      (e.g. `International` vs `EIA International Energy Data`).
+  //   2. `response.name` when the API actually provides a strong title.
+  //   3. Existing curated title when the API returns `name: null`.
+  //   4. For deep leaf routes where the EIA v2 API echoes the top-level
   //      route id (e.g. `natural-gas/sum/sndm` → `id: "natural-gas"`,
   //      `name: null`), synthesize a title from the URL path segments.
   //      Detected via `isStaleTopLevelId` — never triggered for shallow
   //      routes like `aeo/2026` (id=`AEO2026`) or `electricity/retail-sales`
   //      (name=`Electricity Sales to Ultimate Customers`).
-  //   4. Raw `response.id` as an absolute last resort.
+  //   5. Raw `response.id` as an absolute last resort.
   const title =
+    (preserveExistingTitle ? existing?.title : undefined) ??
     leaf.response.name ??
     existing?.title ??
     (isStaleTopLevelId(leaf) ? synthesizeLeafTitleFromPath(leaf) : leaf.response.id);
