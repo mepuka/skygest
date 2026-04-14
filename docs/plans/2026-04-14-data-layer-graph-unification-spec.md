@@ -506,6 +506,276 @@ That keeps the graph readable and makes failures easier to explain.
 
 ---
 
+## Relationship authority rules
+
+The consolidation only works if the repo becomes explicit about who is allowed
+to own relationship semantics.
+
+### Rule 1: the shared graph owns typed relationships
+
+The shared graph should become the only place that owns structural edges such
+as:
+
+- agent -> dataset publication
+- dataset -> distribution membership
+- dataset -> variable ancestry
+- series -> variable linkage
+- series -> dataset linkage
+- future series -> provenance linkage
+
+If a relationship needs to exist at runtime, it should either exist as a graph
+edge or be derivable from graph-backed helper functions.
+
+### Rule 2: the prepared registry owns exact-match normalization, not graph semantics
+
+`src/resolution/dataLayerRegistry.ts` should continue to own:
+
+- normalized label lookups
+- URL lookups
+- hostname lookups
+- alias lookups
+- collision detection
+
+But it should stop acting as a second owner of relationship topology.
+
+That means exact lookup tables such as `agentByLabel` or `distributionByUrl`
+remain registry-owned, while relationship lookups such as:
+
+- `datasetsByVariableId`
+- `variablesByDatasetId`
+- `variablesByAgentId`
+
+should become graph-backed views instead of independently maintained maps. [C6]
+[C9] [C10]
+
+### Rule 3: projection owns text shaping only
+
+Projection code may decide how to turn relationships into `primaryText`,
+`lineageText`, or `urlText`, but it should never rebuild graph structure on its
+own. [C4]
+
+### Rule 4: ingest adapters own extraction, not runtime graph semantics
+
+Adapters such as the EIA tree ingest may continue to extract source facts and
+materialize entity candidates, but they should not define a second long-lived
+graph contract for the runtime. [C13]
+
+### Rule 5: audit and diagnostics are pure consumers
+
+Audit code is allowed to measure graph quality and projection quality. It is
+not allowed to define its own relationship engine. [C5]
+
+---
+
+## Code-change survey
+
+This is the concrete file-level migration inventory for the first graph
+consolidation wave.
+
+| File | Current role | Future role | Action |
+| --- | --- | --- | --- |
+| `src/domain/data-layer/graph.ts` | Missing | Owner | Add shared node and edge types here. |
+| `src/domain/data-layer/index.ts` | Re-export surface | Owner-adjacent | Export the new graph types from the domain barrel. |
+| `src/data-layer/DataLayerGraph.ts` | Missing | Owner | Add the shared graph builder, node-key indexing, and graph-backed relationship indexes here. |
+| `src/data-layer/DataLayerGraphTraversal.ts` | Missing | Owner | Add label-aware helper walks here so consumers never manipulate `NodeIndex` directly. |
+| `src/resolution/dataLayerRegistry.ts` | Mixed owner | Owner | Keep validation and exact lookups here, but move relationship derivation behind the shared graph and expose the graph on prepared registry values. [C6] |
+| `src/services/DataLayerRegistry.ts` | Public service boundary | Consumer | Expose the shared graph on `prepared`, while still hiding internal registry-only maps. [C7] |
+| `src/ingest/dcat-harness/IngestNode.ts` | Owner | Adapter | Replace harness-local node vocabulary with wrappers or adapters over the shared graph node model. [C2] |
+| `src/ingest/dcat-harness/IngestEdge.ts` | Owner | Adapter | Replace harness-local edge vocabulary with the shared edge model or a narrow adapter. [C3] |
+| `src/ingest/dcat-harness/buildGraph.ts` | Owner | Consumer or wrapper | Port this file onto the shared graph builder so the harness stops owning the core graph contract. [C1] |
+| `src/ingest/dcat-adapters/eia-tree/index.ts` | Consumer | Consumer | Preserve as an ingest consumer; do not let it regain graph ownership during migration. [C13] |
+| `src/search/projectEntitySearchDocs.ts` | Owner | Consumer | Delete `SearchGraph` and `buildSearchGraph`; make the projector consume graph helpers only. [C4] |
+| `src/search/projectFromDataLayer.ts` | Consumer | Consumer | Keep as a thin composition entry point; no graph logic should live here. [C12] |
+| `scripts/analysis/entity-search-audit/run-audit.ts` | Owner | Consumer | Delete the local `SearchGraph` and `buildGraph`; use the shared graph and shared traversal helpers. [C5] |
+| `src/search/buildEntitySearchBundlePlan.ts` | Consumer of relationship lookups | Consumer | Keep as a graph-backed lookup consumer; it should not become a graph walker itself. [C9] |
+| `src/resolution/kernel/Bind.ts` | Consumer of relationship lookups | Consumer | Keep narrowing logic here, but back `findVariablesByAgentId` and `findVariablesByDatasetId` with graph-derived lookups. [C10] |
+| `src/resolution/bundle/resolveDataReference.ts` | Exact-lookup consumer | Consumer | Leave on exact lookup paths for now; do not mix this older resolver into the graph migration scope. [C11] |
+| `tests/data-layer-registry.test.ts` | Contract test | Consumer test | Update to assert that the public prepared registry exposes the shared graph while still hiding private lookup tables. [C17] |
+| `tests/entity-search-projector.test.ts` | Projection contract test | Consumer test | Keep and expand to assert graph-derived lineage and URL behavior after the migration. [C14] |
+| `tests/entity-search-bundle-plan.test.ts` | Consumer test | Consumer test | Keep as a guard that graph-backed lookup behavior still feeds bundle planning correctly. [C15] |
+| `tests/entity-search-service.test.ts` | End-to-end consumer test | Consumer test | Keep as a higher-level guard that projection plus search still behave the same through the migration. [C16] |
+
+### Files that should stop owning relationship topology
+
+These are the important deletions or role reductions:
+
+1. `src/search/projectEntitySearchDocs.ts` should lose its local `SearchGraph`
+   and `buildSearchGraph(...)`. [C4]
+2. `scripts/analysis/entity-search-audit/run-audit.ts` should lose its local
+   `SearchGraph` and `buildGraph(...)`. [C5]
+3. `src/ingest/dcat-harness/IngestNode.ts` and `IngestEdge.ts` should stop
+   being the source of truth for runtime graph vocabulary. [C2] [C3]
+
+### Hidden drift points
+
+These are the migration risks that are easy to miss:
+
+1. `buildPreparedRegistry(...)` currently computes relationship maps directly
+   from both `Dataset.variableIds` and `Series.datasetId`, which means the
+   registry is already a second relationship engine. [C6]
+2. `toPreparedDataLayerRegistryCore(...)` currently strips internal lookup maps
+   from the public prepared registry. If the shared graph is not added there,
+   downstream consumers will keep rebuilding their own maps. [C6] [C7]
+3. `buildEntitySearchBundlePlan(...)` and `Bind.ts` rely on the current lookup
+   surface. If graph-backed lookup generation changes behavior, those files can
+   regress even if projection itself still works. [C9] [C10]
+4. `resolveDataReference.ts` is old but still active code. It should remain a
+   lookup consumer and not be half-migrated into a second graph client. [C11]
+5. The EIA tree adapter re-exports harness graph types and helpers today, so
+   the harness-to-shared-graph migration needs a compatibility plan rather than
+   a blind delete. [C13]
+
+---
+
+## Migration mechanics
+
+### 1. Split exact lookups from relationship lookups
+
+The current prepared registry interleaves both in one function. [C6]
+
+The migration should make that split explicit:
+
+1. build and validate entities
+2. build the shared graph
+3. derive graph-backed relationship indexes from the shared graph
+4. build exact normalized lookup tables
+5. expose both through the existing registry service boundary
+
+This keeps the registry as the assembly layer without letting it remain a
+competing relationship owner.
+
+### 2. Prefer graph-backed indexes over open-ended graph walks in hot code
+
+Not every consumer should run BFS at runtime.
+
+For hot paths, precompute and expose graph-backed indexes such as:
+
+- `datasetsByVariableId`
+- `variablesByDatasetId`
+- `variablesByAgentId`
+- `seriesByDatasetId`
+- `seriesByVariableId`
+- `distributionsByDatasetId`
+
+The difference from today is not that these views disappear. The difference is
+that they are derived from the shared graph rather than defined as an
+independent relationship layer. [C4] [C5] [C6]
+
+### 3. Keep exact URL and alias behavior stable during graph migration
+
+The first graph PR should not change:
+
+- `findDistributionByUrl(...)`
+- `findDatasetByLandingPage(...)`
+- `findAgentByLabel(...)`
+- `findDatasetByAlias(...)`
+- `findVariableByAlias(...)`
+
+Those are already working exact paths and are not the source of the current
+drift problem. [C6] [C11]
+
+### 4. Make the public prepared registry graph-first, not lookup-table-first
+
+The public prepared registry currently exposes only:
+
+- `seed`
+- `entities`
+- `entityById`
+- `pathById`
+
+and deliberately hides private lookup tables. [C6] [C7] [C17]
+
+The shared graph should become part of that public prepared contract. The
+lookup tables should remain private implementation details behind
+`DataLayerRegistryLookup`.
+
+---
+
+## Commit plan inside the implementation branch
+
+The branch should commit to consolidation incrementally, not as one giant
+rewrite.
+
+### Commit 1: shared graph types and builder
+
+Add:
+
+- `src/domain/data-layer/graph.ts`
+- `src/data-layer/DataLayerGraph.ts`
+- `src/data-layer/DataLayerGraphTraversal.ts`
+- `tests/data-layer-graph.test.ts`
+
+Do not change search or audit yet.
+
+### Commit 2: prepared-registry integration
+
+Modify:
+
+- `src/domain/data-layer/index.ts`
+- `src/resolution/dataLayerRegistry.ts`
+- `src/services/DataLayerRegistry.ts`
+- `tests/data-layer-registry.test.ts`
+- any D1 or checked-in bootstrap tests that assert the prepared shape
+
+Goal:
+
+- public prepared registry exposes the graph
+- private registry lookup tables stay private
+- relationship lookups become graph-backed
+
+### Commit 3: ingest harness migration
+
+Modify:
+
+- `src/ingest/dcat-harness/IngestNode.ts`
+- `src/ingest/dcat-harness/IngestEdge.ts`
+- `src/ingest/dcat-harness/buildGraph.ts`
+- `src/ingest/dcat-adapters/eia-tree/index.ts`
+- relevant cold-start ingest tests
+
+Goal:
+
+- the harness becomes a consumer of the shared graph contract
+
+### Commit 4: search projection migration
+
+Modify:
+
+- `src/search/projectEntitySearchDocs.ts`
+- `src/search/projectFromDataLayer.ts`
+- `tests/entity-search-projector.test.ts`
+- `tests/entity-search-service.test.ts`
+
+Goal:
+
+- no local `SearchGraph`
+- projection uses only graph helpers and graph-backed relationship indexes
+
+### Commit 5: audit migration
+
+Modify:
+
+- `scripts/analysis/entity-search-audit/run-audit.ts`
+
+Goal:
+
+- audit measures the same graph-backed projection path the runtime uses
+
+### Commit 6: consumer cleanup
+
+Review and adjust:
+
+- `src/search/buildEntitySearchBundlePlan.ts`
+- `src/resolution/kernel/Bind.ts`
+- `tests/entity-search-bundle-plan.test.ts`
+
+Goal:
+
+- ensure lookup consumers remain stable after graph-backed derivation replaces
+  direct map ownership
+
+---
+
 ## Consumer migration plan
 
 ### Consumer 1: ingest harness
@@ -743,6 +1013,15 @@ continue to be built in parallel until the graph-backed version is proven.
 - [C6] `src/resolution/dataLayerRegistry.ts:252-403, 507-700`
 - [C7] `src/services/DataLayerRegistry.ts:19-69`
 - [C8] `src/domain/data-layer/variable.ts:31-80`
+- [C9] `src/search/buildEntitySearchBundlePlan.ts:26-161`
+- [C10] `src/resolution/kernel/Bind.ts:104-130`
+- [C11] `src/resolution/bundle/resolveDataReference.ts:16-220`
+- [C12] `src/search/projectFromDataLayer.ts:1-20`
+- [C13] `src/ingest/dcat-adapters/eia-tree/index.ts:1-100`
+- [C14] `tests/entity-search-projector.test.ts:150-242`
+- [C15] `tests/entity-search-bundle-plan.test.ts:22-26, 152-159`
+- [C16] `tests/entity-search-service.test.ts:25-33, 157-164`
+- [C17] `tests/data-layer-registry.test.ts:117-157`
 
 ### Effect Graph source
 
