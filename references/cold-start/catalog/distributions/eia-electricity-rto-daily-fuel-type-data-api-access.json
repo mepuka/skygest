@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWEJ0YNG8EZ1XY9TXYB",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWE90WTY6GZHVVXND8H",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/electricity/rto/daily-fuel-type-data/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

@@ -7,7 +7,7 @@
   "sourceRecordId": "aeso_fuel_mix",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-06-05T15:08:00+00:00",
-  "lastSeen": "2026-04-12T16:29:37+00:00",
-  "sourceModified": "2026-04-12T16:29:00+00:00",
+  "lastSeen": "2026-04-14T15:26:00+00:00",
+  "sourceModified": "2026-04-14T15:25:00+00:00",
   "isAuthoritative": true
 }

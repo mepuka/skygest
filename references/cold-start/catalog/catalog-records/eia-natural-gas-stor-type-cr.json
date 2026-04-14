@@ -1,0 +1,11 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KP69GMWKR26R3YMTMB24JAHM",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQEZ5VT3FPCV484JY8W8B5J",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KP69GMWKVZY6JVAT0JCZNXCH",
+  "harvestedFrom": "https://api.eia.gov/v2/natural-gas/stor/type/",
+  "firstSeen": "2026-04-14T15:24:46.023Z",
+  "lastSeen": "2026-04-14T15:24:46.023Z",
+  "isAuthoritative": true
+}

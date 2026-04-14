@@ -5,7 +5,6 @@
   "description": "<p>\nVolumes mensuels d'électricité (MWh) échangés entre responsables d'équilibre (RE) sur la bourse EPEX SPOT, en France, la veille pour livraison le lendemain (J-1).\n</p>\n<hr>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/volumes-echanges-epex-spot/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "Bilan annuel"
@@ -16,11 +15,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKFT54VD486M7QBGGZ7J"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

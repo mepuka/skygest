@@ -4,7 +4,6 @@
   "title": "Ember Installed Capacity Monthly",
   "description": "Get installed wind and solar capacity in a monthly grain.\n    e.g.\n\n`https://api.ember-energy.org/v1/installed-capacity/monthly?is_aggregate_entity=false&series=Solar,Wind&start_date=2020-01&api_key=MY_API_KEY`\n    \n\nThe methodology of this dataset can be found on its [dataset page](https://ember-energy.org/data/monthly-wind-and-solar-capacity-data/)\n    within the 'Methodology - Monthly Wind and Solar Capacity Data' pdf.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
-  "accessRights": "public",
   "license": "CC-BY-4.0",
   "keywords": [
     "installed-capacity",
@@ -14,11 +13,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KNX53R14TAMG6SGSQZ8T464N"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNX53R13BMFM6TQ8CKSG2VTV"
   ],
   "createdAt": "2026-04-11T02:14:38.945Z",
-  "updatedAt": "2026-04-11T02:14:54.829Z",
+  "updatedAt": "2026-04-14T15:25:55.593Z",
   "aliases": [
     {
       "scheme": "ember-route",

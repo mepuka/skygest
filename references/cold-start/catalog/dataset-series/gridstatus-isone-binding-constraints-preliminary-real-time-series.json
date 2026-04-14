@@ -1,0 +1,17 @@
+{
+  "_tag": "DatasetSeries",
+  "id": "https://id.skygest.io/dataset-series/dser_01KP69JZGE1H0NZGG72ABHZ5QA",
+  "title": "GridStatus ISO-NE Binding Constraints Preliminary Real Time",
+  "description": "Collection of GridStatus iso-ne binding constraints preliminary real time datasets published as separate but related feeds.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "cadence": "irregular",
+  "createdAt": "2026-04-14T15:26:00.064Z",
+  "updatedAt": "2026-04-14T15:26:00.064Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "series:isone_binding_constraints_preliminary_real_time",
+      "relation": "exactMatch"
+    }
+  ]
+}

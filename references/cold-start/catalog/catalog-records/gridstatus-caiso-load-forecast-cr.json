@@ -7,7 +7,7 @@
   "sourceRecordId": "caiso_load_forecast",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2024-04-12T17:37:18+00:00",
-  "lastSeen": "2026-04-12T16:26:37+00:00",
-  "sourceModified": "2026-04-12T16:10:00+00:00",
+  "lastSeen": "2026-04-14T15:25:02+00:00",
+  "sourceModified": "2026-04-13T16:10:00+00:00",
   "isAuthoritative": true
 }

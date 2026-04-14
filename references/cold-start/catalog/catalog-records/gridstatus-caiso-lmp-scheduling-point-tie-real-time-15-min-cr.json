@@ -7,7 +7,7 @@
   "sourceRecordId": "caiso_lmp_scheduling_point_tie_real_time_15_min",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-03-13T15:58:53+00:00",
-  "lastSeen": "2026-04-12T16:19:57+00:00",
-  "sourceModified": "2026-04-12T16:45:00+00:00",
+  "lastSeen": "2026-04-14T15:22:49+00:00",
+  "sourceModified": "2026-04-14T15:45:00+00:00",
   "isAuthoritative": true
 }

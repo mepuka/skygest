@@ -5,7 +5,6 @@
   "description": "[Publisher: iMio] All the directory sheets published on the public websites of the Walloon local authorities working with the iMio intercommunale.\nComposition of the dataset Field Labeled Description id Identifier Local unique identifier. type Type of contact Type of contact (organization, function,...). title Title of contact. subtitle Subtitle Subtitle of contact. contact_phones Phones Contact phone numbers. contact_emails E-mail addresses Contact e-mail addresses. vat_number VAT number Contact VAT number. description Description Description of the contact. taxonomy_contact_category Contact categories Contact categories. topics Themes Theme associated with contact. facilities Facilities Facilities associated with contact. Image Image Photo of the contact. coordinates Coordinates Geolocation of the contact. address_street_name Street name Contact street name. address_street_number House number Contact house number. address_postal_code Postcode Postcode of the contact. address_city Municipality Contact municipality. address_country Country of contact. urls Links Links to the contact's website. schedule Schedule Contact opening hours. multi_schedule Hours Additional hours related to the contact. owner_id Owner ID Data owner ID. owner_name Name of the owner Name of the owner of the data. creation_datetime Date of creation Date of creation of the contact form. modification_datetime Date of modification Last date of modification of the contact form.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/https-www-odwb-be-explore-dataset-contacts-en-wallonie-",
-  "accessRights": "public",
   "themes": [
     "energy",
     "agriculture",
@@ -17,11 +16,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP1CQKZ864FW05F8KQHX7D3P"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

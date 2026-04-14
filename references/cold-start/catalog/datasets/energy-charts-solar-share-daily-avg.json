@@ -4,7 +4,6 @@
   "title": "Energy Charts Solar Share Daily Avg",
   "description": "<b>Average daily solar share of load</b>\n    \n\n\n    \n\nReturns the average daily solar share of load of the last 365 days (year = -1) or for a given year if provided.\n    \n\n\n    \n\nResponse schema:\n    \n\n```json\n{\n    \"days\": [\"dd.mm.yyyy\"],\n    \"data\": [float],\n    \"deprecated\": bool\n}\n```",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNWVQMFHEZD7KVN03TEAVA1Q",
-  "accessRights": "public",
   "license": "https://creativecommons.org/licenses/by/4.0/",
   "keywords": [
     "solar_share_daily_avg"
@@ -12,11 +11,13 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KNWVQMFJDG9EVWC6DX4S6J6Y"
   ],
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KP69JMB7QRR3Y1EP2EY3Z7YK",
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNWVQMFH6QYQC1EQ63T1JNN3"
   ],
   "createdAt": "2026-04-10T23:30:44.590Z",
-  "updatedAt": "2026-04-10T23:31:05.948Z",
+  "updatedAt": "2026-04-14T15:25:47.701Z",
   "aliases": [
     {
       "scheme": "energy-charts-endpoint",

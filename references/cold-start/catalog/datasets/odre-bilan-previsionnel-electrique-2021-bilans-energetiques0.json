@@ -5,7 +5,6 @@
   "description": "<p>\nCe jeu de données présente un scénario commun sur les bilans énergétiques du système électrique français continental sur l'horizon 2021 - 2025 puis deux scénarios sur la coupe 2030.</p>\n<p>\nEn complément, des indicateurs sont fournis pour chaque année de étudiée :\n</p>\n<ul>\n<li>Emissions de CO2 du système électrique.</li>\n<li>Part des énergies renouvelables.</li>\n<li>Part du nucléaire dans la production.</li>\n</ul>\n<p>\nPour plus d'informations sur les scénarios, le bilan prévisionnel 2021 est disponible en téléchargement sur le site rte-france.com (<a href=\"https://www.rte-france.com/fr/article/bilan-previsionnel\" target=\"_blank\">https://www.rte-france.com/fr/article/bilan-previsionnel</a>).\n</p>\n<hr>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/bilan-previsionnel-electrique-2021-bilans-energetiques0/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "Prospective"
@@ -17,11 +16,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKG1N01QD1H02WY0KPC8"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

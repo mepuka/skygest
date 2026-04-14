@@ -5,7 +5,6 @@
   "description": "<p>\nCe jeu de données présente les données relatives à la localisation géographique et aux caractéristiques techniques des stations et des points de recharge de véhicules électriques ouverts au public.\n</p>\n<p>\nContexte : depuis le <a href=\"https://www.legifrance.gouv.fr/affichTexte.do?cidTexte=JORFTEXT000033860620&amp;dateTexte=&amp;categorieLien=id\">décret n° 2017-26 du 12 janvier 2017</a>, les données relatives à la localisation géographique et aux  caractéristiques techniques des stations et des points de recharge de  véhicules électriques ouverts au public doivent être publiées sur <a href=\"http://data.gouv.fr\">data.gouv.fr</a>. Le format des données est défini par <a href=\"https://www.legifrance.gouv.fr/affichTexte.do?cidTexte=JORFTEXT000033860733&amp;categorieLien=id\">l’arrêté du 12 janvier 2017</a>. Etalab réalise une consolidation régulière des fichiers déposés sur <a href=\"http://data.gouv.fr\">data.gouv.fr</a> avec le tag <code>irve</code></p><p>Vous trouverez la source <a href=\"https://www.data.gouv.fr/fr/datasets/fichier-consolide-des-bornes-de-recharge-pour-vehicules-electriques/\" target=\"_blank\">ici</a>.\n</p>\n<hr>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/bornes-irve/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "Tableau de Bord Régional"
@@ -17,11 +16,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKFXHAJWEYFFCP8VW1N1"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

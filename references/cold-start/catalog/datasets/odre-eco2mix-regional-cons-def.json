@@ -5,7 +5,6 @@
   "description": "<p>\nCe jeu de données, rafraîchi une fois par jour, présente les données régionales consolidées depuis janvier 2021 et définitives (de janvier 2013 à décembre 2024) issues de l'application éCO<sub>2</sub>mix. Elles sont élaborées à partir des comptages et complétées par des forfaits. Les données sont dites consolidées lorsqu'elles ont été vérifiées et complétées (livraison en milieu de M+1). Elles deviennent définitives lorsque tous les partenaires ont transmis et vérifié l'ensemble des comptages, (livraison deuxième trimestre A+1).\n</p>\n<p>\nVous y trouverez au pas demi-heure:\n</p>\n<ul>\n<li>La consommation réalisée.</li>\n<li>La production selon les différentes filières composant le mix énergétique.</li>\n<li>La consommation des pompes dans les Stations de Transfert d'Energie par Pompage (STEP).</li>\n<li>Le solde des échanges avec les régions limitrophes.</li></ul><p>Pour information, ci-dessous les définitions de TCO et TCH :</p><ul><li>TCO : le Taux de COuverture (TCO) d'une filière de production au sein d'une région représente la part de cette filière dans la consommation de cette région</li><li>TCH : le Taux de CHarge (TCH) ou facteur de charge (FC) d'une filière représente son volume de production par rapport à la capacité de production installée et en service de cette filière</li>\n</ul>\n<p>\nSi vous souhaitez consulter les données régionales \"temps réel\" après la dernière consolidation, vous pouvez suivre ce lien : <a href=\"https://opendata.reseaux-energies.fr/explore/dataset/eco2mix-regional-tr\">https://opendata.reseaux-energies.fr/explore/dataset/eco2mix-regional-tr</a>\n</p>\n<p>\nPour en savoir plus, n'hésitez pas à consulter le site éCO<sub>2</sub>mix à cette adresse : <a href=\"http://www.rte-france.com/fr/eco2mix/eco2mix\">http://www.rte-france.com/fr/eco2mix/eco2mix</a>\n</p>\n<p>\n<strong>Ce jeu de données est mis à jour automatiquement une fois par jour : en raison d'un nombre de téléchargements excessif des données éCO<sub>2</sub>mix régionales consolidées et définitives par des robots à des fréquences disproportionnées au regard de la fréquence de mise à jour du jeu de données, un quota de 50000 appels API par utilisateur et par mois a été mis en place. Si vous constatez des soucis d'accès aux données suite à la mise en place de ce quota, merci de nous contacter à l'adresse <a href=\"mailto:rte-opendata@rte-france.com\">rte-opendata@rte-france.com</a></strong>\n</p>\n<hr>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/eco2mix-regional-cons-def/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "éCO2mix"
@@ -18,11 +17,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKG44TMBH25SG901K1ED"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

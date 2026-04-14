@@ -5,7 +5,6 @@
   "description": "[Publisher: Statistikmyndigheten SCB - Statistiska centralbyrån] Electricity production, net and usage, in GWh by Production and usage, bidding zone and month",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/https-statistikdatabasen-scb-se-dataset-tab78",
-  "accessRights": "public",
   "license": "http://creativecommons.org/publicdomain/zero/1.0/",
   "themes": [
     "energy"
@@ -14,11 +13,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYD0E7AMRHD3XK0JWWK",
     "https://id.skygest.io/distribution/dist_01KP1CQKYDKHAAZ8S5H7H252JV"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

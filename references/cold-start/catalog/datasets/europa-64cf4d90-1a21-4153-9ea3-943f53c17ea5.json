@@ -1,0 +1,30 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69KF1C41TRHBAGPG30NM8T",
+  "title": "Leistungsvertrag Hauptpumpwerk Mörtinger (Stadtgemeinde Tulln an der Donau)",
+  "description": "[Publisher: Stadtgemeinde Tulln an der Donau] Leistungsvertrag Hauptpumpwerk Mörtinger",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
+  "landingPage": "https://data.europa.eu/data/datasets/64cf4d90-1a21-4153-9ea3-943f53c17ea5",
+  "license": "https://creativecommons.org/licenses/by/4.0/deed.de",
+  "themes": [
+    "energy",
+    "environment"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69KF1H2FNC987R6ZTGH33K",
+    "https://id.skygest.io/distribution/dist_01KP69KF1QTR0KJVTKYD0R4W1T"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
+  ],
+  "createdAt": "2026-04-14T15:26:15.788Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
+  "aliases": [
+    {
+      "scheme": "europa-dataset-id",
+      "value": "64cf4d90-1a21-4153-9ea3-943f53c17ea5",
+      "relation": "exactMatch"
+    }
+  ]
+}

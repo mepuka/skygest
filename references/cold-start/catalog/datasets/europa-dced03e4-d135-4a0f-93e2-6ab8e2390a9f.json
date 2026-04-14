@@ -5,7 +5,6 @@
   "description": "[Publisher: Gas Networks Ireland] Daily gas supply for Ireland from January 1 2018 to December 31 2025.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/dced03e4-d135-4a0f-93e2-6ab8e2390a9f",
-  "accessRights": "public",
   "temporal": "2018-01-01T00:00:00Z/2023-09-30T00:00:00Z",
   "themes": [
     "energy"
@@ -14,11 +13,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYPWZMYM6665R6FFH16",
     "https://id.skygest.io/distribution/dist_01KP1CQKYP4YWWQTSYWCTSKBC3"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

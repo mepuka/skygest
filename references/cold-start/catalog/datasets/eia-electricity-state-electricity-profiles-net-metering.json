@@ -1,0 +1,35 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69GMWFRSKV5HNDPHY5H6ZD",
+  "title": "Electricity Net Metering: Customers and Capacity",
+  "description": "Electricity net metering customer counts and capacity by state, sector, and generating technology.\n    Source: Form EIA-861\n    Product: State Electricity Profiles, Table 11",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "license": "https://www.eia.gov/about/copyrights_reuse.php",
+  "temporal": "2013/2024",
+  "keywords": [
+    "annual",
+    "sector",
+    "state",
+    "technology"
+  ],
+  "themes": [
+    "electricity",
+    "state-electricity-profiles"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69GMWFF4TWD9TTC5AYDZBM"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "electricity/state-electricity-profiles/net-metering",
+      "relation": "exactMatch"
+    }
+  ]
+}

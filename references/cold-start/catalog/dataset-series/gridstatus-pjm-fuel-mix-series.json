@@ -1,0 +1,17 @@
+{
+  "_tag": "DatasetSeries",
+  "id": "https://id.skygest.io/dataset-series/dser_01KP69JZGEVKC4ZYJRRX05052Y",
+  "title": "GridStatus PJM Fuel Mix",
+  "description": "Collection of GridStatus pjm fuel mix datasets published as separate but related feeds.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "cadence": "irregular",
+  "createdAt": "2026-04-14T15:26:00.064Z",
+  "updatedAt": "2026-04-14T15:26:00.064Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "series:pjm_fuel_mix",
+      "relation": "exactMatch"
+    }
+  ]
+}

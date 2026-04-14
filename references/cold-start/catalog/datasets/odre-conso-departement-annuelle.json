@@ -5,7 +5,6 @@
   "description": "<p>\nCe jeu de données est constitué à partir des données locales de consommation finale en MWh publiées par le Ministère de la Transition Écologique et Solidaire (état au 01/10/2020), regroupées par département.\n</p>\n<p>\nIl est utilisé dans le tableau de bord Régional (affichage cartographique).\n</p>\n<p>\nUne note méthodologique détaillant les traitements effectués sur les données du SDES pour constituer ce jeu de données est téléchargeable ci-dessous.\n</p>\n<hr>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/conso-departement-annuelle/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "Tableau de Bord Régional",
@@ -19,11 +18,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKFV2CB02020A3D99MJS"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

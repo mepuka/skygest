@@ -5,7 +5,6 @@
   "description": "Week-ahead net transfer capacity on cross-border interconnectors.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9",
   "landingPage": "https://transparency.entsoe.eu/",
-  "accessRights": "public",
   "keywords": [
     "transmission",
     "Art. 11.1(a)"
@@ -16,11 +15,13 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP1ASA1B2BS6KQRMA5TBCZFQ"
   ],
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KP69K4V37G8MCW9A3S1B3EVS",
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1ASA196ZW4HCGRC7TGWS41"
   ],
   "createdAt": "2026-04-12T17:10:46.402Z",
-  "updatedAt": "2026-04-12T17:10:46.402Z",
+  "updatedAt": "2026-04-14T15:26:07.918Z",
   "aliases": [
     {
       "scheme": "entsoe-document-type",

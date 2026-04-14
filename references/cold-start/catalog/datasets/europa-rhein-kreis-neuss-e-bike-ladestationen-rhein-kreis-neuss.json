@@ -5,7 +5,6 @@
   "description": "[Publisher: Rhein-Kreis Neuss]",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/rhein-kreis-neuss-e-bike-ladestationen-rhein-kreis-neuss",
-  "accessRights": "public",
   "license": "http://dcat-ap.de/def/licenses/dl-zero-de/2.0",
   "themes": [
     "transport",
@@ -29,11 +28,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZ0QX3QQC3DK8EJBJ9Y",
     "https://id.skygest.io/distribution/dist_01KP1CQKZ0CBSTFMTX9CC8JGSB"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

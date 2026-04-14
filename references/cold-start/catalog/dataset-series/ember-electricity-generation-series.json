@@ -1,0 +1,17 @@
+{
+  "_tag": "DatasetSeries",
+  "id": "https://id.skygest.io/dataset-series/dser_01KP69JS68P8PDQDDE3K3Y3K3P",
+  "title": "Ember Electricity Generation",
+  "description": "Collection of Ember electricity generation datasets grouped by reporting resolution.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
+  "cadence": "monthly",
+  "createdAt": "2026-04-14T15:25:55.593Z",
+  "updatedAt": "2026-04-14T15:25:55.593Z",
+  "aliases": [
+    {
+      "scheme": "ember-route",
+      "value": "electricity-generation",
+      "relation": "exactMatch"
+    }
+  ]
+}

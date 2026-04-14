@@ -5,7 +5,6 @@
   "description": "Ce jeu de données présente la consommation horaire maximale de gaz (en MWh PCS 0°C) par jour à la maille nationale sur le réseau de NaTran et de Teréga. Les données sont définitives. Les consommations maximum sont complétées par les valeurs des températures de référence et moyenne.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/consommation-journaliere-maximale-de-gaz-maille-nationale/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "Extremas"
@@ -17,11 +16,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKG0KJCPXBGWC0GTNMHR"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

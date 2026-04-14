@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWF6AYB0XSAECSE5PEF",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWFKHRH2TBMY9FG551B",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/electricity/state-electricity-profiles/capability/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

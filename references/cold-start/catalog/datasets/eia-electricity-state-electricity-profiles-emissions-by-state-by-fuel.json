@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69GMWEHDXVG3HM46RX4PE0",
+  "title": "Emissions from Energy Consumption at Conventional Power Plants and Combined-Heat-and-Power Plants",
+  "description": "Emissions from electricity generation and the production of useful thermal output at conventional power plants and combined-heat-and-power plants.\n    See Electric Power Annual, Technical Notes for a description of the sources and methodology used to develop the emissions estimates.\n    Sources: Forms EIA-860, EIA-923, and calculations made by the Office of  Energy Production, Conversion & Delivery (EPCD)\n    Product: State Electricity Profiles, Table 7",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "license": "https://www.eia.gov/about/copyrights_reuse.php",
+  "temporal": "1990/2024",
+  "keywords": [
+    "annual",
+    "fuelid",
+    "stateid"
+  ],
+  "themes": [
+    "electricity",
+    "state-electricity-profiles"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69GMWEMQ9MZD9N1S9K3Y4R"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "electricity/state-electricity-profiles/emissions-by-state-by-fuel",
+      "relation": "exactMatch"
+    }
+  ]
+}

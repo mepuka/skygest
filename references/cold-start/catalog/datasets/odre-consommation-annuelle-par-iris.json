@@ -5,7 +5,6 @@
   "description": "<p>\n\tCe jeu de données présente les consommations de gaz et d'électricité annuelles (MWh) des sites industriels raccordés aux réseaux de transport de NaTran, Teréga et RTE, et leur nombre, par maille géographique IRIS (dernier référentiel disponible 2023) .</p><p>\n\tLes mailles IRIS (Ilots Regroupés pour l'Information Statistique) sont référencées par l'INSEE.</p><p>\n\tLes données sont des mesures brutes de quantités livrées de gaz et d'électricité aux points de livraison industriels.</p><hr>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/consommation-annuelle-par-iris/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "LTECV",
@@ -18,11 +17,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKG2YCQ2QYT3Q1DQZVGS"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

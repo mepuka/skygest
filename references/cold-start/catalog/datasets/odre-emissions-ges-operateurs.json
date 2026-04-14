@@ -5,7 +5,6 @@
   "description": "<p>Le bilan des émissions de gaz à effet de serre (BEGES) est une empreinte carbone qui comprend les émissions directes et indirectes des activités d’une organisation. Les partenaires ont fait le choix de prendre en compte un périmètre large avec, notamment, les émissions indirectes liées au cycle de vie de leur patrimoine industriel et tertiaire. </p><ul><li>Le scope 3 qui  correspond aux autres émissions indirectes de GES n'est pas affiché ici. Ce jeu de données présente les émissions de GES en kt éq. CO<sub>2</sub> pour chacune des sources d’émission pour les scope 1 et 2. </li><li>Le scope 1 correspond aux émissions directes de GES : sources de gaz à effet de serre, fixes et mobiles, contrôlées par l'opérateur. </li><li>Le scope 2 correspond aux émissions indirectes de GES associée à l’énergie : provenant de la production de l'électricité, de la chaleur ou de la vapeur achetées et consommées par l'opérateur pour ses activités.\n</li></ul><p>\nPour plus de détails pour RTE, vous pouvez vous rendre\nsur le site institutionnel de RTE : <a href=\"https://assets.rte-france.com/prod/public/2023-11/Synthese-bilan-gaz-effe-serre-plan-de-transition-2023-2026_0.pdf\" target=\"_blank\">BEGES2023</a></p><p>Pour plus de détails pour NaTran, vous pouvez vous rendre sur le site institutionnel de NaTran : <a href=\"https://www.natrangroupe.com/nos-actions/preservation-environnement\" target=\"_blank\">Préservons notre environnement</a><br>\n</p>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/emissions-ges-operateurs/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "GES",
@@ -17,11 +16,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKFW16YPN5N603Q0S7TE"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

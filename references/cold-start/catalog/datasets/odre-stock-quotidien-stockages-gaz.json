@@ -5,7 +5,6 @@
   "description": "<p>Ce jeu de données présente le stock de gaz présent dans les stockages de gaz de Teréga et Storengy, par PITS et en fin de journée gazière depuis le 1<sup>er</sup> novembre 2010 (GWh  \t<a href=\"https://opendata.reseaux-energies.fr/pages/glossaire/\">PCS</a> 0°C).</p><hr>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/stock-quotidien-stockages-gaz/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "themes": [
     "Stockage"
@@ -13,11 +12,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKG5K7H14JJNFHDETSZZ"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

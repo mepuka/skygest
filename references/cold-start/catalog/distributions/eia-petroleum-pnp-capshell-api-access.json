@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWQHC82G9GAAQ3JABBV",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWQ7TMBT9Q88C9K3NHX",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/petroleum/pnp/capshell/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

@@ -7,7 +7,7 @@
   "sourceRecordId": "pjm_net_exports_by_state_hourly",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-07-11T21:22:12+00:00",
-  "lastSeen": "2026-04-12T16:21:16+00:00",
-  "sourceModified": "2026-04-12T15:00:00+00:00",
+  "lastSeen": "2026-04-14T15:21:41+00:00",
+  "sourceModified": "2026-04-14T14:00:00+00:00",
   "isAuthoritative": true
 }

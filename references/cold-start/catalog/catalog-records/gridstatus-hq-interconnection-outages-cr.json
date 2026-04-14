@@ -7,7 +7,7 @@
   "sourceRecordId": "hq_interconnection_outages",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2026-01-12T20:17:06+00:00",
-  "lastSeen": "2026-04-12T08:33:16+00:00",
+  "lastSeen": "2026-04-14T08:31:00+00:00",
   "sourceModified": "2026-03-27T00:00:00+00:00",
   "isAuthoritative": true
 }

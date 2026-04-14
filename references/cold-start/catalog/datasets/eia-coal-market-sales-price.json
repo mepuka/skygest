@@ -1,0 +1,33 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69GMWA8Z2114AX6YCTK574",
+  "title": "Market Sales Price",
+  "description": "Coal market sales prices and amounts by mine types for \r\n        regions and states (unless withheld for pricing protections).  Source: EIA Form \r\n            7A and MSHA Form 7000-2.  Interactive browser:  https://www.eia.gov/coal/data/browser/",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "license": "https://www.eia.gov/about/copyrights_reuse.php",
+  "temporal": "2001/2024",
+  "keywords": [
+    "annual",
+    "marketTypeId",
+    "stateRegionId"
+  ],
+  "themes": [
+    "coal"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69GMWAGGFGAHTP11MMTN2G"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "coal/market-sales-price",
+      "relation": "exactMatch"
+    }
+  ]
+}

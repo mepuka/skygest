@@ -5,7 +5,6 @@
   "description": "[Publisher: Bezirksregierung Arnsberg]",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/83bde471-df87-4d9c-ab3b-96f50b103a24",
-  "accessRights": "public",
   "license": "http://dcat-ap.de/def/licenses/dl-zero-de/2.0",
   "themes": [
     "environment",
@@ -14,14 +13,15 @@
   ],
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP1CQKZTC7J3QKRYSEEGZRVP",
-    "https://id.skygest.io/distribution/dist_01KP1CQKZT1BWFWQQDJBM03J75",
-    "https://id.skygest.io/distribution/dist_01KP1CQKZTB0P717G134TWE66F"
+    "https://id.skygest.io/distribution/dist_01KP1CQKZTB0P717G134TWE66F",
+    "https://id.skygest.io/distribution/dist_01KP1CQKZT1BWFWQQDJBM03J75"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

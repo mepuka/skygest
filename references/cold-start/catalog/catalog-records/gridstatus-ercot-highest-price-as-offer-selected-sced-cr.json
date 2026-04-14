@@ -7,7 +7,7 @@
   "sourceRecordId": "ercot_highest_price_as_offer_selected_sced",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-12-16T00:22:28+00:00",
-  "lastSeen": "2026-04-12T08:19:39+00:00",
-  "sourceModified": "2026-04-10T04:55:18+00:00",
+  "lastSeen": "2026-04-14T08:14:56+00:00",
+  "sourceModified": "2026-04-12T04:55:22+00:00",
   "isAuthoritative": true
 }

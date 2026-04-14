@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWEDFK3TZ37EB659KJE",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWE9RSM8V66NMBQ8CC7",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/electricity/rto/region-data/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

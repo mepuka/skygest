@@ -5,7 +5,6 @@
   "description": "The guidance documents in this section have been put together to provide with you information on the different types of Flood Data that is available on the Smart Dublin Open Data portal and how to access it. Please read the guidelines carefully and if you have any issues, please contact the Smart Dublin team at: data@smartdublin.ie. \r\nThe guidelines will provide you with information on the following:\r\n-What Flood Data is Available?\r\n- How do I access the flood data - getting set-up guidelines\r\n- Terms and Conditions for Flood Data Usage\r\n- Links to the Data Access Request Form\r\n- Flood Data Licensing Information\r\n",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/e0e2dbc1-9a62-4a24-b666-6418b84bf0d1",
-  "accessRights": "public",
   "themes": [
     "energy"
   ],
@@ -16,11 +15,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYN4Z7CW14JZEJ73Y39",
     "https://id.skygest.io/distribution/dist_01KP1CQKYNXGDAGWZET39A4NVE"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

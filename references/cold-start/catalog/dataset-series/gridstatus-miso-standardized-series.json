@@ -1,0 +1,17 @@
+{
+  "_tag": "DatasetSeries",
+  "id": "https://id.skygest.io/dataset-series/dser_01KP69JZGEV6TJN7JVY063NJA2",
+  "title": "GridStatus MISO Standardized",
+  "description": "Collection of GridStatus miso standardized datasets published as separate but related feeds.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
+  "cadence": "irregular",
+  "createdAt": "2026-04-14T15:26:00.064Z",
+  "updatedAt": "2026-04-14T15:26:00.064Z",
+  "aliases": [
+    {
+      "scheme": "gridstatus-dataset-id",
+      "value": "series:miso_standardized",
+      "relation": "exactMatch"
+    }
+  ]
+}

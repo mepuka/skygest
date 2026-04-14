@@ -5,7 +5,6 @@
   "description": "[Publisher: Ville de Genève] Toujours très dynamique en matière de démocratisation de l'accès à Internet, la Ville de Genève propose au public un réseau de points d'accès Wi-Fi gratuits. Pour se connecter au réseau, il faut se situer dans une zone d'accès Wi-Fi couverte par l'émetteur de la Ville de Genève, puis sélectionner le réseau \"ville-geneve\". Vous aurez alors la possibilité de vous connecter, si vous possédez un compte, ou d'en obtenir un gratuitement par SMS.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/vdg_wifi_public-ville-geneve",
-  "accessRights": "public",
   "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by_ask",
   "themes": [
     "regions",
@@ -23,11 +22,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYV9E8QPZV43ZFGW9GN",
     "https://id.skygest.io/distribution/dist_01KP1CQKYV2052741QN58VV46Y"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

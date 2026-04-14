@@ -7,7 +7,7 @@
   "sourceRecordId": "caiso_storage_energy_bids_ifm",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2026-04-10T03:34:57+00:00",
-  "lastSeen": "2026-04-12T16:29:32+00:00",
-  "sourceModified": "2026-04-10T06:00:00+00:00",
+  "lastSeen": "2026-04-14T15:23:55+00:00",
+  "sourceModified": "2026-04-13T06:00:00+00:00",
   "isAuthoritative": true
 }

@@ -5,7 +5,6 @@
   "description": "[Publisher: ORES] Name of the report : Number of notifications of active charging stations based on the form filled in by the customer\nLevel of aggregation : The dataset contains information aggregated by energy source (electricity/gas), geographical sector and locality.\nScope : Reporting on all charging stations reported by ORES customers\nEnergy sources : electricity\nFrequency : monthly\nGeographical sector : \"The geographical sectors correspond to the areas of the former inter-municipal communities before the merger. These are territorial subdivisions of ORES Assets, which include some shareholders (affiliated municipalities and financial inter-municipalities) by geographical area.\nThe following link will take you to the list of municipalities allocated to the geographical sector.\"\nhttps://www.oresassets.be/fr/territoires-d-activites-et-secteurs\nPostal code : Postal code of the town\nLocality : A locality is a territorial unit of definite or indefinite area that is generally inhabited. A municipality generally corresponds to either a town with surrounding villages, several nearby villages or a single central there with surrounding hamlets. The term \"locality\" refers to these municipal subdivisions.\nIn operation / out of operation :\nIn operation: The charging station is active.Except for operation: The charging station is inactive.Date of commissioning/decommissioning : \"Date on which the charging station was put into operation or out of service\nFuture data shall be excluded from reporting.\"\nPrivate charging station/public charging station : \n\"Private charging station: can only be used by the customerPublic charging station: It can be used by all road users. Recharging point to which the owner or the operator gives access to the users of an electric car in a non-discriminatory manner. Brand of the manufacturer of the charging station\nModel : Model of the brand used\nMax. power (kW) : Available charging power for the charging station concerned in kW\nNumber of plugs : Number of plugs/connections at the charging station. With 2 or more plugs, several vehicles can charge at the same station at the same time. \nBidirectional \"Yes / No :\nOne speaks of a bidirectional charging station, if it can not only charge the vehicle, but also use the vehicle battery to supply an apartment with electricity or feed energy into the grid (V2G technology).\nIntelligent \"Yes / No :\nThe smart charging station is a domestic charging station that allows a balanced use of energy between the customer's charging station and the other electrical appliances in his household. In short, the customer can charge his vehicle and at the same time use other energy-intensive devices without overloading.\n_Number of active charging stations Allows the calculation of the total number of reported active charging stations. The rows of the record with the same data are grouped, one row of the record can contain several active charging stations.\nRemaining exception category : \"GDPR measures:\n\n\nIf there are less than 2 charging points (1 point) per locality, this will be anonymized under an \"EXC\" code. \nThis rule shall be applied so that it is not possible to derive a specific customer from the characteristics of the charging stations.\"",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/https-www-odwb-be-explore-dataset-declarations_bornes_rechargement_formulaires_clients_mensuel-",
-  "accessRights": "public",
   "license": "CC_BY_4_0",
   "temporal": "2022-04-30T23:00:00Z/",
   "themes": [
@@ -15,11 +14,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP1CQKZG8C8EAPPSD6FQPAES"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

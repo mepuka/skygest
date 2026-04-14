@@ -7,7 +7,7 @@
   "sourceRecordId": "ercot_hub_name_dc_ties",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2026-03-06T20:20:29+00:00",
-  "lastSeen": "2026-04-11T18:03:38+00:00",
+  "lastSeen": "2026-04-13T18:04:11+00:00",
   "sourceModified": "2026-03-18T05:00:00+00:00",
   "isAuthoritative": true
 }

@@ -7,6 +7,6 @@
   "sourceRecordId": "caiso_fuel_regions",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2024-09-04T16:23:46+00:00",
-  "lastSeen": "2026-04-09T21:28:14+00:00",
+  "lastSeen": "2026-04-13T22:01:21+00:00",
   "isAuthoritative": true
 }

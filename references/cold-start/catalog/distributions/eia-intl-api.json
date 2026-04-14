@@ -7,9 +7,9 @@
   "accessURL": "https://api.eia.gov/v2/international",
   "mediaType": "application/json",
   "format": "json",
-  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y",
   "accessRights": "public",
-  "aliases": [],
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y",
   "createdAt": "2026-04-12T00:00:00.000Z",
-  "updatedAt": "2026-04-12T00:00:00.000Z"
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
 }

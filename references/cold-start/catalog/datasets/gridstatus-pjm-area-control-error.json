@@ -8,7 +8,6 @@
   ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/pjm_area_control_error",
-  "accessRights": "public",
   "temporal": "2025-01-09T00:00:01+00:00/2026-04-11T02:40:46+00:00",
   "keywords": [
     "pjm_area_control_error",
@@ -23,11 +22,12 @@
     "https://id.skygest.io/distribution/dist_01KNX70F5GKDAAGHFV84X6SJN4",
     "https://id.skygest.io/distribution/dist_01KNX70F5G1EEB6D914ZM05M86"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-12T16:29:41.516Z",
+  "updatedAt": "2026-04-14T15:26:00.064Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

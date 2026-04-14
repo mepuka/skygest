@@ -5,7 +5,6 @@
   "description": "[Publisher: Dublin City Council] CSV &amp; GeoJSON datasets of DCC’s public bin locations.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/6cbabf95-6b81-48e7-a2b8-b2345bbe80a1",
-  "accessRights": "public",
   "themes": [
     "energy"
   ],
@@ -17,11 +16,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYZ9P6VFQQ669XBA8PF",
     "https://id.skygest.io/distribution/dist_01KP1CQKYZ2HHRGB187VMBCZ31"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

@@ -5,7 +5,6 @@
   "description": "[Publisher: Statistisches Amt] Dieser Datensatz beinhaltet den täglichen Stromverbrauch sowie den mittels eines Modells berechneten, anhand des Kalendertages und der Witterung zu erwartenden Stromverbrauch.Der Stromverbrauch ist die Summe der elektrischen Energie, die im Kanton Basel-Stadt täglich aus dem Netz bezogen wird, inklusive Netzverluste. Der tägliche Stromverbrauch ergibt sich als Summe des viertelstündlich ausgewiesenen Stromverbrauchs im OGD-Datensatz \"Kantonaler Stromverbrauch\" ([https://data.bs.ch/explore/dataset/100233/](https://data.bs.ch/explore/dataset/100233/)).Der Code des Modells kann selber ausgeführt und weiterentwickelt werden. Hierfür wird Renku verwendet. Renku ist eine Plattform, die verschiedene Werkzeuge für reproduzierbare und kollaborative Datenanalyseprojekte bündelt:[https://renkulab.io/p/statabs/erwarteter-stromverbrauch-basel-stadt](https://renkulab.io/p/statabs/erwarteter-stromverbrauch-basel-stadt)",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/100245-kanton-basel-stadt",
-  "accessRights": "public",
   "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by",
   "themes": [
     "energy"
@@ -21,11 +20,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZKXPM75HRG3P9HQXXS",
     "https://id.skygest.io/distribution/dist_01KP1CQKZK9ESXX93ZA43JSDTF"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

@@ -7,7 +7,7 @@
   "sourceRecordId": "ercot_sced_smne_60_day",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2023-07-14T21:33:01+00:00",
-  "lastSeen": "2026-04-12T11:39:00+00:00",
-  "sourceModified": "2026-02-12T05:59:59+00:00",
+  "lastSeen": "2026-04-14T11:36:52+00:00",
+  "sourceModified": "2026-02-14T05:59:59+00:00",
   "isAuthoritative": true
 }

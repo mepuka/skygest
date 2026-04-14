@@ -7,7 +7,7 @@
   "sourceRecordId": "eia_henry_hub_natural_gas_spot_prices_daily",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2024-09-07T18:18:04+00:00",
-  "lastSeen": "2026-04-12T03:46:39+00:00",
+  "lastSeen": "2026-04-14T03:40:07+00:00",
   "sourceModified": "2026-04-07T05:00:00+00:00",
   "isAuthoritative": true
 }

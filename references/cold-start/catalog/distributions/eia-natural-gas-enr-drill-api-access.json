@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWHDW01TK6EG5G641CQ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWHPNWRT26NT4RYAY9Y",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/natural-gas/enr/drill/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

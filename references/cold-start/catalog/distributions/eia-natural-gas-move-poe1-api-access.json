@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWJ06HYQJD5T8R37M27",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWJYCT6V7M4T8Z69NZR",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/natural-gas/move/poe1/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

@@ -7,7 +7,7 @@
   "sourceRecordId": "spp_lmp_day_ahead_hourly",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2023-04-20T05:00:40+00:00",
-  "lastSeen": "2026-04-12T16:29:40+00:00",
-  "sourceModified": "2026-04-13T04:00:00+00:00",
+  "lastSeen": "2026-04-14T15:25:30+00:00",
+  "sourceModified": "2026-04-15T04:00:00+00:00",
   "isAuthoritative": true
 }

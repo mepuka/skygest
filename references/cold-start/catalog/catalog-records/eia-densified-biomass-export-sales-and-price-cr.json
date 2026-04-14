@@ -1,0 +1,11 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KP69GMWBXDHMVXS2T26MDRRC",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQEZ5VT3FPCV484JY8W8B5J",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KP69GMWBK79M60348BV496RV",
+  "harvestedFrom": "https://api.eia.gov/v2/densified-biomass/export-sales-and-price/",
+  "firstSeen": "2026-04-14T15:24:46.023Z",
+  "lastSeen": "2026-04-14T15:24:46.023Z",
+  "isAuthoritative": true
+}

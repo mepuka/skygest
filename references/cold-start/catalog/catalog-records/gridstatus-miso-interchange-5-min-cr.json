@@ -7,7 +7,7 @@
   "sourceRecordId": "miso_interchange_5_min",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-06-06T23:35:44+00:00",
-  "lastSeen": "2026-04-12T16:28:33+00:00",
-  "sourceModified": "2026-04-12T16:15:00+00:00",
+  "lastSeen": "2026-04-14T15:25:46+00:00",
+  "sourceModified": "2026-04-14T15:15:00+00:00",
   "isAuthoritative": true
 }

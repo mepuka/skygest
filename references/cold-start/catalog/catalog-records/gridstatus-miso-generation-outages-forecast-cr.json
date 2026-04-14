@@ -7,7 +7,7 @@
   "sourceRecordId": "miso_generation_outages_forecast",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2024-10-18T17:06:09+00:00",
-  "lastSeen": "2026-04-10T23:50:32+00:00",
-  "sourceModified": "2026-04-10T05:00:00+00:00",
+  "lastSeen": "2026-04-13T23:50:01+00:00",
+  "sourceModified": "2026-04-13T05:00:00+00:00",
   "isAuthoritative": true
 }

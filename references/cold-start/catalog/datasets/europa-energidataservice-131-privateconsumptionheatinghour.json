@@ -5,7 +5,6 @@
   "description": "[Publisher: Energinet] Hourly consumption of private households by housing and heating categories by municipality.\n\nData is updated with a 9-15 day delay.\n**Housing categories** are created based on Bygnings- og Boligregistret (BBR)'s building usage codes [BygAnvendelse](https://teknik.bbr.dk/kodelister/0/1/0/BygAnvendelse) whereas **heating categories** are based on Bygnings- og Boligregistret (BBR)'s heating installation codes [Varmeinstallation](https://instruks.bbr.dk/varmeinstallation1/0/31). Heating installations are grouped in two categories: 'Elvarme eller varmepumpe' (Electric heating or heat pump) and 'Andet' (Other).\n\nTo comply with laws regarding the protection of private data, **methods for anonymizing data \nhave been applied**. This dataset uses number and dominance as a criterion for confidentiality. The number criteria is set to 20 and the dominance criteria is set to 60 percent per hour for 3 hours straight. \nIn case of the criteria being exceeded, the dataset will combine data columns or aggregate data columns to a high level in the following order: \n1. Housing categories being combined\n2. Heating categories being combined\n3. Municipalities being combined  and/or aggregated\n4. Time being combined and/or aggregated",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/energidataservice_131_privateconsumptionheatinghour",
-  "accessRights": "public",
   "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
   "temporal": "2021-01-01T00:00:00Z/",
   "themes": [
@@ -15,11 +14,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZW2EHR0HHGSE9S4AWB",
     "https://id.skygest.io/distribution/dist_01KP1CQKZWP66JN5RSA8SCKGT2"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

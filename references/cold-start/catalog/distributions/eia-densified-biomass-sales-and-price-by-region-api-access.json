@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWB5281WNKNH5XCM54J",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWBEY9KN4RJ99J5RNM3",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/densified-biomass/sales-and-price-by-region/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

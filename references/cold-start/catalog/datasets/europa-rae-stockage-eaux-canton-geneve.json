@@ -5,7 +5,6 @@
   "description": "[Publisher: Office cantonal de l'eau] Cette couche contient autant les ouvrages stockant des eaux pluviales ou usées. Un bassin de rétention d'eaux pluviales a pour but d'écrêter les débits entrant dans celui-ci, soit en vue d'une protection hydraulique du réseau situé en aval, soit en vue d'une protection du milieu récepteur contre les effets néfastes de déversements d'eaux pluviales urbaines sur son hydrologie naturelle. Afin de limiter le nombre de déversements d'eaux mélangées dans le milieu récepteur en temps de pluie, il est possible d'installer un ouvrage de rétention sur un réseau unitaire, stockant les déversements lors d'épisode pluvieux et les restituant ultérieurement dans le réseau pour traitement à la station d'épuration. Le fonctionnement est identique à celui d'un bassin de rétention des eaux pluviales. Il porte généralement le nom de bassin de stockage-restitution (ou BEP pour bassin d'eaux pluviales, terminologie pouvant prêter à confusion avec un bassin de rétention des eaux pluviales). Ces objets font également partie du produit \"Cadastre du réseau d'assainissement des eaux\".",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/rae_stockage_eaux-canton-geneve",
-  "accessRights": "public",
   "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by",
   "themes": [
     "society",
@@ -23,11 +22,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYW9V6RVQ2PBZ8KV6VB",
     "https://id.skygest.io/distribution/dist_01KP1CQKYWHZMKJCX413QR621Z"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

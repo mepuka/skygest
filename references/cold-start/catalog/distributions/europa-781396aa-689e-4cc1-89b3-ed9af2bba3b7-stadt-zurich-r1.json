@@ -1,0 +1,15 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69KF2CNJGP59GQVVAAP70D",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69KF1YZGEXKMQ8YS00CNMS",
+  "kind": "download",
+  "title": "JSON distribution",
+  "accessURL": "https://www.stadt-zuerich.ch/geodaten/download/VBZ_Infrastruktur_OGD?format=10009",
+  "mediaType": "application/json",
+  "format": "json",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-14T15:26:15.788Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
+  "aliases": []
+}

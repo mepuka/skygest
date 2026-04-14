@@ -7,7 +7,7 @@
   "sourceRecordId": "caiso_storage_soc_rtd",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2026-04-10T03:34:57+00:00",
-  "lastSeen": "2026-04-10T23:52:16+00:00",
-  "sourceModified": "2026-04-09T06:55:00+00:00",
+  "lastSeen": "2026-04-13T17:08:50+00:00",
+  "sourceModified": "2026-04-10T06:55:00+00:00",
   "isAuthoritative": true
 }

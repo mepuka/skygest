@@ -5,7 +5,6 @@
   "description": "<p>\n</p><p class=\"MsoNormal\" style=\"margin-bottom:0cm;line-height:14.25pt;background:\n#FFFFFE\"><b><i><span style='font-size:10.5pt;font-family:Consolas;mso-fareast-font-family:\n\"Times New Roman\";mso-bidi-font-family:\"Times New Roman\";color:blue;mso-fareast-language:\nFR'>ATTENTION</span></i></b><i><span style='font-size:10.5pt;font-family:Consolas;\nmso-fareast-font-family:\"Times New Roman\";mso-bidi-font-family:\"Times New Roman\";\ncolor:blue;mso-fareast-language:FR'> : les données du 1er mai 2022 au 26\njuin 2025 sont surestimées. Les valeurs corrigées sont disponibles dans le jeu\nde données « consolidées ».</span></i></p><p class=\"MsoNormal\" style=\"margin-bottom:0cm;line-height:14.25pt;background:\n#FFFFFE\"><i><span style='font-size:10.5pt;font-family:Consolas;\nmso-fareast-font-family:\"Times New Roman\";mso-bidi-font-family:\"Times New Roman\";\ncolor:blue;mso-fareast-language:FR'><br></span></i></p><p>Ce jeu de données présente, depuis le 1er janvier 2020, les valeurs provisoires des soutirages des consommateurs et des producteurs raccordés au réseau de transport d'électricité (RTE), par jour, par regroupement d'activités économiques du premier niveau (section), par tension de raccordement et par demi-heure. Ces données sont élaborées à partir des équipements de comptage.\n</p>\n<p>\nPour chaque demi-heure, la puissance est fournie en MW. L'énergie journalière est exprimée en MWh.\n</p>\n<p>\nLes valeurs d'un jour donné sont publiées en version provisoire le jour suivant. Les données du week-end sont visibles à partir du lundi suivant. Par ailleurs, le non-respect du <a href=\"https://opendata.reseaux-energies.fr/pages/glossaire/\">secret statistique</a> par demi-heure peut conduire à masquer la ligne correspondant à la journée, au secteur d'activité et la tension de raccordement concernés.</p><p>Depuis le 23 juin 2022, une modification du modèle utilisé pour définir le secret statistique peut amener à prendre en compte des valeurs qui étaient exclues auparavant.<br></p><p>\n</p>\n<p>\nCe jeu de données est publié conformément à l'article D 111-66 du code de l'énergie et en application de l'arrêté du 29 décembre 2017 (Loi pour une République Numérique).\n</p>\n<hr>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/soutirages-quotidiens-provisoires-rpt-par-section/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "themes": [
     "Consommation"
@@ -13,11 +12,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKFXD34S4F3DR99GRES7"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

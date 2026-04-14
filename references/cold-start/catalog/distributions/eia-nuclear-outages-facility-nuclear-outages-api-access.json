@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWB2HNBHGFXC1K4QZA7",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWBENQGJJJK56F2HYG7",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/nuclear-outages/facility-nuclear-outages/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

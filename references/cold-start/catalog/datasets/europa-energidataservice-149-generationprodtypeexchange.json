@@ -5,7 +5,6 @@
   "description": "[Publisher: Energinet] Production per fuel, exchange and total consumption per bidding zone.\n\nThe dataset combines fast updated data with more correct settlement data. Only the best data is shown per time period. No filters are needed.\n\nThe dataset replaces [Electricity Balance Non-Validated](https://www.energidataservice.dk/tso-electricity/ElectricityBalanceNonv), which will be discontinued in the beginning of the new year, and deleted at a later date.\nVersions:\n* Initial: Based on online power signal to Energinet's SCADA system. Published shortly after end of period.\n* Preliminary: Based on settlement data, however divided on fuels based on last year data per power plant. 8-10 days delay.\n* Final: Based on settlement data, division on fuels based on data per power plant in the relevant year. Published June 1 the following year.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/energidataservice_149_generationprodtypeexchange",
-  "accessRights": "public",
   "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
   "temporal": "2015-01-01T00:00:00Z/",
   "themes": [
@@ -15,11 +14,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZVGHA42VG79C4PQQMT",
     "https://id.skygest.io/distribution/dist_01KP1CQKZV1YKS6276Z8WTVQ16"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

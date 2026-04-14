@@ -5,7 +5,6 @@
   "description": "[Publisher: Industrielle Werke Basel] IWB baut im Kanton Basel-Stadt ein Netz leistungsfähiger öffentlich zugänglicher Ladestationen auf, um der umweltfreundlichen und gerade für Ballungsgebiete idealen Elektromobilität entscheidende Impulse zu geben. Hier finden Sie unsere Ladestationen.\nIn der Pilotphase wurden die Parkplätze mit LoRa-angebunden Sensoren ausgestattet. Ziel war es festzustellen, ob Parkplätze durch Fahrzeuge besetzt werden, ohne dass diese einen aktiven Ladevorgang vornehmen. Nach internen Abstimmungen wird die IWB die Übermittlung der Daten ab ca. Mitte September 2022 nicht weiterführen. Gründe dafür sind Schwierigkeiten bei der Übertragung der Werte sowie eine fehlende Relevanz für die Praxis. Beim Roll-Out der weiteren öffentlichen Ladestationen auf Allmend werden voraussichtlich keine LoRa-Sensoren mehr verbaut.\nEchtzeitdaten zur Belegung der Elektroauto-Ladestationen der gesamten Schweiz basierend auf dem Status des Ladevorgangs sind hier zu finden: [https://opendata.swiss/de/dataset/ladestationen](https://opendata.swiss/de/dataset/ladestationen)",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/100005-kanton-basel-stadt",
-  "accessRights": "public",
   "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by_ask",
   "themes": [
     "energy",
@@ -25,15 +24,16 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYS8FP0J29WH50SXGC2",
     "https://id.skygest.io/distribution/dist_01KP1CQKYSJ2JSXW1DB2EBT40M",
     "https://id.skygest.io/distribution/dist_01KP1CQKYSWP7APY834A6CV8Y6",
-    "https://id.skygest.io/distribution/dist_01KP1CQKYSRPANKXSQ754G7WKV",
     "https://id.skygest.io/distribution/dist_01KP1CQKYS8YFD1QTTQAKD4PBA",
+    "https://id.skygest.io/distribution/dist_01KP1CQKYSRPANKXSQ754G7WKV",
     "https://id.skygest.io/distribution/dist_01KP1CQKYSB4T8FX52DNGKRT5Z"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

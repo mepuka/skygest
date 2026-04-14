@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69KG1TSM2KJTE3RG8AQ8Z5",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZTW6MC8C3TE71R310H",
+  "kind": "download",
+  "title": "GEOGRAPHIC MARKUP LANGUAGE (GML) distribution",
+  "accessURL": "https://www.opengeodata.nrw.de/produkte/umwelt_klima/wasser/trinkwasser/wasserschutzgebiete/",
+  "format": "geographic markup language (gml)",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-14T15:26:15.788Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
+  "aliases": []
+}

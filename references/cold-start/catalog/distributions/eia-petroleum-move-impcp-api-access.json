@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWSWFEQX13CS8SANRGM",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWS0XZMYES48FYTZBQM",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/petroleum/move/impcp/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWM11XPWHBM6G72V5RC",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWMY6M0GMW5D4DEY05N",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/petroleum/pri/dfp3/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWHA87V90WAZSD2WE8A",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWHKF74T241YBKFSB1P",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/natural-gas/enr/seis/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

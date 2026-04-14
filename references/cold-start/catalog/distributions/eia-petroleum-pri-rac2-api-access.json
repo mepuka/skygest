@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWM0DDADQRRS52B7NC3",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWMRHFGD3PNCMA9CMBY",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/petroleum/pri/rac2/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

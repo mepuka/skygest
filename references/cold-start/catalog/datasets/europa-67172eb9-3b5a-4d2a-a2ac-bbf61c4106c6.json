@@ -5,7 +5,6 @@
   "description": "[Publisher: Kildare County Council ] A Wind Energy Strategy forms part of the Kildare County Development Plan 2023-2029. The Strategy designates areas across the county where wind energy developments are acceptable in principle, open for consideration and not normally permissible. The data is used to inform planning policy and to guide appropriate development. Please see chapter 7 of the Kildare County Development Plan 2023 - 2029 for more details on landscape character in Kildare.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/67172eb9-3b5a-4d2a-a2ac-bbf61c4106c6",
-  "accessRights": "public",
   "temporal": "2023-01-28T00:00:00Z/2029-01-27T00:00:00Z",
   "themes": [
     "energy"
@@ -13,11 +12,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP1CQKZPWH84PWWR08646H70"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

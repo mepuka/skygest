@@ -7,7 +7,7 @@
   "sourceRecordId": "caiso_branch_shadow_prices_rtpd_15_min",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-10-29T17:42:17+00:00",
-  "lastSeen": "2026-04-12T16:29:18+00:00",
-  "sourceModified": "2026-04-12T16:15:00+00:00",
+  "lastSeen": "2026-04-14T15:23:41+00:00",
+  "sourceModified": "2026-04-14T15:15:00+00:00",
   "isAuthoritative": true
 }

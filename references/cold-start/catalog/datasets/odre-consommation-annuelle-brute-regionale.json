@@ -5,7 +5,6 @@
   "description": "<p class=\"\">Ce jeu de données présente les consommations nationales annuelles brutes d’électricité (GWh) et de gaz (GWh <a href=\"https://opendata.reseaux-energies.fr/pages/glossaire/\">PCS</a> 0°C).</p><p class=\"\" style=\"font-family: sans-serif;\"><span style=\"font-family: inherit;\">Concernant les données Electricité :</span></p><p class=\"\"></p><ul><li>Périmètre : France continentale et Corse, pertes comprises avec et sans correction de l'aléa climatique.</li></ul><ul><li><span style=\"font-weight: bolder;\">Suite à un recalcul de l'autoconsommation photovoltaïque, la consommation sur les années 2022 à 2024 a augmenté.</span></li></ul><ul><li>Pour l'électricité, les données sont dites consolidées lorsqu'elles ont été vérifiées et complétées (livraison en milieu de M+1). Elles deviennent définitives lorsque tous les partenaires ont transmis et vérifié l'ensemble de leurs comptages (livraison deuxième semestre A+1)</li></ul><p><br></p><p>Concernant les données Gaz : </p><ul><li>Périmètre : France continentale sans correction de l'aléa climatique.</li></ul><ul><li><span style=\"font-weight: bolder;\">Nouveauté 2024 : Les valeurs de consommation de gaz depuis 2015 inclus les consommations mesurées au réseau de transport (Clients industriels et distributions publiques) ainsi que les consommations issues des injections de biométhane consommées sur le réseau de distribution.</span></li></ul><p></p><p><br></p><p><br></p><p><span style=\"font-family: inherit; font-size: 0.875rem;\"><br></span></p><p class=\"\"><br></p><p></p>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/consommation-annuelle-brute-regionale/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "Tableau de Bord Régional",
@@ -18,11 +17,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKFXFQRBY5M2W63MM703"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

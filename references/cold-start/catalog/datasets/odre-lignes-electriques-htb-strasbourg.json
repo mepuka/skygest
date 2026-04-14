@@ -5,7 +5,6 @@
   "description": "<p>\nCe jeu de données représente la position des lignes électriques aériennes HTB sur l’ensemble du réseau de transport géré par Strasbourg Électricité Réseaux dans le département du Bas-Rhin.\n</p>\n<p>\nCes données sont produites par les contributeurs OpenStreetMap et diffusées sous la licence OpenDataBase License (OdBL). Le standard attributaire retenu est celui d'OpenStreetMap. Plus de détails sont disponibles sur la documentation du projet <a href=\"https://wiki.openstreetmap.org/wiki/WikiProject_Power_networks/France#R.C3.A9seaux_de_distribution\">https://wiki.openstreetmap.org/wiki/WikiProject_Power_networks/France#R.C3.A9seaux_de_distribution</a>.\n</p>\n<p>\nLes données sont mises à disposition à titre purement indicatif sans garantie quant à leur degré de fiabilité. OpenStreetMap et <a href=\"http://infos-réseaux.com/\">Infos-Réseaux.com</a> ne sauraient, par conséquent, être tenus responsable en cas de défaut de fiabilité. L'utilisation des données est exclusive du respect de toute procédure obligatoire et notamment des procédures prévues par la réglementation dite « DT-DICT » relative à l’exécution de travaux à proximité de certains ouvrages souterrains, aériens ou subaquatiques de transport ou de distribution (cf. art. L. 554-1 et suivants et art. R. 554-1 et suivants du Code de l’environnement).\n</p>\n<p>\nL'utilisation des données ne saurait, en outre, exempter l’utilisateur d’avoir à solliciter l'exploitant pour toutes les opérations relevant de ses missions de service public et notamment celles visant à ce qu’elle apprécie, en réalisant une pré-étude ou une étude de raccordement, l’impact sur le réseau public de distribution d’électricité lié au raccordement d’un éventuel projet.\n</p>\n<hr/>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/lignes-electriques-htb-strasbourg/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "SIG"
@@ -16,11 +15,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKFT88FYSRVZTA8SCYG4"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

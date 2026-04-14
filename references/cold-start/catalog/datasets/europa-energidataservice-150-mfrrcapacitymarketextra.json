@@ -5,7 +5,6 @@
   "description": "[Publisher: Energinet] Energinet makes procurement of manuel frequency restoration reserves (mFRR) in an afternoon auction on an hourly capacity market – only if additional reserves are needed. This site provides market-related information for the balancing capacity market. Here, you can find details on requested demand, procured volumes, and reserve prices across different directions and price areas per hour. \nSince January 2025, mFRR capacity demand is determined daily via dynamic dimensioning based on forecasts. If forecasts underestimate the need, Energinet may initiate an ‘extra auction’ in the afternoon to secure sufficient reserves, which is the data included in this dataset. Results from the daily morning auctions are available under: [mFRR Capacity Market ](https://www.energidataservice.dk/tso-electricity/mFRRCapacityMarket)\n\n**NOTE:** It is important to note that this extra auction only occurs occasionally and is not a daily event. Therefore, the data below may appear empty, but volumes and prices are shown when an auction has taken place. \n\nFor further information, please see: \n* [Balancering og systemydelser](https://energinet.dk/el/balancering-og-systemydelser/)\n* [Balancing and Ancillary Services](https://en.energinet.dk/electricity/balancing-and-ancillary-services/)\n\nThe Upward demand and Downward demand columns contain values starting on 2025-08-21.\n\n**Looking for realtime \"mFRR Request\"?** Find the data on [Realtime Electricity Market Data](https://www.energidataservice.dk/datasets/realtime-electricity-market).",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/energidataservice_150_mfrrcapacitymarketextra",
-  "accessRights": "public",
   "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
   "temporal": "2025-01-10T00:00:00Z/",
   "themes": [
@@ -15,11 +14,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZV3P6YN9KJXS2Y6SB2",
     "https://id.skygest.io/distribution/dist_01KP1CQKZVVZGB99TZ1G7G6RNS"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

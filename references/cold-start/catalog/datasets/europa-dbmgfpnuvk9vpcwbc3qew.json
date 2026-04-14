@@ -5,7 +5,6 @@
   "description": "[Publisher: Eurostat] Environmental protection investments of corporations as specialist and secondary producers by environmental purpose",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/dbmgfpnuvk9vpcwbc3qew",
-  "accessRights": "public",
   "license": "CC_BY_4_0",
   "temporal": "2012-01-01T00:00:00Z/2024-12-31T00:00:00Z",
   "themes": [
@@ -19,11 +18,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZ02R9N0ACKPQY0PZR6",
     "https://id.skygest.io/distribution/dist_01KP1CQKZ0GY044PNQWS17QX17"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

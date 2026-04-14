@@ -8,7 +8,6 @@
   ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/ercot_real_time_system_conditions",
-  "accessRights": "public",
   "temporal": "2023-06-19T18:16:51+00:00/2026-04-11T02:44:40+00:00",
   "keywords": [
     "ercot_real_time_system_conditions",
@@ -23,11 +22,12 @@
     "https://id.skygest.io/distribution/dist_01KNX70F4Z5N3ZZ6AB2E24Q8KX",
     "https://id.skygest.io/distribution/dist_01KNX70F4ZAXZRTVKCYY99TQXP"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-12T16:29:41.516Z",
+  "updatedAt": "2026-04-14T15:26:00.064Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

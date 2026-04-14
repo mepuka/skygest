@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWSSNA1PKZA6SJAE12N",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWSTQVYXD688F0MD13R",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/petroleum/move/pipe/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

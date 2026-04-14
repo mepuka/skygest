@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMW914ANN2SD11HAZM7J",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMW9N8XSS9YNFSTPMSDK",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/seds/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

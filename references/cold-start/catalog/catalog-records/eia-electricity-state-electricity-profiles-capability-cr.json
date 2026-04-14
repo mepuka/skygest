@@ -1,0 +1,11 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KP69GMWFQVHT36TDX1W3AJJT",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQEZ5VT3FPCV484JY8W8B5J",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KP69GMWFKHRH2TBMY9FG551B",
+  "harvestedFrom": "https://api.eia.gov/v2/electricity/state-electricity-profiles/capability/",
+  "firstSeen": "2026-04-14T15:24:46.023Z",
+  "lastSeen": "2026-04-14T15:24:46.023Z",
+  "isAuthoritative": true
+}

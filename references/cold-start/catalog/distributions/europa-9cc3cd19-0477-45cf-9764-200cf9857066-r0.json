@@ -1,0 +1,14 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69KG1PQQ3P4X2WWM47SZH2",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1CQKZTW6MC8C3TE71R310H",
+  "kind": "download",
+  "title": "VIEW distribution",
+  "accessURL": "https://www.wms.nrw.de/umwelt/wsg?SERVICE=WMS&REQUEST=GetCapabilities",
+  "format": "view",
+  "accessRights": "public",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP",
+  "createdAt": "2026-04-14T15:26:15.788Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
+  "aliases": []
+}

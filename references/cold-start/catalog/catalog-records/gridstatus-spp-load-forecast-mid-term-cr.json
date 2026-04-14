@@ -7,7 +7,7 @@
   "sourceRecordId": "spp_load_forecast_mid_term",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2024-01-30T19:42:54+00:00",
-  "lastSeen": "2026-04-12T16:29:33+00:00",
-  "sourceModified": "2026-04-12T16:00:00+00:00",
+  "lastSeen": "2026-04-14T15:25:59+00:00",
+  "sourceModified": "2026-04-14T15:00:00+00:00",
   "isAuthoritative": true
 }

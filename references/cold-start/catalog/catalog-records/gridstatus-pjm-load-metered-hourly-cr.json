@@ -7,7 +7,7 @@
   "sourceRecordId": "pjm_load_metered_hourly",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2024-09-11T18:16:45+00:00",
-  "lastSeen": "2026-04-12T16:21:09+00:00",
-  "sourceModified": "2026-04-10T03:00:00+00:00",
+  "lastSeen": "2026-04-14T15:25:56+00:00",
+  "sourceModified": "2026-04-13T03:00:00+00:00",
   "isAuthoritative": true
 }

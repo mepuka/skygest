@@ -5,7 +5,6 @@
   "description": "[Publisher: Eurostat] The indicator measures the share of recycled municipal waste in the total municipal waste generation. Recycling includes material recycling, composting and anaerobic digestion. The ratio is expressed in percent (%) as both terms are measured in the same unit, namely tonnes.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/l3vawkes1ikiggl2uqcava",
-  "accessRights": "public",
   "license": "CC_BY_4_0",
   "temporal": "2000-01-01T00:00:00Z/2024-12-31T00:00:00Z",
   "themes": [
@@ -19,11 +18,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZ25ZD9D5PAQRDPMK9K",
     "https://id.skygest.io/distribution/dist_01KP1CQKZ2EADR6A1R70CXS1T7"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

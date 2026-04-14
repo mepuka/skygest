@@ -5,7 +5,6 @@
   "description": "[Publisher: Marktgemeinde Hörsching] Strategische Ausrichtung für die Jahre 2026 - 2030",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/a18d182a-7e09-4dd6-b41e-a7fed4da50a9",
-  "accessRights": "public",
   "temporal": "2026-03-24T00:00:00Z/2031-03-24T00:00:00Z",
   "themes": [
     "health",
@@ -22,11 +21,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZAMF4C8HH80EJZT8AT",
     "https://id.skygest.io/distribution/dist_01KP1CQKZAGEFJCJCZFXN6S278"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

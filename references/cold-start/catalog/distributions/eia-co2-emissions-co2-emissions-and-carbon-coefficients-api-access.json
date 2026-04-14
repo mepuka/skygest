@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWDM82SJX3YBXNH5FN8",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWDZH75QS49V70EWN0A",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/co2-emissions/co2-emissions-and-carbon-coefficients/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

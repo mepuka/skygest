@@ -5,7 +5,6 @@
   "description": "<p>Ce jeu de donnée est un dérivé du jeu de données suivant : <a href=\"https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=repartition-des-potentiels-de-methanisation-a-horizon-2050-par-canton&amp;q=&amp;rows=10000&amp;facet=departement&amp;facet=region&amp;facet=code_canton&amp;facet=canton\" style='background-color: rgb(255, 255, 255); font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400;' target=\"_blank\">https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=repartition-des-potentiels-de-methanisation-a-horizon-2050-par-canton&amp;q=&amp;rows=10000&amp;facet=departement&amp;facet=region&amp;facet=code_canton&amp;facet=canton</a><br></p>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/repartition-des-potentiels-de-methanisation-a-horizon-2050-a-la-maille-regionale/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "EnR",
@@ -18,11 +17,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKG4BPRDK1D38BMHNR73"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

@@ -5,7 +5,6 @@
   "description": "[Publisher: Office cantonal de l'eau] Les points de raccordement matérialisent le raccordement d'un collecteur sur un autre collecteur lorsque celui-ci n'est pas fait au travers d'un ouvrage. Ces objets font également partie du produit \"Cadastre du réseau d'assainissement des eaux\".",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/rae_pt_raccordement-canton-geneve",
-  "accessRights": "public",
   "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by",
   "themes": [
     "regions",
@@ -23,11 +22,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYWAWE7MNYTW26WWTNA",
     "https://id.skygest.io/distribution/dist_01KP1CQKYWCS6Q9Q52HCCN5HQT"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",
