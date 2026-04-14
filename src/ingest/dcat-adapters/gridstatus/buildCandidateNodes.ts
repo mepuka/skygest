@@ -15,6 +15,7 @@ import {
 } from "../../../domain/data-layer";
 import { stripUndefinedAndDecodeWith } from "../../../platform/Json";
 import {
+  findDistributionInIndex,
   stableSlug,
   type CatalogIndex,
   type IngestNode,
@@ -751,8 +752,15 @@ export const buildCandidateNodes = (
     const datasetId = existingDataset?.id ?? mintDatasetId();
     const existingApiDistribution =
       idx.distributionsByDatasetIdKind.get(`${datasetId}::api-access`) ?? null;
-    const existingCsvDistribution =
-      idx.distributionsByDatasetIdKind.get(`${datasetId}::download`) ?? null;
+    const existingCsvDistribution = findDistributionInIndex(idx, {
+      datasetId,
+      kind: "download",
+      downloadURL: `${gridstatusDatasetQueryUrl(
+        baseUrl,
+        datasetInfo.id
+      )}?return_format=csv&download=true`,
+      format: "csv"
+    });
     const preservedDistributionIds = idx.allDistributions
       .filter(
         (distribution) =>

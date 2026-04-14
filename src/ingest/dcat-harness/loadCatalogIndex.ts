@@ -15,6 +15,7 @@ import {
   formatSchemaParseError,
   stringifyUnknown
 } from "../../platform/Json";
+import { normalizeDistributionUrl } from "../../resolution/normalize";
 import { IngestFsError, IngestHarnessError, IngestSchemaError } from "./errors";
 
 const INDEX_LOAD_CONCURRENCY = 10;
@@ -29,6 +30,8 @@ export interface CatalogIndex {
   readonly datasetFileSlugById: Map<Dataset["id"], string>;
   readonly datasetSeriesById: Map<DatasetSeries["id"], DatasetSeries>;
   readonly datasetSeriesFileSlugById: Map<DatasetSeries["id"], string>;
+  // Downloads widen this key with URL/downloadURL when available so one
+  // dataset can keep multiple distinct file resources without collisions.
   readonly distributionsByDatasetIdKind: Map<string, Distribution>;
   readonly distributionFileSlugById: Map<Distribution["id"], string>;
   readonly catalogRecordsByCatalogAndPrimaryTopic: Map<string, CatalogRecord>;
@@ -86,6 +89,15 @@ interface LoadedCatalogEntities {
   readonly catalogs: ReadonlyArray<LoadedEntity<Catalog>>;
   readonly agents: ReadonlyArray<LoadedEntity<Agent>>;
 }
+
+type DistributionLookup = Pick<
+  Distribution,
+  "datasetId" | "kind" | "accessURL" | "downloadURL" | "format"
+>;
+
+const urlDisambiguatedDistributionKinds = new Set<
+  Distribution["kind"]
+>(["download", "landing-page"]);
 
 export interface CatalogIndexLoadResult {
   readonly index: CatalogIndex;
@@ -220,6 +232,78 @@ const registerUnique = <T>(
   return Effect.void;
 };
 
+const baseDistributionLookupKey = (
+  distribution: Pick<Distribution, "datasetId" | "kind">
+): string => `${distribution.datasetId}::${distribution.kind}`;
+
+const normalizedDistributionFormat = (
+  value: string | undefined
+): string | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  const trimmed = value.trim().toLowerCase();
+  return trimmed.length === 0 ? undefined : trimmed;
+};
+
+const distributionLookupDisambiguator = (
+  distribution: DistributionLookup
+): string | undefined => {
+  if (!urlDisambiguatedDistributionKinds.has(distribution.kind)) {
+    return undefined;
+  }
+
+  const rawUrl = distribution.accessURL ?? distribution.downloadURL;
+  if (rawUrl !== undefined) {
+    return `url:${normalizeDistributionUrl(rawUrl) ?? rawUrl.trim()}`;
+  }
+
+  const format = normalizedDistributionFormat(distribution.format ?? undefined);
+  return format === undefined ? undefined : `format:${format}`;
+};
+
+export const distributionLookupKey = (
+  distribution: DistributionLookup
+): string => {
+  const baseKey = baseDistributionLookupKey(distribution);
+  const disambiguator = distributionLookupDisambiguator(distribution);
+  return disambiguator === undefined ? baseKey : `${baseKey}::${disambiguator}`;
+};
+
+export const findDistributionInIndex = (
+  index: Pick<CatalogIndex, "distributionsByDatasetIdKind" | "allDistributions">,
+  distribution: DistributionLookup
+): Distribution | null => {
+  const exactKey = distributionLookupKey(distribution);
+  const exactMatch = index.distributionsByDatasetIdKind.get(exactKey);
+  if (exactMatch !== undefined) {
+    return exactMatch;
+  }
+
+  const baseKey = baseDistributionLookupKey(distribution);
+  if (exactKey !== baseKey) {
+    const legacyMatch = index.distributionsByDatasetIdKind.get(baseKey);
+    if (legacyMatch !== undefined) {
+      return legacyMatch;
+    }
+  }
+
+  const exactArrayMatch = index.allDistributions.find(
+    (candidate) => distributionLookupKey(candidate) === exactKey
+  );
+  if (exactArrayMatch !== undefined) {
+    return exactArrayMatch;
+  }
+
+  const sameKindCandidates = index.allDistributions.filter(
+    (candidate) =>
+      candidate.datasetId === distribution.datasetId &&
+      candidate.kind === distribution.kind
+  );
+  return sameKindCandidates.length === 1 ? sameKindCandidates[0]! : null;
+};
+
 export const buildCatalogIndex = Effect.fn("DcatHarness.buildCatalogIndex")(
   function* (
     entities: LoadedCatalogEntities,
@@ -291,7 +375,7 @@ export const buildCatalogIndex = Effect.fn("DcatHarness.buildCatalogIndex")(
 
     for (const { slug, data: distribution } of entities.distributions) {
       distributionFileSlugById.set(distribution.id, slug);
-      const key = `${distribution.datasetId}::${distribution.kind}`;
+      const key = distributionLookupKey(distribution);
       yield* registerUnique(
         distributionsByDatasetIdKind,
         key,

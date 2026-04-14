@@ -13,6 +13,7 @@ import {
 } from "../../../domain/data-layer";
 import { stripUndefinedAndDecodeWith } from "../../../platform/Json";
 import {
+  findDistributionInIndex,
   stableSlug,
   type CatalogIndex,
   type IngestNode,
@@ -753,10 +754,12 @@ export const buildCandidateNodes = (
 
     for (let i = 0; i < resources.length; i++) {
       const resource = resources[i]!;
-      const existingDistribution =
-        idx.distributionsByDatasetIdKind.get(
-          `${datasetId}::${deriveDistributionKind(resource.format)}`
-        ) ?? null;
+      const existingDistribution = findDistributionInIndex(idx, {
+        datasetId,
+        kind: deriveDistributionKind(resource.format),
+        accessURL: resource.access_url ?? undefined,
+        format: resource.format ?? undefined
+      });
 
       const distribution = buildDistributionCandidate(
         resource,
