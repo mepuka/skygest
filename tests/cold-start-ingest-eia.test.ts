@@ -1886,6 +1886,44 @@ describe("buildDatasetCandidate", () => {
     expect(fresh.title).toBe("retail-sales");
   });
 
+  it("preserves a stronger existing EIA title when API v2 response.name is weaker", () => {
+    const ctx = makeBuilderCtx("2026-05-01T00:00:00.000Z");
+    const weakNameLeaf = {
+      path: "international",
+      parents: [],
+      response: {
+        id: "international",
+        name: "International",
+        facets: [],
+        defaultFrequency: null
+      } as unknown as EiaApiResponse["response"]
+    };
+    const existing = {
+      _tag: "Dataset",
+      id: BUILDER_DATASET_ID as unknown as Dataset["id"],
+      title: "EIA International Energy Data",
+      publisherAgentId: ctx.eiaAgent.id,
+      accessRights: "public",
+      aliases: [],
+      createdAt: FIXTURE_NOW as unknown as Dataset["createdAt"],
+      updatedAt: FIXTURE_NOW as unknown as Dataset["updatedAt"]
+    } as unknown as Dataset;
+
+    const ds = buildDatasetCandidate(weakNameLeaf, ctx, existing, undefined);
+
+    expect(ds.title).toBe("EIA International Energy Data");
+    expect(ds.aliases).toContainEqual({
+      scheme: "eia-route",
+      value: "international",
+      relation: "exactMatch"
+    });
+    expect(ds.aliases).toContainEqual({
+      scheme: "display-alias",
+      value: "International",
+      relation: "closeMatch"
+    });
+  });
+
   it("synthesizes title from path segments when API v2 echoes the top-level route id", () => {
     // EIA's v2 API returns `response.id = <top-level route>` and
     // `response.name = null` for many deep leaf routes (e.g.
