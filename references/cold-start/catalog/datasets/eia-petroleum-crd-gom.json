@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69GMWNK3QBHJKH0PDXZ5D0",
+  "title": "Petroleum · Crd · Gom",
+  "description": "EIA petroleum gas survey data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "license": "https://www.eia.gov/about/copyrights_reuse.php",
+  "temporal": "1992/2007",
+  "keywords": [
+    "annual",
+    "duoarea",
+    "process",
+    "product",
+    "series"
+  ],
+  "themes": [
+    "petroleum",
+    "crd"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69GMWNNQ4EMTY78ZGHECC8"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "petroleum/crd/gom",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWEMQ9MZD9N1S9K3Y4R",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWEHDXVG3HM46RX4PE0",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/electricity/state-electricity-profiles/emissions-by-state-by-fuel/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

@@ -5,7 +5,6 @@
   "description": "<p class=\"MsoNormal\" style=\"margin-bottom:7.5pt;line-height:normal\"><span style='font-size: 8pt; font-family: \"Segoe UI\", sans-serif;'>Ce jeu de données\nprésente les productions régionales annuelles d'énergie renouvelable en France\n(GWh) pour l'électricité depuis 2008 et depuis 2015 pour le gaz.<o:p></o:p></span></p><p class=\"MsoNormal\" style=\"margin-bottom:7.5pt;line-height:normal\"><span style='font-size: 8pt; font-family: \"Segoe UI\", sans-serif;'>Pour le biométhane, il\ns'agit des quantités injectées dans les réseaux de gaz (réseaux de distribution\net de transport) en France comptabilisée aux points d'interfaces transport/distribution puis répartie entre les régions avec des clés de répartition adéquates. Les injections sont donc affectées par ces clés de répartition et non associées exactement à celles de chaque site.<o:p></o:p></span></p><p class=\"MsoNormal\" style=\"margin-bottom:7.5pt;line-height:normal\">\n\n\n\n</p><p class=\"MsoNormal\" style=\"margin-bottom:7.5pt;line-height:normal\"><span style='font-size: 8pt; font-family: \"Segoe UI\", sans-serif;'>Selon l'arrêté du 8\nnovembre 2007 pris en application de l'article 2 du décret n° 2006-1118 du 5\nseptembre 2006 relatif aux garanties d'origine de l'électricité produite à\npartir de sources d'énergie renouvelables ou par cogénération » , la\npartie renouvelable est calculée comme suit :</span></p><ul><li style=\"margin-bottom: 7.5pt; line-height: normal;\"><span style='font-size: 8pt; font-family: \"Segoe UI\", sans-serif;'>Hydraulique : On soustrait 70 % de la consommation liée au pompage.</span></li><li style=\"margin-bottom: 7.5pt; line-height: normal;\"><span style='font-size: 8pt; font-family: \"Segoe UI\", sans-serif;'>Bioénergies : La production des usines d'incinération d'ordures ménagères est comptabilisée à 50%. Les autres combustibles sont comptabilisés à 100 %</span></li><li style=\"margin-bottom: 7.5pt; line-height: normal;\"><span style='font-size: 8pt; font-family: \"Segoe UI\", sans-serif;'>Eolien et solaire : La production est comptabilisée à 100 %.</span></li></ul><p style=\"margin-bottom: 7.5pt; line-height: normal;\"><span style='font-size:11.0pt;font-family:\"Aptos\",sans-serif;\nmso-fareast-font-family:\"Times New Roman\";mso-bidi-font-family:Aptos;\nmso-ligatures:standardcontextual;mso-ansi-language:FR;mso-fareast-language:\nEN-US;mso-bidi-language:AR-SA'><b>Suite à un recalcul de l'autoconsommation photovoltaïque, la production photovoltaïque sur les années 2022 à 2024 a augmenté.</b></span></p><p style=\"margin-bottom: 7.5pt; line-height: normal;\"><br></p><hr><p style=\"margin-bottom: 7.5pt; line-height: normal;\"><span style='font-size: 8pt; font-family: \"Segoe UI\", sans-serif;'><br></span></p><p class=\"MsoNormal\" style=\"margin-bottom:7.5pt;line-height:normal\"><span style='font-size: 8pt; font-family: \"Segoe UI\", sans-serif;'><o:p></o:p></span></p>\n\n<p class=\"MsoListParagraphCxSpFirst\" style=\"margin-bottom:7.5pt;mso-add-space:\nauto;text-indent:-18.0pt;line-height:normal;mso-list:l0 level1 lfo1\"><span style=\"font-size: 9.5pt; font-family: Symbol;\">·<span style='font-variant-numeric: normal; font-variant-east-asian: normal; font-stretch: normal; font-size: 7pt; line-height: normal; font-family: \"Times New Roman\";'>      </span></span></p><p></p>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/prod-region-annuelle-enr/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "Tableau de Bord Régional",
@@ -19,11 +18,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKFVHM2SZJWQ67RNPM74"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

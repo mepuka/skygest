@@ -1,0 +1,17 @@
+{
+  "_tag": "DatasetSeries",
+  "id": "https://id.skygest.io/dataset-series/dser_01KP69JCARGXDZYTVQF84Z8CVP",
+  "title": "Monitoring des capacités d'échanges aux frontières françaises de la région CWE/Europe du Centre-Ouest en 2020",
+  "description": "Collection of ODRÉ monitoring capacites echanges cwe datasets published as separate annual or dated releases.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
+  "cadence": "annual",
+  "createdAt": "2026-04-14T15:25:39.627Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
+  "aliases": [
+    {
+      "scheme": "odre-dataset-id",
+      "value": "series:monitoring-capacites-echanges-cwe",
+      "relation": "exactMatch"
+    }
+  ]
+}

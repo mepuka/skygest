@@ -7,7 +7,7 @@
   "sourceRecordId": "isone_zonal_load_real_time_hourly",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2024-10-15T14:48:32+00:00",
-  "lastSeen": "2026-04-12T16:29:04+00:00",
-  "sourceModified": "2026-04-09T03:00:00+00:00",
+  "lastSeen": "2026-04-14T15:23:53+00:00",
+  "sourceModified": "2026-04-10T03:00:00+00:00",
   "isAuthoritative": true
 }

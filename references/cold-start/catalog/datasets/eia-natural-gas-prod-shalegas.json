@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69GMWJQ30E05EXY9W1K8DS",
+  "title": "Natural Gas · Prod · Shalegas",
+  "description": "EIA natural gas survey data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "license": "https://www.eia.gov/about/copyrights_reuse.php",
+  "temporal": "2007/2021",
+  "keywords": [
+    "annual",
+    "duoarea",
+    "process",
+    "product",
+    "series"
+  ],
+  "themes": [
+    "natural-gas",
+    "prod"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69GMWJY7WHKJE9RHBF0QG3"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "natural-gas/prod/shalegas",
+      "relation": "exactMatch"
+    }
+  ]
+}

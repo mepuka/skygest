@@ -5,7 +5,6 @@
   "description": "<p>Ce jeu de données restitue la dynamique de production de biométhane engagée par un territoire par rapport à sa consommation de gaz. </p><p>Le calcul de ce ration s'appuie sur : </p><ul><li>La production annuelle de biométhane (en cours et à venir) enregistrée dans le registre de capacité dont NaTran et Téréga sont les gestionnaire. </li><li>La consommation annuelle de gaz à 3 ans d'après les scenarii Perspectives Gaz 2024.</li></ul><p style=\"font-family: sans-serif;\"><br></p>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/prod-igr-prosp-epci-grtgaz/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "EnR",
@@ -19,11 +18,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKG41NTVMJT6C8EJ2MPK"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

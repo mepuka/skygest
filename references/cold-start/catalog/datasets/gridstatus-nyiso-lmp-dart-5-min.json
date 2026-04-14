@@ -8,7 +8,6 @@
   ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/nyiso_lmp_dart_5_min",
-  "accessRights": "public",
   "keywords": [
     "nyiso_lmp_dart_5_min",
     "nyiso",
@@ -22,11 +21,13 @@
     "https://id.skygest.io/distribution/dist_01KNX70F5FRF80936B2C9ZTRZQ",
     "https://id.skygest.io/distribution/dist_01KNX70F5F7XQZBM7NT2Q9GN4F"
   ],
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KP69JZGEBKZMZAT9XNAKSY01",
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-12T16:29:41.516Z",
+  "updatedAt": "2026-04-14T15:26:00.064Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

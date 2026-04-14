@@ -5,7 +5,6 @@
   "description": "<p>\nJeu de données pour simplifier la conversion d'une unité de mesure gazière vers une autre unité.\n</p>\n<p>\nDéfinitions des unités mentionnées dans le jeu de données :\n</p>\n<table>\n<tbody>\n<tr><td>Unité</td><td>Description</td></tr>\n<tr><td>tep</td><td>Tonne équivalent pétrole</td></tr>\n<tr><td>GJ</td><td>Giga joules</td></tr>\n<tr><td>Therm</td><td>Therm = Unité de mesure d'énergie anglo-saxonne</td></tr>\n<tr><td>MBTU</td><td>Thousand british thermal unit = Unité de mesure d'énergie anglo-saxonne</td></tr>\n<tr><td>bep</td><td>Baril équivalent pétrole</td></tr>\n<tr><td>kwh</td><td>Kilowattheure, équivalence énergétique d'un gaz stocké, transporté, produit, ...</td></tr>\n<tr><td>m3</td><td>Mètre cube, unité de volume classique pour quantifier le volume de gaz</td></tr>\n</tbody>\n</table>\n<p>\n<br>\n</p><hr>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/conversion-des-unites-gazieres/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "themes": [
     "Territoires et régions"
@@ -13,11 +12,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKG1WKQS2MYSKGH9HPWH"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

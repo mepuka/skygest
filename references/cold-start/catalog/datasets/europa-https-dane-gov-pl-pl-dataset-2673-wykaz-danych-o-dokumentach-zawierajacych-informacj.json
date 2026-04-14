@@ -5,7 +5,6 @@
   "description": "[Publisher: Państwowa Agencja Atomistyki] <p>Wykaz danych o dokumentach zawierających informacje o środowisku i jego ochronie </p>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/https-dane-gov-pl-pl-dataset-2673-wykaz-danych-o-dokumentach-zawierajacych-informacj",
-  "accessRights": "public",
   "themes": [
     "environment",
     "energy"
@@ -19,11 +18,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZT3M10TMNDRX22WY53",
     "https://id.skygest.io/distribution/dist_01KP1CQKZT1D6V14057T9RF6M3"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

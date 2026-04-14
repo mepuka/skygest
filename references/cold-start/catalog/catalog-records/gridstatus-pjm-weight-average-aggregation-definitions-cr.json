@@ -7,7 +7,7 @@
   "sourceRecordId": "pjm_weight_average_aggregation_definitions",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-07-18T21:12:10+00:00",
-  "lastSeen": "2026-04-11T19:04:40+00:00",
+  "lastSeen": "2026-04-13T19:04:48+00:00",
   "sourceModified": "2026-03-20T04:00:00+00:00",
   "isAuthoritative": true
 }

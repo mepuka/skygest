@@ -8,7 +8,6 @@
   ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/isone_reserve_zone_prices_designations_real_time_5_min",
-  "accessRights": "public",
   "temporal": "2023-07-01T00:00:00+00:00/2026-04-11T02:45:00+00:00",
   "keywords": [
     "isone_reserve_zone_prices_designations_real_time_5_min",
@@ -23,11 +22,12 @@
     "https://id.skygest.io/distribution/dist_01KNX70F5BFSWRNX6Y948HAN68",
     "https://id.skygest.io/distribution/dist_01KNX70F5B6X4VR99MSA9PG0S9"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-12T16:29:41.516Z",
+  "updatedAt": "2026-04-14T15:26:00.064Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

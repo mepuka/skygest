@@ -7,7 +7,7 @@
   "sourceRecordId": "pjm_scheduled_interchange_real_time",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-07-11T21:24:01+00:00",
-  "lastSeen": "2026-04-12T16:21:17+00:00",
-  "sourceModified": "2026-04-12T03:00:00+00:00",
+  "lastSeen": "2026-04-14T15:21:43+00:00",
+  "sourceModified": "2026-04-14T03:00:00+00:00",
   "isAuthoritative": true
 }

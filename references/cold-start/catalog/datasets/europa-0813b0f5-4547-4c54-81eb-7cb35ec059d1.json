@@ -5,7 +5,6 @@
   "description": "[Publisher: Land Vorarlberg (IFG)] Fachexpertise für die Ausweisung von Beschleunigungsgebieten für Windkraft- und Photovoltaikanlagen nach der EU RED III Richtlinie; Kosten inkl. UST 28.750 EUR",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/0813b0f5-4547-4c54-81eb-7cb35ec059d1",
-  "accessRights": "public",
   "license": "https://creativecommons.org/licenses/by/4.0/",
   "themes": [
     "energy",
@@ -14,11 +13,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP1CQKYZK97FDFG7X1C8JZN4"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

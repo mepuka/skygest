@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KP69KF1RVC18PH7VE042TY4F",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KP1CQKY8BVF9WHKYBE8YPMZT",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KP69KF1C41TRHBAGPG30NM8T",
+  "sourceRecordId": "64cf4d90-1a21-4153-9ea3-943f53c17ea5",
+  "harvestedFrom": "https://data.europa.eu/api/hub/search/ckan/package_search",
+  "firstSeen": "2026-04-14T15:26:15.788Z",
+  "lastSeen": "2026-04-14T15:26:15.788Z",
+  "sourceModified": "2026-04-10T00:00:00Z",
+  "isAuthoritative": true
+}

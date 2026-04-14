@@ -5,7 +5,6 @@
   "description": "[Publisher: Energinet] The dataset consists of the gas quality values: Gross Calorific Values, Wobbe Index, and Normal Density for the delivered natural gas from the transmission grid to each meter and regulator stations in Denmark. \nThese values are only indicative and are not suited for settlement purposes. Though Energinet consider the values to be true, we cannot guarantee the accuracy, as Energinet has neither verified nor approved the information. For verified data, please contact EVIDA.\n\nThe information can be auto validated by the user with the validation rules written for each factor in metadata.\n\nThe described gas quality is not necessarily the gas quality that will be delivered to the consumers, since upgraded biogas can enter at the distribution level.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/energidataservice_52_mrstationsgasquality~~1",
-  "accessRights": "public",
   "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
   "temporal": "2013-01-28T00:00:00Z/",
   "themes": [
@@ -15,11 +14,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZVG3FJMGJ31SPE9STQ",
     "https://id.skygest.io/distribution/dist_01KP1CQKZVD3XH9X59M90TJFAC"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

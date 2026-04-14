@@ -7,7 +7,7 @@
   "sourceRecordId": "pjm_sync_reserve_events",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-10-29T15:52:38+00:00",
-  "lastSeen": "2026-04-11T19:07:37+00:00",
+  "lastSeen": "2026-04-13T19:07:43+00:00",
   "sourceModified": "2026-03-05T07:24:00+00:00",
   "isAuthoritative": true
 }

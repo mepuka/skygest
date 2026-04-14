@@ -5,7 +5,6 @@
   "description": "Settlement imbalance prices per bidding zone or control area.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VFHVJNF9VV9J3JQGV9",
   "landingPage": "https://transparency.entsoe.eu/",
-  "accessRights": "public",
   "keywords": [
     "balancing",
     "Art. 17.1(e)"
@@ -16,11 +15,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP1ASA1CDXJ42PV6G38RATPS"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1ASA196ZW4HCGRC7TGWS41"
   ],
   "createdAt": "2026-04-12T17:10:46.402Z",
-  "updatedAt": "2026-04-12T17:10:46.402Z",
+  "updatedAt": "2026-04-14T15:26:07.918Z",
   "aliases": [
     {
       "scheme": "entsoe-document-type",

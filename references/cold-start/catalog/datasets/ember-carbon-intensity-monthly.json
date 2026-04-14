@@ -4,7 +4,6 @@
   "title": "Ember Carbon Intensity Monthly",
   "description": "Get grid carbon intensity data at a monthly grain.\n    e.g.\n\n`https://api.ember-energy.org/v1/carbon-intensity/monthly?entity=Brazil&include_all_dates_value_range=true&api_key=MY_API_KEY`\n    \n\nThe methodology of this dataset can be found on its [dataset page](https://ember-energy.org/data/monthly-electricity-data/)\n    within the 'Methodology - Ember Electricity Data' pdf.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5VEC3TDVM9ASP83CZC1",
-  "accessRights": "public",
   "license": "CC-BY-4.0",
   "keywords": [
     "carbon-intensity",
@@ -14,11 +13,13 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KNX53R14KBEAWTQEGYM15RMY"
   ],
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KP69JS67J87CWBG9S5MB7ND3",
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNX53R13BMFM6TQ8CKSG2VTV"
   ],
   "createdAt": "2026-04-11T02:14:38.945Z",
-  "updatedAt": "2026-04-11T02:14:54.829Z",
+  "updatedAt": "2026-04-14T15:25:55.593Z",
   "aliases": [
     {
       "scheme": "ember-route",

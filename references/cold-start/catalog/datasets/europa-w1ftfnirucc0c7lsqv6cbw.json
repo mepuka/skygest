@@ -5,7 +5,6 @@
   "description": "[Publisher: Eurostat] Intermediate consumption of environmental protection services by institutional sector, NACE Rev. 2 activity and environmental purpose",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/w1ftfnirucc0c7lsqv6cbw",
-  "accessRights": "public",
   "license": "CC_BY_4_0",
   "temporal": "2012-01-01T00:00:00Z/2024-12-31T00:00:00Z",
   "themes": [
@@ -19,11 +18,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZ0KQGAE7AV129V3KDH",
     "https://id.skygest.io/distribution/dist_01KP1CQKZ0XSJ0ZPG31FEKBNW6"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

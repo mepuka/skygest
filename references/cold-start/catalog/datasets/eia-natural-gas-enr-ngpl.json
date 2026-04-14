@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69GMWGECK7MBX7KSJ3G0PW",
+  "title": "Natural Gas · Enr · Ngpl",
+  "description": "EIA natural gas survey data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "license": "https://www.eia.gov/about/copyrights_reuse.php",
+  "temporal": "1979/2021",
+  "keywords": [
+    "annual",
+    "duoarea",
+    "process",
+    "product",
+    "series"
+  ],
+  "themes": [
+    "natural-gas",
+    "enr"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69GMWG9R3XKT78VZ21WHDX"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "natural-gas/enr/ngpl",
+      "relation": "exactMatch"
+    }
+  ]
+}

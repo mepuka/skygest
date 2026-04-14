@@ -7,7 +7,7 @@
   "sourceRecordId": "spp_fuel_mix_by_baa",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2026-04-02T18:45:19+00:00",
-  "lastSeen": "2026-04-12T16:29:30+00:00",
-  "sourceModified": "2026-04-12T16:20:00+00:00",
+  "lastSeen": "2026-04-14T15:25:56+00:00",
+  "sourceModified": "2026-04-14T15:20:00+00:00",
   "isAuthoritative": true
 }

@@ -5,7 +5,6 @@
   "description": "[Publisher: Industrielle Werke Basel] Dieser Datensatz beinhaltet die Summe der elektrischen Energie, die im Kanton Basel-Stadt innert 15-Minuten Intervallen aus dem Netz bezogen wird, inklusive [Netzverluste](https://de.wikipedia.org/wiki/Übertragungsverlust). Lokal direkt am Ort der Produktion verbrauchte elektrische Energie (z.B. aus Photovoltaikanlagen), welche nicht ins öffentliche Netz eingespiesen wird, ist in den vorliegenden Daten nicht enthalten. Seit 1. September 2020 liegen auch Daten zum Verbrauch der Kunden in der Grundversorgung vs. dem freien Markt vor. Die Daten umfassen den an allen im Netz installierten fernausgelesenen Zählern gemessenen Verbrauch sowie ergänzend, da nicht 100 % der Zähler fernauslesbar sind, Daten aus den ins Netz eingespeisten Strommengen. Hinweis: Die Werte der folgenden Messstartzeiten sind interpoliert: 01.01.2014 00:00, 01.11.2015 00:00 und 01.10.2019 00:00.Änderungsprotokoll: 10.10.23: Aktualisierungsintervall von \"WEEKLY\" auf \"DAILY\" geändert.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/100233-kanton-basel-stadt",
-  "accessRights": "public",
   "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by",
   "temporal": "2011-12-30T23:00:00Z/2026-04-03T22:00:00Z",
   "themes": [
@@ -22,11 +21,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYJWGBGDZ185HKCFKY0",
     "https://id.skygest.io/distribution/dist_01KP1CQKYJSZZ7VECF2R897Z7K"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

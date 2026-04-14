@@ -5,7 +5,6 @@
   "description": "<p style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; margin-bottom: 1em; color: rgb(51, 51, 51); font-size: 14px;'>Ce jeu de données présente par région les consommations annuelles de gaz (MWh) des Centrales à Cycle Combiné Gaz raccordées au réseau de transport de NaTran,.</p><p style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; margin-bottom: 1em; color: rgb(51, 51, 51); font-size: 14px;'>Les données sont des mesures brutes de quantités livrées de gaz aux points de livraison industriels.</p><p style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; margin-bottom: 1em; color: rgb(51, 51, 51); font-size: 14px;'>Les données sont définitives.</p>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/cccg-annuel-reg/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "CCCG",
@@ -18,11 +17,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKFV05FQM5DZ310HGBHJ"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWGX4JBCDAB1VB33D56",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWGJVZVBY5VDGJ1H9VB",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/natural-gas/enr/nang/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

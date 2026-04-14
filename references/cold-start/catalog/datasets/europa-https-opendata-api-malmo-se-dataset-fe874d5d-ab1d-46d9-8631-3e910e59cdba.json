@@ -5,7 +5,6 @@
   "description": "[Publisher: Malmö stad] The city of Malmö has solar cell systems on many of its buildings in the city,\nfor example at schools, retirement homes, museums and administrative offices.\n\nThis dataset contains:  \n\\- Solar cell systems owned by the city of Malmö.  \n\\- Electricity produced in kilowatt hours from the solar cell systems. Divided\nby month, per system and hour.\n\n**Attributes in resource Solar cell systems**\n\n  * `Id [anläggnings-id]`\n  * `Name [populärnamn på anläggningen]`\n  * `ModuleArea [sammanlagd solpanelyta i kvadratmeter]`\n  * `StartupDate [installationsdatum]`\n  * `PanelCount [totalt antal solpaneler i anläggningen]`\n  * `PanelType [typ av solpanel]`\n  * `Enabled [aktiverad]`\n  * `MaxDisplayValue [installerad effekt (kWp)]`\n  * `Address [anläggningens placering, postadress]`\n  * `geometry [anläggningens placering, typ: Point, CRS: WGS84]`\n\nA value of 0 or -1 can occur for PanelCount. This means that data is missing.\n\n**Attributes in resource Electricity generation**\n\n  * `Id [anläggnings-id]`\n  * `AggregationType [aggregationsgranularitet]`\n  * `ProductionData`  \n\\- `StartDate [datum och heltimme]`  \n\\- `Produced [producerad el i kWh sedan närmast föregående heltimme]`\n\nDuring the spring of 2025, an adjustment was made to the IDs of a number of\nfacilities.  \nThe following table shows the old and new IDs for the affected facilities:  \n`1005_A_AS1_SOL_E1 --> 1005_A_AS1_6390_ELM1_E1`  \n`1063_F_SOL_E1 --> 1063_F_6390_ELM1_E1`  \n`1601_A_AS3_ELM_SOL_E1 --> 1601_A_6390_ELM1_E1`  \n`1719_B_AS1_SOL_BYA_E1 --> 1719_A_AS1_6390_ELM1_E1`  \n`1719_B_AS1_SOL_BYB_E1 --> 1719_B_AS1_6390_ELM1_E1`  \n`1896_A_A1EE_SOLPANEL_E1 --> 1896_A_6390_ELM1_E1`  \n`1906_A_6390_EM1_E1 --> 1906_A_6390_ELM1_E1`\n\n",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/https-opendata-api-malmo-se-dataset-fe874d5d-ab1d-46d9-8631-3e910e59cdba",
-  "accessRights": "public",
   "license": "http://creativecommons.org/publicdomain/zero/1.0",
   "temporal": "2024-01-01T00:00:00Z/",
   "themes": [
@@ -40,11 +39,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZ4DJK2MCN8DPV1XJZD",
     "https://id.skygest.io/distribution/dist_01KP1CQKZ4P9JW5MXFQ0JMYA35"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

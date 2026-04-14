@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWQ074VN9QNQQQ05NAB",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWQCXV0VGHPWMTA00E3",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/petroleum/pnp/bioplfuel/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

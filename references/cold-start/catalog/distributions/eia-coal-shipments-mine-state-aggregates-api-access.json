@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWD4DJBZ9YC6AQXNMAK",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWD6W8N1F8CPE77BAEW",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/coal/shipments/mine-state-aggregates/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

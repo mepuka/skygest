@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWA3XJCH3RR0KRT0SKC",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWA09ZRC1SPFV92PJ37",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/electricity/electric-power-operational-data/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

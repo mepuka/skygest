@@ -5,7 +5,6 @@
   "description": "[Publisher: Eurostat] Gross production of electricity and derived heat from combustible fuels by type of plant and operator",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/rxsi45kk2qidahqgn9itwg",
-  "accessRights": "public",
   "license": "CC_BY_4_0",
   "temporal": "1990-01-01T00:00:00Z/2024-12-31T00:00:00Z",
   "themes": [
@@ -19,11 +18,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYMCNQ19ZZ3ZH4Z9CS3",
     "https://id.skygest.io/distribution/dist_01KP1CQKYMRAETBNA5MDD2130D"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

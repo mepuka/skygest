@@ -5,7 +5,6 @@
   "description": "[Publisher: Eurostat] Exports of natural gas by partner country - monthly data",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/pvs4vrmzy7t8ypvfvgfgea",
-  "accessRights": "public",
   "license": "CC_BY_4_0",
   "temporal": "2008-01-01T00:00:00Z/2026-02-28T00:00:00Z",
   "themes": [
@@ -19,11 +18,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYMB01HCMW2XJB3K50Z",
     "https://id.skygest.io/distribution/dist_01KP1CQKYM7ZS1Q9MYD2V8B9DS"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

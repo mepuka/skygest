@@ -7,7 +7,7 @@
   "sourceRecordId": "aeso_load",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-06-10T23:04:50+00:00",
-  "lastSeen": "2026-04-12T16:29:39+00:00",
-  "sourceModified": "2026-04-12T15:00:00+00:00",
+  "lastSeen": "2026-04-14T15:25:56+00:00",
+  "sourceModified": "2026-04-14T14:00:00+00:00",
   "isAuthoritative": true
 }

@@ -7,7 +7,7 @@
   "sourceRecordId": "ercot_unplanned_resource_outages",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2024-07-25T16:27:44+00:00",
-  "lastSeen": "2026-04-12T10:02:26+00:00",
-  "sourceModified": "2026-04-12T10:02:09+00:00",
+  "lastSeen": "2026-04-14T10:02:21+00:00",
+  "sourceModified": "2026-04-14T10:01:08+00:00",
   "isAuthoritative": true
 }

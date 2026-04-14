@@ -8,7 +8,6 @@
   ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/caiso_lmp_real_time_15_min",
-  "accessRights": "public",
   "temporal": "2019-09-09T07:00:00+00:00/2026-04-11T03:15:00+00:00",
   "keywords": [
     "caiso_lmp_real_time_15_min",
@@ -23,11 +22,13 @@
     "https://id.skygest.io/distribution/dist_01KNX70F4KXP3Q0G6T4HCVW8BW",
     "https://id.skygest.io/distribution/dist_01KNX70F4KP3B1AVRZN8WPC047"
   ],
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KP69JZGD10SERZS14DJ0ZX2P",
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-12T16:29:41.516Z",
+  "updatedAt": "2026-04-14T15:26:00.064Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69GMWHKF74T241YBKFSB1P",
+  "title": "Natural Gas · Enr · Seis",
+  "description": "EIA natural gas survey data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "license": "https://www.eia.gov/about/copyrights_reuse.php",
+  "temporal": "2000-01/2011-07",
+  "keywords": [
+    "duoarea",
+    "monthly",
+    "process",
+    "product",
+    "series"
+  ],
+  "themes": [
+    "natural-gas",
+    "enr"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69GMWHA87V90WAZSD2WE8A"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "natural-gas/enr/seis",
+      "relation": "exactMatch"
+    }
+  ]
+}

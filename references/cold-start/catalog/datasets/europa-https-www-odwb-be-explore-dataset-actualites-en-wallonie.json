@@ -5,7 +5,6 @@
   "description": "[Publisher: iMio] All news published on the public websites of Walloon local authorities working with the intercommunal iMio.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/https-www-odwb-be-explore-dataset-actualites-en-wallonie-",
-  "accessRights": "public",
   "themes": [
     "regions",
     "government",
@@ -19,11 +18,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP1CQKZ8WBMQE87E6C8WA0ZF"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

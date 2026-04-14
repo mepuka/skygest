@@ -1,0 +1,33 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69GMWF76SYBQXXXJ4T9KAG",
+  "title": " Supply and disposition of electricity",
+  "description": "Supply and disposition of electricity by state.\n    Sources: Forms EIA-860, EIA-861, and EIA-923\n    Product: State Electricity Profiles, Table 10",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "license": "https://www.eia.gov/about/copyrights_reuse.php",
+  "temporal": "1990/2024",
+  "keywords": [
+    "annual",
+    "state"
+  ],
+  "themes": [
+    "electricity",
+    "state-electricity-profiles"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69GMWF2EMN52W488AYFXQJ"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "electricity/state-electricity-profiles/source-disposition",
+      "relation": "exactMatch"
+    }
+  ]
+}

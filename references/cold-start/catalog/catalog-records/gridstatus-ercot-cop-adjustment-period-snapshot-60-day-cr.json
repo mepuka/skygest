@@ -7,7 +7,7 @@
   "sourceRecordId": "ercot_cop_adjustment_period_snapshot_60_day",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-05-23T00:22:25+00:00",
-  "lastSeen": "2026-04-12T13:55:17+00:00",
-  "sourceModified": "2026-02-12T05:00:00+00:00",
+  "lastSeen": "2026-04-14T13:48:00+00:00",
+  "sourceModified": "2026-02-14T05:00:00+00:00",
   "isAuthoritative": true
 }

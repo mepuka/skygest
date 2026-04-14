@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69GMWD2FYZA990KMEJKZVY",
+  "title": "Total CO2 Emissions by Sector and Fuel - deprecated: see SEDS",
+  "description": "CO2 emission aggregates by fuel, state, and sector.  Report and documentation: https://www.eia.gov/environment/emissions/state/. \"This route is deprecated and no longer receiving fresh data.\n     For state-level CO2 emissions data, please use the /v2/seds/ API route.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "license": "https://www.eia.gov/about/copyrights_reuse.php",
+  "temporal": "1970/2022",
+  "keywords": [
+    "annual",
+    "fuelId",
+    "sectorId",
+    "stateId"
+  ],
+  "themes": [
+    "co2-emissions"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69GMWDQSRFGW4AP06AVTV4"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "co2-emissions/co2-emissions-aggregates",
+      "relation": "exactMatch"
+    }
+  ]
+}

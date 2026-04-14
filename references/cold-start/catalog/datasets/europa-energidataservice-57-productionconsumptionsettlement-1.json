@@ -5,7 +5,6 @@
   "description": "[Publisher: Energinet] Production and consumption based on settlement data from Datahub. Data from 2005, but please note additional info in comments.\nData is updated with a 9-15 day delay.\n\nMeasurement data may be updated up to 2 years after the specific date, however data is normally 99% correct after 15 days, and will gradually be improved with the last update after 3 months. After 3 months, data will normally be 99,9% correct.\n\nData from 2005, but not in all rows:\n* Commercial power separated from local power from 2021.\n* Solar power divided into the four columns from 2020. Before 2020 all solar power is placed in SolarPowerSelfConMWh.\n* Transmission grid loss from 1/10 2008. Zero is actually a null.\n* GridLossDistributionMWh and GridLossInterconnectorsMWh from 1/1 2021.\n* In some cases, zero should actually be a null.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/energidataservice_57_productionconsumptionsettlement~~1",
-  "accessRights": "public",
   "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
   "temporal": "2005-01-01T00:00:00Z/",
   "themes": [
@@ -15,11 +14,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZ6NX48EKWWYFM2HEQ9",
     "https://id.skygest.io/distribution/dist_01KP1CQKZ6FA9W7BW1ECAENPYG"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

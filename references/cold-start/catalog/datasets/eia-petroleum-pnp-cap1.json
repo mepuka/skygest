@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69GMWP9G91D76J5TZCQAXV",
+  "title": "Petroleum · Pnp · Cap1",
+  "description": "EIA petroleum gas survey data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "license": "https://www.eia.gov/about/copyrights_reuse.php",
+  "temporal": "1982/2025",
+  "keywords": [
+    "annual",
+    "duoarea",
+    "process",
+    "product",
+    "series"
+  ],
+  "themes": [
+    "petroleum",
+    "pnp"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69GMWPT92W5GYXEKZ70M76"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "petroleum/pnp/cap1",
+      "relation": "exactMatch"
+    }
+  ]
+}

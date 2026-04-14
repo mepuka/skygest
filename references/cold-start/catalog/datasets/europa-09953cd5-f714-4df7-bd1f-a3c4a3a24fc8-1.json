@@ -5,7 +5,6 @@
   "description": "[Publisher: Central Statistics Office] Domestic Building Energy Rating",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/09953cd5-f714-4df7-bd1f-a3c4a3a24fc8~~1",
-  "accessRights": "public",
   "themes": [
     "energy"
   ],
@@ -15,11 +14,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYQFG5JZN2W4SN6R3RV",
     "https://id.skygest.io/distribution/dist_01KP1CQKYQXX8WENQPGCMTEAD6"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

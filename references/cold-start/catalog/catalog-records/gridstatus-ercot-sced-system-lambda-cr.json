@@ -7,7 +7,7 @@
   "sourceRecordId": "ercot_sced_system_lambda",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2023-09-25T00:46:02+00:00",
-  "lastSeen": "2026-04-12T16:29:36+00:00",
-  "sourceModified": "2026-04-12T16:15:21+00:00",
+  "lastSeen": "2026-04-14T15:25:58+00:00",
+  "sourceModified": "2026-04-14T15:20:17+00:00",
   "isAuthoritative": true
 }

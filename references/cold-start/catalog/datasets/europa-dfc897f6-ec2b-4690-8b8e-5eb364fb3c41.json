@@ -5,7 +5,6 @@
   "description": "[Publisher: DANAK - Den Danske Akkrediteringsfond] I registeret kan der søges på danske akkrediterede virksomheder. Der kan søges på kalibrering, prøvning, medicinske undersøgelser, akkrediterings numre, inspektion, certificeringer, samt validering og verifikation.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/dfc897f6-ec2b-4690-8b8e-5eb364fb3c41",
-  "accessRights": "public",
   "themes": [
     "energy",
     "agriculture",
@@ -15,11 +14,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP1CQKYH63TR4DACBJBH2G43"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWA3C40D3P4KCPADXR8",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWA442J15JQG4CEBSQ2",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/coal/aggregate-production/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

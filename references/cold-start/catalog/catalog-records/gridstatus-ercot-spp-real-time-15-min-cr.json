@@ -7,7 +7,7 @@
   "sourceRecordId": "ercot_spp_real_time_15_min",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2023-04-19T22:18:30+00:00",
-  "lastSeen": "2026-04-12T16:17:43+00:00",
-  "sourceModified": "2026-04-12T16:00:00+00:00",
+  "lastSeen": "2026-04-14T15:17:43+00:00",
+  "sourceModified": "2026-04-14T15:00:00+00:00",
   "isAuthoritative": true
 }

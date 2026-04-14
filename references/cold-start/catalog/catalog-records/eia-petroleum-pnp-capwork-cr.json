@@ -1,0 +1,11 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KP69GMWQR8F6PFCC6NPH2B9G",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KNQEZ5VT3FPCV484JY8W8B5J",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KP69GMWQTBQHKBEEPDV0YVKG",
+  "harvestedFrom": "https://api.eia.gov/v2/petroleum/pnp/capwork/",
+  "firstSeen": "2026-04-14T15:24:46.023Z",
+  "lastSeen": "2026-04-14T15:24:46.023Z",
+  "isAuthoritative": true
+}

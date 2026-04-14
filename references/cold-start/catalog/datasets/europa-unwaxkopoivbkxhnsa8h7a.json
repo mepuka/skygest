@@ -5,7 +5,6 @@
   "description": "[Publisher: Eurostat] Electricity production capacities for renewables and wastes",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/unwaxkopoivbkxhnsa8h7a",
-  "accessRights": "public",
   "license": "CC_BY_4_0",
   "temporal": "1990-01-01T00:00:00Z/2024-12-31T00:00:00Z",
   "themes": [
@@ -19,11 +18,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZ7HHMBCZD4WQ4FV3H2",
     "https://id.skygest.io/distribution/dist_01KP1CQKZ7WTQ23MGND6YYQ363"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

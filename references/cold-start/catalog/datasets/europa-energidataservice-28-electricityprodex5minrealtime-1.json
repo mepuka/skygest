@@ -5,7 +5,6 @@
   "description": "[Publisher: Energinet] The electricity production and exchange in MW in 5 minutes intervals and updated every 5th minute.\nNOTE: Data are based on upscaled real-time power measurements from the SCADA system. Errors will occur, and will generally not be corrected. For statistical purposes, see [Production and Consumption - Settlement](https://www.energidataservice.dk/tso-electricity/ProductionConsumptionSettlement).\n\nThe total load, including loses, is calculated as the sum of production from power plants, solar and wind power plus the exchange to Germany, Sweden, Norway, and The Netherlands. The exchange between Bornholm and Price area SE4 is included in the exchange DK2 to Sweden, and should not be taken into account.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/energidataservice_28_electricityprodex5minrealtime~~1",
-  "accessRights": "public",
   "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
   "temporal": "2015-01-01T00:00:00Z/",
   "themes": [
@@ -15,11 +14,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZ8ESK067B8N5X03DPD",
     "https://id.skygest.io/distribution/dist_01KP1CQKZ83TB7T5XA7HZJN91G"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

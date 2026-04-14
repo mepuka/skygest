@@ -5,7 +5,6 @@
   "description": "[Publisher: Energinet] This dataset is replaced by the new dataset [Generation per Production Type and Exchange](https://www.energidataservice.dk/tso-electricity/GenerationProdTypeExchange) and has been discontinued on January 6, 2026. It will be deleted at a later date. Updates will be published on this page and on [NEWS](https://www.energidataservice.dk/news).\nData represents the overall balance of consumption, production, import and export of electricity in an area. Production is divided into main production types.\n\nNote that data is expressed in MWh/h, or average load, not MWh.\n\nData are based on upscaled real-time power measurements from the SCADA system. More precisely, the values are averages of power measurements every 4th second. **Errors will occur, and will generally not be corrected**. For statistical purposes, see [Production and Consumption - Settlement](https://www.energidataservice.dk/tso-electricity/ProductionConsumptionSettlement).\n\nGross consumption = sum of production + sum of exchange to connected areas. A positive exchange is import of electricity, while a negative is export. \n\nThe total production is the sum of all production types.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/energidataservice_27_electricitybalancenonv~~1",
-  "accessRights": "public",
   "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
   "temporal": "2017-01-01T00:00:00Z/",
   "themes": [
@@ -15,11 +14,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZVKN9CS9CWB9770SCC",
     "https://id.skygest.io/distribution/dist_01KP1CQKZV7MQGERSVXCB7KK79"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

@@ -8,7 +8,6 @@
   ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/miso_lmp_real_time_5_min_final",
-  "accessRights": "public",
   "temporal": "2021-12-20T05:00:00+00:00/2026-03-23T04:55:00+00:00",
   "keywords": [
     "miso_lmp_real_time_5_min_final",
@@ -23,11 +22,12 @@
     "https://id.skygest.io/distribution/dist_01KNX70F5D9E8ST4SR0HGJ13DZ",
     "https://id.skygest.io/distribution/dist_01KNX70F5D14VWZBF0HNW7Q70C"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-12T16:29:41.516Z",
+  "updatedAt": "2026-04-14T15:26:00.064Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

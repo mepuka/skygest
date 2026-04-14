@@ -8,7 +8,6 @@
   ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/ercot_as_demand_curves_daily_ruc",
-  "accessRights": "public",
   "temporal": "2025-12-05T20:33:01+00:00/2026-04-10T19:33:01+00:00",
   "keywords": [
     "ercot_as_demand_curves_daily_ruc",
@@ -23,11 +22,12 @@
     "https://id.skygest.io/distribution/dist_01KNX70F4S87FF4M1MDP7R8ZXT",
     "https://id.skygest.io/distribution/dist_01KNX70F4SV1X3723BKKE1CQ26"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-12T16:29:41.516Z",
+  "updatedAt": "2026-04-14T15:26:00.064Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

@@ -7,7 +7,7 @@
   "sourceRecordId": "pjm_inc_and_dec_bids_day_ahead_hourly",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-10-29T19:00:50+00:00",
-  "lastSeen": "2026-04-11T19:07:36+00:00",
+  "lastSeen": "2026-04-13T19:07:42+00:00",
   "sourceModified": "2026-04-01T08:00:47+00:00",
   "isAuthoritative": true
 }

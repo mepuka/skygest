@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWN256EV970HDGXM7NF",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWNXMHE6VR5D58QSQ81",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/petroleum/crd/welldep/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

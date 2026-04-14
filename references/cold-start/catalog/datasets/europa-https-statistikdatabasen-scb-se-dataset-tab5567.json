@@ -5,7 +5,6 @@
   "description": "[Publisher: Statistikmyndigheten SCB - Statistiska centralbyrån] Fuel consumption by type of fuel, production, facility and quarter",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/https-statistikdatabasen-scb-se-dataset-tab5567",
-  "accessRights": "public",
   "license": "http://creativecommons.org/publicdomain/zero/1.0/",
   "themes": [
     "energy"
@@ -14,11 +13,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZQ9STS0XDJRN23FWR2",
     "https://id.skygest.io/distribution/dist_01KP1CQKZQH76520BR1A5EFEG1"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

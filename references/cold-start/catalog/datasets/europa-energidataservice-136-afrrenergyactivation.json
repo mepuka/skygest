@@ -5,7 +5,6 @@
   "description": "[Publisher: Energinet] The energy volume activated by the LFC.\nNB: The data is continuously updated and includes data from the last 3 months. Therefore, data beyond this time frame is not included in the dataset and the field \"Date From\" should be disregarded, as it does not affect the dataset's content or validity.\n\nFor further information, please see:\n* [Balancering og systemydelser](https://energinet.dk/el/balancering-og-systemydelser/)\n* [Balancing and Ancillary Services](https://en.energinet.dk/electricity/balancing-and-ancillary-services/)",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/energidataservice_136_afrrenergyactivation",
-  "accessRights": "public",
   "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
   "themes": [
     "energy"
@@ -14,11 +13,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZWTR4ESXHKWPP2HXBK",
     "https://id.skygest.io/distribution/dist_01KP1CQKZWRYT7NHFA80PZ230Y"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

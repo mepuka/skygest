@@ -5,7 +5,6 @@
   "description": "[Publisher: Marktgemeinde Feldkirchen an der Donau] Werkvertrag Ortsplatzgestaltung Bad Mühllacken zwischen der Marktgemeinde Feldkirchen an der Donau und der RORA Installationen GmbH betreffend HKLS",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/218aea0d-1d8e-4771-a838-612a425821bb",
-  "accessRights": "public",
   "license": "https://creativecommons.org/licenses/by/4.0/deed.de",
   "temporal": "2026-03-24T00:00:00Z/",
   "themes": [
@@ -20,11 +19,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZA9BWQ07BWQ741TFP2",
     "https://id.skygest.io/distribution/dist_01KP1CQKZAPP5JCW4N2H7F0M3T"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

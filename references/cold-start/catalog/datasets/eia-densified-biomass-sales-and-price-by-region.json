@@ -1,0 +1,32 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69GMWBEY9KN4RJ99J5RNM3",
+  "title": "Sales and Price by Region",
+  "description": "Densified biomass sales and average price by region.  \r\n        Source: EIA-63C  Report:  www.eia.gov/biomass/",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "license": "https://www.eia.gov/about/copyrights_reuse.php",
+  "temporal": "2016-01/2025-10",
+  "keywords": [
+    "monthly",
+    "region"
+  ],
+  "themes": [
+    "densified-biomass"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69GMWB5281WNKNH5XCM54J"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "densified-biomass/sales-and-price-by-region",
+      "relation": "exactMatch"
+    }
+  ]
+}

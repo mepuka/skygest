@@ -5,18 +5,23 @@
   "kind": "download",
   "title": "TEC Register",
   "description": "The data file contains the latest version of the TEC Register including all changes up to publication. This file will be updated twice weekly on Tuesdays and Fridays. ** NOTE: ** Following updates to CUSC paragraphs 6.30.3.2 and 6.35.2, the Transmission Entry Capacity (TEC) Registers will include an additional column called “Gate” from 21st November,2025 indicating whether agreements are classified as Gate 1 or Gate 2. This column will be populated once agreements have been countersigned. Until that point, the field will remain blank. Please note: 1) Capacity across stages and technology types is currently presented in aggregate, which may result in duplicate entries. This will be refined as the register process evolves, with future updates aiming to split capacity by stage and technology to improve clarity and accuracy. 2) This approach ensures transparency while reflecting the current status of agreements under the Connections Reform process. **Project IDs:** are Case Sensitive i.e. a0l4L0000005iPb; a0l4L0000005ipb and a0l4L0000005ipB relate to different projects. **Staging:** If a project includes staged TEC there will be an associated number in the Stage column. Some projects have two separate lines without numbers - this usually indicates that the project is already built and the Customer is perhaps adding a different type of generation or building new generation to be connected at a future date. Once built the second line will fall away and the TEC incorporated into the overall project.",
-  "downloadURL": "https://api.neso.energy/dataset/cbd45e54-e6e2-4a38-99f1-8de6fd96d7c1/resource/17becbab-e3e8-473f-b303-3806f43a6a10/download/tec-register-10-april-2026.csv",
+  "downloadURL": "https://api.neso.energy/dataset/cbd45e54-e6e2-4a38-99f1-8de6fd96d7c1/resource/17becbab-e3e8-473f-b303-3806f43a6a10/download/tec-register-14-april-2026.csv",
   "mediaType": "text/csv",
   "format": "csv",
   "accessRights": "public",
   "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
   "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
   "createdAt": "2026-04-14T02:09:59.759Z",
-  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T15:25:34.063Z",
   "aliases": [
     {
       "scheme": "url",
       "value": "https://api.neso.energy/dataset/cbd45e54-e6e2-4a38-99f1-8de6fd96d7c1/resource/17becbab-e3e8-473f-b303-3806f43a6a10/download/tec-register-10-april-2026.csv",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/cbd45e54-e6e2-4a38-99f1-8de6fd96d7c1/resource/17becbab-e3e8-473f-b303-3806f43a6a10/download/tec-register-14-april-2026.csv",
       "relation": "exactMatch"
     }
   ]

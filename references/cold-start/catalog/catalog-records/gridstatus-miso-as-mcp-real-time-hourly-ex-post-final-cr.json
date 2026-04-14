@@ -7,7 +7,7 @@
   "sourceRecordId": "miso_as_mcp_real_time_hourly_ex_post_final",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-09-30T11:52:31+00:00",
-  "lastSeen": "2026-04-11T22:19:00+00:00",
-  "sourceModified": "2026-04-08T23:00:00+00:00",
+  "lastSeen": "2026-04-14T15:13:24+00:00",
+  "sourceModified": "2026-04-09T04:00:00+00:00",
   "isAuthoritative": true
 }

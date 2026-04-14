@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69GMWSETAVG7FCWB8V4C66",
+  "title": "Petroleum · Stoc · Ref",
+  "description": "EIA petroleum gas survey data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "license": "https://www.eia.gov/about/copyrights_reuse.php",
+  "temporal": "1981-01/2026-01",
+  "keywords": [
+    "duoarea",
+    "monthly",
+    "process",
+    "product",
+    "series"
+  ],
+  "themes": [
+    "petroleum",
+    "stoc"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69GMWS210DM3Z9DMDMTXZ3"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "petroleum/stoc/ref",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -5,7 +5,6 @@
   "description": "[Publisher: Bayerische Staatsregierung] Seats of the Ministerial Commissioners for the Gymnasiums and the State School Counselling Offices as well as seats of the Certificate Recognition Office for the Free State of Bavaria.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/7a0304a7-cbb7-4f78-9704-a3e8d3b05dfa~~1",
-  "accessRights": "public",
   "license": "http://dcat-ap.de/def/licenses/cc-by/4.0",
   "themes": [
     "environment",
@@ -16,11 +15,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZXVPHZKZKGSC70T5YN",
     "https://id.skygest.io/distribution/dist_01KP1CQKZXME1XMDT3R8T4FS0G"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

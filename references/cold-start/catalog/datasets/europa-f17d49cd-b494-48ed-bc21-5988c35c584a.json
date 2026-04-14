@@ -5,7 +5,6 @@
   "description": "[Publisher: Gas Networks Ireland] Shrinkage gas refers to natural gas that is consumed or lost during the operation of the gas transmission and distribution network. It is not delivered to end customers but is necessary for running the system. In GNI’s context, shrinkage gas typically covers:\r\n\r\nCompressor fuel usage – Gas used to power compressors that push gas through pipelines at high pressure (e.g., at Moffat for interconnection between Scotland and Ireland).\r\nOwn-use gas – Gas used for heating or other operational purposes within the network.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/f17d49cd-b494-48ed-bc21-5988c35c584a",
-  "accessRights": "public",
   "temporal": "2018-01-01T00:00:00Z/2025-09-30T00:00:00Z",
   "themes": [
     "energy"
@@ -14,11 +13,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYPR43ACN0VBV639XTT",
     "https://id.skygest.io/distribution/dist_01KP1CQKYPFQ2W1Q6QJ3C5S7XN"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

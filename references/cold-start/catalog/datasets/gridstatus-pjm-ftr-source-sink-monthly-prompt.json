@@ -8,7 +8,6 @@
   ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/pjm_ftr_source_sink_monthly_prompt",
-  "accessRights": "public",
   "temporal": "2026-02-04T05:00:00+00:00/2026-04-09T04:00:00+00:00",
   "keywords": [
     "pjm_ftr_source_sink_monthly_prompt",
@@ -23,11 +22,12 @@
     "https://id.skygest.io/distribution/dist_01KNX70F5GEG974NVJ5QCZ9F28",
     "https://id.skygest.io/distribution/dist_01KNX70F5G1XYHZZP2551SGZMD"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-12T16:29:41.516Z",
+  "updatedAt": "2026-04-14T15:26:00.064Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWTX7CFRZFJFP2375XH",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWTAA7CXZWPE6VM7DKH",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/petroleum/cons/refmg/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

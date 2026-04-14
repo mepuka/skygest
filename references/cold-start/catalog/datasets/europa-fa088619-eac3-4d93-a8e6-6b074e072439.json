@@ -5,7 +5,6 @@
   "description": "[Publisher: Landesbetrieb Geoinformation und Vermessung]",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/fa088619-eac3-4d93-a8e6-6b074e072439",
-  "accessRights": "public",
   "license": "http://dcat-ap.de/def/licenses/dl-by-de/2.0",
   "themes": [
     "energy"
@@ -15,11 +14,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZPJVQ9E1HNYEJEGRA8",
     "https://id.skygest.io/distribution/dist_01KP1CQKZPMQJGSNBWCK3GQ6G9"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

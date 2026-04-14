@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWGT8VRCJ3Q0W1F4AZN",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWGJKFXJMF35Y14CC15",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/natural-gas/pri/fut/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

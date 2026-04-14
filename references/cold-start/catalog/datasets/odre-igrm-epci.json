@@ -5,7 +5,6 @@
   "description": "<p>Ce jeu de données présente les valeurs du ratio entre la production locale de gaz renouvelable et la consommation locale de gaz au périmètre des EPCI .</p><p>Pour calculer ce ratio :  <o:p></o:p></p><ul><li>La <b>production </b>correspond à la quantité de gaz renouvelable \nproduite un mois donné sur un territoire<o:p></o:p></li><li>La <b>consommation </b>correspond à la consommation de gaz \nd’un mois donné sur un territoire</li></ul><p>L’indicateur est mis à jour tous les mois.</p><p>Certains territoires ne sont pas disponibles pour respecter les obligations de confidentialité.</p><p><br></p><p>*** Incident sur les données à partir de janvier 2024 *** </p><p><span style=\"font-size: 0.875rem;\">Compte tenu de la modification de la structure des données du jeu de données des consommations annuelles mises à disposition en Open Data par les distributeurs via le site de l'Agence Oré, l</span><span style=\"font-size: 0.875rem;\">es données des IGR ne prennent pas en compte les consommations de gaz sur les réseaux de distribution.</span><span style=\"font-family: inherit; font-size: 0.875rem;\"> </span><span style=\"font-size: 0.875rem;\">Nous sommes en cours d'adaptation de nos développements pour prendre en compte cette modification.</span><br></p>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/igrm-epci/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "IGR",
@@ -20,11 +19,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKG0T0PXEJYPWS1H5PX5"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

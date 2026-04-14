@@ -5,7 +5,6 @@
   "description": "[Publisher: Landesamt für Digitalisierung, Breitband und Vermessung]",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/211eb465-315e-43aa-8bc3-05191cf12c0a",
-  "accessRights": "public",
   "license": "http://dcat-ap.de/def/licenses/cc-by/4.0",
   "themes": [
     "regions",
@@ -25,11 +24,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZQQRM4HZP6AXF2S83Q",
     "https://id.skygest.io/distribution/dist_01KP1CQKZQ2RW6E5DYVC1YEA48"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

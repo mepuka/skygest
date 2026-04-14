@@ -7,7 +7,7 @@
   "sourceRecordId": "pjm_projected_area_statistics_at_peak",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2024-06-18T00:27:18+00:00",
-  "lastSeen": "2026-04-12T16:21:02+00:00",
-  "sourceModified": "2026-04-12T12:00:44+00:00",
+  "lastSeen": "2026-04-14T15:25:51+00:00",
+  "sourceModified": "2026-04-14T12:00:35+00:00",
   "isAuthoritative": true
 }

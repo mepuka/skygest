@@ -5,7 +5,6 @@
   "description": "[Publisher: Malmö stad] Total number of solar power plants connected to the electricity grid. The\nfigures come from the survey Grid-connected solar power plants.\n\nSource: Swedish Energy Agency (via Kolada)\n\n",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/https-opendata-api-malmo-se-dataset-f094c34a-501b-440d-af7b-f7000cf8d805",
-  "accessRights": "public",
   "license": "http://creativecommons.org/publicdomain/zero/1.0",
   "themes": [
     "energy"
@@ -13,11 +12,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP1CQKZH6MGJ8EBPR9HBZJ90"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

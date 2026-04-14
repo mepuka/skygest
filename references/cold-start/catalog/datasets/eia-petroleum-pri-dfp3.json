@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69GMWMY6M0GMW5D4DEY05N",
+  "title": "Petroleum · Pri · Dfp3",
+  "description": "EIA petroleum gas survey data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "license": "https://www.eia.gov/about/copyrights_reuse.php",
+  "temporal": "1993-10/2026-01",
+  "keywords": [
+    "duoarea",
+    "monthly",
+    "process",
+    "product",
+    "series"
+  ],
+  "themes": [
+    "petroleum",
+    "pri"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69GMWM11XPWHBM6G72V5RC"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "petroleum/pri/dfp3",
+      "relation": "exactMatch"
+    }
+  ]
+}

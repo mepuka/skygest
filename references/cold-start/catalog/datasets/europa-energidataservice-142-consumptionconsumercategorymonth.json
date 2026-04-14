@@ -5,7 +5,6 @@
   "description": "[Publisher: Energinet] Monthly consumption of business sector, public sector and private units by region.\n\nThe dataset is updated between the 9th and 15th the following month.\nThe **consumer categories** are created based on DK10 Industry Codes as specified by Statistics Denmark:\n* Erhverv (Business Sector): All units related to a CVR number including category 11 ('Uoplyst aktiviteter'), except those that belong to category 9.\n* Offentligt (Public Sector): Units in category 9 ('Offentlig administration, undervisning og sundhed').\n* Privat (Private): Other units (without CVR numbers).\n\nTo comply with laws regarding the protection of private data, **methods for anonymizing data have been applied**. This dataset uses number and dominance as a criterion for confidentiality. The number criteria is set to 20 and the dominance criteria is set to 60 percent per hour for 3 hours straight. \nIn case of the criteria being exceeded, the dataset will combine data columns or aggregate data columns to a high level in the following order: \n1. Consumer categories being combined into 2 categories\n2. Regions being combined and/or aggregated\n3. Time being combined and/or aggregated",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/energidataservice_142_consumptionconsumercategorymonth",
-  "accessRights": "public",
   "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
   "temporal": "2021-01-01T00:00:00Z/",
   "themes": [
@@ -15,11 +14,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZW6RC8XGNTS1GVC3FH",
     "https://id.skygest.io/distribution/dist_01KP1CQKZWE36CE5Z6Z9SBCH5G"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

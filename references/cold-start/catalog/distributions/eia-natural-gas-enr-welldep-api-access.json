@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWHEBRZKSKGQWAAKRYQ",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWH4HSWC8PBJJ7ZZS7E",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/natural-gas/enr/welldep/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

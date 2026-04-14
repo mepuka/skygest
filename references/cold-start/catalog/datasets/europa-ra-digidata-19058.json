@@ -5,7 +5,6 @@
   "description": "[Publisher: Rigsarkivet] Energistyrelsen har sammen med den systemansvarlige virksomhed, Energinet.dk og netvirksomhederne opbygget et landsdækkende register for vindkraftanlæg.\nRegistret anvendes til administration, statistik og kontrol af prisafregninger, herunder fuldlasttimeopgørelser samt i forbindelse med EU direktivet om fremme af elektricitet produceret fra vedvarende energikilder.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/ra_digidata_19058",
-  "accessRights": "public",
   "temporal": "1978-01-01T00:00:00Z/2010-01-01T00:00:00Z",
   "themes": [
     "energy"
@@ -13,11 +12,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP1CQKY9K507R477CWEY2FVV"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

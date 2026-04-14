@@ -8,7 +8,6 @@
   ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/isone_load_forecast_hourly",
-  "accessRights": "public",
   "temporal": "2016-07-31T13:32:00+00:00/2026-04-10T20:26:00+00:00",
   "keywords": [
     "isone_load_forecast_hourly",
@@ -23,11 +22,13 @@
     "https://id.skygest.io/distribution/dist_01KNX70F5AK40KTPV6EKPJ6F81",
     "https://id.skygest.io/distribution/dist_01KNX70F5AJPR5DZQYGGKE2TFJ"
   ],
+  "inSeries": "https://id.skygest.io/dataset-series/dser_01KP69JZGEHC0YPXZVXP477FXF",
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-12T16:29:41.516Z",
+  "updatedAt": "2026-04-14T15:26:00.064Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

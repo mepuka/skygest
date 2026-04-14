@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWNM3WTT1V46J1C40SG",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWN2737HPJBRWWTK99P",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/petroleum/crd/crpdn/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

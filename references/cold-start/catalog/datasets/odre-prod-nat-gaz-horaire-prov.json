@@ -5,7 +5,6 @@
   "description": "<p>Ce jeu de données présente les valeurs provisoires des productions de biométhane des sites raccordés au réseau de NaTran et de Teréga à la maille nationale à un pas de temps horaire (en MWh  \t<a href=\"https://opendata.reseaux-energies.fr/pages/glossaire/\">PCS</a> 0°C).</p><p>Ces  données sont élaborées à partir des équipements de  comptage.</p><p>Vous pouvez retrouver l'ensemble des sites raccordés à NaTran et de <span style=\"font-size: 12.495px;\">Teréga </span>ici :  <a href=\"https://opendata.reseaux-energies.fr/explore/dataset/points-dinjection-de-biomethane-en-france\" target=\"_blank\">https://opendata.reseaux-energies.fr/explore/dataset/points-dinjection-de-biomethane-en-france</a><a href=\"https://opendata.reseaux-energies.fr/explore/dataset/points-dinjection-de-biomethane-en-france\"></a></p><p>Le nombre de sites définitifs est défini en fonction du jeu de données \"<b>Production mensuelle de biométhane (2015 à 2021)</b>\" accessible ici : <a href=\"https://opendata.reseaux-energies.fr/explore/dataset/production-mensuelle-biomethane/table/?sort=mois\" target=\"_blank\">https://opendata.reseaux-energies.fr/explore/dataset/production-mensuelle-biomethane/table/?sort=mois</a></p><p><a href=\"https://opendata.reseaux-energies.fr/explore/dataset/points-dinjection-de-biomethane-en-france\"> </a></p><p>Ce  jeu de données est publié conformément à l'article D 111-66 du  code    de l'énergie et en application de l'arrêté du 29 décembre 2017  (Loi pour une République Numérique).<br></p>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/prod-nat-gaz-horaire-prov/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "EnR",
@@ -19,11 +18,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKG5592JX68P7NK790Y3"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

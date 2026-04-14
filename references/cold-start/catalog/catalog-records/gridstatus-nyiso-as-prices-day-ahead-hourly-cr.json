@@ -7,7 +7,7 @@
   "sourceRecordId": "nyiso_as_prices_day_ahead_hourly",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-03-24T15:08:45+00:00",
-  "lastSeen": "2026-04-12T13:47:07+00:00",
-  "sourceModified": "2026-04-14T03:00:00+00:00",
+  "lastSeen": "2026-04-14T13:45:58+00:00",
+  "sourceModified": "2026-04-16T03:00:00+00:00",
   "isAuthoritative": true
 }

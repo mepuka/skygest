@@ -5,7 +5,6 @@
   "description": "[Publisher: Energinet] Forecast of wind and solar power with a resolution of one hour.\nSolar power forecasts are not updated between 6pm and 6am. Therefore, no 5 Hour forecast exists for Solar power between 11pm and 11am.\n\n1 Hour and 5 Hour forecasts are released up to 15 minutes before the start of the forecast and might be updated until 1 minute before the forecast starts. Within this time frame up to 3 updates can take place. \n\nThe hourly forecast values are calculated from the values in [Forecast Wind and Solar power, 5min](https://www.energidataservice.dk/tso-electricity/Forecasts_5Min).\n\nThe following illustrates how the value from 14:00 to 15:00 is calculated:\n((Value at 14:00) / 2 + (All values from 14:05 to 14:55) + (Value at 15:00) / 2) / 12.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/energidataservice_40_forecasts_hour~~1",
-  "accessRights": "public",
   "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
   "temporal": "2019-10-31T00:00:00Z/",
   "themes": [
@@ -15,11 +14,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZV2D5JEBYKZY4BV039",
     "https://id.skygest.io/distribution/dist_01KP1CQKZVCQ1TGFNWVA74DT08"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

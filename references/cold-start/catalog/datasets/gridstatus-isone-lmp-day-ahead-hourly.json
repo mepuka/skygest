@@ -8,7 +8,6 @@
   ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/isone_lmp_day_ahead_hourly",
-  "accessRights": "public",
   "temporal": "2016-01-01T05:00:00+00:00/2026-04-12T03:00:00+00:00",
   "keywords": [
     "isone_lmp_day_ahead_hourly",
@@ -23,11 +22,12 @@
     "https://id.skygest.io/distribution/dist_01KNX70F5AJSH8S32N60RPDX7E",
     "https://id.skygest.io/distribution/dist_01KNX70F5AB7PCX6BJVPA5NCZW"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-12T16:29:41.516Z",
+  "updatedAt": "2026-04-14T15:26:00.064Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

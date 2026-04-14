@@ -5,7 +5,6 @@
   "description": "[Publisher: South Dublin County Council] <div>The WEEE Directive legislates for environmentally friendly disposal of WEEE. The Irish regulations implement the new European Directive on waste electrical and electronic equipment and apply to producers (manufacturers and importers) distributors (retailers) of electrical and electronic equipment.</div><div>The European Union (Waste Electrical and Electronic Equipment) Regulations 2014 (S.I. No. 149 of 2014) came into effect on 29th March 2014.</div><div>Producers and retailers are now responsible for the financing of the collection, treatment, recovery and disposal of WEEE.</div><div>It means that final users of such household WEEE are now entitled to leave that waste back without charge, either to retail outlets when buying a replacement item or other authorised collection points, including local authority civic amenity sites.</div>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/eb4da817-f809-499a-a4e2-0a96befab014",
-  "accessRights": "public",
   "themes": [
     "energy"
   ],
@@ -17,11 +16,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZF90CTEH5XTJ7ABVTZ",
     "https://id.skygest.io/distribution/dist_01KP1CQKZGXRB533VGPV8SMY8P"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

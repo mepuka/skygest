@@ -5,7 +5,6 @@
   "description": "[Publisher: FG Bewilligungen, Stadtpolizei, Sicherheitsdepartement] Summe der gemäss den Wärmelieferungsverträgen abonnierten Leistung in MW pro Jahr im Wärmeverbund KVA und Holz.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/72a17fa0-a2b7-4a8b-8e4f-c3204815d045-stadt-zurich",
-  "accessRights": "public",
   "license": "http://dcat-ap.ch/vocabulary/licenses/terms_open",
   "themes": [
     "energy"
@@ -13,11 +12,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP1CQKZ027F7QCP35W9DPZK3"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

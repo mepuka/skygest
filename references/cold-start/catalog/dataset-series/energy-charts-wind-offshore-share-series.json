@@ -1,0 +1,17 @@
+{
+  "_tag": "DatasetSeries",
+  "id": "https://id.skygest.io/dataset-series/dser_01KP69JMB8NXJAN18W36PHP40G",
+  "title": "Energy Charts Wind Offshore Share",
+  "description": "Collection of Energy Charts wind offshore share endpoints published as separate but related feeds.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNWVQMFHEZD7KVN03TEAVA1Q",
+  "cadence": "irregular",
+  "createdAt": "2026-04-14T15:25:47.701Z",
+  "updatedAt": "2026-04-14T15:25:47.701Z",
+  "aliases": [
+    {
+      "scheme": "energy-charts-endpoint",
+      "value": "series:wind_offshore_share",
+      "relation": "exactMatch"
+    }
+  ]
+}

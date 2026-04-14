@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP69GMWK7W5YDS3V91C8YGC4",
+  "title": "Natural Gas · Cons · Acct",
+  "description": "EIA natural gas survey data",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQEZ5V57VJJJFYV6HWM03VB",
+  "license": "https://www.eia.gov/about/copyrights_reuse.php",
+  "temporal": "1982/2024",
+  "keywords": [
+    "annual",
+    "duoarea",
+    "process",
+    "product",
+    "series"
+  ],
+  "themes": [
+    "natural-gas",
+    "cons"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP69GMWK1D8ZYTNWW0M35XZ7"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KNQEZ5VHS74DM94ABW2ZM93Y"
+  ],
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": [
+    {
+      "scheme": "eia-route",
+      "value": "natural-gas/cons/acct",
+      "relation": "exactMatch"
+    }
+  ]
+}

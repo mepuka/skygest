@@ -8,7 +8,6 @@
   ],
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K72JEEK9HPDVYTMBWBT",
   "landingPage": "https://www.gridstatus.io/datasets/pjm_projected_rto_statistics_at_peak",
-  "accessRights": "public",
   "temporal": "2011-08-24T12:30:20+00:00/2026-04-10T12:01:03+00:00",
   "keywords": [
     "pjm_projected_rto_statistics_at_peak",
@@ -23,11 +22,12 @@
     "https://id.skygest.io/distribution/dist_01KNX70F5JRYN7MARVBZ9M9BHN",
     "https://id.skygest.io/distribution/dist_01KNX70F5JHC9TTADQHKM3D8B4"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNQTFC3SCBVEA560C7K0EHV0"
   ],
   "createdAt": "2026-04-11T02:47:48.597Z",
-  "updatedAt": "2026-04-12T16:29:41.516Z",
+  "updatedAt": "2026-04-14T15:26:00.064Z",
   "aliases": [
     {
       "scheme": "gridstatus-dataset-id",

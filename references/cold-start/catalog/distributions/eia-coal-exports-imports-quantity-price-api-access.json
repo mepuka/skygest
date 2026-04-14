@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWATVHEWP9ZEJV9KPZD",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWAGR5ZZPZTWF18ERCB",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/coal/exports-imports-quantity-price/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

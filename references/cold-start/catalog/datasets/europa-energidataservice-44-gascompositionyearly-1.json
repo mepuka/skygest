@@ -5,7 +5,6 @@
   "description": "[Publisher: Energinet] Gas quality data for the Danish transmission grid that is representative for gas delivered from the transmission grid. The data are validated but the data cannot be used for billing purposes. The basis of the dataset is hourly values and the maximal and minimal value is therefore respective the maximal and minimal hourly value.\nThe values listed are for informational purposes only and are not suited for settlement purposes. Though Energinet consider the numbers to be true, we cannot guarantee the accuracy of the values.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/energidataservice_44_gascompositionyearly~~1",
-  "accessRights": "public",
   "license": "https://publications.europa.eu/resource/authority/licence/CC_BY_4_0",
   "temporal": "2015-01-01T00:00:00Z/",
   "themes": [
@@ -15,11 +14,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZVY8SHA7MTD61YWQJ6",
     "https://id.skygest.io/distribution/dist_01KP1CQKZVCVGB98VT29MG6DZS"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

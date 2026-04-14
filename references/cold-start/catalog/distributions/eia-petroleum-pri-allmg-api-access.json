@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWM6Q42NRJ9VFK7STF3",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWM2H03KTADN8QKMV1Z",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/petroleum/pri/allmg/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

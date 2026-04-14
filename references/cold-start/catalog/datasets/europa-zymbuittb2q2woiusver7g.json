@@ -5,7 +5,6 @@
   "description": "[Publisher: Eurostat] <p>Energy consumption of transport activities (road transport, rail transport (incl. metro, trams, etc.), domestic aviation, domestic navigation and pipeline transport), by type of fuel (according to the Standard International Energy product Classification - SIEC). Expressed in thousand tonnes of oil equivalent. Quantities delivered to international aviation and international marine bunkers are excluded. Energy used in ships for fishing is excluded (included in the fishing sector).</p>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/zymbuittb2q2woiusver7g",
-  "accessRights": "public",
   "license": "CC_BY_4_0",
   "temporal": "2013-01-01T00:00:00Z/2024-12-31T00:00:00Z",
   "themes": [
@@ -19,11 +18,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZSTDRD7VXA21P1JPH4",
     "https://id.skygest.io/distribution/dist_01KP1CQKZSGB6YRRR4H0TNGYMG"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

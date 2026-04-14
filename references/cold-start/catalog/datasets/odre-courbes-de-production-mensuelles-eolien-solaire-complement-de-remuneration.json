@@ -5,7 +5,6 @@
   "description": "<p>\n</p><p><span style=\"font-family: inherit; font-size: 0.875rem;\">Ce jeu de données est constitué des chroniques de production mensuelle éolienne et solaire au pas horaire, à la maille France depuis 2020, permettant à la CRE de calculer les prix de référence utilisés dans le calcul du complément de rémunération pour les filières éoliennes et solaires.</span></p>\n<p>\nLe complément de rémunération est un dispositif de soutien des producteurs d’énergie éolienne et solaire prévu aux articles <a href=\"https://www.legifrance.gouv.fr/affichCode.do;jsessionid=4EA59519B448F6D7D5ADCAB9C9994F9C.tplgfr26s_3?idSectionTA=LEGISCTA000031053454&amp;cidTexte=LEGITEXT000023983208&amp;dateTexte=20180129\" title=\"\">L. 314-18 à L. 314-27</a> du code de l’énergie.\n</p>\n<p>\nIl a été introduit par la LTECV. Dans ce mécanisme où les\nproducteurs d’électricité à partir d’<a href=\"https://www.cre.fr/Pages-annexes/Glossaire/ENERGIE-RENOUVELABLE\">énergie\nrenouvelable</a> commercialisent leur énergie directement sur les marchés, une prime vient compenser l’écart entre les revenus tirés de cette vente et un niveau de rémunération de référence, fixé selon le type d’installations par la puissance publique dans le cadre d’un arrêté tarifaire ou par le producteur dans le cadre d’une procédure de mise en concurrence.\n</p>\n<p>\nCe complément de rémunération peut généralement être qualifié de prime variable, ou ex post, dans la mesure où son montant s’ajuste pour compenser la différence entre la rémunération de référence et un revenu marché de référence.\n</p>\n<p>\nCe dispositif vise à exposer les producteurs aux signaux des prix de marché de court terme, tout en leur garantissant une rémunération raisonnable.\n</p>\n<p>\nCe jeu de données sera mis à jour à une fréquence mensuelle.</p>\n<hr>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/courbes-de-production-mensuelles-eolien-solaire-complement-de-remuneration/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "EnR",
@@ -18,11 +17,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKFWM9A30GSYZMN4T0SN"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

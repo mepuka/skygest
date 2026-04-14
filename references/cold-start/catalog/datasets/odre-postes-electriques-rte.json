@@ -5,7 +5,6 @@
   "description": "<p><b style=\"font-family: inherit; font-size: 0.875rem;\">RTE a fait évoluer l'accès aux données GPS des infrastructures du réseau public de transport pour des raisons de sécurité publique. RTE travaille à des solutions alternatives et publie les données sous une nouvelle forme, dans le souci de concilier au mieux la protection de ses actifs avec l'information du public.</b></p><p class=\"MsoNormal\" style=\"text-align:justify\">Ce jeu de données présente pour la France Métropolitaine, l’ensemble des sites électriques de propriété ou de copropriété RTE ou étant l’extrémité d’une liaison RTE.</p><p class=\"MsoNormal\" style=\"text-align:justify\"><span style=\"font-family: inherit; font-size: 0.875rem;\">Un site rassemble tous les équipements de tous les niveaux de tension sur une entité géographique unique.</span></p><p class=\"MsoNormal\" style=\"text-align:justify\"><span style=\"font-family: inherit; font-size: 0.875rem;\">Ces sites portent la mention « Poste de transformation » en dernière colonne.</span></p><p class=\"MsoNormal\" style=\"text-align:justify\">La liste présente les sites RTE ainsi que les sites électriques non RTE mais où aboutissent les lignes appartenant à RTE.</p><p class=\"MsoNormal\" style=\"text-align:justify\">Cette liste est complétée par les sites RTE contenant un support de piquage. C’est-à-dire un éclatement ou un regroupement d’ouvrages, la plupart du temps ne contenant qu’un simple support. Ces éléments portent la mention « Poste de piquage » en dernière colonne. Ceci pour être cohérent avec le jeu de données « Lignes aériennes » dont le découpage s’arrête sur ces piquages.</p><p class=\"MsoNormal\" style=\"text-align:justify\"><span style=\"font-family: inherit; font-size: 0.875rem;\">Pour tous renseignements complémentaires sur ce jeu de données, écrivez nous via le formulaire suivant : </span><a href=\"https://odre.opendatasoft.com/pages/contactv2/\" style=\"font-family: sans-serif; font-size: 0.875rem; background-color: rgb(255, 255, 255);\">Contact - ODRE — Open Data Réseaux Énergies (ODRÉ)</a>.</p>\n<hr>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/postes-electriques-rte/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "INSPIRE",
@@ -17,11 +16,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKG3AM56XYWB73D78EBJ"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

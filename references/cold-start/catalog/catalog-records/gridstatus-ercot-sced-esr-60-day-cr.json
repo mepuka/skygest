@@ -7,7 +7,7 @@
   "sourceRecordId": "ercot_sced_esr_60_day",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2026-02-06T23:54:47+00:00",
-  "lastSeen": "2026-04-12T11:39:04+00:00",
-  "sourceModified": "2026-02-12T05:55:16+00:00",
+  "lastSeen": "2026-04-14T11:36:57+00:00",
+  "sourceModified": "2026-02-14T05:55:21+00:00",
   "isAuthoritative": true
 }

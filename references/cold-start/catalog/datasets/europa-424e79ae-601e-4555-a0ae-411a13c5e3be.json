@@ -5,7 +5,6 @@
   "description": "[Publisher: Stadtgemeinde Leoben] Mit einer gezielten LED-Umrüstung rund um den Hauptplatz und einem umfassenden Straßenbauprogramm 2026 investiert die Stadtgemeinde Leoben konsequent in ihre bestehende Infrastruktur. Rund 75 Leuchten in den Fußgängerzonen rund um den Hauptplatz wurden modernisiert. Parallel dazu setzt Leoben 2026 mehrere Schwerpunkte im Straßenbau.",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/424e79ae-601e-4555-a0ae-411a13c5e3be",
-  "accessRights": "public",
   "license": "https://creativecommons.org/licenses/by/4.0/deed.de",
   "temporal": "2026-03-03T00:00:00Z/2027-03-03T00:00:00Z",
   "themes": [
@@ -19,11 +18,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZTCVDP0QFH2HEA6V3D",
     "https://id.skygest.io/distribution/dist_01KP1CQKZTFAR5AVMB1JEA51P5"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

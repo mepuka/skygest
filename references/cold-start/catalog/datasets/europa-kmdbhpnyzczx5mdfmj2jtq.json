@@ -5,7 +5,6 @@
   "description": "[Publisher: Eurostat] <p>Consumption of households&nbsp;(space heating, water heating, cooling, cooking, electrical appliances) and by type of fuel (according to the Standard International Energy product Classification - SIEC). Expressed in thousand tonnes of oil equivalent. Self-produced electricity is included in electricity consumption. Self-produced heat is counted only for active systems (such as solar thermal panels), while passive heating systems (such as south-oriented windows) are excluded.</p>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/kmdbhpnyzczx5mdfmj2jtq",
-  "accessRights": "public",
   "license": "CC_BY_4_0",
   "temporal": "2013-01-01T00:00:00Z/2024-12-31T00:00:00Z",
   "themes": [
@@ -19,11 +18,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZT30JS8PJN2JDWVMCZ",
     "https://id.skygest.io/distribution/dist_01KP1CQKZTYV35AVDDDYWSGF9X"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

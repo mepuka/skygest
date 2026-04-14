@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWE3H2QF28FDX5Q34QM",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWE7ARAHY6BX0ZE4CG4",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/electricity/rto/daily-region-sub-ba-data/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

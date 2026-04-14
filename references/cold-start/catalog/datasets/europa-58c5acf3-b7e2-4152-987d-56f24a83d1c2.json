@@ -5,7 +5,6 @@
   "description": "[Publisher: South Dublin County Council] <p style='background-color:rgb(255, 255, 255); border:0px solid currentcolor; box-sizing:border-box; color:rgb(74, 74, 74); font-family:&quot;Avenir Next&quot;, Avenir, &quot;Helvetica Neue&quot;, sans-serif; font-size:16px; font-style:normal; font-variant-caps:normal; font-variant-ligatures:normal; font-weight:400; letter-spacing:normal; margin:0px 0px 1rem; text-align:start; text-decoration-color:initial; text-decoration-style:initial; text-indent:0px; text-transform:none; word-spacing:0px;'>A Derelict Site is defined in the Act as any land which detracts, or is likely to detract, to a material degree from the amenity, character or appearance of land in the neighbourhood of the land in question because of -<br />(a) The existence of structures which are in a ruinous, derelict or dangerous condition<br />(b) The neglected, unsightly or objectionable condition of the land or any structures on the land<br />(c) The presence of litter, rubbish, debris or waste on the land.</p><p style='background-color:rgb(255, 255, 255); border:0px solid currentcolor; box-sizing:border-box; color:rgb(74, 74, 74); font-family:&quot;Avenir Next&quot;, Avenir, &quot;Helvetica Neue&quot;, sans-serif; font-size:16px; font-style:normal; font-variant-caps:normal; font-variant-ligatures:normal; font-weight:400; letter-spacing:normal; margin:0px 0px 1rem; text-align:start; text-decoration-color:initial; text-decoration-style:initial; text-indent:0px; text-transform:none; word-spacing:0px;'>The Act places a duty on every owner and occupier of land to take all reasonable steps to ensure that the land does not become or continue to be a derelict site.<br />&nbsp;</p><p style='background-color:rgb(255, 255, 255); border:0px solid currentcolor; box-sizing:border-box; color:rgb(74, 74, 74); font-family:&quot;Avenir Next&quot;, Avenir, &quot;Helvetica Neue&quot;, sans-serif; font-size:16px; font-style:normal; font-variant-caps:normal; font-variant-ligatures:normal; font-weight:400; letter-spacing:normal; margin:0px 0px 1rem; text-align:start; text-decoration-color:initial; text-decoration-style:initial; text-indent:0px; text-transform:none; word-spacing:0px;'>Under the Act, the Council has the authority to:<br />(a) Serve a Notice on the owner/occupier specifying works to be carried out to prevent or abate dereliction<br />(b) Acquire by agreement or compulsorily any derelict site situated within its administrative area<br />(c) Impose an annual levy on any derelict site, which is considered to be urban land, within its administrative area which stands entered on the Derelict Sites Register on the 1st January of that year. From January 2020, the levy shall be 7% of the market value of the land/site.</p><p style='background-color:rgb(255, 255, 255); border:0px solid currentcolor; box-sizing:border-box; color:rgb(74, 74, 74); font-family:&quot;Avenir Next&quot;, Avenir, &quot;Helvetica Neue&quot;, sans-serif; font-size:16px; font-style:normal; font-variant-caps:normal; font-variant-ligatures:normal; font-weight:400; letter-spacing:normal; margin:0px 0px 1rem; text-align:start; text-decoration-color:initial; text-decoration-style:initial; text-indent:0px; text-transform:none; word-spacing:0px;'>To report a derelict site, contact the Enforcement and Licensing Section by email at info@sdublincoco.ie or by telephone at 01 4149000.</p>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/58c5acf3-b7e2-4152-987d-56f24a83d1c2",
-  "accessRights": "public",
   "themes": [
     "energy"
   ],
@@ -16,11 +15,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZ6D228FYS6X0V1BZT2",
     "https://id.skygest.io/distribution/dist_01KP1CQKZ62V7Z20241Y4DNKQV"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

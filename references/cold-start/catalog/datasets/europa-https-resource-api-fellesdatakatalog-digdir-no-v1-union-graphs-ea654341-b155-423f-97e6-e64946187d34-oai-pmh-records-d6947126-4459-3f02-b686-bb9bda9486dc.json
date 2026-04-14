@@ -5,7 +5,6 @@
   "description": "[Publisher: Norges vassdrags- og energidirektorat]",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/https-resource-api-fellesdatakatalog-digdir-no-v1-union-graphs-ea654341-b155-423f-97e6-e64946187d34-oai-pmh-records-d6947126-4459-3f02-b686-bb9bda9486dc",
-  "accessRights": "public",
   "license": "NLOD_1_0",
   "temporal": "2015-09-11T00:00:00Z/",
   "themes": [
@@ -15,11 +14,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYFT5ZKZE4WN84JVK8J",
     "https://id.skygest.io/distribution/dist_01KP1CQKYGX23WTZTEFNDV826B"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

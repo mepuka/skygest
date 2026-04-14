@@ -7,7 +7,7 @@
   "sourceRecordId": "ieso_wind_embedded_forecast",
   "harvestedFrom": "https://api.gridstatus.io/v1/datasets",
   "firstSeen": "2025-05-12T15:58:43+00:00",
-  "lastSeen": "2026-04-12T16:28:50+00:00",
-  "sourceModified": "2026-04-12T15:33:10+00:00",
+  "lastSeen": "2026-04-14T15:25:51+00:00",
+  "sourceModified": "2026-04-14T14:33:09+00:00",
   "isAuthoritative": true
 }

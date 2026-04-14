@@ -5,7 +5,6 @@
   "description": "<p>\nHistorique quotidien des capacités d’effacement de consommation d’électricité (MW) sur le mécanisme d’ajustement.\n</p>\n<ul>\n<li>Offre minimum disponible sur la journée</li>\n<li>Offre moyenne disponible sur la journée</li>\n<li>Offre maximum disponible sur la journée</li>\n<li>Effacement maximum activé sur la journée</li>\n</ul>\n<hr>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/effacements-quotidiens-ma/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "keywords": [
     "Bilan annuel"
@@ -16,11 +15,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKG2A9WKE7WT8AJ70HT8"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

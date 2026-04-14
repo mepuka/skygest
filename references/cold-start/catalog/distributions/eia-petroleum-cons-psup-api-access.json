@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWTNB2QE7V91VB0VZJ6",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWT3ZYW73YRDT7J69GW",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/petroleum/cons/psup/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

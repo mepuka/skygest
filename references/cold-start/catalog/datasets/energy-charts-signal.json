@@ -4,7 +4,6 @@
   "title": "Energy Charts Signal",
   "description": "<b>Electricity traffic signal</b>\n    \n\n\n    \n\nReturns the renewable share of load in percent from today until prediction is currently available and the corresponding traffic light.\n    \n\n\n    \n\nThe traffic light \"signal\" is indicated by the following numbers:\n    \n\n\n    -1: Red (grid congestion),\n    0: Red (low renewable share),\n    1: Yellow (average renewable share),\n    2: Green (high renewable share)\n    \n\n\n    \n\nIf no data is available from the primary data providers, a best guess is made from historic data. This is indicated by \"substitute\" set to True.\n    \n\n\n    \n\n\"postal_code\" is an optional input parameter, which will consider the local grid state (e.g. transmission line overload) in future implementations.\n    \n\n\n    \n\nResponse schema:\n    \n\n```json\n{\n    \"unix_seconds\": [int],\n    \"share\": [float],\n    \"signal\": [int],\n    \"substitute\": bool,\n    \"deprecated\": bool\n}\n```",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNWVQMFHEZD7KVN03TEAVA1Q",
-  "accessRights": "public",
   "license": "https://creativecommons.org/licenses/by/4.0/",
   "keywords": [
     "signal"
@@ -12,11 +11,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KNWVQMFJ851903BFRJ450MRS"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KNWVQMFH6QYQC1EQ63T1JNN3"
   ],
   "createdAt": "2026-04-10T23:30:44.590Z",
-  "updatedAt": "2026-04-10T23:31:05.948Z",
+  "updatedAt": "2026-04-14T15:25:47.701Z",
   "aliases": [
     {
       "scheme": "energy-charts-endpoint",

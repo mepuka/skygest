@@ -5,18 +5,23 @@
   "kind": "download",
   "title": "Non-BM Physical Notifications",
   "description": "This Data File contains Non-BM Physical Notifications (PN) data declared to OBP by Service Providers, once declarations have been accepted and validated by OBP system by gate closure. This information is continuously published throughout the day on this platform.",
-  "downloadURL": "https://api.neso.energy/dataset/73edf630-fe9e-45a6-a2be-fa0d31a8ec1d/resource/dfe1d229-e973-43c6-b5eb-c28ad59d7136/download/pn_20260414_09_nbm.csv",
+  "downloadURL": "https://api.neso.energy/dataset/73edf630-fe9e-45a6-a2be-fa0d31a8ec1d/resource/dfe1d229-e973-43c6-b5eb-c28ad59d7136/download/pn_20260414_35_nbm.csv",
   "mediaType": "text/csv",
   "format": "csv",
   "accessRights": "public",
   "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
   "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
   "createdAt": "2026-04-14T02:09:59.759Z",
-  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T15:25:34.063Z",
   "aliases": [
     {
       "scheme": "url",
       "value": "https://api.neso.energy/dataset/73edf630-fe9e-45a6-a2be-fa0d31a8ec1d/resource/dfe1d229-e973-43c6-b5eb-c28ad59d7136/download/pn_20260414_09_nbm.csv",
+      "relation": "exactMatch"
+    },
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/73edf630-fe9e-45a6-a2be-fa0d31a8ec1d/resource/dfe1d229-e973-43c6-b5eb-c28ad59d7136/download/pn_20260414_35_nbm.csv",
       "relation": "exactMatch"
     }
   ]

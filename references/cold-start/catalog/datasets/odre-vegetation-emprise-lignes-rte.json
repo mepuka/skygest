@@ -5,7 +5,6 @@
   "description": "<p>\nCe jeu de données recense la végétation dans l’emprise des lignes électriques RTE au 6 mai 2024 susceptible de présenter un risque d’amorçage avec les câbles. Ces données n’ont pas vocation à constituer un inventaire exhaustif de la végétation, mais uniquement les essences dont la croissance est susceptible de présenter un risque vis-à-vis des lignes électriques.\n</p>\n<p>\nEn pièce jointe, vous trouverez également un fichier listant ces données au format SHAPE FILE (RGF 93 Lambert 93) utilisable dans un système d'information géographique (SIG).\n</p>\n<hr>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KNQS8K70JC6HXDBVHH76K2HC",
   "landingPage": "https://odre.opendatasoft.com/explore/dataset/vegetation-emprise-lignes-rte/",
-  "accessRights": "public",
   "license": "Licence Ouverte v2.0 (Etalab)",
   "themes": [
     "Infrastructures",
@@ -14,11 +13,12 @@
   "distributionIds": [
     "https://id.skygest.io/distribution/dist_01KP19XKFX9VJSPGJ38VVTJE96"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP19XKFRKEEX3F403NDM863D"
   ],
   "createdAt": "2026-04-12T16:55:36.147Z",
-  "updatedAt": "2026-04-12T16:55:48.622Z",
+  "updatedAt": "2026-04-14T15:25:39.627Z",
   "aliases": [
     {
       "scheme": "odre-dataset-id",

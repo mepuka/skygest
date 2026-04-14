@@ -5,7 +5,6 @@
   "description": "[Publisher: ssd] Ce jeu de données fournit des mesures de vent enregistrées toutes les 10 minutes pour le périmètre « Schwyberg », situé dans le canton de Fribourg. Collectées dans le cadre du mandat du Grand Conseil pour la planification éolienne cantonale, ces données comprennent la vitesse et la direction du vent, la température, l'humidité relative à différentes hauteurs, ainsi que le potentiel de production éolienne (productible éolien). Ces informations sont essentielles pour la planification énergétique et sont mises à disposition en libre accès sur la plateforme Open Government Data du canton de Fribourg dans un souci de transparence et d'accès à l'information pour tous. Le périmètre « Schwyberg » se situe dans le district de la Singine sur la crête du Schwyberg à environ 1 610 mètres d’altitude.L'heure\nUTC (temps universel coordonné) sert de référence mondiale et ne change pas\navec les saisons. Pour obtenir l'heure locale, ajoutez 1 heure en hiver (UTC+1)\net 2 heures en été (UTC+2).Pour plus d'informations : [https://www.fr.ch/fribourg-vents/schwyberg](https://www.fr.ch/fribourg-vents/schwyberg)",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/08_02_eolien_schwyberg-ssd",
-  "accessRights": "public",
   "license": "http://dcat-ap.ch/vocabulary/licenses/terms_by",
   "temporal": "2025-09-01T00:00:00Z/2026-04-05T23:50:00Z",
   "themes": [
@@ -22,11 +21,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKYT3FCDBY0TZ32S8JH8",
     "https://id.skygest.io/distribution/dist_01KP1CQKYT09JVW5YYYCB8D618"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",

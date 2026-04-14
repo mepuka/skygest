@@ -1,0 +1,10 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP69GMWAQXZMTCJ6QBPZ3FMV",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP69GMWA1R91T8K2V6CY6GRG",
+  "kind": "api-access",
+  "accessURL": "https://api.eia.gov/v2/coal/price-by-rank/",
+  "createdAt": "2026-04-14T15:24:46.023Z",
+  "updatedAt": "2026-04-14T15:24:46.023Z",
+  "aliases": []
+}

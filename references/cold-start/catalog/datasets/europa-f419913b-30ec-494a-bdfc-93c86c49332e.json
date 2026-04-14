@@ -5,7 +5,6 @@
   "description": "[Publisher: South Dublin County Council] <p>This data represents water quality of a selection of river and stream sites in South Dublin County.</p><p>The samples are collected at a monthly frequency and are collected by South Dublin County Council staff and analysed by Dublin City Council’s accredited laboratory on Marrowbone Lane in Dublin City. </p><p>This dataset reports for samples taken during the period: 01/01/2014 - 30/08/2022.<br />Samples are primarily collected to determine compliance against environmental quality standards in the legislation, S.I. No. 272/2009 - European Communities Environmental Objectives (Surface Waters) Regulations 2009, and precursor phosphate regulations. The monthly collection of samples also allows for the trend testing across monthly, season and yearly quantities.  The laboratory does not operate on Saturday or Sunday which places a constraint for samples to be delivered to the lab from Wednesday to Friday to facilitate the BOD5 day test. Microbiological parameters are not collected due to similar laboratory constraints. If you have any queries relating to this dataset, please contact the Water &amp; Drainage section in South Dublin County Council by emailing waterpollution@sdublincoco.ie </p>",
   "publisherAgentId": "https://id.skygest.io/agent/ag_01KP1CQKY89M01BE7XH185TYJ2",
   "landingPage": "https://data.europa.eu/data/datasets/f419913b-30ec-494a-bdfc-93c86c49332e",
-  "accessRights": "public",
   "themes": [
     "energy"
   ],
@@ -17,11 +16,12 @@
     "https://id.skygest.io/distribution/dist_01KP1CQKZQA09SFB6QM3FME1RR",
     "https://id.skygest.io/distribution/dist_01KP1CQKZQWH2CA35R2BHD7R1Q"
   ],
+  "accessRights": "public",
   "dataServiceIds": [
     "https://id.skygest.io/data-service/svc_01KP1CQKY8BPB3WGQGSN5MT6XP"
   ],
   "createdAt": "2026-04-12T17:44:45.202Z",
-  "updatedAt": "2026-04-12T17:44:45.202Z",
+  "updatedAt": "2026-04-14T15:26:15.788Z",
   "aliases": [
     {
       "scheme": "europa-dataset-id",
