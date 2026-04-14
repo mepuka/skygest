@@ -21,6 +21,8 @@
     "sync:energy-profile": "bun run scripts/sync-energy-profile.ts",
     "gen:energy-profile": "bun run scripts/generate-energy-profile.ts",
     "gen:data-layer-spine": "bun run scripts/generate-data-layer-spine.ts",
+    "search-db:migrate": "bun run scripts/migrate-search-db.ts",
+    "search-db:rebuild": "bun run scripts/rebuild-search-db.ts",
     "ops": "bun run src/scripts/ops.ts"
   },
   "devDependencies": {

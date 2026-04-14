@@ -24,13 +24,14 @@ import {
   FileSystem,
   Option,
   Path,
-  Schema,
-  Stream
+  Schema
 } from "effect";
 import {
   ChildProcess,
   ChildProcessSpawner
 } from "effect/unstable/process";
+import { CommandExecutionError } from "../domain/errors";
+import { runCommandCollectingOutput } from "./CommandRunner";
 import { stringifyUnknown } from "./Json";
 
 // ---------------------------------------------------------------------------
@@ -89,31 +90,18 @@ const mapFsError = (operation: D1SnapshotOperation, dbName: string) =>
 const runCommand = (
   dbName: string,
   operation: D1SnapshotOperation,
+  commandText: string,
   command: ChildProcess.Command
 ): Effect.Effect<string, D1SnapshotError, ChildProcessSpawner.ChildProcessSpawner> =>
-  Effect.gen(function* () {
-    const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
-    const handle = yield* spawner.spawn(command);
-    const output = yield* Stream.decodeText(handle.all).pipe(Stream.mkString);
-    const code = yield* handle.exitCode;
-    if (code !== 0) {
-      return yield* new D1SnapshotError({
+  runCommandCollectingOutput(commandText, command).pipe(
+    Effect.mapError((error) =>
+      new D1SnapshotError({
         operation,
         dbName,
-        message: `exit code ${String(code)}: ${output.trim()}`
-      });
-    }
-    return output;
-  }).pipe(
-    Effect.scoped,
-    Effect.mapError((error) =>
-      error instanceof D1SnapshotError
-        ? error
-        : new D1SnapshotError({
-            operation,
-            dbName,
-            message: stringifyUnknown(error)
-          })
+        message: error instanceof CommandExecutionError
+          ? error.message
+          : stringifyUnknown(error)
+      })
     )
   );
 
@@ -218,16 +206,20 @@ export const ensureD1Snapshot = (
             dumpPath,
             ...(options.extraArgs ?? [])
           ];
+          const exportCommandText = `wrangler ${exportArgs.join(" ")}`;
           yield* runCommand(
             options.dbName,
             "wrangler-export",
+            exportCommandText,
             ChildProcess.make("wrangler", exportArgs)
           );
 
           // Step 2: sqlite3 <tmpSqlite> ".read <dumpPath>"
+          const sqliteCommandText = `sqlite3 ${tmpSqlitePath} .read ${dumpPath}`;
           yield* runCommand(
             options.dbName,
             "sqlite-import",
+            sqliteCommandText,
             ChildProcess.make("sqlite3", [tmpSqlitePath, `.read ${dumpPath}`])
           );
 
