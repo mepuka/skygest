@@ -3,6 +3,7 @@
   "id": "https://id.skygest.io/series/ser_01KNQEZ5XB46SZ4MTCEXR6W4PW",
   "label": "EU solar generation by country (annual)",
   "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN8PY5KZKS91E7QVTB",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNX53R149V3QYRSNC9SVJ8NF",
   "fixedDims": {
     "place": "EU",
     "frequency": "annual",

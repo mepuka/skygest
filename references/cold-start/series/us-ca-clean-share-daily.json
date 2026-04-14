@@ -3,6 +3,7 @@
   "id": "https://id.skygest.io/series/ser_01KNQEZ5XBED9DAWEZJ5K4PG62",
   "label": "CAISO clean electricity share (daily)",
   "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN50KM85CVJQWYFMTY",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",
   "fixedDims": {
     "place": "US-CA",
     "market": "CAISO",

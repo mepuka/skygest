@@ -10,6 +10,7 @@ import {
   Option,
   Path,
   References,
+  Result,
   Schema
 } from "effect";
 import { TestClock } from "effect/testing";
@@ -80,6 +81,17 @@ const jsonResponse = (
 const makeHttpLayer = (
   handler: Parameters<typeof HttpClient.make>[0]
 ) => Layer.succeed(HttpClient.HttpClient, HttpClient.make(handler));
+
+const expectSuccessfulResult = <A, E extends { readonly message: string }>(
+  result: Result.Result<A, E>
+): A => {
+  expect(Result.isSuccess(result)).toBe(true);
+  if (Result.isFailure(result)) {
+    throw result.failure;
+  }
+
+  return result.success;
+};
 
 describe("fetchRoute", () => {
   it.effect("decodes a leaf route response into EiaApiResponse", () =>
@@ -886,14 +898,9 @@ describe("buildIngestGraph", () => {
       (dataset.data as Dataset).id
     );
 
-    const graph = buildIngestGraph([
-      agent,
-      catalog,
-      dataset,
-      distribution,
-      dataService,
-      cr
-    ]);
+    const graph = expectSuccessfulResult(
+      buildIngestGraph([agent, catalog, dataset, distribution, dataService, cr])
+    );
 
     expect(Graph.nodeCount(graph)).toBe(6);
     // 3 publishes (agent→catalog, agent→dataset, agent→data-service) +
@@ -935,21 +942,14 @@ describe("buildIngestGraph", () => {
       (dataset.data as Dataset).id
     );
 
-    const { graph, dataLayerGraph } = buildIngestGraphs([
-      agent,
-      catalog,
-      dataset,
-      distribution,
-      dataService,
-      cr
-    ]);
+    const { graph, dataLayerGraph } = expectSuccessfulResult(
+      buildIngestGraphs([agent, catalog, dataset, distribution, dataService, cr])
+    );
 
     const ingestTopoIds = Array.from(Graph.values(Graph.topo(graph))).map(
       (node) => node.data.id
     );
-    const sharedTopoIds = Array.from(
-      Graph.values(Graph.topo(dataLayerGraph.raw))
-    ).map((entity) => entity.id);
+    const sharedTopoIds = dataLayerGraph.topoNodes().map((entity) => entity.id);
 
     expect(ingestTopoIds).toEqual(sharedTopoIds);
   });
@@ -968,7 +968,9 @@ describe("buildIngestGraph", () => {
       (datasetSeries.data as DatasetSeries).id
     );
 
-    const graph = buildIngestGraph([dataset, datasetSeries, agent]);
+    const graph = expectSuccessfulResult(
+      buildIngestGraph([dataset, datasetSeries, agent])
+    );
     const topoOrder = Array.from(Graph.values(Graph.topo(graph)));
     const positions = new Map<string, number>();
     topoOrder.forEach((node, idx) => positions.set(node.slug, idx));
@@ -1011,15 +1013,17 @@ describe("buildIngestGraph", () => {
       (dataset.data as Dataset).id
     );
 
-    const graph = buildIngestGraph([
-      // Intentionally jumbled — buildIngestGraph + topo must reorder.
-      cr,
-      distribution,
-      dataService,
-      dataset,
-      catalog,
-      agent
-    ]);
+    const graph = expectSuccessfulResult(
+      buildIngestGraph([
+        // Intentionally jumbled — buildIngestGraph + topo must reorder.
+        cr,
+        distribution,
+        dataService,
+        dataset,
+        catalog,
+        agent
+      ])
+    );
 
     const topoOrder = Array.from(Graph.values(Graph.topo(graph)));
     const positions = new Map<string, number>();
@@ -2324,7 +2328,7 @@ describe("buildCandidateNodes", () => {
     // This ties Task 5.5 (buildIngestGraph) + Task 6 (loadCatalogIndex)
     // + Task 7 (builders) together and catches any accidental cycle,
     // orphaned edge, or wiring bug introduced by the builders.
-    const graph = buildIngestGraph(nodes);
+    const graph = expectSuccessfulResult(buildIngestGraph(nodes));
     expect(Graph.isAcyclic(graph)).toBe(true);
     const topo = Array.from(Graph.values(Graph.topo(graph)));
     expect(topo.length).toBe(nodes.length);
@@ -2334,9 +2338,11 @@ describe("buildCandidateNodes", () => {
 
   it("fails fast on duplicate node keys", () => {
     const agent = fakeAgent("eia", "01KNQEZ5V57VJJJFYV6HWM03VB");
-    expect(() => buildIngestGraph([agent, agent])).toThrow(
-      "Duplicate ingest graph node key"
-    );
+    const result = buildIngestGraph([agent, agent]);
+    expect(Result.isFailure(result)).toBe(true);
+    if (Result.isFailure(result)) {
+      expect(result.failure.message).toContain("Duplicate ingest graph node key");
+    }
   });
 
   it("marks merged=true on a dataset whose route is already in the catalog index", () => {
@@ -2416,7 +2422,7 @@ describe("buildCandidateNodes", () => {
     expect(aeo2023Node?.data.inSeries).toBe(datasetSeriesNode?.data.id);
     expect(aeo2024Node?.data.inSeries).toBe(datasetSeriesNode?.data.id);
 
-    const graph = buildIngestGraph(nodes);
+    const graph = expectSuccessfulResult(buildIngestGraph(nodes));
     const topo = Array.from(Graph.values(Graph.topo(graph)));
     const positions = new Map(topo.map((node, index) => [node.slug, index]));
     expect(

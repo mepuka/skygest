@@ -111,6 +111,62 @@ export type LookupCollisionIssue = Schema.Schema.Type<
   typeof LookupCollisionIssue
 >;
 
+const DataLayerGraphDuplicateNodeReason = Schema.Union([
+  Schema.Literal("duplicate-node-key"),
+  Schema.Literal("duplicate-entity-id")
+]);
+
+export const DataLayerGraphDuplicateNodeIssue = Schema.TaggedStruct(
+  "DataLayerGraphDuplicateNodeIssue",
+  {
+    path: Schema.String,
+    nodeKey: Schema.String,
+    entityId: Schema.String,
+    reason: DataLayerGraphDuplicateNodeReason
+  }
+);
+export type DataLayerGraphDuplicateNodeIssue = Schema.Schema.Type<
+  typeof DataLayerGraphDuplicateNodeIssue
+>;
+
+export const DataLayerGraphUnexpectedTargetIssue = Schema.TaggedStruct(
+  "DataLayerGraphUnexpectedTargetIssue",
+  {
+    path: Schema.String,
+    field: Schema.String,
+    targetId: Schema.String,
+    expectedTags: Schema.Array(Schema.String),
+    actualTag: Schema.String
+  }
+);
+export type DataLayerGraphUnexpectedTargetIssue = Schema.Schema.Type<
+  typeof DataLayerGraphUnexpectedTargetIssue
+>;
+
+export const DataLayerGraphInvariantIssue = Schema.TaggedStruct(
+  "DataLayerGraphInvariantIssue",
+  {
+    path: Schema.String,
+    message: Schema.String
+  }
+);
+export type DataLayerGraphInvariantIssue = Schema.Schema.Type<
+  typeof DataLayerGraphInvariantIssue
+>;
+
+export const DataLayerGraphCardinalityIssue = Schema.TaggedStruct(
+  "DataLayerGraphCardinalityIssue",
+  {
+    path: Schema.String,
+    edgeKind: Schema.String,
+    expectedCount: Schema.Number,
+    actualCount: Schema.Number
+  }
+);
+export type DataLayerGraphCardinalityIssue = Schema.Schema.Type<
+  typeof DataLayerGraphCardinalityIssue
+>;
+
 export const DataLayerRegistryIssue = Schema.Union([
   FileReadIssue,
   JsonParseIssue,
@@ -120,7 +176,11 @@ export const DataLayerRegistryIssue = Schema.Union([
   MissingReferenceIssue,
   SemanticConsistencyIssue,
   UnknownVocabularyValueIssue,
-  LookupCollisionIssue
+  LookupCollisionIssue,
+  DataLayerGraphDuplicateNodeIssue,
+  DataLayerGraphUnexpectedTargetIssue,
+  DataLayerGraphInvariantIssue,
+  DataLayerGraphCardinalityIssue
 ]);
 export type DataLayerRegistryIssue = Schema.Schema.Type<
   typeof DataLayerRegistryIssue

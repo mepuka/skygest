@@ -2,9 +2,9 @@
  * Generate Series JSON files for SKY-215 cold-start.
  * Usage: bun scripts/generate-series.ts
  *
- * Idempotent as of SKY-317: reuses IDs from .series-ids.json and emits
- * datasetId from .series-dataset-backfill.json. Rerunning is a no-op against
- * the current checked-in state.
+ * Idempotent as of SKY-317/SKY-356: reuses IDs from .series-ids.json and emits
+ * datasetId from .series-dataset-backfill.json for the original SKY-215 series
+ * set. Rerunning is a no-op against the current checked-in state.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -51,8 +51,8 @@ interface SeriesDef {
   frequency?: string;
   extra?: Record<string, string>;
   // Inline dataset linkage for net-new series (SKY-323+).
-  // The SKY-317 backfill manifest remains the source of truth for
-  // retroactive backfills derived from candidate evidence.
+  // The backfill manifest remains the source of truth for the original
+  // SKY-215 series set, including later curated provenance repairs.
   datasetId?: string;
 }
 

@@ -1,6 +1,13 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Graph, Result } from "effect";
-import type { DataLayerRegistrySeed } from "../src/domain/data-layer";
+import { Result } from "effect";
+import {
+  makeAgentId,
+  makeDatasetId,
+  makeDistributionId,
+  makeSeriesId,
+  makeVariableId,
+  type DataLayerRegistrySeed,
+} from "../src/domain/data-layer";
 import { prepareDataLayerRegistry } from "../src/resolution/dataLayerRegistry";
 import {
   predecessorsByKinds,
@@ -9,12 +16,15 @@ import {
 } from "../src/data-layer/DataLayerGraphTraversal";
 
 const iso = "2026-04-09T00:00:00.000Z" as const;
-const agentId = "https://id.skygest.io/agent/ag_1234567890AB" as any;
-const datasetId = "https://id.skygest.io/dataset/ds_1234567890AB" as any;
-const distributionId =
-  "https://id.skygest.io/distribution/dist_1234567890AB" as any;
-const variableId = "https://id.skygest.io/variable/var_1234567890AB" as any;
-const seriesId = "https://id.skygest.io/series/ser_1234567890AB" as any;
+const agentId = makeAgentId("https://id.skygest.io/agent/ag_1234567890AB");
+const datasetId = makeDatasetId("https://id.skygest.io/dataset/ds_1234567890AB");
+const distributionId = makeDistributionId(
+  "https://id.skygest.io/distribution/dist_1234567890AB",
+);
+const variableId = makeVariableId(
+  "https://id.skygest.io/variable/var_1234567890AB",
+);
+const seriesId = makeSeriesId("https://id.skygest.io/series/ser_1234567890AB");
 
 const makeSeed = (
   options: {
@@ -99,7 +109,7 @@ describe("data-layer graph", () => {
       throw new Error("expected prepared registry");
     }
 
-    expect(Graph.nodeCount(prepared.success.graph.raw)).toBe(5);
+    expect(prepared.success.graph.nodeCount()).toBe(5);
 
     const publishedDatasets = successorsByKinds(
       prepared.success.graph,

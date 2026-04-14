@@ -1,79 +1,159 @@
 {
   "version": 1,
-  "source": "SKY-317 series→dataset backfill, derived from unanimous candidate evidence",
-  "generatedAt": "2026-04-13",
+  "source": "SKY-317 series→dataset backfill plus SKY-356 active-series provenance repair",
+  "generatedAt": "2026-04-14",
   "explicit": {
     "global-renewable-capacity-annual": {
       "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRV0G2XWPZD8NKXBMT",
       "datasetFile": "irena-capacity-stats-dataset.json",
-      "evidence": "5 unanimous candidates, publisher IRENA"
+      "evidence": "5 unanimous candidate votes, publisher IRENA",
+      "basis": "candidate-unanimous"
     },
     "us-ca-solar-generation-daily": {
       "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",
       "datasetFile": "caiso-todays-outlook.json",
-      "evidence": "4 unanimous candidates, publisher CAISO"
+      "evidence": "4 unanimous candidate votes, publisher CAISO",
+      "basis": "candidate-unanimous"
     },
     "us-co2-emissions-by-state-annual": {
       "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VHGV1ZECFSTCKW0B2R",
       "datasetFile": "eia-state-co2.json",
-      "evidence": "2 unanimous candidates, publisher EIA"
+      "evidence": "2 unanimous candidate votes, publisher EIA",
+      "basis": "candidate-unanimous"
     },
     "us-pjm-capacity-auction-annual": {
       "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRA0G6PMJAY725QSPF",
       "datasetFile": "pjm-capacity-auction.json",
-      "evidence": "1 unanimous candidate, publisher PJM"
+      "evidence": "1 unanimous candidate vote, publisher PJM",
+      "basis": "candidate-unanimous"
     },
     "us-pjm-load-forecast": {
       "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRS8ZDD0YCERY6C64B",
       "datasetFile": "pjm-load-forecast.json",
-      "evidence": "3 unanimous candidates, publisher PJM"
+      "evidence": "3 unanimous candidate votes, publisher PJM",
+      "basis": "candidate-unanimous"
     },
     "us-tx-electricity-demand-hourly": {
       "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQFWFMC2WM23G1K793",
       "datasetFile": "ercot-generation.json",
-      "evidence": "4 unanimous candidates, publisher ERCOT. NOTE: dataset title says 'Generation' but ERCOT's real-time dashboard exposes both generation and demand; the variableId is electricity-demand."
+      "evidence": "4 unanimous candidate votes. ERCOT's checked-in real-time generation dashboard also exposes demand, which is why this demand series hangs off the same source.",
+      "basis": "candidate-unanimous"
     },
     "us-tx-solar-generation-daily": {
       "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQJN53T6M83MN1XJFC",
       "datasetFile": "ercot-solar-records.json",
-      "evidence": "6 unanimous candidates (+1 NONE), publisher ERCOT"
-    }
-  },
-  "deliberatelyOmitted": {
+      "evidence": "6 unanimous candidate votes (+1 null), publisher ERCOT",
+      "basis": "candidate-unanimous"
+    },
     "de-wholesale-electricity-price": {
-      "reason": "Unanimous 3/3 candidates vote eia-electricity-data.json, but EIA does not publish German wholesale electricity prices. The candidates are a known corpus error. Fixing them is SKY-215 hygiene, not SKY-317 scope.",
-      "followUpTicket": null
+      "datasetId": "https://id.skygest.io/dataset/ds_01KP1ASA1CPSNJW6ZY8PQH0WYG",
+      "datasetFile": "entsoe-a44-a01.json",
+      "evidence": "SKY-215's series curation pins Germany wholesale prices to ENTSO-E/EPEX; the checked-in day-ahead price dataset for bidding zones is entsoe-a44-a01.",
+      "basis": "catalog-curated"
     },
     "eu-solar-generation-annual": {
-      "reason": "Split 2/3 between entsoe-transparency and nrel-atb. Picking the majority would override the NREL candidate; fixing it is out of scope.",
-      "followUpTicket": null
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNX53R149V3QYRSNC9SVJ8NF",
+      "datasetFile": "ember-electricity-generation-yearly.json",
+      "evidence": "SKY-215's key-series list pins EU solar generation to Ember; the checked-in yearly Ember generation dataset is the cross-country annual source.",
+      "basis": "catalog-curated"
     },
     "global-electricity-generation-annual": {
-      "reason": "Split 4/7 across ember-data-explorer, iea-data-portal, eia-electricity-data, bnef-datacenter. Multiple coherent choices.",
-      "followUpTicket": null
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNX53R149V3QYRSNC9SVJ8NF",
+      "datasetFile": "ember-electricity-generation-yearly.json",
+      "evidence": "SKY-323 follow-up research explicitly reopens this series onto Ember Electricity Generation Yearly as the canonical checked-in global yearly source.",
+      "basis": "catalog-curated"
     },
     "us-ca-electricity-price-hourly": {
-      "reason": "14/17 for caiso-todays-outlook, 3/17 for iea-data-portal. Strong majority but not unanimous.",
-      "followUpTicket": null
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",
+      "datasetFile": "caiso-todays-outlook.json",
+      "evidence": "14 of 17 candidate votes point to CAISO Today's Outlook, which stays the checked-in CAISO price surface for this hourly series.",
+      "basis": "candidate-majority"
     },
     "us-electricity-generation-annual": {
-      "reason": "3/5 for eia-electricity-data, 2/5 for ember-data-explorer. Both are plausible publishers of the same variable.",
-      "followUpTicket": null
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VJ626BQSJJ7JETCR44",
+      "datasetFile": "eia-generation-us.json",
+      "evidence": "SKY-215's key-series list pins U.S. electricity generation to EIA; the checked-in annual generation dataset is eia-generation-us.",
+      "basis": "catalog-curated"
+    },
+    "eu-coal-generation-annual": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNX53R149V3QYRSNC9SVJ8NF",
+      "datasetFile": "ember-electricity-generation-yearly.json",
+      "evidence": "SKY-215's key-series list pins EU coal generation to Ember; the checked-in yearly Ember generation dataset is the cross-country annual source.",
+      "basis": "catalog-curated"
+    },
+    "global-battery-pack-price-annual": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VPB7N9XFY1WSWNKM1R",
+      "datasetFile": "bnef-battery-price.json",
+      "evidence": "SKY-215's key-series list pins global battery pack price to BloombergNEF's Battery Price Survey.",
+      "basis": "catalog-curated"
+    },
+    "global-clean-energy-investment-annual": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VKBNWTX6A3DEP1JRWT",
+      "datasetFile": "iea-wei.json",
+      "evidence": "SKY-215's key-series list pins global clean energy investment to IEA World Energy Investment.",
+      "basis": "catalog-curated"
+    },
+    "global-energy-transition-investment-annual": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VPXM7P1ME16YJ6FVHP",
+      "datasetFile": "bnef-eti.json",
+      "evidence": "SKY-215's key-series list pins global energy transition investment to BloombergNEF Energy Transition Investment.",
+      "basis": "catalog-curated"
+    },
+    "global-solar-pv-capacity-annual": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRV0G2XWPZD8NKXBMT",
+      "datasetFile": "irena-capacity-stats-dataset.json",
+      "evidence": "SKY-215's key-series list pins global solar PV capacity to IRENA Renewable Capacity Statistics.",
+      "basis": "catalog-curated"
+    },
+    "tr-wholesale-electricity-price": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VN7VR6AYRJ5NCDMHTR",
+      "datasetFile": "ember-turkiye.json",
+      "evidence": "SKY-215's key-series list pins Turkey wholesale electricity price to Ember; the checked-in Turkey review is the available source artifact.",
+      "basis": "catalog-curated"
+    },
+    "us-ca-battery-discharge-daily": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VRVHH80RX2GMCC0YTT",
+      "datasetFile": "caiso-battery-discharge.json",
+      "evidence": "SKY-215's key-series list pins CAISO battery discharge to CAISO Battery Discharge Records.",
+      "basis": "catalog-curated"
+    },
+    "us-ca-clean-share-daily": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VQXVN89QWNEDFKX134",
+      "datasetFile": "caiso-todays-outlook.json",
+      "evidence": "CAISO Today's Outlook is the checked-in CAISO source already used for daily solar and mix views, and it is the best provenance surface for daily clean-share reads.",
+      "basis": "catalog-curated"
+    },
+    "us-ca-interconnection-queue": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VSKXDY6EA8XC38PWHJ",
+      "datasetFile": "lbnl-queue.json",
+      "evidence": "The cold-start catalog still lacks a dedicated CAISO queue dataset; LBNL Queue Analysis is the closest checked-in backlog source and includes CAISO subset coverage.",
+      "basis": "catalog-curated"
+    },
+    "us-data-center-demand-forecast": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VPHK3Y5F3NH1EW7R82",
+      "datasetFile": "bnef-datacenter.json",
+      "evidence": "SKY-215's key-series list pins U.S. data center demand forecasts to BloombergNEF Data Center Demand.",
+      "basis": "catalog-curated"
+    },
+    "us-interconnection-queue-annual": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VSKXDY6EA8XC38PWHJ",
+      "datasetFile": "lbnl-queue.json",
+      "evidence": "SKY-215's key-series list pins the U.S. interconnection queue series to LBNL Queue Analysis.",
+      "basis": "catalog-curated"
+    },
+    "us-tx-wind-generation-daily": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNX70F51M2ERXWJ5WP2TTGRJ",
+      "datasetFile": "gridstatus-ercot-wind-actual-and-forecast-hourly.json",
+      "evidence": "The checked-in ERCOT wind report mirror is the available source artifact for daily wind-generation rollups in the cold-start catalog.",
+      "basis": "catalog-curated"
+    },
+    "za-clean-electricity-share-monthly": {
+      "datasetId": "https://id.skygest.io/dataset/ds_01KNX53R14VCPTYD4B6NG7GNMQ",
+      "datasetFile": "ember-electricity-generation-monthly.json",
+      "evidence": "SKY-215's key-series list pins South Africa clean electricity share to Ember; the checked-in monthly Ember generation dataset is the available monthly source.",
+      "basis": "catalog-curated"
     }
   },
-  "zeroEvidence": [
-    "eu-coal-generation-annual",
-    "global-battery-pack-price-annual",
-    "global-clean-energy-investment-annual",
-    "global-energy-transition-investment-annual",
-    "global-solar-pv-capacity-annual",
-    "tr-wholesale-electricity-price",
-    "us-ca-battery-discharge-daily",
-    "us-ca-clean-share-daily",
-    "us-ca-interconnection-queue",
-    "us-data-center-demand-forecast",
-    "us-interconnection-queue-annual",
-    "us-tx-wind-generation-daily",
-    "za-clean-electricity-share-monthly"
-  ]
+  "deliberatelyOmitted": {},
+  "zeroEvidence": []
 }

@@ -1,10 +1,10 @@
-import { Graph, Option } from "effect";
+import { Graph, Result } from "effect";
 import {
   buildDataLayerGraph,
   type DataLayerGraph,
 } from "../../data-layer/DataLayerGraph";
 import type { DataLayerGraphEdge } from "../../domain/data-layer/graph";
-import { IngestHarnessError } from "./errors";
+import { IngestGraphBuildError, IngestHarnessError } from "./errors";
 import type { IngestEdge } from "./IngestEdge";
 import type { IngestGraph } from "./IngestGraph";
 import type { IngestNode } from "./IngestNode";
@@ -14,24 +14,14 @@ export type BuiltIngestGraphs = {
   readonly dataLayerGraph: DataLayerGraph;
 };
 
+// Ingest nodes wrap the shared entity as `{ _tag, slug, data }`, so the
+// harness keeps its own key helper instead of reusing makeDataLayerGraphNodeKey.
 const nodeKey = (node: IngestNode): string => `${node._tag}::${node.data.id}`;
 
-const nodeIndex = (
-  indexById: Map<string, number>,
-  node: IngestNode,
-): number => {
-  const index = indexById.get(nodeKey(node));
-  if (index !== undefined) {
-    return index;
-  }
-
-  throw new IngestHarnessError({
+const missingNodeIndexError = (node: IngestNode) =>
+  new IngestHarnessError({
     message: `Missing node index for ${nodeKey(node)} while building graph`,
   });
-};
-
-const errorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 const compatibleIngestEdge = (
   source: IngestNode | undefined,
@@ -72,6 +62,8 @@ const compatibleIngestEdge = (
         ? "served-by"
         : undefined;
     default:
+      // The shared graph intentionally carries richer runtime-only edges such
+      // as series / variable lineage that the compatibility graph must omit.
       return undefined;
   }
 };
@@ -79,91 +71,97 @@ const compatibleIngestEdge = (
 const buildCompatibilityGraph = (
   validatedNodes: ReadonlyArray<IngestNode>,
   dataLayerGraph: DataLayerGraph,
-): IngestGraph => {
+): Result.Result<IngestGraph, IngestHarnessError> => {
   const indexById = new Map<string, number>();
   const nodeByEntityId = new Map<string, IngestNode>(
     validatedNodes.map((node) => [node.data.id, node]),
   );
+  const mutable = Graph.beginMutation(Graph.directed<IngestNode, IngestEdge>());
 
-  return Graph.directed<IngestNode, IngestEdge>((mutable) => {
-    for (const node of validatedNodes) {
-      indexById.set(nodeKey(node), Graph.addNode(mutable, node));
+  for (const node of validatedNodes) {
+    indexById.set(nodeKey(node), Graph.addNode(mutable, node));
+  }
+
+  for (const { source: sourceNode, target: targetNode, edge } of dataLayerGraph.edgeRecords()) {
+    const source = nodeByEntityId.get(sourceNode.id);
+    const target = nodeByEntityId.get(targetNode.id);
+    if (source === undefined || target === undefined) {
+      continue;
     }
 
-    for (const edgeIndex of Graph.indices(Graph.edges(dataLayerGraph.raw))) {
-      const edge = Option.getOrUndefined(
-        Graph.getEdge(dataLayerGraph.raw, edgeIndex),
-      );
-      if (edge === undefined) {
-        continue;
-      }
-
-      const sourceNode = Option.getOrUndefined(
-        Graph.getNode(dataLayerGraph.raw, edge.source),
-      );
-      const targetNode = Option.getOrUndefined(
-        Graph.getNode(dataLayerGraph.raw, edge.target),
-      );
-      if (sourceNode === undefined || targetNode === undefined) {
-        throw new IngestHarnessError({
-          message: `Missing shared graph node while rebuilding ingest compatibility graph`,
-        });
-      }
-
-      const source = nodeByEntityId.get(sourceNode.id);
-      const target = nodeByEntityId.get(targetNode.id);
-      if (source === undefined || target === undefined) {
-        continue;
-      }
-
-      const compatibleEdge = compatibleIngestEdge(source, target, edge.data);
-      if (compatibleEdge === undefined) {
-        continue;
-      }
-
-      Graph.addEdge(
-        mutable,
-        nodeIndex(indexById, source),
-        nodeIndex(indexById, target),
-        compatibleEdge,
-      );
+    const compatibleEdge = compatibleIngestEdge(source, target, edge);
+    if (compatibleEdge === undefined) {
+      continue;
     }
-  });
+
+    const sourceNodeIndex = indexById.get(nodeKey(source));
+    if (sourceNodeIndex === undefined) {
+      return Result.fail(missingNodeIndexError(source));
+    }
+
+    const targetNodeIndex = indexById.get(nodeKey(target));
+    if (targetNodeIndex === undefined) {
+      return Result.fail(missingNodeIndexError(target));
+    }
+
+    Graph.addEdge(mutable, sourceNodeIndex, targetNodeIndex, compatibleEdge);
+  }
+
+  return Result.succeed(Graph.endMutation(mutable));
 };
 
 export const buildIngestGraphs = (
   validatedNodes: ReadonlyArray<IngestNode>,
-): BuiltIngestGraphs => {
+): Result.Result<
+  BuiltIngestGraphs,
+  IngestGraphBuildError | IngestHarnessError
+> => {
   const seenNodeKeys = new Set<string>();
 
   for (const node of validatedNodes) {
     const key = nodeKey(node);
     if (seenNodeKeys.has(key)) {
-      throw new IngestHarnessError({
-        message: `Duplicate ingest graph node key ${key}`,
-      });
+      return Result.fail(
+        new IngestHarnessError({
+          message: `Duplicate ingest graph node key ${key}`,
+        }),
+      );
     }
     seenNodeKeys.add(key);
   }
 
-  try {
-    const dataLayerGraph = buildDataLayerGraph(
-      validatedNodes.map((node) => node.data),
+  const dataLayerGraph = buildDataLayerGraph(
+    validatedNodes.map((node) => node.data),
+  );
+  if (Result.isFailure(dataLayerGraph)) {
+    return Result.fail(
+      new IngestGraphBuildError({
+        message:
+          "Shared data-layer graph validation failed while building the ingest graph",
+        issues: dataLayerGraph.failure,
+      }),
     );
-
-    return {
-      dataLayerGraph,
-      graph: buildCompatibilityGraph(validatedNodes, dataLayerGraph),
-    };
-  } catch (error) {
-    throw error instanceof IngestHarnessError
-      ? error
-      : new IngestHarnessError({
-          message: errorMessage(error),
-        });
   }
+
+  const compatibilityGraph = buildCompatibilityGraph(
+    validatedNodes,
+    dataLayerGraph.success,
+  );
+  if (Result.isFailure(compatibilityGraph)) {
+    return Result.fail(compatibilityGraph.failure);
+  }
+
+  return Result.succeed({
+    dataLayerGraph: dataLayerGraph.success,
+    graph: compatibilityGraph.success,
+  });
 };
 
 export const buildIngestGraph = (
   validatedNodes: ReadonlyArray<IngestNode>,
-): IngestGraph => buildIngestGraphs(validatedNodes).graph;
+): Result.Result<IngestGraph, IngestGraphBuildError | IngestHarnessError> => {
+  const built = buildIngestGraphs(validatedNodes);
+  return Result.isFailure(built)
+    ? Result.fail(built.failure)
+    : Result.succeed(built.success.graph);
+};

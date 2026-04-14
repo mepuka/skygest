@@ -778,11 +778,18 @@ const buildPreparedRegistry = (
     }
   }
 
-  if (issues.length > 0) {
+  const graphResult = buildDataLayerGraph([...entityById.values()], {
+    pathById,
+  });
+  if (Result.isFailure(graphResult)) {
+    issues.push(...graphResult.failure);
+  }
+
+  if (issues.length > 0 || Result.isFailure(graphResult)) {
     return Result.fail({ root, issues });
   }
 
-  const graph = buildDataLayerGraph([...entityById.values()]);
+  const graph = graphResult.success;
 
   const sortedDatasetsByAgentId = new Map(
     seed.agents.map((agent) => [
@@ -987,6 +994,16 @@ export const formatDataLayerRegistryDiagnostic = (
           return `- ${issue.path}: ${issue.facet} has unknown canonical value "${issue.value}"`;
         case "LookupCollisionIssue":
           return `- ${issue.lookup} collision on "${issue.key}": ${issue.entityIds.join(", ")}`;
+        case "DataLayerGraphDuplicateNodeIssue":
+          return issue.reason === "duplicate-node-key"
+            ? `- ${issue.path}: duplicate graph node key ${issue.nodeKey}`
+            : `- ${issue.path}: duplicate graph entity id ${issue.entityId}`;
+        case "DataLayerGraphUnexpectedTargetIssue":
+          return `- ${issue.path}: ${issue.field} -> ${issue.targetId} is ${issue.actualTag}, expected ${issue.expectedTags.join(" | ")}`;
+        case "DataLayerGraphInvariantIssue":
+          return `- ${issue.path}: ${issue.message}`;
+        case "DataLayerGraphCardinalityIssue":
+          return `- ${issue.path}: expected exactly ${issue.expectedCount} outgoing ${issue.edgeKind} edge(s), found ${issue.actualCount}`;
       }
     }),
   ];

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Chunk, Effect, Graph, Option, Result } from "effect";
-import type { DataLayerRegistrySeed } from "../src/domain/data-layer";
+import { Chunk, Effect, Option, Result } from "effect";
+import {
+  makeSeriesId,
+  type DataLayerRegistrySeed,
+} from "../src/domain/data-layer";
 import {
   prepareDataLayerRegistry,
   toDataLayerRegistryLookup,
@@ -13,6 +16,7 @@ const datasetId = "https://id.skygest.io/dataset/ds_1234567890AB" as any;
 const distributionId =
   "https://id.skygest.io/distribution/dist_1234567890AB" as any;
 const variableId = "https://id.skygest.io/variable/var_1234567890AB" as any;
+const seriesId = makeSeriesId("https://id.skygest.io/series/ser_1234567890AB");
 
 const makeSeed = (): DataLayerRegistrySeed => ({
   agents: [
@@ -131,7 +135,7 @@ describe("data layer registry prep", () => {
     expect([...lookup.findVariablesByDatasetId(datasetId)]).toEqual([
       prepared.success.seed.variables[0],
     ]);
-    expect(Graph.nodeCount(prepared.success.graph.raw)).toBe(4);
+    expect(prepared.success.graph.nodeCount()).toBe(4);
     expect(
       Option.getOrNull(
         lookup.findVariableByAlias("eia-series", "ELEC.GEN.ALL-US-99.M"),
@@ -152,7 +156,7 @@ describe("data layer registry prep", () => {
         const registry = yield* DataLayerRegistry;
 
         expect(registry.prepared.seed.datasets).toHaveLength(1);
-        expect(Graph.nodeCount(registry.prepared.graph.raw)).toBe(4);
+        expect(registry.prepared.graph.nodeCount()).toBe(4);
         expect(
           "variablesByAgentId" in
             (registry.prepared as Record<string, unknown>),
@@ -267,6 +271,39 @@ describe("data layer registry prep", () => {
       path: `Variable:${variableId}`,
       facet: "policyInstrument",
       value: "not-a-real-policy",
+    });
+  });
+
+  it("surfaces graph build cardinality issues through the registry failure channel", () => {
+    const seed = makeSeed();
+    const prepared = prepareDataLayerRegistry({
+      ...seed,
+      series: [
+        {
+          _tag: "Series",
+          id: seriesId,
+          label: "Net generation (annual)",
+          variableId,
+          fixedDims: {},
+          aliases: [],
+          createdAt: iso as any,
+          updatedAt: iso as any,
+        },
+      ],
+    });
+
+    expect(Result.isFailure(prepared)).toBe(true);
+
+    if (Result.isSuccess(prepared)) {
+      throw new Error("expected graph cardinality failure");
+    }
+
+    expect(prepared.failure.issues).toContainEqual({
+      _tag: "DataLayerGraphCardinalityIssue",
+      path: `Series:${seriesId}`,
+      edgeKind: "published-in-dataset",
+      expectedCount: 1,
+      actualCount: 0,
     });
   });
 

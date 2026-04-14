@@ -3,6 +3,7 @@
   "id": "https://id.skygest.io/series/ser_01KNQEZ5XC2A209DPSH50E6HJM",
   "label": "Germany wholesale electricity price",
   "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP1ASA1CPSNJW6ZY8PQH0WYG",
   "fixedDims": {
     "place": "DE",
     "market": "EPEX",

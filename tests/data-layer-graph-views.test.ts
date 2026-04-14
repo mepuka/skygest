@@ -14,17 +14,31 @@ import {
   variableForSeries,
   variablesForDataset,
 } from "../src/data-layer/DataLayerGraphViews";
-import type { DataLayerRegistrySeed } from "../src/domain/data-layer";
+import {
+  makeAgentId,
+  makeDatasetId,
+  makeDistributionId,
+  makeSeriesId,
+  makeVariableId,
+  type DataLayerRegistrySeed,
+} from "../src/domain/data-layer";
 import { prepareDataLayerRegistry } from "../src/resolution/dataLayerRegistry";
 
 const iso = "2026-04-09T00:00:00.000Z" as const;
-const parentAgentId = "https://id.skygest.io/agent/ag_PARENT123456" as any;
-const childAgentId = "https://id.skygest.io/agent/ag_CHILD1234567" as any;
-const datasetId = "https://id.skygest.io/dataset/ds_1234567890AB" as any;
-const distributionId =
-  "https://id.skygest.io/distribution/dist_1234567890AB" as any;
-const variableId = "https://id.skygest.io/variable/var_1234567890AB" as any;
-const seriesId = "https://id.skygest.io/series/ser_1234567890AB" as any;
+const parentAgentId = makeAgentId(
+  "https://id.skygest.io/agent/ag_PARENT123456",
+);
+const childAgentId = makeAgentId(
+  "https://id.skygest.io/agent/ag_CHILD1234567",
+);
+const datasetId = makeDatasetId("https://id.skygest.io/dataset/ds_1234567890AB");
+const distributionId = makeDistributionId(
+  "https://id.skygest.io/distribution/dist_1234567890AB",
+);
+const variableId = makeVariableId(
+  "https://id.skygest.io/variable/var_1234567890AB",
+);
+const seriesId = makeSeriesId("https://id.skygest.io/series/ser_1234567890AB");
 
 const makeSeed = (): DataLayerRegistrySeed => ({
   agents: [

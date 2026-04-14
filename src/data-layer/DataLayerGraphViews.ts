@@ -1,3 +1,5 @@
+// Named graph reads live here so consumers can reuse stable relationship
+// queries without restating edge-kind tuples across the runtime.
 import type {
   Agent,
   Dataset,
@@ -38,8 +40,9 @@ export const agentLineageChain = (
   const chain: Array<Agent> = [agent];
   const seen = new Set<string>([agent.id]);
   let current = agent;
+  const maxDepth = graph.nodeCount();
 
-  while (true) {
+  while (chain.length < maxDepth) {
     const parent = firstPredecessorNodeByKindsAndTag(
       graph,
       current.id,

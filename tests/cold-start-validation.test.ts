@@ -10,6 +10,12 @@ const ROOT = join(import.meta.dirname, "..", checkedInDataLayerRegistryRoot);
 const CANDIDATES_DIR = join(ROOT, "candidates");
 // Flake fix: these cold-start checks load the registry and scan many JSON files under full-suite contention.
 const coldStartValidationTimeoutMs = 30_000;
+const inlinePinnedSeries = new Set([
+  "de-public-electricity-generation-daily",
+  "eu-public-electricity-generation-quarterly",
+  "tr-electricity-generation-by-fuel-annual",
+  "global-energy-co2-emissions-ar6-annual"
+]);
 
 async function collectJson(dir: string): Promise<string[]> {
   const out: string[] = [];
@@ -173,40 +179,43 @@ describe.skip("Cold-start validation", () => {
       "utf-8"
     );
     const manifest = JSON.parse(manifestRaw) as {
-      explicit: Record<string, unknown>;
+      explicit: Record<
+        string,
+        { basis: "candidate-unanimous" | "candidate-majority" | "catalog-curated" }
+      >;
       deliberatelyOmitted: Record<string, unknown>;
       zeroEvidence: ReadonlyArray<string>;
     };
 
-    // Partition series filenames into SKY-317 manifest-covered and net-new
-    // (SKY-323+ series that declare datasetId inline in generate-series.ts).
+    // Partition series filenames into manifest-covered legacy series and
+    // SKY-323+ inline-pinned series.
     const seriesDirEntries = await readdir(join(ROOT, "series"));
     const seriesSlugs = seriesDirEntries
       .filter((f) => f.endsWith(".json") && !f.startsWith("."))
       .map((f) => f.replace(/\.json$/, ""));
 
-    const manifestSlugs = new Set<string>([
-      ...Object.keys(manifest.explicit),
-      ...Object.keys(manifest.deliberatelyOmitted),
-      ...manifest.zeroEvidence
-    ]);
+    const manifestSlugs = new Set<string>(Object.keys(manifest.explicit));
     const manifestCoveredSlugs = seriesSlugs.filter((s) => manifestSlugs.has(s));
-    const netNewSlugs = seriesSlugs.filter((s) => !manifestSlugs.has(s));
-
-    const expectedManifestLinked = Object.keys(manifest.explicit).length;
-    const expectedManifestUnlinked =
-      Object.keys(manifest.deliberatelyOmitted).length + manifest.zeroEvidence.length;
+    const inlinePinnedSlugs = seriesSlugs.filter((s) => inlinePinnedSeries.has(s));
 
     // Every manifest slug must have a matching series file.
-    expect(manifestCoveredSlugs.length).toBe(
-      expectedManifestLinked + expectedManifestUnlinked
-    );
-    // Total series count == manifest-covered + net-new.
-    expect(total).toBe(manifestCoveredSlugs.length + netNewSlugs.length);
+    expect(manifestCoveredSlugs.length).toBe(Object.keys(manifest.explicit).length);
+    // Total series count == manifest-covered + inline-pinned.
+    expect(total).toBe(manifestCoveredSlugs.length + inlinePinnedSlugs.length);
+
+    const unanimousCount = Object.values(manifest.explicit).filter(
+      (spec) => spec.basis === "candidate-unanimous"
+    ).length;
+    const majorityCount = Object.values(manifest.explicit).filter(
+      (spec) => spec.basis === "candidate-majority"
+    ).length;
+    const curatedCount = Object.values(manifest.explicit).filter(
+      (spec) => spec.basis === "catalog-curated"
+    ).length;
 
     console.log(
       `[SKY-317 coverage] series.datasetId: ${linked}/${total} linked, ${unlinked} unlinked ` +
-        `(${Object.keys(manifest.deliberatelyOmitted).length} deliberately omitted, ${manifest.zeroEvidence.length} zero-evidence, ${netNewSlugs.length} net-new)`
+        `(${unanimousCount} candidate-unanimous, ${majorityCount} candidate-majority, ${curatedCount} catalog-curated, ${inlinePinnedSlugs.length} inline-pinned)`
     );
   }, coldStartValidationTimeoutMs);
 });
