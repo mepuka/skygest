@@ -46,6 +46,14 @@ src/ingest/     → Bluesky ingest pipeline (Workflows + Durable Objects)
 4. **Use branded types for IDs:** `Did`, `AtUri`, `HttpsUrl`, `TopicSlug`, `OntologyConceptSlug`. Never raw `Schema.String` for identifiers.
 5. **Row schemas are the exception** — D1 repos may define local row schemas, but must transform to domain types via helpers.
 
+## Data-Layer Relationships
+
+When producing or consuming DCAT-related entities (`Agent`, `Catalog`, `CatalogRecord`, `DataService`, `Dataset`, `DatasetSeries`, `Distribution`, `Variable`, `Series`), these files are the sources of truth. Reach through them; do not redeclare or rebuild their contents locally.
+
+- **`src/domain/data-layer/`** — node types, edge kinds, ID brands, registry diagnostics, and the ontology mapping at `graph-ontology-mapping.ts`. Shared schemas for DCAT entities live here.
+- **`src/data-layer/DataLayerGraph.ts` + `DataLayerGraphTraversal.ts` + `DataLayerGraphViews.ts`** — the shared runtime graph, exposed on `PreparedDataLayerRegistry.graph`. Cross-entity walks and named relationship reads go through these helpers.
+- **`docs/plans/2026-04-14-data-layer-graph-unification-spec.md`** — design context and the ontology-parity addendum. Read before adding new node or edge kinds.
+
 ## Testing
 
 Use `bun run test` (vitest via @effect/vitest). Test Effect code with `Effect.runPromise` + layer provision.

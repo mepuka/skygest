@@ -54,6 +54,103 @@ repair should layer on top of the unified graph, not invent another join model.
 
 ---
 
+## Implementation status
+
+### Status after the first two implementation slices
+
+The highest-risk runtime drift paths named in this spec have now been reduced
+substantially:
+
+1. The shared graph types, builder, and traversal layer now exist in the repo.
+   [C18] [C19] [C20]
+2. The prepared registry now exposes `prepared.graph`, and the relationship
+   lookup tables used by the runtime are derived from that shared graph rather
+   than maintained as a separate raw-field relationship engine. [C6] [C17]
+3. Search projection no longer builds its own local `SearchGraph`; it now
+   reads relationship structure from the shared graph and has regression
+   coverage for the series-only lineage recovery case that originally made
+   drift visible. [C4] [C14]
+
+That means the core runtime path is now in better shape:
+
+- one graph contract for runtime relationships
+- one projection path reading that contract
+- one test surface asserting that recovered dataset-variable lineage still
+  reaches projection
+
+### Drift risk that is now addressed
+
+The following drift risks called out earlier in this spec are now addressed:
+
+1. `buildPreparedRegistry(...)` is no longer maintaining relationship lookups
+   by directly replaying `Dataset.variableIds` and `Series.datasetId` as a
+   parallel graph model. It now builds a shared graph first, then derives the
+   runtime relationship lookups from graph traversal. [C6]
+2. `toPreparedDataLayerRegistryCore(...)` now exposes the graph publicly, so
+   downstream consumers do not have to rebuild their own relationship maps just
+   to traverse the prepared registry. [C6] [C17]
+3. `projectEntitySearchDocs(...)` no longer owns a separate `SearchGraph`, so
+   projection is no longer a second source of truth for entity relationships.
+   [C4]
+
+### Drift risk that still remains
+
+The repository still has two meaningful drift surfaces:
+
+1. The audit script still defines its own `SearchGraph` and local
+   `buildGraph(...)`, and it still runs that local graph beside
+   `projectEntitySearchDocs(prepared)`. That means audit can still diverge from
+   the runtime relationship model even though projection no longer does. [C5]
+2. The ingest harness still owns `IngestNode`, `IngestEdge`, and
+   `buildIngestGraph(...)` as a separate graph contract. That is still a second
+   graph vocabulary in the repo, with a smaller node and edge set than the
+   shared runtime graph. [C1] [C2] [C3]
+
+There is also one lower-severity remaining consolidation opportunity:
+
+3. Common graph-backed relationship views are still assembled partly in
+   `buildPreparedRegistry(...)` and partly as repeated edge-kind reads in
+   consumer code. That is no longer a topology drift problem, but it is still a
+   repeated "named relationship view" problem. [C4] [C6] [C20]
+
+### Recommended next consolidation steps
+
+To keep reducing drift rather than just moving it around, the next steps should
+be:
+
+1. Migrate `scripts/analysis/entity-search-audit/run-audit.ts` onto
+   `prepared.graph` and shared traversal or view helpers, then delete its local
+   `SearchGraph` and `buildGraph(...)`. [C5]
+2. Port the ingest harness onto the shared node and edge contract, or wrap it
+   in adapters so `src/ingest/dcat-harness/` stops exporting a second graph
+   vocabulary. [C1] [C2] [C3]
+3. Add domain-level graph view helpers for the repeated patterns that now show
+   up in both registry assembly and projection:
+   - dataset -> publisher agents
+   - dataset -> variables
+   - dataset -> distributions
+   - dataset <- series
+   - variable <- datasets
+   - variable <- series
+   - series -> dataset
+   - series -> variable
+
+   This would remove repeated edge-kind tuples from projector code and from
+   graph-backed lookup derivation without reintroducing a second graph. [C4]
+   [C6] [C20]
+
+4. Extract graph-backed derived lookup views into a dedicated module such as
+   `src/data-layer/DataLayerGraphViews.ts`, so the registry assembles them but
+   does not define them itself. That would make the registry an integration
+   layer rather than the long-term owner of those reusable graph views. [C6]
+   [C19] [C20]
+5. Add a TS-side graph-to-ontology mapping file and parity tests before the
+   provenance-edge expansion wave. That is the cheapest way to stop the shared
+   graph vocabulary from drifting away from the ontology and ABox direction as
+   `SKY-346` and `SKY-356` converge. [C18] [O1] [O8]
+
+---
+
 ## Problem statement
 
 The current architecture has three different relationship systems:
@@ -310,6 +407,27 @@ functions such as:
 These helpers should operate on typed node and edge kinds, not on raw numeric
 indexes, even if they use indexes internally.
 
+### 4. Named graph views
+
+Create `src/data-layer/DataLayerGraphViews.ts`.
+
+This module should sit one level above raw traversal helpers and define the
+named relationship views that multiple consumers already need, such as:
+
+- dataset -> publisher agents
+- dataset -> variables
+- dataset -> distributions
+- dataset <- series
+- variable <- datasets
+- variable <- series
+- series -> dataset
+- series -> variable
+
+The purpose of this layer is not to replace the graph. It is to prevent the
+same edge-kind tuples from being restated in the registry, projector, and audit
+paths. The graph remains the authority; the views module becomes the shared
+place for common bounded reads. [C4] [C6] [C20]
+
 ---
 
 ## Node model
@@ -367,10 +485,16 @@ type DataLayerGraphEdge =
   | { readonly kind: "has-distribution"; readonly origin: "declared" }
   | { readonly kind: "served-by"; readonly origin: "declared" }
   | { readonly kind: "has-series-member"; readonly origin: "declared" }
-  | { readonly kind: "has-variable"; readonly origin: "declared" | "derived-from-series" }
+  | {
+      readonly kind: "has-variable";
+      readonly origin: "declared" | "derived-from-series";
+    }
   | { readonly kind: "in-dataset"; readonly origin: "declared" }
   | { readonly kind: "measures"; readonly origin: "declared" }
-  | { readonly kind: "sources-from"; readonly origin: "declared" | "projected" };
+  | {
+      readonly kind: "sources-from";
+      readonly origin: "declared" | "projected";
+    };
 ```
 
 ### Initial edge set
@@ -565,42 +689,52 @@ graph contract for the runtime. [C13]
 Audit code is allowed to measure graph quality and projection quality. It is
 not allowed to define its own relationship engine. [C5]
 
+### Rule 6: named relationship views are shared utilities
+
+If multiple consumers need the same bounded walk, that walk should be defined
+once in the shared graph layer and reused. The registry, projector, audit, and
+future resolver code may consume named graph views, but they should not each
+restate the same edge-kind tuples inline. [C4] [C6] [C20]
+
 ---
 
 ## Code-change survey
 
-This is the concrete file-level migration inventory for the first graph
-consolidation wave.
+This is the concrete file-level migration inventory for the graph
+consolidation workstream. The `Spec-start role` column captures the repo shape
+when this spec was first drafted; landed status notes below capture what has
+already changed on the current implementation branch.
 
-| File | Current role | Future role | Action |
-| --- | --- | --- | --- |
-| `src/domain/data-layer/graph.ts` | Missing | Owner | Add shared node and edge types here. |
-| `src/domain/data-layer/index.ts` | Re-export surface | Owner-adjacent | Export the new graph types from the domain barrel. |
-| `src/data-layer/DataLayerGraph.ts` | Missing | Owner | Add the shared graph builder, node-key indexing, and graph-backed relationship indexes here. |
-| `src/data-layer/DataLayerGraphTraversal.ts` | Missing | Owner | Add label-aware helper walks here so consumers never manipulate `NodeIndex` directly. |
-| `src/resolution/dataLayerRegistry.ts` | Mixed owner | Owner | Keep validation and exact lookups here, but move relationship derivation behind the shared graph and expose the graph on prepared registry values. [C6] |
-| `src/services/DataLayerRegistry.ts` | Public service boundary | Consumer | Expose the shared graph on `prepared`, while still hiding internal registry-only maps. [C7] |
-| `src/ingest/dcat-harness/IngestNode.ts` | Owner | Adapter | Replace harness-local node vocabulary with wrappers or adapters over the shared graph node model. [C2] |
-| `src/ingest/dcat-harness/IngestEdge.ts` | Owner | Adapter | Replace harness-local edge vocabulary with the shared edge model or a narrow adapter. [C3] |
-| `src/ingest/dcat-harness/buildGraph.ts` | Owner | Consumer or wrapper | Port this file onto the shared graph builder so the harness stops owning the core graph contract. [C1] |
-| `src/ingest/dcat-adapters/eia-tree/index.ts` | Consumer | Consumer | Preserve as an ingest consumer; do not let it regain graph ownership during migration. [C13] |
-| `src/search/projectEntitySearchDocs.ts` | Owner | Consumer | Delete `SearchGraph` and `buildSearchGraph`; make the projector consume graph helpers only. [C4] |
-| `src/search/projectFromDataLayer.ts` | Consumer | Consumer | Keep as a thin composition entry point; no graph logic should live here. [C12] |
-| `scripts/analysis/entity-search-audit/run-audit.ts` | Owner | Consumer | Delete the local `SearchGraph` and `buildGraph`; use the shared graph and shared traversal helpers. [C5] |
-| `src/search/buildEntitySearchBundlePlan.ts` | Consumer of relationship lookups | Consumer | Keep as a graph-backed lookup consumer; it should not become a graph walker itself. [C9] |
-| `src/resolution/kernel/Bind.ts` | Consumer of relationship lookups | Consumer | Keep narrowing logic here, but back `findVariablesByAgentId` and `findVariablesByDatasetId` with graph-derived lookups. [C10] |
-| `src/resolution/bundle/resolveDataReference.ts` | Exact-lookup consumer | Consumer | Leave on exact lookup paths for now; do not mix this older resolver into the graph migration scope. [C11] |
-| `tests/data-layer-registry.test.ts` | Contract test | Consumer test | Update to assert that the public prepared registry exposes the shared graph while still hiding private lookup tables. [C17] |
-| `tests/entity-search-projector.test.ts` | Projection contract test | Consumer test | Keep and expand to assert graph-derived lineage and URL behavior after the migration. [C14] |
-| `tests/entity-search-bundle-plan.test.ts` | Consumer test | Consumer test | Keep as a guard that graph-backed lookup behavior still feeds bundle planning correctly. [C15] |
-| `tests/entity-search-service.test.ts` | End-to-end consumer test | Consumer test | Keep as a higher-level guard that projection plus search still behave the same through the migration. [C16] |
+| File                                                | Spec-start role                  | Target role         | Action                                                                                                                                                  |
+| --------------------------------------------------- | -------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/domain/data-layer/graph.ts`                    | Missing                          | Owner               | Add shared node and edge types here.                                                                                                                    |
+| `src/domain/data-layer/index.ts`                    | Re-export surface                | Owner-adjacent      | Export the new graph types from the domain barrel.                                                                                                      |
+| `src/data-layer/DataLayerGraph.ts`                  | Missing                          | Owner               | Add the shared graph builder, node-key indexing, and graph-backed relationship indexes here.                                                            |
+| `src/data-layer/DataLayerGraphTraversal.ts`         | Missing                          | Owner               | Add label-aware helper walks here so consumers never manipulate `NodeIndex` directly.                                                                   |
+| `src/resolution/dataLayerRegistry.ts`               | Mixed owner                      | Owner               | Keep validation and exact lookups here, but move relationship derivation behind the shared graph and expose the graph on prepared registry values. [C6] |
+| `src/services/DataLayerRegistry.ts`                 | Public service boundary          | Consumer            | Expose the shared graph on `prepared`, while still hiding internal registry-only maps. [C7]                                                             |
+| `src/ingest/dcat-harness/IngestNode.ts`             | Owner                            | Adapter             | Replace harness-local node vocabulary with wrappers or adapters over the shared graph node model. [C2]                                                  |
+| `src/ingest/dcat-harness/IngestEdge.ts`             | Owner                            | Adapter             | Replace harness-local edge vocabulary with the shared edge model or a narrow adapter. [C3]                                                              |
+| `src/ingest/dcat-harness/buildGraph.ts`             | Owner                            | Consumer or wrapper | Port this file onto the shared graph builder so the harness stops owning the core graph contract. [C1]                                                  |
+| `src/ingest/dcat-adapters/eia-tree/index.ts`        | Consumer                         | Consumer            | Preserve as an ingest consumer; do not let it regain graph ownership during migration. [C13]                                                            |
+| `src/search/projectEntitySearchDocs.ts`             | Owner                            | Consumer            | Delete `SearchGraph` and `buildSearchGraph`; keep the projector on shared graph helpers only. [C4]                                                      |
+| `src/search/projectFromDataLayer.ts`                | Consumer                         | Consumer            | Keep as a thin composition entry point; no graph logic should live here. [C12]                                                                          |
+| `scripts/analysis/entity-search-audit/run-audit.ts` | Owner                            | Consumer            | Delete the local `SearchGraph` and `buildGraph`; use the shared graph and shared traversal helpers. [C5]                                                |
+| `src/search/buildEntitySearchBundlePlan.ts`         | Consumer of relationship lookups | Consumer            | Keep as a graph-backed lookup consumer; it should not become a graph walker itself. [C9]                                                                |
+| `src/resolution/kernel/Bind.ts`                     | Consumer of relationship lookups | Consumer            | Keep narrowing logic here, but back `findVariablesByAgentId` and `findVariablesByDatasetId` with graph-derived lookups. [C10]                           |
+| `src/resolution/bundle/resolveDataReference.ts`     | Exact-lookup consumer            | Consumer            | Leave on exact lookup paths for now; do not mix this older resolver into the graph migration scope. [C11]                                               |
+| `tests/data-layer-registry.test.ts`                 | Contract test                    | Consumer test       | Update to assert that the public prepared registry exposes the shared graph while still hiding private lookup tables. [C17]                             |
+| `tests/entity-search-projector.test.ts`             | Projection contract test         | Consumer test       | Keep and expand to assert graph-derived lineage and URL behavior after the migration. [C14]                                                             |
+| `tests/entity-search-bundle-plan.test.ts`           | Consumer test                    | Consumer test       | Keep as a guard that graph-backed lookup behavior still feeds bundle planning correctly. [C15]                                                          |
+| `tests/entity-search-service.test.ts`               | End-to-end consumer test         | Consumer test       | Keep as a higher-level guard that projection plus search still behave the same through the migration. [C16]                                             |
 
 ### Files that should stop owning relationship topology
 
 These are the important deletions or role reductions:
 
-1. `src/search/projectEntitySearchDocs.ts` should lose its local `SearchGraph`
-   and `buildSearchGraph(...)`. [C4]
+1. `src/search/projectEntitySearchDocs.ts` has already lost its local
+   `SearchGraph` on the current branch; keep it from regressing into a second
+   relationship owner. [C4]
 2. `scripts/analysis/entity-search-audit/run-audit.ts` should lose its local
    `SearchGraph` and `buildGraph(...)`. [C5]
 3. `src/ingest/dcat-harness/IngestNode.ts` and `IngestEdge.ts` should stop
@@ -610,20 +744,24 @@ These are the important deletions or role reductions:
 
 These are the migration risks that are easy to miss:
 
-1. `buildPreparedRegistry(...)` currently computes relationship maps directly
-   from both `Dataset.variableIds` and `Series.datasetId`, which means the
-   registry is already a second relationship engine. [C6]
-2. `toPreparedDataLayerRegistryCore(...)` currently strips internal lookup maps
-   from the public prepared registry. If the shared graph is not added there,
-   downstream consumers will keep rebuilding their own maps. [C6] [C7]
-3. `buildEntitySearchBundlePlan(...)` and `Bind.ts` rely on the current lookup
-   surface. If graph-backed lookup generation changes behavior, those files can
+1. The audit script still carries its own `SearchGraph` and `buildGraph(...)`,
+   so audit can drift away from the runtime relationship model even though the
+   projector no longer does. [C5]
+2. The ingest harness still exports a separate graph vocabulary, so ingest can
+   drift away from the shared runtime graph unless the harness is ported or
+   wrapped. [C1] [C2] [C3]
+3. Common named relationship views are still repeated between registry
+   derivation and projector reads. That is no longer a topology drift risk, but
+   it is still a reuse and maintenance risk. [C4] [C6] [C20]
+4. `buildEntitySearchBundlePlan(...)` and `Bind.ts` rely on the graph-backed
+   lookup surface. If graph view extraction changes behavior, those files can
    regress even if projection itself still works. [C9] [C10]
-4. `resolveDataReference.ts` is old but still active code. It should remain a
+5. `resolveDataReference.ts` is old but still active code. It should remain a
    lookup consumer and not be half-migrated into a second graph client. [C11]
-5. The EIA tree adapter re-exports harness graph types and helpers today, so
-   the harness-to-shared-graph migration needs a compatibility plan rather than
-   a blind delete. [C13]
+6. The ontology parity guardrail is still missing. Edge naming, provenance
+   semantics, and agent hierarchy can drift ahead of the ontology unless the
+   mapping file and parity tests land before the provenance wave. [C18] [O1]
+   [O8]
 
 ---
 
@@ -676,17 +814,18 @@ drift problem. [C6] [C11]
 
 ### 4. Make the public prepared registry graph-first, not lookup-table-first
 
-The public prepared registry currently exposes only:
+Before the graph work, the public prepared registry exposed only:
 
 - `seed`
 - `entities`
 - `entityById`
 - `pathById`
 
-and deliberately hides private lookup tables. [C6] [C7] [C17]
+and deliberately hid private lookup tables. [C6] [C7] [C17]
 
-The shared graph should become part of that public prepared contract. The
-lookup tables should remain private implementation details behind
+It now also exposes `graph`, and that graph should remain part of the public
+prepared contract. The lookup tables should remain private implementation
+details behind
 `DataLayerRegistryLookup`.
 
 ---
@@ -707,6 +846,8 @@ Add:
 
 Do not change search or audit yet.
 
+Status: landed on the current implementation branch. [C18] [C19] [C20]
+
 ### Commit 2: prepared-registry integration
 
 Modify:
@@ -723,21 +864,9 @@ Goal:
 - private registry lookup tables stay private
 - relationship lookups become graph-backed
 
-### Commit 3: ingest harness migration
+Status: landed on the current implementation branch. [C6] [C17]
 
-Modify:
-
-- `src/ingest/dcat-harness/IngestNode.ts`
-- `src/ingest/dcat-harness/IngestEdge.ts`
-- `src/ingest/dcat-harness/buildGraph.ts`
-- `src/ingest/dcat-adapters/eia-tree/index.ts`
-- relevant cold-start ingest tests
-
-Goal:
-
-- the harness becomes a consumer of the shared graph contract
-
-### Commit 4: search projection migration
+### Commit 3: search projection migration
 
 Modify:
 
@@ -751,7 +880,9 @@ Goal:
 - no local `SearchGraph`
 - projection uses only graph helpers and graph-backed relationship indexes
 
-### Commit 5: audit migration
+Status: landed on the current implementation branch. [C4] [C14] [C16]
+
+### Commit 4: audit migration
 
 Modify:
 
@@ -761,18 +892,52 @@ Goal:
 
 - audit measures the same graph-backed projection path the runtime uses
 
-### Commit 6: consumer cleanup
+### Commit 5: graph view extraction and lookup cleanup
 
 Review and adjust:
 
+- `src/data-layer/DataLayerGraphViews.ts`
+- `src/resolution/dataLayerRegistry.ts`
+- `src/search/projectEntitySearchDocs.ts`
+- `scripts/analysis/entity-search-audit/run-audit.ts`
 - `src/search/buildEntitySearchBundlePlan.ts`
 - `src/resolution/kernel/Bind.ts`
 - `tests/entity-search-bundle-plan.test.ts`
 
 Goal:
 
+- ensure common named relationship reads live in one shared module
 - ensure lookup consumers remain stable after graph-backed derivation replaces
   direct map ownership
+
+### Commit 6: ingest harness convergence
+
+Modify:
+
+- `src/ingest/dcat-harness/IngestNode.ts`
+- `src/ingest/dcat-harness/IngestEdge.ts`
+- `src/ingest/dcat-harness/buildGraph.ts`
+- `src/ingest/dcat-adapters/eia-tree/index.ts`
+- relevant cold-start ingest tests
+
+Goal:
+
+- the harness becomes a consumer of the shared graph contract rather than a
+  second graph owner
+
+### Commit 7: ontology mapping and invariants
+
+Modify:
+
+- `src/domain/data-layer/graph-ontology-mapping.ts`
+- `src/data-layer/DataLayerGraph.ts`
+- graph unit tests
+
+Goal:
+
+- every graph edge kind has an explicit ontology mapping
+- graph build invariants catch cardinality or naming drift before it reaches
+  projection or audit
 
 ---
 
@@ -849,38 +1014,51 @@ still keeping the two directions aligned.
 
 ## PR plan
 
-### PR 1: shared graph foundation
+### Current branch status
 
-Suggested ticket home: `SKY-356`
+The current implementation branch `sky-356/runtime-graph-foundation` already
+includes:
 
-Suggested branch:
+- shared node and edge types
+- shared graph builder
+- label-aware traversal helpers
+- `PreparedDataLayerRegistry.graph`
+- graph-backed registry relationship lookups
+- search projection migration off the old local `SearchGraph`
 
-- `sky-356/runtime-graph-foundation`
+That means the remaining PR plan should now focus on the unresolved drift
+surfaces, not repeat the work that already landed on the branch. [C4] [C6]
+[C18] [C19] [C20]
 
-Scope:
-
-- add shared node and edge types
-- add shared graph builder
-- add label-aware traversal helpers
-- attach `graph` to `PreparedDataLayerRegistry`
-- port ingest harness builder onto the shared graph
-- add graph unit tests
-
-Do not change search projection behavior in this PR.
-
-### PR 2: search and audit migration
+### PR 1: audit migration and shared view extraction
 
 Suggested ticket home: `SKY-356`
 
 Scope:
 
-- rewrite `projectEntitySearchDocs.ts` to use shared graph traversal
-- delete local `SearchGraph`
 - rewrite `run-audit.ts` to use the shared graph
-- preserve or intentionally update search projection expectations
-- rerun search projector tests and audit outputs
+- delete the audit-local `SearchGraph`
+- extract repeated relationship reads into `DataLayerGraphViews.ts`
+- update projector and registry code to consume shared named views where useful
+- rerun audit outputs and graph-backed projection tests
 
-This is the PR that removes duplicate graph logic from the live runtime path.
+This PR removes the last active runtime-adjacent duplicate relationship engine
+and closes the remaining high-risk drift path in the audit loop. [C5]
+
+### PR 2: ingest harness convergence
+
+Suggested ticket home: `SKY-356`
+
+Scope:
+
+- replace harness-local node and edge vocabulary with the shared graph contract
+- port `src/ingest/dcat-harness/buildGraph.ts` onto the shared graph builder or
+  a thin adapter over it
+- preserve cold-start ingest behavior while removing the harness as a second
+  graph owner
+
+This PR removes the second graph vocabulary in the repo and keeps ingest from
+drifting away from the runtime graph model. [C1] [C2] [C3]
 
 ### PR 3: provenance edge expansion and validation
 
@@ -889,12 +1067,14 @@ Suggested ticket home: `SKY-356`
 Scope:
 
 - add `sources-from` where justified
+- add `graph-ontology-mapping.ts` and parity tests
 - add validation for provenance-path completeness
 - add explicit series provenance coverage reporting
 - harden `Series` URL surface generation through graph walks
 
 This is where the unified graph begins directly closing the series provenance
-gap called out by `SKY-356`.
+gap called out by `SKY-356`, while also adding the ontology guardrails that keep
+the TS-side graph vocabulary from drifting away from the ABox direction.
 
 ### Parallel data tickets
 
@@ -1001,6 +1181,190 @@ continue to be built in parallel until the graph-backed version is proven.
 
 ---
 
+## Addendum: ontology parity analysis (2026-04-14 followup)
+
+This addendum captures a followup review against the companion ontology
+repository `ontology_skill/ontologies/skygest-energy-vocab`. The goal is to
+pin down where the proposed TypeScript graph edges align with the ontology's
+existing property design [O1] and where they drift, so the runtime graph and
+the ABox stay conceptually joinable even though `How this relates to SKY-346`
+deliberately keeps them as separate artifacts. [T3]
+
+### Parity table: TS edges ↔ sevocab properties
+
+| TS edge                   | Direction               | Ontology property                                                            | Cardinality                           | Parity                                                                                                                                                                                                                                                                                    |
+| ------------------------- | ----------------------- | ---------------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `publishes` [C3]          | Agent → Dataset         | `dct:publisher` via OWL restriction on `sevocab:EnergyDataset` [O6] [O9]     | reused, implicit                      | Direction mismatch. TS projects Agent→Dataset; ontology canonical direction is Dataset→Agent. Semantically equivalent, needs inversion on export.                                                                                                                                         |
+| `has-distribution` [C3]   | Dataset → Distribution  | `dcat:distribution` via OWL restriction on `sevocab:EnergyDataset` [O6] [O9] | reused, implicit                      | Aligned.                                                                                                                                                                                                                                                                                  |
+| `has-series-member` [C3]  | DatasetSeries → Dataset | `dcat:inSeries` (standard DCAT 3)                                            | inherited                             | Aligned (implicit).                                                                                                                                                                                                                                                                       |
+| `has-variable` (proposed) | Dataset → Variable      | `sevocab:hasVariable` [O1] [O4]                                              | 0..n, documented as denormalized view | Semantic drift risk. Ontology explicitly states `hasVariable` is NOT the source of truth: the structural path is Dataset → Series → Variable via `sevocab:hasSeries` and `sevocab:implementsVariable`, and SPARQL consumers are warned not to rely on OWL property-chain entailment. [O4] |
+| `in-dataset` (proposed)   | Series → Dataset        | `sevocab:publishedInDataset` [O1] [O5]                                       | `owl:FunctionalProperty`, exactly 1   | Naming drift plus cardinality loss. Same semantics, shorter TS name, but the TS edge record does not carry the functional constraint.                                                                                                                                                     |
+| `measures` (proposed)     | Series → Variable       | `sevocab:implementsVariable` [O1] [O2]                                       | `owl:FunctionalProperty`, exactly 1   | Naming drift plus cardinality loss. Short TS name loses the "implements within publishing context" semantic.                                                                                                                                                                              |
+| _(no TS edge)_            | Dataset → Series        | `sevocab:hasSeries`, inverse of `publishedInDataset` [O1] [O3]               | 0..n                                  | Missing on TS side. The spec proposes `has-series-member` for DatasetSeries (the collection), not for individual Series instances.                                                                                                                                                        |
+| `parent-agent` (proposed) | Agent → Agent           | none declared                                                                | —                                     | Missing on ontology side. No `org:subOrganizationOf` / `foaf:member` / `dct:isPartOf` declared or reused for agent hierarchy. SKY-327 [T8] should pick this.                                                                                                                              |
+| `contains-record` [C3]    | Catalog → CatalogRecord | `dcat:record` (standard DCAT)                                                | inherited                             | Aligned (implicit).                                                                                                                                                                                                                                                                       |
+| `primary-topic-of` [C3]   | Dataset → CatalogRecord | `foaf:primaryTopic` (standard FOAF)                                          | inherited                             | Aligned (implicit).                                                                                                                                                                                                                                                                       |
+| `served-by` [C3]          | Dataset → DataService   | `dcat:accessService` (standard DCAT)                                         | inherited                             | Aligned (implicit).                                                                                                                                                                                                                                                                       |
+| `sources-from` (proposed) | Series → Distribution   | none; PROV-O not imported [O8]                                               | —                                     | Missing on both sides. SKY-356 [T2] invents this. Natural ontology home is `prov:wasDerivedFrom`, but PROV is not currently in the vocab's imports.                                                                                                                                       |
+
+Facet dimensions (`measuredProperty`, `domainObject`, `technologyOrFuel`,
+`statisticType`, `aggregation`, `unitFamily`, `policyInstrument`) are modeled
+on the ontology side as `qb:DimensionProperty, owl:ObjectProperty` with
+`skos:Concept` range and `maxQualifiedCardinality 1` on `sevocab:EnergyVariable`
+[O7]. The runtime treats them as scope-filter columns on the Variable row,
+not as graph edges. This asymmetry is deliberate on both sides and compatible
+with the spec's node and edge model. Revisit only if a consumer needs to
+traverse "all variables tagged fuel=solar" through the graph rather than via
+index lookup.
+
+### Drift risks
+
+#### R1. `has-variable` as a denormalized view
+
+The ontology is explicit that `sevocab:hasVariable` is a documented convenience
+view, not the structural path [O4]. The spec's edge model already anticipates
+this with `origin: "declared" | "derived-from-series"` on `has-variable`.
+This addendum extends that guidance: the graph builder should emit
+`has-variable` with `origin: "declared"` only when a Dataset attaches a
+Variable directly without going through a Series, and should emit
+`origin: "derived-from-series"` for every Variable reachable via
+`hasSeries + implementsVariable`. That keeps the convenience edge available
+for fast projection while staying honest about provenance, and it preserves
+the ontology's "SPARQL consumers should not rely on property-chain entailment"
+warning as a runtime-level guarantee rather than a documentation-only caveat.
+
+#### R2. Naming drift on the Series structural edges
+
+`measures` ↔ `sevocab:implementsVariable` and `in-dataset` ↔
+`sevocab:publishedInDataset` are the two functional structural edges for
+Series [O2] [O5]. Recommendation: if TypeScript-side parity is still desired,
+do the rename in the next shared-graph cleanup slice before audit and ingest
+migration spread the short names further. This is no longer zero cost: the
+current branch already uses the short names in graph construction, projection,
+and tests [C4] [C14] [C17] [C18] [C19]. See Open question 4 below.
+
+#### R3. Functional cardinality is not expressed on TS edges
+
+`implementsVariable` and `publishedInDataset` are `owl:FunctionalProperty` in
+the ontology [O2] [O5]. TS edge records do not carry cardinality. For
+`Series`, the single-valued `datasetId` and `variableId` fields on the domain
+type enforce this structurally, so the graph builder naturally produces
+exactly one outgoing edge per Series for each kind, but nothing checks it.
+Recommendation: add a graph builder invariant that every Series node has
+exactly one outgoing `measures` (or renamed equivalent) edge and exactly one
+outgoing `in-dataset` (or renamed equivalent) edge, and fail under the same
+diagnostic path as other registry errors [C6]. This directly satisfies
+SKY-356 [T2]'s validation requirement that broken provenance paths fail
+loudly.
+
+#### R4. `parent-agent` is unilateral
+
+TS spec has `parent-agent`; the ontology does not. The audit confirms this is
+not currently biting — 0 of 66 agents carry parent links [D2] — but SKY-327
+[T8] is on the SKY-355 [T1] queue and will expand agent matching to include
+hierarchy (Fraunhofer → Fraunhofer ISE, etc.). Recommendation: do not invent
+`sevocab:parentAgent`. Reuse `org:subOrganizationOf` or `foaf:member`; FOAF is
+already imported [O8]. Pin the decision inside SKY-327 rather than blocking
+graph unification. See Open question 5 below.
+
+#### R5. `sources-from` is a both-sides gap
+
+SKY-356 [T2] requires a Series-to-Distribution provenance edge. Neither side
+has one. On the ontology side, the natural choice is `prov:wasDerivedFrom` (or
+a subproperty such as `sevocab:seriesSourcedFromDistribution`), which requires
+adding a PROV-O import to `ontology_skill/ontologies/skygest-energy-vocab/imports/`
+[O8]. The TS side already proposes `sources-from` with an
+`origin: "declared" | "projected"` discriminator. Recommendation: do not land
+`sources-from` in the provenance-edge commit of the implementation branch
+without the corresponding ontology-side property declaration in the same wave.
+This is exactly the drift risk the spec's `How this relates to SKY-346`
+section warns against.
+
+### Drift prevention mechanism
+
+The spec says relationship names, meaning, and validation expectations should
+converge across the TypeScript runtime graph and the ontology ABox but does
+not specify how that convergence is enforced. Three candidate mechanisms:
+
+1. **TS-side mapping file.** Add
+   `src/domain/data-layer/graph-ontology-mapping.ts` as the single source of
+   truth: every `DataLayerGraphEdgeKind` has a typed record with IRI,
+   direction, cardinality, and origin discriminator. A unit test asserts
+   totality — every edge kind has a mapping entry, and every IRI the mapping
+   references must be grep-findable in the vocab TTL or its imports. Drift
+   fails `bun run test`.
+2. **SSSOM mapping on the ontology side.** Add
+   `ontology_skill/ontologies/skygest-energy-vocab/mappings/sevocab-to-skygest-typescript.sssom.tsv`,
+   consistent with the vocab's existing SSSOM mappings to OEO, ENTSOE, QUDT,
+   and Wikidata [O11]. More idiomatic for the ontology workflow. Downside: the
+   TS repo does not currently consume it, so drift is caught only when the
+   ontology-side SSSOM QA runs.
+3. **Both, with one-way sync.** TS-side mapping is primary; a CI job in
+   `ontology_skill` consumes the TS mapping file and emits an SSSOM report
+   comparing it against the actual TTL property declarations. Drift fails
+   one of the two CIs.
+
+Recommendation: land mechanism (1) in the next shared-graph cleanup or
+provenance PR. It is still the cheapest guardrail and catches the 80 percent
+case — typos, missing mappings, renamed edges. When SKY-346 [T3] begins
+generating runtime data from the ABox, promote to mechanism (3) so both
+repositories live in the same drift-detection loop.
+
+### Open questions added by this addendum
+
+#### 4. Should the implementation branch ship with ontology names or short TS names?
+
+Options:
+
+- **(a) Rename TS to ontology names before the first commit.** `measures` →
+  `implementsVariable`, `in-dataset` → `publishedInDataset`. Cleanest for
+  permanent parity. Lowest remaining cost if done in the next cleanup slice,
+  before audit and ingest migration widen the call surface further.
+- **(b) Ship TS with short names, rename later.** Accept a future refactor
+  cost.
+- **(c) Keep short names permanently, use the mapping file for round-trip.**
+  TS stays ergonomic, ontology stays idiomatic, the mapping file bridges them.
+
+Recommendation: **(a)** for the two Series structural edges specifically
+(`implementsVariable` and `publishedInDataset`), and **(c)** for the reused
+W3C edges (`publishes`, `has-distribution`, `contains-record`, and friends)
+because those are conceptually inverted or wrapped rather than directly
+mirrored. The Series edges carry semantic load — functionality, publishing
+context — that the short names lose. The reused W3C edges can stay ergonomic
+on the TS side and round-trip through the mapping file.
+
+#### 5. Where should `parent-agent` live, and which property should back it?
+
+Recommendation: pin this inside SKY-327 [T8] rather than blocking graph
+unification. Candidates: `org:subOrganizationOf` (W3C Org Ontology, most
+idiomatic, requires adding `org-extract.ttl` to vocab imports [O8]),
+`foaf:member` (already imported [O8]), or `dct:isPartOf` (generic fallback).
+
+#### 6. Does `sources-from` land in the same wave as a PROV-O import?
+
+Recommendation: yes. Do not emit `sources-from` in the provenance-edge commit
+without the corresponding `prov-extract.ttl` addition to the vocab imports
+[O8] and a property declaration aligned with `prov:wasDerivedFrom`. This is
+the single most important drift guardrail in the SKY-356 [T2] workstream.
+
+### Acceptance criteria added by this addendum
+
+Append to `§ Acceptance criteria`:
+
+11. Every `DataLayerGraphEdgeKind` has a corresponding entry in the TS-side
+    ontology mapping file.
+12. Every IRI the mapping file references is declared in
+    `ontology_skill/ontologies/skygest-energy-vocab/skygest-energy-vocab.ttl`
+    or in one of its imports [O8].
+13. Series nodes in the built graph have exactly one outgoing
+    `implementsVariable` (or renamed equivalent) edge and exactly one
+    outgoing `publishedInDataset` (or renamed equivalent) edge, enforced at
+    graph construction time with registry-style diagnostics.
+14. `sources-from` edges are not emitted by any consumer until the
+    corresponding ontology-side provenance property is declared.
+
+---
+
 ## References
 
 ### Code
@@ -1008,9 +1372,9 @@ continue to be built in parallel until the graph-backed version is proven.
 - [C1] `src/ingest/dcat-harness/buildGraph.ts:20-178`
 - [C2] `src/ingest/dcat-harness/IngestNode.ts:11-53`
 - [C3] `src/ingest/dcat-harness/IngestEdge.ts:1-7`
-- [C4] `src/search/projectEntitySearchDocs.ts:28-120, 304-389, 392-482, 484-716`
-- [C5] `scripts/analysis/entity-search-audit/run-audit.ts:91-245`
-- [C6] `src/resolution/dataLayerRegistry.ts:252-403, 507-700`
+- [C4] `src/search/projectEntitySearchDocs.ts:1-769`
+- [C5] `scripts/analysis/entity-search-audit/run-audit.ts:91-99, 219-276, 391-415`
+- [C6] `src/resolution/dataLayerRegistry.ts:77-105, 784-860`
 - [C7] `src/services/DataLayerRegistry.ts:19-69`
 - [C8] `src/domain/data-layer/variable.ts:31-80`
 - [C9] `src/search/buildEntitySearchBundlePlan.ts:26-161`
@@ -1018,10 +1382,31 @@ continue to be built in parallel until the graph-backed version is proven.
 - [C11] `src/resolution/bundle/resolveDataReference.ts:16-220`
 - [C12] `src/search/projectFromDataLayer.ts:1-20`
 - [C13] `src/ingest/dcat-adapters/eia-tree/index.ts:1-100`
-- [C14] `tests/entity-search-projector.test.ts:150-242`
+- [C14] `tests/entity-search-projector.test.ts:153-267`
 - [C15] `tests/entity-search-bundle-plan.test.ts:22-26, 152-159`
 - [C16] `tests/entity-search-service.test.ts:25-33, 157-164`
-- [C17] `tests/data-layer-registry.test.ts:117-157`
+- [C17] `tests/data-layer-registry.test.ts:87-167`
+- [C18] `src/domain/data-layer/graph.ts:1-55`
+- [C19] `src/data-layer/DataLayerGraph.ts:9-358`
+- [C20] `src/data-layer/DataLayerGraphTraversal.ts:1-198`
+
+### Ontology source
+
+The ontology lives in a sibling repository at `/Users/pooks/Dev/ontology_skill/`,
+not inside `skygest-cloudflare`. Paths below are repo-relative within
+`ontology_skill`.
+
+- [O1] `ontologies/skygest-energy-vocab/docs/property-design-dcat-extension.yaml:8-88` — `hasVariable`, `hasSeries`, `implementsVariable`, `publishedInDataset` property design rationale, cardinality, and the explicit "denormalized view" note for `hasVariable`
+- [O2] `ontologies/skygest-energy-vocab/skygest-energy-vocab.ttl:1629` — `sevocab:implementsVariable` declared as `owl:FunctionalProperty, owl:ObjectProperty`
+- [O3] `ontologies/skygest-energy-vocab/skygest-energy-vocab.ttl:1855-1861` — `sevocab:hasSeries` declaration with `rdfs:domain sevocab:EnergyDataset`, `rdfs:range sevocab:Series`, and `owl:inverseOf sevocab:publishedInDataset`
+- [O4] `ontologies/skygest-energy-vocab/skygest-energy-vocab.ttl:1863-1868` — `sevocab:hasVariable` declaration with the `rdfs:comment` warning that SPARQL consumers should traverse `hasSeries + implementsVariable` rather than relying on OWL property-chain entailment
+- [O5] `ontologies/skygest-energy-vocab/skygest-energy-vocab.ttl:1870-1877` — `sevocab:publishedInDataset` declared as `owl:FunctionalProperty, owl:ObjectProperty` with `owl:inverseOf sevocab:hasSeries`
+- [O6] `ontologies/skygest-energy-vocab/skygest-energy-vocab.ttl:1984-1996` — `sevocab:EnergyDataset` class with OWL restrictions on `dcat:distribution`, `sevocab:hasVariable`, and `dcterms:publisher`
+- [O7] `ontologies/skygest-energy-vocab/skygest-energy-vocab.ttl:1920-1960` — the seven facet dimension properties declared as `qb:DimensionProperty, owl:ObjectProperty` with `qb:codeList` pointing into sevocab concept schemes
+- [O8] `ontologies/skygest-energy-vocab/imports/` — directory contents: `bfo-core.ttl`, `datacube-extract.ttl`, `dcat-extract.ttl`, `foaf-extract.ttl`, `oeo-module.ttl`, `oeo_terms.txt`, `qudt-quantitykind.ttl`, `qudt-unit.ttl`, `schema-extract.ttl`. Note absence of a PROV-O import and absence of an Org Ontology import — both relevant to the `sources-from` and `parent-agent` gaps respectively.
+- [O9] `ontologies/skygest-energy-vocab/docs/property-design-dcat-extension.yaml:90-112` — reused-properties block documenting `dct:publisher` and `dcat:distribution` as modeled via local OWL restrictions on `EnergyDataset` rather than redeclared globally
+- [O10] `ontologies/skygest-energy-vocab/docs/conceptual-model-dcat-extension.yaml:63-80` — `Series` class definition stating the Dataset → Series → Variable structural path and explicitly disambiguating `sevocab:Series` from `dcat:DatasetSeries`
+- [O11] `ontologies/skygest-energy-vocab/mappings/` — directory contents: `sevocab-to-entsoe.sssom.tsv`, `sevocab-to-oeo.sssom.tsv`, `sevocab-to-qudt.sssom.tsv`, `sevocab-to-wikidata.sssom.tsv`, and `mapping-qa-report.md`. This is the precedent for adding `sevocab-to-skygest-typescript.sssom.tsv` under drift-prevention mechanism (2) or (3).
 
 ### Effect Graph source
 
