@@ -9,3 +9,4 @@ export * from "./candidate";
 export * from "./query";
 export * from "./registry";
 export * from "./schema-org";
+export * from "./graph";
