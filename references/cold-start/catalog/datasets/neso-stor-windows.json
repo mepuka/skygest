@@ -1,0 +1,38 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1EDM8VPXM38RD2MDECY4",
+  "title": "Short Term Operating Reserve (STOR) Windows",
+  "description": "This dataset sets out the Short Term Operating Reserve (STOR) committed windows from Season 15 to Season 19 applicable from 1 April 2021 to 1 April 2026. These seasons define the committed windows for each STOR Service Day where STOR is required to be provided in accordance with the STOR Day Ahead Service Terms.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/stor-windows",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Ancillary Services",
+    "Procurement",
+    "STOR",
+    "Short",
+    "Subscribable",
+    "Ancillary services",
+    "Ad hoc"
+  ],
+  "themes": [
+    "electricity",
+    "market"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1EDRZ1RD1BKE8ZZQ365X"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/stor-windows",
+      "relation": "exactMatch"
+    }
+  ]
+}

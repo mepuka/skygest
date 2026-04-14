@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1EDMHRH2D119CF2SDTMD",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1EDGE8TWK5E0B1V3FSXT",
+  "kind": "download",
+  "title": "DC, DR & DM Results Summary Master Data 2021-2023",
+  "description": "Dynamic Containment, Dynamic Regulation & Dynamic Moderation Results Summary Master Data 2021-2023",
+  "downloadURL": "https://api.neso.energy/datastore/dump/888e5029-f786-41d2-bc15-cbfd1d285e96",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/datastore/dump/888e5029-f786-41d2-bc15-cbfd1d285e96",
+      "relation": "exactMatch"
+    }
+  ]
+}

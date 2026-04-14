@@ -1,0 +1,40 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E30GJJ582Z7CJX1KNSG",
+  "title": "Historic Demand Data",
+  "description": "This section contains historic electricity demand, interconnector, hydro storage pumping, Non-BM Short Term Operating Reserve (STOR), wind and solar outturn data.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/historic-demand-data",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Demand",
+    "Historic",
+    "Interconnectors",
+    "Outturn",
+    "Solar",
+    "Subscribable",
+    "Wind"
+  ],
+  "themes": [
+    "electricity",
+    "market",
+    "grid"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E351X3KGTHJXD6DGKFC",
+    "https://id.skygest.io/distribution/dist_01KP4W1E3537BQM67GCPS56JM0"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/historic-demand-data",
+      "relation": "exactMatch"
+    }
+  ]
+}

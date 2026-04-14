@@ -113,7 +113,7 @@ export const ENERGY_INSTITUTE_MANIFEST: ReadonlyArray<EnergyInstituteDatasetMani
           kind: "download",
           title: "Statistical Review data downloads",
           description:
-            "Download hub for the Statistical Review workbook and consolidated data files.",
+            "Download hub for the Statistical Review workbook, consolidated data files, report, and methodology documentation.",
           accessURL: ENERGY_INSTITUTE_REVIEW_RESOURCES_URL,
           format: "multiple"
         },
@@ -126,25 +126,6 @@ export const ENERGY_INSTITUTE_MANIFEST: ReadonlyArray<EnergyInstituteDatasetMani
           accessURL: ENERGY_INSTITUTE_REVIEW_CHARTING_APP_URL,
           format: "html",
           mediaType: "text/html"
-        },
-        {
-          slug: "ei-review-resources",
-          kind: "landing-page",
-          title: "Resources and data downloads",
-          description:
-            "Overview page for Statistical Review downloads, citations, and supporting materials.",
-          accessURL: ENERGY_INSTITUTE_REVIEW_RESOURCES_URL,
-          format: "html",
-          mediaType: "text/html"
-        },
-        {
-          slug: "ei-review-docs",
-          kind: "documentation",
-          title: "Statistical Review report and methodology downloads",
-          description:
-            "Report, methodology, and definitions downloads published with the Statistical Review.",
-          accessURL: ENERGY_INSTITUTE_REVIEW_RESOURCES_URL,
-          format: "pdf"
         }
       ]
     },
@@ -166,31 +147,12 @@ export const ENERGY_INSTITUTE_MANIFEST: ReadonlyArray<EnergyInstituteDatasetMani
       series: COUNTRY_TRANSITION_TRACKER_SERIES,
       distributions: [
         {
-          slug: "ei-tracker-download",
-          kind: "download",
-          title: "Country Transition Tracker data downloads",
-          description:
-            "Download hub for the annual Country Transition Tracker workbook and consolidated files.",
-          accessURL: ENERGY_INSTITUTE_REVIEW_RESOURCES_URL,
-          format: "multiple"
-        },
-        {
           slug: "ei-tracker-web",
           kind: "interactive-web-app",
           title: "Country Transition Tracker tool",
           description:
-            "Interactive Country Transition Tracker application published by the Energy Institute.",
+            "Interactive Country Transition Tracker application published by the Energy Institute. The tracker app is the canonical data surface for this dataset.",
           accessURL: ENERGY_INSTITUTE_TRACKER_APP_URL,
-          format: "html",
-          mediaType: "text/html"
-        },
-        {
-          slug: "ei-tracker-page",
-          kind: "landing-page",
-          title: "Country Transition Tracker landing page",
-          description:
-            "Overview page for the Country Transition Tracker publication and downloads.",
-          accessURL: ENERGY_INSTITUTE_TRACKER_PAGE_URL,
           format: "html",
           mediaType: "text/html"
         }

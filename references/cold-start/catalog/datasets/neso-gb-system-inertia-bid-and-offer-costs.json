@@ -1,0 +1,38 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1ED0BGSXSRAEWFEDR4AB",
+  "title": "Great Britain System Inertia Bid and Offer Costs",
+  "description": "This dataset provides indicative values for the average daily price (in £ per GVAs) for BM accepted offers tagged as being for System Inertia. It also includes the cost of bid actions required to offer on inertia. There are three variations of costs included in this dataset. Method A: The cost of the inertia based on the average bid price, Method B: The cost of inertia assuming the units replace energy taken off at the average wind bid price, Method C: The cost of inertia assuming the units replace energy taken off at the highest bid price. These prices represent all bid prices in each category and not necessarily the accepted bid price.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/gb-system-inertia-bid-and-offer-costs",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Bid",
+    "Cost",
+    "Inertia",
+    "Offer",
+    "Subscribable",
+    "Balancing costs",
+    "Ad hoc"
+  ],
+  "themes": [
+    "electricity",
+    "grid"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1ED4FAZ5QDYEW60WACEG"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/gb-system-inertia-bid-and-offer-costs",
+      "relation": "exactMatch"
+    }
+  ]
+}

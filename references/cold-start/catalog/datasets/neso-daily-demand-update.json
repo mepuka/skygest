@@ -1,0 +1,44 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E35TJK3A8HCSMWXZN4P",
+  "title": "Demand Data Update",
+  "description": "This publication is similar to \"Historic Demand Data\" dataset but updated on a daily basis with approximately ten days lag in receiving settlement data. In the dataset, embedded forecast for the upcoming next 7 days is also made available.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/daily-demand-update",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Embedded",
+    "Forecast",
+    "Historic",
+    "Interconnectors",
+    "National Demand",
+    "Solar",
+    "Subscribable",
+    "TSD",
+    "Total System Demand",
+    "Wind",
+    "Demand"
+  ],
+  "themes": [
+    "electricity",
+    "grid",
+    "planning"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E39426PVN1T9NFZ37QP",
+    "https://id.skygest.io/distribution/dist_01KP4W1E39FVH8M9ZAK9DWZ4Z9"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/daily-demand-update",
+      "relation": "exactMatch"
+    }
+  ]
+}

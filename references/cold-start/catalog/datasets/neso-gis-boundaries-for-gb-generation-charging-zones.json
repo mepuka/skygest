@@ -1,0 +1,39 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E92B38W7CZ811RDZFJ2",
+  "title": "GIS Boundaries for GB Generation Charging Zones",
+  "description": "This dataset contains approximate GIS (geographic information system) geospatial boundaries for each of the TNUoS generation zones in Great Britain. There are 27 TNUoS generation zones, and each is associated with a set of generation zonal tariffs. The total number of TNUoS generation zones may change over time. In addition, the boundaries tend to flex over time when a new substation is added close to a boundary. Once we identify an existing substation that is the closest neighbour to the new substation (the “distance” is measured by site-specific incremental MWkm), the boundary is, theoretically, re-drawn to ensure that the new substation falls into the same generation zone that contains its nearest neighbouring substation. The boundaries are indicative and come with the disclaimer that they are not 100% accurate. That said, they are a good indication of the geography of TNUoS generation zones. In the event of any inconsistencies between the shapefiles and the CUSC, the TNUoS tariff reports or the NGESO Use of System Charging Statements, then the CUSC, the TNUoS tariff reports or the NGESO Use of System Charging Statements will take precedence. For the TNUoS demand zones shapefiles, please refer to https://api.nationalgrideso.com/dataset/gis-boundaries-for-gb-dno-license-areas",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/gis-boundaries-for-gb-generation-charging-zones",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "GIS",
+    "Generation",
+    "Generations Zones",
+    "Shape Files",
+    "Subscribable",
+    "Network charges",
+    "Ad hoc"
+  ],
+  "themes": [
+    "electricity",
+    "market",
+    "grid"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E97RK7J83ZP8C2AHREC"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/gis-boundaries-for-gb-generation-charging-zones",
+      "relation": "exactMatch"
+    }
+  ]
+}

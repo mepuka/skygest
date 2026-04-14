@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E9HCKR82XK31ZAYBWGE",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E9CKHP8BNFZT2JP1EY0",
+  "kind": "download",
+  "title": "Monthly BSUoS Forecast Summary - April 2026",
+  "description": "The Balancing Services Use of System (BSUoS) costs are reported on a monthly basis with a forecast for the next month and a rolling 24 month period. Here you can find the data for the 24 month ahead forecast. **Disclaimer**: This forecast is published without prejudice and whilst every effort has been made to ensure the accuracy based on the assumptions and models used, it is subject to several estimations and forecasts and may not bear relation to either the indicative or actual tariffs Electricity system Operator will publish at a later date.",
+  "downloadURL": "https://api.neso.energy/dataset/c0376ed7-3205-4fe2-9496-28496f1f287a/resource/d8231d25-e7df-4292-a71d-53f8a2b6ed26/download/bsuos-forecast-april-2026.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/c0376ed7-3205-4fe2-9496-28496f1f287a/resource/d8231d25-e7df-4292-a71d-53f8a2b6ed26/download/bsuos-forecast-april-2026.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

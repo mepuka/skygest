@@ -1,0 +1,42 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E7PPPX0VGRP5Q8KHWHM",
+  "title": "Open Balancing Platform (OBP) - Non-BM Instructions",
+  "description": "NESO publishes non-BM instructions data from Open Balancing Platform (OBP) system. This information is continuously published throughout the day on this platform. As of today, this page hosts Non-BM Quick Reserve Service Instructions data. Non-BM Slow Reserve Service and Non-BM MW Dispatch Service Instructions data will be added here when the service goes live in OBP/migrates from ASDP. Additional transparency data for Non-BM Reserve services mastered by OBP can be found in Non-BM Physical Notifications and Non-BM Reserve Availability and Utilisation price . As part of system migration, OBP will incrementally master more non-BM services, and less will be mastered by ASDP. As services are migrated, more non-BM data will be populated on this OBP page, and less on the ASDP page . ** NOTE: ** From March 16th onwards, the title of the dataset \"Open Balancing Platform (OBP) - Non-BM Reserve Instructions\" will be changed to \"Open Balancing Platform (OBP) - Non-BM Instructions\". This dataset currently contains Non-BM Quick Reserve Service Instructions data. Non-BM Slow Reserve Service and Non-BM MW Dispatch Service Instructions data will be added here when the service goes live in OBP/migrates from ASDP.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/obp-non-bm-reserve-instructions",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Dispatch",
+    "Instructions",
+    "MW Dispatch",
+    "Non-BM",
+    "Quick Reserve",
+    "Reserve",
+    "Service",
+    "Slow Reserve",
+    "Subscribable",
+    "Ancillary services",
+    "Ad hoc"
+  ],
+  "themes": [
+    "electricity",
+    "market"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E7TCTDA8AEBK9HGHWTC"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/obp-non-bm-reserve-instructions",
+      "relation": "exactMatch"
+    }
+  ]
+}

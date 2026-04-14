@@ -1,0 +1,37 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E1AEFTH5ZEEPVN77VYM",
+  "title": "Skip Rates",
+  "description": "A new dataset to calculate Skip Rates using the methodology developed with LCP Delta. For more information on this methodology see the Skip Rate section of the website. This dataset provides the skip rates per 30mins of each day following each stage of exclusions as set out in the methodology on the website. For more insights into the data see Skip Rates Dashboard on the website.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/skip-rates",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Balancing Costs",
+    "Dispatch Efficiency",
+    "Skip Rates",
+    "Subscribable",
+    "Balancing costs",
+    "Daily"
+  ],
+  "themes": [
+    "electricity"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E1GMJPZ0NP4M346HESE",
+    "https://id.skygest.io/distribution/dist_01KP4W1E1HY2C3NXPQA1JPDHJ5"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/skip-rates",
+      "relation": "exactMatch"
+    }
+  ]
+}

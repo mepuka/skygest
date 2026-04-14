@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1EEQB82V4A3P6P7DE5PM",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1EEKH3T257QGYC4ATR90",
+  "kind": "download",
+  "title": "Phase 2 FFR Auction LinearOrders Masterdata 2020-2021",
+  "description": "Phase 2 FFR Auction LinearOrders Masterdata 2020-2021",
+  "downloadURL": "https://api.neso.energy/dataset/2d649d03-fb37-46a2-ae82-9e651438b559/resource/404a1de1-5fe9-4569-815a-394e83af96eb/download/phase-2-ffr-auction-linearorders-masterdata-2020-2021.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/2d649d03-fb37-46a2-ae82-9e651438b559/resource/404a1de1-5fe9-4569-815a-394e83af96eb/download/phase-2-ffr-auction-linearorders-masterdata-2020-2021.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

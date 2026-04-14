@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1DYNYKFHN2PVH5WTVY8V",
+  "title": "Daily Wind Availability",
+  "description": "This publication displays the Electricity System Operator’s (ESO) wind generator availability in megawatts (MW) at a daily resolution for 2-14 days ahead.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/daily-wind-availability",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Availability",
+    "Daily",
+    "Subscribable",
+    "Wind",
+    "Generation",
+    "Hourly"
+  ],
+  "themes": [
+    "electricity"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1DYSZ97PM8DQT9R4GZM2"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/daily-wind-availability",
+      "relation": "exactMatch"
+    }
+  ]
+}

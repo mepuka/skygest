@@ -1,0 +1,50 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1DZJW7GBDNKZEXF8YVRB",
+  "title": "Interconnector Requirement and Auction Summary Data",
+  "description": "National Energy System Operator (NESO) trades on interconnectors to adjust the flow of electricity into or out of Great Britain to help manage system issues such as thermal, voltage or stability constraints or to manage energy requirements such as upwards and downwards margin. Trades can take place on IFA1, BritNed, NEMO, IFA2, ElecLink and Viking Link interconnectors. We invite qualified counterparties into NESO Interconnector (IC) auctions which run ad hoc across the day. The counterparties, who hold respective interconnector capacity or be able to secure the capacity later on, can bid in the auction based on the requirement. Requirements are not firm and are subject to change depending on prevailing system conditions. When the auction has been concluded, the information for a given requirement (lot) will be updated to include the volumes secured on each interconnector, the best price, the volume-weighted average price (VWA), and the clearing price. The requirement may not be completely filled. To participate in this market, a counterparty is required to have a Grid Trade Master Agreement (GTMA) in place with NESO and to have access to capacity on channel interconnectors, along with being registered with the BSC party. OTF Dates - Featuring Trading At various times of the year members of the trading team are invited along to the OTF to provide a deep dive or insight into our day job. Here are some of the OTF dates the trading team have attended: 6th July - DA trading on Eleclink click here 27th July - High cost trading days click here 17th August - CMN and trading data locations click here 5th October - Overview of how we trade click here >**NOTE:** Documentation relating to interconnector trading, including the procurement framework and supporting materials: Interconnector Trading Procurement Framework",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/interconnector-requirement-and-auction-summary-data",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Auction",
+    "Bid",
+    "Bidding",
+    "Britned",
+    "GTMA",
+    "IC",
+    "IFA",
+    "IFA2",
+    "Interconnector",
+    "Nemo",
+    "Powerbi",
+    "Requirement",
+    "SCH7a",
+    "Schedule 7A",
+    "Subscribable",
+    "Trades",
+    "Trading",
+    "Ad hoc"
+  ],
+  "themes": [
+    "electricity",
+    "market",
+    "grid"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1DZPYTJA04S4AQXS1EC4"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/interconnector-requirement-and-auction-summary-data",
+      "relation": "exactMatch"
+    }
+  ]
+}

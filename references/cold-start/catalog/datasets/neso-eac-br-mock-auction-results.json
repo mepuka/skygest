@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1EDW2HFQ3GZ90N1PR585",
+  "title": "EAC-BR Mock Auction Results",
+  "description": "A set of auction results views which present the outcome of daily Enduring Auction Capability (EAC) - Balancing Reserve (BR) mock auction runs. The EAC-BR Mock Auction Results are updated daily in the morning and are available in the listed resources below. >** NOTE: ** EAC-BR Mock Auction Results are scheduled to be published on this page from 14th-23rd February 2024 only.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/eac-br-mock-auction-results",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "EAC BR MOCK Auction",
+    "EAC-BR Mock Acution Results from EAC",
+    "Subscribable",
+    "Ancillary services",
+    "Daily"
+  ],
+  "themes": [
+    "electricity",
+    "market"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1EE031E3BQMYFQA8KVWW"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/eac-br-mock-auction-results",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E9NFWV9P59XTZ4WCCD7",
+  "title": "Strategic Spatial Energy Plan (SSEP) Onshore Publication Zone Shapefile",
+  "description": "Onshore and Offshore economic and publication zones related to the draft and final Strategic Spatial Energy Plan (SSEP).",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/ssep-onshore-publication-zone-shapefile",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "GIS",
+    "Map",
+    "SSEP",
+    "Shapefile",
+    "Subscribable",
+    "Zone",
+    "Strategic Energy Planning",
+    "Ad-hoc"
+  ],
+  "themes": [
+    "energy"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E9SG5B26X9004MX0QBS"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/ssep-onshore-publication-zone-shapefile",
+      "relation": "exactMatch"
+    }
+  ]
+}

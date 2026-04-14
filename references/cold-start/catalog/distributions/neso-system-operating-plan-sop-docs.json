@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E01WKCJEXSJ6KY95BAX",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1DZXG8G36SSQT7KR6M6A",
+  "kind": "documentation",
+  "title": "Glossary of terms used in System Operating Plan",
+  "description": "This document provides information to support understanding of the System Operating Plan",
+  "accessURL": "https://api.neso.energy/dataset/99442aab-b184-44f5-8495-fc0b82869d46/resource/596fbeb4-77be-48a4-89b7-f442e73e54c0/download/glossary-of-terms-used-in-a-system-operating-plan.pdf",
+  "mediaType": "application/pdf",
+  "format": "pdf",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/99442aab-b184-44f5-8495-fc0b82869d46/resource/596fbeb4-77be-48a4-89b7-f442e73e54c0/download/glossary-of-terms-used-in-a-system-operating-plan.pdf",
+      "relation": "exactMatch"
+    }
+  ]
+}

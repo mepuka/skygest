@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E7YFEZXK84HE5022GYP",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E7T1BW28NCE4TTQDYEZ",
+  "kind": "download",
+  "title": "Slow Reserve Important Industry Notification",
+  "description": "This resource contains important industry notifications for Slow Reserve service.",
+  "downloadURL": "https://api.neso.energy/dataset/fc8dadc7-235d-44b0-bab2-320dc76095de/resource/11a90fe4-27c1-46b5-9619-016f2752413d/download/sr-important-industry-notifications.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/fc8dadc7-235d-44b0-bab2-320dc76095de/resource/11a90fe4-27c1-46b5-9619-016f2752413d/download/sr-important-industry-notifications.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

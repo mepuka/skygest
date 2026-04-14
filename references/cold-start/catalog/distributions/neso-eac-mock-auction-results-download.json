@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E8Y783YREHAWHPE68E6",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E8TBYNF3M0VZD5AZ9M3",
+  "kind": "download",
+  "title": "NESO Mock Response-Reserve Results By Unit 2025-2026",
+  "description": "This contains the cleared quantity and clearing price for each accepted unit for each service and period.",
+  "downloadURL": "https://api.neso.energy/datastore/dump/955cf89f-232e-4b9c-8414-6351080f49fa",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/datastore/dump/955cf89f-232e-4b9c-8414-6351080f49fa",
+      "relation": "exactMatch"
+    }
+  ]
+}

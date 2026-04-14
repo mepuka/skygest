@@ -1,0 +1,39 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E4ZWBVWJC0291ACX2HK",
+  "title": "Daily Balancing Services Use of System (BSUoS) Volume Data",
+  "description": "The BSUoS charge recovers the cost of day-to-day operation of the transmission system. Generators and suppliers are liable for these charges, which are calculated daily as a flat tariff for all users. Historical values of these charges, on a daily basis in a annual file, are provided here. There have been 60 settlement periods missing from 01 January 2017 up to today. You can find the complete list in the Missing_Dates_Periods.xlsx file below.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/daily-balancing-volume-balancing-services-use-of-system",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Balancing",
+    "Bsuos",
+    "Daily",
+    "Subscribable",
+    "Volume",
+    "Balancing costs",
+    "Weekly"
+  ],
+  "themes": [
+    "electricity",
+    "market",
+    "grid"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E54MYB52EJ56M436QXZ"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/daily-balancing-volume-balancing-services-use-of-system",
+      "relation": "exactMatch"
+    }
+  ]
+}

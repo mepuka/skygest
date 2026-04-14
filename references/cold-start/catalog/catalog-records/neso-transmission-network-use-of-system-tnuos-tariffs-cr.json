@@ -1,0 +1,13 @@
+{
+  "_tag": "CatalogRecord",
+  "id": "https://id.skygest.io/catalog-record/cr_01KP4W1EADA8AK5AAE38NPXJCT",
+  "catalogId": "https://id.skygest.io/catalog/cat_01KP4W1DWZDNKXKM052R1ESGW6",
+  "primaryTopicType": "dataset",
+  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KP4W1EA9PT4X1MW3E7QG3PD3",
+  "sourceRecordId": "eaef4708-1100-4ad9-98d5-d892f3c9a56c",
+  "harvestedFrom": "https://api.neso.energy/api/3/action/package_search",
+  "firstSeen": "2021-01-15T11:09:44.791138",
+  "lastSeen": "2026-04-14T02:09:59.759Z",
+  "sourceModified": "2026-02-04T12:29:53.460487",
+  "isAuthoritative": true
+}

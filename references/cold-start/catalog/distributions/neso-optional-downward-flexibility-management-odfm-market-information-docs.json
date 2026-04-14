@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1EEKW01KQQQ1GKYGPMHH",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1EEEBRFSD7VSBVGCH9PQ",
+  "kind": "documentation",
+  "title": "ODFM Requirement - Summer 2021",
+  "description": "ODFM Requirement - Summer 2021",
+  "accessURL": "https://api.neso.energy/dataset/23ec7a9f-6220-4d1e-9099-e9195a2ed177/resource/430861fa-3ffc-4e8b-80b1-06e3ebe19007/download/ofdm-requirement-paper.pdf",
+  "mediaType": "application/pdf",
+  "format": "pdf",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/23ec7a9f-6220-4d1e-9099-e9195a2ed177/resource/430861fa-3ffc-4e8b-80b1-06e3ebe19007/download/ofdm-requirement-paper.pdf",
+      "relation": "exactMatch"
+    }
+  ]
+}

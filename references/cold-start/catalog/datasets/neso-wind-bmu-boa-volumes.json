@@ -1,0 +1,39 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E3DPBV1R680SZ550T64",
+  "title": "Wind BOA Volumes",
+  "description": "This dataset contains the volumes of all BOAs taken on wind BMUs that are used in our incentive wind forecasts.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/wind-bmu-boa-volumes",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "BMU",
+    "Bid",
+    "Boas",
+    "Offer",
+    "Subscribable",
+    "Wind",
+    "Generation",
+    "Daily"
+  ],
+  "themes": [
+    "electricity",
+    "planning"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E3HY1A1B3N2ZHK5CHJ7"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/wind-bmu-boa-volumes",
+      "relation": "exactMatch"
+    }
+  ]
+}

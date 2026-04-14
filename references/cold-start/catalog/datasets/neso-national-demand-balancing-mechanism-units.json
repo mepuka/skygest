@@ -1,0 +1,34 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E827E6GYPQCVFYQ99GH",
+  "title": "National Demand Balancing Mechanism Units",
+  "description": "This dataset contains a preliminary list of Balancing Mechanism units that make up National Demand. This is related to the Historic Demand Data published here",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/national-demand-balancing-mechanism-units",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "BM Units",
+    "Demand",
+    "Subscribable",
+    "Ad hoc"
+  ],
+  "themes": [
+    "electricity"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E86XYEXSZMDFH7JFEN9"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/national-demand-balancing-mechanism-units",
+      "relation": "exactMatch"
+    }
+  ]
+}

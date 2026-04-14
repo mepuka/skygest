@@ -1,0 +1,43 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E3HQT8W9NHPSSTA3Z7Q",
+  "title": "Historic GTMA (Grid Trade Master Agreement) Trades Data",
+  "description": "This dataset contains data for historic GTMA (Grid Trade Master Agreement) trades conducted since April 2015. The data includes the trade ID, start and end time and date, the volume in MW, the price in £/MWh and the total cost of the trade. The dataset will be updated on a monthly basis shortly after the start of the month, with the previous months data. The live data file is refreshed every morning to capture the trades occurred between D-1 06:00 and D 06:00. However post-delivery things can change, for example counterparties can default (not deliver the trade) and in this event the data may not be updated retrospectively. OTF Dates - Featuring Trading At various times of the year members of the trading team are invited along to the OTF to provide a deep dive or insight into our day job. Here are some of the OTF dates the trading team have attended: 6th July - DA trading on Eleclink click here 27th July - High cost trading days click here 17th August - CMN and trading data locations click here 5th October - Overview of how we trade click here",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/historic-gtma-grid-trade-master-agreement-trades-data",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Agreement",
+    "Data",
+    "GTMA",
+    "Grid",
+    "Historic",
+    "Master",
+    "SCH7a",
+    "Schedule 7A",
+    "Subscribable",
+    "Trade",
+    "Trades",
+    "Trading"
+  ],
+  "themes": [
+    "market",
+    "grid"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E3NM2Y092739XH3QGJF"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/historic-gtma-grid-trade-master-agreement-trades-data",
+      "relation": "exactMatch"
+    }
+  ]
+}

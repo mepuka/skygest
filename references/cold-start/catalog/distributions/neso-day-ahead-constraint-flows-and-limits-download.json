@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E0K6RANBGQSX3Y13G31",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E0F4W293ATZQ1XG53HN",
+  "kind": "download",
+  "title": "Day Ahead Constraint Flows and Limits",
+  "description": "The data below is a snapshot of the limits and flows at relevant boundaries at day ahead stage. These flow values are calculated at Day Ahead and will not reflect any changes in the flows following the publication of this data. The boundary flows are the forecast position after Day Ahead energy scheduling has been run. Please note that from the 22nd April 2024 the flows no longer consider expected constraint mitigation or optimisation actions. Before this date the data did consider constraint mitigation actions. This change has happened as the software used to collate this information has been updated. The network diagrams show the constraint boundaries and arrows indicating the positive direction of power flow across each boundary.",
+  "downloadURL": "https://api.neso.energy/dataset/cf3cbc92-2d5d-4c2b-bd29-e11a21070b26/resource/38a18ec1-9e40-465d-93fb-301e80fd1352/download/day-ahead-constraints-limits-and-flow-output-v1.5.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/cf3cbc92-2d5d-4c2b-bd29-e11a21070b26/resource/38a18ec1-9e40-465d-93fb-301e80fd1352/download/day-ahead-constraints-limits-and-flow-output-v1.5.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

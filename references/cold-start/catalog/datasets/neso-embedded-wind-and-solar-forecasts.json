@@ -1,0 +1,39 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1DYS5F8TG5QK1W84KHBA",
+  "title": "Embedded Wind and Solar Forecasts",
+  "description": "National Energy System Operator (NESO) publishes at a half-hourly resolution the embedded (refer to embedded document for definition) wind and solar forecast from within day up to 14 days ahead. This forecast gets updated on an hourly basis. ** NOTE: ** NESO is aware of the issues of missing archived records for this dataset and are working to resolve it as quickly as possible.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/embedded-wind-and-solar-forecasts",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Embedded",
+    "Forecast",
+    "Generation",
+    "Powerbi",
+    "Solar",
+    "Subscribable",
+    "Wind"
+  ],
+  "themes": [
+    "electricity",
+    "planning"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1DYYA13GSGX5X1T3B2JV",
+    "https://id.skygest.io/distribution/dist_01KP4W1DYYEMTQWHDDZ776E4E0"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/embedded-wind-and-solar-forecasts",
+      "relation": "exactMatch"
+    }
+  ]
+}

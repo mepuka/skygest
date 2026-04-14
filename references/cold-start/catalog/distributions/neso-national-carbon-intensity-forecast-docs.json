@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1DZ2XWQB46YCBTSK37NF",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1DYYM68HYCK2XDQ1GWTQ",
+  "kind": "documentation",
+  "title": "National Carbon Intensity Forecast Methodology",
+  "description": "A detailed description of national carbon intensity forecast methodology.",
+  "accessURL": "https://api.neso.energy/dataset/f406810a-1a36-48d2-b542-1dfb1348096e/resource/36638178-e993-4d34-afdc-4ada83993585/download/neso-ci-national-methodology_v2.pdf",
+  "mediaType": "application/pdf",
+  "format": "pdf",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/f406810a-1a36-48d2-b542-1dfb1348096e/resource/36638178-e993-4d34-afdc-4ada83993585/download/neso-ci-national-methodology_v2.pdf",
+      "relation": "exactMatch"
+    }
+  ]
+}

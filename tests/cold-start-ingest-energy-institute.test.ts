@@ -183,7 +183,9 @@ describe("energy institute adapter", () => {
     const ctx = buildContextFromIndex(idx, FIXTURE_NOW);
     const candidates = buildCandidateNodes(ENERGY_INSTITUTE_MANIFEST, idx, ctx);
 
-    expect(candidates).toHaveLength(15);
+    // 1 agent + 1 catalog + 2 datasets + 2 dataset-series + 3 distributions
+    // (review-download, review-web, tracker-web) + 2 catalog-records = 11
+    expect(candidates).toHaveLength(11);
 
     const reviewDatasetNode = candidates.find(
       (candidate): candidate is Extract<typeof candidates[number], { _tag: "dataset" }> =>
@@ -393,8 +395,8 @@ describe("energy institute adapter", () => {
       expect(firstReviewDataset.aliases.some((alias) => alias.value === ENERGY_INSTITUTE_REVIEW_HOME_URL)).toBe(
         true
       );
-      expect(firstReviewDataset.distributionIds).toHaveLength(4);
-      expect(firstTrackerDataset.distributionIds).toHaveLength(3);
+      expect(firstReviewDataset.distributionIds).toHaveLength(2);
+      expect(firstTrackerDataset.distributionIds).toHaveLength(1);
       expect(firstTrackerDataset.inSeries).toBe(firstTrackerSeries.id);
       expect(firstReviewDownload.id).toBe(REVIEW_DOWNLOAD.id);
       expect(firstReviewDownload.accessURL).toBe(
@@ -409,12 +411,8 @@ describe("energy institute adapter", () => {
         "ei-statistical-review.json"
       ]);
       expect(distributionFiles.sort()).toEqual([
-        "ei-review-docs.json",
         "ei-review-download.json",
-        "ei-review-resources.json",
         "ei-review-web.json",
-        "ei-tracker-download.json",
-        "ei-tracker-page.json",
         "ei-tracker-web.json"
       ]);
       expect(report.manifestEntryCount).toBe(2);
@@ -451,7 +449,7 @@ describe("energy institute adapter", () => {
       expect(reloaded.skippedDatasets).toHaveLength(0);
       expect(reloaded.index.allDatasets).toHaveLength(2);
       expect(reloaded.index.allDatasetSeries).toHaveLength(2);
-      expect(reloaded.index.allDistributions).toHaveLength(7);
+      expect(reloaded.index.allDistributions).toHaveLength(3);
       expect(reloaded.index.allCatalogRecords).toHaveLength(2);
 
       yield* Effect.promise(() => cleanup(tmp));

@@ -1,0 +1,39 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E4MQJ01B07576QDA7YG",
+  "title": "Stability Pathfinder service information",
+  "description": "This dataset gives indicative information on the availability and utilisation of Stability Pathfinder contracts. The information is provided at a settlement period resolution for all contracted units. Time values are all given in local time in . ** NOTE: ** For long term stability services, there is no utilisation payment made, and therefore the dataset is updated approximately a week after delivery. The dataset does not include data for Grid Forming Batteries. This is because the NESO Control room is not required to send instructions to utilise this technology type for Stability purposes, as this is delivered continuously when the sites are connected to the system. .",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/stability-pathfinder-service-information",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Availability",
+    "Inertia",
+    "Pathfinder",
+    "Stability",
+    "Subscribable",
+    "System Inertia",
+    "Utilisation",
+    "System",
+    "Weekly"
+  ],
+  "themes": [
+    "grid"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E4TTWJ6AT8RR1JV8P19"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/stability-pathfinder-service-information",
+      "relation": "exactMatch"
+    }
+  ]
+}

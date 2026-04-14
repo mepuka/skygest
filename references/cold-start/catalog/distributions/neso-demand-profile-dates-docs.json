@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E1ASP2CY9V3V0PE3CV2",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E1AFE7TJQMB1FMGKJKW",
+  "kind": "documentation",
+  "title": "Demand Profile Dates",
+  "description": "This resource contains the historic and forecast profile dates used to convert our Cardinal Point forecasts into half hourly demand forecasts between the start of 2018 up to 14 days ahead. The profile dates are NESO's estimate at the historic date which will most closely match the forecast date in terms of weather, embedded generation, time of year, recurring calendar activities and special events. These dates can change as we get closer to real time as our weather forecasts are updated and certainty improves.",
+  "accessURL": "https://api.neso.energy/dataset/11a2a8d3-3d65-4545-af02-be85e54db078/resource/48862d1a-f285-4709-a48c-1c0e8e7b37c3/download/profile_dates.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/11a2a8d3-3d65-4545-af02-be85e54db078/resource/48862d1a-f285-4709-a48c-1c0e8e7b37c3/download/profile_dates.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

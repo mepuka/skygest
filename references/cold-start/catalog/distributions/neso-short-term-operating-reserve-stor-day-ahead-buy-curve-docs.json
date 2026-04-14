@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E4Z6HRJTVFF226ZFAZH",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E4TN7B9Q7WTG6VKRN37",
+  "kind": "documentation",
+  "title": "STOR Day Ahead Buy Curve Hash",
+  "description": "This file is not readable data, but is shared ahead of the STOR Day Ahead Auction to give confidence that we have set the volume and price cut offs before the auction. The date in the filename is the date the STOR service will be delivered.",
+  "accessURL": "https://api.neso.energy/dataset/0eb97ab8-61bd-4ac2-9619-10d80ae50e77/resource/1eacef3e-c7e5-4ce2-a1e3-c667f39c0a17/download/2026-03-31_hash.txt",
+  "mediaType": "text/plain",
+  "format": "txt",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/0eb97ab8-61bd-4ac2-9619-10d80ae50e77/resource/1eacef3e-c7e5-4ce2-a1e3-c667f39c0a17/download/2026-03-31_hash.txt",
+      "relation": "exactMatch"
+    }
+  ]
+}

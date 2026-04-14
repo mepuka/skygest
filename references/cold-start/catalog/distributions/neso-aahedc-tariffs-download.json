@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E7G7E5E99FE76TS15J9",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E7A9ZQ6QQ1QYYJBMVX7",
+  "kind": "download",
+  "title": "Assistance for Areas of High Electricity Distribution Costs (AAHEDC) Tariffs",
+  "description": "This dataset contains a breakdown of all the Assistance for Areas of High Electricity Distribution Costs (AAHEDC) Tariffs elements which are forecasted and set by the revenue team at National Grid ESO. These files will be updated on a biannually (when tariffs are published), to receive automatic updates please register and subscribe to this dataset.",
+  "downloadURL": "https://api.neso.energy/dataset/43d94335-c97f-4939-a8b9-607d2cfb3734/resource/ffd29cc8-3c55-4e83-aa0e-73212d4fedba/download/aahedc-tariffs-for-dataportal-2026-03.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/43d94335-c97f-4939-a8b9-607d2cfb3734/resource/ffd29cc8-3c55-4e83-aa0e-73212d4fedba/download/aahedc-tariffs-for-dataportal-2026-03.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1EAHATP5H95ZG243CGMT",
+  "title": "Transitional Regional Energy Strategic Plan (tRESP) - Generation Pathways",
+  "description": "The transitional RESP (tRESP) is the first output from NESO's Regional Energy Strategic Plan (RESP) team. It is designed as a bridge between the current approach to energy distribution network planning, and the full RESP approach which will be in place from 2028. The electricity distribution network operators (DNOs) will use the tRESP alongside Ofgem’s business planning guidance, to develop their plans for the third electricity distribution price control period, known as ED3, which covers 2028-33. The tRESP Pathways are structured in a similar way to the building block outputs from NESO's Future Energy Scenarios (FES) 2025: Pathways to Net Zero. Each of the 35 building blocks represent an individual component of demand or generation/storage. When combined, this provides a view of the changing energy landscape out to 2050. Here we present Pathways per tRESP Grid Supply Point (GSP) feeding area (or by GSP group in Scotland), across 23 tRESP generation building blocks, per year. The generation Pathways are also provided per RESP nation and region, as well as on an indicative basis per local authority across Great Britain. FES describes three pathways to net zero – Holistic Transition, Electric Engagement and Hydrogen Evolution. Ofgem asked NESO to create a single tRESP Short-Term Pathway (from 2025 to 2035). The purpose of a single pathway is to provide a strategic view to enable investment decisions over multiple regulatory periods. The tRESP Short-Term Pathway is informed by the DNOs’ Holistic Transition pathway, adjusted by NESO for consistency and alignment. Holistic Transition is a pathway with high renewables and high consumer engagement, and it was the pathway that Ofgem previously advised should be used for planning transmission networks. The single pathway branches into multiple long-term pathways to account for greater uncertainty between 2035-2050. These are tRESP versions of Holistic Transition, Electric Engagement and Hydrogen Evolution. Additionally, the tRESP Demand Pathways databooks and supporting files can be found here . The demand dataset also contains lists of all tRESP building blocks and of tRESP GSP areas with names, as well as Geographic Information System (GIS) files of both the tRESP GSP areas and the RESP nations and regions areas.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/tresp-generation-pathways",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "DNO",
+    "Demand",
+    "ED3",
+    "Electricity Distribution",
+    "Forecast",
+    "Generation",
+    "Ofgem",
+    "Pathways",
+    "RIIO-ED3",
+    "Subscribable",
+    "tRESP",
+    "tRESP Pathways",
+    "Ad-hoc"
+  ],
+  "themes": [
+    "electricity",
+    "gas",
+    "grid",
+    "planning"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1EANGS2DBSAZ00Y7QA3T"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/tresp-generation-pathways",
+      "relation": "exactMatch"
+    }
+  ]
+}

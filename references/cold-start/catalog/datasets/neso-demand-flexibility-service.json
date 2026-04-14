@@ -1,0 +1,36 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1EE9KQJGMDR536VQGPKZ",
+  "title": "Demand Flexibility Service 2023/24",
+  "description": "Please visit Demand Flexibility Service for the latest auction results. This dataset will no longer be updated. NESO are again launching the Demand Flexibility Service (DFS) for Winter 2023/24. The service allows the NESO to access additional flexibility when the national demand is at its highest – during peak winter days – which is not currently accessible to the NESO in real time. The service will allow consumers – both domestic and I&C – to be incentivised for voluntarily flexing the time during which they use their electricity. This dataset contains updates and information relating to both **live** and **test** DFS events. NESO have launched the Demand Flexibility Service (DFS) for winter 2023/24. The service allows the NESO to access additional flexibility when the national demand is at its highest – during peak winter days – which is not currently accessible to the NESO in real time. The service will allow consumers – both domestic and I&C – to be incentivised for voluntarily flexing the time during which they use their electricity. Text message/SMS alerts are available for this dataset. This dataset will contain the following files: - **DFS Utilisation Report**: this file will provide details of accepted and rejected bids for both **live** and **test** events, and includes a breakdown by GSP. The NESO will endeavour to update this file within one hour of bid submission gate closure – which occurs one hour after the DFS service requirements are issued. Note: this file will only be updated on days with a corresponding DFS service requirement. - **DFS Utilisation Report Summary**: this file will provide a summary of the demand flexibility volumes procured and delivered for both **live** and **test** events. The file will be updated after the DFS utilisation report has been updated, and/or when the relevant settlements data has been processed. - **DFS Industry Notifications**: this file will indicate when the NESO anticipates publishing a DFS service requirement for a **live** or **test** event, and will provide additional information pertaining to issuing a DFS service requirement. - **DFS Service Requirement**: this file will contain details of service requirements for both **live** and **test** events.”",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/demand-flexibility-service",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Demand",
+    "Demand Flexibility Service",
+    "Flexibility",
+    "Subscribable",
+    "Not Active"
+  ],
+  "themes": [
+    "electricity",
+    "market"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1EEEV968W1PA3GSG75YZ"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/demand-flexibility-service",
+      "relation": "exactMatch"
+    }
+  ]
+}

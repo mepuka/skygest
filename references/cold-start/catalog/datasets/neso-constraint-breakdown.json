@@ -1,0 +1,42 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1E42KSVFPDV1MPWD2TTF",
+  "title": "Constraint Breakdown Costs and Volume",
+  "description": "The publication consists of constraint breakdown information to provide additional transparency of why as ESO we are taking actions on the system. Please note that tags applied to actions can occasionally be changed post event and in this instance the information in this dataset would be refreshed to reflect the up to date information. The data is applicable to the transmission network only.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/constraint-breakdown",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "Contstraints",
+    "Costs",
+    "Daily",
+    "Inertia",
+    "Rocof",
+    "Subscribable",
+    "Thermal",
+    "Voltage",
+    "Volumes",
+    "Balancing costs",
+    "Weekly"
+  ],
+  "themes": [
+    "electricity",
+    "grid"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1E46DV9APPMEBKXN69KR"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/constraint-breakdown",
+      "relation": "exactMatch"
+    }
+  ]
+}

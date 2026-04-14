@@ -8,6 +8,8 @@
     "formerly BP Statistical Review"
   ],
   "homepage": "https://www.energyinst.org",
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z",
   "aliases": [
     {
       "scheme": "wikidata",
@@ -19,7 +21,5 @@
       "value": "https://www.energyinst.org",
       "relation": "exactMatch"
     }
-  ],
-  "createdAt": "2026-04-08T00:00:00.000Z",
-  "updatedAt": "2026-04-08T00:00:00.000Z"
+  ]
 }

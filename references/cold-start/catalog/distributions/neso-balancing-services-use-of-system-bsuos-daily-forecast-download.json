@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1EEZAM8FJBM6TWGQPG8D",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1EEVK0VHAV0BX5KJ4MKW",
+  "kind": "download",
+  "title": "Daily BSUoS Forecast 2022-23",
+  "description": "The Electricity System Operator (ESO) publishes historic and future Balancing Services Use of System (BSUoS) charge forecast for the financial year.",
+  "downloadURL": "https://api.neso.energy/dataset/a8368560-87ac-4d31-85b7-625322430456/resource/b98095a8-310a-4fee-8d51-e20531c49465/download/daily-bsuos-forecast-2022-23.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/a8368560-87ac-4d31-85b7-625322430456/resource/b98095a8-310a-4fee-8d51-e20531c49465/download/daily-bsuos-forecast-2022-23.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

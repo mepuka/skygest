@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E5MWV5NF13ZQ9PSCHVX",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E5GMX1RRRE6N80NK8Q1",
+  "kind": "download",
+  "title": "GB System Inertia Costs 2025",
+  "description": "Cost per unit of inertia. This file is updated daily appending to one file per financial year",
+  "downloadURL": "https://api.neso.energy/dataset/59f20804-9c9e-4f70-a809-c4c48a4f4c6e/resource/a6a52241-1774-48d8-935f-2bef0d843e18/download/inertia_costs.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/59f20804-9c9e-4f70-a809-c4c48a4f4c6e/resource/a6a52241-1774-48d8-935f-2bef0d843e18/download/inertia_costs.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

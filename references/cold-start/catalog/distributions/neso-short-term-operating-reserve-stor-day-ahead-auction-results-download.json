@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E7NH1NW5NBA3946PM9M",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E7GADSR0P6AKQQRRSP6",
+  "kind": "download",
+  "title": "STOR DA Auction Results",
+  "description": "STOR DA Auction Results for 30/03/2026",
+  "downloadURL": "https://api.neso.energy/dataset/fb4a9900-9438-47ae-9788-06f490353a89/resource/844a1a65-0a3c-4704-b327-d1685d0c397b/download/stor-da-auction-results.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/fb4a9900-9438-47ae-9788-06f490353a89/resource/844a1a65-0a3c-4704-b327-d1685d0c397b/download/stor-da-auction-results.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

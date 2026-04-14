@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E2BSGWX22CX8ZKWFG51",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E26RSEQHT7A8YMVEDH1",
+  "kind": "download",
+  "title": "Carbon Intensity of Balancing Actions",
+  "description": "File containing half hourly carbon intensity of Balancing Mechanism combined Final Physical Notices and balancing actions.",
+  "downloadURL": "https://api.neso.energy/dataset/5d3a7f30-020b-4bf2-9f56-1a7522ece994/resource/0b7edf10-4328-4b85-a0af-e6daa6bb8428/download/balancing_actions_carbon_intensity_ckan.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/5d3a7f30-020b-4bf2-9f56-1a7522ece994/resource/0b7edf10-4328-4b85-a0af-e6daa6bb8428/download/balancing_actions_carbon_intensity_ckan.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

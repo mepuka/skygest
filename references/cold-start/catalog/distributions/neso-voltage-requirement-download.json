@@ -1,0 +1,23 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E5CJ4SCMNP47GW1BQJC",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E589Y0BHGQZTGBE8XS0",
+  "kind": "download",
+  "title": "Week Ahead Overnight Voltage Requirement 20-26",
+  "description": "The number of voltage machine required for a given voltage group for upcoming weekend and following Monday to Friday. Given the complexity and locational nature of the voltage requirement, the actual requirement is likely to change, also further optimisation can be carried out towards real time based on the market condition, unit running pattern, demand and supply fundamentals.",
+  "downloadURL": "https://api.neso.energy/dataset/9f4acccb-bf79-452b-aa77-a680ae728722/resource/00881643-7a5e-4eed-b144-06423a88202b/download/overnightvoltagerequirement20-26_1.csv",
+  "mediaType": "text/csv",
+  "format": "csv",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "accessServiceId": "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/9f4acccb-bf79-452b-aa77-a680ae728722/resource/00881643-7a5e-4eed-b144-06423a88202b/download/overnightvoltagerequirement20-26_1.csv",
+      "relation": "exactMatch"
+    }
+  ]
+}

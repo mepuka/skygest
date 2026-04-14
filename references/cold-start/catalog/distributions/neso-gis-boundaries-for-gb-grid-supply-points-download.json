@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1E920R2NZV29NJN1CN8A",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1E8YRB7QWWMNY4WRY2V4",
+  "kind": "download",
+  "title": "GSP Regions 20251204",
+  "description": "Zip folder containing GIS boundaries for Grid Supply Points in ESRI Shapefile and GeoJSON formats. Versions have been included for both the OSGB36 / British National Grid (EPSG:27700) and WGS 84 (EPSG:4326) coordinate reference systems. Version: 2025-12-04.",
+  "downloadURL": "https://api.neso.energy/dataset/2810092e-d4b2-472f-b955-d8bea01f9ec0/resource/c5647312-afab-4a58-8158-2f1efed1d7fc/download/gsp_regions_20251204.zip",
+  "mediaType": "application/zip",
+  "format": "zip",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/2810092e-d4b2-472f-b955-d8bea01f9ec0/resource/c5647312-afab-4a58-8158-2f1efed1d7fc/download/gsp_regions_20251204.zip",
+      "relation": "exactMatch"
+    }
+  ]
+}

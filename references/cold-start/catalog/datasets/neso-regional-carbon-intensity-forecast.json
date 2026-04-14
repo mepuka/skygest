@@ -1,0 +1,40 @@
+{
+  "_tag": "Dataset",
+  "id": "https://id.skygest.io/dataset/ds_01KP4W1DZ2X0KJ82MYKQCEY59R",
+  "title": "Regional Carbon Intensity Forecast",
+  "description": "This dataset contains regional carbon intensity forecast for the GB electricity system.The carbon intensity of electricity is a measure of how much CO2 emissions are produced per kilowatt hour of electricity consumed.",
+  "publisherAgentId": "https://id.skygest.io/agent/ag_01KP172ZRBS4Z4NGY24XA7YX6D",
+  "landingPage": "https://www.neso.energy/data-portal/regional-carbon-intensity-forecast",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "keywords": [
+    "CO2",
+    "Carbon",
+    "Forecast",
+    "Intensity",
+    "Regional",
+    "Subscribable",
+    "Carbon intensity",
+    "Hourly"
+  ],
+  "themes": [
+    "electricity",
+    "planning"
+  ],
+  "distributionIds": [
+    "https://id.skygest.io/distribution/dist_01KP4W1DZ8PCYFTXAEP7KKM4JK",
+    "https://id.skygest.io/distribution/dist_01KP4W1DZD2KS3CWW510MXW1N6"
+  ],
+  "accessRights": "public",
+  "dataServiceIds": [
+    "https://id.skygest.io/data-service/svc_01KP4W1DWZG3S96C6XZD3YG71N"
+  ],
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://www.neso.energy/data-portal/regional-carbon-intensity-forecast",
+      "relation": "exactMatch"
+    }
+  ]
+}

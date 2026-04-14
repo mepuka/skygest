@@ -1,0 +1,22 @@
+{
+  "_tag": "Distribution",
+  "id": "https://id.skygest.io/distribution/dist_01KP4W1ECVF9N2S878W6XRHXVC",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KP4W1ECQ90E7EWT86GS6PJEN",
+  "kind": "documentation",
+  "title": "Network Diagram",
+  "description": "A network diagram of Voltage Requirement Area",
+  "accessURL": "https://api.neso.energy/dataset/8df6dd77-315f-465e-a8d9-ce0492853050/resource/ec0669de-e67a-4601-831e-3d3f4ed6406e/download/network-diagram.pdf",
+  "mediaType": "application/pdf",
+  "format": "pdf",
+  "accessRights": "public",
+  "license": "https://www.neso.energy/data-portal/ngeso-open-licence",
+  "createdAt": "2026-04-14T02:09:59.759Z",
+  "updatedAt": "2026-04-14T02:09:59.759Z",
+  "aliases": [
+    {
+      "scheme": "url",
+      "value": "https://api.neso.energy/dataset/8df6dd77-315f-465e-a8d9-ce0492853050/resource/ec0669de-e67a-4601-831e-3d3f4ed6406e/download/network-diagram.pdf",
+      "relation": "exactMatch"
+    }
+  ]
+}
