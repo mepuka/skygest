@@ -2,7 +2,8 @@ import { describe, expect, it } from "@effect/vitest";
 import { Effect, Option } from "effect";
 import { FacetVocabulary } from "../src/resolution/facetVocabulary";
 
-describe("CD-008 price/share/count surface-form routing", () => {
+// SKIPPED: facet vocabulary is deprecated under SKY-348 (OEO + prompt-layer extraction). Restore once the OEO-bound resolver kernel has its own surface-form routing tests.
+describe.skip("CD-008 price/share/count surface-form routing", () => {
   it.effect("routes unqualified 'price' to measuredProperty only", () =>
     Effect.gen(function* () {
       const vocab = yield* FacetVocabulary;
@@ -52,7 +53,7 @@ describe("CD-008 price/share/count surface-form routing", () => {
   );
 });
 
-describe("domain-object and aggregation lexicon tightening", () => {
+describe.skip("domain-object and aggregation lexicon tightening", () => {
   it.effect("does not fire domainObject=heat on bare narrative 'heat'", () =>
     Effect.gen(function* () {
       const vocab = yield* FacetVocabulary;

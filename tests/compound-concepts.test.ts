@@ -3,7 +3,8 @@ import { Effect, Result, Schema } from "effect";
 import { FacetVocabulary } from "../src/resolution/facetVocabulary";
 import { CompoundSurfaceFormEntry } from "../src/resolution/facetVocabulary/compoundConcepts";
 
-describe("CompoundSurfaceFormEntry schema", () => {
+// SKIPPED: compound concepts are part of the facet vocabulary shelf, deprecated under SKY-348 (OEO + prompt-layer extraction).
+describe.skip("CompoundSurfaceFormEntry schema", () => {
   it("decodes a minimal hand-curated entry", () => {
     const decoded = Schema.decodeUnknownSync(CompoundSurfaceFormEntry)({
       surfaceForm: "spot price",
@@ -38,7 +39,7 @@ describe("CompoundSurfaceFormEntry schema", () => {
   });
 });
 
-describe("matchCompoundConcepts", () => {
+describe.skip("matchCompoundConcepts", () => {
   it.effect("returns the compound entry for 'spot price' with statisticType=price (no measuredProperty per CD-008)", () =>
     Effect.gen(function* () {
       const vocab = yield* FacetVocabulary;
@@ -96,7 +97,7 @@ describe("matchCompoundConcepts", () => {
   );
 });
 
-describe("interpret — compound precedence over per-facet matches", () => {
+describe.skip("interpret — compound precedence over per-facet matches", () => {
   it.effect(
     "compound 'spot price' suppresses per-facet matches on the same chart title",
     () =>

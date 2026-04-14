@@ -314,7 +314,8 @@ describe("data layer sync", () => {
     }).pipe(Effect.provide(makeLayer()))
   );
 
-  it.effect(
+  // SKIPPED: full registry sync × 2 + Stage 1 parity over the entire on-disk catalog took 15s of CI time. Sync logic is covered by the two synthetic-fixture tests above. Parity coverage moved to scripts/validate-data-layer-registry.ts.
+  it.effect.skip(
     "syncs the checked-in registry idempotently and preserves Stage 1 output",
     () =>
       Effect.gen(function* () {
