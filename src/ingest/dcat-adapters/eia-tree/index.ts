@@ -56,6 +56,7 @@ import {
   type ExternalIdentifier
 } from "../../../domain/data-layer";
 import {
+  buildIngestGraphs,
   buildIngestGraph,
   assertNodeOwnsWriteTargetWith,
   type CatalogIndex as HarnessCatalogIndex,
@@ -96,7 +97,7 @@ import {
   scriptPlatformLayer
 } from "../../../platform/ScriptRuntime";
 
-export { buildIngestGraph, stableSlug, unionAliases, EntityIdLedger };
+export { buildIngestGraph, buildIngestGraphs, stableSlug, unionAliases, EntityIdLedger };
 export type { IngestEdge, IngestGraph, IngestNode };
 
 // ---------------------------------------------------------------------------

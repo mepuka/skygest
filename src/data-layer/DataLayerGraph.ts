@@ -279,6 +279,24 @@ export const buildDataLayerGraph = (
                 origin: "declared",
               });
             }
+
+            for (const datasetId of entity.servesDatasetIds) {
+              const dataset = getRequiredTargetEntity(
+                entityById,
+                entity,
+                "servesDatasetIds",
+                datasetId,
+                ["Dataset"],
+              );
+              if ((dataset.dataServiceIds ?? []).includes(entity.id)) {
+                continue;
+              }
+
+              addEdge(mutable, nodeIndexByEntityId, dataset.id, entity.id, {
+                kind: "served-by",
+                origin: "declared",
+              });
+            }
             break;
           }
           case "DatasetSeries": {
@@ -308,7 +326,7 @@ export const buildDataLayerGraph = (
               ["Variable"],
             );
             addEdge(mutable, nodeIndexByEntityId, entity.id, variable.id, {
-              kind: "measures",
+              kind: "implements-variable",
               origin: "declared",
             });
 
@@ -321,7 +339,7 @@ export const buildDataLayerGraph = (
             );
             if (dataset !== undefined) {
               addEdge(mutable, nodeIndexByEntityId, entity.id, dataset.id, {
-                kind: "in-dataset",
+                kind: "published-in-dataset",
                 origin: "declared",
               });
 

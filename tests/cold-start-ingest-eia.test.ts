@@ -33,6 +33,7 @@ import {
   buildContextFromIndex,
   buildDatasetCandidate,
   buildDistributionCandidates,
+  buildIngestGraphs,
   buildIngestGraph,
   assertNodeOwnsWriteTarget,
   type BuildContext,
@@ -855,7 +856,7 @@ const fakeCatalogRecord = (
 });
 
 describe("buildIngestGraph", () => {
-  it("produces a 6-node, 6-edge acyclic graph for a single leaf", () => {
+  it("produces a 6-node, 7-edge acyclic graph for a single leaf", () => {
     const agent = fakeAgent("eia", "01KNQEZ5V57VJJJFYV6HWM03VB");
     const catalog = fakeCatalog(
       "eia",
@@ -904,6 +905,55 @@ describe("buildIngestGraph", () => {
     expect(Graph.isAcyclic(graph)).toBe(true);
   });
 
+  it("keeps the compatibility graph topologically aligned with the shared data-layer graph", () => {
+    const agent = fakeAgent("eia", "01KNQEZ5V57VJJJFYV6HWM03VB");
+    const catalog = fakeCatalog(
+      "eia",
+      "01KNQEZ5V57VJJJFYV6HWM03VC",
+      (agent.data as Agent).id
+    );
+    const dataset = fakeDataset(
+      "eia-electricity-retail-sales",
+      "01KNQSXEPQHNVM0AVMA3SQRNK3",
+      (agent.data as Agent).id
+    );
+    const distribution = fakeDistribution(
+      "eia-electricity-retail-sales-api",
+      "01KNQSXEPQE7D85JBAFH47Y9MS",
+      (dataset.data as Dataset).id
+    );
+    const dataService = fakeDataService(
+      "eia-api",
+      "01KNQEZ5VHS74DM94ABW2ZM93Y",
+      (agent.data as Agent).id,
+      [(dataset.data as Dataset).id]
+    );
+    const cr = fakeCatalogRecord(
+      "eia-electricity-retail-sales-cr",
+      "01KNQSXEPQHNVM0AVMA3SQRNK4",
+      (catalog.data as Catalog).id,
+      (dataset.data as Dataset).id
+    );
+
+    const { graph, dataLayerGraph } = buildIngestGraphs([
+      agent,
+      catalog,
+      dataset,
+      distribution,
+      dataService,
+      cr
+    ]);
+
+    const ingestTopoIds = Array.from(Graph.values(Graph.topo(graph))).map(
+      (node) => node.data.id
+    );
+    const sharedTopoIds = Array.from(
+      Graph.values(Graph.topo(dataLayerGraph.raw))
+    ).map((entity) => entity.id);
+
+    expect(ingestTopoIds).toEqual(sharedTopoIds);
+  });
+
   it("orders dataset-series before its member dataset when Dataset.inSeries is set", () => {
     const agent = fakeAgent("eia", "01KNQEZ5V57VJJJFYV6HWM03VB");
     const datasetSeries = fakeDatasetSeries(
@@ -931,7 +981,7 @@ describe("buildIngestGraph", () => {
     ).toBe(true);
   });
 
-  it("emits Agent before Catalog before Dataset before {Distribution, CR, DataService} in topological order", () => {
+  it("emits a dependency-respecting topological order for shared and compatibility edges", () => {
     const agent = fakeAgent("eia", "01KNQEZ5V57VJJJFYV6HWM03VB");
     const catalog = fakeCatalog(
       "eia",
@@ -973,28 +1023,38 @@ describe("buildIngestGraph", () => {
 
     const topoOrder = Array.from(Graph.values(Graph.topo(graph)));
     const positions = new Map<string, number>();
-    topoOrder.forEach((node, idx) => positions.set(node.slug, idx));
+    topoOrder.forEach((node, idx) =>
+      positions.set(`${node._tag}:${node.slug}`, idx)
+    );
 
     // Agent must come before Catalog, Dataset, and DataService
-    expect(positions.get("eia")! < positions.get("eia-api")!).toBe(true);
-    expect(positions.get("eia")! < positions.get("eia-electricity-retail-sales")!).toBe(true);
+    expect(positions.get("agent:eia")! < positions.get("catalog:eia")!).toBe(
+      true
+    );
+    expect(
+      positions.get("agent:eia")! <
+        positions.get("dataset:eia-electricity-retail-sales")!
+    ).toBe(true);
+    expect(
+      positions.get("agent:eia")! < positions.get("data-service:eia-api")!
+    ).toBe(true);
     // Dataset must come before its Distribution + CR + DataService
     expect(
-      positions.get("eia-electricity-retail-sales")! <
-        positions.get("eia-electricity-retail-sales-api")!
+      positions.get("dataset:eia-electricity-retail-sales")! <
+        positions.get("distribution:eia-electricity-retail-sales-api")!
     ).toBe(true);
     expect(
-      positions.get("eia-electricity-retail-sales")! <
-        positions.get("eia-electricity-retail-sales-cr")!
+      positions.get("dataset:eia-electricity-retail-sales")! <
+        positions.get("catalog-record:eia-electricity-retail-sales-cr")!
     ).toBe(true);
     expect(
-      positions.get("eia-electricity-retail-sales")! <
-        positions.get("eia-api")!
+      positions.get("dataset:eia-electricity-retail-sales")! <
+        positions.get("data-service:eia-api")!
     ).toBe(true);
     // Catalog must come before its CR
     expect(
-      positions.get("eia")! <
-        positions.get("eia-electricity-retail-sales-cr")!
+      positions.get("catalog:eia")! <
+        positions.get("catalog-record:eia-electricity-retail-sales-cr")!
     ).toBe(true);
   });
 });

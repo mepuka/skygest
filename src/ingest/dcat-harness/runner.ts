@@ -1,4 +1,5 @@
 import { Clock, DateTime, Effect, FileSystem, Graph, Path } from "effect";
+import type { DataLayerGraph } from "../../data-layer/DataLayerGraph";
 import type { AliasScheme, ExternalIdentifier } from "../../domain/data-layer";
 import { Logging } from "../../platform/Logging";
 import { stringifyUnknown } from "../../platform/Json";
@@ -10,7 +11,7 @@ import {
 import { IngestFsError, IngestHarnessError, IngestLedgerError, IngestSchemaError } from "./errors";
 import type { IngestGraph } from "./IngestGraph";
 import type { IngestNode } from "./IngestNode";
-import { buildIngestGraph } from "./buildGraph";
+import { buildIngestGraphs } from "./buildGraph";
 import { ledgerKeyForNode, loadLedgerWith, saveLedgerWith } from "./ledger";
 import { type CatalogIndex, loadCatalogIndexWith } from "./loadCatalogIndex";
 import { validateCandidates } from "./validate";
@@ -54,6 +55,7 @@ export interface DcatSuccessInput<Config, Fetched, Context> {
   readonly index: CatalogIndex;
   readonly context: Context;
   readonly nowIso: string;
+  readonly dataLayerGraph: DataLayerGraph;
   readonly graph: IngestGraph;
   readonly topoOrder: ReadonlyArray<IngestNode>;
   readonly nodeCount: number;
@@ -291,8 +293,8 @@ export const runDcatIngest = Effect.fn("DcatHarness.runDcatIngest")(
       return yield* firstFailure;
     }
 
-    const graph = yield* Effect.try({
-      try: () => buildIngestGraph(successes),
+    const { graph, dataLayerGraph } = yield* Effect.try({
+      try: () => buildIngestGraphs(successes),
       catch: (error) =>
         error instanceof IngestHarnessError
           ? error
@@ -333,6 +335,7 @@ export const runDcatIngest = Effect.fn("DcatHarness.runDcatIngest")(
         index,
         context,
         nowIso,
+        dataLayerGraph,
         graph,
         topoOrder,
         nodeCount,
@@ -391,6 +394,7 @@ export const runDcatIngest = Effect.fn("DcatHarness.runDcatIngest")(
       index,
       context,
       nowIso,
+      dataLayerGraph,
       graph,
       topoOrder,
       nodeCount,

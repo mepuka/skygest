@@ -121,7 +121,7 @@ describe("data-layer graph", () => {
     expect(datasetVariables[0]?.edge.origin).toBe("derived-from-series");
 
     const seriesDatasets = successorsByKinds(prepared.success.graph, seriesId, [
-      "in-dataset",
+      "published-in-dataset",
     ]);
     expect(seriesDatasets.map((neighbor) => neighbor.node.id)).toEqual([
       datasetId,
@@ -130,7 +130,7 @@ describe("data-layer graph", () => {
     const seriesVariables = successorsByKinds(
       prepared.success.graph,
       seriesId,
-      ["measures"],
+      ["implements-variable"],
     );
     expect(seriesVariables.map((neighbor) => neighbor.node.id)).toEqual([
       variableId,

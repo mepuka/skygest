@@ -2,9 +2,10 @@ import { Chunk, Option, Order, Result } from "effect";
 import type { DataLayerGraph } from "../data-layer/DataLayerGraph";
 import { buildDataLayerGraph } from "../data-layer/DataLayerGraph";
 import {
-  predecessorsByKinds,
-  successorsByKinds,
-} from "../data-layer/DataLayerGraphTraversal";
+  datasetsForPublisherAgent,
+  datasetsForVariable,
+  variablesForDataset,
+} from "../data-layer/DataLayerGraphViews";
 import {
   dataLayerEntityKindSpecs,
   type Agent,
@@ -786,33 +787,21 @@ const buildPreparedRegistry = (
   const sortedDatasetsByAgentId = new Map(
     seed.agents.map((agent) => [
       agent.id,
-      sortDatasets(
-        successorsByKinds(graph, agent.id, ["publishes"])
-          .map((neighbor) => neighbor.node)
-          .filter((node): node is Dataset => node._tag === "Dataset"),
-      ),
+      sortDatasets(datasetsForPublisherAgent(graph, agent.id)),
     ]),
   );
 
   const sortedDatasetsByVariableId = new Map(
     seed.variables.map((variable) => [
       variable.id,
-      sortDatasets(
-        predecessorsByKinds(graph, variable.id, ["has-variable"])
-          .map((neighbor) => neighbor.node)
-          .filter((node): node is Dataset => node._tag === "Dataset"),
-      ),
+      sortDatasets(datasetsForVariable(graph, variable.id)),
     ]),
   );
 
   const sortedVariablesByDatasetId = new Map(
     seed.datasets.map((dataset) => [
       dataset.id,
-      sortVariables(
-        successorsByKinds(graph, dataset.id, ["has-variable"])
-          .map((neighbor) => neighbor.node)
-          .filter((node): node is Variable => node._tag === "Variable"),
-      ),
+      sortVariables(variablesForDataset(graph, dataset.id)),
     ]),
   );
 

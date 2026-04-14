@@ -18,11 +18,17 @@ import {
   normalizeLookupText,
 } from "../platform/Normalize";
 import {
-  firstPredecessorNodeByKindsAndTag,
-  firstSuccessorNodeByKindsAndTag,
-  predecessorNodesByKindsAndTag,
-  successorNodesByKindsAndTag,
-} from "../data-layer/DataLayerGraphTraversal";
+  datasetForDistribution,
+  datasetForSeries,
+  datasetsForVariable,
+  distributionsForDataset,
+  parentAgentsForAgent,
+  publisherAgentsForDataset,
+  seriesForDataset,
+  seriesForVariable,
+  variableForSeries,
+  variablesForDataset,
+} from "../data-layer/DataLayerGraphViews";
 import type { PreparedDataLayerRegistry } from "../resolution/dataLayerRegistry";
 import {
   collectNormalizedSearchUrls,
@@ -182,12 +188,7 @@ const projectAgent = (
   const homepageHostname = toOptionalHostname(agent.homepage);
   const aliasValues = aliases.map((alias) => alias.value);
   const lineageValues = agentLabels(
-    predecessorNodesByKindsAndTag(
-      prepared.graph,
-      agent.id,
-      ["parent-agent"],
-      "Agent",
-    ),
+    parentAgentsForAgent(prepared.graph, agent.id),
   );
   const urlValues = collectUniqueSearchText(
     canonicalUrls,
@@ -236,31 +237,14 @@ const projectDataset = (
   prepared: PreparedDataLayerRegistry,
 ): EntitySearchDocument => {
   const aliases = dedupeAliases(dataset.aliases);
-  const childVariables = successorNodesByKindsAndTag(
+  const childVariables = variablesForDataset(prepared.graph, dataset.id);
+  const childDistributions = distributionsForDataset(
     prepared.graph,
     dataset.id,
-    ["has-variable"],
-    "Variable",
   );
-  const childDistributions = successorNodesByKindsAndTag(
-    prepared.graph,
-    dataset.id,
-    ["has-distribution"],
-    "Distribution",
-  );
-  const childSeries = predecessorNodesByKindsAndTag(
-    prepared.graph,
-    dataset.id,
-    ["in-dataset"],
-    "Series",
-  );
+  const childSeries = seriesForDataset(prepared.graph, dataset.id);
   const publisherLabels = agentLabels(
-    predecessorNodesByKindsAndTag(
-      prepared.graph,
-      dataset.id,
-      ["publishes"],
-      "Agent",
-    ),
+    publisherAgentsForDataset(prepared.graph, dataset.id),
   );
   const canonicalUrls = toCanonicalUrls(
     dataset.landingPage,
@@ -362,41 +346,17 @@ const projectDistribution = (
   prepared: PreparedDataLayerRegistry,
 ): EntitySearchDocument => {
   const aliases = dedupeAliases(distribution.aliases);
-  const dataset = firstPredecessorNodeByKindsAndTag(
-    prepared.graph,
-    distribution.id,
-    ["has-distribution"],
-    "Dataset",
-  );
+  const dataset = datasetForDistribution(prepared.graph, distribution.id);
   const childVariables =
     dataset === undefined
       ? []
-      : successorNodesByKindsAndTag(
-          prepared.graph,
-          dataset.id,
-          ["has-variable"],
-          "Variable",
-        );
+      : variablesForDataset(prepared.graph, dataset.id);
   const childSeries =
-    dataset === undefined
-      ? []
-      : predecessorNodesByKindsAndTag(
-          prepared.graph,
-          dataset.id,
-          ["in-dataset"],
-          "Series",
-        );
+    dataset === undefined ? [] : seriesForDataset(prepared.graph, dataset.id);
   const publisherLabels =
     dataset === undefined
       ? []
-      : agentLabels(
-          predecessorNodesByKindsAndTag(
-            prepared.graph,
-            dataset.id,
-            ["publishes"],
-            "Agent",
-          ),
-        );
+      : agentLabels(publisherAgentsForDataset(prepared.graph, dataset.id));
   const canonicalUrls = toCanonicalUrls(
     distribution.accessURL,
     distribution.downloadURL,
@@ -502,38 +462,16 @@ const projectSeries = (
   prepared: PreparedDataLayerRegistry,
 ): EntitySearchDocument => {
   const aliases = dedupeAliases(series.aliases);
-  const variable = firstSuccessorNodeByKindsAndTag(
-    prepared.graph,
-    series.id,
-    ["measures"],
-    "Variable",
-  );
-  const dataset = firstSuccessorNodeByKindsAndTag(
-    prepared.graph,
-    series.id,
-    ["in-dataset"],
-    "Dataset",
-  );
+  const variable = variableForSeries(prepared.graph, series.id);
+  const dataset = datasetForSeries(prepared.graph, series.id);
   const childDistributions =
     dataset === undefined
       ? []
-      : successorNodesByKindsAndTag(
-          prepared.graph,
-          dataset.id,
-          ["has-distribution"],
-          "Distribution",
-        );
+      : distributionsForDataset(prepared.graph, dataset.id);
   const publisherLabels =
     dataset === undefined
       ? []
-      : agentLabels(
-          predecessorNodesByKindsAndTag(
-            prepared.graph,
-            dataset.id,
-            ["publishes"],
-            "Agent",
-          ),
-        );
+      : agentLabels(publisherAgentsForDataset(prepared.graph, dataset.id));
   const canonicalUrls = toCanonicalUrls(
     ...aliases
       .filter((alias) => alias.scheme === "url")
@@ -659,35 +597,15 @@ const projectVariable = (
   prepared: PreparedDataLayerRegistry,
 ): EntitySearchDocument => {
   const aliases = dedupeAliases(variable.aliases);
-  const datasets = predecessorNodesByKindsAndTag(
-    prepared.graph,
-    variable.id,
-    ["has-variable"],
-    "Dataset",
-  );
-  const series = predecessorNodesByKindsAndTag(
-    prepared.graph,
-    variable.id,
-    ["measures"],
-    "Series",
-  );
+  const datasets = datasetsForVariable(prepared.graph, variable.id);
+  const series = seriesForVariable(prepared.graph, variable.id);
   const publisherLabels = agentLabels(
     datasets.flatMap((dataset) =>
-      predecessorNodesByKindsAndTag(
-        prepared.graph,
-        dataset.id,
-        ["publishes"],
-        "Agent",
-      ),
+      publisherAgentsForDataset(prepared.graph, dataset.id),
     ),
   );
   const relatedDistributions = datasets.flatMap((dataset) =>
-    successorNodesByKindsAndTag(
-      prepared.graph,
-      dataset.id,
-      ["has-distribution"],
-      "Distribution",
-    ),
+    distributionsForDataset(prepared.graph, dataset.id),
   );
   const distributionHosts = collectUniqueSearchText(
     relatedDistributions.flatMap((distribution) => [

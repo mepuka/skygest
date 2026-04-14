@@ -38,11 +38,11 @@ export type DataLayerGraphEdge =
       readonly origin: "declared" | "derived-from-series";
     }
   | {
-      readonly kind: "in-dataset";
+      readonly kind: "published-in-dataset";
       readonly origin: "declared";
     }
   | {
-      readonly kind: "measures";
+      readonly kind: "implements-variable";
       readonly origin: "declared";
     }
   | {
