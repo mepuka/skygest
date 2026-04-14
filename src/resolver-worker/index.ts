@@ -10,7 +10,11 @@ import {
 import type { ResolverWorkerEnvBindings } from "../platform/Env";
 import { makeEffectRpc } from "../platform/Rpc";
 import { makeResolverLayer } from "../resolver/Layer";
-import { resolveBulkEffect, resolvePostEffect } from "../resolver/Router";
+import {
+  resolveBulkEffect,
+  resolvePostEffect,
+  searchCandidatesEffect
+} from "../resolver/Router";
 import {
   handleFetchWithBoundary,
   handleResolverWorkerRequest
@@ -66,6 +70,22 @@ export class ResolverEntrypoint extends WorkerEntrypoint<ResolverWorkerEnvBindin
           error,
           input.posts[0]?.postUri,
           "ResolverEntrypoint.resolveBulk"
+        )
+    );
+  }
+
+  searchCandidates(
+    input: Parameters<typeof searchCandidatesEffect>[0],
+    _options?: { readonly requestId?: string }
+  ) {
+    return resolverRpc.run(
+      this.env,
+      searchCandidatesEffect(input),
+      (error) =>
+        toResolverRpcError(
+          error,
+          input.postUri,
+          "ResolverEntrypoint.searchCandidates"
         )
     );
   }

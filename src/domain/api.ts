@@ -77,6 +77,8 @@ import {
   CatalogId,
   CatalogRecord,
   CatalogRecordId,
+  DataLayerEntityTag as DataLayerEntityTagSchema,
+  DataLayerKind as DataLayerKindSchema,
   DataLayerRegistryEntity,
   DataService,
   DataServiceId,
@@ -98,6 +100,14 @@ import {
   DateLike
 } from "./data-layer";
 import { AtUri, Did, PostUri } from "./types";
+
+export const DataLayerEntityTag = DataLayerEntityTagSchema;
+export type DataLayerEntityTag = Schema.Schema.Type<
+  typeof DataLayerEntityTagSchema
+>;
+
+export const DataLayerKind = DataLayerKindSchema;
+export type DataLayerKind = Schema.Schema.Type<typeof DataLayerKindSchema>;
 
 const withStatus = <S extends Schema.Top>(
   schema: S,
@@ -330,31 +340,6 @@ const OptionalNonNegativeIntFromString = Schema.optionalKey(
 );
 const OptionalBooleanFromString = Schema.optionalKey(BooleanFromString);
 const OptionalString = Schema.optionalKey(Schema.String);
-export const DataLayerKind = Schema.Literals([
-  "agents",
-  "catalogs",
-  "catalog-records",
-  "datasets",
-  "distributions",
-  "data-services",
-  "dataset-series",
-  "variables",
-  "series"
-]);
-export type DataLayerKind = Schema.Schema.Type<typeof DataLayerKind>;
-
-export const DataLayerEntityTag = Schema.Literals([
-  "Agent",
-  "Catalog",
-  "CatalogRecord",
-  "Dataset",
-  "Distribution",
-  "DataService",
-  "DatasetSeries",
-  "Variable",
-  "Series"
-]);
-export type DataLayerEntityTag = Schema.Schema.Type<typeof DataLayerEntityTag>;
 
 const DecodedDid = StringFromUriComponent.pipe(Schema.decodeTo(Did));
 const DecodedAtUri = StringFromUriComponent.pipe(Schema.decodeTo(AtUri));

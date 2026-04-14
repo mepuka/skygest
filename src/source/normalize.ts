@@ -9,7 +9,7 @@
  * § Normalization Rules for the authoritative specification.
  */
 import { Option } from "effect";
-import { normalizeDomain } from "../domain/normalize";
+import { normalizeDomain } from "../platform/Normalize";
 
 // ---------------------------------------------------------------------------
 // Source-prefix stripping

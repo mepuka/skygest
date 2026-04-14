@@ -1,19 +1,16 @@
-import { Effect, Layer, Result } from "effect";
-import { DataLayerRegistryLoadError } from "../domain/errors";
-import {
-  formatDataLayerRegistryDiagnostic,
-  prepareDataLayerRegistry,
-  toDataLayerRegistryLookup
-} from "../resolution/dataLayerRegistry";
+import { Effect } from "effect";
 import { AgentsRepo } from "../services/AgentsRepo";
 import { CatalogRecordsRepo } from "../services/CatalogRecordsRepo";
 import { CatalogsRepo } from "../services/CatalogsRepo";
-import { DataLayerRegistry } from "../services/DataLayerRegistry";
 import { DataServicesRepo } from "../services/DataServicesRepo";
 import { DatasetSeriesRepo } from "../services/DatasetSeriesRepo";
 import { DatasetsRepo } from "../services/DatasetsRepo";
 import { DistributionsRepo } from "../services/DistributionsRepo";
 import { SeriesRepo } from "../services/SeriesRepo";
+import {
+  loadPreparedDataLayerRegistry,
+  DataLayerRegistry
+} from "../services/DataLayerRegistry";
 import { VariablesRepo } from "../services/VariablesRepo";
 
 export const d1DataLayerRegistryRoot = "d1://data-layer-registry";
@@ -49,31 +46,16 @@ export const loadD1DataLayerSeed = () =>
 export const loadD1DataLayerRegistry = (
   root = d1DataLayerRegistryRoot
 ) =>
-  Effect.gen(function* () {
-    const seed = yield* loadD1DataLayerSeed();
-
-    const prepared = prepareDataLayerRegistry(seed, { root });
-    if (Result.isFailure(prepared)) {
-      return yield* new DataLayerRegistryLoadError({
-        root,
-        diagnostic: prepared.failure,
-        message: formatDataLayerRegistryDiagnostic(prepared.failure)
-      });
-    }
-
-    return prepared.success;
-  });
+  loadPreparedDataLayerRegistry(
+    loadD1DataLayerSeed().pipe(
+      Effect.map((seed) => ({
+        seed,
+        root
+      }))
+    )
+  );
 
 export const d1DataLayerRegistryLayer = (
   root = d1DataLayerRegistryRoot
 ) =>
-  Layer.effect(
-    DataLayerRegistry,
-    Effect.gen(function* () {
-      const prepared = yield* loadD1DataLayerRegistry(root);
-      return DataLayerRegistry.of({
-        prepared,
-        lookup: toDataLayerRegistryLookup(prepared)
-      });
-    })
-  );
+  DataLayerRegistry.layerFromEffect(loadD1DataLayerRegistry(root));

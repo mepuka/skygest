@@ -1,0 +1,21 @@
+{
+  "_tag": "Variable",
+  "id": "https://id.skygest.io/variable/var_01ENTITYEIAVAR",
+  "label": "Wind electricity generation",
+  "definition": "Electrical energy produced by wind turbines",
+  "measuredProperty": "generation",
+  "domainObject": "electricity",
+  "technologyOrFuel": "wind",
+  "statisticType": "flow",
+  "aggregation": "sum",
+  "unitFamily": "energy",
+  "aliases": [
+    {
+      "scheme": "display-alias",
+      "value": "Wind output",
+      "relation": "closeMatch"
+    }
+  ],
+  "createdAt": "2026-04-08T00:00:00.000Z",
+  "updatedAt": "2026-04-08T00:00:00.000Z"
+}

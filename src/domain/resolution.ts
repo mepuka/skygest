@@ -1,4 +1,5 @@
 import { Schema } from "effect";
+import { EntitySearchBundleCandidates } from "./entitySearch";
 import { Stage1Input, Stage1Result } from "./stage1Resolution";
 import { ResolutionOutcome } from "./resolutionKernel";
 import {
@@ -32,6 +33,11 @@ export const ResolvePostResponse = Schema.Struct({
   latencyMs: ResolveLatencyMs
 });
 export type ResolvePostResponse = Schema.Schema.Type<typeof ResolvePostResponse>;
+
+export const ResolveSearchCandidatesResponse = EntitySearchBundleCandidates;
+export type ResolveSearchCandidatesResponse = Schema.Schema.Type<
+  typeof ResolveSearchCandidatesResponse
+>;
 
 export const ResolveBulkRequest = Schema.Struct({
   posts: Schema.Array(ResolvePostRequest).pipe(
