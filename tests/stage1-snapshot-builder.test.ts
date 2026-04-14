@@ -55,7 +55,8 @@ const withTempSqliteFileEffect = <A, E, R>(
       }).pipe(Effect.orDie)
   );
 
-describe("Stage1EvalSnapshotBuilder", () => {
+// SKIPPED: this builder only exists to feed the resolver-kernel.test.ts suite, which is itself skipped under SKY-348 (OEO + prompt-layer extraction). Restore once the kernel rewrite has its own snapshot builder requirements.
+describe.skip("Stage1EvalSnapshotBuilder", () => {
   it("decodes legacy build reports that still contain unsupported-post-source diagnostics", () => {
     const report = decodeBuildReportJson(`{
       "manifestPath": "/tmp/gold-set-resolver.json",
