@@ -12,7 +12,7 @@ The most important update versus the previous version of this document is that t
 The seam set now also has two new wrinkles that matter to the rest of this document:
 
 - the shipped data-ref lookup tools now sit directly on top of the registry and citation read models
-- the typed-search read model is wired in code but still deployment-gated because `SEARCH_DB` is not bound in the current worker configs
+- the typed-search read model is now staging-backed through `SEARCH_DB` and operator scripts, but production still omits the binding
 
 ## Inventory
 
@@ -29,7 +29,7 @@ The seam set now also has two new wrinkles that matter to the rest of this docum
 | `DataLayerRegistry` | Stage 1 + kernel -> runtime entity lookups | `src/resolution/dataLayerRegistry.ts` | stabilizing | Every real resolution depends on this lookup contract. |
 | `ResolverClient` | enrichment workflow + other callers -> resolver Worker | `ResolvePostRequest`, `ResolvePostResponse` in `src/domain/resolution.ts` | stabilizing | The cross-Worker resolver call now sits on the hot path. |
 | `DataRefQueryService` | MCP read surface -> exact entity lookup and reverse citation lookup | `ResolveDataRefInput` / `ResolveDataRefOutput`, `FindCandidatesByDataRefInput` / `FindCandidatesByDataRefOutput` in `src/domain/data-layer/query.ts` | stabilizing | Editors and the model now depend on it for exact lookup and cross-post joins. |
-| `EntitySearchService` | `ResolverService.searchCandidates` -> grouped typed candidates | `EntitySearchBundleCandidates` in `src/domain/entitySearch.ts` | stabilizing, binding-gated | Exists in code for ranked fallback, but current worker configs omit `SEARCH_DB`. |
+| `EntitySearchService` | `ResolverService.searchCandidates` -> grouped typed candidates | `EntitySearchBundleCandidates` in `src/domain/entitySearch.ts` | stabilizing, staging-configured | Staging resolver config binds `SEARCH_DB`; production still falls back to the empty repo layer. |
 | `PostEnrichmentReadService` | MCP/API readers -> joined enrichment view | `GetPostEnrichmentsOutput` in `src/domain/enrichment.ts` | locked | This is how the editorial side sees the new resolver row. |
 | `EditorialPickBundleReadService` | hydrate-story + discussion workflow -> bundled post context | `EditorialPickBundle` in `src/domain/editorial.ts` | locked | Story scaffolding depends on this seam staying stable. |
 
@@ -41,10 +41,10 @@ The seam set now also has two new wrinkles that matter to the rest of this docum
 | `RESOLVER` Service Binding | ingest/agent Workers -> resolver Worker | `ResolverEntrypoint` RPC in `src/resolver-worker/index.ts` | stabilizing | This is the live resolver transport seam. |
 | `POST /v1/resolve/post` | HTTP caller -> resolver Worker | `ResolvePostRequest` / `ResolvePostResponse` | stabilizing | External or tooling callers can hit the same contract over HTTP. |
 | `POST /v1/resolve/bulk` | HTTP caller -> resolver Worker | `ResolveBulkRequest` / `ResolveBulkResponse` | stabilizing | Backfill and batch tooling depend on it. |
-| `POST /v1/resolve/search-candidates` | HTTP caller -> resolver Worker | `ResolvePostRequest` / `ResolveSearchCandidatesResponse` | stabilizing, binding-gated | Route exists in code for grouped candidate lookup, but deployed workers do not yet bind `SEARCH_DB`. |
+| `POST /v1/resolve/search-candidates` | HTTP caller -> resolver Worker | `ResolvePostRequest` / `ResolveSearchCandidatesResponse` | stabilizing, staging-configured | Route is backed by staging `SEARCH_DB`, but production configs still omit that binding. |
 | `GET /v1/resolve/health` | uptime checks -> resolver Worker | simple health response | locked | Operational liveness probe. |
 | `DB` binding | all Workers -> D1 | D1 row decoders in `src/services/d1/*` | locked | If this fails, everything fails. |
-| `SEARCH_DB` binding | resolver Worker -> search D1 | `src/search/Layer.ts` plus `entity_search_*` tables | deployment-gated | Until this binding exists, resolver search uses the empty repo layer. |
+| `SEARCH_DB` binding | resolver Worker -> search D1 | `src/search/Layer.ts` plus `entity_search_*` tables | staging-bound, production-deferred | Staging resolver and agent configs now declare it; production still uses the empty repo fallback. |
 | `ONTOLOGY_KV` binding | agent/ingest Workers -> KV | topic expansion and ontology reads | stabilizing | Not the core resolver seam, but still editor-visible. |
 
 ### Stored-data seams
@@ -66,7 +66,8 @@ The seam set now also has two new wrinkles that matter to the rest of this docum
 | `references/cold-start/*` | cold-start ingest + reviewed edits -> sync pipeline, tests, local inspection | checked-in JSON entities | stabilizing | Still the audited seed surface for the registry. |
 | energy-profile manifest -> generated profile | `references/energy-profile/shacl-manifest.json` -> `src/domain/generated/energyVariableProfile.ts` | generated facet metadata used by partial-variable algebra and kernel | stabilizing | Resolver facet semantics now depend on this generated seam. |
 | `scripts/validate-data-layer-registry.ts` | checked-in registry -> operator / CI guardrail | end-to-end load + invariant checks over `references/cold-start/` | locked | Full-catalog validation moved here after the fast unit suite started skipping the heavy on-disk cases. |
-| entity-search projection | checked-in or D1 registry -> search D1 read model | `projectEntitySearchDocs`, `scripts/rebuild-entity-search-index.ts`, `entity_search_*` tables | stabilizing, deployment-gated | Keeps typed search rebuildable rather than source-of-truth. |
+| search-db operator scripts | operator CLI -> staging `SEARCH_DB` | `scripts/migrate-search-db.ts`, `scripts/rebuild-search-db.ts` | stabilizing, staging-scoped | Makes the search schema and rebuild path real in staging without turning search into source-of-truth. |
+| entity-search projection | checked-in or D1 registry -> search D1 read model | `projectEntitySearchDocs`, `scripts/rebuild-entity-search-index.ts`, `entity_search_*` tables | stabilizing, staging-backed | Keeps typed search rebuildable rather than source-of-truth. |
 | `eval/resolution-kernel/*` | expected outcomes -> diagnostic runs | `expected-outcomes.jsonl`, `run-eval.ts`, run folders | stabilizing | This is the active resolver quality loop. |
 | `.skygest/cache/*.json` | cache sync CLIs -> build-graph, discussion workflow | editorial cache manifests | locked | Editorial read-side work depends on these local mirrors. |
 | Story and annotation frontmatter | hydrate-story + discussion workflow -> build-graph | `src/domain/narrative/*` | locked at the base level | The core editorial working surface. |
@@ -109,9 +110,9 @@ Ordered by current blast radius, highest first.
 
 The resolver row and the lookup tools live in D1 today. The story-file projection of those data refs does not. That is `SKY-242`, followed by the validator warning pass in `SKY-243`.
 
-### 3. Typed search is wired in code, but not yet in deploy config
+### 3. Typed search is now staging-backed, but still environment-scoped
 
-`ResolverService.searchCandidates` and `/v1/resolve/search-candidates` now exist, but current wrangler configs do not bind `SEARCH_DB`, so the resolver search layer still falls back to the empty repo.
+`ResolverService.searchCandidates` and `/v1/resolve/search-candidates` now have staging `SEARCH_DB` bindings plus migrate/rebuild scripts. Production configs still omit the binding, so search behavior is still environment-dependent and should not yet be treated as a universal contract.
 
 ### 4. Full-catalog validation moved out of the fast unit suite
 
@@ -135,12 +136,12 @@ The on-disk registry tests are now intentionally skipped in the fast suite. `scr
 - Already has rich read access through `get_post_enrichments`, `get_editorial_pick_bundle`, thread tools, post search, and pipeline status.
 - Can already inspect structured kernel outcomes for posts that have run through the resolver.
 - Already has the ad-hoc data-ref lookup and cross-expert join tools.
-- Does not yet get the typed search path as an MCP tool, and the resolver-side search route is still binding-gated.
+- Does not yet get the typed search path as an MCP tool, and the resolver-side search route is still staging-scoped rather than a cross-environment contract.
 
 **Operator**
 
-- Controls the admin API, cache sync, registry sync, the registry validator, energy-profile generation, kernel eval runs, and deploys.
-- Is the person who can compare stored resolver rows, citation rows, and validator output against the kernel eval harness and decide whether the current runtime is good enough to lean on.
+- Controls the admin API, cache sync, registry sync, the registry validator, search-db migrate/rebuild scripts, energy-profile generation, kernel eval runs, and deploys.
+- Is the person who can compare stored resolver rows, citation rows, validator output, and staged search-db state against the kernel eval harness and decide whether the current runtime is good enough to lean on.
 
 ## What changed in this refresh
 
@@ -148,4 +149,4 @@ The on-disk registry tests are now intentionally skipped in the fast suite. `scr
 2. The registry contract is now described as carrying real series-backed narrowing, tolerant URL lookup, landing-page lookup, and publisher-aware dataset matching.
 3. The citation read model behind `find_candidates_by_data_ref` is now called out explicitly.
 4. The registry validator is now treated as a first-class guardrail seam because the fast unit suite skips the heavy full-catalog checks.
-5. The typed-search seam is now documented as code-real but deployment-gated.
+5. The typed-search seam is now documented as staging-backed infrastructure rather than an unbound code-only seam.

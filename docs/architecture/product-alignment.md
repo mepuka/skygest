@@ -49,7 +49,7 @@ Legend:
 
 Columns use the current subsystem names from `system-context.md`. `Resolution Stack` means Stage 1 matching plus the kernel inside `skygest-resolver`. `Stored Row` means `post_enrichments(kind = data-ref-resolution)`. `Kernel Eval` is operator-only and is not part of the reader/editor runtime path.
 
-`/v1/resolve/search-candidates` and the typed search layer are omitted from the matrix because the code seam exists, but current worker configs still do not bind `SEARCH_DB`.
+`/v1/resolve/search-candidates` and the typed search layer are omitted from the matrix because they are now staging-backed infrastructure, not yet a stable reader/editor contract across environments.
 
 | # | Experience | Ingest | Vision | Source | Resolver | Resolution Stack | Registry | Stored Row | Kernel Eval | MCP | HTTP | Caches | hydrate-story | Discussion | Story Files | build-graph | Editions |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -90,7 +90,7 @@ What did **not** finish with the cutover:
 
 - **R3** still needs those data refs projected into story files (`SKY-242`) and guarded by build-graph warnings (`SKY-243`).
 - **E1** still needs the same projection step before the editor sees resolver-backed data refs on disk by default.
-- The typed search foundation exists in code, but it is not yet a live runtime dependency because the current worker configs do not bind `SEARCH_DB`.
+- The typed search foundation now has staging `SEARCH_DB` infra and rebuild scripts, but it still is not part of the default reader/editor contract because production provisioning and takeup remain pending.
 
 So the cutover plus follow-through moved both runtime and lookup from "planned" to "real," but the editorial product still needs the last-mile on-disk surfaces.
 
@@ -111,7 +111,7 @@ The remaining gap is now narrower and more concrete:
 
 1. **Story-frontmatter projection** is still missing (`SKY-242`).
 2. **build-graph unresolved-ref warnings** are still missing (`SKY-243`).
-3. **Typed search deployment** is still gated by the missing `SEARCH_DB` binding, even though the code seam exists.
+3. **Typed search takeup** is still intentionally narrow. The staging `SEARCH_DB` path is real now, but production provisioning and a durable consumer contract still remain outside the current product surface.
 
 That is a better product situation than before because the remaining work is concentrated on disk surfaces and deployment discipline instead of being mixed up with missing lookup primitives.
 
@@ -130,14 +130,14 @@ This is the shortest path from "resolver and lookup tools are real" to "editor s
 
 - eval-driven kernel follow-ups under the `SKY-314` umbrella
 - bind and matching work that raises citation density and makes the shipped join surface more useful
-- deploy typed search only when `SEARCH_DB` is actually bound and a real caller needs ranked retrieval
+- keep typed search scoped to staged infra until production provisioning and a real caller justify widening the contract
 
-This track is justified because the kernel eval harness already shows that the shipped runtime still has meaningful misses, and the search layer should not be treated as live before its database exists in deploy config.
+This track is justified because the kernel eval harness already shows that the shipped runtime still has meaningful misses, and the staged search layer should not be widened into a default contract until production provisioning and real caller demand both exist.
 
 What should wait:
 
 - a revived "runtime Stage 3" story
-- pretending typed search is live before `SEARCH_DB` is bound
+- pretending typed search is already a default cross-environment product surface
 - extra editions polish before resolver-backed story files exist on disk
 
 ## 4. What we should build next
@@ -154,11 +154,11 @@ The series-backed narrowing path is real now. The remaining gains come from bett
 
 **Only then decide whether typed search should become a live runtime dependency.**
 
-The code seam exists, but the current worker configs do not bind `SEARCH_DB`, so it should be treated as a deployment-gated option rather than today's product contract.
+The code seam now has real staging infrastructure behind it, but production provisioning is still deferred, so it should be treated as staged optionality rather than today's default product contract.
 
 ## What changed in this refresh
 
 1. The matrix now treats the lookup tools as shipped, not planned blockers.
-2. The remaining editor/model blockers are now framed as story-file projection, warning surfaces, and deployment gating.
+2. The remaining editor/model blockers are now framed as story-file projection, warning surfaces, and staged-only typed-search takeup.
 3. The note under `Resolution Stack` now reflects quality limits rather than missing `SKY-317` shelf plumbing.
 4. The recommended next work now separates editorial last-mile completion from quality and deployment discipline.

@@ -180,6 +180,8 @@ This is now the active quality loop for the resolver. It measures the same kerne
 
 The full-catalog registry guardrail moved as well: `scripts/validate-data-layer-registry.ts` now carries the on-disk registry invariants that were too heavy for the fast unit suite.
 
+A parallel search-side operator loop now exists too: `scripts/migrate-search-db.ts` and `scripts/rebuild-search-db.ts` maintain the staging `SEARCH_DB` behind `/v1/resolve/search-candidates`. That search read model is adjacent to this trace, not part of the stored `data-ref-resolution` path itself.
+
 Why this matters for the architecture family:
 
 1. It keeps the docs honest. The resolver is shipped infrastructure, but not finished quality work.
@@ -193,5 +195,5 @@ Why this matters for the architecture family:
 3. Editor-facing exact lookup and cross-post reverse lookup are now real.
 4. The main product gaps are story-file projection and editor warning surfaces, not missing lookup tools.
 5. The main quality gaps are kernel accuracy and citation density, not missing agent shelves.
-6. Typed entity search exists in code, but it is not yet a deployed runtime dependency until `SEARCH_DB` is bound.
+6. Typed entity search now has staging `SEARCH_DB` bindings plus migrate/rebuild scripts, but it is still a sidecar read model and not yet a production-wide contract.
 7. Any future LLM reranking or workflow-based follow-up should be described as future work, not as part of today's runtime path.

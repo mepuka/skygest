@@ -1,6 +1,6 @@
 # Skygest System Context
 
-This document maps the current top-level subsystems across `skygest-cloudflare` and `skygest-editorial` after the April 14, 2026 registry, lookup, and ingest follow-ons. The live resolver path is still `Stage 1 matching -> Resolution Kernel` inside the standalone `skygest-resolver` Worker, and the older "runtime Stage 2 plus Stage 3 workflow" story is still obsolete. Two caveats from the previous snapshot have now changed: editor-facing data-ref lookup is shipped on the MCP surface, and series-backed dataset and agent narrowing are no longer just scaffolded registry behavior. A separate typed entity-search layer also now exists in code, but it is not yet a deployed runtime dependency because the current worker configs do not bind `SEARCH_DB`.
+This document maps the current top-level subsystems across `skygest-cloudflare` and `skygest-editorial` after the April 14, 2026 registry, lookup, ingest, and search-infra follow-ons. The live resolver path is still `Stage 1 matching -> Resolution Kernel` inside the standalone `skygest-resolver` Worker, and the older "runtime Stage 2 plus Stage 3 workflow" story is still obsolete. Two caveats from the previous snapshot have now changed: editor-facing data-ref lookup is shipped on the MCP surface, and series-backed dataset and agent narrowing are no longer just scaffolded registry behavior. A separate typed entity-search layer now has real staging infrastructure through `SEARCH_DB` plus migrate/rebuild scripts, but it is still not a production-wide contract because production provisioning is deferred.
 
 Effect vocabulary is still load-bearing here: every subsystem name is a Tag, a Workflow class, a Worker name, or a script you can grep for.
 
@@ -36,6 +36,7 @@ graph TD
     Seed[Checked-in Cold-start Registry<br/>references/cold-start/*]
     Profile[Energy Profile Generation<br/>scripts/generate-energy-profile.ts +<br/>scripts/sync-energy-profile.ts]
     RegistryCheck[Registry Validator<br/>scripts/validate-data-layer-registry.ts]
+    SearchOps[Search DB Ops<br/>scripts/migrate-search-db.ts +<br/>scripts/rebuild-search-db.ts]
     KernelEval[Kernel Eval Harness<br/>eval/resolution-kernel/*]
   end
 
@@ -75,6 +76,7 @@ graph TD
   Seed -->|filesystem read| RegistryCheck
   Profile -.->|generated facet metadata| Kernel
   RegistryCheck -.->|load + invariant checks| Registry
+  SearchOps -.->|migrate + rebuild<br/>staging SEARCH_DB| Search
   Registry -.->|staging export + gold-set context| KernelEval
   KernelEval -.->|quality feedback| Kernel
 
@@ -103,6 +105,7 @@ graph TD
   Operator -->|bun run| Sync
   Operator -->|bun run| ColdStart
   Operator -->|bun run| Profile
+  Operator -->|bun run| SearchOps
   Operator -->|bun run| KernelEval
   Operator -->|wrangler deploy| IngestWorker
   Operator -->|wrangler deploy| AgentWorker
@@ -118,7 +121,7 @@ graph TD
   class IngestWorker,AgentWorker,Ingest,Enrich,Vision,SrcAttr,Resolver,Stage1,Kernel,Registry,Search,MCP,Api cf
   class Hydrate,Sync,Caches,BuildGraph,Discussion,Stories,Arcs,Editions ed
   class DomainBridge bridge
-  class ColdStart,Seed,Profile,RegistryCheck,KernelEval tools
+  class ColdStart,Seed,Profile,RegistryCheck,SearchOps,KernelEval tools
   class Reader,Editor,MCPModel,Operator actor
 ```
 
@@ -154,9 +157,11 @@ graph TD
 
 **On-demand Registry Validator** (`scripts/validate-data-layer-registry.ts`). Loads the checked-in cold-start tree end to end and runs the full-catalog invariants that were moved out of the fast unit suite. It is now the load-bearing guardrail for whole-registry decode, referential integrity, and series-backed shelf checks before or alongside catalog-heavy merges. *Shipped.*
 
+**Search DB Migration + Rebuild Tooling** (`scripts/migrate-search-db.ts`, `scripts/rebuild-search-db.ts`, `scripts/rebuild-entity-search-index.ts`). Operator scripts that apply the typed-search schema to the staging `SEARCH_DB` and rebuild the search read model from the canonical data-layer source. This is what turns typed search from a code-only seam into a staged service surface. Production provisioning is still deferred, so the search path remains environment-scoped rather than universal. *Shipped for staging ops; production expansion deferred.*
+
 **Kernel Eval Harness** (`eval/resolution-kernel/`). The current resolver-quality loop. It runs expected outcomes against the shipped kernel contract and writes diagnostic runs under `eval/resolution-kernel/runs/<timestamp>/`. The important architectural point is that this is now the quality loop worth watching, not the old Stage 1-only eval story. *Shipped; results still show real accuracy work remaining.*
 
-**Typed Entity Search Foundation** (`src/search/`, `src/domain/entitySearch.ts`, `src/services/EntitySearchService.ts`, `scripts/rebuild-entity-search-index.ts`). Projects Agents, Datasets, Distributions, Series, and Variables into a rebuildable search read model and exposes grouped candidate search through `/v1/resolve/search-candidates`. Important caveat: the resolver code can compose this service, but the current `wrangler*.toml` configs do not bind `SEARCH_DB`, so deployed workers still fall back to the empty search repo layer. *Implemented in code; deployment-gated.*
+**Typed Entity Search Foundation** (`src/search/`, `src/domain/entitySearch.ts`, `src/services/EntitySearchService.ts`, `scripts/rebuild-entity-search-index.ts`). Projects Agents, Datasets, Distributions, Series, and Variables into a rebuildable search read model and exposes grouped candidate search through `/v1/resolve/search-candidates`. The staging resolver and agent configs now declare `SEARCH_DB`, and the operator scripts can migrate and rebuild it. Production still omits the binding, so this should be described as staged infrastructure rather than a production-wide reader/editor contract. *Shipped in staging; production-deferred.*
 
 **MCP Surface** (`src/mcp/Router.ts`, `src/mcp/Toolkit.ts`). Exposes the tool surface used by the discussion workflow and other operator/editor flows. The dedicated lookup tools `resolve_data_ref` and `find_candidates_by_data_ref` are now part of the shipped read surface, and the reverse-lookup tool reads from a citation model refreshed when `data-ref-resolution` enrichments are saved. *Shipped.*
 
@@ -192,7 +197,7 @@ graph TD
 
 **MCP-calling LLM** is the model inside the discussion workflow and other tool-using flows. The tool surface is its API, which is why structured Schema-backed output matters so much.
 
-**Operator** runs the admin API, sync scripts, cold-start ingest scripts, `scripts/validate-data-layer-registry.ts`, energy-profile generation and sync, kernel eval runs, and `wrangler deploy` against the worker configs. The operator is also the person who can turn the resolver lane on in staging and judge whether the stored outputs are trustworthy enough to move forward.
+**Operator** runs the admin API, sync scripts, cold-start ingest scripts, `scripts/validate-data-layer-registry.ts`, `scripts/migrate-search-db.ts`, `scripts/rebuild-search-db.ts`, energy-profile generation and sync, kernel eval runs, and `wrangler deploy` against the worker configs. The operator is also the person who can turn the resolver lane on in staging and judge whether the stored outputs are trustworthy enough to move forward.
 
 ## Key seams
 
@@ -223,10 +228,11 @@ graph TD
 | DatasetSeries ingest + sync path | Shipped |
 | Energy profile generation and generated runtime facet metadata | Shipped |
 | On-demand registry validator | Shipped |
+| Search DB migrate/rebuild scripts | Shipped for staging operator flow |
 | Kernel eval harness | Shipped, but accuracy work remains active |
 | Agent-based narrowing shelves | Shipped, but accuracy work remains active |
 | `resolve_data_ref` / `find_candidates_by_data_ref` MCP tools | Shipped |
-| Typed entity search foundation + `/v1/resolve/search-candidates` | Implemented in code; deployment-gated by `SEARCH_DB` |
+| Typed entity search foundation + `/v1/resolve/search-candidates` | Shipped in staging via `SEARCH_DB`; production deferred |
 | hydrate-story `dataRefs` projection | Planned (`SKY-242`) |
 | build-graph unresolved data-ref warnings | Planned (`SKY-243`) |
 | LLM follow-up workflow / old Stage 3 story | Not part of the current runtime; future work only |
@@ -238,5 +244,5 @@ graph TD
 1. Data-ref lookup and reverse-join tools are now described as shipped, not planned.
 2. Series-backed dataset and agent narrowing are now described as real registry behavior, not an incomplete scaffold.
 3. Publication-side `DatasetSeries` ingest is now called out explicitly as a shipped catalog capability.
-4. The on-demand registry validator is now part of the architecture story because full-catalog invariants moved out of the fast unit suite.
-5. Typed entity search is called out as a real code seam but not yet a deployed runtime dependency because `SEARCH_DB` is unbound.
+4. The on-demand registry validator and search-db operator scripts are now part of the architecture story because more data quality and rebuild work moved into explicit operator tooling.
+5. Typed entity search is now described as staged infrastructure with production still deferred, not as an unbound code-only seam.
