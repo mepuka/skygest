@@ -99,6 +99,15 @@ export const entitySearchDocumentWriteColumnsWithoutId =
 export const entitySearchDocWriteChunkSize = 25;
 export const entitySearchUrlWriteChunkSize = 100;
 
+// Script-path chunking (inline SQL literals, not bound params). One row per
+// INSERT keeps each statement under D1's 100KB per-statement limit even for
+// datasets with large payload_json. Statements-per-file groups many single-
+// row INSERTs into one wrangler invocation so the full rebuild is ~50 execs.
+export const entitySearchDocScriptRowsPerStatement = 1;
+export const entitySearchDocScriptStatementsPerFile = 100;
+export const entitySearchUrlScriptRowsPerStatement = 50;
+export const entitySearchUrlScriptStatementsPerFile = 10;
+
 const encodeAliasesJson = encodeJsonStringWith(Schema.Array(EntitySearchAlias));
 const encodeUrlsJson = encodeJsonStringWith(Schema.Array(EntitySearchUrl));
 

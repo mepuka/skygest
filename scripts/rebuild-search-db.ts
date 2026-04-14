@@ -106,7 +106,7 @@ const rebuildSearchDbCommand = Command.make(
         chunks,
         (chunk) =>
           Console.log(`Executing ${chunk.label}`).pipe(
-            Effect.zipRight(
+            Effect.andThen(
               executeWranglerD1TempSqlFile({
                 databaseName,
                 sql: chunk.sql,

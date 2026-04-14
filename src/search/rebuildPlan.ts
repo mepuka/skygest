@@ -2,8 +2,10 @@ import type {
   EntitySearchDocument
 } from "../domain/entitySearch";
 import {
-  entitySearchDocWriteChunkSize,
-  entitySearchUrlWriteChunkSize
+  entitySearchDocScriptRowsPerStatement,
+  entitySearchDocScriptStatementsPerFile,
+  entitySearchUrlScriptRowsPerStatement,
+  entitySearchUrlScriptStatementsPerFile
 } from "./documentRows";
 import {
   renderDeleteAllEntitySearchSql,
@@ -35,34 +37,48 @@ const chunkValues = <A>(
 const joinStatements = (statements: ReadonlyArray<string>) =>
   `${statements.join(";\n\n")};\n`;
 
+const bundleStatementsIntoFiles = (
+  statements: ReadonlyArray<string>,
+  statementsPerFile: number,
+  labelPrefix: string
+): ReadonlyArray<EntitySearchSqlChunk> =>
+  chunkValues(statements, statementsPerFile).map((group, index) => ({
+    label: `${labelPrefix}-${String(index + 1)}`,
+    sql: `${group.join("\n")}\n`
+  }));
+
 export const buildEntitySearchRebuildSqlChunks = (
   documents: ReadonlyArray<EntitySearchDocument>
 ): ReadonlyArray<EntitySearchSqlChunk> => {
   const docRows = toEntitySearchDocumentWriteRows(documents);
   const urlRows = toEntitySearchCanonicalUrlInsertRows(documents);
 
-  const docChunks = chunkValues(docRows, entitySearchDocWriteChunkSize).flatMap(
-    (rows, index) => {
-      const sql = renderInsertEntitySearchDocsStatement(rows);
-      return sql === null
-        ? []
-        : [{
-            label: `entity-search-docs-${String(index + 1)}`,
-            sql: `${sql};\n`
-          }];
-    }
+  const docInsertStatements = chunkValues(
+    docRows,
+    entitySearchDocScriptRowsPerStatement
+  ).flatMap((rows) => {
+    const sql = renderInsertEntitySearchDocsStatement(rows);
+    return sql === null ? [] : [`${sql};`];
+  });
+
+  const urlInsertStatements = chunkValues(
+    urlRows,
+    entitySearchUrlScriptRowsPerStatement
+  ).flatMap((rows) => {
+    const sql = renderInsertEntitySearchDocUrlsStatement(rows);
+    return sql === null ? [] : [`${sql};`];
+  });
+
+  const docChunks = bundleStatementsIntoFiles(
+    docInsertStatements,
+    entitySearchDocScriptStatementsPerFile,
+    "entity-search-docs"
   );
 
-  const urlChunks = chunkValues(urlRows, entitySearchUrlWriteChunkSize).flatMap(
-    (rows, index) => {
-      const sql = renderInsertEntitySearchDocUrlsStatement(rows);
-      return sql === null
-        ? []
-        : [{
-            label: `entity-search-urls-${String(index + 1)}`,
-            sql: `${sql};\n`
-          }];
-    }
+  const urlChunks = bundleStatementsIntoFiles(
+    urlInsertStatements,
+    entitySearchUrlScriptStatementsPerFile,
+    "entity-search-urls"
   );
 
   return [

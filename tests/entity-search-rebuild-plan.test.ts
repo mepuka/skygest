@@ -30,15 +30,24 @@ const makeDocument = (index: number) => {
 };
 
 describe("buildEntitySearchRebuildSqlChunks", () => {
-  it("creates a reset chunk, chunked inserts, and an FTS rebuild chunk", () => {
-    const documents = Array.from({ length: 26 }, (_, index) => makeDocument(index));
+  it("creates a reset chunk, bundled inserts, and an FTS rebuild chunk", () => {
+    // 250 docs → 50 INSERT statements (5 rows each) → 3 doc files (20 stmts each)
+    const documents = Array.from({ length: 250 }, (_, index) => makeDocument(index));
     const chunks = buildEntitySearchRebuildSqlChunks(documents);
 
     expect(chunks[0]?.label).toBe("entity-search-reset");
     expect(chunks.at(-1)?.label).toBe("entity-search-fts-rebuild");
-    expect(chunks.some((chunk) => chunk.label === "entity-search-docs-1")).toBe(true);
-    expect(chunks.some((chunk) => chunk.label === "entity-search-docs-2")).toBe(true);
-    expect(chunks.some((chunk) => chunk.label === "entity-search-urls-1")).toBe(true);
+
+    const docFiles = chunks.filter((chunk) =>
+      chunk.label.startsWith("entity-search-docs-")
+    );
+    expect(docFiles.length).toBeGreaterThanOrEqual(2);
+    expect(docFiles[0]?.sql).toContain("INSERT INTO entity_search_docs");
+    expect(docFiles[0]?.sql.match(/INSERT INTO entity_search_docs/g)?.length).toBeGreaterThan(1);
+
+    expect(
+      chunks.some((chunk) => chunk.label === "entity-search-urls-1")
+    ).toBe(true);
     expect(chunks.at(-1)?.sql).toContain("INSERT INTO entity_search_fts");
   });
 
