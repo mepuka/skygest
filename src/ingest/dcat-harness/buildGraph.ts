@@ -1,178 +1,167 @@
-import { Graph } from "effect";
-import { IngestHarnessError } from "./errors";
+import { Graph, Result } from "effect";
+import {
+  buildDataLayerGraph,
+  type DataLayerGraph,
+} from "../../data-layer/DataLayerGraph";
+import type { DataLayerGraphEdge } from "../../domain/data-layer/graph";
+import { IngestGraphBuildError, IngestHarnessError } from "./errors";
 import type { IngestEdge } from "./IngestEdge";
 import type { IngestGraph } from "./IngestGraph";
 import type { IngestNode } from "./IngestNode";
 
-const nodeKey = (node: IngestNode): string => `${node._tag}::${node.data.id}`;
-
-const nodeIndex = (indexById: Map<string, number>, node: IngestNode): number => {
-  const index = indexById.get(nodeKey(node));
-  if (index !== undefined) {
-    return index;
-  }
-
-  throw new IngestHarnessError({
-    message: `Missing node index for ${nodeKey(node)} while building graph`
-  });
+export type BuiltIngestGraphs = {
+  readonly graph: IngestGraph;
+  readonly dataLayerGraph: DataLayerGraph;
 };
 
-export const buildIngestGraph = (
-  validatedNodes: ReadonlyArray<IngestNode>
-): IngestGraph => {
+// Ingest nodes wrap the shared entity as `{ _tag, slug, data }`, so the
+// harness keeps its own key helper instead of reusing makeDataLayerGraphNodeKey.
+const nodeKey = (node: IngestNode): string => `${node._tag}::${node.data.id}`;
+
+const missingNodeIndexError = (node: IngestNode) =>
+  new IngestHarnessError({
+    message: `Missing node index for ${nodeKey(node)} while building graph`,
+  });
+
+const compatibleIngestEdge = (
+  source: IngestNode | undefined,
+  target: IngestNode | undefined,
+  edge: DataLayerGraphEdge,
+): IngestEdge | undefined => {
+  if (source === undefined || target === undefined) {
+    return undefined;
+  }
+
+  switch (edge.kind) {
+    case "publishes":
+      return source._tag === "agent" &&
+        (target._tag === "catalog" ||
+          target._tag === "dataset" ||
+          target._tag === "dataset-series" ||
+          target._tag === "data-service")
+        ? "publishes"
+        : undefined;
+    case "contains-record":
+      return source._tag === "catalog" && target._tag === "catalog-record"
+        ? "contains-record"
+        : undefined;
+    case "has-series-member":
+      return source._tag === "dataset-series" && target._tag === "dataset"
+        ? "has-series-member"
+        : undefined;
+    case "has-distribution":
+      return source._tag === "dataset" && target._tag === "distribution"
+        ? "has-distribution"
+        : undefined;
+    case "primary-topic-of":
+      return source._tag === "dataset" && target._tag === "catalog-record"
+        ? "primary-topic-of"
+        : undefined;
+    case "served-by":
+      return source._tag === "dataset" && target._tag === "data-service"
+        ? "served-by"
+        : undefined;
+    default:
+      // The shared graph intentionally carries richer runtime-only edges such
+      // as series / variable lineage that the compatibility graph must omit.
+      return undefined;
+  }
+};
+
+const buildCompatibilityGraph = (
+  validatedNodes: ReadonlyArray<IngestNode>,
+  dataLayerGraph: DataLayerGraph,
+): Result.Result<IngestGraph, IngestHarnessError> => {
   const indexById = new Map<string, number>();
+  const nodeByEntityId = new Map<string, IngestNode>(
+    validatedNodes.map((node) => [node.data.id, node]),
+  );
+  const mutable = Graph.beginMutation(Graph.directed<IngestNode, IngestEdge>());
+
+  for (const node of validatedNodes) {
+    indexById.set(nodeKey(node), Graph.addNode(mutable, node));
+  }
+
+  for (const { source: sourceNode, target: targetNode, edge } of dataLayerGraph.edgeRecords()) {
+    const source = nodeByEntityId.get(sourceNode.id);
+    const target = nodeByEntityId.get(targetNode.id);
+    if (source === undefined || target === undefined) {
+      continue;
+    }
+
+    const compatibleEdge = compatibleIngestEdge(source, target, edge);
+    if (compatibleEdge === undefined) {
+      continue;
+    }
+
+    const sourceNodeIndex = indexById.get(nodeKey(source));
+    if (sourceNodeIndex === undefined) {
+      return Result.fail(missingNodeIndexError(source));
+    }
+
+    const targetNodeIndex = indexById.get(nodeKey(target));
+    if (targetNodeIndex === undefined) {
+      return Result.fail(missingNodeIndexError(target));
+    }
+
+    Graph.addEdge(mutable, sourceNodeIndex, targetNodeIndex, compatibleEdge);
+  }
+
+  return Result.succeed(Graph.endMutation(mutable));
+};
+
+export const buildIngestGraphs = (
+  validatedNodes: ReadonlyArray<IngestNode>,
+): Result.Result<
+  BuiltIngestGraphs,
+  IngestGraphBuildError | IngestHarnessError
+> => {
   const seenNodeKeys = new Set<string>();
 
   for (const node of validatedNodes) {
     const key = nodeKey(node);
     if (seenNodeKeys.has(key)) {
-      throw new IngestHarnessError({
-        message: `Duplicate ingest graph node key ${key}`
-      });
+      return Result.fail(
+        new IngestHarnessError({
+          message: `Duplicate ingest graph node key ${key}`,
+        }),
+      );
     }
     seenNodeKeys.add(key);
   }
 
-  return Graph.directed<IngestNode, IngestEdge>((mutable) => {
-    const agentNodes: Array<Extract<IngestNode, { _tag: "agent" }>> = [];
-    const catalogNodes: Array<Extract<IngestNode, { _tag: "catalog" }>> = [];
-    const dataServiceNodes: Array<
-      Extract<IngestNode, { _tag: "data-service" }>
-    > = [];
-    const datasetNodes: Array<Extract<IngestNode, { _tag: "dataset" }>> = [];
-    const datasetSeriesNodes: Array<
-      Extract<IngestNode, { _tag: "dataset-series" }>
-    > = [];
-    const distNodes: Array<Extract<IngestNode, { _tag: "distribution" }>> = [];
-    const crNodes: Array<Extract<IngestNode, { _tag: "catalog-record" }>> = [];
+  const dataLayerGraph = buildDataLayerGraph(
+    validatedNodes.map((node) => node.data),
+  );
+  if (Result.isFailure(dataLayerGraph)) {
+    return Result.fail(
+      new IngestGraphBuildError({
+        message:
+          "Shared data-layer graph validation failed while building the ingest graph",
+        issues: dataLayerGraph.failure,
+      }),
+    );
+  }
 
-    for (const node of validatedNodes) {
-      indexById.set(nodeKey(node), Graph.addNode(mutable, node));
-      switch (node._tag) {
-        case "agent":
-          agentNodes.push(node);
-          break;
-        case "catalog":
-          catalogNodes.push(node);
-          break;
-        case "data-service":
-          dataServiceNodes.push(node);
-          break;
-        case "dataset":
-          datasetNodes.push(node);
-          break;
-        case "dataset-series":
-          datasetSeriesNodes.push(node);
-          break;
-        case "distribution":
-          distNodes.push(node);
-          break;
-        case "catalog-record":
-          crNodes.push(node);
-          break;
-      }
-    }
+  const compatibilityGraph = buildCompatibilityGraph(
+    validatedNodes,
+    dataLayerGraph.success,
+  );
+  if (Result.isFailure(compatibilityGraph)) {
+    return Result.fail(compatibilityGraph.failure);
+  }
 
-    for (const agent of agentNodes) {
-      const agentIdx = nodeIndex(indexById, agent);
-      for (const catalog of catalogNodes) {
-        if (catalog.data.publisherAgentId === agent.data.id) {
-          Graph.addEdge(
-            mutable,
-            agentIdx,
-            nodeIndex(indexById, catalog),
-            "publishes"
-          );
-        }
-      }
-      for (const dataset of datasetNodes) {
-        if (dataset.data.publisherAgentId === agent.data.id) {
-          Graph.addEdge(
-            mutable,
-            agentIdx,
-            nodeIndex(indexById, dataset),
-            "publishes"
-          );
-        }
-      }
-      for (const datasetSeries of datasetSeriesNodes) {
-        if (datasetSeries.data.publisherAgentId === agent.data.id) {
-          Graph.addEdge(
-            mutable,
-            agentIdx,
-            nodeIndex(indexById, datasetSeries),
-            "publishes"
-          );
-        }
-      }
-      for (const dataService of dataServiceNodes) {
-        if (dataService.data.publisherAgentId === agent.data.id) {
-          Graph.addEdge(
-            mutable,
-            agentIdx,
-            nodeIndex(indexById, dataService),
-            "publishes"
-          );
-        }
-      }
-    }
-
-    for (const catalog of catalogNodes) {
-      const catalogIdx = nodeIndex(indexById, catalog);
-      for (const catalogRecord of crNodes) {
-        if (catalogRecord.data.catalogId === catalog.data.id) {
-          Graph.addEdge(
-            mutable,
-            catalogIdx,
-            nodeIndex(indexById, catalogRecord),
-            "contains-record"
-          );
-        }
-      }
-    }
-
-    for (const dataset of datasetNodes) {
-      const datasetIdx = nodeIndex(indexById, dataset);
-      for (const datasetSeries of datasetSeriesNodes) {
-        if (dataset.data.inSeries === datasetSeries.data.id) {
-          Graph.addEdge(
-            mutable,
-            nodeIndex(indexById, datasetSeries),
-            datasetIdx,
-            "has-series-member"
-          );
-        }
-      }
-      for (const distribution of distNodes) {
-        if (distribution.data.datasetId === dataset.data.id) {
-          Graph.addEdge(
-            mutable,
-            datasetIdx,
-            nodeIndex(indexById, distribution),
-            "has-distribution"
-          );
-        }
-      }
-      for (const catalogRecord of crNodes) {
-        if (catalogRecord.data.primaryTopicId === dataset.data.id) {
-          Graph.addEdge(
-            mutable,
-            datasetIdx,
-            nodeIndex(indexById, catalogRecord),
-            "primary-topic-of"
-          );
-        }
-      }
-      for (const dataService of dataServiceNodes) {
-        if (dataService.data.servesDatasetIds.includes(dataset.data.id)) {
-          Graph.addEdge(
-            mutable,
-            datasetIdx,
-            nodeIndex(indexById, dataService),
-            "served-by"
-          );
-        }
-      }
-    }
+  return Result.succeed({
+    dataLayerGraph: dataLayerGraph.success,
+    graph: compatibilityGraph.success,
   });
+};
+
+export const buildIngestGraph = (
+  validatedNodes: ReadonlyArray<IngestNode>,
+): Result.Result<IngestGraph, IngestGraphBuildError | IngestHarnessError> => {
+  const built = buildIngestGraphs(validatedNodes);
+  return Result.isFailure(built)
+    ? Result.fail(built.failure)
+    : Result.succeed(built.success.graph);
 };

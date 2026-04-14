@@ -10,6 +10,7 @@ import {
   Option,
   Path,
   References,
+  Result,
   Schema
 } from "effect";
 import { TestClock } from "effect/testing";
@@ -33,6 +34,7 @@ import {
   buildContextFromIndex,
   buildDatasetCandidate,
   buildDistributionCandidates,
+  buildIngestGraphs,
   buildIngestGraph,
   assertNodeOwnsWriteTarget,
   type BuildContext,
@@ -79,6 +81,17 @@ const jsonResponse = (
 const makeHttpLayer = (
   handler: Parameters<typeof HttpClient.make>[0]
 ) => Layer.succeed(HttpClient.HttpClient, HttpClient.make(handler));
+
+const expectSuccessfulResult = <A, E extends { readonly message: string }>(
+  result: Result.Result<A, E>
+): A => {
+  expect(Result.isSuccess(result)).toBe(true);
+  if (Result.isFailure(result)) {
+    throw result.failure;
+  }
+
+  return result.success;
+};
 
 describe("fetchRoute", () => {
   it.effect("decodes a leaf route response into EiaApiResponse", () =>
@@ -855,7 +868,7 @@ const fakeCatalogRecord = (
 });
 
 describe("buildIngestGraph", () => {
-  it("produces a 6-node, 6-edge acyclic graph for a single leaf", () => {
+  it("produces a 6-node, 7-edge acyclic graph for a single leaf", () => {
     const agent = fakeAgent("eia", "01KNQEZ5V57VJJJFYV6HWM03VB");
     const catalog = fakeCatalog(
       "eia",
@@ -885,14 +898,9 @@ describe("buildIngestGraph", () => {
       (dataset.data as Dataset).id
     );
 
-    const graph = buildIngestGraph([
-      agent,
-      catalog,
-      dataset,
-      distribution,
-      dataService,
-      cr
-    ]);
+    const graph = expectSuccessfulResult(
+      buildIngestGraph([agent, catalog, dataset, distribution, dataService, cr])
+    );
 
     expect(Graph.nodeCount(graph)).toBe(6);
     // 3 publishes (agent→catalog, agent→dataset, agent→data-service) +
@@ -902,6 +910,48 @@ describe("buildIngestGraph", () => {
     // 1 served-by (dataset→data-service)
     expect(Graph.edgeCount(graph)).toBe(7);
     expect(Graph.isAcyclic(graph)).toBe(true);
+  });
+
+  it("keeps the compatibility graph topologically aligned with the shared data-layer graph", () => {
+    const agent = fakeAgent("eia", "01KNQEZ5V57VJJJFYV6HWM03VB");
+    const catalog = fakeCatalog(
+      "eia",
+      "01KNQEZ5V57VJJJFYV6HWM03VC",
+      (agent.data as Agent).id
+    );
+    const dataset = fakeDataset(
+      "eia-electricity-retail-sales",
+      "01KNQSXEPQHNVM0AVMA3SQRNK3",
+      (agent.data as Agent).id
+    );
+    const distribution = fakeDistribution(
+      "eia-electricity-retail-sales-api",
+      "01KNQSXEPQE7D85JBAFH47Y9MS",
+      (dataset.data as Dataset).id
+    );
+    const dataService = fakeDataService(
+      "eia-api",
+      "01KNQEZ5VHS74DM94ABW2ZM93Y",
+      (agent.data as Agent).id,
+      [(dataset.data as Dataset).id]
+    );
+    const cr = fakeCatalogRecord(
+      "eia-electricity-retail-sales-cr",
+      "01KNQSXEPQHNVM0AVMA3SQRNK4",
+      (catalog.data as Catalog).id,
+      (dataset.data as Dataset).id
+    );
+
+    const { graph, dataLayerGraph } = expectSuccessfulResult(
+      buildIngestGraphs([agent, catalog, dataset, distribution, dataService, cr])
+    );
+
+    const ingestTopoIds = Array.from(Graph.values(Graph.topo(graph))).map(
+      (node) => node.data.id
+    );
+    const sharedTopoIds = dataLayerGraph.topoNodes().map((entity) => entity.id);
+
+    expect(ingestTopoIds).toEqual(sharedTopoIds);
   });
 
   it("orders dataset-series before its member dataset when Dataset.inSeries is set", () => {
@@ -918,7 +968,9 @@ describe("buildIngestGraph", () => {
       (datasetSeries.data as DatasetSeries).id
     );
 
-    const graph = buildIngestGraph([dataset, datasetSeries, agent]);
+    const graph = expectSuccessfulResult(
+      buildIngestGraph([dataset, datasetSeries, agent])
+    );
     const topoOrder = Array.from(Graph.values(Graph.topo(graph)));
     const positions = new Map<string, number>();
     topoOrder.forEach((node, idx) => positions.set(node.slug, idx));
@@ -931,7 +983,7 @@ describe("buildIngestGraph", () => {
     ).toBe(true);
   });
 
-  it("emits Agent before Catalog before Dataset before {Distribution, CR, DataService} in topological order", () => {
+  it("emits a dependency-respecting topological order for shared and compatibility edges", () => {
     const agent = fakeAgent("eia", "01KNQEZ5V57VJJJFYV6HWM03VB");
     const catalog = fakeCatalog(
       "eia",
@@ -961,40 +1013,52 @@ describe("buildIngestGraph", () => {
       (dataset.data as Dataset).id
     );
 
-    const graph = buildIngestGraph([
-      // Intentionally jumbled — buildIngestGraph + topo must reorder.
-      cr,
-      distribution,
-      dataService,
-      dataset,
-      catalog,
-      agent
-    ]);
+    const graph = expectSuccessfulResult(
+      buildIngestGraph([
+        // Intentionally jumbled — buildIngestGraph + topo must reorder.
+        cr,
+        distribution,
+        dataService,
+        dataset,
+        catalog,
+        agent
+      ])
+    );
 
     const topoOrder = Array.from(Graph.values(Graph.topo(graph)));
     const positions = new Map<string, number>();
-    topoOrder.forEach((node, idx) => positions.set(node.slug, idx));
+    topoOrder.forEach((node, idx) =>
+      positions.set(`${node._tag}:${node.slug}`, idx)
+    );
 
     // Agent must come before Catalog, Dataset, and DataService
-    expect(positions.get("eia")! < positions.get("eia-api")!).toBe(true);
-    expect(positions.get("eia")! < positions.get("eia-electricity-retail-sales")!).toBe(true);
+    expect(positions.get("agent:eia")! < positions.get("catalog:eia")!).toBe(
+      true
+    );
+    expect(
+      positions.get("agent:eia")! <
+        positions.get("dataset:eia-electricity-retail-sales")!
+    ).toBe(true);
+    expect(
+      positions.get("agent:eia")! < positions.get("data-service:eia-api")!
+    ).toBe(true);
     // Dataset must come before its Distribution + CR + DataService
     expect(
-      positions.get("eia-electricity-retail-sales")! <
-        positions.get("eia-electricity-retail-sales-api")!
+      positions.get("dataset:eia-electricity-retail-sales")! <
+        positions.get("distribution:eia-electricity-retail-sales-api")!
     ).toBe(true);
     expect(
-      positions.get("eia-electricity-retail-sales")! <
-        positions.get("eia-electricity-retail-sales-cr")!
+      positions.get("dataset:eia-electricity-retail-sales")! <
+        positions.get("catalog-record:eia-electricity-retail-sales-cr")!
     ).toBe(true);
     expect(
-      positions.get("eia-electricity-retail-sales")! <
-        positions.get("eia-api")!
+      positions.get("dataset:eia-electricity-retail-sales")! <
+        positions.get("data-service:eia-api")!
     ).toBe(true);
     // Catalog must come before its CR
     expect(
-      positions.get("eia")! <
-        positions.get("eia-electricity-retail-sales-cr")!
+      positions.get("catalog:eia")! <
+        positions.get("catalog-record:eia-electricity-retail-sales-cr")!
     ).toBe(true);
   });
 });
@@ -2264,7 +2328,7 @@ describe("buildCandidateNodes", () => {
     // This ties Task 5.5 (buildIngestGraph) + Task 6 (loadCatalogIndex)
     // + Task 7 (builders) together and catches any accidental cycle,
     // orphaned edge, or wiring bug introduced by the builders.
-    const graph = buildIngestGraph(nodes);
+    const graph = expectSuccessfulResult(buildIngestGraph(nodes));
     expect(Graph.isAcyclic(graph)).toBe(true);
     const topo = Array.from(Graph.values(Graph.topo(graph)));
     expect(topo.length).toBe(nodes.length);
@@ -2274,9 +2338,11 @@ describe("buildCandidateNodes", () => {
 
   it("fails fast on duplicate node keys", () => {
     const agent = fakeAgent("eia", "01KNQEZ5V57VJJJFYV6HWM03VB");
-    expect(() => buildIngestGraph([agent, agent])).toThrow(
-      "Duplicate ingest graph node key"
-    );
+    const result = buildIngestGraph([agent, agent]);
+    expect(Result.isFailure(result)).toBe(true);
+    if (Result.isFailure(result)) {
+      expect(result.failure.message).toContain("Duplicate ingest graph node key");
+    }
   });
 
   it("marks merged=true on a dataset whose route is already in the catalog index", () => {
@@ -2356,7 +2422,7 @@ describe("buildCandidateNodes", () => {
     expect(aeo2023Node?.data.inSeries).toBe(datasetSeriesNode?.data.id);
     expect(aeo2024Node?.data.inSeries).toBe(datasetSeriesNode?.data.id);
 
-    const graph = buildIngestGraph(nodes);
+    const graph = expectSuccessfulResult(buildIngestGraph(nodes));
     const topo = Array.from(Graph.values(Graph.topo(graph)));
     const positions = new Map(topo.map((node, index) => [node.slug, index]));
     expect(

@@ -3,6 +3,7 @@
   "id": "https://id.skygest.io/series/ser_01KNQEZ5XBM8EZ4EX5H2SEHPQY",
   "label": "Turkey wholesale electricity price",
   "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WNMWFT32DHZE32VG71",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VN7VR6AYRJ5NCDMHTR",
   "fixedDims": {
     "place": "TR",
     "frequency": "monthly"

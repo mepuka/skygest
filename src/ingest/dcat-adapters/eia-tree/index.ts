@@ -56,6 +56,7 @@ import {
   type ExternalIdentifier
 } from "../../../domain/data-layer";
 import {
+  buildIngestGraphs,
   buildIngestGraph,
   assertNodeOwnsWriteTargetWith,
   type CatalogIndex as HarnessCatalogIndex,
@@ -96,7 +97,7 @@ import {
   scriptPlatformLayer
 } from "../../../platform/ScriptRuntime";
 
-export { buildIngestGraph, stableSlug, unionAliases, EntityIdLedger };
+export { buildIngestGraph, buildIngestGraphs, stableSlug, unionAliases, EntityIdLedger };
 export type { IngestEdge, IngestGraph, IngestNode };
 
 // ---------------------------------------------------------------------------
@@ -1985,7 +1986,12 @@ export const runEiaIngest = Effect.fn("EiaIngest.main")(function* () {
   }
 
   // ---------- Stage 2b: build the IngestGraph from validated nodes ----------
-  const graph = buildIngestGraph(successes);
+  const graphResult = buildIngestGraph(successes);
+  if (Result.isFailure(graphResult)) {
+    return yield* graphResult.failure;
+  }
+
+  const graph = graphResult.success;
   const nodeCount = Graph.nodeCount(graph);
   const edgeCount = Graph.edgeCount(graph);
   const acyclic = Graph.isAcyclic(graph);

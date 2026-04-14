@@ -1,10 +1,17 @@
 import { Chunk, Option, Order, Result } from "effect";
+import type { DataLayerGraph } from "../data-layer/DataLayerGraph";
+import { buildDataLayerGraph } from "../data-layer/DataLayerGraph";
+import {
+  datasetsForPublisherAgent,
+  datasetsForVariable,
+  variablesForDataset,
+} from "../data-layer/DataLayerGraphViews";
 import {
   dataLayerEntityKindSpecs,
   type Agent,
   type Dataset,
   type Distribution,
-  type Variable
+  type Variable,
 } from "../domain/data-layer";
 import type { AliasScheme } from "../domain/data-layer/alias";
 import type {
@@ -16,7 +23,7 @@ import type {
   LookupCollisionIssue,
   MissingReferenceIssue,
   SemanticConsistencyIssue,
-  UnknownVocabularyValueIssue
+  UnknownVocabularyValueIssue,
 } from "../domain/data-layer/registry";
 import {
   AggregationMembers,
@@ -25,22 +32,28 @@ import {
   PolicyInstrumentCanonicals,
   StatisticTypeMembers,
   TechnologyOrFuelCanonicals,
-  UnitFamilyMembers
+  UnitFamilyMembers,
 } from "../domain/generated/energyVariableProfile";
 import {
   buildUrlPrefixes,
   normalizeAliasLookupValue,
   normalizeDistributionHostname,
   normalizeDistributionUrl,
-  normalizeLookupText
+  normalizeLookupText,
 } from "./normalize";
 
 const distributionOrder = Order.mapInput(
   Order.String,
-  (distribution: Distribution) => distribution.id
+  (distribution: Distribution) => distribution.id,
 );
-const datasetOrder = Order.mapInput(Order.String, (dataset: Dataset) => dataset.id);
-const variableOrder = Order.mapInput(Order.String, (variable: Variable) => variable.id);
+const datasetOrder = Order.mapInput(
+  Order.String,
+  (dataset: Dataset) => dataset.id,
+);
+const variableOrder = Order.mapInput(
+  Order.String,
+  (variable: Variable) => variable.id,
+);
 
 const sortDistributions = (items: Iterable<Distribution>) =>
   Chunk.sort(Chunk.fromIterable(items), distributionOrder);
@@ -67,6 +80,7 @@ export type PreparedDataLayerRegistry = {
   readonly entities: Chunk.Chunk<DataLayerRegistryEntity>;
   readonly entityById: ReadonlyMap<string, DataLayerRegistryEntity>;
   readonly pathById: ReadonlyMap<string, string>;
+  readonly graph: DataLayerGraph;
 };
 
 type PreparedResolverLookupTables = {
@@ -81,7 +95,10 @@ type PreparedResolverLookupTables = {
   readonly variablesByDatasetId: ReadonlyMap<string, Chunk.Chunk<Variable>>;
   readonly distributionByUrl: ReadonlyMap<string, Distribution>;
   readonly datasetByLandingPage: ReadonlyMap<string, Dataset>;
-  readonly distributionsByHostname: ReadonlyMap<string, Chunk.Chunk<Distribution>>;
+  readonly distributionsByHostname: ReadonlyMap<
+    string,
+    Chunk.Chunk<Distribution>
+  >;
   readonly distributionUrlPrefixEntries: ReadonlyArray<{
     readonly prefix: string;
     readonly distribution: Distribution;
@@ -94,30 +111,34 @@ export type PreparedDataLayerRegistryInternal = PreparedDataLayerRegistry &
 export type DataLayerRegistryLookup = {
   readonly entities: Chunk.Chunk<DataLayerRegistryEntity>;
   readonly findByCanonicalUri: (
-    canonicalUri: string
+    canonicalUri: string,
   ) => Option.Option<DataLayerRegistryEntity>;
   readonly findAgentByLabel: (label: string) => Option.Option<Agent>;
   readonly findAgentByHomepageDomain: (domain: string) => Option.Option<Agent>;
   readonly findDatasetByTitle: (title: string) => Option.Option<Dataset>;
   readonly findDatasetByAlias: (
     scheme: AliasScheme,
-    value: string
+    value: string,
   ) => Option.Option<Dataset>;
   readonly findDatasetsByAgentId: (agentId: string) => Chunk.Chunk<Dataset>;
-  readonly findDatasetsByVariableId: (variableId: string) => Chunk.Chunk<Dataset>;
+  readonly findDatasetsByVariableId: (
+    variableId: string,
+  ) => Chunk.Chunk<Dataset>;
   readonly findVariablesByAgentId: (agentId: string) => Chunk.Chunk<Variable>;
-  readonly findVariablesByDatasetId: (datasetId: string) => Chunk.Chunk<Variable>;
-  readonly findDistributionByUrl: (
-    url: string
-  ) => Option.Option<Distribution>;
+  readonly findVariablesByDatasetId: (
+    datasetId: string,
+  ) => Chunk.Chunk<Variable>;
+  readonly findDistributionByUrl: (url: string) => Option.Option<Distribution>;
   readonly findDatasetByLandingPage: (url: string) => Option.Option<Dataset>;
   readonly findDistributionsByHostname: (
-    hostname: string
+    hostname: string,
   ) => Chunk.Chunk<Distribution>;
-  readonly findDistributionsByUrlPrefix: (url: string) => Chunk.Chunk<Distribution>;
+  readonly findDistributionsByUrlPrefix: (
+    url: string,
+  ) => Chunk.Chunk<Distribution>;
   readonly findVariableByAlias: (
     scheme: AliasScheme,
-    value: string
+    value: string,
   ) => Option.Option<Variable>;
 };
 
@@ -126,18 +147,19 @@ type PrepareOptions = {
   readonly pathById?: ReadonlyMap<string, string>;
 };
 
-const defaultPathFor = (entity: DataLayerRegistryEntity) => `${entity._tag}:${entity.id}`;
+const defaultPathFor = (entity: DataLayerRegistryEntity) =>
+  `${entity._tag}:${entity.id}`;
 
 const toRegistryRecords = (
   seed: DataLayerRegistrySeed,
-  pathById: ReadonlyMap<string, string>
+  pathById: ReadonlyMap<string, string>,
 ): ReadonlyArray<RegistryRecord> => {
   const records: Array<RegistryRecord> = [];
   const push = <A extends DataLayerRegistryEntity>(items: ReadonlyArray<A>) => {
     for (const entity of items) {
       records.push({
         entity,
-        path: pathById.get(entity.id) ?? defaultPathFor(entity)
+        path: pathById.get(entity.id) ?? defaultPathFor(entity),
       });
     }
   };
@@ -151,7 +173,7 @@ const toRegistryRecords = (
 
 const pushIssue = <A extends DataLayerRegistryIssue>(
   issues: Array<DataLayerRegistryIssue>,
-  issue: A
+  issue: A,
 ) => {
   issues.push(issue);
 };
@@ -160,44 +182,44 @@ const makeMissingReferenceIssue = (
   path: string,
   field: string,
   targetId: string,
-  expectedTag: string
+  expectedTag: string,
 ): MissingReferenceIssue => ({
   _tag: "MissingReferenceIssue",
   path,
   field,
   targetId,
-  expectedTag
+  expectedTag,
 });
 
 const makeSemanticConsistencyIssue = (
   path: string,
-  message: string
+  message: string,
 ): SemanticConsistencyIssue => ({
   _tag: "SemanticConsistencyIssue",
   path,
-  message
+  message,
 });
 
 const makeUnknownVocabularyValueIssue = (
   path: string,
   facet: string,
-  value: string
+  value: string,
 ): UnknownVocabularyValueIssue => ({
   _tag: "UnknownVocabularyValueIssue",
   path,
   facet,
-  value
+  value,
 });
 
 const makeLookupCollisionIssue = (
   lookup: string,
   key: string,
-  entityIds: ReadonlyArray<string>
+  entityIds: ReadonlyArray<string>,
 ): LookupCollisionIssue => ({
   _tag: "LookupCollisionIssue",
   lookup,
   key,
-  entityIds: [...entityIds].sort((left, right) => left.localeCompare(right))
+  entityIds: [...entityIds].sort((left, right) => left.localeCompare(right)),
 });
 
 const aliasLookupKey = (scheme: AliasScheme, value: string) =>
@@ -209,7 +231,7 @@ const checkReference = (
   field: string,
   targetId: string | undefined,
   expectedTag: DataLayerRegistryEntity["_tag"],
-  entityById: ReadonlyMap<string, DataLayerRegistryEntity>
+  entityById: ReadonlyMap<string, DataLayerRegistryEntity>,
 ) => {
   if (targetId === undefined) {
     return;
@@ -219,7 +241,7 @@ const checkReference = (
   if (target === undefined) {
     pushIssue(
       issues,
-      makeMissingReferenceIssue(path, field, targetId, expectedTag)
+      makeMissingReferenceIssue(path, field, targetId, expectedTag),
     );
     return;
   }
@@ -229,8 +251,8 @@ const checkReference = (
       issues,
       makeSemanticConsistencyIssue(
         path,
-        `${field} points to ${target._tag}, expected ${expectedTag}`
-      )
+        `${field} points to ${target._tag}, expected ${expectedTag}`,
+      ),
     );
   }
 };
@@ -240,7 +262,7 @@ const checkVocabularyValue = (
   path: string,
   facet: string,
   value: string | undefined,
-  allowedValues: ReadonlySet<string>
+  allowedValues: ReadonlySet<string>,
 ) => {
   if (value === undefined || allowedValues.has(value)) {
     return;
@@ -251,28 +273,50 @@ const checkVocabularyValue = (
 
 const validateReferences = (
   records: ReadonlyArray<RegistryRecord>,
-  entityById: ReadonlyMap<string, DataLayerRegistryEntity>
+  entityById: ReadonlyMap<string, DataLayerRegistryEntity>,
 ) => {
   const issues: Array<DataLayerRegistryIssue> = [];
 
   for (const { entity, path } of records) {
     switch (entity._tag) {
       case "Agent":
-        checkReference(issues, path, "parentAgentId", entity.parentAgentId, "Agent", entityById);
+        checkReference(
+          issues,
+          path,
+          "parentAgentId",
+          entity.parentAgentId,
+          "Agent",
+          entityById,
+        );
         break;
       case "Catalog":
-        checkReference(issues, path, "publisherAgentId", entity.publisherAgentId, "Agent", entityById);
+        checkReference(
+          issues,
+          path,
+          "publisherAgentId",
+          entity.publisherAgentId,
+          "Agent",
+          entityById,
+        );
         break;
       case "CatalogRecord": {
-        checkReference(issues, path, "catalogId", entity.catalogId, "Catalog", entityById);
-        const expectedTag = entity.primaryTopicType === "dataset" ? "Dataset" : "DataService";
+        checkReference(
+          issues,
+          path,
+          "catalogId",
+          entity.catalogId,
+          "Catalog",
+          entityById,
+        );
+        const expectedTag =
+          entity.primaryTopicType === "dataset" ? "Dataset" : "DataService";
         checkReference(
           issues,
           path,
           "primaryTopicId",
           entity.primaryTopicId,
           expectedTag,
-          entityById
+          entityById,
         );
         checkReference(
           issues,
@@ -280,48 +324,108 @@ const validateReferences = (
           "duplicateOf",
           entity.duplicateOf,
           "CatalogRecord",
-          entityById
+          entityById,
         );
         break;
       }
       case "Dataset":
-        checkReference(issues, path, "publisherAgentId", entity.publisherAgentId, "Agent", entityById);
-        checkReference(issues, path, "inSeries", entity.inSeries, "DatasetSeries", entityById);
+        checkReference(
+          issues,
+          path,
+          "publisherAgentId",
+          entity.publisherAgentId,
+          "Agent",
+          entityById,
+        );
+        checkReference(
+          issues,
+          path,
+          "inSeries",
+          entity.inSeries,
+          "DatasetSeries",
+          entityById,
+        );
         for (const variableId of entity.variableIds ?? []) {
-          checkReference(issues, path, "variableIds", variableId, "Variable", entityById);
+          checkReference(
+            issues,
+            path,
+            "variableIds",
+            variableId,
+            "Variable",
+            entityById,
+          );
         }
         for (const distributionId of entity.distributionIds ?? []) {
-          checkReference(issues, path, "distributionIds", distributionId, "Distribution", entityById);
+          checkReference(
+            issues,
+            path,
+            "distributionIds",
+            distributionId,
+            "Distribution",
+            entityById,
+          );
           const distribution = entityById.get(distributionId);
-          if (distribution !== undefined && distribution._tag === "Distribution" && distribution.datasetId !== entity.id) {
+          if (
+            distribution !== undefined &&
+            distribution._tag === "Distribution" &&
+            distribution.datasetId !== entity.id
+          ) {
             pushIssue(
               issues,
               makeSemanticConsistencyIssue(
                 path,
-                `distribution ${distributionId} belongs to dataset ${distribution.datasetId}, not ${entity.id}`
-              )
+                `distribution ${distributionId} belongs to dataset ${distribution.datasetId}, not ${entity.id}`,
+              ),
             );
           }
         }
         for (const serviceId of entity.dataServiceIds ?? []) {
-          checkReference(issues, path, "dataServiceIds", serviceId, "DataService", entityById);
+          checkReference(
+            issues,
+            path,
+            "dataServiceIds",
+            serviceId,
+            "DataService",
+            entityById,
+          );
         }
         break;
       case "Distribution":
-        checkReference(issues, path, "datasetId", entity.datasetId, "Dataset", entityById);
+        checkReference(
+          issues,
+          path,
+          "datasetId",
+          entity.datasetId,
+          "Dataset",
+          entityById,
+        );
         checkReference(
           issues,
           path,
           "accessServiceId",
           entity.accessServiceId,
           "DataService",
-          entityById
+          entityById,
         );
         break;
       case "DataService":
-        checkReference(issues, path, "publisherAgentId", entity.publisherAgentId, "Agent", entityById);
+        checkReference(
+          issues,
+          path,
+          "publisherAgentId",
+          entity.publisherAgentId,
+          "Agent",
+          entityById,
+        );
         for (const datasetId of entity.servesDatasetIds) {
-          checkReference(issues, path, "servesDatasetIds", datasetId, "Dataset", entityById);
+          checkReference(
+            issues,
+            path,
+            "servesDatasetIds",
+            datasetId,
+            "Dataset",
+            entityById,
+          );
           const dataset = entityById.get(datasetId);
           if (
             dataset !== undefined &&
@@ -332,14 +436,21 @@ const validateReferences = (
               issues,
               makeSemanticConsistencyIssue(
                 path,
-                `service/dataset backref missing: servesDatasetIds includes ${datasetId} but that dataset does not list this service in dataServiceIds`
-              )
+                `service/dataset backref missing: servesDatasetIds includes ${datasetId} but that dataset does not list this service in dataServiceIds`,
+              ),
             );
           }
         }
         break;
       case "DatasetSeries":
-        checkReference(issues, path, "publisherAgentId", entity.publisherAgentId, "Agent", entityById);
+        checkReference(
+          issues,
+          path,
+          "publisherAgentId",
+          entity.publisherAgentId,
+          "Agent",
+          entityById,
+        );
         break;
       case "Variable":
         checkVocabularyValue(
@@ -347,54 +458,68 @@ const validateReferences = (
           path,
           "measuredProperty",
           entity.measuredProperty,
-          measuredPropertyCanonicals
+          measuredPropertyCanonicals,
         );
         checkVocabularyValue(
           issues,
           path,
           "domainObject",
           entity.domainObject,
-          domainObjectCanonicals
+          domainObjectCanonicals,
         );
         checkVocabularyValue(
           issues,
           path,
           "technologyOrFuel",
           entity.technologyOrFuel,
-          technologyOrFuelCanonicals
+          technologyOrFuelCanonicals,
         );
         checkVocabularyValue(
           issues,
           path,
           "statisticType",
           entity.statisticType,
-          statisticTypeCanonicals
+          statisticTypeCanonicals,
         );
         checkVocabularyValue(
           issues,
           path,
           "aggregation",
           entity.aggregation,
-          aggregationCanonicals
+          aggregationCanonicals,
         );
         checkVocabularyValue(
           issues,
           path,
           "unitFamily",
           entity.unitFamily,
-          unitFamilyCanonicals
+          unitFamilyCanonicals,
         );
         checkVocabularyValue(
           issues,
           path,
           "policyInstrument",
           entity.policyInstrument,
-          policyInstrumentCanonicals
+          policyInstrumentCanonicals,
         );
         break;
       case "Series":
-        checkReference(issues, path, "variableId", entity.variableId, "Variable", entityById);
-        checkReference(issues, path, "datasetId", entity.datasetId, "Dataset", entityById);
+        checkReference(
+          issues,
+          path,
+          "variableId",
+          entity.variableId,
+          "Variable",
+          entityById,
+        );
+        checkReference(
+          issues,
+          path,
+          "datasetId",
+          entity.datasetId,
+          "Dataset",
+          entityById,
+        );
         break;
     }
   }
@@ -417,7 +542,7 @@ const collectDuplicateIdIssues = (records: ReadonlyArray<RegistryRecord>) => {
       issues.push({
         _tag: "DuplicateCanonicalIdIssue",
         canonicalId,
-        paths: [...paths].sort((left, right) => left.localeCompare(right))
+        paths: [...paths].sort((left, right) => left.localeCompare(right)),
       });
     }
   }
@@ -430,13 +555,13 @@ const registerExactLookup = <A extends { readonly id: string }>(
   lookupName: string,
   map: Map<string, A>,
   key: string,
-  entity: A
+  entity: A,
 ) => {
   const existing = map.get(key);
   if (existing !== undefined && existing.id !== entity.id) {
     pushIssue(
       issues,
-      makeLookupCollisionIssue(lookupName, key, [existing.id, entity.id])
+      makeLookupCollisionIssue(lookupName, key, [existing.id, entity.id]),
     );
     return;
   }
@@ -453,7 +578,7 @@ const registerExactLookupTolerant = <A extends { readonly id: string }>(
   map: Map<string, A>,
   ambiguous: Set<string>,
   key: string,
-  entity: A
+  entity: A,
 ) => {
   if (ambiguous.has(key)) {
     return;
@@ -473,7 +598,7 @@ const registerExactLookupTolerant = <A extends { readonly id: string }>(
 const registerManyLookup = <A extends { readonly id: string }>(
   map: Map<string, Array<A>>,
   key: string,
-  entity: A
+  entity: A,
 ) => {
   const existing = map.get(key) ?? [];
   if (!existing.some((item) => item.id === entity.id)) {
@@ -507,13 +632,16 @@ const isExactDistributionUrl = (normalizedUrl: string) =>
 const buildPreparedRegistry = (
   seed: DataLayerRegistrySeed,
   records: ReadonlyArray<RegistryRecord>,
-  root: string
-): Result.Result<PreparedDataLayerRegistryInternal, DataLayerRegistryDiagnostic> => {
+  root: string,
+): Result.Result<
+  PreparedDataLayerRegistryInternal,
+  DataLayerRegistryDiagnostic
+> => {
   const duplicateIdIssues = collectDuplicateIdIssues(records);
   if (duplicateIdIssues.length > 0) {
     return Result.fail({
       root,
-      issues: duplicateIdIssues
+      issues: duplicateIdIssues,
     });
   }
 
@@ -530,9 +658,6 @@ const buildPreparedRegistry = (
   const datasetByTitle = new Map<string, Dataset>();
   const datasetByAlias = new Map<string, Dataset>();
   const variableByAlias = new Map<string, Variable>();
-  const datasetsByAgentId = new Map<string, Array<Dataset>>();
-  const datasetsByVariableId = new Map<string, Array<Dataset>>();
-  const variablesByDatasetId = new Map<string, Array<Variable>>();
   const distributionByUrl = new Map<string, Distribution>();
   const distributionByUrlAmbiguous = new Set<string>();
   const datasetByLandingPage = new Map<string, Dataset>();
@@ -549,7 +674,7 @@ const buildPreparedRegistry = (
       "agent-label",
       agentByLabel,
       normalizeLookupText(agent.name),
-      agent
+      agent,
     );
     for (const alternateName of agent.alternateNames ?? []) {
       registerExactLookup(
@@ -557,7 +682,7 @@ const buildPreparedRegistry = (
         "agent-label",
         agentByLabel,
         normalizeLookupText(alternateName),
-        agent
+        agent,
       );
     }
     if (agent.homepage !== undefined) {
@@ -568,33 +693,31 @@ const buildPreparedRegistry = (
           "agent-homepage-domain",
           agentByHomepageDomain,
           homepageDomain,
-          agent
+          agent,
         );
       }
     }
   }
 
   for (const dataset of seed.datasets) {
-    if (dataset.publisherAgentId !== undefined) {
-      registerManyLookup(datasetsByAgentId, dataset.publisherAgentId, dataset);
-    }
-
     registerExactLookup(
       issues,
       "dataset-title",
       datasetByTitle,
       normalizeLookupText(dataset.title),
-      dataset
+      dataset,
     );
 
     if (dataset.landingPage !== undefined) {
-      const normalizedLandingPage = normalizeDistributionUrl(dataset.landingPage);
+      const normalizedLandingPage = normalizeDistributionUrl(
+        dataset.landingPage,
+      );
       if (normalizedLandingPage !== null) {
         registerExactLookupTolerant(
           datasetByLandingPage,
           datasetByLandingPageAmbiguous,
           normalizedLandingPage,
-          dataset
+          dataset,
         );
       }
     }
@@ -608,16 +731,8 @@ const buildPreparedRegistry = (
         "dataset-alias",
         datasetByAlias,
         aliasLookupKey(alias.scheme, alias.value),
-        dataset
+        dataset,
       );
-    }
-
-    for (const variableId of dataset.variableIds ?? []) {
-      const variable = entityById.get(variableId);
-      if (variable !== undefined && variable._tag === "Variable") {
-        registerManyLookup(datasetsByVariableId, variableId, dataset);
-        registerManyLookup(variablesByDatasetId, dataset.id, variable);
-      }
     }
   }
 
@@ -628,23 +743,8 @@ const buildPreparedRegistry = (
         "variable-alias",
         variableByAlias,
         aliasLookupKey(alias.scheme, alias.value),
-        variable
+        variable,
       );
-    }
-  }
-
-  for (const series of seed.series) {
-    if (series.datasetId === undefined) {
-      continue;
-    }
-
-    const dataset = entityById.get(series.datasetId);
-    const variable = entityById.get(series.variableId);
-    if (dataset !== undefined && dataset._tag === "Dataset") {
-      registerManyLookup(datasetsByVariableId, series.variableId, dataset);
-    }
-    if (variable !== undefined && variable._tag === "Variable") {
-      registerManyLookup(variablesByDatasetId, series.datasetId, variable);
     }
   }
 
@@ -659,7 +759,7 @@ const buildPreparedRegistry = (
             distributionByUrl,
             distributionByUrlAmbiguous,
             normalizedUrl,
-            distribution
+            distribution,
           );
         }
 
@@ -672,15 +772,45 @@ const buildPreparedRegistry = (
         registerManyLookup(
           distributionsByHostname,
           normalizedHostname,
-          distribution
+          distribution,
         );
       }
     }
   }
 
-  if (issues.length > 0) {
+  const graphResult = buildDataLayerGraph([...entityById.values()], {
+    pathById,
+  });
+  if (Result.isFailure(graphResult)) {
+    issues.push(...graphResult.failure);
+  }
+
+  if (issues.length > 0 || Result.isFailure(graphResult)) {
     return Result.fail({ root, issues });
   }
+
+  const graph = graphResult.success;
+
+  const sortedDatasetsByAgentId = new Map(
+    seed.agents.map((agent) => [
+      agent.id,
+      sortDatasets(datasetsForPublisherAgent(graph, agent.id)),
+    ]),
+  );
+
+  const sortedDatasetsByVariableId = new Map(
+    seed.variables.map((variable) => [
+      variable.id,
+      sortDatasets(datasetsForVariable(graph, variable.id)),
+    ]),
+  );
+
+  const sortedVariablesByDatasetId = new Map(
+    seed.datasets.map((dataset) => [
+      dataset.id,
+      sortVariables(variablesForDataset(graph, dataset.id)),
+    ]),
+  );
 
   const sortedPrefixEntries = [...distributionUrlPrefixEntries].sort(
     (left, right) => {
@@ -690,17 +820,7 @@ const buildPreparedRegistry = (
       }
 
       return left.distribution.id.localeCompare(right.distribution.id);
-    }
-  );
-
-  const sortedDatasetsByAgentId = new Map(
-    [...datasetsByAgentId.entries()].map(([key, value]) => [key, sortDatasets(value)])
-  );
-  const sortedDatasetsByVariableId = new Map(
-    [...datasetsByVariableId.entries()].map(([key, value]) => [key, sortDatasets(value)])
-  );
-  const sortedVariablesByDatasetId = new Map(
-    [...variablesByDatasetId.entries()].map(([key, value]) => [key, sortVariables(value)])
+    },
   );
   const sortedVariablesByAgentId = new Map(
     [...sortedDatasetsByAgentId.entries()].map(([agentId, datasets]) => {
@@ -708,7 +828,8 @@ const buildPreparedRegistry = (
       const variables: Array<Variable> = [];
 
       for (const dataset of datasets) {
-        for (const variable of sortedVariablesByDatasetId.get(dataset.id) ?? Chunk.empty()) {
+        for (const variable of sortedVariablesByDatasetId.get(dataset.id) ??
+          Chunk.empty()) {
           if (seen.has(variable.id)) {
             continue;
           }
@@ -719,7 +840,7 @@ const buildPreparedRegistry = (
       }
 
       return [agentId, sortVariables(variables)] as const;
-    })
+    }),
   );
 
   return Result.succeed({
@@ -727,6 +848,7 @@ const buildPreparedRegistry = (
     entities: Chunk.fromIterable([...entityById.values()]),
     entityById,
     pathById,
+    graph,
     agentByLabel,
     agentByHomepageDomain,
     datasetByTitle,
@@ -741,17 +863,20 @@ const buildPreparedRegistry = (
     distributionsByHostname: new Map(
       [...distributionsByHostname.entries()].map(([key, value]) => [
         key,
-        sortDistributions(value)
-      ])
+        sortDistributions(value),
+      ]),
     ),
-    distributionUrlPrefixEntries: sortedPrefixEntries
+    distributionUrlPrefixEntries: sortedPrefixEntries,
   });
 };
 
 export const prepareDataLayerRegistry = (
   seed: DataLayerRegistrySeed,
-  options: PrepareOptions = {}
-): Result.Result<PreparedDataLayerRegistryInternal, DataLayerRegistryDiagnostic> => {
+  options: PrepareOptions = {},
+): Result.Result<
+  PreparedDataLayerRegistryInternal,
+  DataLayerRegistryDiagnostic
+> => {
   const root = options.root ?? "manual-seed";
   const pathById = options.pathById ?? new Map<string, string>();
   const records = toRegistryRecords(seed, pathById);
@@ -759,16 +884,17 @@ export const prepareDataLayerRegistry = (
 };
 
 export const toPreparedDataLayerRegistryCore = (
-  prepared: PreparedDataLayerRegistryInternal
+  prepared: PreparedDataLayerRegistryInternal,
 ): PreparedDataLayerRegistry => ({
   seed: prepared.seed,
   entities: prepared.entities,
   entityById: prepared.entityById,
-  pathById: prepared.pathById
+  pathById: prepared.pathById,
+  graph: prepared.graph,
 });
 
 export const toDataLayerRegistryLookup = (
-  prepared: PreparedDataLayerRegistryInternal
+  prepared: PreparedDataLayerRegistryInternal,
 ): DataLayerRegistryLookup => ({
   entities: prepared.entities,
   findByCanonicalUri: (canonicalUri) =>
@@ -778,14 +904,16 @@ export const toDataLayerRegistryLookup = (
   findAgentByHomepageDomain: (domain) =>
     Option.fromNullishOr(
       prepared.agentByHomepageDomain.get(
-        normalizeDistributionHostname(domain) ?? normalizeLookupText(domain)
-      )
+        normalizeDistributionHostname(domain) ?? normalizeLookupText(domain),
+      ),
     ),
   findDatasetByTitle: (title) =>
-    Option.fromNullishOr(prepared.datasetByTitle.get(normalizeLookupText(title))),
+    Option.fromNullishOr(
+      prepared.datasetByTitle.get(normalizeLookupText(title)),
+    ),
   findDatasetByAlias: (scheme, value) =>
     Option.fromNullishOr(
-      prepared.datasetByAlias.get(aliasLookupKey(scheme, value))
+      prepared.datasetByAlias.get(aliasLookupKey(scheme, value)),
     ),
   findDatasetsByAgentId: (agentId) =>
     prepared.datasetIdsByAgentId.get(agentId) ?? Chunk.empty(),
@@ -811,7 +939,7 @@ export const toDataLayerRegistryLookup = (
     const normalized = normalizeDistributionHostname(hostname);
     return normalized === null
       ? Chunk.empty()
-      : prepared.distributionsByHostname.get(normalized) ?? Chunk.empty();
+      : (prepared.distributionsByHostname.get(normalized) ?? Chunk.empty());
   },
   findDistributionsByUrlPrefix: (url) => {
     const normalized = normalizeDistributionUrl(url);
@@ -822,7 +950,10 @@ export const toDataLayerRegistryLookup = (
     const matches: Array<Distribution> = [];
     const seen = new Set<string>();
     for (const entry of prepared.distributionUrlPrefixEntries) {
-      if (!normalized.startsWith(entry.prefix) || seen.has(entry.distribution.id)) {
+      if (
+        !normalized.startsWith(entry.prefix) ||
+        seen.has(entry.distribution.id)
+      ) {
         continue;
       }
 
@@ -834,12 +965,12 @@ export const toDataLayerRegistryLookup = (
   },
   findVariableByAlias: (scheme, value) =>
     Option.fromNullishOr(
-      prepared.variableByAlias.get(aliasLookupKey(scheme, value))
-    )
+      prepared.variableByAlias.get(aliasLookupKey(scheme, value)),
+    ),
 });
 
 export const formatDataLayerRegistryDiagnostic = (
-  diagnostic: DataLayerRegistryDiagnostic
+  diagnostic: DataLayerRegistryDiagnostic,
 ) => {
   const lines = [
     `Data layer registry validation failed for ${diagnostic.root}`,
@@ -863,8 +994,18 @@ export const formatDataLayerRegistryDiagnostic = (
           return `- ${issue.path}: ${issue.facet} has unknown canonical value "${issue.value}"`;
         case "LookupCollisionIssue":
           return `- ${issue.lookup} collision on "${issue.key}": ${issue.entityIds.join(", ")}`;
+        case "DataLayerGraphDuplicateNodeIssue":
+          return issue.reason === "duplicate-node-key"
+            ? `- ${issue.path}: duplicate graph node key ${issue.nodeKey}`
+            : `- ${issue.path}: duplicate graph entity id ${issue.entityId}`;
+        case "DataLayerGraphUnexpectedTargetIssue":
+          return `- ${issue.path}: ${issue.field} -> ${issue.targetId} is ${issue.actualTag}, expected ${issue.expectedTags.join(" | ")}`;
+        case "DataLayerGraphInvariantIssue":
+          return `- ${issue.path}: ${issue.message}`;
+        case "DataLayerGraphCardinalityIssue":
+          return `- ${issue.path}: expected exactly ${issue.expectedCount} outgoing ${issue.edgeKind} edge(s), found ${issue.actualCount}`;
       }
-    })
+    }),
   ];
 
   return lines.join("\n");

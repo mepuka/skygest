@@ -3,6 +3,7 @@
   "id": "https://id.skygest.io/series/ser_01KNQEZ5XBJ05QEBXKNFJ298TT",
   "label": "Global battery pack price (annual)",
   "variableId": "https://id.skygest.io/variable/var_01KNQEZ5WN52GGSKRQ0PP5V8V4",
+  "datasetId": "https://id.skygest.io/dataset/ds_01KNQEZ5VPB7N9XFY1WSWNKM1R",
   "fixedDims": {
     "place": "GLOBAL",
     "frequency": "annual"

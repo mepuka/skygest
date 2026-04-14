@@ -5,8 +5,9 @@
  * Usage: bun scripts/audit-series-dataset-evidence.ts
  *
  * Emits a table of (seriesSlug, voteCount, status, winningDataset) and a
- * list of zero-evidence series. Treats the candidate corpus as ground truth
- * — never invents pairings.
+ * list of zero-evidence series. This is a historical candidate-evidence audit
+ * only; active checked-in series links may now also be curated from the
+ * catalog when candidate evidence was missing or known-bad.
  */
 // Expected footer at plan-freeze time: UNANIMOUS 8  SPLIT 4  NONE 13 (see docs/plans/2026-04-13-sky-317-series-dataset-backfill.md §0.2)
 import { Command } from "effect/unstable/cli";

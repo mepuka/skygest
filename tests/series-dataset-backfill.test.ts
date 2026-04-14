@@ -15,11 +15,22 @@ type BackfillManifest = {
       readonly datasetId: string;
       readonly datasetFile: string;
       readonly evidence: string;
+      readonly basis:
+        | "candidate-unanimous"
+        | "candidate-majority"
+        | "catalog-curated";
     }
   >;
   readonly deliberatelyOmitted: Record<string, { readonly reason: string }>;
   readonly zeroEvidence: ReadonlyArray<string>;
 };
+
+const inlinePinnedSeries = new Set([
+  "de-public-electricity-generation-daily",
+  "eu-public-electricity-generation-quarterly",
+  "tr-electricity-generation-by-fuel-annual",
+  "global-energy-co2-emissions-ar6-annual"
+]);
 
 const loadBackfill = (): BackfillManifest =>
   JSON.parse(readFileSync(BACKFILL_PATH, "utf-8")) as BackfillManifest;
@@ -49,6 +60,20 @@ const loadAllCandidates = () => {
 };
 
 describe("SKY-317 series→dataset backfill", () => {
+  it("covers every non-inline series with an explicit dataset pairing", () => {
+    const manifest = loadBackfill();
+    const seriesDir = `${ROOT}/series`;
+    const nonInlineSeries = readdirSync(seriesDir)
+      .filter((f) => f.endsWith(".json") && !f.startsWith("."))
+      .map((f) => f.replace(/\.json$/, ""))
+      .filter((slug) => !inlinePinnedSeries.has(slug))
+      .sort();
+
+    expect(Object.keys(manifest.explicit).sort()).toEqual(nonInlineSeries);
+    expect(Object.keys(manifest.deliberatelyOmitted)).toEqual([]);
+    expect(manifest.zeroEvidence).toEqual([]);
+  });
+
   it("every explicit backfill pair resolves to a real dataset file", () => {
     const manifest = loadBackfill();
     for (const [slug, spec] of Object.entries(manifest.explicit)) {
@@ -68,32 +93,17 @@ describe("SKY-317 series→dataset backfill", () => {
     }
   });
 
-  it("deliberately-omitted series files do NOT have datasetId set", () => {
-    const manifest = loadBackfill();
-    for (const slug of Object.keys(manifest.deliberatelyOmitted)) {
-      const series = loadSeries(slug);
-      expect(
-        series.datasetId,
-        `${slug} is in deliberatelyOmitted and must have datasetId undefined`
-      ).toBeUndefined();
-    }
-  });
-
-  it("zero-evidence series files do NOT have datasetId set", () => {
-    const manifest = loadBackfill();
-    for (const slug of manifest.zeroEvidence) {
-      const series = loadSeries(slug);
-      expect(
-        series.datasetId,
-        `${slug} has no candidate evidence and must have datasetId undefined`
-      ).toBeUndefined();
-    }
-  });
-
-  it("every backfilled dataset's publisherAgentId matches all candidates' referencedAgentId", () => {
+  it("candidate-backed backfills still match candidate publisher evidence", () => {
     const manifest = loadBackfill();
     const candidates = loadAllCandidates();
     for (const [slug, spec] of Object.entries(manifest.explicit)) {
+      if (
+        spec.basis !== "candidate-unanimous" &&
+        spec.basis !== "candidate-majority"
+      ) {
+        continue;
+      }
+
       const dataset = loadDataset(spec.datasetFile);
       const series = loadSeries(slug);
       const voters = candidates.filter(
@@ -103,46 +113,29 @@ describe("SKY-317 series→dataset backfill", () => {
         voters.length,
         `${slug} should have at least one voting candidate`
       ).toBeGreaterThan(0);
-      for (const voter of voters) {
+
+      const matchingVoters = voters.filter(
+        (voter) => voter.referencedDatasetId === spec.datasetId
+      );
+      if (spec.basis === "candidate-unanimous") {
+        expect(
+          matchingVoters.length,
+          `${slug} unanimous manifest entry must match every voting candidate`
+        ).toBe(voters.length);
+      }
+      if (spec.basis === "candidate-majority") {
+        expect(
+          matchingVoters.length,
+          `${slug} majority manifest entry must be supported by a strict majority of candidate votes`
+        ).toBeGreaterThan(voters.length / 2);
+      }
+
+      for (const voter of matchingVoters) {
         expect(
           voter.referencedAgentId,
           `${slug} voter ${voter.referencedSeriesId} referencedAgentId should match dataset.publisherAgentId`
         ).toBe(dataset.publisherAgentId);
       }
     }
-  });
-
-  it("for every candidate that references both a series and a dataset, the series' datasetId agrees (when present)", () => {
-    const candidates = loadAllCandidates();
-    // Build seriesId → datasetId map from the 25 series files
-    const seriesDir = `${ROOT}/series`;
-    const seriesById = new Map<string, { slug: string; datasetId: string | undefined }>();
-    for (const file of readdirSync(seriesDir)) {
-      if (!file.endsWith(".json") || file.startsWith(".")) continue;
-      const slug = file.replace(/\.json$/, "");
-      const series = loadSeries(slug);
-      seriesById.set(series.id, { slug, datasetId: series.datasetId });
-    }
-
-    const conflicts: Array<string> = [];
-    for (const c of candidates) {
-      if (
-        typeof c.referencedSeriesId !== "string" ||
-        typeof c.referencedDatasetId !== "string"
-      )
-        continue;
-      const series = seriesById.get(c.referencedSeriesId);
-      if (series?.datasetId === undefined) continue;
-      if (series.datasetId !== c.referencedDatasetId) {
-        conflicts.push(
-          `series ${series.slug} has datasetId ${series.datasetId} but candidate votes ${c.referencedDatasetId}`
-        );
-      }
-    }
-
-    expect(
-      conflicts,
-      `no candidate may disagree with a backfilled series.datasetId:\n${conflicts.join("\n")}`
-    ).toEqual([]);
   });
 });
