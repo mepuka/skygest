@@ -30,6 +30,10 @@ type SearchGraph = {
   readonly seriesByVariableId: ReadonlyMap<string, ReadonlyArray<Series>>;
 };
 
+// Phase 1 mirrors the DCAT-facing spine in
+// `references/data-layer-spine/manifest.json`: index only the typed catalog
+// entities that participate in resolver lookup, and keep posts as
+// request-time evidence rather than part of this corpus.
 const isInScopeEntity = (
   entity: DataLayerRegistryEntity
 ): entity is Agent | Dataset | Distribution | Series | Variable =>

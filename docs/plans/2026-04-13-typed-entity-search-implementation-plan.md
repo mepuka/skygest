@@ -396,6 +396,11 @@ The search docs should carry:
 But request-time search should not depend on SPARQL, SHACL execution, or graph
 traversal outside the already-loaded registry scope.
 
+For the current variable facets, phase 1 should index the existing canonical
+string values directly. If SKY-348 later introduces OEO IRIs, those IRIs should
+arrive as parallel enrichment fields, not as a replacement for the current
+string-valued facet filters.
+
 ### 8. Vectorize must be optional from day one
 
 Design the service so lexical retrieval works with no vector binding at all.
@@ -602,6 +607,13 @@ Phase 1 should index:
 Do not index `Catalog`, `CatalogRecord`, `DataService`, or `DatasetSeries` in
 the public resolver path yet. They can be added later for operator/debug use if
 needed.
+
+Phase 1 is also DCAT-only in corpus shape.
+
+Posts remain request-time evidence that gets converted into a bundle search
+plan. They are not part of the phase-1 entity-search corpus. If the later D4
+post URI scheme lands, posts should become a separate corpus under
+`https://id.skygest.io/post/...` without changing the DCAT entity index.
 
 ## Document shape
 

@@ -1,7 +1,7 @@
 import { Array as Arr, Result, Option, Schema, SchemaIssue } from "effect";
 import type { LinkRecord } from "../domain/bi";
-import { normalizeDomain } from "../domain/normalize";
 import { stripUndefined } from "../platform/Json";
+import { normalizeLinkedHostname } from "../platform/Normalize";
 import type { Did } from "../domain/types";
 import { extractBlobCid, feedThumbnailUrl } from "./BskyCdn";
 
@@ -141,17 +141,8 @@ export const slimPostRecordFromUnknown = (record: unknown): SlimPostRecord =>
     }) as SlimPostRecord
   });
 
-const hostnameFor = (value: string): string | null => {
-  try {
-    return new URL(value).hostname;
-  } catch {
-    return null;
-  }
-};
-
 const normalizedHostnameFor = (value: string): string | null => {
-  const hostname = hostnameFor(value);
-  return hostname ? normalizeDomain(hostname) : null;
+  return normalizeLinkedHostname(value);
 };
 
 export const extractLinkRecords = (

@@ -72,7 +72,9 @@ const entitySearchFtsStatement = `CREATE VIRTUAL TABLE IF NOT EXISTS entity_sear
   lineage_text,
   url_text,
   ontology_text,
-  tokenize = 'porter unicode61'
+  tokenize = 'unicode61 remove_diacritics 2',
+  prefix = '3 4',
+  detail = full
 )`;
 
 export const entitySearchMigrations: ReadonlyArray<D1Migration> = [

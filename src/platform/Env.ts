@@ -69,7 +69,7 @@ export type WorkflowEnrichmentEnvBindings =
   >;
 
 export type ResolverWorkerEnvBindings =
-  SearchRuntimeEnvBindings;
+  EnvBindings;
 
 export type SearchRuntimeEnvBindings =
   Simplify<

@@ -1,4 +1,4 @@
-import { Effect, ServiceMap } from "effect";
+import { Effect, Layer, ServiceMap } from "effect";
 import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import type {
@@ -30,3 +30,16 @@ export class EntitySearchRepo extends ServiceMap.Service<
     readonly optimizeFts: () => Effect.Effect<void, SqlError | DbError>;
   }
 >()("@skygest/EntitySearchRepo") {}
+
+export const emptyEntitySearchRepoLayer = Layer.succeed(
+  EntitySearchRepo,
+  EntitySearchRepo.of({
+    replaceAllDocuments: () => Effect.void,
+    upsertDocuments: () => Effect.void,
+    deleteDocuments: () => Effect.void,
+    getByEntityId: () => Effect.succeed(null),
+    searchLexical: () => Effect.succeed([]),
+    rebuildFts: () => Effect.void,
+    optimizeFts: () => Effect.void
+  })
+);

@@ -6,6 +6,7 @@ export {
   normalizeAliasLookupValue,
   normalizeDistributionHostname,
   normalizeDistributionUrl,
+  normalizeLinkedHostname,
   normalizeLookupText,
   parseUrlLike
 } from "../resolution/normalize";

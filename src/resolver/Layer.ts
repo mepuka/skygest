@@ -2,12 +2,19 @@ import { D1Client } from "@effect/sql-d1";
 import { Layer } from "effect";
 import { d1DataLayerRegistryLayer } from "../bootstrap/D1DataLayerRegistry";
 import { EnrichmentPlanner } from "../enrichment/EnrichmentPlanner";
-import { CloudflareEnv, type ResolverWorkerEnvBindings } from "../platform/Env";
+import {
+  CloudflareEnv,
+  type ResolverWorkerEnvBindings,
+  type SearchRuntimeEnvBindings
+} from "../platform/Env";
 import { Logging } from "../platform/Logging";
 import { ResolutionKernel } from "../resolution/ResolutionKernel";
 import { FacetVocabulary } from "../resolution/facetVocabulary";
 import { Stage1Resolver } from "../resolution/Stage1Resolver";
 import { makeEntitySearchBaseLayer } from "../search/Layer";
+import {
+  emptyEntitySearchRepoLayer
+} from "../services/EntitySearchRepo";
 import { CandidatePayloadRepoD1 } from "../services/d1/CandidatePayloadRepoD1";
 import { DataLayerReposD1 } from "../services/d1/DataLayerReposD1";
 import { EntitySearchRepoD1 } from "../services/d1/EntitySearchRepoD1";
@@ -40,10 +47,20 @@ export const makeResolverLayer = (env: ResolverWorkerEnvBindings) => {
   const resolutionKernelLayer = ResolutionKernel.layer.pipe(
     Layer.provideMerge(Layer.mergeAll(registryLayer, facetVocabularyLayer))
   );
-  const entitySearchBaseLayer = makeEntitySearchBaseLayer(env);
-  const entitySearchRepoLayer = EntitySearchRepoD1.layer.pipe(
-    Layer.provideMerge(entitySearchBaseLayer)
-  );
+  const searchEnv: SearchRuntimeEnvBindings | undefined =
+    env.SEARCH_DB === undefined
+      ? undefined
+      : (env as SearchRuntimeEnvBindings);
+  const entitySearchBaseLayer =
+    searchEnv === undefined
+      ? (Layer.empty as unknown as Layer.Layer<any, any, never>)
+      : (makeEntitySearchBaseLayer(searchEnv) as Layer.Layer<any, any, never>);
+  const entitySearchRepoLayer =
+    searchEnv === undefined
+      ? (emptyEntitySearchRepoLayer as Layer.Layer<any, any, never>)
+      : (EntitySearchRepoD1.layer.pipe(
+          Layer.provideMerge(entitySearchBaseLayer)
+        ) as Layer.Layer<any, any, never>);
   const entitySearchSemanticRecallLayer = EntitySemanticRecall.noneLayer;
   const entitySearchServiceLayer = EntitySearchService.layer.pipe(
     Layer.provideMerge(
