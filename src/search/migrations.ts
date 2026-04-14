@@ -77,6 +77,15 @@ const entitySearchFtsStatement = `CREATE VIRTUAL TABLE IF NOT EXISTS entity_sear
   detail = full
 )`;
 
+const entitySearchDocUrlsTableStatement = `CREATE TABLE IF NOT EXISTS entity_search_doc_urls (
+  entity_id TEXT NOT NULL,
+  canonical_url TEXT NOT NULL,
+  PRIMARY KEY (entity_id, canonical_url)
+)`;
+
+const entitySearchDocUrlsIndexStatement = `CREATE INDEX IF NOT EXISTS idx_entity_search_doc_urls_canonical_url
+  ON entity_search_doc_urls(canonical_url)`;
+
 export const entitySearchMigrations: ReadonlyArray<D1Migration> = [
   {
     id: 1,
@@ -85,6 +94,14 @@ export const entitySearchMigrations: ReadonlyArray<D1Migration> = [
       entitySearchDocsTableStatement,
       ...entitySearchDocsIndexStatements,
       entitySearchFtsStatement
+    ]
+  },
+  {
+    id: 2,
+    name: "entity_search_exact_urls",
+    statements: [
+      entitySearchDocUrlsTableStatement,
+      entitySearchDocUrlsIndexStatement
     ]
   }
 ];

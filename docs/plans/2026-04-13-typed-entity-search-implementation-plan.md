@@ -320,6 +320,9 @@ Rationale:
 - the repo already uses D1 everywhere relevant
 - Cloudflare D1 is single-threaded per database, so isolating the search queue
   from the rest of the app is valuable
+- the Worker write path should use `D1Database.batch()` semantics for real D1
+  writes instead of assuming SQL-client transactions, because Effect's current
+  D1 client does not expose transaction support
 - the resolver worker can cleanly take an additional search binding
 - the post search stack already proves out FTS5 in this codebase
 - local development and migrations are already built around D1
@@ -1379,7 +1382,7 @@ Responsibilities:
 - prepare the registry
 - project search docs
 - write projection rows into the dedicated search database
-- replace search docs and FTS rows transactionally in chunks
+- replace search docs and FTS rows in D1-safe chunked batches
 - optionally run FTS optimize
 
 ### 2. Incremental sync hook

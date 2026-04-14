@@ -1,11 +1,14 @@
+import { D1Client } from "@effect/sql-d1";
 import { Effect, Layer, Option, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
+import type { SqlError } from "effect/unstable/sql/SqlError";
 import {
   AgentId,
   DatasetId,
   SeriesId,
   VariableId
 } from "../../domain/data-layer";
+import { DbError } from "../../domain/errors";
 import {
   EntitySearchAlias,
   EntitySearchDocument,
@@ -16,7 +19,7 @@ import {
   EntitySearchQueryInput,
   EntitySearchUrl
 } from "../../domain/entitySearch";
-import { stripUndefined } from "../../platform/Json";
+import { encodeJsonStringWith, stripUndefined } from "../../platform/Json";
 import {
   normalizeDistributionHostname,
   normalizeDistributionUrl
@@ -33,6 +36,12 @@ const EntitySearchUrlsJson = Schema.fromJsonString(
   Schema.Array(EntitySearchUrl)
 );
 const defaultSearchLimit = 20;
+const encodeEntitySearchAliasesJson = encodeJsonStringWith(
+  Schema.Array(EntitySearchAlias)
+);
+const encodeEntitySearchUrlsJson = encodeJsonStringWith(
+  Schema.Array(EntitySearchUrl)
+);
 
 const EntitySearchDocumentRowSchema = Schema.Struct({
   entity_id: EntitySearchEntityId,
@@ -165,6 +174,73 @@ type EntitySearchLexicalRow = Schema.Schema.Type<
   typeof EntitySearchLexicalRowSchema
 >;
 
+type D1BatchBindValue = string | number | boolean | ArrayBuffer | null;
+
+const d1WriteChunkSize = 25;
+const d1UrlInsertChunkSize = 100;
+
+const entitySearchDocumentUpsertColumns = [
+  "entity_id",
+  "entity_type",
+  "primary_label",
+  "secondary_label",
+  "publisher_agent_id",
+  "agent_id",
+  "dataset_id",
+  "variable_id",
+  "series_id",
+  "measured_property",
+  "domain_object",
+  "technology_or_fuel",
+  "statistic_type",
+  "aggregation",
+  "unit_family",
+  "policy_instrument",
+  "frequency",
+  "place",
+  "market",
+  "homepage_hostname",
+  "landing_page_hostname",
+  "access_hostname",
+  "download_hostname",
+  "canonical_urls_json",
+  "aliases_json",
+  "payload_json",
+  "primary_text",
+  "alias_text",
+  "lineage_text",
+  "url_text",
+  "ontology_text",
+  "semantic_text",
+  "updated_at",
+  "deleted_at"
+] as const satisfies ReadonlyArray<keyof EntitySearchDocumentUpsertRow>;
+
+const entitySearchDocumentUpsertColumnsWithoutId =
+  entitySearchDocumentUpsertColumns.filter(
+    (column) => column !== "entity_id"
+  ) as ReadonlyArray<
+    Exclude<(typeof entitySearchDocumentUpsertColumns)[number], "entity_id">
+  >;
+
+const chunkValues = <A>(
+  values: ReadonlyArray<A>,
+  size: number
+): ReadonlyArray<ReadonlyArray<A>> => {
+  const chunks: Array<ReadonlyArray<A>> = [];
+
+  for (let index = 0; index < values.length; index += size) {
+    chunks.push(values.slice(index, index + size));
+  }
+
+  return chunks;
+};
+
+const makeBatchDbError = (cause: unknown, message: string) =>
+  new DbError({
+    message: cause instanceof Error ? `${message}: ${cause.message}` : message
+  });
+
 const toDocument = (row: EntitySearchDocumentRow) =>
   decodeWithDbError(
     EntitySearchDocument,
@@ -254,6 +330,152 @@ const toFtsRow = (document: EntitySearchDocument): EntitySearchFtsRow => ({
   url_text: document.urlText,
   ontology_text: document.ontologyText
 });
+
+const toD1UpsertBindValues = (
+  row: EntitySearchDocumentUpsertRow
+): ReadonlyArray<D1BatchBindValue> =>
+  entitySearchDocumentUpsertColumns.map((column) => {
+    switch (column) {
+      case "aliases_json":
+        return encodeEntitySearchAliasesJson(row.aliases_json);
+      case "canonical_urls_json":
+        return encodeEntitySearchUrlsJson(row.canonical_urls_json);
+      default:
+        return row[column] as D1BatchBindValue;
+    }
+  });
+
+const prepareBulkDocumentUpsertStatement = (
+  db: D1Database,
+  rows: ReadonlyArray<EntitySearchDocumentUpsertRow>
+): D1PreparedStatement | null => {
+  if (rows.length === 0) {
+    return null;
+  }
+
+  const placeholders = rows
+    .map(
+      () => `(${entitySearchDocumentUpsertColumns.map(() => "?").join(", ")})`
+    )
+    .join(", ");
+  const updateAssignments = entitySearchDocumentUpsertColumnsWithoutId
+    .map((column) => `${column} = excluded.${column}`)
+    .join(", ");
+  const values = rows.flatMap((row) => toD1UpsertBindValues(row));
+
+  return db.prepare(
+    `INSERT INTO entity_search_docs (${entitySearchDocumentUpsertColumns.join(", ")})
+     VALUES ${placeholders}
+     ON CONFLICT(entity_id) DO UPDATE SET ${updateAssignments}`
+  ).bind(...values);
+};
+
+const prepareInsertCanonicalUrlStatement = (
+  db: D1Database,
+  rows: ReadonlyArray<readonly [entityId: string, canonicalUrl: string]>
+): D1PreparedStatement | null => {
+  if (rows.length === 0) {
+    return null;
+  }
+
+  const placeholders = rows.map(() => "(?, ?)").join(", ");
+  const values = rows.flatMap(([entityId, canonicalUrl]) => [
+    entityId,
+    canonicalUrl
+  ]);
+
+  return db.prepare(
+    `INSERT OR IGNORE INTO entity_search_doc_urls (entity_id, canonical_url)
+     VALUES ${placeholders}`
+  ).bind(...values);
+};
+
+const prepareDeleteRowsByEntityIdsStatement = (
+  db: D1Database,
+  table: "entity_search_fts" | "entity_search_docs" | "entity_search_doc_urls",
+  column: "entity_id",
+  entityIds: ReadonlyArray<EntitySearchEntityId>
+): D1PreparedStatement | null => {
+  if (entityIds.length === 0) {
+    return null;
+  }
+
+  const placeholders = entityIds.map(() => "?").join(", ");
+  return db.prepare(
+    `DELETE FROM ${table} WHERE ${column} IN (${placeholders})`
+  ).bind(...entityIds);
+};
+
+const prepareRebuildFtsInsertStatement = (
+  db: D1Database,
+  entityIds?: ReadonlyArray<EntitySearchEntityId>
+): D1PreparedStatement => {
+  if (entityIds === undefined || entityIds.length === 0) {
+    return db.prepare(
+      `INSERT INTO entity_search_fts (
+         entity_id,
+         entity_type,
+         primary_text,
+         alias_text,
+         lineage_text,
+         url_text,
+         ontology_text
+       )
+       SELECT
+         d.entity_id,
+         d.entity_type,
+         d.primary_text,
+         d.alias_text,
+         d.lineage_text,
+         d.url_text,
+         d.ontology_text
+       FROM entity_search_docs d
+       WHERE d.deleted_at IS NULL`
+    );
+  }
+
+  const placeholders = entityIds.map(() => "?").join(", ");
+  return db.prepare(
+    `INSERT INTO entity_search_fts (
+       entity_id,
+       entity_type,
+       primary_text,
+       alias_text,
+       lineage_text,
+       url_text,
+       ontology_text
+     )
+     SELECT
+       d.entity_id,
+       d.entity_type,
+       d.primary_text,
+       d.alias_text,
+       d.lineage_text,
+       d.url_text,
+       d.ontology_text
+     FROM entity_search_docs d
+     WHERE d.deleted_at IS NULL
+       AND d.entity_id IN (${placeholders})`
+  ).bind(...entityIds);
+};
+
+const runD1Batch = (
+  db: D1Database,
+  statements: ReadonlyArray<D1PreparedStatement | null>,
+  operation: string
+) => {
+  const prepared = statements.filter(
+    (statement): statement is D1PreparedStatement => statement !== null
+  );
+
+  return prepared.length === 0
+    ? Effect.void
+    : Effect.tryPromise({
+        try: () => db.batch(Array.from(prepared)),
+        catch: (cause) =>
+          makeBatchDbError(cause, `Failed to execute D1 batch for ${operation}`)
+      }).pipe(Effect.asVoid);
+};
 
 const dedupeValues = <A extends string>(
   values: ReadonlyArray<A> | undefined
@@ -503,6 +725,11 @@ const firstMatchingHostname = (
 export const EntitySearchRepoD1 = {
   layer: Layer.effect(EntitySearchRepo, Effect.gen(function* () {
     const sql = yield* EntitySearchSql;
+    const d1Client = yield* Effect.serviceOption(D1Client.D1Client);
+    const rawDb = Option.match(d1Client, {
+      onNone: () => null,
+      onSome: (client) => client.config.db
+    });
 
     const findDocumentRowByEntityId = SqlSchema.findOneOption({
       Request: EntitySearchEntityId,
@@ -583,6 +810,18 @@ export const EntitySearchRepoD1 = {
             )})
           `.pipe(Effect.asVoid);
 
+    const deleteDocumentUrlRowsByEntityIds = (
+      entityIds: ReadonlyArray<EntitySearchEntityId>
+    ) =>
+      entityIds.length === 0
+        ? Effect.succeed(void 0)
+        : sql`
+            DELETE FROM entity_search_doc_urls
+            WHERE entity_id IN (${sql.join(", ", false)(
+              entityIds.map((entityId) => sql`${entityId}`)
+            )})
+          `.pipe(Effect.asVoid);
+
     const insertFtsRow = SqlSchema.void({
       Request: EntitySearchFtsRowSchema,
       execute: (row) =>
@@ -636,6 +875,142 @@ export const EntitySearchRepoD1 = {
       )
     );
 
+    const insertDocumentUrlRows = (
+      entityId: EntitySearchEntityId,
+      canonicalUrls: ReadonlyArray<EntitySearchUrl>
+    ) =>
+      Effect.forEach(
+        canonicalUrls,
+        (canonicalUrl) =>
+          sql`
+            INSERT OR IGNORE INTO entity_search_doc_urls (
+              entity_id,
+              canonical_url
+            ) VALUES (
+              ${entityId},
+              ${canonicalUrl}
+            )
+          `.pipe(Effect.asVoid),
+        { concurrency: 1, discard: true }
+      );
+
+    const runD1WriteBatch = (
+      operation: string,
+      statements: ReadonlyArray<D1PreparedStatement | null>
+    ) =>
+      rawDb === null
+        ? Effect.fail(
+            new DbError({
+              message: `Missing D1 database binding for ${operation}`
+            })
+          )
+        : runD1Batch(rawDb, statements, operation);
+
+    const makeCanonicalUrlRows = (
+      rows: ReadonlyArray<EntitySearchDocumentUpsertRow>
+    ): ReadonlyArray<readonly [entityId: string, canonicalUrl: string]> =>
+      rows.flatMap((row) =>
+        row.canonical_urls_json.map(
+          (canonicalUrl) =>
+            [row.entity_id, canonicalUrl] as const
+        )
+      );
+
+    const makeD1ReplaceAllStatements = (
+      rows: ReadonlyArray<EntitySearchDocumentUpsertRow>
+    ) => {
+      if (rawDb === null) {
+        return [] as ReadonlyArray<D1PreparedStatement | null>;
+      }
+
+      const urlRows = makeCanonicalUrlRows(rows);
+      return [
+        rawDb.prepare("DELETE FROM entity_search_fts"),
+        rawDb.prepare("DELETE FROM entity_search_doc_urls"),
+        rawDb.prepare("DELETE FROM entity_search_docs"),
+        ...chunkValues(rows, d1WriteChunkSize).map((chunk) =>
+          prepareBulkDocumentUpsertStatement(rawDb, chunk)
+        ),
+        ...chunkValues(urlRows, d1UrlInsertChunkSize).map((chunk) =>
+          prepareInsertCanonicalUrlStatement(rawDb, chunk)
+        ),
+        prepareRebuildFtsInsertStatement(rawDb)
+      ];
+    };
+
+    const makeD1UpsertStatements = (
+      rows: ReadonlyArray<EntitySearchDocumentUpsertRow>
+    ) => {
+      if (rawDb === null) {
+        return [] as ReadonlyArray<D1PreparedStatement | null>;
+      }
+
+      const entityIds = rows.map((row) => row.entity_id);
+      const urlRows = makeCanonicalUrlRows(rows);
+      return [
+        ...chunkValues(entityIds, d1UrlInsertChunkSize).map((chunk) =>
+          prepareDeleteRowsByEntityIdsStatement(
+            rawDb,
+            "entity_search_fts",
+            "entity_id",
+            chunk
+          )
+        ),
+        ...chunkValues(entityIds, d1UrlInsertChunkSize).map((chunk) =>
+          prepareDeleteRowsByEntityIdsStatement(
+            rawDb,
+            "entity_search_doc_urls",
+            "entity_id",
+            chunk
+          )
+        ),
+        ...chunkValues(rows, d1WriteChunkSize).map((chunk) =>
+          prepareBulkDocumentUpsertStatement(rawDb, chunk)
+        ),
+        ...chunkValues(urlRows, d1UrlInsertChunkSize).map((chunk) =>
+          prepareInsertCanonicalUrlStatement(rawDb, chunk)
+        ),
+        ...chunkValues(entityIds, d1UrlInsertChunkSize).map((chunk) =>
+          prepareRebuildFtsInsertStatement(rawDb, chunk)
+        )
+      ];
+    };
+
+    const makeD1DeleteStatements = (
+      entityIds: ReadonlyArray<EntitySearchEntityId>
+    ) => {
+      if (rawDb === null) {
+        return [] as ReadonlyArray<D1PreparedStatement | null>;
+      }
+
+      return [
+        ...chunkValues(entityIds, d1UrlInsertChunkSize).map((chunk) =>
+          prepareDeleteRowsByEntityIdsStatement(
+            rawDb,
+            "entity_search_fts",
+            "entity_id",
+            chunk
+          )
+        ),
+        ...chunkValues(entityIds, d1UrlInsertChunkSize).map((chunk) =>
+          prepareDeleteRowsByEntityIdsStatement(
+            rawDb,
+            "entity_search_doc_urls",
+            "entity_id",
+            chunk
+          )
+        ),
+        ...chunkValues(entityIds, d1UrlInsertChunkSize).map((chunk) =>
+          prepareDeleteRowsByEntityIdsStatement(
+            rawDb,
+            "entity_search_docs",
+            "entity_id",
+            chunk
+          )
+        )
+      ];
+    };
+
     const replaceAllDocuments = (
       documents: ReadonlyArray<EntitySearchDocument>
     ) =>
@@ -649,23 +1024,37 @@ export const EntitySearchRepoD1 = {
           ),
         { concurrency: 1 }
       ).pipe(
-        Effect.flatMap((validated) =>
-          sql.withTransaction(
-            Effect.gen(function* () {
-              yield* sql`DELETE FROM entity_search_fts`.pipe(Effect.asVoid);
-              yield* sql`DELETE FROM entity_search_docs`.pipe(Effect.asVoid);
+        Effect.flatMap((validated) => {
+          const rows = validated.map(toUpsertRow);
 
-              for (const document of validated) {
-                yield* withSchemaDbError(
-                  upsertDocumentRow(toUpsertRow(document)),
-                  `Failed to persist entity-search document ${document.entityId}`
-                );
-              }
+          return rawDb === null
+            ? sql.withTransaction(
+                Effect.gen(function* () {
+                  yield* sql`DELETE FROM entity_search_fts`.pipe(Effect.asVoid);
+                  yield* sql`DELETE FROM entity_search_doc_urls`.pipe(
+                    Effect.asVoid
+                  );
+                  yield* sql`DELETE FROM entity_search_docs`.pipe(Effect.asVoid);
 
-              yield* rebuildFtsBody;
-            })
-          )
-        )
+                  for (const document of validated) {
+                    yield* withSchemaDbError(
+                      upsertDocumentRow(toUpsertRow(document)),
+                      `Failed to persist entity-search document ${document.entityId}`
+                    );
+                    yield* insertDocumentUrlRows(
+                      document.entityId,
+                      document.canonicalUrls
+                    );
+                  }
+
+                  yield* rebuildFtsBody;
+                })
+              )
+            : runD1WriteBatch(
+                "replaceAllDocuments",
+                makeD1ReplaceAllStatements(rows)
+              );
+        })
       );
 
     const upsertDocuments = (
@@ -681,26 +1070,38 @@ export const EntitySearchRepoD1 = {
           ),
         { concurrency: 1 }
       ).pipe(
-        Effect.flatMap((validated) =>
-          sql.withTransaction(
-            Effect.gen(function* () {
-              const entityIds = validated.map((document) => document.entityId);
+        Effect.flatMap((validated) => {
+          const rows = validated.map(toUpsertRow);
 
-              yield* deleteFtsRowsByEntityIds(entityIds);
+          return rawDb === null
+            ? sql.withTransaction(
+                Effect.gen(function* () {
+                  const entityIds = validated.map((document) => document.entityId);
 
-              for (const document of validated) {
-                yield* withSchemaDbError(
-                  upsertDocumentRow(toUpsertRow(document)),
-                  `Failed to persist entity-search document ${document.entityId}`
-                );
-                yield* withSchemaDbError(
-                  insertFtsRow(toFtsRow(document)),
-                  `Failed to persist entity-search FTS row ${document.entityId}`
-                );
-              }
-            })
-          )
-        )
+                  yield* deleteFtsRowsByEntityIds(entityIds);
+                  yield* deleteDocumentUrlRowsByEntityIds(entityIds);
+
+                  for (const document of validated) {
+                    yield* withSchemaDbError(
+                      upsertDocumentRow(toUpsertRow(document)),
+                      `Failed to persist entity-search document ${document.entityId}`
+                    );
+                    yield* insertDocumentUrlRows(
+                      document.entityId,
+                      document.canonicalUrls
+                    );
+                    yield* withSchemaDbError(
+                      insertFtsRow(toFtsRow(document)),
+                      `Failed to persist entity-search FTS row ${document.entityId}`
+                    );
+                  }
+                })
+              )
+            : runD1WriteBatch(
+                "upsertDocuments",
+                makeD1UpsertStatements(rows)
+              );
+        })
       );
 
     const deleteDocuments = (
@@ -716,13 +1117,19 @@ export const EntitySearchRepoD1 = {
           ),
         { concurrency: 1 }
       ).pipe(
-        Effect.flatMap((validated) =>
-          sql.withTransaction(
-            Effect.gen(function* () {
-              yield* deleteFtsRowsByEntityIds(validated);
-              yield* deleteDocumentRowsByEntityIds(validated);
-            })
-          )
+        Effect.flatMap((validated): Effect.Effect<void, SqlError | DbError> =>
+          rawDb === null
+            ? sql.withTransaction(
+                Effect.gen(function* () {
+                  yield* deleteFtsRowsByEntityIds(validated);
+                  yield* deleteDocumentUrlRowsByEntityIds(validated);
+                  yield* deleteDocumentRowsByEntityIds(validated);
+                })
+              )
+            : runD1WriteBatch(
+                "deleteDocuments",
+                makeD1DeleteStatements(validated)
+              )
         )
       );
 
@@ -757,15 +1164,14 @@ export const EntitySearchRepoD1 = {
 
       const conditions = buildDocumentConditions(sql, input);
       conditions.push(
-        sql`(${sql.join(" OR ", false)(
-          exactCanonicalUrls.map((canonicalUrl) =>
-            sql`EXISTS (
-              SELECT 1
-              FROM json_each(d.canonical_urls_json) exact_url
-              WHERE exact_url.value = ${canonicalUrl}
-            )`
-          )
-        )})`
+        sql`EXISTS (
+          SELECT 1
+          FROM entity_search_doc_urls exact_url
+          WHERE exact_url.entity_id = d.entity_id
+            AND exact_url.canonical_url IN (${sql.join(", ", false)(
+              exactCanonicalUrls.map((canonicalUrl) => sql`${canonicalUrl}`)
+            )})
+        )`
       );
 
       return sql<any>`
@@ -980,7 +1386,12 @@ export const EntitySearchRepoD1 = {
     };
 
     const rebuildFts = () =>
-      sql.withTransaction(rebuildFtsBody);
+      rawDb === null
+        ? sql.withTransaction(rebuildFtsBody)
+        : runD1WriteBatch("rebuildFts", [
+            rawDb.prepare("DELETE FROM entity_search_fts"),
+            prepareRebuildFtsInsertStatement(rawDb)
+          ]);
 
     const optimizeFts = () =>
       sql`

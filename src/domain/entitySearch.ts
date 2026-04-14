@@ -71,7 +71,7 @@ export type EntitySearchAliasScheme = Schema.Schema.Type<
   typeof EntitySearchAliasScheme
 >;
 
-export const EntitySearchScope = Schema.Struct({
+const entitySearchScopeFields = {
   publisherAgentId: Schema.optionalKey(AgentId),
   agentId: Schema.optionalKey(AgentId),
   datasetId: Schema.optionalKey(DatasetId),
@@ -91,6 +91,10 @@ export const EntitySearchScope = Schema.Struct({
   landingPageHostname: Schema.optionalKey(EntitySearchHostname),
   accessHostname: Schema.optionalKey(EntitySearchHostname),
   downloadHostname: Schema.optionalKey(EntitySearchHostname)
+} as const;
+
+export const EntitySearchScope = Schema.Struct({
+  ...entitySearchScopeFields
 }).annotate({
   description:
     "Structured scope filters that narrow ranked retrieval without changing the underlying search corpus"
@@ -103,25 +107,7 @@ export const EntitySearchDocument = Schema.Struct({
   primaryLabel: NonEmptyText,
   secondaryLabel: Schema.optionalKey(NonEmptyText),
   aliases: Schema.Array(EntitySearchAlias),
-  publisherAgentId: Schema.optionalKey(AgentId),
-  agentId: Schema.optionalKey(AgentId),
-  datasetId: Schema.optionalKey(DatasetId),
-  variableId: Schema.optionalKey(VariableId),
-  seriesId: Schema.optionalKey(SeriesId),
-  measuredProperty: Schema.optionalKey(NonEmptyText),
-  domainObject: Schema.optionalKey(NonEmptyText),
-  technologyOrFuel: Schema.optionalKey(NonEmptyText),
-  statisticType: Schema.optionalKey(NonEmptyText),
-  aggregation: Schema.optionalKey(NonEmptyText),
-  unitFamily: Schema.optionalKey(NonEmptyText),
-  policyInstrument: Schema.optionalKey(NonEmptyText),
-  frequency: Schema.optionalKey(NonEmptyText),
-  place: Schema.optionalKey(NonEmptyText),
-  market: Schema.optionalKey(NonEmptyText),
-  homepageHostname: Schema.optionalKey(EntitySearchHostname),
-  landingPageHostname: Schema.optionalKey(EntitySearchHostname),
-  accessHostname: Schema.optionalKey(EntitySearchHostname),
-  downloadHostname: Schema.optionalKey(EntitySearchHostname),
+  ...entitySearchScopeFields,
   canonicalUrls: Schema.Array(EntitySearchUrl),
   payloadJson: NonEmptyText,
   primaryText: NonEmptyText,

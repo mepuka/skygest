@@ -19,6 +19,11 @@ import {
   normalizeLookupText
 } from "../platform/Normalize";
 import type { PreparedDataLayerRegistry } from "../resolution/dataLayerRegistry";
+import {
+  collectNormalizedSearchUrls,
+  collectUniqueSearchText,
+  joinSearchText
+} from "./searchSignals";
 
 type SearchGraph = {
   readonly agentsById: ReadonlyMap<string, Agent>;
@@ -114,74 +119,6 @@ const buildSearchGraph = (prepared: PreparedDataLayerRegistry): SearchGraph => {
   };
 };
 
-const pushUniqueText = (
-  seen: Set<string>,
-  values: Array<string>,
-  raw: string | undefined | null
-) => {
-  if (typeof raw !== "string") {
-    return;
-  }
-
-  const value = raw.trim();
-  if (value.length === 0) {
-    return;
-  }
-
-  const key = normalizeLookupText(value);
-  if (seen.has(key)) {
-    return;
-  }
-
-  seen.add(key);
-  values.push(value);
-};
-
-const collectUniqueText = (
-  ...inputs: ReadonlyArray<unknown>
-): ReadonlyArray<string> => {
-  const seen = new Set<string>();
-  const values: Array<string> = [];
-
-  const visit = (input: unknown): void => {
-    if (input == null) {
-      return;
-    }
-
-    if (typeof input === "string") {
-      pushUniqueText(seen, values, input);
-      return;
-    }
-
-    if (Array.isArray(input)) {
-      for (const value of input) {
-        visit(value);
-      }
-      return;
-    }
-
-    if (typeof input === "object") {
-      for (const value of Object.values(input)) {
-        visit(value);
-      }
-    }
-  };
-
-  for (const input of inputs) {
-    visit(input);
-  }
-
-  return values;
-};
-
-const joinSearchText = (
-  fallback: string,
-  ...inputs: ReadonlyArray<unknown>
-): string => {
-  const values = collectUniqueText(...inputs);
-  return values.length === 0 ? fallback : values.join("\n");
-};
-
 const firstDistinct = (
   primary: string,
   ...candidates: ReadonlyArray<string | undefined | null>
@@ -235,26 +172,8 @@ const toDisplayAliases = (
 
 const toCanonicalUrls = (
   ...inputs: ReadonlyArray<string | undefined | null>
-): ReadonlyArray<string> => {
-  const seen = new Set<string>();
-  const urls: Array<string> = [];
-
-  for (const input of inputs) {
-    if (input == null) {
-      continue;
-    }
-
-    const normalized = normalizeDistributionUrl(input);
-    if (normalized === null || seen.has(normalized)) {
-      continue;
-    }
-
-    seen.add(normalized);
-    urls.push(normalized);
-  }
-
-  return urls;
-};
+): ReadonlyArray<string> =>
+  collectNormalizedSearchUrls(...inputs);
 
 const toOptionalHostname = (input: string | undefined): string | undefined =>
   input === undefined
@@ -268,7 +187,7 @@ const agentLabels = (
   graph: SearchGraph,
   agentIds: ReadonlyArray<string | undefined>
 ): ReadonlyArray<string> =>
-  collectUniqueText(
+  collectUniqueSearchText(
     agentIds.flatMap((agentId) => {
       if (agentId === undefined) {
         return [];
@@ -284,7 +203,7 @@ const agentLabels = (
 const variableFacetTexts = (
   variables: ReadonlyArray<Variable>
 ): ReadonlyArray<string> =>
-  collectUniqueText(
+  collectUniqueSearchText(
     variables.flatMap((variable) => [
       variable.label,
       variable.definition,
@@ -348,7 +267,7 @@ const projectAgent = (
   const lineageValues = agent.parentAgentId === undefined
     ? []
     : agentLabels(graph, [agent.parentAgentId]);
-  const urlValues = collectUniqueText(canonicalUrls, homepageHostname, prefixesForUrls(canonicalUrls));
+  const urlValues = collectUniqueSearchText(canonicalUrls, homepageHostname, prefixesForUrls(canonicalUrls));
   const primaryText = joinSearchText(agent.name, agent.name, agent.alternateNames);
   const aliasText = joinSearchText(agent.name, aliasValues);
   const lineageText = joinSearchText(agent.name, lineageValues);
@@ -402,7 +321,7 @@ const projectDataset = (
   const landingPageHostname = toOptionalHostname(dataset.landingPage);
   const aliasValues = aliases.map((alias) => alias.value);
   const childVariableFacetValues = variableFacetTexts(childVariables);
-  const distributionLineage = collectUniqueText(
+  const distributionLineage = collectUniqueSearchText(
     childDistributions.flatMap((distribution) => [
       distribution.title,
       toOptionalHostname(distribution.accessURL),
@@ -410,7 +329,7 @@ const projectDataset = (
     ])
   );
   const seriesLabels = childSeries.map((series) => series.label);
-  const urlValues = collectUniqueText(canonicalUrls, landingPageHostname, prefixesForUrls(canonicalUrls));
+  const urlValues = collectUniqueSearchText(canonicalUrls, landingPageHostname, prefixesForUrls(canonicalUrls));
   const primaryText = joinSearchText(
     dataset.title,
     dataset.title,
@@ -490,7 +409,7 @@ const projectDistribution = (
   const accessHostname = toOptionalHostname(distribution.accessURL);
   const downloadHostname = toOptionalHostname(distribution.downloadURL);
   const aliasValues = aliases.map((alias) => alias.value);
-  const urlValues = collectUniqueText(
+  const urlValues = collectUniqueSearchText(
     canonicalUrls,
     accessHostname,
     downloadHostname,
@@ -578,7 +497,7 @@ const projectSeries = (
     ...aliases.filter((alias) => alias.scheme === "url").map((alias) => alias.value)
   );
   const aliasValues = aliases.map((alias) => alias.value);
-  const fixedDimValues = collectUniqueText(
+  const fixedDimValues = collectUniqueSearchText(
     series.fixedDims.place,
     series.fixedDims.market,
     series.fixedDims.frequency,
@@ -665,7 +584,7 @@ const projectVariable = (
   const relatedDistributions = datasets.flatMap(
     (dataset) => graph.distributionsByDatasetId.get(dataset.id) ?? []
   );
-  const distributionHosts = collectUniqueText(
+  const distributionHosts = collectUniqueSearchText(
     relatedDistributions.flatMap((distribution) => [
       toOptionalHostname(distribution.accessURL),
       toOptionalHostname(distribution.downloadURL)

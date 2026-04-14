@@ -12,116 +12,16 @@ import type {
   Stage1Input,
   Stage1Result
 } from "../domain/stage1Resolution";
-import { normalizeDistributionHostname, normalizeDistributionUrl, normalizeLookupText } from "../platform/Normalize";
 import type { DataLayerRegistryLookup } from "../resolution/dataLayerRegistry";
+import {
+  collectNormalizedSearchHostnames,
+  collectNormalizedSearchUrls,
+  collectUniqueSearchText
+} from "./searchSignals";
 
 const decodeBundlePlan = Schema.decodeUnknownSync(
   EntitySearchBundlePlanSchema
 );
-
-const pushUniqueText = (
-  seen: Set<string>,
-  values: Array<string>,
-  raw: string | null | undefined
-) => {
-  if (raw == null) {
-    return;
-  }
-
-  const value = raw.trim();
-  if (value.length === 0) {
-    return;
-  }
-
-  const key = normalizeLookupText(value);
-  if (seen.has(key)) {
-    return;
-  }
-
-  seen.add(key);
-  values.push(value);
-};
-
-const collectUniqueText = (...inputs: ReadonlyArray<unknown>): ReadonlyArray<string> => {
-  const seen = new Set<string>();
-  const values: Array<string> = [];
-
-  const visit = (input: unknown): void => {
-    if (input == null) {
-      return;
-    }
-
-    if (typeof input === "string") {
-      pushUniqueText(seen, values, input);
-      return;
-    }
-
-    if (Array.isArray(input)) {
-      for (const value of input) {
-        visit(value);
-      }
-      return;
-    }
-
-    if (typeof input === "object") {
-      for (const value of Object.values(input)) {
-        visit(value);
-      }
-    }
-  };
-
-  for (const input of inputs) {
-    visit(input);
-  }
-
-  return values;
-};
-
-const collectNormalizedUrls = (
-  ...inputs: ReadonlyArray<string | null | undefined>
-): ReadonlyArray<string> => {
-  const seen = new Set<string>();
-  const values: Array<string> = [];
-
-  for (const input of inputs) {
-    if (input == null) {
-      continue;
-    }
-
-    const normalized = normalizeDistributionUrl(input);
-    if (normalized === null || seen.has(normalized)) {
-      continue;
-    }
-
-    seen.add(normalized);
-    values.push(normalized);
-  }
-
-  return values;
-};
-
-const collectNormalizedHostnames = (
-  ...inputs: ReadonlyArray<string | null | undefined>
-): ReadonlyArray<string> => {
-  const seen = new Set<string>();
-  const values: Array<string> = [];
-
-  for (const input of inputs) {
-    if (input == null) {
-      continue;
-    }
-
-    const normalized = normalizeDistributionHostname(input);
-    if (normalized === null || seen.has(normalized)) {
-      continue;
-    }
-
-    seen.add(normalized);
-    values.push(normalized);
-  }
-
-  return values;
-};
 
 const getMatchedDatasets = (
   stage1: Stage1Result | undefined,
@@ -299,7 +199,7 @@ export const buildEntitySearchBundlePlan = (
   const summaryFindings =
     input.vision?.summary.keyFindings.map((finding) => finding.text) ?? [];
 
-  const exactCanonicalUrls = collectNormalizedUrls(
+  const exactCanonicalUrls = collectNormalizedSearchUrls(
     ...(input.postContext.links.map((link) => link.url)),
     ...(input.postContext.linkCards.map((card) => card.uri)),
     input.sourceAttribution?.contentSource?.url ?? undefined,
@@ -307,7 +207,7 @@ export const buildEntitySearchBundlePlan = (
     ...buildResidualUrls(stage1)
   );
 
-  const exactHostnames = collectNormalizedHostnames(
+  const exactHostnames = collectNormalizedSearchHostnames(
     ...(input.postContext.links.map((link) => link.domain ?? link.url)),
     ...(input.postContext.linkCards.map((card) => card.uri)),
     input.sourceAttribution?.contentSource?.domain ?? undefined,
@@ -322,7 +222,7 @@ export const buildEntitySearchBundlePlan = (
     ...(publisherAgentId === undefined ? {} : { publisherAgentId }),
     ...(datasetId === undefined ? {} : { datasetId }),
     ...(variableId === undefined ? {} : { variableId }),
-    agentText: collectUniqueText(
+    agentText: collectUniqueSearchText(
       input.sourceAttribution?.provider?.providerLabel,
       input.sourceAttribution?.provider?.sourceFamily,
       input.sourceAttribution?.contentSource?.publication,
@@ -332,7 +232,7 @@ export const buildEntitySearchBundlePlan = (
       buildResidualText(stage1, "organization-mention"),
       buildResidualText(stage1, "logo-text")
     ),
-    datasetText: collectUniqueText(
+    datasetText: collectUniqueSearchText(
       input.sourceAttribution?.contentSource?.title,
       input.postContext.links.flatMap((link) => [link.title, link.description]),
       input.postContext.linkCards.flatMap((card) => [card.title, card.description]),
@@ -344,14 +244,14 @@ export const buildEntitySearchBundlePlan = (
       buildResidualDatasetTitles(stage1),
       buildResidualText(stage1, "source-line")
     ),
-    distributionText: collectUniqueText(
+    distributionText: collectUniqueSearchText(
       input.sourceAttribution?.contentSource?.title,
       input.postContext.links.flatMap((link) => [link.url, link.domain, link.title]),
       input.postContext.linkCards.flatMap((card) => [card.uri, card.title]),
       visibleUrls,
       exactHostnames
     ),
-    seriesText: collectUniqueText(
+    seriesText: collectUniqueSearchText(
       chartTitles,
       summaryTitles,
       seriesLabels,
@@ -359,7 +259,7 @@ export const buildEntitySearchBundlePlan = (
       keyFindings,
       summaryFindings
     ),
-    variableText: collectUniqueText(
+    variableText: collectUniqueSearchText(
       chartTitles,
       summaryTitles,
       input.vision?.summary.text,

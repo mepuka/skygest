@@ -47,20 +47,17 @@ export const makeResolverLayer = (env: ResolverWorkerEnvBindings) => {
   const resolutionKernelLayer = ResolutionKernel.layer.pipe(
     Layer.provideMerge(Layer.mergeAll(registryLayer, facetVocabularyLayer))
   );
-  const searchEnv: SearchRuntimeEnvBindings | undefined =
-    env.SEARCH_DB === undefined
-      ? undefined
-      : (env as SearchRuntimeEnvBindings);
-  const entitySearchBaseLayer =
-    searchEnv === undefined
-      ? (Layer.empty as unknown as Layer.Layer<any, any, never>)
-      : (makeEntitySearchBaseLayer(searchEnv) as Layer.Layer<any, any, never>);
   const entitySearchRepoLayer =
-    searchEnv === undefined
-      ? (emptyEntitySearchRepoLayer as Layer.Layer<any, any, never>)
-      : (EntitySearchRepoD1.layer.pipe(
-          Layer.provideMerge(entitySearchBaseLayer)
-        ) as Layer.Layer<any, any, never>);
+    env.SEARCH_DB === undefined
+      ? emptyEntitySearchRepoLayer
+      : EntitySearchRepoD1.layer.pipe(
+          Layer.provideMerge(
+            makeEntitySearchBaseLayer({
+              ...env,
+              SEARCH_DB: env.SEARCH_DB
+            } satisfies SearchRuntimeEnvBindings)
+          )
+        );
   const entitySearchSemanticRecallLayer = EntitySemanticRecall.noneLayer;
   const entitySearchServiceLayer = EntitySearchService.layer.pipe(
     Layer.provideMerge(
@@ -92,7 +89,6 @@ export const makeResolverLayer = (env: ResolverWorkerEnvBindings) => {
     facetVocabularyLayer,
     stage1ResolverLayer,
     resolutionKernelLayer,
-    entitySearchBaseLayer,
     entitySearchRepoLayer,
     entitySearchSemanticRecallLayer,
     entitySearchServiceLayer,

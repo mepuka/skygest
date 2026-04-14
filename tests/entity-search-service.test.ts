@@ -6,8 +6,14 @@ import {
   Distribution,
   Series,
   Variable,
-  type DataLayerRegistrySeed
+  type DataLayerRegistrySeed,
+  mintAgentId,
+  mintDatasetId,
+  mintDistributionId,
+  mintSeriesId,
+  mintVariableId
 } from "../src/domain/data-layer";
+import { ProviderId } from "../src/domain/source";
 import type {
   EntitySearchSemanticRecallHit
 } from "../src/domain/entitySearch";
@@ -15,6 +21,7 @@ import type {
   Stage1Input,
   Stage1Result
 } from "../src/domain/stage1Resolution";
+import { PostUri } from "../src/domain/types";
 import { prepareDataLayerRegistry } from "../src/resolution/dataLayerRegistry";
 import { DataLayerRegistry } from "../src/services/DataLayerRegistry";
 import { runEntitySearchMigrations } from "../src/search/migrate";
@@ -31,13 +38,14 @@ const decodeDataset = Schema.decodeUnknownSync(Dataset);
 const decodeDistribution = Schema.decodeUnknownSync(Distribution);
 const decodeSeries = Schema.decodeUnknownSync(Series);
 const decodeVariable = Schema.decodeUnknownSync(Variable);
+const decodePostUri = Schema.decodeUnknownSync(PostUri);
+const decodeProviderId = Schema.decodeUnknownSync(ProviderId);
 
-const agentId = "https://id.skygest.io/agent/ag_01ENTITYEIAAGENT" as any;
-const datasetId = "https://id.skygest.io/dataset/ds_01ENTITYEIADATASET" as any;
-const distributionId =
-  "https://id.skygest.io/distribution/dist_01ENTITYEIADIST" as any;
-const variableId = "https://id.skygest.io/variable/var_01ENTITYEIAVAR" as any;
-const seriesId = "https://id.skygest.io/series/ser_01ENTITYEIASERIES" as any;
+const agentId = mintAgentId();
+const datasetId = mintDatasetId();
+const distributionId = mintDistributionId();
+const variableId = mintVariableId();
+const seriesId = mintSeriesId();
 
 const makeSyntheticSeed = (): DataLayerRegistrySeed => {
   const agent = decodeAgent({
@@ -157,7 +165,7 @@ const makePreparedRegistry = () => {
 
 const makeStage1Input = (): Stage1Input => ({
   postContext: {
-    postUri: "at://did:plc:test/app.bsky.feed.post/post-1" as any,
+    postUri: decodePostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
     text: "EIA chart showing ERCOT wind generation",
     links: [
       {
@@ -183,7 +191,7 @@ const makeStage1Input = (): Stage1Input => ({
   sourceAttribution: {
     kind: "source-attribution",
     provider: {
-      providerId: "eia" as any,
+      providerId: decodeProviderId("eia"),
       providerLabel: "EIA",
       sourceFamily: null
     },
@@ -347,6 +355,41 @@ describe("EntitySearchService", () => {
       expect(result.distributions[0]?.document.entityId).toBe(distributionId);
       expect(result.series[0]?.document.entityId).toBe(seriesId);
       expect(result.variables[0]?.document.entityId).toBe(variableId);
+    }).pipe(Effect.provide(makeServiceLayer()))
+  );
+
+  it.effect("dispatches the generic and typed search methods through the repo", () =>
+    Effect.gen(function* () {
+      yield* seedSearchDocs;
+      const service = yield* EntitySearchService;
+
+      const allTypes = yield* service.search({
+        query: "ERCOT wind generation",
+        entityTypes: ["Series"],
+        limit: 3
+      });
+      const agents = yield* service.searchAgents({
+        query: "Energy Information Administration",
+        limit: 3
+      });
+      const datasets = yield* service.searchDatasets({
+        query: "Hourly Electric Grid Monitor",
+        limit: 3
+      });
+      const distributions = yield* service.searchDistributions({
+        exactHostnames: ["https://api.eia.gov/v2/electricity/rto/"],
+        limit: 3
+      });
+      const series = yield* service.searchSeries({
+        query: "ERCOT wind generation",
+        limit: 3
+      });
+
+      expect(allTypes[0]?.document.entityId).toBe(seriesId);
+      expect(agents[0]?.document.entityId).toBe(agentId);
+      expect(datasets[0]?.document.entityId).toBe(datasetId);
+      expect(distributions[0]?.document.entityId).toBe(distributionId);
+      expect(series[0]?.document.entityId).toBe(seriesId);
     }).pipe(Effect.provide(makeServiceLayer()))
   );
 
