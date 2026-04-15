@@ -7,6 +7,9 @@ import type {
 } from "../src/domain/sourceMatching";
 import { ProviderRegistry } from "../src/services/ProviderRegistry";
 
+const chartAssetKey =
+  "https://id.skygest.io/post/bluesky/did.plc.test/matcher/chart/chart-1" as any;
+
 const TestLayer = Layer.provideMerge(
   SourceAttributionMatcher.layer,
   ProviderRegistry.layer
@@ -168,7 +171,7 @@ describe("SourceAttributionMatcher", () => {
         vision: {
           assets: [
             {
-              assetKey: "chart-1",
+              assetKey: chartAssetKey,
               analysis: {
                 title: null,
                 sourceLines: [
@@ -200,7 +203,7 @@ describe("SourceAttributionMatcher", () => {
       expect(result.providerCandidates[0]?.evidence[0]).toMatchObject({
         signal: "source-line-alias",
         rank: 1,
-        assetKey: "chart-1",
+        assetKey: chartAssetKey,
         sourceText: "Source: ERCOT"
       });
     })

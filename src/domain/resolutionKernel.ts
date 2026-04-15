@@ -3,6 +3,7 @@ import { ZeroToOneScore } from "./confidence";
 import { AliasScheme } from "./data-layer/alias";
 import { Dataset } from "./data-layer/catalog";
 import { AgentId, DatasetId, VariableId } from "./data-layer/ids";
+import { ChartAssetId } from "./data-layer/post-ids";
 import { TimePeriod } from "./data-layer/variable";
 import { PartialVariableFacetConflict } from "./errors";
 import { ChartAxis, TemporalCoverage } from "./media";
@@ -130,7 +131,7 @@ export type DatasetNameMatch = Schema.Schema.Type<typeof DatasetNameMatch>;
 
 export const ResolutionEvidenceBundle = Schema.Struct({
   postUri: Schema.optionalKey(PostUri),
-  assetKey: Schema.optionalKey(Schema.String),
+  assetKey: Schema.optionalKey(ChartAssetId),
   postText: Schema.Array(Schema.String),
   chartTitle: Schema.optionalKey(Schema.String),
   xAxis: Schema.optionalKey(ChartAxis),

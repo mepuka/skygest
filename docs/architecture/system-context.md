@@ -34,7 +34,6 @@ graph TD
     ColdStart[Cold-start Ingest Toolchain<br/>scripts/cold-start-ingest-*.ts +<br/>src/ingest/dcat-harness]
     Seed[Checked-in Cold-start Registry<br/>references/cold-start/*]
     Profile[Energy Profile Generation<br/>scripts/generate-energy-profile.ts +<br/>scripts/sync-energy-profile.ts]
-    KernelEval[Kernel Eval Harness<br/>eval/resolution-kernel/*]
   end
 
   subgraph ED[skygest-editorial]
@@ -70,8 +69,6 @@ graph TD
   ColdStart -->|filesystem write| Seed
   Seed -->|sync-data-layer CLI| Registry
   Profile -.->|generated facet metadata| Kernel
-  Registry -.->|staging export + gold-set context| KernelEval
-  KernelEval -.->|quality feedback| Kernel
 
   MCP -->|D1 row read| Enrich
   MCP -->|D1 row read| Registry
@@ -98,7 +95,6 @@ graph TD
   Operator -->|bun run| Sync
   Operator -->|bun run| ColdStart
   Operator -->|bun run| Profile
-  Operator -->|bun run| KernelEval
   Operator -->|wrangler deploy| IngestWorker
   Operator -->|wrangler deploy| AgentWorker
   Operator -->|wrangler deploy| Resolver
@@ -113,7 +109,7 @@ graph TD
   class IngestWorker,AgentWorker,Ingest,Enrich,Vision,SrcAttr,Resolver,Stage1,Kernel,Registry,MCP,Api cf
   class Hydrate,Sync,Caches,BuildGraph,Discussion,Stories,Arcs,Editions ed
   class DomainBridge bridge
-  class ColdStart,Seed,Profile,KernelEval tools
+  class ColdStart,Seed,Profile tools
   class Reader,Editor,MCPModel,Operator actor
 ```
 
@@ -143,11 +139,9 @@ graph TD
 
 **Cold-start Ingest Toolchain** (`scripts/cold-start-ingest-*.ts`, `src/ingest/dcat-harness/`). Local Effect scripts that fetch provider catalog surfaces and project them into checked-in Skygest registry data. The shared harness owns merge rules, slug stability, validation, graph construction, and atomic writes. *Shipped.*
 
-**Checked-in Cold-start Registry** (`references/cold-start/`). Human-reviewed JSON seed state for the data layer. Runtime does not read it directly in production anymore, but it remains the audited source that feeds the D1 registry, local tests, and eval fixtures. *Shipped.*
+**Checked-in Cold-start Registry** (`references/cold-start/`). Human-reviewed JSON seed state for the data layer. Runtime does not read it directly in production anymore, but it remains the audited source that feeds the D1 registry and local tests. *Shipped.*
 
 **Energy Profile Generation** (`scripts/generate-energy-profile.ts`, `scripts/sync-energy-profile.ts`, `src/domain/generated/energyVariableProfile.ts`). The generated profile is now the canonical runtime source of facet metadata for the resolution kernel and partial-variable algebra. This is the bridge between the checked-in structural manifest and the code the resolver actually uses at runtime. *Shipped.*
-
-**Kernel Eval Harness** (`eval/resolution-kernel/`). The current resolver-quality loop. It runs expected outcomes against the shipped kernel contract and writes diagnostic runs under `eval/resolution-kernel/runs/<timestamp>/`. The important architectural point is that this is now the quality loop worth watching, not the old Stage 1-only eval story. *Shipped; results still show real accuracy work remaining.*
 
 **MCP Surface** (`src/mcp/Router.ts`, `src/mcp/Toolkit.ts`). Exposes the tool surface used by the discussion workflow and other operator/editor flows. The data-ref resolution rows are already readable through existing read tools such as `get_post_enrichments`, but the dedicated lookup tools `resolve_data_ref` and `find_candidates_by_data_ref` are still not present. *Shipped, with planned data-ref lookup additions.*
 
@@ -183,7 +177,7 @@ graph TD
 
 **MCP-calling LLM** is the model inside the discussion workflow and other tool-using flows. The tool surface is its API, which is why structured Schema-backed output matters so much.
 
-**Operator** runs the admin API, sync scripts, cold-start ingest scripts, energy-profile generation and sync, kernel eval runs, and `wrangler deploy` against the worker configs. The operator is also the person who can turn the resolver lane on in staging and judge whether the stored outputs are trustworthy enough to move forward.
+**Operator** runs the admin API, sync scripts, cold-start ingest scripts, energy-profile generation and sync, and `wrangler deploy` against the worker configs. The operator is also the person who can turn the resolver lane on in staging and judge whether the stored outputs are trustworthy enough to move forward.
 
 ## Key seams
 
@@ -197,7 +191,6 @@ graph TD
 | Registry lookup contract | D1-backed entity lookups used by Stage 1 and the kernel | `src/resolution/dataLayerRegistry.ts` |
 | Checked-in registry -> D1 registry | Reviewed seed state promoted into runtime tables | `scripts/sync-data-layer.ts`, `src/data-layer/Sync.ts` |
 | Energy profile manifest -> generated runtime profile | Structural facet rules promoted into generated runtime code | `references/energy-profile/shacl-manifest.json` -> `src/domain/generated/energyVariableProfile.ts` |
-| Kernel eval harness | Expected outcomes and diagnostic runs | `eval/resolution-kernel/expected-outcomes.jsonl` plus `run-eval.ts` |
 | MCP read path | Tool responses consumed by editorial workflows | `src/mcp/Toolkit.ts` plus response Schemas in `src/domain/*` |
 | Editorial cache mirror | Local cached registry manifests | `.skygest/cache/*.json` |
 | Story frontmatter | Filesystem contract between scripts, discussion workflow, and validator | `src/domain/narrative/*` |
@@ -212,7 +205,6 @@ graph TD
 | Persisted `data-ref-resolution` enrichment row (`stage1 + kernel`) | Shipped |
 | Data Layer Registry (D1), Checked-in Cold-start Registry, sync pipeline | Shipped |
 | Energy profile generation and generated runtime facet metadata | Shipped |
-| Kernel eval harness | Shipped, but accuracy work remains active |
 | Agent-based narrowing completeness | In progress (`SKY-317`) |
 | `resolve_data_ref` / `find_candidates_by_data_ref` MCP tools | Planned (`SKY-241`, `SKY-244`) |
 | hydrate-story `dataRefs` projection | Planned (`SKY-242`) |
@@ -226,5 +218,5 @@ graph TD
 1. The resolver is now described as shipped infrastructure, not a planned slice.
 2. The resolver contract is now `stage1 + kernel`, not `stage1 + optional stage2 + stage3`.
 3. The old runtime Stage 2 and Stage 3 language was removed because it no longer matches the code on `main`.
-4. The active quality loop is now the kernel eval harness.
+4. The old snapshot-based eval harnesses were removed; the next end-to-end bundle eval surface belongs with `SKY-343`.
 5. The docs now call out the real remaining gaps: lookup tools, story projection, build-graph warnings, and registry completeness for agent narrowing.

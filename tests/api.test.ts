@@ -17,6 +17,7 @@ import { KnowledgeQueryService } from "../src/services/KnowledgeQueryService";
 import { smokeFixtureUris } from "../src/staging/SmokeFixture";
 import {
   makeBiLayer,
+  sampleChartAssetId,
   sampleDid,
   seedKnowledgeBase,
   withTempSqliteFile
@@ -139,13 +140,13 @@ const makeVisionEnrichmentPayload = () => ({
     keyFindings: [
       {
         text: "Load rises through summer.",
-        assetKeys: ["embed:0:https://cdn.bsky.app/full-1.jpg"]
+        assetKeys: [sampleChartAssetId]
       }
     ]
   },
   assets: [
     {
-      assetKey: "embed:0:https://cdn.bsky.app/full-1.jpg",
+      assetKey: sampleChartAssetId,
       assetType: "image" as const,
       source: "embed" as const,
       index: 0,

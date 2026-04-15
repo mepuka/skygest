@@ -1,6 +1,11 @@
 import { Schema } from "effect";
 import { describe, expect, it } from "@effect/vitest";
-import { parseAvatarUrl, feedThumbnailUrl, extractBlobCid } from "../src/bluesky/BskyCdn";
+import {
+  extractBlobCid,
+  feedThumbnailUrl,
+  parseAvatarUrl,
+  parseFeedImageUrl
+} from "../src/bluesky/BskyCdn";
 import { Did, HttpsUrl } from "../src/domain/types";
 
 const decodeDid = Schema.decodeUnknownSync(Did);
@@ -39,6 +44,57 @@ describe("BskyCdn helpers", () => {
       const result = feedThumbnailUrl(did, "bafkrei-cid");
       const decoded = Schema.decodeUnknownSync(HttpsUrl)(result);
       expect(decoded).toBe(result);
+    });
+  });
+
+  describe("parseFeedImageUrl", () => {
+    it("parses Bluesky fullsize feed image URLs", () => {
+      expect(
+        parseFeedImageUrl(
+          "https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:abc/bafkrei123@jpeg"
+        )
+      ).toEqual({
+        did: decodeDid("did:plc:abc"),
+        blobCid: "bafkrei123"
+      });
+    });
+
+    it("parses Bluesky thumbnail feed image URLs", () => {
+      expect(
+        parseFeedImageUrl(
+          "https://cdn.bsky.app/img/feed_thumbnail/plain/did:web:example.com/bafkrei456@jpeg"
+        )
+      ).toEqual({
+        did: decodeDid("did:web:example.com"),
+        blobCid: "bafkrei456"
+      });
+    });
+
+    it("parses stored feed image URLs without a trailing format suffix", () => {
+      expect(
+        parseFeedImageUrl(
+          "https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:abc/bafkrei789"
+        )
+      ).toEqual({
+        did: decodeDid("did:plc:abc"),
+        blobCid: "bafkrei789"
+      });
+    });
+
+    it("rejects non-feed Bluesky CDN URLs", () => {
+      expect(
+        parseFeedImageUrl(
+          "https://cdn.bsky.app/img/avatar/plain/did:plc:abc/bafkrei123@jpeg"
+        )
+      ).toBeNull();
+    });
+
+    it("rejects non-https URLs", () => {
+      expect(
+        parseFeedImageUrl(
+          "http://cdn.bsky.app/img/feed_fullsize/plain/did:plc:abc/bafkrei123@jpeg"
+        )
+      ).toBeNull();
     });
   });
 

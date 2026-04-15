@@ -1,7 +1,7 @@
 import { Result, Schema } from "effect";
 import { CandidatePayloadStage } from "./candidatePayload";
+import { ChartAssetId } from "./data-layer/post-ids";
 import { DataLayerRegistryDiagnostic } from "./data-layer/registry";
-import { Stage1EvalSnapshotBuildReport } from "./stage1EvalBuild";
 import { DateLike, Did, PostUri, TranscriptR2Key } from "./types";
 import {
   decodeJsonStringEitherWith,
@@ -123,14 +123,6 @@ export class InvalidObservationWindowError extends Schema.TaggedErrorClass<Inval
   }
 ) {}
 
-export class Stage1EvalSnapshotBuildError extends Schema.TaggedErrorClass<Stage1EvalSnapshotBuildError>()(
-  "Stage1EvalSnapshotBuildError",
-  {
-    message: Schema.String,
-    report: Schema.suspend(() => Stage1EvalSnapshotBuildReport)
-  }
-) {}
-
 export class EnrichmentWorkflowLaunchError extends Schema.TaggedErrorClass<EnrichmentWorkflowLaunchError>()(
   "EnrichmentWorkflowLaunchError",
   {
@@ -240,7 +232,7 @@ export class GeminiParseError extends Schema.TaggedErrorClass<GeminiParseError>(
 export class EnrichmentAssetFetchError extends Schema.TaggedErrorClass<EnrichmentAssetFetchError>()(
   "EnrichmentAssetFetchError",
   {
-    assetKey: Schema.String,
+    assetKey: ChartAssetId,
     message: Schema.String,
     status: Schema.optionalKey(Schema.Number),
     operation: Schema.String

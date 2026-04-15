@@ -11,6 +11,7 @@ import type {
   Variable
 } from "../domain/data-layer";
 import type { AgentId } from "../domain/data-layer/ids";
+import type { ChartAssetId } from "../domain/data-layer/post-ids";
 import type {
   AgentHomepageEvidence,
   AgentLabelEvidence,
@@ -318,7 +319,7 @@ const pushDistributionMatches = (
 const pushDatasetTitleMatch = (
   state: BuildState,
   datasetName: string,
-  assetKey: string | undefined,
+  assetKey: ChartAssetId | undefined,
   lookup: DataLayerRegistryLookup,
   options: {
     readonly preferredAgentIds?: ReadonlyArray<AgentId>;
@@ -492,7 +493,7 @@ const pushAgentLabelMatch = (
   text: string,
   lookup: DataLayerRegistryLookup,
   options: {
-    readonly assetKey?: string;
+    readonly assetKey?: ChartAssetId;
     readonly location?: string;
     readonly rank?: number;
     readonly emitResidualOnMiss?: boolean;
@@ -538,7 +539,7 @@ const pushDeferredResidual = (
   state: BuildState,
   source: DeferredToKernelResidual["source"],
   text: string,
-  assetKey?: string
+  assetKey?: ChartAssetId
 ) => {
   addResidual(
     state,

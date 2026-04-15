@@ -102,7 +102,7 @@ describe.skip("checked-in data layer registry loader", () => {
             },
             assets: [
               {
-                assetKey: "asset-1",
+                assetKey: "asset-1" as any,
                 assetType: "image" as const,
                 source: "embed" as const,
                 index: 0,

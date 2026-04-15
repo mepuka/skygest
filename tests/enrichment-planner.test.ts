@@ -11,8 +11,20 @@ import {
   seedKnowledgeBase
 } from "./support/runtime";
 import type { PostUri } from "../src/domain/types";
+import { chartAssetIdFromBluesky } from "../src/domain/data-layer/post-ids";
 
 const solarUri = `at://${sampleDid}/app.bsky.feed.post/post-solar` as PostUri;
+const imageOneBlobCid = "bafkreiassetimage01";
+const imageTwoBlobCid = "bafkreiassetimage02";
+const mediaBlobCid = "bafkreiassetmedia01";
+const imageOneThumb = `https://cdn.bsky.app/img/feed_thumbnail/plain/${sampleDid}/${imageOneBlobCid}@jpeg`;
+const imageOneFullsize = `https://cdn.bsky.app/img/feed_fullsize/plain/${sampleDid}/${imageOneBlobCid}@jpeg`;
+const imageTwoThumb = `https://cdn.bsky.app/img/feed_thumbnail/plain/${sampleDid}/${imageTwoBlobCid}@jpeg`;
+const imageTwoFullsize = `https://cdn.bsky.app/img/feed_fullsize/plain/${sampleDid}/${imageTwoBlobCid}@jpeg`;
+const mediaThumb = `https://cdn.bsky.app/img/feed_thumbnail/plain/${sampleDid}/${mediaBlobCid}@jpeg`;
+const mediaFullsize = `https://cdn.bsky.app/img/feed_fullsize/plain/${sampleDid}/${mediaBlobCid}@jpeg`;
+const imageOneAssetKey = chartAssetIdFromBluesky(solarUri, imageOneBlobCid);
+const mediaAssetKey = chartAssetIdFromBluesky(solarUri, mediaBlobCid);
 
 const makeLayer = () => {
   const baseLayer = makeBiLayer();
@@ -38,13 +50,13 @@ describe("EnrichmentPlanner", () => {
           kind: "img",
           images: [
             {
-              thumb: "https://cdn.bsky.app/thumb-1.jpg",
-              fullsize: "https://cdn.bsky.app/full-1.jpg",
+              thumb: imageOneThumb,
+              fullsize: imageOneFullsize,
               alt: "Chart one"
             },
             {
-              thumb: "https://cdn.bsky.app/thumb-2.jpg",
-              fullsize: "https://cdn.bsky.app/full-2.jpg",
+              thumb: imageTwoThumb,
+              fullsize: imageTwoFullsize,
               alt: null
             }
           ]
@@ -66,10 +78,11 @@ describe("EnrichmentPlanner", () => {
       expect(plan.assets).toHaveLength(2);
       expect(plan.assets[0]).toEqual(
         expect.objectContaining({
+          assetKey: imageOneAssetKey,
           assetType: "image",
           source: "embed",
           index: 0,
-          fullsize: "https://cdn.bsky.app/full-1.jpg",
+          fullsize: imageOneFullsize,
           alt: "Chart one"
         })
       );
@@ -151,8 +164,8 @@ describe("EnrichmentPlanner", () => {
             kind: "img",
             images: [
               {
-                thumb: "https://cdn.bsky.app/thumb-media.jpg",
-                fullsize: "https://cdn.bsky.app/full-media.jpg",
+                thumb: mediaThumb,
+                fullsize: mediaFullsize,
                 alt: "Chart screenshot"
               }
             ]
@@ -196,13 +209,13 @@ describe("EnrichmentPlanner", () => {
             keyFindings: [
               {
                 text: "Source identified in chart footer",
-                assetKeys: ["media:0:https://cdn.bsky.app/full-media.jpg"]
+                assetKeys: [mediaAssetKey]
               }
             ]
           },
           assets: [
             {
-              assetKey: "media:0:https://cdn.bsky.app/full-media.jpg",
+              assetKey: mediaAssetKey,
               assetType: "image",
               source: "media",
               index: 0,
@@ -276,8 +289,8 @@ describe("EnrichmentPlanner", () => {
           kind: "img",
           images: [
             {
-              thumb: "https://cdn.bsky.app/thumb-1.jpg",
-              fullsize: "https://cdn.bsky.app/full-1.jpg",
+              thumb: imageOneThumb,
+              fullsize: imageOneFullsize,
               alt: null
             }
           ]

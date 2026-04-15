@@ -14,6 +14,9 @@ import {
   type EnrichmentPlanningContext
 } from "../src/enrichment/EnrichmentPredicates";
 
+const sampleChartAssetId =
+  "https://id.skygest.io/post/bluesky/did.plc.test/predicates/chart/chart-1" as any;
+
 const makeContext = (
   overrides: Partial<EnrichmentPlanningContext> = {}
 ): EnrichmentPlanningContext => ({
@@ -45,7 +48,7 @@ describe("EnrichmentPredicates", () => {
         makeContext({
           assets: [
             {
-              assetKey: "embed:0:image",
+              assetKey: sampleChartAssetId,
               assetType: "image",
               source: "embed",
               index: 0,
@@ -77,7 +80,7 @@ describe("EnrichmentPredicates", () => {
       enrichmentType: "source-attribution",
       assets: [
         {
-          assetKey: "embed:0:image",
+          assetKey: sampleChartAssetId,
           assetType: "image",
           source: "embed",
           index: 0,

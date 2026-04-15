@@ -1,0 +1,318 @@
+import { Schema } from "effect";
+import { describe, expect, it } from "@effect/vitest";
+import {
+  makeDatasetId
+} from "../src/domain/data-layer/ids";
+import { parseChartAssetId } from "../src/domain/data-layer/post-ids";
+import { type PostUri, PostUri as PostUriSchema } from "../src/domain/types";
+import { repairChartAssetIdsForBlueskyPost } from "../src/enrichment/ChartAssetIdRepair";
+
+const decodePostUri = Schema.decodeUnknownSync(PostUriSchema);
+
+const postUri = decodePostUri(
+  "at://did:plc:testdid123/app.bsky.feed.post/post-1"
+);
+const oldAssetKey =
+  "embed:0:https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:testdid123/bafkreitestblob@jpeg";
+
+describe("repairChartAssetIdsForBlueskyPost", () => {
+  it("repairs legacy asset keys inside vision enrichments", () => {
+    const result = repairChartAssetIdsForBlueskyPost({
+      postUri,
+      payload: {
+        kind: "vision",
+        summary: {
+          text: "Solar chart",
+          mediaTypes: ["chart"],
+          chartTypes: ["line-chart"],
+          titles: ["Solar output"],
+          keyFindings: [
+            {
+              text: "Solar output rose",
+              assetKeys: [oldAssetKey]
+            }
+          ]
+        },
+        assets: [
+          {
+            assetKey: oldAssetKey,
+            assetType: "image",
+            source: "embed",
+            index: 0,
+            originalAltText: null,
+            extractionRoute: "full",
+            analysis: {
+              mediaType: "chart",
+              chartTypes: ["line-chart"],
+              altText: "Solar chart",
+              altTextProvenance: "synthetic",
+              xAxis: null,
+              yAxis: null,
+              series: [],
+              sourceLines: [],
+              temporalCoverage: null,
+              keyFindings: ["Solar output rose"],
+              visibleUrls: [],
+              organizationMentions: [],
+              logoText: [],
+              title: "Solar output",
+              modelId: "gemini-test",
+              processedAt: 1
+            }
+          }
+        ],
+        modelId: "gemini-test",
+        promptVersion: "v2",
+        processedAt: 1
+      }
+    });
+
+    expect(result._tag).toBe("repaired");
+    if (result._tag !== "repaired") {
+      return;
+    }
+    expect(result.payload.kind).toBe("vision");
+    if (result.payload.kind !== "vision") {
+      return;
+    }
+
+    expect(result.replacements).toHaveLength(1);
+    expect(parseChartAssetId(result.replacements[0]!.chartAssetId)).toEqual({
+      platform: "bluesky",
+      did: "did:plc:testdid123" as any,
+      rkey: "post-1",
+      blobCid: "bafkreitestblob"
+    });
+    expect(result.payload.summary.keyFindings[0]?.assetKeys).toEqual([
+      result.replacements[0]!.chartAssetId
+    ]);
+    expect(result.payload.assets[0]?.assetKey).toBe(
+      result.replacements[0]!.chartAssetId
+    );
+  });
+
+  it("repairs legacy asset keys inside source-attribution evidence", () => {
+    const result = repairChartAssetIdsForBlueskyPost({
+      postUri,
+      payload: {
+        kind: "source-attribution",
+        provider: {
+          providerId: "example-provider",
+          providerLabel: "Example Provider",
+          sourceFamily: "research"
+        },
+        resolution: "matched",
+        providerCandidates: [
+          {
+            providerId: "example-provider",
+            providerLabel: "Example Provider",
+            sourceFamily: "research",
+            bestRank: 1,
+            evidence: [
+              {
+                signal: "source-line-alias",
+                rank: 1,
+                assetKey: oldAssetKey,
+                sourceText: "Source: Example Provider",
+                matchedAlias: "Example Provider"
+              }
+            ]
+          }
+        ],
+        contentSource: null,
+        socialProvenance: null,
+        processedAt: 1
+      }
+    });
+
+    expect(result._tag).toBe("repaired");
+    if (result._tag !== "repaired") {
+      return;
+    }
+    expect(result.payload.kind).toBe("source-attribution");
+    if (result.payload.kind !== "source-attribution") {
+      return;
+    }
+
+    expect(
+      result.payload.providerCandidates[0]?.evidence[0]
+    ).toEqual(
+      expect.objectContaining({
+        assetKey: result.replacements[0]!.chartAssetId
+      })
+    );
+  });
+
+  it("repairs legacy asset keys and derived series keys inside data-ref-resolution payloads", () => {
+    const result = repairChartAssetIdsForBlueskyPost({
+      postUri,
+      payload: {
+        kind: "data-ref-resolution",
+        stage1: {
+          matches: [
+            {
+              _tag: "DatasetMatch",
+              datasetId: makeDatasetId(
+                "https://id.skygest.io/dataset/ds_TESTDATAREF01"
+              ),
+              title: "Example dataset",
+              bestRank: 1,
+              evidence: [
+                {
+                  _tag: "DatasetTitleEvidence",
+                  signal: "dataset-title",
+                  rank: 1,
+                  assetKey: oldAssetKey,
+                  datasetName: "Example dataset",
+                  normalizedTitle: "example dataset"
+                }
+              ]
+            }
+          ],
+          residuals: [
+            {
+              _tag: "DeferredToKernelResidual",
+              source: "axis-label",
+              text: "Price",
+              reason: "requires kernel semantic interpretation",
+              assetKey: oldAssetKey
+            }
+          ]
+        },
+        kernel: [
+          {
+            _tag: "NoMatch",
+            bundle: {
+              postUri,
+              assetKey: oldAssetKey,
+              postText: ["Example post"],
+              chartTitle: "Example chart",
+              xAxis: {
+                label: "Year",
+                unit: null
+              },
+              yAxis: {
+                label: "Price",
+                unit: "USD/MWh"
+              },
+              series: [
+                {
+                  itemKey: `${oldAssetKey}:series:0`,
+                  legendLabel: "Retail price",
+                  unit: "USD/MWh"
+                }
+              ],
+              keyFindings: ["Example finding"],
+              sourceLines: [
+                {
+                  sourceText: "Source: Example",
+                  datasetName: "Example dataset"
+                }
+              ],
+              publisherHints: [
+                {
+                  label: "Example Provider",
+                  confidence: 0.9
+                }
+              ]
+            },
+            reason: "no dataset match"
+          }
+        ],
+        resolverVersion: "resolution-kernel@sky-314",
+        processedAt: 1
+      }
+    });
+
+    expect(result._tag).toBe("repaired");
+    if (result._tag !== "repaired") {
+      return;
+    }
+    expect(result.payload.kind).toBe("data-ref-resolution");
+    if (result.payload.kind !== "data-ref-resolution") {
+      return;
+    }
+
+    const chartAssetId = result.replacements[0]!.chartAssetId;
+    expect(result.payload.stage1.matches[0]).toEqual(
+      expect.objectContaining({
+        evidence: [
+          expect.objectContaining({
+            assetKey: chartAssetId
+          })
+        ]
+      })
+    );
+    expect(result.payload.stage1.residuals[0]).toEqual(
+      expect.objectContaining({
+        assetKey: chartAssetId
+      })
+    );
+    expect(result.payload.kernel[0]).toEqual(
+      expect.objectContaining({
+        bundle: expect.objectContaining({
+          assetKey: chartAssetId,
+          series: [
+            expect.objectContaining({
+              itemKey: `${chartAssetId}:series:0`
+            })
+          ]
+        })
+      })
+    );
+  });
+
+  it("fails cleanly when a legacy asset key cannot be parsed into a Bluesky image id", () => {
+    const result = repairChartAssetIdsForBlueskyPost({
+      postUri,
+      payload: {
+        kind: "vision",
+        summary: {
+          text: "Video chart",
+          mediaTypes: ["video"],
+          chartTypes: [],
+          titles: [],
+          keyFindings: []
+        },
+        assets: [
+          {
+            assetKey: "embed:0:https://example.com/video.m3u8",
+            assetType: "video",
+            source: "embed",
+            index: 0,
+            originalAltText: null,
+            extractionRoute: "full",
+            analysis: {
+              mediaType: "video",
+              chartTypes: [],
+              altText: null,
+              altTextProvenance: "synthetic",
+              xAxis: null,
+              yAxis: null,
+              series: [],
+              sourceLines: [],
+              temporalCoverage: null,
+              keyFindings: [],
+              visibleUrls: [],
+              organizationMentions: [],
+              logoText: [],
+              title: null,
+              modelId: "gemini-test",
+              processedAt: 1
+            }
+          }
+        ],
+        modelId: "gemini-test",
+        promptVersion: "v2",
+        processedAt: 1
+      }
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        _tag: "failed",
+        reason: "unparseable-legacy-asset-key"
+      })
+    );
+  });
+});

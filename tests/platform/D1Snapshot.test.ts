@@ -118,9 +118,9 @@ describe("D1SnapshotLayer.isCacheFresh", () => {
   });
 });
 
-// NOTE: full ensureD1Snapshot / d1SnapshotLayer coverage (wrangler + sqlite3
-// subprocess paths) is validated end-to-end by running
-// `bun scripts/build-stage1-eval-snapshot.ts` against staging D1 rather than
-// by mocking ChildProcessSpawner here. The subprocess contract is a thin
-// wrapper over `ChildProcess.make` + exit-code checking and has no conditional
-// logic worth unit-testing in isolation.
+// NOTE: full ensureD1Snapshot / d1SnapshotLayer coverage for the wrangler and
+// sqlite3 subprocess paths is validated end-to-end through the staging-backed
+// scripts that use snapshot hydration, rather than by mocking
+// ChildProcessSpawner here. The subprocess contract is a thin wrapper over
+// `ChildProcess.make` + exit-code checking and has no conditional logic worth
+// unit-testing in isolation.

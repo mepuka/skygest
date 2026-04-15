@@ -1,5 +1,6 @@
 import { Schema } from "effect";
 import { LinkRecord, StoredTopicMatch, ThreadEmbedType } from "./bi";
+import { ChartAssetId } from "./data-layer/post-ids";
 import { EmbedPayload, QuoteRef } from "./embed";
 import {
   WorkflowEnrichmentKind,
@@ -57,7 +58,7 @@ export const EnrichmentPlannedQuoteContext = Schema.Struct({
 export type EnrichmentPlannedQuoteContext = typeof EnrichmentPlannedQuoteContext.Type;
 
 export const EnrichmentPlannedImageAsset = Schema.Struct({
-  assetKey: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
+  assetKey: ChartAssetId,
   assetType: Schema.Literal("image"),
   source: Schema.Literals(["embed", "media"]),
   index: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
@@ -70,7 +71,7 @@ export type EnrichmentPlannedImageAsset = Schema.Schema.Type<
 >;
 
 export const EnrichmentPlannedVideoAsset = Schema.Struct({
-  assetKey: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
+  assetKey: ChartAssetId,
   assetType: Schema.Literal("video"),
   source: Schema.Literals(["embed", "media"]),
   index: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),

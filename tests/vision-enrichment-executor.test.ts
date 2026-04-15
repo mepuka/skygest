@@ -4,6 +4,7 @@ import { vi } from "vitest";
 import type { VisionExecutionPlan } from "../src/domain/enrichmentPlan";
 import type { PostUri } from "../src/domain/types";
 import { GeminiApiError } from "../src/domain/errors";
+import { chartAssetIdFromBluesky } from "../src/domain/data-layer/post-ids";
 import { GeminiVisionService } from "../src/enrichment/GeminiVisionService";
 import {
   fullExtractionEligible,
@@ -11,15 +12,18 @@ import {
 } from "../src/enrichment/VisionEnrichmentExecutor";
 
 const asPostUri = (value: string) => value as PostUri;
+const planPostUri = asPostUri("at://did:plc:test/app.bsky.feed.post/post-1");
+const assetKeyOne = chartAssetIdFromBluesky(planPostUri, "bafkreiassetone");
+const assetKeyTwo = chartAssetIdFromBluesky(planPostUri, "bafkreiassettwo");
 
 const makePlan = (): VisionExecutionPlan => ({
-  postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+  postUri: planPostUri,
   enrichmentType: "vision",
   schemaVersion: "v1",
   decision: "execute",
   captureStage: "picked",
   post: {
-    postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+    postUri: planPostUri,
     did: "did:plc:test" as any,
     handle: null,
     text: "Stored post text",
@@ -34,7 +38,7 @@ const makePlan = (): VisionExecutionPlan => ({
   linkCards: [],
   assets: [
     {
-      assetKey: "embed:0:https://cdn.bsky.app/full-1.jpg",
+      assetKey: assetKeyOne,
       assetType: "image",
       source: "embed",
       index: 0,
@@ -43,7 +47,7 @@ const makePlan = (): VisionExecutionPlan => ({
       alt: null
     },
     {
-      assetKey: "embed:1:https://cdn.bsky.app/full-2.jpg",
+      assetKey: assetKeyTwo,
       assetType: "image",
       source: "embed",
       index: 1,
@@ -262,13 +266,13 @@ describe("VisionEnrichmentExecutor", () => {
             {
               text: "Prices rose through the summer",
               assetKeys: [
-                "embed:0:https://cdn.bsky.app/full-1.jpg",
-                "embed:1:https://cdn.bsky.app/full-2.jpg"
+                assetKeyOne,
+                assetKeyTwo
               ]
             },
             {
               text: "Battery storage additions accelerated",
-              assetKeys: ["embed:1:https://cdn.bsky.app/full-2.jpg"]
+              assetKeys: [assetKeyTwo]
             }
           ])
         );
@@ -315,7 +319,7 @@ describe("VisionEnrichmentExecutor", () => {
           const error = Cause.squash(exit.cause);
           expect(error).toMatchObject({
             _tag: "EnrichmentAssetFetchError",
-            assetKey: "embed:0:https://cdn.bsky.app/full-1.jpg",
+            assetKey: assetKeyOne,
             status: 503
           });
         }

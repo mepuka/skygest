@@ -12,8 +12,8 @@ import {
   EnrichmentPostContextMissingError
 } from "../domain/errors";
 import {
-  type EnrichmentPlannedAsset,
   EnrichmentExecutionPlan,
+  EnrichmentPlannedAsset as EnrichmentPlannedAssetSchema,
   EnrichmentPlannerInput
 } from "../domain/enrichmentPlan";
 import {
@@ -22,6 +22,8 @@ import {
 } from "../domain/enrichment";
 import type { EmbedPayload } from "../domain/embed";
 import type { PostUri } from "../domain/types";
+import { platformFromUri } from "../domain/types";
+import { chartAssetIdFromBluesky } from "../domain/data-layer/post-ids";
 import { CandidatePayloadRepo } from "../services/CandidatePayloadRepo";
 import { decodeWithDbError } from "../services/d1/schemaDecode";
 import {
@@ -29,6 +31,7 @@ import {
   type EnrichmentPlanningContext
 } from "./EnrichmentPredicates";
 import { extractPostLinkCards } from "./PostContextSignals";
+import { parseFeedImageUrl } from "../bluesky/BskyCdn";
 
 const PlannerPostRowSchema = Schema.Struct({
   postUri: Schema.String,
@@ -62,11 +65,17 @@ const PlannerTopicRowSchema = Schema.Struct({
 });
 const PlannerTopicRowsSchema = Schema.Array(PlannerTopicRowSchema);
 
-const toAssetKey = (
-  source: "embed" | "media",
-  index: number,
+const toChartAssetId = (
+  postUri: PostUri,
   stableRef: string | null
-) => `${source}:${index}:${stableRef ?? "missing-ref"}`;
+) => {
+  if (platformFromUri(postUri) !== "bluesky" || stableRef === null) {
+    return null;
+  }
+
+  const parsed = parseFeedImageUrl(stableRef);
+  return parsed === null ? null : chartAssetIdFromBluesky(postUri, parsed.blobCid);
+};
 
 const extractQuoteContext = (embedPayload: EmbedPayload | null) => {
   if (embedPayload === null) {
@@ -96,13 +105,14 @@ const extractQuoteContext = (embedPayload: EmbedPayload | null) => {
 };
 
 const extractAssetsFromMedia = (
+  postUri: PostUri,
   source: "embed" | "media",
   embedPayload: Exclude<EmbedPayload, { kind: "quote" | "link" }>
-): ReadonlyArray<EnrichmentPlannedAsset> => {
+): ReadonlyArray<unknown> => {
   switch (embedPayload.kind) {
     case "img":
       return embedPayload.images.map((image, index) => ({
-        assetKey: toAssetKey(source, index, image.fullsize),
+        assetKey: toChartAssetId(postUri, image.fullsize),
         assetType: "image" as const,
         source,
         index,
@@ -113,7 +123,7 @@ const extractAssetsFromMedia = (
     case "video":
       return [
         {
-          assetKey: toAssetKey(source, 0, embedPayload.playlist),
+          assetKey: toChartAssetId(postUri, embedPayload.thumbnail),
           assetType: "video" as const,
           source,
           index: 0,
@@ -126,11 +136,11 @@ const extractAssetsFromMedia = (
       return embedPayload.media === null ||
         (embedPayload.media.kind !== "img" && embedPayload.media.kind !== "video")
         ? []
-        : extractAssetsFromMedia("media", embedPayload.media);
+        : extractAssetsFromMedia(postUri, "media", embedPayload.media);
   }
 };
 
-const extractAssets = (embedPayload: EmbedPayload | null) => {
+const extractAssets = (postUri: PostUri, embedPayload: EmbedPayload | null) => {
   if (embedPayload === null) {
     return [];
   }
@@ -139,7 +149,7 @@ const extractAssets = (embedPayload: EmbedPayload | null) => {
     case "img":
     case "video":
     case "media":
-      return extractAssetsFromMedia("embed", embedPayload);
+      return extractAssetsFromMedia(postUri, "embed", embedPayload);
     default:
       return [];
   }
@@ -327,7 +337,11 @@ export class EnrichmentPlanner extends ServiceMap.Service<
         );
         const payload = yield* loadPickedPayload(validated.postUri);
         const postContext = yield* loadPostContext(validated.postUri);
-        const assets = extractAssets(payload.embedPayload);
+        const assets = yield* decodeWithDbError(
+          Schema.Array(EnrichmentPlannedAssetSchema),
+          extractAssets(validated.postUri, payload.embedPayload),
+          `Failed to derive enrichment assets for ${validated.postUri}`
+        );
         const quote = extractQuoteContext(payload.embedPayload);
         const linkCards = extractPostLinkCards(payload.embedPayload);
         const existingEnrichments = decodeExistingEnrichments(payload);

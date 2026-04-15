@@ -1,7 +1,9 @@
-import { Result, Schema } from "effect";
-import { HttpsUrl, type Did } from "../domain/types";
+import { Option, Result, Schema } from "effect";
+import { Did, HttpsUrl } from "../domain/types";
+import { parseUrlLike } from "../platform/Normalize";
 
 const decodeHttpsUrl = Schema.decodeUnknownResult(HttpsUrl);
+const decodeDid = Schema.decodeUnknownResult(Did);
 
 export const parseAvatarUrl = (raw: string): HttpsUrl | null => {
   const result = decodeHttpsUrl(raw);
@@ -11,6 +13,42 @@ export const parseAvatarUrl = (raw: string): HttpsUrl | null => {
 export const feedThumbnailUrl = (did: Did, blobCid: string): HttpsUrl => {
   const url = `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${blobCid}@jpeg`;
   return Schema.decodeUnknownSync(HttpsUrl)(url);
+};
+
+export const parseFeedImageUrl = (
+  raw: string
+): { readonly did: Did; readonly blobCid: string } | null => {
+  return Option.match(parseUrlLike(raw), {
+    onNone: () => null,
+    onSome: (url) => {
+      if (url.protocol !== "https:" || url.hostname !== "cdn.bsky.app") {
+        return null;
+      }
+
+      const match = url.pathname.match(
+        /^\/img\/feed_(?:fullsize|thumbnail)\/plain\/([^/]+)\/([^/@:]+)(?:@[^/]+)?$/u
+      );
+      if (match === null) {
+        return null;
+      }
+
+      const didValue = match[1];
+      const blobCid = match[2];
+      if (didValue === undefined || blobCid === undefined || blobCid.length === 0) {
+        return null;
+      }
+
+      const did = decodeDid(didValue);
+      if (!Result.isSuccess(did)) {
+        return null;
+      }
+
+      return {
+        did: did.success,
+        blobCid
+      };
+    }
+  });
 };
 
 export const extractBlobCid = (thumb: unknown): string | null => {

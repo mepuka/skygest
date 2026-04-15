@@ -1,6 +1,7 @@
 import { Schema } from "effect";
 import { ZeroToOneScore } from "./confidence";
 import { AliasScheme } from "./data-layer/alias";
+import { ChartAssetId } from "./data-layer/post-ids";
 import { MatchTextSource, Stage1Rank, UrlSource } from "./stage1Shared";
 
 export const ExactDistributionUrlEvidence = Schema.TaggedStruct(
@@ -48,7 +49,7 @@ export type DistributionHostnameEvidence = Schema.Schema.Type<
 export const DatasetTitleEvidence = Schema.TaggedStruct("DatasetTitleEvidence", {
   signal: Schema.Literal("dataset-title"),
   rank: Stage1Rank,
-  assetKey: Schema.optionalKey(Schema.String),
+  assetKey: Schema.optionalKey(ChartAssetId),
   datasetName: Schema.String,
   normalizedTitle: Schema.String,
   fuzzyScore: Schema.optionalKey(ZeroToOneScore)
@@ -91,7 +92,7 @@ export const AgentLabelEvidence = Schema.TaggedStruct("AgentLabelEvidence", {
   source: MatchTextSource,
   text: Schema.String,
   normalizedLabel: Schema.String,
-  assetKey: Schema.optionalKey(Schema.String),
+  assetKey: Schema.optionalKey(ChartAssetId),
   location: Schema.optionalKey(Schema.String)
 });
 export type AgentLabelEvidence = Schema.Schema.Type<typeof AgentLabelEvidence>;
