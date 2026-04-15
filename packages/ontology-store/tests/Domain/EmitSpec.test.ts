@@ -324,13 +324,62 @@ describe("ClassEmitSpec", () => {
 });
 
 describe("EmitSpec", () => {
-  it("decodes an empty-class top-level spec", () => {
+  // Minimal ClassEmitSpec fixture reused across the 9 required keys.
+  const minimalClassSpec = {
+    primaryClassIri: "https://example.org/TestClass",
+    additionalClassIris: [],
+    forward: { fields: [] },
+    reverse: {
+      subjectSelector: {
+        _tag: "TypedSubject" as const,
+        classIri: "https://example.org/TestClass"
+      },
+      fields: []
+    }
+  };
+
+  const allNineClasses = {
+    Agent: minimalClassSpec,
+    Catalog: minimalClassSpec,
+    CatalogRecord: minimalClassSpec,
+    DataService: minimalClassSpec,
+    Dataset: minimalClassSpec,
+    DatasetSeries: minimalClassSpec,
+    Distribution: minimalClassSpec,
+    Variable: minimalClassSpec,
+    Series: minimalClassSpec
+  };
+
+  it("decodes a top-level spec with all 9 required class keys", () => {
     const decoded = Schema.decodeUnknownSync(EmitSpec)({
       version: "0.1.0",
       generatedFrom: "test-fixture",
-      classes: {}
+      classes: allNineClasses
     });
     expect(decoded.version).toBe("0.1.0");
-    expect(Object.keys(decoded.classes)).toHaveLength(0);
+    expect(Object.keys(decoded.classes).sort()).toEqual([
+      "Agent",
+      "Catalog",
+      "CatalogRecord",
+      "DataService",
+      "Dataset",
+      "DatasetSeries",
+      "Distribution",
+      "Series",
+      "Variable"
+    ]);
+  });
+
+  it("rejects a top-level spec missing one of the 9 required class keys", () => {
+    // The classes field is an explicit 9-key Struct; omitting any key
+    // should fail decode. This pins the generator's class coverage.
+    const { Agent: _agent, ...partial } = allNineClasses;
+    expect(() =>
+      Schema.decodeUnknownSync(EmitSpec)({
+        version: "0.1.0",
+        generatedFrom: "test-fixture",
+        classes: partial
+      })
+    ).toThrow();
   });
 });

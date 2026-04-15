@@ -87,18 +87,6 @@ const SCHEMAS = {
   Series
 } as const;
 
-const CLASS_ORDER: ReadonlyArray<keyof typeof SCHEMAS> = [
-  "Agent",
-  "Catalog",
-  "CatalogRecord",
-  "DataService",
-  "Dataset",
-  "DatasetSeries",
-  "Distribution",
-  "Variable",
-  "Series"
-];
-
 type ClassName = keyof typeof SCHEMAS;
 
 /**
@@ -750,10 +738,22 @@ const generateClass = (name: ClassName): ClassEmitSpec => {
 // ---------------------------------------------------------------------------
 
 export const generateEmitSpec = (): EmitSpecType => {
-  const classes: Record<string, ClassEmitSpec> = {};
-  for (const name of CLASS_ORDER) {
-    classes[name] = generateClass(name);
-  }
+  // Explicit 9-key object matches the `EmitSpec.classes` Struct signature.
+  // Building it inline (rather than a `Record<string, ClassEmitSpec>`
+  // intermediate) lets TypeScript check that every generator class lands
+  // in the spec — schema drift or a missing REVERSE_POLICY entry surfaces
+  // here.
+  const classes: EmitSpecType["classes"] = {
+    Agent: generateClass("Agent"),
+    Catalog: generateClass("Catalog"),
+    CatalogRecord: generateClass("CatalogRecord"),
+    DataService: generateClass("DataService"),
+    Dataset: generateClass("Dataset"),
+    DatasetSeries: generateClass("DatasetSeries"),
+    Distribution: generateClass("Distribution"),
+    Variable: generateClass("Variable"),
+    Series: generateClass("Series")
+  };
   const spec: EmitSpecType = {
     version: "0.1.0",
     generatedFrom: "src/domain/data-layer/*.ts Schema ASTs",

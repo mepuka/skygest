@@ -244,11 +244,39 @@ export type ClassEmitSpec = Schema.Schema.Type<typeof ClassEmitSpec>;
 // `scripts/generate-emit-spec.ts`, consumed by `mapping/forward.ts` and
 // `mapping/reverse.ts`. The round-trip test also decodes this file to
 // source the lossy-field ignore list.
+//
+// The `classes` field is an explicit 9-key Struct rather than an open
+// Record. The generator produces exactly these 9 DCAT domain classes
+// today and any schema drift — an added or removed class — should fail
+// loudly at decode time instead of silently flowing through the pipeline.
 // ---------------------------------------------------------------------------
+
+export const EmitSpecClassKey = Schema.Literals([
+  "Agent",
+  "Catalog",
+  "CatalogRecord",
+  "DataService",
+  "Dataset",
+  "DatasetSeries",
+  "Distribution",
+  "Variable",
+  "Series"
+]);
+export type EmitSpecClassKey = Schema.Schema.Type<typeof EmitSpecClassKey>;
 
 export const EmitSpec = Schema.Struct({
   version: Schema.String,
   generatedFrom: Schema.String,
-  classes: Schema.Record(Schema.String, ClassEmitSpec)
+  classes: Schema.Struct({
+    Agent: ClassEmitSpec,
+    Catalog: ClassEmitSpec,
+    CatalogRecord: ClassEmitSpec,
+    DataService: ClassEmitSpec,
+    Dataset: ClassEmitSpec,
+    DatasetSeries: ClassEmitSpec,
+    Distribution: ClassEmitSpec,
+    Variable: ClassEmitSpec,
+    Series: ClassEmitSpec
+  })
 });
 export type EmitSpec = Schema.Schema.Type<typeof EmitSpec>;
