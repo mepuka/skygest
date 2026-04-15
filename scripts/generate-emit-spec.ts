@@ -190,8 +190,13 @@ const FIELD_FORWARD_OVERRIDES: FieldForwardOverrides = {
     primaryTopicId: { forceValueKind: { _tag: "Iri" } }
   },
   Dataset: {
-    themes: deferredToIri,
-    variableIds: { forceLossy: "derived-from-series" }
+    themes: deferredToIri
+    // NOTE: `variableIds` is NOT listed here. The field is denormalized
+    // on Dataset but the source of truth is Series.datasetId + variableId,
+    // so the lossy marker lives on the REVERSE side (see REVERSE_POLICY)
+    // where the projection-parity comparator reads its ignore list from.
+    // A forward-side `lossy: derived-from-series` would be dead annotation
+    // surface — no consumer reads it.
   },
   DatasetSeries: {
     cadence: deferredToIri

@@ -163,11 +163,14 @@ describe("generated/emit-spec.json", () => {
       expect(field?.lossy).toBe("deferred-to-iri");
     });
 
-    it("variableIds forward carries derived-from-series lossy marker", () => {
+    it("variableIds forward has no lossy marker (the lossy side is reverse)", () => {
+      // The projection-parity comparator reads its ignore list from
+      // reverse.fields[].lossy — a forward-side marker would be dead
+      // annotation surface nothing reads. Pins the invariant.
       const field = ds.forward.fields.find(
         (f) => f.runtimeName === "variableIds"
       );
-      expect(field?.lossy).toBe("derived-from-series");
+      expect(field?.lossy).toBeUndefined();
     });
 
     it("variableIds reverse uses Default + derived-from-series lossy", () => {

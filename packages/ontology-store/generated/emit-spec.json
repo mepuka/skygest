@@ -892,8 +892,7 @@
             "valueKind": {
               "_tag": "Iri"
             },
-            "cardinality": "many",
-            "lossy": "derived-from-series"
+            "cardinality": "many"
           },
           {
             "runtimeName": "distributionIds",
