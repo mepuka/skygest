@@ -125,13 +125,13 @@ export const CatalogRecord = Schema.Struct({
   sourceModified: Schema.optionalKey(DateLike),
   isAuthoritative: Schema.optionalKey(Schema.Boolean),
   duplicateOf: Schema.optionalKey(CatalogRecordId)
-}).annotate({
+}).pipe(
+  Schema.check(Schema.makeFilter(validatePrimaryTopicId))
+).annotate({
   description: "Catalog's view of a resource — carries only catalog-tracking dates, not Skygest-managed timestamps (D5). primaryTopicId is validated against primaryTopicType.",
   [DcatClass]: "http://www.w3.org/ns/dcat#CatalogRecord",
   [DesignDecision]: "D5"
-}).pipe(
-  Schema.check(Schema.makeFilter(validatePrimaryTopicId))
-);
+});
 export type CatalogRecord = Schema.Schema.Type<typeof CatalogRecord>;
 
 // ---------------------------------------------------------------------------

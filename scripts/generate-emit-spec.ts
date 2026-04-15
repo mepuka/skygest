@@ -209,57 +209,29 @@ const FIELD_FORWARD_OVERRIDES: FieldForwardOverrides = {
 // ---------------------------------------------------------------------------
 // AST annotation accessor
 //
-// Effect 4 stores schema annotations in one of two places:
+// Effect 4's `SchemaAST.resolve(ast)` returns annotations from the last
+// check when checks are present, or from `ast.annotations` (Base)
+// otherwise. All runtime schemas in this codebase are authored so that any
+// `.annotate({...})` call that supplies DcatClass / DcatProperty /
+// SchemaOrgType runs AFTER any `.pipe(Schema.check(...))` chain — so the
+// annotation always lands where `resolve()` expects it.
 //
-//  - On `ast.annotations` (Base annotations), when `.annotate(...)` is
-//    called while the AST has no checks (or before any `.pipe(Schema.check
-//    (...))` runs).
-//
-//  - On the last check's annotations, when `.annotate(...)` is called
-//    AFTER a check has been added (like Schema.brand on a branded type,
-//    which itself stores the brand name under the "brands" key on the
-//    last check's annotations).
-//
-// The runtime schemas in this codebase mix both patterns:
-//
-//   Agent = Schema.Struct({...}).annotate({[DcatClass]: "..."})
-//     → DcatClass lives on Base (no checks on the Struct).
-//
-//   CatalogRecord = Schema.Struct({...}).annotate({[DcatClass]: "..."})
-//                       .pipe(Schema.check(validator))
-//     → DcatClass is on Base; the filter check has no annotations.
-//       SchemaAST.resolve() would look at the last check and miss
-//       DcatClass entirely.
-//
-//   AgentId = Schema.String.pipe(Schema.check(pattern), Schema.brand("AgentId"))
-//   publisherAgentId = AgentId.annotate({[DcatProperty]: "..."})
-//     → The pattern check is the last check; `.brand("AgentId")`
-//       appends "brands" to its annotations; the subsequent
-//       .annotate({DcatProperty: ...}) ALSO appends to the last check.
-//       Base is empty.
-//
-// Correct reader: look at both Base annotations and the last check's
-// annotations. Base wins on conflict (matches the "annotations before
-// checks" pattern the class-level code uses).
+// `Schema.Annotations.Annotations` is typed as `{[x: string]: unknown}` —
+// the TypeScript signature doesn't permit symbol indexing, but at runtime
+// the object is a plain JS record and symbol keys are legal. We cast
+// through `AnyAnnotations` to reach the symbol-keyed DCAT annotations.
 // ---------------------------------------------------------------------------
 
 type AnyAnnotations = Record<string | symbol, unknown>;
 
-const getAllAnnotations = (ast: SchemaAST.AST): AnyAnnotations => {
-  const base = (ast.annotations ?? {}) as AnyAnnotations;
-  if (!ast.checks || ast.checks.length === 0) {
-    return base;
-  }
-  const lastCheck = ast.checks[ast.checks.length - 1];
-  const checkAnnotations = (lastCheck?.annotations ?? {}) as AnyAnnotations;
-  return { ...checkAnnotations, ...base };
-};
+const getAnnotations = (ast: SchemaAST.AST): AnyAnnotations =>
+  (SchemaAST.resolve(ast) ?? {}) as AnyAnnotations;
 
 const getAnnotationString = (
   ast: SchemaAST.AST,
   key: symbol
 ): string | undefined => {
-  const value = getAllAnnotations(ast)[key];
+  const value = getAnnotations(ast)[key];
   return typeof value === "string" ? value : undefined;
 };
 
@@ -273,7 +245,7 @@ const getDcatProperty = (ast: SchemaAST.AST): string | undefined =>
   getAnnotationString(ast, DcatProperty);
 
 const getBrandNames = (ast: SchemaAST.AST): ReadonlyArray<string> => {
-  const value = getAllAnnotations(ast)["brands"];
+  const value = getAnnotations(ast)["brands"];
   return Array.isArray(value) ? (value as ReadonlyArray<string>) : [];
 };
 
