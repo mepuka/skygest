@@ -441,6 +441,25 @@ const timestampedAliasedPolicy: Record<string, ReversePolicyEntry> = {
   aliases: runtimeLocal([])
 };
 
+const inverseEdge = (
+  forwardOwnerClassIri: string,
+  forwardPredicate: string
+): ReversePolicyEntry => ({
+  distillFrom: {
+    _tag: "InverseEdge",
+    forwardOwnerClassIri: forwardOwnerClassIri as DistillFrom extends {
+      forwardOwnerClassIri: infer O;
+    }
+      ? O
+      : never,
+    forwardPredicate: forwardPredicate as DistillFrom extends {
+      forwardPredicate: infer P;
+    }
+      ? P
+      : never
+  }
+});
+
 const REVERSE_POLICY: ReversePolicy = {
   Agent: {
     _tag: tagLiteral("Agent"),
@@ -468,7 +487,11 @@ const REVERSE_POLICY: ReversePolicy = {
   CatalogRecord: {
     _tag: tagLiteral("CatalogRecord"),
     id: subjectIri,
-    catalogId: runtimeLocal(null),
+    // `catalogId` is now a plain forward predicate on CatalogRecord itself
+    // (annotated with dcterms:isPartOf in src/domain/data-layer/catalog.ts).
+    // The reverse side falls through to the default `Predicate` policy, so
+    // no explicit entry is needed here.
+    //
     // primaryTopicType is the string discriminant; it is NOT emitted and
     // must be reconstructed by the reverse mapping from the resolved
     // target entity's rdf:type.
@@ -489,7 +512,14 @@ const REVERSE_POLICY: ReversePolicy = {
     _tag: tagLiteral("Dataset"),
     id: subjectIri,
     accessRights: runtimeLocal(null),
-    dataServiceIds: runtimeLocal([]),
+    // `dataServiceIds` has no forward predicate on Dataset — the canonical
+    // DCAT edge runs DataService → Dataset via dcat:servesDataset. The
+    // reverse walks that inverse direction: find every DataService whose
+    // servesDataset includes this Dataset.
+    dataServiceIds: inverseEdge(
+      "http://www.w3.org/ns/dcat#DataService",
+      "http://www.w3.org/ns/dcat#servesDataset"
+    ),
     // variableIds is denormalized on forward but the source of truth for
     // Dataset→Variable membership is Series.datasetId + Series.variableId.
     // The reverse rebuilds it by walking Series edges at distill time.
@@ -510,7 +540,14 @@ const REVERSE_POLICY: ReversePolicy = {
   Distribution: {
     _tag: tagLiteral("Distribution"),
     id: subjectIri,
-    datasetId: runtimeLocal(null),
+    // `datasetId` has no forward predicate on Distribution — the canonical
+    // DCAT edge runs Dataset → Distribution via dcat:distribution. The
+    // reverse walks the inverse direction: find the Dataset whose
+    // distribution set includes this Distribution.
+    datasetId: inverseEdge(
+      "http://www.w3.org/ns/dcat#Dataset",
+      "http://www.w3.org/ns/dcat#distribution"
+    ),
     kind: runtimeLocal(null),
     accessRights: runtimeLocal(null),
     ...timestampedAliasedPolicy
@@ -619,6 +656,37 @@ const generateClass = (name: ClassName): ClassEmitSpec => {
         `${name}.${fieldName}: no DcatProperty annotation and no REVERSE_POLICY entry. ` +
           `Add it to REVERSE_POLICY or annotate the schema.`
       );
+    }
+  }
+
+  // --- Generator self-check: no bad Default-null/branded-IRI pairings ---
+  //
+  // If a reverse field distills to `Default { defaultValue: null }` AND the
+  // matching forward side emits it as an Iri-valued field, the phase-5
+  // decode would fail because the runtime Schema's required branded ID
+  // (AgentId, DatasetId, ...) rejects null. Surface the mistake at
+  // generator time instead of letting it silently break the round-trip.
+  for (const reverse of reverseFields) {
+    if (
+      reverse.distillFrom._tag === "Default" &&
+      reverse.distillFrom.defaultValue === null
+    ) {
+      const forward = forwardFields.find(
+        (f) => f.runtimeName === reverse.runtimeName
+      );
+      if (
+        forward &&
+        forward.predicate !== null &&
+        forward.valueKind?._tag === "Iri" &&
+        (forward.cardinality === "single" || forward.cardinality === "many")
+      ) {
+        throw new Error(
+          `${name}.${reverse.runtimeName}: reverse distillFrom is Default(null) ` +
+            `but forward emits an ${forward.cardinality} IRI. Phase 5 decode will ` +
+            `fail because the runtime Schema rejects null. Use InverseEdge or a ` +
+            `real forward predicate.`
+        );
+      }
     }
   }
 

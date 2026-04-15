@@ -174,6 +174,23 @@ describe("DistillFrom", () => {
     expect(decoded._tag).toBe("PredicateWithPrecedence");
   });
 
+  it("decodes InverseEdge with forwardOwnerClassIri + forwardPredicate", () => {
+    const decoded = Schema.decodeUnknownSync(DistillFrom)({
+      _tag: "InverseEdge",
+      forwardOwnerClassIri: "http://www.w3.org/ns/dcat#Dataset",
+      forwardPredicate: "http://www.w3.org/ns/dcat#distribution"
+    });
+    expect(decoded._tag).toBe("InverseEdge");
+    if (decoded._tag === "InverseEdge") {
+      expect(decoded.forwardOwnerClassIri).toBe(
+        "http://www.w3.org/ns/dcat#Dataset"
+      );
+      expect(decoded.forwardPredicate).toBe(
+        "http://www.w3.org/ns/dcat#distribution"
+      );
+    }
+  });
+
   it("decodes Default with a scalar default value", () => {
     const decoded = Schema.decodeUnknownSync(DistillFrom)({
       _tag: "Default",

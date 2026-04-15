@@ -351,9 +351,11 @@
           },
           {
             "runtimeName": "catalogId",
-            "predicate": null,
-            "cardinality": "single",
-            "skipEmit": true
+            "predicate": "http://purl.org/dc/terms/isPartOf",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single"
           },
           {
             "runtimeName": "primaryTopicType",
@@ -446,11 +448,10 @@
           {
             "runtimeName": "catalogId",
             "distillFrom": {
-              "_tag": "Default",
-              "defaultValue": null
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/isPartOf"
             },
-            "cardinality": "single",
-            "lossy": "runtime-local"
+            "cardinality": "single"
           },
           {
             "runtimeName": "primaryTopicType",
@@ -1081,11 +1082,11 @@
           {
             "runtimeName": "dataServiceIds",
             "distillFrom": {
-              "_tag": "Default",
-              "defaultValue": []
+              "_tag": "InverseEdge",
+              "forwardOwnerClassIri": "http://www.w3.org/ns/dcat#DataService",
+              "forwardPredicate": "http://www.w3.org/ns/dcat#servesDataset"
             },
-            "cardinality": "many",
-            "lossy": "runtime-local"
+            "cardinality": "many"
           },
           {
             "runtimeName": "createdAt",
@@ -1459,11 +1460,11 @@
           {
             "runtimeName": "datasetId",
             "distillFrom": {
-              "_tag": "Default",
-              "defaultValue": null
+              "_tag": "InverseEdge",
+              "forwardOwnerClassIri": "http://www.w3.org/ns/dcat#Dataset",
+              "forwardPredicate": "http://www.w3.org/ns/dcat#distribution"
             },
-            "cardinality": "single",
-            "lossy": "runtime-local"
+            "cardinality": "single"
           },
           {
             "runtimeName": "kind",

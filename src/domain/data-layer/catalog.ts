@@ -106,7 +106,10 @@ const validatePrimaryTopicId = (record: {
 export const CatalogRecord = Schema.Struct({
   _tag: Schema.Literal("CatalogRecord"),
   id: CatalogRecordId,
-  catalogId: CatalogId,
+  catalogId: CatalogId.annotate({
+    [DcatProperty]: "http://purl.org/dc/terms/isPartOf",
+    description: "Parent Catalog. Emitted as dcterms:isPartOf; DCAT has no canonical CatalogRecord -> Catalog predicate (dcat:record runs the other direction) so the standard DCMI 'is part of' property is used."
+  }),
   primaryTopicType: Schema.Literals(["dataset", "dataService"]).annotate({
     description: "Discriminant that selects the entity kind for primaryTopicId; not emitted as a separate RDF predicate."
   }),

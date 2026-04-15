@@ -153,6 +153,28 @@ export const DistillFrom = Schema.Union([
     conflictResolution: Schema.String
   }),
   /**
+   * Reconstruct this field by walking the INVERSE direction of a forward
+   * edge emitted by a different class. Used for relationships whose
+   * canonical DCAT predicate lives on the other side of the edge:
+   *
+   * - `Distribution.datasetId` — walk `dcat:distribution` triples whose
+   *   object is this Distribution and take the subject (Dataset).
+   * - `Dataset.dataServiceIds` — walk `dcat:servesDataset` triples whose
+   *   object is this Dataset and take every subject (DataService).
+   *
+   * The reverse mapping queries the RdfStore for triples matching
+   * `(?s, forwardPredicate, currentSubject)` and assigns the subjects
+   * of those triples to the field. The `forwardOwnerClassIri` names the
+   * class whose forward section emits the predicate; the reverse mapper
+   * uses it to type-filter the subjects (`?s rdf:type forwardOwnerClassIri`)
+   * when the store contains mixed data. Non-lossy.
+   */
+  Schema.Struct({
+    _tag: Schema.Literal("InverseEdge"),
+    forwardOwnerClassIri: IRI,
+    forwardPredicate: IRI
+  }),
+  /**
    * The field has no predicate to pull from; inject a default on distill.
    * Used for runtime-local fields (`createdAt`, `updatedAt`, `accessRights`)
    * and for fields derived from other entities (`Dataset.variableIds`

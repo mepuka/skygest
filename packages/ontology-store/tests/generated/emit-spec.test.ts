@@ -118,6 +118,21 @@ describe("generated/emit-spec.json", () => {
       expect(field?.predicate).toBeNull();
       expect(field?.skipEmit).toBe(true);
     });
+
+    it("catalogId emits as dcterms:isPartOf IRI (forward) and reverses via Predicate", () => {
+      const forward = cr.forward.fields.find(
+        (f) => f.runtimeName === "catalogId"
+      );
+      expect(forward?.predicate).toBe("http://purl.org/dc/terms/isPartOf");
+      expect(forward?.valueKind).toEqual({ _tag: "Iri" });
+      const reverse = cr.reverse.fields.find(
+        (f) => f.runtimeName === "catalogId"
+      );
+      expect(reverse?.distillFrom).toEqual({
+        _tag: "Predicate",
+        predicate: "http://purl.org/dc/terms/isPartOf"
+      });
+    });
   });
 
   describe("Dataset", () => {
@@ -162,6 +177,19 @@ describe("generated/emit-spec.json", () => {
       expect(field?.distillFrom._tag).toBe("Default");
       expect(field?.lossy).toBe("derived-from-series");
     });
+
+    it("dataServiceIds reverse uses InverseEdge walking dcat:servesDataset", () => {
+      const field = ds.reverse.fields.find(
+        (f) => f.runtimeName === "dataServiceIds"
+      );
+      expect(field?.distillFrom).toEqual({
+        _tag: "InverseEdge",
+        forwardOwnerClassIri: "http://www.w3.org/ns/dcat#DataService",
+        forwardPredicate: "http://www.w3.org/ns/dcat#servesDataset"
+      });
+      // dataServiceIds is NOT lossy — the inverse walk is non-lossy
+      expect(field?.lossy).toBeUndefined();
+    });
   });
 
   describe("Distribution", () => {
@@ -187,6 +215,18 @@ describe("generated/emit-spec.json", () => {
         primitive: "number",
         xsdDatatype: "xsd:decimal"
       });
+    });
+
+    it("datasetId reverse uses InverseEdge walking dcat:distribution", () => {
+      const field = dist.reverse.fields.find(
+        (f) => f.runtimeName === "datasetId"
+      );
+      expect(field?.distillFrom).toEqual({
+        _tag: "InverseEdge",
+        forwardOwnerClassIri: "http://www.w3.org/ns/dcat#Dataset",
+        forwardPredicate: "http://www.w3.org/ns/dcat#distribution"
+      });
+      expect(field?.lossy).toBeUndefined();
     });
   });
 
