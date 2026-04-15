@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "../../.cache/tsc/packages-ontology-store.tsbuildinfo"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": []
+}
