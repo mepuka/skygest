@@ -8,6 +8,10 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "dependencies": {
+    "n3": "^2.0.3",
+    "shacl-engine": "^1.1.0"
+  },
   "peerDependencies": {
     "effect": "4.0.0-beta.43"
   }
