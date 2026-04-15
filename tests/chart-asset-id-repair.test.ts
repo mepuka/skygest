@@ -5,7 +5,10 @@ import {
 } from "../src/domain/data-layer/ids";
 import { parseChartAssetId } from "../src/domain/data-layer/post-ids";
 import { type PostUri, PostUri as PostUriSchema } from "../src/domain/types";
-import { repairChartAssetIdsForBlueskyPost } from "../src/enrichment/ChartAssetIdRepair";
+import {
+  repairChartAssetIdsForBlueskyPost,
+  repairChartAssetIdsForTwitterPost
+} from "../src/enrichment/ChartAssetIdRepair";
 
 const decodePostUri = Schema.decodeUnknownSync(PostUriSchema);
 
@@ -312,6 +315,209 @@ describe("repairChartAssetIdsForBlueskyPost", () => {
       expect.objectContaining({
         _tag: "failed",
         reason: "unparseable-legacy-asset-key"
+      })
+    );
+  });
+});
+
+describe("repairChartAssetIdsForTwitterPost", () => {
+  it("repairs legacy Twitter asset keys inside vision enrichments", () => {
+    const twitterPostUri = decodePostUri("x://user42/status/1870000000001");
+    const twitterAssetKey =
+      "embed:0:https://pbs.twimg.com/media/GT2AbCdWgAAefgh?format=jpg&name=large";
+
+    const result = repairChartAssetIdsForTwitterPost({
+      postUri: twitterPostUri,
+      payload: {
+        kind: "vision",
+        summary: {
+          text: "Solar chart",
+          mediaTypes: ["chart"],
+          chartTypes: ["line-chart"],
+          titles: ["Solar output"],
+          keyFindings: [
+            {
+              text: "Solar output rose",
+              assetKeys: [twitterAssetKey]
+            }
+          ]
+        },
+        assets: [
+          {
+            assetKey: twitterAssetKey,
+            assetType: "image",
+            source: "embed",
+            index: 0,
+            originalAltText: null,
+            extractionRoute: "full",
+            analysis: {
+              mediaType: "chart",
+              chartTypes: ["line-chart"],
+              altText: "Solar chart",
+              altTextProvenance: "synthetic",
+              xAxis: null,
+              yAxis: null,
+              series: [],
+              sourceLines: [],
+              temporalCoverage: null,
+              keyFindings: ["Solar output rose"],
+              visibleUrls: [],
+              organizationMentions: [],
+              logoText: [],
+              title: "Solar output",
+              modelId: "gemini-test",
+              processedAt: 1
+            }
+          }
+        ],
+        modelId: "gemini-test",
+        promptVersion: "v2",
+        processedAt: 1
+      }
+    });
+
+    expect(result._tag).toBe("repaired");
+    if (result._tag !== "repaired") {
+      return;
+    }
+
+    expect(parseChartAssetId(result.replacements[0]!.chartAssetId)).toEqual({
+      platform: "twitter",
+      tweetId: "1870000000001",
+      mediaId: "GT2AbCdWgAAefgh"
+    });
+    expect(result.payload.kind).toBe("vision");
+    if (result.payload.kind !== "vision") {
+      return;
+    }
+
+    expect(result.payload.summary.keyFindings[0]?.assetKeys).toEqual([
+      result.replacements[0]!.chartAssetId
+    ]);
+    expect(result.payload.assets[0]?.assetKey).toBe(
+      result.replacements[0]!.chartAssetId
+    );
+  });
+
+  it("repairs legacy Twitter asset keys and derived series keys inside data-ref-resolution payloads", () => {
+    const twitterPostUri = decodePostUri("x://user42/status/1870000000001");
+    const twitterAssetKey =
+      "embed:0:https://pbs.twimg.com/media/GT2AbCdWgAAefgh?format=jpg&name=large";
+
+    const result = repairChartAssetIdsForTwitterPost({
+      postUri: twitterPostUri,
+      payload: {
+        kind: "data-ref-resolution",
+        stage1: {
+          matches: [
+            {
+              _tag: "DatasetMatch",
+              datasetId: makeDatasetId(
+                "https://id.skygest.io/dataset/ds_TESTDATAREF01"
+              ),
+              title: "Example dataset",
+              bestRank: 1,
+              evidence: [
+                {
+                  _tag: "DatasetTitleEvidence",
+                  signal: "dataset-title",
+                  rank: 1,
+                  assetKey: twitterAssetKey,
+                  datasetName: "Example dataset",
+                  normalizedTitle: "example dataset"
+                }
+              ]
+            }
+          ],
+          residuals: [
+            {
+              _tag: "DeferredToKernelResidual",
+              source: "axis-label",
+              text: "Price",
+              reason: "requires kernel semantic interpretation",
+              assetKey: twitterAssetKey
+            }
+          ]
+        },
+        kernel: [
+          {
+            _tag: "NoMatch",
+            bundle: {
+              postUri: twitterPostUri,
+              assetKey: twitterAssetKey,
+              postText: ["Example post"],
+              chartTitle: "Example chart",
+              xAxis: {
+                label: "Year",
+                unit: null
+              },
+              yAxis: {
+                label: "Price",
+                unit: "USD/MWh"
+              },
+              series: [
+                {
+                  itemKey: `${twitterAssetKey}:series:0`,
+                  legendLabel: "Retail price",
+                  unit: "USD/MWh"
+                }
+              ],
+              keyFindings: ["Example finding"],
+              sourceLines: [
+                {
+                  sourceText: "Source: Example",
+                  datasetName: "Example dataset"
+                }
+              ],
+              publisherHints: [
+                {
+                  label: "Example Provider",
+                  confidence: 0.9
+                }
+              ]
+            },
+            reason: "no dataset match"
+          }
+        ],
+        resolverVersion: "resolution-kernel@sky-314",
+        processedAt: 1
+      }
+    });
+
+    expect(result._tag).toBe("repaired");
+    if (result._tag !== "repaired") {
+      return;
+    }
+    expect(result.payload.kind).toBe("data-ref-resolution");
+    if (result.payload.kind !== "data-ref-resolution") {
+      return;
+    }
+
+    const chartAssetId = result.replacements[0]!.chartAssetId;
+    expect(result.payload.stage1.matches[0]).toEqual(
+      expect.objectContaining({
+        evidence: [
+          expect.objectContaining({
+            assetKey: chartAssetId
+          })
+        ]
+      })
+    );
+    expect(result.payload.stage1.residuals[0]).toEqual(
+      expect.objectContaining({
+        assetKey: chartAssetId
+      })
+    );
+    expect(result.payload.kernel[0]).toEqual(
+      expect.objectContaining({
+        bundle: expect.objectContaining({
+          assetKey: chartAssetId,
+          series: [
+            expect.objectContaining({
+              itemKey: `${chartAssetId}:series:0`
+            })
+          ]
+        })
       })
     );
   });

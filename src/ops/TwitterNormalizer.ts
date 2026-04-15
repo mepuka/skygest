@@ -60,7 +60,8 @@ const buildEmbed = (
         images: tweet.photos.map((p) => ({
           thumb: p.url,
           fullsize: p.url,
-          alt: p.altText ?? null
+          alt: p.altText ?? null,
+          mediaId: p.id
         }))
       }
     };

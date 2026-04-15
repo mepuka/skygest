@@ -1,5 +1,6 @@
 import { Effect, Layer } from "effect";
 import { describe, expect, it } from "@effect/vitest";
+import { SqlClient } from "effect/unstable/sql";
 import {
   CandidatePayloadNotPickedError
 } from "../src/domain/candidatePayload";
@@ -11,7 +12,10 @@ import {
   seedKnowledgeBase
 } from "./support/runtime";
 import type { PostUri } from "../src/domain/types";
-import { chartAssetIdFromBluesky } from "../src/domain/data-layer/post-ids";
+import {
+  chartAssetIdFromBluesky,
+  chartAssetIdFromTwitter
+} from "../src/domain/data-layer/post-ids";
 
 const solarUri = `at://${sampleDid}/app.bsky.feed.post/post-solar` as PostUri;
 const imageOneBlobCid = "bafkreiassetimage01";
@@ -25,6 +29,13 @@ const mediaThumb = `https://cdn.bsky.app/img/feed_thumbnail/plain/${sampleDid}/$
 const mediaFullsize = `https://cdn.bsky.app/img/feed_fullsize/plain/${sampleDid}/${mediaBlobCid}@jpeg`;
 const imageOneAssetKey = chartAssetIdFromBluesky(solarUri, imageOneBlobCid);
 const mediaAssetKey = chartAssetIdFromBluesky(solarUri, mediaBlobCid);
+const twitterUri = "x://user42/status/1870000000001" as PostUri;
+const twitterMediaId = "1850000000001";
+const twitterUrlMediaId = "GT2AbCdWgAAefgh";
+const twitterImageUrl =
+  "https://pbs.twimg.com/media/GT2AbCdWgAAefgh?format=jpg&name=large";
+const twitterAssetKey = chartAssetIdFromTwitter(twitterUri, twitterMediaId);
+const twitterUrlAssetKey = chartAssetIdFromTwitter(twitterUri, twitterUrlMediaId);
 
 const makeLayer = () => {
   const baseLayer = makeBiLayer();
@@ -52,12 +63,14 @@ describe("EnrichmentPlanner", () => {
             {
               thumb: imageOneThumb,
               fullsize: imageOneFullsize,
-              alt: "Chart one"
+              alt: "Chart one",
+              mediaId: null
             },
             {
               thumb: imageTwoThumb,
               fullsize: imageTwoFullsize,
-              alt: null
+              alt: null,
+              mediaId: null
             }
           ]
         }
@@ -143,6 +156,144 @@ describe("EnrichmentPlanner", () => {
     }).pipe(Effect.provide(makeLayer()))
   );
 
+  it.effect("uses Twitter media ids when planning image assets", () =>
+    Effect.gen(function* () {
+      yield* seedKnowledgeBase();
+      const sql = yield* SqlClient.SqlClient;
+      const payloads = yield* CandidatePayloadService;
+      const planner = yield* EnrichmentPlanner;
+
+      yield* sql`
+        INSERT INTO posts (
+          uri,
+          did,
+          cid,
+          text,
+          created_at,
+          indexed_at,
+          has_links,
+          status,
+          ingest_id
+        ) VALUES (
+          ${twitterUri},
+          ${sampleDid},
+          ${"cid-twitter-plan"},
+          ${"Imported Twitter market update"},
+          ${1_870_000_000_000},
+          ${1_870_000_000_000},
+          ${0},
+          ${"active"},
+          ${"ingest-twitter-plan"}
+        )
+      `.pipe(Effect.asVoid);
+
+      yield* payloads.capturePayload({
+        postUri: twitterUri,
+        captureStage: "candidate",
+        embedType: "img",
+        embedPayload: {
+          kind: "img",
+          images: [
+            {
+              thumb: twitterImageUrl,
+              fullsize: twitterImageUrl,
+              alt: "Twitter chart",
+              mediaId: twitterMediaId
+            }
+          ]
+        }
+      });
+      yield* payloads.markPicked(twitterUri);
+
+      const plan = yield* planner.plan({
+        postUri: twitterUri,
+        enrichmentType: "vision",
+        schemaVersion: "v1"
+      });
+
+      expect(plan.decision).toBe("execute");
+      expect(plan.assets).toEqual([
+        expect.objectContaining({
+          assetKey: twitterAssetKey,
+          assetType: "image",
+          source: "embed",
+          index: 0,
+          fullsize: twitterImageUrl,
+          alt: "Twitter chart"
+        })
+      ]);
+    }).pipe(Effect.provide(makeLayer()))
+  );
+
+  it.effect("falls back to the Twitter image URL when the stored media id is missing", () =>
+    Effect.gen(function* () {
+      yield* seedKnowledgeBase();
+      const sql = yield* SqlClient.SqlClient;
+      const payloads = yield* CandidatePayloadService;
+      const planner = yield* EnrichmentPlanner;
+
+      yield* sql`
+        INSERT INTO posts (
+          uri,
+          did,
+          cid,
+          text,
+          created_at,
+          indexed_at,
+          has_links,
+          status,
+          ingest_id
+        ) VALUES (
+          ${twitterUri},
+          ${sampleDid},
+          ${"cid-twitter-plan-fallback"},
+          ${"Imported Twitter market update"},
+          ${1_870_000_000_000},
+          ${1_870_000_000_000},
+          ${0},
+          ${"active"},
+          ${"ingest-twitter-plan-fallback"}
+        )
+      `.pipe(Effect.asVoid);
+
+      yield* payloads.capturePayload({
+        postUri: twitterUri,
+        captureStage: "candidate",
+        embedType: "img",
+        embedPayload: {
+          kind: "img",
+          images: [
+            {
+              thumb: twitterImageUrl,
+              fullsize: twitterImageUrl,
+              alt: "Twitter chart",
+              mediaId: null
+            }
+          ]
+        }
+      });
+      yield* payloads.markPicked(twitterUri);
+
+      const plan = yield* planner.plan({
+        postUri: twitterUri,
+        enrichmentType: "vision",
+        schemaVersion: "v1"
+      });
+
+      expect(plan.decision).toBe("execute");
+      expect(plan.assets).toEqual([
+        expect.objectContaining({
+          assetKey: twitterUrlAssetKey,
+          assetType: "image",
+          source: "embed",
+          index: 0,
+          fullsize: twitterImageUrl,
+          alt: "Twitter chart"
+        })
+      ]);
+    }).pipe(Effect.provide(makeLayer()))
+  );
+
   it.effect("assembles quote context and valid existing enrichments for source attribution", () =>
     Effect.gen(function* () {
       yield* seedKnowledgeBase();
@@ -166,7 +317,8 @@ describe("EnrichmentPlanner", () => {
               {
                 thumb: mediaThumb,
                 fullsize: mediaFullsize,
-                alt: "Chart screenshot"
+                alt: "Chart screenshot",
+                mediaId: null
               }
             ]
           }
@@ -291,7 +443,8 @@ describe("EnrichmentPlanner", () => {
             {
               thumb: imageOneThumb,
               fullsize: imageOneFullsize,
-              alt: null
+              alt: null,
+              mediaId: null
             }
           ]
         }

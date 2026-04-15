@@ -115,7 +115,8 @@ const makePlan = (
       {
         thumb: "https://cdn.bsky.app/thumb-1.jpg",
         fullsize: "https://cdn.bsky.app/full-1.jpg",
-        alt: null
+        alt: null,
+        mediaId: null
       }
     ]
   },

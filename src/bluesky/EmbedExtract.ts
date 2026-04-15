@@ -47,7 +47,8 @@ export const buildTypedEmbed = (embed: any): EmbedPayload | null => {
       images: (embed.images as any[]).map((img: any) => ({
         thumb: img.thumb ?? "",
         fullsize: img.fullsize ?? "",
-        alt: img.alt ?? null
+        alt: img.alt ?? null,
+        mediaId: null
       }))
     };
   }

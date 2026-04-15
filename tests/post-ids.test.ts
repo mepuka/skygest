@@ -6,9 +6,11 @@ import {
   ChartAssetId,
   PostSkygestUri,
   chartAssetIdFromBluesky,
+  chartAssetIdFromTwitter,
   decodeDidDots,
   encodeDidDots,
   mintBlueskyChartAssetId,
+  mintTwitterChartAssetId,
   mintPostSkygestUri,
   parseChartAssetId,
   parsePostSkygestUri
@@ -158,6 +160,57 @@ describe("post-ids", () => {
         });
       })
     );
+  });
+
+  it("round-trips minted Twitter chart asset ids", () => {
+    fc.assert(
+      fc.property(numericTokenArbitrary, tokenArbitrary, (tweetId, mediaId) => {
+        const chartAssetId = mintTwitterChartAssetId({
+          tweetId,
+          mediaId
+        });
+
+        expect(decodeChartAssetId(chartAssetId)).toBe(chartAssetId);
+        expect(parseChartAssetId(chartAssetId)).toEqual({
+          platform: "twitter",
+          tweetId,
+          mediaId
+        });
+      })
+    );
+  });
+
+  it("derives a Twitter chart asset id from the platform post URI", () => {
+    fc.assert(
+      fc.property(
+        numericTokenArbitrary,
+        numericTokenArbitrary,
+        tokenArbitrary,
+        (userId, tweetId, mediaId) => {
+          const postUri = decodePostUri(`x://${userId}/status/${tweetId}`);
+          const chartAssetId = chartAssetIdFromTwitter(postUri, mediaId);
+
+          expect(parseChartAssetId(chartAssetId)).toEqual({
+            platform: "twitter",
+            tweetId,
+            mediaId
+          });
+        }
+      )
+    );
+  });
+
+  it("accepts legacy Twitter post URIs without the status segment", () => {
+    const postUri = decodePostUri("x://user42/1870000000001");
+    const skygestUri = mintPostSkygestUri(postUri);
+    const chartAssetId = chartAssetIdFromTwitter(postUri, "GT2AbCdWgAAefgh");
+
+    expect(skygestUri).toBe("https://id.skygest.io/post/twitter/1870000000001");
+    expect(parseChartAssetId(chartAssetId)).toEqual({
+      platform: "twitter",
+      tweetId: "1870000000001",
+      mediaId: "GT2AbCdWgAAefgh"
+    });
   });
 
   it("parses representative real Bluesky image URLs from the old eval corpus", () => {
