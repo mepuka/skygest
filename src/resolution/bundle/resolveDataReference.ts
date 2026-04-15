@@ -13,6 +13,10 @@ import type { DataLayerRegistryLookup } from "../dataLayerRegistry";
 import { findDatasetMatchesForName } from "../datasetNameMatch";
 import { normalizeDistributionHostname } from "../normalize";
 
+// SUPERSEDED-BY: SKY-343 / src/resolution/bundle/resolveBundle.ts
+// Keep this exact-match kernel in tree as a reference during the cutover.
+// New bundle-resolution wiring should use resolveBundle instead.
+
 // ---------------------------------------------------------------------------
 // resolveDataReference — pure, total retrieval + scope-narrowing kernel.
 //
@@ -567,6 +571,7 @@ const resolveDatasets = (
 // Public entry point
 // ---------------------------------------------------------------------------
 
+/** @deprecated Superseded by SKY-343 resolveBundle(); retained only as a cutover reference. */
 export const resolveDataReference = (
   bundle: EnrichedBundle,
   lookup: DataLayerRegistryLookup

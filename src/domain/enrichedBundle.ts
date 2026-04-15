@@ -25,6 +25,7 @@ export type EnrichedBundle = Schema.Schema.Type<typeof EnrichedBundle>;
 // Rung enumeration
 // ---------------------------------------------------------------------------
 
+/** @deprecated Superseded by SKY-343 bundle-resolution types in src/domain/bundleResolution.ts. */
 export const ResolutionRung = Schema.Literals([
   "Agent",
   "Dataset",
@@ -40,8 +41,13 @@ export type ResolutionRung = Schema.Schema.Type<typeof ResolutionRung>;
 //
 // Each variant records which vision/source-attribution/post-context field
 // produced the hit, plus the literal query value fed to the lookup.
+//
+// SUPERSEDED-BY: SKY-343 / src/domain/bundleResolution.ts
+// These exact-match resolver types remain in tree only to support the
+// reference implementation at src/resolution/bundle/resolveDataReference.ts.
 // ---------------------------------------------------------------------------
 
+/** @deprecated Superseded by SKY-343 bundle-resolution types in src/domain/bundleResolution.ts. */
 export const AgentSignal = Schema.Union([
   Schema.TaggedStruct("SourceAttributionProvider", {
     providerLabel: Schema.String
@@ -83,6 +89,7 @@ export type AgentSignal = Schema.Schema.Type<typeof AgentSignal>;
 // Name-lane variants invoke findDatasetMatchesForName().
 // ---------------------------------------------------------------------------
 
+/** @deprecated Superseded by SKY-343 bundle-resolution types in src/domain/bundleResolution.ts. */
 export const DatasetSignal = Schema.Union([
   Schema.TaggedStruct("VisibleUrlDistribution", {
     url: Schema.String
@@ -121,6 +128,7 @@ export type DatasetSignal = Schema.Schema.Type<typeof DatasetSignal>;
 // Resolved hit shapes (one entry per distinct rung result).
 // ---------------------------------------------------------------------------
 
+/** @deprecated Superseded by SKY-343 bundle-resolution types in src/domain/bundleResolution.ts. */
 export const ResolvedAgent = Schema.Struct({
   agentId: AgentId,
   via: AgentSignal
@@ -129,6 +137,7 @@ export const ResolvedAgent = Schema.Struct({
 });
 export type ResolvedAgent = Schema.Schema.Type<typeof ResolvedAgent>;
 
+/** @deprecated Superseded by SKY-343 bundle-resolution types in src/domain/bundleResolution.ts. */
 export const ResolvedDataset = Schema.Struct({
   datasetId: DatasetId,
   via: DatasetSignal,
@@ -146,6 +155,7 @@ export type ResolvedDataset = Schema.Schema.Type<typeof ResolvedDataset>;
 // and an optional status note (e.g. stub rungs 3/4).
 // ---------------------------------------------------------------------------
 
+/** @deprecated Superseded by SKY-343 bundle-resolution types in src/domain/bundleResolution.ts. */
 export const TrailStatus = Schema.Literals([
   "hit",
   "miss",
@@ -155,6 +165,7 @@ export const TrailStatus = Schema.Literals([
 ]);
 export type TrailStatus = Schema.Schema.Type<typeof TrailStatus>;
 
+/** @deprecated Superseded by SKY-343 bundle-resolution types in src/domain/bundleResolution.ts. */
 export const TrailEntry = Schema.Struct({
   rung: ResolutionRung,
   signal: Schema.String,
@@ -170,8 +181,11 @@ export type TrailEntry = Schema.Schema.Type<typeof TrailEntry>;
 
 // ---------------------------------------------------------------------------
 // DataReferenceResolution — the kernel's output for one bundle.
+//
+// SUPERSEDED-BY: SKY-343 / src/domain/bundleResolution.ts
 // ---------------------------------------------------------------------------
 
+/** @deprecated Superseded by SKY-343 bundle-resolution types in src/domain/bundleResolution.ts. */
 export const DataReferenceResolution = Schema.Struct({
   agents: Schema.Array(ResolvedAgent),
   datasets: Schema.Array(ResolvedDataset),

@@ -318,6 +318,54 @@ const collectDatasetExactUrlQueries = (
   return values;
 };
 
+const collectVariablePlaceholderQueries = (
+  bundle: EnrichedBundle
+): ReadonlyArray<TextSignalQuery> => {
+  const values: Array<TextSignalQuery> = [];
+  const seen = new Set<string>();
+
+  for (const series of bundle.asset.analysis.series) {
+    pushTextSignal(
+      values,
+      seen,
+      "series-legend-label",
+      "asset.analysis.series[].legendLabel",
+      series.legendLabel
+    );
+  }
+
+  pushTextSignal(
+    values,
+    seen,
+    "axis-label",
+    "asset.analysis.xAxis.label",
+    bundle.asset.analysis.xAxis?.label
+  );
+  pushTextSignal(
+    values,
+    seen,
+    "axis-unit",
+    "asset.analysis.xAxis.unit",
+    bundle.asset.analysis.xAxis?.unit
+  );
+  pushTextSignal(
+    values,
+    seen,
+    "axis-label",
+    "asset.analysis.yAxis.label",
+    bundle.asset.analysis.yAxis?.label
+  );
+  pushTextSignal(
+    values,
+    seen,
+    "axis-unit",
+    "asset.analysis.yAxis.unit",
+    bundle.asset.analysis.yAxis?.unit
+  );
+
+  return values;
+};
+
 const makeTrailEntry = (
   input: BundleResolutionTrailEntry
 ): BundleResolutionTrailEntry => input;
@@ -554,12 +602,32 @@ export const resolveBundle = Effect.fn("resolveBundle")(function* (
       "Series search will be wired in the next SKY-343 slice once the agent/dataset envelope is proven."
     )
   );
-  trail.push(
-    makeNotImplementedEntry(
-      "Variable",
-      "Variable search stays deferred in this initial SKY-343 slice."
-    )
-  );
+
+  const variablePlaceholderQueries = collectVariablePlaceholderQueries(bundle);
+  if (variablePlaceholderQueries.length === 0) {
+    trail.push(
+      makeNotImplementedEntry(
+        "Variable",
+        "Variable search stays deferred in this initial SKY-343 slice."
+      )
+    );
+  } else {
+    for (const probe of variablePlaceholderQueries) {
+      trail.push(
+        makeTrailEntry({
+          rung: "Variable",
+          signal: probe.signal,
+          lane: "not-implemented",
+          query: probe.query,
+          scoped: false,
+          scopeAgentIds: [],
+          hits: [],
+          note:
+            "variable query derived and recorded, but variable search stays deferred in this SKY-343 slice"
+        })
+      );
+    }
+  }
 
   return decodeBundleResolution({
     agents,

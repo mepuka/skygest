@@ -472,4 +472,39 @@ describe("resolveBundle", () => {
       );
     }).pipe(Effect.provide(makeServiceLayer()))
   );
+
+  it.effect("records variable placeholder queries from legend and axis signals", () =>
+    Effect.gen(function* () {
+      yield* seedSearchDocs;
+
+      const result = yield* resolveBundle(makeBundle(), { limit: 3 as any });
+      const variableEntries = result.trail.filter(
+        (entry) => entry.rung === "Variable"
+      );
+
+      expect(
+        variableEntries.some(
+          (entry) =>
+            entry.signal.kind === "series-legend-label" &&
+            entry.query === "ERCOT wind generation" &&
+            entry.lane === "not-implemented" &&
+            entry.hits.length === 0
+        )
+      ).toBe(true);
+      expect(
+        variableEntries.some(
+          (entry) =>
+            entry.signal.kind === "axis-label" &&
+            entry.query === "Wind generation"
+        )
+      ).toBe(true);
+      expect(
+        variableEntries.some(
+          (entry) =>
+            entry.signal.kind === "axis-unit" &&
+            entry.query === "MWh"
+        )
+      ).toBe(true);
+    }).pipe(Effect.provide(makeServiceLayer()))
+  );
 });

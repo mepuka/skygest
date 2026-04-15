@@ -1,5 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Schema } from "effect";
+import { chartAssetIdFromBluesky } from "../src/domain/data-layer/post-ids";
 import { ResolutionEvidenceBundle } from "../src/domain/resolutionKernel";
 import { Stage1Input } from "../src/domain/stage1Resolution";
 import {
@@ -9,6 +10,14 @@ import {
 
 const decodeStage1Input = Schema.decodeUnknownSync(Stage1Input);
 const decodeBundle = Schema.decodeUnknownSync(ResolutionEvidenceBundle);
+const assetKeyOne = chartAssetIdFromBluesky(
+  "at://did:plc:test/app.bsky.feed.post/sky-313" as any,
+  "asset-1"
+);
+const assetKeyTwo = chartAssetIdFromBluesky(
+  "at://did:plc:test/app.bsky.feed.post/sky-315" as any,
+  "asset-2"
+);
 
 describe("buildResolutionEvidenceBundles", () => {
   it("builds one bundle per vision asset and preserves chart evidence", () => {
@@ -31,7 +40,7 @@ describe("buildResolutionEvidenceBundles", () => {
         },
         assets: [
           {
-            assetKey: "asset-1",
+            assetKey: assetKeyOne,
             assetType: "image",
             source: "embed",
             index: 0,
@@ -119,7 +128,7 @@ describe("buildResolutionEvidenceBundles", () => {
     expect(() => decodeBundle(bundles[0])).not.toThrow();
     expect(bundles[0]).toEqual({
       postUri: input.postContext.postUri,
-      assetKey: "asset-1",
+      assetKey: assetKeyOne,
       postText: ["New chart on solar generation in Germany"],
       chartTitle: "German solar generation",
       xAxis: {
@@ -132,7 +141,7 @@ describe("buildResolutionEvidenceBundles", () => {
       },
       series: [
         {
-          itemKey: "asset-1:series:0",
+          itemKey: `${assetKeyOne}:series:0`,
           legendLabel: "Solar",
           unit: "TWh"
         }
@@ -187,7 +196,7 @@ describe("buildResolutionEvidenceBundles", () => {
         },
         assets: [
           {
-            assetKey: "asset-2",
+            assetKey: assetKeyTwo,
             assetType: "image",
             source: "embed",
             index: 0,
@@ -227,12 +236,12 @@ describe("buildResolutionEvidenceBundles", () => {
 
     expect(bundles[0]?.series).toEqual([
       {
-        itemKey: "asset-2:series:0",
+        itemKey: `${assetKeyTwo}:series:0`,
         legendLabel: "Solar",
         unit: "TWh"
       },
       {
-        itemKey: "asset-2:series:1",
+        itemKey: `${assetKeyTwo}:series:1`,
         legendLabel: "Wind",
         unit: "TWh"
       }
