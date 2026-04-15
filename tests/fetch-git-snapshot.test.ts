@@ -141,6 +141,36 @@ const makeFixture = async (
 };
 
 describe("fetchGitSnapshot", () => {
+  it("short-circuits cleanly when the lock file commit is a placeholder", async () => {
+    const rootDir = await fsp.mkdtemp(
+      nodePath.join(os.tmpdir(), "git-snapshot-fetch-placeholder-")
+    );
+
+    try {
+      const lockPath = nodePath.join(rootDir, "placeholder.lock.json");
+      const destDir = nodePath.join(rootDir, ".generated", "fixture");
+
+      await writeJson(lockPath, {
+        repo: "github.com/example/not-created-yet",
+        ref: "",
+        commit: "",
+        manifestHash: ""
+      });
+
+      await Effect.runPromise(
+        fetchGitSnapshot({
+          lockFile: lockPath,
+          destDir,
+          requiredManifestFile: "manifest.json"
+        }).pipe(Effect.provide(scriptPlatformLayer))
+      );
+
+      await expect(fsp.access(destDir)).rejects.toBeDefined();
+    } finally {
+      await fsp.rm(rootDir, { recursive: true, force: true });
+    }
+  });
+
   it("is idempotent for the same pinned commit and does not delete existing contents on the second run", async () => {
     const rootDir = await fsp.mkdtemp(
       nodePath.join(os.tmpdir(), "git-snapshot-fetch-")
