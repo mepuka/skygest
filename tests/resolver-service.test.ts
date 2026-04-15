@@ -15,6 +15,7 @@ import { CloudflareEnv, type EnvBindings } from "../src/platform/Env";
 import { ResolutionKernel } from "../src/resolution/ResolutionKernel";
 import { Stage1Resolver } from "../src/resolution/Stage1Resolver";
 import { ResolverService } from "../src/resolver/ResolverService";
+import { DataLayerRegistry } from "../src/services/DataLayerRegistry";
 import { EntitySearchService } from "../src/services/EntitySearchService";
 
 const asPostUri = (value: string) => value as PostUri;
@@ -100,7 +101,11 @@ const makeEnv = (): EnvBindings => ({
   OPERATOR_SECRET: "resolver-secret"
 });
 
-const makeSearchCandidates = () => ({
+const makeSearchCandidatesResponse = () => ({
+  bundles: []
+});
+
+const makeEntitySearchBundleCandidates = () => ({
   plan: {
     exactCanonicalUrls: [],
     exactHostnames: [],
@@ -136,6 +141,10 @@ const makeServiceLayer = (options?: {
             options?.resolveStage1?.(input as Stage1Input) ??
             Effect.succeed(makeStage1Result())
         }),
+        Layer.succeed(DataLayerRegistry, {
+          prepared: {} as never,
+          lookup: {} as never
+        }),
         Layer.succeed(ResolutionKernel, {
           resolve: (input) =>
             options?.resolveKernel?.(input as Stage1Input) ??
@@ -148,7 +157,8 @@ const makeServiceLayer = (options?: {
           searchDistributions: () => Effect.succeed([]),
           searchSeries: () => Effect.succeed([]),
           searchVariables: () => Effect.succeed([]),
-          searchBundleCandidates: () => Effect.succeed(makeSearchCandidates())
+          searchBundleCandidates: () =>
+            Effect.succeed(makeEntitySearchBundleCandidates())
         })
       )
     )
@@ -289,8 +299,7 @@ describe("ResolverService", () => {
         stage1Input: makeStage1Input()
       });
 
-      expect(result.plan).toEqual(makeSearchCandidates().plan);
-      expect(result.datasets).toEqual([]);
+      expect(result).toEqual(makeSearchCandidatesResponse());
     }).pipe(Effect.provide(makeServiceLayer()))
   );
 });
