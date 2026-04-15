@@ -44,11 +44,11 @@
         },
         {
           "runtimeName": "alternateNames",
-          "ontologyIri": null,
+          "ontologyIri": "http://www.w3.org/2004/02/skos/core#altLabel",
           "type": { "_tag": "literalArray", "literalKind": "string" },
           "optional": true,
           "generation": "generated",
-          "description": "Runtime-local but emitted into the Agent fragment for symmetry with name."
+          "description": "SKOS alternate labels for the agent. Paired on distill with display-alias via PredicateWithPrecedence in emit-spec.json."
         },
         {
           "runtimeName": "homepage",
