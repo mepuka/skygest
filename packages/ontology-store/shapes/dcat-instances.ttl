@@ -78,9 +78,8 @@ sevocab:DatasetShape
   sh:property [
     a sh:PropertyShape ;
     sh:path dcat:distribution ;
-    sh:minCount 1 ;
     sh:class dcat:Distribution ;
-    sh:message "Every Dataset must point to at least one dcat:Distribution." ;
+    sh:message "A Dataset distribution, when present, must be a dcat:Distribution." ;
   ] .
 
 sevocab:DistributionShape
