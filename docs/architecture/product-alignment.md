@@ -6,7 +6,7 @@ This document maps actor-facing experiences to the subsystems and seams they dep
 - `resolution-trace.md` for the one-post walkthrough
 - `seams.md` for the seam inventory
 
-The key update in this refresh is that the resolver is no longer hypothetical infrastructure. The runtime write path is shipped. The remaining product question is how quickly that shipped runtime becomes usable in the editorial loop.
+The key update in this refresh is that the resolver is no longer hypothetical infrastructure. The runtime write path is shipped, the registry prep loop is now fed by a git-pinned snapshot plus a shared graph, and staged typed-search infra now exists underneath the still-missing editor-facing lookup tools. The remaining product question is how quickly that shipped runtime and supporting infra become usable in the editorial loop.
 
 ## 1. Actors and their core experiences
 
@@ -100,13 +100,14 @@ The model already has:
 - `get_post_enrichments`
 - `get_editorial_pick_bundle`
 - stored resolver rows for posts that have run through the lane
+- staged typed-search infrastructure and rebuild scripts under `SEARCH_DB`
 
 The remaining gap is narrower and clearer:
 
 1. **Ad-hoc direct lookup** is missing (`SKY-241`).
 2. **Cross-expert join lookup** is missing (`SKY-244`).
 
-That is a better product situation than before because the missing surface is now concentrated in two explicit tool seams instead of being mixed up with missing runtime plumbing.
+That is a better product situation than before because the missing surface is now concentrated in two explicit tool seams instead of being mixed up with missing runtime plumbing or missing search infrastructure.
 
 ### (c) What is justified next, and what should wait
 
@@ -119,7 +120,7 @@ Two tracks are justified now.
 - `SKY-243` (warn on unresolved refs in build-graph)
 - `SKY-244` (cross-expert join tool)
 
-This is the shortest path from "resolver writes good rows" to "editor can actually use them."
+This is the shortest path from "resolver writes good rows" to "editor can actually use them," and it should build on the registry and staged search surfaces that now already exist.
 
 **Track 2: resolver quality and registry completeness**
 
@@ -149,11 +150,12 @@ That means `SKY-317` plus the registry and coverage follow-ons the eval harness 
 
 **Hold future reranking or workflow escalation behind those two tracks.**
 
-The system already has the right runtime shape. It now needs better data behind that shape and better editorial surfaces on top of it.
+The system already has the right runtime shape. It now needs better data behind that shape and better editorial surfaces on top of it, not another infrastructure reset.
 
 ## What changed in this refresh
 
-1. The matrix now treats the resolver runtime as shipped, not planned.
-2. The model's structured-gap experience is now counted as real for posts that have run through the lane.
-3. The remaining editor/model blockers are now framed as missing lookup and projection surfaces.
-4. The recommended next work is split into a product-surface track and a quality track.
+1. The matrix still treats the resolver runtime as shipped, not planned.
+2. The narrative now calls out the shared-graph and git-pinned-snapshot prep loop behind that runtime.
+3. The model's structured-gap experience is still counted as real for posts that have run through the lane.
+4. The remaining editor/model blockers are now framed as missing lookup and projection surfaces on top of already-shipped supporting infra.
+5. The recommended next work is still split into a product-surface track and a quality track.

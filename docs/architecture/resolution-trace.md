@@ -16,20 +16,22 @@ The critical architectural update is that the runtime path is now:
 
 There is no live runtime Stage 2 or Stage 3 flow in this branch.
 
+The prep loop behind that runtime also changed recently: cold-start inputs now arrive through a git-pinned snapshot fetched into `.generated/cold-start`, and the prepared registry the resolver reads now carries a shared data-layer graph.
+
 ## Snapshot note
 
 This trace describes the shipped contract, not a claim that every gold-set post already resolves perfectly. The resolver now writes real `data-ref-resolution` rows, but the kernel eval harness still shows meaningful accuracy gaps. So the document is about how data moves through the system and where the current quality loop sits.
 
 ## Prep loop
 
-### 0A. Provider ingest -> checked-in cold-start registry
+### 0A. Provider ingest -> git-pinned cold-start snapshot
 
 - **Component:** `scripts/cold-start-ingest-*.ts` over `src/ingest/dcat-harness/`
 - **Input:** provider catalog or API surfaces
-- **Output:** reviewed JSON entities under `references/cold-start/`
-- **Why it matters:** the resolver only becomes meaningful if the Ember agent, dataset, distribution, and variable already exist in the checked-in registry
+- **Output:** reviewed JSON entities under `.generated/cold-start/`, backed by the pinned `skygest-ingest-artifacts` snapshot
+- **Why it matters:** the resolver only becomes meaningful if the Ember agent, dataset, distribution, and variable already exist in the fetched snapshot that feeds the runtime registry
 
-This is still the human-reviewed source material behind the runtime registry, even though production no longer reads it directly.
+This is still reviewed source material behind the runtime registry, even though it is no longer stored inline in this repo.
 
 ### 0B. Energy-profile manifest -> generated runtime facet metadata
 
@@ -40,14 +42,14 @@ This is still the human-reviewed source material behind the runtime registry, ev
 
 This became more important after the kernel cutover because the partial-variable algebra and kernel binding logic now depend on the generated runtime profile rather than an implicit hand-maintained shape.
 
-### 0C. Checked-in registry -> D1 runtime registry
+### 0C. Git-pinned snapshot -> D1 runtime registry
 
 - **Component:** `scripts/sync-data-layer.ts`, `src/data-layer/Sync.ts`
-- **Input:** `references/cold-start/`
+- **Input:** `.generated/cold-start/`
 - **Output:** the D1 tables the runtime actually reads
-- **Why it matters:** Stage 1 and the kernel now resolve against the D1-backed registry, not the checked-in files directly
+- **Why it matters:** Stage 1 and the kernel now resolve against the D1-backed registry, not the fetched snapshot files directly
 
-The runtime registry is the live source of truth. The checked-in tree remains the reviewed seed surface.
+The runtime registry is the live source of truth. The fetched snapshot remains the reviewed seed surface, and `prepareDataLayerRegistry` now also builds the shared graph that later steps reuse.
 
 ## Runtime path
 
@@ -123,6 +125,8 @@ The kernel binds those bundles against the D1-backed registry and emits `Resolut
 
 This is the key replacement for the older staged runtime story. The live resolver no longer says "Stage 1, then maybe Stage 2, then maybe Stage 3." It says "Stage 1 plus one authoritative kernel output array."
 
+Under the hood, that D1-backed registry is no longer just ad-hoc lookup maps. `prepareDataLayerRegistry` now builds a shared graph plus named relationship views, so resolver narrowing, ingest graph validation, and typed entity-search projection all read one ontology-aligned relationship surface.
+
 Two caveats matter:
 
 1. `Resolved` outcomes can now carry `agentId`, which is the architectural hook for agent-aware narrowing.
@@ -162,6 +166,8 @@ This means the system already has real resolver output in D1 and on the MCP read
 
 That is the product gap now. The runtime write path exists; the editorial projection and lookup paths still need to catch up.
 
+The supporting lookup substrate did move forward: staging now has `SEARCH_DB` bindings plus `migrate-search-db` / `rebuild-search-db` operator scripts. So the missing piece is no longer low-level typed search plumbing by itself; it is the shipped MCP and editorial surface on top.
+
 ## Feedback loop
 
 ### 8. No checked-in snapshot harness
@@ -178,6 +184,7 @@ Why this matters for the architecture family:
 
 1. The resolver infrastructure is no longer hypothetical. It is a shipped Worker and a shipped stored row.
 2. The durable resolver contract is now `stage1 + kernel`.
-3. The main product gaps are lookup and projection gaps, not missing runtime plumbing.
-4. The main quality gaps are kernel accuracy and registry completeness, especially around agent-aware narrowing.
-5. Any future LLM reranking or workflow-based follow-up should be described as future work, not as part of today's runtime path.
+3. The prep loop now depends on a git-pinned fetched snapshot plus a shared graph-backed registry, not the deleted in-tree cold-start directory.
+4. The main product gaps are lookup and projection surfaces, even though the supporting search substrate now exists in staging.
+5. The main quality gaps are kernel accuracy and registry completeness, especially around agent-aware narrowing.
+6. Any future LLM reranking or workflow-based follow-up should be described as future work, not as part of today's runtime path.

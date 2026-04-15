@@ -1,6 +1,6 @@
 # Skygest System Context
 
-This document maps the current top-level subsystems across `skygest-cloudflare` and `skygest-editorial` after the April 12, 2026 resolver cutover. The load-bearing change versus the previous architecture snapshot is simple: the live resolver path is now `Stage 1 matching -> Resolution Kernel` inside the standalone `skygest-resolver` Worker. The older "runtime Stage 2 plus Stage 3 workflow" story is not the current system.
+This document maps the current top-level subsystems across `skygest-cloudflare` and `skygest-editorial` after three recent shifts: the April 12, 2026 resolver cutover, the April 14 shared data-layer graph cutover, and the April 15 git-pinned cold-start cutover plus staged search-infra rollout. The load-bearing runtime story is still `Stage 1 matching -> Resolution Kernel` inside the standalone `skygest-resolver` Worker, but the prep loop around that runtime changed too: cold-start seed data is now fetched into `.generated/cold-start`, the prepared registry now carries a shared `DataLayerGraph`, and staging now has a separate typed search database even though the editor-facing lookup tools are still pending.
 
 Effect vocabulary is still load-bearing here: every subsystem name is a Tag, a Workflow class, a Worker name, or a script you can grep for.
 
@@ -25,6 +25,7 @@ graph TD
     Stage1[Stage 1 Matching<br/>src/resolution/Stage1.ts]
     Kernel[Resolution Kernel<br/>src/resolution/ResolutionKernel.ts]
     Registry[Data Layer Registry<br/>D1-backed runtime source of truth]
+    SearchIndex[Typed Entity Search<br/>SEARCH_DB (staging) +<br/>src/search]
     MCP[MCP Surface<br/>src/mcp/Router.ts]
     Api[HTTP API<br/>src/api + src/admin]
   end
@@ -32,8 +33,9 @@ graph TD
   subgraph TOOLS[Local Tooling in skygest-cloudflare]
     direction TB
     ColdStart[Cold-start Ingest Toolchain<br/>scripts/cold-start-ingest-*.ts +<br/>src/ingest/dcat-harness]
-    Seed[Checked-in Cold-start Registry<br/>references/cold-start/*]
+    Snapshot[Git-pinned Cold-start Snapshot<br/>.generated/cold-start/*]
     Profile[Energy Profile Generation<br/>scripts/generate-energy-profile.ts +<br/>scripts/sync-energy-profile.ts]
+    SearchOps[Search DB Toolchain<br/>scripts/migrate-search-db.ts +<br/>scripts/rebuild-search-db.ts]
   end
 
   subgraph ED[skygest-editorial]
@@ -65,10 +67,13 @@ graph TD
   Stage1 -.->|registry lookups| Registry
   Kernel -.->|registry lookups| Registry
   Kernel -->|D1 row: post_enrichments<br/>kind=data-ref-resolution| Enrich
+  Resolver -.->|optional SEARCH_DB reads| SearchIndex
 
-  ColdStart -->|filesystem write| Seed
-  Seed -->|sync-data-layer CLI| Registry
+  ColdStart -->|filesystem write| Snapshot
+  Snapshot -->|sync-data-layer CLI| Registry
   Profile -.->|generated facet metadata| Kernel
+  Registry -.->|canonical D1 snapshot| SearchOps
+  SearchOps -->|rebuild typed docs| SearchIndex
 
   MCP -->|D1 row read| Enrich
   MCP -->|D1 row read| Registry
@@ -95,6 +100,7 @@ graph TD
   Operator -->|bun run| Sync
   Operator -->|bun run| ColdStart
   Operator -->|bun run| Profile
+  Operator -->|bun run| SearchOps
   Operator -->|wrangler deploy| IngestWorker
   Operator -->|wrangler deploy| AgentWorker
   Operator -->|wrangler deploy| Resolver
@@ -106,10 +112,10 @@ graph TD
   classDef tools fill:#fff3e0,stroke:#ef6c00,color:#e65100
   classDef actor fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
 
-  class IngestWorker,AgentWorker,Ingest,Enrich,Vision,SrcAttr,Resolver,Stage1,Kernel,Registry,MCP,Api cf
+  class IngestWorker,AgentWorker,Ingest,Enrich,Vision,SrcAttr,Resolver,Stage1,Kernel,Registry,SearchIndex,MCP,Api cf
   class Hydrate,Sync,Caches,BuildGraph,Discussion,Stories,Arcs,Editions ed
   class DomainBridge bridge
-  class ColdStart,Seed,Profile tools
+  class ColdStart,Snapshot,Profile,SearchOps tools
   class Reader,Editor,MCPModel,Operator actor
 ```
 
@@ -135,15 +141,19 @@ graph TD
 
 **Resolution Kernel** (`src/resolution/ResolutionKernel.ts`, `src/domain/resolutionKernel.ts`). The authoritative resolver output. It takes Stage 1 input plus structured evidence bundles, binds against the D1-backed registry, and emits `ResolutionOutcome[]` with statuses such as `Resolved`, `Ambiguous`, `Underspecified`, `Conflicted`, `OutOfRegistry`, and `NoMatch`. The old runtime Stage 2 path has been removed; the kernel is the live replacement. *Shipped.*
 
-**Data Layer Registry (D1)** (`variables`, `series`, `distributions`, `datasets`, `agents`, `catalogs`, `catalog_records`, `data_services`, `dataset_series`). The runtime source of truth for resolver lookups. It is loaded into a prepared lookup contract at Worker cold start and is fed from the checked-in cold-start tree via `scripts/sync-data-layer.ts`. One current limitation matters: the code path for agent-based narrowing exists, but the live registry shelves are still incomplete until `SKY-317`, so the system should not be described as having fully working agent narrowing yet. *Shipped, with a known completeness gap.*
+**Data Layer Registry (D1)** (`variables`, `series`, `distributions`, `datasets`, `agents`, `catalogs`, `catalog_records`, `data_services`, `dataset_series`). The runtime source of truth for resolver lookups. `prepareDataLayerRegistry` now builds a prepared lookup contract plus a shared `PreparedDataLayerRegistry.graph` that Stage 1, the kernel, the ingest harness, and entity-search projection all reuse. It is fed from the git-pinned cold-start snapshot via `scripts/sync-data-layer.ts`. One current limitation matters: the code path for agent-based narrowing exists, but the live registry shelves are still incomplete until `SKY-317`, so the system should not be described as having fully working agent narrowing yet. *Shipped, with a known completeness gap.*
 
-**Cold-start Ingest Toolchain** (`scripts/cold-start-ingest-*.ts`, `src/ingest/dcat-harness/`). Local Effect scripts that fetch provider catalog surfaces and project them into checked-in Skygest registry data. The shared harness owns merge rules, slug stability, validation, graph construction, and atomic writes. *Shipped.*
+**Cold-start Ingest Toolchain** (`scripts/cold-start-ingest-*.ts`, `src/ingest/dcat-harness/`). Local Effect scripts that fetch provider catalog surfaces and project them into the git-pinned cold-start snapshot tree under `.generated/cold-start/`. The shared harness owns merge rules, slug stability, validation, graph construction, ontology-aligned edge mapping, and atomic writes. *Shipped.*
 
-**Checked-in Cold-start Registry** (`references/cold-start/`). Human-reviewed JSON seed state for the data layer. Runtime does not read it directly in production anymore, but it remains the audited source that feeds the D1 registry and local tests. *Shipped.*
+**Git-pinned Cold-start Snapshot** (`.generated/cold-start/`, fetched from `skygest-ingest-artifacts`). The fetched working tree for the canonical cold-start seed repo. Local scripts, tests, and CI now read this snapshot instead of an in-tree `references/cold-start/` directory. The source material is still reviewed JSON; it is just no longer stored inline in this repo. *Shipped.*
 
 **Energy Profile Generation** (`scripts/generate-energy-profile.ts`, `scripts/sync-energy-profile.ts`, `src/domain/generated/energyVariableProfile.ts`). The generated profile is now the canonical runtime source of facet metadata for the resolution kernel and partial-variable algebra. This is the bridge between the checked-in structural manifest and the code the resolver actually uses at runtime. *Shipped.*
 
-**MCP Surface** (`src/mcp/Router.ts`, `src/mcp/Toolkit.ts`). Exposes the tool surface used by the discussion workflow and other operator/editor flows. The data-ref resolution rows are already readable through existing read tools such as `get_post_enrichments`, but the dedicated lookup tools `resolve_data_ref` and `find_candidates_by_data_ref` are still not present. *Shipped, with planned data-ref lookup additions.*
+**Typed Entity Search (staging)** (`src/search/`, `src/services/d1/EntitySearchRepoD1.ts`, `SEARCH_DB`). Derived search corpus projected from the canonical data-layer registry. The resolver can wire `EntitySearchService` when the `SEARCH_DB` binding exists; today that binding is provisioned in staging on the resolver and agent workers. *Shipped infrastructure in staging; not yet a shipped editor surface.*
+
+**Search DB Operator Toolchain** (`scripts/migrate-search-db.ts`, `scripts/rebuild-search-db.ts`, `src/platform/WranglerD1.ts`). Operator scripts that migrate and rebuild `SEARCH_DB` from a canonical D1 snapshot of the data-layer registry. This is now part of the staging deployment path, which means typed search infra exists before the editor/model lookup tools do. *Shipped for staging operations.*
+
+**MCP Surface** (`src/mcp/Router.ts`, `src/mcp/Toolkit.ts`). Exposes the tool surface used by the discussion workflow and other operator/editor flows. The data-ref resolution rows are already readable through existing read tools such as `get_post_enrichments`. The typed lookup substrate beneath future data-ref lookup tools now exists in staging, but the dedicated MCP tools `resolve_data_ref` and `find_candidates_by_data_ref` are still not present. *Shipped, with planned data-ref lookup additions.*
 
 **HTTP API Surface** (`src/api/Router.ts`, `src/admin/Router.ts`, plus backend routes mounted under `/admin`). Public reads plus operator writes. Authorized by bearer token on the admin side. *Shipped.*
 
@@ -177,7 +187,7 @@ graph TD
 
 **MCP-calling LLM** is the model inside the discussion workflow and other tool-using flows. The tool surface is its API, which is why structured Schema-backed output matters so much.
 
-**Operator** runs the admin API, sync scripts, cold-start ingest scripts, energy-profile generation and sync, and `wrangler deploy` against the worker configs. The operator is also the person who can turn the resolver lane on in staging and judge whether the stored outputs are trustworthy enough to move forward.
+**Operator** runs the admin API, sync scripts, cold-start ingest scripts, snapshot fetches, search DB migrate/rebuild scripts, energy-profile generation and sync, and `wrangler deploy` against the worker configs. The operator is also the person who can turn the resolver lane on in staging and judge whether the stored outputs are trustworthy enough to move forward.
 
 ## Key seams
 
@@ -188,8 +198,9 @@ graph TD
 | Source Attribution -> Resolver | Source-attribution row plus vision/post context | `Stage1Input` assembled from `postContext`, `vision`, `sourceAttribution` |
 | Resolver service boundary | Resolver request and response across the `RESOLVER` binding or HTTP | `ResolvePostRequest` / `ResolvePostResponse` in `src/domain/resolution.ts` |
 | Resolver -> stored enrichment | Persisted resolver result in `post_enrichments` | `DataRefResolutionEnrichment` in `src/domain/enrichment.ts` with `stage1 + kernel` |
-| Registry lookup contract | D1-backed entity lookups used by Stage 1 and the kernel | `src/resolution/dataLayerRegistry.ts` |
-| Checked-in registry -> D1 registry | Reviewed seed state promoted into runtime tables | `scripts/sync-data-layer.ts`, `src/data-layer/Sync.ts` |
+| Registry lookup contract | D1-backed entity lookups plus the shared graph used by Stage 1, the kernel, the ingest harness, audit, and entity-search projection | `PreparedDataLayerRegistry.graph` + `src/resolution/dataLayerRegistry.ts` |
+| Git-pinned snapshot -> D1 registry | Reviewed seed state promoted into runtime tables | `.generated/cold-start/*` + `scripts/sync-data-layer.ts`, `src/data-layer/Sync.ts` |
+| Canonical registry -> `SEARCH_DB` | Typed entity-search documents rebuilt from the canonical data-layer source | `scripts/rebuild-search-db.ts`, `src/search/projectFromDataLayer.ts`, `src/search/rebuildPlan.ts` |
 | Energy profile manifest -> generated runtime profile | Structural facet rules promoted into generated runtime code | `references/energy-profile/shacl-manifest.json` -> `src/domain/generated/energyVariableProfile.ts` |
 | MCP read path | Tool responses consumed by editorial workflows | `src/mcp/Toolkit.ts` plus response Schemas in `src/domain/*` |
 | Editorial cache mirror | Local cached registry manifests | `.skygest/cache/*.json` |
@@ -203,7 +214,9 @@ graph TD
 | Resolver Worker + `RESOLVER` Service Binding / `ResolverEntrypoint` RPC | Shipped |
 | Stage 1 Matching + Resolution Kernel | Shipped |
 | Persisted `data-ref-resolution` enrichment row (`stage1 + kernel`) | Shipped |
-| Data Layer Registry (D1), Checked-in Cold-start Registry, sync pipeline | Shipped |
+| Data Layer Registry (D1), git-pinned cold-start snapshot, shared graph, sync pipeline | Shipped |
+| Typed entity-search substrate + `SEARCH_DB` staging bindings | Shipped infrastructure in staging |
+| Search DB migrate/rebuild toolchain | Shipped for staging operations |
 | Energy profile generation and generated runtime facet metadata | Shipped |
 | Agent-based narrowing completeness | In progress (`SKY-317`) |
 | `resolve_data_ref` / `find_candidates_by_data_ref` MCP tools | Planned (`SKY-241`, `SKY-244`) |
@@ -215,8 +228,9 @@ graph TD
 
 ## What changed in this refresh
 
-1. The resolver is now described as shipped infrastructure, not a planned slice.
-2. The resolver contract is now `stage1 + kernel`, not `stage1 + optional stage2 + stage3`.
-3. The old runtime Stage 2 and Stage 3 language was removed because it no longer matches the code on `main`.
-4. The old snapshot-based eval harnesses were removed; the next end-to-end bundle eval surface belongs with `SKY-343`.
-5. The docs now call out the real remaining gaps: lookup tools, story projection, build-graph warnings, and registry completeness for agent narrowing.
+1. The prepared registry is now described as a shared graph-backed runtime contract, not just a bag of lookup maps.
+2. The cold-start seed source is now described as the git-pinned snapshot fetched into `.generated/cold-start`, not `references/cold-start/`.
+3. The typed entity-search and `SEARCH_DB` staging infrastructure is now called out explicitly as shipped supporting infra.
+4. The resolver contract remains `stage1 + kernel`, and the old runtime Stage 2 and Stage 3 language stays removed because it no longer matches the code on `main`.
+5. The old snapshot-based eval harnesses remain removed; the next end-to-end bundle eval surface belongs with `SKY-343`.
+6. The docs now call out the real remaining gaps: lookup tools, story projection, build-graph warnings, and registry completeness for agent narrowing.
