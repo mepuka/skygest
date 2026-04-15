@@ -15,3 +15,16 @@ export const SdmxConcept = Symbol.for("skygest/sdmx-concept");
 
 /** Design decision reference — e.g., "D1", "D5", "D12" */
 export const DesignDecision = Symbol.for("skygest/design-decision");
+
+/**
+ * XSD datatype marker for String-valued filters that carry a specific RDF
+ * literal datatype. Emitted by the ontology-store's EmitSpec generator into
+ * `ValueKind.Literal.xsdDatatype` so forward mapping can attach the right
+ * `xsd:*` datatype URI and SHACL shapes can validate with `sh:datatype`.
+ *
+ * Current users: `DateLike` (`xsd:date`), `IsoTimestamp` (`xsd:dateTime`) —
+ * both annotated on their base filter in src/domain/types.ts. Other string
+ * / number / boolean types fall through to the generator's default
+ * classification.
+ */
+export const XsdDatatype = Symbol.for("skygest/xsd-datatype");

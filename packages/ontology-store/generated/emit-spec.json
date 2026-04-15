@@ -30,7 +30,8 @@
             "predicate": "http://xmlns.com/foaf/0.1/name",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single"
           },
@@ -39,7 +40,8 @@
             "predicate": "http://www.w3.org/2004/02/skos/core#altLabel",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "many"
           },
@@ -195,7 +197,8 @@
             "predicate": "http://purl.org/dc/terms/title",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single"
           },
@@ -204,7 +207,8 @@
             "predicate": "http://purl.org/dc/terms/description",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -382,7 +386,8 @@
             "predicate": "http://purl.org/dc/terms/issued",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:date"
             },
             "cardinality": "single-optional"
           },
@@ -391,7 +396,8 @@
             "predicate": "http://purl.org/dc/terms/modified",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:date"
             },
             "cardinality": "single-optional"
           },
@@ -549,7 +555,8 @@
             "predicate": "http://purl.org/dc/terms/title",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single"
           },
@@ -558,7 +565,8 @@
             "predicate": "http://purl.org/dc/terms/description",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -591,7 +599,8 @@
             "predicate": "http://purl.org/dc/terms/conformsTo",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -614,7 +623,8 @@
             "predicate": "http://purl.org/dc/terms/license",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -787,7 +797,8 @@
             "predicate": "http://purl.org/dc/terms/title",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single"
           },
@@ -796,7 +807,8 @@
             "predicate": "http://purl.org/dc/terms/description",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -837,7 +849,8 @@
             "predicate": "http://purl.org/dc/terms/license",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -846,7 +859,8 @@
             "predicate": "http://purl.org/dc/terms/temporal",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -855,7 +869,8 @@
             "predicate": "http://www.w3.org/ns/dcat#keyword",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "many"
           },
@@ -864,7 +879,8 @@
             "predicate": "http://www.w3.org/ns/dcat#theme",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "many",
             "lossy": "deferred-to-iri"
@@ -1123,7 +1139,8 @@
             "predicate": "http://purl.org/dc/terms/title",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single"
           },
@@ -1132,7 +1149,8 @@
             "predicate": "http://purl.org/dc/terms/description",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -1301,7 +1319,8 @@
             "predicate": "http://purl.org/dc/terms/title",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -1310,7 +1329,8 @@
             "predicate": "http://purl.org/dc/terms/description",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -1335,7 +1355,8 @@
             "predicate": "http://www.w3.org/ns/dcat#mediaType",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -1344,7 +1365,8 @@
             "predicate": "http://purl.org/dc/terms/format",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -1353,7 +1375,8 @@
             "predicate": "http://www.w3.org/ns/dcat#byteSize",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "number"
+              "primitive": "number",
+              "xsdDatatype": "xsd:decimal"
             },
             "cardinality": "single-optional"
           },
@@ -1362,7 +1385,8 @@
             "predicate": "http://spdx.org/rdf/terms#checksum",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -1377,7 +1401,8 @@
             "predicate": "http://purl.org/dc/terms/license",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -1610,7 +1635,8 @@
             "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single"
           },
@@ -1619,7 +1645,8 @@
             "predicate": "http://www.w3.org/2004/02/skos/core#definition",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional"
           },
@@ -1628,7 +1655,8 @@
             "predicate": "https://skygest.dev/vocab/energy/measuredProperty",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional",
             "lossy": "deferred-to-iri"
@@ -1638,7 +1666,8 @@
             "predicate": "https://skygest.dev/vocab/energy/domainObject",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional",
             "lossy": "deferred-to-iri"
@@ -1648,7 +1677,8 @@
             "predicate": "https://skygest.dev/vocab/energy/technologyOrFuel",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional",
             "lossy": "deferred-to-iri"
@@ -1711,7 +1741,8 @@
             "predicate": "https://skygest.dev/vocab/energy/policyInstrument",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single-optional",
             "lossy": "deferred-to-iri"
@@ -1882,7 +1913,8 @@
             "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
             "valueKind": {
               "_tag": "Literal",
-              "primitive": "string"
+              "primitive": "string",
+              "xsdDatatype": "xsd:string"
             },
             "cardinality": "single"
           },

@@ -45,10 +45,14 @@ describe("generated/emit-spec.json", () => {
       expect(agent.primaryClassIri).toBe("http://xmlns.com/foaf/0.1/Agent");
     });
 
-    it("name emits as foaf:name literal", () => {
+    it("name emits as foaf:name literal with xsd:string datatype", () => {
       const field = agent.forward.fields.find((f) => f.runtimeName === "name");
       expect(field?.predicate).toBe("http://xmlns.com/foaf/0.1/name");
-      expect(field?.valueKind).toEqual({ _tag: "Literal", primitive: "string" });
+      expect(field?.valueKind).toEqual({
+        _tag: "Literal",
+        primitive: "string",
+        xsdDatatype: "xsd:string"
+      });
     });
 
     it("homepage emits as foaf:homepage IRI (WebUrl detection)", () => {
@@ -174,11 +178,43 @@ describe("generated/emit-spec.json", () => {
       expect(download?.valueKind).toEqual({ _tag: "Iri" });
     });
 
-    it("byteSize is a numeric literal", () => {
+    it("byteSize is a numeric literal with xsd:decimal datatype", () => {
       const field = dist.forward.fields.find(
         (f) => f.runtimeName === "byteSize"
       );
-      expect(field?.valueKind).toEqual({ _tag: "Literal", primitive: "number" });
+      expect(field?.valueKind).toEqual({
+        _tag: "Literal",
+        primitive: "number",
+        xsdDatatype: "xsd:decimal"
+      });
+    });
+  });
+
+  describe("CatalogRecord date fields", () => {
+    const cr = decoded.classes.CatalogRecord!;
+
+    it("firstSeen emits as dcterms:issued with xsd:date datatype", () => {
+      const field = cr.forward.fields.find(
+        (f) => f.runtimeName === "firstSeen"
+      );
+      expect(field?.predicate).toBe("http://purl.org/dc/terms/issued");
+      expect(field?.valueKind).toEqual({
+        _tag: "Literal",
+        primitive: "string",
+        xsdDatatype: "xsd:date"
+      });
+    });
+
+    it("lastSeen emits as dcterms:modified with xsd:date datatype", () => {
+      const field = cr.forward.fields.find(
+        (f) => f.runtimeName === "lastSeen"
+      );
+      expect(field?.predicate).toBe("http://purl.org/dc/terms/modified");
+      expect(field?.valueKind).toEqual({
+        _tag: "Literal",
+        primitive: "string",
+        xsdDatatype: "xsd:date"
+      });
     });
   });
 

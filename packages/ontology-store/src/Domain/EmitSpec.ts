@@ -29,14 +29,32 @@ import { IRI } from "./Rdf";
 export const LiteralPrimitive = Schema.Literals(["string", "number", "boolean"]);
 export type LiteralPrimitive = Schema.Schema.Type<typeof LiteralPrimitive>;
 
+/**
+ * XSD datatypes the forward mapper may attach to RDF literals. The set is
+ * intentionally narrow — expand it when a new runtime type (e.g. an
+ * xsd:duration branded string) needs to round-trip.
+ */
+export const XsdDatatype = Schema.Literals([
+  "xsd:string",
+  "xsd:dateTime",
+  "xsd:date",
+  "xsd:integer",
+  "xsd:decimal",
+  "xsd:boolean"
+]);
+export type XsdDatatype = Schema.Schema.Type<typeof XsdDatatype>;
+
 export const ValueKind = Schema.Union([
   /**
    * Plain literal value (string, number, boolean) serialized as an
-   * xsd-typed RDF literal.
+   * xsd-typed RDF literal. The `xsdDatatype` field names the specific
+   * `xsd:*` URI the forward mapper attaches to the N3 literal object
+   * and the SHACL `sh:datatype` constraint reads back.
    */
   Schema.Struct({
     _tag: Schema.Literal("Literal"),
-    primitive: LiteralPrimitive
+    primitive: LiteralPrimitive,
+    xsdDatatype: XsdDatatype
   }),
   /**
    * IRI value. The runtime field holds a URL or a branded-ID URI; it is

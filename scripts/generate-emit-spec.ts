@@ -35,7 +35,8 @@ import { WebUrl } from "../src/domain/data-layer/base";
 import {
   DcatClass,
   DcatProperty,
-  SchemaOrgType
+  SchemaOrgType,
+  XsdDatatype as XsdDatatypeMarker
 } from "../src/domain/data-layer/annotations";
 
 import type {
@@ -249,6 +250,34 @@ const getBrandNames = (ast: SchemaAST.AST): ReadonlyArray<string> => {
   return Array.isArray(value) ? (value as ReadonlyArray<string>) : [];
 };
 
+/**
+ * Read the `XsdDatatype` marker from an AST node's annotations (set by
+ * `src/domain/types.ts` on `DateLike` and `IsoTimestamp`).
+ */
+type XsdDatatypeLiteral =
+  | "xsd:string"
+  | "xsd:dateTime"
+  | "xsd:date"
+  | "xsd:integer"
+  | "xsd:decimal"
+  | "xsd:boolean";
+
+const XSD_DATATYPE_VALUES: ReadonlySet<XsdDatatypeLiteral> = new Set([
+  "xsd:string",
+  "xsd:dateTime",
+  "xsd:date",
+  "xsd:integer",
+  "xsd:decimal",
+  "xsd:boolean"
+]);
+
+const getXsdDatatype = (ast: SchemaAST.AST): XsdDatatypeLiteral | undefined => {
+  const value = getAnnotations(ast)[XsdDatatypeMarker];
+  return typeof value === "string" && XSD_DATATYPE_VALUES.has(value as XsdDatatypeLiteral)
+    ? (value as XsdDatatypeLiteral)
+    : undefined;
+};
+
 // ---------------------------------------------------------------------------
 // classifyField — walk a property-signature type AST and return its value
 // kind + cardinality for the EmitSpec.
@@ -325,22 +354,32 @@ const classifyField = (type: SchemaAST.AST): ClassifiedField => {
     if (isWebUrlAst(type)) {
       return { valueKind: { _tag: "Iri" }, cardinality };
     }
+    // Date-like filters carry an explicit XsdDatatype marker
+    // (DateLike → xsd:date, IsoTimestamp → xsd:dateTime). Plain strings
+    // default to xsd:string.
+    const xsdDatatype = getXsdDatatype(type) ?? "xsd:string";
     return {
-      valueKind: { _tag: "Literal", primitive: "string" },
+      valueKind: { _tag: "Literal", primitive: "string", xsdDatatype },
       cardinality
     };
   }
 
   if (SchemaAST.isNumber(type)) {
+    // xsd:decimal is the broadest numeric xsd type — covers both
+    // integer and decimal at the RDF level. Milestone 2 may split on
+    // a marker when we need to distinguish integer from decimal for
+    // per-field SHACL datatype constraints.
+    const xsdDatatype = getXsdDatatype(type) ?? "xsd:decimal";
     return {
-      valueKind: { _tag: "Literal", primitive: "number" },
+      valueKind: { _tag: "Literal", primitive: "number", xsdDatatype },
       cardinality
     };
   }
 
   if (SchemaAST.isBoolean(type)) {
+    const xsdDatatype = getXsdDatatype(type) ?? "xsd:boolean";
     return {
-      valueKind: { _tag: "Literal", primitive: "boolean" },
+      valueKind: { _tag: "Literal", primitive: "boolean", xsdDatatype },
       cardinality
     };
   }

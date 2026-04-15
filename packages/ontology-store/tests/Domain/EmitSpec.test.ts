@@ -10,7 +10,8 @@ import {
   LiteralPrimitive,
   ReverseField,
   SubjectSelector,
-  ValueKind
+  ValueKind,
+  XsdDatatype
 } from "../../src/Domain/EmitSpec";
 
 describe("LiteralPrimitive", () => {
@@ -21,16 +22,104 @@ describe("LiteralPrimitive", () => {
   });
 });
 
+describe("XsdDatatype", () => {
+  it("accepts the 6 supported xsd types", () => {
+    const cases = [
+      "xsd:string",
+      "xsd:dateTime",
+      "xsd:date",
+      "xsd:integer",
+      "xsd:decimal",
+      "xsd:boolean"
+    ] as const;
+    for (const c of cases) {
+      expect(Schema.decodeUnknownSync(XsdDatatype)(c)).toBe(c);
+    }
+  });
+
+  it("rejects unknown xsd types", () => {
+    expect(() => Schema.decodeUnknownSync(XsdDatatype)("xsd:duration")).toThrow();
+  });
+});
+
 describe("ValueKind", () => {
-  it("decodes a literal value kind", () => {
+  it("decodes a literal value kind with xsd:string", () => {
     const decoded = Schema.decodeUnknownSync(ValueKind)({
       _tag: "Literal",
-      primitive: "string"
+      primitive: "string",
+      xsdDatatype: "xsd:string"
     });
     expect(decoded._tag).toBe("Literal");
     if (decoded._tag === "Literal") {
       expect(decoded.primitive).toBe("string");
+      expect(decoded.xsdDatatype).toBe("xsd:string");
     }
+  });
+
+  it("decodes a literal value kind with xsd:date (DateLike case)", () => {
+    const decoded = Schema.decodeUnknownSync(ValueKind)({
+      _tag: "Literal",
+      primitive: "string",
+      xsdDatatype: "xsd:date"
+    });
+    if (decoded._tag === "Literal") {
+      expect(decoded.xsdDatatype).toBe("xsd:date");
+    }
+  });
+
+  it("decodes a literal value kind with xsd:dateTime (IsoTimestamp case)", () => {
+    const decoded = Schema.decodeUnknownSync(ValueKind)({
+      _tag: "Literal",
+      primitive: "string",
+      xsdDatatype: "xsd:dateTime"
+    });
+    if (decoded._tag === "Literal") {
+      expect(decoded.xsdDatatype).toBe("xsd:dateTime");
+    }
+  });
+
+  it("decodes a numeric literal value kind with xsd:decimal (default)", () => {
+    const decoded = Schema.decodeUnknownSync(ValueKind)({
+      _tag: "Literal",
+      primitive: "number",
+      xsdDatatype: "xsd:decimal"
+    });
+    if (decoded._tag === "Literal") {
+      expect(decoded.primitive).toBe("number");
+      expect(decoded.xsdDatatype).toBe("xsd:decimal");
+    }
+  });
+
+  it("decodes a numeric literal value kind with xsd:integer (explicit)", () => {
+    const decoded = Schema.decodeUnknownSync(ValueKind)({
+      _tag: "Literal",
+      primitive: "number",
+      xsdDatatype: "xsd:integer"
+    });
+    if (decoded._tag === "Literal") {
+      expect(decoded.xsdDatatype).toBe("xsd:integer");
+    }
+  });
+
+  it("decodes a boolean literal value kind with xsd:boolean", () => {
+    const decoded = Schema.decodeUnknownSync(ValueKind)({
+      _tag: "Literal",
+      primitive: "boolean",
+      xsdDatatype: "xsd:boolean"
+    });
+    if (decoded._tag === "Literal") {
+      expect(decoded.primitive).toBe("boolean");
+      expect(decoded.xsdDatatype).toBe("xsd:boolean");
+    }
+  });
+
+  it("rejects a Literal value kind without xsdDatatype", () => {
+    expect(() =>
+      Schema.decodeUnknownSync(ValueKind)({
+        _tag: "Literal",
+        primitive: "string"
+      })
+    ).toThrow();
   });
 
   it("decodes an IRI value kind", () => {
@@ -110,7 +199,7 @@ describe("ForwardField", () => {
     const decoded = Schema.decodeUnknownSync(ForwardField)({
       runtimeName: "title",
       predicate: "http://purl.org/dc/terms/title",
-      valueKind: { _tag: "Literal", primitive: "string" },
+      valueKind: { _tag: "Literal", primitive: "string", xsdDatatype: "xsd:string" },
       cardinality: "single"
     });
     expect(decoded.runtimeName).toBe("title");
@@ -132,7 +221,7 @@ describe("ForwardField", () => {
     const decoded = Schema.decodeUnknownSync(ForwardField)({
       runtimeName: "themes",
       predicate: "http://www.w3.org/ns/dcat#theme",
-      valueKind: { _tag: "Literal", primitive: "string" },
+      valueKind: { _tag: "Literal", primitive: "string", xsdDatatype: "xsd:string" },
       cardinality: "many",
       lossy: "deferred-to-iri"
     });
@@ -183,7 +272,7 @@ describe("ClassEmitSpec", () => {
           {
             runtimeName: "title",
             predicate: "http://purl.org/dc/terms/title",
-            valueKind: { _tag: "Literal", primitive: "string" },
+            valueKind: { _tag: "Literal", primitive: "string", xsdDatatype: "xsd:string" },
             cardinality: "single"
           }
         ]

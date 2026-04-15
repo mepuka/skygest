@@ -1,4 +1,5 @@
 import { Schema } from "effect";
+import { XsdDatatype } from "./data-layer/annotations";
 
 const isHttpsUrl = (value: string) => {
   try {
@@ -48,7 +49,7 @@ const validateIsoTimestamp = (value: string) => {
 export const IsoTimestamp = Schema.String.pipe(
   Schema.check(Schema.makeFilter(validateIsoTimestamp)),
   Schema.brand("IsoTimestamp")
-);
+).annotate({ [XsdDatatype]: "xsd:dateTime" });
 export type IsoTimestamp = Schema.Schema.Type<typeof IsoTimestamp>;
 
 const DATE_LIKE_PATTERN = /^\d{4}(?:-\d{2}(?:-\d{2}(?:T.+)?)?)?$/u;
@@ -58,10 +59,19 @@ const validateDateLike = (value: string) =>
     ? undefined
     : "expected a date-like value: YYYY, YYYY-MM, YYYY-MM-DD, or ISO 8601 timestamp";
 
-/** Flexible date string — accepts year, year-month, date, or full timestamp. */
+/**
+ * Flexible date string — accepts year, year-month, date, or full timestamp.
+ *
+ * xsd:date is the RDF-level datatype we attach (the validator also accepts
+ * ISO datetimes, but the narrower `xsd:date` is the usual intent for DCAT's
+ * dcterms:issued / dcterms:modified fields that use DateLike).
+ */
 export const DateLike = Schema.String.pipe(
   Schema.check(Schema.makeFilter(validateDateLike))
-).annotate({ description: "Date-like value: YYYY, YYYY-MM, YYYY-MM-DD, or ISO 8601 timestamp" });
+).annotate({
+  description: "Date-like value: YYYY, YYYY-MM, YYYY-MM-DD, or ISO 8601 timestamp",
+  [XsdDatatype]: "xsd:date"
+});
 export type DateLike = Schema.Schema.Type<typeof DateLike>;
 
 const isWebUrl = (value: string) => {
