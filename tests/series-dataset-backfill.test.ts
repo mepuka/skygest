@@ -3,8 +3,9 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { Schema } from "effect";
 import { Series } from "../src/domain/data-layer";
+import { checkedInDataLayerRegistryRoot } from "../src/bootstrap/CheckedInDataLayerRegistry";
 
-const ROOT = "references/cold-start";
+const ROOT = checkedInDataLayerRegistryRoot;
 const BACKFILL_PATH = `${ROOT}/series/.series-dataset-backfill.json`;
 
 type BackfillManifest = {

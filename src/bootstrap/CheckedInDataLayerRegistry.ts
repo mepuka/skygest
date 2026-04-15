@@ -18,7 +18,7 @@ import {
   DataLayerRegistry
 } from "../services/DataLayerRegistry";
 
-export const checkedInDataLayerRegistryRoot = "references/cold-start";
+export const checkedInDataLayerRegistryRoot = ".generated/cold-start";
 
 const directorySpecs = dataLayerEntityKindSpecs.map((spec) => ({
   key: spec.seedKey,

@@ -16,6 +16,11 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Load snapshot deploy key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SNAPSHOT_DEPLOY_KEY }}
+
       - name: Checkout ontology reference
         id: ontology_reference
         continue-on-error: true
@@ -75,6 +80,11 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Load snapshot deploy key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SNAPSHOT_DEPLOY_KEY }}
+
       - name: Link twitter scraper
         run: |
           git clone --depth 1 https://github.com/mepuka/better-twitter-scraper.git ../better_twitter_scraper
@@ -98,6 +108,11 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+
+      - name: Load snapshot deploy key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SNAPSHOT_DEPLOY_KEY }}
 
       - run: bun install --frozen-lockfile
 

@@ -50,7 +50,7 @@ const decodeDataService = stripUndefinedAndDecodeWith(DataService);
 
 /**
  * The ENTSO-E agent is expected to already exist in the catalog index
- * (cold-started from `references/cold-start/catalog/agents/entso-e.json`).
+ * (cold-started from `.generated/cold-start/catalog/agents/entso-e.json`).
  * We resolve it by its file slug rather than minting a new agent.
  */
 const resolveExistingCatalog = (
@@ -135,7 +135,7 @@ export const buildContextFromIndex = (
   if (existingAgent === null) {
     throw new Error(
       `ENTSO-E agent not found in catalog index (expected file slug "${ENTSOE_AGENT_FILE_SLUG}"). ` +
-        "Ensure references/cold-start/catalog/agents/entso-e.json exists."
+        "Ensure .generated/cold-start/catalog/agents/entso-e.json exists."
     );
   }
 

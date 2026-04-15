@@ -5,7 +5,7 @@ import {
   scriptPlatformLayer
 } from "../src/platform/ScriptRuntime";
 
-export const fetchIngestArtifacts = Effect.fn("fetch-ingest-artifacts.run")(function* () {
+export const fetchIngestArtifacts = Effect.gen(function* () {
   const path = yield* Path.Path;
 
   yield* fetchGitSnapshot({
@@ -13,7 +13,7 @@ export const fetchIngestArtifacts = Effect.fn("fetch-ingest-artifacts.run")(func
     destDir: path.resolve(process.cwd(), ".generated/cold-start"),
     requiredManifestFile: "manifest.json"
   });
-});
+}).pipe(Effect.withSpan("fetch-ingest-artifacts.run"));
 
 if (import.meta.main) {
   runScriptMain(

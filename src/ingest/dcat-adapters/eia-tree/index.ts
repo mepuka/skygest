@@ -2,7 +2,7 @@
  * SKY-254 — EIA DCAT ingestion (Workstream A)
  *
  * Effect-native, schema-validated, idempotent ingestion of the EIA API v2
- * catalog tree into the cold-start registry under references/cold-start/.
+ * catalog tree into the cold-start registry under .generated/cold-start/.
  * The script walks api.eia.gov/v2/, builds an IngestGraph of typed nodes
  * (Agent | Catalog | DataService | DatasetSeries | Dataset | Distribution | CatalogRecord),
  * validates every candidate via Effect.partition, and emits files in

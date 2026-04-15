@@ -24,6 +24,7 @@ import {
   runScriptMain,
   scriptPlatformLayer
 } from "../src/platform/ScriptRuntime";
+import { checkedInDataLayerRegistryRoot } from "../src/bootstrap/CheckedInDataLayerRegistry";
 
 type SeriesVote = {
   readonly candidate: string;
@@ -89,7 +90,10 @@ const loadAndDecode = Effect.fn("audit-series-dataset-evidence.loadAndDecode")(
 const runAudit = Effect.fn("audit-series-dataset-evidence.run")(function* () {
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
-  const root = path.resolve(process.cwd(), "references/cold-start");
+  const root = path.resolve(
+    process.cwd(),
+    checkedInDataLayerRegistryRoot
+  );
 
   // 1. Load series slug → id map
   const seriesIdsPath = path.join(root, "series", ".series-ids.json");

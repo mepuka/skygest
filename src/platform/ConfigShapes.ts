@@ -107,7 +107,7 @@ const optionalTrimmedString = (name: string) =>
 export const ColdStartCommonKeys = {
   rootDir: Config.withDefault(
     Config.string("COLD_START_ROOT"),
-    "references/cold-start"
+    ".generated/cold-start"
   ),
   dryRun: Config.withDefault(Config.boolean("COLD_START_DRY_RUN"), false),
   noCache: Config.withDefault(Config.boolean("COLD_START_NO_CACHE"), false)

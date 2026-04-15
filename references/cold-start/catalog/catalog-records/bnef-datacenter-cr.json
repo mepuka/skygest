@@ -1,9 +1,0 @@
-{
-  "_tag": "CatalogRecord",
-  "id": "https://id.skygest.io/catalog-record/cr_01KNQEZ5VPFRFBAS1TZ6YZ2PG2",
-  "catalogId": "https://id.skygest.io/catalog/cat_01KNQEZ5VTE381VBQ5JAEVY76Z",
-  "primaryTopicType": "dataset",
-  "primaryTopicId": "https://id.skygest.io/dataset/ds_01KNQEZ5VPHK3Y5F3NH1EW7R82",
-  "firstSeen": "2026-04-08",
-  "isAuthoritative": true
-}

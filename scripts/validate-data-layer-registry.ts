@@ -1,7 +1,7 @@
 /**
  * On-demand validator for the checked-in data layer registry.
  *
- * Loads `references/cold-start/` end-to-end via the same loader the runtime
+ * Loads `.generated/cold-start/` end-to-end via the same loader the runtime
  * uses, then runs invariant checks that used to live in
  * `tests/data-layer-registry.test.ts`. Those checks scaled with the catalog
  * (now ~7000 files) and were no longer appropriate for the test runner.

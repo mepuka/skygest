@@ -129,7 +129,7 @@ describe("ConfigShapes", () => {
       Effect.gen(function* () {
         const provider = ConfigProvider.fromUnknown({});
         const result = yield* Config.all(ColdStartCommonKeys).parse(provider);
-        expect(result.rootDir).toBe("references/cold-start");
+        expect(result.rootDir).toBe(".generated/cold-start");
         expect(result.dryRun).toBe(false);
         expect(result.noCache).toBe(false);
       })
@@ -213,7 +213,7 @@ describe("ConfigShapes", () => {
         });
         const result = yield* Config.all(EmberIngestKeys).parse(provider);
         expect(Redacted.value(result.apiKey)).toBe("ember-secret");
-        expect(result.rootDir).toBe("references/cold-start");
+        expect(result.rootDir).toBe(".generated/cold-start");
         expect(result.openApiUrl).toBe(
           "https://api.ember-energy.org/v1/openapi.json"
         );
@@ -241,7 +241,7 @@ describe("ConfigShapes", () => {
           NESO_ONLY_DATASET: "historic-demand-data"
         });
         const result = yield* Config.all(NesoIngestKeys).parse(provider);
-        expect(result.rootDir).toBe("references/cold-start");
+        expect(result.rootDir).toBe(".generated/cold-start");
         expect(result.baseUrl).toBe("https://api.neso.energy/api/3/action");
         expect(result.minIntervalMs).toBe(1000);
         expect(result.maxDatasets).toBe(500);
@@ -255,7 +255,7 @@ describe("ConfigShapes", () => {
       Effect.gen(function* () {
         const provider = ConfigProvider.fromUnknown({});
         const result = yield* Config.all(EnergyInstituteIngestKeys).parse(provider);
-        expect(result.rootDir).toBe("references/cold-start");
+        expect(result.rootDir).toBe(".generated/cold-start");
         expect(result.dryRun).toBe(false);
         expect(result.noCache).toBe(false);
       })
@@ -270,7 +270,7 @@ describe("ConfigShapes", () => {
         });
         const result = yield* Config.all(GridStatusIngestKeys).parse(provider);
         expect(Redacted.value(result.apiKey)).toBe("gridstatus-secret");
-        expect(result.rootDir).toBe("references/cold-start");
+        expect(result.rootDir).toBe(".generated/cold-start");
         expect(result.baseUrl).toBe("https://api.gridstatus.io/v1");
         expect(result.minIntervalMs).toBe(200);
       })
