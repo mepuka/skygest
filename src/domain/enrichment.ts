@@ -9,6 +9,7 @@
 
 import { Schema, SchemaGetter } from "effect";
 import { FlexibleNumber } from "./bi";
+import { ChartAssetId } from "./data-layer/post-ids";
 import { NonNegativeInt, PlatformSchema, PostUri } from "./types";
 import { EnrichmentErrorEnvelope } from "./errors";
 import {
@@ -155,7 +156,7 @@ export type VisionAssetAnalysis = Schema.Schema.Type<typeof VisionAssetAnalysis>
 
 export const VisionSynthesisFinding = Schema.Struct({
   text: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
-  assetKeys: Schema.Array(Schema.String.pipe(Schema.check(Schema.isMinLength(1))))
+  assetKeys: Schema.Array(ChartAssetId)
 });
 export type VisionSynthesisFinding = Schema.Schema.Type<
   typeof VisionSynthesisFinding
@@ -171,7 +172,7 @@ export const VisionPostSummary = Schema.Struct({
 export type VisionPostSummary = Schema.Schema.Type<typeof VisionPostSummary>;
 
 export const VisionAssetEnrichment = Schema.Struct({
-  assetKey: Schema.String.pipe(Schema.check(Schema.isMinLength(1))),
+  assetKey: ChartAssetId,
   assetType: VisionAssetType,
   source: VisionAssetSource,
   index: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),

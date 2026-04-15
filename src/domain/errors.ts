@@ -1,5 +1,6 @@
 import { Result, Schema } from "effect";
 import { CandidatePayloadStage } from "./candidatePayload";
+import { ChartAssetId } from "./data-layer/post-ids";
 import { DataLayerRegistryDiagnostic } from "./data-layer/registry";
 import { Stage1EvalSnapshotBuildReport } from "./stage1EvalBuild";
 import { DateLike, Did, PostUri, TranscriptR2Key } from "./types";
@@ -240,7 +241,7 @@ export class GeminiParseError extends Schema.TaggedErrorClass<GeminiParseError>(
 export class EnrichmentAssetFetchError extends Schema.TaggedErrorClass<EnrichmentAssetFetchError>()(
   "EnrichmentAssetFetchError",
   {
-    assetKey: Schema.String,
+    assetKey: ChartAssetId,
     message: Schema.String,
     status: Schema.optionalKey(Schema.Number),
     operation: Schema.String

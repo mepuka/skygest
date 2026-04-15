@@ -216,13 +216,13 @@ const makeStage1Input = (): Stage1Input => ({
       keyFindings: [
         {
           text: "ERCOT wind output rises",
-          assetKeys: ["asset-1"]
+          assetKeys: ["asset-1" as any]
         }
       ]
     },
     assets: [
       {
-        assetKey: "asset-1",
+        assetKey: "asset-1" as any,
         assetType: "image",
         source: "embed",
         index: 0,
@@ -290,7 +290,7 @@ const makeStage1Result = (): Stage1Result => ({
       _tag: "UnmatchedDatasetTitleResidual",
       datasetName: "EIA Hourly Electric Grid Monitor",
       normalizedTitle: "eia hourly electric grid monitor",
-      assetKey: "asset-1"
+      assetKey: "asset-1" as any
     }
   ]
 });
@@ -390,6 +390,27 @@ describe("EntitySearchService", () => {
       expect(datasets[0]?.document.entityId).toBe(datasetId);
       expect(distributions[0]?.document.entityId).toBe(distributionId);
       expect(series[0]?.document.entityId).toBe(seriesId);
+    }).pipe(Effect.provide(makeServiceLayer()))
+  );
+
+  it.effect("retrieves series through inherited parent URL and hostname surfaces", () =>
+    Effect.gen(function* () {
+      yield* seedSearchDocs;
+      const service = yield* EntitySearchService;
+
+      const byExactUrl = yield* service.searchSeries({
+        exactCanonicalUrls: ["https://api.eia.gov/v2/electricity/rto/"],
+        limit: 3
+      });
+      const byExactHostname = yield* service.searchSeries({
+        exactHostnames: ["https://api.eia.gov/v2/electricity/rto/"],
+        limit: 3
+      });
+
+      expect(byExactUrl[0]?.document.entityId).toBe(seriesId);
+      expect(byExactUrl[0]?.matchKind).toBe("exact-url");
+      expect(byExactHostname[0]?.document.entityId).toBe(seriesId);
+      expect(byExactHostname[0]?.matchKind).toBe("exact-hostname");
     }).pipe(Effect.provide(makeServiceLayer()))
   );
 

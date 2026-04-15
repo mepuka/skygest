@@ -11,7 +11,7 @@ import type { VisionEnrichment, VisionAssetEnrichment } from "../src/domain/enri
 const makeAsset = (
   overrides: Partial<VisionAssetEnrichment["analysis"]> = {}
 ): VisionAssetEnrichment => ({
-  assetKey: "a1",
+  assetKey: "a1" as any,
   assetType: "image",
   source: "embed",
   index: 0,
@@ -50,7 +50,7 @@ const makeEnrichment = (
     mediaTypes: ["chart"],
     chartTypes: ["line-chart"],
     titles: ["Energy Production"],
-    keyFindings: [{ text: "Production rose 10%", assetKeys: ["a1"] }],
+    keyFindings: [{ text: "Production rose 10%", assetKeys: ["a1" as any] }],
     ...(overrides.summary ?? {})
   },
   assets: overrides.assets ?? [makeAsset()],

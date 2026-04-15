@@ -145,7 +145,7 @@ const makeSourceLineInput = (
     },
     assets: [
       {
-        assetKey: "asset-1",
+        assetKey: "asset-1" as any,
         assetType: "image" as const,
         source: "embed" as const,
         index: 0,
@@ -230,7 +230,7 @@ describe("runStage1", () => {
           },
           assets: [
             {
-              assetKey: "asset-1",
+              assetKey: "asset-1" as any,
               assetType: "image",
               source: "embed",
               index: 0,

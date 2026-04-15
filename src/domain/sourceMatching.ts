@@ -1,5 +1,6 @@
 import { Schema } from "effect";
 import { LinkRecord } from "./bi";
+import { ChartAssetId } from "./data-layer/post-ids";
 import { Did } from "./types";
 import { PostLinkCard } from "./postContext";
 import {
@@ -32,7 +33,7 @@ export type VisionOrganizationMentionLocation = Schema.Schema.Type<
 export const SourceLineAliasEvidence = Schema.Struct({
   signal: Schema.Literal("source-line-alias"),
   rank: Schema.Literal(1),
-  assetKey: Schema.String,
+  assetKey: ChartAssetId,
   sourceText: Schema.String,
   matchedAlias: Schema.String
 });
@@ -43,7 +44,7 @@ export type SourceLineAliasEvidence = Schema.Schema.Type<
 export const SourceLineDomainEvidence = Schema.Struct({
   signal: Schema.Literal("source-line-domain"),
   rank: Schema.Literal(2),
-  assetKey: Schema.String,
+  assetKey: ChartAssetId,
   sourceText: Schema.String,
   domain: Schema.String
 });
@@ -54,7 +55,7 @@ export type SourceLineDomainEvidence = Schema.Schema.Type<
 export const ChartTitleAliasEvidence = Schema.Struct({
   signal: Schema.Literal("chart-title-alias"),
   rank: Schema.Literal(3),
-  assetKey: Schema.String,
+  assetKey: ChartAssetId,
   title: Schema.String,
   matchedAlias: Schema.String
 });
@@ -83,7 +84,7 @@ export type EmbedLinkDomainEvidence = Schema.Schema.Type<
 export const VisibleUrlDomainEvidence = Schema.Struct({
   signal: Schema.Literal("visible-url-domain"),
   rank: Schema.Literal(6),
-  assetKey: Schema.String,
+  assetKey: ChartAssetId,
   url: Schema.String,
   domain: Schema.String
 });
@@ -103,7 +104,7 @@ export type PostTextMentionEvidence = Schema.Schema.Type<
 export const OrganizationMentionAliasEvidence = Schema.Struct({
   signal: Schema.Literal("organization-mention-alias"),
   rank: Schema.Literal(8),
-  assetKey: Schema.String,
+  assetKey: ChartAssetId,
   name: Schema.String,
   location: VisionOrganizationMentionLocation,
   matchedAlias: Schema.String
@@ -115,7 +116,7 @@ export type OrganizationMentionAliasEvidence = Schema.Schema.Type<
 export const LogoTextAliasEvidence = Schema.Struct({
   signal: Schema.Literal("logo-text-alias"),
   rank: Schema.Literal(9),
-  assetKey: Schema.String,
+  assetKey: ChartAssetId,
   text: Schema.String,
   matchedAlias: Schema.String
 });
@@ -177,7 +178,7 @@ export type VisionSignalAssetAnalysis = Schema.Schema.Type<
 >;
 
 export const VisionSignalAsset = Schema.Struct({
-  assetKey: Schema.String,
+  assetKey: ChartAssetId,
   analysis: VisionSignalAssetAnalysis
 });
 export type VisionSignalAsset = Schema.Schema.Type<typeof VisionSignalAsset>;

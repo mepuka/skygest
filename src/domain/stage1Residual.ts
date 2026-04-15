@@ -1,6 +1,7 @@
 import { Schema } from "effect";
 import { ResolutionEntityId } from "./resolutionEntityId";
 import { Stage1Evidence } from "./stage1Evidence";
+import { ChartAssetId } from "./data-layer/post-ids";
 import {
   MatchTextSource,
   Stage1MatchGrain,
@@ -21,7 +22,7 @@ export const UnmatchedDatasetTitleResidual = Schema.TaggedStruct(
   {
     datasetName: Schema.String,
     normalizedTitle: Schema.String,
-    assetKey: Schema.optionalKey(Schema.String)
+    assetKey: Schema.optionalKey(ChartAssetId)
   }
 );
 export type UnmatchedDatasetTitleResidual = Schema.Schema.Type<
@@ -32,7 +33,7 @@ export const UnmatchedTextResidual = Schema.TaggedStruct("UnmatchedTextResidual"
   source: MatchTextSource,
   text: Schema.String,
   normalizedText: Schema.String,
-  assetKey: Schema.optionalKey(Schema.String),
+  assetKey: Schema.optionalKey(ChartAssetId),
   location: Schema.optionalKey(Schema.String)
 });
 export type UnmatchedTextResidual = Schema.Schema.Type<
@@ -64,7 +65,7 @@ export const DeferredToKernelResidual = Schema.TaggedStruct(
     source: MatchTextSource,
     text: Schema.String,
     reason: Schema.String,
-    assetKey: Schema.optionalKey(Schema.String)
+    assetKey: Schema.optionalKey(ChartAssetId)
   }
 );
 export type DeferredToKernelResidual = Schema.Schema.Type<

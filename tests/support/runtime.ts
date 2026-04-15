@@ -9,6 +9,7 @@ import { energySeedDid, energySeedManifest } from "../../src/bootstrap/CheckedIn
 import { bootstrapExperts } from "../../src/bootstrap/ExpertSeeds";
 import { BlueskyClient, layer as BlueskyClientLayer } from "../../src/bluesky/BlueskyClient";
 import { runMigrations } from "../../src/db/migrate";
+import { chartAssetIdFromBluesky } from "../../src/domain/data-layer/post-ids";
 import { CandidatePayloadService } from "../../src/services/CandidatePayloadService";
 import { DataRefQueryService } from "../../src/services/DataRefQueryService";
 import { EditorialScore } from "../../src/domain/editorial";
@@ -114,6 +115,12 @@ export const testConfig = (
 
 export const seedManifest = energySeedManifest;
 export const sampleDid = energySeedDid;
+const sampleAssetPostUri =
+  `at://${sampleDid}/app.bsky.feed.post/runtime-test-post` as PostUri;
+export const sampleChartAssetId = chartAssetIdFromBluesky(
+  sampleAssetPostUri,
+  "bafkreiruntimetestasset"
+);
 
 export const makeSqliteLayer = (filename = ":memory:") =>
   SqliteClient.layer({ filename });
@@ -321,13 +328,13 @@ export const makeVisionEnrichmentPayload = () => ({
     keyFindings: [
       {
         text: "Load rises through summer.",
-        assetKeys: ["embed:0:https://cdn.bsky.app/full-1.jpg"]
+        assetKeys: [sampleChartAssetId]
       }
     ]
   },
   assets: [
     {
-      assetKey: "embed:0:https://cdn.bsky.app/full-1.jpg",
+      assetKey: sampleChartAssetId,
       assetType: "image" as const,
       source: "embed" as const,
       index: 0,

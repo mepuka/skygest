@@ -4,6 +4,7 @@ export * from "./base";
 export * from "./catalog";
 export * from "./kinds";
 export * from "./ids";
+export * from "./post-ids";
 export * from "./variable";
 export * from "./candidate";
 export * from "./query";

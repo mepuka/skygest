@@ -211,13 +211,13 @@ const makeStage1Input = (): Stage1Input => ({
       keyFindings: [
         {
           text: "ERCOT wind output rises",
-          assetKeys: ["asset-1"]
+          assetKeys: ["asset-1" as any]
         }
       ]
     },
     assets: [
       {
-        assetKey: "asset-1",
+        assetKey: "asset-1" as any,
         assetType: "image",
         source: "embed",
         index: 0,
@@ -306,7 +306,7 @@ const makeStage1Result = (): Stage1Result => ({
       _tag: "UnmatchedDatasetTitleResidual",
       datasetName: "EIA Hourly Electric Grid Monitor",
       normalizedTitle: "eia hourly electric grid monitor",
-      assetKey: "asset-1"
+      assetKey: "asset-1" as any
     },
     {
       _tag: "UnmatchedUrlResidual",
@@ -320,7 +320,7 @@ const makeStage1Result = (): Stage1Result => ({
       source: "axis-label",
       text: "Wind generation",
       normalizedText: "wind generation",
-      assetKey: "asset-1"
+      assetKey: "asset-1" as any
     }
   ]
 });

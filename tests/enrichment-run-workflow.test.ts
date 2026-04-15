@@ -15,6 +15,7 @@ import type {
   EnrichmentRunParams,
   EnrichmentRunRecord
 } from "../src/domain/enrichmentRun";
+import { chartAssetIdFromBluesky } from "../src/domain/data-layer/post-ids";
 import type { ResolutionOutcome } from "../src/domain/resolutionKernel";
 import type { PostUri } from "../src/domain/types";
 import { EnrichmentPlanner } from "../src/enrichment/EnrichmentPlanner";
@@ -47,13 +48,18 @@ vi.mock("../src/enrichment/Layer", () => ({
 }));
 
 const asPostUri = (value: string) => value as PostUri;
+const workflowPostUri = asPostUri("at://did:plc:test/app.bsky.feed.post/post-1");
+const workflowAssetKey = chartAssetIdFromBluesky(
+  workflowPostUri,
+  "bafkreiworkflowasset"
+);
 
 const makeRunRecord = (
   overrides: Partial<EnrichmentRunRecord> = {}
 ): EnrichmentRunRecord => ({
   id: "run-1",
   workflowInstanceId: "run-1",
-  postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+  postUri: workflowPostUri,
   enrichmentType: "vision",
   schemaVersion: "v1",
   triggeredBy: "admin",
@@ -89,13 +95,13 @@ const makeStep = () =>
 const makePlan = (
   overrides: Partial<EnrichmentExecutionPlan> = {}
 ): EnrichmentExecutionPlan => ({
-  postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+  postUri: workflowPostUri,
   enrichmentType: "vision",
   schemaVersion: "v1",
   decision: "execute",
   captureStage: "picked",
   post: {
-    postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
+    postUri: workflowPostUri,
     did: "did:plc:test" as any,
     handle: null,
     text: "Stored post text",
@@ -119,7 +125,7 @@ const makePlan = (
   linkCards: [],
   assets: [
     {
-      assetKey: "embed:0:https://cdn.bsky.app/full-1.jpg",
+      assetKey: workflowAssetKey,
       assetType: "image",
       source: "embed",
       index: 0,
@@ -143,13 +149,13 @@ const makeVisionEnrichment = (): VisionEnrichment => ({
     keyFindings: [
       {
         text: "Prices rose through the summer",
-        assetKeys: ["embed:0:https://cdn.bsky.app/full-1.jpg"]
+        assetKeys: [workflowAssetKey]
       }
     ]
   },
   assets: [
     {
-      assetKey: "embed:0:https://cdn.bsky.app/full-1.jpg",
+      assetKey: workflowAssetKey,
       assetType: "image",
       source: "embed",
       index: 0,
@@ -977,7 +983,7 @@ describe("EnrichmentRunWorkflow", () => {
         },
         assets: [
           {
-            assetKey: "embed:0:https://cdn.bsky.app/full-1.jpg",
+            assetKey: workflowAssetKey,
             assetType: "image",
             source: "embed",
             index: 0,
