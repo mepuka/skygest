@@ -14,10 +14,11 @@ import {
 import { SqlClient } from "effect/unstable/sql";
 import { Command, Flag } from "effect/unstable/cli";
 import { EnrichmentOutput } from "../src/domain/enrichment";
-import { PostUri } from "../src/domain/types";
+import { PostUri, platformFromUri } from "../src/domain/types";
 import { repairChartAssetIdsForPost } from "../src/enrichment/ChartAssetIdRepair";
 import { D1SnapshotKeys } from "../src/platform/ConfigShapes";
 import { d1SnapshotLayer } from "../src/platform/D1SnapshotLayer";
+import { parseUrlLike } from "../src/platform/Normalize";
 import {
   encodeJsonStringWith,
   stringifyUnknown
@@ -77,6 +78,10 @@ type RepairSummary = {
   readonly noAssetReferences: number;
   readonly failed: number;
 };
+
+const LEGACY_ASSET_STABLE_REF_PATTERN = /^(?:embed|media):\d+:(.+)$/u;
+const MISSING_REF_ASSET_KEY_PATTERN = /^(?:embed|media):\d+:missing-ref$/u;
+const SERIES_ITEM_KEY_MARKER = ":series:";
 
 const toAbsolutePath = (value: string) =>
   isAbsolute(value) ? value : resolve(ROOT, value);
@@ -183,6 +188,95 @@ const loadRepairRows = (
     )
   );
 
+const extractLegacyStableRef = (legacyAssetKey: string) => {
+  const match = LEGACY_ASSET_STABLE_REF_PATTERN.exec(legacyAssetKey);
+  const stableRef = match?.[1];
+  return stableRef !== undefined && stableRef.length > 0 ? stableRef : null;
+};
+
+const isTwitterVideoStableRef = (stableRef: string) =>
+  Option.match(parseUrlLike(stableRef), {
+    onNone: () => false,
+    onSome: (url) =>
+      url.protocol === "https:" &&
+      (
+        url.hostname === "video.twimg.com" ||
+        (
+          url.hostname === "pbs.twimg.com" &&
+          url.pathname.startsWith("/ext_tw_video_thumb/")
+        )
+      )
+  });
+
+const collectAssetReferenceValues = (value: unknown): ReadonlyArray<string> => {
+  const collected: Array<string> = [];
+
+  const visit = (current: unknown): void => {
+    if (Array.isArray(current)) {
+      for (const item of current) {
+        visit(item);
+      }
+      return;
+    }
+
+    if (typeof current !== "object" || current === null) {
+      return;
+    }
+
+    for (const [key, child] of Object.entries(current)) {
+      if (key === "assetKey" && typeof child === "string") {
+        collected.push(child);
+      } else if (key === "assetKeys" && Array.isArray(child)) {
+        for (const entry of child) {
+          if (typeof entry === "string") {
+            collected.push(entry);
+          }
+        }
+      } else if (key === "itemKey" && typeof child === "string") {
+        const markerIndex = child.indexOf(SERIES_ITEM_KEY_MARKER);
+        collected.push(
+          markerIndex > 0 ? child.slice(0, markerIndex) : child
+        );
+      }
+
+      visit(child);
+    }
+  };
+
+  visit(value);
+  return collected;
+};
+
+const classifyIgnoredFailure = (
+  row: RepairRow,
+  payload: unknown,
+  failure: FailureLogEntry
+): "no-asset-references" | null => {
+  if (
+    failure.reason === "unparseable-legacy-asset-key" &&
+    platformFromUri(row.postUri) === "twitter" &&
+    failure.legacyAssetKeys.length > 0 &&
+    failure.legacyAssetKeys.every((legacyAssetKey) => {
+      const stableRef = extractLegacyStableRef(legacyAssetKey);
+      return stableRef !== null && isTwitterVideoStableRef(stableRef);
+    })
+  ) {
+    return "no-asset-references";
+  }
+
+  if (failure.reason !== "invalid-payload") {
+    return null;
+  }
+
+  const assetReferences = collectAssetReferenceValues(payload);
+  return assetReferences.length > 0 &&
+      assetReferences.every((assetReference) =>
+        MISSING_REF_ASSET_KEY_PATTERN.test(assetReference)
+      )
+    ? "no-asset-references"
+    : null;
+};
+
 const planRepair = (row: RepairRow) =>
   Effect.gen(function* () {
     const payload = yield* decodeJsonColumnWithDbError(
@@ -220,16 +314,31 @@ const planRepair = (row: RepairRow) =>
           reason: repaired.reason
         };
       case "failed":
-        return {
-          _tag: "failed" as const,
-          failure: {
+        return (() => {
+          const ignoredFailureReason = classifyIgnoredFailure(row, payload, {
             postUri: row.postUri,
             enrichmentType: row.enrichmentType,
             reason: repaired.reason,
             message: repaired.message,
             legacyAssetKeys: repaired.legacyAssetKeys
-          } satisfies FailureLogEntry
-        };
+          });
+
+          return ignoredFailureReason === null
+            ? {
+                _tag: "failed" as const,
+                failure: {
+                  postUri: row.postUri,
+                  enrichmentType: row.enrichmentType,
+                  reason: repaired.reason,
+                  message: repaired.message,
+                  legacyAssetKeys: repaired.legacyAssetKeys
+                } satisfies FailureLogEntry
+              }
+            : {
+                _tag: "unchanged" as const,
+                reason: ignoredFailureReason
+              };
+        })();
     }
   }).pipe(
     Effect.catch((error) =>

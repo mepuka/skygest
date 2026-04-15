@@ -31,9 +31,11 @@ const imageOneAssetKey = chartAssetIdFromBluesky(solarUri, imageOneBlobCid);
 const mediaAssetKey = chartAssetIdFromBluesky(solarUri, mediaBlobCid);
 const twitterUri = "x://user42/status/1870000000001" as PostUri;
 const twitterMediaId = "1850000000001";
+const twitterUrlMediaId = "GT2AbCdWgAAefgh";
 const twitterImageUrl =
   "https://pbs.twimg.com/media/GT2AbCdWgAAefgh?format=jpg&name=large";
 const twitterAssetKey = chartAssetIdFromTwitter(twitterUri, twitterMediaId);
+const twitterUrlAssetKey = chartAssetIdFromTwitter(twitterUri, twitterUrlMediaId);
 
 const makeLayer = () => {
   const baseLayer = makeBiLayer();
@@ -213,6 +215,75 @@ describe("EnrichmentPlanner", () => {
       expect(plan.assets).toEqual([
         expect.objectContaining({
           assetKey: twitterAssetKey,
+          assetType: "image",
+          source: "embed",
+          index: 0,
+          fullsize: twitterImageUrl,
+          alt: "Twitter chart"
+        })
+      ]);
+    }).pipe(Effect.provide(makeLayer()))
+  );
+
+  it.effect("falls back to the Twitter image URL when the stored media id is missing", () =>
+    Effect.gen(function* () {
+      yield* seedKnowledgeBase();
+      const sql = yield* SqlClient.SqlClient;
+      const payloads = yield* CandidatePayloadService;
+      const planner = yield* EnrichmentPlanner;
+
+      yield* sql`
+        INSERT INTO posts (
+          uri,
+          did,
+          cid,
+          text,
+          created_at,
+          indexed_at,
+          has_links,
+          status,
+          ingest_id
+        ) VALUES (
+          ${twitterUri},
+          ${sampleDid},
+          ${"cid-twitter-plan-fallback"},
+          ${"Imported Twitter market update"},
+          ${1_870_000_000_000},
+          ${1_870_000_000_000},
+          ${0},
+          ${"active"},
+          ${"ingest-twitter-plan-fallback"}
+        )
+      `.pipe(Effect.asVoid);
+
+      yield* payloads.capturePayload({
+        postUri: twitterUri,
+        captureStage: "candidate",
+        embedType: "img",
+        embedPayload: {
+          kind: "img",
+          images: [
+            {
+              thumb: twitterImageUrl,
+              fullsize: twitterImageUrl,
+              alt: "Twitter chart",
+              mediaId: null
+            }
+          ]
+        }
+      });
+      yield* payloads.markPicked(twitterUri);
+
+      const plan = yield* planner.plan({
+        postUri: twitterUri,
+        enrichmentType: "vision",
+        schemaVersion: "v1"
+      });
+
+      expect(plan.decision).toBe("execute");
+      expect(plan.assets).toEqual([
+        expect.objectContaining({
+          assetKey: twitterUrlAssetKey,
           assetType: "image",
           source: "embed",
           index: 0,

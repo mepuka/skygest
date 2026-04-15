@@ -90,7 +90,7 @@ export type ParsedChartAssetId =
 
 const BLUESKY_POST_URI_PATTERN =
   /^at:\/\/([^/]+)\/app\.bsky\.feed\.post\/([^/?#]+)$/u;
-const TWITTER_POST_URI_PATTERN = /^x:\/\/([^/]+)\/status\/([^/?#]+)$/u;
+const TWITTER_POST_URI_PATTERN = /^x:\/\/([^/]+)\/(?:status\/)?([^/?#]+)$/u;
 const BLUESKY_POST_SKYGEST_PATTERN =
   /^https:\/\/id\.skygest\.io\/post\/bluesky\/([^/]+)\/([^/]+)$/u;
 const TWITTER_POST_SKYGEST_PATTERN =

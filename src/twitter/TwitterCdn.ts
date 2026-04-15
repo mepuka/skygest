@@ -11,7 +11,9 @@ export const parseTwitterMediaUrl = (
         return null;
       }
 
-      const match = url.pathname.match(/^\/media\/([^/]+?)(?:\.[^/]+)?$/u);
+      const match = url.pathname.match(
+        /^\/media\/([^/:]+?)(?:\.[^/:]+)?(?::[^/]+)?$/u
+      );
       if (match === null) {
         return null;
       }

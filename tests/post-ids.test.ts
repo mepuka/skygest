@@ -200,6 +200,19 @@ describe("post-ids", () => {
     );
   });
 
+  it("accepts legacy Twitter post URIs without the status segment", () => {
+    const postUri = decodePostUri("x://user42/1870000000001");
+    const skygestUri = mintPostSkygestUri(postUri);
+    const chartAssetId = chartAssetIdFromTwitter(postUri, "GT2AbCdWgAAefgh");
+
+    expect(skygestUri).toBe("https://id.skygest.io/post/twitter/1870000000001");
+    expect(parseChartAssetId(chartAssetId)).toEqual({
+      platform: "twitter",
+      tweetId: "1870000000001",
+      mediaId: "GT2AbCdWgAAefgh"
+    });
+  });
+
   it("parses representative real Bluesky image URLs from the old eval corpus", () => {
     expect(realStoredBskyImageUrls.length).toBeGreaterThan(0);
 
