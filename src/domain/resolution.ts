@@ -1,5 +1,6 @@
 import { Schema } from "effect";
-import { EntitySearchBundleCandidates } from "./entitySearch";
+import { ChartAssetId } from "./data-layer/post-ids";
+import { BundleResolution } from "./bundleResolution";
 import { Stage1Input, Stage1Result } from "./stage1Resolution";
 import { ResolutionOutcome } from "./resolutionKernel";
 import {
@@ -34,7 +35,17 @@ export const ResolvePostResponse = Schema.Struct({
 });
 export type ResolvePostResponse = Schema.Schema.Type<typeof ResolvePostResponse>;
 
-export const ResolveSearchCandidatesResponse = EntitySearchBundleCandidates;
+export const ResolveSearchCandidatesBundle = Schema.Struct({
+  assetKey: ChartAssetId,
+  resolution: BundleResolution
+});
+export type ResolveSearchCandidatesBundle = Schema.Schema.Type<
+  typeof ResolveSearchCandidatesBundle
+>;
+
+export const ResolveSearchCandidatesResponse = Schema.Struct({
+  bundles: Schema.Array(ResolveSearchCandidatesBundle)
+});
 export type ResolveSearchCandidatesResponse = Schema.Schema.Type<
   typeof ResolveSearchCandidatesResponse
 >;

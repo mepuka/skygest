@@ -49,20 +49,7 @@ const resolveBulkSuccess = () =>
 
 const searchCandidatesSuccess = () =>
   Effect.succeed({
-    plan: {
-      exactCanonicalUrls: [],
-      exactHostnames: [],
-      agentText: [],
-      datasetText: [],
-      distributionText: [],
-      seriesText: [],
-      variableText: []
-    },
-    agents: [],
-    datasets: [],
-    distributions: [],
-    series: [],
-    variables: []
+    bundles: []
   });
 
 const expectJsonResponse = async <A>(
@@ -174,13 +161,9 @@ describe("resolver router", () => {
     );
 
     const body = await expectJsonResponse<{
-      readonly plan: {
-        readonly exactCanonicalUrls: ReadonlyArray<string>;
-      };
-      readonly datasets: ReadonlyArray<unknown>;
+      readonly bundles: ReadonlyArray<unknown>;
     }>(response);
-    expect(body.plan.exactCanonicalUrls).toEqual([]);
-    expect(body.datasets).toEqual([]);
+    expect(body.bundles).toEqual([]);
   });
 
   it("maps decode errors to a 400 response", async () => {

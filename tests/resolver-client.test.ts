@@ -149,20 +149,7 @@ describe("ResolverClient", () => {
         return {
           ok: true as const,
           value: {
-            plan: {
-              exactCanonicalUrls: [],
-              exactHostnames: [],
-              agentText: [],
-              datasetText: [],
-              distributionText: [],
-              seriesText: [],
-              variableText: []
-            },
-            agents: [],
-            datasets: [],
-            distributions: [],
-            series: [],
-            variables: []
+            bundles: []
           }
         };
       }
@@ -183,8 +170,7 @@ describe("ResolverClient", () => {
         }
       );
 
-      expect(result.plan.seriesText).toEqual([]);
-      expect(result.variables).toEqual([]);
+      expect(result.bundles).toEqual([]);
       expect(capturedOptions).toEqual({
         requestId: "req-search-123",
         [RESOLVER_REQUEST_ID_HEADER]: "req-search-123"

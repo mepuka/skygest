@@ -13,6 +13,7 @@ import {
   Variable as VariableSchema,
   type DataLayerRegistrySeed
 } from "../src/domain/data-layer";
+import { chartAssetIdFromBluesky } from "../src/domain/data-layer/post-ids";
 import {
   Stage1Input as Stage1InputSchema,
   type Stage1Input
@@ -33,6 +34,10 @@ const decodeAgent = Schema.decodeUnknownSync(AgentSchema);
 const decodeVariable = Schema.decodeUnknownSync(VariableSchema);
 const decodeSeries = Schema.decodeUnknownSync(SeriesSchema);
 const decodeStage1Input = Schema.decodeUnknownSync(Stage1InputSchema);
+const emberVisionAssetKey = chartAssetIdFromBluesky(
+  "at://did:plc:test/app.bsky.feed.post/vision" as any,
+  "asset-ember"
+);
 
 const iso = "2026-04-11T12:00:00.000Z";
 // Flake fix: this sync/parity test does two full registry syncs plus Stage 1 verification and can starve under full-suite contention.
@@ -167,7 +172,7 @@ const stage1ParityCases: ReadonlyArray<Stage1ParityCase> = [
         },
         assets: [
           {
-            assetKey: "asset-ember",
+            assetKey: emberVisionAssetKey,
             assetType: "image",
             source: "embed",
             index: 0,

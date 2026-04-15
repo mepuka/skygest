@@ -16,10 +16,12 @@ import {
   ResolveBulkResponse,
   ResolvePostRequest,
   ResolvePostResponse,
+  ResolveSearchCandidatesResponse,
   type ResolveBulkRequest,
   type ResolveBulkResponse as ResolveBulkResponseValue,
   type ResolvePostRequest as ResolvePostRequestValue,
-  type ResolvePostResponse as ResolvePostResponseValue
+  type ResolvePostResponse as ResolvePostResponseValue,
+  type ResolveSearchCandidatesResponse as ResolveSearchCandidatesResponseValue
 } from "../domain/resolution";
 import {
   ResolverBulkItemError,
@@ -29,7 +31,6 @@ import {
   type EnrichmentExecutionPlan,
   type EnrichmentPlannedExistingEnrichment
 } from "../domain/enrichmentPlan";
-import type { EntitySearchBundleCandidates } from "../domain/entitySearch";
 import { PostUri } from "../domain/types";
 import { EnrichmentPlanner } from "../enrichment/EnrichmentPlanner";
 import {
@@ -37,7 +38,10 @@ import {
   stringifyUnknown
 } from "../platform/Json";
 import { ResolutionKernel } from "../resolution/ResolutionKernel";
+import { buildEnrichedBundles } from "../resolution/bundle/buildEnrichedBundles";
+import { resolveBundle } from "../resolution/bundle/resolveBundle";
 import { Stage1Resolver } from "../resolution/Stage1Resolver";
+import { DataLayerRegistry } from "../services/DataLayerRegistry";
 import { EntitySearchService } from "../services/EntitySearchService";
 import { buildStage1Input } from "./stage1Input";
 
@@ -92,7 +96,7 @@ export class ResolverService extends ServiceMap.Service<
     readonly searchCandidates: (
       input: ResolvePostRequestValue
     ) => Effect.Effect<
-      EntitySearchBundleCandidates,
+      ResolveSearchCandidatesResponseValue,
       | CandidatePayloadNotPickedError
       | DbError
       | EnrichmentPayloadMissingError
@@ -109,6 +113,7 @@ export class ResolverService extends ServiceMap.Service<
       const planner = yield* EnrichmentPlanner;
       const stage1Resolver = yield* Stage1Resolver;
       const resolutionKernel = yield* ResolutionKernel;
+      const registry = yield* DataLayerRegistry;
       const entitySearch = yield* EntitySearchService;
       const decodePostResponse = (input: unknown) =>
         Schema.decodeUnknownEffect(ResolvePostResponse)(input).pipe(
@@ -147,6 +152,16 @@ export class ResolverService extends ServiceMap.Service<
               new EnrichmentSchemaDecodeError({
                 message: formatSchemaParseError(decodeError),
                 operation: "ResolverService.resolvePost"
+              })
+          )
+        );
+      const decodeSearchCandidatesResponse = (input: unknown) =>
+        Schema.decodeUnknownEffect(ResolveSearchCandidatesResponse)(input).pipe(
+          Effect.mapError(
+            (decodeError) =>
+              new EnrichmentSchemaDecodeError({
+                message: formatSchemaParseError(decodeError),
+                operation: "ResolverService.searchCandidates"
               })
           )
         );
@@ -225,11 +240,22 @@ export class ResolverService extends ServiceMap.Service<
         "ResolverService.searchCandidates"
       )(function* (input: ResolvePostRequestValue) {
         const { stage1Input } = yield* loadValidatedStage1Input(input);
-        const stage1 = yield* stage1Resolver.resolve(stage1Input);
+        const bundles = buildEnrichedBundles(stage1Input);
+        const results = yield* Effect.forEach(
+          bundles,
+          (bundle) =>
+            resolveBundle(bundle).pipe(
+              Effect.provideService(DataLayerRegistry, registry),
+              Effect.provideService(EntitySearchService, entitySearch)
+            ),
+          { concurrency: "unbounded" }
+        );
 
-        return yield* entitySearch.searchBundleCandidates({
-          stage1Input,
-          stage1
+        return yield* decodeSearchCandidatesResponse({
+          bundles: bundles.map((bundle, index) => ({
+            assetKey: bundle.asset.assetKey,
+            resolution: results[index]
+          }))
         });
       });
 
