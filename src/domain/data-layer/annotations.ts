@@ -67,3 +67,14 @@ export const DesignDecision = Symbol.for("skygest/design-decision");
  * classification.
  */
 export const XsdDatatype = Symbol.for("skygest/xsd-datatype");
+
+/**
+ * Marker that identifies the `WebUrl` filter. Used by the ontology-store
+ * EmitSpec generator to classify fields with WebUrl value kind without
+ * relying on run-function identity (which is fragile across `.pipe(check)`
+ * compositions in Effect 4). The marker lives on the WebUrl filter
+ * itself so any annotation chain built from WebUrl preserves it.
+ *
+ * Not intended for other consumers — this is an internal generator hook.
+ */
+export const WebUrlMarker = Symbol.for("skygest/web-url-marker");

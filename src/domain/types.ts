@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { XsdDatatype } from "./data-layer/annotations";
+import { WebUrlMarker, XsdDatatype } from "./data-layer/annotations";
 
 const isHttpsUrl = (value: string) => {
   try {
@@ -86,7 +86,10 @@ const isWebUrl = (value: string) => {
 /** Web URL — accepts http: and https: (many government data portals use http). */
 export const WebUrl = Schema.String.pipe(
   Schema.check(Schema.makeFilter(isWebUrl))
-).annotate({ description: "Web URL (http or https)" });
+).annotate({
+  description: "Web URL (http or https)",
+  [WebUrlMarker]: true
+});
 export type WebUrl = Schema.Schema.Type<typeof WebUrl>;
 
 const PODCAST_SEGMENT_URI_PREFIX = "podcast-segment://";

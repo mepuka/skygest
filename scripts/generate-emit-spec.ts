@@ -31,11 +31,11 @@ import {
   Distribution
 } from "../src/domain/data-layer/catalog";
 import { Series, Variable } from "../src/domain/data-layer/variable";
-import { WebUrl } from "../src/domain/data-layer/base";
 import {
   DcatClass,
   DcatProperty,
   SchemaOrgType,
+  WebUrlMarker,
   XsdDatatype as XsdDatatypeMarker
 } from "../src/domain/data-layer/annotations";
 
@@ -127,36 +127,24 @@ const PRIMARY_CLASS_IRI_FALLBACK: Partial<Record<ClassName, string>> = {
 };
 
 /**
- * WebUrl identity check — WebUrl is a `Schema.String` with a pattern
- * filter, NOT a branded type (see src/domain/types.ts). We can't detect
- * it via `brands`. Instead, we capture a reference to its filter's `run`
- * function at generator startup and compare run-function identity when
- * walking field ASTs.
+ * WebUrl detection — WebUrl is a `Schema.String` with a pattern filter,
+ * NOT a branded type (see src/domain/types.ts). We identify it via the
+ * `WebUrlMarker` annotation placed on the filter in types.ts. The marker
+ * survives `.pipe(Schema.check(...))` compositions because it lives on
+ * the filter itself, not on run-function identity.
  *
- * Why this works: `Schema.annotate(...)` on a Filter produces a new
- * Filter via `new Filter(this.run, newAnnotations)` — the `run` reference
- * is preserved. So any field annotated from `WebUrl.annotate({...})`
- * keeps the same closure reference in its last check.
+ * The walk inspects every check's annotations — not just the last —
+ * so the marker is still detected when a field adds additional checks
+ * via `WebUrl.pipe(Schema.check(...))` (not currently done, but robust).
  */
-const WEB_URL_FILTER_RUN = ((): unknown => {
-  const webUrlAst = WebUrl.ast;
-  if (!webUrlAst.checks || webUrlAst.checks.length === 0) return undefined;
-  const lastCheck = webUrlAst.checks[webUrlAst.checks.length - 1];
-  // Filter instances have a `run` property; FilterGroup doesn't.
-  return lastCheck && "run" in lastCheck
-    ? (lastCheck as { run: unknown }).run
-    : undefined;
-})();
-
 const isWebUrlAst = (ast: SchemaAST.AST): boolean => {
   if (ast._tag !== "String") return false;
   if (!ast.checks || ast.checks.length === 0) return false;
-  if (WEB_URL_FILTER_RUN === undefined) return false;
   for (const check of ast.checks) {
-    if (
-      "run" in check &&
-      (check as { run: unknown }).run === WEB_URL_FILTER_RUN
-    ) {
+    const annotations = check.annotations as
+      | Record<string | symbol, unknown>
+      | undefined;
+    if (annotations && annotations[WebUrlMarker] === true) {
       return true;
     }
   }
