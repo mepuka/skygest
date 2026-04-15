@@ -17,6 +17,7 @@
  * guidance only.
  */
 
+import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as nodePath from "node:path";
 import { Schema, SchemaAST } from "effect";
@@ -501,7 +502,11 @@ const REVERSE_POLICY: ReversePolicy = {
     alternateNames: {
       distillFrom: {
         _tag: "PredicateWithPrecedence",
-        predicate: "http://www.w3.org/2004/02/skos/core#altLabel",
+        predicate: "http://www.w3.org/2004/02/skos/core#altLabel" as DistillFrom extends {
+          predicate: infer P;
+        }
+          ? P
+          : never,
         precedence: "alternateNames-before-display-alias",
         conflictResolution: "preferFirst"
       }
@@ -737,6 +742,37 @@ const generateClass = (name: ClassName): ClassEmitSpec => {
 // Public API
 // ---------------------------------------------------------------------------
 
+/**
+ * Source files the generator walks. The sha256 of their concatenated
+ * contents is pinned in `generatedFrom` so a stale committed
+ * emit-spec.json surfaces at PR-review time: any edit to these files
+ * changes the hash, and the drift test in
+ * `packages/ontology-store/tests/generated/emit-spec.test.ts` fails
+ * unless the committed artifact was regenerated.
+ */
+const SOURCE_FILES: ReadonlyArray<string> = [
+  "src/domain/data-layer/catalog.ts",
+  "src/domain/data-layer/variable.ts",
+  "src/domain/data-layer/base.ts",
+  "src/domain/data-layer/annotations.ts",
+  "src/domain/types.ts"
+];
+
+/**
+ * Compute a short sha256 hex prefix over the concatenated contents of
+ * the generator's source files. Files are concatenated in declaration
+ * order with no separators — the hash is stable as long as the list
+ * and the file contents are stable.
+ */
+const computeSourceHash = (): string => {
+  const hash = createHash("sha256");
+  for (const relative of SOURCE_FILES) {
+    const absolute = nodePath.resolve(process.cwd(), relative);
+    hash.update(fs.readFileSync(absolute));
+  }
+  return hash.digest("hex").slice(0, 16);
+};
+
 export const generateEmitSpec = (): EmitSpecType => {
   // Explicit 9-key object matches the `EmitSpec.classes` Struct signature.
   // Building it inline (rather than a `Record<string, ClassEmitSpec>`
@@ -756,7 +792,7 @@ export const generateEmitSpec = (): EmitSpecType => {
   };
   const spec: EmitSpecType = {
     version: "0.1.0",
-    generatedFrom: "src/domain/data-layer/*.ts Schema ASTs",
+    generatedFrom: `src/domain/data-layer/*.ts@sha256:${computeSourceHash()}`,
     classes
   };
 

@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "generatedFrom": "src/domain/data-layer/*.ts Schema ASTs",
+  "generatedFrom": "src/domain/data-layer/*.ts@sha256:92aa2e3f83f7d002",
   "classes": {
     "Agent": {
       "primaryClassIri": "http://xmlns.com/foaf/0.1/Agent",

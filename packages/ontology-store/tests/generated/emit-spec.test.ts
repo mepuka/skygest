@@ -1,7 +1,11 @@
+import { readFileSync } from "node:fs";
+import { resolve as resolvePath } from "node:path";
+
 import { describe, expect, it } from "@effect/vitest";
 import { Schema } from "effect";
 
 import { EmitSpec } from "../../src/Domain/EmitSpec";
+import { generateEmitSpec } from "../../../../scripts/generate-emit-spec";
 import emitSpecJson from "../../generated/emit-spec.json" with { type: "json" };
 
 /**
@@ -20,6 +24,36 @@ describe("generated/emit-spec.json", () => {
   it("decodes cleanly against the EmitSpec schema", () => {
     expect(decoded.version).toBeTypeOf("string");
     expect(decoded.generatedFrom).toBeTypeOf("string");
+  });
+
+  it("generatedFrom carries a sha256 prefix of the generator source files", () => {
+    // Format: src/domain/data-layer/*.ts@sha256:<16-hex-chars>
+    // The prefix changes whenever any of the generator's source files
+    // change, so PR review surfaces committed-emit-spec staleness.
+    expect(decoded.generatedFrom).toMatch(
+      /^src\/domain\/data-layer\/\*\.ts@sha256:[a-f0-9]{16}$/
+    );
+  });
+
+  it("committed emit-spec.json matches a fresh generator run (drift check)", () => {
+    // Running generateEmitSpec() in-process and comparing to the committed
+    // file catches any edit to the generator or the source files that
+    // wasn't followed by `bun run gen:emit-spec`. Without this, a
+    // developer could land a generator change without regenerating the
+    // committed JSON and all the other integration tests would still
+    // pass against the stale artifact.
+    const fresh = generateEmitSpec();
+    const freshJson = `${JSON.stringify(fresh, null, 2)}\n`;
+    const committedPath = resolvePath(
+      process.cwd(),
+      "packages/ontology-store/generated/emit-spec.json"
+    );
+    const committedJson = readFileSync(committedPath, "utf8");
+    expect(
+      freshJson,
+      "packages/ontology-store/generated/emit-spec.json is stale. " +
+        "Run `bun run gen:emit-spec` and commit the diff."
+    ).toBe(committedJson);
   });
 
   it("covers all 9 DCAT domain classes", () => {
