@@ -1,0 +1,1999 @@
+{
+  "version": "0.1.0",
+  "generatedFrom": "src/domain/data-layer/*.ts Schema ASTs",
+  "classes": {
+    "Agent": {
+      "primaryClassIri": "http://xmlns.com/foaf/0.1/Agent",
+      "additionalClassIris": [],
+      "forward": {
+        "fields": [
+          {
+            "runtimeName": "_tag",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "id",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "kind",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "name",
+            "predicate": "http://xmlns.com/foaf/0.1/name",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "alternateNames",
+            "predicate": "http://www.w3.org/2004/02/skos/core#altLabel",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "many"
+          },
+          {
+            "runtimeName": "homepage",
+            "predicate": "http://xmlns.com/foaf/0.1/homepage",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "parentAgentId",
+            "predicate": null,
+            "cardinality": "single-optional",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "createdAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "updatedAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "aliases",
+            "predicate": null,
+            "cardinality": "many",
+            "skipEmit": true
+          }
+        ]
+      },
+      "reverse": {
+        "subjectSelector": {
+          "_tag": "TypedSubject",
+          "classIri": "http://xmlns.com/foaf/0.1/Agent"
+        },
+        "fields": [
+          {
+            "runtimeName": "_tag",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "Agent"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "id",
+            "distillFrom": {
+              "_tag": "SubjectIri"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "kind",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": null
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "name",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://xmlns.com/foaf/0.1/name"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "alternateNames",
+            "distillFrom": {
+              "_tag": "PredicateWithPrecedence",
+              "predicate": "http://www.w3.org/2004/02/skos/core#altLabel",
+              "precedence": "alternateNames-before-display-alias",
+              "conflictResolution": "preferFirst"
+            },
+            "cardinality": "many"
+          },
+          {
+            "runtimeName": "homepage",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://xmlns.com/foaf/0.1/homepage"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "parentAgentId",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": null
+            },
+            "cardinality": "single-optional",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "createdAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "updatedAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "aliases",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": []
+            },
+            "cardinality": "many",
+            "lossy": "runtime-local"
+          }
+        ]
+      }
+    },
+    "Catalog": {
+      "primaryClassIri": "http://www.w3.org/ns/dcat#Catalog",
+      "additionalClassIris": [],
+      "forward": {
+        "fields": [
+          {
+            "runtimeName": "_tag",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "id",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "title",
+            "predicate": "http://purl.org/dc/terms/title",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "description",
+            "predicate": "http://purl.org/dc/terms/description",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "publisherAgentId",
+            "predicate": "http://purl.org/dc/terms/publisher",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "homepage",
+            "predicate": "http://xmlns.com/foaf/0.1/homepage",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "createdAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "updatedAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "aliases",
+            "predicate": null,
+            "cardinality": "many",
+            "skipEmit": true
+          }
+        ]
+      },
+      "reverse": {
+        "subjectSelector": {
+          "_tag": "TypedSubject",
+          "classIri": "http://www.w3.org/ns/dcat#Catalog"
+        },
+        "fields": [
+          {
+            "runtimeName": "_tag",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "Catalog"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "id",
+            "distillFrom": {
+              "_tag": "SubjectIri"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "title",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/title"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "description",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/description"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "publisherAgentId",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/publisher"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "homepage",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://xmlns.com/foaf/0.1/homepage"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "createdAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "updatedAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "aliases",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": []
+            },
+            "cardinality": "many",
+            "lossy": "runtime-local"
+          }
+        ]
+      }
+    },
+    "CatalogRecord": {
+      "primaryClassIri": "http://www.w3.org/ns/dcat#CatalogRecord",
+      "additionalClassIris": [],
+      "forward": {
+        "fields": [
+          {
+            "runtimeName": "_tag",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "id",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "catalogId",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "primaryTopicType",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "primaryTopicId",
+            "predicate": "http://xmlns.com/foaf/0.1/primaryTopic",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "sourceRecordId",
+            "predicate": null,
+            "cardinality": "single-optional",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "harvestedFrom",
+            "predicate": null,
+            "cardinality": "single-optional",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "firstSeen",
+            "predicate": "http://purl.org/dc/terms/issued",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "lastSeen",
+            "predicate": "http://purl.org/dc/terms/modified",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "sourceModified",
+            "predicate": null,
+            "cardinality": "single-optional",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "isAuthoritative",
+            "predicate": null,
+            "cardinality": "single-optional",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "duplicateOf",
+            "predicate": null,
+            "cardinality": "single-optional",
+            "skipEmit": true
+          }
+        ]
+      },
+      "reverse": {
+        "subjectSelector": {
+          "_tag": "TypedSubject",
+          "classIri": "http://www.w3.org/ns/dcat#CatalogRecord"
+        },
+        "fields": [
+          {
+            "runtimeName": "_tag",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "CatalogRecord"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "id",
+            "distillFrom": {
+              "_tag": "SubjectIri"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "catalogId",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": null
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "primaryTopicType",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<derive-from-primary-topic-class>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "primaryTopicId",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://xmlns.com/foaf/0.1/primaryTopic"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "sourceRecordId",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": null
+            },
+            "cardinality": "single-optional",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "harvestedFrom",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": null
+            },
+            "cardinality": "single-optional",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "firstSeen",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/issued"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "lastSeen",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/modified"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "sourceModified",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": null
+            },
+            "cardinality": "single-optional",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "isAuthoritative",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": null
+            },
+            "cardinality": "single-optional",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "duplicateOf",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": null
+            },
+            "cardinality": "single-optional",
+            "lossy": "runtime-local"
+          }
+        ]
+      }
+    },
+    "DataService": {
+      "primaryClassIri": "http://www.w3.org/ns/dcat#DataService",
+      "additionalClassIris": [],
+      "forward": {
+        "fields": [
+          {
+            "runtimeName": "_tag",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "id",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "title",
+            "predicate": "http://purl.org/dc/terms/title",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "description",
+            "predicate": "http://purl.org/dc/terms/description",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "publisherAgentId",
+            "predicate": "http://purl.org/dc/terms/publisher",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "endpointURLs",
+            "predicate": "http://www.w3.org/ns/dcat#endpointURL",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "many"
+          },
+          {
+            "runtimeName": "endpointDescription",
+            "predicate": "http://www.w3.org/ns/dcat#endpointDescription",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "conformsTo",
+            "predicate": "http://purl.org/dc/terms/conformsTo",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "servesDatasetIds",
+            "predicate": "http://www.w3.org/ns/dcat#servesDataset",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "many"
+          },
+          {
+            "runtimeName": "accessRights",
+            "predicate": null,
+            "cardinality": "single-optional",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "license",
+            "predicate": "http://purl.org/dc/terms/license",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "createdAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "updatedAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "aliases",
+            "predicate": null,
+            "cardinality": "many",
+            "skipEmit": true
+          }
+        ]
+      },
+      "reverse": {
+        "subjectSelector": {
+          "_tag": "TypedSubject",
+          "classIri": "http://www.w3.org/ns/dcat#DataService"
+        },
+        "fields": [
+          {
+            "runtimeName": "_tag",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "DataService"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "id",
+            "distillFrom": {
+              "_tag": "SubjectIri"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "title",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/title"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "description",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/description"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "publisherAgentId",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/publisher"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "endpointURLs",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/ns/dcat#endpointURL"
+            },
+            "cardinality": "many"
+          },
+          {
+            "runtimeName": "endpointDescription",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/ns/dcat#endpointDescription"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "conformsTo",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/conformsTo"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "servesDatasetIds",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/ns/dcat#servesDataset"
+            },
+            "cardinality": "many"
+          },
+          {
+            "runtimeName": "accessRights",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": null
+            },
+            "cardinality": "single-optional",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "license",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/license"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "createdAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "updatedAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "aliases",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": []
+            },
+            "cardinality": "many",
+            "lossy": "runtime-local"
+          }
+        ]
+      }
+    },
+    "Dataset": {
+      "primaryClassIri": "http://www.w3.org/ns/dcat#Dataset",
+      "additionalClassIris": [
+        "https://schema.org/Dataset"
+      ],
+      "forward": {
+        "fields": [
+          {
+            "runtimeName": "_tag",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "id",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "title",
+            "predicate": "http://purl.org/dc/terms/title",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "description",
+            "predicate": "http://purl.org/dc/terms/description",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "creatorAgentId",
+            "predicate": "http://purl.org/dc/terms/creator",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "wasDerivedFrom",
+            "predicate": "http://www.w3.org/ns/prov#wasDerivedFrom",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "many"
+          },
+          {
+            "runtimeName": "publisherAgentId",
+            "predicate": "http://purl.org/dc/terms/publisher",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "landingPage",
+            "predicate": "http://www.w3.org/ns/dcat#landingPage",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "license",
+            "predicate": "http://purl.org/dc/terms/license",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "temporal",
+            "predicate": "http://purl.org/dc/terms/temporal",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "keywords",
+            "predicate": "http://www.w3.org/ns/dcat#keyword",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "many"
+          },
+          {
+            "runtimeName": "themes",
+            "predicate": "http://www.w3.org/ns/dcat#theme",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "many",
+            "lossy": "deferred-to-iri"
+          },
+          {
+            "runtimeName": "variableIds",
+            "predicate": "https://skygest.dev/vocab/energy/hasVariable",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "many",
+            "lossy": "derived-from-series"
+          },
+          {
+            "runtimeName": "distributionIds",
+            "predicate": "http://www.w3.org/ns/dcat#distribution",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "many"
+          },
+          {
+            "runtimeName": "inSeries",
+            "predicate": "http://www.w3.org/ns/dcat#inSeries",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "accessRights",
+            "predicate": null,
+            "cardinality": "single-optional",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "dataServiceIds",
+            "predicate": null,
+            "cardinality": "many",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "createdAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "updatedAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "aliases",
+            "predicate": null,
+            "cardinality": "many",
+            "skipEmit": true
+          }
+        ]
+      },
+      "reverse": {
+        "subjectSelector": {
+          "_tag": "TypedSubject",
+          "classIri": "http://www.w3.org/ns/dcat#Dataset"
+        },
+        "fields": [
+          {
+            "runtimeName": "_tag",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "Dataset"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "id",
+            "distillFrom": {
+              "_tag": "SubjectIri"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "title",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/title"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "description",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/description"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "creatorAgentId",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/creator"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "wasDerivedFrom",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/ns/prov#wasDerivedFrom"
+            },
+            "cardinality": "many"
+          },
+          {
+            "runtimeName": "publisherAgentId",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/publisher"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "landingPage",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/ns/dcat#landingPage"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "license",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/license"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "temporal",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/temporal"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "keywords",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/ns/dcat#keyword"
+            },
+            "cardinality": "many"
+          },
+          {
+            "runtimeName": "themes",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/ns/dcat#theme"
+            },
+            "cardinality": "many"
+          },
+          {
+            "runtimeName": "variableIds",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<derive-from-series>"
+            },
+            "cardinality": "many",
+            "lossy": "derived-from-series"
+          },
+          {
+            "runtimeName": "distributionIds",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/ns/dcat#distribution"
+            },
+            "cardinality": "many"
+          },
+          {
+            "runtimeName": "inSeries",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/ns/dcat#inSeries"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "accessRights",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": null
+            },
+            "cardinality": "single-optional",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "dataServiceIds",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": []
+            },
+            "cardinality": "many",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "createdAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "updatedAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "aliases",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": []
+            },
+            "cardinality": "many",
+            "lossy": "runtime-local"
+          }
+        ]
+      }
+    },
+    "DatasetSeries": {
+      "primaryClassIri": "http://www.w3.org/ns/dcat#DatasetSeries",
+      "additionalClassIris": [],
+      "forward": {
+        "fields": [
+          {
+            "runtimeName": "_tag",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "id",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "title",
+            "predicate": "http://purl.org/dc/terms/title",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "description",
+            "predicate": "http://purl.org/dc/terms/description",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "publisherAgentId",
+            "predicate": "http://purl.org/dc/terms/publisher",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "cadence",
+            "predicate": "http://purl.org/dc/terms/accrualPeriodicity",
+            "valueKind": {
+              "_tag": "EnumLiteral",
+              "values": [
+                "annual",
+                "quarterly",
+                "monthly",
+                "weekly",
+                "daily",
+                "irregular"
+              ]
+            },
+            "cardinality": "single",
+            "lossy": "deferred-to-iri"
+          },
+          {
+            "runtimeName": "createdAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "updatedAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "aliases",
+            "predicate": null,
+            "cardinality": "many",
+            "skipEmit": true
+          }
+        ]
+      },
+      "reverse": {
+        "subjectSelector": {
+          "_tag": "TypedSubject",
+          "classIri": "http://www.w3.org/ns/dcat#DatasetSeries"
+        },
+        "fields": [
+          {
+            "runtimeName": "_tag",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "DatasetSeries"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "id",
+            "distillFrom": {
+              "_tag": "SubjectIri"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "title",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/title"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "description",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/description"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "publisherAgentId",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/publisher"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "cadence",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/accrualPeriodicity"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "createdAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "updatedAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "aliases",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": []
+            },
+            "cardinality": "many",
+            "lossy": "runtime-local"
+          }
+        ]
+      }
+    },
+    "Distribution": {
+      "primaryClassIri": "http://www.w3.org/ns/dcat#Distribution",
+      "additionalClassIris": [
+        "https://schema.org/DataDownload"
+      ],
+      "forward": {
+        "fields": [
+          {
+            "runtimeName": "_tag",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "id",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "datasetId",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "kind",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "title",
+            "predicate": "http://purl.org/dc/terms/title",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "description",
+            "predicate": "http://purl.org/dc/terms/description",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "accessURL",
+            "predicate": "http://www.w3.org/ns/dcat#accessURL",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "downloadURL",
+            "predicate": "http://www.w3.org/ns/dcat#downloadURL",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "mediaType",
+            "predicate": "http://www.w3.org/ns/dcat#mediaType",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "format",
+            "predicate": "http://purl.org/dc/terms/format",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "byteSize",
+            "predicate": "http://www.w3.org/ns/dcat#byteSize",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "number"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "checksum",
+            "predicate": "http://spdx.org/rdf/terms#checksum",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "accessRights",
+            "predicate": null,
+            "cardinality": "single-optional",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "license",
+            "predicate": "http://purl.org/dc/terms/license",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "accessServiceId",
+            "predicate": "http://www.w3.org/ns/dcat#accessService",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "createdAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "updatedAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "aliases",
+            "predicate": null,
+            "cardinality": "many",
+            "skipEmit": true
+          }
+        ]
+      },
+      "reverse": {
+        "subjectSelector": {
+          "_tag": "TypedSubject",
+          "classIri": "http://www.w3.org/ns/dcat#Distribution"
+        },
+        "fields": [
+          {
+            "runtimeName": "_tag",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "Distribution"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "id",
+            "distillFrom": {
+              "_tag": "SubjectIri"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "datasetId",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": null
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "kind",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": null
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "title",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/title"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "description",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/description"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "accessURL",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/ns/dcat#accessURL"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "downloadURL",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/ns/dcat#downloadURL"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "mediaType",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/ns/dcat#mediaType"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "format",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/format"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "byteSize",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/ns/dcat#byteSize"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "checksum",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://spdx.org/rdf/terms#checksum"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "accessRights",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": null
+            },
+            "cardinality": "single-optional",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "license",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://purl.org/dc/terms/license"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "accessServiceId",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/ns/dcat#accessService"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "createdAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "updatedAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "aliases",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": []
+            },
+            "cardinality": "many",
+            "lossy": "runtime-local"
+          }
+        ]
+      }
+    },
+    "Variable": {
+      "primaryClassIri": "https://skygest.dev/vocab/energy/EnergyVariable",
+      "additionalClassIris": [
+        "https://schema.org/StatisticalVariable"
+      ],
+      "forward": {
+        "fields": [
+          {
+            "runtimeName": "createdAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "updatedAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "aliases",
+            "predicate": null,
+            "cardinality": "many",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "_tag",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "id",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "label",
+            "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "definition",
+            "predicate": "http://www.w3.org/2004/02/skos/core#definition",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "measuredProperty",
+            "predicate": "https://skygest.dev/vocab/energy/measuredProperty",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional",
+            "lossy": "deferred-to-iri"
+          },
+          {
+            "runtimeName": "domainObject",
+            "predicate": "https://skygest.dev/vocab/energy/domainObject",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional",
+            "lossy": "deferred-to-iri"
+          },
+          {
+            "runtimeName": "technologyOrFuel",
+            "predicate": "https://skygest.dev/vocab/energy/technologyOrFuel",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional",
+            "lossy": "deferred-to-iri"
+          },
+          {
+            "runtimeName": "statisticType",
+            "predicate": "https://skygest.dev/vocab/energy/statisticType",
+            "valueKind": {
+              "_tag": "EnumLiteral",
+              "values": [
+                "stock",
+                "flow",
+                "price",
+                "share",
+                "count"
+              ]
+            },
+            "cardinality": "single-optional",
+            "lossy": "deferred-to-iri"
+          },
+          {
+            "runtimeName": "aggregation",
+            "predicate": "https://skygest.dev/vocab/energy/aggregation",
+            "valueKind": {
+              "_tag": "EnumLiteral",
+              "values": [
+                "point",
+                "end_of_period",
+                "sum",
+                "average",
+                "max",
+                "min",
+                "settlement"
+              ]
+            },
+            "cardinality": "single-optional",
+            "lossy": "deferred-to-iri"
+          },
+          {
+            "runtimeName": "unitFamily",
+            "predicate": "https://skygest.dev/vocab/energy/unitFamily",
+            "valueKind": {
+              "_tag": "EnumLiteral",
+              "values": [
+                "power",
+                "energy",
+                "currency",
+                "currency_per_energy",
+                "mass_co2e",
+                "intensity",
+                "dimensionless",
+                "other"
+              ]
+            },
+            "cardinality": "single-optional",
+            "lossy": "deferred-to-iri"
+          },
+          {
+            "runtimeName": "policyInstrument",
+            "predicate": "https://skygest.dev/vocab/energy/policyInstrument",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single-optional",
+            "lossy": "deferred-to-iri"
+          }
+        ]
+      },
+      "reverse": {
+        "subjectSelector": {
+          "_tag": "TypedSubject",
+          "classIri": "https://skygest.dev/vocab/energy/EnergyVariable"
+        },
+        "fields": [
+          {
+            "runtimeName": "createdAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "updatedAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "aliases",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": []
+            },
+            "cardinality": "many",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "_tag",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "Variable"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "id",
+            "distillFrom": {
+              "_tag": "SubjectIri"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "label",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/2000/01/rdf-schema#label"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "definition",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/2004/02/skos/core#definition"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "measuredProperty",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "https://skygest.dev/vocab/energy/measuredProperty"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "domainObject",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "https://skygest.dev/vocab/energy/domainObject"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "technologyOrFuel",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "https://skygest.dev/vocab/energy/technologyOrFuel"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "statisticType",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "https://skygest.dev/vocab/energy/statisticType"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "aggregation",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "https://skygest.dev/vocab/energy/aggregation"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "unitFamily",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "https://skygest.dev/vocab/energy/unitFamily"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "policyInstrument",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "https://skygest.dev/vocab/energy/policyInstrument"
+            },
+            "cardinality": "single-optional"
+          }
+        ]
+      }
+    },
+    "Series": {
+      "primaryClassIri": "https://skygest.dev/vocab/energy/Series",
+      "additionalClassIris": [],
+      "forward": {
+        "fields": [
+          {
+            "runtimeName": "createdAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "updatedAt",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "aliases",
+            "predicate": null,
+            "cardinality": "many",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "_tag",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "id",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          },
+          {
+            "runtimeName": "label",
+            "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+            "valueKind": {
+              "_tag": "Literal",
+              "primitive": "string"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "variableId",
+            "predicate": "https://skygest.dev/vocab/energy/implementsVariable",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "datasetId",
+            "predicate": "https://skygest.dev/vocab/energy/publishedInDataset",
+            "valueKind": {
+              "_tag": "Iri"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "fixedDims",
+            "predicate": null,
+            "cardinality": "single",
+            "skipEmit": true
+          }
+        ]
+      },
+      "reverse": {
+        "subjectSelector": {
+          "_tag": "TypedSubject",
+          "classIri": "https://skygest.dev/vocab/energy/Series"
+        },
+        "fields": [
+          {
+            "runtimeName": "createdAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "updatedAt",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "<inject>"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "aliases",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": []
+            },
+            "cardinality": "many",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "_tag",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": "Series"
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          },
+          {
+            "runtimeName": "id",
+            "distillFrom": {
+              "_tag": "SubjectIri"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "label",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "http://www.w3.org/2000/01/rdf-schema#label"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "variableId",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "https://skygest.dev/vocab/energy/implementsVariable"
+            },
+            "cardinality": "single"
+          },
+          {
+            "runtimeName": "datasetId",
+            "distillFrom": {
+              "_tag": "Predicate",
+              "predicate": "https://skygest.dev/vocab/energy/publishedInDataset"
+            },
+            "cardinality": "single-optional"
+          },
+          {
+            "runtimeName": "fixedDims",
+            "distillFrom": {
+              "_tag": "Default",
+              "defaultValue": {}
+            },
+            "cardinality": "single",
+            "lossy": "runtime-local"
+          }
+        ]
+      }
+    }
+  }
+}
