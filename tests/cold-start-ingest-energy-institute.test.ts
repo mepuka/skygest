@@ -47,7 +47,7 @@ const FIXTURE_SUBDIRS = [
 const repoCatalogFile = (...segments: ReadonlyArray<string>) =>
   nodePath.resolve(
     process.cwd(),
-    "references",
+    ".generated",
     "cold-start",
     "catalog",
     ...segments

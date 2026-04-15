@@ -50,7 +50,7 @@ const decodeDataService = stripUndefinedAndDecodeWith(DataService);
 
 /**
  * The RTE agent is expected to already exist in the catalog index
- * (cold-started from `references/cold-start/catalog/agents/rte.json`).
+ * (cold-started from `.generated/cold-start/catalog/agents/rte.json`).
  * We resolve it by its file slug rather than minting a new agent.
  */
 const resolveExistingCatalog = (
@@ -134,7 +134,7 @@ export const buildContextFromIndex = (
   if (existingAgent === null) {
     throw new Error(
       `RTE agent not found in catalog index (expected file slug "${RTE_AGENT_FILE_SLUG}"). ` +
-        "Ensure references/cold-start/catalog/agents/rte.json exists."
+        "Ensure .generated/cold-start/catalog/agents/rte.json exists."
     );
   }
 

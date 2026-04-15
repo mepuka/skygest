@@ -1,6 +1,6 @@
 {
-  "repo": "github.com/mepuka/skygest-ingest-artifacts",
-  "ref": "",
-  "commit": "",
-  "manifestHash": ""
+  "repo": "git@github.com:mepuka/skygest-ingest-artifacts.git",
+  "ref": "v2026.04.15-import",
+  "commit": "b1bc8fefa5c83d061623cc3ea554f962a06aa3f5",
+  "manifestHash": "5ea6011726f69283e8ca264153d5b528d50e20811e1eef3047d73fc369671459"
 }

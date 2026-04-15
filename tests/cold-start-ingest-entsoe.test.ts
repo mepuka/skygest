@@ -43,7 +43,7 @@ const FIXTURE_SUBDIRS = [
 ] as const;
 
 const repoCatalogFile = (...segments: ReadonlyArray<string>) =>
-  nodePath.resolve(process.cwd(), "references", "cold-start", "catalog", ...segments);
+  nodePath.resolve(process.cwd(), ".generated", "cold-start", "catalog", ...segments);
 
 const ENTSOE_AGENT = Schema.decodeUnknownSync(Agent)(
   JSON.parse(fs.readFileSync(repoCatalogFile("agents", "entso-e.json"), "utf8"))

@@ -2,8 +2,9 @@ import { describe, expect, it } from "@effect/vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { Candidate } from "../src/domain/data-layer";
 import { Schema } from "effect";
+import { checkedInDataLayerRegistryRoot } from "../src/bootstrap/CheckedInDataLayerRegistry";
 
-const ROOT = "references/cold-start";
+const ROOT = checkedInDataLayerRegistryRoot;
 const pjmCapacitySeriesPath = `${ROOT}/series/us-pjm-capacity-auction-annual.json`;
 const pjmCapacityCandidatePath =
   `${ROOT}/candidates/cand-256-tf7gldn_app_bsky_feed_post_3mijrwbak6p2j.json`;

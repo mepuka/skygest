@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Schema } from "effect";
-import ligniteProductionJson from "../references/cold-start/variables/lignite-production.json";
+import ligniteProductionJson from "./fixtures/data-layer/lignite-production.json";
 import {
   Variable,
   Series,

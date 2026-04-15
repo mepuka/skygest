@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "prepare": "effect-language-service patch",
+    "postinstall": "bun run scripts/fetch-ingest-artifacts.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "cf:types": "bun run scripts/generate-worker-types.ts",

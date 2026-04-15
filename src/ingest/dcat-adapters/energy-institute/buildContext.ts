@@ -65,7 +65,7 @@ export const buildContextFromIndex = (
   if (existingAgent === null) {
     throw new Error(
       `Energy Institute agent not found in catalog index (expected file slug "${ENERGY_INSTITUTE_AGENT_FILE_SLUG}"). ` +
-        "Ensure references/cold-start/catalog/agents/energy-institute.json exists."
+        "Ensure .generated/cold-start/catalog/agents/energy-institute.json exists."
     );
   }
 

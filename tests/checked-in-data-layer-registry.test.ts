@@ -36,7 +36,7 @@ describe.skip("checked-in data layer registry loader", () => {
   it.effect("fails with a typed diagnostic when the root is missing", () =>
     Effect.gen(function* () {
       const failure = yield* loadCheckedInDataLayerRegistry(
-        "references/cold-start/does-not-exist"
+        ".generated/cold-start/does-not-exist"
       ).pipe(
         Effect.provide(localFileSystemLayer),
         Effect.flip

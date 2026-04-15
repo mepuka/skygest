@@ -107,7 +107,7 @@ export const buildContextFromIndex = (
   if (existingAgent === null) {
     throw new Error(
       `NESO agent not found in catalog index (expected file slug "${NESO_AGENT_FILE_SLUG}"). ` +
-        "Ensure references/cold-start/catalog/agents/neso.json exists."
+        "Ensure .generated/cold-start/catalog/agents/neso.json exists."
     );
   }
 
