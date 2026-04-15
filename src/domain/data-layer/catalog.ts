@@ -108,10 +108,11 @@ export const CatalogRecord = Schema.Struct({
   id: CatalogRecordId,
   catalogId: CatalogId,
   primaryTopicType: Schema.Literals(["dataset", "dataService"]).annotate({
-    [DcatProperty]: "http://xmlns.com/foaf/0.1/primaryTopic"
+    description: "Discriminant that selects the entity kind for primaryTopicId; not emitted as a separate RDF predicate."
   }),
   primaryTopicId: Schema.String.annotate({
-    description: "Must match the entity kind indicated by primaryTopicType (DatasetId or DataServiceId)"
+    [DcatProperty]: "http://xmlns.com/foaf/0.1/primaryTopic",
+    description: "Must match the entity kind indicated by primaryTopicType (DatasetId or DataServiceId). Emitted as the object of foaf:primaryTopic in RDF."
   }),
   sourceRecordId: Schema.optionalKey(Schema.String),
   harvestedFrom: Schema.optionalKey(Schema.String),

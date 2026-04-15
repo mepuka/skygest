@@ -9,6 +9,7 @@ import {
   DataService,
   DatasetSeries,
   DcatClass,
+  DcatProperty,
   DesignDecision,
   SchemaOrgType
 } from "../src/domain/data-layer";
@@ -161,6 +162,35 @@ describe("CatalogRecord", () => {
       primaryTopicId: SVC_ID
     };
     expect(Schema.decodeUnknownSync(CatalogRecord)(input).primaryTopicType).toBe("dataService");
+  });
+
+  it("annotates foaf:primaryTopic on primaryTopicId, not primaryTopicType", () => {
+    // Regression lock: the DcatProperty annotation must live on the IRI-valued
+    // field (primaryTopicId), not on the string discriminant (primaryTopicType).
+    // Otherwise any RDF emitter reading DcatProperty annotations would push the
+    // literal string "dataset" as the predicate value instead of the target IRI.
+    const ast = CatalogRecord.ast;
+    if (ast._tag !== "Objects") {
+      throw new Error(`expected Objects, got ${ast._tag}`);
+    }
+    const byName = new Map(
+      ast.propertySignatures.map((p) => [String(p.name), p])
+    );
+    const topicIdSig = byName.get("primaryTopicId");
+    const topicTypeSig = byName.get("primaryTopicType");
+    if (!topicIdSig || !topicTypeSig) {
+      throw new Error("primaryTopicId or primaryTopicType missing from CatalogRecord AST");
+    }
+
+    const idAnnotations = topicIdSig.type.annotations as
+      | Record<symbol, unknown>
+      | undefined;
+    const typeAnnotations = topicTypeSig.type.annotations as
+      | Record<symbol, unknown>
+      | undefined;
+
+    expect(idAnnotations?.[DcatProperty]).toBe("http://xmlns.com/foaf/0.1/primaryTopic");
+    expect(typeAnnotations?.[DcatProperty]).toBeUndefined();
   });
 });
 
