@@ -1,0 +1,230 @@
+import { describe, expect, it } from "@effect/vitest";
+import { Schema } from "effect";
+
+import {
+  Cardinality,
+  ClassEmitSpec,
+  DistillFrom,
+  EmitSpec,
+  ForwardField,
+  LiteralPrimitive,
+  ReverseField,
+  SubjectSelector,
+  ValueKind
+} from "../../src/Domain/EmitSpec";
+
+describe("LiteralPrimitive", () => {
+  it("accepts string / number / boolean", () => {
+    expect(Schema.decodeUnknownSync(LiteralPrimitive)("string")).toBe("string");
+    expect(Schema.decodeUnknownSync(LiteralPrimitive)("number")).toBe("number");
+    expect(Schema.decodeUnknownSync(LiteralPrimitive)("boolean")).toBe("boolean");
+  });
+});
+
+describe("ValueKind", () => {
+  it("decodes a literal value kind", () => {
+    const decoded = Schema.decodeUnknownSync(ValueKind)({
+      _tag: "Literal",
+      primitive: "string"
+    });
+    expect(decoded._tag).toBe("Literal");
+    if (decoded._tag === "Literal") {
+      expect(decoded.primitive).toBe("string");
+    }
+  });
+
+  it("decodes an IRI value kind", () => {
+    const decoded = Schema.decodeUnknownSync(ValueKind)({ _tag: "Iri" });
+    expect(decoded._tag).toBe("Iri");
+  });
+
+  it("decodes an enum-literal value kind with values", () => {
+    const decoded = Schema.decodeUnknownSync(ValueKind)({
+      _tag: "EnumLiteral",
+      values: ["annual", "quarterly", "monthly"]
+    });
+    expect(decoded._tag).toBe("EnumLiteral");
+    if (decoded._tag === "EnumLiteral") {
+      expect(decoded.values).toHaveLength(3);
+    }
+  });
+});
+
+describe("Cardinality", () => {
+  it("accepts single / single-optional / many", () => {
+    expect(Schema.decodeUnknownSync(Cardinality)("single")).toBe("single");
+    expect(Schema.decodeUnknownSync(Cardinality)("single-optional")).toBe("single-optional");
+    expect(Schema.decodeUnknownSync(Cardinality)("many")).toBe("many");
+  });
+});
+
+describe("DistillFrom", () => {
+  it("decodes SubjectIri", () => {
+    const decoded = Schema.decodeUnknownSync(DistillFrom)({ _tag: "SubjectIri" });
+    expect(decoded._tag).toBe("SubjectIri");
+  });
+
+  it("decodes Predicate with a predicate IRI", () => {
+    const decoded = Schema.decodeUnknownSync(DistillFrom)({
+      _tag: "Predicate",
+      predicate: "http://purl.org/dc/terms/title"
+    });
+    expect(decoded._tag).toBe("Predicate");
+    if (decoded._tag === "Predicate") {
+      expect(decoded.predicate).toBe("http://purl.org/dc/terms/title");
+    }
+  });
+
+  it("decodes PredicateWithPrecedence", () => {
+    const decoded = Schema.decodeUnknownSync(DistillFrom)({
+      _tag: "PredicateWithPrecedence",
+      predicate: "http://www.w3.org/2004/02/skos/core#altLabel",
+      precedence: "alternateNames-before-display-alias",
+      conflictResolution: "preferFirst"
+    });
+    expect(decoded._tag).toBe("PredicateWithPrecedence");
+  });
+
+  it("decodes Default with a scalar default value", () => {
+    const decoded = Schema.decodeUnknownSync(DistillFrom)({
+      _tag: "Default",
+      defaultValue: null
+    });
+    expect(decoded._tag).toBe("Default");
+    if (decoded._tag === "Default") {
+      expect(decoded.defaultValue).toBeNull();
+    }
+  });
+
+  it("decodes Default with an empty-array default for set-valued fields", () => {
+    const decoded = Schema.decodeUnknownSync(DistillFrom)({
+      _tag: "Default",
+      defaultValue: []
+    });
+    expect(decoded._tag).toBe("Default");
+  });
+});
+
+describe("ForwardField", () => {
+  it("decodes a mapped field with a predicate and single cardinality", () => {
+    const decoded = Schema.decodeUnknownSync(ForwardField)({
+      runtimeName: "title",
+      predicate: "http://purl.org/dc/terms/title",
+      valueKind: { _tag: "Literal", primitive: "string" },
+      cardinality: "single"
+    });
+    expect(decoded.runtimeName).toBe("title");
+    expect(decoded.predicate).toBe("http://purl.org/dc/terms/title");
+  });
+
+  it("decodes a skipped field with predicate: null and skipEmit: true", () => {
+    const decoded = Schema.decodeUnknownSync(ForwardField)({
+      runtimeName: "accessRights",
+      predicate: null,
+      cardinality: "single-optional",
+      skipEmit: true
+    });
+    expect(decoded.predicate).toBeNull();
+    expect(decoded.skipEmit).toBe(true);
+  });
+
+  it("decodes a field with a deferred-to-iri lossy marker", () => {
+    const decoded = Schema.decodeUnknownSync(ForwardField)({
+      runtimeName: "themes",
+      predicate: "http://www.w3.org/ns/dcat#theme",
+      valueKind: { _tag: "Literal", primitive: "string" },
+      cardinality: "many",
+      lossy: "deferred-to-iri"
+    });
+    expect(decoded.lossy).toBe("deferred-to-iri");
+  });
+});
+
+describe("ReverseField", () => {
+  it("decodes a SubjectIri id field", () => {
+    const decoded = Schema.decodeUnknownSync(ReverseField)({
+      runtimeName: "id",
+      distillFrom: { _tag: "SubjectIri" },
+      cardinality: "single"
+    });
+    expect(decoded.runtimeName).toBe("id");
+    expect(decoded.distillFrom._tag).toBe("SubjectIri");
+  });
+
+  it("decodes a runtime-local default field", () => {
+    const decoded = Schema.decodeUnknownSync(ReverseField)({
+      runtimeName: "createdAt",
+      distillFrom: { _tag: "Default", defaultValue: "<inject>" },
+      cardinality: "single",
+      lossy: "runtime-local"
+    });
+    expect(decoded.lossy).toBe("runtime-local");
+  });
+});
+
+describe("SubjectSelector", () => {
+  it("decodes a TypedSubject selector", () => {
+    const decoded = Schema.decodeUnknownSync(SubjectSelector)({
+      _tag: "TypedSubject",
+      classIri: "http://www.w3.org/ns/dcat#Dataset"
+    });
+    expect(decoded._tag).toBe("TypedSubject");
+    expect(decoded.classIri).toBe("http://www.w3.org/ns/dcat#Dataset");
+  });
+});
+
+describe("ClassEmitSpec", () => {
+  it("decodes a minimal Dataset-like class spec", () => {
+    const decoded = Schema.decodeUnknownSync(ClassEmitSpec)({
+      primaryClassIri: "http://www.w3.org/ns/dcat#Dataset",
+      additionalClassIris: ["https://schema.org/Dataset"],
+      forward: {
+        fields: [
+          {
+            runtimeName: "title",
+            predicate: "http://purl.org/dc/terms/title",
+            valueKind: { _tag: "Literal", primitive: "string" },
+            cardinality: "single"
+          }
+        ]
+      },
+      reverse: {
+        subjectSelector: {
+          _tag: "TypedSubject",
+          classIri: "http://www.w3.org/ns/dcat#Dataset"
+        },
+        fields: [
+          {
+            runtimeName: "id",
+            distillFrom: { _tag: "SubjectIri" },
+            cardinality: "single"
+          },
+          {
+            runtimeName: "title",
+            distillFrom: {
+              _tag: "Predicate",
+              predicate: "http://purl.org/dc/terms/title"
+            },
+            cardinality: "single"
+          }
+        ]
+      }
+    });
+    expect(decoded.primaryClassIri).toBe("http://www.w3.org/ns/dcat#Dataset");
+    expect(decoded.additionalClassIris).toHaveLength(1);
+    expect(decoded.forward.fields).toHaveLength(1);
+    expect(decoded.reverse.fields).toHaveLength(2);
+  });
+});
+
+describe("EmitSpec", () => {
+  it("decodes an empty-class top-level spec", () => {
+    const decoded = Schema.decodeUnknownSync(EmitSpec)({
+      version: "0.1.0",
+      generatedFrom: "test-fixture",
+      classes: {}
+    });
+    expect(decoded.version).toBe("0.1.0");
+    expect(Object.keys(decoded.classes)).toHaveLength(0);
+  });
+});
