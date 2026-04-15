@@ -111,6 +111,15 @@ type ClassName = keyof typeof SCHEMAS;
  * Introducing a separate `SevocabClass` annotation symbol would fragment
  * the annotation space; hardcoding here keeps the runtime schemas clean
  * and surfaces the override as an explicit generator decision.
+ *
+ * **Decision on open question #1 (skygest-internal governance):** for
+ * milestone 1, sevocab-native classes (Variable, Series) use `sevocab:`
+ * IRIs directly — `https://skygest.dev/vocab/energy/{EnergyVariable,
+ * Series}`. We reserve `skygest-internal:` minting authority for a
+ * future class that has no natural sevocab IRI and no clean external
+ * IRI; re-open open question #1 at that point. See
+ * `docs/plans/2026-04-15-sky-362-ontology-store-design.md`
+ * §"Open questions" for the full rationale.
  */
 const PRIMARY_CLASS_IRI_FALLBACK: Partial<Record<ClassName, string>> = {
   Variable: "https://skygest.dev/vocab/energy/EnergyVariable",
@@ -250,6 +259,31 @@ const getSchemaOrgType = (ast: SchemaAST.AST): string | undefined =>
 const getDcatProperty = (ast: SchemaAST.AST): string | undefined =>
   getAnnotationString(ast, DcatProperty);
 
+// SdmxConcept / DesignDecision — intentionally NOT read.
+//
+// The five annotation symbols on src/domain/data-layer/annotations.ts are:
+//
+//   PROJECTED to RDF by this generator:
+//     - DcatClass           → primaryClassIri                (above)
+//     - DcatProperty        → forward.fields[].predicate     (above)
+//     - SchemaOrgType       → additionalClassIris[]          (above)
+//     - XsdDatatype (below) → valueKind.xsdDatatype
+//
+//   NOT PROJECTED (non-projected in milestone 1):
+//     - SdmxConcept    — SDMX lacks a single canonical IRI namespace for
+//                        its information model (Concept, SeriesKey, etc.).
+//                        Minting sevocab-local URIs for these now would
+//                        pollute the neuro-symbolic alignment target
+//                        (see project_neuro_symbolic_loop.md). The
+//                        annotation stays on runtime Schemas so a future
+//                        milestone can turn it on once the policy is locked.
+//     - DesignDecision — documentation-only, traces runtime types back to
+//                        the design-decision registry. No RDF meaning.
+//
+// If you need SDMX class membership to land in the graph, introduce a
+// dedicated SDMX namespace policy (open question, deferred) rather than
+// scattering sevocab-local SDMX IRIs here.
+
 const getBrandNames = (ast: SchemaAST.AST): ReadonlyArray<string> => {
   const value = getAnnotations(ast)["brands"];
   return Array.isArray(value) ? (value as ReadonlyArray<string>) : [];
@@ -303,21 +337,32 @@ type ClassifiedField = {
   readonly cardinality: Cardinality;
 };
 
-const classifyField = (type: SchemaAST.AST): ClassifiedField => {
+/**
+ * Field context string threaded into `classifyField` errors so they
+ * point at the specific `Class.field` that failed. Unset only at the
+ * top of the generator before we know which class we're in.
+ */
+type FieldContext = `${ClassName}.${string}` | "<unknown>";
+
+const classifyField = (
+  type: SchemaAST.AST,
+  context: FieldContext
+): ClassifiedField => {
   const optional = SchemaAST.isOptional(type);
 
   // Arrays — recurse into rest[0] for the element type.
   if (SchemaAST.isArrays(type)) {
     if (type.elements.length !== 0 || type.rest.length !== 1) {
       throw new Error(
-        `classifyField: unsupported Arrays shape (elements=${type.elements.length}, rest=${type.rest.length})`
+        `classifyField(${context}): unsupported Arrays shape ` +
+          `(elements=${type.elements.length}, rest=${type.rest.length})`
       );
     }
     const element = type.rest[0];
     if (!element) {
-      throw new Error("classifyField: Arrays.rest[0] is undefined");
+      throw new Error(`classifyField(${context}): Arrays.rest[0] is undefined`);
     }
-    const classified = classifyField(element);
+    const classified = classifyField(element, context);
     return { valueKind: classified.valueKind, cardinality: "many" };
   }
 
@@ -328,7 +373,8 @@ const classifyField = (type: SchemaAST.AST): ClassifiedField => {
     const allLiterals = type.types.every((member) => SchemaAST.isLiteral(member));
     if (!allLiterals) {
       throw new Error(
-        `classifyField: Union with non-Literal members (got ${type.types.map((m) => m._tag).join(",")})`
+        `classifyField(${context}): Union with non-Literal members ` +
+          `(got ${type.types.map((m) => m._tag).join(",")})`
       );
     }
     const values = type.types.map((member) => {
@@ -389,7 +435,9 @@ const classifyField = (type: SchemaAST.AST): ClassifiedField => {
     };
   }
 
-  throw new Error(`classifyField: unsupported AST kind '${type._tag}'`);
+  throw new Error(
+    `classifyField(${context}): unsupported AST kind '${type._tag}'`
+  );
 };
 
 // ---------------------------------------------------------------------------
@@ -618,7 +666,7 @@ const generateClass = (name: ClassName): ClassEmitSpec => {
     // --- Forward side ---
     const forwardOverride = FIELD_FORWARD_OVERRIDES[name]?.[fieldName];
     if (dcatProperty) {
-      const classified = classifyField(fieldType);
+      const classified = classifyField(fieldType, `${name}.${fieldName}`);
       const valueKind = forwardOverride?.forceValueKind ?? classified.valueKind;
       const forwardField: ForwardField = {
         runtimeName: fieldName,
