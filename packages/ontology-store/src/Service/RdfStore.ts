@@ -78,7 +78,7 @@ export class RdfStoreService extends ServiceMap.Service<
         Effect.sync(() => new Store()),
         (store) =>
           Effect.sync(() => {
-            store.deleteMatches(null, null, null, null);
+            store.deleteMatches(undefined, undefined, undefined, undefined);
           })
       );
 
@@ -134,31 +134,29 @@ export class RdfStoreService extends ServiceMap.Service<
         store: RdfStore
       ) {
         const quads = yield* query(store);
-
-        return yield* Effect.tryPromise({
+        const writer = yield* Effect.try({
           try: () =>
-            new Promise<string>((resolve, reject) => {
-              try {
-                const writer = new Writer({
-                  format: "text/turtle",
-                  prefixes: DEFAULT_TURTLE_PREFIXES
-                });
-
-                writer.addQuads(quads);
-                writer.end((error, result) => {
-                  if (error != null) {
-                    reject(error);
-                    return;
-                  }
-
-                  resolve(result ?? "");
-                });
-              } catch (cause) {
-                reject(cause);
-              }
+            new Writer({
+              format: "text/turtle",
+              prefixes: DEFAULT_TURTLE_PREFIXES
             }),
           catch: mapRdfError("toTurtle")
         });
+
+        yield* Effect.try({
+          try: () => {
+            writer.addQuads(quads);
+          },
+          catch: mapRdfError("toTurtle")
+        });
+
+        return yield* Effect.effectify(
+          (
+            callback: (error: Error | null, result?: string) => void
+          ) => writer.end(callback as (error: Error, result: any) => void),
+          (error) => mapRdfError("toTurtle")(error),
+          (error) => mapRdfError("toTurtle")(error)
+        )().pipe(Effect.map((result) => result ?? ""));
       });
 
       return RdfStoreService.of({
