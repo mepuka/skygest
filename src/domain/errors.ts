@@ -344,6 +344,17 @@ export class DataLayerSpineGenerationError extends Schema.TaggedErrorClass<DataL
   }
 ) {}
 
+export class GitSnapshotFetchError extends Schema.TaggedErrorClass<GitSnapshotFetchError>()(
+  "GitSnapshotFetchError",
+  {
+    operation: Schema.String,
+    message: Schema.String,
+    path: Schema.optionalKey(Schema.String),
+    repo: Schema.optionalKey(Schema.String),
+    commit: Schema.optionalKey(Schema.String)
+  }
+) {}
+
 export class SeriesDatasetAuditIoError extends Schema.TaggedErrorClass<SeriesDatasetAuditIoError>()(
   "SeriesDatasetAuditIoError",
   {
