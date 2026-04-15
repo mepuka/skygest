@@ -38,6 +38,13 @@
         "typescript": "^5",
       },
     },
+    "packages/ontology-store": {
+      "name": "@skygest/ontology-store",
+      "version": "0.0.0",
+      "peerDependencies": {
+        "effect": "4.0.0-beta.43",
+      },
+    },
   },
   "overrides": {
     "@effect/platform-node-shared": "4.0.0-beta.43",
@@ -432,6 +439,8 @@
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.59.0", "", { "os": "win32", "cpu": "x64" }, "sha512-2HRCml6OztYXyJXAvdDXPKcawukWY2GpR5/nxKp4iBgiO3wcoEGkAaqctIbZcNB6KlUQBIqt8VYkNSj2397EfA=="],
 
     "@sindresorhus/is": ["@sindresorhus/is@7.2.0", "", {}, "sha512-P1Cz1dWaFfR4IR+U13mqqiGsLFf1KbayybWwdd2vfctdV6hDpUkgCY0nKOLLTMSoRd/jJNjtbqzf13K8DCCXQw=="],
+
+    "@skygest/ontology-store": ["@skygest/ontology-store@workspace:packages/ontology-store"],
 
     "@speed-highlight/core": ["@speed-highlight/core@1.2.15", "", {}, "sha512-BMq1K3DsElxDWawkX6eLg9+CKJrTVGCBAWVuHXVUV2u0s2711qiChLSId6ikYPfxhdYocLNt3wWwSvDiTvFabw=="],
 
