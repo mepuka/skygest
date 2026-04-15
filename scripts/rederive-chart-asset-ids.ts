@@ -15,7 +15,7 @@ import { SqlClient } from "effect/unstable/sql";
 import { Command, Flag } from "effect/unstable/cli";
 import { EnrichmentOutput } from "../src/domain/enrichment";
 import { PostUri } from "../src/domain/types";
-import { repairChartAssetIdsForBlueskyPost } from "../src/enrichment/ChartAssetIdRepair";
+import { repairChartAssetIdsForPost } from "../src/enrichment/ChartAssetIdRepair";
 import { D1SnapshotKeys } from "../src/platform/ConfigShapes";
 import { d1SnapshotLayer } from "../src/platform/D1SnapshotLayer";
 import {
@@ -117,7 +117,7 @@ const limitFlag = Flag.integer("limit").pipe(
 );
 
 const postUriFlag = Flag.string("post-uri").pipe(
-  Flag.withDescription("Optional single Bluesky post URI to scan"),
+  Flag.withDescription("Optional single post URI to scan"),
   Flag.optional
 );
 
@@ -169,7 +169,7 @@ const loadRepairRows = (
       enrichment_payload_json as enrichmentPayloadJson
     FROM post_enrichments
     WHERE enrichment_type IN ('vision', 'source-attribution', 'data-ref-resolution')
-      AND post_uri LIKE 'at://%'
+      AND (post_uri LIKE 'at://%' OR post_uri LIKE 'x://%')
       AND (${options.postUri} IS NULL OR post_uri = ${options.postUri})
     ORDER BY post_uri ASC, enrichment_type ASC
     LIMIT ${options.limit}
@@ -189,7 +189,7 @@ const planRepair = (row: RepairRow) =>
       row.enrichmentPayloadJson,
       `enrichment payload for ${row.postUri}/${row.enrichmentType}`
     );
-    const repaired = repairChartAssetIdsForBlueskyPost({
+    const repaired = repairChartAssetIdsForPost({
       postUri: row.postUri,
       payload
     });
@@ -353,7 +353,7 @@ const command = Command.make(
         const summary = buildSummary(rows, plannedUpdates, unchanged, failures);
 
         yield* Console.log(
-          `Scanned ${String(summary.scanned)} Bluesky enrichment rows from ${sqlClient.sourceLabel}.`
+          `Scanned ${String(summary.scanned)} enrichment rows from ${sqlClient.sourceLabel}.`
         );
         yield* Console.log(
           `Repaired ${String(summary.repaired)} rows, left ${String(summary.alreadyCanonical)} already canonical, left ${String(summary.noAssetReferences)} without asset references, and logged ${String(summary.failed)} failures.`

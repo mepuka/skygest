@@ -203,7 +203,8 @@ describe("CandidatePayloadRepoD1", () => {
             {
               thumb: "https://cdn.bsky.app/thumb-1.jpg",
               fullsize: "https://cdn.bsky.app/full-1.jpg",
-              alt: "Line chart"
+              alt: "Line chart",
+              mediaId: null
             }
           ]
         },
@@ -224,7 +225,8 @@ describe("CandidatePayloadRepoD1", () => {
           {
             thumb: "https://cdn.bsky.app/thumb-1.jpg",
             fullsize: "https://cdn.bsky.app/full-1.jpg",
-            alt: "Line chart"
+            alt: "Line chart",
+            mediaId: null
           }
         ]
       });
@@ -243,7 +245,7 @@ describe("CandidatePayloadRepoD1", () => {
         embedType: "img",
         embedPayload: {
           kind: "img",
-          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null }]
+          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null, mediaId: null }]
         },
         enrichments: [],
         capturedAt: 10,
@@ -313,7 +315,7 @@ describe("CandidatePayloadRepoD1", () => {
         embedType: "img",
         embedPayload: {
           kind: "img",
-          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null }]
+          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null, mediaId: null }]
         },
         enrichments: [],
         capturedAt: 10,
@@ -337,7 +339,7 @@ describe("CandidatePayloadRepoD1", () => {
         embedType: "img",
         embedPayload: {
           kind: "img",
-          images: [{ thumb: "thumb-b", fullsize: "full-b", alt: "Updated alt" }]
+          images: [{ thumb: "thumb-b", fullsize: "full-b", alt: "Updated alt", mediaId: null }]
         },
         enrichments: [],
         capturedAt: 40,
@@ -351,7 +353,7 @@ describe("CandidatePayloadRepoD1", () => {
       expect(stored?.captureStage).toBe("picked");
       expect(stored?.embedPayload).toEqual({
         kind: "img",
-        images: [{ thumb: "thumb-b", fullsize: "full-b", alt: "Updated alt" }]
+        images: [{ thumb: "thumb-b", fullsize: "full-b", alt: "Updated alt", mediaId: null }]
       });
       expect(stored?.enrichments).toEqual([
         {
@@ -397,7 +399,7 @@ describe("CandidatePayloadRepoD1", () => {
         embedType: "img",
         embedPayload: {
           kind: "img",
-          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null }]
+          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null, mediaId: null }]
         },
         enrichments: [],
         capturedAt: 10,
@@ -434,7 +436,7 @@ describe("CandidatePayloadRepoD1", () => {
         embedType: "img",
         embedPayload: {
           kind: "img",
-          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null }]
+          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null, mediaId: null }]
         },
         enrichments: [],
         capturedAt: 10,
@@ -532,7 +534,7 @@ describe("CandidatePayloadRepoD1", () => {
         embedType: "img",
         embedPayload: {
           kind: "img",
-          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null }]
+          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null, mediaId: null }]
         },
         enrichments: [],
         capturedAt: 10,

@@ -2,6 +2,7 @@ import { Result, Schema } from "effect";
 import { parseFeedImageUrl } from "../bluesky/BskyCdn";
 import {
   chartAssetIdFromBluesky,
+  chartAssetIdFromTwitter,
   mintPostSkygestUri,
   parseChartAssetId,
   parsePostSkygestUri,
@@ -12,6 +13,7 @@ import {
 } from "../domain/enrichment";
 import type { PostUri } from "../domain/types";
 import { formatSchemaParseError } from "../platform/Json";
+import { parseTwitterMediaUrl } from "../twitter/TwitterCdn";
 
 const decodeEnrichmentOutput = Schema.decodeUnknownResult(EnrichmentOutput);
 type EnrichmentOutputValue = Schema.Schema.Type<typeof EnrichmentOutput>;
@@ -224,11 +226,11 @@ const deriveReplacementMap = (
     }
   })();
 
-  if (parsedPost === null || parsedPost.platform !== "bluesky") {
+  if (parsedPost === null) {
     return {
       _tag: "failure",
       reason: "unsupported-post-uri",
-      message: `Expected a Bluesky post URI, received ${postUri}`,
+      message: `Expected a supported post URI, received ${postUri}`,
       legacyAssetKeys: [...legacyAssetKeys]
     };
   }
@@ -246,29 +248,51 @@ const deriveReplacementMap = (
       };
     }
 
-    const imageUrl = parseFeedImageUrl(parsedLegacy.stableRef);
-    if (imageUrl === null) {
-      return {
-        _tag: "failure",
-        reason: "unparseable-legacy-asset-key",
-        message: `Legacy asset key does not contain a parseable Bluesky feed image URL: ${legacyAssetKey}`,
-        legacyAssetKeys: [legacyAssetKey]
-      };
-    }
+    switch (parsedPost.platform) {
+      case "bluesky": {
+        const imageUrl = parseFeedImageUrl(parsedLegacy.stableRef);
+        if (imageUrl === null) {
+          return {
+            _tag: "failure",
+            reason: "unparseable-legacy-asset-key",
+            message: `Legacy asset key does not contain a parseable Bluesky feed image URL: ${legacyAssetKey}`,
+            legacyAssetKeys: [legacyAssetKey]
+          };
+        }
 
-    if (imageUrl.did !== parsedPost.did) {
-      return {
-        _tag: "failure",
-        reason: "did-mismatch",
-        message: `Legacy asset key DID ${imageUrl.did} does not match post URI DID ${parsedPost.did}`,
-        legacyAssetKeys: [legacyAssetKey]
-      };
-    }
+        if (imageUrl.did !== parsedPost.did) {
+          return {
+            _tag: "failure",
+            reason: "did-mismatch",
+            message: `Legacy asset key DID ${imageUrl.did} does not match post URI DID ${parsedPost.did}`,
+            legacyAssetKeys: [legacyAssetKey]
+          };
+        }
 
-    replacements.set(
-      legacyAssetKey,
-      chartAssetIdFromBluesky(postUri, imageUrl.blobCid)
-    );
+        replacements.set(
+          legacyAssetKey,
+          chartAssetIdFromBluesky(postUri, imageUrl.blobCid)
+        );
+        break;
+      }
+      case "twitter": {
+        const mediaUrl = parseTwitterMediaUrl(parsedLegacy.stableRef);
+        if (mediaUrl === null) {
+          return {
+            _tag: "failure",
+            reason: "unparseable-legacy-asset-key",
+            message: `Legacy asset key does not contain a parseable Twitter media URL: ${legacyAssetKey}`,
+            legacyAssetKeys: [legacyAssetKey]
+          };
+        }
+
+        replacements.set(
+          legacyAssetKey,
+          chartAssetIdFromTwitter(postUri, mediaUrl.mediaId)
+        );
+        break;
+      }
+    }
   }
 
   return {
@@ -277,7 +301,7 @@ const deriveReplacementMap = (
   };
 };
 
-export const repairChartAssetIdsForBlueskyPost = ({
+export const repairChartAssetIdsForPost = ({
   postUri,
   payload
 }: {
@@ -363,3 +387,13 @@ export const repairChartAssetIdsForBlueskyPost = ({
     )
   };
 };
+
+export const repairChartAssetIdsForBlueskyPost = (options: {
+  readonly postUri: PostUri;
+  readonly payload: unknown;
+}) => repairChartAssetIdsForPost(options);
+
+export const repairChartAssetIdsForTwitterPost = (options: {
+  readonly postUri: PostUri;
+  readonly payload: unknown;
+}) => repairChartAssetIdsForPost(options);

@@ -23,7 +23,10 @@ import {
 import type { EmbedPayload } from "../domain/embed";
 import type { PostUri } from "../domain/types";
 import { platformFromUri } from "../domain/types";
-import { chartAssetIdFromBluesky } from "../domain/data-layer/post-ids";
+import {
+  chartAssetIdFromBluesky,
+  chartAssetIdFromTwitter
+} from "../domain/data-layer/post-ids";
 import { CandidatePayloadRepo } from "../services/CandidatePayloadRepo";
 import { decodeWithDbError } from "../services/d1/schemaDecode";
 import {
@@ -32,6 +35,7 @@ import {
 } from "./EnrichmentPredicates";
 import { extractPostLinkCards } from "./PostContextSignals";
 import { parseFeedImageUrl } from "../bluesky/BskyCdn";
+import { parseTwitterMediaUrl } from "../twitter/TwitterCdn";
 
 const PlannerPostRowSchema = Schema.Struct({
   postUri: Schema.String,
@@ -67,14 +71,30 @@ const PlannerTopicRowsSchema = Schema.Array(PlannerTopicRowSchema);
 
 const toChartAssetId = (
   postUri: PostUri,
-  stableRef: string | null
+  stableRef: string | null,
+  mediaId?: string | null
 ) => {
-  if (platformFromUri(postUri) !== "bluesky" || stableRef === null) {
-    return null;
-  }
+  switch (platformFromUri(postUri)) {
+    case "bluesky": {
+      if (stableRef === null) {
+        return null;
+      }
 
-  const parsed = parseFeedImageUrl(stableRef);
-  return parsed === null ? null : chartAssetIdFromBluesky(postUri, parsed.blobCid);
+      const parsed = parseFeedImageUrl(stableRef);
+      return parsed === null
+        ? null
+        : chartAssetIdFromBluesky(postUri, parsed.blobCid);
+    }
+    case "twitter": {
+      const resolvedMediaId = mediaId ?? (
+        stableRef === null ? null : parseTwitterMediaUrl(stableRef)?.mediaId ?? null
+      );
+
+      return resolvedMediaId === null
+        ? null
+        : chartAssetIdFromTwitter(postUri, resolvedMediaId);
+    }
+  }
 };
 
 const extractQuoteContext = (embedPayload: EmbedPayload | null) => {
@@ -112,7 +132,7 @@ const extractAssetsFromMedia = (
   switch (embedPayload.kind) {
     case "img":
       return embedPayload.images.map((image, index) => ({
-        assetKey: toChartAssetId(postUri, image.fullsize),
+        assetKey: toChartAssetId(postUri, image.fullsize, image.mediaId),
         assetType: "image" as const,
         source,
         index,

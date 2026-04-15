@@ -537,7 +537,15 @@ describe("curate_post Twitter branch", () => {
     text: "Solar curtailment in CAISO hit a new record today — 5.2 GWh curtailed. Grid operators are struggling.",
     createdAt: 1_710_000_000_000,
     embedType: "img",
-    embedPayload: { kind: "img", images: [{ thumb: "https://pbs.twimg.com/media/thumb.jpg", fullsize: "https://pbs.twimg.com/media/full.jpg", alt: "chart" }] },
+    embedPayload: {
+      kind: "img",
+      images: [{
+        thumb: "https://pbs.twimg.com/media/thumb.jpg",
+        fullsize: "https://pbs.twimg.com/media/full.jpg",
+        alt: "chart",
+        mediaId: null
+      }]
+    },
     links: []
   };
 

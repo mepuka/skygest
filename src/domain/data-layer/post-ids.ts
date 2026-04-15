@@ -203,6 +203,17 @@ export const mintBlueskyChartAssetId = ({
     `${SGPOST_ABOX_NAMESPACE}bluesky/${encodeDidDots(did)}/${rkey}/chart/${blobCid}`
   );
 
+export const mintTwitterChartAssetId = ({
+  tweetId,
+  mediaId
+}: {
+  readonly tweetId: string;
+  readonly mediaId: string;
+}): ChartAssetId =>
+  decodeChartAssetId(
+    `${SGPOST_ABOX_NAMESPACE}twitter/${tweetId}/chart/${mediaId}`
+  );
+
 export const chartAssetIdFromBluesky = (
   postUri: PostUri,
   blobCid: string
@@ -219,6 +230,24 @@ export const chartAssetIdFromBluesky = (
     did: parsed.did,
     rkey: parsed.rkey,
     blobCid
+  });
+};
+
+export const chartAssetIdFromTwitter = (
+  postUri: PostUri,
+  mediaId: string
+): ChartAssetId => {
+  const parsed = requireParsedPostUri(postUri);
+
+  if (parsed.platform !== "twitter") {
+    throw new TypeError(
+      `Expected a Twitter post URI when minting a Twitter chart asset: ${postUri}`
+    );
+  }
+
+  return mintTwitterChartAssetId({
+    tweetId: parsed.tweetId,
+    mediaId
   });
 };
 

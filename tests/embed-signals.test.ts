@@ -11,7 +11,12 @@ describe("EmbedSignals", () => {
   it("detects visual, link, and quote signals across direct and media embeds", () => {
     const imageEmbed = {
       kind: "img" as const,
-      images: [{ alt: "Chart", fullsize: "https://example.com/chart.jpg", thumb: "https://example.com/chart-thumb.jpg" }]
+      images: [{
+        alt: "Chart",
+        fullsize: "https://example.com/chart.jpg",
+        mediaId: null,
+        thumb: "https://example.com/chart-thumb.jpg"
+      }]
     };
     const mediaLinkEmbed = {
       kind: "media" as const,

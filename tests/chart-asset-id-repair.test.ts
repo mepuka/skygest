@@ -5,7 +5,10 @@ import {
 } from "../src/domain/data-layer/ids";
 import { parseChartAssetId } from "../src/domain/data-layer/post-ids";
 import { type PostUri, PostUri as PostUriSchema } from "../src/domain/types";
-import { repairChartAssetIdsForBlueskyPost } from "../src/enrichment/ChartAssetIdRepair";
+import {
+  repairChartAssetIdsForBlueskyPost,
+  repairChartAssetIdsForTwitterPost
+} from "../src/enrichment/ChartAssetIdRepair";
 
 const decodePostUri = Schema.decodeUnknownSync(PostUriSchema);
 
@@ -313,6 +316,86 @@ describe("repairChartAssetIdsForBlueskyPost", () => {
         _tag: "failed",
         reason: "unparseable-legacy-asset-key"
       })
+    );
+  });
+});
+
+describe("repairChartAssetIdsForTwitterPost", () => {
+  it("repairs legacy Twitter asset keys inside vision enrichments", () => {
+    const twitterPostUri = decodePostUri("x://user42/status/1870000000001");
+    const twitterAssetKey =
+      "embed:0:https://pbs.twimg.com/media/GT2AbCdWgAAefgh?format=jpg&name=large";
+
+    const result = repairChartAssetIdsForTwitterPost({
+      postUri: twitterPostUri,
+      payload: {
+        kind: "vision",
+        summary: {
+          text: "Solar chart",
+          mediaTypes: ["chart"],
+          chartTypes: ["line-chart"],
+          titles: ["Solar output"],
+          keyFindings: [
+            {
+              text: "Solar output rose",
+              assetKeys: [twitterAssetKey]
+            }
+          ]
+        },
+        assets: [
+          {
+            assetKey: twitterAssetKey,
+            assetType: "image",
+            source: "embed",
+            index: 0,
+            originalAltText: null,
+            extractionRoute: "full",
+            analysis: {
+              mediaType: "chart",
+              chartTypes: ["line-chart"],
+              altText: "Solar chart",
+              altTextProvenance: "synthetic",
+              xAxis: null,
+              yAxis: null,
+              series: [],
+              sourceLines: [],
+              temporalCoverage: null,
+              keyFindings: ["Solar output rose"],
+              visibleUrls: [],
+              organizationMentions: [],
+              logoText: [],
+              title: "Solar output",
+              modelId: "gemini-test",
+              processedAt: 1
+            }
+          }
+        ],
+        modelId: "gemini-test",
+        promptVersion: "v2",
+        processedAt: 1
+      }
+    });
+
+    expect(result._tag).toBe("repaired");
+    if (result._tag !== "repaired") {
+      return;
+    }
+
+    expect(parseChartAssetId(result.replacements[0]!.chartAssetId)).toEqual({
+      platform: "twitter",
+      tweetId: "1870000000001",
+      mediaId: "GT2AbCdWgAAefgh"
+    });
+    expect(result.payload.kind).toBe("vision");
+    if (result.payload.kind !== "vision") {
+      return;
+    }
+
+    expect(result.payload.summary.keyFindings[0]?.assetKeys).toEqual([
+      result.replacements[0]!.chartAssetId
+    ]);
+    expect(result.payload.assets[0]?.assetKey).toBe(
+      result.replacements[0]!.chartAssetId
     );
   });
 });

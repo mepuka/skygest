@@ -63,7 +63,8 @@ describe("normalizeTweet", () => {
         {
           thumb: "https://pbs.twimg.com/media/abc.jpg",
           fullsize: "https://pbs.twimg.com/media/abc.jpg",
-          alt: "solar panel"
+          alt: "solar panel",
+          mediaId: "p1"
         }
       ]
     });
@@ -81,7 +82,8 @@ describe("normalizeTweet", () => {
         {
           thumb: "https://example.com/img.png",
           fullsize: "https://example.com/img.png",
-          alt: null
+          alt: null,
+          mediaId: "p1"
         }
       ]
     });

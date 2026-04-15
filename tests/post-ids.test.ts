@@ -6,9 +6,11 @@ import {
   ChartAssetId,
   PostSkygestUri,
   chartAssetIdFromBluesky,
+  chartAssetIdFromTwitter,
   decodeDidDots,
   encodeDidDots,
   mintBlueskyChartAssetId,
+  mintTwitterChartAssetId,
   mintPostSkygestUri,
   parseChartAssetId,
   parsePostSkygestUri
@@ -157,6 +159,44 @@ describe("post-ids", () => {
           blobCid
         });
       })
+    );
+  });
+
+  it("round-trips minted Twitter chart asset ids", () => {
+    fc.assert(
+      fc.property(numericTokenArbitrary, tokenArbitrary, (tweetId, mediaId) => {
+        const chartAssetId = mintTwitterChartAssetId({
+          tweetId,
+          mediaId
+        });
+
+        expect(decodeChartAssetId(chartAssetId)).toBe(chartAssetId);
+        expect(parseChartAssetId(chartAssetId)).toEqual({
+          platform: "twitter",
+          tweetId,
+          mediaId
+        });
+      })
+    );
+  });
+
+  it("derives a Twitter chart asset id from the platform post URI", () => {
+    fc.assert(
+      fc.property(
+        numericTokenArbitrary,
+        numericTokenArbitrary,
+        tokenArbitrary,
+        (userId, tweetId, mediaId) => {
+          const postUri = decodePostUri(`x://${userId}/status/${tweetId}`);
+          const chartAssetId = chartAssetIdFromTwitter(postUri, mediaId);
+
+          expect(parseChartAssetId(chartAssetId)).toEqual({
+            platform: "twitter",
+            tweetId,
+            mediaId
+          });
+        }
+      )
     );
   });
 

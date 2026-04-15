@@ -29,7 +29,10 @@ export type EmbedKind = Schema.Schema.Type<typeof EmbedKind>;
 export const ImageRef = Schema.Struct({
   thumb: Schema.String,
   fullsize: Schema.String,
-  alt: Schema.NullOr(Schema.String)
+  alt: Schema.NullOr(Schema.String),
+  mediaId: Schema.NullOr(Schema.String).pipe(
+    Schema.withDecodingDefaultKey(() => null)
+  )
 });
 export type ImageRef = Schema.Schema.Type<typeof ImageRef>;
 
