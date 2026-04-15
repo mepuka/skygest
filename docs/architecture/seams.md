@@ -55,7 +55,6 @@ The most important update versus the previous version of this document is that t
 |---|---|---|---|---|
 | `references/cold-start/*` | cold-start ingest + reviewed edits -> sync pipeline, tests, local inspection | checked-in JSON entities | stabilizing | Still the audited seed surface for the registry. |
 | energy-profile manifest -> generated profile | `references/energy-profile/shacl-manifest.json` -> `src/domain/generated/energyVariableProfile.ts` | generated facet metadata used by partial-variable algebra and kernel | stabilizing | Resolver facet semantics now depend on this generated seam. |
-| `eval/resolution-kernel/*` | expected outcomes -> diagnostic runs | `expected-outcomes.jsonl`, `run-eval.ts`, run folders | stabilizing | This is the active resolver quality loop. |
 | `.skygest/cache/*.json` | cache sync CLIs -> build-graph, discussion workflow | editorial cache manifests | locked | Editorial read-side work depends on these local mirrors. |
 | Story and annotation frontmatter | hydrate-story + discussion workflow -> build-graph | `src/domain/narrative/*` | locked at the base level | The core editorial working surface. |
 | `@skygest/domain/*` alias | `skygest-editorial` -> shared Cloudflare Schemas | tsconfig `paths` alias | locked | One broken alias breaks both repos at once. |

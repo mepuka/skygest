@@ -164,19 +164,15 @@ That is the product gap now. The runtime write path exists; the editorial projec
 
 ## Feedback loop
 
-### 8. Kernel eval harness
+### 8. No checked-in snapshot harness
 
-- **Component:** `eval/resolution-kernel/run-eval.ts`
-- **Input:** `eval/resolution-kernel/expected-outcomes.jsonl`
-- **Output:** run folders under `eval/resolution-kernel/runs/<timestamp>/`
-
-This is now the active quality loop for the resolver. It measures the same kernel contract that production writes to D1.
+`SKY-358` removed the old `eval/resolution-kernel/`, `eval/resolution-stage1/`, and related snapshot and gold-set scaffolding. That is intentional. Those files encoded legacy chart ids and would misstate what the current bundle-resolution work is supposed to prove.
 
 Why this matters for the architecture family:
 
-1. It keeps the docs honest. The resolver is shipped infrastructure, but not finished quality work.
-2. It tells us what kind of work remains. The next fixes are not about inventing a new runtime stage; they are about improving the current kernel and the registry completeness that feeds it.
-3. It explains why `SKY-317` and related registry follow-ons matter. The kernel can only narrow on shelves the runtime registry actually contains.
+1. It keeps the docs honest. The resolver is shipped infrastructure, but the old snapshot fixtures are no longer the source of truth.
+2. It prevents legacy eval artifacts from defining current requirements.
+3. It leaves the next end-to-end bundle-resolution eval surface to `SKY-343` and its follow-ons.
 
 ## What this trace means now
 
