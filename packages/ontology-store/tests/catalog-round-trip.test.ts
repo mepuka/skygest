@@ -6,8 +6,20 @@ import { fileURLToPath } from "node:url";
 
 import { loadCheckedInDataLayerSeed } from "../../../src/bootstrap/CheckedInDataLayerRegistry";
 import type {
+  Agent as AgentEntity,
   DataLayerRegistryEntity,
   DataLayerRegistrySeed
+} from "../../../src/domain/data-layer";
+import {
+  AgentId,
+  CatalogId,
+  CatalogRecordId,
+  DataServiceId,
+  DatasetId,
+  DatasetSeriesId,
+  DistributionId,
+  SeriesId,
+  VariableId
 } from "../../../src/domain/data-layer";
 import emitSpecJson from "../generated/emit-spec.json";
 import {
@@ -16,6 +28,7 @@ import {
 } from "../src/Domain/EmitSpec";
 import { IRI } from "../src/Domain/Rdf";
 import { emitEntityQuads } from "../src/mapping/forward";
+import { distillEntities } from "../src/mapping/reverse";
 import { RdfStoreService } from "../src/Service/RdfStore";
 
 const asIri = Schema.decodeUnknownSync(IRI);
@@ -35,6 +48,17 @@ const SKOS_MAPPING_PREDICATES = [
   asIri("http://www.w3.org/2004/02/skos/core#broadMatch"),
   asIri("http://www.w3.org/2004/02/skos/core#narrowMatch")
 ] as const;
+const decodeIdByTag = {
+  Agent: Schema.decodeUnknownSync(AgentId),
+  Catalog: Schema.decodeUnknownSync(CatalogId),
+  CatalogRecord: Schema.decodeUnknownSync(CatalogRecordId),
+  DataService: Schema.decodeUnknownSync(DataServiceId),
+  Dataset: Schema.decodeUnknownSync(DatasetId),
+  DatasetSeries: Schema.decodeUnknownSync(DatasetSeriesId),
+  Distribution: Schema.decodeUnknownSync(DistributionId),
+  Variable: Schema.decodeUnknownSync(VariableId),
+  Series: Schema.decodeUnknownSync(SeriesId)
+} as const;
 
 const expectedTypeCounts = (seed: DataLayerRegistrySeed) =>
   new Map<EmitSpecClassKey, number>([
@@ -61,6 +85,26 @@ const flattenSeed = (seed: DataLayerRegistrySeed): ReadonlyArray<DataLayerRegist
   ...seed.series
 ];
 
+const countByTag = (entities: ReadonlyArray<DataLayerRegistryEntity>) =>
+  entities.reduce(
+    (counts, entity) =>
+      counts.set(entity._tag, (counts.get(entity._tag as EmitSpecClassKey) ?? 0) + 1),
+    new Map<EmitSpecClassKey, number>()
+  );
+
+const emitSeedToStore = (seed: DataLayerRegistrySeed) =>
+  Effect.gen(function* () {
+    const rdf = yield* RdfStoreService;
+    const store = yield* rdf.makeStore;
+
+    for (const entity of flattenSeed(seed)) {
+      const quads = yield* emitEntityQuads(entity);
+      yield* rdf.addQuads(store, quads);
+    }
+
+    return store;
+  });
+
 const iriPredicates = new Set(
   Object.values(emitSpec.classes).flatMap((classSpec) =>
     classSpec.forward.fields.flatMap((field) =>
@@ -79,12 +123,7 @@ describe("cold-start catalog round-trip", () => {
         Effect.gen(function* () {
           const seed = yield* loadCheckedInDataLayerSeed(coldStartRoot);
           const rdf = yield* RdfStoreService;
-          const store = yield* rdf.makeStore;
-
-          for (const entity of flattenSeed(seed)) {
-            const quads = yield* emitEntityQuads(entity);
-            yield* rdf.addQuads(store, quads);
-          }
+          const store = yield* emitSeedToStore(seed);
 
           for (const [classKey, expectedCount] of expectedTypeCounts(seed)) {
             const classSpec = emitSpec.classes[classKey];
@@ -125,6 +164,39 @@ describe("cold-start catalog round-trip", () => {
           expect(
             altLabelQuads.every((quad) => quad.object.termType === "Literal")
           ).toBe(true);
+        }).pipe(
+          Effect.provide(testLayer),
+          Effect.provideService(References.MinimumLogLevel, "Error"),
+          Effect.scoped
+        )
+      ),
+    60_000
+  );
+
+  it(
+    "phase 5: distill rebuilds the expected entity counts with valid ids",
+    () =>
+      Effect.runPromise(
+        Effect.gen(function* () {
+          const seed = yield* loadCheckedInDataLayerSeed(coldStartRoot);
+          const store = yield* emitSeedToStore(seed);
+          const distilled = yield* distillEntities(store);
+
+          expect(countByTag(distilled)).toEqual(expectedTypeCounts(seed));
+
+          for (const entity of distilled) {
+            const decodeId = decodeIdByTag[entity._tag as keyof typeof decodeIdByTag];
+            expect(() => decodeId(entity.id)).not.toThrow();
+          }
+
+          const aemo = distilled.find(
+            (entity): entity is AgentEntity =>
+              entity._tag === "Agent" &&
+              entity.name === "Australian Energy Market Operator"
+          );
+
+          expect(aemo).toBeDefined();
+          expect(aemo?.alternateNames).toContain("AEMO");
         }).pipe(
           Effect.provide(testLayer),
           Effect.provideService(References.MinimumLogLevel, "Error"),
