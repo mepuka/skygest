@@ -22,7 +22,6 @@
   "exclude": [
     "analysis/**",
     "src/filters/**",
-    "src/services/CandidateSessionsRepo.ts",
     "src/services/kv/**",
     "src/web/**"
   ]

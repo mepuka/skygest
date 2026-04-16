@@ -44,7 +44,6 @@
     "analysis/**",
     "src/**/*.test.ts",
     "src/filters/**",
-    "src/services/CandidateSessionsRepo.ts",
     "src/services/kv/**",
     "src/web/**"
   ]
