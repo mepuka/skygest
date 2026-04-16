@@ -105,7 +105,7 @@
             "runtimeName": "kind",
             "distillFrom": {
               "_tag": "Default",
-              "defaultValue": null
+              "defaultValue": "organization"
             },
             "cardinality": "single",
             "lossy": "runtime-local"
@@ -1469,7 +1469,7 @@
             "runtimeName": "kind",
             "distillFrom": {
               "_tag": "Default",
-              "defaultValue": null
+              "defaultValue": "other"
             },
             "cardinality": "single",
             "lossy": "runtime-local"

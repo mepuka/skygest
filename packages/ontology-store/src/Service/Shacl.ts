@@ -3,7 +3,9 @@ import rdfDataset from "@rdfjs/dataset";
 import { Effect, Layer, Scope, Schema, ServiceMap } from "effect";
 import { Validator } from "shacl-engine";
 
+import { stringifyUnknown } from "../../../../src/platform/Json";
 import { type RdfStore, RdfStoreService } from "./RdfStore";
+import { asIri } from "../Domain/Rdf";
 import {
   type ShaclValidationReport,
   ShaclValidationReport as ShaclValidationReportSchema,
@@ -12,41 +14,24 @@ import {
   ShaclValidationError
 } from "../Domain/Shacl";
 
-const decodeShaclValidationReport =
-  Schema.decodeUnknownSync(ShaclValidationReportSchema);
+const decodeShaclValidationReport = Schema.decodeUnknownEffect(ShaclValidationReportSchema);
 
 const shaclFactory = Object.assign(Object.create(rdfDataModel), {
   dataset: rdfDataset.dataset
 });
 
-const serializeUnknown = (value: unknown): string => {
-  if (typeof value === "string") {
-    return value;
-  }
-
-  if (value instanceof Error) {
-    return value.message;
-  }
-
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return String(value);
-  }
-};
-
 const mapShapesLoadError = (cause: unknown) =>
   new ShapesLoadError({
     operation: "loadShapes",
-    message: serializeUnknown(cause),
-    cause: serializeUnknown(cause)
+    message: stringifyUnknown(cause),
+    cause: stringifyUnknown(cause)
   });
 
 const mapShaclValidationError = (operation: string) => (cause: unknown) =>
   new ShaclValidationError({
     operation,
-    message: serializeUnknown(cause),
-    cause: serializeUnknown(cause)
+    message: stringifyUnknown(cause),
+    cause: stringifyUnknown(cause)
   });
 
 const pathQuantifierSuffix = (quantifier: string) => {
@@ -84,60 +69,111 @@ const serializePath = (
     .join(" / ");
 };
 
-const toSeverity = (iri: string): ShaclViolation["severity"] => {
+const failValidation = (operation: string, message: string) =>
+  Effect.fail(
+    new ShaclValidationError({
+      operation,
+      message,
+      cause: message
+    })
+  );
+
+const toSeverity = (
+  operation: string,
+  iri: string
+): Effect.Effect<ShaclViolation["severity"], ShaclValidationError> => {
   switch (iri) {
     case "http://www.w3.org/ns/shacl#Violation":
-      return "Violation";
+      return Effect.succeed("Violation");
     case "http://www.w3.org/ns/shacl#Warning":
-      return "Warning";
+      return Effect.succeed("Warning");
     case "http://www.w3.org/ns/shacl#Info":
-      return "Info";
+      return Effect.succeed("Info");
     default:
-      throw new Error(`Unsupported SHACL severity: ${iri}`);
+      return failValidation(operation, `Unsupported SHACL severity: ${iri}`);
   }
 };
 
-const requireValue = (field: string, value: string | undefined) => {
+const requireValue = (
+  operation: string,
+  field: string,
+  value: string | undefined
+): Effect.Effect<string, ShaclValidationError> => {
   if (value === undefined || value.length === 0) {
-    throw new Error(`Missing ${field} in shacl-engine result`);
+    return failValidation(operation, `Missing ${field} in shacl-engine result`);
   }
 
-  return value;
+  return Effect.succeed(value);
 };
 
-const adaptViolation = (result: {
-  readonly focusNode?: { readonly term?: { readonly value?: string } };
-  readonly shape?: { readonly ptr?: { readonly term?: { readonly value?: string } } };
-  readonly constraintComponent?: { readonly value?: string };
-  readonly severity?: { readonly value?: string };
-  readonly message?: ReadonlyArray<{ readonly value?: string }>;
-  readonly path?: ReadonlyArray<{
-    readonly quantifier: string;
-    readonly start: string;
-    readonly predicates: ReadonlyArray<{ readonly value: string }>;
-  }>;
-  readonly value?: { readonly term?: { readonly value?: string } };
-}): ShaclViolation => {
-  const path = serializePath(result.path);
-  const value = result.value?.term?.value;
+const requireIri = (
+  operation: string,
+  field: string,
+  value: string | undefined
+) =>
+  requireValue(operation, field, value).pipe(
+    Effect.andThen((iri) =>
+      Effect.try({
+        try: () => asIri(iri),
+        catch: mapShaclValidationError(operation)
+      })
+    )
+  );
 
-  return {
-    focusNode: requireValue("focusNode", result.focusNode?.term?.value),
-    sourceShape: requireValue("sourceShape", result.shape?.ptr?.term?.value),
-    sourceConstraint: requireValue(
+const adaptViolation = (
+  operation: string,
+  result: {
+    readonly focusNode?: { readonly term?: { readonly value?: string } };
+    readonly shape?: { readonly ptr?: { readonly term?: { readonly value?: string } } };
+    readonly constraintComponent?: { readonly value?: string };
+    readonly severity?: { readonly value?: string };
+    readonly message?: ReadonlyArray<{ readonly value?: string }>;
+    readonly path?: ReadonlyArray<{
+      readonly quantifier: string;
+      readonly start: string;
+      readonly predicates: ReadonlyArray<{ readonly value: string }>;
+    }>;
+    readonly value?: { readonly term?: { readonly value?: string } };
+  }
+): Effect.Effect<ShaclViolation, ShaclValidationError> =>
+  Effect.gen(function* () {
+    const path = serializePath(result.path);
+    const value = result.value?.term?.value;
+    const focusNode = yield* requireIri(
+      operation,
+      "focusNode",
+      result.focusNode?.term?.value
+    );
+    const sourceShape = yield* requireIri(
+      operation,
+      "sourceShape",
+      result.shape?.ptr?.term?.value
+    );
+    const sourceConstraint = yield* requireIri(
+      operation,
       "sourceConstraint",
       result.constraintComponent?.value
-    ),
-    severity: toSeverity(requireValue("severity", result.severity?.value)),
-    message:
-      result.message
-        ?.map((item) => item.value)
-        .filter((value): value is string => value !== undefined && value.length > 0)
-        .join(" | ") || requireValue("sourceConstraint", result.constraintComponent?.value),
-    ...(path === undefined ? {} : { path }),
-    ...(value === undefined ? {} : { value })
-  };
-};
+    );
+    const severityIri = yield* requireValue(
+      operation,
+      "severity",
+      result.severity?.value
+    );
+
+    return {
+      focusNode,
+      sourceShape,
+      sourceConstraint,
+      severity: yield* toSeverity(operation, severityIri),
+      message:
+        result.message
+          ?.map((item) => item.value)
+          .filter((value): value is string => value !== undefined && value.length > 0)
+          .join(" | ") || sourceConstraint,
+      ...(path === undefined ? {} : { path }),
+      ...(value === undefined ? {} : { value })
+    };
+  });
 
 export class ShaclService extends ServiceMap.Service<
   ShaclService,
@@ -182,14 +218,14 @@ export class ShaclService extends ServiceMap.Service<
           catch: mapShaclValidationError("validate")
         });
 
-        return yield* Effect.try({
-          try: () =>
-            decodeShaclValidationReport({
-              conforms: report.conforms,
-              violations: report.results.map(adaptViolation)
-            }),
-          catch: mapShaclValidationError("validate")
-        });
+        const violations = yield* Effect.forEach(report.results, (result) =>
+          adaptViolation("validate", result)
+        );
+
+        return yield* decodeShaclValidationReport({
+          conforms: report.conforms,
+          violations
+        }).pipe(Effect.mapError(mapShaclValidationError("validate")));
       });
 
       return ShaclService.of({

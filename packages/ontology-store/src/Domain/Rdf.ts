@@ -1,5 +1,7 @@
 import { Schema } from "effect";
 
+import { stringifyUnknown } from "../../../../src/platform/Json";
+
 /**
  * IRI — a non-empty absolute IRI string. Branded so that call sites that
  * accept an IRI cannot be passed an arbitrary string without validation.
@@ -13,6 +15,7 @@ export const IRI = Schema.String.pipe(
   Schema.brand("IRI")
 );
 export type IRI = Schema.Schema.Type<typeof IRI>;
+export const asIri = Schema.decodeUnknownSync(IRI);
 
 /**
  * RdfError — tagged error for failures inside the N3-backed RDF store
@@ -28,3 +31,12 @@ export class RdfError extends Schema.TaggedErrorClass<RdfError>()("RdfError", {
   message: Schema.String,
   cause: Schema.optionalKey(Schema.String)
 }) {}
+
+export const mapRdfError = (operation: string) => (cause: unknown) => {
+  const detail = stringifyUnknown(cause);
+  return new RdfError({
+    operation,
+    message: detail,
+    cause: detail
+  });
+};

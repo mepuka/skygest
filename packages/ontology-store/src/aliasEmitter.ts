@@ -1,10 +1,11 @@
-import { Effect, Schema } from "effect";
+import { Effect } from "effect";
 import { DataFactory, type Quad } from "n3";
 
-import type { ExternalIdentifier } from "../../../src/domain/data-layer/alias";
-import { type IRI, IRI as IriSchema } from "./Domain/Rdf";
-
-const asIri = Schema.decodeUnknownSync(IriSchema);
+import {
+  type ExternalIdentifier,
+  uriResolvableAliasSchemes
+} from "../../../src/domain/data-layer/alias";
+import { type IRI, asIri } from "./Domain/Rdf";
 
 const SKOS_ALT_LABEL = asIri("http://www.w3.org/2004/02/skos/core#altLabel");
 const SKOS_EXACT_MATCH = asIri("http://www.w3.org/2004/02/skos/core#exactMatch");
@@ -16,6 +17,11 @@ export type AliasQuad = Quad;
 
 const isAbsoluteIri = (value: string) =>
   value.startsWith("http://") || value.startsWith("https://");
+
+const isUriResolvableAliasScheme = (
+  scheme: ExternalIdentifier["scheme"]
+): scheme is (typeof uriResolvableAliasSchemes)[number] =>
+  (uriResolvableAliasSchemes as ReadonlyArray<string>).includes(scheme);
 
 const toMappingPredicate = (
   relation: ExternalIdentifier["relation"]
@@ -39,6 +45,10 @@ const toObjectIri = (alias: ExternalIdentifier): IRI | undefined => {
     return asIri(alias.uri);
   }
 
+  if (!isUriResolvableAliasScheme(alias.scheme)) {
+    return undefined;
+  }
+
   switch (alias.scheme) {
     case "wikidata":
       return asIri(
@@ -56,8 +66,6 @@ const toObjectIri = (alias: ExternalIdentifier): IRI | undefined => {
       );
     case "url":
       return asIri(alias.value);
-    default:
-      return undefined;
   }
 };
 

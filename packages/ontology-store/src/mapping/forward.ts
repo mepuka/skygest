@@ -1,19 +1,15 @@
-import { Effect, Schema } from "effect";
+import { Effect } from "effect";
 import { DataFactory, type Quad } from "n3";
 
 import type { DataLayerRegistryEntity } from "../../../../src/domain/data-layer";
-import emitSpecJson from "../../generated/emit-spec.json";
 import {
-  EmitSpec as EmitSpecSchema,
   type EmitSpecClassKey,
   type ForwardField,
   type ValueKind
 } from "../Domain/EmitSpec";
-import { type IRI, IRI as IriSchema } from "../Domain/Rdf";
+import { type IRI, asIri } from "../Domain/Rdf";
 import { emitAliases } from "../aliasEmitter";
-
-const asIri = Schema.decodeUnknownSync(IriSchema);
-const emitSpec = Schema.decodeUnknownSync(EmitSpecSchema)(emitSpecJson);
+import { loadedEmitSpec as emitSpec } from "../loadedEmitSpec";
 
 const RDF_TYPE = asIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
 

@@ -1,21 +1,19 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Schema } from "effect";
-
-import { IRI, RdfError } from "../../src/Domain/Rdf";
+import { RdfError, asIri, mapRdfError } from "../../src/Domain/Rdf";
 
 describe("IRI", () => {
   it("accepts a well-formed HTTP IRI", () => {
-    const result = Schema.decodeUnknownSync(IRI)("https://id.skygest.io/agent/ag_01");
+    const result = asIri("https://id.skygest.io/agent/ag_01");
     expect(result).toBe("https://id.skygest.io/agent/ag_01");
   });
 
   it("rejects the empty string", () => {
-    expect(() => Schema.decodeUnknownSync(IRI)("")).toThrow();
+    expect(() => asIri("")).toThrow();
   });
 
   it("rejects non-string values", () => {
-    expect(() => Schema.decodeUnknownSync(IRI)(42)).toThrow();
-    expect(() => Schema.decodeUnknownSync(IRI)(null)).toThrow();
+    expect(() => asIri(42)).toThrow();
+    expect(() => asIri(null)).toThrow();
   });
 });
 
@@ -34,5 +32,12 @@ describe("RdfError", () => {
       cause: "TypeError: term.subject is null"
     });
     expect(err.cause).toBe("TypeError: term.subject is null");
+  });
+
+  it("maps unknown failures into an RdfError", () => {
+    const err = mapRdfError("query")(new Error("store blew up"));
+    expect(err._tag).toBe("RdfError");
+    expect(err.operation).toBe("query");
+    expect(err.message).toBe("store blew up");
   });
 });

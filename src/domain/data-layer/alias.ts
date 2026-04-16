@@ -30,6 +30,14 @@ export const AliasScheme = Schema.Literals(aliasSchemes).annotate({
 });
 export type AliasScheme = Schema.Schema.Type<typeof AliasScheme>;
 
+export const uriResolvableAliasSchemes = [
+  "wikidata",
+  "doi",
+  "ror",
+  "url"
+] as const satisfies ReadonlyArray<AliasScheme>;
+export type UriResolvableAliasScheme = (typeof uriResolvableAliasSchemes)[number];
+
 export const aliasRelations = [
   "exactMatch", "closeMatch", "broadMatch", "narrowMatch", "methodologyVariant"
  ] as const;

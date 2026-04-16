@@ -38,6 +38,22 @@ const failingDataFixture = `
     a foaf:Agent .
 `;
 
+const malformedShapesFixture = `
+  @prefix ex: <https://example.org/shapes/> .
+  @prefix sh: <http://www.w3.org/ns/shacl#> .
+  @prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+  ex:AgentShape
+    a sh:NodeShape ;
+    sh:targetClass foaf:Agent ;
+    sh:property ex:BrokenPropertyShape .
+
+  ex:BrokenPropertyShape
+    a sh:PropertyShape ;
+    sh:path [] ;
+    sh:minCount 1 .
+`;
+
 describe("ShaclService", () => {
   it("loadShapes parses Turtle shapes into a store", () =>
     Effect.runPromise(
@@ -94,6 +110,23 @@ describe("ShaclService", () => {
           message: "foaf:name is required",
           path: "http://xmlns.com/foaf/0.1/name"
         });
+      }).pipe(Effect.provide(TestLayer), Effect.scoped)
+    ));
+
+  it("validate maps malformed shape execution failures into ShaclValidationError", () =>
+    Effect.runPromise(
+      Effect.gen(function* () {
+        const shacl = yield* ShaclService;
+        const rdf = yield* RdfStoreService;
+
+        const shapesStore = yield* shacl.loadShapes(malformedShapesFixture);
+        const dataStore = yield* rdf.makeStore;
+        yield* rdf.parseTurtle(dataStore, failingDataFixture);
+
+        const error = yield* shacl.validate(dataStore, shapesStore).pipe(Effect.flip);
+
+        expect(error._tag).toBe("ShaclValidationError");
+        expect(error.operation).toBe("validate");
       }).pipe(Effect.provide(TestLayer), Effect.scoped)
     ));
 });

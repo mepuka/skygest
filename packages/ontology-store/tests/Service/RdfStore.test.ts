@@ -1,11 +1,8 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect } from "effect";
-import { Schema } from "effect";
 
-import { IRI } from "../../src/Domain/Rdf";
+import { asIri } from "../../src/Domain/Rdf";
 import { RdfStoreService } from "../../src/Service/RdfStore";
-
-const asIri = Schema.decodeUnknownSync(IRI);
 
 const RDF_TYPE = asIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
 const FOAF_AGENT = asIri("http://xmlns.com/foaf/0.1/Agent");

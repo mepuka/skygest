@@ -1,6 +1,7 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Schema } from "effect";
 
+import { asIri } from "../../src/Domain/Rdf";
 import {
   ShaclSeverity,
   ShaclValidationError,
@@ -24,8 +25,8 @@ describe("ShaclSeverity", () => {
 describe("ShaclViolation", () => {
   it("decodes a minimal property-scoped violation", () => {
     const decoded = Schema.decodeUnknownSync(ShaclViolation)({
-      focusNode: "https://id.skygest.io/agent/ag_01",
-      sourceShape: "sky-sh:AgentShape",
+      focusNode: asIri("https://id.skygest.io/agent/ag_01"),
+      sourceShape: asIri("https://skygest.dev/shapes/AgentShape"),
       sourceConstraint: "http://www.w3.org/ns/shacl#MinCountConstraintComponent",
       severity: "Violation",
       message: "foaf:name is required",
@@ -38,8 +39,8 @@ describe("ShaclViolation", () => {
 
   it("decodes a violation with a serialized offending value", () => {
     const decoded = Schema.decodeUnknownSync(ShaclViolation)({
-      focusNode: "https://id.skygest.io/dataset/ds_01",
-      sourceShape: "sky-sh:DatasetShape",
+      focusNode: asIri("https://id.skygest.io/dataset/ds_01"),
+      sourceShape: asIri("https://skygest.dev/shapes/DatasetShape"),
       sourceConstraint: "http://www.w3.org/ns/shacl#ClassConstraintComponent",
       severity: "Violation",
       message: "publisher must be a foaf:Agent",
@@ -65,8 +66,8 @@ describe("ShaclValidationReport", () => {
       conforms: false,
       violations: [
         {
-          focusNode: "https://id.skygest.io/agent/ag_01",
-          sourceShape: "sky-sh:AgentShape",
+          focusNode: asIri("https://id.skygest.io/agent/ag_01"),
+          sourceShape: asIri("https://skygest.dev/shapes/AgentShape"),
           sourceConstraint: "http://www.w3.org/ns/shacl#MinCountConstraintComponent",
           severity: "Violation",
           message: "missing foaf:name"

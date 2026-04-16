@@ -1,13 +1,7 @@
-import { Schema } from "effect";
-
 import type { DataLayerRegistryEntity } from "../../../../src/domain/data-layer";
-import emitSpecJson from "../../generated/emit-spec.json";
-import {
-  EmitSpec as EmitSpecSchema,
-  type EmitSpecClassKey
-} from "../Domain/EmitSpec";
-
-const emitSpec = Schema.decodeUnknownSync(EmitSpecSchema)(emitSpecJson);
+import { type EmitSpecClassKey } from "../Domain/EmitSpec";
+import { loadedEmitSpec as emitSpec } from "../loadedEmitSpec";
+import { stableJson } from "../stableJson";
 
 export type ProjectionParityDiff = {
   readonly field: string;
@@ -19,8 +13,6 @@ export type ProjectionParityResult = {
   readonly ok: boolean;
   readonly diffs: ReadonlyArray<ProjectionParityDiff>;
 };
-
-const stableJson = (value: unknown): string => JSON.stringify(value);
 
 const normalizeMany = (value: unknown): ReadonlyArray<unknown> =>
   (Array.isArray(value) ? [...value] : []).sort((left, right) =>
@@ -46,7 +38,7 @@ export const compareProjectionParity = (
 
   const classKey = source._tag as EmitSpecClassKey;
   const relevantFields = emitSpec.classes[classKey].reverse.fields.filter(
-    (field) => field.lossy === undefined
+    (field) => !("lossy" in field)
   );
 
   const sourceRecord = source as Record<string, unknown>;

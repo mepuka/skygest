@@ -1,10 +1,8 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, Logger, References, Schema } from "effect";
+import { Effect, Logger, References } from "effect";
 
-import { IRI } from "../src/Domain/Rdf";
+import { asIri } from "../src/Domain/Rdf";
 import { emitAliases } from "../src/aliasEmitter";
-
-const asIri = Schema.decodeUnknownSync(IRI);
 
 const SUBJECT = asIri("https://example.org/entity/agent");
 const SKOS_ALT_LABEL = "http://www.w3.org/2004/02/skos/core#altLabel";
@@ -72,6 +70,23 @@ describe("emitAliases", () => {
       expect(quads[0]?.predicate.value).toBe(SKOS_EXACT_MATCH);
       expect(quads[0]?.object.termType).toBe("NamedNode");
       expect(quads[0]?.object.value).toBe("https://ror.org/04xfq0j82");
+    })
+  );
+
+  it.effect("emits a DOI alias against the canonical doi.org URI", () =>
+    Effect.gen(function* () {
+      const quads = yield* emitAliases(SUBJECT, [
+        {
+          scheme: "doi",
+          value: "10.5281/zenodo.12345",
+          relation: "exactMatch"
+        }
+      ]);
+
+      expect(quads).toHaveLength(1);
+      expect(quads[0]?.predicate.value).toBe(SKOS_EXACT_MATCH);
+      expect(quads[0]?.object.termType).toBe("NamedNode");
+      expect(quads[0]?.object.value).toBe("https://doi.org/10.5281/zenodo.12345");
     })
   );
 
@@ -148,6 +163,21 @@ describe("emitAliases", () => {
       expect(quads).toHaveLength(1);
       expect(quads[0]?.predicate.value).toBe(SKOS_CLOSE_MATCH);
       expect(quads[0]?.object.value).toBe("https://www.wikidata.org/entity/Q4712345");
+    })
+  );
+
+  it.effect("preserves a pre-formed absolute URI for URL aliases", () =>
+    Effect.gen(function* () {
+      const quads = yield* emitAliases(SUBJECT, [
+        {
+          scheme: "url",
+          value: "https://example.org/custom/alias",
+          relation: "exactMatch"
+        }
+      ]);
+
+      expect(quads).toHaveLength(1);
+      expect(quads[0]?.object.value).toBe("https://example.org/custom/alias");
     })
   );
 });

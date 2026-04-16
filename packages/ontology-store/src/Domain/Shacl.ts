@@ -1,5 +1,7 @@
 import { Schema } from "effect";
 
+import { IRI } from "./Rdf";
+
 /**
  * ShaclSeverity — the three severity levels in the SHACL specification.
  * Milestone 1 treats every constraint as `Violation`; Info and Warning are
@@ -18,9 +20,9 @@ export type ShaclSeverity = Schema.Schema.Type<typeof ShaclSeverity>;
  * offending value when it can be serialized as a string.
  */
 export const ShaclViolation = Schema.Struct({
-  focusNode: Schema.String,
-  sourceShape: Schema.String,
-  sourceConstraint: Schema.String,
+  focusNode: IRI,
+  sourceShape: IRI,
+  sourceConstraint: IRI,
   severity: ShaclSeverity,
   message: Schema.String,
   path: Schema.optionalKey(Schema.String),

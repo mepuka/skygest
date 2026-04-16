@@ -494,7 +494,7 @@ const REVERSE_POLICY: ReversePolicy = {
   Agent: {
     _tag: tagLiteral("Agent"),
     id: subjectIri,
-    kind: runtimeLocal(null),
+    kind: runtimeLocal("organization"),
     parentAgentId: runtimeLocal(null),
     // `alternateNames` and `display-alias` may both produce skos:altLabel
     // literals on emit. The reverse attributes them to `alternateNames`
@@ -582,7 +582,7 @@ const REVERSE_POLICY: ReversePolicy = {
       "http://www.w3.org/ns/dcat#Dataset",
       "http://www.w3.org/ns/dcat#distribution"
     ),
-    kind: runtimeLocal(null),
+    kind: runtimeLocal("other"),
     accessRights: runtimeLocal(null),
     ...timestampedAliasedPolicy
   },

@@ -1,15 +1,6 @@
 import { DateTime, Effect, Schema } from "effect";
 import type {
-  Agent as AgentEntity,
-  Catalog as CatalogEntity,
-  CatalogRecord as CatalogRecordEntity,
   DataLayerRegistryEntity,
-  DataService as DataServiceEntity,
-  Dataset as DatasetEntity,
-  DatasetSeries as DatasetSeriesEntity,
-  Distribution as DistributionEntity,
-  Series as SeriesEntity,
-  Variable as VariableEntity
 } from "../../../../src/domain/data-layer";
 import {
   Agent,
@@ -22,65 +13,41 @@ import {
   Series,
   Variable
 } from "../../../../src/domain/data-layer";
-import { stringifyUnknown } from "../../../../src/platform/Json";
-import emitSpecJson from "../../generated/emit-spec.json";
 import {
-  EmitSpec as EmitSpecSchema,
   type EmitSpecClassKey,
   type ForwardField,
   type ReverseField
 } from "../Domain/EmitSpec";
-import { type IRI, IRI as IriSchema, RdfError } from "../Domain/Rdf";
+import { type IRI, asIri, mapRdfError } from "../Domain/Rdf";
 import { type RdfStore, RdfStoreService } from "../Service/RdfStore";
-
-const asIri = Schema.decodeUnknownSync(IriSchema);
-const emitSpec = Schema.decodeUnknownSync(EmitSpecSchema)(emitSpecJson);
+import { loadedEmitSpec as emitSpec } from "../loadedEmitSpec";
+import { stableJson } from "../stableJson";
 
 const RDF_TYPE = asIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
 const FOAF_PRIMARY_TOPIC = asIri("http://xmlns.com/foaf/0.1/primaryTopic");
 
-type DistilledEntity =
-  | AgentEntity
-  | CatalogEntity
-  | CatalogRecordEntity
-  | DataServiceEntity
-  | DatasetEntity
-  | DatasetSeriesEntity
-  | DistributionEntity
-  | VariableEntity
-  | SeriesEntity;
-
-const mapRdfError = (operation: string) => (cause: unknown) => {
-  const detail = stringifyUnknown(cause);
-  return new RdfError({
-    operation,
-    message: detail,
-    cause: detail
-  });
-};
-
 const decodeByClass: {
-  readonly [K in EmitSpecClassKey]: (input: unknown) => DistilledEntity;
+  readonly [K in EmitSpecClassKey]: (input: unknown) => DataLayerRegistryEntity;
 } = {
-  Agent: Schema.decodeUnknownSync(Agent) as (input: unknown) => DistilledEntity,
-  Catalog: Schema.decodeUnknownSync(Catalog) as (input: unknown) => DistilledEntity,
+  Agent: Schema.decodeUnknownSync(Agent) as (input: unknown) => DataLayerRegistryEntity,
+  Catalog: Schema.decodeUnknownSync(Catalog) as (input: unknown) => DataLayerRegistryEntity,
   CatalogRecord: Schema.decodeUnknownSync(CatalogRecord) as (
     input: unknown
-  ) => DistilledEntity,
+  ) => DataLayerRegistryEntity,
   DataService: Schema.decodeUnknownSync(DataService) as (
     input: unknown
-  ) => DistilledEntity,
-  Dataset: Schema.decodeUnknownSync(Dataset) as (input: unknown) => DistilledEntity,
+  ) => DataLayerRegistryEntity,
+  Dataset: Schema.decodeUnknownSync(Dataset) as (input: unknown) => DataLayerRegistryEntity,
   DatasetSeries: Schema.decodeUnknownSync(DatasetSeries) as (
     input: unknown
-  ) => DistilledEntity,
+  ) => DataLayerRegistryEntity,
   Distribution: Schema.decodeUnknownSync(Distribution) as (
     input: unknown
-  ) => DistilledEntity,
+  ) => DataLayerRegistryEntity,
   Variable: Schema.decodeUnknownSync(Variable) as (
     input: unknown
-  ) => DistilledEntity,
-  Series: Schema.decodeUnknownSync(Series) as (input: unknown) => DistilledEntity
+  ) => DataLayerRegistryEntity,
+  Series: Schema.decodeUnknownSync(Series) as (input: unknown) => DataLayerRegistryEntity
 };
 
 const forwardFieldByClass: {
@@ -107,7 +74,7 @@ const ensureUnique = <A>(values: ReadonlyArray<A>): ReadonlyArray<A> => {
     const key =
       typeof value === "string" || typeof value === "number" || typeof value === "boolean"
         ? String(value)
-        : JSON.stringify(value);
+        : stableJson(value);
     if (!seen.has(key)) {
       seen.add(key);
       deduped.push(value);
@@ -350,12 +317,6 @@ const resolveDefaultValue = Effect.fn("reverse.resolveDefaultValue")(function* (
   }
 
   if (defaultValue === null) {
-    if (classKey === "Agent" && field.runtimeName === "kind") {
-      return "organization";
-    }
-    if (classKey === "Distribution" && field.runtimeName === "kind") {
-      return "other";
-    }
     return undefined;
   }
 
