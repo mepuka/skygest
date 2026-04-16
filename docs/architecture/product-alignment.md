@@ -35,7 +35,7 @@ The key update in this refresh is that the resolver is no longer hypothetical in
 
 1. **O1 - Enable and inspect the resolver lane in staging.** Turn the lane on, run real posts, and inspect the stored outputs.
 2. **O2 - Single pipeline-health read.** Ask "is the system healthy?" without stitching together five separate endpoints.
-3. **O3 - Quality loop from stored rows to verification.** Compare what production is storing with targeted resolver checks and replay tests.
+3. **O3 - Quality loop from stored rows to verification.** Compare what production is storing with targeted resolver checks, replay tests, and adjacent export validation.
 4. **O4 - Deploy without breaking editorial.** Change shared schemas and know quickly whether the editorial repo still works.
 
 ## 2. The matrix
@@ -70,7 +70,7 @@ Columns use the current subsystem names from `system-context.md`. `Resolution St
 
 Assumption note: `Resolution Stack` is marked `🚧` for the product-facing rows because the runtime is shipped but still quality-limited, and it intentionally stops at provenance-first output for now.
 
-## 3. Three analyses
+## 3. Four analyses
 
 ### (a) What the resolver cutover already changed
 
@@ -108,7 +108,25 @@ The remaining gap is narrower and clearer:
 
 That is a better product situation than before because the missing surface is now concentrated in two explicit tool seams instead of being mixed up with missing runtime plumbing.
 
-### (c) What is justified next, and what should wait
+### (c) What the ontology-store package changed
+
+The ontology-store work matters mainly to operator confidence and future interoperability, not to the reader/editor loop yet.
+
+What it changed already:
+
+1. The repo now has a tested RDF emit, validate, serialize, reload, and distill path over the same snapshot the registry sync consumes.
+2. The mapping rules and SHACL shapes are committed artifacts, not an implied future direction.
+3. `O3` is stronger because resolver verification now sits next to a separate export-validation seam instead of standing alone.
+
+What it did **not** change:
+
+- it did not put RDF or SHACL on the Worker hot path
+- it did not unblock editorial lookup or story projection by itself
+- it did not change the live resolver's provenance-first runtime scope
+
+So this package belongs in the architecture story, but as an adjacent validation/export seam rather than a user-facing runtime capability.
+
+### (d) What is justified next, and what should wait
 
 Two tracks are justified now.
 
@@ -123,16 +141,16 @@ This is the shortest path from "resolver writes good rows" to "editor can actual
 
 **Track 2: resolver quality and registry completeness**
 
-- `SKY-317` (restore real agent-based narrowing)
-- related registry and coverage work such as `SKY-322`, `SKY-323`, `SKY-324`
-- eval-driven kernel follow-ups under the `SKY-314` umbrella
+- follow-on provenance and search-quality work
+- any remaining registry coverage work the live resolver still depends on
+- eventual semantic follow-through once provenance-first output is stable enough to trust
 
 This track is justified because the shipped runtime still has meaningful misses and only covers the provenance half of the problem. The resolver exists; now it needs to become more trustworthy and eventually more semantically capable.
 
 What should wait:
 
 - a revived "runtime Stage 3" story
-- any documentation that implies agent narrowing is already complete
+- any documentation that implies semantic variable/series resolution is already shipped
 - extra editions polish before resolver-backed story files and lookup tools exist
 
 ## 4. What we should build next
@@ -145,15 +163,17 @@ That means `SKY-241`, `SKY-242`, `SKY-243`, and `SKY-244`. Without them, the run
 
 **In parallel, improve the quality of the shipped resolver instead of inventing a new runtime stage.**
 
-That means `SKY-317` plus the registry and coverage follow-ons the eval harness is already pointing at. This is the honest next quality loop.
+That means better provenance coverage, better search quality, and eventually a deliberate semantic-resolution follow-on when the runtime and data plane are ready. This is the honest next quality loop.
 
-**Hold future reranking or workflow escalation behind those two tracks.**
+**Keep ontology-store on the adjacent validation/export track.**
 
-The system already has the right runtime shape. It now needs better data behind that shape and better editorial surfaces on top of it.
+That package now matters to architecture health, but it should stay out of the hot path until there is a concrete product reason to pull it closer.
 
 ## What changed in this refresh
 
 1. The matrix now treats the resolver runtime as shipped, not planned.
 2. The model's structured-gap experience is now counted as real for posts that have run through the lane.
 3. The remaining editor/model blockers are now framed as missing lookup and projection surfaces.
-4. The recommended next work is split into a product-surface track and a quality track.
+4. The snapshot path now matches the repo's actual `.generated/cold-start` flow.
+5. The ontology-store package is now called out as an operator-facing validation/export seam.
+6. The recommended next work stays split between a product-surface track and a runtime-quality track.

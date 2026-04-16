@@ -55,8 +55,9 @@ The highest-risk resolver seam is now the live contract between:
 
 | Seam | Producer -> Consumer | Contract | State | Why it matters |
 |---|---|---|---|---|
-| `references/cold-start/*` | cold-start ingest + reviewed edits -> sync pipeline, tests, local inspection | checked-in JSON entities | stabilizing | Still the audited seed surface for the registry. |
+| `.generated/cold-start/*` | fetch + cold-start ingest -> sync pipeline, tests, local inspection | git-backed snapshot tree | stabilizing | This is the repo-local source that feeds runtime sync and validation. |
 | variable vocabulary constants | domain code -> registry validation and normalization | `src/domain/data-layer/variable-vocabulary.ts` | locked | Small closed lists still matter to the data-layer spine after facet removal. |
+| ontology-store emit/distill seam | snapshot entities -> RDF, SHACL validation, round-trip rebuild | `packages/ontology-store/*`, committed emit spec, committed shapes | stabilizing | This is the new validation/export seam outside the Worker hot path. |
 | `.skygest/cache/*.json` | cache sync CLIs -> build-graph, discussion workflow | editorial cache manifests | locked | Editorial read-side work depends on these local mirrors. |
 | Story and annotation frontmatter | hydrate-story + discussion workflow -> build-graph | `src/domain/narrative/*` | locked at the base level | The core editorial working surface. |
 | `@skygest/domain/*` alias | `skygest-editorial` -> shared Cloudflare Schemas | tsconfig `paths` alias | locked | One broken alias breaks both repos at once. |
@@ -82,11 +83,11 @@ Ordered by current blast radius, highest first.
 
 **3. `ResolvePostResponse` <-> `DataRefResolutionEnrichment`.** This is the seam that just changed under the system. It now defines the live resolver story as `stage1 + resolution`. If the docs, read services, or tool consumers drift from that, architecture confusion returns immediately.
 
-**4. `@skygest/DataLayerRegistry` plus `EntitySearchService`.** Stage 1, bundle resolution, and future lookup tools all depend on these two surfaces. If either drifts, provenance resolution quality drops immediately.
+**4. `DataLayerRegistry` plus `EntitySearchService`.** Stage 1, bundle resolution, and future lookup tools all depend on these two surfaces. If either drifts, provenance resolution quality drops immediately.
 
 **5. `RESOLVER` binding plus `ResolverEntrypoint` RPC.** The resolver is now a real third Worker. This transport seam is cheap to misuse because it looks like a local service call while crossing a Worker boundary.
 
-**6. Checked-in registry plus sync pipeline plus variable vocabulary constants.** This is the source material behind the runtime registry and its surviving normalization rules. Drift here produces quiet resolver quality regressions that look like runtime bugs.
+**6. Snapshot sync plus ontology-store mapping artifacts.** The fetched snapshot, committed emit spec, and committed SHACL shapes now form a secondary but real architecture seam. Drift here produces export and validation surprises that may not show up in the runtime path until much later.
 
 ## Current seam risks
 
@@ -101,6 +102,10 @@ The live runtime deliberately stops at provenance-first output. Agent and datase
 ### 3. Story files still lag the stored runtime state
 
 The resolver row lives in D1 today. The story-file projection of those data refs does not. That is `SKY-242`, followed by the validator warning pass in `SKY-243`.
+
+### 4. The ontology export seam is real, but not yet product-facing
+
+The ontology-store package now has committed mapping rules and round-trip tests, but reader/editor flows do not consume it yet. That means the seam matters for validation and future interoperability before it matters for day-to-day product behavior.
 
 ## Actor exposure
 
@@ -123,7 +128,7 @@ The resolver row lives in D1 today. The story-file projection of those data refs
 
 **Operator**
 
-- Controls the admin API, cache sync, registry sync, search projection rebuilds, and deploys.
+- Controls the admin API, cache sync, registry sync, search projection rebuilds, ontology-store validation, and deploys.
 - Is the person who can compare stored resolver rows against targeted verification and decide whether the current runtime is good enough to lean on.
 
 ## What changed in this refresh
@@ -132,4 +137,6 @@ The resolver row lives in D1 today. The story-file projection of those data refs
 2. The old `stage2` / `stage3` stored-row story was removed because it no longer matches the code.
 3. The facet kernel and generated energy-profile seam were removed from the live architecture story.
 4. The document now treats registry plus search projection as the load-bearing lookup seam.
-5. The document now distinguishes between shipped resolver transport and still-missing editorial lookup/projection seams.
+5. The snapshot path now matches the repo: `.generated/cold-start`, not `references/cold-start`.
+6. The ontology-store package is now called out as a separate validation/export seam adjacent to the runtime.
+7. The document now distinguishes between shipped resolver transport and still-missing editorial lookup/projection seams.

@@ -1,6 +1,6 @@
 # Skygest System Context
 
-This document maps the current top-level subsystems across `skygest-cloudflare` and `skygest-editorial` after the April 15, 2026 provenance-first resolver cleanup. The live resolver path is now `Stage 1 matching -> asset bundle search` inside the standalone `skygest-resolver` Worker. The facet vocabulary, facet kernel, and generated energy-profile runtime are no longer part of the shipped path. Variable and series semantic resolution are future work.
+This document maps the current top-level subsystems across `skygest-cloudflare` and `skygest-editorial` after the April 15-16, 2026 resolver cleanup and ontology-store additions. The live resolver path is now `Stage 1 matching -> asset bundle search` inside the standalone `skygest-resolver` Worker. The facet vocabulary, facet kernel, and generated energy-profile runtime are no longer part of the shipped path. Variable and series semantic resolution are future work.
 
 Effect vocabulary is still load-bearing here: every subsystem name is a Tag, a Workflow class, a Worker name, or a script you can grep for.
 
@@ -33,8 +33,9 @@ graph TD
   subgraph TOOLS[Local Tooling in skygest-cloudflare]
     direction TB
     ColdStart[Cold-start Ingest Toolchain<br/>scripts/cold-start-ingest-*.ts +<br/>src/ingest/dcat-harness]
-    Seed[Checked-in Cold-start Registry<br/>references/cold-start/*]
+    Seed[Git-backed Cold-start Snapshot<br/>.generated/cold-start/*]
     VariableVocab[Variable Vocabulary Constants<br/>src/domain/data-layer/variable-vocabulary.ts]
+    OntologyStore[Ontology Store Package<br/>packages/ontology-store]
   end
 
   subgraph ED[skygest-editorial]
@@ -70,6 +71,7 @@ graph TD
 
   ColdStart -->|filesystem write| Seed
   Seed -->|sync-data-layer CLI| Registry
+  Seed -->|emit + distill validation| OntologyStore
   VariableVocab -.->|closed enum + canonical lists| Registry
 
   MCP -->|D1 row read| Enrich
@@ -96,6 +98,7 @@ graph TD
   Operator -->|HTTPS bearer auth| Api
   Operator -->|bun run| Sync
   Operator -->|bun run| ColdStart
+  Operator -->|bun run test| OntologyStore
   Operator -->|wrangler deploy| IngestWorker
   Operator -->|wrangler deploy| AgentWorker
   Operator -->|wrangler deploy| Resolver
@@ -110,7 +113,7 @@ graph TD
   class IngestWorker,AgentWorker,Ingest,Enrich,Vision,SrcAttr,Resolver,Stage1,Search,Registry,SearchProjection,MCP,Api cf
   class Hydrate,Sync,Caches,BuildGraph,Discussion,Stories,Arcs,Editions ed
   class DomainBridge bridge
-  class ColdStart,Seed,VariableVocab tools
+  class ColdStart,Seed,VariableVocab,OntologyStore tools
   class Reader,Editor,MCPModel,Operator actor
 ```
 
@@ -136,15 +139,17 @@ graph TD
 
 **Bundle Resolution Search** (`src/resolution/bundle/resolveBundle.ts`, `src/resolver/ResolverService.ts`). The authoritative resolver output for the current runtime. It turns each chart asset into an enriched bundle, preserves provenance signals, and resolves agent and dataset candidates through exact URL, hostname, and entity-search lanes. Series and variable arrays are intentionally empty in this slice; semantic resolution is deferred. *Shipped.*
 
-**Data Layer Registry (D1)** (`variables`, `series`, `distributions`, `datasets`, `agents`, `catalogs`, `catalog_records`, `data_services`, `dataset_series`). The runtime source of truth for Stage 1 lookups, exact URL matching, and graph expansion from distribution to dataset and publisher. It is loaded into a prepared lookup contract at Worker cold start and is fed from the checked-in cold-start tree via `scripts/sync-data-layer.ts`. *Shipped.*
+**Data Layer Registry (D1)** (`variables`, `series`, `distributions`, `datasets`, `agents`, `catalogs`, `catalog_records`, `data_services`, `dataset_series`). The runtime source of truth for Stage 1 lookups, exact URL matching, and graph expansion from distribution to dataset and publisher. It is loaded into a prepared lookup contract at Worker cold start and is fed from the git-backed cold-start snapshot via `scripts/sync-data-layer.ts`. *Shipped.*
 
 **Entity Search Projection** (`SEARCH_DB`, `src/search/*`, `src/services/EntitySearchService.ts`). The lexical and typed-search substrate used by bundle resolution after Stage 1. This is now part of the live resolver path for provenance-first search rather than an optional sidecar. *Shipped.*
 
-**Cold-start Ingest Toolchain** (`scripts/cold-start-ingest-*.ts`, `src/ingest/dcat-harness/`). Local Effect scripts that fetch provider catalog surfaces and project them into checked-in Skygest registry data. The shared harness owns merge rules, slug stability, validation, graph construction, and atomic writes. *Shipped.*
+**Cold-start Ingest Toolchain** (`scripts/cold-start-ingest-*.ts`, `src/ingest/dcat-harness/`). Local Effect scripts that fetch provider catalog surfaces and project them into the git-backed snapshot the rest of the repo consumes. The shared harness owns merge rules, slug stability, validation, graph construction, and atomic writes. *Shipped.*
 
-**Checked-in Cold-start Registry** (`references/cold-start/`). Human-reviewed JSON seed state for the data layer. Runtime does not read it directly in production anymore, but it remains the audited source that feeds the D1 registry and local tests. *Shipped.*
+**Git-backed Cold-start Snapshot** (`.generated/cold-start/`, `src/bootstrap/CheckedInDataLayerRegistry.ts`). Fetched catalog snapshot used by sync scripts, tests, and registry preparation. The Worker runtime still does not read it directly in production, but it is the repo-local source that feeds the D1 registry and validation tooling. *Shipped.*
 
 **Variable Vocabulary Constants** (`src/domain/data-layer/variable-vocabulary.ts`, `src/domain/data-layer/variable-enums.ts`). Small closed lists such as statistic types, aggregation families, unit families, and canonical concept names that still matter to registry validation and the data-layer spine. These now live in permanent domain code instead of a generated facet profile. *Shipped.*
+
+**Ontology Store Package** (`packages/ontology-store/`). The RDF export, SHACL validation, and round-trip distill package for data-layer entities. It emits the registry snapshot into RDF, validates against committed shapes, and rebuilds entities back out again. It is not on the Worker hot path, but it is now a real adjacent architecture seam for validation and future ontology interoperability. *Shipped as validation/export tooling.*
 
 **MCP Surface** (`src/mcp/Router.ts`, `src/mcp/Toolkit.ts`). Exposes the tool surface used by the discussion workflow and other operator/editor flows. The data-ref resolution rows are already readable through existing read tools such as `get_post_enrichments`, but the dedicated lookup tools `resolve_data_ref` and `find_candidates_by_data_ref` are still not present. *Shipped, with planned data-ref lookup additions.*
 
@@ -180,7 +185,7 @@ graph TD
 
 **MCP-calling LLM** is the model inside the discussion workflow and other tool-using flows. The tool surface is its API, which is why structured Schema-backed output matters so much.
 
-**Operator** runs the admin API, sync scripts, cold-start ingest scripts, search projection rebuilds, and `wrangler deploy` against the worker configs. The operator is also the person who can turn the resolver lane on in staging and judge whether the stored outputs are trustworthy enough to move forward.
+**Operator** runs the admin API, sync scripts, cold-start ingest scripts, search projection rebuilds, ontology-store validation, and `wrangler deploy` against the worker configs. The operator is also the person who can turn the resolver lane on in staging and judge whether the stored outputs are trustworthy enough to move forward.
 
 ## Key seams
 
@@ -193,7 +198,8 @@ graph TD
 | Resolver -> stored enrichment | Persisted resolver result in `post_enrichments` | `DataRefResolutionEnrichment` in `src/domain/enrichment.ts` with `stage1 + resolution` plus legacy `kernel` read compatibility |
 | Registry lookup contract | D1-backed entity lookups used by Stage 1 and bundle resolution | `src/resolution/dataLayerRegistry.ts` |
 | Search projection contract | Typed search hits used by bundle resolution | `src/domain/entitySearch.ts`, `src/services/EntitySearchService.ts` |
-| Checked-in registry -> D1 registry | Reviewed seed state promoted into runtime tables | `scripts/sync-data-layer.ts`, `src/data-layer/Sync.ts` |
+| Snapshot -> D1 registry | Fetched snapshot promoted into runtime tables | `scripts/sync-data-layer.ts`, `src/data-layer/Sync.ts`, `.generated/cold-start/` |
+| Snapshot -> ontology-store | RDF emit, SHACL validation, and distill over the repo-local snapshot | `packages/ontology-store/*`, `packages/ontology-store/generated/emit-spec.json`, `packages/ontology-store/shapes/dcat-instances.ttl` |
 | Variable vocabulary constants | Shared enum and canonical-name lists used by the data-layer spine | `src/domain/data-layer/variable-vocabulary.ts` |
 | MCP read path | Tool responses consumed by editorial workflows | `src/mcp/Toolkit.ts` plus response Schemas in `src/domain/*` |
 | Editorial cache mirror | Local cached registry manifests | `.skygest/cache/*.json` |
@@ -207,8 +213,9 @@ graph TD
 | Resolver Worker + `RESOLVER` Service Binding / `ResolverEntrypoint` RPC | Shipped |
 | Stage 1 Matching + Bundle Resolution Search | Shipped |
 | Persisted `data-ref-resolution` enrichment row (`stage1 + resolution`, legacy `kernel` rows readable) | Shipped |
-| Data Layer Registry (D1), Checked-in Cold-start Registry, sync pipeline | Shipped |
+| Data Layer Registry (D1), git-backed snapshot, sync pipeline | Shipped |
 | Entity Search projection and typed search lanes | Shipped |
+| Ontology-store RDF round-trip and SHACL validation package | Shipped |
 | Variable/series semantic runtime resolution | Deferred |
 | `resolve_data_ref` / `find_candidates_by_data_ref` MCP tools | Planned (`SKY-241`, `SKY-244`) |
 | hydrate-story `dataRefs` projection | Planned (`SKY-242`) |
@@ -222,5 +229,6 @@ graph TD
 1. The resolver is now described as `stage1 + resolution`, not `stage1 + kernel`.
 2. The facet vocabulary, facet kernel, and generated energy-profile runtime were removed from the live story.
 3. The docs now call out entity search as part of the shipped resolver path.
-4. Variable and series semantic resolution are explicitly marked as deferred follow-on work.
-5. The remaining product gaps are lookup tools, story projection, and build-graph warnings.
+4. The snapshot path now matches the repo: `.generated/cold-start`, not `references/cold-start`.
+5. The ontology-store package is now documented as a shipped validation/export seam adjacent to the runtime.
+6. Variable and series semantic resolution are explicitly marked as deferred follow-on work.

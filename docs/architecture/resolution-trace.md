@@ -22,30 +22,37 @@ This trace describes the shipped contract, not a claim that every post already r
 
 ## Prep loop
 
-### 0A. Provider ingest -> checked-in cold-start registry
+### 0A. Provider ingest -> git-backed cold-start snapshot
 
 - **Component:** `scripts/cold-start-ingest-*.ts` over `src/ingest/dcat-harness/`
 - **Input:** provider catalog or API surfaces
-- **Output:** reviewed JSON entities under `references/cold-start/`
-- **Why it matters:** the resolver only becomes meaningful if the Ember agent, dataset, and distribution already exist in the checked-in registry
+- **Output:** fetched registry snapshot under `.generated/cold-start/`
+- **Why it matters:** the resolver only becomes meaningful if the Ember agent, dataset, and distribution already exist in the repo-local snapshot
 
-This is still the human-reviewed source material behind the runtime registry, even though production no longer reads it directly.
+This is the repo-local source material behind the runtime registry, even though production no longer reads it directly.
 
-### 0B. Checked-in registry -> D1 runtime registry
+### 0B. Snapshot -> D1 runtime registry
 
 - **Component:** `scripts/sync-data-layer.ts`, `src/data-layer/Sync.ts`
-- **Input:** `references/cold-start/`
+- **Input:** `.generated/cold-start/`
 - **Output:** the D1 tables the runtime actually reads
-- **Why it matters:** Stage 1 and bundle resolution now resolve against the D1-backed registry, not the checked-in files directly
+- **Why it matters:** Stage 1 and bundle resolution now resolve against the D1-backed registry, not the snapshot files directly
 
-The runtime registry is the live source of truth. The checked-in tree remains the reviewed seed surface.
+The runtime registry is the live source of truth. The fetched snapshot remains the repo-local seed surface.
 
 ### 0C. D1 registry -> entity search projection
 
 - **Component:** search rebuild scripts plus `SEARCH_DB`
-- **Input:** data-layer entities promoted from the checked-in registry
+- **Input:** data-layer entities promoted from the snapshot
 - **Output:** typed search rows used by the resolver
 - **Why it matters:** after exact URL and hostname wins, the resolver now falls through to typed search instead of facet stitching
+
+### 0D. Snapshot -> ontology-store round-trip validation
+
+- **Component:** `packages/ontology-store/`
+- **Input:** the same `.generated/cold-start/` entity corpus
+- **Output:** RDF emission, SHACL validation, Turtle reload, and distill-back tests
+- **Why it matters:** this is not part of the hot path, but it is now a real adjacent quality loop that checks whether the catalog snapshot can survive the new ontology export seam
 
 ## Runtime path
 
@@ -163,13 +170,15 @@ That is the product gap now. The runtime write path exists; the editorial projec
 
 ### 8. No checked-in snapshot harness
 
-The current quality loop is now targeted resolver and enrichment tests over the live `stage1 + resolution` contract, plus repo-search checks that the deleted facet stack is gone from the live code path.
+The current runtime quality loop is now targeted resolver and enrichment tests over the live `stage1 + resolution` contract, plus repo-search checks that the deleted facet stack is gone from the live code path.
+
+Alongside that, the ontology-store package now adds a separate non-runtime validation loop: emit the snapshot into RDF, validate against SHACL shapes, serialize, reload, and distill back to entities. That loop is about export fidelity and schema drift, not hot-path resolver behavior.
 
 Why this matters for the architecture family:
 
-1. It keeps the docs honest. The resolver is shipped infrastructure, but the old snapshot fixtures are no longer the source of truth.
+1. It keeps the docs honest. The resolver is shipped infrastructure, but the old facet fixtures are no longer the source of truth.
 2. It prevents legacy eval artifacts from defining current requirements.
-3. It leaves the next end-to-end bundle-resolution eval surface to `SKY-343` and its follow-ons.
+3. It makes the new ontology export seam explicit without pretending it is part of the request path.
 
 ## What this trace means now
 
@@ -177,4 +186,5 @@ Why this matters for the architecture family:
 2. The durable resolver contract is now `stage1 + resolution`.
 3. The main product gaps are lookup and projection gaps, not missing runtime plumbing.
 4. The main quality gaps are provenance coverage and registry completeness, not missing facet algebra.
-5. Any future semantic resolution or reranking should be described as follow-on work, not as part of today's runtime path.
+5. The ontology-store package is a real adjacent validation seam, but not part of today's resolver hot path.
+6. Any future semantic resolution or reranking should be described as follow-on work, not as part of today's runtime path.
