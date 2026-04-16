@@ -8,8 +8,6 @@ import {
   type SearchRuntimeEnvBindings
 } from "../platform/Env";
 import { Logging } from "../platform/Logging";
-import { ResolutionKernel } from "../resolution/ResolutionKernel";
-import { FacetVocabulary } from "../resolution/facetVocabulary";
 import { Stage1Resolver } from "../resolution/Stage1Resolver";
 import { makeEntitySearchBaseLayer } from "../search/Layer";
 import {
@@ -43,10 +41,6 @@ export const makeResolverLayer = (env: ResolverWorkerEnvBindings) => {
   const stage1ResolverLayer = Stage1Resolver.layer.pipe(
     Layer.provideMerge(registryLayer)
   );
-  const facetVocabularyLayer = FacetVocabulary.layer;
-  const resolutionKernelLayer = ResolutionKernel.layer.pipe(
-    Layer.provideMerge(Layer.mergeAll(registryLayer, facetVocabularyLayer))
-  );
   const entitySearchRepoLayer =
     env.SEARCH_DB === undefined
       ? emptyEntitySearchRepoLayer
@@ -74,7 +68,6 @@ export const makeResolverLayer = (env: ResolverWorkerEnvBindings) => {
         baseLayer,
         plannerLayer,
         stage1ResolverLayer,
-        resolutionKernelLayer,
         entitySearchServiceLayer
       )
     )
@@ -86,9 +79,7 @@ export const makeResolverLayer = (env: ResolverWorkerEnvBindings) => {
     plannerLayer,
     dataLayerReposLayer,
     registryLayer,
-    facetVocabularyLayer,
     stage1ResolverLayer,
-    resolutionKernelLayer,
     entitySearchRepoLayer,
     entitySearchSemanticRecallLayer,
     entitySearchServiceLayer,

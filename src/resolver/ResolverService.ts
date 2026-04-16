@@ -16,6 +16,7 @@ import {
   ResolveBulkResponse,
   ResolvePostRequest,
   ResolvePostResponse,
+  ResolveSearchCandidatesBundle,
   ResolveSearchCandidatesResponse,
   type ResolveBulkRequest,
   type ResolveBulkResponse as ResolveBulkResponseValue,
@@ -31,13 +32,13 @@ import {
   type EnrichmentExecutionPlan,
   type EnrichmentPlannedExistingEnrichment
 } from "../domain/enrichmentPlan";
+import { type Stage1Input } from "../domain/stage1Resolution";
 import { PostUri } from "../domain/types";
 import { EnrichmentPlanner } from "../enrichment/EnrichmentPlanner";
 import {
   formatSchemaParseError,
   stringifyUnknown
 } from "../platform/Json";
-import { ResolutionKernel } from "../resolution/ResolutionKernel";
 import { buildEnrichedBundles } from "../resolution/bundle/buildEnrichedBundles";
 import { resolveBundle } from "../resolution/bundle/resolveBundle";
 import { Stage1Resolver } from "../resolution/Stage1Resolver";
@@ -45,7 +46,7 @@ import { DataLayerRegistry } from "../services/DataLayerRegistry";
 import { EntitySearchService } from "../services/EntitySearchService";
 import { buildStage1Input } from "./stage1Input";
 
-const RESOLVER_VERSION = "resolution-kernel@sky-314";
+const RESOLVER_VERSION = "bundle-resolution@sky-367";
 
 const selectLatestSourceAttribution = (
   enrichments: ReadonlyArray<EnrichmentPlannedExistingEnrichment>
@@ -112,7 +113,6 @@ export class ResolverService extends ServiceMap.Service<
     Effect.gen(function* () {
       const planner = yield* EnrichmentPlanner;
       const stage1Resolver = yield* Stage1Resolver;
-      const resolutionKernel = yield* ResolutionKernel;
       const registry = yield* DataLayerRegistry;
       const entitySearch = yield* EntitySearchService;
       const decodePostResponse = (input: unknown) =>
@@ -162,6 +162,18 @@ export class ResolverService extends ServiceMap.Service<
               new EnrichmentSchemaDecodeError({
                 message: formatSchemaParseError(decodeError),
                 operation: "ResolverService.searchCandidates"
+              })
+          )
+        );
+      const decodeResolvedAssetBundles = (input: unknown) =>
+        Schema.decodeUnknownEffect(
+          Schema.Array(ResolveSearchCandidatesBundle)
+        )(input).pipe(
+          Effect.mapError(
+            (decodeError) =>
+              new EnrichmentSchemaDecodeError({
+                message: formatSchemaParseError(decodeError),
+                operation: "ResolverService.resolveAssetBundles"
               })
           )
         );
@@ -217,29 +229,28 @@ export class ResolverService extends ServiceMap.Service<
         const stage1StartedAt = yield* Clock.currentTimeMillis;
         const stage1 = yield* stage1Resolver.resolve(stage1Input);
         const stage1FinishedAt = yield* Clock.currentTimeMillis;
-        const kernelStartedAt = yield* Clock.currentTimeMillis;
-        const kernel = yield* resolutionKernel.resolve(stage1Input);
-        const kernelFinishedAt = yield* Clock.currentTimeMillis;
+        const resolutionStartedAt = yield* Clock.currentTimeMillis;
+        const resolution = yield* resolveAssetBundles(stage1Input);
+        const resolutionFinishedAt = yield* Clock.currentTimeMillis;
 
         const finishedAt = yield* Clock.currentTimeMillis;
 
         return yield* decodePostResponse({
           postUri: request.postUri,
           stage1,
-          kernel,
+          resolution,
           resolverVersion: RESOLVER_VERSION,
           latencyMs: {
             stage1: stage1FinishedAt - stage1StartedAt,
-            kernel: kernelFinishedAt - kernelStartedAt,
+            resolution: resolutionFinishedAt - resolutionStartedAt,
             total: finishedAt - startedAt
           }
         });
       });
 
-      const searchCandidates = Effect.fn(
-        "ResolverService.searchCandidates"
-      )(function* (input: ResolvePostRequestValue) {
-        const { stage1Input } = yield* loadValidatedStage1Input(input);
+      const resolveAssetBundles = Effect.fn(
+        "ResolverService.resolveAssetBundles"
+      )(function* (stage1Input: Stage1Input) {
         const bundles = buildEnrichedBundles(stage1Input);
         const results = yield* Effect.forEach(
           bundles,
@@ -251,11 +262,22 @@ export class ResolverService extends ServiceMap.Service<
           { concurrency: "unbounded" }
         );
 
-        return yield* decodeSearchCandidatesResponse({
-          bundles: bundles.map((bundle, index) => ({
+        return yield* decodeResolvedAssetBundles(
+          bundles.map((bundle, index) => ({
             assetKey: bundle.asset.assetKey,
             resolution: results[index]
           }))
+        );
+      });
+
+      const searchCandidates = Effect.fn(
+        "ResolverService.searchCandidates"
+      )(function* (input: ResolvePostRequestValue) {
+        const { stage1Input } = yield* loadValidatedStage1Input(input);
+        const bundles = yield* resolveAssetBundles(stage1Input);
+
+        return yield* decodeSearchCandidatesResponse({
+          bundles
         });
       });
 

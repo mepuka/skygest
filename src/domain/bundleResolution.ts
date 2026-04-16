@@ -1,10 +1,20 @@
 import { Schema } from "effect";
 import { AgentId, DatasetId, SeriesId, VariableId } from "./data-layer/ids";
+import { ChartAssetId } from "./data-layer/post-ids";
 import {
   EntitySearchEntityId,
   EntitySearchMatchKind
 } from "./entitySearch";
-import { ResolutionRung } from "./enrichedBundle";
+
+export const ResolutionRung = Schema.Literals([
+  "Agent",
+  "Dataset",
+  "Series",
+  "Variable"
+]).annotate({
+  description: "The four resolution rungs preserved in bundle-resolution trails"
+});
+export type ResolutionRung = Schema.Schema.Type<typeof ResolutionRung>;
 
 export const BundleResolutionSignalKind = Schema.Literals([
   "source-attribution-provider-label",
@@ -135,3 +145,14 @@ export const BundleResolution = Schema.Struct({
     "Typed bundle-resolution envelope produced from one EnrichedBundle over exact URL/domain lookups and EntitySearch queries"
 });
 export type BundleResolution = Schema.Schema.Type<typeof BundleResolution>;
+
+export const ResolvedAssetBundle = Schema.Struct({
+  assetKey: ChartAssetId,
+  resolution: BundleResolution
+}).annotate({
+  description:
+    "One asset-keyed provenance resolution result produced from a chart bundle"
+});
+export type ResolvedAssetBundle = Schema.Schema.Type<
+  typeof ResolvedAssetBundle
+>;

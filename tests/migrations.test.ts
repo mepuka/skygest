@@ -111,7 +111,11 @@ describe("phase-one migrations", () => {
         { id: 22, name: "data_layer_registry" },
         { id: 23, name: "runtime_variable_profile_alignment" },
         { id: 24, name: "series_dataset_alignment" },
-        { id: 25, name: "data_ref_candidate_citations" }
+        { id: 25, name: "data_ref_candidate_citations" },
+        {
+          id: 26,
+          name: "data_ref_candidate_citation_source_alignment"
+        }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );

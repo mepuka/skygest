@@ -9,6 +9,7 @@
 
 import { Schema, SchemaGetter } from "effect";
 import { FlexibleNumber } from "./bi";
+import { ResolvedAssetBundle } from "./bundleResolution";
 import { ChartAssetId } from "./data-layer/post-ids";
 import { NonNegativeInt, PlatformSchema, PostUri } from "./types";
 import { EnrichmentErrorEnvelope } from "./errors";
@@ -36,7 +37,6 @@ import {
   ResolverVersion
 } from "./resolutionShared";
 import { Stage1Result } from "./stage1Resolution";
-import { ResolutionOutcome } from "./resolutionKernel";
 
 const DeferredStage1Result = Schema.suspend(() => Stage1Result);
 
@@ -273,19 +273,46 @@ export const GroundingEnrichment = Schema.Struct({
 export type GroundingEnrichment = Schema.Schema.Type<typeof GroundingEnrichment>;
 
 // ---------------------------------------------------------------------------
-// Data-ref resolution enrichment (SKY-314: persisted Stage 1 + kernel result)
+// Data-ref resolution enrichment
 // ---------------------------------------------------------------------------
 
-export const DataRefResolutionEnrichment = Schema.Struct({
+export const DataRefResolutionEnrichmentV2 = Schema.Struct({
   kind: Schema.Literal("data-ref-resolution"),
   stage1: DeferredStage1Result,
-  kernel: Schema.Array(ResolutionOutcome),
+  resolution: Schema.Array(ResolvedAssetBundle),
   resolverVersion: ResolverVersion,
   processedAt: Schema.Number
 });
+export type DataRefResolutionEnrichmentV2 = Schema.Schema.Type<
+  typeof DataRefResolutionEnrichmentV2
+>;
+
+export const LegacyDataRefResolutionEnrichment = Schema.Struct({
+  kind: Schema.Literal("data-ref-resolution"),
+  stage1: DeferredStage1Result,
+  kernel: Schema.Array(Schema.Unknown),
+  resolverVersion: ResolverVersion,
+  processedAt: Schema.Number
+});
+export type LegacyDataRefResolutionEnrichment = Schema.Schema.Type<
+  typeof LegacyDataRefResolutionEnrichment
+>;
+
+export const DataRefResolutionEnrichment = Schema.Union([
+  DataRefResolutionEnrichmentV2,
+  LegacyDataRefResolutionEnrichment
+]);
 export type DataRefResolutionEnrichment = Schema.Schema.Type<
   typeof DataRefResolutionEnrichment
 >;
+
+export const isDataRefResolutionEnrichmentV2 = (
+  value: DataRefResolutionEnrichment
+): value is DataRefResolutionEnrichmentV2 => "resolution" in value;
+
+export const isLegacyDataRefResolutionEnrichment = (
+  value: DataRefResolutionEnrichment
+): value is LegacyDataRefResolutionEnrichment => "kernel" in value;
 
 // ---------------------------------------------------------------------------
 // EnrichmentOutput union

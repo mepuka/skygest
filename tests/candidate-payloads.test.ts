@@ -6,6 +6,7 @@ import {
   CandidatePayloadNotPickedError
 } from "../src/domain/candidatePayload";
 import { DataRefResolutionEnrichment } from "../src/domain/enrichment";
+import { chartAssetIdFromBluesky } from "../src/domain/data-layer/post-ids";
 import { runMigrations } from "../src/db/migrate";
 import { CandidatePayloadService } from "../src/services/CandidatePayloadService";
 import { CandidatePayloadRepo } from "../src/services/CandidatePayloadRepo";
@@ -25,17 +26,12 @@ const decodeDataRefResolutionEnrichment = Schema.decodeUnknownSync(
 );
 const dataRefAgentId = "https://id.skygest.io/agent/ag_TESTDATAREF01";
 const dataRefDatasetId = "https://id.skygest.io/dataset/ds_TESTDATAREF01";
-const dataRefVariableId = "https://id.skygest.io/variable/var_TESTDATAREF01";
-const dataRefVariableIdUpdated = "https://id.skygest.io/variable/var_TESTDATAREF02";
 
 const makeDataRefResolutionPayload = (options?: {
   readonly includeDatasetMatch?: boolean;
+  readonly includeResolutionAgent?: boolean;
+  readonly includeResolutionDataset?: boolean;
   readonly agentId?: string;
-  readonly variableId?: string;
-  readonly startDate?: string;
-  readonly endDate?: string;
-  readonly yAxisUnit?: string | null;
-  readonly seriesUnit?: string | null;
 }) =>
   decodeDataRefResolutionEnrichment({
     kind: "data-ref-resolution",
@@ -62,74 +58,46 @@ const makeDataRefResolutionPayload = (options?: {
             ],
       residuals: []
     },
-    kernel: [
+    resolution: [
       {
-        _tag: "Resolved",
-        bundle: {
-          postUri: solarUri,
-          postText: ["Average retail electricity prices rose in Q1 2024."],
-          chartTitle: "Average retail electricity price",
-          xAxis: {
-            label: "Quarter",
-            unit: null
-          },
-          yAxis: {
-            label: "Price",
-            unit: options?.yAxisUnit ?? "USD"
-          },
-          series: [
-            {
-              itemKey: "price",
-              legendLabel: "Retail price",
-              unit: options?.seriesUnit ?? "USD/MWh"
-            }
-          ],
-          keyFindings: [],
-          sourceLines: [],
-          publisherHints: [],
-          temporalCoverage: {
-            startDate: options?.startDate ?? "2024-01",
-            endDate: options?.endDate ?? "2024-03"
-          }
-        },
-        sharedPartial: {
-          measuredProperty: "price",
-          domainObject: "electricity",
-          statisticType: "price",
-          aggregation: "average",
-          unitFamily: "currency_per_energy"
-        },
-        attachedContext: {
-          place: "United States"
-        },
-        items: [
-          {
-            _tag: "bound",
-            itemKey: "price",
-            semanticPartial: {
-              measuredProperty: "price",
-              domainObject: "electricity",
-              statisticType: "price",
-              aggregation: "average",
-              unitFamily: "currency_per_energy"
-            },
-            attachedContext: {
-              place: "United States"
-            },
-            evidence: [
-              {
-                source: "series-label",
-                text: "Retail price",
-                itemKey: "price"
-              }
-            ],
-            variableId: options?.variableId ?? dataRefVariableId,
-            label: "Retail electricity price"
-          }
-        ],
-        agentId: options?.agentId ?? dataRefAgentId,
-        confidence: 0.95,
-        tier: "entailment"
+        assetKey: chartAssetIdFromBluesky(solarUri, "bafkreicandidatepayload"),
+        resolution: {
+          agents:
+            options?.includeResolutionAgent === false
+              ? []
+              : [
+                  {
+                    entityId: options?.agentId ?? dataRefAgentId,
+                    signal: {
+                      kind: "source-attribution-provider-label",
+                      field: "sourceAttribution.provider.providerLabel",
+                      value: "Example Provider"
+                    },
+                    score: null,
+                    scoped: false,
+                    matchKind: "exact-hostname"
+                  }
+                ],
+          datasets:
+            options?.includeResolutionDataset === false
+              ? []
+              : [
+                  {
+                    entityId: dataRefDatasetId,
+                    signal: {
+                      kind: "source-line-dataset-name",
+                      field: "asset.analysis.sourceLines[].datasetName",
+                      value: "Average retail electricity price"
+                    },
+                    score: 0.97,
+                    scoped: true,
+                    matchKind: "lexical"
+                  }
+                ],
+          series: [],
+          variables: [],
+          trail: []
+        }
       }
     ],
     resolverVersion: "test-resolver-v1",
@@ -143,6 +111,46 @@ const makeLayer = () => {
 
   return Layer.mergeAll(baseLayer, repoLayer, serviceLayer);
 };
+
+describe("DataRefResolutionEnrichment schema", () => {
+  it("decodes both new resolution rows and legacy kernel rows", () => {
+    const modern = decodeDataRefResolutionEnrichment({
+      kind: "data-ref-resolution",
+      stage1: {
+        matches: [],
+        residuals: []
+      },
+      resolution: [],
+      resolverVersion: "bundle-resolution@sky-367",
+      processedAt: 1
+    });
+    const legacy = decodeDataRefResolutionEnrichment({
+      kind: "data-ref-resolution",
+      stage1: {
+        matches: [],
+        residuals: []
+      },
+      kernel: [{ _tag: "NoMatch" }],
+      resolverVersion: "resolution-kernel@sky-314",
+      processedAt: 1
+    });
+
+    expect("resolution" in modern).toBe(true);
+    expect("kernel" in legacy).toBe(true);
+  });
+
+  it("encodes new writes using the resolution field only", () => {
+    const encodeDataRefResolutionEnrichment = Schema.encodeSync(
+      DataRefResolutionEnrichment
+    );
+    const encoded = encodeDataRefResolutionEnrichment(
+      makeDataRefResolutionPayload()
+    );
+
+    expect("resolution" in encoded).toBe(true);
+    expect("kernel" in encoded).toBe(false);
+  });
+});
 
 describe("payload storage migrations", () => {
   it.live("creates post_payloads and post_enrichments with the expected primary keys", () =>
@@ -484,22 +492,10 @@ describe("CandidatePayloadRepoD1", () => {
       expect(rows).toEqual([
         {
           entityId: dataRefAgentId,
-          citationSource: "kernel",
+          citationSource: "resolution",
           citationKey:
-            `kernel\u0000resolved\u0000${dataRefAgentId}\u00002024-01\u00002024-03\u0000`,
+            `resolution\u0000resolved\u0000${dataRefAgentId}\u0000\u0000\u0000`,
           resolutionState: "resolved",
-          assertedUnit: null,
-          observationStart: "2024-01",
-          observationEnd: "2024-03",
-          observationSortKey: "2024-03",
-          hasObservationTime: 1
-        },
-        {
-          entityId: dataRefDatasetId,
-          citationSource: "stage1",
-          citationKey:
-            `stage1\u0000source_only\u0000${dataRefDatasetId}\u0000\u0000\u0000`,
-          resolutionState: "source_only",
           assertedUnit: null,
           observationStart: null,
           observationEnd: null,
@@ -507,16 +503,16 @@ describe("CandidatePayloadRepoD1", () => {
           hasObservationTime: 0
         },
         {
-          entityId: dataRefVariableId,
-          citationSource: "kernel",
+          entityId: dataRefDatasetId,
+          citationSource: "resolution",
           citationKey:
-            `kernel\u0000resolved\u0000${dataRefVariableId}\u00002024-01\u00002024-03\u0000`,
+            `resolution\u0000resolved\u0000${dataRefDatasetId}\u0000\u0000\u0000`,
           resolutionState: "resolved",
-          assertedUnit: "USD/MWh",
-          observationStart: "2024-01",
-          observationEnd: "2024-03",
-          observationSortKey: "2024-03",
-          hasObservationTime: 1
+          assertedUnit: null,
+          observationStart: null,
+          observationEnd: null,
+          observationSortKey: "",
+          hasObservationTime: 0
         }
       ]);
     }).pipe(Effect.provide(makeLayer()))
@@ -559,9 +555,7 @@ describe("CandidatePayloadRepoD1", () => {
           enrichmentType: "data-ref-resolution",
           enrichmentPayload: makeDataRefResolutionPayload({
             includeDatasetMatch: false,
-            variableId: dataRefVariableIdUpdated,
-            endDate: "2024-06",
-            seriesUnit: "cents/kWh"
+            includeResolutionDataset: false
           })
         },
         70,
@@ -587,15 +581,9 @@ describe("CandidatePayloadRepoD1", () => {
       expect(rows).toEqual([
         {
           entityId: dataRefAgentId,
-          citationSource: "kernel",
+          citationSource: "resolution",
           assertedUnit: null,
-          observationSortKey: "2024-06"
-        },
-        {
-          entityId: dataRefVariableIdUpdated,
-          citationSource: "kernel",
-          assertedUnit: "cents/kWh",
-          observationSortKey: "2024-06"
+          observationSortKey: ""
         }
       ]);
     }).pipe(Effect.provide(makeLayer()))

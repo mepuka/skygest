@@ -1,4 +1,4 @@
-import { Effect, Layer } from "effect";
+import { Chunk, Effect, Layer, Option } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import type { SourceAttributionEnrichment } from "../src/domain/enrichment";
 import type { EnrichmentExecutionPlan } from "../src/domain/enrichmentPlan";
@@ -6,13 +6,12 @@ import {
   EnrichmentSchemaDecodeError,
   ResolverSourceAttributionMissingError
 } from "../src/domain/errors";
-import type { ResolutionOutcome } from "../src/domain/resolutionKernel";
+import { chartAssetIdFromBluesky } from "../src/domain/data-layer/post-ids";
 import type { ResolveBulkRequest, ResolvePostRequest } from "../src/domain/resolution";
 import type { Stage1Input, Stage1Result } from "../src/domain/stage1Resolution";
 import type { PostUri } from "../src/domain/types";
 import { EnrichmentPlanner } from "../src/enrichment/EnrichmentPlanner";
 import { CloudflareEnv, type EnvBindings } from "../src/platform/Env";
-import { ResolutionKernel } from "../src/resolution/ResolutionKernel";
 import { Stage1Resolver } from "../src/resolution/Stage1Resolver";
 import { ResolverService } from "../src/resolver/ResolverService";
 import { DataLayerRegistry } from "../src/services/DataLayerRegistry";
@@ -74,26 +73,81 @@ const makeStage1Input = (
   sourceAttribution: makeSourceAttribution(10)
 });
 
+const makeStage1InputWithVision = (
+  postUri = "at://did:plc:test/app.bsky.feed.post/post-1"
+): Stage1Input => {
+  const typedPostUri = asPostUri(postUri);
+
+  return {
+    ...makeStage1Input(postUri),
+    vision: {
+      kind: "vision",
+      summary: {
+        text: "Example chart",
+        mediaTypes: ["chart"],
+        chartTypes: ["line-chart"],
+        titles: ["Example dataset"],
+        keyFindings: []
+      },
+      assets: [
+        {
+          assetKey: chartAssetIdFromBluesky(
+            typedPostUri,
+            "bafkreiresolverserviceasset"
+          ),
+          assetType: "image",
+          source: "embed",
+          index: 0,
+          originalAltText: null,
+          extractionRoute: "full",
+          analysis: {
+            mediaType: "chart",
+            chartTypes: ["line-chart"],
+            altText: "Example chart",
+            altTextProvenance: "synthetic",
+            xAxis: {
+              label: "Month",
+              unit: null
+            },
+            yAxis: {
+              label: "Load",
+              unit: "MWh"
+            },
+            series: [
+              {
+                legendLabel: "Load",
+                unit: "MWh"
+              }
+            ],
+            sourceLines: [
+              {
+                sourceText: "Source: Example Provider",
+                datasetName: "Example dataset"
+              }
+            ],
+            temporalCoverage: null,
+            keyFindings: [],
+            visibleUrls: [],
+            organizationMentions: [],
+            logoText: ["Example Provider"],
+            title: "Example dataset",
+            modelId: "gemini-test",
+            processedAt: 10
+          }
+        }
+      ],
+      modelId: "gemini-test",
+      promptVersion: "v2",
+      processedAt: 10
+    }
+  };
+};
+
 const makeStage1Result = (
   residuals: Stage1Result["residuals"] = []
 ): Stage1Result => ({
   matches: [],
   residuals
-});
-
-const makeKernelOutcome = (
-  postUri = "at://did:plc:test/app.bsky.feed.post/post-1"
-): ResolutionOutcome => ({
-  _tag: "NoMatch",
-  bundle: {
-    postUri: asPostUri(postUri),
-    postText: ["Stored post text"],
-    series: [],
-    keyFindings: [],
-    sourceLines: [],
-    publisherHints: []
-  },
-  reason: "no checked-in registry match"
 });
 
 const makeEnv = (): EnvBindings => ({
@@ -125,9 +179,12 @@ const makeEntitySearchBundleCandidates = () => ({
 const makeServiceLayer = (options?: {
   readonly plan?: EnrichmentExecutionPlan;
   readonly resolveStage1?: (input: Stage1Input) => Effect.Effect<Stage1Result>;
-  readonly resolveKernel?: (
-    input: Stage1Input
-  ) => Effect.Effect<ReadonlyArray<ResolutionOutcome>>;
+  readonly searchAgents?: (
+    input: unknown
+  ) => Effect.Effect<ReadonlyArray<any>>;
+  readonly searchDatasets?: (
+    input: unknown
+  ) => Effect.Effect<ReadonlyArray<any>>;
 }) =>
   ResolverService.layer.pipe(
     Layer.provideMerge(
@@ -143,22 +200,35 @@ const makeServiceLayer = (options?: {
         }),
         Layer.succeed(DataLayerRegistry, {
           prepared: {} as never,
-          lookup: {} as never
-        }),
-        Layer.succeed(ResolutionKernel, {
-          resolve: (input) =>
-            options?.resolveKernel?.(input as Stage1Input) ??
-            Effect.succeed([makeKernelOutcome()])
+          lookup: {
+            entities: Chunk.empty(),
+            findByCanonicalUri: () => Option.none(),
+            findAgentByLabel: () => Option.none(),
+            findAgentByHomepageDomain: () => Option.none(),
+            findDatasetByTitle: () => Option.none(),
+            findDatasetByAlias: () => Option.none(),
+            findDatasetsByAgentId: () => Chunk.empty(),
+            findDatasetsByVariableId: () => Chunk.empty(),
+            findVariablesByAgentId: () => Chunk.empty(),
+            findVariablesByDatasetId: () => Chunk.empty(),
+            findDistributionByUrl: () => Option.none(),
+            findDatasetByLandingPage: () => Option.none(),
+            findDistributionsByHostname: () => Chunk.empty(),
+            findDistributionsByUrlPrefix: () => Chunk.empty(),
+            findVariableByAlias: () => Option.none()
+          } as never
         }),
         Layer.succeed(EntitySearchService, {
           search: () => Effect.succeed([]),
-          searchAgents: () => Effect.succeed([]),
-          searchDatasets: () => Effect.succeed([]),
+          searchAgents: (input) =>
+            options?.searchAgents?.(input) ?? Effect.succeed([]),
+          searchDatasets: (input) =>
+            options?.searchDatasets?.(input) ?? Effect.succeed([]),
           searchDistributions: () => Effect.succeed([]),
           searchSeries: () => Effect.succeed([]),
           searchVariables: () => Effect.succeed([]),
           searchBundleCandidates: () =>
-            Effect.succeed(makeEntitySearchBundleCandidates())
+            Effect.succeed(makeEntitySearchBundleCandidates() as any)
         })
       )
     )
@@ -194,7 +264,7 @@ describe("ResolverService", () => {
         });
 
         expect(result.stage1.matches).toEqual([]);
-        expect(result.kernel[0]?._tag).toBe("NoMatch");
+        expect(result.resolution).toEqual([]);
         expect(resolvedInputs).toHaveLength(1);
         expect(resolvedInputs[0]?.sourceAttribution?.processedAt).toBe(30);
         expect(resolvedInputs[0]?.postContext.postUri).toBe(
@@ -228,20 +298,56 @@ describe("ResolverService", () => {
     })()
   );
 
-  it.effect("returns kernel outcomes and kernel latency in the live response", () =>
+  it.effect("routes resolvePost and searchCandidates through the same bundle-resolution seam", () =>
     Effect.gen(function* () {
       const service = yield* ResolverService;
-      const result = yield* service.resolvePost({
+      const input = {
         postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
-        stage1Input: makeStage1Input()
-      });
+        stage1Input: makeStage1InputWithVision()
+      } satisfies ResolvePostRequest;
 
-      expect(result.kernel).toEqual([makeKernelOutcome()]);
-      expect(result.latencyMs.kernel).toBeGreaterThanOrEqual(0);
+      const postResult = yield* service.resolvePost(input);
+      const searchResult = yield* service.searchCandidates(input);
+
+      expect(postResult.resolution).toEqual(searchResult.bundles);
+      expect(postResult.resolution[0]?.resolution.agents[0]?.entityId).toBe(
+        "https://id.skygest.io/agent/ag_TESTDATAREF01"
+      );
+      expect(postResult.resolution[0]?.resolution.datasets[0]?.entityId).toBe(
+        "https://id.skygest.io/dataset/ds_TESTDATAREF01"
+      );
+      expect(postResult.latencyMs.resolution).toBeGreaterThanOrEqual(0);
     }).pipe(
       Effect.provide(
         makeServiceLayer({
-          resolveKernel: () => Effect.succeed([makeKernelOutcome()])
+          searchAgents: () =>
+            Effect.succeed([
+              {
+                document: {
+                  entityId: "https://id.skygest.io/agent/ag_TESTDATAREF01",
+                  entityType: "Agent",
+                  primaryLabel: "Example Provider"
+                },
+                score: 0.97,
+                rank: 1,
+                matchKind: "lexical",
+                snippet: null
+              } as any
+            ]),
+          searchDatasets: () =>
+            Effect.succeed([
+              {
+                document: {
+                  entityId: "https://id.skygest.io/dataset/ds_TESTDATAREF01",
+                  entityType: "Dataset",
+                  primaryLabel: "Example dataset"
+                },
+                score: 0.91,
+                rank: 1,
+                matchKind: "lexical",
+                snippet: null
+              } as any
+            ])
         })
       )
     )

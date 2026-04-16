@@ -2,20 +2,22 @@ import { Effect, Schema } from "effect";
 import { describe, expect, it } from "@effect/vitest";
 import { ResolverClient, RESOLVER_REQUEST_ID_HEADER } from "../src/resolver/Client";
 import { ResolverClientError } from "../src/domain/errors";
+import { chartAssetIdFromBluesky } from "../src/domain/data-layer/post-ids";
 import { PostUri } from "../src/domain/types";
 
 const asPostUri = Schema.decodeUnknownSync(PostUri);
-const makeKernelOutcome = (postUri: string) => ({
-  _tag: "NoMatch" as const,
-  bundle: {
-    postUri,
-    postText: ["ERCOT annual load"],
+const makeResolvedAssetBundle = (postUri: string) => ({
+  assetKey: chartAssetIdFromBluesky(
+    asPostUri(postUri),
+    "bafkreiresolverclientasset"
+  ),
+  resolution: {
+    agents: [],
+    datasets: [],
     series: [],
-    keyFindings: [],
-    sourceLines: [],
-    publisherHints: []
-  },
-  reason: "no checked-in registry match"
+    variables: [],
+    trail: []
+  }
 });
 
 describe("ResolverClient", () => {
@@ -29,20 +31,22 @@ describe("ResolverClient", () => {
       ) => {
         capturedInput = input;
         capturedOptions = options;
-      return {
-        ok: true as const,
-        value: {
-          postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
-          stage1: {
-            matches: [],
-            residuals: []
-          },
-          kernel: [makeKernelOutcome("at://did:plc:abc/app.bsky.feed.post/xyz")],
-          resolverVersion: "resolution-kernel@sky-314",
-          latencyMs: {
-            stage1: 2,
-            kernel: 1,
-            total: 3
+        return {
+          ok: true as const,
+          value: {
+            postUri: "at://did:plc:abc/app.bsky.feed.post/xyz",
+            stage1: {
+              matches: [],
+              residuals: []
+            },
+            resolution: [
+              makeResolvedAssetBundle("at://did:plc:abc/app.bsky.feed.post/xyz")
+            ],
+            resolverVersion: "bundle-resolution@sky-367",
+            latencyMs: {
+              stage1: 2,
+              resolution: 1,
+              total: 3
             }
           }
         };
@@ -64,10 +68,10 @@ describe("ResolverClient", () => {
         }
       );
 
-      expect(result.resolverVersion).toBe("resolution-kernel@sky-314");
+      expect(result.resolverVersion).toBe("bundle-resolution@sky-367");
       expect(result.stage1.matches).toEqual([]);
-      expect(result.kernel).toHaveLength(1);
-      expect(result.kernel[0]?._tag).toBe("NoMatch");
+      expect(result.resolution).toHaveLength(1);
+      expect(result.resolution[0]?.resolution.datasets).toEqual([]);
       expect(capturedOptions).toEqual({
         requestId: "req-123",
         [RESOLVER_REQUEST_ID_HEADER]: "req-123"
@@ -90,15 +94,15 @@ describe("ResolverClient", () => {
                 matches: [],
                 residuals: []
               },
-              kernel: [
-                makeKernelOutcome(
+              resolution: [
+                makeResolvedAssetBundle(
                   "at://did:plc:abc/app.bsky.feed.post/xyz"
                 )
               ],
-              resolverVersion: "resolution-kernel@sky-314",
+              resolverVersion: "bundle-resolution@sky-367",
               latencyMs: {
                 stage1: 2,
-                kernel: 1,
+                resolution: 1,
                 total: 3
               }
             }

@@ -1,17 +1,52 @@
-import { Option } from "effect";
+import { Option, Schema } from "effect";
 import {
   AliasSchemeValues,
+  AliasScheme as AliasSchemeSchema,
   aliasSchemes,
   type AliasScheme
 } from "../domain/data-layer/alias";
-import type { Agent, Dataset } from "../domain/data-layer";
+import { Dataset, type Agent, type Dataset as DatasetValue } from "../domain/data-layer";
 import type { AgentId } from "../domain/data-layer/ids";
 import type { VisionAssetEnrichment } from "../domain/enrichment";
-import type { DatasetNameMatch } from "../domain/resolutionKernel";
 import type { Stage1Input } from "../domain/stage1Resolution";
 import type { DataLayerRegistryLookup } from "./dataLayerRegistry";
 import { jaccardTokenSet } from "./fuzzyMatch";
 import { extractStructuredIdentifierCandidates } from "./normalize";
+
+export const DatasetTitleExactMatch = Schema.TaggedStruct(
+  "DatasetTitleExactMatch",
+  {
+    dataset: Dataset
+  }
+);
+export type DatasetTitleExactMatch = Schema.Schema.Type<
+  typeof DatasetTitleExactMatch
+>;
+
+export const DatasetTitleFuzzyMatch = Schema.TaggedStruct(
+  "DatasetTitleFuzzyMatch",
+  {
+    dataset: Dataset,
+    score: Schema.Number
+  }
+);
+export type DatasetTitleFuzzyMatch = Schema.Schema.Type<
+  typeof DatasetTitleFuzzyMatch
+>;
+
+export const DatasetAliasMatch = Schema.TaggedStruct("DatasetAliasMatch", {
+  dataset: Dataset,
+  aliasScheme: AliasSchemeSchema,
+  aliasValue: Schema.String
+});
+export type DatasetAliasMatch = Schema.Schema.Type<typeof DatasetAliasMatch>;
+
+export const DatasetNameMatch = Schema.Union([
+  DatasetTitleExactMatch,
+  DatasetTitleFuzzyMatch,
+  DatasetAliasMatch
+]);
+export type DatasetNameMatch = Schema.Schema.Type<typeof DatasetNameMatch>;
 
 const structuredAliasSchemes = aliasSchemes.filter(
   (scheme): scheme is AliasScheme =>
@@ -85,16 +120,16 @@ const listStructuredAliasCandidates = (
 
 const listAllDatasets = (
   lookup: DataLayerRegistryLookup
-): ReadonlyArray<Dataset> =>
+): ReadonlyArray<DatasetValue> =>
   Array.from(lookup.entities).flatMap((entity) =>
     entity._tag === "Dataset" ? [entity] : []
   );
 
 const dedupeDatasets = (
-  datasets: ReadonlyArray<Dataset>
-): ReadonlyArray<Dataset> => {
-  const seen = new Set<Dataset["id"]>();
-  const deduped: Array<Dataset> = [];
+  datasets: ReadonlyArray<DatasetValue>
+): ReadonlyArray<DatasetValue> => {
+  const seen = new Set<DatasetValue["id"]>();
+  const deduped: Array<DatasetValue> = [];
 
   for (const dataset of datasets) {
     if (seen.has(dataset.id)) {

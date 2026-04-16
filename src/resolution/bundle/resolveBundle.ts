@@ -4,9 +4,10 @@ import type {
   SearchLimit,
   EntitySearchHit as EntitySearchHitValue
 } from "../../domain/entitySearch";
-import type { EnrichedBundle, ResolutionRung } from "../../domain/enrichedBundle";
+import type { EnrichedBundle } from "../../domain/enrichedBundle";
 import {
   BundleResolution as BundleResolutionSchema,
+  ResolutionRung,
   type BundleResolution,
   type BundleResolutionSignal,
   type BundleResolutionSignalKind,
@@ -318,54 +319,6 @@ const collectDatasetExactUrlQueries = (
   return values;
 };
 
-const collectVariablePlaceholderQueries = (
-  bundle: EnrichedBundle
-): ReadonlyArray<TextSignalQuery> => {
-  const values: Array<TextSignalQuery> = [];
-  const seen = new Set<string>();
-
-  for (const series of bundle.asset.analysis.series) {
-    pushTextSignal(
-      values,
-      seen,
-      "series-legend-label",
-      "asset.analysis.series[].legendLabel",
-      series.legendLabel
-    );
-  }
-
-  pushTextSignal(
-    values,
-    seen,
-    "axis-label",
-    "asset.analysis.xAxis.label",
-    bundle.asset.analysis.xAxis?.label
-  );
-  pushTextSignal(
-    values,
-    seen,
-    "axis-unit",
-    "asset.analysis.xAxis.unit",
-    bundle.asset.analysis.xAxis?.unit
-  );
-  pushTextSignal(
-    values,
-    seen,
-    "axis-label",
-    "asset.analysis.yAxis.label",
-    bundle.asset.analysis.yAxis?.label
-  );
-  pushTextSignal(
-    values,
-    seen,
-    "axis-unit",
-    "asset.analysis.yAxis.unit",
-    bundle.asset.analysis.yAxis?.unit
-  );
-
-  return values;
-};
-
 const makeTrailEntry = (
   input: BundleResolutionTrailEntry
 ): BundleResolutionTrailEntry => input;
@@ -403,21 +356,6 @@ const pushResolvedDataset = (
   seen.add(input.entityId);
   datasets.push(input);
 };
-
-const makeNotImplementedEntry = (
-  rung: Extract<ResolutionRung, "Series" | "Variable">,
-  note: string
-): BundleResolutionTrailEntry =>
-  makeTrailEntry({
-    rung,
-    signal: makeSignal("not-implemented", "(unimplemented)", rung),
-    lane: "not-implemented",
-    query: null,
-    scoped: false,
-    scopeAgentIds: [],
-    hits: [],
-    note
-  });
 
 export const resolveBundle = Effect.fn("resolveBundle")(function* (
   bundle: EnrichedBundle,
@@ -593,39 +531,6 @@ export const resolveBundle = Effect.fn("resolveBundle")(function* (
           matchKind: hit.matchKind
         });
       }
-    }
-  }
-
-  trail.push(
-    makeNotImplementedEntry(
-      "Series",
-      "Series search will be wired in the next SKY-343 slice once the agent/dataset envelope is proven."
-    )
-  );
-
-  const variablePlaceholderQueries = collectVariablePlaceholderQueries(bundle);
-  if (variablePlaceholderQueries.length === 0) {
-    trail.push(
-      makeNotImplementedEntry(
-        "Variable",
-        "Variable search stays deferred in this initial SKY-343 slice."
-      )
-    );
-  } else {
-    for (const probe of variablePlaceholderQueries) {
-      trail.push(
-        makeTrailEntry({
-          rung: "Variable",
-          signal: probe.signal,
-          lane: "not-implemented",
-          query: probe.query,
-          scoped: false,
-          scopeAgentIds: [],
-          hits: [],
-          note:
-            "variable query derived and recorded, but variable search stays deferred in this SKY-343 slice"
-        })
-      );
     }
   }
 

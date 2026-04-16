@@ -437,7 +437,7 @@ export class EnrichmentRunWorkflow extends WorkflowEntrypoint<
             Schema.decodeUnknownEffect(DataRefResolutionEnrichment)({
               kind: "data-ref-resolution",
               stage1: resolverResponse.stage1,
-              kernel: resolverResponse.kernel,
+              resolution: resolverResponse.resolution,
               resolverVersion: resolverResponse.resolverVersion,
               processedAt: resolverWrittenAt
             }).pipe(

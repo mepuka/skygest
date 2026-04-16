@@ -3,7 +3,7 @@ import {
   AggregationMembers,
   StatisticTypeMembers,
   UnitFamilyMembers
-} from "../generated/energyVariableProfile";
+} from "./variable-vocabulary";
 
 export const StatisticType = Schema.Literals(StatisticTypeMembers).annotate({
   description: "Statistical measure type (SDMX-aligned)"

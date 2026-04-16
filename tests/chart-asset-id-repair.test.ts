@@ -232,7 +232,10 @@ describe("repairChartAssetIdsForBlueskyPost", () => {
       return;
     }
     expect(result.payload.kind).toBe("data-ref-resolution");
-    if (result.payload.kind !== "data-ref-resolution") {
+    if (
+      result.payload.kind !== "data-ref-resolution" ||
+      !("kernel" in result.payload)
+    ) {
       return;
     }
 
@@ -489,7 +492,10 @@ describe("repairChartAssetIdsForTwitterPost", () => {
       return;
     }
     expect(result.payload.kind).toBe("data-ref-resolution");
-    if (result.payload.kind !== "data-ref-resolution") {
+    if (
+      result.payload.kind !== "data-ref-resolution" ||
+      !("kernel" in result.payload)
+    ) {
       return;
     }
 

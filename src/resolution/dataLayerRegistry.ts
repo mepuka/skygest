@@ -33,7 +33,7 @@ import {
   StatisticTypeMembers,
   TechnologyOrFuelCanonicals,
   UnitFamilyMembers,
-} from "../domain/generated/energyVariableProfile";
+} from "../domain/data-layer/variable-vocabulary";
 import {
   buildUrlPrefixes,
   normalizeAliasLookupValue,
