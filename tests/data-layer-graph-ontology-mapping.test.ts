@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { type DataLayerGraphEdgeKind } from "../src/domain/data-layer/graph";
 import { dataLayerGraphEdgeOntologyMapping } from "../src/domain/data-layer/graph-ontology-mapping";
@@ -22,14 +22,19 @@ const ontologyRoot = resolve(
   process.cwd(),
   "../ontology_skill/ontologies/skygest-energy-vocab",
 );
-const ontologyDeclarationCorpus = [
-  readFileSync(join(ontologyRoot, "skygest-energy-vocab.ttl"), "utf8"),
-  ...readdirSync(join(ontologyRoot, "imports")).map((filename) =>
-    readFileSync(join(ontologyRoot, "imports", filename), "utf8"),
-  ),
-].join("\n");
+const ontologyAvailable = existsSync(ontologyRoot);
+const ontologyDeclarationCorpus = ontologyAvailable
+  ? [
+      readFileSync(join(ontologyRoot, "skygest-energy-vocab.ttl"), "utf8"),
+      ...readdirSync(join(ontologyRoot, "imports")).map((filename) =>
+        readFileSync(join(ontologyRoot, "imports", filename), "utf8"),
+      ),
+    ].join("\n")
+  : "";
 
-describe("data-layer graph ontology mapping", () => {
+describe.skipIf(!ontologyAvailable)(
+  "data-layer graph ontology mapping — requires ../ontology_skill sibling checkout",
+  () => {
   it("covers every runtime edge kind", () => {
     expect(Object.keys(dataLayerGraphEdgeOntologyMapping).sort()).toEqual(
       [...expectedEdgeKinds].sort(),
