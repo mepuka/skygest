@@ -1,4 +1,9 @@
+import type { FileSystem } from "effect/FileSystem";
+import type { Path } from "effect/Path";
+import type { Stdio } from "effect/Stdio";
+import type { Terminal } from "effect/Terminal";
 import { Argument, Command, Flag } from "effect/unstable/cli";
+import type { ChildProcessSpawner } from "effect/unstable/process/ChildProcessSpawner";
 import { Console, Effect, Layer, Option, Redacted, Stream } from "effect";
 import { FetchHttpClient } from "effect/unstable/http";
 import { BlueskyClient, makeBlueskyClient } from "../bluesky/BlueskyClient";
@@ -854,7 +859,19 @@ export const opsCommand = Command.make("ops", {}, () => Effect.void).pipe(
   Command.withSubcommands([deployCommand, stageCommand, ingestUrlCommand])
 );
 
-export const runOpsCli = (argv: ReadonlyArray<string>): Effect.Effect<void, any, any> =>
+type OpsCliEnv =
+  | ChildProcessSpawner
+  | FileSystem
+  | Path
+  | Stdio
+  | Terminal
+  | OperatorSecret
+  | StagingOperatorClient
+  | WranglerCli;
+
+export const runOpsCli = (
+  argv: ReadonlyArray<string>
+): Effect.Effect<void, unknown, OpsCliEnv> =>
   Effect.suspend(() =>
     Effect.promise(getOpsCommand).pipe(
       Effect.flatMap((cmd) =>
