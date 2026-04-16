@@ -6,7 +6,7 @@ This document maps actor-facing experiences to the subsystems and seams they dep
 - `resolution-trace.md` for the one-post walkthrough
 - `seams.md` for the seam inventory
 
-The key update in this refresh is that the resolver is no longer hypothetical infrastructure. The runtime write path is shipped. The remaining product question is how quickly that shipped runtime becomes usable in the editorial loop.
+The key update in this refresh is that the resolver is no longer hypothetical infrastructure. The runtime write path is shipped, and it is now simpler: Stage 1 plus provenance-first asset resolution. The remaining product question is how quickly that shipped runtime becomes usable in the editorial loop.
 
 ## 1. Actors and their core experiences
 
@@ -28,14 +28,14 @@ The key update in this refresh is that the resolver is no longer hypothetical in
 
 1. **M1 - Resolve a single data ref.** Takes a URI or hint and returns one typed registry entity it can reason over.
 2. **M2 - Cross-expert join as a tool.** Looks up the set of posts that cite the same underlying data reference.
-3. **M3 - Inspect structured kernel gaps for a post.** Reads a post's resolver outcome and can tell whether the system found a match, preserved an ambiguity, or fell out of the registry.
+3. **M3 - Inspect structured resolution gaps for a post.** Reads a post's resolver outcome and can tell whether the system found a match, preserved an ambiguity, or stopped at a provenance-only result.
 4. **M4 - Rich post context in one call.** Pulls the post, enrichments, resolver row, and editorial state without repeated round-trips.
 
 ### Operator
 
 1. **O1 - Enable and inspect the resolver lane in staging.** Turn the lane on, run real posts, and inspect the stored outputs.
 2. **O2 - Single pipeline-health read.** Ask "is the system healthy?" without stitching together five separate endpoints.
-3. **O3 - Quality loop from stored rows to eval harness.** Compare what production is storing with what the kernel eval harness says should happen.
+3. **O3 - Quality loop from stored rows to verification.** Compare what production is storing with targeted resolver checks and replay tests.
 4. **O4 - Deploy without breaking editorial.** Change shared schemas and know quickly whether the editorial repo still works.
 
 ## 2. The matrix
@@ -47,9 +47,9 @@ Legend:
 - `📋` planned blocker
 - `⚪` not required
 
-Columns use the current subsystem names from `system-context.md`. `Resolution Stack` means Stage 1 matching plus the kernel inside `skygest-resolver`. `Stored Row` means `post_enrichments(kind = data-ref-resolution)`. `Kernel Eval` is operator-only and is not part of the reader/editor runtime path.
+Columns use the current subsystem names from `system-context.md`. `Resolution Stack` means Stage 1 matching plus provenance-first bundle search inside `skygest-resolver`. `Stored Row` means `post_enrichments(kind = data-ref-resolution)`. `Resolver QA` is operator-only and is not part of the reader/editor runtime path.
 
-| # | Experience | Ingest | Vision | Source | Resolver | Resolution Stack | Registry | Stored Row | Kernel Eval | MCP | HTTP | Caches | hydrate-story | Discussion | Story Files | build-graph | Editions |
+| # | Experience | Ingest | Vision | Source | Resolver | Resolution Stack | Registry | Stored Row | Resolver QA | MCP | HTTP | Caches | hydrate-story | Discussion | Story Files | build-graph | Editions |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | R1 | Headline names the question | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ✅ | 🚧 |
 | R2 | Chart with provenance | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ✅ | 🚧 |
@@ -61,14 +61,14 @@ Columns use the current subsystem names from `system-context.md`. `Resolution St
 | E4 | Arc evolution against a novel frame | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ⚪ |
 | M1 | Resolve a single data ref | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ⚪ | ⚪ | 📋 SKY-241 | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
 | M2 | Cross-expert join as a tool | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ⚪ | 📋 SKY-244 | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
-| M3 | Inspect structured kernel gaps for a post | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ✅ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
+| M3 | Inspect structured resolution gaps for a post | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ✅ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
 | M4 | Rich post context in one call | ✅ | ✅ | ✅ | ✅ | ✅ | ⚪ | ✅ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ |
 | O1 | Enable and inspect the resolver lane in staging | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
 | O2 | Single pipeline-health read | ✅ | ✅ | ✅ | ✅ | 🚧 | ⚪ | ✅ | ⚪ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
-| O3 | Quality loop from stored rows to eval harness | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
+| O3 | Quality loop from stored rows to verification | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
 | O4 | Deploy without breaking editorial | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ⚪ | ✅ | ✅ | ⚪ |
 
-Assumption note: `Resolution Stack` is marked `🚧` for the product-facing rows because the runtime is shipped but the kernel still has active quality gaps and registry completeness limits, especially around agent-based narrowing (`SKY-317`).
+Assumption note: `Resolution Stack` is marked `🚧` for the product-facing rows because the runtime is shipped but still quality-limited, and it intentionally stops at provenance-first output for now.
 
 ## 3. Three analyses
 
@@ -127,7 +127,7 @@ This is the shortest path from "resolver writes good rows" to "editor can actual
 - related registry and coverage work such as `SKY-322`, `SKY-323`, `SKY-324`
 - eval-driven kernel follow-ups under the `SKY-314` umbrella
 
-This track is justified because the kernel eval harness already shows that the shipped runtime still has meaningful misses. The resolver exists; now it needs to become more trustworthy.
+This track is justified because the shipped runtime still has meaningful misses and only covers the provenance half of the problem. The resolver exists; now it needs to become more trustworthy and eventually more semantically capable.
 
 What should wait:
 
@@ -143,7 +143,7 @@ The architecture family now points to one clean ordering.
 
 That means `SKY-241`, `SKY-242`, `SKY-243`, and `SKY-244`. Without them, the runtime writes resolver rows that the editor can mostly inspect only indirectly.
 
-**In parallel, improve the quality of the shipped kernel instead of inventing a new runtime stage.**
+**In parallel, improve the quality of the shipped resolver instead of inventing a new runtime stage.**
 
 That means `SKY-317` plus the registry and coverage follow-ons the eval harness is already pointing at. This is the honest next quality loop.
 

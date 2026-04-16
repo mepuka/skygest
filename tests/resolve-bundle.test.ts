@@ -473,38 +473,16 @@ describe("resolveBundle", () => {
     }).pipe(Effect.provide(makeServiceLayer()))
   );
 
-  it.effect("records variable placeholder queries from legend and axis signals", () =>
+  it.effect("leaves deferred series and variable buckets empty in the provenance-first slice", () =>
     Effect.gen(function* () {
       yield* seedSearchDocs;
 
       const result = yield* resolveBundle(makeBundle(), { limit: 3 as any });
-      const variableEntries = result.trail.filter(
-        (entry) => entry.rung === "Variable"
-      );
 
-      expect(
-        variableEntries.some(
-          (entry) =>
-            entry.signal.kind === "series-legend-label" &&
-            entry.query === "ERCOT wind generation" &&
-            entry.lane === "not-implemented" &&
-            entry.hits.length === 0
-        )
-      ).toBe(true);
-      expect(
-        variableEntries.some(
-          (entry) =>
-            entry.signal.kind === "axis-label" &&
-            entry.query === "Wind generation"
-        )
-      ).toBe(true);
-      expect(
-        variableEntries.some(
-          (entry) =>
-            entry.signal.kind === "axis-unit" &&
-            entry.query === "MWh"
-        )
-      ).toBe(true);
+      expect(result.series).toEqual([]);
+      expect(result.variables).toEqual([]);
+      expect(result.trail.some((entry) => entry.rung === "Series")).toBe(false);
+      expect(result.trail.some((entry) => entry.rung === "Variable")).toBe(false);
     }).pipe(Effect.provide(makeServiceLayer()))
   );
 });

@@ -1,56 +1,109 @@
-# Improving Skygest Data-Reference Resolution
+# Skygest Resolution Improvement Plan
 
-_Event-driven architecture, ontology-aware candidate generation, and TypeScript-friendly implementation guidance for resolving agents, datasets, distributions, variables, and series from enriched social-media charts_
+Prepared on April 15, 2026.
 
-Prepared on April 14, 2026.
+This document is now a forward-looking follow-up plan. It does **not** describe the live runtime on `main`.
 
-## 1. Executive Summary
+The live runtime after `SKY-367` is:
 
-Skygest already has the correct core runtime seam for this problem: vision -> source attribution -> resolver worker -> Stage 1 -> Resolution Kernel -> stored data-ref-resolution row. The next step should not be another broad resolver rewrite. The next step should be to turn that seam into a versioned, event-driven, dual-track resolver that separately handles provenance resolution and semantic resolution, then joins the results through the data-layer graph and ontology-derived constraints. [I1][I2][I3]
+`vision -> source attribution -> resolver worker -> Stage 1 -> provenance-first asset resolution -> stored data-ref-resolution row`
 
-The most important near-term finding is upstream of ranking. The empirical search audit shows that the current checked-in corpus is missing the graph completeness needed for the intended resolver behavior: dataset-to-variable links are absent, variable reverse ancestry is absent, series rows have no URL surface, and several search projections are collapsing in ways that make tuning misleading. Fixing those problems should happen before heavy ranking or reranker tuning. [I4]
+That shipped path writes `stage1 + resolution`, not `stage1 + kernel`. The facet vocabulary, facet kernel, and generated energy-profile runtime were removed. Variable and series semantic resolution are intentionally deferred.
 
-This document recommends five architectural moves. First, model resolution as a bundle of linked roles rather than a single winning URI. Second, split candidate generation into two tracks: a provenance track for agent/dataset/distribution and a semantic track for variable/series. Third, make every result versioned against registry, ontology, and resolver versions and add a re-resolution loop when those inputs change. Fourth, push ontology reasoning offline and materialize lightweight closure tables for the hot path. Fifth, finish the editorial projection surface so that the shipped runtime becomes usable in hydrate-story, build-graph, and MCP tools. [I5][I6]
+## 1. What Is Live Today
 
-**Decision Summary**
+The current resolver does three things:
+
+1. Runs deterministic Stage 1 matching over URLs, aliases, source lines, and publisher hints.
+2. Builds one enriched bundle per chart asset.
+3. Resolves provenance-first results for agent and dataset scope through exact URL, hostname, and typed search lanes.
+
+That is the contract the rest of the system should treat as authoritative.
+
+## 2. What Is Still Missing
+
+The resolver is cleaner, but it is narrower than the earlier kernel-shaped ambition. The missing pieces now fall into four groups.
+
+### Semantic resolution
+
+- The live path does not yet resolve variables or series.
+- The stored `resolution` payload keeps empty `variables` and `series` arrays for now.
+- Any future semantic step should be added as a separate follow-on, not hidden inside Stage 1 or mixed back into provenance search.
+
+### Data-plane completeness
+
+- Dataset-to-variable and dataset-to-series relationships are still incomplete in the registry.
+- Search quality still depends heavily on alias coverage, canonical URLs, and clean publisher naming.
+- Search projection quality matters more than ontology-style facet reasoning on the current hot path.
+
+### Freshness
+
+- Historical resolver rows do not automatically improve when the registry or search projection improves.
+- A future re-resolution loop still needs version stamps, impact targeting, and replay triggers.
+
+### Editorial surface
+
+- Editors can read stored resolver rows today.
+- They still need the last-mile product surface:
+  - direct lookup
+  - cross-expert joins
+  - story-frontmatter projection
+  - stale or unresolved warnings
+
+## 3. Decision Summary
 
 | Decision | Recommendation | Why |
 | --- | --- | --- |
-| Runtime authority | Keep Stage 1 + Resolution Kernel as the authoritative hot-path contract; treat any future LLM adjudication as optional and asynchronous. | The shipped architecture is already built around stage1 + kernel, and the current gap is quality and freshness, not another runtime stage taxonomy. [I1][I2][I3] |
-| Resolution object | Resolve a bundle of roles, not one URI: source agent, source dataset/distribution, semantic variable, semantic series, and optional chart slice. | A single chart often needs both provenance resolution and semantic resolution; collapsing those into one URI loses useful certainty and makes evaluation harder. |
-| Primary improvement order | Fix graph completeness before tuning ranking: restore dataset↔variable ancestry, restore series URL/provenance surfaces, and normalize alias coverage. | The empirical audit shows those data-plane gaps are blocking the intended facet and URL behavior today. [I4] |
-| Freshness strategy | Make resolution versioned and event-driven: every result must carry registryVersion, ontologyVersion, resolverVersion, and evidence fingerprint. | Without versioning and re-resolution triggers, the system will stay forward-only and silently stale when the registry or ontology improves. [I1][I5] |
-| Reasoning strategy | Run ontology reasoning offline and materialize closure tables for the hot path; do not put live SPARQL/OWL inference on the request path. | Skygest already treats the graph as a derived artifact in the triple-store design; that is the right separation of concerns for latency and operational simplicity. [I5] |
+| Runtime authority | Keep `stage1 + resolution` as the authoritative hot-path contract. | This is the code that ships today, and the repo should not tell a different runtime story. |
+| Resolver scope | Keep the current runtime provenance-first until semantic resolution has a separate design and test plan. | The cleanup intentionally traded some capability for a much simpler live path. |
+| Next data work | Improve registry coverage and search projection quality before adding semantic ranking complexity. | Better source data will buy more than reviving facet algebra. |
+| Freshness | Add versioned re-resolution later rather than backfilling the old kernel model. | The new contract is simpler and should stay that way. |
+| Ontology use | Keep ontology reasoning offline and feed the hot path with precomputed artifacts only. | The runtime should stay cheap, explicit, and easy to debug. |
 
-## 2. Problem Definition and Success Criteria
+## 4. Recommended Next Tracks
 
-Input: a social-media post plus enrichment artifacts. In practice this means post text, outbound links, link-card titles, chart titles, visible URLs, source lines, logo text, organization mentions, axes, units, legend labels, temporal coverage, and thread context.
+### Track A: finish the current shipped product surface
 
-Desired output: a structured resolution bundle that can resolve the chart at multiple levels of specificity. The ideal case is not just 'this looks like Ember'; it is 'this chart most likely came from this dataset/distribution and depicts this variable/series and chart slice.'
+- `resolve_data_ref`
+- `find_candidates_by_data_ref`
+- hydrate-story projection of stored data refs
+- build-graph warnings for unresolved or stale refs
 
-The system should be allowed to succeed partially. A post may cleanly resolve to a source dataset but only weakly to a series. Conversely, a chart may strongly resolve to a variable/series while provenance remains uncertain. Forcing a single monolithic status hides useful certainty.
+This is the shortest path from "the resolver writes rows" to "editors can use them."
 
-Success should therefore be measured at each rung of a resolution ladder rather than by one all-or-nothing metric.
+### Track B: improve provenance quality
 
-**Resolution Ladder**
+- strengthen exact URL and hostname coverage
+- improve publisher alias coverage
+- improve dataset naming and search projection labels
+- fill the missing graph edges that provenance search expands through today
 
-| Level | Output | Meaning | Default policy |
-| --- | --- | --- | --- |
-| L1 | Agent / publisher | Best-effort source organization or publisher family | Auto-link if single exact/near-exact candidate and no conflict |
-| L2 | Dataset / distribution | Likely source artifact behind the chart | Auto-link if URL/source-line evidence is strong |
-| L3 | Variable | The quantity being plotted (generation, price, emissions, share, etc.) | Auto-link if semantic cues and ontology constraints agree |
-| L4 | Series | Variable + fixed dimensions such as geography, frequency, market, or sector | Auto-link only with strong dimensional agreement |
-| L5 | Chart slice | Series + inferred time window and transform (share, rolling avg, YoY, etc.) | Suggestion/review first; treat as future-grade precision |
+This is the honest next quality loop for the live runtime.
 
-## 3. Current-State Diagnosis
+### Track C: design semantic resolution as a separate follow-on
 
-The shipped runtime path is already clearer than older architecture sketches: the authoritative runtime result is stage1 + kernel, persisted into post_enrichments(kind=data-ref-resolution). There is no live runtime Stage 2 plus Stage 3 flow in the current branch. That is good news because it gives the system one stable contract to harden. [I1][I2][I3]
+- define the variable and series contract separately from provenance results
+- decide how semantic output joins back to dataset and agent context
+- add tests and evaluation for that contract directly instead of reviving the old kernel model
 
-The bigger issue is that the data plane does not yet support the intended search semantics. The empirical audit found all 1,790 Dataset rows had NULL across all seven facet columns, all 25 Variable rows had no parent datasets, and all 29 Series rows had zero canonical URLs. In other words, important parts of the resolver's candidate space are structurally unreachable or under-described before ranking even begins. [I4]
+The important point is separation: semantic resolution should be additive, not a rollback to facet stitching.
 
-There is also a freshness gap. The architecture notes surface an important missing mechanism: there is no first-class re-resolution sweep when the registry grows or when the ontology/search projections change. That means historical posts can remain stale even if the registry gets better. [I1][I5]
+### Track D: add freshness and replay
 
-Finally, the product surface is still incomplete. The runtime can already write resolver rows, but editors and MCP workflows still need better lookup and projection tools: direct resolve_data_ref lookup, cross-expert join by data reference, story-frontmatter projection, and stale/unresolved warnings in build-graph. [I6]
+- version resolver rows against registry and search projection versions
+- compute impact sets when source data changes
+- re-run only the affected posts and assets
+
+This matters once the search substrate is good enough that reruns are worth doing.
+
+## 5. Success Criteria
+
+The next iteration should be considered successful when:
+
+1. The runtime contract remains `stage1 + resolution`.
+2. Provenance quality improves without reintroducing the facet stack.
+3. Editors and MCP tools can actually use the stored resolver rows.
+4. A future semantic follow-on can be added cleanly beside the current resolver instead of through another rewrite.
 
 ## 4. Recommended Architecture: Dual-Track, Event-Driven Resolution
 

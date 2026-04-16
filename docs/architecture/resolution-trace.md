@@ -1,24 +1,24 @@
-# Resolution Trace: One Post Through the Shipped Kernel Path
+# Resolution Trace: One Post Through the Shipped Provenance-First Path
 
 This document walks one real post through the resolver path that is actually shipped on `main` today. The post is:
 
 `at://did:plc:3zhdeyok4trlrd3cijz7p4e6/app.bsky.feed.post/3m7rx7sb6q22l`
 
-It is the same Blyth Offshore Wind / Ember chart example the earlier docs used, because the gold file still gives us a concrete target to reason about:
+It is the same Blyth Offshore Wind / Ember chart example the earlier docs used, because it still gives us a concrete target to reason about:
 
 - Ember as the publisher
 - the Ember dataset/distribution pair behind the chart
-- the UK electricity variable the chart is talking about
+- the chart provenance cues that should point at Ember's dataset surface
 
 The critical architectural update is that the runtime path is now:
 
-`vision -> source-attribution -> resolver worker -> Stage 1 matching -> resolution kernel -> stored data-ref-resolution row`
+`vision -> source-attribution -> resolver worker -> Stage 1 matching -> asset bundle search -> stored data-ref-resolution row`
 
-There is no live runtime Stage 2 or Stage 3 flow in this branch.
+There is no live facet kernel in this branch. Variable and series semantic resolution are future work.
 
 ## Snapshot note
 
-This trace describes the shipped contract, not a claim that every gold-set post already resolves perfectly. The resolver now writes real `data-ref-resolution` rows, but the kernel eval harness still shows meaningful accuracy gaps. So the document is about how data moves through the system and where the current quality loop sits.
+This trace describes the shipped contract, not a claim that every post already resolves perfectly. The resolver now writes real `data-ref-resolution` rows, but the live output is intentionally narrower than the older kernel-shaped ambition. The current path is about provenance-first matching: agent, dataset, and distribution-derived scope.
 
 ## Prep loop
 
@@ -27,27 +27,25 @@ This trace describes the shipped contract, not a claim that every gold-set post 
 - **Component:** `scripts/cold-start-ingest-*.ts` over `src/ingest/dcat-harness/`
 - **Input:** provider catalog or API surfaces
 - **Output:** reviewed JSON entities under `references/cold-start/`
-- **Why it matters:** the resolver only becomes meaningful if the Ember agent, dataset, distribution, and variable already exist in the checked-in registry
+- **Why it matters:** the resolver only becomes meaningful if the Ember agent, dataset, and distribution already exist in the checked-in registry
 
 This is still the human-reviewed source material behind the runtime registry, even though production no longer reads it directly.
 
-### 0B. Energy-profile manifest -> generated runtime facet metadata
-
-- **Component:** `scripts/generate-energy-profile.ts` and `scripts/sync-energy-profile.ts`
-- **Input:** `references/energy-profile/shacl-manifest.json`
-- **Output:** `src/domain/generated/energyVariableProfile.ts`
-- **Why it matters:** the generated profile is the canonical runtime source of the kernel's facet keys and required dimensions
-
-This became more important after the kernel cutover because the partial-variable algebra and kernel binding logic now depend on the generated runtime profile rather than an implicit hand-maintained shape.
-
-### 0C. Checked-in registry -> D1 runtime registry
+### 0B. Checked-in registry -> D1 runtime registry
 
 - **Component:** `scripts/sync-data-layer.ts`, `src/data-layer/Sync.ts`
 - **Input:** `references/cold-start/`
 - **Output:** the D1 tables the runtime actually reads
-- **Why it matters:** Stage 1 and the kernel now resolve against the D1-backed registry, not the checked-in files directly
+- **Why it matters:** Stage 1 and bundle resolution now resolve against the D1-backed registry, not the checked-in files directly
 
 The runtime registry is the live source of truth. The checked-in tree remains the reviewed seed surface.
+
+### 0C. D1 registry -> entity search projection
+
+- **Component:** search rebuild scripts plus `SEARCH_DB`
+- **Input:** data-layer entities promoted from the checked-in registry
+- **Output:** typed search rows used by the resolver
+- **Why it matters:** after exact URL and hostname wins, the resolver now falls through to typed search instead of facet stitching
 
 ## Runtime path
 
@@ -89,20 +87,20 @@ Current response contract:
 export const ResolvePostResponse = Schema.Struct({
   postUri: PostUri,
   stage1: Stage1Result,
-  kernel: Schema.Array(ResolutionOutcome),
+  resolution: Schema.Array(ResolvedAssetBundle),
   resolverVersion: ResolverVersion,
   latencyMs: ResolveLatencyMs
 });
 ```
 
-This is the contract the architecture docs now need to follow everywhere else.
+This is the live contract everywhere else in the repo.
 
-### 5. Inside the resolver: Stage 1 matching -> evidence bundles -> kernel outcomes
+### 5. Inside the resolver: Stage 1 matching -> asset bundles -> provenance search
 
-- **Components:** `Stage1Resolver`, `buildResolutionEvidenceBundles`, `ResolutionKernel`
+- **Components:** `Stage1Resolver`, `EnrichmentPlanner`, `resolveBundle`
 - **Why it matters:** this is now the entire live resolver stack
 
-The resolver first runs Stage 1 and produces the familiar direct matches plus typed residuals. It then assembles evidence bundles from:
+The resolver first runs Stage 1 and produces the familiar direct matches plus typed residuals. It then assembles asset bundles from:
 
 - post text
 - chart title
@@ -112,21 +110,20 @@ The resolver first runs Stage 1 and produces the familiar direct matches plus ty
 - source lines
 - publisher hints
 
-The kernel binds those bundles against the D1-backed registry and emits `ResolutionOutcome[]`. The live status vocabulary is:
+For each asset bundle, the live resolver now:
 
-- `Resolved`
-- `Ambiguous`
-- `Underspecified`
-- `Conflicted`
-- `OutOfRegistry`
-- `NoMatch`
+- keeps the provenance signals as a trail
+- resolves exact URL and exact hostname candidates first
+- falls through to entity search for agent and dataset candidates
+- expands distribution hits back to dataset scope
+- stores empty `series` and `variables` arrays for now
 
-This is the key replacement for the older staged runtime story. The live resolver no longer says "Stage 1, then maybe Stage 2, then maybe Stage 3." It says "Stage 1 plus one authoritative kernel output array."
+This is the key replacement for the older staged runtime story. The live resolver no longer says "Stage 1 plus kernel outcomes." It says "Stage 1 plus one authoritative asset-resolution array."
 
 Two caveats matter:
 
-1. `Resolved` outcomes can now carry `agentId`, which is the architectural hook for agent-aware narrowing.
-2. The live registry shelves that make that narrowing effective are still incomplete until `SKY-317`, so the code path exists before the data fully backs it up.
+1. The runtime is intentionally provenance-first. It can strongly link agent and dataset surfaces before it can semantically resolve the chart's variable.
+2. Series and variable semantic resolution are deliberately deferred in this slice.
 
 ### 6. Resolver result -> stored `data-ref-resolution` enrichment
 
@@ -137,16 +134,16 @@ Two caveats matter:
 Current stored shape:
 
 ```ts
-export const DataRefResolutionEnrichment = Schema.Struct({
+export const DataRefResolutionEnrichmentV2 = Schema.Struct({
   kind: Schema.Literal("data-ref-resolution"),
   stage1: DeferredStage1Result,
-  kernel: Schema.Array(ResolutionOutcome),
+  resolution: Schema.Array(ResolvedAssetBundle),
   resolverVersion: ResolverVersion,
   processedAt: Schema.Number
 });
 ```
 
-That is the new durable seam. The stored row does not carry a runtime Stage 2 or Stage 3 payload because those are not part of the shipped path anymore.
+That is the new durable seam. Legacy stored rows with `kernel` are still readable so old enrichments do not break.
 
 ### 7. Editorial read path
 
@@ -166,7 +163,7 @@ That is the product gap now. The runtime write path exists; the editorial projec
 
 ### 8. No checked-in snapshot harness
 
-`SKY-358` removed the old `eval/resolution-kernel/`, `eval/resolution-stage1/`, and related snapshot and gold-set scaffolding. That is intentional. Those files encoded legacy chart ids and would misstate what the current bundle-resolution work is supposed to prove.
+The current quality loop is now targeted resolver and enrichment tests over the live `stage1 + resolution` contract, plus repo-search checks that the deleted facet stack is gone from the live code path.
 
 Why this matters for the architecture family:
 
@@ -177,7 +174,7 @@ Why this matters for the architecture family:
 ## What this trace means now
 
 1. The resolver infrastructure is no longer hypothetical. It is a shipped Worker and a shipped stored row.
-2. The durable resolver contract is now `stage1 + kernel`.
+2. The durable resolver contract is now `stage1 + resolution`.
 3. The main product gaps are lookup and projection gaps, not missing runtime plumbing.
-4. The main quality gaps are kernel accuracy and registry completeness, especially around agent-aware narrowing.
-5. Any future LLM reranking or workflow-based follow-up should be described as future work, not as part of today's runtime path.
+4. The main quality gaps are provenance coverage and registry completeness, not missing facet algebra.
+5. Any future semantic resolution or reranking should be described as follow-on work, not as part of today's runtime path.

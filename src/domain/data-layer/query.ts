@@ -82,7 +82,11 @@ export const DataRefCitationKey = Schema.String.pipe(
 });
 export type DataRefCitationKey = Schema.Schema.Type<typeof DataRefCitationKey>;
 
-export const DataRefCitationSource = Schema.Literals(["kernel", "stage1"]).annotate({
+export const DataRefCitationSource = Schema.Literals([
+  "resolution",
+  "kernel",
+  "stage1"
+]).annotate({
   description: "How the citation row was produced"
 });
 export type DataRefCitationSource = Schema.Schema.Type<typeof DataRefCitationSource>;

@@ -39,6 +39,9 @@ import type {
   ListEnrichmentGapsOutput,
   ListEnrichmentIssuesOutput
 } from "../domain/enrichment.ts";
+import {
+  isDataRefResolutionEnrichmentV2
+} from "../domain/enrichment.ts";
 import type { ImportPostsOutput } from "../domain/api.ts";
 import type {
   FindCandidatesByDataRefHit,
@@ -978,19 +981,43 @@ export const formatEnrichments = (
         case "data-ref-resolution": {
           const matchCount = e.payload.stage1.matches.length;
           const residualCount = e.payload.stage1.residuals.length;
-          const outcomeCounts = new Map<string, number>();
-          for (const outcome of e.payload.kernel) {
-            outcomeCounts.set(
-              outcome._tag,
-              (outcomeCounts.get(outcome._tag) ?? 0) + 1
-            );
-          }
-          const outcomeSummary =
-            outcomeCounts.size === 0
-              ? "0 outcomes"
-              : Array.from(outcomeCounts.entries())
-                  .map(([tag, count]) => `${count} ${tag}`)
-                  .join(", ");
+          const outcomeSummary = isDataRefResolutionEnrichmentV2(e.payload)
+            ? (() => {
+                const agentIds = new Set<string>();
+                const datasetIds = new Set<string>();
+
+                for (const bundle of e.payload.resolution) {
+                  for (const agent of bundle.resolution.agents) {
+                    agentIds.add(agent.entityId);
+                  }
+
+                  for (const dataset of bundle.resolution.datasets) {
+                    datasetIds.add(dataset.entityId);
+                  }
+                }
+
+                return `${e.payload.resolution.length} bundle${e.payload.resolution.length !== 1 ? "s" : ""}, ${agentIds.size} agent${agentIds.size !== 1 ? "s" : ""}, ${datasetIds.size} dataset${datasetIds.size !== 1 ? "s" : ""}`;
+              })()
+            : (() => {
+                const outcomeCounts = new Map<string, number>();
+
+                for (const outcome of e.payload.kernel) {
+                  const tag =
+                    typeof outcome === "object" &&
+                    outcome !== null &&
+                    "_tag" in outcome &&
+                    typeof outcome._tag === "string"
+                      ? outcome._tag
+                      : "Unknown";
+                  outcomeCounts.set(tag, (outcomeCounts.get(tag) ?? 0) + 1);
+                }
+
+                return outcomeCounts.size === 0
+                  ? "0 outcomes"
+                  : Array.from(outcomeCounts.entries())
+                      .map(([tag, count]) => `${count} ${tag}`)
+                      .join(", ");
+              })();
           lines.push(
             `[R] data-ref-resolution \u00B7 ${matchCount} match${matchCount !== 1 ? "es" : ""} \u00B7 ${residualCount} residual${residualCount !== 1 ? "s" : ""} \u00B7 ${outcomeSummary} \u00B7 ${date}`
           );

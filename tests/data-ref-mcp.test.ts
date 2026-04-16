@@ -195,7 +195,7 @@ const seedExpertAndPosts = (
 const insertCitation = (input: {
   readonly sourcePostUri: string;
   readonly entityId: string;
-  readonly citationSource?: "kernel" | "stage1";
+  readonly citationSource?: "resolution" | "kernel" | "stage1";
   readonly citationKey?: string;
   readonly resolutionState: "source_only" | "partially_resolved" | "resolved";
   readonly assertedValueJson?: string | null;
@@ -228,10 +228,10 @@ const insertCitation = (input: {
       ) VALUES (
         ${input.sourcePostUri},
         ${input.entityId},
-        ${input.citationSource ?? "kernel"},
+        ${input.citationSource ?? "resolution"},
         ${input.citationKey ??
           [
-            input.citationSource ?? "kernel",
+            input.citationSource ?? "resolution",
             input.resolutionState,
             input.entityId,
             input.observationStart ?? input.observationEnd ?? "",

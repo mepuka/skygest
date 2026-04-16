@@ -1,6 +1,6 @@
 # Skygest System Context
 
-This document maps the current top-level subsystems across `skygest-cloudflare` and `skygest-editorial` after the April 12, 2026 resolver cutover. The load-bearing change versus the previous architecture snapshot is simple: the live resolver path is now `Stage 1 matching -> Resolution Kernel` inside the standalone `skygest-resolver` Worker. The older "runtime Stage 2 plus Stage 3 workflow" story is not the current system.
+This document maps the current top-level subsystems across `skygest-cloudflare` and `skygest-editorial` after the April 15, 2026 provenance-first resolver cleanup. The live resolver path is now `Stage 1 matching -> asset bundle search` inside the standalone `skygest-resolver` Worker. The facet vocabulary, facet kernel, and generated energy-profile runtime are no longer part of the shipped path. Variable and series semantic resolution are future work.
 
 Effect vocabulary is still load-bearing here: every subsystem name is a Tag, a Workflow class, a Worker name, or a script you can grep for.
 
@@ -23,8 +23,9 @@ graph TD
     SrcAttr[Source-Attribution Lane<br/>SourceAttributionExecutor]
     Resolver[skygest-resolver Worker<br/>src/resolver-worker/index.ts]
     Stage1[Stage 1 Matching<br/>src/resolution/Stage1.ts]
-    Kernel[Resolution Kernel<br/>src/resolution/ResolutionKernel.ts]
+    Search[Bundle Resolution Search<br/>src/resolution/bundle/resolveBundle.ts]
     Registry[Data Layer Registry<br/>D1-backed runtime source of truth]
+    SearchProjection[Entity Search Projection<br/>SEARCH_DB + EntitySearch]
     MCP[MCP Surface<br/>src/mcp/Router.ts]
     Api[HTTP API<br/>src/api + src/admin]
   end
@@ -33,7 +34,7 @@ graph TD
     direction TB
     ColdStart[Cold-start Ingest Toolchain<br/>scripts/cold-start-ingest-*.ts +<br/>src/ingest/dcat-harness]
     Seed[Checked-in Cold-start Registry<br/>references/cold-start/*]
-    Profile[Energy Profile Generation<br/>scripts/generate-energy-profile.ts +<br/>scripts/sync-energy-profile.ts]
+    VariableVocab[Variable Vocabulary Constants<br/>src/domain/data-layer/variable-vocabulary.ts]
   end
 
   subgraph ED[skygest-editorial]
@@ -61,14 +62,15 @@ graph TD
   Vision -->|D1 row: post_enrichments<br/>kind=vision| SrcAttr
   SrcAttr -->|Service Binding + RPC<br/>RESOLVER| Resolver
   Resolver --> Stage1
-  Stage1 --> Kernel
+  Stage1 --> Search
   Stage1 -.->|registry lookups| Registry
-  Kernel -.->|registry lookups| Registry
-  Kernel -->|D1 row: post_enrichments<br/>kind=data-ref-resolution| Enrich
+  Search -.->|registry lookups| Registry
+  Search -.->|search queries| SearchProjection
+  Search -->|D1 row: post_enrichments<br/>kind=data-ref-resolution| Enrich
 
   ColdStart -->|filesystem write| Seed
   Seed -->|sync-data-layer CLI| Registry
-  Profile -.->|generated facet metadata| Kernel
+  VariableVocab -.->|closed enum + canonical lists| Registry
 
   MCP -->|D1 row read| Enrich
   MCP -->|D1 row read| Registry
@@ -94,7 +96,6 @@ graph TD
   Operator -->|HTTPS bearer auth| Api
   Operator -->|bun run| Sync
   Operator -->|bun run| ColdStart
-  Operator -->|bun run| Profile
   Operator -->|wrangler deploy| IngestWorker
   Operator -->|wrangler deploy| AgentWorker
   Operator -->|wrangler deploy| Resolver
@@ -106,10 +107,10 @@ graph TD
   classDef tools fill:#fff3e0,stroke:#ef6c00,color:#e65100
   classDef actor fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
 
-  class IngestWorker,AgentWorker,Ingest,Enrich,Vision,SrcAttr,Resolver,Stage1,Kernel,Registry,MCP,Api cf
+  class IngestWorker,AgentWorker,Ingest,Enrich,Vision,SrcAttr,Resolver,Stage1,Search,Registry,SearchProjection,MCP,Api cf
   class Hydrate,Sync,Caches,BuildGraph,Discussion,Stories,Arcs,Editions ed
   class DomainBridge bridge
-  class ColdStart,Seed,Profile tools
+  class ColdStart,Seed,VariableVocab tools
   class Reader,Editor,MCPModel,Operator actor
 ```
 
@@ -123,7 +124,7 @@ graph TD
 
 **Post Ingest** (`src/ingest/`). Polls tracked experts, writes new posts to D1, and launches enrichment for new material. Exposes `IngestWorkflowLauncher` and `IngestRunWorkflow`; depends on the expert repos, sync-state repos, and Bluesky/Twitter client layers. *Shipped.*
 
-**Enrichment Chain** (`src/enrichment/`). Runs the lane DAG over each post via `EnrichmentRunWorkflow` and `EnrichmentPlanner`. The important current behavior is that, when `ENABLE_DATA_REF_RESOLUTION` is on, the workflow now calls the resolver after source attribution and persists a `data-ref-resolution` enrichment row containing `stage1` plus `kernel` output. *Shipped.*
+**Enrichment Chain** (`src/enrichment/`). Runs the lane DAG over each post via `EnrichmentRunWorkflow` and `EnrichmentPlanner`. When `ENABLE_DATA_REF_RESOLUTION` is on, the workflow calls the resolver after source attribution and persists a `data-ref-resolution` enrichment row containing `stage1` plus asset-level `resolution` bundles. Legacy `kernel` rows remain readable, but new writes use the new shape only. *Shipped.*
 
 **Vision Lane** (`src/enrichment/vision/`). Calls Gemini to extract chart titles, visible URLs, source lines, logo text, and other media cues. Exposes `VisionEnrichmentExecutor` layered on `GeminiVisionServiceLive`. *Shipped.*
 
@@ -131,17 +132,19 @@ graph TD
 
 **skygest-resolver Worker** (`wrangler.resolver.toml`, `src/resolver-worker/index.ts`). Standalone Worker that exposes the resolver over HTTP and over the `RESOLVER` Service Binding through `ResolverEntrypoint`. It is now part of the shipped runtime, not a planned deployment slice. `src/resolver/Client.ts` is the calling seam used by the ingest and agent workers. *Shipped.*
 
-**Stage 1 Matching** (`src/resolution/Stage1.ts`, `src/resolution/Stage1Resolver.ts`). The deterministic first pass that turns post context, vision output, and source-attribution output into direct matches and typed residuals. It still matters, but it is now an internal step inside the resolver stack rather than the whole runtime story. *Shipped.*
+**Stage 1 Matching** (`src/resolution/Stage1.ts`, `src/resolution/Stage1Resolver.ts`). The deterministic first pass that turns post context, vision output, and source-attribution output into direct matches and typed residuals. It is still the front door to the live resolver and still carries the exact-match and scope-hint work. *Shipped.*
 
-**Resolution Kernel** (`src/resolution/ResolutionKernel.ts`, `src/domain/resolutionKernel.ts`). The authoritative resolver output. It takes Stage 1 input plus structured evidence bundles, binds against the D1-backed registry, and emits `ResolutionOutcome[]` with statuses such as `Resolved`, `Ambiguous`, `Underspecified`, `Conflicted`, `OutOfRegistry`, and `NoMatch`. The old runtime Stage 2 path has been removed; the kernel is the live replacement. *Shipped.*
+**Bundle Resolution Search** (`src/resolution/bundle/resolveBundle.ts`, `src/resolver/ResolverService.ts`). The authoritative resolver output for the current runtime. It turns each chart asset into an enriched bundle, preserves provenance signals, and resolves agent and dataset candidates through exact URL, hostname, and entity-search lanes. Series and variable arrays are intentionally empty in this slice; semantic resolution is deferred. *Shipped.*
 
-**Data Layer Registry (D1)** (`variables`, `series`, `distributions`, `datasets`, `agents`, `catalogs`, `catalog_records`, `data_services`, `dataset_series`). The runtime source of truth for resolver lookups. It is loaded into a prepared lookup contract at Worker cold start and is fed from the checked-in cold-start tree via `scripts/sync-data-layer.ts`. One current limitation matters: the code path for agent-based narrowing exists, but the live registry shelves are still incomplete until `SKY-317`, so the system should not be described as having fully working agent narrowing yet. *Shipped, with a known completeness gap.*
+**Data Layer Registry (D1)** (`variables`, `series`, `distributions`, `datasets`, `agents`, `catalogs`, `catalog_records`, `data_services`, `dataset_series`). The runtime source of truth for Stage 1 lookups, exact URL matching, and graph expansion from distribution to dataset and publisher. It is loaded into a prepared lookup contract at Worker cold start and is fed from the checked-in cold-start tree via `scripts/sync-data-layer.ts`. *Shipped.*
+
+**Entity Search Projection** (`SEARCH_DB`, `src/search/*`, `src/services/EntitySearchService.ts`). The lexical and typed-search substrate used by bundle resolution after Stage 1. This is now part of the live resolver path for provenance-first search rather than an optional sidecar. *Shipped.*
 
 **Cold-start Ingest Toolchain** (`scripts/cold-start-ingest-*.ts`, `src/ingest/dcat-harness/`). Local Effect scripts that fetch provider catalog surfaces and project them into checked-in Skygest registry data. The shared harness owns merge rules, slug stability, validation, graph construction, and atomic writes. *Shipped.*
 
 **Checked-in Cold-start Registry** (`references/cold-start/`). Human-reviewed JSON seed state for the data layer. Runtime does not read it directly in production anymore, but it remains the audited source that feeds the D1 registry and local tests. *Shipped.*
 
-**Energy Profile Generation** (`scripts/generate-energy-profile.ts`, `scripts/sync-energy-profile.ts`, `src/domain/generated/energyVariableProfile.ts`). The generated profile is now the canonical runtime source of facet metadata for the resolution kernel and partial-variable algebra. This is the bridge between the checked-in structural manifest and the code the resolver actually uses at runtime. *Shipped.*
+**Variable Vocabulary Constants** (`src/domain/data-layer/variable-vocabulary.ts`, `src/domain/data-layer/variable-enums.ts`). Small closed lists such as statistic types, aggregation families, unit families, and canonical concept names that still matter to registry validation and the data-layer spine. These now live in permanent domain code instead of a generated facet profile. *Shipped.*
 
 **MCP Surface** (`src/mcp/Router.ts`, `src/mcp/Toolkit.ts`). Exposes the tool surface used by the discussion workflow and other operator/editor flows. The data-ref resolution rows are already readable through existing read tools such as `get_post_enrichments`, but the dedicated lookup tools `resolve_data_ref` and `find_candidates_by_data_ref` are still not present. *Shipped, with planned data-ref lookup additions.*
 
@@ -177,7 +180,7 @@ graph TD
 
 **MCP-calling LLM** is the model inside the discussion workflow and other tool-using flows. The tool surface is its API, which is why structured Schema-backed output matters so much.
 
-**Operator** runs the admin API, sync scripts, cold-start ingest scripts, energy-profile generation and sync, and `wrangler deploy` against the worker configs. The operator is also the person who can turn the resolver lane on in staging and judge whether the stored outputs are trustworthy enough to move forward.
+**Operator** runs the admin API, sync scripts, cold-start ingest scripts, search projection rebuilds, and `wrangler deploy` against the worker configs. The operator is also the person who can turn the resolver lane on in staging and judge whether the stored outputs are trustworthy enough to move forward.
 
 ## Key seams
 
@@ -187,10 +190,11 @@ graph TD
 | Vision -> Source Attribution | Vision enrichment row written by the vision lane | `VisionEnrichment` in `src/domain/enrichment.ts` |
 | Source Attribution -> Resolver | Source-attribution row plus vision/post context | `Stage1Input` assembled from `postContext`, `vision`, `sourceAttribution` |
 | Resolver service boundary | Resolver request and response across the `RESOLVER` binding or HTTP | `ResolvePostRequest` / `ResolvePostResponse` in `src/domain/resolution.ts` |
-| Resolver -> stored enrichment | Persisted resolver result in `post_enrichments` | `DataRefResolutionEnrichment` in `src/domain/enrichment.ts` with `stage1 + kernel` |
-| Registry lookup contract | D1-backed entity lookups used by Stage 1 and the kernel | `src/resolution/dataLayerRegistry.ts` |
+| Resolver -> stored enrichment | Persisted resolver result in `post_enrichments` | `DataRefResolutionEnrichment` in `src/domain/enrichment.ts` with `stage1 + resolution` plus legacy `kernel` read compatibility |
+| Registry lookup contract | D1-backed entity lookups used by Stage 1 and bundle resolution | `src/resolution/dataLayerRegistry.ts` |
+| Search projection contract | Typed search hits used by bundle resolution | `src/domain/entitySearch.ts`, `src/services/EntitySearchService.ts` |
 | Checked-in registry -> D1 registry | Reviewed seed state promoted into runtime tables | `scripts/sync-data-layer.ts`, `src/data-layer/Sync.ts` |
-| Energy profile manifest -> generated runtime profile | Structural facet rules promoted into generated runtime code | `references/energy-profile/shacl-manifest.json` -> `src/domain/generated/energyVariableProfile.ts` |
+| Variable vocabulary constants | Shared enum and canonical-name lists used by the data-layer spine | `src/domain/data-layer/variable-vocabulary.ts` |
 | MCP read path | Tool responses consumed by editorial workflows | `src/mcp/Toolkit.ts` plus response Schemas in `src/domain/*` |
 | Editorial cache mirror | Local cached registry manifests | `.skygest/cache/*.json` |
 | Story frontmatter | Filesystem contract between scripts, discussion workflow, and validator | `src/domain/narrative/*` |
@@ -201,11 +205,11 @@ graph TD
 |---|---|
 | Post Ingest, Enrichment Chain, Vision Lane, Source-Attribution Lane | Shipped |
 | Resolver Worker + `RESOLVER` Service Binding / `ResolverEntrypoint` RPC | Shipped |
-| Stage 1 Matching + Resolution Kernel | Shipped |
-| Persisted `data-ref-resolution` enrichment row (`stage1 + kernel`) | Shipped |
+| Stage 1 Matching + Bundle Resolution Search | Shipped |
+| Persisted `data-ref-resolution` enrichment row (`stage1 + resolution`, legacy `kernel` rows readable) | Shipped |
 | Data Layer Registry (D1), Checked-in Cold-start Registry, sync pipeline | Shipped |
-| Energy profile generation and generated runtime facet metadata | Shipped |
-| Agent-based narrowing completeness | In progress (`SKY-317`) |
+| Entity Search projection and typed search lanes | Shipped |
+| Variable/series semantic runtime resolution | Deferred |
 | `resolve_data_ref` / `find_candidates_by_data_ref` MCP tools | Planned (`SKY-241`, `SKY-244`) |
 | hydrate-story `dataRefs` projection | Planned (`SKY-242`) |
 | build-graph unresolved data-ref warnings | Planned (`SKY-243`) |
@@ -215,8 +219,8 @@ graph TD
 
 ## What changed in this refresh
 
-1. The resolver is now described as shipped infrastructure, not a planned slice.
-2. The resolver contract is now `stage1 + kernel`, not `stage1 + optional stage2 + stage3`.
-3. The old runtime Stage 2 and Stage 3 language was removed because it no longer matches the code on `main`.
-4. The old snapshot-based eval harnesses were removed; the next end-to-end bundle eval surface belongs with `SKY-343`.
-5. The docs now call out the real remaining gaps: lookup tools, story projection, build-graph warnings, and registry completeness for agent narrowing.
+1. The resolver is now described as `stage1 + resolution`, not `stage1 + kernel`.
+2. The facet vocabulary, facet kernel, and generated energy-profile runtime were removed from the live story.
+3. The docs now call out entity search as part of the shipped resolver path.
+4. Variable and series semantic resolution are explicitly marked as deferred follow-on work.
+5. The remaining product gaps are lookup tools, story projection, and build-graph warnings.

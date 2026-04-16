@@ -1,34 +1,9 @@
-/**
- * AUTO-GENERATED. DO NOT EDIT.
- *
- * Source manifest: references/energy-profile/shacl-manifest.json
- * Manifest version: 1
- * Source commit: 82a18c7acd52b6b84aa2a69d8b99a084c4573259
- * Input hash: sha256:e307f251e0b40b04ff658af6e41b2b5303740307ed2ca83925c76d5e49e82016
- * Generation command: bun run gen:energy-profile
- */
-
-export const FACET_KEYS = [
-  "measuredProperty",
-  "domainObject",
-  "technologyOrFuel",
-  "statisticType",
-  "aggregation",
-  "unitFamily",
-  "policyInstrument",
-] as const;
-
-export const REQUIRED_FACET_KEYS = [
-  "measuredProperty",
-  "statisticType",
-] as const;
-
 export const StatisticTypeMembers = [
   "stock",
   "flow",
   "price",
   "share",
-  "count",
+  "count"
 ] as const;
 
 export const AggregationMembers = [
@@ -38,7 +13,7 @@ export const AggregationMembers = [
   "average",
   "max",
   "min",
-  "settlement",
+  "settlement"
 ] as const;
 
 export const UnitFamilyMembers = [
@@ -49,7 +24,7 @@ export const UnitFamilyMembers = [
   "mass_co2e",
   "intensity",
   "dimensionless",
-  "other",
+  "other"
 ] as const;
 
 export const MeasuredPropertyCanonicals = [
@@ -70,7 +45,7 @@ export const MeasuredPropertyCanonicals = [
   "revenue",
   "share",
   "supply",
-  "trade",
+  "trade"
 ] as const;
 
 export const DomainObjectCanonicals = [
@@ -105,7 +80,7 @@ export const DomainObjectCanonicals = [
   "transport",
   "virtual power plant",
   "wholesale market",
-  "wind turbine",
+  "wind turbine"
 ] as const;
 
 export const TechnologyOrFuelCanonicals = [
@@ -136,7 +111,7 @@ export const TechnologyOrFuelCanonicals = [
   "solar thermal",
   "synthetic fuel",
   "waste",
-  "wind",
+  "wind"
 ] as const;
 
 export const PolicyInstrumentCanonicals = [
@@ -149,27 +124,5 @@ export const PolicyInstrumentCanonicals = [
   "net metering",
   "power purchase agreement",
   "renewable portfolio standard",
-  "subsidy",
+  "subsidy"
 ] as const;
-
-export const AggregationCanonicals = [
-  "average",
-  "end_of_period",
-  "max",
-  "min",
-  "point",
-  "settlement",
-  "sum",
-] as const;
-
-export const UnitFamilyCanonicals = [
-  "currency",
-  "currency_per_energy",
-  "dimensionless",
-  "energy",
-  "intensity",
-  "mass_co2e",
-  "other",
-  "power",
-] as const;
-

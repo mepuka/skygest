@@ -1,5 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Schema } from "effect";
+import { chartAssetIdFromBluesky } from "../src/domain/data-layer/post-ids";
 import {
   ResolveBulkRequest,
   ResolveBulkResponse,
@@ -23,175 +24,39 @@ const secondPostUri = asPostUri(
   "at://did:plc:test/app.bsky.feed.post/resolution-boundary-2"
 );
 
-const windVariableId =
-  "https://id.skygest.io/variable/var_1234567890AB" as const;
-const solarVariableId =
-  "https://id.skygest.io/variable/var_ABCDEFGHIJKL" as const;
-
-const ambiguousKernelOutcome = {
-  _tag: "Ambiguous" as const,
-  bundle: {
-    postUri,
-    postText: [],
-    chartTitle: "Electricity generation",
-    yAxis: {
-      label: "Generation",
-      unit: "TWh"
-    },
-    series: [
+const resolvedAssetBundle = {
+  assetKey: chartAssetIdFromBluesky(postUri, "bafkreiresolutionboundary"),
+  resolution: {
+    agents: [
       {
-        itemKey: "wind",
-        legendLabel: "Wind",
-        unit: "TWh"
-      },
-      {
-        itemKey: "hydro",
-        legendLabel: "Hydro",
-        unit: "TWh"
+        entityId: "https://id.skygest.io/agent/ag_1234567890AB" as any,
+        signal: {
+          kind: "source-attribution-provider-label" as const,
+          field: "sourceAttribution.provider.providerLabel",
+          value: "Example Provider"
+        },
+        score: null,
+        scoped: false,
+        matchKind: "exact-hostname" as const
       }
     ],
-    keyFindings: [],
-    sourceLines: [],
-    publisherHints: []
-  },
-  hypotheses: [
-    {
-      sharedPartial: {
-        measuredProperty: "generation",
-        domainObject: "electricity",
-        statisticType: "flow"
-      },
-      attachedContext: {},
-      items: [
-        {
-          itemKey: "wind",
-          partial: {
-            technologyOrFuel: "wind"
-          },
-          evidence: [
-            {
-              source: "series-label" as const,
-              text: "Wind",
-              itemKey: "wind"
-            }
-          ]
+    datasets: [
+      {
+        entityId: "https://id.skygest.io/dataset/ds_1234567890AB" as any,
+        signal: {
+          kind: "source-line-dataset-name" as const,
+          field: "asset.analysis.sourceLines[].datasetName",
+          value: "Example Dataset"
         },
-        {
-          itemKey: "hydro",
-          partial: {
-            technologyOrFuel: "hydro"
-          },
-          evidence: [
-            {
-              source: "series-label" as const,
-              text: "Hydro",
-              itemKey: "hydro"
-            }
-          ]
-        }
-      ],
-      evidence: [
-        {
-          source: "chart-title" as const,
-          text: "Electricity generation"
-        }
-      ],
-      tier: "strong-heuristic" as const
-    }
-  ],
-  items: [
-    {
-      _tag: "bound" as const,
-      itemKey: "wind",
-      semanticPartial: {
-        measuredProperty: "generation",
-        domainObject: "electricity",
-        technologyOrFuel: "wind",
-        statisticType: "flow"
-      },
-      attachedContext: {},
-      evidence: [
-        {
-          source: "series-label" as const,
-          text: "Wind",
-          itemKey: "wind"
-        }
-      ],
-      variableId: windVariableId,
-      label: "Wind electricity generation"
-    },
-    {
-      _tag: "gap" as const,
-      itemKey: "hydro",
-      semanticPartial: {
-        measuredProperty: "generation",
-        domainObject: "electricity",
-        technologyOrFuel: "hydro",
-        statisticType: "flow"
-      },
-      attachedContext: {},
-      evidence: [
-        {
-          source: "series-label" as const,
-          text: "Hydro",
-          itemKey: "hydro"
-        }
-      ],
-      candidates: [
-        {
-          variableId: solarVariableId,
-          label: "Solar electricity generation",
-          matchedFacets: [
-            "measuredProperty",
-            "domainObject",
-            "statisticType"
-          ],
-          mismatchedFacets: [],
-          subsumptionRatio: 0.75,
-          partialSpecificity: 4,
-          semanticPartial: {
-            measuredProperty: "generation",
-            domainObject: "electricity",
-            technologyOrFuel: "solar PV",
-            statisticType: "flow"
-          }
-        }
-      ],
-      reason: "ambiguous-candidates" as const
-    }
-  ],
-  gaps: [
-    {
-      partial: {
-        measuredProperty: "generation",
-        domainObject: "electricity",
-        technologyOrFuel: "hydro",
-        statisticType: "flow"
-      },
-      candidates: [
-        {
-          variableId: solarVariableId,
-          label: "Solar electricity generation",
-          matchedFacets: [
-            "measuredProperty",
-            "domainObject",
-            "statisticType"
-          ],
-          mismatchedFacets: [],
-          subsumptionRatio: 0.75,
-          partialSpecificity: 4,
-          semanticPartial: {
-            measuredProperty: "generation",
-            domainObject: "electricity",
-            technologyOrFuel: "solar PV",
-            statisticType: "flow"
-          }
-        }
-      ],
-      reason: "ambiguous-candidates" as const
-    }
-  ],
-  tier: "strong-heuristic" as const
+        score: 0.91,
+        scoped: true,
+        matchKind: "lexical" as const
+      }
+    ],
+    series: [],
+    variables: [],
+    trail: []
+  }
 };
 
 describe("resolution boundary schemas", () => {
@@ -211,18 +76,18 @@ describe("resolution boundary schemas", () => {
     ).toThrow();
   });
 
-  it("encodes and decodes resolver responses carrying tagged kernel outcomes", () => {
+  it("encodes and decodes resolver responses carrying asset-keyed resolution bundles", () => {
     const response = decodeResolvePostResponse({
       postUri,
       stage1: {
         matches: [],
         residuals: []
       },
-      kernel: [ambiguousKernelOutcome],
-      resolverVersion: "resolution-kernel@sky-314",
+      resolution: [resolvedAssetBundle],
+      resolverVersion: "bundle-resolution@sky-367",
       latencyMs: {
         stage1: 1,
-        kernel: 1,
+        resolution: 1,
         total: 2
       }
     });
@@ -230,17 +95,11 @@ describe("resolution boundary schemas", () => {
     const encoded = encodeResolvePostResponse(response);
     const roundTripped = decodeResolvePostResponse(encoded);
 
-    expect(roundTripped.kernel).toHaveLength(1);
-    expect(roundTripped.kernel[0]?._tag).toBe("Ambiguous");
-    if (roundTripped.kernel[0]?._tag !== "Ambiguous") {
-      return;
-    }
-
-    expect(roundTripped.kernel[0].items.map((item) => item._tag)).toEqual([
-      "bound",
-      "gap"
-    ]);
-    expect(roundTripped.kernel[0].gaps[0]?.reason).toBe("ambiguous-candidates");
+    expect(roundTripped.resolution).toHaveLength(1);
+    expect(roundTripped.resolution[0]?.assetKey).toBe(resolvedAssetBundle.assetKey);
+    expect(roundTripped.resolution[0]?.resolution.agents[0]?.entityId).toBe(
+      "https://id.skygest.io/agent/ag_1234567890AB"
+    );
   });
 
   it("encodes and decodes bulk resolver responses with keyed errors", () => {
@@ -252,11 +111,11 @@ describe("resolution boundary schemas", () => {
             matches: [],
             residuals: []
           },
-          kernel: [ambiguousKernelOutcome],
-          resolverVersion: "resolution-kernel@sky-314",
+          resolution: [resolvedAssetBundle],
+          resolverVersion: "bundle-resolution@sky-367",
           latencyMs: {
             stage1: 1,
-            kernel: 1,
+            resolution: 1,
             total: 2
           }
         }
@@ -273,7 +132,9 @@ describe("resolution boundary schemas", () => {
     const encoded = encodeResolveBulkResponse(response);
     const roundTripped = decodeResolveBulkResponse(encoded);
 
-    expect(roundTripped.results[postUri]?.kernel[0]?._tag).toBe("Ambiguous");
+    expect(roundTripped.results[postUri]?.resolution[0]?.assetKey).toBe(
+      resolvedAssetBundle.assetKey
+    );
     expect(roundTripped.errors[secondPostUri]?.tag).toBe(
       "ResolverSourceAttributionMissingError"
     );

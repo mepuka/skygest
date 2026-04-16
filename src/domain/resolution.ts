@@ -1,8 +1,6 @@
 import { Schema } from "effect";
-import { ChartAssetId } from "./data-layer/post-ids";
-import { BundleResolution } from "./bundleResolution";
+import { ResolvedAssetBundle } from "./bundleResolution";
 import { Stage1Input, Stage1Result } from "./stage1Resolution";
-import { ResolutionOutcome } from "./resolutionKernel";
 import {
   ResolverBulkItemError,
   ResolverVersion
@@ -15,7 +13,7 @@ const isNonEmptyResolvePostList = (
 
 export const ResolveLatencyMs = Schema.Struct({
   stage1: Schema.Number.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
-  kernel: Schema.Number.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  resolution: Schema.Number.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   total: Schema.Number.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
 });
 export type ResolveLatencyMs = Schema.Schema.Type<typeof ResolveLatencyMs>;
@@ -29,16 +27,13 @@ export type ResolvePostRequest = Schema.Schema.Type<typeof ResolvePostRequest>;
 export const ResolvePostResponse = Schema.Struct({
   postUri: PostUri,
   stage1: Stage1Result,
-  kernel: Schema.Array(ResolutionOutcome),
+  resolution: Schema.Array(ResolvedAssetBundle),
   resolverVersion: ResolverVersion,
   latencyMs: ResolveLatencyMs
 });
 export type ResolvePostResponse = Schema.Schema.Type<typeof ResolvePostResponse>;
 
-export const ResolveSearchCandidatesBundle = Schema.Struct({
-  assetKey: ChartAssetId,
-  resolution: BundleResolution
-});
+export const ResolveSearchCandidatesBundle = ResolvedAssetBundle;
 export type ResolveSearchCandidatesBundle = Schema.Schema.Type<
   typeof ResolveSearchCandidatesBundle
 >;

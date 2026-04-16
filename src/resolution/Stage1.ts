@@ -547,7 +547,7 @@ const pushDeferredResidual = (
       _tag: "DeferredToKernelResidual" as const,
       source,
       text,
-      reason: "requires kernel semantic interpretation",
+      reason: "requires follow-up resolution search",
       assetKey
     })
   );

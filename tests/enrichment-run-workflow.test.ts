@@ -16,7 +16,6 @@ import type {
   EnrichmentRunRecord
 } from "../src/domain/enrichmentRun";
 import { chartAssetIdFromBluesky } from "../src/domain/data-layer/post-ids";
-import type { ResolutionOutcome } from "../src/domain/resolutionKernel";
 import type { PostUri } from "../src/domain/types";
 import { EnrichmentPlanner } from "../src/enrichment/EnrichmentPlanner";
 import { EnrichmentWorkflowLauncher } from "../src/enrichment/EnrichmentWorkflowLauncher";
@@ -200,20 +199,24 @@ const makeSourceAttributionEnrichment = (): SourceAttributionEnrichment => ({
   processedAt: 20
 });
 
-const makeKernelOutcome = (
+const makeResolutionBundles = (
   postUri = "at://did:plc:test/app.bsky.feed.post/post-1"
-): ResolutionOutcome => ({
-  _tag: "NoMatch",
-  bundle: {
-    postUri: asPostUri(postUri),
-    postText: ["Stored post text"],
-    series: [],
-    keyFindings: [],
-    sourceLines: [],
-    publisherHints: []
-  },
-  reason: "no checked-in registry match"
-});
+)=>
+  [
+    {
+      assetKey: chartAssetIdFromBluesky(
+        asPostUri(postUri),
+        "bafkreiworkflowresolutionasset"
+      ),
+      resolution: {
+        agents: [],
+        datasets: [],
+        series: [],
+        variables: [],
+        trail: []
+      }
+    }
+  ];
 
 describe("EnrichmentRunWorkflow", () => {
   it.live("completes a vision run and persists the enrichment payload", () =>
@@ -423,11 +426,11 @@ describe("EnrichmentRunWorkflow", () => {
                       matches: [],
                       residuals: []
                     },
-                    kernel: [makeKernelOutcome(input.postUri)],
-                    resolverVersion: "resolution-kernel@sky-314",
+                    resolution: makeResolutionBundles(input.postUri),
+                    resolverVersion: "bundle-resolution@sky-367",
                     latencyMs: {
                       stage1: 3,
-                      kernel: 2,
+                      resolution: 2,
                       total: 5
                     }
                   };
@@ -531,8 +534,8 @@ describe("EnrichmentRunWorkflow", () => {
               matches: [],
               residuals: []
             },
-            kernel: [expect.objectContaining({ _tag: "NoMatch" })],
-            resolverVersion: "resolution-kernel@sky-314"
+            resolution: makeResolutionBundles(),
+            resolverVersion: "bundle-resolution@sky-367"
           })
         }
       ]);
@@ -593,11 +596,11 @@ describe("EnrichmentRunWorkflow", () => {
                       matches: [],
                       residuals: []
                     },
-                    kernel: [makeKernelOutcome(input.postUri)],
-                    resolverVersion: "resolution-kernel@sky-314",
+                    resolution: makeResolutionBundles(input.postUri),
+                    resolverVersion: "bundle-resolution@sky-367",
                     latencyMs: {
                       stage1: 1,
-                      kernel: 1,
+                      resolution: 1,
                       total: 2
                     }
                   };

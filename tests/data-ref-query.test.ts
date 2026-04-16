@@ -198,7 +198,7 @@ const seedExpertAndPosts = (
 const insertCitation = (input: {
   readonly sourcePostUri: string;
   readonly entityId: string;
-  readonly citationSource?: "kernel" | "stage1";
+  readonly citationSource?: "resolution" | "kernel" | "stage1";
   readonly citationKey?: string;
   readonly resolutionState: "source_only" | "partially_resolved" | "resolved";
   readonly assertedValueJson?: string | null;
@@ -231,10 +231,10 @@ const insertCitation = (input: {
       ) VALUES (
         ${input.sourcePostUri},
         ${input.entityId},
-        ${input.citationSource ?? "kernel"},
+        ${input.citationSource ?? "resolution"},
         ${input.citationKey ??
           [
-            input.citationSource ?? "kernel",
+            input.citationSource ?? "resolution",
             input.resolutionState,
             input.entityId,
             input.observationStart ?? input.observationEnd ?? "",
@@ -280,7 +280,7 @@ describe("data-ref query schemas", () => {
       observationSortKey: "2024-03",
       sourcePostUri: `at://${sampleDid}/app.bsky.feed.post/round-trip`,
       citationKey:
-        `kernel\u0000resolved\u0000${supportedEntityIds.variable}\u00002024-01\u00002024-03\u0000`
+        `resolution\u0000resolved\u0000${supportedEntityIds.variable}\u00002024-01\u00002024-03\u0000`
     });
     const roundTripCursor = decodeCursor(encodeCursor(typedCursor));
 
@@ -302,7 +302,7 @@ describe("data-ref query schemas", () => {
             handle: "seed.example.com",
             displayName: "Seed Example"
           },
-          citationSource: "kernel",
+          citationSource: "resolution",
           resolutionState: "resolved",
           assertedValue: 42,
           assertedUnit: "USD/MWh",
@@ -401,6 +401,7 @@ describe("DataRefQueryService.findCandidatesByDataRef", () => {
               insertCitation({
                 sourcePostUri: postUris[0],
                 entityId: supportedEntityIds.agent,
+                citationSource: "resolution",
                 resolutionState: "resolved"
               }),
               insertCitation({
@@ -418,6 +419,7 @@ describe("DataRefQueryService.findCandidatesByDataRef", () => {
               insertCitation({
                 sourcePostUri: postUris[3],
                 entityId: supportedEntityIds.variable,
+                citationSource: "kernel",
                 resolutionState: "resolved"
               })
             ],
@@ -443,7 +445,7 @@ describe("DataRefQueryService.findCandidatesByDataRef", () => {
             });
 
             expect(agentRows.items[0]?.sourcePostUri).toBe(postUris[0]);
-            expect(agentRows.items[0]?.citationSource).toBe("kernel");
+            expect(agentRows.items[0]?.citationSource).toBe("resolution");
             expect(datasetRows.items[0]?.sourcePostUri).toBe(postUris[1]);
             expect(datasetRows.items[0]?.citationSource).toBe("stage1");
             expect(distributionRows.items[0]?.sourcePostUri).toBe(postUris[2]);

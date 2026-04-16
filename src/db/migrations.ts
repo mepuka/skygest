@@ -44,6 +44,22 @@ const columnExists = (
     Effect.map((rows) => rows.length > 0)
   );
 
+const tableDefinitionContains = (
+  sql: SqlClient.SqlClient,
+  tableName: string,
+  needle: string
+) =>
+  sql<{ sql: string | null }>`
+    SELECT sql as sql
+    FROM sqlite_master
+    WHERE type = 'table'
+      AND name = ${tableName}
+  `.pipe(
+    Effect.map((rows) =>
+      rows.some((row) => typeof row.sql === "string" && row.sql.includes(needle))
+    )
+  );
+
 const publicationRegistryIdentityTableStatement = `CREATE TABLE IF NOT EXISTS publications (
   publication_id TEXT PRIMARY KEY,
   medium TEXT NOT NULL DEFAULT 'text' CHECK (medium IN ('text', 'podcast')),
@@ -949,41 +965,130 @@ const migration24: D1Migration = {
   run: runSeriesDatasetAlignmentMigration
 };
 
+const dataRefCandidateCitationsTableStatement = `CREATE TABLE IF NOT EXISTS data_ref_candidate_citations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  source_post_uri TEXT NOT NULL,
+  entity_id TEXT NOT NULL,
+  citation_source TEXT NOT NULL CHECK (citation_source IN ('resolution', 'kernel', 'stage1')),
+  citation_key TEXT NOT NULL,
+  resolution_state TEXT NOT NULL CHECK (resolution_state IN ('source_only', 'partially_resolved', 'resolved')),
+  asserted_value_json TEXT,
+  asserted_unit TEXT,
+  observation_start TEXT,
+  observation_end TEXT,
+  observation_label TEXT,
+  normalized_observation_start TEXT NOT NULL DEFAULT '',
+  normalized_observation_end TEXT NOT NULL DEFAULT '',
+  observation_sort_key TEXT NOT NULL DEFAULT '',
+  has_observation_time INTEGER NOT NULL DEFAULT 0 CHECK (has_observation_time IN (0, 1)),
+  updated_at INTEGER NOT NULL,
+  UNIQUE (source_post_uri, citation_key),
+  FOREIGN KEY (source_post_uri) REFERENCES posts(uri) ON DELETE CASCADE
+)`;
+
+const dataRefCandidateCitationsIndexStatements = [
+  `CREATE INDEX IF NOT EXISTS idx_data_ref_candidate_citations_entity_cursor
+    ON data_ref_candidate_citations(
+      entity_id,
+      has_observation_time DESC,
+      observation_sort_key DESC,
+      source_post_uri ASC,
+      citation_key ASC
+    )`,
+  `CREATE INDEX IF NOT EXISTS idx_data_ref_candidate_citations_post
+    ON data_ref_candidate_citations(source_post_uri)`
+] as const;
+
+const ensureDataRefCandidateCitationIndexes = (
+  sql: SqlClient.SqlClient
+) =>
+  Effect.forEach(
+    dataRefCandidateCitationsIndexStatements,
+    (statement) => executeUnsafeStatement(sql, statement),
+    { discard: true }
+  );
+
 const migration25: D1Migration = {
   id: 25,
   name: "data_ref_candidate_citations",
   statements: [
-    `CREATE TABLE IF NOT EXISTS data_ref_candidate_citations (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      source_post_uri TEXT NOT NULL,
-      entity_id TEXT NOT NULL,
-      citation_source TEXT NOT NULL CHECK (citation_source IN ('kernel', 'stage1')),
-      citation_key TEXT NOT NULL,
-      resolution_state TEXT NOT NULL CHECK (resolution_state IN ('source_only', 'partially_resolved', 'resolved')),
-      asserted_value_json TEXT,
-      asserted_unit TEXT,
-      observation_start TEXT,
-      observation_end TEXT,
-      observation_label TEXT,
-      normalized_observation_start TEXT NOT NULL DEFAULT '',
-      normalized_observation_end TEXT NOT NULL DEFAULT '',
-      observation_sort_key TEXT NOT NULL DEFAULT '',
-      has_observation_time INTEGER NOT NULL DEFAULT 0 CHECK (has_observation_time IN (0, 1)),
-      updated_at INTEGER NOT NULL,
-      UNIQUE (source_post_uri, citation_key),
-      FOREIGN KEY (source_post_uri) REFERENCES posts(uri) ON DELETE CASCADE
-    )`,
-    `CREATE INDEX IF NOT EXISTS idx_data_ref_candidate_citations_entity_cursor
-      ON data_ref_candidate_citations(
-        entity_id,
-        has_observation_time DESC,
-        observation_sort_key DESC,
-        source_post_uri ASC,
-        citation_key ASC
-      )`,
-    `CREATE INDEX IF NOT EXISTS idx_data_ref_candidate_citations_post
-      ON data_ref_candidate_citations(source_post_uri)`
+    dataRefCandidateCitationsTableStatement,
+    ...dataRefCandidateCitationsIndexStatements
   ]
+};
+
+const runDataRefCitationSourceAlignmentMigration = (
+  sql: SqlClient.SqlClient
+) =>
+  Effect.gen(function* () {
+    const hasTable = yield* tableExists(sql, "data_ref_candidate_citations");
+    if (!hasTable) {
+      yield* executeUnsafeStatement(sql, dataRefCandidateCitationsTableStatement);
+      return yield* ensureDataRefCandidateCitationIndexes(sql);
+    }
+
+    const supportsResolution = yield* tableDefinitionContains(
+      sql,
+      "data_ref_candidate_citations",
+      "'resolution'"
+    );
+    if (supportsResolution) {
+      return yield* ensureDataRefCandidateCitationIndexes(sql);
+    }
+
+    yield* executeUnsafeStatement(
+      sql,
+      `ALTER TABLE data_ref_candidate_citations
+        RENAME TO data_ref_candidate_citations_legacy`
+    );
+    yield* executeUnsafeStatement(sql, dataRefCandidateCitationsTableStatement);
+    yield* executeUnsafeStatement(
+      sql,
+      `INSERT INTO data_ref_candidate_citations (
+        id,
+        source_post_uri,
+        entity_id,
+        citation_source,
+        citation_key,
+        resolution_state,
+        asserted_value_json,
+        asserted_unit,
+        observation_start,
+        observation_end,
+        observation_label,
+        normalized_observation_start,
+        normalized_observation_end,
+        observation_sort_key,
+        has_observation_time,
+        updated_at
+      )
+      SELECT
+        id,
+        source_post_uri,
+        entity_id,
+        citation_source,
+        citation_key,
+        resolution_state,
+        asserted_value_json,
+        asserted_unit,
+        observation_start,
+        observation_end,
+        observation_label,
+        normalized_observation_start,
+        normalized_observation_end,
+        observation_sort_key,
+        has_observation_time,
+        updated_at
+      FROM data_ref_candidate_citations_legacy`
+    );
+    yield* executeUnsafeStatement(sql, `DROP TABLE data_ref_candidate_citations_legacy`);
+    yield* ensureDataRefCandidateCitationIndexes(sql);
+  });
+
+const migration26: D1Migration = {
+  id: 26,
+  name: "data_ref_candidate_citation_source_alignment",
+  run: runDataRefCitationSourceAlignmentMigration
 };
 
 export const migrations: ReadonlyArray<D1Migration> = [
@@ -1011,5 +1116,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration22,
   migration23,
   migration24,
-  migration25
+  migration25,
+  migration26
 ];
