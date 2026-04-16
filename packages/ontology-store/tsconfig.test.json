@@ -3,6 +3,11 @@
   "compilerOptions": {
     "tsBuildInfoFile": "../../.cache/tsc/packages-ontology-store-test.tsbuildinfo"
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "vitest.config.ts"],
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts",
+    "vitest.config.ts",
+    "../../scripts/generate-emit-spec.ts"
+  ],
   "exclude": []
 }

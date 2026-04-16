@@ -106,12 +106,16 @@ const validatePrimaryTopicId = (record: {
 export const CatalogRecord = Schema.Struct({
   _tag: Schema.Literal("CatalogRecord"),
   id: CatalogRecordId,
-  catalogId: CatalogId,
+  catalogId: CatalogId.annotate({
+    [DcatProperty]: "http://purl.org/dc/terms/isPartOf",
+    description: "Parent Catalog. Emitted as dcterms:isPartOf; DCAT has no canonical CatalogRecord -> Catalog predicate (dcat:record runs the other direction) so the standard DCMI 'is part of' property is used."
+  }),
   primaryTopicType: Schema.Literals(["dataset", "dataService"]).annotate({
-    [DcatProperty]: "http://xmlns.com/foaf/0.1/primaryTopic"
+    description: "Discriminant that selects the entity kind for primaryTopicId; not emitted as a separate RDF predicate."
   }),
   primaryTopicId: Schema.String.annotate({
-    description: "Must match the entity kind indicated by primaryTopicType (DatasetId or DataServiceId)"
+    [DcatProperty]: "http://xmlns.com/foaf/0.1/primaryTopic",
+    description: "Must match the entity kind indicated by primaryTopicType (DatasetId or DataServiceId). Emitted as the object of foaf:primaryTopic in RDF."
   }),
   sourceRecordId: Schema.optionalKey(Schema.String),
   harvestedFrom: Schema.optionalKey(Schema.String),
@@ -124,13 +128,13 @@ export const CatalogRecord = Schema.Struct({
   sourceModified: Schema.optionalKey(DateLike),
   isAuthoritative: Schema.optionalKey(Schema.Boolean),
   duplicateOf: Schema.optionalKey(CatalogRecordId)
-}).annotate({
+}).pipe(
+  Schema.check(Schema.makeFilter(validatePrimaryTopicId))
+).annotate({
   description: "Catalog's view of a resource — carries only catalog-tracking dates, not Skygest-managed timestamps (D5). primaryTopicId is validated against primaryTopicType.",
   [DcatClass]: "http://www.w3.org/ns/dcat#CatalogRecord",
   [DesignDecision]: "D5"
-}).pipe(
-  Schema.check(Schema.makeFilter(validatePrimaryTopicId))
-);
+});
 export type CatalogRecord = Schema.Schema.Type<typeof CatalogRecord>;
 
 // ---------------------------------------------------------------------------

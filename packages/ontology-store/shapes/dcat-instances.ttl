@@ -1,0 +1,212 @@
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <https://schema.org/> .
+@prefix sevocab: <https://skygest.dev/vocab/energy/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+sevocab:AgentShape
+  a sh:NodeShape ;
+  sh:targetClass foaf:Agent ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path foaf:name ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Every Agent must have exactly one foaf:name." ;
+  ] .
+
+sevocab:CatalogShape
+  a sh:NodeShape ;
+  sh:targetClass dcat:Catalog ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Every Catalog must have exactly one dcterms:title." ;
+  ] ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcterms:publisher ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class foaf:Agent ;
+    sh:message "Every Catalog must point to exactly one foaf:Agent publisher." ;
+  ] .
+
+sevocab:CatalogRecordShape
+  a sh:NodeShape ;
+  sh:targetClass dcat:CatalogRecord ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcterms:isPartOf ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class dcat:Catalog ;
+    sh:message "Every CatalogRecord must belong to exactly one dcat:Catalog." ;
+  ] ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path foaf:primaryTopic ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Every CatalogRecord must point to exactly one primary topic." ;
+  ] .
+
+sevocab:DatasetShape
+  a sh:NodeShape ;
+  sh:targetClass dcat:Dataset ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Every Dataset must have exactly one dcterms:title." ;
+  ] ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcterms:publisher ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class foaf:Agent ;
+    sh:message "Every Dataset must point to exactly one foaf:Agent publisher." ;
+  ] ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcat:distribution ;
+    sh:class dcat:Distribution ;
+    sh:message "A Dataset distribution, when present, must be a dcat:Distribution." ;
+  ] .
+
+sevocab:DistributionShape
+  a sh:NodeShape ;
+  sh:targetClass dcat:Distribution ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:maxCount 1 ;
+    sh:message "A Distribution may have at most one dcterms:title." ;
+  ] ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcat:accessURL ;
+    sh:maxCount 1 ;
+    sh:message "A Distribution may have at most one dcat:accessURL." ;
+  ] ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcat:downloadURL ;
+    sh:maxCount 1 ;
+    sh:message "A Distribution may have at most one dcat:downloadURL." ;
+  ] ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcat:accessService ;
+    sh:maxCount 1 ;
+    sh:class dcat:DataService ;
+    sh:message "A Distribution may point to at most one dcat:DataService access service." ;
+  ] ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcat:byteSize ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:decimal ;
+    sh:message "A Distribution byte size must be a single xsd:decimal literal." ;
+  ] .
+
+sevocab:DataServiceShape
+  a sh:NodeShape ;
+  sh:targetClass dcat:DataService ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Every DataService must have exactly one dcterms:title." ;
+  ] ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcat:endpointURL ;
+    sh:minCount 1 ;
+    sh:message "Every DataService must expose at least one dcat:endpointURL." ;
+  ] ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcterms:publisher ;
+    sh:maxCount 1 ;
+    sh:class foaf:Agent ;
+    sh:message "A DataService publisher, when present, must be a foaf:Agent." ;
+  ] ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcat:servesDataset ;
+    sh:class dcat:Dataset ;
+    sh:message "A DataService served dataset, when present, must be a dcat:Dataset." ;
+  ] .
+
+sevocab:DatasetSeriesShape
+  a sh:NodeShape ;
+  sh:targetClass dcat:DatasetSeries ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Every DatasetSeries must have exactly one dcterms:title." ;
+  ] ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path dcterms:accrualPeriodicity ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:in (
+      "annual"
+      "quarterly"
+      "monthly"
+      "weekly"
+      "daily"
+      "irregular"
+    ) ;
+    sh:message "A DatasetSeries cadence must be one of the six supported literal values." ;
+  ] .
+
+sevocab:VariableShape
+  a sh:NodeShape ;
+  sh:targetClass sevocab:EnergyVariable ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path rdfs:label ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Every EnergyVariable must have exactly one rdfs:label." ;
+  ] .
+
+sevocab:SeriesShape
+  a sh:NodeShape ;
+  sh:targetClass sevocab:Series ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path rdfs:label ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Every Series must have exactly one rdfs:label." ;
+  ] ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path sevocab:implementsVariable ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class sevocab:EnergyVariable ;
+    sh:message "Every Series must point to exactly one EnergyVariable." ;
+  ] ;
+  sh:property [
+    a sh:PropertyShape ;
+    sh:path sevocab:publishedInDataset ;
+    sh:maxCount 1 ;
+    sh:class dcat:Dataset ;
+    sh:message "A Series may point to at most one dcat:Dataset." ;
+  ] .

@@ -5,7 +5,7 @@
  * edge cases that the per-module tests don't cover.
  */
 import { describe, expect, it } from "@effect/vitest";
-import { Schema } from "effect";
+import { Schema, SchemaAST } from "effect";
 import {
   Variable, Series, Observation, Candidate, DataLayerRecord,
   Agent, Catalog, CatalogRecord, Dataset, Distribution, DataService, DatasetSeries,
@@ -618,9 +618,14 @@ describe("Fixture 9: Duplicate (scheme, value) alias must fail decode", () => {
 // ---------------------------------------------------------------------------
 
 describe("Fixture 10: Annotation presence check", () => {
+  // Use SchemaAST.resolve() so the test reads annotations from the last
+  // check when checks are present (CatalogRecord has a filter check) or
+  // from Base annotations otherwise — matches the Effect 4 annotation
+  // resolution rule so the test is insensitive to authoring order of
+  // `.annotate()` vs `.pipe(Schema.check(...))`.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ann = (schema: any) =>
-    schema.ast.annotations as Record<symbol, unknown>;
+    (SchemaAST.resolve(schema.ast) ?? {}) as Record<symbol, unknown>;
 
   it("Variable carries SchemaOrgType, SdmxConcept, and DesignDecision", () => {
     expect(ann(Variable)[SchemaOrgType]).toBe("https://schema.org/StatisticalVariable");

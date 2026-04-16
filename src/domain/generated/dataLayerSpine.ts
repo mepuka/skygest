@@ -18,7 +18,7 @@ import { Aggregation, StatisticType, UnitFamily } from "../data-layer/variable-e
 
 export const AgentOntologyFields = {
   name: Schema.String.annotate({ [DcatProperty]: "http://xmlns.com/foaf/0.1/name" }),
-  alternateNames: Schema.optionalKey(Schema.Array(Schema.String)),
+  alternateNames: Schema.optionalKey(Schema.Array(Schema.String).annotate({ [DcatProperty]: "http://www.w3.org/2004/02/skos/core#altLabel" })),
   homepage: Schema.optionalKey(WebUrl.annotate({ [DcatProperty]: "http://xmlns.com/foaf/0.1/homepage" })),
 } as const;
 
