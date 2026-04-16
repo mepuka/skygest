@@ -298,6 +298,8 @@ const legacyKernelRowsForOutcome = (
 const resolutionRowsForBundle = (
   bundle: DataRefResolutionEnrichmentV2["resolution"][number]
 ): ReadonlyArray<PreparedDataRefCandidateCitation> => [
+  // TODO: When semantic resolution starts emitting variable/series hits, extend
+  // citation persistence here instead of silently dropping those rows.
   ...bundle.resolution.agents.map((agent) =>
     makeUntimedCitation({
       entityId: agent.entityId,

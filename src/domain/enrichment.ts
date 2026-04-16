@@ -312,7 +312,8 @@ export const isDataRefResolutionEnrichmentV2 = (
 
 export const isLegacyDataRefResolutionEnrichment = (
   value: DataRefResolutionEnrichment
-): value is LegacyDataRefResolutionEnrichment => "kernel" in value;
+): value is LegacyDataRefResolutionEnrichment =>
+  "kernel" in value && !("resolution" in value);
 
 // ---------------------------------------------------------------------------
 // EnrichmentOutput union
