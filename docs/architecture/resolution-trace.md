@@ -154,17 +154,16 @@ That is the new durable seam. Legacy stored rows with `kernel` are still readabl
 
 ### 7. Editorial read path
 
-- **Current readers:** `get_post_enrichments`, `get_editorial_pick_bundle`
+- **Current readers:** `get_post_enrichments`, `get_editorial_pick_bundle`, `resolve_data_ref`, `find_candidates_by_data_ref`
 - **Current gap:** `hydrate-story` does not yet project these data refs into story frontmatter
 
-This means the system already has real resolver output in D1 and on the MCP read surface, but the editorial repo still needs the follow-through steps:
+This means the system already has real resolver output in D1 and on the MCP read/query surface. The missing follow-through is narrower now:
 
-- `SKY-241` for direct lookup on demand
 - `SKY-242` for story-frontmatter projection
-- `SKY-243` for build-graph warnings over unresolved refs
-- `SKY-244` for cross-expert join lookup
+- enough resolver quality and citation density for reverse lookup to pay off consistently in real editorial work
+- continued `build-graph` coverage once those refs start landing on disk by default
 
-That is the product gap now. The runtime write path exists; the editorial projection and lookup paths still need to catch up.
+That is the product gap now. The runtime write path and the on-demand read/query path exist; the filesystem projection path still needs to catch up.
 
 ## Feedback loop
 
@@ -184,7 +183,7 @@ Why this matters for the architecture family:
 
 1. The resolver infrastructure is no longer hypothetical. It is a shipped Worker and a shipped stored row.
 2. The durable resolver contract is now `stage1 + resolution`.
-3. The main product gaps are lookup and projection gaps, not missing runtime plumbing.
+3. The main product gap is projection into editorial files, not missing runtime plumbing.
 4. The main quality gaps are provenance coverage and registry completeness, not missing facet algebra.
 5. The ontology-store package is a real adjacent validation seam, but not part of today's resolver hot path.
 6. Any future semantic resolution or reranking should be described as follow-on work, not as part of today's runtime path.

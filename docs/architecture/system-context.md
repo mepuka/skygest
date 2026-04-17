@@ -151,7 +151,7 @@ graph TD
 
 **Ontology Store Package** (`packages/ontology-store/`). The RDF export, SHACL validation, and round-trip distill package for data-layer entities. It emits the registry snapshot into RDF, validates against committed shapes, and rebuilds entities back out again. It is not on the Worker hot path, but it is now a real adjacent architecture seam for validation and future ontology interoperability. *Shipped as validation/export tooling.*
 
-**MCP Surface** (`src/mcp/Router.ts`, `src/mcp/Toolkit.ts`). Exposes the tool surface used by the discussion workflow and other operator/editor flows. The data-ref resolution rows are already readable through existing read tools such as `get_post_enrichments`, but the dedicated lookup tools `resolve_data_ref` and `find_candidates_by_data_ref` are still not present. *Shipped, with planned data-ref lookup additions.*
+**MCP Surface** (`src/mcp/Router.ts`, `src/mcp/Toolkit.ts`). Exposes the tool surface used by the discussion workflow and other operator/editor flows. Alongside `get_post_enrichments`, the read side now includes exact `resolve_data_ref` lookup and reverse `find_candidates_by_data_ref` lookup over stored citation rows. The remaining editorial gap is no longer MCP lookup coverage; it is getting those refs projected into story frontmatter by default. *Shipped.*
 
 **HTTP API Surface** (`src/api/Router.ts`, `src/admin/Router.ts`, plus backend routes mounted under `/admin`). Public reads plus operator writes. Authorized by bearer token on the admin side. *Shipped.*
 
@@ -163,7 +163,7 @@ graph TD
 
 **Editorial Caches** (`.skygest/cache/experts.json`, `variables.json`, `series.json`, `distributions.json`, `datasets.json`, `agents.json`). Read-only local mirrors of the Cloudflare registry. Used by build-graph and the discussion workflow. *Shipped.*
 
-**build-graph Validator** (`scripts/build-graph.ts` -> `src/narrative/BuildGraph.ts`). Validates frontmatter and graph structure across stories, arcs, annotations, and editions. The additional warning pass for unresolved data-layer refs is still open `SKY-243`. *Shipped core, data-layer warning pass planned.*
+**build-graph Validator** (`scripts/build-graph.ts` -> `src/narrative/BuildGraph.ts`). Validates frontmatter and graph structure across stories, arcs, annotations, and editions. It already warns on legacy, malformed, and cache-backed data-layer ref problems in warning mode, and can ratchet into stricter cache enforcement when asked. The remaining gap is story projection, not warning plumbing. *Shipped.*
 
 **Discussion Skill** (`.claude/skills/discussion/SKILL.md`). The editor-facing voice loop. It depends on the MCP read surface, story files, and the editorial scripts. *Shipped.*
 
@@ -201,7 +201,7 @@ graph TD
 | Snapshot -> D1 registry | Fetched snapshot promoted into runtime tables | `scripts/sync-data-layer.ts`, `src/data-layer/Sync.ts`, `.generated/cold-start/` |
 | Snapshot -> ontology-store | RDF emit, SHACL validation, and distill over the repo-local snapshot | `packages/ontology-store/*`, `packages/ontology-store/generated/emit-spec.json`, `packages/ontology-store/shapes/dcat-instances.ttl` |
 | Variable vocabulary constants | Shared enum and canonical-name lists used by the data-layer spine | `src/domain/data-layer/variable-vocabulary.ts` |
-| MCP read path | Tool responses consumed by editorial workflows | `src/mcp/Toolkit.ts` plus response Schemas in `src/domain/*` |
+| MCP read/query path | Tool responses plus exact and reverse data-ref lookup consumed by editorial workflows | `src/mcp/Toolkit.ts`, `src/services/DataRefQueryService.ts`, `src/domain/data-layer/query.ts` |
 | Editorial cache mirror | Local cached registry manifests | `.skygest/cache/*.json` |
 | Story frontmatter | Filesystem contract between scripts, discussion workflow, and validator | `src/domain/narrative/*` |
 
@@ -217,18 +217,19 @@ graph TD
 | Entity Search projection and typed search lanes | Shipped |
 | Ontology-store RDF round-trip and SHACL validation package | Shipped |
 | Variable/series semantic runtime resolution | Deferred |
-| `resolve_data_ref` / `find_candidates_by_data_ref` MCP tools | Planned (`SKY-241`, `SKY-244`) |
+| `resolve_data_ref` / `find_candidates_by_data_ref` MCP tools | Shipped |
 | hydrate-story `dataRefs` projection | Planned (`SKY-242`) |
-| build-graph unresolved data-ref warnings | Planned (`SKY-243`) |
+| build-graph data-ref warnings and optional strict cache validation | Shipped |
 | LLM follow-up workflow / old Stage 3 story | Not part of the current runtime; future work only |
 | Editorial caches, hydrate-story core, build-graph core, discussion workflow, story files, narrative arcs | Shipped |
 | Editions compile workflow | In progress |
 
 ## What changed in this refresh
 
-1. The resolver is now described as `stage1 + resolution`, not `stage1 + kernel`.
-2. The facet vocabulary, facet kernel, and generated energy-profile runtime were removed from the live story.
-3. The docs now call out entity search as part of the shipped resolver path.
-4. The snapshot path now matches the repo: `.generated/cold-start`, not `references/cold-start`.
-5. The ontology-store package is now documented as a shipped validation/export seam adjacent to the runtime.
-6. Variable and series semantic resolution are explicitly marked as deferred follow-on work.
+1. The resolver is still described as `stage1 + resolution`, not `stage1 + kernel`.
+2. The facet vocabulary, facet kernel, and generated energy-profile runtime stay out of the live story.
+3. The docs now call out entity search, exact lookup, and reverse citation lookup as part of the shipped read path.
+4. The editorial follow-through gap is now isolated to story-frontmatter projection, not missing MCP lookup coverage.
+5. The snapshot path still matches the repo: `.generated/cold-start`, not `references/cold-start`.
+6. The ontology-store package remains a shipped validation/export seam adjacent to the runtime.
+7. Variable and series semantic resolution remain explicitly deferred follow-on work.

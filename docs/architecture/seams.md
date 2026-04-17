@@ -68,10 +68,10 @@ The highest-risk resolver seam is now the live contract between:
 |---|---|---|---|---|
 | `get_post_enrichments` | MCP reader -> post enrichment read service | `GetPostEnrichmentsOutput` | locked | The model can already read stored resolution rows here. |
 | `get_editorial_pick_bundle` | hydrate-story / discussion workflow -> bundle reader | `EditorialPickBundle` | locked | Story scaffolding depends on it. |
-| `resolve_data_ref` | planned MCP tool -> registry lookup | dedicated lookup schema, not yet shipped | planned (`SKY-241`) | Missing ad-hoc lookup seam for the editor/model. |
-| `find_candidates_by_data_ref` | planned MCP tool -> cross-post lookup | dedicated join schema, not yet shipped | planned (`SKY-244`) | Missing cross-expert join seam. |
+| `resolve_data_ref` | shipped MCP tool -> registry lookup | exact canonical-URI or alias lookup via `DataRefQueryService` | shipped | The editor/model can resolve one registry entity on demand without going through a post. |
+| `find_candidates_by_data_ref` | shipped MCP tool -> reverse citation lookup | paged reverse lookup over stored candidate citations via `DataRefQueryService` | shipped, quality-limited | The editor/model can join across posts that cite the same entity, but usefulness still depends on citation density and resolver quality. |
 | hydrate-story data-ref projection | planned story refresh -> filesystem frontmatter | additive `dataRefs` projection | planned (`SKY-242`) | Missing bridge from stored resolver rows into local story files. |
-| build-graph unresolved-ref warnings | planned validator extension -> operator/editor warning surface | warning-only validation over local caches | planned (`SKY-243`) | Missing fail-loud editorial guardrail. |
+| build-graph data-ref warnings | shipped validator path -> operator/editor warning surface | warning-first validation over typed IDs plus local caches, with optional strict cache enforcement | shipped | Catches malformed or unknown data refs before they quietly spread through editorial files. |
 
 ## Stability heat map
 
@@ -83,7 +83,7 @@ Ordered by current blast radius, highest first.
 
 **3. `ResolvePostResponse` <-> `DataRefResolutionEnrichment`.** This is the seam that just changed under the system. It now defines the live resolver story as `stage1 + resolution`. If the docs, read services, or tool consumers drift from that, architecture confusion returns immediately.
 
-**4. `DataLayerRegistry` plus `EntitySearchService`.** Stage 1, bundle resolution, and future lookup tools all depend on these two surfaces. If either drifts, provenance resolution quality drops immediately.
+**4. `DataLayerRegistry` plus `EntitySearchService`.** Stage 1, bundle resolution, and the shipped lookup/query tools all depend on these two surfaces. If either drifts, provenance resolution quality drops immediately.
 
 **5. `RESOLVER` binding plus `ResolverEntrypoint` RPC.** The resolver is now a real third Worker. This transport seam is cheap to misuse because it looks like a local service call while crossing a Worker boundary.
 
@@ -95,13 +95,13 @@ Ordered by current blast radius, highest first.
 
 The live runtime deliberately stops at provenance-first output. Agent and dataset resolution are real; variable and series semantic output are not. Future docs and tooling need to describe that as a chosen scope cut, not as a hidden bug.
 
-### 2. The model can read resolution rows, but cannot yet query them on demand
+### 2. The model can query the read side, but those tools are still exact and quality-limited
 
-`get_post_enrichments` already exposes stored resolver rows. What is still missing is the direct lookup seam (`SKY-241`) and the cross-expert join seam (`SKY-244`).
+`get_post_enrichments`, `resolve_data_ref`, and `find_candidates_by_data_ref` now expose the main read/query path. The remaining risk is not tool absence; it is that direct lookup is exact-match only and reverse lookup is only as useful as the citation rows the resolver currently produces.
 
 ### 3. Story files still lag the stored runtime state
 
-The resolver row lives in D1 today. The story-file projection of those data refs does not. That is `SKY-242`, followed by the validator warning pass in `SKY-243`.
+The resolver row lives in D1 today. The story-file projection of those data refs does not. That is `SKY-242`. The validator warning path already exists, but until `hydrate-story` writes resolver-backed refs onto disk by default, it mostly protects manually authored or migrated references.
 
 ### 4. The ontology export seam is real, but not yet product-facing
 
@@ -117,14 +117,14 @@ The ontology-store package now has committed mapping rules and round-trip tests,
 **Editor**
 
 - Uses the discussion workflow, `hydrate-story`, `spawn-arc`, and `build-graph`.
-- Reads current resolver output indirectly through MCP tools.
+- Reads current resolver output through MCP tools, including exact lookup and reverse citation lookup.
 - Does not yet get resolver-backed `dataRefs` projected into story files automatically.
 
 **MCP-calling LLM**
 
-- Already has rich read access through `get_post_enrichments`, `get_editorial_pick_bundle`, thread tools, post search, and pipeline status.
+- Already has rich read access through `get_post_enrichments`, `get_editorial_pick_bundle`, `resolve_data_ref`, `find_candidates_by_data_ref`, thread tools, post search, and pipeline status.
 - Can already inspect structured resolution outcomes for posts that have run through the resolver.
-- Still lacks the ad-hoc data-ref lookup and cross-expert join tools.
+- Already has direct and reverse data-ref lookup tools, but they remain exact and quality-limited rather than editorially complete.
 
 **Operator**
 
