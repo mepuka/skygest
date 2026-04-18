@@ -53,14 +53,14 @@ Columns use the current subsystem names from `system-context.md`. `Resolution St
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | R1 | Headline names the question | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ✅ | 🚧 |
 | R2 | Chart with provenance | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ✅ | 🚧 |
-| R3 | Expert-data-argument link | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ⚪ | ✅ | ⚪ | ✅ | 📋 SKY-242 | ✅ | ✅ | 📋 SKY-243 | 🚧 |
+| R3 | Expert-data-argument link | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ⚪ | ✅ | ⚪ | ✅ | 📋 SKY-242 | ✅ | ✅ | ✅ | 🚧 |
 | R4 | Temporal grounding | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ✅ | 🚧 |
-| E1 | Voice-drops into a hydrated story | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ⚪ | ✅ | ⚪ | ✅ | 📋 SKY-242 | ✅ | ✅ | 📋 SKY-243 | ⚪ |
-| E2 | Cross-expert join on a data reference | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ⚪ | 📋 SKY-241/244 | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ |
+| E1 | Voice-drops into a hydrated story | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ⚪ | ✅ | ⚪ | ✅ | 📋 SKY-242 | ✅ | ✅ | ✅ | ⚪ |
+| E2 | Cross-expert join on a data reference | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ⚪ | 🚧 | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ |
 | E3 | Curate without losing hand-edits | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ✅ | ⚪ |
 | E4 | Arc evolution against a novel frame | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ⚪ |
-| M1 | Resolve a single data ref | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ⚪ | ⚪ | 📋 SKY-241 | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
-| M2 | Cross-expert join as a tool | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ⚪ | 📋 SKY-244 | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
+| M1 | Resolve a single data ref | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ⚪ | ⚪ | 🚧 | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
+| M2 | Cross-expert join as a tool | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ⚪ | 🚧 | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
 | M3 | Inspect structured resolution gaps for a post | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ✅ | ✅ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
 | M4 | Rich post context in one call | ✅ | ✅ | ✅ | ✅ | ✅ | ⚪ | ✅ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ | ✅ | ⚪ | ⚪ | ⚪ |
 | O1 | Enable and inspect the resolver lane in staging | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
@@ -68,7 +68,7 @@ Columns use the current subsystem names from `system-context.md`. `Resolution St
 | O3 | Quality loop from stored rows to verification | ✅ | ✅ | ✅ | ✅ | 🚧 | ✅ | ✅ | ✅ | ✅ | ✅ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ |
 | O4 | Deploy without breaking editorial | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ⚪ | ✅ | ✅ | ⚪ | ✅ | ✅ | ⚪ |
 
-Assumption note: `Resolution Stack` is marked `🚧` for the product-facing rows because the runtime is shipped but still quality-limited, and it intentionally stops at provenance-first output for now.
+Assumption note: `Resolution Stack` is marked `🚧` for the product-facing rows because the runtime is shipped but still quality-limited, and it intentionally stops at provenance-first output for now. The `MCP` column is also `🚧` for lookup/join rows because those tools now exist, but they still depend on exact IDs or aliases and on the current density of stored citation rows.
 
 ## 3. Four analyses
 
@@ -84,29 +84,31 @@ That immediately changes three experiences:
 
 What did **not** finish with the cutover:
 
-- **R3** still needs those data refs projected into story files (`SKY-242`) and guarded by build-graph warnings (`SKY-243`).
+- **R3** still needs those data refs projected into story files (`SKY-242`) before the reader-facing artifact can carry them by default.
 - **E1** still needs the same projection step before the editor sees resolver-backed data refs on disk by default.
-- **E2**, **M1**, and **M2** still need the dedicated lookup and join tools (`SKY-241`, `SKY-244`).
+- **E2**, **M1**, and **M2** now have real tools, but they are still limited by exact lookup semantics and by current citation density.
 
-So the cutover moved the runtime from "planned" to "real," but the editorial product still needs the last-mile surfaces.
+So the cutover moved both the runtime and the basic read/query path from "planned" to "real," but the editorial product still needs the last-mile projection step and a stronger quality floor.
 
-### (b) The remaining MCP gap
+### (b) The remaining read-side gap
 
-The old version of this document treated the model's data-ref gap as mostly a missing resolver runtime. That is no longer accurate.
+The old version of this document treated the model's data-ref gap as mostly a missing resolver runtime and missing lookup tools. That is no longer accurate.
 
 The model already has:
 
 - post search and thread tools
 - `get_post_enrichments`
 - `get_editorial_pick_bundle`
+- `resolve_data_ref`
+- `find_candidates_by_data_ref`
 - stored resolver rows for posts that have run through the lane
 
 The remaining gap is narrower and clearer:
 
-1. **Ad-hoc direct lookup** is missing (`SKY-241`).
-2. **Cross-expert join lookup** is missing (`SKY-244`).
+1. **Filesystem projection is still missing.** The story scaffold on disk still does not carry resolver-backed `data_refs` by default (`SKY-242`).
+2. **Lookup quality is still bounded by exactness and row density.** Direct lookup wants exact IDs or aliases, and reverse join only pays off when the resolver has produced enough useful citation rows.
 
-That is a better product situation than before because the missing surface is now concentrated in two explicit tool seams instead of being mixed up with missing runtime plumbing.
+That is a better product situation than before because the missing surface is now concentrated in one projection seam and one quality problem instead of being mixed up with missing runtime plumbing.
 
 ### (c) What the ontology-store package changed
 
@@ -132,12 +134,11 @@ Two tracks are justified now.
 
 **Track 1: product surface completion**
 
-- `SKY-241` (`resolve_data_ref`)
 - `SKY-242` (project data refs into story files)
-- `SKY-243` (warn on unresolved refs in build-graph)
-- `SKY-244` (cross-expert join tool)
+- better real-post smoke coverage over `get_post_enrichments` -> `resolve_data_ref` -> `find_candidates_by_data_ref`
+- any follow-on UX tightening needed once projected refs hit story files
 
-This is the shortest path from "resolver writes good rows" to "editor can actually use them."
+This is the shortest path from "resolver writes good rows and exposes them through tools" to "editor can actually use them on disk."
 
 **Track 2: resolver quality and registry completeness**
 
@@ -157,9 +158,9 @@ What should wait:
 
 The architecture family now points to one clean ordering.
 
-**First, finish the editorial surfaces for the resolver we already shipped.**
+**First, finish the editorial projection step for the resolver we already shipped.**
 
-That means `SKY-241`, `SKY-242`, `SKY-243`, and `SKY-244`. Without them, the runtime writes resolver rows that the editor can mostly inspect only indirectly.
+That means `SKY-242` first. The lookup tools and build-graph warning path are already here; the missing step is putting resolver-backed refs into story files by default.
 
 **In parallel, improve the quality of the shipped resolver instead of inventing a new runtime stage.**
 
@@ -173,7 +174,9 @@ That package now matters to architecture health, but it should stay out of the h
 
 1. The matrix now treats the resolver runtime as shipped, not planned.
 2. The model's structured-gap experience is now counted as real for posts that have run through the lane.
-3. The remaining editor/model blockers are now framed as missing lookup and projection surfaces.
-4. The snapshot path now matches the repo's actual `.generated/cold-start` flow.
-5. The ontology-store package is now called out as an operator-facing validation/export seam.
-6. The recommended next work stays split between a product-surface track and a runtime-quality track.
+3. The direct and reverse data-ref MCP tools are now treated as shipped, not planned.
+4. The build-graph data-ref warning path is now treated as shipped, not planned.
+5. The remaining editor-facing blocker is now framed as story-frontmatter projection plus quality work, not missing lookup tools.
+6. The snapshot path now matches the repo's actual `.generated/cold-start` flow.
+7. The ontology-store package is now called out as an operator-facing validation/export seam.
+8. The recommended next work stays split between a product-surface track and a runtime-quality track.
