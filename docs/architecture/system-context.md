@@ -151,19 +151,19 @@ graph TD
 
 **Ontology Store Package** (`packages/ontology-store/`). The RDF export, SHACL validation, and round-trip distill package for data-layer entities. It emits the registry snapshot into RDF, validates against committed shapes, and rebuilds entities back out again. It is not on the Worker hot path, but it is now a real adjacent architecture seam for validation and future ontology interoperability. *Shipped as validation/export tooling.*
 
-**MCP Surface** (`src/mcp/Router.ts`, `src/mcp/Toolkit.ts`). Exposes the tool surface used by the discussion workflow and other operator/editor flows. The data-ref resolution rows are already readable through existing read tools such as `get_post_enrichments`, but the dedicated lookup tools `resolve_data_ref` and `find_candidates_by_data_ref` are still not present. *Shipped, with planned data-ref lookup additions.*
+**MCP Surface** (`src/mcp/Router.ts`, `src/mcp/Toolkit.ts`). Exposes the tool surface used by the discussion workflow and other operator/editor flows. The shipped read path now includes `get_post_enrichments` for stored resolver rows plus the direct and reverse lookup tools `resolve_data_ref` and `find_candidates_by_data_ref`. `get_editorial_pick_bundle` still packages story-scaffold context without projecting resolver-backed `dataRefs` into filesystem frontmatter. *Shipped, with story-file projection still pending.*
 
 **HTTP API Surface** (`src/api/Router.ts`, `src/admin/Router.ts`, plus backend routes mounted under `/admin`). Public reads plus operator writes. Authorized by bearer token on the admin side. *Shipped.*
 
 ### skygest-editorial
 
-**hydrate-story** (`scripts/hydrate-story.ts` -> `src/narrative/HydrateStory.ts`). Pulls an `EditorialPickBundle` from staging and writes or refreshes a story scaffold plus per-post annotations. The core scaffold path is shipped; projecting resolver-backed `dataRefs` into story frontmatter is still the open `SKY-242` step. *Shipped core, data-ref projection planned.*
+**hydrate-story** (`scripts/hydrate-story.ts` -> `src/narrative/HydrateStory.ts`). Pulls an `EditorialPickBundle` from staging and writes or refreshes a story scaffold plus per-post annotations. The core scaffold path is shipped and preserves existing `data_refs` on refresh, but new story and annotation files still default to empty `data_refs`; projecting resolver-backed refs into frontmatter is still the open `SKY-242` step. *Shipped core, resolver-backed data-ref projection planned.*
 
 **Cache Sync CLIs** (`scripts/sync-experts.ts`, `scripts/sync-data-layer-cache.ts`). Refresh the local registry mirrors from staging on demand. The data-layer cache substrate is already in place. *Shipped.*
 
 **Editorial Caches** (`.skygest/cache/experts.json`, `variables.json`, `series.json`, `distributions.json`, `datasets.json`, `agents.json`). Read-only local mirrors of the Cloudflare registry. Used by build-graph and the discussion workflow. *Shipped.*
 
-**build-graph Validator** (`scripts/build-graph.ts` -> `src/narrative/BuildGraph.ts`). Validates frontmatter and graph structure across stories, arcs, annotations, and editions. The additional warning pass for unresolved data-layer refs is still open `SKY-243`. *Shipped core, data-layer warning pass planned.*
+**build-graph Validator** (`scripts/build-graph.ts` -> `src/narrative/BuildGraph.ts`). Validates frontmatter and graph structure across stories, arcs, annotations, and editions. It now also warns on legacy, malformed, and cache-missing data-layer refs through the local cache validators, giving the editorial side a shipped guardrail even though hydrate-story still does not materialize new refs automatically. *Shipped, with warning-only data-ref guardrails.*
 
 **Discussion Skill** (`.claude/skills/discussion/SKILL.md`). The editor-facing voice loop. It depends on the MCP read surface, story files, and the editorial scripts. *Shipped.*
 
@@ -217,18 +217,16 @@ graph TD
 | Entity Search projection and typed search lanes | Shipped |
 | Ontology-store RDF round-trip and SHACL validation package | Shipped |
 | Variable/series semantic runtime resolution | Deferred |
-| `resolve_data_ref` / `find_candidates_by_data_ref` MCP tools | Planned (`SKY-241`, `SKY-244`) |
+| `resolve_data_ref` / `find_candidates_by_data_ref` MCP tools | Shipped |
 | hydrate-story `dataRefs` projection | Planned (`SKY-242`) |
-| build-graph unresolved data-ref warnings | Planned (`SKY-243`) |
+| build-graph unresolved data-ref warnings | Shipped (warning-only guardrail) |
 | LLM follow-up workflow / old Stage 3 story | Not part of the current runtime; future work only |
 | Editorial caches, hydrate-story core, build-graph core, discussion workflow, story files, narrative arcs | Shipped |
 | Editions compile workflow | In progress |
 
 ## What changed in this refresh
 
-1. The resolver is now described as `stage1 + resolution`, not `stage1 + kernel`.
-2. The facet vocabulary, facet kernel, and generated energy-profile runtime were removed from the live story.
-3. The docs now call out entity search as part of the shipped resolver path.
-4. The snapshot path now matches the repo: `.generated/cold-start`, not `references/cold-start`.
-5. The ontology-store package is now documented as a shipped validation/export seam adjacent to the runtime.
-6. Variable and series semantic resolution are explicitly marked as deferred follow-on work.
+1. The MCP read surface is now documented as shipped end-to-end for stored rows, direct lookup, and reverse lookup.
+2. hydrate-story is now described more precisely: it preserves existing `data_refs`, but still writes empty arrays for new story and annotation files.
+3. build-graph data-ref warnings are now documented as a shipped editorial guardrail rather than a future slice.
+4. The remaining editorial gap is narrowed to story-frontmatter projection, not missing lookup tools.

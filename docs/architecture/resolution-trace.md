@@ -154,17 +154,15 @@ That is the new durable seam. Legacy stored rows with `kernel` are still readabl
 
 ### 7. Editorial read path
 
-- **Current readers:** `get_post_enrichments`, `get_editorial_pick_bundle`
-- **Current gap:** `hydrate-story` does not yet project these data refs into story frontmatter
+- **Current readers:** `get_post_enrichments`, `resolve_data_ref`, `find_candidates_by_data_ref`
+- **Adjacent bundle reader:** `get_editorial_pick_bundle` still packages pick context, but it does not materialize resolver-backed `data_refs`
+- **Current guardrail:** `build-graph` now warns on legacy, malformed, and cache-missing data-layer refs in story and annotation frontmatter
 
-This means the system already has real resolver output in D1 and on the MCP read surface, but the editorial repo still needs the follow-through steps:
+This means the system already has real resolver output in D1, direct and reverse lookup on the MCP surface, and a warning-only editorial validator. The remaining follow-through step is still:
 
-- `SKY-241` for direct lookup on demand
 - `SKY-242` for story-frontmatter projection
-- `SKY-243` for build-graph warnings over unresolved refs
-- `SKY-244` for cross-expert join lookup
 
-That is the product gap now. The runtime write path exists; the editorial projection and lookup paths still need to catch up.
+That is the product gap now. The runtime write path and query path exist; the missing piece is materializing those refs into story and annotation files by default.
 
 ## Feedback loop
 
@@ -184,7 +182,7 @@ Why this matters for the architecture family:
 
 1. The resolver infrastructure is no longer hypothetical. It is a shipped Worker and a shipped stored row.
 2. The durable resolver contract is now `stage1 + resolution`.
-3. The main product gaps are lookup and projection gaps, not missing runtime plumbing.
-4. The main quality gaps are provenance coverage and registry completeness, not missing facet algebra.
+3. The main product gap is editorial projection and packaging, not missing raw lookup tools.
+4. The main quality gaps are provenance coverage, candidate-citation coverage, and registry completeness, not missing facet algebra.
 5. The ontology-store package is a real adjacent validation seam, but not part of today's resolver hot path.
 6. Any future semantic resolution or reranking should be described as follow-on work, not as part of today's runtime path.
