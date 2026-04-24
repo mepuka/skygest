@@ -67,11 +67,11 @@ The highest-risk resolver seam is now the live contract between:
 | Seam | Producer -> Consumer | Contract | State | Why it matters |
 |---|---|---|---|---|
 | `get_post_enrichments` | MCP reader -> post enrichment read service | `GetPostEnrichmentsOutput` | locked | The model can already read stored resolution rows here. |
-| `get_editorial_pick_bundle` | hydrate-story / discussion workflow -> bundle reader | `EditorialPickBundle` | locked | Story scaffolding depends on it. |
-| `resolve_data_ref` | planned MCP tool -> registry lookup | dedicated lookup schema, not yet shipped | planned (`SKY-241`) | Missing ad-hoc lookup seam for the editor/model. |
-| `find_candidates_by_data_ref` | planned MCP tool -> cross-post lookup | dedicated join schema, not yet shipped | planned (`SKY-244`) | Missing cross-expert join seam. |
+| `get_editorial_pick_bundle` | hydrate-story / discussion workflow -> bundle reader | `EditorialPickBundle` | locked | Story scaffolding depends on it, even though it does not yet materialize `data_refs`. |
+| `resolve_data_ref` | MCP tool -> registry exact lookup | `ResolveDataRefInput` / `ResolveDataRefOutput` in `src/domain/data-layer/query.ts` | locked | Shipped ad-hoc exact lookup seam for the editor/model. |
+| `find_candidates_by_data_ref` | MCP tool -> stored candidate citation lookup | `FindCandidatesByDataRefInput` / `FindCandidatesByDataRefOutput` in `src/domain/data-layer/query.ts` | stabilizing | Shipped cross-expert join seam over stored candidate citations. |
 | hydrate-story data-ref projection | planned story refresh -> filesystem frontmatter | additive `dataRefs` projection | planned (`SKY-242`) | Missing bridge from stored resolver rows into local story files. |
-| build-graph unresolved-ref warnings | planned validator extension -> operator/editor warning surface | warning-only validation over local caches | planned (`SKY-243`) | Missing fail-loud editorial guardrail. |
+| build-graph unresolved-ref warnings | build-graph CLI -> operator/editor warning surface | warning-only validation over typed IDs and local caches | stabilizing | Shipped guardrail that catches malformed or stale local refs before publish. |
 
 ## Stability heat map
 
@@ -83,7 +83,7 @@ Ordered by current blast radius, highest first.
 
 **3. `ResolvePostResponse` <-> `DataRefResolutionEnrichment`.** This is the seam that just changed under the system. It now defines the live resolver story as `stage1 + resolution`. If the docs, read services, or tool consumers drift from that, architecture confusion returns immediately.
 
-**4. `DataLayerRegistry` plus `EntitySearchService`.** Stage 1, bundle resolution, and future lookup tools all depend on these two surfaces. If either drifts, provenance resolution quality drops immediately.
+**4. Graph-backed `DataLayerRegistry` plus `EntitySearchService`.** Stage 1, bundle resolution, and the lookup tools all depend on these two surfaces. If either drifts, provenance resolution quality drops immediately.
 
 **5. `RESOLVER` binding plus `ResolverEntrypoint` RPC.** The resolver is now a real third Worker. This transport seam is cheap to misuse because it looks like a local service call while crossing a Worker boundary.
 
@@ -95,13 +95,13 @@ Ordered by current blast radius, highest first.
 
 The live runtime deliberately stops at provenance-first output. Agent and dataset resolution are real; variable and series semantic output are not. Future docs and tooling need to describe that as a chosen scope cut, not as a hidden bug.
 
-### 2. The model can read resolution rows, but cannot yet query them on demand
+### 2. The model can query the resolver surface, but bundle hydration still lags
 
-`get_post_enrichments` already exposes stored resolver rows. What is still missing is the direct lookup seam (`SKY-241`) and the cross-expert join seam (`SKY-244`).
+`get_post_enrichments` exposes stored resolver rows, `resolve_data_ref` can resolve exact IDs and aliases, and `find_candidates_by_data_ref` can reverse-join stored candidate citations. What is still missing is a higher-level path that carries those refs into story and annotation frontmatter automatically.
 
 ### 3. Story files still lag the stored runtime state
 
-The resolver row lives in D1 today. The story-file projection of those data refs does not. That is `SKY-242`, followed by the validator warning pass in `SKY-243`.
+The resolver row lives in D1 today. The story-file projection of those data refs still does not. `build-graph` can now warn on untyped, malformed, or cache-missing refs, but `hydrate-story` still writes empty `data_refs` by default.
 
 ### 4. The ontology export seam is real, but not yet product-facing
 
@@ -118,13 +118,13 @@ The ontology-store package now has committed mapping rules and round-trip tests,
 
 - Uses the discussion workflow, `hydrate-story`, `spawn-arc`, and `build-graph`.
 - Reads current resolver output indirectly through MCP tools.
-- Does not yet get resolver-backed `dataRefs` projected into story files automatically.
+- Does not yet get resolver-backed `dataRefs` projected into story files automatically; the current guardrail is build-graph warning output over typed and cached refs.
 
 **MCP-calling LLM**
 
 - Already has rich read access through `get_post_enrichments`, `get_editorial_pick_bundle`, thread tools, post search, and pipeline status.
 - Can already inspect structured resolution outcomes for posts that have run through the resolver.
-- Still lacks the ad-hoc data-ref lookup and cross-expert join tools.
+- Already has ad-hoc direct lookup and cross-expert join tools, but still has to compose them manually with bundle and story workflows.
 
 **Operator**
 
@@ -133,10 +133,7 @@ The ontology-store package now has committed mapping rules and round-trip tests,
 
 ## What changed in this refresh
 
-1. The live resolver seam is now documented as shipped.
-2. The old `stage2` / `stage3` stored-row story was removed because it no longer matches the code.
-3. The facet kernel and generated energy-profile seam were removed from the live architecture story.
-4. The document now treats registry plus search projection as the load-bearing lookup seam.
-5. The snapshot path now matches the repo: `.generated/cold-start`, not `references/cold-start`.
-6. The ontology-store package is now called out as a separate validation/export seam adjacent to the runtime.
-7. The document now distinguishes between shipped resolver transport and still-missing editorial lookup/projection seams.
+1. The direct and reverse data-ref lookup seams are now documented as shipped rather than planned.
+2. The document now distinguishes between shipped query surfaces and the still-missing hydrate-story projection step.
+3. build-graph data-ref warnings are now called out as the current editorial guardrail.
+4. Actor exposure is now aligned with the real split: query access is shipped, filesystem materialization is not.
