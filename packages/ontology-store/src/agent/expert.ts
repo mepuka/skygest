@@ -93,6 +93,14 @@ export type ExpertMetadata = Readonly<Record<ExpertMetadataKey, string>>;
 // TODO(ttl-properties): emit ei:bio in iris.ts after upstream adds it.
 const EI_BIO = namedNode("https://w3id.org/energy-intel/bio");
 
+// `ei:did` is not declared in agent.ttl yet either. Construct the IRI
+// inline; once agent.ttl declares `ei:did a owl:DatatypeProperty`,
+// regenerate iris.ts and replace this with `EI.did`. The triple is
+// load-bearing for round-trip identity stability — see
+// `expertFromTriples`.
+// TODO(ttl-properties): emit ei:did in iris.ts after upstream adds it.
+const EI_DID = namedNode("https://w3id.org/energy-intel/did");
+
 /**
  * Forward mapping. Re-expands the flattened TS `Expert` into BFO
  * inherence triples.
@@ -106,14 +114,16 @@ const EI_BIO = namedNode("https://w3id.org/energy-intel/bio");
  *   (expert, rdf:type, ei:Expert)
  *   (expert, rdf:type, foaf:Person)
  *   (expert, foaf:name, "displayName")
- *   (expert, ei:bio, "bio")               // when present
+ *   (expert, ei:did,  "did:plc:xyz")
+ *   (expert, ei:bio,  "bio")              // when present
  */
 export const expertToTriples = (e: Expert): ReadonlyArray<RdfQuad> => {
   const subject = namedNode(e.iri);
   const triples: RdfQuad[] = [
     quad(subject, RDF.type, EI.Expert),
     quad(subject, RDF.type, FOAF.Person),
-    quad(subject, FOAF.name, literal(e.displayName))
+    quad(subject, FOAF.name, literal(e.displayName)),
+    quad(subject, EI_DID, literal(e.did))
   ];
   for (const roleIri of e.roles) {
     const role = namedNode(roleIri);
@@ -149,8 +159,14 @@ const decodeExpert = Schema.decodeUnknownEffect(Expert);
  *   - tier and primaryTopic: not represented as triples in this slice;
  *     dropped on round-trip until upstream declares them.
  *   - affiliations: same — dropped on round-trip.
- *   - did: not stored as a triple in this slice; we derive it from the
- *     last URL segment of the subject IRI. See TODO(IRI-convention).
+ *
+ * `did` is round-trip stable — it is stored as a `(expert, ei:did,
+ * "did:plc:...")` literal triple by `expertToTriples` and read back
+ * here. The IRI is built from the URL-sanitised handle, not the DID,
+ * so deriving `did` from the IRI tail (the prior implementation) drifted
+ * identity (e.g. `expert/MarkZJacobson` parsed back as did "MarkZJacobson"
+ * instead of "did:plc:xyz"). The AI Search projection key is derived
+ * from `did`, so the drift was load-bearing.
  */
 export const expertFromTriples = (
   quads: ReadonlyArray<RdfQuad>,
@@ -207,12 +223,21 @@ export const expertFromTriples = (
       });
     }
 
-    // did: derive from the last segment of the IRI. The energy-intel
-    // expert IRI convention is `expert/{did-or-handle}`; the slug is
-    // a URL-safe rendering and is the closest stable handle we have.
-    // TODO(IRI-convention): if upstream publishes a `ei:did` property,
-    //   read it from triples instead of parsing the IRI.
-    const didFromIri = subject.split("/").pop() ?? "";
+    // did: required ei:did literal. Stored as a triple by the forward
+    // mapping (rather than derived from the IRI tail) so a handle-keyed
+    // IRI like `expert/MarkZJacobson` does not round-trip its DID
+    // ("did:plc:xyz") into the wrong value.
+    const didQuads = store.getQuads(subjectNode, EI_DID, null, null);
+    const didQuad = didQuads[0];
+    if (!didQuad) {
+      yield* new RdfMappingError({
+        direction: "reverse",
+        entity: "Expert",
+        iri: subject,
+        message: "missing required ei:did"
+      });
+    }
+    const did = didQuad?.object.value ?? "";
 
     // Build the candidate object with conditional assignment so absent
     // optional fields stay absent (Schema.optionalKey under
@@ -220,7 +245,7 @@ export const expertFromTriples = (
     // from `{}` and rejects the former). Mirrors `expertFromLegacyRow`.
     const candidate: Record<string, unknown> = {
       iri: subject,
-      did: didFromIri,
+      did,
       displayName,
       roles
     };

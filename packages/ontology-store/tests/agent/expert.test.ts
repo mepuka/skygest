@@ -71,6 +71,7 @@ describe("ExpertModule", () => {
       const triples = expertToTriples(original);
       const distilled = yield* expertFromTriples(triples, original.iri);
       expect(distilled.iri).toBe(original.iri);
+      expect(distilled.did).toBe(original.did);
       expect(distilled.displayName).toBe(original.displayName);
       expect(distilled.roles).toEqual(original.roles);
       expect(distilled.bio).toBe(original.bio);
@@ -92,6 +93,7 @@ describe("ExpertModule", () => {
       const triples = expertToTriples(original);
       const distilled = yield* expertFromTriples(triples, original.iri);
       expect(distilled.iri).toBe(original.iri);
+      expect(distilled.did).toBe(original.did);
       expect(distilled.displayName).toBe(original.displayName);
       expect(distilled.roles).toEqual(original.roles);
       expect(distilled.bio).toBeUndefined();

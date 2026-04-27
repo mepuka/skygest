@@ -20,9 +20,11 @@
  *   - tier, primaryTopic, affiliations: not represented as triples in
  *     this slice. agent.ttl needs property declarations before they can
  *     round-trip; see expert.ts file-level docstring.
- *   - did: not stored as a triple either. The reverse mapping derives
- *     it from the last URL segment of the IRI, so the round-trip value
- *     is the slug rather than the original `did:plc:xyz`.
+ *
+ * `did` is round-trip stable: it is stored as a `(expert, ei:did,
+ * "did:plc:...")` literal triple and read back from the same triple,
+ * so the reverse value matches the original even when the IRI is
+ * keyed on a handle (e.g. `expert/MarkZJacobson`).
  */
 
 import { describe, expect, it } from "@effect/vitest";
@@ -90,6 +92,7 @@ describe("Expert six-phase round-trip", () => {
 
       // Phase 6: Parity (preserved fields)
       expect(distilled.iri).toBe(original.iri);
+      expect(distilled.did).toBe(original.did);
       expect(distilled.displayName).toBe(original.displayName);
       expect(distilled.roles).toEqual(original.roles);
       expect(distilled.bio).toBe(original.bio);
