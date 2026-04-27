@@ -91,7 +91,11 @@ export class EntityGraphRepo extends ServiceMap.Service<
       replacement: TypedLinkInput<PredicateName>
     ) => Effect.Effect<
       EntityLink,
-      SqlError | EntityGraphLinkInvalidError | EntityGraphLinkNotFoundError
+      | SqlError
+      | EntityGraphEndpointNotFoundError
+      | EntityGraphLinkInvalidError
+      | EntityGraphLinkNotFoundError
+      | EntityGraphTypeMismatchError
     >;
     readonly linksOut: (
       subject: EntityIri,

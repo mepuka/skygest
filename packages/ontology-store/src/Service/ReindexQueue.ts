@@ -1,4 +1,5 @@
 import { Effect, Schema, ServiceMap } from "effect";
+import type { SqlError } from "effect/unstable/sql/SqlError";
 
 import type {
   EntityIri,
@@ -34,7 +35,17 @@ export class ReindexQueueService extends ServiceMap.Service<
   {
     readonly schedule: (
       request: ReindexRequest
-    ) => Effect.Effect<void, ReindexDepthExceededError>;
+    ) => Effect.Effect<void, ReindexDepthExceededError | SqlError>;
+    readonly nextBatch: (
+      now: number,
+      limit: number
+    ) => Effect.Effect<ReadonlyArray<ReindexQueueItem>, SqlError>;
+    readonly markComplete: (queueId: string) => Effect.Effect<void, SqlError>;
+    readonly markFailed: (
+      queueId: string,
+      now: number,
+      message?: string
+    ) => Effect.Effect<void, SqlError>;
     readonly drain: (
       batch: ReadonlyArray<ReindexQueueItem>
     ) => Effect.Effect<ReindexBatchResult, unknown>;
@@ -49,6 +60,9 @@ export class ReindexQueueService extends ServiceMap.Service<
             })
           )
         : Effect.void,
+    nextBatch: () => Effect.succeed([]),
+    markComplete: () => Effect.void,
+    markFailed: () => Effect.void,
     drain: (batch) => Effect.succeed({ rendered: batch.length, failed: 0 })
   });
 }

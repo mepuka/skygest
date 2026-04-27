@@ -215,7 +215,25 @@ export const REINDEX_QUEUE_SCHEMA_STATEMENTS = [
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_reindex_queue_coalesce
     ON reindex_queue(coalesce_key)`,
   `CREATE INDEX IF NOT EXISTS idx_reindex_queue_next
-    ON reindex_queue(next_attempt_at) WHERE attempts < 3`
+    ON reindex_queue(next_attempt_at) WHERE attempts < 3`,
+  `CREATE TABLE IF NOT EXISTS reindex_queue_dlq (
+    queue_id           TEXT PRIMARY KEY,
+    coalesce_key       TEXT NOT NULL,
+    target_entity_type TEXT NOT NULL,
+    target_iri         TEXT NOT NULL,
+    origin_iri         TEXT NOT NULL,
+    cause              TEXT NOT NULL,
+    cause_priority     INTEGER NOT NULL,
+    propagation_depth  INTEGER NOT NULL,
+    attempts           INTEGER NOT NULL,
+    next_attempt_at    INTEGER NOT NULL,
+    enqueued_at        INTEGER NOT NULL,
+    updated_at         INTEGER NOT NULL,
+    failed_at          INTEGER NOT NULL,
+    failure_message    TEXT
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_reindex_queue_dlq_failed
+    ON reindex_queue_dlq(failed_at DESC)`
 ] as const;
 
 export const ENTITY_GRAPH_ALL_SCHEMA_STATEMENTS = [

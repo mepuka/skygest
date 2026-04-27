@@ -93,6 +93,7 @@ export type {
 export {
   EntityGraphRepo
 } from "./Service/EntityGraphRepo";
+export { EntityGraphRepoD1 } from "./Service/EntityGraphRepoD1";
 export type {
   LinkQueryOptions,
   NewLinkEvidence,
@@ -109,6 +110,7 @@ export {
   ReindexDepthExceededError,
   ReindexQueueService
 } from "./Service/ReindexQueue";
+export { ReindexQueueD1 } from "./Service/ReindexQueueD1";
 export type {
   ReindexBatchResult,
   ReindexRequest
