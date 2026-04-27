@@ -1,18 +1,26 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, Layer, References, Schema } from "effect";
+import { Schema } from "effect";
 
 import {
-  distill,
-  emit,
+  BFO,
+  EI,
+  EXPERT_METADATA_KEYS,
+  Expert,
+  ExpertIri,
+  ExpertModule,
+  FOAF,
   IRI,
+  RDF,
   RdfError,
+  RdfMappingError,
   RdfStoreService,
   ShaclService,
   ShaclValidationReport,
-  ShaclViolation
+  ShaclViolation,
+  expertFromLegacyRow,
+  expertFromTriples,
+  expertToTriples
 } from "../src/index";
-
-const TestLayer = Layer.mergeAll(RdfStoreService.Default, ShaclService.Default);
 
 describe("@skygest/ontology-store", () => {
   it("exports the RDF and SHACL domain helpers", () => {
@@ -42,39 +50,35 @@ describe("@skygest/ontology-store", () => {
     expect(error._tag).toBe("RdfError");
   });
 
-  it("emits and distills a simple entity through the public API", () =>
-    Effect.runPromise(
-      Effect.gen(function* () {
-        const rdf = yield* RdfStoreService;
-        const store = yield* rdf.makeStore;
+  it("exposes the RDF and SHACL service tags", () => {
+    expect(RdfStoreService).toBeDefined();
+    expect(ShaclService).toBeDefined();
+  });
 
-        yield* emit(
-          {
-            _tag: "Agent",
-            id: "https://id.skygest.io/agent/ag_01TESTENTITY12345",
-            kind: "organization",
-            name: "Example Agent",
-            alternateNames: ["EA"],
-            createdAt: "2026-04-15T00:00:00.000Z",
-            updatedAt: "2026-04-15T00:00:00.000Z",
-            aliases: []
-          },
-          store
-        );
+  it("exposes RdfMappingError tagged error", () => {
+    const error = new RdfMappingError({
+      direction: "forward",
+      entity: "Expert",
+      iri: "https://example.org/iri",
+      message: "boom"
+    });
+    expect(error._tag).toBe("RdfMappingError");
+  });
 
-        const distilled = yield* distill(store);
+  it("exposes Expert agent module surface", () => {
+    expect(Expert).toBeDefined();
+    expect(ExpertIri).toBeDefined();
+    expect(ExpertModule).toBeDefined();
+    expect(expertToTriples).toBeDefined();
+    expect(expertFromTriples).toBeDefined();
+    expect(expertFromLegacyRow).toBeDefined();
+    expect([...EXPERT_METADATA_KEYS]).toContain("entity_type");
+  });
 
-        expect(distilled).toHaveLength(1);
-        expect(distilled[0]).toMatchObject({
-          _tag: "Agent",
-          id: "https://id.skygest.io/agent/ag_01TESTENTITY12345",
-          name: "Example Agent",
-          alternateNames: ["EA"]
-        });
-      }).pipe(
-        Effect.provide(TestLayer),
-        Effect.provideService(References.MinimumLogLevel, "Error"),
-        Effect.scoped
-      )
-    ));
+  it("exposes namespace IRI constants", () => {
+    expect(EI.Expert).toBeDefined();
+    expect(BFO.bearerOf).toBeDefined();
+    expect(FOAF.name).toBeDefined();
+    expect(RDF.type).toBeDefined();
+  });
 });

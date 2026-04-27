@@ -1,4 +1,5 @@
 import { Schema } from "effect";
+import type { Quad } from "n3";
 
 import { stringifyUnknown } from "../../../../src/platform/Json";
 
@@ -6,9 +7,9 @@ import { stringifyUnknown } from "../../../../src/platform/Json";
  * IRI — a non-empty absolute IRI string. Branded so that call sites that
  * accept an IRI cannot be passed an arbitrary string without validation.
  *
- * The EmitSpec forward section produces IRIs by composing the instance
- * namespace prefix with branded entity IDs. The SHACL shapes file and the
- * reverse mapping both consume IRIs in this shape.
+ * IRIs in this package are consumed by the SHACL harness and the per-entity
+ * ontology modules introduced in later tasks. The brand carries no runtime
+ * information beyond its namespace pattern.
  */
 export const IRI = Schema.String.pipe(
   Schema.check(Schema.isMinLength(1)),
@@ -16,6 +17,16 @@ export const IRI = Schema.String.pipe(
 );
 export type IRI = Schema.Schema.Type<typeof IRI>;
 export const asIri = Schema.decodeUnknownSync(IRI);
+
+/**
+ * RdfQuad — re-export of n3's `Quad` under the package's canonical name.
+ *
+ * Per-entity ontology modules consume this in their `toTriples` /
+ * `fromTriples` signatures. Sourcing the type from `Domain/Rdf.ts` keeps
+ * the domain layer the single source of truth — services and modules
+ * import from here rather than reaching into `n3` directly.
+ */
+export type RdfQuad = Quad;
 
 /**
  * RdfError — tagged error for failures inside the N3-backed RDF store

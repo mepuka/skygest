@@ -1,0 +1,32 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix ei: <https://w3id.org/energy-intel/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ei:ExpertShape a sh:NodeShape ;
+  sh:targetClass ei:Expert ;
+  sh:nodeKind sh:IRI ;
+  sh:pattern "^https://w3id\\.org/energy-intel/expert/[A-Za-z0-9_-]+$" ;
+  sh:message "Expert IRI must match the energy-intel pattern" ;
+  sh:property [
+    sh:path foaf:name ;
+    sh:minCount 1 ;
+    sh:datatype xsd:string ;
+    sh:message "Expert must have a foaf:name" ;
+  ] ;
+  sh:property [
+    sh:path <https://w3id.org/energy-intel/did> ;
+    sh:minCount 1 ;
+    sh:datatype xsd:string ;
+    sh:message "Expert must have an ei:did literal" ;
+  ] ;
+  sh:property [
+    sh:path bfo:0000053 ;
+    sh:minCount 1 ;
+    sh:qualifiedValueShape [
+      sh:class ei:EnergyExpertRole ;
+    ] ;
+    sh:qualifiedMinCount 1 ;
+    sh:message "Expert must bear at least one EnergyExpertRole" ;
+  ] .

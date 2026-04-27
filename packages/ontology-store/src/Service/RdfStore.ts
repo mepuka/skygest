@@ -1,7 +1,9 @@
 import { Effect, Layer, Scope, ServiceMap } from "effect";
-import { DataFactory, Parser, Store, Writer, type NamedNode, type Quad } from "n3";
+import { DataFactory, Parser, Store, Writer, type NamedNode } from "n3";
 
-import { type IRI, RdfError, mapRdfError } from "../Domain/Rdf";
+import { type IRI, RdfError, mapRdfError, type RdfQuad } from "../Domain/Rdf";
+
+export type { RdfQuad };
 
 const DEFAULT_TURTLE_PREFIXES = {
   rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -17,7 +19,6 @@ const DEFAULT_TURTLE_PREFIXES = {
 } as const;
 
 export type RdfStore = Store;
-export type RdfQuad = Quad;
 
 export type RdfQuery = {
   readonly subject?: IRI;

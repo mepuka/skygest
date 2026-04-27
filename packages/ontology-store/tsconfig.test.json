@@ -6,8 +6,7 @@
   "include": [
     "src/**/*.ts",
     "tests/**/*.ts",
-    "vitest.config.ts",
-    "../../scripts/generate-emit-spec.ts"
+    "vitest.config.ts"
   ],
   "exclude": []
 }
