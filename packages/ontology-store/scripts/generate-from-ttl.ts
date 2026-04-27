@@ -43,37 +43,33 @@ class InvalidModuleArg extends Schema.TaggedErrorClass<InvalidModuleArg>()(
   }
 ) {}
 
-class MissingEnergyIntelRootError extends Schema.TaggedErrorClass<MissingEnergyIntelRootError>()(
-  "MissingEnergyIntelRootError",
+class VendoredTtlMissingError extends Schema.TaggedErrorClass<VendoredTtlMissingError>()(
+  "VendoredTtlMissingError",
   {
+    path: Schema.String,
     message: Schema.String
   }
 ) {}
 
 // Resolution order:
-//   1. process.env.ENERGY_INTEL_ROOT — wins when set.
-//   2. Otherwise, fail with MissingEnergyIntelRootError; the codegen
-//      pipeline depends on the upstream ontology_skill repo and we
-//      refuse to silently fall back to a developer-laptop path.
+//   1. process.env.ENERGY_INTEL_ROOT — wins when set; this is the
+//      developer override for iterating against a working copy of the
+//      upstream `ontology_skill` repo.
+//   2. Vendored copy under packages/ontology-store/vendor/energy-intel.
+//      Pinned to a specific upstream commit (.upstream-commit). The
+//      vendored copy is the source of truth in CI: codegen and the
+//      drift gate run against it unconditionally.
 //
-// TODO(SKY-368): lift to a git submodule or `.generated/upstream/...`
-// checkout (similar to the cold-start data fetch precedent) so CI can
-// run the drift gate unconditionally.
-const resolveEnergyIntelRoot = (): Effect.Effect<
-  string,
-  MissingEnergyIntelRootError
-> =>
-  Effect.gen(function* () {
+// See packages/ontology-store/vendor/energy-intel/README.md for the
+// manual update procedure.
+const resolveEnergyIntelRoot = (): Effect.Effect<string> =>
+  Effect.sync(() => {
     const fromEnv = process.env.ENERGY_INTEL_ROOT;
-    if (!fromEnv) {
-      yield* new MissingEnergyIntelRootError({
-        message:
-          "ENERGY_INTEL_ROOT env var must point to the energy-intel modules directory " +
-          "(e.g. ENERGY_INTEL_ROOT=/path/to/ontology_skill/ontologies/energy-intel/modules). " +
-          "See packages/ontology-store/README.md for the upstream repo location."
-      });
-    }
-    return fromEnv;
+    if (fromEnv) return fromEnv;
+    // import.meta.dir is the absolute directory of this script. The
+    // vendored TTLs live two directories up (../vendor/energy-intel)
+    // relative to the script.
+    return `${import.meta.dir}/../vendor/energy-intel`;
   });
 
 const GENERATED_DIR = "packages/ontology-store/src/generated";
@@ -101,6 +97,17 @@ const main = Effect.gen(function* () {
   yield* Effect.log(`generating from module: ${moduleName}`);
   yield* Effect.log(`reading TTL: ${ttlPath}`);
 
+  const ttlExists = yield* fs.exists(ttlPath);
+  if (!ttlExists) {
+    yield* new VendoredTtlMissingError({
+      path: ttlPath,
+      message:
+        `TTL not found at ${ttlPath}. Vendored TTLs live under ` +
+        `packages/ontology-store/vendor/energy-intel; see that directory's ` +
+        `README for the manual update procedure. Set ENERGY_INTEL_ROOT to ` +
+        `override the lookup path during local development.`
+    });
+  }
   const ttl = yield* fs.readFileString(ttlPath);
   const table = yield* parseTtlToClassTable(ttl);
   const jsonSchema = yield* buildJsonSchema(table);
