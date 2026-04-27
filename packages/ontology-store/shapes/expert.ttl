@@ -16,6 +16,12 @@ ei:ExpertShape a sh:NodeShape ;
     sh:message "Expert must have a foaf:name" ;
   ] ;
   sh:property [
+    sh:path <https://w3id.org/energy-intel/did> ;
+    sh:minCount 1 ;
+    sh:datatype xsd:string ;
+    sh:message "Expert must have an ei:did literal" ;
+  ] ;
+  sh:property [
     sh:path bfo:0000053 ;
     sh:minCount 1 ;
     sh:qualifiedValueShape [
