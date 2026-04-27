@@ -10,6 +10,7 @@ describe("parseTtlToClassTable", () => {
         @prefix ei: <https://w3id.org/energy-intel/> .
         @prefix foaf: <http://xmlns.com/foaf/0.1/> .
         @prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
         @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
         @prefix owl: <http://www.w3.org/2002/07/owl#> .
         @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
@@ -17,7 +18,18 @@ describe("parseTtlToClassTable", () => {
         ei:Expert a owl:Class ;
           rdfs:label "Expert"@en ;
           owl:disjointWith ei:Organization ;
-          skos:definition "An energy expert."@en .
+          skos:definition "An energy expert."@en ;
+          owl:equivalentClass [
+            a owl:Class ;
+            owl:intersectionOf (
+              foaf:Person
+              [
+                a owl:Restriction ;
+                owl:onProperty bfo:0000053 ;
+                owl:someValuesFrom ei:EnergyExpertRole
+              ]
+            )
+          ] .
 
         ei:Organization a owl:Class ;
           rdfs:label "Organization"@en .
@@ -27,16 +39,21 @@ describe("parseTtlToClassTable", () => {
           rdfs:subClassOf bfo:0000023 .
       `;
       const table = yield* parseTtlToClassTable(ttl);
-      expect(
-        table.classes.find(
-          (c) => c.iri === "https://w3id.org/energy-intel/Expert"
-        )
-      ).toMatchObject({
+      const expert = table.classes.find(
+        (c) => c.iri === "https://w3id.org/energy-intel/Expert"
+      );
+      expect(expert).toMatchObject({
         iri: "https://w3id.org/energy-intel/Expert",
         label: "Expert",
         definition: "An energy expert.",
         disjointWith: ["https://w3id.org/energy-intel/Organization"]
       });
+      expect(expert?.equivalentClassRestrictions).toEqual([
+        {
+          onProperty: "http://purl.obolibrary.org/obo/BFO_0000053",
+          someValuesFrom: "https://w3id.org/energy-intel/EnergyExpertRole"
+        }
+      ]);
       expect(
         table.classes.find(
           (c) => c.iri === "https://w3id.org/energy-intel/EnergyExpertRole"
