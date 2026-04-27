@@ -1,8 +1,20 @@
 # Energy-Intel Entity-Graph Architecture (Slice 2)
 
-**Status:** Design synthesized 2026-04-27 from 5 parallel Opus 4.7 design agents.
+**Status:** Design synthesized 2026-04-27 from 5 parallel Opus 4.7 design agents. **Revised 2026-04-28** in response to PR #138 review (3 P1 + 4 P2 findings).
 **Companion:** `docs/plans/2026-04-27-energy-intel-unified-abstraction-architecture.md` (slice 1, superseded by this doc on the AI-Search-as-spine framing).
 **Goal:** Lock the entity-graph foundation — `EntityDefinition` core contract, relation graph schema, unified projection contract, Alchemy unification, and workflow services — so slice 2 implementation lands without further design churn.
+
+**Review revisions (2026-04-28):**
+
+| # | Severity | Finding | Resolution |
+|---|----------|---------|------------|
+| 1 | P1 | Context assembly depended on a missing entity registry | Added `entities` table + `lookupEntity` / `upsertEntity` / `listEntities` to `EntityGraphRepo`; `assembleEntityContext` rewritten to two-step (graph layer → storage adapter dispatch). Cross-cutting decision #11 records the pattern. |
+| 2 | P1 | Unique `triple_hash` blocked supersession audit chain | `triple_hash` uniqueness made conditional on `state = 'active'` via partial unique index; supersession is a two-step transaction. |
+| 3 | P1 | Non-default AI Search namespace modeled with the wrong binding | Dropped instance binding; worker accesses via `env.ENERGY_INTEL_SEARCH.get("entity-search")`. Section 4.2 + Section 3.2 + adapter updated. |
+| 4 | P2 | AI Search items.upload used object-arg shape | Switched to positional `upload(name, content, { metadata })` per Workers binding API. |
+| 5 | P2 | Predicate examples drifted from generated `iris.ts` | `PREDICATES` now imports from `iris.ts`; hand-writing predicate URLs forbidden; codegen is the source of truth. |
+| 6 | P2 | Drift check called `e.exampleInstance` / `e.toMetadata` (wrong abstractions) | Drift check consumes `(projection, fixture)` pairs sourced from per-entity `*ProjectionFixture` exports; `EntityDefinition` stays free of testing concerns. |
+| 7 | P2 | Reindex dedup via `Ref<HashSet<…>>` was not durable cross-isolate | Resolved open Q #1: cron'd D1-backed `reindex_queue` with `INSERT OR IGNORE` on a unique coalesce index. Cloudflare Queue is not provisioned in slice 2. |
 
 ## Overview
 
@@ -122,6 +134,8 @@ Concrete `ExpertEntity`:
 
 ```ts
 // packages/ontology-store/src/agent/expert.ts
+import { BFO, EI } from "../iris"
+
 export const ExpertEntity = defineEntity({
   tag: "Expert" as const,
   schema: Expert,
@@ -133,7 +147,7 @@ export const ExpertEntity = defineEntity({
     ),
   },
   ontology: {
-    classIri: "https://w3id.org/energy-intel/Expert",
+    classIri: EI.Expert,
     typeChain: ["foaf:Person", "ei:Expert"],
     shapeRef: "shapes/expert.ttl",
     toTriples: expertToTriples,
@@ -145,8 +159,8 @@ export const ExpertEntity = defineEntity({
     facts: expertFacts,
   },
   relations: {
-    affiliatedWith: { direction: "outbound", predicate: EI_AFFILIATED_WITH, target: "Organization", cardinality: "many" },
-    bears: { direction: "outbound", predicate: BFO_BEARER_OF, target: "EnergyExpertRole", cardinality: "many" },
+    affiliatedWith: { direction: "outbound", predicate: EI.affiliatedWith, target: "Organization", cardinality: "many" },
+    bears:          { direction: "outbound", predicate: BFO.bearerOf,      target: "EnergyExpertRole", cardinality: "many" },
   },
   agentContext: {
     description: "A foaf:Person bearing at least one EnergyExpertRole.",
@@ -155,6 +169,8 @@ export const ExpertEntity = defineEntity({
   },
 })
 ```
+
+Predicate IRIs (`EI.affiliatedWith`, `BFO.bearerOf`, …) are imported from the codegen-driven `iris.ts`. See Section 2.3 for the predicate-registry pattern and the rule that hand-writing predicate URL strings is forbidden.
 
 **Type-level invariants enforced (no runtime checks needed):**
 
@@ -182,7 +198,7 @@ export const lookup = <T extends EntityTag>(tag: T): Registry[T] => Registry[tag
 
 `AnyEntity` is the discriminated union for every cross-type code path — `linksOut` returns it, search results carry it, agent traversal walks edges by tag.
 
-**(B) Hydrated read models composed from definition + graph.** `hydrate(tag, iri)` lives in the graph layer (so `EntityDefinition` stays free of `EntityGraphRepo` as a dependency), composes core entity + edges:
+**(B) Hydrated read models composed from definition + graph.** `hydrate(tag, iri)` lives in the graph layer (so `EntityDefinition` stays free of `EntityGraphRepo` as a dependency), composes core entity + edges. When the caller already knows the tag at compile time it can skip the `lookupEntity` step; the registry-dispatched composition in Section 5.2 (`assembleEntityContext`) is the form to use when the tag is dynamic.
 
 ```ts
 export const hydrate = <T extends EntityTag>(tag: T, iri: string) =>
@@ -207,9 +223,19 @@ Two D1 tables, both keyed by stable `link_id`. Triple identity enforced by separ
 ### 2.1 D1 schema
 
 ```sql
+-- Canonical registry: "this IRI is a known entity of this type".
+-- Full row data lives in per-entity storage adapters (`experts`, `organizations`, …).
+CREATE TABLE IF NOT EXISTS entities (
+  iri          TEXT PRIMARY KEY,
+  entity_type  TEXT NOT NULL,
+  created_at   INTEGER NOT NULL,
+  updated_at   INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_entities_type ON entities(entity_type, updated_at DESC);
+
 CREATE TABLE IF NOT EXISTS entity_links (
   link_id          TEXT PRIMARY KEY,                     -- ULID, monotonic
-  triple_hash      TEXT NOT NULL UNIQUE,                 -- BLAKE3(s|p|o|graph)
+  triple_hash      TEXT NOT NULL,                        -- BLAKE3(s|p|o|graph) — unique only over active rows (see partial index below)
   subject_iri      TEXT NOT NULL,
   predicate_iri    TEXT NOT NULL,
   object_iri       TEXT,                                 -- branded EntityIri OR
@@ -240,6 +266,11 @@ CREATE INDEX IF NOT EXISTS idx_entity_links_subject_type
 CREATE INDEX IF NOT EXISTS idx_entity_links_object_type
   ON entity_links(object_type, predicate_iri);
 
+-- Partial unique index: only one ACTIVE row per (s, p, o, graph) triple.
+-- Superseded/retracted rows preserve the audit chain by sharing the same hash as their replacement.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_entity_links_triple_active
+  ON entity_links(triple_hash) WHERE state = 'active';
+
 CREATE TABLE IF NOT EXISTS entity_link_evidence (
   evidence_id      TEXT PRIMARY KEY,                     -- ULID
   link_id          TEXT NOT NULL,
@@ -264,10 +295,25 @@ CREATE INDEX IF NOT EXISTS idx_evidence_source
 
 `linksOut(iri)` hits `idx_entity_links_out` with a single prefix scan; `linksIn(iri)` hits `idx_entity_links_in`. Retracted/superseded rows persist; queries default-filter to `state = 'active'`.
 
+**The `entities` table is the canonical registry of "this IRI is a known entity of this type."** It is intentionally minimal — full row data lives in per-entity storage adapters (`experts`, `organizations`, etc.). The graph layer answers topology questions (does this IRI exist? what type? what edges?); content questions dispatch through the registry to the appropriate `StorageAdapter<Def>`. This split keeps the graph layer free of per-entity column drift while making cross-type traversal cheap (every edge resolves to a typed neighbor in one lookup). See cross-cutting decision #11.
+
+**`triple_hash` is unique only over active rows (partial unique index).** Superseded and retracted rows preserve the audit chain by sharing the same hash as their replacement. Re-asserting an active edge that already exists becomes a deterministic upsert via `INSERT ... ON CONFLICT(triple_hash) WHERE state = 'active' DO UPDATE`. Supersession is a two-step transaction: mark the old row `state = 'superseded'` (which removes it from the partial unique constraint), then insert the new active row. This unblocks the audit-chain pattern that a global `UNIQUE(triple_hash)` would have rejected.
+
 ### 2.2 EntityGraphRepo service
 
 ```ts
 export class EntityGraphRepo extends ServiceMap.Service<EntityGraphRepo, {
+  // Entity registry (`entities` table) — graph-layer topology answers.
+  readonly upsertEntity: (iri: EntityIri, entityType: EntityTag) =>
+    Effect.Effect<EntityRecord, SqlError | DbError>
+
+  readonly lookupEntity: (iri: EntityIri) =>
+    Effect.Effect<EntityRecord, SqlError | DbError | EntityNotFoundError>
+
+  readonly listEntities: (filter?: { entityType?: EntityTag; limit?: number; cursor?: string }) =>
+    Effect.Effect<{ readonly records: ReadonlyArray<EntityRecord>; readonly nextCursor?: string }, SqlError | DbError>
+
+  // Edge / evidence operations
   readonly createLink: <P extends keyof PredicateRegistry>(input: TypedLinkInput<P>) =>
     Effect.Effect<EntityLink, SqlError | DbError | EntityGraphLinkInvalidError>
 
@@ -294,6 +340,8 @@ export class EntityGraphRepo extends ServiceMap.Service<EntityGraphRepo, {
 }>()("@skygest/EntityGraphRepo") {}
 ```
 
+`EntityRecord = { iri: EntityIri; entity_type: EntityTag; created_at: number; updated_at: number }`. The graph layer answers "does this IRI exist and what type is it?"; full row hydration goes through the per-entity `StorageAdapter<Def>`. `lookupEntity` raises `EntityNotFoundError` when the IRI is absent; `upsertEntity` is the only write path to the registry table and is called from each per-entity storage adapter's `save()` so the registry stays consistent with adapter-owned tables.
+
 `LinkQueryOpts` includes `predicate`, `state`, `asOf` (temporal point query), `minConfidence`, `limit`. `TraversalPattern` carries `hops`, `maxDepth`, `maxNodes`, `asOf`.
 
 ### 2.3 Predicate-type-safety pattern
@@ -301,15 +349,13 @@ export class EntityGraphRepo extends ServiceMap.Service<EntityGraphRepo, {
 Predicates are not just IRI strings — they carry a `(subjectType, objectType)` contract. A `PredicateRegistry` baked into TS at compile time makes `createLink` reject `(Organization, ei:authoredBy, Dataset)` before it touches D1.
 
 ```ts
+import { BFO, EI } from "../../packages/ontology-store/src/iris"
+
 export const PREDICATES = {
-  "ei:mentions":   { iri: asPredicateIri("https://w3id.org/ei/mentions"),
-                     subject: ["Expert", "Post"], object: ["Post", "Article", "Dataset", "Organization", "Expert"] },
-  "ei:authoredBy": { iri: asPredicateIri("https://w3id.org/ei/authoredBy"),
-                     subject: ["Post", "Article"], object: ["Expert"] },
-  "bfo:bearerOf":  { iri: asPredicateIri("http://purl.obolibrary.org/obo/BFO_0000053"),
-                     subject: ["Expert", "Organization"], object: ["EnergyExpertRole", "PublisherRole"] },
-  "ei:affiliatedWith": { iri: asPredicateIri("https://w3id.org/ei/affiliatedWith"),
-                     subject: ["Expert"], object: ["Organization"] },
+  "ei:mentions":       { iri: EI.mentions,        subject: ["Expert", "Post"],          object: ["Post", "Article", "Dataset", "Organization", "Expert"] },
+  "ei:authoredBy":     { iri: EI.authoredBy,      subject: ["Post", "Article"],         object: ["Expert"] },
+  "bfo:bearerOf":      { iri: BFO.bearerOf,       subject: ["Expert", "Organization"],  object: ["EnergyExpertRole", "PublisherRole"] },
+  "ei:affiliatedWith": { iri: EI.affiliatedWith,  subject: ["Expert"],                  object: ["Organization"] },
 } as const satisfies Record<string, PredicateSpec>
 
 export type PredicateRegistry = typeof PREDICATES
@@ -324,6 +370,8 @@ export type TypedLinkInput<P extends keyof PredicateRegistry> = {
   readonly evidence: NewLinkEvidence
 }
 ```
+
+> **The codegen-driven `iris.ts` is the single source for predicate IRIs.** Slice 2 requires upstream `agent.ttl` to declare `ei:mentions`, `ei:authoredBy`, and `ei:affiliatedWith` as `owl:ObjectProperty` so the codegen surfaces them to `EI.mentions` / `EI.authoredBy` / `EI.affiliatedWith`. If upstream lags, follow the precedent from PR #137 where `ei:bio` and `ei:did` were inlined in `iris.ts` with a TODO marker. **Hand-writing predicate IRIs as URL strings is forbidden** — drift between the registry and the generated ontology constants is a real risk.
 
 A runtime guard re-checks `subjectType ∈ subject` because TS soundness ends at decoded D1 row boundaries — older schema rows could carry obsolete combinations; `EntityGraphLinkInvalidError` makes that visible.
 
@@ -405,7 +453,7 @@ export const aiSearchInstanceConfig = {
 }
 ```
 
-This single `as const` array is the type-level SSoT for: each entity's `toMetadata` return type, Alchemy's `customMetadata` declaration, and the worker's runtime `env.ENTITY_SEARCH.search({ filters })` calls.
+This single `as const` array is the type-level SSoT for: each entity's `toMetadata` return type, Alchemy's `customMetadata` declaration, and the worker's runtime `env.ENERGY_INTEL_SEARCH.get("entity-search").search({ filters })` calls (namespace binding; see Section 4.2 for the rule).
 
 ### 3.2 AI Search adapter
 
@@ -415,12 +463,15 @@ export const makeAiSearchAdapter = <S extends Schema.Top>(
 ): Effect.Effect<ProjectionAdapter<S, UnifiedSearchMetadata>, never, EnergyIntelSearch> =>
   Effect.gen(function* () {
     const svc = yield* EnergyIntelSearch
-    const inst = svc.binding.get(svc.instance)  // namespace-binding form
+    // Non-default namespace requires a namespace binding (see Section 4.2).
+    // `svc.namespace` is the wrapped `env.ENERGY_INTEL_SEARCH` namespace binding.
+    const inst = svc.namespace.get("entity-search")
     return {
       upsert: (e) => Effect.tryPromise({
-        try: () => inst.items.upload({
-          name: contract.toKey(e),
-          content: contract.toBody(e),
+        // Cloudflare AI Search items binding is positional:
+        //   items.upload(name, content, { metadata })
+        // See https://developers.cloudflare.com/ai-search/api/items/workers-binding/
+        try: () => inst.items.upload(contract.toKey(e), contract.toBody(e), {
           metadata: contract.toMetadata(e),
         }),
         catch: (cause) => new ProjectionWriteError({ cause, op: "upsert" }),
@@ -434,7 +485,10 @@ export const makeAiSearchAdapter = <S extends Schema.Top>(
   })
 ```
 
-Item-key folder routing (`entities/expert/<id>.md`) carries `entity_type` for free via the built-in `folder` field — frees the custom metadata slot for `time_bucket`.
+Item-key folder routing (`entities/expert/<id>.md`) carries `entity_type` for free via the built-in `folder` field — frees the custom metadata slot for `time_bucket`. Two API-shape pitfalls fixed in review:
+
+1. **Namespace binding, not instance binding.** `entity-search` lives in the non-default `energy-intel` namespace, so the only available binding form is namespace-binding plus `.get("entity-search")`. See Section 4.2.
+2. **Positional `items.upload(name, content, opts)`.** The Workers binding does not accept the object-arg shape `{ name, content, metadata }`. Source: https://developers.cloudflare.com/ai-search/api/items/workers-binding/.
 
 ### 3.3 Cross-type search API
 
@@ -584,17 +638,36 @@ const entitySearch = await AiSearchInstanceWithMetadata("entity-search", {
 })
 
 // Workers (translated from wrangler.toml at parity)
-export const ingestWorker = await Worker("ingest", { /* … bindings include entitySearch, db, etc … */ })
+//
+// IMPORTANT: `entity-search` lives in the non-default `energy-intel` namespace.
+// Cloudflare instance bindings only target the DEFAULT namespace; non-default
+// namespaces must be reached via a NAMESPACE binding plus
+// `env.ENERGY_INTEL_SEARCH.get("entity-search")`. There is no
+// `ENTITY_SEARCH` instance binding for this design.
+export const ingestWorker = await Worker("ingest", {
+  bindings: {
+    DB: db,
+    ENERGY_INTEL_SEARCH: searchNs,    // namespace binding only
+    AI_GATEWAY: aiGateway,
+    /* … */
+  },
+})
 export const resolverWorker = await Worker("resolver", { /* … */ })
 export const agentWorker = await Worker("agent", {
   bindings: {
-    DB: db, ENTITY_SEARCH: entitySearch, NS: searchNs, AI_GATEWAY: aiGateway,
-    INGEST_SERVICE: ingestWorker, RESOLVER: resolverWorker,
+    DB: db,
+    ENERGY_INTEL_SEARCH: searchNs,    // namespace binding only
+    AI_GATEWAY: aiGateway,
+    INGEST_SERVICE: ingestWorker,
+    RESOLVER: resolverWorker,
   },
 })
+// Worker accesses the instance via `env.ENERGY_INTEL_SEARCH.get("entity-search")`.
 
 await app.finalize()
 ```
+
+Cloudflare distinguishes instance bindings (which target only the default namespace) from namespace bindings (which work for any namespace including non-default ones). Because `entity-search` lives in the non-default `energy-intel` namespace, the worker MUST use a namespace binding. There is no instance binding for `entity-search`.
 
 ### 4.3 `provisionEntity()` — aggregation, not Resource
 
@@ -641,29 +714,40 @@ export type EntityMetadata = Readonly<Record<EntityMetadataKey, string>>
 
 // alchemy.run.ts → customMetadata: ENTITY_METADATA_FIELDS
 // Each entity's projection.toMetadata returns EntityMetadata
-// Worker runtime: env.ENTITY_SEARCH.search({ filters }) accepts Partial<EntityMetadata>
+// Worker runtime: env.ENERGY_INTEL_SEARCH.get("entity-search").search({ filters }) accepts Partial<EntityMetadata>
 ```
 
 A 6th field is a TS error in every projection's return type AND every search-call type-arg. Add/remove is a compile-time event, not a deploy-time event.
 
 ### 4.6 Drift detection
 
-If entity A declares `topic` and entity B declares `theme`, both their `toMetadata` must satisfy `EntityMetadata`. They can't — `EntityMetadata` carries the global key set. TS rejects before `bun run typecheck` finishes. For runtime drift (someone bypasses the type system), `provisionEntity` runs an assertion pass before calling Alchemy:
+If entity A declares `topic` and entity B declares `theme`, both their `toMetadata` must satisfy `EntityMetadata`. They can't — `EntityMetadata` carries the global key set. TS rejects before `bun run typecheck` finishes. For runtime drift (someone bypasses the type system), `provisionEntity` runs an assertion pass before calling Alchemy.
+
+The check operates on `(projection, fixture)` pairs — `toMetadata` lives on the **projection contract**, not the entity definition, and entity definitions stay free of testing concerns. Each entity module exports a `<Entity>ProjectionFixture` value following the precedent set in PR #137 (`tests/fixtures/expert.fixture.ts`). `alchemy.run.ts` collects them and passes the array to the assertion:
 
 ```ts
-function assertNoMetadataDrift(entities: ReadonlyArray<EntityDefinition<any, any, any, any>>) {
+export interface ProjectionFixture<Self extends Schema.Top> {
+  readonly entityType: string
+  readonly fixture: Schema.Schema.Type<Self>
+  readonly projection: ProjectionContract<Self, UnifiedSearchMetadata>
+}
+
+function assertNoMetadataDrift(fixtures: ReadonlyArray<ProjectionFixture<any>>) {
   const declared = new Set(ENTITY_METADATA_FIELDS.map((f) => f.field_name))
-  for (const e of entities) {
-    const sample = e.toMetadata(e.exampleInstance)  // entities ship a fixture
+  for (const f of fixtures) {
+    const sample = f.projection.toMetadata(f.fixture)
     const keys = new Set(Object.keys(sample))
     if (![...keys].every((k) => declared.has(k))) {
-      throw new Error(`Entity ${e.tag} emits metadata field not in ENTITY_METADATA_FIELDS: ${[...keys].filter((k) => !declared.has(k)).join(", ")}`)
+      throw new Error(
+        `Projection ${f.entityType} emits metadata field not in ENTITY_METADATA_FIELDS: ` +
+        [...keys].filter((k) => !declared.has(k)).join(", ")
+      )
     }
   }
 }
 ```
 
-Runs at module load before `app.finalize()` — deploy aborts before any Cloudflare API call.
+Runs at module load before `app.finalize()` — deploy aborts before any Cloudflare API call. `EntityDefinition` does NOT carry `exampleInstance` or `toMetadata`; both belong to the test fixture and the projection respectively.
 
 ### 4.7 CI flow
 
@@ -725,7 +809,7 @@ These names avoid baking the entity catalog into service identities — the same
 
 ### 5.2 Worked workflow: `assembleEntityContext`
 
-The smallest realistic example — graph traversal + per-entity render:
+The smallest realistic example — graph traversal + per-entity render. The hydration is **two-step**: the graph layer answers topology ("what type is this IRI?") via `lookupEntity`, then the per-entity `StorageAdapter<Def>` answers content ("give me the full row"). This split keeps the graph layer free of per-entity column drift; see Section 2.1 (entities table) and cross-cutting decision #11.
 
 ```ts
 export const assembleEntityContext = (iri: EntityIri, depth = 1) =>
@@ -734,21 +818,29 @@ export const assembleEntityContext = (iri: EntityIri, depth = 1) =>
     const graph = yield* EntityGraphRepo
     const projection = yield* AgentContextProjection
 
-    const entity = yield* graph.getEntity(iri)
-    const definition = yield* registry.getDefinition(entity.entity_type)
+    const record = yield* graph.lookupEntity(iri)              // (iri, entity_type) — graph layer
+    const definition = yield* registry.getDefinition(record.entity_type)
+    const storage = yield* registry.getStorageAdapter(record.entity_type)
+    const entity = yield* storage.load(iri)                    // full row — adapter dispatch
+
     const linksOut = yield* graph.linksOut(iri, { acceptedOnly: true })
     const linksIn = yield* graph.linksIn(iri, { acceptedOnly: true })
 
     const neighborIris = [...linksOut, ...linksIn].map((l) => l.other_iri)
     const neighbors = depth > 0
-      ? yield* Effect.forEach(neighborIris, (n) => graph.getEntity(n), { concurrency: 8 })
+      ? yield* Effect.forEach(neighborIris, (n) =>
+          Effect.gen(function* () {
+            const nRec = yield* graph.lookupEntity(n)
+            const nStorage = yield* registry.getStorageAdapter(nRec.entity_type)
+            return yield* nStorage.load(n)
+          }), { concurrency: 8 })
       : []
 
     return yield* projection.render({ entity, definition, linksOut, linksIn, neighbors })
   })
 ```
 
-Every primitive is a slice 2 capability; slice 3 wraps this in `EntityContextService.assemble` and exposes it as an `assemble_context` MCP tool.
+Every primitive is a slice 2 capability; slice 3 wraps this in `EntityContextService.assemble` and exposes it as an `assemble_context` MCP tool. There is no `getEntity` on `EntityGraphRepo` — the registry-dispatched composition above replaces it.
 
 ### 5.3 Agent-tool exposure: per-entity gating + MCP generation
 
@@ -774,9 +866,28 @@ Three change classes each declare their fanout:
 
 `ReindexRequest` carries `originIri`, `propagationDepth: number`, and `cause: ReindexCause`. **Depth budget is a hard stop:** `propagationDepth >= 2` is rejected at `schedule()` time. Slice 2 ships only depth 0 and depth 1; "transitive summary refresh" is opt-in per `EntityDefinition.render.summaryDependsOnNeighbors: boolean` (default false).
 
-**Idempotency** comes from a coalescing key `${entity_type}:${iri}:${batch_window}`. Queue consumer dedups by key over a 30-second window using a `Ref<HashSet<CoalesceKey>>` in front of the queue. Same entity reindexed twice in a window collapses to one render. Re-running render-and-upload over a stable input yields a stable AI Search PUT (overwrite-on-name).
+**Idempotency** comes from a coalescing key `${entity_type}:${iri}:${batch_window_ms}`. The earlier draft of this section called for a `Ref<HashSet<CoalesceKey>>` in front of the queue, but that only dedups within a single isolate — cross-isolate, cross-restart, cross-consumer-worker dedup needs durable state. The substrate decision below moves dedup into the queue table itself so coalescing survives isolate eviction.
 
-**Substrate:** Cloudflare Queue gives durable cross-isolate fanout but adds a binding and consumer worker. Alternative: D1-backed `reindex_queue` table polled by a cron'd worker. **Open question — slice 2 must pick.** A cron'd D1 queue is a faster bootstrap and aligns with the "AI Search projection is one of many" framing. The `ReindexQueueService` interface is identical either way; impl is swappable without touching call sites.
+**Substrate (RESOLVED — was open question #1):** cron'd D1-backed `reindex_queue` table. A cron'd consumer worker drains in batches. This decision pairs with the durability requirement above: dedup naturally lives in D1 as `INSERT OR IGNORE` on a unique `(coalesce_key)` index. Coalescing is durable across isolates, restarts, and worker swaps because the dedup state IS the queue state. Cloudflare Queues are the alternative for high-fanout durable messaging but require a binding + consumer worker AND a separate dedup mechanism (DO or D1 lookup). For slice 2's expected workload (~10² reindex events per hour), D1 is sufficient and aligned with the "AI Search projection is one of many" framing. The `ReindexQueueService` interface is identical either way; impl is swappable without touching call sites.
+
+```sql
+CREATE TABLE IF NOT EXISTS reindex_queue (
+  queue_id           TEXT PRIMARY KEY,                              -- ULID
+  coalesce_key       TEXT NOT NULL,                                 -- entity_type:iri:batch_window_ms
+  origin_iri         TEXT NOT NULL,
+  cause              TEXT NOT NULL CHECK (cause IN ('entity-changed','edge-changed','entity-renamed','rebuild-all')),
+  propagation_depth  INTEGER NOT NULL CHECK (propagation_depth >= 0 AND propagation_depth <= 1),
+  attempts           INTEGER NOT NULL DEFAULT 0,
+  next_attempt_at    INTEGER NOT NULL,
+  enqueued_at        INTEGER NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_reindex_queue_coalesce
+  ON reindex_queue(coalesce_key);
+CREATE INDEX IF NOT EXISTS idx_reindex_queue_next
+  ON reindex_queue(next_attempt_at) WHERE attempts < 3;
+```
+
+The `idx_reindex_queue_coalesce` UNIQUE index makes `INSERT OR IGNORE` the natural dedup path. The `idx_reindex_queue_next` partial index is the consumer's drain query. After a successful render-and-upload, the row is deleted; on failure, `attempts++` and `next_attempt_at = now + backoff`. After 3 failed attempts, the row is moved to `reindex_queue_dlq` for inspection. Section 4.2's Alchemy provisioning therefore does NOT include a Cloudflare Queue resource — slice 2 ships only D1 + cron'd worker.
 
 **Failure mode:** single render failure must not poison the batch. Drain effect uses `Effect.forEach(items, ..., { concurrency: 4, discard: true })` wrapped in `Effect.either` per item; outcomes partition into `{ rendered, failed }`; failed set re-enqueues with attempt counter capped at 3.
 
@@ -828,7 +939,7 @@ Inside the workflow, `Effect.partition` keeps partial successes durable when hal
 
 **Forward-looking pattern: link-review state machine via `Effect.gen` + durable state.** The `candidate → accepted → rejected → superseded` lifecycle is a pure function over `entity_link_evidence` rows. Each transition is one `Effect.gen`: read current state, validate transition against an allowed-transitions `Map<FromState, Set<ToState>>` constant, write new evidence row with `reviewer/decided_at/supersedes_link_id`, schedule reindex. Composes naturally with future versioning — bump the constant, leave storage alone, typed transition function rejects invalid transitions at the boundary. Same pattern handles entity reconciliation merges later.
 
-**Open questions:** Reindex queue substrate (Cloudflare Queue vs D1-backed cron'd worker — slice 2 must decide). `summaryDependsOnNeighbors` as a coarse on/off flag (finer per-edge-kind dependency declaration ships in slice 4+). Tool naming convention for non-noun entities. Workflow trace persistence for replay/audit (deferred).
+**Open questions:** `summaryDependsOnNeighbors` as a coarse on/off flag (finer per-edge-kind dependency declaration ships in slice 4+). Tool naming convention for non-noun entities. Workflow trace persistence for replay/audit (deferred). (Reindex queue substrate is no longer open — Section 5.4 picks cron'd D1-backed queue; see cross-cutting decision #12.)
 
 ## Cross-cutting decisions
 
@@ -852,22 +963,27 @@ The 5 sections converge on a small set of architectural commitments:
 
 9. **Workflows are short-lived `Effect` programs over durable state.** No workflow runtime, no homebrew state machine. Long-lived flows live in `entity_links` + `entity_link_evidence` rows; agents re-enter the durable state.
 
-10. **Two-table edge model with bitemporal default.** `entity_links` (canonical edge with ULID + triple_hash, `state` + `effective_from/until` + `superseded_by`) plus `entity_link_evidence` (provenance, confidence, review state, joined by `link_id`).
+10. **Two-table edge model with bitemporal default.** `entity_links` (canonical edge with ULID + triple_hash, `state` + `effective_from/until` + `superseded_by`) plus `entity_link_evidence` (provenance, confidence, review state, joined by `link_id`). `triple_hash` is unique only over `state = 'active'` rows (partial unique index) so supersession can preserve the audit chain; re-asserting an active edge is an upsert; supersession is a two-step transaction (mark old `superseded` → insert new `active`).
+
+11. **`entities` table is the canonical entity registry.** A minimal `(iri, entity_type, created_at, updated_at)` table answers graph-layer topology questions ("does this IRI exist? what type?"). Full row data lives in per-entity `StorageAdapter<Def>` tables (`experts`, `organizations`, …). `EntityGraphRepo.lookupEntity` returns the registry row; content hydration dispatches through `EntityRegistry.getStorageAdapter(type)`. `getEntity` does NOT exist on `EntityGraphRepo` — the registry-dispatched two-step composition replaces it. This split keeps the graph layer free of per-entity column drift while making cross-type traversal cheap.
+
+12. **Reindex substrate is cron'd D1-backed queue, not Cloudflare Queue.** A `reindex_queue` table with a UNIQUE `(coalesce_key)` index makes `INSERT OR IGNORE` the natural durable dedup. A cron'd consumer worker drains by `next_attempt_at`. Coalescing survives isolate eviction, restarts, and worker swaps because the dedup state IS the queue state. Cloudflare Queues remain the right tool when fanout outgrows D1 throughput, but slice 2 does not provision a Queue resource. Resolves prior open question #1.
 
 ## Slice 2 scope (locked)
 
 Ships:
 - `EntityDefinition` core contract (Section 1) + `defineEntity` builder + tagged-union `AnyEntity` registry view
-- `EntityGraphRepo` over D1 with the two-table schema (Section 2) + `linksOut/linksIn/neighbors/traverse` + typed `createLink`
-- `ProjectionContract<E, M, K>` + AI Search adapter + `EntitySearch` cross-type service (Section 3) + `entity-search` instance configured with the 5 metadata fields
-- Alchemy unification (Section 4): `provisionEntity()` + `AiSearchInstanceWithMetadata` wrapper + entity-driven `alchemy.run.ts` + wrangler retirement (with `adopt:true` cutover)
-- `Expert` and `Organization` entity definitions in the new shape (Section 1) — Organization proves multi-entity composition
+- `EntityGraphRepo` over D1 with the three-table schema (Section 2): `entities` registry, `entity_links`, `entity_link_evidence` + partial unique index on `triple_hash WHERE state = 'active'` + `lookupEntity` / `upsertEntity` / `listEntities` / `linksOut` / `linksIn` / `neighbors` / `traverse` + typed `createLink`
+- `ProjectionContract<E, M, K>` + AI Search adapter (positional `items.upload`, namespace-binding access) + `EntitySearch` cross-type service (Section 3) + `entity-search` instance configured with the 5 metadata fields
+- Alchemy unification (Section 4): `provisionEntity()` + `AiSearchInstanceWithMetadata` wrapper + entity-driven `alchemy.run.ts` + wrangler retirement (with `adopt:true` cutover); `(projection, fixture)` drift check at module load
+- `Expert` and `Organization` entity definitions in the new shape (Section 1) — Organization proves multi-entity composition; per-entity `*ProjectionFixture` exports for the drift check
 - `EntityRegistry` Effect Service + Layer wiring (Section 5)
 - `EntityGraphChangeBus` no-op layer in slice 2; `ReindexQueueService` contract with bounded-depth scheduling
+- `reindex_queue` D1 table + cron'd consumer worker contract (decision #12); slice 2 ships the schema + service interface, slice 3 ships the consumer body
 
 Deferred:
 - Post → Entity linking workflow with LLM disambiguation (slice 3)
-- Reindex propagation runtime (slice 3) — the queue + consumer; slice 2 ships only the contract
+- Reindex propagation runtime (slice 3) — the consumer body that drains `reindex_queue` and calls per-entity projections; slice 2 ships only the table + service contract
 - Link review state machine (slice 4 — depends on a real reviewer UI surface)
 - Entity reconciliation (slice 4 — depends on rename + supersession primitives that slice 2 establishes)
 - Temporal queries beyond `asOf` point queries (slice 4+)
@@ -881,14 +997,14 @@ Out of scope entirely:
 
 ## Open questions consolidated
 
-The agents flagged questions slice 2 must resolve before code lands:
+The agents flagged questions slice 2 must resolve before code lands. Two are resolved by the 2026-04-28 review revisions:
 
-1. **Reindex substrate** — Cloudflare Queue (durable, requires consumer worker) or cron'd D1 polling (lighter, eventual). [Section 5]
-2. **Predicate IRIs as a brand** — codegen-emitted `PredicateIri` brand vs plain string. Affects `PredicateRegistry` type safety. [Section 1]
+1. ~~**Reindex substrate** — Cloudflare Queue vs cron'd D1 polling. [Section 5]~~ **RESOLVED 2026-04-28:** cron'd D1-backed `reindex_queue` with `INSERT OR IGNORE` dedup. See cross-cutting decision #12 and Section 5.4.
+2. **Predicate IRIs as a brand** — codegen-emitted `PredicateIri` brand vs plain string. Affects `PredicateRegistry` type safety. [Section 1] (Note: predicate IRI **values** are now codegen-driven via `iris.ts`; the open question is whether to additionally brand the type.)
 3. **`graph_iri` column** — keep for future named-graph use or drop until needed. [Section 2]
 4. **Object literals separate table** — `entity_link_literals` for fulltext-on-literals path. [Section 2]
-5. **Hydration ownership** — graph layer (recommended; resolved) vs `EntityDefinition`. [Sections 1+2 — resolved as graph layer.]
+5. ~~**Hydration ownership** — graph layer vs `EntityDefinition`.~~ **RESOLVED 2026-04-28:** registry-dispatched two-step. Graph layer (`EntityGraphRepo.lookupEntity`) answers topology; per-entity `StorageAdapter<Def>` answers content. See cross-cutting decision #11 and Sections 2.1–2.2 + 5.2.
 6. **AI Search blob:** verify whether DO migration tag history remains a manual-cutover concern after Alchemy adopt. [Section 4]
 7. **Datetime vs text for `time_bucket`** — text bucketing now; datetime + range when needed. [Section 3]
 
-The implementation plan should resolve these explicitly before coding starts.
+The implementation plan should resolve the remaining (open) items explicitly before coding starts.
