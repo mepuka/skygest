@@ -34,9 +34,12 @@ describe("emitIrisModule", () => {
       'Expert: namedNode("https://w3id.org/energy-intel/Expert")'
     );
     expect(source).toContain("export const BFO");
+    // Curated alias: bearerOf maps to BFO_0000053. The raw BFO_NNNNNNN form
+    // should NOT appear for aliased terms.
     expect(source).toContain(
-      'BFO_0000053: namedNode("http://purl.obolibrary.org/obo/BFO_0000053")'
+      'bearerOf: namedNode("http://purl.obolibrary.org/obo/BFO_0000053")'
     );
+    expect(source).not.toContain('BFO_0000053: namedNode');
     expect(source).toContain("export const FOAF");
     expect(source).toContain('name: namedNode("http://xmlns.com/foaf/0.1/name")');
     expect(source).toContain("export const RDF");
@@ -89,6 +92,52 @@ describe("emitIrisModule", () => {
     );
     expect(source).toContain(
       'Organization: namedNode("http://xmlns.com/foaf/0.1/Organization")'
+    );
+  });
+
+  it("aliases curated BFO terms but falls back to BFO_NNNN for unknown terms", () => {
+    const table: ClassTable = {
+      classes: [
+        {
+          iri: "https://w3id.org/energy-intel/Expert",
+          label: "Expert",
+          superClasses: [],
+          disjointWith: [],
+          equivalentClassRestrictions: [],
+          properties: [
+            {
+              // Aliased -> bearerOf
+              iri: "http://purl.obolibrary.org/obo/BFO_0000053",
+              optional: true,
+              list: false
+            },
+            {
+              // Aliased -> inheresIn
+              iri: "http://purl.obolibrary.org/obo/BFO_0000052",
+              optional: true,
+              list: false
+            },
+            {
+              // NOT in alias table -> falls back to raw BFO_0000099
+              iri: "http://purl.obolibrary.org/obo/BFO_0000099",
+              optional: true,
+              list: false
+            }
+          ]
+        }
+      ],
+      prefixes: {}
+    };
+    const source = emitIrisModule(table);
+    expect(source).toContain(
+      'bearerOf: namedNode("http://purl.obolibrary.org/obo/BFO_0000053")'
+    );
+    expect(source).toContain(
+      'inheresIn: namedNode("http://purl.obolibrary.org/obo/BFO_0000052")'
+    );
+    // Non-aliased term keeps the raw BFO_NNNN key.
+    expect(source).toContain(
+      'BFO_0000099: namedNode("http://purl.obolibrary.org/obo/BFO_0000099")'
     );
   });
 

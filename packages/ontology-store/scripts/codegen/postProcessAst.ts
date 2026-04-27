@@ -23,18 +23,46 @@
  *   (`EnergyExpertRole`). `SchemaRepresentation.topologicalSort` is
  *   `@internal` and operates on `References` keyed by sanitised `$ref` —
  *   computing it ourselves keeps the surface stable and avoids reaching into
- *   internals.
+ *   internals. Cycles raise `CodegenAstError` rather than degrading silently.
  * - No file IO; that lives in Task 9's `writeOntologyClasses.ts`.
  *
  * Branded IRI scheme: every class gets a regex anchored to
  * `^https://w3id\.org/energy-intel/<lower>/[A-Za-z0-9_-]+$` (where `<lower>`
  * is the class local name with first character lowercased), matching the
  * upstream IRI minting convention. Properties whose `range` is another class
- * pick up that target class's brand in Task 9.
+ * pick up that target class's brand in Task 9. Class IRIs outside the
+ * energy-intel namespace raise `CodegenAstError(kind: "UnknownNamespace")`
+ * rather than emitting a permissive pattern.
  */
-import { Effect, JsonSchema, SchemaRepresentation } from "effect";
+import { Effect, JsonSchema, Schema, SchemaRepresentation } from "effect";
 import type { ClassTable, EquivalentClassRestriction } from "./parseTtl.ts";
 import type { JsonSchemaDocument } from "./buildJsonSchema.ts";
+
+/**
+ * Tagged error surfaced from post-processing failures. Replaces the prior
+ * silent fallbacks for two load-bearing invariants:
+ *
+ * - `DependencyCycle` — `topoSortClasses` discovered a cycle in the class
+ *   `range` graph. The architecture doc treats topological emit order as a
+ *   correctness guarantee for Task 9 (dependents must appear after their
+ *   dependencies); silently swallowing a cycle would let malformed input
+ *   produce wrong-but-plausible TS source. `cyclePath` carries the IRIs that
+ *   form the cycle, in DFS-discovery order.
+ *
+ * - `UnknownNamespace` — `iriPatternForClass` was asked to brand a class IRI
+ *   outside the energy-intel namespace. The slice ontology is pure
+ *   `ei:* + foaf:* + bfo:*`, so this only fires on malformed input; emitting
+ *   a permissive `^.+$` would defeat the brand and ship corrupt regex.
+ */
+export class CodegenAstError extends Schema.TaggedErrorClass<CodegenAstError>()(
+  "CodegenAstError",
+  {
+    kind: Schema.Literals(["DependencyCycle", "UnknownNamespace"]),
+    cyclePath: Schema.optionalKey(Schema.Array(Schema.String)),
+    classIri: Schema.optionalKey(Schema.String),
+    message: Schema.String
+  }
+) {}
 
 /**
  * Per-class brand metadata. Task 9's TS-source writer substitutes `brandName`
@@ -90,19 +118,34 @@ const localName = (iri: string): string => {
  *   Expert            -> ^https://w3id\.org/energy-intel/expert/[A-Za-z0-9_-]+$
  *   EnergyExpertRole  -> ^https://w3id\.org/energy-intel/energyExpertRole/[A-Za-z0-9_-]+$
  *
- * For non-energy-intel classes we still emit a brand but use a generic
- * `^.+$` permissive pattern; the generator should never see these in
- * practice (the slice ontology is pure ei:* + foaf:* + bfo:*), but this
- * keeps the function total.
+ * Class IRIs outside the energy-intel namespace raise
+ * `CodegenAstError(kind: "UnknownNamespace")`. The slice ontology is pure
+ * `ei:* + foaf:* + bfo:*` and only `ei:*` becomes a `Schema.Class`, so this
+ * never fires in practice; if it does, the generator should not silently emit
+ * a permissive `^.+$` brand and ship corrupt regex.
  */
-const irlPatternForClass = (classIri: string): string => {
-  if (!classIri.startsWith(ENERGY_INTEL_NS)) {
-    return `^.+$`;
-  }
-  const local = localName(classIri);
-  const lower = local.charAt(0).toLowerCase() + local.slice(1);
-  return `^https://w3id\\.org/energy-intel/${lower}/[A-Za-z0-9_-]+$`;
-};
+const iriPatternForClass = (
+  classIri: string
+): Effect.Effect<string, CodegenAstError> =>
+  Effect.gen(function* () {
+    if (!classIri.startsWith(ENERGY_INTEL_NS)) {
+      return yield* new CodegenAstError({
+        kind: "UnknownNamespace",
+        classIri,
+        message: `Class IRI ${classIri} is not in the energy-intel namespace ${ENERGY_INTEL_NS}; refusing permissive pattern.`
+      });
+    }
+    const local = localName(classIri);
+    // TODO(IRI-convention): Confirm naming policy for multi-word class
+    // names with the energy-intel ontology owners. The current rule
+    // (lowercase first char of last segment) produces "energyExpertRole"
+    // for EnergyExpertRole, but the slice's example fixtures use
+    // "/role/EnergyExpertRole/<id>" (a different convention). For the
+    // Expert vertical slice we only mint Expert IRIs ("expert"), so this
+    // is dormant — but Task 11's fixtures need an explicit decision.
+    const lower = local.charAt(0).toLowerCase() + local.slice(1);
+    return `^https://w3id\\.org/energy-intel/${lower}/[A-Za-z0-9_-]+$`;
+  });
 
 /**
  * Render an `owl:equivalentClass` restriction as a human-readable doc line.
@@ -124,126 +167,119 @@ const renderEquivalentClassDoc = (
 /**
  * Topological sort of class IRIs by `range`-edge dependencies. A class is
  * emitted after every class IRI it references through any property's `range`.
- * Cycles fall back to insertion order — Task 9 doesn't depend on a strict
- * topo guarantee for cyclic graphs (the slice ontology has none), and we'd
- * rather degrade gracefully than throw on malformed input.
+ *
+ * Cycles raise `CodegenAstError(kind: "DependencyCycle")` rather than falling
+ * back to insertion order: Task 9 relies on dependents appearing after their
+ * dependencies, and silently degrading on malformed input would produce
+ * wrong-but-plausible TS source. `cyclePath` is the DFS path captured at
+ * detection time, including the re-visited IRI as the closing element so
+ * readers can see the loop (`A → B → C → A`).
  */
-const topoSortClasses = (table: ClassTable): ReadonlyArray<string> => {
-  const known = new Set(table.classes.map((c) => c.iri));
-  const dependsOn = new Map<string, ReadonlyArray<string>>();
-  for (const cls of table.classes) {
-    const deps = new Set<string>();
-    for (const prop of cls.properties) {
-      if (prop.range !== undefined && known.has(prop.range)) {
-        deps.add(prop.range);
+const topoSortClasses = (
+  table: ClassTable
+): Effect.Effect<ReadonlyArray<string>, CodegenAstError> =>
+  Effect.gen(function* () {
+    const known = new Set(table.classes.map((c) => c.iri));
+    const dependsOn = new Map<string, ReadonlyArray<string>>();
+    for (const cls of table.classes) {
+      const deps = new Set<string>();
+      for (const prop of cls.properties) {
+        if (prop.range !== undefined && known.has(prop.range)) {
+          deps.add(prop.range);
+        }
+      }
+      dependsOn.set(cls.iri, [...deps]);
+    }
+
+    const sorted: Array<string> = [];
+    const visited = new Set<string>();
+    const onStack = new Set<string>();
+    const stackPath: Array<string> = [];
+
+    // DFS with explicit cycle detection. Returns the cycle path (closed
+    // loop, dependency-first ordering) the moment a back-edge is seen.
+    const visit = (iri: string): ReadonlyArray<string> | undefined => {
+      if (visited.has(iri)) return undefined;
+      if (onStack.has(iri)) {
+        const cycleStart = stackPath.indexOf(iri);
+        return cycleStart >= 0
+          ? [...stackPath.slice(cycleStart), iri]
+          : [iri, iri];
+      }
+      onStack.add(iri);
+      stackPath.push(iri);
+      for (const dep of dependsOn.get(iri) ?? []) {
+        const cycle = visit(dep);
+        if (cycle !== undefined) return cycle;
+      }
+      stackPath.pop();
+      onStack.delete(iri);
+      visited.add(iri);
+      sorted.push(iri);
+      return undefined;
+    };
+
+    for (const cls of table.classes) {
+      const cycle = visit(cls.iri);
+      if (cycle !== undefined) {
+        return yield* new CodegenAstError({
+          kind: "DependencyCycle",
+          cyclePath: cycle,
+          message: `Topological sort cannot proceed: dependency cycle ${cycle.join(" -> ")}.`
+        });
       }
     }
-    dependsOn.set(cls.iri, [...deps]);
-  }
-
-  const sorted: Array<string> = [];
-  const visited = new Set<string>();
-  const onStack = new Set<string>();
-
-  const visit = (iri: string): void => {
-    if (visited.has(iri)) return;
-    if (onStack.has(iri)) {
-      // Cycle: bail on this branch; remaining classes append in original order.
-      return;
-    }
-    onStack.add(iri);
-    for (const dep of dependsOn.get(iri) ?? []) {
-      visit(dep);
-    }
-    onStack.delete(iri);
-    visited.add(iri);
-    sorted.push(iri);
-  };
-
-  for (const cls of table.classes) {
-    visit(cls.iri);
-  }
-  return sorted;
-};
-
-/**
- * Adapt `JsonSchemaDocument` (the lightweight `{ $schema, $defs }` shape from
- * `buildJsonSchema.ts`) to `JsonSchema.Document<"draft-2020-12">` for
- * `SchemaRepresentation.fromJsonSchemaDocument`. Picks the first `$defs`
- * entry as the root schema and keeps the rest as `definitions`; downstream
- * consumers walk `references`, not the root, so the choice of root is
- * structurally irrelevant.
- */
-const toEffectDocument = (
-  document: JsonSchemaDocument,
-  emitOrder: ReadonlyArray<string>,
-  classDefKeys: ReadonlyMap<string, string>
-): JsonSchema.Document<"draft-2020-12"> => {
-  // `JsonSchema.Definitions` is `Record<string, JsonSchema>` where
-  // `JsonSchema` is the open `{ [x: string]: unknown }` shape; our
-  // `JsonSchemaObject` is structurally compatible (every key is JSON) but
-  // doesn't carry the open index signature, so we coerce through `unknown`
-  // to satisfy the index-signature constraint.
-  const definitions = { ...document.$defs } as unknown as JsonSchema.Definitions;
-  // Pick the topologically-last class (the most-dependent one) as the root.
-  // Any choice works; this keeps `references` populated with every other
-  // class.
-  const rootIri = emitOrder[emitOrder.length - 1];
-  const rootKey =
-    rootIri !== undefined ? classDefKeys.get(rootIri) : undefined;
-  const rootSchema: JsonSchema.JsonSchema =
-    rootKey !== undefined ? { $ref: `#/$defs/${rootKey}` } : {};
-  return {
-    dialect: "draft-2020-12",
-    schema: rootSchema,
-    definitions
-  };
-};
+    return sorted;
+  });
 
 export const postProcessAst = (
   jsonSchema: JsonSchemaDocument,
   table: ClassTable
-): Effect.Effect<ProcessedAst, Error> =>
-  Effect.try({
-    try: (): ProcessedAst => {
-      // Pre-build IRI → $defs key map so root selection mirrors
-      // buildJsonSchema's localName logic exactly.
-      const classDefKeys = new Map<string, string>();
-      for (const cls of table.classes) {
-        classDefKeys.set(cls.iri, localName(cls.iri));
-      }
+): Effect.Effect<ProcessedAst, CodegenAstError | Error> =>
+  Effect.gen(function* () {
+    const emitOrder = yield* topoSortClasses(table);
 
-      const emitOrder = topoSortClasses(table);
+    // Build per-class brand metadata. Task 9 strings-substitutes these into
+    // the generated `Schema.String.pipe(Schema.pattern(...), Schema.brand(...))`
+    // for each class's `iri` field plus emits the equivalent-class JSDoc.
+    const brandedIris: Array<BrandedIriMetadata> = [];
+    for (const cls of table.classes) {
+      const pattern = yield* iriPatternForClass(cls.iri);
+      brandedIris.push({
+        className: localName(cls.iri),
+        classIri: cls.iri,
+        brandName: `${localName(cls.iri)}Iri`,
+        pattern,
+        equivalentClassDoc: cls.equivalentClassRestrictions.map((r) =>
+          renderEquivalentClassDoc(cls.iri, r)
+        )
+      });
+    }
 
-      // Build per-class brand metadata. Task 9 strings-substitutes these into
-      // the generated `Schema.String.pipe(Schema.pattern(...), Schema.brand(...))`
-      // for each class's `iri` field plus emits the equivalent-class JSDoc.
-      const brandedIris: Array<BrandedIriMetadata> = table.classes.map(
-        (cls): BrandedIriMetadata => ({
-          className: localName(cls.iri),
-          classIri: cls.iri,
-          brandName: `${localName(cls.iri)}Iri`,
-          pattern: irlPatternForClass(cls.iri),
-          equivalentClassDoc: cls.equivalentClassRestrictions.map((r) =>
-            renderEquivalentClassDoc(cls.iri, r)
-          )
-        })
-      );
+    // Lift the JSON Schema document into Effect's representation system.
+    // `JsonSchema.fromSchemaDraft2020_12` accepts the open
+    // `{ $defs, ...rest }` shape directly: it strips `$defs` into the
+    // canonical `definitions` field and keeps the rest as the root `schema`.
+    // `buildJsonSchema` emits a `$defs`-only document (no root keys), so the
+    // resulting `schema` is effectively empty — but `toMultiDocument` still
+    // populates `references` with every class, which is what Task 9 walks.
+    const multiDocument = yield* Effect.try({
+      try: () => {
+        // `JsonSchemaDocument` is structurally an open JSON Schema (every
+        // value is JSON-encodable) but TS lacks an index signature on the
+        // closed interface; widen via `unknown` to satisfy the
+        // `[x: string]: unknown` shape `fromSchemaDraft2020_12` expects.
+        const raw = jsonSchema as unknown as JsonSchema.JsonSchema;
+        const document = SchemaRepresentation.fromJsonSchemaDocument(
+          JsonSchema.fromSchemaDraft2020_12(raw)
+        );
+        return SchemaRepresentation.toMultiDocument(document);
+      },
+      catch: (cause): Error =>
+        cause instanceof Error
+          ? cause
+          : new Error(`AST post-process failed: ${String(cause)}`)
+    });
 
-      // Lift the JSON Schema document into Effect's representation system.
-      // We go through the `MultiDocument` form because `buildJsonSchema`
-      // produces a `$defs`-only document — every class is a definition, none
-      // are root. `toMultiDocument` keeps `references` populated with the
-      // full graph.
-      const document = SchemaRepresentation.fromJsonSchemaDocument(
-        toEffectDocument(jsonSchema, emitOrder, classDefKeys)
-      );
-      const multiDocument = SchemaRepresentation.toMultiDocument(document);
-
-      return { multiDocument, brandedIris, emitOrder };
-    },
-    catch: (cause) =>
-      cause instanceof Error
-        ? cause
-        : new Error(`AST post-process failed: ${String(cause)}`)
+    return { multiDocument, brandedIris, emitOrder };
   });

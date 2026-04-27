@@ -16,9 +16,10 @@
  * Discovery rules:
  * - `EI` includes every class IRI under `https://w3id.org/energy-intel/`
  *   plus every property with that prefix.
- * - `BFO` includes every property under `http://purl.obolibrary.org/obo/BFO_`,
- *   keyed by its full `BFO_NNNNNNN` segment so `BFO.BFO_0000053` reads
- *   straight off the IRI.
+ * - `BFO` includes every property under `http://purl.obolibrary.org/obo/BFO_`.
+ *   Curated terms (see `BFO_ALIASES`) emit a friendly key (`bearerOf`,
+ *   `inheresIn`); other terms fall back to their `BFO_NNNNNNN` segment so
+ *   the writer can still reference them by raw ID.
  * - `FOAF` includes every property under `http://xmlns.com/foaf/0.1/` plus
  *   the always-needed `name`, `Person`, `Organization` terms.
  * - `RDF`, `RDFS`, `OWL`, `SKOS`, `XSD` use a fixed common-term set so the
@@ -37,6 +38,21 @@ const NS_RDFS = "http://www.w3.org/2000/01/rdf-schema#";
 const NS_OWL = "http://www.w3.org/2002/07/owl#";
 const NS_SKOS = "http://www.w3.org/2004/02/skos/core#";
 const NS_XSD = "http://www.w3.org/2001/XMLSchema#";
+
+/**
+ * Curated aliases for BFO terms. Generated TS source emits the mapped
+ * key (`bearerOf`) instead of the raw `BFO_NNNNNNN` segment so consumers
+ * read more naturally (`BFO.bearerOf` vs. `BFO.BFO_0000053`). Terms not
+ * present here keep the `BFO_NNNNNNN` form as a safe fallback. Add new
+ * entries as the slice ontology grows.
+ */
+const BFO_ALIASES: Readonly<Record<string, string>> = {
+  BFO_0000023: "role",
+  BFO_0000027: "objectAggregate",
+  BFO_0000030: "object",
+  BFO_0000052: "inheresIn",
+  BFO_0000053: "bearerOf"
+};
 
 /**
  * Trailing segment of `iri` after `prefix`, or `undefined` if `iri` does not
@@ -80,9 +96,12 @@ export const emitIrisModule = (table: ClassTable): string => {
       const bfoTail = stripPrefix(prop.iri, NS_BFO);
       // Only keep BFO_NNNNNNN form (skip e.g. RO_, IAO_) — the slice ontology
       // only references BFO terms, but the namespace bucket is `purl.obo`
-      // shared. Filter by the conventional BFO_ prefix.
+      // shared. Filter by the conventional BFO_ prefix. Apply the curated
+      // alias table when present so generated source reads `BFO.bearerOf`
+      // instead of `BFO.BFO_0000053`; otherwise keep the raw segment.
       if (bfoTail !== undefined && bfoTail.startsWith("BFO_")) {
-        bfo.set(bfoTail, prop.iri);
+        const key = BFO_ALIASES[bfoTail] ?? bfoTail;
+        bfo.set(key, prop.iri);
       }
 
       const foafTail = stripPrefix(prop.iri, NS_FOAF);
