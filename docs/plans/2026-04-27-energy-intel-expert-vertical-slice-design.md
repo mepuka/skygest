@@ -1,5 +1,13 @@
 # Energy-Intel Ontology Adoption: Expert Vertical Slice
 
+> **Implementation status (2026-04-27):** PR #137 ships **Phase A-D only** — the
+> ontology-store package consolidation, codegen pipeline, and the canonical
+> hand-written Expert agent module + SHACL shape + six-phase round-trip test.
+> Phase E (Alchemy migration + AI Search provisioning) and Phase F (coordination
+> services + populate script + admin route + cutover) are deferred to separate
+> PRs since they touch live Cloudflare infrastructure. The plan below describes
+> the full target state.
+
 **Status:** Design locked 2026-04-27. Implementation pending.
 **Scope:** One PR. ~2 weeks. Codegen + Alchemy + AI Search instance live + queryable `Expert` end-to-end.
 

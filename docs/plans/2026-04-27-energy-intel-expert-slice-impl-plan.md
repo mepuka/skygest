@@ -1,5 +1,13 @@
 # Energy-Intel Expert Slice Implementation Plan
 
+> **Implementation status (2026-04-27):** PR #137 ships **Phase A-D only** — the
+> ontology-store package consolidation, codegen pipeline, and the canonical
+> hand-written Expert agent module + SHACL shape + six-phase round-trip test.
+> Phase E (Alchemy migration + AI Search provisioning) and Phase F (coordination
+> services + populate script + admin route + cutover) are deferred to separate
+> PRs since they touch live Cloudflare infrastructure. The 21-task plan below
+> remains the contract for the full target state.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Ship the energy-intel ontology vertical slice on `Expert` end-to-end — codegen pipeline producing Effect schemas from `agent.ttl`, Alchemy migration provisioning all infra plus a live AI Search instance for `experts`, a typed `searchExperts` Effect service returning `Expert[]` from the agent worker, and a populated AI Search index seeded from D1.
