@@ -32,6 +32,7 @@ import { describe, expect, it } from "@effect/vitest";
 import { Effect, FileSystem, Layer, Path } from "effect";
 import * as BunFileSystem from "@effect/platform-bun/BunFileSystem";
 import * as BunPath from "@effect/platform-bun/BunPath";
+import { fileURLToPath } from "node:url";
 import {
   mergeClassTables,
   parseTtlToClassTable
@@ -43,9 +44,15 @@ import { renderSchemaSource } from "../../scripts/codegen/renderSchemaSource";
 
 const fsLayer = Layer.mergeAll(BunFileSystem.layer, BunPath.layer);
 
-const TTL_ROOT = "packages/ontology-store/vendor/energy-intel";
-const COMMITTED_AGENT = "packages/ontology-store/src/generated/agent.ts";
-const COMMITTED_IRIS = "packages/ontology-store/src/iris.ts";
+const TTL_ROOT = fileURLToPath(
+  new URL("../../vendor/energy-intel", import.meta.url)
+);
+const COMMITTED_AGENT = fileURLToPath(
+  new URL("../../src/generated/agent.ts", import.meta.url)
+);
+const COMMITTED_IRIS = fileURLToPath(
+  new URL("../../src/iris.ts", import.meta.url)
+);
 
 describe("codegen drift gate", () => {
   it.effect("regenerated agent.ts matches committed", () =>

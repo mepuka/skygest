@@ -23,10 +23,21 @@
  */
 
 import { Effect, Schema } from "effect";
-import { DataFactory, Store } from "n3";
+import { DataFactory, Store, type NamedNode } from "n3";
 
 import { RdfMappingError } from "../Domain/Errors";
+import {
+  asPredicateIri,
+  defineEntity,
+  type EntityFact,
+  type PredicateIri
+} from "../Domain/EntityDefinition";
 import type { OntologyEntityModule } from "../Domain/OntologyEntity";
+import {
+  type EntityMetadata,
+  type ProjectionContract,
+  type ProjectionFixture
+} from "../Domain/Projection";
 import type { RdfQuad } from "../Domain/Rdf";
 import {
   EnergyExpertRoleIri,
@@ -36,6 +47,7 @@ import {
 import { BFO, EI, FOAF, RDF } from "../iris";
 
 const { quad, namedNode, literal } = DataFactory;
+const predicate = (term: NamedNode): PredicateIri => asPredicateIri(term.value);
 
 // Re-export the branded IRI brands so downstream consumers of this
 // module can reach for them through one import.
@@ -278,6 +290,32 @@ const renderExpertMarkdown = (e: Expert): string => {
   return lines.join("\n");
 };
 
+export const renderExpertSummary = (e: Expert): string => {
+  const authority = e.tier ?? "expert";
+  const topic = e.primaryTopic ?? "energy topics";
+  return `${e.displayName}, ${authority} on ${topic}`;
+};
+
+export const expertFacts = (
+  e: Expert
+): ReadonlyArray<EntityFact<typeof ExpertIri>> => {
+  const facts: Array<EntityFact<typeof ExpertIri>> = [
+    { subject: e.iri, predicate: predicate(EI_DID), object: e.did },
+    { subject: e.iri, predicate: predicate(FOAF.name), object: e.displayName }
+  ];
+  for (const role of e.roles) {
+    facts.push({ subject: e.iri, predicate: predicate(BFO.bearerOf), object: role });
+  }
+  for (const affiliation of e.affiliations ?? []) {
+    facts.push({
+      subject: e.iri,
+      predicate: predicate(EI.affiliatedWith),
+      object: affiliation
+    });
+  }
+  return facts;
+};
+
 export const ExpertProjection = {
   toKey: (e: Expert): string => `expert/${e.did}.md`,
   toBody: renderExpertMarkdown,
@@ -290,11 +328,91 @@ export const ExpertProjection = {
   })
 } as const;
 
+const slugifyKeyPart = (value: string): string =>
+  value.replace(/[^A-Za-z0-9_-]+/g, "_");
+
+export const ExpertUnifiedProjection = {
+  entityType: "Expert",
+  toKey: (e: Expert): `entities/expert/${string}.md` =>
+    `entities/expert/${slugifyKeyPart(e.did)}.md`,
+  toBody: renderExpertMarkdown,
+  toMetadata: (e: Expert): EntityMetadata => ({
+    entity_type: "Expert",
+    iri: e.iri,
+    topic: e.primaryTopic ?? "unknown",
+    authority: e.tier ?? "unknown",
+    time_bucket: "unknown"
+  })
+} as const satisfies ProjectionContract<
+  typeof Expert,
+  EntityMetadata,
+  `entities/expert/${string}.md`
+>;
+
+export const ExpertProjectionFixture = {
+  entityType: "Expert",
+  fixture: Schema.decodeUnknownSync(Expert)({
+    iri: "https://w3id.org/energy-intel/expert/FixtureExpert",
+    did: "did:plc:fixture",
+    displayName: "Fixture Expert",
+    roles: ["https://w3id.org/energy-intel/energyExpertRole/research"],
+    tier: "core",
+    primaryTopic: "grid"
+  }),
+  projection: ExpertUnifiedProjection
+} as const satisfies ProjectionFixture<typeof Expert>;
+
 // ---------------------------------------------------------------------------
 // Module wiring
 // ---------------------------------------------------------------------------
 
 const iriOf = (e: Expert): string => e.iri;
+const deriveExpertIri = ({ handle }: { readonly handle: string }): ExpertIri =>
+  Schema.decodeUnknownSync(ExpertIri)(
+    `https://w3id.org/energy-intel/expert/${handle.replace(SLUG_DISALLOWED, "_")}`
+  );
+
+export const ExpertEntity = defineEntity({
+  tag: "Expert" as const,
+  schema: Expert,
+  identity: {
+    iri: ExpertIri,
+    iriOf: (e) => e.iri,
+    derive: deriveExpertIri
+  },
+  ontology: {
+    classIri: EI.Expert.value,
+    typeChain: [FOAF.Person.value, EI.Expert.value],
+    shapeRef: "shapes/expert.ttl",
+    toTriples: expertToTriples,
+    fromTriples: expertFromTriples
+  },
+  render: {
+    summary: renderExpertSummary,
+    fulltext: renderExpertMarkdown,
+    facts: expertFacts
+  },
+  relations: {
+    affiliatedWith: {
+      direction: "outbound",
+      predicate: predicate(EI.affiliatedWith),
+      target: "Organization",
+      cardinality: "many"
+    },
+    bears: {
+      direction: "outbound",
+      predicate: predicate(BFO.bearerOf),
+      target: "EnergyExpertRole",
+      cardinality: "many"
+    }
+  },
+  agentContext: {
+    description:
+      "A foaf:Person bearing at least one EnergyExpertRole.",
+    tools: ["search", "get", "linksOut", "linksIn"],
+    summaryTemplate: (e) => `Expert ${e.displayName} (${e.did})`
+  }
+});
 
 /**
  * Canonical OntologyEntityModule for Expert.

@@ -7,4 +7,12 @@
  * import them through this barrel rather than reaching into the worker
  * tree directly.
  */
-export { RdfMappingError } from "../../../../src/domain/errors";
+export {
+  EntityGraphEndpointNotFoundError,
+  EntityGraphLinkInvalidError,
+  EntityGraphLinkNotFoundError,
+  EntityGraphTraversalLimitError,
+  EntityGraphTypeMismatchError,
+  EntityNotFoundError,
+  RdfMappingError
+} from "../../../../src/domain/errors";

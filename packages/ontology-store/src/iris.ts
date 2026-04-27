@@ -11,6 +11,9 @@ export const EI = {
   Expert: namedNode("https://w3id.org/energy-intel/Expert"),
   Organization: namedNode("https://w3id.org/energy-intel/Organization"),
   PublisherRole: namedNode("https://w3id.org/energy-intel/PublisherRole"),
+  affiliatedWith: namedNode("https://w3id.org/energy-intel/affiliatedWith"),
+  authoredBy: namedNode("https://w3id.org/energy-intel/authoredBy"),
+  mentions: namedNode("https://w3id.org/energy-intel/mentions"),
 } as const;
 
 export const BFO = {

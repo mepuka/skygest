@@ -85,6 +85,20 @@ export const emitIrisModule = (table: ClassTable): string => {
   const bfo = new Map<string, string>();
   const foaf = new Map<string, string>();
 
+  for (const propertyIri of table.declaredProperties ?? []) {
+    const eiPropTail = stripPrefix(propertyIri, NS_EI);
+    if (eiPropTail !== undefined) ei.set(eiPropTail, propertyIri);
+
+    const bfoTail = stripPrefix(propertyIri, NS_BFO);
+    if (bfoTail !== undefined && bfoTail.startsWith("BFO_")) {
+      const key = BFO_ALIASES[bfoTail] ?? bfoTail;
+      bfo.set(key, propertyIri);
+    }
+
+    const foafTail = stripPrefix(propertyIri, NS_FOAF);
+    if (foafTail !== undefined) foaf.set(foafTail, propertyIri);
+  }
+
   for (const cls of table.classes) {
     const eiTail = stripPrefix(cls.iri, NS_EI);
     if (eiTail !== undefined) ei.set(eiTail, cls.iri);
