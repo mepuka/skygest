@@ -1,4 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
+import { vi } from "vitest";
 import { buildJsonSchema } from "../../scripts/codegen/buildJsonSchema";
 import type { ClassTable } from "../../scripts/codegen/parseTtl";
 
@@ -102,5 +103,38 @@ describe("buildJsonSchema", () => {
     expect(expert.properties.BFO_0000053).toEqual({
       $ref: "#/$defs/EnergyExpertRole"
     });
+  });
+
+  it("falls back to string + warning when range IRI is unknown", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const table: ClassTable = {
+        classes: [
+          {
+            iri: "https://w3id.org/energy-intel/Expert",
+            label: "Expert",
+            superClasses: [],
+            disjointWith: [],
+            equivalentClassRestrictions: [],
+            properties: [
+              {
+                iri: "https://w3id.org/energy-intel/mystery",
+                range: "https://example.org/UnknownRange",
+                optional: true,
+                list: false
+              }
+            ]
+          }
+        ],
+        prefixes: {}
+      };
+      const schema = buildJsonSchema(table);
+      expect(schema.$defs.Expert!.properties.mystery).toEqual({
+        type: "string"
+      });
+      expect(warn).toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+    }
   });
 });

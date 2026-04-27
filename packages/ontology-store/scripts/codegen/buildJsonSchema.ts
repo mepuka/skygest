@@ -144,6 +144,9 @@ export const buildJsonSchema = (table: ClassTable): JsonSchemaDocument => {
       const key = localName(prop.iri);
       properties[key] = propertyShape(prop, classDefKeys);
     }
+    // TODO: emit `required: [...]` once parseTtl wires owl:Restriction
+    // cardinality off blank-node restrictions; today every property is
+    // optional per parseTtl.ts default.
     $defs[defKey] = {
       type: "object",
       properties
