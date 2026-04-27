@@ -77,6 +77,27 @@ describe("ExpertModule", () => {
     })
   );
 
+  it.effect("fromTriples round-trips an expert without a bio", () =>
+    Effect.gen(function* () {
+      // Regression: under exactOptionalPropertyTypes + Schema.optionalKey,
+      // passing `{ bio: undefined }` to the decoder fails because the key
+      // must be absent, not present-as-undefined. The fix builds the
+      // candidate object with conditional assignment.
+      const original = Schema.decodeUnknownSync(Expert)({
+        iri: "https://w3id.org/energy-intel/expert/NoBio",
+        did: "did:plc:nobio",
+        displayName: "No Bio",
+        roles: ["https://w3id.org/energy-intel/energyExpertRole/research"]
+      });
+      const triples = expertToTriples(original);
+      const distilled = yield* expertFromTriples(triples, original.iri);
+      expect(distilled.iri).toBe(original.iri);
+      expect(distilled.displayName).toBe(original.displayName);
+      expect(distilled.roles).toEqual(original.roles);
+      expect(distilled.bio).toBeUndefined();
+    })
+  );
+
   it.effect("fromLegacyRow constructs valid Expert", () =>
     Effect.gen(function* () {
       const expert = yield* expertFromLegacyRow({

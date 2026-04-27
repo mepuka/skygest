@@ -214,13 +214,18 @@ export const expertFromTriples = (
     //   read it from triples instead of parsing the IRI.
     const didFromIri = subject.split("/").pop() ?? "";
 
-    return yield* decodeExpert({
+    // Build the candidate object with conditional assignment so absent
+    // optional fields stay absent (Schema.optionalKey under
+    // exactOptionalPropertyTypes treats `{ bio: undefined }` differently
+    // from `{}` and rejects the former). Mirrors `expertFromLegacyRow`.
+    const candidate: Record<string, unknown> = {
       iri: subject,
       did: didFromIri,
       displayName,
-      roles,
-      bio: bioQuad?.object.value
-    });
+      roles
+    };
+    if (bioQuad !== undefined) candidate.bio = bioQuad.object.value;
+    return yield* decodeExpert(candidate);
   });
 
 // ---------------------------------------------------------------------------
