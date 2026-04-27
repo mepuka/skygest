@@ -18,10 +18,18 @@
  * output. The drift gate test
  * (packages/ontology-store/tests/codegen/drift.test.ts) re-runs the
  * pipeline in-memory and asserts it matches the committed files.
+ *
+ * iris.ts is emitted from the *union* of every vendored TTL module —
+ * regenerating one module never drops terms contributed by another.
+ * The per-module `<module>.ts` is still emitted from only the
+ * requested module's ClassTable.
  */
 import { Effect, FileSystem, Path, Schema } from "effect";
 import { BunRuntime, BunServices } from "@effect/platform-bun";
-import { parseTtlToClassTable } from "./codegen/parseTtl.ts";
+import {
+  mergeClassTables,
+  parseTtlToClassTable
+} from "./codegen/parseTtl.ts";
 import { buildJsonSchema } from "./codegen/buildJsonSchema.ts";
 import { postProcessAst } from "./codegen/postProcessAst.ts";
 import { emitIrisModule } from "./codegen/emitIrisModule.ts";
@@ -75,6 +83,29 @@ const resolveEnergyIntelRoot = (): Effect.Effect<string> =>
 const GENERATED_DIR = "packages/ontology-store/src/generated";
 const IRIS_PATH = "packages/ontology-store/src/iris.ts";
 
+/**
+ * Discover every `.ttl` file inside `ttlRoot`. Returns module names
+ * (without the `.ttl` suffix) sorted alphabetically so the merged
+ * `ClassTable` is order-stable across runs. An empty directory or
+ * missing path returns `[]` rather than failing — the caller falls
+ * back to the requested-module table alone.
+ */
+const listTtlModules = (
+  ttlRoot: string
+): Effect.Effect<ReadonlyArray<string>, never, FileSystem.FileSystem> =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const exists = yield* fs.exists(ttlRoot).pipe(Effect.orElseSucceed(() => false));
+    if (!exists) return [];
+    const entries = yield* fs
+      .readDirectory(ttlRoot)
+      .pipe(Effect.orElseSucceed(() => [] as ReadonlyArray<string>));
+    return entries
+      .filter((name) => name.endsWith(".ttl"))
+      .map((name) => name.slice(0, -".ttl".length))
+      .sort();
+  });
+
 const main = Effect.gen(function* () {
   const arg = Bun.argv[2];
   const moduleName: OntologyModule = yield* Schema.decodeUnknownEffect(
@@ -109,12 +140,31 @@ const main = Effect.gen(function* () {
     });
   }
   const ttl = yield* fs.readFileString(ttlPath);
-  const table = yield* parseTtlToClassTable(ttl);
-  const jsonSchema = yield* buildJsonSchema(table);
-  const processed = yield* postProcessAst(jsonSchema, table);
+  const moduleTable = yield* parseTtlToClassTable(ttl);
 
-  const generatedSource = renderSchemaSource(processed, table);
-  const irisSource = emitIrisModule(table);
+  // Build the union ClassTable across every vendored TTL so iris.ts
+  // does not drop terms contributed by other modules. The requested
+  // module is parsed exactly once (here above) and its table is reused
+  // in the merge so we never re-read the same file. If the directory
+  // has no other modules, the merged table degenerates to
+  // `moduleTable` and iris.ts output is unchanged.
+  const allModuleNames = yield* listTtlModules(energyIntelRoot);
+  const otherModuleNames = allModuleNames.filter((name) => name !== moduleName);
+  const otherTables = yield* Effect.forEach(otherModuleNames, (name) =>
+    Effect.gen(function* () {
+      const otherTtl = yield* fs.readFileString(
+        path.join(energyIntelRoot, `${name}.ttl`)
+      );
+      return yield* parseTtlToClassTable(otherTtl);
+    })
+  );
+  const mergedTable = mergeClassTables([moduleTable, ...otherTables]);
+
+  const jsonSchema = yield* buildJsonSchema(moduleTable);
+  const processed = yield* postProcessAst(jsonSchema, moduleTable);
+
+  const generatedSource = renderSchemaSource(processed, moduleTable);
+  const irisSource = emitIrisModule(mergedTable);
 
   yield* fs.makeDirectory(GENERATED_DIR, { recursive: true });
   yield* fs.writeFileString(

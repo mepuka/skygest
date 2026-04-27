@@ -1,6 +1,9 @@
 import { describe, expect, it } from "@effect/vitest";
 import { emitIrisModule } from "../../scripts/codegen/emitIrisModule";
-import type { ClassTable } from "../../scripts/codegen/parseTtl";
+import {
+  mergeClassTables,
+  type ClassTable
+} from "../../scripts/codegen/parseTtl";
 
 describe("emitIrisModule", () => {
   it("emits namespace constants for EI, BFO, FOAF, RDF, OWL, etc.", () => {
@@ -177,6 +180,47 @@ describe("emitIrisModule", () => {
     const source = emitIrisModule(table);
     expect(source).toContain(
       'bearerOf: namedNode("http://purl.obolibrary.org/obo/BFO_0000053")'
+    );
+  });
+
+  it("emits the union of all classes when given a merged multi-module ClassTable", () => {
+    // Anchors the contract that running codegen for one module never
+    // drops terms contributed by another module: the union table feeds
+    // emitIrisModule, so both the agent-only EI.Expert and a synthetic
+    // ei:Foo from a hypothetical second module surface in iris.ts.
+    const agentTable: ClassTable = {
+      classes: [
+        {
+          iri: "https://w3id.org/energy-intel/Expert",
+          label: "Expert",
+          superClasses: [],
+          disjointWith: [],
+          equivalentClassRestrictions: [],
+          properties: []
+        }
+      ],
+      prefixes: { ei: "https://w3id.org/energy-intel/" }
+    };
+    const fooTable: ClassTable = {
+      classes: [
+        {
+          iri: "https://w3id.org/energy-intel/Foo",
+          label: "Foo",
+          superClasses: [],
+          disjointWith: [],
+          equivalentClassRestrictions: [],
+          properties: []
+        }
+      ],
+      prefixes: { ei: "https://w3id.org/energy-intel/" }
+    };
+    const merged = mergeClassTables([agentTable, fooTable]);
+    const source = emitIrisModule(merged);
+    expect(source).toContain(
+      'Expert: namedNode("https://w3id.org/energy-intel/Expert")'
+    );
+    expect(source).toContain(
+      'Foo: namedNode("https://w3id.org/energy-intel/Foo")'
     );
   });
 

@@ -1,7 +1,11 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect } from "effect";
 
-import { parseTtlToClassTable } from "../../scripts/codegen/parseTtl";
+import {
+  mergeClassTables,
+  parseTtlToClassTable,
+  type ClassTable
+} from "../../scripts/codegen/parseTtl";
 
 describe("parseTtlToClassTable", () => {
   it.effect("emits Expert class with foaf:Person + role-bearer pattern", () =>
@@ -101,4 +105,73 @@ describe("parseTtlToClassTable", () => {
       });
     })
   );
+});
+
+describe("mergeClassTables", () => {
+  const tableA: ClassTable = {
+    classes: [
+      {
+        iri: "https://w3id.org/energy-intel/Expert",
+        label: "Expert",
+        superClasses: [],
+        disjointWith: [],
+        equivalentClassRestrictions: [],
+        properties: []
+      }
+    ],
+    prefixes: { ei: "https://w3id.org/energy-intel/" }
+  };
+  const tableB: ClassTable = {
+    classes: [
+      {
+        iri: "https://w3id.org/energy-intel/MediaAttachment",
+        label: "MediaAttachment",
+        superClasses: [],
+        disjointWith: [],
+        equivalentClassRestrictions: [],
+        properties: []
+      }
+    ],
+    prefixes: {
+      ei: "https://w3id.org/energy-intel/",
+      foaf: "http://xmlns.com/foaf/0.1/"
+    }
+  };
+
+  it("concatenates classes from disjoint tables", () => {
+    const merged = mergeClassTables([tableA, tableB]);
+    const iris = merged.classes.map((c) => c.iri);
+    expect(iris).toContain("https://w3id.org/energy-intel/Expert");
+    expect(iris).toContain("https://w3id.org/energy-intel/MediaAttachment");
+  });
+
+  it("dedupes overlapping class IRIs (first wins)", () => {
+    const merged = mergeClassTables([tableA, tableA]);
+    expect(merged.classes).toHaveLength(1);
+    expect(merged.classes[0]?.iri).toBe(
+      "https://w3id.org/energy-intel/Expert"
+    );
+  });
+
+  it("unions prefix records", () => {
+    const merged = mergeClassTables([tableA, tableB]);
+    expect(merged.prefixes).toEqual({
+      ei: "https://w3id.org/energy-intel/",
+      foaf: "http://xmlns.com/foaf/0.1/"
+    });
+  });
+
+  it("returns an empty table when given no inputs", () => {
+    const merged = mergeClassTables([]);
+    expect(merged).toEqual({ classes: [], prefixes: {} });
+  });
+
+  it("returns a structurally-equivalent table when given a single input", () => {
+    const merged = mergeClassTables([tableA]);
+    expect(merged.classes).toHaveLength(1);
+    expect(merged.classes[0]?.iri).toBe(
+      "https://w3id.org/energy-intel/Expert"
+    );
+    expect(merged.prefixes).toEqual({ ei: "https://w3id.org/energy-intel/" });
+  });
 });

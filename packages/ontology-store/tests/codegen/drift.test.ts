@@ -16,6 +16,13 @@
  * `ENERGY_INTEL_ROOT` (the env var only affects the codegen *script*,
  * for iterating against a working copy of the upstream repo).
  *
+ * iris.ts comparison: the script emits iris.ts from the *union* of
+ * every vendored TTL; the drift gate has to mirror that union or it
+ * drifts as soon as a second module lands. The current vendored set
+ * is `agent.ttl` only, so the merged table degenerates to the agent
+ * table and the iris.ts output is byte-identical to the per-agent
+ * emission.
+ *
  * The test is intentionally pure (no `execSync`, no `bun` subprocess) — it
  * imports the same pipeline functions the script uses and lets the
  * `BunServices.layer` provide the FS so the assertions live entirely
@@ -25,7 +32,10 @@ import { describe, expect, it } from "@effect/vitest";
 import { Effect, FileSystem, Layer, Path } from "effect";
 import * as BunFileSystem from "@effect/platform-bun/BunFileSystem";
 import * as BunPath from "@effect/platform-bun/BunPath";
-import { parseTtlToClassTable } from "../../scripts/codegen/parseTtl";
+import {
+  mergeClassTables,
+  parseTtlToClassTable
+} from "../../scripts/codegen/parseTtl";
 import { buildJsonSchema } from "../../scripts/codegen/buildJsonSchema";
 import { postProcessAst } from "../../scripts/codegen/postProcessAst";
 import { emitIrisModule } from "../../scripts/codegen/emitIrisModule";
@@ -59,9 +69,22 @@ describe("codegen drift gate", () => {
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
 
-      const ttl = yield* fs.readFileString(path.join(TTL_ROOT, "agent.ttl"));
-      const table = yield* parseTtlToClassTable(ttl);
-      const regenerated = emitIrisModule(table);
+      // Walk every vendored .ttl, parse to ClassTable, merge, emit
+      // iris.ts. Mirrors `scripts/generate-from-ttl.ts` so the drift
+      // gate stays aligned with the script as more modules land.
+      const entries = yield* fs.readDirectory(TTL_ROOT);
+      const ttlNames = entries
+        .filter((name) => name.endsWith(".ttl"))
+        .map((name) => name.slice(0, -".ttl".length))
+        .sort();
+      const tables = yield* Effect.forEach(ttlNames, (name) =>
+        Effect.gen(function* () {
+          const ttl = yield* fs.readFileString(path.join(TTL_ROOT, `${name}.ttl`));
+          return yield* parseTtlToClassTable(ttl);
+        })
+      );
+      const merged = mergeClassTables(tables);
+      const regenerated = emitIrisModule(merged);
 
       const committed = yield* fs.readFileString(COMMITTED_IRIS);
       expect(regenerated).toBe(committed);

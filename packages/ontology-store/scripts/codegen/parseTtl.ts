@@ -251,6 +251,41 @@ const finalizeClass = (cls: MutableClassRecord): ClassRecord =>
         properties: cls.properties
       };
 
+/**
+ * Concatenate `classes` arrays and union `prefixes` records across
+ * multiple ClassTables. Used by the codegen entrypoint to feed
+ * `emitIrisModule` the union of every vendored TTL — running codegen
+ * against `media` then must not drop `EI.Expert` from `iris.ts`.
+ *
+ * Duplicates by IRI inside `classes` are de-duped (first-seen wins
+ * to keep the merge stable across module ordering); for `prefixes`,
+ * later tables override earlier ones (later TTLs are assumed to ship
+ * the latest prefix mappings, though in practice the vendored TTLs
+ * use the same prefix set so this is rarely visible).
+ *
+ * Stable: iterating an empty input or a single-table input returns
+ * a structurally-equivalent ClassTable so the codegen pipeline keeps
+ * working when only one TTL is vendored.
+ */
+export const mergeClassTables = (
+  tables: ReadonlyArray<ClassTable>
+): ClassTable => {
+  const classByIri = new Map<string, ClassRecord>();
+  const prefixes: Record<string, string> = {};
+  for (const table of tables) {
+    for (const cls of table.classes) {
+      if (!classByIri.has(cls.iri)) classByIri.set(cls.iri, cls);
+    }
+    for (const [prefix, iri] of Object.entries(table.prefixes)) {
+      prefixes[prefix] = iri;
+    }
+  }
+  return {
+    classes: Array.from(classByIri.values()),
+    prefixes
+  };
+};
+
 export const parseTtlToClassTable = (
   ttl: string
 ): Effect.Effect<ClassTable, TtlParseError> =>
