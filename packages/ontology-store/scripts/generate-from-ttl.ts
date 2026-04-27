@@ -14,11 +14,24 @@
  * skeleton: argument validation + log-line + cleanup. The pipeline
  * stages will be filled in subsequent tasks.
  */
-import { Effect } from "effect"
+import { Effect, Schema } from "effect"
 import { BunRuntime, BunServices } from "@effect/platform-bun"
 
-const MODULES = ["agent", "media", "measurement", "data"] as const
-type Module = (typeof MODULES)[number]
+const OntologyModuleSchema = Schema.Literals([
+  "agent",
+  "media",
+  "measurement",
+  "data"
+])
+type OntologyModule = typeof OntologyModuleSchema.Type
+
+class InvalidModuleArg extends Schema.TaggedErrorClass<InvalidModuleArg>()(
+  "InvalidModuleArg",
+  {
+    received: Schema.optionalKey(Schema.String),
+    expected: Schema.Array(Schema.String)
+  }
+) {}
 
 // TODO(SKY-368): replace hard-coded path with an env var (e.g. `ENERGY_INTEL_ROOT`)
 // once the codegen pipeline lands and the energy-intel ontology becomes a
@@ -28,11 +41,18 @@ const ENERGY_INTEL_ROOT =
   "/Users/pooks/Dev/ontology_skill/ontologies/energy-intel/modules"
 
 const main = Effect.gen(function* () {
-  const args = Bun.argv.slice(2)
-  const module = args[0] as Module | undefined
-  if (!module || !MODULES.includes(module)) {
-    yield* Effect.die(`Usage: generate-from-ttl.ts <${MODULES.join("|")}>`)
-  }
+  const arg = Bun.argv[2]
+  const module: OntologyModule = yield* Schema.decodeUnknownEffect(
+    OntologyModuleSchema
+  )(arg).pipe(
+    Effect.mapError(
+      () =>
+        new InvalidModuleArg({
+          received: arg,
+          expected: ["agent", "media", "measurement", "data"]
+        })
+    )
+  )
   yield* Effect.log(`generating from module: ${module}`)
   yield* Effect.log(`energy-intel root: ${ENERGY_INTEL_ROOT}`)
   // Implementation lands in tasks 6-9.
