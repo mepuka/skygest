@@ -6,9 +6,9 @@ import { stringifyUnknown } from "../../../../src/platform/Json";
  * IRI — a non-empty absolute IRI string. Branded so that call sites that
  * accept an IRI cannot be passed an arbitrary string without validation.
  *
- * The EmitSpec forward section produces IRIs by composing the instance
- * namespace prefix with branded entity IDs. The SHACL shapes file and the
- * reverse mapping both consume IRIs in this shape.
+ * IRIs in this package are consumed by the SHACL harness and the per-entity
+ * ontology modules introduced in later tasks. The brand carries no runtime
+ * information beyond its namespace pattern.
  */
 export const IRI = Schema.String.pipe(
   Schema.check(Schema.isMinLength(1)),
