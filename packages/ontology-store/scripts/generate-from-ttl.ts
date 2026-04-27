@@ -43,12 +43,38 @@ class InvalidModuleArg extends Schema.TaggedErrorClass<InvalidModuleArg>()(
   }
 ) {}
 
-// TODO(SKY-368): replace hard-coded path with an env var (e.g. `ENERGY_INTEL_ROOT`)
-// once the codegen pipeline lands and the energy-intel ontology becomes a
-// stable input. The path points outside this worktree because the ontology
-// lives at /Users/pooks/Dev/ontology_skill/.
-const ENERGY_INTEL_ROOT =
-  "/Users/pooks/Dev/ontology_skill/ontologies/energy-intel/modules";
+class MissingEnergyIntelRootError extends Schema.TaggedErrorClass<MissingEnergyIntelRootError>()(
+  "MissingEnergyIntelRootError",
+  {
+    message: Schema.String
+  }
+) {}
+
+// Resolution order:
+//   1. process.env.ENERGY_INTEL_ROOT — wins when set.
+//   2. Otherwise, fail with MissingEnergyIntelRootError; the codegen
+//      pipeline depends on the upstream ontology_skill repo and we
+//      refuse to silently fall back to a developer-laptop path.
+//
+// TODO(SKY-368): lift to a git submodule or `.generated/upstream/...`
+// checkout (similar to the cold-start data fetch precedent) so CI can
+// run the drift gate unconditionally.
+const resolveEnergyIntelRoot = (): Effect.Effect<
+  string,
+  MissingEnergyIntelRootError
+> =>
+  Effect.gen(function* () {
+    const fromEnv = process.env.ENERGY_INTEL_ROOT;
+    if (!fromEnv) {
+      yield* new MissingEnergyIntelRootError({
+        message:
+          "ENERGY_INTEL_ROOT env var must point to the energy-intel modules directory " +
+          "(e.g. ENERGY_INTEL_ROOT=/path/to/ontology_skill/ontologies/energy-intel/modules). " +
+          "See packages/ontology-store/README.md for the upstream repo location."
+      });
+    }
+    return fromEnv;
+  });
 
 const GENERATED_DIR = "packages/ontology-store/src/generated";
 const IRIS_PATH = "packages/ontology-store/src/iris.ts";
@@ -70,7 +96,8 @@ const main = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
 
-  const ttlPath = path.join(ENERGY_INTEL_ROOT, `${moduleName}.ttl`);
+  const energyIntelRoot = yield* resolveEnergyIntelRoot();
+  const ttlPath = path.join(energyIntelRoot, `${moduleName}.ttl`);
   yield* Effect.log(`generating from module: ${moduleName}`);
   yield* Effect.log(`reading TTL: ${ttlPath}`);
 
