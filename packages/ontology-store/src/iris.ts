@@ -14,7 +14,7 @@ export const EI = {
 } as const;
 
 export const BFO = {
-
+  bearerOf: namedNode("http://purl.obolibrary.org/obo/BFO_0000053"),
 } as const;
 
 export const FOAF = {

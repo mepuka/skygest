@@ -141,6 +141,31 @@ describe("emitIrisModule", () => {
     );
   });
 
+  it("emits BFO terms from equivalentClassRestrictions", () => {
+    const table: ClassTable = {
+      classes: [
+        {
+          iri: "https://w3id.org/energy-intel/Expert",
+          label: "Expert",
+          superClasses: [],
+          disjointWith: [],
+          equivalentClassRestrictions: [
+            {
+              onProperty: "http://purl.obolibrary.org/obo/BFO_0000053",
+              someValuesFrom: "https://w3id.org/energy-intel/EnergyExpertRole"
+            }
+          ],
+          properties: []
+        }
+      ],
+      prefixes: {}
+    };
+    const source = emitIrisModule(table);
+    expect(source).toContain(
+      'bearerOf: namedNode("http://purl.obolibrary.org/obo/BFO_0000053")'
+    );
+  });
+
   it("emits the standard RDF/RDFS/OWL/SKOS/XSD predicates the writer needs", () => {
     const table: ClassTable = { classes: [], prefixes: {} };
     const source = emitIrisModule(table);

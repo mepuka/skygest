@@ -107,6 +107,18 @@ export const emitIrisModule = (table: ClassTable): string => {
       const foafTail = stripPrefix(prop.iri, NS_FOAF);
       if (foafTail !== undefined) foaf.set(foafTail, prop.iri);
     }
+
+    // BFO terms in agent.ttl (and similar TTLs) only appear inside
+    // owl:Restriction.onProperty references on owl:equivalentClass — they are
+    // not declared as owl:ObjectProperty, so cls.properties[] never sees them.
+    // Walk the restrictions to surface those IRIs as well.
+    for (const restriction of cls.equivalentClassRestrictions) {
+      const bfoTail = stripPrefix(restriction.onProperty, NS_BFO);
+      if (bfoTail !== undefined && bfoTail.startsWith("BFO_")) {
+        const key = BFO_ALIASES[bfoTail] ?? bfoTail;
+        bfo.set(key, restriction.onProperty);
+      }
+    }
   }
 
   // Always-on FOAF terms the writer needs even if the slice ontology didn't
