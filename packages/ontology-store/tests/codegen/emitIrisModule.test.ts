@@ -95,6 +95,20 @@ describe("emitIrisModule", () => {
     );
   });
 
+  it("emits canonical BFO role-pattern terms even with empty table", () => {
+    const table: ClassTable = {
+      classes: [],
+      prefixes: {}
+    };
+    const source = emitIrisModule(table);
+    expect(source).toContain(
+      'bearerOf: namedNode("http://purl.obolibrary.org/obo/BFO_0000053")'
+    );
+    expect(source).toContain(
+      'inheresIn: namedNode("http://purl.obolibrary.org/obo/BFO_0000052")'
+    );
+  });
+
   it("aliases curated BFO terms but falls back to BFO_NNNN for unknown terms", () => {
     const table: ClassTable = {
       classes: [
