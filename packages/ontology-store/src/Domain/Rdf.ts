@@ -1,4 +1,5 @@
 import { Schema } from "effect";
+import type { Quad } from "n3";
 
 import { stringifyUnknown } from "../../../../src/platform/Json";
 
@@ -16,6 +17,16 @@ export const IRI = Schema.String.pipe(
 );
 export type IRI = Schema.Schema.Type<typeof IRI>;
 export const asIri = Schema.decodeUnknownSync(IRI);
+
+/**
+ * RdfQuad — re-export of n3's `Quad` under the package's canonical name.
+ *
+ * Per-entity ontology modules consume this in their `toTriples` /
+ * `fromTriples` signatures. Sourcing the type from `Domain/Rdf.ts` keeps
+ * the domain layer the single source of truth — services and modules
+ * import from here rather than reaching into `n3` directly.
+ */
+export type RdfQuad = Quad;
 
 /**
  * RdfError — tagged error for failures inside the N3-backed RDF store
