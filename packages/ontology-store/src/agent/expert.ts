@@ -1,0 +1,337 @@
+/**
+ * Hand-written Expert agent module.
+ *
+ * Canonical reference for every per-entity ontology module under
+ * packages/ontology-store/. Implements the OntologyEntityModule
+ * contract (Domain/OntologyEntity.ts) for the energy-intel Expert.
+ *
+ * Three responsibilities co-exist in a single file by design:
+ *   1. Application schema — the runtime shape Expert consumers see.
+ *   2. RDF mapping — forward (toTriples) + reverse (fromTriples).
+ *   3. AI Search projection — toKey/toBody/toMetadata.
+ *
+ * The application schema extends beyond the codegen output because
+ * agent.ttl does not yet declare owl:DatatypeProperty / ObjectProperty
+ * for displayName / did / bio / tier / primaryTopic. Once those are
+ * declared upstream, regenerate src/generated/agent.ts and replace the
+ * hand-declared fields with the generated property schemas to make
+ * this fully codegen-driven. The branded ExpertIri / EnergyExpertRoleIri
+ * / OrganizationIri imports below are already codegen-driven.
+ *
+ * Description-logic axiom (informational):
+ *   Expert ≡ foaf:Person ⊓ ∃bfo:bearerOf.EnergyExpertRole
+ */
+
+import { Effect, Schema } from "effect";
+import { DataFactory, Store } from "n3";
+
+import { RdfMappingError } from "../Domain/Errors";
+import type { OntologyEntityModule } from "../Domain/OntologyEntity";
+import type { RdfQuad } from "../Domain/Rdf";
+import {
+  EnergyExpertRoleIri,
+  ExpertIri,
+  OrganizationIri
+} from "../generated/agent";
+import { BFO, EI, FOAF, RDF } from "../iris";
+
+const { quad, namedNode, literal } = DataFactory;
+
+// Re-export the branded IRI brands so downstream consumers of this
+// module can reach for them through one import.
+export { EnergyExpertRoleIri, ExpertIri, OrganizationIri };
+
+/**
+ * Application-level Expert shape.
+ *
+ * `iri` is the codegen-driven branded identity. The other fields are
+ * hand-declared until agent.ttl gains property declarations; see the
+ * file-level docstring for the regen path.
+ *
+ * `did` is intentionally `Schema.String` here rather than the worker's
+ * `Did` brand because the ontology-store package does not depend on
+ * `src/domain/`. Consumers that already hold a branded `Did` may pass
+ * it directly — the brand is structurally compatible. A future revision
+ * may lift `Did` into a shared domain crate.
+ */
+export class Expert extends Schema.Class<Expert>("Expert")({
+  iri: ExpertIri,
+  did: Schema.String,
+  displayName: Schema.String,
+  roles: Schema.NonEmptyArray(EnergyExpertRoleIri),
+  affiliations: Schema.optionalKey(Schema.Array(OrganizationIri)),
+  bio: Schema.optionalKey(Schema.String),
+  tier: Schema.optionalKey(Schema.String),
+  primaryTopic: Schema.optionalKey(Schema.String)
+}) {}
+
+/**
+ * Metadata key set for AI Search projection. The five keys here are
+ * the contract with the Alchemy `experts` AI Search instance — adding
+ * or removing a key without matching alchemy.run.ts surfaces as a TS
+ * structural mismatch on `OntologyEntityModule<typeof Expert,
+ * ExpertMetadata>`.
+ */
+export const EXPERT_METADATA_KEYS = [
+  "entity_type",
+  "did",
+  "iri",
+  "tier",
+  "topic"
+] as const;
+export type ExpertMetadataKey = (typeof EXPERT_METADATA_KEYS)[number];
+export type ExpertMetadata = Readonly<Record<ExpertMetadataKey, string>>;
+
+// ---------------------------------------------------------------------------
+// Forward mapping: Expert -> RDF quads
+// ---------------------------------------------------------------------------
+
+// `ei:bio` is not declared in agent.ttl yet, so it is absent from
+// iris.ts. Construct the IRI inline; once agent.ttl declares
+// `ei:bio a owl:DatatypeProperty`, regenerate iris.ts and replace
+// this with `EI.bio`.
+// TODO(ttl-properties): emit ei:bio in iris.ts after upstream adds it.
+const EI_BIO = namedNode("https://w3id.org/energy-intel/bio");
+
+/**
+ * Forward mapping. Re-expands the flattened TS `Expert` into BFO
+ * inherence triples.
+ *
+ * For each role IRI, three triples are emitted:
+ *   (role, rdf:type,  ei:EnergyExpertRole)
+ *   (role, bfo:inheresIn, expert)         // BFO_0000052
+ *   (expert, bfo:bearerOf, role)          // BFO_0000053
+ *
+ * Plus the standard typing and properties on the expert subject:
+ *   (expert, rdf:type, ei:Expert)
+ *   (expert, rdf:type, foaf:Person)
+ *   (expert, foaf:name, "displayName")
+ *   (expert, ei:bio, "bio")               // when present
+ */
+export const expertToTriples = (e: Expert): ReadonlyArray<RdfQuad> => {
+  const subject = namedNode(e.iri);
+  const triples: RdfQuad[] = [
+    quad(subject, RDF.type, EI.Expert),
+    quad(subject, RDF.type, FOAF.Person),
+    quad(subject, FOAF.name, literal(e.displayName))
+  ];
+  for (const roleIri of e.roles) {
+    const role = namedNode(roleIri);
+    triples.push(quad(role, RDF.type, EI.EnergyExpertRole));
+    triples.push(quad(role, BFO.inheresIn, subject));
+    triples.push(quad(subject, BFO.bearerOf, role));
+  }
+  if (e.bio !== undefined) {
+    triples.push(quad(subject, EI_BIO, literal(e.bio)));
+  }
+  return triples;
+};
+
+// ---------------------------------------------------------------------------
+// Reverse mapping: RDF quads -> Expert
+// ---------------------------------------------------------------------------
+
+// Why this is policy-driven:
+// fromTriples receives an arbitrary slab of quads — it deliberately
+// ignores anything it does not recognise (different subject, foreign
+// predicates, role IRIs not typed as ei:EnergyExpertRole). Required
+// fields are checked explicitly and raise RdfMappingError; optional
+// fields silently become `undefined`. Schema.decodeUnknownEffect adds
+// the structural validation pass.
+
+const decodeExpert = Schema.decodeUnknownEffect(Expert);
+
+/**
+ * Reverse mapping. Walks the n3 Store, picks up the recognised triples,
+ * and decodes through `Schema.decodeUnknownEffect` for validation.
+ *
+ * Lossy fields:
+ *   - tier and primaryTopic: not represented as triples in this slice;
+ *     dropped on round-trip until upstream declares them.
+ *   - affiliations: same — dropped on round-trip.
+ *   - did: not stored as a triple in this slice; we derive it from the
+ *     last URL segment of the subject IRI. See TODO(IRI-convention).
+ */
+export const expertFromTriples = (
+  quads: ReadonlyArray<RdfQuad>,
+  subject: string
+): Effect.Effect<Expert, RdfMappingError | Schema.SchemaError> =>
+  Effect.gen(function* () {
+    const store = new Store([...quads]);
+    const subjectNode = namedNode(subject);
+
+    // displayName: foaf:name (required)
+    const nameQuads = store.getQuads(subjectNode, FOAF.name, null, null);
+    const nameQuad = nameQuads[0];
+    if (!nameQuad) {
+      yield* new RdfMappingError({
+        direction: "reverse",
+        entity: "Expert",
+        iri: subject,
+        message: "missing required foaf:name"
+      });
+    }
+    const displayName = nameQuad?.object.value ?? "";
+
+    // bio: ei:bio (optional)
+    const bioQuads = store.getQuads(subjectNode, EI_BIO, null, null);
+    const bioQuad = bioQuads[0];
+
+    // roles: bfo:bearerOf objects whose type is ei:EnergyExpertRole.
+    // The type filter discards bearerOf links pointing at PublisherRole
+    // or DataProviderRole, so a single store can mix expert/org agents
+    // without cross-contamination on reverse.
+    const bearerOfQuads = store.getQuads(
+      subjectNode,
+      BFO.bearerOf,
+      null,
+      null
+    );
+    const roles: string[] = [];
+    for (const bq of bearerOfQuads) {
+      if (bq.object.termType !== "NamedNode") continue;
+      const typed = store.getQuads(
+        bq.object,
+        RDF.type,
+        EI.EnergyExpertRole,
+        null
+      );
+      if (typed.length > 0) roles.push(bq.object.value);
+    }
+    if (roles.length === 0) {
+      yield* new RdfMappingError({
+        direction: "reverse",
+        entity: "Expert",
+        iri: subject,
+        message: "Expert must bear at least one EnergyExpertRole"
+      });
+    }
+
+    // did: derive from the last segment of the IRI. The energy-intel
+    // expert IRI convention is `expert/{did-or-handle}`; the slug is
+    // a URL-safe rendering and is the closest stable handle we have.
+    // TODO(IRI-convention): if upstream publishes a `ei:did` property,
+    //   read it from triples instead of parsing the IRI.
+    const didFromIri = subject.split("/").pop() ?? "";
+
+    return yield* decodeExpert({
+      iri: subject,
+      did: didFromIri,
+      displayName,
+      roles,
+      bio: bioQuad?.object.value
+    });
+  });
+
+// ---------------------------------------------------------------------------
+// AI Search projection
+// ---------------------------------------------------------------------------
+
+const renderExpertMarkdown = (e: Expert): string => {
+  const lines: string[] = [
+    "---",
+    `displayName: ${e.displayName}`,
+    `did: ${e.did}`,
+    `iri: ${e.iri}`,
+    "roles:"
+  ];
+  for (const r of e.roles) lines.push(`  - ${r}`);
+  if (e.affiliations !== undefined && e.affiliations.length > 0) {
+    lines.push("affiliations:");
+    for (const a of e.affiliations) lines.push(`  - ${a}`);
+  }
+  if (e.tier !== undefined) lines.push(`tier: ${e.tier}`);
+  if (e.primaryTopic !== undefined)
+    lines.push(`primary_topic: ${e.primaryTopic}`);
+  lines.push("---", "", `# ${e.displayName}`, "");
+  if (e.bio !== undefined) lines.push(e.bio);
+  return lines.join("\n");
+};
+
+export const ExpertProjection = {
+  toKey: (e: Expert): string => `expert/${e.did}.md`,
+  toBody: renderExpertMarkdown,
+  toMetadata: (e: Expert): ExpertMetadata => ({
+    entity_type: "Expert",
+    did: e.did,
+    iri: e.iri,
+    tier: e.tier ?? "unknown",
+    topic: e.primaryTopic ?? "unknown"
+  })
+} as const;
+
+// ---------------------------------------------------------------------------
+// Module wiring
+// ---------------------------------------------------------------------------
+
+const iriOf = (e: Expert): string => e.iri;
+
+/**
+ * Canonical OntologyEntityModule for Expert.
+ *
+ * Every future entity module (Organization, Dataset, etc.) follows this
+ * exact shape: a single `<Module>` const that satisfies the
+ * `OntologyEntityModule` contract structurally, exporting the
+ * underlying transforms for direct use where the contract surface is
+ * not needed.
+ */
+export const ExpertModule: OntologyEntityModule<typeof Expert, ExpertMetadata> =
+  {
+    schema: Expert,
+    iriOf,
+    toTriples: expertToTriples,
+    fromTriples: expertFromTriples,
+    toAiSearchKey: ExpertProjection.toKey,
+    toAiSearchBody: ExpertProjection.toBody,
+    toAiSearchMetadata: ExpertProjection.toMetadata
+  };
+
+// ---------------------------------------------------------------------------
+// Legacy migration helper (consumed by Task 19's OntologyExpertRepo)
+// ---------------------------------------------------------------------------
+
+/**
+ * Subset of the legacy `experts` D1 row shape this module needs to
+ * synthesise an energy-intel Expert. Defined locally because the
+ * legacy row schema lives in `src/services/d1/` (worker tree) and the
+ * ontology-store package is meant to be reachable without depending on
+ * the worker's domain layer.
+ */
+export interface LegacyExpertRow {
+  readonly did: string;
+  readonly handle: string;
+  readonly displayName?: string;
+  readonly bio?: string;
+  readonly tier?: string;
+  readonly primaryTopic?: string;
+}
+
+const SLUG_DISALLOWED = /[^A-Za-z0-9_-]+/g;
+
+// The default role IRI is a stub. Task 19 (`OntologyExpertRepo`) is
+// expected to refine this — most likely by carrying per-expert role
+// hints on the legacy row or by deriving the role from `tier`.
+const DEFAULT_LEGACY_ROLE_IRI =
+  "https://w3id.org/energy-intel/energyExpertRole/default";
+
+/**
+ * Build an `Expert` from a legacy D1 row. Used by Task 19's repo to
+ * migrate existing experts into the ontology store. The handle is
+ * URL-sanitised before being interpolated into the IRI so it satisfies
+ * the codegen-driven `ExpertIri` regex.
+ */
+export const expertFromLegacyRow = (
+  row: LegacyExpertRow
+): Effect.Effect<Expert, Schema.SchemaError> => {
+  const safeHandle = row.handle.replace(SLUG_DISALLOWED, "_");
+  const candidate: Record<string, unknown> = {
+    iri: `https://w3id.org/energy-intel/expert/${safeHandle}`,
+    did: row.did,
+    displayName: row.displayName ?? row.handle,
+    roles: [DEFAULT_LEGACY_ROLE_IRI]
+  };
+  if (row.bio !== undefined) candidate.bio = row.bio;
+  if (row.tier !== undefined) candidate.tier = row.tier;
+  if (row.primaryTopic !== undefined) candidate.primaryTopic = row.primaryTopic;
+  return decodeExpert(candidate);
+};
