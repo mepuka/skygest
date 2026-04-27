@@ -6,24 +6,34 @@
  * Where <module> is one of: agent, media, measurement, data
  *
  * Pipeline:
- *   TTL → JSON Schema 2020-12 → Effect Schema AST →
- *   AST post-processor (brand IRIs, fold owl:equivalentClass) →
- *   TS source via SchemaRepresentation.toCodeDocument
+ *   TTL → ClassTable (parseTtl)
+ *      → JSON Schema 2020-12 (buildJsonSchema)
+ *      → ProcessedAst with branded-IRI metadata + topo emit order (postProcessAst)
+ *      → Effect Schema TS source (renderSchemaSource)
+ *      → file write under packages/ontology-store/src/generated/<module>.ts
+ *      + iris.ts namespace constants (emitIrisModule) under
+ *        packages/ontology-store/src/iris.ts
  *
- * Implementation lands across tasks 6-9. This file is the entry-point
- * skeleton: argument validation + log-line + cleanup. The pipeline
- * stages will be filled in subsequent tasks.
+ * Idempotent: re-running with the same TTL input produces byte-identical
+ * output. The drift gate test
+ * (packages/ontology-store/tests/codegen/drift.test.ts) re-runs the
+ * pipeline in-memory and asserts it matches the committed files.
  */
-import { Effect, Schema } from "effect"
-import { BunRuntime, BunServices } from "@effect/platform-bun"
+import { Effect, FileSystem, Path, Schema } from "effect";
+import { BunRuntime, BunServices } from "@effect/platform-bun";
+import { parseTtlToClassTable } from "./codegen/parseTtl.ts";
+import { buildJsonSchema } from "./codegen/buildJsonSchema.ts";
+import { postProcessAst } from "./codegen/postProcessAst.ts";
+import { emitIrisModule } from "./codegen/emitIrisModule.ts";
+import { renderSchemaSource } from "./codegen/renderSchemaSource.ts";
 
 const OntologyModuleSchema = Schema.Literals([
   "agent",
   "media",
   "measurement",
   "data"
-])
-type OntologyModule = typeof OntologyModuleSchema.Type
+]);
+type OntologyModule = typeof OntologyModuleSchema.Type;
 
 class InvalidModuleArg extends Schema.TaggedErrorClass<InvalidModuleArg>()(
   "InvalidModuleArg",
@@ -38,11 +48,14 @@ class InvalidModuleArg extends Schema.TaggedErrorClass<InvalidModuleArg>()(
 // stable input. The path points outside this worktree because the ontology
 // lives at /Users/pooks/Dev/ontology_skill/.
 const ENERGY_INTEL_ROOT =
-  "/Users/pooks/Dev/ontology_skill/ontologies/energy-intel/modules"
+  "/Users/pooks/Dev/ontology_skill/ontologies/energy-intel/modules";
+
+const GENERATED_DIR = "packages/ontology-store/src/generated";
+const IRIS_PATH = "packages/ontology-store/src/iris.ts";
 
 const main = Effect.gen(function* () {
-  const arg = Bun.argv[2]
-  const module: OntologyModule = yield* Schema.decodeUnknownEffect(
+  const arg = Bun.argv[2];
+  const moduleName: OntologyModule = yield* Schema.decodeUnknownEffect(
     OntologyModuleSchema
   )(arg).pipe(
     Effect.mapError(
@@ -52,10 +65,31 @@ const main = Effect.gen(function* () {
           expected: ["agent", "media", "measurement", "data"]
         })
     )
-  )
-  yield* Effect.log(`generating from module: ${module}`)
-  yield* Effect.log(`energy-intel root: ${ENERGY_INTEL_ROOT}`)
-  // Implementation lands in tasks 6-9.
-})
+  );
 
-BunRuntime.runMain(main.pipe(Effect.provide(BunServices.layer)))
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+
+  const ttlPath = path.join(ENERGY_INTEL_ROOT, `${moduleName}.ttl`);
+  yield* Effect.log(`generating from module: ${moduleName}`);
+  yield* Effect.log(`reading TTL: ${ttlPath}`);
+
+  const ttl = yield* fs.readFileString(ttlPath);
+  const table = yield* parseTtlToClassTable(ttl);
+  const jsonSchema = buildJsonSchema(table);
+  const processed = yield* postProcessAst(jsonSchema, table);
+
+  const generatedSource = renderSchemaSource(processed, table);
+  const irisSource = emitIrisModule(table);
+
+  yield* fs.makeDirectory(GENERATED_DIR, { recursive: true });
+  yield* fs.writeFileString(
+    path.join(GENERATED_DIR, `${moduleName}.ts`),
+    generatedSource
+  );
+  yield* fs.writeFileString(IRIS_PATH, irisSource);
+
+  yield* Effect.log(`generated: ${moduleName}.ts and iris.ts`);
+});
+
+BunRuntime.runMain(main.pipe(Effect.provide(BunServices.layer)));
