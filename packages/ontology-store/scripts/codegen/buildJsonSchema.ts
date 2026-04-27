@@ -21,7 +21,25 @@
  * Task 8's AST post-processor can rename to friendlier names (`bearerOf`)
  * after the fact.
  */
+import { Effect, Schema } from "effect";
 import type { ClassProperty, ClassTable } from "./parseTtl.ts";
+
+/**
+ * Tagged error surfaced when the builder cannot resolve an ontology
+ * range IRI to a primitive XSD type or to a class IRI in the same
+ * table. Replaces the prior silent `console.warn` + permissive
+ * `{ type: "string" }` fallback that let ontology typos sail through
+ * to the generated schema.
+ */
+export class BuildJsonSchemaError extends Schema.TaggedErrorClass<BuildJsonSchemaError>()(
+  "BuildJsonSchemaError",
+  {
+    kind: Schema.Literals(["UnknownRange"]),
+    propertyIri: Schema.String,
+    rangeIri: Schema.String,
+    message: Schema.String
+  }
+) {}
 
 export interface JsonSchemaPrimitive {
   readonly type: "string" | "number" | "integer" | "boolean";
@@ -101,60 +119,83 @@ const localName = (iri: string): string => {
   return sanitized.length === 0 ? "_" : sanitized;
 };
 
+/**
+ * Resolve a property `range` IRI to a JSON Schema primitive or `$ref`.
+ *
+ * Cases:
+ *   - `range` undefined: keep the permissive `{ type: "string" }`
+ *     fallback. This is "no rdfs:range declared" — a different shape
+ *     from "unknown IRI" and is a known incomplete-ontology condition
+ *     for the slice's hand-written agent.ttl (some classes have no
+ *     declared properties at all).
+ *   - `range` is a known XSD primitive: return the mapped shape.
+ *   - `range` is a class IRI in this table: emit `$ref`.
+ *   - `range` is anything else: hard-error with `BuildJsonSchemaError`.
+ *     Prior behavior was a `console.warn` + permissive string fallback
+ *     that allowed ontology typos to silently corrupt the generated
+ *     schema.
+ */
 const mapRange = (
-  range: string | undefined,
+  prop: ClassProperty,
   classDefKeys: ReadonlyMap<string, string>
-): JsonSchemaProperty => {
-  if (range === undefined) {
-    // TODO: surface as a structured diagnostic once Task 9 wires logging.
-    return { type: "string" };
-  }
-  const xsd = XSD_TYPE_MAP[range];
-  if (xsd !== undefined) return xsd;
-  const defKey = classDefKeys.get(range);
-  if (defKey !== undefined) return { $ref: `#/$defs/${defKey}` };
-  console.warn(
-    `[buildJsonSchema] Unknown range IRI ${range}; defaulting to "string".`
-  );
-  return { type: "string" };
-};
+): Effect.Effect<JsonSchemaProperty, BuildJsonSchemaError> =>
+  Effect.gen(function* () {
+    const range = prop.range;
+    if (range === undefined) {
+      return { type: "string" };
+    }
+    const xsd = XSD_TYPE_MAP[range];
+    if (xsd !== undefined) return xsd;
+    const defKey = classDefKeys.get(range);
+    if (defKey !== undefined) return { $ref: `#/$defs/${defKey}` };
+    return yield* new BuildJsonSchemaError({
+      kind: "UnknownRange",
+      propertyIri: prop.iri,
+      rangeIri: range,
+      message: `Unknown range IRI: ${range} on property ${prop.iri}`
+    });
+  });
 
 const propertyShape = (
   prop: ClassProperty,
   classDefKeys: ReadonlyMap<string, string>
-): JsonSchemaProperty => {
-  const base = mapRange(prop.range, classDefKeys);
-  return prop.list ? { type: "array", items: base } : base;
-};
+): Effect.Effect<JsonSchemaProperty, BuildJsonSchemaError> =>
+  Effect.gen(function* () {
+    const base = yield* mapRange(prop, classDefKeys);
+    return prop.list ? { type: "array", items: base } : base;
+  });
 
-export const buildJsonSchema = (table: ClassTable): JsonSchemaDocument => {
-  // Pre-build IRI → $defs key map so cross-class $ref resolution is O(1)
-  // and order-independent (a property's range may resolve to a class that
-  // appears later in `table.classes`).
-  const classDefKeys = new Map<string, string>();
-  for (const cls of table.classes) {
-    classDefKeys.set(cls.iri, localName(cls.iri));
-  }
-
-  const $defs: Record<string, JsonSchemaObject> = {};
-  for (const cls of table.classes) {
-    const defKey = classDefKeys.get(cls.iri)!;
-    const properties: Record<string, JsonSchemaProperty> = {};
-    for (const prop of cls.properties) {
-      const key = localName(prop.iri);
-      properties[key] = propertyShape(prop, classDefKeys);
+export const buildJsonSchema = (
+  table: ClassTable
+): Effect.Effect<JsonSchemaDocument, BuildJsonSchemaError> =>
+  Effect.gen(function* () {
+    // Pre-build IRI → $defs key map so cross-class $ref resolution is O(1)
+    // and order-independent (a property's range may resolve to a class that
+    // appears later in `table.classes`).
+    const classDefKeys = new Map<string, string>();
+    for (const cls of table.classes) {
+      classDefKeys.set(cls.iri, localName(cls.iri));
     }
-    // TODO: emit `required: [...]` once parseTtl wires owl:Restriction
-    // cardinality off blank-node restrictions; today every property is
-    // optional per parseTtl.ts default.
-    $defs[defKey] = {
-      type: "object",
-      properties
-    };
-  }
 
-  return {
-    $schema: JSON_SCHEMA_2020_12,
-    $defs
-  };
-};
+    const $defs: Record<string, JsonSchemaObject> = {};
+    for (const cls of table.classes) {
+      const defKey = classDefKeys.get(cls.iri)!;
+      const properties: Record<string, JsonSchemaProperty> = {};
+      for (const prop of cls.properties) {
+        const key = localName(prop.iri);
+        properties[key] = yield* propertyShape(prop, classDefKeys);
+      }
+      // TODO: emit `required: [...]` once parseTtl wires owl:Restriction
+      // cardinality off blank-node restrictions; today every property is
+      // optional per parseTtl.ts default.
+      $defs[defKey] = {
+        type: "object",
+        properties
+      };
+    }
+
+    return {
+      $schema: JSON_SCHEMA_2020_12,
+      $defs
+    };
+  });

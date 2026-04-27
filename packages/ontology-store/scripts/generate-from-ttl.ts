@@ -103,7 +103,7 @@ const main = Effect.gen(function* () {
 
   const ttl = yield* fs.readFileString(ttlPath);
   const table = yield* parseTtlToClassTable(ttl);
-  const jsonSchema = buildJsonSchema(table);
+  const jsonSchema = yield* buildJsonSchema(table);
   const processed = yield* postProcessAst(jsonSchema, table);
 
   const generatedSource = renderSchemaSource(processed, table);

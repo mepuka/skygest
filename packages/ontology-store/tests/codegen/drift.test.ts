@@ -47,7 +47,7 @@ describe.skipIf(!ENERGY_INTEL_ROOT)("codegen drift gate", () => {
         path.join(ENERGY_INTEL_ROOT!, "agent.ttl")
       );
       const table = yield* parseTtlToClassTable(ttl);
-      const jsonSchema = buildJsonSchema(table);
+      const jsonSchema = yield* buildJsonSchema(table);
       const processed = yield* postProcessAst(jsonSchema, table);
       const regenerated = renderSchemaSource(processed, table);
 

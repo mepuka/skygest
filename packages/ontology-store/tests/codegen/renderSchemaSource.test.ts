@@ -22,7 +22,7 @@ describe("renderSchemaSource", () => {
         ],
         prefixes: {}
       };
-      const jsonSchema = buildJsonSchema(table);
+      const jsonSchema = yield* buildJsonSchema(table);
       const processed = yield* postProcessAst(jsonSchema, table);
       const source = renderSchemaSource(processed, table);
 
@@ -58,7 +58,7 @@ describe("renderSchemaSource", () => {
         ],
         prefixes: {}
       };
-      const jsonSchema = buildJsonSchema(table);
+      const jsonSchema = yield* buildJsonSchema(table);
       const processed = yield* postProcessAst(jsonSchema, table);
       const source = renderSchemaSource(processed, table);
 
@@ -100,7 +100,7 @@ describe("renderSchemaSource", () => {
         ],
         prefixes: {}
       };
-      const jsonSchema = buildJsonSchema(table);
+      const jsonSchema = yield* buildJsonSchema(table);
       const processed = yield* postProcessAst(jsonSchema, table);
       const source = renderSchemaSource(processed, table);
 
@@ -146,7 +146,7 @@ describe("renderSchemaSource", () => {
         ],
         prefixes: {}
       };
-      const jsonSchema = buildJsonSchema(table);
+      const jsonSchema = yield* buildJsonSchema(table);
       const processed = yield* postProcessAst(jsonSchema, table);
       const source = renderSchemaSource(processed, table);
 
@@ -183,7 +183,7 @@ describe("renderSchemaSource", () => {
         ],
         prefixes: {}
       };
-      const jsonSchema = buildJsonSchema(table);
+      const jsonSchema = yield* buildJsonSchema(table);
       const processed = yield* postProcessAst(jsonSchema, table);
       const source = renderSchemaSource(processed, table);
 

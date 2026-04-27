@@ -23,7 +23,7 @@ describe("postProcessAst", () => {
         ],
         prefixes: {}
       };
-      const jsonSchema = buildJsonSchema(table);
+      const jsonSchema = yield* buildJsonSchema(table);
       const result = yield* postProcessAst(jsonSchema, table);
       expect(result.brandedIris).toHaveLength(1);
       expect(result.brandedIris[0]).toMatchObject({
@@ -68,7 +68,7 @@ describe("postProcessAst", () => {
         ],
         prefixes: {}
       };
-      const jsonSchema = buildJsonSchema(table);
+      const jsonSchema = yield* buildJsonSchema(table);
       const result = yield* postProcessAst(jsonSchema, table);
       const roleIdx = result.emitOrder.indexOf(
         "https://w3id.org/energy-intel/EnergyExpertRole"
@@ -111,7 +111,7 @@ describe("postProcessAst", () => {
         ],
         prefixes: {}
       };
-      const jsonSchema = buildJsonSchema(table);
+      const jsonSchema = yield* buildJsonSchema(table);
       const result = yield* postProcessAst(jsonSchema, table);
       const expertMeta = result.brandedIris.find(
         (b) => b.className === "Expert"
@@ -166,7 +166,7 @@ describe("postProcessAst", () => {
           ],
           prefixes: {}
         };
-        const jsonSchema = buildJsonSchema(table);
+        const jsonSchema = yield* buildJsonSchema(table);
         const error = yield* postProcessAst(jsonSchema, table).pipe(
           Effect.flip
         );
@@ -202,7 +202,7 @@ describe("postProcessAst", () => {
           ],
           prefixes: {}
         };
-        const jsonSchema = buildJsonSchema(table);
+        const jsonSchema = yield* buildJsonSchema(table);
         const error = yield* postProcessAst(jsonSchema, table).pipe(
           Effect.flip
         );
@@ -237,7 +237,7 @@ describe("postProcessAst", () => {
         ],
         prefixes: {}
       };
-      const jsonSchema = buildJsonSchema(table);
+      const jsonSchema = yield* buildJsonSchema(table);
       const result = yield* postProcessAst(jsonSchema, table);
       const refKeys = Object.keys(result.multiDocument.references);
       expect(refKeys).toContain("Expert");
