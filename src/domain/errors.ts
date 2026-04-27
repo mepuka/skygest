@@ -373,6 +373,27 @@ export class SeriesDatasetAuditDecodeError extends Schema.TaggedErrorClass<Serie
   }
 ) {}
 
+export class AiSearchError extends Schema.TaggedErrorClass<AiSearchError>()(
+  "AiSearchError",
+  {
+    operation: Schema.Literals(["upload", "search", "get", "delete"]),
+    instance: Schema.String,
+    message: Schema.String,
+    status: Schema.optionalKey(Schema.Number),
+    key: Schema.optionalKey(Schema.String)
+  }
+) {}
+
+export class RdfMappingError extends Schema.TaggedErrorClass<RdfMappingError>()(
+  "RdfMappingError",
+  {
+    direction: Schema.Literals(["forward", "reverse"]),
+    entity: Schema.String,
+    iri: Schema.optionalKey(Schema.String),
+    message: Schema.String
+  }
+) {}
+
 export class FacetDecompositionError extends Schema.TaggedErrorClass<FacetDecompositionError>()(
   "FacetDecompositionError",
   {
