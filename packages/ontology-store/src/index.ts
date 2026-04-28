@@ -10,6 +10,7 @@ export { ShaclService } from "./Service/Shacl";
 
 // Cross-package tagged errors (re-exported through Domain/Errors barrel).
 export {
+  AiSearchError,
   EntityGraphEndpointNotFoundError,
   EntityGraphLinkInvalidError,
   EntityGraphLinkNotFoundError,
@@ -88,8 +89,42 @@ export type {
   EntityMetadataKey,
   ProjectionAdapter,
   ProjectionContract,
-  ProjectionFixture
+  ProjectionFixture,
+  ProjectionRuntimeAdapter
 } from "./Domain/Projection";
+export {
+  AiSearchClient,
+  DEFAULT_ENTITY_SEARCH_INSTANCE,
+  EntitySearchResultDecodeError,
+  EntitySearchService,
+  makeAiSearchAdapter,
+  makeAiSearchClient
+} from "./Service/AiSearchClient";
+export type {
+  AiSearchInstanceBinding,
+  AiSearchItemInfo,
+  AiSearchItemsBinding,
+  AiSearchListItemsParams,
+  AiSearchListItemsResponse,
+  AiSearchMetadata,
+  AiSearchMetadataValue,
+  AiSearchNamespaceBinding,
+  AiSearchSearchRequest,
+  AiSearchSearchResponse,
+  EntitySearchFilter,
+  EntitySearchInput,
+  EntitySearchResult
+} from "./Service/AiSearchClient";
+export {
+  EntityContextHydrationError,
+  EntityContextService
+} from "./Service/EntityContext";
+export type {
+  EntityContext,
+  EntityContextNeighbor,
+  EntityContextOptions,
+  RenderedEntityContextNode
+} from "./Service/EntityContext";
 export {
   EntityGraphRepo
 } from "./Service/EntityGraphRepo";

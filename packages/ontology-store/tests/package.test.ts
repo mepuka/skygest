@@ -7,7 +7,10 @@ import {
   ENTITY_METADATA_FIELDS,
   EI,
   EXPERT_METADATA_KEYS,
+  AiSearchClient,
   Expert,
+  EntityContextService,
+  EntitySearchService,
   ExpertEntity,
   ExpertIri,
   ExpertModule,
@@ -107,5 +110,8 @@ describe("@skygest/ontology-store", () => {
       "authority",
       "time_bucket"
     ]);
+    expect(AiSearchClient).toBeDefined();
+    expect(EntitySearchService).toBeDefined();
+    expect(EntityContextService).toBeDefined();
   });
 });

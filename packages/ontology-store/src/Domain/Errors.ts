@@ -8,6 +8,7 @@
  * tree directly.
  */
 export {
+  AiSearchError,
   EntityGraphEndpointNotFoundError,
   EntityGraphLinkInvalidError,
   EntityGraphLinkNotFoundError,

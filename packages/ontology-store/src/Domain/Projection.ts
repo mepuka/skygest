@@ -49,18 +49,19 @@ export interface ProjectionContract<
   ) => ReadonlyArray<Key>;
 }
 
-export interface ProjectionAdapter<
-  Self extends Schema.Top,
+export interface ProjectionRuntimeAdapter<
+  Entity,
   Meta extends Readonly<Record<string, string | number | boolean>>
 > {
-  readonly upsert: (
-    entity: Schema.Schema.Type<Self>
-  ) => Effect.Effect<void, ProjectionWriteError>;
+  readonly upsert: (entity: Entity) => Effect.Effect<void, ProjectionWriteError>;
   readonly delete: (iri: string) => Effect.Effect<void, ProjectionWriteError>;
-  readonly rename: (
-    entity: Schema.Schema.Type<Self>
-  ) => Effect.Effect<void, ProjectionWriteError>;
+  readonly rename: (entity: Entity) => Effect.Effect<void, ProjectionWriteError>;
 }
+
+export type ProjectionAdapter<
+  Self extends Schema.Top,
+  Meta extends Readonly<Record<string, string | number | boolean>>
+> = ProjectionRuntimeAdapter<Schema.Schema.Type<Self>, Meta>;
 
 export interface ProjectionFixture<Self extends Schema.Top> {
   readonly entityType: string;
