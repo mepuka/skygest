@@ -7,8 +7,11 @@ import {
   type EntityMetadataKey
 } from "./Domain/Projection";
 import { DEFAULT_ENTITY_SEARCH_INSTANCE } from "./Service/AiSearchClient";
-import { ExpertEntity } from "./agent/expert";
-import { OrganizationEntity } from "./agent/organization";
+import { ExpertEntity, ExpertProjectionFixture } from "./agent/expert";
+import {
+  OrganizationEntity,
+  OrganizationProjectionFixture
+} from "./agent/organization";
 
 export const ENERGY_INTEL_SEARCH_BINDING = "ENERGY_INTEL_SEARCH" as const;
 export const ENERGY_INTEL_SEARCH_NAMESPACE = "energy-intel" as const;
@@ -88,3 +91,46 @@ export const ENTITY_PROVISIONING = [
   ExpertProvisioning,
   OrganizationProvisioning
 ] as const;
+
+export const ENTITY_PROJECTION_FIXTURES = [
+  ExpertProjectionFixture,
+  OrganizationProjectionFixture
+] as const;
+
+const customMetadataEqual = (
+  left: typeof ENTITY_SEARCH_CUSTOM_METADATA,
+  right: typeof ENTITY_SEARCH_CUSTOM_METADATA
+): boolean =>
+  left.length === right.length &&
+  left.every(
+    (field, index) =>
+      field.field_name === right[index]?.field_name &&
+      field.data_type === right[index]?.data_type
+  );
+
+export const defineUnifiedEntitySearchProvisioning = (
+  plans: ReadonlyArray<EntityProvisioningPlan>
+): typeof ENTITY_SEARCH_PROVISIONING => {
+  const first = plans[0];
+  if (first === undefined) {
+    throw new Error("At least one entity provisioning plan is required");
+  }
+
+  for (const plan of plans) {
+    if (
+      plan.search.binding !== first.search.binding ||
+      plan.search.namespace !== first.search.namespace ||
+      plan.search.instance !== first.search.instance ||
+      !customMetadataEqual(
+        plan.search.customMetadata,
+        first.search.customMetadata
+      )
+    ) {
+      throw new Error(
+        `Entity ${plan.tag} declares a search provisioning plan that does not match the unified entity-search contract`
+      );
+    }
+  }
+
+  return first.search;
+};

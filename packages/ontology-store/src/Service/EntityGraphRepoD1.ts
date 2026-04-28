@@ -43,6 +43,10 @@ const DEFAULT_GRAPH_IRI = Schema.decodeUnknownSync(GraphIri)(
 
 type D1DatabaseBinding = D1Client.D1Client["config"]["db"];
 type D1PreparedStatementBinding = ReturnType<D1DatabaseBinding["prepare"]>;
+type D1BatchResult = {
+  readonly success?: boolean;
+  readonly error?: unknown;
+};
 
 const EntityRecordRow = Schema.Struct({
   iri: Schema.String,
@@ -251,15 +255,22 @@ const hashTriple = (
   predicateIri: string,
   objectIri: string,
   graphIri: string
-): Effect.Effect<TripleHash> =>
-  Effect.promise(async () => {
-    const bytes = new TextEncoder().encode(
-      `${subjectIri}\u0000${predicateIri}\u0000${objectIri}\u0000${graphIri}`
-    );
-    return Schema.decodeUnknownSync(TripleHash)(
-      hex(await crypto.subtle.digest("SHA-256", bytes))
-    );
-  });
+): Effect.Effect<TripleHash, SqlError> =>
+  Effect.tryPromise({
+    try: async () => {
+      const bytes = new TextEncoder().encode(
+        `${subjectIri}\u0000${predicateIri}\u0000${objectIri}\u0000${graphIri}`
+      );
+      return hex(await crypto.subtle.digest("SHA-256", bytes));
+    },
+    catch: (cause) => decodeSqlError(cause, "triple hash digest")
+  }).pipe(
+    Effect.flatMap((hash) =>
+      Schema.decodeUnknownEffect(TripleHash)(hash).pipe(
+        Effect.mapError((cause) => decodeSqlError(cause, "triple hash"))
+      )
+    )
+  );
 
 const firstEntity = (
   rows: ReadonlyArray<EntityRecordRow>,
@@ -325,7 +336,21 @@ const runD1Batch = (
   Effect.tryPromise({
     try: () => db.batch(Array.from(statements)),
     catch: (cause) => d1BatchSqlError(cause, operation)
-  }).pipe(Effect.asVoid);
+  }).pipe(
+    Effect.flatMap((results) => {
+      const failureIndex = (results as ReadonlyArray<D1BatchResult>).findIndex(
+        (result) => result.success === false
+      );
+      return failureIndex === -1
+        ? Effect.void
+        : Effect.fail(
+            d1BatchSqlError(
+              (results as ReadonlyArray<D1BatchResult>)[failureIndex],
+              `${operation}[${String(failureIndex)}]`
+            )
+          );
+    })
+  );
 
 export const EntityGraphRepoD1 = {
   layer: Layer.effect(

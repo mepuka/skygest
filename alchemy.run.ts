@@ -10,12 +10,13 @@ import {
   Worker,
   Workflow
 } from "alchemy/cloudflare";
+import { Effect } from "effect";
 
 import {
-  ENERGY_INTEL_SEARCH_BINDING,
-  ENERGY_INTEL_SEARCH_INSTANCE,
-  ENERGY_INTEL_SEARCH_NAMESPACE,
-  ENTITY_SEARCH_CUSTOM_METADATA
+  ENTITY_PROJECTION_FIXTURES,
+  ENTITY_PROVISIONING,
+  assertNoMetadataDrift,
+  defineUnifiedEntitySearchProvisioning
 } from "@skygest/ontology-store";
 
 import { ensureAiSearchCustomMetadata } from "./alchemy/ai-search-metadata";
@@ -27,6 +28,10 @@ import type { EnrichmentEntrypoint } from "./src/worker/filter";
 
 const ACCOUNT_ID = "af578620f2ff4eae2042c031be82f7e7";
 const COMPATIBILITY_DATE = "2026-04-28";
+const entitySearchProvisioning =
+  defineUnifiedEntitySearchProvisioning(ENTITY_PROVISIONING);
+
+await Effect.runPromise(assertNoMetadataDrift(ENTITY_PROJECTION_FIXTURES));
 
 type DeploymentConfig = {
   readonly workerSuffix: string;
@@ -124,7 +129,7 @@ const [db, ontologyKv, transcriptsBucket, energyIntelSearch] =
     }),
     AiSearchNamespace("energy-intel-search", {
       ...apiOptions,
-      name: ENERGY_INTEL_SEARCH_NAMESPACE,
+      name: entitySearchProvisioning.namespace,
       description: "Skygest energy intelligence entity search",
       adopt: true,
       delete: false
@@ -144,7 +149,7 @@ const searchDb =
 
 export const entitySearch = await AiSearch("entity-search", {
   ...apiOptions,
-  name: ENERGY_INTEL_SEARCH_INSTANCE,
+  name: entitySearchProvisioning.instance,
   namespace: energyIntelSearch,
   adopt: true,
   delete: false,
@@ -156,9 +161,9 @@ export const entitySearch = await AiSearch("entity-search", {
 
 await ensureAiSearchCustomMetadata({
   apiOptions,
-  namespace: ENERGY_INTEL_SEARCH_NAMESPACE,
+  namespace: entitySearchProvisioning.namespace,
   instanceName: entitySearch.name,
-  customMetadata: ENTITY_SEARCH_CUSTOM_METADATA
+  customMetadata: entitySearchProvisioning.customMetadata
 });
 
 const searchDbBinding = searchDb === undefined ? {} : { SEARCH_DB: searchDb };
@@ -203,6 +208,7 @@ export const ingestWorker = await Worker("ingest", {
     ONTOLOGY_KV: ontologyKv,
     TRANSCRIPTS_BUCKET: transcriptsBucket,
     RESOLVER: resolverWorker,
+    [entitySearchProvisioning.binding]: energyIntelSearch,
     INGEST_RUN_WORKFLOW: Workflow<IngestRunParams>("ingest-run", {
       workflowName: "ingest-run",
       className: "IngestRunWorkflow"
@@ -239,7 +245,7 @@ export const agentWorker = await Worker("agent", {
     TRANSCRIPTS_BUCKET: transcriptsBucket,
     INGEST_SERVICE: ingestWorker,
     RESOLVER: resolverWorker,
-    [ENERGY_INTEL_SEARCH_BINDING]: energyIntelSearch,
+    [entitySearchProvisioning.binding]: energyIntelSearch,
     ASSETS: await Assets({ path: "./dist" }),
     ...config.agentVars
   },

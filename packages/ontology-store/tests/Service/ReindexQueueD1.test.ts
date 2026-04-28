@@ -65,7 +65,7 @@ const makeQueueD1BatchLayer = (captures: {
     cause: "entity-changed",
     cause_priority: 0,
     propagation_depth: 0,
-    attempts: 2,
+    attempts: 3,
     next_attempt_at: 10,
     enqueued_at: 1,
     updated_at: 1
@@ -77,7 +77,8 @@ const makeQueueD1BatchLayer = (captures: {
         params,
         all: async () => ({
           results:
-            query.includes("FROM reindex_queue") && params[0] === "queue-1"
+            query.includes("UPDATE reindex_queue") &&
+            params.includes("queue-1")
               ? [row]
               : [],
           success: true,

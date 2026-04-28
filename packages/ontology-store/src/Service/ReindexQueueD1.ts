@@ -32,6 +32,10 @@ type ReindexQueueRow = typeof ReindexQueueRow.Type;
 
 type D1DatabaseBinding = D1Client.D1Client["config"]["db"];
 type D1PreparedStatementBinding = ReturnType<D1DatabaseBinding["prepare"]>;
+type D1BatchResult = {
+  readonly success?: boolean;
+  readonly error?: unknown;
+};
 
 const decodeSqlError = (cause: unknown): SqlError =>
   new SqlError({
@@ -92,7 +96,21 @@ const runD1Batch = (
   Effect.tryPromise({
     try: () => db.batch(Array.from(statements)),
     catch: (cause) => d1BatchSqlError(cause, operation)
-  }).pipe(Effect.asVoid);
+  }).pipe(
+    Effect.flatMap((results) => {
+      const failureIndex = (results as ReadonlyArray<D1BatchResult>).findIndex(
+        (result) => result.success === false
+      );
+      return failureIndex === -1
+        ? Effect.void
+        : Effect.fail(
+            d1BatchSqlError(
+              (results as ReadonlyArray<D1BatchResult>)[failureIndex],
+              `${operation}[${String(failureIndex)}]`
+            )
+          );
+    })
+  );
 
 export const ReindexQueueD1 = {
   layer: Layer.effect(
@@ -207,7 +225,7 @@ export const ReindexQueueD1 = {
             ${item.cause},
             ${item.causePriority},
             ${item.propagationDepth},
-            ${item.attempts + 1},
+            ${item.attempts},
             ${item.nextAttemptAt},
             ${item.enqueuedAt},
             ${now},
@@ -259,7 +277,7 @@ export const ReindexQueueD1 = {
                     item.cause,
                     item.causePriority,
                     item.propagationDepth,
-                    item.attempts + 1,
+                    item.attempts,
                     item.nextAttemptAt,
                     item.enqueuedAt,
                     now,
@@ -283,7 +301,18 @@ export const ReindexQueueD1 = {
       ) =>
         Effect.gen(function* () {
           const rows = yield* sql<ReindexQueueRow>`
-            SELECT
+            UPDATE reindex_queue
+            SET attempts = attempts + 1,
+              next_attempt_at = CASE
+                WHEN attempts + 1 >= 3 THEN next_attempt_at
+                WHEN attempts + 1 = 1 THEN ${now + backoffMs(1)}
+                WHEN attempts + 1 = 2 THEN ${now + backoffMs(2)}
+                ELSE ${now + backoffMs(3)}
+              END,
+              updated_at = ${now}
+            WHERE queue_id = ${queueId}
+              AND attempts < 3
+            RETURNING
               queue_id as queue_id,
               coalesce_key as coalesce_key,
               target_entity_type as target_entity_type,
@@ -296,25 +325,13 @@ export const ReindexQueueD1 = {
               next_attempt_at as next_attempt_at,
               enqueued_at as enqueued_at,
               updated_at as updated_at
-            FROM reindex_queue
-            WHERE queue_id = ${queueId}
-            LIMIT 1
           `.pipe(Effect.flatMap(decodeRows));
           const row = rows[0];
           if (row === undefined) return;
           const item = yield* toItem(row);
-          if (item.attempts + 1 >= 3) {
+          if (item.attempts >= 3) {
             yield* moveToDlqWithD1Batch(item, now, message);
-            return;
           }
-          const attempts = item.attempts + 1;
-          yield* sql`
-            UPDATE reindex_queue
-            SET attempts = ${attempts},
-              next_attempt_at = ${now + backoffMs(attempts)},
-              updated_at = ${now}
-            WHERE queue_id = ${queueId}
-          `.pipe(Effect.asVoid);
         });
 
       const drain = (batch: ReadonlyArray<ReindexQueueItem>) =>

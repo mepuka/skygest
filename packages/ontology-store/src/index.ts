@@ -200,13 +200,15 @@ export {
   ENERGY_INTEL_SEARCH_BINDING,
   ENERGY_INTEL_SEARCH_INSTANCE,
   ENERGY_INTEL_SEARCH_NAMESPACE,
+  ENTITY_PROJECTION_FIXTURES,
   ENTITY_PROVISIONING,
   ENTITY_SEARCH_CUSTOM_METADATA,
   ENTITY_SEARCH_PROVISIONING,
   ExpertProvisioning,
   MAX_AI_SEARCH_CUSTOM_METADATA_FIELDS,
   OrganizationProvisioning,
-  defineEntityProvisioning
+  defineEntityProvisioning,
+  defineUnifiedEntitySearchProvisioning
 } from "./Provisioning";
 export type {
   AiSearchCustomMetadataField,

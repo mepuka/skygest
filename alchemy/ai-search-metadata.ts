@@ -5,16 +5,40 @@ import {
   updateAiSearchInstance,
   type AiSearch
 } from "alchemy/cloudflare";
-import { Scope } from "alchemy";
+import { Scope, type Phase } from "alchemy";
 
 import {
   MAX_AI_SEARCH_CUSTOM_METADATA_FIELDS,
   type AiSearchCustomMetadataField
-} from "@skygest/ontology-store";
+} from "../packages/ontology-store/src/Provisioning";
 
 type ExistingAiSearchInstance = Awaited<
   ReturnType<typeof getAiSearchInstance>
 >;
+type CloudflareApi = Awaited<ReturnType<typeof createCloudflareApi>>;
+
+export interface AiSearchMetadataClient {
+  readonly createApi: (
+    apiOptions?: CloudflareApiOptions
+  ) => Promise<CloudflareApi>;
+  readonly getInstance: (
+    api: CloudflareApi,
+    namespace: string,
+    instanceName: string
+  ) => Promise<ExistingAiSearchInstance>;
+  readonly updateInstance: (
+    api: CloudflareApi,
+    namespace: string,
+    instanceId: string,
+    payload: AiSearch.ApiPayload
+  ) => Promise<ExistingAiSearchInstance>;
+}
+
+const defaultClient: AiSearchMetadataClient = {
+  createApi: (apiOptions) => createCloudflareApi(apiOptions ?? {}),
+  getInstance: getAiSearchInstance,
+  updateInstance: updateAiSearchInstance
+};
 
 const normalizeFields = (
   fields: ReadonlyArray<AiSearchCustomMetadataField>
@@ -110,17 +134,24 @@ const updatePayload = (
   custom_metadata: customMetadata.map((field) => ({ ...field }))
 });
 
-export const ensureAiSearchCustomMetadata = async (input: {
+// Alchemy 0.93.4 exposes `custom_metadata` in the low-level Cloudflare API
+// payload, but not yet on user-facing `AiSearch` props. Keep this bridge until
+// upstream exposes a `customMetadata` prop:
+// https://github.com/alchemy-run/alchemy/issues?q=AiSearch+custom_metadata
+export const ensureAiSearchCustomMetadataForPhase = async (input: {
+  readonly phase: Phase;
   readonly apiOptions?: CloudflareApiOptions;
   readonly namespace: string;
   readonly instanceName: string;
   readonly customMetadata: ReadonlyArray<AiSearchCustomMetadataField>;
+  readonly client?: AiSearchMetadataClient;
 }): Promise<void> => {
-  if (Scope.current.phase !== "up") return;
+  if (input.phase !== "up") return;
 
+  const client = input.client ?? defaultClient;
   const customMetadata = normalizeFields(input.customMetadata);
-  const api = await createCloudflareApi(input.apiOptions ?? {});
-  const instance = await getAiSearchInstance(
+  const api = await client.createApi(input.apiOptions);
+  const instance = await client.getInstance(
     api,
     input.namespace,
     input.instanceName
@@ -128,10 +159,21 @@ export const ensureAiSearchCustomMetadata = async (input: {
 
   if (fieldsEqual(instance.custom_metadata, customMetadata)) return;
 
-  await updateAiSearchInstance(
+  await client.updateInstance(
     api,
     input.namespace,
     instance.id,
     updatePayload(instance, customMetadata)
   );
 };
+
+export const ensureAiSearchCustomMetadata = async (input: {
+  readonly apiOptions?: CloudflareApiOptions;
+  readonly namespace: string;
+  readonly instanceName: string;
+  readonly customMetadata: ReadonlyArray<AiSearchCustomMetadataField>;
+}): Promise<void> =>
+  ensureAiSearchCustomMetadataForPhase({
+    ...input,
+    phase: Scope.current.phase
+  });

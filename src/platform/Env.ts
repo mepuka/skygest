@@ -1,4 +1,7 @@
 import { Array, ServiceMap, Effect, Layer, Option, Schema } from "effect";
+import type {
+  AiSearchNamespaceBinding
+} from "../../packages/ontology-store/src/Service/AiSearchClient";
 import type { EnrichmentRunParams } from "../domain/enrichmentRun";
 import type { IngestRunParams } from "../domain/polling";
 import type { ResolverBinding } from "../resolver/Client";
@@ -36,9 +39,6 @@ type IngestWorkflowBinding = Workflow<IngestRunParams>;
 type EnrichmentWorkflowBinding = Workflow<EnrichmentRunParams>;
 type ExpertPollCoordinatorNamespace = DurableObjectNamespace;
 type IngestServiceBinding = EnrichmentTriggerBinding & Fetcher;
-type AiSearchNamespaceBinding = {
-  readonly get: (name: string) => unknown;
-};
 
 export type EnvBindings = Simplify<
   SharedRuntimeEnv &
