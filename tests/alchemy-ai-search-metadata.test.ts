@@ -6,10 +6,14 @@ import {
   type AiSearchMetadataClient
 } from "../alchemy/ai-search-metadata";
 
-const instance = (customMetadata?: ReadonlyArray<unknown> | null) =>
+const instance = (
+  customMetadata?: ReadonlyArray<unknown> | null,
+  extra?: Readonly<Record<string, unknown>>
+) =>
   ({
     id: "instance-id",
-    custom_metadata: customMetadata
+    custom_metadata: customMetadata,
+    ...extra
   }) as Awaited<ReturnType<AiSearchMetadataClient["getInstance"]>>;
 
 describe("ensureAiSearchCustomMetadataForPhase", () => {
@@ -147,5 +151,45 @@ describe("ensureAiSearchCustomMetadataForPhase", () => {
     });
 
     expect(calls).toEqual(["getInstance", "updateInstance"]);
+  });
+
+  it("omits null instance fields from the update payload", async () => {
+    let payload: { readonly [key: string]: unknown } | undefined;
+    const client = {
+      createApi: async () => ({}),
+      getInstance: async () =>
+        instance(null, {
+          source: null,
+          type: null,
+          metadata: null,
+          public_endpoint_params: null,
+          source_params: null
+        }),
+      updateInstance: async (
+        _api: unknown,
+        _namespace: string,
+        _instanceId: string,
+        nextPayload: { readonly [key: string]: unknown }
+      ) => {
+        payload = nextPayload;
+        return instance(ENTITY_SEARCH_CUSTOM_METADATA);
+      }
+    } as unknown as AiSearchMetadataClient;
+
+    await ensureAiSearchCustomMetadataForPhase({
+      phase: "up",
+      namespace: "energy-intel",
+      instanceName: "entity-search",
+      customMetadata: ENTITY_SEARCH_CUSTOM_METADATA,
+      client
+    });
+
+    expect(payload).toBeDefined();
+    expect(payload).not.toHaveProperty("source");
+    expect(payload).not.toHaveProperty("type");
+    expect(payload).not.toHaveProperty("metadata");
+    expect(payload).not.toHaveProperty("public_endpoint_params");
+    expect(payload).not.toHaveProperty("source_params");
+    expect(payload?.custom_metadata).toEqual(ENTITY_SEARCH_CUSTOM_METADATA);
   });
 });
