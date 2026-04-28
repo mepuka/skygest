@@ -23,6 +23,8 @@ export interface ReindexBatchResult {
   readonly failed: number;
 }
 
+export const REINDEX_MAX_PROPAGATION_DEPTH = 1;
+
 export class ReindexDepthExceededError extends Schema.TaggedErrorClass<ReindexDepthExceededError>()(
   "ReindexDepthExceededError",
   {
@@ -53,7 +55,7 @@ export class ReindexQueueService extends ServiceMap.Service<
 >()("@skygest/ontology-store/ReindexQueueService") {
   static readonly Noop = ReindexQueueService.of({
     schedule: (request) =>
-      request.propagationDepth > 1
+      request.propagationDepth > REINDEX_MAX_PROPAGATION_DEPTH
         ? Effect.fail(
             new ReindexDepthExceededError({
               propagationDepth: request.propagationDepth

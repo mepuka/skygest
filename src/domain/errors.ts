@@ -432,6 +432,7 @@ export class AiSearchError extends Schema.TaggedErrorClass<AiSearchError>()(
     instance: Schema.String,
     message: Schema.String,
     status: Schema.optionalKey(Schema.Number),
+    retryAfterMs: Schema.optionalKey(Schema.Number),
     key: Schema.optionalKey(Schema.String)
   }
 ) {}

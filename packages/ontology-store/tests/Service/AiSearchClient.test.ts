@@ -1,5 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, Layer } from "effect";
+import { Effect, Fiber, Layer, Random } from "effect";
+import { TestClock } from "effect/testing";
 
 import {
   AiSearchClient,
@@ -134,6 +135,67 @@ describe("AiSearchClient", () => {
         time_bucket: "unknown"
       });
       expect(fake.uploads[0]?.content).toContain("# Fixture Expert");
+    })
+  );
+
+  it.effect("retries transient AI Search upload failures", () =>
+    Effect.gen(function* () {
+      let attempts = 0;
+      let startedResolve: (() => void) | undefined;
+      const started = new Promise<void>((resolve) => {
+        startedResolve = resolve;
+      });
+      const instance: AiSearchInstanceBinding = {
+        items: {
+          list: () => Promise.resolve({ result: [] }),
+          upload: (name, _content, options) => {
+            attempts += 1;
+            startedResolve?.();
+            if (attempts < 3) {
+              return Promise.reject(
+                Object.assign(new Error("rate limited"), {
+                  status: 429,
+                  retryAfterMs: 0
+                })
+              );
+            }
+            const item: AiSearchItemInfo = {
+              id: `item-${attempts}`,
+              key: name,
+              status: "completed",
+              ...(options?.metadata === undefined
+                ? {}
+                : { metadata: options.metadata })
+            };
+            return Promise.resolve(item);
+          },
+          delete: () => Promise.resolve()
+        },
+        search: () => Promise.reject(new Error("not used"))
+      };
+      const namespace: AiSearchNamespaceBinding = {
+        get: () => instance
+      };
+      const program = Effect.gen(function* () {
+        const client = yield* AiSearchClient;
+        yield* client.upload("entity-search", "entities/expert/retry.md", "body", {
+          entity_type: "Expert"
+        });
+      }).pipe(
+        Effect.provide(AiSearchClient.layer(namespace)),
+        Random.withSeed(0)
+      );
+
+      const fiber = yield* Effect.forkChild(program);
+      yield* Effect.promise(() => started);
+
+      expect(attempts).toBe(1);
+      expect(fiber.pollUnsafe()).toBeUndefined();
+
+      yield* TestClock.adjust("5 seconds");
+      yield* Fiber.join(fiber);
+
+      expect(attempts).toBe(3);
     })
   );
 

@@ -21,9 +21,11 @@ describe("AiSearchError", () => {
       instance: "experts",
       message: "rate limited",
       status: 429,
+      retryAfterMs: 1_000,
       key: "expert/did:plc:xyz.md"
     });
     expect(err.status).toBe(429);
+    expect(err.retryAfterMs).toBe(1_000);
     expect(err.key).toBe("expert/did:plc:xyz.md");
   });
 });

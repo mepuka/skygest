@@ -142,6 +142,7 @@ export {
 } from "./Service/EntityRegistry";
 export type { RegisteredEntity } from "./Service/EntityRegistry";
 export {
+  REINDEX_MAX_PROPAGATION_DEPTH,
   ReindexDepthExceededError,
   ReindexQueueService
 } from "./Service/ReindexQueue";

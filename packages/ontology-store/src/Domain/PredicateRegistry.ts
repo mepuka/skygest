@@ -2,6 +2,7 @@ import type { NamedNode } from "n3";
 
 import { BFO, EI } from "../iris";
 import { asPredicateIri, type PredicateIri } from "./EntityDefinition";
+import type { EntityIri } from "./EntityGraph";
 
 const predicate = (term: NamedNode): PredicateIri => asPredicateIri(term.value);
 
@@ -44,11 +45,11 @@ export type ObjectOf<P extends PredicateName> =
 export interface TypedLinkInput<P extends PredicateName> {
   readonly predicate: P;
   readonly subject: {
-    readonly iri: string;
+    readonly iri: EntityIri;
     readonly type: SubjectOf<P>;
   };
   readonly object: {
-    readonly iri: string;
+    readonly iri: EntityIri;
     readonly type: ObjectOf<P>;
   };
   readonly effectiveFrom: number;

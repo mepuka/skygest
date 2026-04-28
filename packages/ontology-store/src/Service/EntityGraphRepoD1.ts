@@ -1,5 +1,7 @@
-import { Clock, Effect, Layer, Schema } from "effect";
+import { D1Client } from "@effect/sql-d1";
+import { Clock, Effect, Layer, Option, Random, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
+import { SqlError, UnknownError } from "effect/unstable/sql/SqlError";
 
 import {
   EntityGraphEndpointNotFoundError,
@@ -38,6 +40,9 @@ import {
 const DEFAULT_GRAPH_IRI = Schema.decodeUnknownSync(GraphIri)(
   "urn:skygest:graph:default"
 );
+
+type D1DatabaseBinding = D1Client.D1Client["config"]["db"];
+type D1PreparedStatementBinding = ReturnType<D1DatabaseBinding["prepare"]>;
 
 const EntityRecordRow = Schema.Struct({
   iri: Schema.String,
@@ -82,13 +87,62 @@ const LinkEvidenceRow = Schema.Struct({
 });
 type LinkEvidenceRow = typeof LinkEvidenceRow.Type;
 
+const EntityLinkWithEvidenceRow = Schema.Struct({
+  link_id: Schema.String,
+  triple_hash: Schema.String,
+  subject_iri: Schema.String,
+  predicate_iri: Schema.String,
+  object_iri: Schema.NullOr(Schema.String),
+  object_value: Schema.NullOr(Schema.String),
+  object_datatype: Schema.NullOr(Schema.String),
+  graph_iri: Schema.String,
+  subject_type: Schema.String,
+  object_type: Schema.String,
+  state: Schema.String,
+  effective_from: Schema.Number,
+  effective_until: Schema.NullOr(Schema.Number),
+  superseded_by: Schema.NullOr(Schema.String),
+  created_at: Schema.Number,
+  updated_at: Schema.Number,
+  evidence_id: Schema.NullOr(Schema.String),
+  asserted_by: Schema.NullOr(Schema.String),
+  assertion_kind: Schema.NullOr(Schema.String),
+  confidence: Schema.NullOr(Schema.Number),
+  evidence_span: Schema.NullOr(Schema.String),
+  source_iri: Schema.NullOr(Schema.String),
+  review_state: Schema.NullOr(Schema.String),
+  reviewer: Schema.NullOr(Schema.String),
+  reviewed_at: Schema.NullOr(Schema.Number),
+  asserted_at: Schema.NullOr(Schema.Number)
+});
+type EntityLinkWithEvidenceRow = typeof EntityLinkWithEvidenceRow.Type;
+
+const decodeSqlError = (cause: unknown, operation: string): SqlError =>
+  new SqlError({
+    reason: new UnknownError({
+      cause,
+      message: `Failed to decode ${operation}`,
+      operation
+    })
+  });
+
 const decodeEntityRows = (rows: unknown) =>
-  Effect.sync(() => Schema.decodeUnknownSync(Schema.Array(EntityRecordRow))(rows));
+  Schema.decodeUnknownEffect(Schema.Array(EntityRecordRow))(rows).pipe(
+    Effect.mapError((cause) => decodeSqlError(cause, "entity registry rows"))
+  );
 const decodeLinkRows = (rows: unknown) =>
-  Effect.sync(() => Schema.decodeUnknownSync(Schema.Array(EntityLinkRow))(rows));
+  Schema.decodeUnknownEffect(Schema.Array(EntityLinkRow))(rows).pipe(
+    Effect.mapError((cause) => decodeSqlError(cause, "entity link rows"))
+  );
 const decodeEvidenceRows = (rows: unknown) =>
-  Effect.sync(() =>
-    Schema.decodeUnknownSync(Schema.Array(LinkEvidenceRow))(rows)
+  Schema.decodeUnknownEffect(Schema.Array(LinkEvidenceRow))(rows).pipe(
+    Effect.mapError((cause) => decodeSqlError(cause, "entity link evidence rows"))
+  );
+const decodeLinkWithEvidenceRows = (rows: unknown) =>
+  Schema.decodeUnknownEffect(Schema.Array(EntityLinkWithEvidenceRow))(rows).pipe(
+    Effect.mapError((cause) =>
+      decodeSqlError(cause, "entity link evidence join rows")
+    )
   );
 
 const entityRecordFromRow = (row: EntityRecordRow): EntityRecord =>
@@ -138,7 +192,54 @@ const evidenceFromRow = (row: LinkEvidenceRow): LinkEvidence => {
   return Schema.decodeUnknownSync(LinkEvidence)(candidate);
 };
 
-const randomId = (): string => crypto.randomUUID();
+const evidenceFromJoinedRow = (
+  row: EntityLinkWithEvidenceRow
+): LinkEvidence | null => {
+  if (
+    row.evidence_id === null ||
+    row.asserted_by === null ||
+    row.assertion_kind === null ||
+    row.confidence === null ||
+    row.review_state === null ||
+    row.asserted_at === null
+  ) {
+    return null;
+  }
+  return evidenceFromRow({
+    evidence_id: row.evidence_id,
+    link_id: row.link_id,
+    asserted_by: row.asserted_by,
+    assertion_kind: row.assertion_kind,
+    confidence: row.confidence,
+    evidence_span: row.evidence_span,
+    source_iri: row.source_iri,
+    review_state: row.review_state,
+    reviewer: row.reviewer,
+    reviewed_at: row.reviewed_at,
+    asserted_at: row.asserted_at
+  });
+};
+
+const linksWithEvidenceFromRows = (
+  rows: ReadonlyArray<EntityLinkWithEvidenceRow>
+): ReadonlyArray<EntityLinkWithEvidence> => {
+  const byLinkId = new Map<string, EntityLinkWithEvidence>();
+  for (const row of rows) {
+    const existing = byLinkId.get(row.link_id);
+    const current =
+      existing ??
+      ({
+        link: entityLinkFromRow(row),
+        evidence: []
+      } satisfies EntityLinkWithEvidence);
+    const evidence = evidenceFromJoinedRow(row);
+    if (evidence !== null) {
+      (current.evidence as Array<LinkEvidence>).push(evidence);
+    }
+    byLinkId.set(row.link_id, current);
+  }
+  return [...byLinkId.values()];
+};
 
 const hex = (bytes: ArrayBuffer): string =>
   [...new Uint8Array(bytes)]
@@ -189,16 +290,15 @@ const validateEndpoint = (
   expected: string,
   position: "subject" | "object"
 ) =>
-  record.entityType === expected
-    ? Effect.void
-    : Effect.fail(
-        new EntityGraphTypeMismatchError({
-          iri: record.iri,
-          expected,
-          actual: record.entityType,
-          position
-        })
-      );
+  Effect.gen(function* () {
+    if (record.entityType === expected) return;
+    return yield* new EntityGraphTypeMismatchError({
+      iri: record.iri,
+      expected,
+      actual: record.entityType,
+      position
+    });
+  });
 
 const linkPredicateMatches = (opts: LinkQueryOptions | undefined, link: EntityLink) =>
   opts?.predicate === undefined || link.predicateIri === opts.predicate;
@@ -208,11 +308,39 @@ const linkAsOfMatches = (opts: LinkQueryOptions | undefined, link: EntityLink) =
   (link.effectiveFrom <= opts.asOf &&
     (link.effectiveUntil === undefined || link.effectiveUntil > opts.asOf));
 
+const d1BatchSqlError = (cause: unknown, operation: string): SqlError =>
+  new SqlError({
+    reason: new UnknownError({
+      cause,
+      message: `Failed to execute D1 batch for ${operation}`,
+      operation
+    })
+  });
+
+const runD1Batch = (
+  db: D1DatabaseBinding,
+  statements: ReadonlyArray<D1PreparedStatementBinding>,
+  operation: string
+): Effect.Effect<void, SqlError> =>
+  Effect.tryPromise({
+    try: () => db.batch(Array.from(statements)),
+    catch: (cause) => d1BatchSqlError(cause, operation)
+  }).pipe(Effect.asVoid);
+
 export const EntityGraphRepoD1 = {
   layer: Layer.effect(
     EntityGraphRepo,
     Effect.gen(function* () {
       const sql = yield* SqlClient.SqlClient;
+      const d1Client = yield* Effect.serviceOption(D1Client.D1Client);
+      const rawDb = Option.match(d1Client, {
+        onNone: () => null,
+        onSome: (client) => client.config.db
+      });
+
+      yield* sql`${sql.unsafe("PRAGMA foreign_keys = ON")}`.pipe(
+        Effect.asVoid
+      );
 
       const lookupEntity = (iri: EntityIri) =>
         sql<EntityRecordRow>`
@@ -254,28 +382,6 @@ export const EntityGraphRepoD1 = {
         `.pipe(
           Effect.flatMap(decodeLinkRows),
           Effect.flatMap((rows) => firstLink(rows, linkId))
-        );
-
-      const evidenceForLink = (linkId: LinkId) =>
-        sql<LinkEvidenceRow>`
-          SELECT
-            evidence_id as evidence_id,
-            link_id as link_id,
-            asserted_by as asserted_by,
-            assertion_kind as assertion_kind,
-            confidence as confidence,
-            evidence_span as evidence_span,
-            source_iri as source_iri,
-            review_state as review_state,
-            reviewer as reviewer,
-            reviewed_at as reviewed_at,
-            asserted_at as asserted_at
-          FROM entity_link_evidence
-          WHERE link_id = ${linkId}
-          ORDER BY asserted_at DESC
-        `.pipe(
-          Effect.flatMap(decodeEvidenceRows),
-          Effect.map((rows) => rows.map(evidenceFromRow))
         );
 
       const upsertEntity = (iri: EntityIri, entityType: EntityTag) =>
@@ -329,13 +435,13 @@ export const EntityGraphRepoD1 = {
       ) =>
         lookupEntity(asEntityIri(endpoint.iri)).pipe(
           Effect.catchTag("EntityNotFoundError", () =>
-            Effect.fail(
-              new EntityGraphEndpointNotFoundError({
+            Effect.gen(function* () {
+              return yield* new EntityGraphEndpointNotFoundError({
                 iri: endpoint.iri,
                 entityType: endpoint.type,
                 position
-              })
-            )
+              });
+            })
           ),
           Effect.flatMap((record) => validateEndpoint(record, endpoint.type, position))
         );
@@ -402,7 +508,9 @@ export const EntityGraphRepoD1 = {
           yield* requireEndpoint(input.subject, "subject");
           yield* requireEndpoint(input.object, "object");
           const now = yield* Clock.currentTimeMillis;
-          const linkId = Schema.decodeUnknownSync(LinkId)(randomId());
+          const linkId = Schema.decodeUnknownSync(LinkId)(
+            yield* Random.nextUUIDv4
+          );
           const spec = predicateSpec(input.predicate);
           const tripleHash = yield* hashTriple(
             input.subject.iri,
@@ -450,7 +558,7 @@ export const EntityGraphRepoD1 = {
         Effect.gen(function* () {
           yield* selectLinkById(linkId);
           const assertedAt = yield* Clock.currentTimeMillis;
-          const evidenceId = randomId();
+          const evidenceId = yield* Random.nextUUIDv4;
           yield* sql`
             INSERT INTO entity_link_evidence (
               evidence_id,
@@ -521,7 +629,7 @@ export const EntityGraphRepoD1 = {
         replacement: TypedLinkInput<PredicateName>
       ) =>
         Effect.gen(function* () {
-          const old = yield* selectLinkById(oldId);
+          yield* selectLinkById(oldId);
           if (
             !isPredicateTypeAllowed(
               replacement.predicate,
@@ -539,32 +647,101 @@ export const EntityGraphRepoD1 = {
           yield* requireEndpoint(replacement.subject, "subject");
           yield* requireEndpoint(replacement.object, "object");
           const now = yield* Clock.currentTimeMillis;
-          const replacementId = Schema.decodeUnknownSync(LinkId)(randomId());
-          yield* sql.withTransaction(
-            Effect.gen(function* () {
-              yield* insertLink(
-                replacement,
-                "draft",
-                replacementId,
-                old.tripleHash,
-                now
-              );
-              yield* sql`
-                UPDATE entity_links
-                SET state = 'superseded',
-                  effective_until = ${replacement.effectiveFrom},
-                  superseded_by = ${replacementId},
-                  updated_at = ${now}
-                WHERE link_id = ${oldId}
-              `.pipe(Effect.asVoid);
-              yield* sql`
-                UPDATE entity_links
-                SET state = 'active',
-                  updated_at = ${now}
-                WHERE link_id = ${replacementId}
-              `.pipe(Effect.asVoid);
-            })
+          const replacementId = Schema.decodeUnknownSync(LinkId)(
+            yield* Random.nextUUIDv4
           );
+          const spec = predicateSpec(replacement.predicate);
+          const replacementTripleHash = yield* hashTriple(
+            replacement.subject.iri,
+            spec.iri,
+            replacement.object.iri,
+            DEFAULT_GRAPH_IRI
+          );
+          if (rawDb !== null) {
+            yield* runD1Batch(
+              rawDb,
+              [
+                rawDb.prepare(
+                  `INSERT INTO entity_links (
+                    link_id,
+                    triple_hash,
+                    subject_iri,
+                    predicate_iri,
+                    object_iri,
+                    object_value,
+                    object_datatype,
+                    graph_iri,
+                    subject_type,
+                    object_type,
+                    state,
+                    effective_from,
+                    effective_until,
+                    superseded_by,
+                    created_at,
+                    updated_at
+                  ) VALUES (?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, 'draft', ?, NULL, NULL, ?, ?)`
+                ).bind(
+                  replacementId,
+                  replacementTripleHash,
+                  replacement.subject.iri,
+                  spec.iri,
+                  replacement.object.iri,
+                  DEFAULT_GRAPH_IRI,
+                  replacement.subject.type,
+                  replacement.object.type,
+                  replacement.effectiveFrom,
+                  now,
+                  now
+                ),
+                rawDb.prepare(
+                  `UPDATE entity_links
+                   SET state = 'superseded',
+                     effective_until = ?,
+                     superseded_by = ?,
+                     updated_at = ?
+                   WHERE link_id = ?`
+                ).bind(
+                  replacement.effectiveFrom,
+                  replacementId,
+                  now,
+                  oldId
+                ),
+                rawDb.prepare(
+                  `UPDATE entity_links
+                   SET state = 'active',
+                     updated_at = ?
+                   WHERE link_id = ?`
+                ).bind(now, replacementId)
+              ],
+              "EntityGraphRepoD1.supersede"
+            );
+          } else {
+            yield* sql.withTransaction(
+              Effect.gen(function* () {
+                yield* insertLink(
+                  replacement,
+                  "draft",
+                  replacementId,
+                  replacementTripleHash,
+                  now
+                );
+                yield* sql`
+                  UPDATE entity_links
+                  SET state = 'superseded',
+                    effective_until = ${replacement.effectiveFrom},
+                    superseded_by = ${replacementId},
+                    updated_at = ${now}
+                  WHERE link_id = ${oldId}
+                `.pipe(Effect.asVoid);
+                yield* sql`
+                  UPDATE entity_links
+                  SET state = 'active',
+                    updated_at = ${now}
+                  WHERE link_id = ${replacementId}
+                `.pipe(Effect.asVoid);
+              })
+            );
+          }
           return yield* selectLinkById(replacementId);
         });
 
@@ -574,40 +751,67 @@ export const EntityGraphRepoD1 = {
         opts?: LinkQueryOptions
       ) =>
         Effect.gen(function* () {
-          const loaded = yield* sql<EntityLinkRow>`
-            SELECT
-              link_id as link_id,
-              triple_hash as triple_hash,
-              subject_iri as subject_iri,
-              predicate_iri as predicate_iri,
-              object_iri as object_iri,
-              object_value as object_value,
-              object_datatype as object_datatype,
-              graph_iri as graph_iri,
-              subject_type as subject_type,
-              object_type as object_type,
-              state as state,
-              effective_from as effective_from,
-              effective_until as effective_until,
-              superseded_by as superseded_by,
-              created_at as created_at,
-              updated_at as updated_at
-            FROM entity_links
-            WHERE ${sql.unsafe(column)} = ${iri}
-              AND state = ${opts?.state ?? "active"}
-            ORDER BY effective_from DESC
-            LIMIT ${opts?.limit ?? 100}
-          `.pipe(Effect.flatMap(decodeLinkRows));
-
-          const links = loaded
-            .map(entityLinkFromRow)
-            .filter((link) => linkPredicateMatches(opts, link))
-            .filter((link) => linkAsOfMatches(opts, link));
-          const withEvidence = yield* Effect.forEach(links, (link) =>
-            evidenceForLink(link.linkId).pipe(
-              Effect.map((evidence): EntityLinkWithEvidence => ({ link, evidence }))
+          const loaded = yield* sql<EntityLinkWithEvidenceRow>`
+            WITH selected_links AS (
+              SELECT
+                link_id,
+                triple_hash,
+                subject_iri,
+                predicate_iri,
+                object_iri,
+                object_value,
+                object_datatype,
+                graph_iri,
+                subject_type,
+                object_type,
+                state,
+                effective_from,
+                effective_until,
+                superseded_by,
+                created_at,
+                updated_at
+              FROM entity_links
+              WHERE ${sql.unsafe(column)} = ${iri}
+                AND state = ${opts?.state ?? "active"}
+              ORDER BY effective_from DESC
+              LIMIT ${opts?.limit ?? 100}
             )
-          );
+            SELECT
+              l.link_id as link_id,
+              l.triple_hash as triple_hash,
+              l.subject_iri as subject_iri,
+              l.predicate_iri as predicate_iri,
+              l.object_iri as object_iri,
+              l.object_value as object_value,
+              l.object_datatype as object_datatype,
+              l.graph_iri as graph_iri,
+              l.subject_type as subject_type,
+              l.object_type as object_type,
+              l.state as state,
+              l.effective_from as effective_from,
+              l.effective_until as effective_until,
+              l.superseded_by as superseded_by,
+              l.created_at as created_at,
+              l.updated_at as updated_at,
+              e.evidence_id as evidence_id,
+              e.asserted_by as asserted_by,
+              e.assertion_kind as assertion_kind,
+              e.confidence as confidence,
+              e.evidence_span as evidence_span,
+              e.source_iri as source_iri,
+              e.review_state as review_state,
+              e.reviewer as reviewer,
+              e.reviewed_at as reviewed_at,
+              e.asserted_at as asserted_at
+            FROM selected_links l
+            LEFT JOIN entity_link_evidence e
+              ON e.link_id = l.link_id
+            ORDER BY l.effective_from DESC, e.asserted_at DESC
+          `.pipe(Effect.flatMap(decodeLinkWithEvidenceRows));
+
+          const withEvidence = linksWithEvidenceFromRows(loaded)
+            .filter((item) => linkPredicateMatches(opts, item.link))
+            .filter((item) => linkAsOfMatches(opts, item.link));
           return opts?.minConfidence === undefined
             ? withEvidence
             : withEvidence.filter((item) =>

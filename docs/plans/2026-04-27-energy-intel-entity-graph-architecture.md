@@ -1,8 +1,8 @@
 # Energy-Intel Entity-Graph Architecture (Slice 2)
 
-**Status:** Design synthesized 2026-04-27 from 5 parallel Opus 4.7 design agents. **Revised 2026-04-28** in response to two PR #138 review passes and local Alchemy reference verification.
+**Status:** Architecture plus slice-2 runtime foundation. Design synthesized 2026-04-27 from 5 parallel Opus 4.7 design agents. **Revised 2026-04-28** in response to three PR #138 review passes, local Alchemy reference verification, and production-hardening feedback.
 **Companion:** `docs/plans/2026-04-27-energy-intel-unified-abstraction-architecture.md` (slice 1, superseded by this doc on the AI-Search-as-spine framing).
-**Goal:** Lock the entity-graph foundation — `EntityDefinition` core contract, relation graph schema, unified projection contract, Alchemy unification, and workflow services — so slice 2 implementation lands without further design churn.
+**Goal:** Land the entity-graph foundation — `EntityDefinition` core contract, relation graph schema, unified projection contract, AI Search adapter, context assembly, and reindex queue substrate — while keeping Alchemy unification as the deployment target for the next slice.
 
 **Review revisions (2026-04-28):**
 
@@ -19,6 +19,12 @@
 | 9 | P2 | Entity links could orphan traversal | `entities` gains composite uniqueness and edge rows carry registry-backed foreign keys; `createLink` validates both endpoint registry rows before insert. |
 | 10 | P2 | Provisioning leaked storage back onto `EntityDefinition` | `provisionEntity` now consumes a separate `EntityProvisioningPlan`; storage/projection/deployment policies close over definitions but do not live on them. |
 | 11 | P2 | Reindex coalescing could drop stronger work | Queue scheduling uses conflict-merge UPSERT semantics, preserving the max depth and strongest cause instead of first-writer-wins insert-only dedup. |
+| 12 | P1 | D1 supersession used unsupported transactions | Production path uses D1 `batch()` for the three-step supersession write; SQLite tests keep the local transaction path. |
+| 13 | P1 | Foreign keys were inert in production | Schema includes `PRAGMA foreign_keys = ON`, and `EntityGraphRepoD1` enables it at layer construction. |
+| 14 | P1 | AI Search client had no reliability policy | AI Search upload/list/delete/search calls now have per-attempt timeout, transient-status retry, jittered exponential backoff, and `Retry-After` support. |
+| 15 | P2 | Link/evidence reads had N+1 query shape | `linksOut` / `linksIn` load selected links and evidence with one `LEFT JOIN` query and group rows in TypeScript. |
+| 16 | P2 | Identifier/hash spec drift was implicit | Current runtime uses Effect `Random.nextUUIDv4` link IDs and SHA-256 triple hashes; ULID/BLAKE3 remains a future policy upgrade, not the current contract. |
+| 17 | P2 | PR claimed design-only while shipping runtime code | This doc and PR body now describe the branch as a runtime foundation PR with Alchemy implementation deferred. |
 
 ## Overview
 
@@ -234,6 +240,8 @@ Three D1 tables: a minimal `entities` registry plus two edge tables keyed by sta
 ### 2.1 D1 schema
 
 ```sql
+PRAGMA foreign_keys = ON;
+
 -- Canonical registry: "this IRI is a known entity of this type".
 -- Full row data lives in per-entity storage adapters (`experts`, `organizations`, …).
 CREATE TABLE IF NOT EXISTS entities (
@@ -246,8 +254,8 @@ CREATE TABLE IF NOT EXISTS entities (
 CREATE INDEX IF NOT EXISTS idx_entities_type ON entities(entity_type, updated_at DESC);
 
 CREATE TABLE IF NOT EXISTS entity_links (
-  link_id          TEXT PRIMARY KEY,                     -- ULID, monotonic
-  triple_hash      TEXT NOT NULL,                        -- BLAKE3(s|p|o|graph) — unique only over active rows (see partial index below)
+  link_id          TEXT PRIMARY KEY,                     -- UUIDv4 in current runtime; ULID is a future ordering policy
+  triple_hash      TEXT NOT NULL,                        -- SHA-256(s|p|o|graph) in current runtime; unique only over active rows
   subject_iri      TEXT NOT NULL,
   predicate_iri    TEXT NOT NULL,
   object_iri       TEXT,                                 -- branded EntityIri OR
@@ -287,7 +295,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_entity_links_triple_active
   ON entity_links(triple_hash) WHERE state = 'active';
 
 CREATE TABLE IF NOT EXISTS entity_link_evidence (
-  evidence_id      TEXT PRIMARY KEY,                     -- ULID
+  evidence_id      TEXT PRIMARY KEY,                     -- UUIDv4 in current runtime
   link_id          TEXT NOT NULL,
   asserted_by      TEXT NOT NULL,                        -- 'agent:gemini-vision' | 'curator:human:<did>'
   assertion_kind   TEXT NOT NULL CHECK (assertion_kind IN ('extracted','curated','inferred','imported')),
@@ -314,7 +322,7 @@ CREATE INDEX IF NOT EXISTS idx_evidence_source
 
 **Graph edges cannot orphan traversal.** `entity_links.subject_iri/subject_type` and `entity_links.object_iri/object_type` are backed by composite foreign keys into `entities(iri, entity_type)`. Literal objects skip the object FK because `object_iri` is `NULL`. `createLink` still validates both endpoint registry rows before insert so callers get a domain error (`EntityGraphEndpointNotFoundError` / `EntityGraphTypeMismatchError`) instead of a raw SQL constraint failure. The DB constraints are the final guardrail against older code paths or manual repair scripts creating edges that `assembleEntityContext` cannot hydrate.
 
-**`triple_hash` is unique only over active rows (partial unique index).** Superseded and retracted rows preserve the audit chain by sharing the same hash as their replacement. Re-asserting an active edge that already exists becomes a deterministic upsert via `INSERT ... ON CONFLICT(triple_hash) WHERE state = 'active' DO UPDATE`. Supersession is a three-step transaction: (1) insert the replacement row as `state = 'draft'` with the same `triple_hash`; (2) update the old active row to `state = 'superseded'`, set `effective_until`, and set `superseded_by = replacement.link_id`; (3) update the replacement row to `state = 'active'`. The replacement exists before the old row points to it, and there is never more than one active row for the triple. This unblocks the audit-chain pattern that a global `UNIQUE(triple_hash)` would have rejected.
+**`triple_hash` is unique only over active rows (partial unique index).** Superseded and retracted rows preserve the audit chain while allowing the active replacement to reuse the same hash when the replacement describes the same triple. Re-asserting an active edge that already exists becomes a deterministic upsert via `INSERT ... ON CONFLICT(triple_hash) WHERE state = 'active' DO UPDATE`. Supersession is a three-step write: (1) insert the replacement row as `state = 'draft'` with the replacement triple hash; (2) update the old active row to `state = 'superseded'`, set `effective_until`, and set `superseded_by = replacement.link_id`; (3) update the replacement row to `state = 'active'`. The replacement exists before the old row points to it, and there is never more than one active row for the triple. In production D1 this is one `batch()` call because `@effect/sql-d1` does not support `withTransaction`; SQLite tests use a local transaction path. This unblocks the audit-chain pattern that a global `UNIQUE(triple_hash)` would have rejected.
 
 ### 2.2 EntityGraphRepo service
 
@@ -430,7 +438,7 @@ Slice 2 ships the `Layer.succeed` no-op layer. Slice 3 swaps in the queue-backed
 
 **Tests:** `createLink` round-trip with `triple_hash` upsert behavior; TS-only `expectType` confirming type rejection; `linksOut`/`linksIn` index hits via `EXPLAIN QUERY PLAN`; `traverse` depth/node bounds; supersession audit chain; temporal `asOf` queries; evidence not-found errors; reindex `EntityGraphChangeBus.publish` invocation on every mutation.
 
-**Open questions:** Object literals as separate `entity_link_literals` table (defer until literal fulltext is needed)? `graph_iri` partitioning — drop column if not used within 2 slices? ULID + `triple_hash` vs content-hash for `link_id` (chose ULID + hash because supersession creates new logical edge with same triple).
+**Open questions:** Object literals as separate `entity_link_literals` table (defer until literal fulltext is needed)? `graph_iri` partitioning — drop column if not used within 2 slices? Ordered ID/hash policy (current branch uses UUIDv4 + SHA-256; ULID + BLAKE3 can replace those behind the same branded fields if ordering or hash throughput matters).
 
 ## 3. Unified Projection Contract
 
@@ -615,11 +623,13 @@ Decision rules in priority order:
 
 The unification target: **one entity definition drives one deployment plan, and Alchemy materializes the Cloudflare resources from that plan.** No hand-syncing between entity TS, D1 migrations, AI Search metadata, Worker bindings, or runtime `Env` types. Verified against the local Alchemy reference checkout at `.reference/alchemy/alchemy/src/cloudflare`.
 
+**Implementation status:** Section 4 is the next deployment slice, not current PR runtime code. This branch does not add `alchemy.run.ts`, `infra/AiSearchWithMetadata.ts`, or retire the existing Wrangler files. The slice-2 code deliberately stops at the entity, graph, projection, and runtime adapter contracts that Alchemy will consume.
+
 ### 4.1 Critical Alchemy limitation discovered
 
 `BaseAiSearchProps` exposes `metadata?: Record<string, unknown>` (the wizard-created flag) but **NOT** the `custom_metadata` array on the user-facing prop. The wire payload has `custom_metadata: Array<{ data_type, field_name }>` (line 809 in source), but it's not exposed through Alchemy's user prop surface.
 
-**Workaround for slice 2:** wrap `AiSearch` with `AiSearchInstanceWithMetadata` in `infra/AiSearchWithMetadata.ts` — uses Alchemy's exported `updateAiSearchInstance(api, namespace, id, payload)` helper after the parent resource resolves to PUT the `custom_metadata` declaration. Track upstream PR adding `customMetadata?` to `BaseAiSearchProps`.
+**Workaround for the Alchemy slice:** wrap `AiSearch` with `AiSearchInstanceWithMetadata` in `infra/AiSearchWithMetadata.ts` — uses Alchemy's exported `updateAiSearchInstance(api, namespace, id, payload)` helper after the parent resource resolves to PUT the `custom_metadata` declaration. Track upstream PR adding `customMetadata?` to `BaseAiSearchProps`.
 
 ### 4.2 `alchemy.run.ts` skeleton (entity-driven)
 
@@ -927,14 +937,14 @@ Three change classes each declare their fanout:
 
 ```sql
 CREATE TABLE IF NOT EXISTS reindex_queue (
-  queue_id           TEXT PRIMARY KEY,                              -- ULID
+  queue_id           TEXT PRIMARY KEY,                              -- UUIDv4 in current runtime
   coalesce_key       TEXT NOT NULL,                                 -- entity_type:iri:batch_window_ms
   target_entity_type TEXT NOT NULL,
   target_iri         TEXT NOT NULL,
   origin_iri         TEXT NOT NULL,
   cause              TEXT NOT NULL CHECK (cause IN ('entity-changed','edge-changed','entity-renamed','rebuild-all')),
   cause_priority     INTEGER NOT NULL DEFAULT 0,
-  propagation_depth  INTEGER NOT NULL CHECK (propagation_depth >= 0 AND propagation_depth <= 1),
+  propagation_depth  INTEGER NOT NULL CHECK (propagation_depth >= 0),
   attempts           INTEGER NOT NULL DEFAULT 0,
   next_attempt_at    INTEGER NOT NULL,
   enqueued_at        INTEGER NOT NULL,
@@ -1039,28 +1049,28 @@ The 5 sections converge on a small set of architectural commitments:
 
 9. **Workflows are short-lived `Effect` programs over durable state.** No workflow runtime, no homebrew state machine. Long-lived flows live in `entity_links` + `entity_link_evidence` rows; agents re-enter the durable state.
 
-10. **Two-table edge model with bitemporal default.** `entity_links` (canonical edge with ULID + triple_hash, `state` + `effective_from/until` + `superseded_by`) plus `entity_link_evidence` (provenance, confidence, review state, joined by `link_id`). `triple_hash` is unique only over `state = 'active'` rows (partial unique index) so supersession can preserve the audit chain; re-asserting an active edge is an upsert; supersession is a three-step transaction (insert draft replacement → mark old `superseded` with `superseded_by` → activate replacement).
+10. **Two-table edge model with bitemporal default.** `entity_links` (canonical edge with UUIDv4 `link_id` + SHA-256 `triple_hash`, `state` + `effective_from/until` + `superseded_by`) plus `entity_link_evidence` (provenance, confidence, review state, joined by `link_id`). `triple_hash` is unique only over `state = 'active'` rows (partial unique index) so supersession can preserve the audit chain; re-asserting an active edge is an upsert; supersession is a three-step write (insert draft replacement → mark old `superseded` with `superseded_by` → activate replacement), executed with D1 `batch()` in production.
 
 11. **`entities` table is the canonical entity registry.** A minimal `(iri, entity_type, created_at, updated_at)` table answers graph-layer topology questions ("does this IRI exist? what type?"). Full row data lives in per-entity `StorageAdapter<Def>` tables (`experts`, `organizations`, …). `entity_links` carries composite FKs back to this registry so graph traversal cannot point at unregistered or mistyped neighbors. `EntityGraphRepo.lookupEntity` returns the registry row; content hydration dispatches through `EntityRegistry.getStorageAdapter(type)`. `getEntity` does NOT exist on `EntityGraphRepo` — the registry-dispatched two-step composition replaces it. This split keeps the graph layer free of per-entity column drift while making cross-type traversal cheap.
 
 12. **Reindex substrate is cron'd D1-backed queue, not Cloudflare Queue.** A `reindex_queue` table with a UNIQUE `(coalesce_key)` index makes UPSERT merge the durable coalescing path. A cron'd consumer worker drains by `next_attempt_at`. Coalescing survives isolate eviction, restarts, and worker swaps because the dedup state IS the queue state. Later requests strengthen queued work by maxing propagation depth and cause priority; first writer does not win by accident. Cloudflare Queues remain the right tool when fanout outgrows D1 throughput, but slice 2 does not provision a Queue resource. Resolves prior open question #1.
 
-13. **Alchemy is the Cloudflare deployment boundary.** Entity provisioning plans produce first-class Alchemy resources: D1 databases/migrations, AI Search namespace + instance, R2/KV resources, Worker bindings, cron triggers, and typed `typeof worker.Env`. AI Search is remote-backed in local dev, so `alchemy dev` still depends on deployed AI Search/R2 resources for this slice.
+13. **Alchemy is the Cloudflare deployment boundary for the next slice.** Entity provisioning plans will produce first-class Alchemy resources: D1 databases/migrations, AI Search namespace + instance, R2/KV resources, Worker bindings, cron triggers, and typed `typeof worker.Env`. AI Search is remote-backed in local dev, so `alchemy dev` still depends on deployed AI Search/R2 resources when that slice lands. This PR defines the contracts that deployment code will consume; it does not add `alchemy.run.ts`.
 
 ## Slice 2 scope (locked)
 
 Ships:
 - `EntityDefinition` core contract (Section 1) + `defineEntity` builder + tagged-union `AnyEntity` registry view
 - TTL/codegen update for graph predicates (`ei:mentions`, `ei:authoredBy`, `ei:affiliatedWith`) before compiling `PredicateRegistry`; generated `NamedNode` values normalize into branded `PredicateIri` strings
-- `EntityGraphRepo` over D1 with the three-table schema (Section 2): `entities` registry, `entity_links`, `entity_link_evidence` + composite registry FKs + partial unique index on `triple_hash WHERE state = 'active'` + `lookupEntity` / `upsertEntity` / `listEntities` / `linksOut` / `linksIn` / `neighbors` / `traverse` + typed `createLink`
-- `ProjectionContract<E, M, K>` + AI Search adapter (positional `items.upload`, namespace-binding access) + `EntitySearch` cross-type service (Section 3) + `entity-search` instance configured with the 5 metadata fields
-- Alchemy unification (Section 4): `EntityProvisioningPlan` + `provisionEntity()` + `AiSearchInstanceWithMetadata` wrapper + entity-driven `alchemy.run.ts` + wrangler retirement (with `adopt:true` cutover); `(projection, fixture)` drift check at module load
+- `EntityGraphRepo` over D1 with the three-table schema (Section 2): `entities` registry, `entity_links`, `entity_link_evidence` + composite registry FKs + partial unique index on `triple_hash WHERE state = 'active'` + `lookupEntity` / `upsertEntity` / `listEntities` / `linksOut` / `linksIn` / `neighbors` / `traverse` + typed `createLink` + D1 `batch()` supersession
+- `ProjectionContract<E, M, K>` + AI Search adapter (positional `items.upload`, namespace-binding access, retry/backoff/timeout) + `EntitySearch` cross-type service (Section 3) + metadata field contract for the unified `entity-search` instance
 - `Expert` and `Organization` entity definitions in the new shape (Section 1) — Organization proves multi-entity composition; per-entity `*ProjectionFixture` exports for the drift check
 - `EntityRegistry` Effect Service + Layer wiring (Section 5)
 - `EntityGraphChangeBus` no-op layer in slice 2; `ReindexQueueService` contract with bounded-depth scheduling
 - `reindex_queue` D1 table + cron'd consumer worker contract with UPSERT merge coalescing (decision #12); slice 2 ships the schema + service interface, slice 3 ships the consumer body
 
 Deferred:
+- Alchemy implementation (Section 4): `EntityProvisioningPlan` + `provisionEntity()` + `AiSearchInstanceWithMetadata` wrapper + entity-driven `alchemy.run.ts` + Wrangler retirement (with `adopt:true` cutover); this PR documents the target but does not add those files
 - Post → Entity linking workflow with LLM disambiguation (slice 3)
 - Reindex propagation runtime (slice 3) — the consumer body that drains `reindex_queue` and calls per-entity projections; slice 2 ships only the table + service contract
 - Link review state machine (slice 4 — depends on a real reviewer UI surface)
@@ -1076,7 +1086,7 @@ Out of scope entirely:
 
 ## Open questions consolidated
 
-The agents flagged questions slice 2 must resolve before code lands. The review revisions resolved the substrate, hydration, predicate, and Alchemy cutover questions:
+The agents flagged questions slice 2 had to resolve before the runtime foundation landed. The review revisions resolved the substrate, hydration, predicate, and Alchemy cutover questions:
 
 1. ~~**Reindex substrate** — Cloudflare Queue vs cron'd D1 polling. [Section 5]~~ **RESOLVED 2026-04-28:** cron'd D1-backed `reindex_queue` with UPSERT merge coalescing. See cross-cutting decision #12 and Section 5.4.
 2. ~~**Predicate IRIs as a brand** — codegen-emitted `PredicateIri` brand vs plain string. [Section 1]~~ **RESOLVED 2026-04-28:** generated `NamedNode` values normalize into branded `PredicateIri` strings via `.value`; graph rows store strings.
@@ -1086,4 +1096,4 @@ The agents flagged questions slice 2 must resolve before code lands. The review 
 6. ~~**DO migration tag history under Alchemy adopt.** [Section 4]~~ **RESOLVED 2026-04-28:** local Alchemy source computes DO migrations and migration tags; `adopt:true` remains the takeover path, not a missing-feature workaround.
 7. **Datetime vs text for `time_bucket`** — text bucketing now; datetime + range when needed. [Section 3]
 
-The implementation plan should resolve the remaining (open) items explicitly before coding starts.
+The remaining items are intentionally deferred design decisions, not blockers for this runtime foundation.

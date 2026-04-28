@@ -1,4 +1,12 @@
-import { Effect, Layer, Schema, ServiceMap } from "effect";
+import {
+  Cause,
+  Duration,
+  Effect,
+  Layer,
+  Schedule,
+  Schema,
+  ServiceMap
+} from "effect";
 
 import { AiSearchError } from "../Domain/Errors";
 import {
@@ -133,21 +141,136 @@ export class EntitySearchResultDecodeError extends Schema.TaggedErrorClass<Entit
   }
 ) {}
 
+const AI_SEARCH_REQUEST_TIMEOUT = Duration.seconds(10);
+const AI_SEARCH_RETRY_SCHEDULE = Schedule.exponential(
+  Duration.millis(250)
+).pipe(Schedule.jittered, Schedule.both(Schedule.recurs(3)));
+
 const messageFromUnknown = (cause: unknown): string =>
   cause instanceof Error ? cause.message : String(cause);
+
+const readNumberProperty = (
+  value: unknown,
+  keys: ReadonlyArray<string>
+): number | undefined => {
+  if (typeof value !== "object" || value === null) return undefined;
+  const record = value as Record<string, unknown>;
+  for (const key of keys) {
+    const candidate = record[key];
+    if (typeof candidate === "number") return candidate;
+  }
+  return undefined;
+};
+
+const extractStatus = (cause: unknown): number | undefined => {
+  const direct = readNumberProperty(cause, ["status", "statusCode"]);
+  if (direct !== undefined) return direct;
+  if (typeof cause === "object" && cause !== null) {
+    const response = (cause as Record<string, unknown>).response;
+    const nested = readNumberProperty(response, ["status", "statusCode"]);
+    if (nested !== undefined) return nested;
+  }
+  const match = messageFromUnknown(cause).match(/\b(429|500|502|503|504)\b/);
+  return match?.[1] === undefined ? undefined : Number(match[1]);
+};
+
+const parseRetryAfter = (value: unknown): number | undefined => {
+  if (typeof value === "number") return Math.max(0, value);
+  if (typeof value !== "string") return undefined;
+  const seconds = Number(value);
+  return Number.isFinite(seconds) ? Math.max(0, seconds * 1_000) : undefined;
+};
+
+const extractRetryAfterMs = (cause: unknown): number | undefined => {
+  const direct = readNumberProperty(cause, ["retryAfterMs"]);
+  if (direct !== undefined) return direct;
+  if (typeof cause !== "object" || cause === null) return undefined;
+  const record = cause as Record<string, unknown>;
+  const retryAfter = parseRetryAfter(record.retryAfter);
+  if (retryAfter !== undefined) return retryAfter;
+  const response = record.response;
+  if (typeof response !== "object" || response === null) return undefined;
+  const headers = (response as Record<string, unknown>).headers;
+  if (typeof headers !== "object" || headers === null) return undefined;
+  const get = (headers as { readonly get?: (name: string) => unknown }).get;
+  return typeof get === "function"
+    ? parseRetryAfter(get.call(headers, "Retry-After"))
+    : undefined;
+};
 
 const aiSearchError = (
   operation: "upload" | "search" | "get" | "delete",
   instance: string,
   cause: unknown,
   key?: string
-): AiSearchError =>
-  new AiSearchError({
+): AiSearchError => {
+  const status = extractStatus(cause);
+  const retryAfterMs = extractRetryAfterMs(cause);
+  return new AiSearchError({
     operation,
     instance,
     message: messageFromUnknown(cause),
+    ...(status === undefined ? {} : { status }),
+    ...(retryAfterMs === undefined ? {} : { retryAfterMs }),
     ...(key === undefined ? {} : { key })
   });
+};
+
+const isRetryableAiSearchError = (error: AiSearchError): boolean =>
+  error.status === 429 ||
+  error.status === 500 ||
+  error.status === 502 ||
+  error.status === 503 ||
+  error.status === 504 ||
+  /timeout|temporar|unavailable|rate limit/i.test(error.message);
+
+const retryAfterDelay = (error: AiSearchError): Effect.Effect<void> =>
+  error.retryAfterMs === undefined || error.retryAfterMs <= 0
+    ? Effect.void
+    : Effect.sleep(Duration.millis(error.retryAfterMs));
+
+const withReliability = <A>(
+  operation: "upload" | "search" | "get" | "delete",
+  instanceName: string,
+  key: string | undefined,
+  effect: Effect.Effect<A, AiSearchError>
+): Effect.Effect<A, AiSearchError> =>
+  effect.pipe(
+    Effect.timeout(AI_SEARCH_REQUEST_TIMEOUT),
+    Effect.mapError((error) =>
+      Cause.isTimeoutError(error)
+        ? aiSearchError(
+            operation,
+            instanceName,
+            new Error("AI Search request timed out"),
+            key
+          )
+        : error
+    ),
+    Effect.tapError((error) =>
+      isRetryableAiSearchError(error) ? retryAfterDelay(error) : Effect.void
+    ),
+    Effect.retry({
+      schedule: AI_SEARCH_RETRY_SCHEDULE,
+      while: isRetryableAiSearchError
+    })
+  );
+
+const tryAiSearchPromise = <A>(
+  operation: "upload" | "search" | "get" | "delete",
+  instanceName: string,
+  key: string | undefined,
+  evaluate: () => Promise<A>
+): Effect.Effect<A, AiSearchError> =>
+  withReliability(
+    operation,
+    instanceName,
+    key,
+    Effect.tryPromise({
+      try: evaluate,
+      catch: (cause) => aiSearchError(operation, instanceName, cause, key)
+    })
+  );
 
 const uploadItem = (
   instanceName: string,
@@ -156,10 +279,9 @@ const uploadItem = (
   body: string,
   metadata: AiSearchMetadata
 ) =>
-  Effect.tryPromise({
-    try: () => instance.items.upload(key, body, { metadata }),
-    catch: (cause) => aiSearchError("upload", instanceName, cause, key)
-  }).pipe(Effect.asVoid);
+  tryAiSearchPromise("upload", instanceName, key, () =>
+    instance.items.upload(key, body, { metadata })
+  ).pipe(Effect.asVoid);
 
 const listAllItems = (
   instanceName: string,
@@ -170,10 +292,12 @@ const listAllItems = (
     let page = 1;
     const items: Array<AiSearchItemInfo> = [];
     while (true) {
-      const response = yield* Effect.tryPromise({
-        try: () => instance.items.list({ page, per_page: perPage }),
-        catch: (cause) => aiSearchError("get", instanceName, cause)
-      });
+      const response = yield* tryAiSearchPromise(
+        "get",
+        instanceName,
+        undefined,
+        () => instance.items.list({ page, per_page: perPage })
+      );
       items.push(...response.result);
       const info = response.result_info;
       if (info === undefined) {
@@ -202,7 +326,9 @@ const deleteItemsMatching = (
         Effect.tryPromise({
           try: () => instance.items.delete(item.id),
           catch: (cause) => aiSearchError("delete", instanceName, cause, item.key)
-        }),
+        }).pipe(
+          (effect) => withReliability("delete", instanceName, item.key, effect)
+        ),
       { discard: true }
     );
   });
@@ -330,10 +456,9 @@ export const makeAiSearchClient = (
         (item) => item.key === key
       ),
     search: (instanceName, request) =>
-      Effect.tryPromise({
-        try: () => namespace.get(instanceName).search(request),
-        catch: (cause) => aiSearchError("search", instanceName, cause)
-      })
+      tryAiSearchPromise("search", instanceName, undefined, () =>
+        namespace.get(instanceName).search(request)
+      )
   });
 
 type AnyProjectionContract = {

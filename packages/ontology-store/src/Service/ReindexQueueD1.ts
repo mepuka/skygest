@@ -1,11 +1,13 @@
-import { Clock, Effect, Layer, Schema } from "effect";
+import { Clock, Effect, Layer, Random, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
+import { SqlError, UnknownError } from "effect/unstable/sql/SqlError";
 
 import {
   ReindexQueueItem,
   REINDEX_QUEUE_UPSERT_SET_CLAUSE
 } from "../Domain/EntityGraph";
 import {
+  REINDEX_MAX_PROPAGATION_DEPTH,
   ReindexDepthExceededError,
   ReindexQueueService,
   type ReindexRequest
@@ -27,8 +29,19 @@ const ReindexQueueRow = Schema.Struct({
 });
 type ReindexQueueRow = typeof ReindexQueueRow.Type;
 
+const decodeSqlError = (cause: unknown): SqlError =>
+  new SqlError({
+    reason: new UnknownError({
+      cause,
+      message: "Failed to decode reindex queue rows",
+      operation: "reindex_queue.decode"
+    })
+  });
+
 const decodeRows = (rows: unknown) =>
-  Effect.sync(() => Schema.decodeUnknownSync(Schema.Array(ReindexQueueRow))(rows));
+  Schema.decodeUnknownEffect(Schema.Array(ReindexQueueRow))(rows).pipe(
+    Effect.mapError(decodeSqlError)
+  );
 
 const toItem = (row: ReindexQueueRow): ReindexQueueItem =>
   Schema.decodeUnknownSync(ReindexQueueItem)({
@@ -45,8 +58,6 @@ const toItem = (row: ReindexQueueRow): ReindexQueueItem =>
     enqueuedAt: row.enqueued_at,
     updatedAt: row.updated_at
   });
-
-const randomId = (): string => crypto.randomUUID();
 
 const COALESCE_WINDOW_MS = 30_000;
 
@@ -66,7 +77,7 @@ export const ReindexQueueD1 = {
 
       const schedule = (request: ReindexRequest) =>
         Effect.gen(function* () {
-          if (request.propagationDepth > 1) {
+          if (request.propagationDepth > REINDEX_MAX_PROPAGATION_DEPTH) {
             return yield* new ReindexDepthExceededError({
               propagationDepth: request.propagationDepth
             });
@@ -87,7 +98,7 @@ export const ReindexQueueD1 = {
               enqueued_at,
               updated_at
             ) VALUES (
-              ${randomId()},
+              ${yield* Random.nextUUIDv4},
               ${coalesceKey(request, now)},
               ${request.targetEntityType},
               ${request.targetIri},

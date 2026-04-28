@@ -129,6 +129,7 @@ export class ReindexQueueItem extends Schema.Class<ReindexQueueItem>(
 }) {}
 
 export const ENTITY_GRAPH_SCHEMA_STATEMENTS = [
+  `PRAGMA foreign_keys = ON`,
   `CREATE TABLE IF NOT EXISTS entities (
     iri          TEXT PRIMARY KEY,
     entity_type  TEXT NOT NULL,
@@ -206,7 +207,7 @@ export const REINDEX_QUEUE_SCHEMA_STATEMENTS = [
     origin_iri         TEXT NOT NULL,
     cause              TEXT NOT NULL CHECK (cause IN ('entity-changed','edge-changed','entity-renamed','rebuild-all')),
     cause_priority     INTEGER NOT NULL DEFAULT 0,
-    propagation_depth  INTEGER NOT NULL CHECK (propagation_depth >= 0 AND propagation_depth <= 1),
+    propagation_depth  INTEGER NOT NULL CHECK (propagation_depth >= 0),
     attempts           INTEGER NOT NULL DEFAULT 0,
     next_attempt_at    INTEGER NOT NULL,
     enqueued_at        INTEGER NOT NULL,
