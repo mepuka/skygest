@@ -1,7 +1,7 @@
 name = "skygest-bi-agent"
 account_id = "af578620f2ff4eae2042c031be82f7e7"
 main = "src/worker/feed.ts"
-compatibility_date = "2026-04-11"
+compatibility_date = "2026-04-28"
 
 [assets]
 directory = "./dist"
@@ -40,6 +40,11 @@ id = "f9888501c4ad473db8ff49ecf069f9ed"
 [[r2_buckets]]
 binding = "TRANSCRIPTS_BUCKET"
 bucket_name = "skygest-transcripts"
+
+[[ai_search_namespaces]]
+binding = "ENERGY_INTEL_SEARCH"
+namespace = "energy-intel"
+remote = true
 
 [env.staging]
 name = "skygest-bi-agent-staging"
@@ -89,6 +94,11 @@ id = "f9888501c4ad473db8ff49ecf069f9ed"
 [[env.staging.r2_buckets]]
 binding = "TRANSCRIPTS_BUCKET"
 bucket_name = "skygest-transcripts-staging"
+
+[[env.staging.ai_search_namespaces]]
+binding = "ENERGY_INTEL_SEARCH"
+namespace = "energy-intel"
+remote = true
 
 # Verified against the live account on 2026-04-11:
 # the staging agent worker is deployed at migration tag v2 and does not bind

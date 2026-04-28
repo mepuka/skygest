@@ -189,6 +189,8 @@ export const ExpertEntity = defineEntity({
 
 Predicate IRIs (`EI.affiliatedWith`, `BFO.bearerOf`, …) are imported from the codegen-driven `iris.ts` as N3 `NamedNode` values, then normalized once through `.value` into the branded `PredicateIri` string used by D1 rows and relation contracts. See Section 2.3 for the predicate-registry pattern and the rule that hand-writing predicate URL strings is forbidden.
 
+`Organization` is the public energy-intel entity for graph traversal, search, and agent context. It deliberately does not replace the existing data-layer `Agent` model, which remains the DCAT/catalog publisher and curator source of truth. When those worlds meet, the bridge should be explicit: register the organization entity, preserve the DCAT `Agent` row, and connect them with an ontology-backed identity or provenance relation rather than merging the two schemas silently.
+
 **Type-level invariants enforced (no runtime checks needed):**
 
 1. `identity.iriOf` returns the brand — caller cannot return a plain string.
@@ -1056,6 +1058,8 @@ The 5 sections converge on a small set of architectural commitments:
 12. **Reindex substrate is cron'd D1-backed queue, not Cloudflare Queue.** A `reindex_queue` table with a UNIQUE `(coalesce_key)` index makes UPSERT merge the durable coalescing path. A cron'd consumer worker drains by `next_attempt_at`. Coalescing survives isolate eviction, restarts, and worker swaps because the dedup state IS the queue state. Later requests strengthen queued work by maxing propagation depth and cause priority; first writer does not win by accident. Cloudflare Queues remain the right tool when fanout outgrows D1 throughput, but slice 2 does not provision a Queue resource. Resolves prior open question #1.
 
 13. **Alchemy is the Cloudflare deployment boundary for the next slice.** Entity provisioning plans will produce first-class Alchemy resources: D1 databases/migrations, AI Search namespace + instance, R2/KV resources, Worker bindings, cron triggers, and typed `typeof worker.Env`. AI Search is remote-backed in local dev, so `alchemy dev` still depends on deployed AI Search/R2 resources when that slice lands. This PR defines the contracts that deployment code will consume; it does not add `alchemy.run.ts`.
+
+14. **Energy-intel `Organization` is not a DCAT `Agent` replacement.** `src/domain/data-layer/catalog.ts` keeps ownership of DCAT publisher/curator rows. The ontology-store `Organization` entity is the agent-facing graph/search node. Cross-store reuse happens through an explicit bridge relation or storage adapter mapping, so data-layer catalog semantics do not leak into the entity graph and entity search concerns do not mutate the DCAT source model.
 
 ## Slice 2 scope (locked)
 

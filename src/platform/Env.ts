@@ -19,6 +19,7 @@ interface AppConfigEnv {
 interface SharedRuntimeEnv {
   readonly DB: D1Database;
   readonly SEARCH_DB?: D1Database;
+  readonly ENERGY_INTEL_SEARCH?: AiSearchNamespaceBinding;
   readonly ONTOLOGY_KV?: KVNamespace;
   readonly TRANSCRIPTS_BUCKET?: R2Bucket;
   readonly PUBLIC_BSKY_API?: string;
@@ -35,6 +36,9 @@ type IngestWorkflowBinding = Workflow<IngestRunParams>;
 type EnrichmentWorkflowBinding = Workflow<EnrichmentRunParams>;
 type ExpertPollCoordinatorNamespace = DurableObjectNamespace;
 type IngestServiceBinding = EnrichmentTriggerBinding & Fetcher;
+type AiSearchNamespaceBinding = {
+  readonly get: (name: string) => unknown;
+};
 
 export type EnvBindings = Simplify<
   SharedRuntimeEnv &

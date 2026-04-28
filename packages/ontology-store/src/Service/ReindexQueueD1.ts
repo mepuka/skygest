@@ -1,4 +1,5 @@
-import { Clock, Effect, Layer, Random, Schema } from "effect";
+import { D1Client } from "@effect/sql-d1";
+import { Clock, Effect, Layer, Option, Random, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { SqlError, UnknownError } from "effect/unstable/sql/SqlError";
 
@@ -29,6 +30,9 @@ const ReindexQueueRow = Schema.Struct({
 });
 type ReindexQueueRow = typeof ReindexQueueRow.Type;
 
+type D1DatabaseBinding = D1Client.D1Client["config"]["db"];
+type D1PreparedStatementBinding = ReturnType<D1DatabaseBinding["prepare"]>;
+
 const decodeSqlError = (cause: unknown): SqlError =>
   new SqlError({
     reason: new UnknownError({
@@ -43,8 +47,10 @@ const decodeRows = (rows: unknown) =>
     Effect.mapError(decodeSqlError)
   );
 
-const toItem = (row: ReindexQueueRow): ReindexQueueItem =>
-  Schema.decodeUnknownSync(ReindexQueueItem)({
+const toItem = (
+  row: ReindexQueueRow
+): Effect.Effect<ReindexQueueItem, SqlError> =>
+  Schema.decodeUnknownEffect(ReindexQueueItem)({
     queueId: row.queue_id,
     coalesceKey: row.coalesce_key,
     targetEntityType: row.target_entity_type,
@@ -57,7 +63,7 @@ const toItem = (row: ReindexQueueRow): ReindexQueueItem =>
     nextAttemptAt: row.next_attempt_at,
     enqueuedAt: row.enqueued_at,
     updatedAt: row.updated_at
-  });
+  }).pipe(Effect.mapError(decodeSqlError));
 
 const COALESCE_WINDOW_MS = 30_000;
 
@@ -69,11 +75,35 @@ const coalesceKey = (request: ReindexRequest, now: number): string => {
 const backoffMs = (attempts: number): number =>
   Math.min(60_000, 1_000 * 2 ** Math.max(0, attempts - 1));
 
+const d1BatchSqlError = (cause: unknown, operation: string): SqlError =>
+  new SqlError({
+    reason: new UnknownError({
+      cause,
+      message: `Failed to execute D1 batch for ${operation}`,
+      operation
+    })
+  });
+
+const runD1Batch = (
+  db: D1DatabaseBinding,
+  statements: ReadonlyArray<D1PreparedStatementBinding>,
+  operation: string
+): Effect.Effect<void, SqlError> =>
+  Effect.tryPromise({
+    try: () => db.batch(Array.from(statements)),
+    catch: (cause) => d1BatchSqlError(cause, operation)
+  }).pipe(Effect.asVoid);
+
 export const ReindexQueueD1 = {
   layer: Layer.effect(
     ReindexQueueService,
     Effect.gen(function* () {
       const sql = yield* SqlClient.SqlClient;
+      const d1Client = yield* Effect.serviceOption(D1Client.D1Client);
+      const rawDb = Option.match(d1Client, {
+        onNone: () => null,
+        onSome: (client) => client.config.db
+      });
 
       const schedule = (request: ReindexRequest) =>
         Effect.gen(function* () {
@@ -138,7 +168,7 @@ export const ReindexQueueD1 = {
           LIMIT ${limit}
         `.pipe(
           Effect.flatMap(decodeRows),
-          Effect.map((rows) => rows.map(toItem))
+          Effect.flatMap((rows) => Effect.forEach(rows, toItem))
         );
 
       const markComplete = (queueId: string) =>
@@ -186,6 +216,66 @@ export const ReindexQueueD1 = {
           )
         `.pipe(Effect.asVoid);
 
+      const moveToDlqWithD1Batch = (
+        item: ReindexQueueItem,
+        now: number,
+        message: string | undefined
+      ) =>
+        rawDb === null
+          ? sql.withTransaction(
+              Effect.gen(function* () {
+                yield* moveToDlq(item, now, message);
+                yield* markComplete(item.queueId);
+              })
+            )
+          : runD1Batch(
+              rawDb,
+              [
+                rawDb
+                  .prepare(
+                    `INSERT OR REPLACE INTO reindex_queue_dlq (
+                      queue_id,
+                      coalesce_key,
+                      target_entity_type,
+                      target_iri,
+                      origin_iri,
+                      cause,
+                      cause_priority,
+                      propagation_depth,
+                      attempts,
+                      next_attempt_at,
+                      enqueued_at,
+                      updated_at,
+                      failed_at,
+                      failure_message
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                  )
+                  .bind(
+                    item.queueId,
+                    item.coalesceKey,
+                    item.targetEntityType,
+                    item.targetIri,
+                    item.originIri,
+                    item.cause,
+                    item.causePriority,
+                    item.propagationDepth,
+                    item.attempts + 1,
+                    item.nextAttemptAt,
+                    item.enqueuedAt,
+                    now,
+                    now,
+                    message ?? null
+                  ),
+                rawDb
+                  .prepare(
+                    `DELETE FROM reindex_queue
+                     WHERE queue_id = ?`
+                  )
+                  .bind(item.queueId)
+              ],
+              "ReindexQueueD1.markFailed"
+            );
+
       const markFailed = (
         queueId: string,
         now: number,
@@ -212,14 +302,9 @@ export const ReindexQueueD1 = {
           `.pipe(Effect.flatMap(decodeRows));
           const row = rows[0];
           if (row === undefined) return;
-          const item = toItem(row);
+          const item = yield* toItem(row);
           if (item.attempts + 1 >= 3) {
-            yield* sql.withTransaction(
-              Effect.gen(function* () {
-                yield* moveToDlq(item, now, message);
-                yield* markComplete(queueId);
-              })
-            );
+            yield* moveToDlqWithD1Batch(item, now, message);
             return;
           }
           const attempts = item.attempts + 1;
