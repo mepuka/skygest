@@ -3,13 +3,22 @@ import { Schema } from "effect";
 
 import {
   BFO,
+  ENTITY_GRAPH_SCHEMA_STATEMENTS,
+  ENTITY_METADATA_FIELDS,
   EI,
   EXPERT_METADATA_KEYS,
+  AiSearchClient,
   Expert,
+  EntityContextService,
+  EntitySearchService,
+  ExpertEntity,
   ExpertIri,
   ExpertModule,
+  ExpertUnifiedProjection,
   FOAF,
   IRI,
+  PREDICATES,
+  PredicateIri,
   RDF,
   RdfError,
   RdfMappingError,
@@ -17,6 +26,7 @@ import {
   ShaclService,
   ShaclValidationReport,
   ShaclViolation,
+  asPredicateIri,
   expertFromLegacyRow,
   expertFromTriples,
   expertToTriples
@@ -73,6 +83,8 @@ describe("@skygest/ontology-store", () => {
     expect(expertFromTriples).toBeDefined();
     expect(expertFromLegacyRow).toBeDefined();
     expect([...EXPERT_METADATA_KEYS]).toContain("entity_type");
+    expect(ExpertEntity.tag).toBe("Expert");
+    expect(ExpertUnifiedProjection.entityType).toBe("Expert");
   });
 
   it("exposes namespace IRI constants", () => {
@@ -80,5 +92,26 @@ describe("@skygest/ontology-store", () => {
     expect(BFO.bearerOf).toBeDefined();
     expect(FOAF.name).toBeDefined();
     expect(RDF.type).toBeDefined();
+    expect(EI.mentions).toBeDefined();
+  });
+
+  it("exposes entity graph and projection primitives", () => {
+    expect(Schema.decodeUnknownSync(PredicateIri)(BFO.bearerOf.value)).toBe(
+      BFO.bearerOf.value
+    );
+    expect(asPredicateIri(PREDICATES["ei:mentions"].iri)).toBe(
+      "https://w3id.org/energy-intel/mentions"
+    );
+    expect(ENTITY_GRAPH_SCHEMA_STATEMENTS.length).toBeGreaterThan(0);
+    expect(ENTITY_METADATA_FIELDS.map((field) => field.field_name)).toEqual([
+      "entity_type",
+      "iri",
+      "topic",
+      "authority",
+      "time_bucket"
+    ]);
+    expect(AiSearchClient).toBeDefined();
+    expect(EntitySearchService).toBeDefined();
+    expect(EntityContextService).toBeDefined();
   });
 });

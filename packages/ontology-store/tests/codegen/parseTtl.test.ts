@@ -103,6 +103,11 @@ describe("parseTtlToClassTable", () => {
         iri: "http://xmlns.com/foaf/0.1/name",
         range: "http://www.w3.org/2001/XMLSchema#string"
       });
+      expect(table.declaredProperties).toEqual([
+        "http://purl.obolibrary.org/obo/BFO_0000053",
+        "http://xmlns.com/foaf/0.1/name",
+        "https://w3id.org/energy-intel/bio"
+      ]);
     })
   );
 });
@@ -163,7 +168,7 @@ describe("mergeClassTables", () => {
 
   it("returns an empty table when given no inputs", () => {
     const merged = mergeClassTables([]);
-    expect(merged).toEqual({ classes: [], prefixes: {} });
+    expect(merged).toEqual({ classes: [], declaredProperties: [], prefixes: {} });
   });
 
   it("returns a structurally-equivalent table when given a single input", () => {

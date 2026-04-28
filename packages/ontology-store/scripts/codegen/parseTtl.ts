@@ -79,6 +79,7 @@ export type ClassRecord = typeof ClassRecord.Type;
 
 export const ClassTable = Schema.Struct({
   classes: Schema.Array(ClassRecord),
+  declaredProperties: Schema.optionalKey(Schema.Array(Schema.String)),
   prefixes: Schema.Record(Schema.String, Schema.String)
 });
 export type ClassTable = typeof ClassTable.Type;
@@ -271,10 +272,14 @@ export const mergeClassTables = (
   tables: ReadonlyArray<ClassTable>
 ): ClassTable => {
   const classByIri = new Map<string, ClassRecord>();
+  const declaredProperties = new Set<string>();
   const prefixes: Record<string, string> = {};
   for (const table of tables) {
     for (const cls of table.classes) {
       if (!classByIri.has(cls.iri)) classByIri.set(cls.iri, cls);
+    }
+    for (const property of table.declaredProperties ?? []) {
+      declaredProperties.add(property);
     }
     for (const [prefix, iri] of Object.entries(table.prefixes)) {
       prefixes[prefix] = iri;
@@ -282,6 +287,7 @@ export const mergeClassTables = (
   }
   return {
     classes: Array.from(classByIri.values()),
+    declaredProperties: Array.from(declaredProperties).sort(),
     prefixes
   };
 };
@@ -336,6 +342,7 @@ export const parseTtlToClassTable = (
       // Stage B: walk owl:DatatypeProperty + owl:ObjectProperty subjects and
       // attach them to their declared rdfs:domain class. Cardinality is left
       // at the slice default (optional + single); Task 7 may revisit.
+      const declaredProperties = new Set<string>();
       for (const propType of [OWL_DATATYPE_PROPERTY, OWL_OBJECT_PROPERTY]) {
         const propQuads = store.getQuads(
           null,
@@ -347,6 +354,7 @@ export const parseTtlToClassTable = (
           const propSubj = propQuad.subject;
           if (!isNamedSubject(propSubj)) continue;
           const propIri = propSubj.value;
+          declaredProperties.add(propIri);
           const label = firstObjectValue(store, propSubj, RDFS_LABEL);
           const range = firstObjectValue(store, propSubj, RDFS_RANGE);
           const domains = objectValuesNamed(store, propSubj, RDFS_DOMAIN);
@@ -368,6 +376,7 @@ export const parseTtlToClassTable = (
 
       return {
         classes: Array.from(classByIri.values()).map(finalizeClass),
+        declaredProperties: Array.from(declaredProperties).sort(),
         prefixes
       };
     },

@@ -20,6 +20,58 @@ export class DbError extends Schema.TaggedErrorClass<DbError>()("DbError", {
   message: Schema.String
 }) {}
 
+export class EntityNotFoundError extends Schema.TaggedErrorClass<EntityNotFoundError>()(
+  "EntityNotFoundError",
+  {
+    iri: Schema.String
+  }
+) {}
+
+export class EntityGraphEndpointNotFoundError extends Schema.TaggedErrorClass<EntityGraphEndpointNotFoundError>()(
+  "EntityGraphEndpointNotFoundError",
+  {
+    iri: Schema.String,
+    entityType: Schema.String,
+    position: Schema.Literals(["subject", "object"])
+  }
+) {}
+
+export class EntityGraphTypeMismatchError extends Schema.TaggedErrorClass<EntityGraphTypeMismatchError>()(
+  "EntityGraphTypeMismatchError",
+  {
+    iri: Schema.String,
+    expected: Schema.String,
+    actual: Schema.String,
+    position: Schema.Literals(["subject", "object"])
+  }
+) {}
+
+export class EntityGraphLinkInvalidError extends Schema.TaggedErrorClass<EntityGraphLinkInvalidError>()(
+  "EntityGraphLinkInvalidError",
+  {
+    predicate: Schema.String,
+    subjectType: Schema.String,
+    objectType: Schema.String,
+    message: Schema.String
+  }
+) {}
+
+export class EntityGraphLinkNotFoundError extends Schema.TaggedErrorClass<EntityGraphLinkNotFoundError>()(
+  "EntityGraphLinkNotFoundError",
+  {
+    linkId: Schema.String
+  }
+) {}
+
+export class EntityGraphTraversalLimitError extends Schema.TaggedErrorClass<EntityGraphTraversalLimitError>()(
+  "EntityGraphTraversalLimitError",
+  {
+    iri: Schema.String,
+    maxDepth: Schema.Number,
+    maxNodes: Schema.Number
+  }
+) {}
+
 export class CommandExecutionError extends Schema.TaggedErrorClass<CommandExecutionError>()(
   "CommandExecutionError",
   {
@@ -380,6 +432,7 @@ export class AiSearchError extends Schema.TaggedErrorClass<AiSearchError>()(
     instance: Schema.String,
     message: Schema.String,
     status: Schema.optionalKey(Schema.Number),
+    retryAfterMs: Schema.optionalKey(Schema.Number),
     key: Schema.optionalKey(Schema.String)
   }
 ) {}

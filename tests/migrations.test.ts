@@ -16,6 +16,9 @@ describe("phase-one migrations", () => {
         WHERE type IN ('table', 'virtual table')
           AND name IN (
             'editorial_picks',
+            'entities',
+            'entity_link_evidence',
+            'entity_links',
             'agents',
             'catalog_records',
             'catalogs',
@@ -43,6 +46,8 @@ describe("phase-one migrations", () => {
             'links',
             'posts_fts',
             'publications',
+            'reindex_queue',
+            'reindex_queue_dlq',
             'series',
             'variables'
           )
@@ -65,6 +70,9 @@ describe("phase-one migrations", () => {
         "datasets",
         "distributions",
         "editorial_picks",
+        "entities",
+        "entity_link_evidence",
+        "entity_links",
         "expert_sources",
         "expert_sync_state",
         "experts",
@@ -83,6 +91,8 @@ describe("phase-one migrations", () => {
         "posts",
         "posts_fts",
         "publications",
+        "reindex_queue",
+        "reindex_queue_dlq",
         "series",
         "variables"
       ]);
@@ -115,7 +125,8 @@ describe("phase-one migrations", () => {
         {
           id: 26,
           name: "data_ref_candidate_citation_source_alignment"
-        }
+        },
+        { id: 27, name: "ontology_entity_graph" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );
