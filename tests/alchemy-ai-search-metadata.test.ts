@@ -6,7 +6,7 @@ import {
   type AiSearchMetadataClient
 } from "../alchemy/ai-search-metadata";
 
-const instance = (customMetadata?: ReadonlyArray<unknown>) =>
+const instance = (customMetadata?: ReadonlyArray<unknown> | null) =>
   ({
     id: "instance-id",
     custom_metadata: customMetadata
@@ -122,5 +122,30 @@ describe("ensureAiSearchCustomMetadataForPhase", () => {
         ENTITY_SEARCH_CUSTOM_METADATA
       ]
     ]);
+  });
+
+  it("treats null custom metadata as missing", async () => {
+    const calls: Array<string> = [];
+    const client = {
+      createApi: async () => ({}),
+      getInstance: async () => {
+        calls.push("getInstance");
+        return instance(null);
+      },
+      updateInstance: async () => {
+        calls.push("updateInstance");
+        return instance(ENTITY_SEARCH_CUSTOM_METADATA);
+      }
+    } as unknown as AiSearchMetadataClient;
+
+    await ensureAiSearchCustomMetadataForPhase({
+      phase: "up",
+      namespace: "energy-intel",
+      instanceName: "entity-search",
+      customMetadata: ENTITY_SEARCH_CUSTOM_METADATA,
+      client
+    });
+
+    expect(calls).toEqual(["getInstance", "updateInstance"]);
   });
 });

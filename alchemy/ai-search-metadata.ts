@@ -64,10 +64,11 @@ const fieldsEqual = (
         readonly field_name: string;
         readonly data_type: AiSearchCustomMetadataField["data_type"];
       }>
+    | null
     | undefined,
   right: ReadonlyArray<AiSearchCustomMetadataField>
 ): boolean => {
-  if (left === undefined || left.length !== right.length) return false;
+  if (left == null || left.length !== right.length) return false;
   return left.every(
     (field, index) =>
       field.field_name.toLowerCase() === right[index]?.field_name &&
