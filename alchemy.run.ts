@@ -147,7 +147,9 @@ const searchDb =
         dev: { remote: true }
       });
 
-export const entitySearch = await AiSearch("entity-search", {
+const ENTITY_SEARCH_RESOURCE_ID = "entity-search";
+
+export const entitySearch = await AiSearch(ENTITY_SEARCH_RESOURCE_ID, {
   ...apiOptions,
   name: entitySearchProvisioning.instance,
   namespace: energyIntelSearch,
@@ -161,6 +163,7 @@ export const entitySearch = await AiSearch("entity-search", {
 
 await ensureAiSearchCustomMetadata({
   apiOptions,
+  resourceId: ENTITY_SEARCH_RESOURCE_ID,
   namespace: entitySearchProvisioning.namespace,
   instanceName: entitySearch.name,
   customMetadata: entitySearchProvisioning.customMetadata
