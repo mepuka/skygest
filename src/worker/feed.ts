@@ -48,7 +48,7 @@ export const handleFeedRequest = async (
       )
     );
     const result = await Effect.runPromise(
-      Effect.result(AppConfig.validate(provider))
+      Effect.result(AppConfig.validateWorker(provider))
     );
     if (result._tag === "Success") {
       return new Response("ok");

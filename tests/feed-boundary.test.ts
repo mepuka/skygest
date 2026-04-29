@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@effect/vitest";
 import { vi } from "vitest";
 import type { AgentWorkerEnvBindings } from "../src/platform/Env";
-import { handleFetchWithBoundary } from "../src/worker/feed";
+import { handleFeedRequest, handleFetchWithBoundary } from "../src/worker/feed";
 
 vi.mock("../src/admin/Router", () => ({
   handleAdminRequest: vi.fn()
@@ -25,6 +25,18 @@ const makeRequest = (path = "/health") =>
   new Request(`http://localhost${path}`);
 
 describe("agent worker top-level error boundary", () => {
+  it("does not require enrichment secrets for /health", async () => {
+    const response = await handleFeedRequest(
+      makeRequest(),
+      {
+        OPERATOR_SECRET: "test-secret"
+      } as AgentWorkerEnvBindings
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("ok");
+  });
+
   it("sanitizes raw Error throws into a scrubbed 500 envelope", async () => {
     const sensitive = "sensitive-agent-worker-detail";
     const response = await handleFetchWithBoundary(

@@ -91,6 +91,16 @@ describe("ConfigValidation", () => {
     })
   );
 
+  it.effect("AppConfig.validateWorker succeeds without enrichment secrets", () =>
+    Effect.gen(function* () {
+      const provider = ConfigProvider.fromUnknown({
+        OPERATOR_SECRET: "real-secret"
+      });
+      const result = yield* AppConfig.validateWorker(provider);
+      expect(result.operatorSecret).toBeDefined();
+    })
+  );
+
   it.effect("summary is human-readable", () =>
     Effect.gen(function* () {
       const result = yield* Effect.result(
