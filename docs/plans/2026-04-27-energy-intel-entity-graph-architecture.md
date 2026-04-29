@@ -1,8 +1,8 @@
 # Energy-Intel Entity-Graph Architecture (Slice 2)
 
-**Status:** Architecture plus slice-2 runtime foundation. Design synthesized 2026-04-27 from 5 parallel Opus 4.7 design agents. **Revised 2026-04-28** in response to three PR #138 review passes, local Alchemy reference verification, and production-hardening feedback.
+**Status:** Architecture plus slice-2 runtime foundation, with the first Alchemy provisioning slice now added in PR #139. Design synthesized 2026-04-27 from 5 parallel Opus 4.7 design agents. **Revised 2026-04-28** in response to three PR #138 review passes, local Alchemy reference verification, production-hardening feedback, and the PR #139 Alchemy follow-up.
 **Companion:** `docs/plans/2026-04-27-energy-intel-unified-abstraction-architecture.md` (slice 1, superseded by this doc on the AI-Search-as-spine framing).
-**Goal:** Land the entity-graph foundation — `EntityDefinition` core contract, relation graph schema, unified projection contract, AI Search adapter, context assembly, and reindex queue substrate — while keeping Alchemy unification as the deployment target for the next slice.
+**Goal:** Land the entity-graph foundation — `EntityDefinition` core contract, relation graph schema, unified projection contract, AI Search adapter, context assembly, and reindex queue substrate — and connect it to an Alchemy-managed Cloudflare deployment path without retiring Wrangler until parity is proven.
 
 **Review revisions (2026-04-28):**
 
@@ -24,7 +24,7 @@
 | 14 | P1 | AI Search client had no reliability policy | AI Search upload/list/delete/search calls now have per-attempt timeout, transient-status retry, jittered exponential backoff, and `Retry-After` support. |
 | 15 | P2 | Link/evidence reads had N+1 query shape | `linksOut` / `linksIn` load selected links and evidence with one `LEFT JOIN` query and group rows in TypeScript. |
 | 16 | P2 | Identifier/hash spec drift was implicit | Current runtime uses Effect `Random.nextUUIDv4` link IDs and SHA-256 triple hashes; ULID/BLAKE3 remains a future policy upgrade, not the current contract. |
-| 17 | P2 | PR claimed design-only while shipping runtime code | This doc and PR body now describe the branch as a runtime foundation PR with Alchemy implementation deferred. |
+| 17 | P2 | PR claimed design-only while shipping runtime code | This doc and PR body now describe PR #138 as a runtime foundation PR; PR #139 adds the initial Alchemy deployment slice. |
 
 ## Overview
 
@@ -188,6 +188,8 @@ export const ExpertEntity = defineEntity({
 ```
 
 Predicate IRIs (`EI.affiliatedWith`, `BFO.bearerOf`, …) are imported from the codegen-driven `iris.ts` as N3 `NamedNode` values, then normalized once through `.value` into the branded `PredicateIri` string used by D1 rows and relation contracts. See Section 2.3 for the predicate-registry pattern and the rule that hand-writing predicate URL strings is forbidden.
+
+`Organization` is the public energy-intel entity for graph traversal, search, and agent context. It deliberately does not replace the existing data-layer `Agent` model, which remains the DCAT/catalog publisher and curator source of truth. When those worlds meet, the bridge should be explicit: register the organization entity, preserve the DCAT `Agent` row, and connect them with an ontology-backed identity or provenance relation rather than merging the two schemas silently.
 
 **Type-level invariants enforced (no runtime checks needed):**
 
@@ -623,61 +625,63 @@ Decision rules in priority order:
 
 The unification target: **one entity definition drives one deployment plan, and Alchemy materializes the Cloudflare resources from that plan.** No hand-syncing between entity TS, D1 migrations, AI Search metadata, Worker bindings, or runtime `Env` types. Verified against the local Alchemy reference checkout at `.reference/alchemy/alchemy/src/cloudflare`.
 
-**Implementation status:** Section 4 is the next deployment slice, not current PR runtime code. This branch does not add `alchemy.run.ts`, `infra/AiSearchWithMetadata.ts`, or retire the existing Wrangler files. The slice-2 code deliberately stops at the entity, graph, projection, and runtime adapter contracts that Alchemy will consume.
+**Implementation status:** PR #139 adds the first Alchemy deployment stack: `alchemy.run.ts`, an AI Search metadata bridge, entity-driven provisioning metadata, and matching Worker bindings. The existing `wrangler*.toml` files remain the live deploy path until an `adopt:true` Alchemy deploy has been smoke-tested against Cloudflare credentials.
 
 ### 4.1 Critical Alchemy limitation discovered
 
 `BaseAiSearchProps` exposes `metadata?: Record<string, unknown>` (the wizard-created flag) but **NOT** the `custom_metadata` array on the user-facing prop. The wire payload has `custom_metadata: Array<{ data_type, field_name }>` (line 809 in source), but it's not exposed through Alchemy's user prop surface.
 
-**Workaround for the Alchemy slice:** wrap `AiSearch` with `AiSearchInstanceWithMetadata` in `infra/AiSearchWithMetadata.ts` — uses Alchemy's exported `updateAiSearchInstance(api, namespace, id, payload)` helper after the parent resource resolves to PUT the `custom_metadata` declaration. Track upstream PR adding `customMetadata?` to `BaseAiSearchProps`.
+**Workaround for the Alchemy slice:** `alchemy/ai-search-metadata.ts` calls Alchemy's exported `updateAiSearchInstance(api, namespace, id, payload)` helper after the parent `AiSearch` resource resolves, then PUTs the `custom_metadata` declaration. Keep that bridge until upstream exposes `customMetadata?` on `BaseAiSearchProps`; the helper carries the tracking search link.
 
-### 4.2 `alchemy.run.ts` skeleton (entity-driven)
+### 4.2 `alchemy.run.ts` implementation (entity-driven)
 
 ```ts
 import alchemy from "alchemy"
-import { AiGateway, AiSearchNamespace, D1Database, KVNamespace, R2Bucket, Worker } from "alchemy/cloudflare"
-import { CloudflareStateStore } from "alchemy/state"
-import { ExpertProvisioning } from "./packages/ontology-store/src/agent/expert.ts"
-import { OrganizationProvisioning } from "./packages/ontology-store/src/agent/organization.ts"
-import { ENTITY_METADATA_FIELDS } from "./packages/ontology-store/src/Domain/Projection.ts"
-import { provisionEntity, AiSearchInstanceWithMetadata } from "./infra/provisionEntity.ts"
+import { AiSearch, AiSearchNamespace, D1Database, KVNamespace, R2Bucket, Worker } from "alchemy/cloudflare"
+import { Effect } from "effect"
+import {
+  ENTITY_PROJECTION_FIXTURES,
+  ENTITY_PROVISIONING,
+  assertNoMetadataDrift,
+  defineUnifiedEntitySearchProvisioning,
+} from "@skygest/ontology-store"
+import { ensureAiSearchCustomMetadata } from "./alchemy/ai-search-metadata.ts"
 
-const ENTITY_PROVISIONING = [ExpertProvisioning, OrganizationProvisioning] as const
-const STAGE = process.env.STAGE ?? "dev"
-
-export const app = await alchemy("skygest-energy-intel", {
-  stateStore: (scope) => new CloudflareStateStore(scope),
-})
+await Effect.runPromise(assertNoMetadataDrift(ENTITY_PROJECTION_FIXTURES))
+const entitySearchProvisioning = defineUnifiedEntitySearchProvisioning(ENTITY_PROVISIONING)
+const app = await alchemy("skygest-cloudflare", { adopt: true })
+const stage = resolveConfig(app.stage) // staging or production only
 
 // Shared infra
-const db = await D1Database("skygest", {
-  name: STAGE === "prod" ? "skygest" : `skygest-${STAGE}`,
-  adopt: true,
-  migrationsDir: "./migrations",
-  migrationsTable: "d1_migrations",
-})
-const ontologyKv = await KVNamespace("ontology-kv", { title: `ontology-kv-${STAGE}`, adopt: true })
+const db = await D1Database("skygest-db", { name: stage.databaseName, adopt: true, delete: false })
+const ontologyKv = await KVNamespace("ontology-kv", { title: "ONTOLOGY_KV", adopt: true, delete: false })
 const transcripts = await R2Bucket("transcripts", {
-  name: `skygest-transcripts-${STAGE}`,
+  name: stage.transcriptsBucketName,
   adopt: true,
-  dev: { remote: true }, // AI Search requires deployed R2 / remote binding even during alchemy dev.
+  delete: false,
+  dev: { remote: true },
 })
-const aiGateway = await AiGateway("energy-intel-gw", { collectLogs: true })
-const searchNs = await AiSearchNamespace("energy-intel", { name: "energy-intel", adopt: true })
-
-// Per-entity provisioning
-await Promise.all(
-  ENTITY_PROVISIONING.map((plan) => provisionEntity(plan, { db, namespace: searchNs, aiGateway, source: transcripts, stage: STAGE })),
-)
+const searchNs = await AiSearchNamespace("energy-intel-search", {
+  name: entitySearchProvisioning.namespace,
+  adopt: true,
+  delete: false,
+})
 
 // Unified entity-graph search instance
-await AiSearchInstanceWithMetadata("entity-search", {
-  name: "entity-search",
+const entitySearch = await AiSearch("entity-search", {
+  name: entitySearchProvisioning.instance,
   namespace: searchNs,
-  source: transcripts,
-  customMetadata: ENTITY_METADATA_FIELDS,    // [{ field_name, data_type }, …] derived from UNIFIED_METADATA_KEYS
-  embeddingModel: "@cf/baai/bge-m3",
   adopt: true,
+  delete: false,
+  cache: false,
+  chunk: true,
+  indexMethod: { vector: true, keyword: true },
+  fusionMethod: "rrf",
+})
+await ensureAiSearchCustomMetadata({
+  namespace: entitySearchProvisioning.namespace,
+  instanceName: entitySearch.name,
+  customMetadata: entitySearchProvisioning.customMetadata,
 })
 
 // Workers (translated from wrangler.toml at parity)
@@ -691,8 +695,8 @@ export const ingestWorker = await Worker("ingest", {
   bindings: {
     DB: db,
     ONTOLOGY_KV: ontologyKv,
-    ENERGY_INTEL_SEARCH: searchNs,    // namespace binding only
-    AI_GATEWAY: aiGateway,
+    TRANSCRIPTS_BUCKET: transcripts,
+    [entitySearchProvisioning.binding]: searchNs,    // namespace binding only
     /* … */
   },
 })
@@ -701,8 +705,8 @@ export const agentWorker = await Worker("agent", {
   bindings: {
     DB: db,
     ONTOLOGY_KV: ontologyKv,
-    ENERGY_INTEL_SEARCH: searchNs,    // namespace binding only
-    AI_GATEWAY: aiGateway,
+    TRANSCRIPTS_BUCKET: transcripts,
+    [entitySearchProvisioning.binding]: searchNs,    // namespace binding only
     INGEST_SERVICE: ingestWorker,
     RESOLVER: resolverWorker,
   },
@@ -839,7 +843,7 @@ Local Alchemy source shows Worker Durable Object migrations are first-class enou
 **Forward-looking pattern: blue-green AI Search instance swaps.** When metadata schema changes (unavoidable over a multi-quarter horizon), AI Search instances cannot mutate `custom_metadata` in place — adding a field requires reindex. Pattern: name with version suffix (`entity-search-v2`), provision alongside, dual-write during cutover, flip the worker binding in one `alchemy deploy`. Both instances live in the same namespace; the namespace-binding is a one-line worker change. Slice 2 adopts the schema-version naming convention from day one.
 
 **Open questions / Alchemy gaps:**
-1. `custom_metadata` not in user props (workaround in slice 2; track upstream PR).
+1. `custom_metadata` not in user props (workaround in `alchemy/ai-search-metadata.ts`; upstream issue/PR search is linked from the helper).
 2. AI Search local dev is remote-backed; preview environments need deployed namespace/instance/source resources.
 3. Cron triggers per-stage: pattern `crons: STAGE === "prod" ? [...] : []`.
 4. Service bindings between workers in one `alchemy.run.ts`: confirmed working.
@@ -1055,7 +1059,9 @@ The 5 sections converge on a small set of architectural commitments:
 
 12. **Reindex substrate is cron'd D1-backed queue, not Cloudflare Queue.** A `reindex_queue` table with a UNIQUE `(coalesce_key)` index makes UPSERT merge the durable coalescing path. A cron'd consumer worker drains by `next_attempt_at`. Coalescing survives isolate eviction, restarts, and worker swaps because the dedup state IS the queue state. Later requests strengthen queued work by maxing propagation depth and cause priority; first writer does not win by accident. Cloudflare Queues remain the right tool when fanout outgrows D1 throughput, but slice 2 does not provision a Queue resource. Resolves prior open question #1.
 
-13. **Alchemy is the Cloudflare deployment boundary for the next slice.** Entity provisioning plans will produce first-class Alchemy resources: D1 databases/migrations, AI Search namespace + instance, R2/KV resources, Worker bindings, cron triggers, and typed `typeof worker.Env`. AI Search is remote-backed in local dev, so `alchemy dev` still depends on deployed AI Search/R2 resources when that slice lands. This PR defines the contracts that deployment code will consume; it does not add `alchemy.run.ts`.
+13. **Alchemy is the Cloudflare deployment boundary.** PR #139 adds the initial `alchemy.run.ts` stack with adopted D1/KV/R2 resources, unified AI Search namespace + instance, Worker bindings, cron triggers, and typed `typeof worker.Env`. AI Search is remote-backed in local dev, so `alchemy dev` still depends on deployed AI Search/R2 resources. Wrangler remains in the repo until one Alchemy read/deploy smoke against real Cloudflare credentials proves parity.
+
+14. **Energy-intel `Organization` is not a DCAT `Agent` replacement.** `src/domain/data-layer/catalog.ts` keeps ownership of DCAT publisher/curator rows. The ontology-store `Organization` entity is the agent-facing graph/search node. Cross-store reuse happens through an explicit bridge relation or storage adapter mapping, so data-layer catalog semantics do not leak into the entity graph and entity search concerns do not mutate the DCAT source model.
 
 ## Slice 2 scope (locked)
 
@@ -1070,7 +1076,7 @@ Ships:
 - `reindex_queue` D1 table + cron'd consumer worker contract with UPSERT merge coalescing (decision #12); slice 2 ships the schema + service interface, slice 3 ships the consumer body
 
 Deferred:
-- Alchemy implementation (Section 4): `EntityProvisioningPlan` + `provisionEntity()` + `AiSearchInstanceWithMetadata` wrapper + entity-driven `alchemy.run.ts` + Wrangler retirement (with `adopt:true` cutover); this PR documents the target but does not add those files
+- Wrangler retirement after Alchemy parity: PR #139 adds the initial entity-driven `alchemy.run.ts`, but the `wrangler*.toml` files remain until `adopt:true` cutover is smoke-tested with Cloudflare credentials
 - Post → Entity linking workflow with LLM disambiguation (slice 3)
 - Reindex propagation runtime (slice 3) — the consumer body that drains `reindex_queue` and calls per-entity projections; slice 2 ships only the table + service contract
 - Link review state machine (slice 4 — depends on a real reviewer UI surface)

@@ -8,7 +8,7 @@ export const ENTITY_METADATA_FIELDS = [
   { field_name: "time_bucket", data_type: "text" }
 ] as const satisfies ReadonlyArray<{
   readonly field_name: string;
-  readonly data_type: "text" | "number" | "boolean" | "datetime";
+  readonly data_type: "text" | "number" | "boolean";
 }>;
 
 export const UNIFIED_METADATA_KEYS = ENTITY_METADATA_FIELDS.map(

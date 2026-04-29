@@ -1,4 +1,7 @@
 import { Array, ServiceMap, Effect, Layer, Option, Schema } from "effect";
+import type {
+  AiSearchNamespaceBinding
+} from "../../packages/ontology-store/src/Service/AiSearchClient";
 import type { EnrichmentRunParams } from "../domain/enrichmentRun";
 import type { IngestRunParams } from "../domain/polling";
 import type { ResolverBinding } from "../resolver/Client";
@@ -19,6 +22,7 @@ interface AppConfigEnv {
 interface SharedRuntimeEnv {
   readonly DB: D1Database;
   readonly SEARCH_DB?: D1Database;
+  readonly ENERGY_INTEL_SEARCH?: AiSearchNamespaceBinding;
   readonly ONTOLOGY_KV?: KVNamespace;
   readonly TRANSCRIPTS_BUCKET?: R2Bucket;
   readonly PUBLIC_BSKY_API?: string;

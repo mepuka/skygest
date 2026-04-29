@@ -1,6 +1,7 @@
+import { D1Client } from "@effect/sql-d1";
 import { SqliteClient } from "@effect/sql-sqlite-node";
 import { describe, expect, it } from "@effect/vitest";
-import { Effect } from "effect";
+import { Effect, Layer } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 
 import {
@@ -10,6 +11,18 @@ import {
   asEntityIri,
   asEntityTag
 } from "../../src";
+
+type CapturedStatement = {
+  readonly query: string;
+  readonly params: ReadonlyArray<unknown>;
+  readonly all: () => Promise<{
+    readonly results: ReadonlyArray<Record<string, unknown>>;
+    readonly success: boolean;
+    readonly meta: { readonly duration: number };
+  }>;
+  readonly raw: () => Promise<ReadonlyArray<ReadonlyArray<unknown>>>;
+};
+type D1DatabaseBinding = D1Client.D1Client["config"]["db"];
 
 const sqliteLayer = SqliteClient.layer({ filename: ":memory:" });
 
@@ -32,7 +45,70 @@ const orgIri = asEntityIri(
 
 const provideLayer = <A, E>(
   effect: Effect.Effect<A, E, ReindexQueueService | SqlClient.SqlClient>
-) => effect.pipe(Effect.provide(ReindexQueueD1.layer), Effect.provide(sqliteLayer));
+) =>
+  effect.pipe(
+    Effect.provide(ReindexQueueD1.layer),
+    Effect.provide(sqliteLayer)
+  );
+
+const makeQueueD1BatchLayer = (captures: {
+  batchStatements: Array<CapturedStatement>;
+  batchCalls: number;
+}) => {
+  const row = {
+    queue_id: "queue-1",
+    coalesce_key:
+      "Expert:https://w3id.org/energy-intel/expert/MarkZJacobson:0",
+    target_entity_type: "Expert",
+    target_iri: expertIri,
+    origin_iri: expertIri,
+    cause: "entity-changed",
+    cause_priority: 0,
+    propagation_depth: 0,
+    attempts: 3,
+    next_attempt_at: 10,
+    enqueued_at: 1,
+    updated_at: 1
+  };
+  const db = {
+    prepare(query: string) {
+      const bind = (...params: ReadonlyArray<unknown>): CapturedStatement => ({
+        query,
+        params,
+        all: async () => ({
+          results:
+            query.includes("UPDATE reindex_queue") &&
+            params.includes("queue-1")
+              ? [row]
+              : [],
+          success: true,
+          meta: { duration: 0 }
+        }),
+        raw: async () => []
+      });
+      return {
+        query,
+        params: [],
+        bind,
+        all: bind().all,
+        raw: bind().raw
+      };
+    },
+    async batch(statements: ReadonlyArray<CapturedStatement>) {
+      captures.batchCalls += 1;
+      captures.batchStatements.push(...statements);
+      return statements.map(() => ({
+        results: [],
+        success: true,
+        meta: { duration: 0 }
+      }));
+    }
+  } as unknown as D1DatabaseBinding;
+
+  const d1Layer = D1Client.layer({ db });
+  const queueLayer = ReindexQueueD1.layer.pipe(Layer.provideMerge(d1Layer));
+  return Layer.mergeAll(d1Layer, queueLayer);
+};
 
 describe("ReindexQueueD1", () => {
   it.effect("merges stronger work into an existing coalesced request", () =>
@@ -111,4 +187,29 @@ describe("ReindexQueueD1", () => {
       })
     )
   );
+
+  it.effect("uses D1 batch when moving an exhausted item to the dead-letter table", () => {
+    const captures = {
+      batchStatements: [] as Array<CapturedStatement>,
+      batchCalls: 0
+    };
+
+    return Effect.gen(function* () {
+      const queue = yield* ReindexQueueService;
+
+      yield* queue.markFailed("queue-1", 30, "third");
+
+      expect(captures.batchCalls).toBe(1);
+      expect(captures.batchStatements).toHaveLength(2);
+      expect(captures.batchStatements[0]?.query).toContain(
+        "INSERT OR REPLACE INTO reindex_queue_dlq"
+      );
+      expect(captures.batchStatements[0]?.params[8]).toBe(3);
+      expect(captures.batchStatements[0]?.params[13]).toBe("third");
+      expect(captures.batchStatements[1]?.query).toContain(
+        "DELETE FROM reindex_queue"
+      );
+      expect(captures.batchStatements[1]?.params).toEqual(["queue-1"]);
+    }).pipe(Effect.provide(makeQueueD1BatchLayer(captures)));
+  });
 });

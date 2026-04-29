@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": ".cache/tsc/alchemy.tsbuildinfo"
+  },
+  "include": [
+    "alchemy.run.ts",
+    "alchemy/**/*.ts",
+    "src/**/*.ts",
+    "packages/ontology-store/src/**/*.ts",
+    "worker-configuration.d.ts",
+    "worker-runtime.d.ts"
+  ],
+  "exclude": [
+    "analysis/**",
+    "src/**/*.test.ts",
+    "src/filters/**",
+    "src/services/kv/**",
+    "src/web/**"
+  ]
+}

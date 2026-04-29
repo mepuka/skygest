@@ -1,7 +1,7 @@
 name = "skygest-resolver"
 account_id = "af578620f2ff4eae2042c031be82f7e7"
 main = "src/resolver-worker/index.ts"
-compatibility_date = "2026-04-11"
+compatibility_date = "2026-04-28"
 
 [observability]
 enabled = true
