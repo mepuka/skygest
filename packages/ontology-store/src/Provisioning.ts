@@ -4,7 +4,10 @@ import type {
 } from "./Domain/EntityDefinition";
 import {
   ENTITY_METADATA_FIELDS,
-  type EntityMetadataKey
+  type EntityMetadata,
+  type EntityMetadataKey,
+  type ProjectionContract,
+  type ProjectionFixture
 } from "./Domain/Projection";
 import { DEFAULT_ENTITY_SEARCH_INSTANCE } from "./Service/AiSearchClient";
 import {
@@ -61,6 +64,20 @@ export type EntityProvisioningPlan = {
   };
 };
 
+export type EntityRuntimeModule<
+  Def extends AnyEntityDefinition = AnyEntityDefinition
+> = {
+  readonly definition: Def;
+  readonly projection: ProjectionContract<Def["schema"], EntityMetadata>;
+  readonly fixture: ProjectionFixture<Def["schema"]>;
+};
+
+export const defineEntityRuntimeModule = <
+  Def extends AnyEntityDefinition
+>(
+  module: EntityRuntimeModule<Def>
+): EntityRuntimeModule<Def> => module;
+
 const relationProvisioning = (
   relations: AnyEntityDefinition["relations"]
 ): ReadonlyArray<EntityRelationProvisioning> =>
@@ -88,32 +105,43 @@ export const defineEntityProvisioning = <Def extends AnyEntityDefinition>(
   }
 });
 
-export const ExpertProvisioning = defineEntityProvisioning(ExpertEntity);
-export const OrganizationProvisioning =
-  defineEntityProvisioning(OrganizationEntity);
-
-export const ENTITY_PROVISIONING = [
-  ExpertProvisioning,
-  OrganizationProvisioning
-] as const;
-
 // The concrete runtime registry is intentionally limited to ontology-store
 // modules backed by generated IRIs and pinned TTL/codegen drift tests.
-export const ENTITY_PROJECTION_SPECS = [
-  {
-    definition: ExpertEntity,
-    projection: ExpertUnifiedProjection
-  },
-  {
-    definition: OrganizationEntity,
-    projection: OrganizationUnifiedProjection
-  }
+export const ExpertRuntimeModule = defineEntityRuntimeModule({
+  definition: ExpertEntity,
+  projection: ExpertUnifiedProjection,
+  fixture: ExpertProjectionFixture
+});
+export const OrganizationRuntimeModule = defineEntityRuntimeModule({
+  definition: OrganizationEntity,
+  projection: OrganizationUnifiedProjection,
+  fixture: OrganizationProjectionFixture
+});
+
+export const ENTITY_RUNTIME_MODULES = [
+  ExpertRuntimeModule,
+  OrganizationRuntimeModule
 ] as const;
 
-export const ENTITY_PROJECTION_FIXTURES = [
-  ExpertProjectionFixture,
-  OrganizationProjectionFixture
-] as const;
+export const ExpertProvisioning = defineEntityProvisioning(
+  ExpertRuntimeModule.definition
+);
+export const OrganizationProvisioning = defineEntityProvisioning(
+  OrganizationRuntimeModule.definition
+);
+
+export const ENTITY_PROVISIONING = ENTITY_RUNTIME_MODULES.map((module) =>
+  defineEntityProvisioning(module.definition)
+);
+
+export const ENTITY_PROJECTION_SPECS = ENTITY_RUNTIME_MODULES.map((module) => ({
+  definition: module.definition,
+  projection: module.projection
+}));
+
+export const ENTITY_PROJECTION_FIXTURES = ENTITY_RUNTIME_MODULES.map(
+  (module) => module.fixture
+);
 
 const customMetadataEqual = (
   left: typeof ENTITY_SEARCH_CUSTOM_METADATA,

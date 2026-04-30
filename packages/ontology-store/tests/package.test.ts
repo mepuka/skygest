@@ -5,8 +5,10 @@ import {
   BFO,
   ENTITY_GRAPH_SCHEMA_STATEMENTS,
   ENTITY_METADATA_FIELDS,
+  ENTITY_PROJECTION_FIXTURES,
   ENTITY_PROJECTION_SPECS,
   ENTITY_PROVISIONING,
+  ENTITY_RUNTIME_MODULES,
   EI,
   EXPERT_METADATA_KEYS,
   AiSearchClient,
@@ -121,8 +123,15 @@ describe("@skygest/ontology-store", () => {
     expect(EntitySnapshotStore).toBeDefined();
     expect(EntityProjectionRegistry).toBeDefined();
     expect(EntityProjectionDrainService).toBeDefined();
-    expect(ENTITY_PROJECTION_SPECS.map((spec) => spec.definition.tag)).toEqual(
-      ENTITY_PROVISIONING.map((plan) => plan.tag)
+    const moduleTags = ENTITY_RUNTIME_MODULES.map(
+      (module) => module.definition.tag
     );
+    expect(ENTITY_PROJECTION_SPECS.map((spec) => spec.definition.tag)).toEqual(
+      moduleTags
+    );
+    expect(ENTITY_PROVISIONING.map((plan) => plan.tag)).toEqual(moduleTags);
+    expect(
+      ENTITY_PROJECTION_FIXTURES.map((fixture) => fixture.entityType)
+    ).toEqual(moduleTags);
   });
 });

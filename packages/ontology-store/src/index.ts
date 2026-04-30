@@ -223,16 +223,21 @@ export {
   ENTITY_PROJECTION_FIXTURES,
   ENTITY_PROJECTION_SPECS,
   ENTITY_PROVISIONING,
+  ENTITY_RUNTIME_MODULES,
   ENTITY_SEARCH_CUSTOM_METADATA,
   ENTITY_SEARCH_PROVISIONING,
   ExpertProvisioning,
+  ExpertRuntimeModule,
   MAX_AI_SEARCH_CUSTOM_METADATA_FIELDS,
   OrganizationProvisioning,
+  OrganizationRuntimeModule,
+  defineEntityRuntimeModule,
   defineEntityProvisioning,
   defineUnifiedEntitySearchProvisioning
 } from "./Provisioning";
 export type {
   AiSearchCustomMetadataField,
   EntityProvisioningPlan,
+  EntityRuntimeModule,
   EntityRelationProvisioning
 } from "./Provisioning";
