@@ -34,10 +34,14 @@ at that SHA.
      > packages/ontology-store/vendor/energy-intel/.upstream-commit
    ```
 
-4. Re-run codegen and verify there is no diff in `src/generated/`:
+4. Re-run codegen for each vendored flat module and verify there is no
+   drift in `src/generated/`:
 
    ```bash
    bun packages/ontology-store/scripts/generate-from-ttl.ts agent
+   bun packages/ontology-store/scripts/generate-from-ttl.ts media
+   bun packages/ontology-store/scripts/generate-from-ttl.ts measurement
+   bun packages/ontology-store/scripts/generate-from-ttl.ts data
    git diff packages/ontology-store/src/generated/  # should be empty
    ```
 
@@ -62,6 +66,6 @@ ENERGY_INTEL_ROOT=/path/to/ontology_skill/ontologies/energy-intel/modules \
 
 This is a manual sync today. A follow-up ticket will add a script
 that reads the upstream commit SHA, fetches the corresponding
-`agent.ttl` (and any other modules), updates `.upstream-commit`, and
+the flat TTL modules, updates `.upstream-commit`, and
 emits a diff for review. Until then, the manual procedure above is
 the contract.

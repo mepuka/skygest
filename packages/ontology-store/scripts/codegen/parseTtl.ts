@@ -42,6 +42,7 @@ const OWL_OBJECT_PROPERTY = "http://www.w3.org/2002/07/owl#ObjectProperty";
 const OWL_DISJOINT = "http://www.w3.org/2002/07/owl#disjointWith";
 const OWL_EQUIVALENT_CLASS = "http://www.w3.org/2002/07/owl#equivalentClass";
 const OWL_INTERSECTION_OF = "http://www.w3.org/2002/07/owl#intersectionOf";
+const OWL_UNION_OF = "http://www.w3.org/2002/07/owl#unionOf";
 const OWL_ON_PROPERTY = "http://www.w3.org/2002/07/owl#onProperty";
 const OWL_SOME_VALUES_FROM = "http://www.w3.org/2002/07/owl#someValuesFrom";
 const RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
@@ -54,6 +55,7 @@ export const ClassProperty = Schema.Struct({
   iri: Schema.String,
   label: Schema.optionalKey(Schema.String),
   range: Schema.optionalKey(Schema.String),
+  rangeUnion: Schema.optionalKey(Schema.Array(Schema.String)),
   optional: Schema.Boolean,
   list: Schema.Boolean
 });
@@ -103,6 +105,15 @@ const firstObjectValue = (
   return quads[0]?.object.value;
 };
 
+const firstObjectTerm = (
+  store: Store,
+  subject: Quad_Subject,
+  predicate: string
+): Term | undefined => {
+  const quads = store.getQuads(subject, namedNodeOf(predicate), null, null);
+  return quads[0]?.object;
+};
+
 const objectValuesNamed = (
   store: Store,
   subject: Quad_Subject,
@@ -121,6 +132,61 @@ const subjectFromTerm = (term: Term): Quad_Subject | undefined =>
   term.termType === "NamedNode" || term.termType === "BlankNode"
     ? (term as Quad_Subject)
     : undefined;
+
+const namedNodeValuesFromRdfList = (
+  store: Store,
+  head: Quad_Subject
+): ReadonlyArray<string> | undefined => {
+  const values: Array<string> = [];
+  let listHead: Quad_Subject | undefined = head;
+  let safety = 0;
+
+  while (listHead !== undefined && safety < 1024) {
+    safety++;
+    if (listHead.termType === "NamedNode" && listHead.value === RDF_NIL) {
+      return values;
+    }
+
+    const first = firstObjectTerm(store, listHead, RDF_FIRST);
+    if (first === undefined || first.termType !== "NamedNode") {
+      return undefined;
+    }
+    values.push(first.value);
+
+    const rest = firstObjectTerm(store, listHead, RDF_REST);
+    if (rest === undefined) return undefined;
+    if (rest.termType === "NamedNode" && rest.value === RDF_NIL) {
+      return values;
+    }
+    listHead = subjectFromTerm(rest);
+  }
+
+  return undefined;
+};
+
+const propertyRange = (
+  store: Store,
+  propertySubject: Quad_Subject
+): Pick<ClassProperty, "range" | "rangeUnion"> => {
+  const range = firstObjectTerm(store, propertySubject, RDFS_RANGE);
+  if (range === undefined) return {};
+  if (range.termType === "NamedNode") return { range: range.value };
+
+  const rangeSubject = subjectFromTerm(range);
+  if (rangeSubject !== undefined) {
+    const unionHeadTerm = firstObjectTerm(store, rangeSubject, OWL_UNION_OF);
+    const unionHead =
+      unionHeadTerm === undefined ? undefined : subjectFromTerm(unionHeadTerm);
+    if (unionHead !== undefined) {
+      const ranges = namedNodeValuesFromRdfList(store, unionHead);
+      if (ranges !== undefined && ranges.length > 0) {
+        return { rangeUnion: ranges };
+      }
+    }
+  }
+
+  return { range: range.value };
+};
 
 /**
  * Walk an `owl:equivalentClass` chain and surface any
@@ -356,19 +422,18 @@ export const parseTtlToClassTable = (
           const propIri = propSubj.value;
           declaredProperties.add(propIri);
           const label = firstObjectValue(store, propSubj, RDFS_LABEL);
-          const range = firstObjectValue(store, propSubj, RDFS_RANGE);
+          const range = propertyRange(store, propSubj);
           const domains = objectValuesNamed(store, propSubj, RDFS_DOMAIN);
           for (const domainIri of domains) {
             const domainClass = classByIri.get(domainIri);
             if (!domainClass) continue;
-            const property: ClassProperty =
-              label === undefined
-                ? range === undefined
-                  ? { iri: propIri, optional: true, list: false }
-                  : { iri: propIri, range, optional: true, list: false }
-                : range === undefined
-                  ? { iri: propIri, label, optional: true, list: false }
-                  : { iri: propIri, label, range, optional: true, list: false };
+            const property: ClassProperty = {
+              iri: propIri,
+              ...(label === undefined ? {} : { label }),
+              ...range,
+              optional: true,
+              list: false
+            };
             domainClass.properties.push(property);
           }
         }

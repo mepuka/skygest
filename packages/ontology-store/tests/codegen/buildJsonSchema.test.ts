@@ -114,6 +114,113 @@ describe("buildJsonSchema", () => {
     })
   );
 
+  it.effect("allows cross-module energy-intel class ranges as IRIs", () =>
+    Effect.gen(function* () {
+      const table: ClassTable = {
+        classes: [
+          {
+            iri: "https://w3id.org/energy-intel/Post",
+            label: "Post",
+            superClasses: [],
+            disjointWith: [],
+            equivalentClassRestrictions: [],
+            properties: [
+              {
+                iri: "https://w3id.org/energy-intel/presents",
+                range:
+                  "https://w3id.org/energy-intel/CanonicalMeasurementClaim",
+                optional: true,
+                list: false
+              }
+            ]
+          }
+        ],
+        prefixes: {}
+      };
+      const rangeTable: ClassTable = {
+        classes: [
+          ...table.classes,
+          {
+            iri: "https://w3id.org/energy-intel/CanonicalMeasurementClaim",
+            label: "CanonicalMeasurementClaim",
+            superClasses: [],
+            disjointWith: [],
+            equivalentClassRestrictions: [],
+            properties: []
+          }
+        ],
+        prefixes: {}
+      };
+      const schema = yield* buildJsonSchema(table, { rangeTable });
+      expect(schema.$defs.Post!.properties.presents).toEqual({
+        type: "string"
+      });
+    })
+  );
+
+  it.effect("allows pinned external ontology ranges as IRIs", () =>
+    Effect.gen(function* () {
+      const table: ClassTable = {
+        classes: [
+          {
+            iri: "https://w3id.org/energy-intel/Excerpt",
+            label: "Excerpt",
+            superClasses: [],
+            disjointWith: [],
+            equivalentClassRestrictions: [],
+            properties: [
+              {
+                iri: "https://w3id.org/energy-intel/excerptFrom",
+                range: "http://purl.obolibrary.org/obo/IAO_0000030",
+                optional: true,
+                list: false
+              }
+            ]
+          }
+        ],
+        prefixes: {}
+      };
+      const schema = yield* buildJsonSchema(table);
+      expect(schema.$defs.Excerpt!.properties.excerptFrom).toEqual({
+        type: "string"
+      });
+    })
+  );
+
+  it.effect("emits anyOf for ontology union ranges", () =>
+    Effect.gen(function* () {
+      const table: ClassTable = {
+        classes: [
+          {
+            iri: "https://w3id.org/energy-intel/CanonicalMeasurementClaim",
+            label: "CanonicalMeasurementClaim",
+            superClasses: [],
+            disjointWith: [],
+            equivalentClassRestrictions: [],
+            properties: [
+              {
+                iri: "https://w3id.org/energy-intel/assertedValue",
+                rangeUnion: [
+                  "http://www.w3.org/2001/XMLSchema#decimal",
+                  "http://www.w3.org/2001/XMLSchema#string"
+                ],
+                optional: true,
+                list: false
+              }
+            ]
+          }
+        ],
+        prefixes: {}
+      };
+      const schema = yield* buildJsonSchema(table);
+      expect(
+        schema.$defs.CanonicalMeasurementClaim!.properties.assertedValue
+      ).toEqual({
+        anyOf: [{ type: "number" }, { type: "string" }]
+      });
+    })
+  );
+
   it.effect(
     "raises BuildJsonSchemaError(UnknownRange) when range IRI is unknown",
     () =>

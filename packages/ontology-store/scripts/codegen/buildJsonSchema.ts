@@ -55,10 +55,15 @@ export interface JsonSchemaRef {
   readonly $ref: string;
 }
 
+export interface JsonSchemaAnyOf {
+  readonly anyOf: ReadonlyArray<JsonSchemaProperty>;
+}
+
 export type JsonSchemaProperty =
   | JsonSchemaPrimitive
   | JsonSchemaArray
-  | JsonSchemaRef;
+  | JsonSchemaRef
+  | JsonSchemaAnyOf;
 
 export interface JsonSchemaObject {
   readonly type: "object";
@@ -74,6 +79,30 @@ export interface JsonSchemaDocument {
 }
 
 const JSON_SCHEMA_2020_12 = "https://json-schema.org/draft/2020-12/schema";
+
+export const ALLOWED_EXTERNAL_RANGE_IRIS = new Set([
+  "http://purl.obolibrary.org/obo/IAO_0000030",
+  "http://qudt.org/schema/qudt/Unit",
+  "http://www.w3.org/2004/02/skos/core#Concept",
+  "http://www.w3.org/ns/dcat#Dataset",
+  "http://www.w3.org/ns/dcat#Distribution",
+  "http://xmlns.com/foaf/0.1/Person"
+] as const);
+
+export interface BuildJsonSchemaOptions {
+  /**
+   * Optional union of all parsed ontology modules. Ranges pointing at another
+   * local energy-intel class are valid, even when that target lives in a
+   * different generated module. They render as strings in this module's
+   * self-contained JSON Schema; same-module ranges still use `$ref`.
+   */
+  readonly rangeTable?: ClassTable;
+  /**
+   * Explicit allow-list for external ontology classes used as object ranges.
+   * Keeping this narrow preserves the "ontology typos fail codegen" guardrail.
+   */
+  readonly allowedExternalRangeIris?: ReadonlySet<string>;
+}
 
 /**
  * XSD datatype IRI → JSON Schema primitive shape.
@@ -135,19 +164,28 @@ const localName = (iri: string): string => {
  *     that allowed ontology typos to silently corrupt the generated
  *     schema.
  */
-const mapRange = (
+interface RangeContext {
+  readonly classDefKeys: ReadonlyMap<string, string>;
+  readonly knownClassIris: ReadonlySet<string>;
+  readonly allowedExternalRangeIris: ReadonlySet<string>;
+}
+
+const mapRangeIri = (
   prop: ClassProperty,
-  classDefKeys: ReadonlyMap<string, string>
+  range: string,
+  context: RangeContext
 ): Effect.Effect<JsonSchemaProperty, BuildJsonSchemaError> =>
   Effect.gen(function* () {
-    const range = prop.range;
-    if (range === undefined) {
-      return { type: "string" };
-    }
     const xsd = XSD_TYPE_MAP[range];
     if (xsd !== undefined) return xsd;
-    const defKey = classDefKeys.get(range);
+    const defKey = context.classDefKeys.get(range);
     if (defKey !== undefined) return { $ref: `#/$defs/${defKey}` };
+    if (
+      context.knownClassIris.has(range) ||
+      context.allowedExternalRangeIris.has(range)
+    ) {
+      return { type: "string" };
+    }
     return yield* new BuildJsonSchemaError({
       kind: "UnknownRange",
       propertyIri: prop.iri,
@@ -156,17 +194,39 @@ const mapRange = (
     });
   });
 
-const propertyShape = (
+const mapRange = (
   prop: ClassProperty,
-  classDefKeys: ReadonlyMap<string, string>
+  context: RangeContext
 ): Effect.Effect<JsonSchemaProperty, BuildJsonSchemaError> =>
   Effect.gen(function* () {
-    const base = yield* mapRange(prop, classDefKeys);
+    const rangeUnion = prop.rangeUnion;
+    if (rangeUnion !== undefined) {
+      const anyOf = yield* Effect.forEach(rangeUnion, (range) =>
+        mapRangeIri(prop, range, context)
+      );
+      return anyOf.length === 1 ? anyOf[0]! : { anyOf };
+    }
+
+    const range = prop.range;
+    if (range === undefined) {
+      return { type: "string" };
+    }
+
+    return yield* mapRangeIri(prop, range, context);
+  });
+
+const propertyShape = (
+  prop: ClassProperty,
+  context: RangeContext
+): Effect.Effect<JsonSchemaProperty, BuildJsonSchemaError> =>
+  Effect.gen(function* () {
+    const base = yield* mapRange(prop, context);
     return prop.list ? { type: "array", items: base } : base;
   });
 
 export const buildJsonSchema = (
-  table: ClassTable
+  table: ClassTable,
+  options: BuildJsonSchemaOptions = {}
 ): Effect.Effect<JsonSchemaDocument, BuildJsonSchemaError> =>
   Effect.gen(function* () {
     // Pre-build IRI → $defs key map so cross-class $ref resolution is O(1)
@@ -176,6 +236,15 @@ export const buildJsonSchema = (
     for (const cls of table.classes) {
       classDefKeys.set(cls.iri, localName(cls.iri));
     }
+    const knownClassIris = new Set(
+      (options.rangeTable ?? table).classes.map((cls) => cls.iri)
+    );
+    const context: RangeContext = {
+      classDefKeys,
+      knownClassIris,
+      allowedExternalRangeIris:
+        options.allowedExternalRangeIris ?? ALLOWED_EXTERNAL_RANGE_IRIS
+    };
 
     const $defs: Record<string, JsonSchemaObject> = {};
     for (const cls of table.classes) {
@@ -183,7 +252,7 @@ export const buildJsonSchema = (
       const properties: Record<string, JsonSchemaProperty> = {};
       for (const prop of cls.properties) {
         const key = localName(prop.iri);
-        properties[key] = yield* propertyShape(prop, classDefKeys);
+        properties[key] = yield* propertyShape(prop, context);
       }
       // TODO: emit `required: [...]` once parseTtl wires owl:Restriction
       // cardinality off blank-node restrictions; today every property is

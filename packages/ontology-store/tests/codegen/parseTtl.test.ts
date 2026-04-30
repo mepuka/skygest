@@ -110,6 +110,38 @@ describe("parseTtlToClassTable", () => {
       ]);
     })
   );
+
+  it.effect("extracts owl:unionOf ranges on properties", () =>
+    Effect.gen(function* () {
+      const ttl = `
+        @prefix ei: <https://w3id.org/energy-intel/> .
+        @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+        @prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+        ei:CanonicalMeasurementClaim a owl:Class .
+
+        ei:assertedValue a owl:DatatypeProperty ;
+          rdfs:domain ei:CanonicalMeasurementClaim ;
+          rdfs:range [
+            owl:unionOf (xsd:decimal xsd:string)
+          ] .
+      `;
+      const table = yield* parseTtlToClassTable(ttl);
+      const claim = table.classes.find(
+        (c) =>
+          c.iri === "https://w3id.org/energy-intel/CanonicalMeasurementClaim"
+      )!;
+      expect(claim.properties[0]).toMatchObject({
+        iri: "https://w3id.org/energy-intel/assertedValue",
+        rangeUnion: [
+          "http://www.w3.org/2001/XMLSchema#decimal",
+          "http://www.w3.org/2001/XMLSchema#string"
+        ]
+      });
+    })
+  );
 });
 
 describe("mergeClassTables", () => {

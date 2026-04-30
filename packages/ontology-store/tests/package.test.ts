@@ -13,11 +13,13 @@ import {
   EXPERT_METADATA_KEYS,
   AiSearchClient,
   Expert,
+  CanonicalMeasurementClaim,
   EntityContextService,
   EntityProjectionDrainService,
   EntityProjectionRegistry,
   EntitySearchService,
   EntitySnapshotStore,
+  EnergyExpertRole,
   ExpertEntity,
   ExpertIri,
   ExpertModule,
@@ -25,6 +27,7 @@ import {
   FOAF,
   IRI,
   PREDICATES,
+  Post,
   PredicateIri,
   RDF,
   RdfError,
@@ -100,6 +103,9 @@ describe("@skygest/ontology-store", () => {
     expect(FOAF.name).toBeDefined();
     expect(RDF.type).toBeDefined();
     expect(EI.mentions).toBeDefined();
+    expect(EI.CanonicalMeasurementClaim).toBeDefined();
+    expect(EI.Post).toBeDefined();
+    expect(EI.presents).toBeDefined();
   });
 
   it("exposes entity graph and projection primitives", () => {
@@ -126,6 +132,9 @@ describe("@skygest/ontology-store", () => {
     const moduleTags = ENTITY_RUNTIME_MODULES.map(
       (module) => module.definition.tag
     );
+    expect(Post).toBeDefined();
+    expect(CanonicalMeasurementClaim).toBeDefined();
+    expect(EnergyExpertRole).toBeDefined();
     expect(ENTITY_PROJECTION_SPECS.map((spec) => spec.definition.tag)).toEqual(
       moduleTags
     );

@@ -155,6 +155,89 @@ describe("renderSchemaSource", () => {
     })
   );
 
+  it.effect("renders union ranges as Schema.Union", () =>
+    Effect.gen(function* () {
+      const table: ClassTable = {
+        classes: [
+          {
+            iri: "https://w3id.org/energy-intel/CanonicalMeasurementClaim",
+            label: "CanonicalMeasurementClaim",
+            superClasses: [],
+            disjointWith: [],
+            equivalentClassRestrictions: [],
+            properties: [
+              {
+                iri: "https://w3id.org/energy-intel/assertedValue",
+                rangeUnion: [
+                  "http://www.w3.org/2001/XMLSchema#decimal",
+                  "http://www.w3.org/2001/XMLSchema#string"
+                ],
+                optional: true,
+                list: false
+              }
+            ]
+          }
+        ],
+        prefixes: {}
+      };
+      const jsonSchema = yield* buildJsonSchema(table);
+      const processed = yield* postProcessAst(jsonSchema, table);
+      const source = renderSchemaSource(processed, table);
+
+      expect(source).toContain(
+        "assertedValue: Schema.optional(Schema.Union([Schema.Number, Schema.String]))"
+      );
+    })
+  );
+
+  it.effect("allows subclass IRIs for local object-property ranges", () =>
+    Effect.gen(function* () {
+      const table: ClassTable = {
+        classes: [
+          {
+            iri: "https://w3id.org/energy-intel/Post",
+            label: "Post",
+            superClasses: [],
+            disjointWith: [],
+            equivalentClassRestrictions: [],
+            properties: [
+              {
+                iri: "https://w3id.org/energy-intel/presents",
+                range: "https://w3id.org/energy-intel/MediaAttachment",
+                optional: true,
+                list: false
+              }
+            ]
+          },
+          {
+            iri: "https://w3id.org/energy-intel/MediaAttachment",
+            label: "MediaAttachment",
+            superClasses: [],
+            disjointWith: [],
+            equivalentClassRestrictions: [],
+            properties: []
+          },
+          {
+            iri: "https://w3id.org/energy-intel/Chart",
+            label: "Chart",
+            superClasses: ["https://w3id.org/energy-intel/MediaAttachment"],
+            disjointWith: [],
+            equivalentClassRestrictions: [],
+            properties: []
+          }
+        ],
+        prefixes: {}
+      };
+      const jsonSchema = yield* buildJsonSchema(table);
+      const processed = yield* postProcessAst(jsonSchema, table);
+      const source = renderSchemaSource(processed, table);
+
+      expect(source).toContain(
+        "presents: Schema.optional(Schema.Union([MediaAttachmentIri, ChartIri]))"
+      );
+    })
+  );
+
   it.effect("includes equivalentClass restrictions in the doc comment", () =>
     Effect.gen(function* () {
       const table: ClassTable = {

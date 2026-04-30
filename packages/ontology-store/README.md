@@ -56,7 +56,7 @@ TTL — regenerating one module never drops terms from another.
 
 `tests/codegen/drift.test.ts` re-runs the pipeline in-memory against
 the vendored TTL copy and asserts the regenerated output matches the
-committed `src/generated/agent.ts` and `src/iris.ts` byte-for-byte.
+committed `src/generated/*.ts` files and `src/iris.ts` byte-for-byte.
 
 The gate runs unconditionally — there is no env-var skip — because
 its question ("does committed generated code match the pinned

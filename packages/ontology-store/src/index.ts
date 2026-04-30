@@ -172,15 +172,53 @@ export {
 export { ReindexQueueD1 } from "./Service/ReindexQueueD1";
 export type { ReindexRequest } from "./Service/ReindexQueue";
 
-// Generated branded IRI brands for the agent module. Keep this list
-// conservative — only re-export what consumers reach for.
+// Generated ontology classes and branded IRI brands.
 export {
+  DataProviderRole,
   DataProviderRoleIri,
+  EnergyExpertRole,
   EnergyExpertRoleIri,
   ExpertIri,
   OrganizationIri,
+  PublisherRole,
   PublisherRoleIri
 } from "./generated/agent";
+export {
+  Chart,
+  ChartIri,
+  Conversation,
+  ConversationIri,
+  EvidenceSource,
+  EvidenceSourceIri,
+  Excerpt,
+  ExcerptIri,
+  GenericImageAttachment,
+  GenericImageAttachmentIri,
+  MediaAttachment,
+  MediaAttachmentIri,
+  PodcastEpisode,
+  PodcastEpisodeIri,
+  PodcastSegment,
+  PodcastSegmentIri,
+  Post,
+  PostIri,
+  Screenshot,
+  ScreenshotIri,
+  SocialThread,
+  SocialThreadIri
+} from "./generated/media";
+export {
+  CanonicalMeasurementClaim,
+  CanonicalMeasurementClaimIri,
+  ClaimTemporalWindow,
+  ClaimTemporalWindowIri,
+  Observation,
+  ObservationIri,
+  Series,
+  SeriesIri,
+  Variable,
+  VariableIri
+} from "./generated/measurement";
 
 // Namespace constants used for triple construction outside the package.
 export { BFO, EI, FOAF, OWL, RDF, RDFS, SKOS, XSD } from "./iris";
