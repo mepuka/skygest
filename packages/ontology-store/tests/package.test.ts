@@ -8,6 +8,7 @@ import {
   ENTITY_PROJECTION_FIXTURES,
   ENTITY_PROJECTION_SPECS,
   ENTITY_PROVISIONING,
+  ENTITY_RUNTIME_CATALOG,
   ENTITY_RUNTIME_MODULES,
   EI,
   EXPERT_METADATA_KEYS,
@@ -132,6 +133,7 @@ describe("@skygest/ontology-store", () => {
     const moduleTags = ENTITY_RUNTIME_MODULES.map(
       (module) => module.definition.tag
     );
+    expect(ENTITY_RUNTIME_CATALOG.tags).toEqual(moduleTags);
     expect(Post).toBeDefined();
     expect(CanonicalMeasurementClaim).toBeDefined();
     expect(EnergyExpertRole).toBeDefined();

@@ -3,12 +3,14 @@ import { Effect, Schema } from "effect";
 
 import {
   ENTITY_METADATA_FIELDS,
+  EntityRuntimeCatalogError,
   Expert,
   ExpertEntity,
   ExpertProjectionFixture,
   ExpertUnifiedProjection,
   OrganizationEntity,
   OrganizationProjectionFixture,
+  defineEntityRuntimeCatalog,
   PREDICATES,
   assertNoMetadataDrift,
   isPredicateTypeAllowed
@@ -73,4 +75,19 @@ describe("EntityDefinition foundation", () => {
       expect(OrganizationEntity.tag).toBe("Organization");
     })
   );
+
+  it("fails fast when runtime catalog tags drift", () => {
+    expect(() =>
+      defineEntityRuntimeCatalog([
+        {
+          definition: ExpertEntity,
+          projection: {
+            ...ExpertUnifiedProjection,
+            entityType: "Organization"
+          },
+          fixture: ExpertProjectionFixture
+        } as never
+      ])
+    ).toThrow(EntityRuntimeCatalogError);
+  });
 });

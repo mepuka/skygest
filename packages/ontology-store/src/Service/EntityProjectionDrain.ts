@@ -31,6 +31,13 @@ export interface EntityProjectionDrainResult {
   readonly failed: number;
 }
 
+export interface EntityProjectionDrainOptions {
+  readonly concurrency?: number;
+}
+
+export const ENTITY_PROJECTION_DRAIN_DEFAULT_CONCURRENCY = 1;
+export const ENTITY_PROJECTION_DRAIN_MAX_CONCURRENCY = 8;
+
 type DrainItemError =
   | EntityProjectionRegistryLookupError
   | EntityProjectionDrainItemError
@@ -65,14 +72,30 @@ const drainItemFailure = (
     cause
   });
 
+const normalizeConcurrency = (
+  options: EntityProjectionDrainOptions | undefined
+): number => {
+  const requested =
+    options?.concurrency ?? ENTITY_PROJECTION_DRAIN_DEFAULT_CONCURRENCY;
+  if (!Number.isFinite(requested)) {
+    return ENTITY_PROJECTION_DRAIN_DEFAULT_CONCURRENCY;
+  }
+  return Math.min(
+    ENTITY_PROJECTION_DRAIN_MAX_CONCURRENCY,
+    Math.max(1, Math.floor(requested))
+  );
+};
+
 export class EntityProjectionDrainService extends ServiceMap.Service<
   EntityProjectionDrainService,
   {
     readonly drainBatch: (
-      batch: ReadonlyArray<ReindexQueueItem>
+      batch: ReadonlyArray<ReindexQueueItem>,
+      options?: EntityProjectionDrainOptions
     ) => Effect.Effect<EntityProjectionDrainResult, SqlError>;
     readonly drainNext: (
-      limit: number
+      limit: number,
+      options?: EntityProjectionDrainOptions
     ) => Effect.Effect<EntityProjectionDrainResult, SqlError>;
   }
 >()("@skygest/ontology-store/EntityProjectionDrainService") {
@@ -123,10 +146,13 @@ export class EntityProjectionDrainService extends ServiceMap.Service<
           )
         );
 
-      const drainBatch = (batch: ReadonlyArray<ReindexQueueItem>) =>
+      const drainBatch = (
+        batch: ReadonlyArray<ReindexQueueItem>,
+        options?: EntityProjectionDrainOptions
+      ) =>
         Effect.gen(function* () {
           const results = yield* Effect.forEach(batch, drainOne, {
-            concurrency: 1
+            concurrency: normalizeConcurrency(options)
           });
           const rendered = results.filter((result) => result).length;
           return {
@@ -136,11 +162,14 @@ export class EntityProjectionDrainService extends ServiceMap.Service<
           };
         });
 
-      const drainNext = (limit: number) =>
+      const drainNext = (
+        limit: number,
+        options?: EntityProjectionDrainOptions
+      ) =>
         Effect.gen(function* () {
           const now = yield* Clock.currentTimeMillis;
           const batch = yield* queue.nextBatch(now, limit);
-          return yield* drainBatch(batch);
+          return yield* drainBatch(batch, options);
         });
 
       return EntityProjectionDrainService.of({ drainBatch, drainNext });

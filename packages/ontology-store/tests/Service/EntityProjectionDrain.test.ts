@@ -14,6 +14,7 @@ import {
   ExpertProjectionFixture,
   ExpertUnifiedProjection,
   OrganizationEntity,
+  OrganizationProjectionFixture,
   OrganizationUnifiedProjection,
   ReindexQueueD1,
   ReindexQueueService,
@@ -177,6 +178,50 @@ describe("EntityProjectionDrainService", () => {
         FROM reindex_queue
       `;
       expect(rows).toEqual([{ attempts: 1 }]);
+    }).pipe(Effect.provide(makeServiceLayer(fake.namespace)));
+  });
+
+  it.effect("drains multiple queued snapshots with bounded concurrency", () => {
+    const fake = makeFakeNamespace();
+
+    return Effect.gen(function* () {
+      yield* installSchema;
+      const snapshots = yield* EntitySnapshotStore;
+      const queue = yield* ReindexQueueService;
+      const drain = yield* EntityProjectionDrainService;
+      const expert = ExpertProjectionFixture.fixture;
+      const organization = OrganizationProjectionFixture.fixture;
+      const expertIri = asEntityIri(expert.iri);
+      const organizationIri = asEntityIri(organization.iri);
+
+      yield* snapshots.save(ExpertEntity, expert);
+      yield* snapshots.save(OrganizationEntity, organization);
+      yield* queue.schedule({
+        targetEntityType: asEntityTag("Expert"),
+        targetIri: expertIri,
+        originIri: expertIri,
+        cause: "entity-changed",
+        causePriority: 0,
+        propagationDepth: 0,
+        nextAttemptAt: 0
+      });
+      yield* queue.schedule({
+        targetEntityType: asEntityTag("Organization"),
+        targetIri: organizationIri,
+        originIri: organizationIri,
+        cause: "entity-changed",
+        causePriority: 0,
+        propagationDepth: 0,
+        nextAttemptAt: 0
+      });
+
+      const result = yield* drain.drainNext(10, { concurrency: 2 });
+
+      expect(result).toEqual({ pulled: 2, rendered: 2, failed: 0 });
+      expect(fake.uploads.map((upload) => upload.name).sort()).toEqual([
+        "entities/expert/did_plc_fixture.md",
+        `entities/organization/${organization.iri.replace(/[^A-Za-z0-9_-]+/g, "_")}.md`
+      ]);
     }).pipe(Effect.provide(makeServiceLayer(fake.namespace)));
   });
 });

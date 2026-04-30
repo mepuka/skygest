@@ -138,10 +138,15 @@ export type {
   TraversalResult
 } from "./Service/EntityGraphRepo";
 export {
+  ENTITY_PROJECTION_DRAIN_DEFAULT_CONCURRENCY,
+  ENTITY_PROJECTION_DRAIN_MAX_CONCURRENCY,
   EntityProjectionDrainItemError,
   EntityProjectionDrainService
 } from "./Service/EntityProjectionDrain";
-export type { EntityProjectionDrainResult } from "./Service/EntityProjectionDrain";
+export type {
+  EntityProjectionDrainOptions,
+  EntityProjectionDrainResult
+} from "./Service/EntityProjectionDrain";
 export {
   EntityProjectionRegistry,
   EntityProjectionRegistryLookupError,
@@ -261,20 +266,24 @@ export {
   ENTITY_PROJECTION_FIXTURES,
   ENTITY_PROJECTION_SPECS,
   ENTITY_PROVISIONING,
+  ENTITY_RUNTIME_CATALOG,
   ENTITY_RUNTIME_MODULES,
   ENTITY_SEARCH_CUSTOM_METADATA,
   ENTITY_SEARCH_PROVISIONING,
+  EntityRuntimeCatalogError,
   ExpertProvisioning,
   ExpertRuntimeModule,
   MAX_AI_SEARCH_CUSTOM_METADATA_FIELDS,
   OrganizationProvisioning,
   OrganizationRuntimeModule,
+  defineEntityRuntimeCatalog,
   defineEntityRuntimeModule,
   defineEntityProvisioning,
   defineUnifiedEntitySearchProvisioning
 } from "./Provisioning";
 export type {
   AiSearchCustomMetadataField,
+  EntityRuntimeCatalog,
   EntityProvisioningPlan,
   EntityRuntimeModule,
   EntityRelationProvisioning
