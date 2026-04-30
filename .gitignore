@@ -68,3 +68,5 @@ references/cold-start/reports/harvest/*-ingest-report.json
 # Twitter auth cookies (contain session secrets)
 twitter-cookies*.json
 *.local.json
+
+.backups/
