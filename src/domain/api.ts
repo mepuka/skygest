@@ -767,6 +767,12 @@ export const EntityReindexDrainInput = Schema.Struct({
       Schema.check(Schema.isInt()),
       Schema.check(Schema.isBetween({ minimum: 1, maximum: 100 }))
     )
+  ),
+  concurrency: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 8 }))
+    )
   )
 });
 export type EntityReindexDrainInput = Schema.Schema.Type<
@@ -780,6 +786,45 @@ export const EntityReindexDrainOutput = Schema.Struct({
 });
 export type EntityReindexDrainOutput = Schema.Schema.Type<
   typeof EntityReindexDrainOutput
+>;
+
+export const EntityExpertsBackfillInput = Schema.Struct({
+  limit: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 500 }))
+    )
+  ),
+  offset: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isGreaterThanOrEqualTo(0))
+    )
+  ),
+  active: Schema.optionalKey(Schema.NullOr(Schema.Boolean)),
+  drain: Schema.optionalKey(Schema.Boolean),
+  drainConcurrency: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 8 }))
+    )
+  )
+});
+export type EntityExpertsBackfillInput = Schema.Schema.Type<
+  typeof EntityExpertsBackfillInput
+>;
+
+export const EntityExpertsBackfillOutput = Schema.Struct({
+  total: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  scanned: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  migrated: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  queued: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failed: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failedDids: Schema.Array(Schema.String),
+  drain: Schema.NullOr(EntityReindexDrainOutput)
+});
+export type EntityExpertsBackfillOutput = Schema.Schema.Type<
+  typeof EntityExpertsBackfillOutput
 >;
 
 // ---------------------------------------------------------------------------
@@ -1057,6 +1102,7 @@ export const AdminRequestSchemas = {
   dataLayerKindPath: DataLayerKindPathParams,
   dataLayerEntityPath: DataLayerEntityPathParams,
   dataLayerAuditPath: DataLayerAuditPathParams,
+  entityExpertsBackfill: EntityExpertsBackfillInput,
   entityReindexDrain: EntityReindexDrainInput
 } as const;
 
@@ -1076,6 +1122,7 @@ export const AdminResponseSchemas = {
   editorialPickBundle: EditorialPickBundle,
   importPosts: ImportPostsOutput,
   stats: StagingStats,
+  entityExpertsBackfill: EntityExpertsBackfillOutput,
   entityReindexDrain: EntityReindexDrainOutput,
   dataLayerEntity: DataLayerRegistryEntity,
   dataLayerEntitiesPage: DataLayerEntityPageOutput,

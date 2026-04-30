@@ -15,6 +15,7 @@ import {
 } from "../domain/api";
 import { CurationService } from "../services/CurationService";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
+import { EntityExpertBackfillService } from "../services/EntityExpertBackfillService";
 import { EditorialService } from "../services/EditorialService";
 import { EditorialPickBundleReadService } from "../services/EditorialPickBundleReadService";
 import { StagingOpsService } from "../services/StagingOpsService";
@@ -96,6 +97,14 @@ const AdminApi = HttpApi.make("admin")
         HttpApiEndpoint.get("stats", "/admin/ops/stats", {
           disableCodecs: true,
           success: AdminResponseSchemas.stats,
+          error: ApiErrorSchemas
+        })
+      )
+      .add(
+        HttpApiEndpoint.post("entityExpertsBackfill", "/admin/ops/entity-experts/backfill", {
+          disableCodecs: true,
+          payload: AdminRequestSchemas.entityExpertsBackfill,
+          success: AdminResponseSchemas.entityExpertsBackfill,
           error: ApiErrorSchemas
         })
       )
@@ -360,11 +369,46 @@ const AdminHandlers = Layer.mergeAll(
           };
         }))
       )
+      .handle("entityExpertsBackfill", ({ payload }) =>
+        withAdminErrors("/admin/ops/entity-experts/backfill", Effect.gen(function* () {
+          yield* ensureStagingOpsEnabled;
+          const backfill = yield* EntityExpertBackfillService;
+          const backfillInput: {
+            limit?: number;
+            offset?: number;
+            active?: boolean | null;
+          } = {};
+          if (payload.limit !== undefined) backfillInput.limit = payload.limit;
+          if (payload.offset !== undefined) backfillInput.offset = payload.offset;
+          if (payload.active !== undefined) backfillInput.active = payload.active;
+          const result = yield* backfill.backfill(backfillInput);
+          if (payload.drain !== true) {
+            return { ...result, drain: null };
+          }
+          if (result.queued === 0) {
+            return {
+              ...result,
+              drain: { pulled: 0, rendered: 0, failed: 0 }
+            };
+          }
+          const drain = yield* EntityProjectionDrainService;
+          const drainOptions =
+            payload.drainConcurrency === undefined
+              ? undefined
+              : { concurrency: payload.drainConcurrency };
+          const drainResult = yield* drain.drainNext(result.queued, drainOptions);
+          return { ...result, drain: drainResult };
+        }))
+      )
       .handle("entityReindexDrain", ({ payload }) =>
         withAdminErrors("/admin/ops/entity-reindex/drain", Effect.gen(function* () {
           yield* ensureStagingOpsEnabled;
           const drain = yield* EntityProjectionDrainService;
-          return yield* drain.drainNext(payload.limit ?? 25);
+          const drainOptions =
+            payload.concurrency === undefined
+              ? undefined
+              : { concurrency: payload.concurrency };
+          return yield* drain.drainNext(payload.limit ?? 25, drainOptions);
         }))
       )
   ),
