@@ -10,7 +10,10 @@ import {
   AiSearchClient,
   Expert,
   EntityContextService,
+  EntityProjectionDrainService,
+  EntityProjectionRegistry,
   EntitySearchService,
+  EntitySnapshotStore,
   ExpertEntity,
   ExpertIri,
   ExpertModule,
@@ -113,5 +116,8 @@ describe("@skygest/ontology-store", () => {
     expect(AiSearchClient).toBeDefined();
     expect(EntitySearchService).toBeDefined();
     expect(EntityContextService).toBeDefined();
+    expect(EntitySnapshotStore).toBeDefined();
+    expect(EntityProjectionRegistry).toBeDefined();
+    expect(EntityProjectionDrainService).toBeDefined();
   });
 });

@@ -761,6 +761,27 @@ export const StagingStats = Schema.Struct({
   lastIngest: Schema.NullOr(StagingStatsLastIngest)
 });
 
+export const EntityReindexDrainInput = Schema.Struct({
+  limit: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 100 }))
+    )
+  )
+});
+export type EntityReindexDrainInput = Schema.Schema.Type<
+  typeof EntityReindexDrainInput
+>;
+
+export const EntityReindexDrainOutput = Schema.Struct({
+  pulled: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  rendered: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failed: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
+});
+export type EntityReindexDrainOutput = Schema.Schema.Type<
+  typeof EntityReindexDrainOutput
+>;
+
 // ---------------------------------------------------------------------------
 // Import schemas (Twitter cross-post pipeline)
 // ---------------------------------------------------------------------------
@@ -1035,7 +1056,8 @@ export const AdminRequestSchemas = {
   dataLayerList: ListDataLayerUrlParams,
   dataLayerKindPath: DataLayerKindPathParams,
   dataLayerEntityPath: DataLayerEntityPathParams,
-  dataLayerAuditPath: DataLayerAuditPathParams
+  dataLayerAuditPath: DataLayerAuditPathParams,
+  entityReindexDrain: EntityReindexDrainInput
 } as const;
 
 export const AdminResponseSchemas = {
@@ -1054,6 +1076,7 @@ export const AdminResponseSchemas = {
   editorialPickBundle: EditorialPickBundle,
   importPosts: ImportPostsOutput,
   stats: StagingStats,
+  entityReindexDrain: EntityReindexDrainOutput,
   dataLayerEntity: DataLayerRegistryEntity,
   dataLayerEntitiesPage: DataLayerEntityPageOutput,
   dataLayerDelete: Schema.Struct({ ok: Schema.Literal(true) }),

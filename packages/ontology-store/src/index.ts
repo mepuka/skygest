@@ -43,9 +43,11 @@ export type { OntologyEntityModule } from "./Domain/OntologyEntity";
 export {
   ENTITY_GRAPH_ALL_SCHEMA_STATEMENTS,
   ENTITY_GRAPH_SCHEMA_STATEMENTS,
+  ENTITY_SNAPSHOT_SCHEMA_STATEMENTS,
   EntityIri,
   EntityLink,
   EntityRecord,
+  EntitySnapshot,
   EntityTag,
   GraphIri,
   LinkEvidence,
@@ -136,6 +138,27 @@ export type {
   TraversalResult
 } from "./Service/EntityGraphRepo";
 export {
+  EntityProjectionDrainItemError,
+  EntityProjectionDrainService
+} from "./Service/EntityProjectionDrain";
+export type { EntityProjectionDrainResult } from "./Service/EntityProjectionDrain";
+export {
+  EntityProjectionRegistry,
+  EntityProjectionRegistryLookupError,
+  defineEntityProjection,
+  defineEntitySnapshotProjection
+} from "./Service/EntityProjectionRegistry";
+export type {
+  EntityProjectionEntry,
+  EntityProjectionSnapshotSpec
+} from "./Service/EntityProjectionRegistry";
+export {
+  EntitySnapshotStore,
+  EntitySnapshotStoreD1,
+  entitySnapshotStorageAdapter,
+  makeEntitySnapshotStorageAdapter
+} from "./Service/EntitySnapshotStore";
+export {
   EntityRegistry,
   EntityRegistryLookupError,
   makeEntityRegistry
@@ -147,10 +170,7 @@ export {
   ReindexQueueService
 } from "./Service/ReindexQueue";
 export { ReindexQueueD1 } from "./Service/ReindexQueueD1";
-export type {
-  ReindexBatchResult,
-  ReindexRequest
-} from "./Service/ReindexQueue";
+export type { ReindexRequest } from "./Service/ReindexQueue";
 
 // Generated branded IRI brands for the agent module. Keep this list
 // conservative — only re-export what consumers reach for.

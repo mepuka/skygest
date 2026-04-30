@@ -334,15 +334,11 @@ export const ReindexQueueD1 = {
           }
         });
 
-      const drain = (batch: ReadonlyArray<ReindexQueueItem>) =>
-        Effect.succeed({ rendered: batch.length, failed: 0 });
-
       return ReindexQueueService.of({
         schedule,
         nextBatch,
         markComplete,
-        markFailed,
-        drain
+        markFailed
       });
     })
   )

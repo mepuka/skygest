@@ -4,6 +4,7 @@ import * as HttpApiEndpoint from "effect/unstable/httpapi/HttpApiEndpoint";
 import * as HttpApiGroup from "effect/unstable/httpapi/HttpApiGroup";
 import { SqlClient } from "effect/unstable/sql";
 import { Effect, Layer } from "effect";
+import { EntityProjectionDrainService } from "@skygest/ontology-store";
 import type { AccessIdentity } from "../auth/AuthService";
 import {
   AdminRequestSchemas,
@@ -95,6 +96,14 @@ const AdminApi = HttpApi.make("admin")
         HttpApiEndpoint.get("stats", "/admin/ops/stats", {
           disableCodecs: true,
           success: AdminResponseSchemas.stats,
+          error: ApiErrorSchemas
+        })
+      )
+      .add(
+        HttpApiEndpoint.post("entityReindexDrain", "/admin/ops/entity-reindex/drain", {
+          disableCodecs: true,
+          payload: AdminRequestSchemas.entityReindexDrain,
+          success: AdminResponseSchemas.entityReindexDrain,
           error: ApiErrorSchemas
         })
       )
@@ -349,6 +358,13 @@ const AdminHandlers = Layer.mergeAll(
             enrichment,
             lastIngest
           };
+        }))
+      )
+      .handle("entityReindexDrain", ({ payload }) =>
+        withAdminErrors("/admin/ops/entity-reindex/drain", Effect.gen(function* () {
+          yield* ensureStagingOpsEnabled;
+          const drain = yield* EntityProjectionDrainService;
+          return yield* drain.drainNext(payload.limit ?? 25);
         }))
       )
   ),

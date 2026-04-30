@@ -262,6 +262,16 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
     };
   }
 
+  if (
+    request.method === "POST" &&
+    pathname === "/admin/ops/entity-reindex/drain"
+  ) {
+    return {
+      action: "entity_reindex_drain",
+      scopes: ["ops:refresh"]
+    };
+  }
+
   if (request.method === "POST" && pathname === "/admin/import/posts") {
     return { action: "import_posts", scopes: ["ops:refresh"] };
   }

@@ -18,11 +18,6 @@ export interface ReindexRequest {
   readonly nextAttemptAt: number;
 }
 
-export interface ReindexBatchResult {
-  readonly rendered: number;
-  readonly failed: number;
-}
-
 export const REINDEX_MAX_PROPAGATION_DEPTH = 1;
 
 export class ReindexDepthExceededError extends Schema.TaggedErrorClass<ReindexDepthExceededError>()(
@@ -48,9 +43,6 @@ export class ReindexQueueService extends ServiceMap.Service<
       now: number,
       message?: string
     ) => Effect.Effect<void, SqlError>;
-    readonly drain: (
-      batch: ReadonlyArray<ReindexQueueItem>
-    ) => Effect.Effect<ReindexBatchResult, unknown>;
   }
 >()("@skygest/ontology-store/ReindexQueueService") {
   static readonly Noop = ReindexQueueService.of({
@@ -64,7 +56,6 @@ export class ReindexQueueService extends ServiceMap.Service<
         : Effect.void,
     nextBatch: () => Effect.succeed([]),
     markComplete: () => Effect.void,
-    markFailed: () => Effect.void,
-    drain: (batch) => Effect.succeed({ rendered: batch.length, failed: 0 })
+    markFailed: () => Effect.void
   });
 }
