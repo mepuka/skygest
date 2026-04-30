@@ -45,4 +45,8 @@ export class AppConfig extends ServiceMap.Service<
    *  (unlike WorkerKeys which defaults to "" for local dev). */
   static validate = (provider: ConfigProvider.ConfigProvider) =>
     validateKeys({ ...WorkerDeployKeys, ...EnrichmentKeys }, provider);
+
+  /** Validate the shared worker runtime keys without enrichment-only secrets. */
+  static validateWorker = (provider: ConfigProvider.ConfigProvider) =>
+    validateKeys(WorkerDeployKeys, provider);
 }
