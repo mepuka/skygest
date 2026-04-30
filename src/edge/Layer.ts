@@ -4,12 +4,9 @@ import {
   AiSearchClient,
   EntityProjectionDrainService,
   EntityProjectionRegistry,
+  ENTITY_PROJECTION_SPECS,
   EntitySnapshotStoreD1,
-  ExpertEntity,
-  ExpertUnifiedProjection,
   makeAiSearchClient,
-  OrganizationEntity,
-  OrganizationUnifiedProjection,
   ReindexQueueD1
 } from "@skygest/ontology-store";
 import { AuthService } from "../auth/AuthService";
@@ -135,16 +132,9 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     Layer.provideMerge(baseLayer)
   );
   const entityProjectionRegistryLayer =
-    EntityProjectionRegistry.snapshotLayer([
-      {
-        definition: ExpertEntity,
-        projection: ExpertUnifiedProjection
-      },
-      {
-        definition: OrganizationEntity,
-        projection: OrganizationUnifiedProjection
-      }
-    ]).pipe(Layer.provideMerge(entitySnapshotStoreLayer));
+    EntityProjectionRegistry.snapshotLayer(ENTITY_PROJECTION_SPECS).pipe(
+      Layer.provideMerge(entitySnapshotStoreLayer)
+    );
   const aiSearchClientLayer = Layer.effect(
     AiSearchClient,
     CloudflareEnv.use((runtimeEnv) =>

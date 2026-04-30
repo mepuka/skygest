@@ -5,6 +5,8 @@ import {
   BFO,
   ENTITY_GRAPH_SCHEMA_STATEMENTS,
   ENTITY_METADATA_FIELDS,
+  ENTITY_PROJECTION_SPECS,
+  ENTITY_PROVISIONING,
   EI,
   EXPERT_METADATA_KEYS,
   AiSearchClient,
@@ -119,5 +121,8 @@ describe("@skygest/ontology-store", () => {
     expect(EntitySnapshotStore).toBeDefined();
     expect(EntityProjectionRegistry).toBeDefined();
     expect(EntityProjectionDrainService).toBeDefined();
+    expect(ENTITY_PROJECTION_SPECS.map((spec) => spec.definition.tag)).toEqual(
+      ENTITY_PROVISIONING.map((plan) => plan.tag)
+    );
   });
 });

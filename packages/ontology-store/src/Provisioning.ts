@@ -7,10 +7,15 @@ import {
   type EntityMetadataKey
 } from "./Domain/Projection";
 import { DEFAULT_ENTITY_SEARCH_INSTANCE } from "./Service/AiSearchClient";
-import { ExpertEntity, ExpertProjectionFixture } from "./agent/expert";
+import {
+  ExpertEntity,
+  ExpertProjectionFixture,
+  ExpertUnifiedProjection
+} from "./agent/expert";
 import {
   OrganizationEntity,
-  OrganizationProjectionFixture
+  OrganizationProjectionFixture,
+  OrganizationUnifiedProjection
 } from "./agent/organization";
 
 export const ENERGY_INTEL_SEARCH_BINDING = "ENERGY_INTEL_SEARCH" as const;
@@ -90,6 +95,19 @@ export const OrganizationProvisioning =
 export const ENTITY_PROVISIONING = [
   ExpertProvisioning,
   OrganizationProvisioning
+] as const;
+
+// The concrete runtime registry is intentionally limited to ontology-store
+// modules backed by generated IRIs and pinned TTL/codegen drift tests.
+export const ENTITY_PROJECTION_SPECS = [
+  {
+    definition: ExpertEntity,
+    projection: ExpertUnifiedProjection
+  },
+  {
+    definition: OrganizationEntity,
+    projection: OrganizationUnifiedProjection
+  }
 ] as const;
 
 export const ENTITY_PROJECTION_FIXTURES = [
