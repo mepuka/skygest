@@ -84,7 +84,12 @@ describe("Post", () => {
       expect(body).toContain(
         "https://w3id.org/energy-intel/expert/MarkZJacobson"
       );
-      expect(body).toContain("topics: grid-and-infrastructure, solar");
+    });
+
+    it("toBody excludes topic slugs (kept on snapshot for filter use only)", () => {
+      const body = PostUnifiedProjection.toBody(samplePost());
+      expect(body).not.toContain("topics:");
+      expect(body).not.toContain("grid-and-infrastructure");
     });
 
     it("toBody omits authored_by when absent", () => {

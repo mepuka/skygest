@@ -234,9 +234,9 @@ export const renderPostMarkdown = (post: Post): string => {
   if (post.authoredByHandle !== undefined) {
     lines.push(`author_handle: ${post.authoredByHandle}`);
   }
-  if (post.topics !== undefined && post.topics.length > 0) {
-    lines.push(`topics: ${post.topics.join(", ")}`);
-  }
+  // Topics are stored on the snapshot for filter use via metadata.topic
+  // but intentionally excluded from the body — slug strings dilute the
+  // embedding without adding natural-language signal.
   lines.push("---", "");
   // Inline an author byline at the top of the body so the embedding picks
   // up the natural-language form (e.g. "Mark Z. Jacobson (@mz.bsky.social)
