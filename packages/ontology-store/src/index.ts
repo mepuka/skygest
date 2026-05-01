@@ -128,6 +128,12 @@ export type {
   RenderedEntityContextNode
 } from "./Service/EntityContext";
 export {
+  optionalD1Database,
+  runD1Batch,
+  type D1DatabaseBinding,
+  type D1PreparedStatementBinding
+} from "./Service/D1Batch";
+export {
   EntityGraphRepo
 } from "./Service/EntityGraphRepo";
 export { EntityGraphRepoD1 } from "./Service/EntityGraphRepoD1";

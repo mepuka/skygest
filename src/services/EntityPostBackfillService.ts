@@ -1,7 +1,19 @@
-import { Clock, Duration, Effect, Exit, Layer, Schedule, Schema, ServiceMap } from "effect";
+import {
+  Clock,
+  Duration,
+  Effect,
+  Exit,
+  Layer,
+  Random,
+  Schedule,
+  Schema,
+  ServiceMap
+} from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { SqlError, UnknownError } from "effect/unstable/sql/SqlError";
 import {
+  REINDEX_QUEUE_UPSERT_SET_CLAUSE,
+  type D1DatabaseBinding,
   EntityGraphRepo,
   EntitySnapshotStore,
   PostEntity,
@@ -9,7 +21,10 @@ import {
   asEntityIri,
   asEntityTag,
   expertFromLegacyRow,
+  optionalD1Database,
+  predicateSpec,
   postFromLegacyRow,
+  runD1Batch,
   type LegacyPostRow
 } from "@skygest/ontology-store";
 import type { DbError } from "../domain/errors";
@@ -39,6 +54,9 @@ const ROW_WRITE_RETRY_SCHEDULE = Schedule.exponential(
 const BACKFILL_ASSERTED_BY = "EntityPostBackfillService" as const;
 const POST_ENTITY_TAG = asEntityTag("Post");
 const EXPERT_ENTITY_TAG = asEntityTag("Expert");
+const DEFAULT_GRAPH_IRI = "urn:skygest:graph:default";
+const COALESCE_WINDOW_MS = 30_000;
+const AUTHORED_BY_PREDICATE_IRI = predicateSpec("ei:authoredBy").iri;
 
 const normalizeLimit = (limit: number | undefined): number =>
   limit === undefined || !Number.isFinite(limit)
@@ -88,6 +106,55 @@ const toLegacyRow = (row: PostRow): LegacyPostRow => ({
   createdAt: row.created_at
 });
 
+type PostValue = Schema.Schema.Type<typeof PostEntity.schema>;
+
+interface PreparedPostRow {
+  readonly source: PostRow;
+  readonly post: PostValue;
+  readonly iri: string;
+  readonly payloadJson: string;
+  readonly authorIri: string | null;
+  readonly authoredByTripleHash: string | null;
+}
+
+const encodeJsonString = Schema.encodeUnknownEffect(
+  Schema.UnknownFromJsonString
+);
+
+const encodePostPayload = (
+  post: PostValue
+): Effect.Effect<string, Schema.SchemaError> =>
+  Schema.encodeUnknownEffect(PostEntity.schema)(post).pipe(
+    Effect.flatMap((encoded) => encodeJsonString(encoded)),
+    Effect.map(String)
+  );
+
+const hex = (bytes: ArrayBuffer): string =>
+  [...new Uint8Array(bytes)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+
+const hashTriple = (
+  subjectIri: string,
+  predicateIri: string,
+  objectIri: string,
+  graphIri: string
+): Effect.Effect<string, SqlError> =>
+  Effect.tryPromise({
+    try: async () => {
+      const bytes = new TextEncoder().encode(
+        `${subjectIri}\u0000${predicateIri}\u0000${objectIri}\u0000${graphIri}`
+      );
+      return hex(await crypto.subtle.digest("SHA-256", bytes));
+    },
+    catch: (cause) => decodeSqlError(cause, "post.authoredBy.tripleHash")
+  });
+
+const coalesceKey = (iri: string, now: number): string => {
+  const bucket = Math.floor(now / COALESCE_WINDOW_MS);
+  return `${POST_ENTITY_TAG}:${iri}:${String(bucket)}`;
+};
+
 export class EntityPostBackfillService extends ServiceMap.Service<
   EntityPostBackfillService,
   {
@@ -104,6 +171,7 @@ export class EntityPostBackfillService extends ServiceMap.Service<
       const snapshots = yield* EntitySnapshotStore;
       const queue = yield* ReindexQueueService;
       const entityGraph = yield* EntityGraphRepo;
+      const rawDb = yield* optionalD1Database;
 
       const buildAuthorIriByDid = Effect.fn(
         "EntityPostBackfillService.buildAuthorIriByDid"
@@ -163,6 +231,242 @@ export class EntityPostBackfillService extends ServiceMap.Service<
           assertionKind: "imported",
           confidence: 1
         });
+      });
+
+      const preparePostRow = Effect.fn(
+        "EntityPostBackfillService.preparePostRow"
+      )(function* (row: PostRow, authorIriByDid: ReadonlyMap<string, string>) {
+        const basePost = yield* postFromLegacyRow(toLegacyRow(row));
+        const authorIri = authorIriByDid.get(row.did) ?? null;
+        const post =
+          authorIri === null
+            ? basePost
+            : yield* Schema.decodeUnknownEffect(PostEntity.schema)({
+                ...basePost,
+                authoredBy: authorIri
+              });
+        const payloadJson = yield* encodePostPayload(post);
+        const iri = String(post.iri);
+        const authoredByTripleHash =
+          authorIri === null
+            ? null
+            : yield* hashTriple(
+                iri,
+                AUTHORED_BY_PREDICATE_IRI,
+                authorIri,
+                DEFAULT_GRAPH_IRI
+              );
+        return {
+          source: row,
+          post,
+          iri,
+          payloadJson,
+          authorIri,
+          authoredByTripleHash
+        } satisfies PreparedPostRow;
+      });
+
+      const bulkWritePrepared = Effect.fn(
+        "EntityPostBackfillService.bulkWritePrepared"
+      )(function* (
+        db: D1DatabaseBinding,
+        preparedRows: ReadonlyArray<PreparedPostRow>,
+        authorIriByDid: ReadonlyMap<string, string>
+      ) {
+        if (preparedRows.length === 0) return;
+        const now = yield* Clock.currentTimeMillis;
+        const statements = [db.prepare("PRAGMA foreign_keys = ON")];
+
+        const upsertEntityStatement = db.prepare(
+          `INSERT INTO entities (iri, entity_type, created_at, updated_at)
+           VALUES (?, ?, ?, ?)
+           ON CONFLICT(iri) DO UPDATE SET
+             entity_type = excluded.entity_type,
+             updated_at = excluded.updated_at`
+        );
+        const upsertSnapshotStatement = db.prepare(
+          `INSERT INTO entity_snapshots (
+             iri,
+             entity_type,
+             payload_json,
+             created_at,
+             updated_at
+           ) VALUES (?, ?, ?, ?, ?)
+           ON CONFLICT(iri) DO UPDATE SET
+             entity_type = excluded.entity_type,
+             payload_json = excluded.payload_json,
+             updated_at = excluded.updated_at`
+        );
+        const upsertQueueStatement = db.prepare(
+          `INSERT INTO reindex_queue (
+             queue_id,
+             coalesce_key,
+             target_entity_type,
+             target_iri,
+             origin_iri,
+             cause,
+             cause_priority,
+             propagation_depth,
+             attempts,
+             next_attempt_at,
+             enqueued_at,
+             updated_at
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT(coalesce_key) DO UPDATE SET
+           ${REINDEX_QUEUE_UPSERT_SET_CLAUSE}`
+        );
+        const upsertAuthoredByLinkStatement = db.prepare(
+          `INSERT INTO entity_links (
+             link_id,
+             triple_hash,
+             subject_iri,
+             predicate_iri,
+             object_iri,
+             object_value,
+             object_datatype,
+             graph_iri,
+             subject_type,
+             object_type,
+             state,
+             effective_from,
+             effective_until,
+             superseded_by,
+             created_at,
+             updated_at
+           ) VALUES (?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, 'active', ?, NULL, NULL, ?, ?)
+           ON CONFLICT(triple_hash) WHERE state = 'active' DO UPDATE SET
+             updated_at = excluded.updated_at`
+        );
+        const insertEvidenceStatement = db.prepare(
+          `INSERT INTO entity_link_evidence (
+             evidence_id,
+             link_id,
+             asserted_by,
+             assertion_kind,
+             confidence,
+             evidence_span,
+             source_iri,
+             review_state,
+             reviewer,
+             reviewed_at,
+             asserted_at
+           )
+           SELECT ?, link_id, ?, ?, ?, NULL, NULL, 'pending', NULL, NULL, ?
+           FROM entity_links
+           WHERE triple_hash = ?
+             AND state = 'active'
+             AND NOT EXISTS (
+               SELECT 1
+               FROM entity_link_evidence existing
+               WHERE existing.link_id = entity_links.link_id
+                 AND existing.asserted_by = ?
+                 AND existing.assertion_kind = ?
+             )`
+        );
+
+        const authorIris = Array.from(new Set(authorIriByDid.values()));
+        for (const authorIri of authorIris) {
+          statements.push(
+            upsertEntityStatement.bind(
+              authorIri,
+              EXPERT_ENTITY_TAG,
+              now,
+              now
+            )
+          );
+        }
+
+        for (const row of preparedRows) {
+          statements.push(
+            upsertEntityStatement.bind(row.iri, POST_ENTITY_TAG, now, now),
+            upsertSnapshotStatement.bind(
+              row.iri,
+              POST_ENTITY_TAG,
+              row.payloadJson,
+              now,
+              now
+            ),
+            upsertQueueStatement.bind(
+              yield* Random.nextUUIDv4,
+              coalesceKey(row.iri, now),
+              POST_ENTITY_TAG,
+              row.iri,
+              row.iri,
+              "entity-changed",
+              0,
+              0,
+              0,
+              now,
+              now,
+              now
+            )
+          );
+          if (
+            row.authorIri !== null &&
+            row.authoredByTripleHash !== null
+          ) {
+            statements.push(
+              upsertAuthoredByLinkStatement.bind(
+                yield* Random.nextUUIDv4,
+                row.authoredByTripleHash,
+                row.iri,
+                AUTHORED_BY_PREDICATE_IRI,
+                row.authorIri,
+                DEFAULT_GRAPH_IRI,
+                POST_ENTITY_TAG,
+                EXPERT_ENTITY_TAG,
+                row.post.postedAt,
+                now,
+                now
+              ),
+              insertEvidenceStatement.bind(
+                yield* Random.nextUUIDv4,
+                BACKFILL_ASSERTED_BY,
+                "imported",
+                1,
+                now,
+                row.authoredByTripleHash,
+                BACKFILL_ASSERTED_BY,
+                "imported"
+              )
+            );
+          }
+        }
+
+        yield* runD1Batch(
+          db,
+          statements,
+          "EntityPostBackfillService.bulkWritePrepared"
+        );
+      });
+
+      const backfillWithD1Batch = Effect.fn(
+        "EntityPostBackfillService.backfillWithD1Batch"
+      )(function* (
+        db: D1DatabaseBinding,
+        rows: ReadonlyArray<PostRow>,
+        authorIriByDid: ReadonlyMap<string, string>
+      ) {
+        const outcomes = yield* Effect.forEach(
+          rows,
+          (row) => Effect.exit(preparePostRow(row, authorIriByDid)),
+          { concurrency: WRITE_CONCURRENCY }
+        );
+        const preparedRows = outcomes.flatMap((outcome) =>
+          Exit.isSuccess(outcome) ? [outcome.value] : []
+        );
+        yield* bulkWritePrepared(db, preparedRows, authorIriByDid);
+        const failedUris = outcomes.flatMap((outcome, index) =>
+          Exit.isSuccess(outcome) ? [] : [rows[index]?.uri ?? "unknown"]
+        );
+        return {
+          migrated: preparedRows.length,
+          queued: preparedRows.length,
+          authoredByEdges: preparedRows.filter((row) => row.authorIri !== null)
+            .length,
+          failed: rows.length - preparedRows.length,
+          failedUris
+        };
       });
 
       const saveAndQueue = Effect.fn(
@@ -229,39 +533,49 @@ export class EntityPostBackfillService extends ServiceMap.Service<
           `;
           const rows = yield* decodeRows(rawRows);
           const authorIriByDid = yield* buildAuthorIriByDid(rows);
-          yield* upsertAuthors(authorIriByDid);
-
-          const outcomes = yield* Effect.forEach(
-            rows,
-            (row) =>
-              Effect.exit(
-                saveAndQueue(row, authorIriByDid).pipe(
-                  Effect.retry({ schedule: ROW_WRITE_RETRY_SCHEDULE })
-                )
-              ),
-            { concurrency: WRITE_CONCURRENCY }
-          );
-          const migrated = outcomes.filter((outcome) => Exit.isSuccess(outcome))
-            .length;
-          const authoredByEdges = outcomes.reduce(
-            (total, outcome) =>
-              Exit.isSuccess(outcome)
-                ? total + outcome.value.authoredByEdges
-                : total,
-            0
-          );
-          const failedUris = outcomes.flatMap((outcome, index) =>
-            Exit.isSuccess(outcome) ? [] : [rows[index]?.uri ?? "unknown"]
-          );
+          const result =
+            rawDb === null
+              ? yield* Effect.gen(function* () {
+                  yield* upsertAuthors(authorIriByDid);
+                  const outcomes = yield* Effect.forEach(
+                    rows,
+                    (row) =>
+                      Effect.exit(
+                        saveAndQueue(row, authorIriByDid).pipe(
+                          Effect.retry({ schedule: ROW_WRITE_RETRY_SCHEDULE })
+                        )
+                      ),
+                    { concurrency: WRITE_CONCURRENCY }
+                  );
+                  const migrated = outcomes.filter((outcome) =>
+                    Exit.isSuccess(outcome)
+                  ).length;
+                  const authoredByEdges = outcomes.reduce(
+                    (total, outcome) =>
+                      Exit.isSuccess(outcome)
+                        ? total + outcome.value.authoredByEdges
+                        : total,
+                    0
+                  );
+                  const failedUris = outcomes.flatMap((outcome, index) =>
+                    Exit.isSuccess(outcome)
+                      ? []
+                      : [rows[index]?.uri ?? "unknown"]
+                  );
+                  return {
+                    migrated,
+                    queued: migrated,
+                    authoredByEdges,
+                    failed: rows.length - migrated,
+                    failedUris
+                  };
+                })
+              : yield* backfillWithD1Batch(rawDb, rows, authorIriByDid);
 
           return {
             total,
             scanned: rows.length,
-            migrated,
-            queued: migrated,
-            authoredByEdges,
-            failed: rows.length - migrated,
-            failedUris
+            ...result
           };
         }
       );
