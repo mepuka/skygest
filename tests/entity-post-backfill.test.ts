@@ -18,6 +18,7 @@ import { ExpertRecord as ExpertRecordSchema } from "../src/domain/bi";
 import type { ExpertRecord } from "../src/domain/bi";
 import { EntityPostBackfillService } from "../src/services/EntityPostBackfillService";
 import { ExpertsRepo } from "../src/services/ExpertsRepo";
+import { OntologyCatalog } from "../src/services/OntologyCatalog";
 
 const sqliteLayer = SqliteClient.layer({ filename: ":memory:" });
 
@@ -40,6 +41,19 @@ const installPostsSchema = Effect.gen(function* () {
       status TEXT DEFAULT 'active'
     )
   `.pipe(Effect.asVoid);
+  yield* sql`
+    CREATE TABLE IF NOT EXISTS post_topics (
+      post_uri TEXT NOT NULL,
+      topic_slug TEXT NOT NULL,
+      matched_term TEXT,
+      match_signal TEXT NOT NULL DEFAULT 'term',
+      match_value TEXT,
+      match_score REAL,
+      ontology_version TEXT NOT NULL DEFAULT 'test-ontology',
+      matcher_version TEXT NOT NULL DEFAULT 'test-matcher',
+      PRIMARY KEY (post_uri, topic_slug)
+    )
+  `.pipe(Effect.asVoid);
 });
 
 const seedPosts = (posts: ReadonlyArray<{
@@ -57,6 +71,41 @@ const seedPosts = (posts: ReadonlyArray<{
         sql`
           INSERT INTO posts (uri, did, text, created_at, indexed_at, status)
           VALUES (${post.uri}, ${post.did}, ${post.text}, ${post.createdAt}, ${post.createdAt}, ${post.status ?? "active"})
+        `.pipe(Effect.asVoid),
+      { discard: true }
+    );
+  });
+
+const seedPostTopics = (topics: ReadonlyArray<{
+  readonly postUri: string;
+  readonly topicSlug: string;
+  readonly matchedTerm?: string | null;
+}>) =>
+  Effect.gen(function* () {
+    const sql = yield* SqlClient.SqlClient;
+    yield* Effect.forEach(
+      topics,
+      (topic) =>
+        sql`
+          INSERT INTO post_topics (
+            post_uri,
+            topic_slug,
+            matched_term,
+            match_signal,
+            match_value,
+            match_score,
+            ontology_version,
+            matcher_version
+          ) VALUES (
+            ${topic.postUri},
+            ${topic.topicSlug},
+            ${topic.matchedTerm ?? topic.topicSlug},
+            'term',
+            ${topic.matchedTerm ?? topic.topicSlug},
+            NULL,
+            'test-ontology',
+            'test-matcher'
+          )
         `.pipe(Effect.asVoid),
       { discard: true }
     );
@@ -121,8 +170,15 @@ const makeServiceLayer = (experts: ReadonlyArray<ExpertRecord> = []) => {
     Layer.provideMerge(sqliteLayer)
   );
   const backfillLayer = EntityPostBackfillService.layer.pipe(
-    Layer.provideMerge(
-      Layer.mergeAll(sqliteLayer, expertsLayer, snapshotLayer, queueLayer, graphLayer)
+      Layer.provideMerge(
+      Layer.mergeAll(
+        sqliteLayer,
+        OntologyCatalog.layer,
+        expertsLayer,
+        snapshotLayer,
+        queueLayer,
+        graphLayer
+      )
     )
   );
 
@@ -167,6 +223,24 @@ describe("EntityPostBackfillService", () => {
           status: "deleted"
         }
       ]);
+      yield* seedPostTopics([
+        {
+          postUri:
+            "at://did:plc:alice/app.bsky.feed.post/3kpost1",
+          topicSlug: "solar"
+        },
+        {
+          postUri:
+            "at://did:plc:alice/app.bsky.feed.post/3kpost1",
+          topicSlug: "grid-and-infrastructure",
+          matchedTerm: "grid"
+        },
+        {
+          postUri:
+            "at://did:plc:bob/app.bsky.feed.post/3kpost2",
+          topicSlug: "hydrogen"
+        }
+      ]);
 
       const backfill = yield* EntityPostBackfillService;
       const snapshots = yield* EntitySnapshotStore;
@@ -180,6 +254,7 @@ describe("EntityPostBackfillService", () => {
         migrated: 2,
         queued: 2,
         authoredByEdges: 1,
+        topicEdges: 3,
         failed: 0,
         failedUris: []
       });
@@ -199,23 +274,38 @@ describe("EntityPostBackfillService", () => {
       expect(saved.authoredBy).toBe(
         "https://w3id.org/energy-intel/expert/did_plc_alice"
       );
+      expect(saved.topics).toEqual(["solar", "grid-and-infrastructure"]);
 
       const aliceLinks = yield* graph.linksOut(
         asEntityIri(
           "https://w3id.org/energy-intel/post/did_plc_alice_3kpost1"
         )
       );
-      expect(aliceLinks).toHaveLength(1);
-      expect(aliceLinks[0]?.link.predicateIri).toBe(
+      expect(aliceLinks).toHaveLength(3);
+      const authoredBy = aliceLinks.find(
+        (link) =>
+          link.link.predicateIri ===
+          "https://w3id.org/energy-intel/authoredBy"
+      );
+      expect(authoredBy?.link.predicateIri).toBe(
         "https://w3id.org/energy-intel/authoredBy"
       );
-      expect(aliceLinks[0]?.link.objectIri).toBe(
+      expect(authoredBy?.link.objectIri).toBe(
         "https://w3id.org/energy-intel/expert/did_plc_alice"
       );
-      expect(aliceLinks[0]?.link.effectiveFrom).toBe(1715000000000);
-      expect(aliceLinks[0]?.evidence[0]?.assertedBy).toBe(
+      expect(authoredBy?.link.effectiveFrom).toBe(1715000000000);
+      expect(authoredBy?.evidence[0]?.assertedBy).toBe(
         "EntityPostBackfillService"
       );
+      const topicLinks = aliceLinks.filter(
+        (link) =>
+          link.link.predicateIri ===
+          "https://w3id.org/energy-intel/aboutTechnology"
+      );
+      expect(topicLinks.map((link) => link.link.objectType).sort()).toEqual([
+        "EnergyTopic",
+        "EnergyTopic"
+      ]);
 
       const queued = yield* queue.nextBatch(0, 10);
       expect(queued).toHaveLength(2);
@@ -253,10 +343,12 @@ describe("EntityPostBackfillService", () => {
       expect(page1.scanned).toBe(2);
       expect(page1.migrated).toBe(2);
       expect(page1.authoredByEdges).toBe(0);
+      expect(page1.topicEdges).toBe(0);
       expect(page2.total).toBe(5);
       expect(page2.scanned).toBe(2);
       expect(page2.migrated).toBe(2);
       expect(page2.authoredByEdges).toBe(0);
+      expect(page2.topicEdges).toBe(0);
     }).pipe(Effect.provide(makeServiceLayer()))
   );
 });

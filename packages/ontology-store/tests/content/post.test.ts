@@ -17,7 +17,8 @@ const samplePost = (): Post =>
     atUri: "at://did:plc:abc/app.bsky.feed.post/3kgvexample",
     text: "First post about grid stability under high renewables.",
     postedAt: 1715000000000,
-    authoredBy: "https://w3id.org/energy-intel/expert/MarkZJacobson"
+    authoredBy: "https://w3id.org/energy-intel/expert/MarkZJacobson",
+    topics: ["grid-and-infrastructure", "solar"]
   });
 
 describe("Post", () => {
@@ -70,7 +71,7 @@ describe("Post", () => {
       expect(meta.iri).toBe(
         "https://w3id.org/energy-intel/post/did_plc_abc_3kgvexample"
       );
-      expect(meta.topic).toBe("unknown");
+      expect(meta.topic).toBe("grid-and-infrastructure");
       expect(meta.authority).toBe("unknown");
       expect(meta.time_bucket).toMatch(/^\d{4}-\d{2}$/);
     });
@@ -83,6 +84,7 @@ describe("Post", () => {
       expect(body).toContain(
         "https://w3id.org/energy-intel/expert/MarkZJacobson"
       );
+      expect(body).toContain("topics: grid-and-infrastructure, solar");
     });
 
     it("toBody omits authored_by when absent", () => {

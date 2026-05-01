@@ -29,6 +29,7 @@ import {
 } from "@skygest/ontology-store";
 import type { DbError } from "../domain/errors";
 import { ExpertsRepo } from "./ExpertsRepo";
+import { OntologyCatalog } from "./OntologyCatalog";
 
 export interface EntityPostBackfillInput {
   readonly limit?: number;
@@ -41,6 +42,7 @@ export interface EntityPostBackfillResult {
   readonly migrated: number;
   readonly queued: number;
   readonly authoredByEdges: number;
+  readonly topicEdges: number;
   readonly failed: number;
   readonly failedUris: ReadonlyArray<string>;
 }
@@ -54,9 +56,13 @@ const ROW_WRITE_RETRY_SCHEDULE = Schedule.exponential(
 const BACKFILL_ASSERTED_BY = "EntityPostBackfillService" as const;
 const POST_ENTITY_TAG = asEntityTag("Post");
 const EXPERT_ENTITY_TAG = asEntityTag("Expert");
+const ENERGY_TOPIC_ENTITY_TAG = asEntityTag("EnergyTopic");
 const DEFAULT_GRAPH_IRI = "urn:skygest:graph:default";
 const COALESCE_WINDOW_MS = 30_000;
 const AUTHORED_BY_PREDICATE_IRI = predicateSpec("ei:authoredBy").iri;
+const ABOUT_TECHNOLOGY_PREDICATE_IRI =
+  predicateSpec("ei:aboutTechnology").iri;
+const UNKNOWN_TOPIC_PRIORITY = 10_000;
 
 const normalizeLimit = (limit: number | undefined): number =>
   limit === undefined || !Number.isFinite(limit)
@@ -72,13 +78,28 @@ const PostRow = Schema.Struct({
   uri: Schema.String,
   did: Schema.String,
   text: Schema.String,
-  created_at: Schema.Number
+  created_at: Schema.Number,
+  topic_json: Schema.String
 });
 type PostRow = typeof PostRow.Type;
 
 const PostCountRow = Schema.Struct({
   total: Schema.Number
 });
+
+const PostTopicMatchRow = Schema.Struct({
+  topicSlug: Schema.String,
+  matchedTerm: Schema.NullOr(Schema.String),
+  matchSignal: Schema.String,
+  matchValue: Schema.NullOr(Schema.String),
+  matchScore: Schema.NullOr(Schema.Number),
+  ontologyVersion: Schema.String,
+  matcherVersion: Schema.String
+});
+type PostTopicMatchRow = typeof PostTopicMatchRow.Type;
+const PostTopicMatchRowsFromJson = Schema.fromJsonString(
+  Schema.Array(PostTopicMatchRow)
+);
 
 const decodeSqlError = (cause: unknown, operation: string): SqlError =>
   new SqlError({
@@ -108,6 +129,22 @@ const toLegacyRow = (row: PostRow): LegacyPostRow => ({
 
 type PostValue = Schema.Schema.Type<typeof PostEntity.schema>;
 
+interface TopicEdge {
+  readonly sourceSlug: string;
+  readonly canonicalSlug: string;
+  readonly iri: string;
+  readonly evidenceSpan: string;
+  readonly confidence: number;
+}
+
+interface TopicLookupEntry {
+  readonly canonicalSlug: string;
+  readonly iris: ReadonlyArray<string>;
+  readonly priority: number;
+}
+
+type TopicLookup = ReadonlyMap<string, TopicLookupEntry>;
+
 interface PreparedPostRow {
   readonly source: PostRow;
   readonly post: PostValue;
@@ -115,6 +152,9 @@ interface PreparedPostRow {
   readonly payloadJson: string;
   readonly authorIri: string | null;
   readonly authoredByTripleHash: string | null;
+  readonly topicEdges: ReadonlyArray<TopicEdge & {
+    readonly tripleHash: string;
+  }>;
 }
 
 const encodeJsonString = Schema.encodeUnknownEffect(
@@ -155,6 +195,80 @@ const coalesceKey = (iri: string, now: number): string => {
   return `${POST_ENTITY_TAG}:${iri}:${String(bucket)}`;
 };
 
+const normalizeTopicKey = (value: string): string =>
+  value
+    .trim()
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/[\s_]+/g, "-")
+    .toLowerCase();
+
+const uniqueSorted = (
+  values: Iterable<string>,
+  priorityOf: (value: string) => number
+): ReadonlyArray<string> =>
+  Array.from(new Set(values)).sort((left, right) => {
+    const priorityDelta = priorityOf(left) - priorityOf(right);
+    return priorityDelta === 0 ? left.localeCompare(right) : priorityDelta;
+  });
+
+const buildTopicLookup = (
+  ontology: (typeof OntologyCatalog)["Service"]
+): TopicLookup => {
+  const conceptsBySlug = new Map(
+    ontology.concepts.map((concept) => [concept.slug, concept] as const)
+  );
+  const priorityByCanonicalSlug = new Map<string, number>(
+    ontology.topics.map((topic, index) => [String(topic.slug), index] as const)
+  );
+  const lookup = new Map<string, TopicLookupEntry>();
+
+  const put = (
+    key: string,
+    entry: Omit<TopicLookupEntry, "priority">
+  ): void => {
+    const priority =
+      priorityByCanonicalSlug.get(entry.canonicalSlug) ??
+      UNKNOWN_TOPIC_PRIORITY;
+    lookup.set(normalizeTopicKey(key), { ...entry, priority });
+  };
+
+  for (const topic of ontology.topics) {
+    const iris = topic.rootConceptSlugs
+      .map((slug) => conceptsBySlug.get(slug)?.iri)
+      .filter((iri): iri is string => iri !== undefined);
+    if (iris.length > 0) {
+      put(topic.slug, { canonicalSlug: topic.slug, iris });
+    }
+  }
+
+  for (const concept of ontology.concepts) {
+    if (concept.canonicalTopicSlug === null) continue;
+    put(concept.slug, {
+      canonicalSlug: concept.canonicalTopicSlug,
+      iris: [concept.iri]
+    });
+    put(concept.label, {
+      canonicalSlug: concept.canonicalTopicSlug,
+      iris: [concept.iri]
+    });
+  }
+
+  return lookup;
+};
+
+const decodeTopicMatches = (
+  row: PostRow
+): Effect.Effect<ReadonlyArray<PostTopicMatchRow>, SqlError> =>
+  Schema.decodeUnknownEffect(PostTopicMatchRowsFromJson)(row.topic_json).pipe(
+    Effect.mapError((cause) => decodeSqlError(cause, "post_topics.decode"))
+  );
+
+const confidenceFromMatch = (match: PostTopicMatchRow): number => {
+  if (match.matchScore === null) return 1;
+  if (!Number.isFinite(match.matchScore)) return 1;
+  return Math.min(1, Math.max(0, match.matchScore));
+};
+
 export class EntityPostBackfillService extends ServiceMap.Service<
   EntityPostBackfillService,
   {
@@ -172,6 +286,8 @@ export class EntityPostBackfillService extends ServiceMap.Service<
       const queue = yield* ReindexQueueService;
       const entityGraph = yield* EntityGraphRepo;
       const rawDb = yield* optionalD1Database;
+      const ontology = yield* OntologyCatalog;
+      const topicLookup = buildTopicLookup(ontology);
 
       const buildAuthorIriByDid = Effect.fn(
         "EntityPostBackfillService.buildAuthorIriByDid"
@@ -233,17 +349,66 @@ export class EntityPostBackfillService extends ServiceMap.Service<
         });
       });
 
+      const resolveTopicEdges = Effect.fn(
+        "EntityPostBackfillService.resolveTopicEdges"
+      )(function* (row: PostRow) {
+        const matches = yield* decodeTopicMatches(row);
+        const canonicalPriority = (slug: string): number =>
+          topicLookup.get(normalizeTopicKey(slug))?.priority ??
+          UNKNOWN_TOPIC_PRIORITY;
+        const canonicalSlugs = uniqueSorted(
+          matches.flatMap((match) => {
+            const entry = topicLookup.get(normalizeTopicKey(match.topicSlug));
+            return entry === undefined ? [] : [entry.canonicalSlug];
+          }),
+          canonicalPriority
+        );
+        const edges: TopicEdge[] = [];
+        const seenEdgeIris = new Set<string>();
+        for (const match of matches) {
+          const entry = topicLookup.get(normalizeTopicKey(match.topicSlug));
+          if (entry === undefined) continue;
+          const evidenceSpan = yield* encodeJsonString({
+            topicSlug: match.topicSlug,
+            canonicalTopicSlug: entry.canonicalSlug,
+            matchedTerm: match.matchedTerm,
+            matchSignal: match.matchSignal,
+            matchValue: match.matchValue,
+            matchScore: match.matchScore,
+            ontologyVersion: match.ontologyVersion,
+            matcherVersion: match.matcherVersion
+          }).pipe(Effect.map(String));
+          for (const iri of entry.iris) {
+            if (seenEdgeIris.has(iri)) continue;
+            seenEdgeIris.add(iri);
+            edges.push({
+              sourceSlug: match.topicSlug,
+              canonicalSlug: entry.canonicalSlug,
+              iri,
+              evidenceSpan,
+              confidence: confidenceFromMatch(match)
+            });
+          }
+        }
+        return { canonicalSlugs, edges };
+      });
+
       const preparePostRow = Effect.fn(
         "EntityPostBackfillService.preparePostRow"
       )(function* (row: PostRow, authorIriByDid: ReadonlyMap<string, string>) {
         const basePost = yield* postFromLegacyRow(toLegacyRow(row));
         const authorIri = authorIriByDid.get(row.did) ?? null;
+        const topics = yield* resolveTopicEdges(row);
         const post =
           authorIri === null
-            ? basePost
+            ? yield* Schema.decodeUnknownEffect(PostEntity.schema)({
+                ...basePost,
+                topics: topics.canonicalSlugs
+              })
             : yield* Schema.decodeUnknownEffect(PostEntity.schema)({
                 ...basePost,
-                authoredBy: authorIri
+                authoredBy: authorIri,
+                topics: topics.canonicalSlugs
               });
         const payloadJson = yield* encodePostPayload(post);
         const iri = String(post.iri);
@@ -256,13 +421,28 @@ export class EntityPostBackfillService extends ServiceMap.Service<
                 authorIri,
                 DEFAULT_GRAPH_IRI
               );
+        const topicEdges = yield* Effect.forEach(
+          topics.edges,
+          (edge) =>
+            Effect.gen(function* () {
+              const tripleHash = yield* hashTriple(
+                iri,
+                ABOUT_TECHNOLOGY_PREDICATE_IRI,
+                edge.iri,
+                DEFAULT_GRAPH_IRI
+              );
+              return { ...edge, tripleHash };
+            }),
+          { concurrency: WRITE_CONCURRENCY }
+        );
         return {
           source: row,
           post,
           iri,
           payloadJson,
           authorIri,
-          authoredByTripleHash
+          authoredByTripleHash,
+          topicEdges
         } satisfies PreparedPostRow;
       });
 
@@ -337,6 +517,28 @@ export class EntityPostBackfillService extends ServiceMap.Service<
            ON CONFLICT(triple_hash) WHERE state = 'active' DO UPDATE SET
              updated_at = excluded.updated_at`
         );
+        const upsertTopicLinkStatement = db.prepare(
+          `INSERT INTO entity_links (
+             link_id,
+             triple_hash,
+             subject_iri,
+             predicate_iri,
+             object_iri,
+             object_value,
+             object_datatype,
+             graph_iri,
+             subject_type,
+             object_type,
+             state,
+             effective_from,
+             effective_until,
+             superseded_by,
+             created_at,
+             updated_at
+           ) VALUES (?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, 'active', ?, NULL, NULL, ?, ?)
+           ON CONFLICT(triple_hash) WHERE state = 'active' DO UPDATE SET
+             updated_at = excluded.updated_at`
+        );
         const insertEvidenceStatement = db.prepare(
           `INSERT INTO entity_link_evidence (
              evidence_id,
@@ -363,13 +565,56 @@ export class EntityPostBackfillService extends ServiceMap.Service<
                  AND existing.assertion_kind = ?
              )`
         );
+        const insertTopicEvidenceStatement = db.prepare(
+          `INSERT INTO entity_link_evidence (
+             evidence_id,
+             link_id,
+             asserted_by,
+             assertion_kind,
+             confidence,
+             evidence_span,
+             source_iri,
+             review_state,
+             reviewer,
+             reviewed_at,
+             asserted_at
+           )
+           SELECT ?, link_id, ?, ?, ?, ?, NULL, 'pending', NULL, NULL, ?
+           FROM entity_links
+           WHERE triple_hash = ?
+             AND state = 'active'
+             AND NOT EXISTS (
+               SELECT 1
+               FROM entity_link_evidence existing
+               WHERE existing.link_id = entity_links.link_id
+                 AND existing.asserted_by = ?
+                 AND existing.assertion_kind = ?
+             )`
+        );
 
         const authorIris = Array.from(new Set(authorIriByDid.values()));
+        const topicIris = Array.from(
+          new Set(
+            preparedRows.flatMap((row) =>
+              row.topicEdges.map((edge) => edge.iri)
+            )
+          )
+        );
         for (const authorIri of authorIris) {
           statements.push(
             upsertEntityStatement.bind(
               authorIri,
               EXPERT_ENTITY_TAG,
+              now,
+              now
+            )
+          );
+        }
+        for (const topicIri of topicIris) {
+          statements.push(
+            upsertEntityStatement.bind(
+              topicIri,
+              ENERGY_TOPIC_ENTITY_TAG,
               now,
               now
             )
@@ -431,6 +676,34 @@ export class EntityPostBackfillService extends ServiceMap.Service<
               )
             );
           }
+          for (const edge of row.topicEdges) {
+            statements.push(
+              upsertTopicLinkStatement.bind(
+                yield* Random.nextUUIDv4,
+                edge.tripleHash,
+                row.iri,
+                ABOUT_TECHNOLOGY_PREDICATE_IRI,
+                edge.iri,
+                DEFAULT_GRAPH_IRI,
+                POST_ENTITY_TAG,
+                ENERGY_TOPIC_ENTITY_TAG,
+                row.post.postedAt,
+                now,
+                now
+              ),
+              insertTopicEvidenceStatement.bind(
+                yield* Random.nextUUIDv4,
+                BACKFILL_ASSERTED_BY,
+                "imported",
+                edge.confidence,
+                edge.evidenceSpan,
+                now,
+                edge.tripleHash,
+                BACKFILL_ASSERTED_BY,
+                "imported"
+              )
+            );
+          }
         }
 
         yield* runD1Batch(
@@ -464,6 +737,10 @@ export class EntityPostBackfillService extends ServiceMap.Service<
           queued: preparedRows.length,
           authoredByEdges: preparedRows.filter((row) => row.authorIri !== null)
             .length,
+          topicEdges: preparedRows.reduce(
+            (total, row) => total + row.topicEdges.length,
+            0
+          ),
           failed: rows.length - preparedRows.length,
           failedUris
         };
@@ -474,12 +751,17 @@ export class EntityPostBackfillService extends ServiceMap.Service<
       )(function* (row: PostRow, authorIriByDid: ReadonlyMap<string, string>) {
         const basePost = yield* postFromLegacyRow(toLegacyRow(row));
         const authorIri = authorIriByDid.get(row.did) ?? null;
+        const topics = yield* resolveTopicEdges(row);
         const post =
           authorIri === null
-            ? basePost
+            ? yield* Schema.decodeUnknownEffect(PostEntity.schema)({
+                ...basePost,
+                topics: topics.canonicalSlugs
+              })
             : yield* Schema.decodeUnknownEffect(PostEntity.schema)({
                 ...basePost,
-                authoredBy: authorIri
+                authoredBy: authorIri,
+                topics: topics.canonicalSlugs
               });
         const iri = asEntityIri(post.iri);
         const now = yield* Clock.currentTimeMillis;
@@ -494,15 +776,41 @@ export class EntityPostBackfillService extends ServiceMap.Service<
           propagationDepth: 0,
           nextAttemptAt: now
         });
-        if (authorIri === null) {
-          return { authoredByEdges: 0 };
-        }
-        yield* writeAuthoredByEdge(
-          iri,
-          asEntityIri(authorIri),
-          post.postedAt
+        yield* Effect.forEach(
+          topics.edges,
+          (edge) =>
+            Effect.gen(function* () {
+              const topicIri = asEntityIri(edge.iri);
+              yield* entityGraph.upsertEntity(
+                topicIri,
+                ENERGY_TOPIC_ENTITY_TAG
+              );
+              const link = yield* entityGraph.createLink({
+                predicate: "ei:aboutTechnology",
+                subject: { iri, type: "Post" },
+                object: { iri: topicIri, type: "EnergyTopic" },
+                effectiveFrom: post.postedAt
+              });
+              yield* entityGraph.recordEvidence(link.linkId, {
+                assertedBy: BACKFILL_ASSERTED_BY,
+                assertionKind: "imported",
+                confidence: edge.confidence,
+                evidenceSpan: edge.evidenceSpan
+              });
+            }),
+          { concurrency: WRITE_CONCURRENCY }
         );
-        return { authoredByEdges: 1 };
+        if (authorIri !== null) {
+          yield* writeAuthoredByEdge(
+            iri,
+            asEntityIri(authorIri),
+            post.postedAt
+          );
+        }
+        return {
+          authoredByEdges: authorIri === null ? 0 : 1,
+          topicEdges: topics.edges.length
+        };
       });
 
       const backfill = Effect.fn("EntityPostBackfillService.backfill")(
@@ -520,14 +828,33 @@ export class EntityPostBackfillService extends ServiceMap.Service<
 
           const rawRows = yield* sql<PostRow>`
             SELECT
-              uri as uri,
-              did as did,
-              text as text,
-              created_at as created_at
-            FROM posts
-            WHERE status = 'active'
-              AND uri LIKE 'at://%'
-            ORDER BY created_at ASC
+              p.uri as uri,
+              p.did as did,
+              p.text as text,
+              p.created_at as created_at,
+              COALESCE(
+                '[' || GROUP_CONCAT(
+                  CASE
+                    WHEN pt.topic_slug IS NULL THEN NULL
+                    ELSE json_object(
+                      'topicSlug', pt.topic_slug,
+                      'matchedTerm', pt.matched_term,
+                      'matchSignal', pt.match_signal,
+                      'matchValue', pt.match_value,
+                      'matchScore', pt.match_score,
+                      'ontologyVersion', pt.ontology_version,
+                      'matcherVersion', pt.matcher_version
+                    )
+                  END
+                ) || ']',
+                '[]'
+              ) as topic_json
+            FROM posts p
+            LEFT JOIN post_topics pt ON pt.post_uri = p.uri
+            WHERE p.status = 'active'
+              AND p.uri LIKE 'at://%'
+            GROUP BY p.uri, p.did, p.text, p.created_at
+            ORDER BY p.created_at ASC
             LIMIT ${limit}
             OFFSET ${offset}
           `;
@@ -557,6 +884,13 @@ export class EntityPostBackfillService extends ServiceMap.Service<
                         : total,
                     0
                   );
+                  const topicEdges = outcomes.reduce(
+                    (total, outcome) =>
+                      Exit.isSuccess(outcome)
+                        ? total + outcome.value.topicEdges
+                        : total,
+                    0
+                  );
                   const failedUris = outcomes.flatMap((outcome, index) =>
                     Exit.isSuccess(outcome)
                       ? []
@@ -566,6 +900,7 @@ export class EntityPostBackfillService extends ServiceMap.Service<
                     migrated,
                     queued: migrated,
                     authoredByEdges,
+                    topicEdges,
                     failed: rows.length - migrated,
                     failedUris
                   };

@@ -69,7 +69,8 @@ export class Post extends Schema.Class<Post>("Post")({
   atUri: Schema.String,
   text: Schema.String,
   postedAt: Schema.Number,
-  authoredBy: Schema.optionalKey(ExpertIri)
+  authoredBy: Schema.optionalKey(ExpertIri),
+  topics: Schema.optionalKey(Schema.Array(Schema.String))
 }) {}
 
 const decodePost = Schema.decodeUnknownEffect(Post);
@@ -225,6 +226,9 @@ export const renderPostMarkdown = (post: Post): string => {
   if (post.authoredBy !== undefined) {
     lines.push(`authored_by: ${post.authoredBy}`);
   }
+  if (post.topics !== undefined && post.topics.length > 0) {
+    lines.push(`topics: ${post.topics.join(", ")}`);
+  }
   lines.push("---", "", post.text);
   return lines.join("\n");
 };
@@ -266,6 +270,9 @@ export const postTimeBucket = (postedAt: number): string => {
   return `${year}-${month}`;
 };
 
+export const postPrimaryTopic = (post: Post): string =>
+  post.topics?.[0] ?? "unknown";
+
 const POST_IRI_PREFIX = "https://w3id.org/energy-intel/post/";
 
 const postKeySuffix = (post: Post): string =>
@@ -281,7 +288,7 @@ export const PostUnifiedProjection = {
   toMetadata: (post: Post): EntityMetadata => ({
     entity_type: "Post",
     iri: post.iri,
-    topic: "unknown",
+    topic: postPrimaryTopic(post),
     authority: "unknown",
     time_bucket: postTimeBucket(post.postedAt)
   })
@@ -298,7 +305,8 @@ export const PostProjectionFixture = {
     did: "did:plc:fixture",
     atUri: "at://did:plc:fixture/app.bsky.feed.post/3kgvexample",
     text: "Fixture post body for testing the Post projection contract.",
-    postedAt: 1700000000000
+    postedAt: 1700000000000,
+    topics: ["grid-and-infrastructure"]
   }),
   projection: PostUnifiedProjection
 } as const satisfies ProjectionFixture<typeof Post>;
@@ -384,6 +392,12 @@ export const PostEntity = defineEntity({
       predicate: predicate(EI.authoredBy),
       target: "Expert",
       cardinality: "one"
+    },
+    aboutTechnology: {
+      direction: "outbound",
+      predicate: predicate(EI.aboutTechnology),
+      target: "EnergyTopic",
+      cardinality: "many"
     }
   },
   agentContext: {

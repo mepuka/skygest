@@ -861,6 +861,7 @@ export const EntityPostsBackfillOutput = Schema.Struct({
   authoredByEdges: Schema.Int.pipe(
     Schema.check(Schema.isGreaterThanOrEqualTo(0))
   ),
+  topicEdges: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   failed: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   failedUris: Schema.Array(Schema.String),
   drain: Schema.NullOr(EntityReindexDrainOutput)

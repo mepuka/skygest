@@ -23,6 +23,11 @@ export const PREDICATES = {
     subject: ["Post", "Article"],
     object: ["Expert"]
   },
+  "ei:aboutTechnology": {
+    iri: predicate(EI.aboutTechnology),
+    subject: ["Post"],
+    object: ["EnergyTopic"]
+  },
   "bfo:bearerOf": {
     iri: predicate(BFO.bearerOf),
     subject: ["Expert", "Organization"],
