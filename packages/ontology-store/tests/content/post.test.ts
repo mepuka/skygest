@@ -138,6 +138,22 @@ describe("Post", () => {
       expect(body).toContain("Solo Name wrote:");
       expect(body).not.toContain("(@");
     });
+
+    it("toBody handles partial author info (handle only) — falls through to @-prefixed handle", () => {
+      const post = Schema.decodeUnknownSync(Post)({
+        iri: "https://w3id.org/energy-intel/post/did_plc_xyz_3kanon",
+        did: "did:plc:xyz",
+        atUri: "at://did:plc:xyz/app.bsky.feed.post/3kanon",
+        text: "Anon-with-handle.",
+        postedAt: 1715000000000,
+        authoredByHandle: "abbiebennett.bsky.social"
+      });
+      const body = PostUnifiedProjection.toBody(post);
+      expect(body).toContain("author_handle: abbiebennett.bsky.social");
+      expect(body).not.toContain("author_name:");
+      expect(body).toContain("@abbiebennett.bsky.social wrote:");
+      expect(body).not.toContain("Unknown author");
+    });
   });
 
   describe("postToTriples / postFromTriples", () => {

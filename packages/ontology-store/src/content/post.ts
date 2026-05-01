@@ -217,6 +217,14 @@ export const postFromTriples = (
 
 const isoDate = (millis: number): string => new Date(millis).toISOString();
 
+const postByline = (post: Post): string | null => {
+  const { authoredByDisplayName: name, authoredByHandle: handle } = post;
+  if (name !== undefined && handle !== undefined) return `${name} (@${handle})`;
+  if (name !== undefined) return name;
+  if (handle !== undefined) return `@${handle}`;
+  return null;
+};
+
 export const renderPostMarkdown = (post: Post): string => {
   const lines: string[] = [
     "---",
@@ -241,15 +249,11 @@ export const renderPostMarkdown = (post: Post): string => {
   // Inline an author byline at the top of the body so the embedding picks
   // up the natural-language form (e.g. "Mark Z. Jacobson (@mz.bsky.social)
   // wrote:") even when the frontmatter is treated as metadata-only by the
-  // tokenizer.
-  if (
-    post.authoredByDisplayName !== undefined ||
-    post.authoredByHandle !== undefined
-  ) {
-    const name = post.authoredByDisplayName ?? "Unknown author";
-    const handle =
-      post.authoredByHandle === undefined ? "" : ` (@${post.authoredByHandle})`;
-    lines.push(`${name}${handle} wrote:`, "");
+  // tokenizer. Falls through to handle-only when displayName is missing
+  // (most legacy experts have a handle but no displayName).
+  const byline = postByline(post);
+  if (byline !== null) {
+    lines.push(`${byline} wrote:`, "");
   }
   lines.push(post.text);
   return lines.join("\n");
