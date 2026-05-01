@@ -142,6 +142,12 @@ describe("EntityPostBackfillService", () => {
       yield* installPostsSchema;
       yield* seedPosts([
         {
+          uri: "x://123/status/1",
+          did: "did:x:123",
+          text: "Unsupported legacy Twitter URI.",
+          createdAt: 1714999900000
+        },
+        {
           uri: "at://did:plc:alice/app.bsky.feed.post/3kpost1",
           did: "did:plc:alice",
           text: "First post about grid stability.",

@@ -180,7 +180,10 @@ export class EntityPostBackfillService extends ServiceMap.Service<
           const offset = normalizeOffset(input?.offset);
 
           const totalRows = yield* sql<{ total: number }>`
-            SELECT COUNT(*) as total FROM posts WHERE status = 'active'
+            SELECT COUNT(*) as total
+            FROM posts
+            WHERE status = 'active'
+              AND uri LIKE 'at://%'
           `.pipe(Effect.flatMap(decodeCount));
           const total = totalRows[0]?.total ?? 0;
 
@@ -192,6 +195,7 @@ export class EntityPostBackfillService extends ServiceMap.Service<
               created_at as created_at
             FROM posts
             WHERE status = 'active'
+              AND uri LIKE 'at://%'
             ORDER BY created_at ASC
             LIMIT ${limit}
             OFFSET ${offset}
