@@ -1,4 +1,4 @@
-import { Clock, Effect, Exit, Layer, Schema, ServiceMap } from "effect";
+import { Clock, Duration, Effect, Exit, Layer, Schedule, Schema, ServiceMap } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { SqlError, UnknownError } from "effect/unstable/sql/SqlError";
 import {
@@ -33,6 +33,9 @@ export interface EntityPostBackfillResult {
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 500;
 const WRITE_CONCURRENCY = 8;
+const ROW_WRITE_RETRY_SCHEDULE = Schedule.exponential(
+  Duration.millis(100)
+).pipe(Schedule.jittered, Schedule.both(Schedule.recurs(2)));
 const BACKFILL_ASSERTED_BY = "EntityPostBackfillService" as const;
 const POST_ENTITY_TAG = asEntityTag("Post");
 const EXPERT_ENTITY_TAG = asEntityTag("Expert");
@@ -230,7 +233,12 @@ export class EntityPostBackfillService extends ServiceMap.Service<
 
           const outcomes = yield* Effect.forEach(
             rows,
-            (row) => Effect.exit(saveAndQueue(row, authorIriByDid)),
+            (row) =>
+              Effect.exit(
+                saveAndQueue(row, authorIriByDid).pipe(
+                  Effect.retry({ schedule: ROW_WRITE_RETRY_SCHEDULE })
+                )
+              ),
             { concurrency: WRITE_CONCURRENCY }
           );
           const migrated = outcomes.filter((outcome) => Exit.isSuccess(outcome))
