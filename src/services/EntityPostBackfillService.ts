@@ -101,20 +101,32 @@ export class EntityPostBackfillService extends ServiceMap.Service<
       const queue = yield* ReindexQueueService;
       const entityGraph = yield* EntityGraphRepo;
 
-      const resolveAuthorIri = Effect.fn(
-        "EntityPostBackfillService.resolveAuthorIri"
-      )(function* (did: string) {
-        const expertRecord = yield* experts.getByDid(did);
-        if (expertRecord === null) return null;
-        const expert = yield* expertFromLegacyRow({
-          did: expertRecord.did,
-          handle: expertRecord.handle,
-          displayName: expertRecord.displayName,
-          bio: expertRecord.description,
-          tier: expertRecord.tier,
-          primaryTopic: expertRecord.domain
-        });
-        return expert.iri;
+      const buildAuthorIriByDid = Effect.fn(
+        "EntityPostBackfillService.buildAuthorIriByDid"
+      )(function* (rows: ReadonlyArray<PostRow>) {
+        const dids = Array.from(new Set(rows.map((row) => row.did)));
+        if (dids.length === 0) return new Map<string, string>();
+        const expertRecords = yield* experts.getByDids(dids);
+        const entries = yield* Effect.forEach(
+          expertRecords,
+          (expertRecord) => Effect.gen(function* () {
+            const expert = yield* expertFromLegacyRow({
+              did: expertRecord.did,
+              handle: expertRecord.handle,
+              displayName: expertRecord.displayName,
+              bio: expertRecord.description,
+              tier: expertRecord.tier,
+              primaryTopic: expertRecord.domain
+            }).pipe(
+              Effect.mapError((cause) =>
+                decodeSqlError(cause, "experts.authorIri")
+              )
+            );
+            return [expertRecord.did, expert.iri] as const;
+          }),
+          { concurrency: 4 }
+        );
+        return new Map(entries);
       });
 
       const writeAuthoredByEdge = Effect.fn(
@@ -140,9 +152,9 @@ export class EntityPostBackfillService extends ServiceMap.Service<
 
       const saveAndQueue = Effect.fn(
         "EntityPostBackfillService.saveAndQueue"
-      )(function* (row: PostRow) {
+      )(function* (row: PostRow, authorIriByDid: ReadonlyMap<string, string>) {
         const basePost = yield* postFromLegacyRow(toLegacyRow(row));
-        const authorIri = yield* resolveAuthorIri(row.did);
+        const authorIri = authorIriByDid.get(row.did) ?? null;
         const post =
           authorIri === null
             ? basePost
@@ -201,11 +213,12 @@ export class EntityPostBackfillService extends ServiceMap.Service<
             OFFSET ${offset}
           `;
           const rows = yield* decodeRows(rawRows);
+          const authorIriByDid = yield* buildAuthorIriByDid(rows);
 
           const outcomes = yield* Effect.forEach(
             rows,
-            (row) => Effect.exit(saveAndQueue(row)),
-            { concurrency: 1 }
+            (row) => Effect.exit(saveAndQueue(row, authorIriByDid)),
+            { concurrency: 4 }
           );
           const migrated = outcomes.filter((outcome) => Exit.isSuccess(outcome))
             .length;
