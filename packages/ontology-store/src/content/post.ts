@@ -70,6 +70,8 @@ export class Post extends Schema.Class<Post>("Post")({
   text: Schema.String,
   postedAt: Schema.Number,
   authoredBy: Schema.optionalKey(ExpertIri),
+  authoredByDisplayName: Schema.optionalKey(Schema.String),
+  authoredByHandle: Schema.optionalKey(Schema.String),
   topics: Schema.optionalKey(Schema.Array(Schema.String))
 }) {}
 
@@ -226,10 +228,30 @@ export const renderPostMarkdown = (post: Post): string => {
   if (post.authoredBy !== undefined) {
     lines.push(`authored_by: ${post.authoredBy}`);
   }
+  if (post.authoredByDisplayName !== undefined) {
+    lines.push(`author_name: ${post.authoredByDisplayName}`);
+  }
+  if (post.authoredByHandle !== undefined) {
+    lines.push(`author_handle: ${post.authoredByHandle}`);
+  }
   if (post.topics !== undefined && post.topics.length > 0) {
     lines.push(`topics: ${post.topics.join(", ")}`);
   }
-  lines.push("---", "", post.text);
+  lines.push("---", "");
+  // Inline an author byline at the top of the body so the embedding picks
+  // up the natural-language form (e.g. "Mark Z. Jacobson (@mz.bsky.social)
+  // wrote:") even when the frontmatter is treated as metadata-only by the
+  // tokenizer.
+  if (
+    post.authoredByDisplayName !== undefined ||
+    post.authoredByHandle !== undefined
+  ) {
+    const name = post.authoredByDisplayName ?? "Unknown author";
+    const handle =
+      post.authoredByHandle === undefined ? "" : ` (@${post.authoredByHandle})`;
+    lines.push(`${name}${handle} wrote:`, "");
+  }
+  lines.push(post.text);
   return lines.join("\n");
 };
 

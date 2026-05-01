@@ -97,6 +97,41 @@ describe("Post", () => {
       });
       const body = PostUnifiedProjection.toBody(post);
       expect(body).not.toContain("authored_by:");
+      expect(body).not.toContain("author_name:");
+      expect(body).not.toContain("wrote:");
+    });
+
+    it("toBody includes author display name + handle inline so the embedding picks up the natural-language byline", () => {
+      const post = Schema.decodeUnknownSync(Post)({
+        iri: "https://w3id.org/energy-intel/post/did_plc_abc_3kgvexample",
+        did: "did:plc:abc",
+        atUri: "at://did:plc:abc/app.bsky.feed.post/3kgvexample",
+        text: "Grid stability under high renewables.",
+        postedAt: 1715000000000,
+        authoredBy: "https://w3id.org/energy-intel/expert/did_plc_abc",
+        authoredByDisplayName: "Mark Z. Jacobson",
+        authoredByHandle: "mark.bsky.social"
+      });
+      const body = PostUnifiedProjection.toBody(post);
+      expect(body).toContain("author_name: Mark Z. Jacobson");
+      expect(body).toContain("author_handle: mark.bsky.social");
+      expect(body).toContain("Mark Z. Jacobson (@mark.bsky.social) wrote:");
+    });
+
+    it("toBody handles partial author info (displayName only)", () => {
+      const post = Schema.decodeUnknownSync(Post)({
+        iri: "https://w3id.org/energy-intel/post/did_plc_xyz_3kpost",
+        did: "did:plc:xyz",
+        atUri: "at://did:plc:xyz/app.bsky.feed.post/3kpost",
+        text: "Test.",
+        postedAt: 1715000000000,
+        authoredByDisplayName: "Solo Name"
+      });
+      const body = PostUnifiedProjection.toBody(post);
+      expect(body).toContain("author_name: Solo Name");
+      expect(body).not.toContain("author_handle:");
+      expect(body).toContain("Solo Name wrote:");
+      expect(body).not.toContain("(@");
     });
   });
 

@@ -274,6 +274,8 @@ describe("EntityPostBackfillService", () => {
       expect(saved.authoredBy).toBe(
         "https://w3id.org/energy-intel/expert/did_plc_alice"
       );
+      expect(saved.authoredByDisplayName).toBe("Alice Energy");
+      expect(saved.authoredByHandle).toBe("alice.energy.example");
       expect(saved.topics).toEqual(["solar", "grid-and-infrastructure"]);
 
       const aliceLinks = yield* graph.linksOut(

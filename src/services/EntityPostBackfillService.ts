@@ -129,6 +129,12 @@ const toLegacyRow = (row: PostRow): LegacyPostRow => ({
 
 type PostValue = Schema.Schema.Type<typeof PostEntity.schema>;
 
+interface AuthorInfo {
+  readonly iri: string;
+  readonly displayName: string | null;
+  readonly handle: string | null;
+}
+
 interface TopicEdge {
   readonly sourceSlug: string;
   readonly canonicalSlug: string;
@@ -289,11 +295,11 @@ export class EntityPostBackfillService extends ServiceMap.Service<
       const ontology = yield* OntologyCatalog;
       const topicLookup = buildTopicLookup(ontology);
 
-      const buildAuthorIriByDid = Effect.fn(
-        "EntityPostBackfillService.buildAuthorIriByDid"
+      const buildAuthorByDid = Effect.fn(
+        "EntityPostBackfillService.buildAuthorByDid"
       )(function* (rows: ReadonlyArray<PostRow>) {
         const dids = Array.from(new Set(rows.map((row) => row.did)));
-        if (dids.length === 0) return new Map<string, string>();
+        if (dids.length === 0) return new Map<string, AuthorInfo>();
         const expertRecords = yield* experts.getByDids(dids);
         const entries = yield* Effect.forEach(
           expertRecords,
@@ -310,7 +316,12 @@ export class EntityPostBackfillService extends ServiceMap.Service<
                 decodeSqlError(cause, "experts.authorIri")
               )
             );
-            return [expertRecord.did, expert.iri] as const;
+            const info: AuthorInfo = {
+              iri: expert.iri,
+              displayName: expertRecord.displayName,
+              handle: expertRecord.handle
+            };
+            return [expertRecord.did, info] as const;
           }),
           { concurrency: WRITE_CONCURRENCY }
         );
@@ -319,8 +330,10 @@ export class EntityPostBackfillService extends ServiceMap.Service<
 
       const upsertAuthors = Effect.fn(
         "EntityPostBackfillService.upsertAuthors"
-      )(function* (authorIriByDid: ReadonlyMap<string, string>) {
-        const authorIris = Array.from(new Set(authorIriByDid.values()));
+      )(function* (authorByDid: ReadonlyMap<string, AuthorInfo>) {
+        const authorIris = Array.from(
+          new Set([...authorByDid.values()].map((info) => info.iri))
+        );
         yield* Effect.forEach(
           authorIris,
           (authorIri) =>
@@ -395,21 +408,28 @@ export class EntityPostBackfillService extends ServiceMap.Service<
 
       const preparePostRow = Effect.fn(
         "EntityPostBackfillService.preparePostRow"
-      )(function* (row: PostRow, authorIriByDid: ReadonlyMap<string, string>) {
+      )(function* (row: PostRow, authorByDid: ReadonlyMap<string, AuthorInfo>) {
         const basePost = yield* postFromLegacyRow(toLegacyRow(row));
-        const authorIri = authorIriByDid.get(row.did) ?? null;
+        const author = authorByDid.get(row.did) ?? null;
+        const authorIri = author?.iri ?? null;
         const topics = yield* resolveTopicEdges(row);
-        const post =
-          authorIri === null
-            ? yield* Schema.decodeUnknownEffect(PostEntity.schema)({
-                ...basePost,
-                topics: topics.canonicalSlugs
-              })
-            : yield* Schema.decodeUnknownEffect(PostEntity.schema)({
-                ...basePost,
-                authoredBy: authorIri,
-                topics: topics.canonicalSlugs
-              });
+        const authorFields =
+          author === null
+            ? {}
+            : {
+                authoredBy: author.iri,
+                ...(author.displayName === null
+                  ? {}
+                  : { authoredByDisplayName: author.displayName }),
+                ...(author.handle === null
+                  ? {}
+                  : { authoredByHandle: author.handle })
+              };
+        const post = yield* Schema.decodeUnknownEffect(PostEntity.schema)({
+          ...basePost,
+          ...authorFields,
+          topics: topics.canonicalSlugs
+        });
         const payloadJson = yield* encodePostPayload(post);
         const iri = String(post.iri);
         const authoredByTripleHash =
@@ -451,7 +471,7 @@ export class EntityPostBackfillService extends ServiceMap.Service<
       )(function* (
         db: D1DatabaseBinding,
         preparedRows: ReadonlyArray<PreparedPostRow>,
-        authorIriByDid: ReadonlyMap<string, string>
+        authorByDid: ReadonlyMap<string, AuthorInfo>
       ) {
         if (preparedRows.length === 0) return;
         const now = yield* Clock.currentTimeMillis;
@@ -592,7 +612,9 @@ export class EntityPostBackfillService extends ServiceMap.Service<
              )`
         );
 
-        const authorIris = Array.from(new Set(authorIriByDid.values()));
+        const authorIris = Array.from(
+          new Set([...authorByDid.values()].map((info) => info.iri))
+        );
         const topicIris = Array.from(
           new Set(
             preparedRows.flatMap((row) =>
@@ -718,17 +740,17 @@ export class EntityPostBackfillService extends ServiceMap.Service<
       )(function* (
         db: D1DatabaseBinding,
         rows: ReadonlyArray<PostRow>,
-        authorIriByDid: ReadonlyMap<string, string>
+        authorByDid: ReadonlyMap<string, AuthorInfo>
       ) {
         const outcomes = yield* Effect.forEach(
           rows,
-          (row) => Effect.exit(preparePostRow(row, authorIriByDid)),
+          (row) => Effect.exit(preparePostRow(row, authorByDid)),
           { concurrency: WRITE_CONCURRENCY }
         );
         const preparedRows = outcomes.flatMap((outcome) =>
           Exit.isSuccess(outcome) ? [outcome.value] : []
         );
-        yield* bulkWritePrepared(db, preparedRows, authorIriByDid);
+        yield* bulkWritePrepared(db, preparedRows, authorByDid);
         const failedUris = outcomes.flatMap((outcome, index) =>
           Exit.isSuccess(outcome) ? [] : [rows[index]?.uri ?? "unknown"]
         );
@@ -748,21 +770,28 @@ export class EntityPostBackfillService extends ServiceMap.Service<
 
       const saveAndQueue = Effect.fn(
         "EntityPostBackfillService.saveAndQueue"
-      )(function* (row: PostRow, authorIriByDid: ReadonlyMap<string, string>) {
+      )(function* (row: PostRow, authorByDid: ReadonlyMap<string, AuthorInfo>) {
         const basePost = yield* postFromLegacyRow(toLegacyRow(row));
-        const authorIri = authorIriByDid.get(row.did) ?? null;
+        const author = authorByDid.get(row.did) ?? null;
+        const authorIri = author?.iri ?? null;
         const topics = yield* resolveTopicEdges(row);
-        const post =
-          authorIri === null
-            ? yield* Schema.decodeUnknownEffect(PostEntity.schema)({
-                ...basePost,
-                topics: topics.canonicalSlugs
-              })
-            : yield* Schema.decodeUnknownEffect(PostEntity.schema)({
-                ...basePost,
-                authoredBy: authorIri,
-                topics: topics.canonicalSlugs
-              });
+        const authorFields =
+          author === null
+            ? {}
+            : {
+                authoredBy: author.iri,
+                ...(author.displayName === null
+                  ? {}
+                  : { authoredByDisplayName: author.displayName }),
+                ...(author.handle === null
+                  ? {}
+                  : { authoredByHandle: author.handle })
+              };
+        const post = yield* Schema.decodeUnknownEffect(PostEntity.schema)({
+          ...basePost,
+          ...authorFields,
+          topics: topics.canonicalSlugs
+        });
         const iri = asEntityIri(post.iri);
         const now = yield* Clock.currentTimeMillis;
 
@@ -859,16 +888,16 @@ export class EntityPostBackfillService extends ServiceMap.Service<
             OFFSET ${offset}
           `;
           const rows = yield* decodeRows(rawRows);
-          const authorIriByDid = yield* buildAuthorIriByDid(rows);
+          const authorByDid = yield* buildAuthorByDid(rows);
           const result =
             rawDb === null
               ? yield* Effect.gen(function* () {
-                  yield* upsertAuthors(authorIriByDid);
+                  yield* upsertAuthors(authorByDid);
                   const outcomes = yield* Effect.forEach(
                     rows,
                     (row) =>
                       Effect.exit(
-                        saveAndQueue(row, authorIriByDid).pipe(
+                        saveAndQueue(row, authorByDid).pipe(
                           Effect.retry({ schedule: ROW_WRITE_RETRY_SCHEDULE })
                         )
                       ),
@@ -905,7 +934,7 @@ export class EntityPostBackfillService extends ServiceMap.Service<
                     failedUris
                   };
                 })
-              : yield* backfillWithD1Batch(rawDb, rows, authorIriByDid);
+              : yield* backfillWithD1Batch(rawDb, rows, authorByDid);
 
           return {
             total,
