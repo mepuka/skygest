@@ -173,8 +173,10 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     Layer.provideMerge(
       Layer.mergeAll(
         baseLayer,
+        expertsLayer,
         entitySnapshotStoreLayer,
-        reindexQueueLayer
+        reindexQueueLayer,
+        entityGraphRepoLayer
       )
     )
   );

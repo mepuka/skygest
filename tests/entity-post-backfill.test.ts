@@ -4,14 +4,20 @@ import { Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import {
   ENTITY_GRAPH_ALL_SCHEMA_STATEMENTS,
+  EntityGraphRepo,
+  EntityGraphRepoD1,
   EntitySnapshotStore,
   EntitySnapshotStoreD1,
   PostEntity,
   PostIri,
   ReindexQueueD1,
-  ReindexQueueService
+  ReindexQueueService,
+  asEntityIri
 } from "@skygest/ontology-store";
+import { ExpertRecord as ExpertRecordSchema } from "../src/domain/bi";
+import type { ExpertRecord } from "../src/domain/bi";
 import { EntityPostBackfillService } from "../src/services/EntityPostBackfillService";
+import { ExpertsRepo } from "../src/services/ExpertsRepo";
 
 const sqliteLayer = SqliteClient.layer({ filename: ":memory:" });
 
@@ -56,23 +62,76 @@ const seedPosts = (posts: ReadonlyArray<{
     );
   });
 
-const makeServiceLayer = () => {
+const expertRecord = (input: {
+  readonly did: string;
+  readonly handle: string | null;
+  readonly displayName: string | null;
+  readonly description: string | null;
+  readonly domain: string;
+}): ExpertRecord =>
+  Schema.decodeUnknownSync(ExpertRecordSchema)({
+    ...input,
+    avatar: null,
+    source: "manual",
+    sourceRef: null,
+    shard: 0,
+    active: true,
+    tier: "energy-focused",
+    addedAt: 1,
+    lastSyncedAt: null
+  });
+
+const makeExpertsLayer = (records: ReadonlyArray<ExpertRecord>) =>
+  Layer.succeed(ExpertsRepo, {
+    upsert: () => Effect.void,
+    upsertMany: () => Effect.void,
+    getByDid: (did: string) =>
+      Effect.succeed(records.find((record) => record.did === did) ?? null),
+    setActive: () => Effect.void,
+    setLastSyncedAt: () => Effect.void,
+    listActive: () => Effect.succeed(records),
+    listActiveByShard: () => Effect.succeed([]),
+    list: () =>
+      Effect.succeed({
+        total: records.length,
+        items: records.map((record) => ({
+          did: record.did,
+          handle: record.handle,
+          displayName: record.displayName,
+          avatar: record.avatar,
+          domain: record.domain,
+          source: record.source,
+          active: record.active,
+          tier: record.tier
+        }))
+      }),
+    getByDids: (dids) =>
+      Effect.succeed(records.filter((record) => dids.includes(record.did)))
+  });
+
+const makeServiceLayer = (experts: ReadonlyArray<ExpertRecord> = []) => {
+  const expertsLayer = makeExpertsLayer(experts);
   const snapshotLayer = EntitySnapshotStoreD1.layer.pipe(
     Layer.provideMerge(sqliteLayer)
   );
   const queueLayer = ReindexQueueD1.layer.pipe(
     Layer.provideMerge(sqliteLayer)
   );
+  const graphLayer = EntityGraphRepoD1.layer.pipe(
+    Layer.provideMerge(sqliteLayer)
+  );
   const backfillLayer = EntityPostBackfillService.layer.pipe(
     Layer.provideMerge(
-      Layer.mergeAll(sqliteLayer, snapshotLayer, queueLayer)
+      Layer.mergeAll(sqliteLayer, expertsLayer, snapshotLayer, queueLayer, graphLayer)
     )
   );
 
   return Layer.mergeAll(
     sqliteLayer,
+    expertsLayer,
     snapshotLayer,
     queueLayer,
+    graphLayer,
     backfillLayer
   );
 };
@@ -106,6 +165,7 @@ describe("EntityPostBackfillService", () => {
       const backfill = yield* EntityPostBackfillService;
       const snapshots = yield* EntitySnapshotStore;
       const queue = yield* ReindexQueueService;
+      const graph = yield* EntityGraphRepo;
 
       const result = yield* backfill.backfill({ limit: 10, offset: 0 });
       expect(result).toEqual({
@@ -113,6 +173,7 @@ describe("EntityPostBackfillService", () => {
         scanned: 2,
         migrated: 2,
         queued: 2,
+        authoredByEdges: 1,
         failed: 0,
         failedUris: []
       });
@@ -129,12 +190,39 @@ describe("EntityPostBackfillService", () => {
       );
       expect(saved.text).toBe("First post about grid stability.");
       expect(saved.postedAt).toBe(1715000000000);
-      expect(saved.authoredBy).toBeUndefined();
+      expect(saved.authoredBy).toBe(
+        "https://w3id.org/energy-intel/expert/did_plc_alice"
+      );
+
+      const aliceLinks = yield* graph.linksOut(
+        asEntityIri(
+          "https://w3id.org/energy-intel/post/did_plc_alice_3kpost1"
+        )
+      );
+      expect(aliceLinks).toHaveLength(1);
+      expect(aliceLinks[0]?.link.predicateIri).toBe(
+        "https://w3id.org/energy-intel/authoredBy"
+      );
+      expect(aliceLinks[0]?.link.objectIri).toBe(
+        "https://w3id.org/energy-intel/expert/did_plc_alice"
+      );
+      expect(aliceLinks[0]?.link.effectiveFrom).toBe(1715000000000);
+      expect(aliceLinks[0]?.evidence[0]?.assertedBy).toBe(
+        "EntityPostBackfillService"
+      );
 
       const queued = yield* queue.nextBatch(0, 10);
       expect(queued).toHaveLength(2);
       expect(queued[0]?.targetEntityType).toBe("Post");
-    }).pipe(Effect.provide(makeServiceLayer()))
+    }).pipe(Effect.provide(makeServiceLayer([
+      expertRecord({
+        did: "did:plc:alice",
+        handle: "alice.energy.example",
+        displayName: "Alice Energy",
+        description: "Grid analyst.",
+        domain: "grid"
+      })
+    ])))
   );
 
   it.effect("paginates correctly and reports total", () =>
@@ -158,9 +246,11 @@ describe("EntityPostBackfillService", () => {
       expect(page1.total).toBe(5);
       expect(page1.scanned).toBe(2);
       expect(page1.migrated).toBe(2);
+      expect(page1.authoredByEdges).toBe(0);
       expect(page2.total).toBe(5);
       expect(page2.scanned).toBe(2);
       expect(page2.migrated).toBe(2);
+      expect(page2.authoredByEdges).toBe(0);
     }).pipe(Effect.provide(makeServiceLayer()))
   );
 });

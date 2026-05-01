@@ -2,14 +2,18 @@ import { Clock, Effect, Exit, Layer, Schema, ServiceMap } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { SqlError, UnknownError } from "effect/unstable/sql/SqlError";
 import {
+  EntityGraphRepo,
   EntitySnapshotStore,
   PostEntity,
   ReindexQueueService,
   asEntityIri,
   asEntityTag,
+  expertFromLegacyRow,
   postFromLegacyRow,
   type LegacyPostRow
 } from "@skygest/ontology-store";
+import type { DbError } from "../domain/errors";
+import { ExpertsRepo } from "./ExpertsRepo";
 
 export interface EntityPostBackfillInput {
   readonly limit?: number;
@@ -21,13 +25,16 @@ export interface EntityPostBackfillResult {
   readonly scanned: number;
   readonly migrated: number;
   readonly queued: number;
+  readonly authoredByEdges: number;
   readonly failed: number;
   readonly failedUris: ReadonlyArray<string>;
 }
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 500;
+const BACKFILL_ASSERTED_BY = "EntityPostBackfillService" as const;
 const POST_ENTITY_TAG = asEntityTag("Post");
+const EXPERT_ENTITY_TAG = asEntityTag("Expert");
 
 const normalizeLimit = (limit: number | undefined): number =>
   limit === undefined || !Number.isFinite(limit)
@@ -82,20 +89,67 @@ export class EntityPostBackfillService extends ServiceMap.Service<
   {
     readonly backfill: (
       input?: EntityPostBackfillInput
-    ) => Effect.Effect<EntityPostBackfillResult, SqlError>;
+    ) => Effect.Effect<EntityPostBackfillResult, SqlError | DbError>;
   }
 >()("@skygest/EntityPostBackfillService") {
   static readonly layer = Layer.effect(
     EntityPostBackfillService,
     Effect.gen(function* () {
       const sql = yield* SqlClient.SqlClient;
+      const experts = yield* ExpertsRepo;
       const snapshots = yield* EntitySnapshotStore;
       const queue = yield* ReindexQueueService;
+      const entityGraph = yield* EntityGraphRepo;
+
+      const resolveAuthorIri = Effect.fn(
+        "EntityPostBackfillService.resolveAuthorIri"
+      )(function* (did: string) {
+        const expertRecord = yield* experts.getByDid(did);
+        if (expertRecord === null) return null;
+        const expert = yield* expertFromLegacyRow({
+          did: expertRecord.did,
+          handle: expertRecord.handle,
+          displayName: expertRecord.displayName,
+          bio: expertRecord.description,
+          tier: expertRecord.tier,
+          primaryTopic: expertRecord.domain
+        });
+        return expert.iri;
+      });
+
+      const writeAuthoredByEdge = Effect.fn(
+        "EntityPostBackfillService.writeAuthoredByEdge"
+      )(function* (
+        postIri: ReturnType<typeof asEntityIri>,
+        expertIri: ReturnType<typeof asEntityIri>,
+        effectiveFrom: number
+      ) {
+        yield* entityGraph.upsertEntity(expertIri, EXPERT_ENTITY_TAG);
+        const link = yield* entityGraph.createLink({
+          predicate: "ei:authoredBy",
+          subject: { iri: postIri, type: "Post" },
+          object: { iri: expertIri, type: "Expert" },
+          effectiveFrom
+        });
+        yield* entityGraph.recordEvidence(link.linkId, {
+          assertedBy: BACKFILL_ASSERTED_BY,
+          assertionKind: "imported",
+          confidence: 1
+        });
+      });
 
       const saveAndQueue = Effect.fn(
         "EntityPostBackfillService.saveAndQueue"
       )(function* (row: PostRow) {
-        const post = yield* postFromLegacyRow(toLegacyRow(row));
+        const basePost = yield* postFromLegacyRow(toLegacyRow(row));
+        const authorIri = yield* resolveAuthorIri(row.did);
+        const post =
+          authorIri === null
+            ? basePost
+            : yield* Schema.decodeUnknownEffect(PostEntity.schema)({
+                ...basePost,
+                authoredBy: authorIri
+              });
         const iri = asEntityIri(post.iri);
         const now = yield* Clock.currentTimeMillis;
 
@@ -109,6 +163,15 @@ export class EntityPostBackfillService extends ServiceMap.Service<
           propagationDepth: 0,
           nextAttemptAt: now
         });
+        if (authorIri === null) {
+          return { authoredByEdges: 0 };
+        }
+        yield* writeAuthoredByEdge(
+          iri,
+          asEntityIri(authorIri),
+          post.postedAt
+        );
+        return { authoredByEdges: 1 };
       });
 
       const backfill = Effect.fn("EntityPostBackfillService.backfill")(
@@ -142,6 +205,13 @@ export class EntityPostBackfillService extends ServiceMap.Service<
           );
           const migrated = outcomes.filter((outcome) => Exit.isSuccess(outcome))
             .length;
+          const authoredByEdges = outcomes.reduce(
+            (total, outcome) =>
+              Exit.isSuccess(outcome)
+                ? total + outcome.value.authoredByEdges
+                : total,
+            0
+          );
           const failedUris = outcomes.flatMap((outcome, index) =>
             Exit.isSuccess(outcome) ? [] : [rows[index]?.uri ?? "unknown"]
           );
@@ -151,6 +221,7 @@ export class EntityPostBackfillService extends ServiceMap.Service<
             scanned: rows.length,
             migrated,
             queued: migrated,
+            authoredByEdges,
             failed: rows.length - migrated,
             failedUris
           };
