@@ -36,7 +36,7 @@ export interface EntityProjectionDrainOptions {
 }
 
 export const ENTITY_PROJECTION_DRAIN_DEFAULT_CONCURRENCY = 1;
-export const ENTITY_PROJECTION_DRAIN_MAX_CONCURRENCY = 8;
+export const ENTITY_PROJECTION_DRAIN_MAX_CONCURRENCY = 16;
 
 type DrainItemError =
   | EntityProjectionRegistryLookupError

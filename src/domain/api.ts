@@ -765,13 +765,13 @@ export const EntityReindexDrainInput = Schema.Struct({
   limit: Schema.optionalKey(
     Schema.Number.pipe(
       Schema.check(Schema.isInt()),
-      Schema.check(Schema.isBetween({ minimum: 1, maximum: 100 }))
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 500 }))
     )
   ),
   concurrency: Schema.optionalKey(
     Schema.Number.pipe(
       Schema.check(Schema.isInt()),
-      Schema.check(Schema.isBetween({ minimum: 1, maximum: 8 }))
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 16 }))
     )
   )
 });
