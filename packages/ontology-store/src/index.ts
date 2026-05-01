@@ -263,6 +263,7 @@ export {
   PostProjectionFixture,
   PostUnifiedProjection,
   postFacts,
+  postFromLegacyRow,
   postFromTriples,
   postIriFromAtUri,
   postTimeBucket,
@@ -270,6 +271,7 @@ export {
   renderPostMarkdown,
   renderPostSummary
 } from "./content/post";
+export type { LegacyPostRow } from "./content/post";
 
 export {
   ENERGY_INTEL_SEARCH_BINDING,

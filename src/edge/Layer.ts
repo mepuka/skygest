@@ -30,6 +30,7 @@ import {
 import { Logging } from "../platform/Logging";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { EntityExpertBackfillService } from "../services/EntityExpertBackfillService";
+import { EntityPostBackfillService } from "../services/EntityPostBackfillService";
 import { CandidatePayloadService } from "../services/CandidatePayloadService";
 import { CurationService } from "../services/CurationService";
 import { DataRefQueryService } from "../services/DataRefQueryService";
@@ -165,6 +166,15 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         entitySnapshotStoreLayer,
         reindexQueueLayer,
         entityGraphRepoLayer
+      )
+    )
+  );
+  const entityPostBackfillLayer = EntityPostBackfillService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        baseLayer,
+        entitySnapshotStoreLayer,
+        reindexQueueLayer
       )
     )
   );
@@ -313,6 +323,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         postImportServiceLayer,
         dataLayerReposLayer,
         entityExpertBackfillLayer,
+        entityPostBackfillLayer,
         entityProjectionDrainLayer
       )
     : Layer.mergeAll(
@@ -337,6 +348,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         postImportServiceLayer,
         dataLayerReposLayer,
         entityExpertBackfillLayer,
+        entityPostBackfillLayer,
         entityProjectionDrainLayer,
         enrichmentLauncherLayer
       );
@@ -362,6 +374,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     aiSearchClientLayer,
     entityProjectionDrainLayer,
     entityExpertBackfillLayer,
+    entityPostBackfillLayer,
     postImportServiceLayer,
     curationRepoLayer,
     dataLayerReposLayer,

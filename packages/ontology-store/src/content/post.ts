@@ -312,6 +312,52 @@ const derivePostIri = ({ handle }: { readonly handle: string }): PostIri =>
     `https://w3id.org/energy-intel/post/${slugify(handle)}`
   );
 
+// ---------------------------------------------------------------------------
+// Legacy migration helper (consumed by EntityPostBackfillService)
+// ---------------------------------------------------------------------------
+
+/**
+ * Subset of the legacy `posts` D1 row shape this module needs to synthesise
+ * an energy-intel Post. Defined locally because the legacy row schema lives
+ * in `src/services/d1/` (worker tree) and the ontology-store package is
+ * meant to be reachable without depending on the worker's domain layer.
+ *
+ * `cid` is optional and currently unused — kept for forward-compatibility
+ * when ATProto record-version round-tripping lands.
+ */
+export interface LegacyPostRow {
+  readonly uri: string;
+  readonly did: string;
+  readonly text: string;
+  readonly createdAt: number;
+  readonly cid?: string | null;
+}
+
+/**
+ * Build a `Post` from a legacy D1 row. Used by EntityPostBackfillService to
+ * migrate existing posts into the ontology store. The IRI is derived
+ * deterministically from the at:// URI so repeated migrations of the same
+ * post produce the same `entities` row (idempotent).
+ *
+ * `authoredBy` is intentionally left undefined here — DID→Expert IRI
+ * resolution is a separate concern that depends on the experts already
+ * being in the entity graph. A follow-up slice will add post→expert edge
+ * backfill once the resolution path is designed.
+ */
+export const postFromLegacyRow = (
+  row: LegacyPostRow
+): Effect.Effect<Post, Schema.SchemaError> => {
+  const iri = postIriFromAtUri(row.uri);
+  const candidate: Record<string, unknown> = {
+    iri,
+    did: row.did,
+    atUri: row.uri,
+    text: row.text,
+    postedAt: row.createdAt
+  };
+  return decodePost(candidate);
+};
+
 export const PostEntity = defineEntity({
   tag: "Post" as const,
   schema: Post,
