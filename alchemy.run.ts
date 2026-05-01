@@ -27,7 +27,7 @@ import type { ResolverEntrypoint } from "./src/resolver-worker";
 import type { EnrichmentEntrypoint } from "./src/worker/filter";
 
 const ACCOUNT_ID = "af578620f2ff4eae2042c031be82f7e7";
-const COMPATIBILITY_DATE = "2026-04-28";
+const COMPATIBILITY_DATE = "2026-05-01";
 const entitySearchProvisioning =
   defineUnifiedEntitySearchProvisioning(ENTITY_PROVISIONING);
 
@@ -42,6 +42,7 @@ type DeploymentConfig = {
   readonly ingestWorkerName: string;
   readonly agentWorkerName: string;
   readonly ingestCrons: ReadonlyArray<string>;
+  readonly agentCrons: ReadonlyArray<string>;
   readonly ingestVars: Readonly<Record<string, string>>;
   readonly agentVars: Readonly<Record<string, string>>;
 };
@@ -63,6 +64,7 @@ const stagingConfig: DeploymentConfig = {
   ingestWorkerName: "skygest-bi-ingest-staging",
   agentWorkerName: "skygest-bi-agent-staging",
   ingestCrons: [],
+  agentCrons: ["*/2 * * * *"],
   ingestVars: {
     ...baseVars,
     ENABLE_STAGING_OPS: "true",
@@ -83,6 +85,7 @@ const productionConfig: DeploymentConfig = {
   ingestWorkerName: "skygest-bi-ingest",
   agentWorkerName: "skygest-bi-agent",
   ingestCrons: ["*/15 * * * *"],
+  agentCrons: [],
   ingestVars: {
     ...baseVars,
     GEMINI_VISION_MODEL: "gemini-2.5-flash"
@@ -237,6 +240,7 @@ export const agentWorker = await Worker("agent", {
   delete: false,
   compatibilityDate: COMPATIBILITY_DATE,
   observability: { enabled: true },
+  crons: [...config.agentCrons],
   assets: {
     not_found_handling: "single-page-application",
     run_worker_first: ["/api/*", "/admin/*", "/mcp", "/health"]

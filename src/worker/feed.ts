@@ -1,10 +1,13 @@
 import { ConfigProvider, Effect } from "effect";
+import { EntityProjectionDrainService } from "@skygest/ontology-store";
 import { handleAdminRequest } from "../admin/Router";
 import { handleApiRequest } from "../api/Router";
 import { handleDataLayerRequest } from "../data-layer/Router";
+import { makeAdminWorkerLayer } from "../edge/Layer";
 import { toHttpErrorResponse } from "../http/ErrorMapping";
 import { handleMcpRequest } from "../mcp/Router";
 import { AppConfig } from "../platform/Config";
+import { runScopedWithLayer } from "../platform/EffectRuntime";
 import type { AgentWorkerEnvBindings } from "../platform/Env";
 import {
   authorizeOperator,
@@ -31,6 +34,8 @@ const isJsonRpcNotification = async (request: Request): Promise<boolean> => {
 };
 
 type BackgroundExecutionContext = Pick<ExecutionContext, "waitUntil">;
+const SCHEDULED_ENTITY_PROJECTION_DRAIN_LIMIT = 500;
+const SCHEDULED_ENTITY_PROJECTION_DRAIN_CONCURRENCY = 8;
 
 export const handleFeedRequest = async (
   request: Request,
@@ -159,4 +164,39 @@ export const fetch = (
 ) =>
   handleFetchWithBoundary(request, env, ctx, handleFeedRequest);
 
-export default { fetch };
+export const handleScheduledEntityProjectionDrain = (
+  env: AgentWorkerEnvBindings
+) =>
+  runScopedWithLayer(
+    Effect.gen(function* () {
+      const drain = yield* EntityProjectionDrainService;
+      const result = yield* drain.drainNext(
+        SCHEDULED_ENTITY_PROJECTION_DRAIN_LIMIT,
+        { concurrency: SCHEDULED_ENTITY_PROJECTION_DRAIN_CONCURRENCY }
+      );
+      yield* Effect.logInfo("entity projection scheduled drain").pipe(
+        Effect.annotateLogs({
+          pulled: result.pulled,
+          rendered: result.rendered,
+          failed: result.failed
+        })
+      );
+      return result;
+    }),
+    makeAdminWorkerLayer(env),
+    { operation: "AgentWorker.scheduled.entityProjectionDrain" }
+  );
+
+export const scheduled = (
+  _controller: ScheduledController,
+  env: AgentWorkerEnvBindings,
+  ctx: ExecutionContext
+) => {
+  ctx.waitUntil(
+    handleScheduledEntityProjectionDrain(env).catch((error: unknown) => {
+      console.error("entity projection scheduled drain failed", error);
+    })
+  );
+};
+
+export default { fetch, scheduled };
