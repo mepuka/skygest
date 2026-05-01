@@ -274,6 +274,16 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
 
   if (
     request.method === "POST" &&
+    pathname === "/admin/ops/entity-posts/backfill"
+  ) {
+    return {
+      action: "entity_posts_backfill",
+      scopes: ["ops:refresh"]
+    };
+  }
+
+  if (
+    request.method === "POST" &&
     pathname === "/admin/ops/entity-reindex/drain"
   ) {
     return {
