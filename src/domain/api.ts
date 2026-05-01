@@ -819,6 +819,7 @@ export const EntityExpertsBackfillOutput = Schema.Struct({
   scanned: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   migrated: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   queued: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  bearsEdges: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   failed: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
   failedDids: Schema.Array(Schema.String),
   drain: Schema.NullOr(EntityReindexDrainOutput)

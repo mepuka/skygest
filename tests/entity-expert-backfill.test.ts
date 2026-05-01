@@ -4,12 +4,15 @@ import { Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import {
   ENTITY_GRAPH_ALL_SCHEMA_STATEMENTS,
+  EntityGraphRepo,
+  EntityGraphRepoD1,
   EntitySnapshotStore,
   EntitySnapshotStoreD1,
   ExpertEntity,
   ExpertIri,
   ReindexQueueD1,
-  ReindexQueueService
+  ReindexQueueService,
+  asEntityIri
 } from "@skygest/ontology-store";
 import { ExpertRecord as ExpertRecordSchema } from "../src/domain/bi";
 import type { ExpertRecord } from "../src/domain/bi";
@@ -89,9 +92,12 @@ const makeServiceLayer = (records: ReadonlyArray<ExpertRecord>) => {
   const queueLayer = ReindexQueueD1.layer.pipe(
     Layer.provideMerge(sqliteLayer)
   );
+  const graphLayer = EntityGraphRepoD1.layer.pipe(
+    Layer.provideMerge(sqliteLayer)
+  );
   const backfillLayer = EntityExpertBackfillService.layer.pipe(
     Layer.provideMerge(
-      Layer.mergeAll(expertsLayer, snapshotLayer, queueLayer)
+      Layer.mergeAll(expertsLayer, snapshotLayer, queueLayer, graphLayer)
     )
   );
 
@@ -100,6 +106,7 @@ const makeServiceLayer = (records: ReadonlyArray<ExpertRecord>) => {
     expertsLayer,
     snapshotLayer,
     queueLayer,
+    graphLayer,
     backfillLayer
   );
 };
@@ -128,6 +135,7 @@ describe("EntityExpertBackfillService", () => {
       const backfill = yield* EntityExpertBackfillService;
       const snapshots = yield* EntitySnapshotStore;
       const queue = yield* ReindexQueueService;
+      const graph = yield* EntityGraphRepo;
 
       const result = yield* backfill.backfill({ limit: 10, offset: 0 });
 
@@ -136,6 +144,7 @@ describe("EntityExpertBackfillService", () => {
         scanned: 2,
         migrated: 2,
         queued: 2,
+        bearsEdges: 2,
         failed: 0,
         failedDids: []
       });
@@ -156,6 +165,24 @@ describe("EntityExpertBackfillService", () => {
         "Expert",
         "Expert"
       ]);
+
+      const aliceLinks = yield* graph.linksOut(
+        asEntityIri(
+          "https://w3id.org/energy-intel/expert/did_plc_alice"
+        )
+      );
+      expect(aliceLinks).toHaveLength(1);
+      expect(aliceLinks[0]?.link.predicateIri).toBe(
+        "http://purl.obolibrary.org/obo/BFO_0000053"
+      );
+      expect(aliceLinks[0]?.link.objectIri).toBe(
+        "https://w3id.org/energy-intel/energyExpertRole/default"
+      );
+      expect(aliceLinks[0]?.evidence).toHaveLength(1);
+      expect(aliceLinks[0]?.evidence[0]?.assertedBy).toBe(
+        "EntityExpertBackfillService"
+      );
+      expect(aliceLinks[0]?.evidence[0]?.assertionKind).toBe("imported");
     }).pipe(Effect.provide(makeServiceLayer(records)));
   });
 });

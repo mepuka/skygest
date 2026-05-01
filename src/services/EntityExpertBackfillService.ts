@@ -1,6 +1,7 @@
 import { Clock, Effect, Exit, Layer, ServiceMap } from "effect";
 import type { SqlError } from "effect/unstable/sql/SqlError";
 import {
+  EntityGraphRepo,
   EntitySnapshotStore,
   ExpertEntity,
   ReindexQueueService,
@@ -23,9 +24,14 @@ export interface EntityExpertBackfillResult {
   readonly scanned: number;
   readonly migrated: number;
   readonly queued: number;
+  readonly bearsEdges: number;
   readonly failed: number;
   readonly failedDids: ReadonlyArray<string>;
 }
+
+const BACKFILL_ASSERTED_BY = "EntityExpertBackfillService" as const;
+const ROLE_ENTITY_TAG = asEntityTag("EnergyExpertRole");
+const EXPERT_ENTITY_TAG = asEntityTag("Expert");
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 500;
@@ -63,6 +69,29 @@ export class EntityExpertBackfillService extends ServiceMap.Service<
       const experts = yield* ExpertsRepo;
       const snapshots = yield* EntitySnapshotStore;
       const queue = yield* ReindexQueueService;
+      const entityGraph = yield* EntityGraphRepo;
+
+      const writeRoleEdge = Effect.fn(
+        "EntityExpertBackfillService.writeRoleEdge"
+      )(function* (
+        expertIri: ReturnType<typeof asEntityIri>,
+        roleIri: string,
+        effectiveFrom: number
+      ) {
+        const roleEntityIri = asEntityIri(roleIri);
+        yield* entityGraph.upsertEntity(roleEntityIri, ROLE_ENTITY_TAG);
+        const link = yield* entityGraph.createLink({
+          predicate: "bfo:bearerOf",
+          subject: { iri: expertIri, type: "Expert" },
+          object: { iri: roleEntityIri, type: "EnergyExpertRole" },
+          effectiveFrom
+        });
+        yield* entityGraph.recordEvidence(link.linkId, {
+          assertedBy: BACKFILL_ASSERTED_BY,
+          assertionKind: "imported",
+          confidence: 1
+        });
+      });
 
       const saveAndQueue = Effect.fn(
         "EntityExpertBackfillService.saveAndQueue"
@@ -72,8 +101,9 @@ export class EntityExpertBackfillService extends ServiceMap.Service<
         const now = yield* Clock.currentTimeMillis;
 
         yield* snapshots.save(ExpertEntity, expert);
+        yield* entityGraph.upsertEntity(iri, EXPERT_ENTITY_TAG);
         yield* queue.schedule({
-          targetEntityType: asEntityTag("Expert"),
+          targetEntityType: EXPERT_ENTITY_TAG,
           targetIri: iri,
           originIri: iri,
           cause: "entity-changed",
@@ -81,6 +111,13 @@ export class EntityExpertBackfillService extends ServiceMap.Service<
           propagationDepth: 0,
           nextAttemptAt: now
         });
+
+        let bearsEdges = 0;
+        for (const roleIri of expert.roles) {
+          yield* writeRoleEdge(iri, roleIri, now);
+          bearsEdges += 1;
+        }
+        return { bearsEdges };
       });
 
       const backfill = Effect.fn("EntityExpertBackfillService.backfill")(
@@ -107,6 +144,13 @@ export class EntityExpertBackfillService extends ServiceMap.Service<
           );
           const migrated = outcomes.filter((outcome) => Exit.isSuccess(outcome))
             .length;
+          const bearsEdges = outcomes.reduce(
+            (total, outcome) =>
+              Exit.isSuccess(outcome)
+                ? total + outcome.value.bearsEdges
+                : total,
+            0
+          );
           const failedDids = [
             ...missingDids,
             ...outcomes.flatMap((outcome, index) =>
@@ -119,6 +163,7 @@ export class EntityExpertBackfillService extends ServiceMap.Service<
             scanned: page.items.length,
             migrated,
             queued: migrated,
+            bearsEdges,
             failed: page.items.length - migrated,
             failedDids
           };

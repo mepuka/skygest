@@ -2,6 +2,7 @@ import { D1Client } from "@effect/sql-d1";
 import { Effect, Layer } from "effect";
 import {
   AiSearchClient,
+  EntityGraphRepoD1,
   EntityProjectionDrainService,
   EntityProjectionRegistry,
   ENTITY_PROJECTION_SPECS,
@@ -132,6 +133,9 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const reindexQueueLayer = ReindexQueueD1.layer.pipe(
     Layer.provideMerge(baseLayer)
   );
+  const entityGraphRepoLayer = EntityGraphRepoD1.layer.pipe(
+    Layer.provideMerge(baseLayer)
+  );
   const entityProjectionRegistryLayer =
     EntityProjectionRegistry.snapshotLayer(ENTITY_PROJECTION_SPECS).pipe(
       Layer.provideMerge(entitySnapshotStoreLayer)
@@ -159,7 +163,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
       Layer.mergeAll(
         expertsLayer,
         entitySnapshotStoreLayer,
-        reindexQueueLayer
+        reindexQueueLayer,
+        entityGraphRepoLayer
       )
     )
   );
@@ -352,6 +357,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     pipelineStatusServiceLayer,
     entitySnapshotStoreLayer,
     reindexQueueLayer,
+    entityGraphRepoLayer,
     entityProjectionRegistryLayer,
     aiSearchClientLayer,
     entityProjectionDrainLayer,
