@@ -150,8 +150,7 @@ export type {
 export {
   EntityProjectionRegistry,
   EntityProjectionRegistryLookupError,
-  defineEntityProjection,
-  defineEntitySnapshotProjection
+  defineEntityProjection
 } from "./Service/EntityProjectionRegistry";
 export type {
   EntityProjectionEntry,
@@ -205,7 +204,6 @@ export {
   PodcastEpisodeIri,
   PodcastSegment,
   PodcastSegmentIri,
-  Post,
   PostIri,
   Screenshot,
   ScreenshotIri,
@@ -260,6 +258,20 @@ export {
 } from "./agent/organization";
 
 export {
+  Post,
+  PostEntity,
+  PostProjectionFixture,
+  PostUnifiedProjection,
+  postFacts,
+  postFromTriples,
+  postIriFromAtUri,
+  postTimeBucket,
+  postToTriples,
+  renderPostMarkdown,
+  renderPostSummary
+} from "./content/post";
+
+export {
   ENERGY_INTEL_SEARCH_BINDING,
   ENERGY_INTEL_SEARCH_INSTANCE,
   ENERGY_INTEL_SEARCH_NAMESPACE,
@@ -276,6 +288,8 @@ export {
   MAX_AI_SEARCH_CUSTOM_METADATA_FIELDS,
   OrganizationProvisioning,
   OrganizationRuntimeModule,
+  PostProvisioning,
+  PostRuntimeModule,
   defineEntityRuntimeCatalog,
   defineEntityRuntimeModule,
   defineEntityProvisioning,

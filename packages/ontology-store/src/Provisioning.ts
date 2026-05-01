@@ -21,6 +21,11 @@ import {
   OrganizationProjectionFixture,
   OrganizationUnifiedProjection
 } from "./agent/organization";
+import {
+  PostEntity,
+  PostProjectionFixture,
+  PostUnifiedProjection
+} from "./content/post";
 
 export const ENERGY_INTEL_SEARCH_BINDING = "ENERGY_INTEL_SEARCH" as const;
 export const ENERGY_INTEL_SEARCH_NAMESPACE = "energy-intel" as const;
@@ -247,10 +252,16 @@ export const OrganizationRuntimeModule = defineEntityRuntimeModule({
   projection: OrganizationUnifiedProjection,
   fixture: OrganizationProjectionFixture
 });
+export const PostRuntimeModule = defineEntityRuntimeModule({
+  definition: PostEntity,
+  projection: PostUnifiedProjection,
+  fixture: PostProjectionFixture
+});
 
 export const ENTITY_RUNTIME_CATALOG = defineEntityRuntimeCatalog([
   ExpertRuntimeModule,
-  OrganizationRuntimeModule
+  OrganizationRuntimeModule,
+  PostRuntimeModule
 ] as const);
 
 export const ENTITY_RUNTIME_MODULES = ENTITY_RUNTIME_CATALOG.modules;
@@ -260,6 +271,9 @@ export const ExpertProvisioning = defineEntityProvisioning(
 );
 export const OrganizationProvisioning = defineEntityProvisioning(
   OrganizationRuntimeModule.definition
+);
+export const PostProvisioning = defineEntityProvisioning(
+  PostRuntimeModule.definition
 );
 
 export const ENTITY_PROVISIONING = ENTITY_RUNTIME_CATALOG.provisioning;

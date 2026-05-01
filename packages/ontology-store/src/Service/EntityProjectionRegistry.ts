@@ -46,12 +46,6 @@ export const defineEntityProjection = <
   entry: EntityProjectionEntry<Def>
 ): EntityProjectionEntry<Def> => entry;
 
-export const defineEntitySnapshotProjection = <
-  Def extends AnyEntityDefinition
->(
-  spec: EntityProjectionSnapshotSpec<Def>
-): EntityProjectionSnapshotSpec<Def> => spec;
-
 const makeEntityProjectionRegistry = (
   entries: ReadonlyArray<EntityProjectionEntry>
 ): (typeof EntityProjectionRegistry)["Service"] => {
