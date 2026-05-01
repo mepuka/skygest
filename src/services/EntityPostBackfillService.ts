@@ -32,6 +32,7 @@ export interface EntityPostBackfillResult {
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 500;
+const WRITE_CONCURRENCY = 8;
 const BACKFILL_ASSERTED_BY = "EntityPostBackfillService" as const;
 const POST_ENTITY_TAG = asEntityTag("Post");
 const EXPERT_ENTITY_TAG = asEntityTag("Expert");
@@ -124,9 +125,21 @@ export class EntityPostBackfillService extends ServiceMap.Service<
             );
             return [expertRecord.did, expert.iri] as const;
           }),
-          { concurrency: 4 }
+          { concurrency: WRITE_CONCURRENCY }
         );
         return new Map(entries);
+      });
+
+      const upsertAuthors = Effect.fn(
+        "EntityPostBackfillService.upsertAuthors"
+      )(function* (authorIriByDid: ReadonlyMap<string, string>) {
+        const authorIris = Array.from(new Set(authorIriByDid.values()));
+        yield* Effect.forEach(
+          authorIris,
+          (authorIri) =>
+            entityGraph.upsertEntity(asEntityIri(authorIri), EXPERT_ENTITY_TAG),
+          { concurrency: WRITE_CONCURRENCY }
+        );
       });
 
       const writeAuthoredByEdge = Effect.fn(
@@ -136,7 +149,6 @@ export class EntityPostBackfillService extends ServiceMap.Service<
         expertIri: ReturnType<typeof asEntityIri>,
         effectiveFrom: number
       ) {
-        yield* entityGraph.upsertEntity(expertIri, EXPERT_ENTITY_TAG);
         const link = yield* entityGraph.createLink({
           predicate: "ei:authoredBy",
           subject: { iri: postIri, type: "Post" },
@@ -214,11 +226,12 @@ export class EntityPostBackfillService extends ServiceMap.Service<
           `;
           const rows = yield* decodeRows(rawRows);
           const authorIriByDid = yield* buildAuthorIriByDid(rows);
+          yield* upsertAuthors(authorIriByDid);
 
           const outcomes = yield* Effect.forEach(
             rows,
             (row) => Effect.exit(saveAndQueue(row, authorIriByDid)),
-            { concurrency: 4 }
+            { concurrency: WRITE_CONCURRENCY }
           );
           const migrated = outcomes.filter((outcome) => Exit.isSuccess(outcome))
             .length;
