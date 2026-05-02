@@ -5,6 +5,7 @@ import {
   Exit,
   Layer,
   Random,
+  Result,
   Schedule,
   Schema,
   ServiceMap
@@ -15,9 +16,8 @@ import {
   REINDEX_QUEUE_UPSERT_SET_CLAUSE,
   type D1DatabaseBinding,
   EntityGraphRepo,
-  EntitySnapshotStore,
+  EntityIngestionWriter,
   PostEntity,
-  ReindexQueueService,
   asEntityIri,
   asEntityTag,
   expertFromLegacyRow,
@@ -28,6 +28,8 @@ import {
   type LegacyPostRow
 } from "@skygest/ontology-store";
 import type { DbError } from "../domain/errors";
+import type { PostEnrichmentResult } from "../domain/enrichment";
+import { validateStoredEnrichment } from "../enrichment/PostEnrichmentReadModel";
 import { ExpertsRepo } from "./ExpertsRepo";
 import { OntologyCatalog } from "./OntologyCatalog";
 
@@ -100,6 +102,14 @@ const PostTopicMatchRowsFromJson = Schema.fromJsonString(
   Schema.Array(PostTopicMatchRow)
 );
 
+const PostEnrichmentRow = Schema.Struct({
+  postUri: Schema.String,
+  enrichmentType: Schema.String,
+  enrichmentPayloadJson: Schema.String,
+  enrichedAt: Schema.Number
+});
+type PostEnrichmentRow = typeof PostEnrichmentRow.Type;
+
 const decodeSqlError = (cause: unknown, operation: string): SqlError =>
   new SqlError({
     reason: new UnknownError({
@@ -117,6 +127,13 @@ const decodeRows = (rows: unknown) =>
 const decodeCount = (rows: unknown) =>
   Schema.decodeUnknownEffect(Schema.Array(PostCountRow))(rows).pipe(
     Effect.mapError((cause) => decodeSqlError(cause, "posts.count"))
+  );
+
+const decodeEnrichmentRows = (rows: unknown) =>
+  Schema.decodeUnknownEffect(Schema.Array(PostEnrichmentRow))(rows).pipe(
+    Effect.mapError((cause) =>
+      decodeSqlError(cause, "post_enrichments.list")
+    )
   );
 
 const toLegacyRow = (row: PostRow): LegacyPostRow => ({
@@ -216,6 +233,17 @@ const uniqueSorted = (
     return priorityDelta === 0 ? left.localeCompare(right) : priorityDelta;
   });
 
+const chunkValues = <A>(
+  values: ReadonlyArray<A>,
+  size: number
+): ReadonlyArray<ReadonlyArray<A>> => {
+  const chunks: A[][] = [];
+  for (let index = 0; index < values.length; index += size) {
+    chunks.push(values.slice(index, index + size));
+  }
+  return chunks;
+};
+
 const buildTopicLookup = (
   ontology: (typeof OntologyCatalog)["Service"]
 ): TopicLookup => {
@@ -274,6 +302,135 @@ const confidenceFromMatch = (match: PostTopicMatchRow): number => {
   return Math.min(1, Math.max(0, match.matchScore));
 };
 
+const nonEmpty = (value: string | null | undefined): value is string =>
+  value !== null && value !== undefined && value.trim().length > 0;
+
+const uniqueLines = (lines: ReadonlyArray<string>): ReadonlyArray<string> =>
+  Array.from(new Set(lines.map((line) => line.trim()).filter(nonEmpty)));
+
+const MAX_ENRICHMENT_LINES = 40;
+
+const formatVisionEnrichment = (
+  result: Extract<PostEnrichmentResult, { readonly kind: "vision" }>
+): ReadonlyArray<string> => {
+  const { payload } = result;
+  const lines: string[] = [`Vision summary: ${payload.summary.text}`];
+  for (const title of payload.summary.titles) {
+    lines.push(`Visible title: ${title}`);
+  }
+  for (const finding of payload.summary.keyFindings) {
+    lines.push(`Vision finding: ${finding.text}`);
+  }
+  for (const asset of payload.assets) {
+    if (asset.analysis.title !== null) {
+      lines.push(`Asset title: ${asset.analysis.title}`);
+    }
+    if (asset.analysis.altText !== null) {
+      lines.push(`Alt text: ${asset.analysis.altText}`);
+    }
+    for (const finding of asset.analysis.keyFindings) {
+      lines.push(`Asset finding: ${finding}`);
+    }
+    for (const sourceLine of asset.analysis.sourceLines) {
+      lines.push(
+        sourceLine.datasetName === null
+          ? `Source line: ${sourceLine.sourceText}`
+          : `Source line: ${sourceLine.sourceText} (${sourceLine.datasetName})`
+      );
+    }
+    for (const url of asset.analysis.visibleUrls) {
+      lines.push(`Visible URL: ${url}`);
+    }
+    for (const mention of asset.analysis.organizationMentions) {
+      lines.push(`Organization mention: ${mention.name}`);
+    }
+    for (const logo of asset.analysis.logoText) {
+      lines.push(`Logo text: ${logo}`);
+    }
+  }
+  return lines;
+};
+
+const formatSourceAttributionEnrichment = (
+  result: Extract<
+    PostEnrichmentResult,
+    { readonly kind: "source-attribution" }
+  >
+): ReadonlyArray<string> => {
+  const { payload } = result;
+  const lines: string[] = [];
+  if (payload.provider !== null) {
+    lines.push(`Source provider: ${payload.provider.providerLabel}`);
+  }
+  if (payload.contentSource !== null) {
+    if (payload.contentSource.title !== null) {
+      lines.push(`Source title: ${payload.contentSource.title}`);
+    }
+    if (payload.contentSource.domain !== null) {
+      lines.push(`Source domain: ${payload.contentSource.domain}`);
+    }
+    if (payload.contentSource.publication !== null) {
+      lines.push(`Publication: ${payload.contentSource.publication}`);
+    }
+    lines.push(`Source URL: ${payload.contentSource.url}`);
+  }
+  for (const candidate of payload.providerCandidates) {
+    lines.push(`Provider candidate: ${candidate.providerLabel}`);
+  }
+  return lines;
+};
+
+const formatGroundingEnrichment = (
+  result: Extract<PostEnrichmentResult, { readonly kind: "grounding" }>
+): ReadonlyArray<string> => [
+  `Grounded claim: ${result.payload.claimText}`,
+  ...result.payload.supportingEvidence.flatMap((evidence) => [
+    evidence.title === null
+      ? `Supporting evidence: ${evidence.url}`
+      : `Supporting evidence: ${evidence.title}`,
+    evidence.url
+  ])
+];
+
+const formatPostEnrichment = (
+  result: PostEnrichmentResult
+): ReadonlyArray<string> => {
+  switch (result.kind) {
+    case "vision":
+      return formatVisionEnrichment(result);
+    case "source-attribution":
+      return formatSourceAttributionEnrichment(result);
+    case "grounding":
+      return formatGroundingEnrichment(result);
+    case "data-ref-resolution":
+      return ["Data-reference resolution available."];
+  }
+};
+
+const enrichmentText = (
+  enrichments: ReadonlyArray<PostEnrichmentResult>
+): string | null => {
+  const lines = uniqueLines(enrichments.flatMap(formatPostEnrichment)).slice(
+    0,
+    MAX_ENRICHMENT_LINES
+  );
+  return lines.length === 0 ? null : lines.join("\n");
+};
+
+const decodeStoredEnrichment = (
+  row: PostEnrichmentRow
+): PostEnrichmentResult | null => {
+  const parsed = Schema.decodeUnknownResult(Schema.UnknownFromJsonString)(
+    row.enrichmentPayloadJson
+  );
+  if (Result.isFailure(parsed)) return null;
+  return validateStoredEnrichment({
+    enrichmentType: row.enrichmentType,
+    enrichmentPayload: parsed.success,
+    enrichedAt: row.enrichedAt
+  });
+};
+
 export class EntityPostBackfillService extends ServiceMap.Service<
   EntityPostBackfillService,
   {
@@ -287,8 +444,7 @@ export class EntityPostBackfillService extends ServiceMap.Service<
     Effect.gen(function* () {
       const sql = yield* SqlClient.SqlClient;
       const experts = yield* ExpertsRepo;
-      const snapshots = yield* EntitySnapshotStore;
-      const queue = yield* ReindexQueueService;
+      const writer = yield* EntityIngestionWriter;
       const entityGraph = yield* EntityGraphRepo;
       const rawDb = yield* optionalD1Database;
       const ontology = yield* OntologyCatalog;
@@ -325,6 +481,45 @@ export class EntityPostBackfillService extends ServiceMap.Service<
           { concurrency: WRITE_CONCURRENCY }
         );
         return new Map(entries);
+      });
+
+      const buildEnrichmentTextByPostUri = Effect.fn(
+        "EntityPostBackfillService.buildEnrichmentTextByPostUri"
+      )(function* (rows: ReadonlyArray<PostRow>) {
+        const uris = Array.from(new Set(rows.map((row) => row.uri)));
+        if (uris.length === 0) return new Map<string, string>();
+
+        const enrichmentRows = yield* Effect.forEach(
+          chunkValues(uris, 50),
+          (chunk) => {
+            const placeholders = chunk.map((uri) => sql`${uri}`);
+            return sql<PostEnrichmentRow>`
+              SELECT
+                post_uri as postUri,
+                enrichment_type as enrichmentType,
+                enrichment_payload_json as enrichmentPayloadJson,
+                enriched_at as enrichedAt
+              FROM post_enrichments
+              WHERE post_uri IN (${sql.join(", ", false)(placeholders)})
+              ORDER BY post_uri ASC, enrichment_type ASC
+            `.pipe(Effect.flatMap(decodeEnrichmentRows));
+          }
+        ).pipe(Effect.map((chunks) => chunks.flat()));
+
+        const byPostUri = new Map<string, PostEnrichmentResult[]>();
+        for (const row of enrichmentRows) {
+          const decoded = decodeStoredEnrichment(row);
+          if (decoded === null) continue;
+          const existing = byPostUri.get(row.postUri) ?? [];
+          byPostUri.set(row.postUri, [...existing, decoded]);
+        }
+
+        return new Map(
+          Array.from(byPostUri).flatMap(([postUri, enrichments]) => {
+            const text = enrichmentText(enrichments);
+            return text === null ? [] : [[postUri, text] as const];
+          })
+        );
       });
 
       const upsertAuthors = Effect.fn(
@@ -407,7 +602,11 @@ export class EntityPostBackfillService extends ServiceMap.Service<
 
       const preparePostRow = Effect.fn(
         "EntityPostBackfillService.preparePostRow"
-      )(function* (row: PostRow, authorByDid: ReadonlyMap<string, AuthorInfo>) {
+      )(function* (
+        row: PostRow,
+        authorByDid: ReadonlyMap<string, AuthorInfo>,
+        enrichmentTextByPostUri: ReadonlyMap<string, string>
+      ) {
         const basePost = yield* postFromLegacyRow(toLegacyRow(row));
         const author = authorByDid.get(row.did) ?? null;
         const authorIri = author?.iri ?? null;
@@ -427,7 +626,10 @@ export class EntityPostBackfillService extends ServiceMap.Service<
         const post = yield* Schema.decodeUnknownEffect(PostEntity.schema)({
           ...basePost,
           ...authorFields,
-          topics: topics.canonicalSlugs
+          topics: topics.canonicalSlugs,
+          ...(enrichmentTextByPostUri.has(row.uri)
+            ? { enrichmentText: enrichmentTextByPostUri.get(row.uri) }
+            : {})
         });
         const payloadJson = yield* encodePostPayload(post);
         const iri = String(post.iri);
@@ -739,11 +941,15 @@ export class EntityPostBackfillService extends ServiceMap.Service<
       )(function* (
         db: D1DatabaseBinding,
         rows: ReadonlyArray<PostRow>,
-        authorByDid: ReadonlyMap<string, AuthorInfo>
+        authorByDid: ReadonlyMap<string, AuthorInfo>,
+        enrichmentTextByPostUri: ReadonlyMap<string, string>
       ) {
         const outcomes = yield* Effect.forEach(
           rows,
-          (row) => Effect.exit(preparePostRow(row, authorByDid)),
+          (row) =>
+            Effect.exit(
+              preparePostRow(row, authorByDid, enrichmentTextByPostUri)
+            ),
           { concurrency: WRITE_CONCURRENCY }
         );
         const preparedRows = outcomes.flatMap((outcome) =>
@@ -769,7 +975,11 @@ export class EntityPostBackfillService extends ServiceMap.Service<
 
       const saveAndQueue = Effect.fn(
         "EntityPostBackfillService.saveAndQueue"
-      )(function* (row: PostRow, authorByDid: ReadonlyMap<string, AuthorInfo>) {
+      )(function* (
+        row: PostRow,
+        authorByDid: ReadonlyMap<string, AuthorInfo>,
+        enrichmentTextByPostUri: ReadonlyMap<string, string>
+      ) {
         const basePost = yield* postFromLegacyRow(toLegacyRow(row));
         const author = authorByDid.get(row.did) ?? null;
         const authorIri = author?.iri ?? null;
@@ -789,21 +999,13 @@ export class EntityPostBackfillService extends ServiceMap.Service<
         const post = yield* Schema.decodeUnknownEffect(PostEntity.schema)({
           ...basePost,
           ...authorFields,
-          topics: topics.canonicalSlugs
+          topics: topics.canonicalSlugs,
+          ...(enrichmentTextByPostUri.has(row.uri)
+            ? { enrichmentText: enrichmentTextByPostUri.get(row.uri) }
+            : {})
         });
-        const iri = asEntityIri(post.iri);
-        const now = yield* Clock.currentTimeMillis;
-
-        yield* snapshots.save(PostEntity, post);
-        yield* queue.schedule({
-          targetEntityType: POST_ENTITY_TAG,
-          targetIri: iri,
-          originIri: iri,
-          cause: "entity-changed",
-          causePriority: 0,
-          propagationDepth: 0,
-          nextAttemptAt: now
-        });
+        const writeResult = yield* writer.write(PostEntity, post);
+        const iri = writeResult.iri;
         yield* Effect.forEach(
           topics.edges,
           (edge) =>
@@ -888,6 +1090,9 @@ export class EntityPostBackfillService extends ServiceMap.Service<
           `;
           const rows = yield* decodeRows(rawRows);
           const authorByDid = yield* buildAuthorByDid(rows);
+          const enrichmentTextByPostUri = yield* buildEnrichmentTextByPostUri(
+            rows
+          );
           const result =
             rawDb === null
               ? yield* Effect.gen(function* () {
@@ -896,7 +1101,11 @@ export class EntityPostBackfillService extends ServiceMap.Service<
                     rows,
                     (row) =>
                       Effect.exit(
-                        saveAndQueue(row, authorByDid).pipe(
+                        saveAndQueue(
+                          row,
+                          authorByDid,
+                          enrichmentTextByPostUri
+                        ).pipe(
                           Effect.retry({ schedule: ROW_WRITE_RETRY_SCHEDULE })
                         )
                       ),
@@ -933,7 +1142,12 @@ export class EntityPostBackfillService extends ServiceMap.Service<
                     failedUris
                   };
                 })
-              : yield* backfillWithD1Batch(rawDb, rows, authorByDid);
+              : yield* backfillWithD1Batch(
+                  rawDb,
+                  rows,
+                  authorByDid,
+                  enrichmentTextByPostUri
+                );
 
           return {
             total,

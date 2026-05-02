@@ -1,12 +1,9 @@
-import { Clock, Effect, Exit, Layer, Schema, ServiceMap } from "effect";
+import { Effect, Exit, Layer, Schema, ServiceMap } from "effect";
 import type { SqlError } from "effect/unstable/sql/SqlError";
 import {
   EnergyTopic,
   EnergyTopicEntity,
-  EntitySnapshotStore,
-  ReindexQueueService,
-  asEntityIri,
-  asEntityTag
+  EntityIngestionWriter
 } from "@skygest/ontology-store";
 import { OntologyCatalog } from "./OntologyCatalog";
 
@@ -26,7 +23,6 @@ export interface EntityTopicBackfillResult {
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 500;
-const TOPIC_ENTITY_TAG = asEntityTag("EnergyTopic");
 
 const normalizeLimit = (limit: number | undefined): number =>
   limit === undefined || !Number.isFinite(limit)
@@ -59,8 +55,7 @@ export class EntityTopicBackfillService extends ServiceMap.Service<
     EntityTopicBackfillService,
     Effect.gen(function* () {
       const ontology = yield* OntologyCatalog;
-      const snapshots = yield* EntitySnapshotStore;
-      const queue = yield* ReindexQueueService;
+      const writer = yield* EntityIngestionWriter;
 
       const saveAndQueue = Effect.fn(
         "EntityTopicBackfillService.saveAndQueue"
@@ -80,19 +75,7 @@ export class EntityTopicBackfillService extends ServiceMap.Service<
           broaderSlugs: concept.broaderSlugs,
           narrowerSlugs: concept.narrowerSlugs
         });
-        const iri = asEntityIri(topic.iri);
-        const now = yield* Clock.currentTimeMillis;
-
-        yield* snapshots.save(EnergyTopicEntity, topic);
-        yield* queue.schedule({
-          targetEntityType: TOPIC_ENTITY_TAG,
-          targetIri: iri,
-          originIri: iri,
-          cause: "entity-changed",
-          causePriority: 0,
-          propagationDepth: 0,
-          nextAttemptAt: now
-        });
+        yield* writer.write(EnergyTopicEntity, topic);
       });
 
       const backfill = Effect.fn("EntityTopicBackfillService.backfill")(

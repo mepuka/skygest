@@ -6,6 +6,7 @@ import {
   ENTITY_GRAPH_ALL_SCHEMA_STATEMENTS,
   EntityGraphRepo,
   EntityGraphRepoD1,
+  EntityIngestionWriter,
   EntitySnapshotStore,
   EntitySnapshotStoreD1,
   ExpertEntity,
@@ -95,9 +96,12 @@ const makeServiceLayer = (records: ReadonlyArray<ExpertRecord>) => {
   const graphLayer = EntityGraphRepoD1.layer.pipe(
     Layer.provideMerge(sqliteLayer)
   );
+  const writerLayer = EntityIngestionWriter.layer.pipe(
+    Layer.provideMerge(Layer.mergeAll(snapshotLayer, queueLayer))
+  );
   const backfillLayer = EntityExpertBackfillService.layer.pipe(
     Layer.provideMerge(
-      Layer.mergeAll(expertsLayer, snapshotLayer, queueLayer, graphLayer)
+      Layer.mergeAll(expertsLayer, writerLayer, graphLayer)
     )
   );
 
@@ -107,6 +111,7 @@ const makeServiceLayer = (records: ReadonlyArray<ExpertRecord>) => {
     snapshotLayer,
     queueLayer,
     graphLayer,
+    writerLayer,
     backfillLayer
   );
 };

@@ -3,6 +3,7 @@ import { Effect, Layer } from "effect";
 import {
   AiSearchClient,
   EntityGraphRepoD1,
+  EntityIngestionWriter,
   EntityProjectionDrainService,
   EntityProjectionRegistry,
   ENTITY_PROJECTION_SPECS,
@@ -30,6 +31,7 @@ import {
 import { Logging } from "../platform/Logging";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { EntityExpertBackfillService } from "../services/EntityExpertBackfillService";
+import { EntityOrganizationBackfillService } from "../services/EntityOrganizationBackfillService";
 import { EntityPostBackfillService } from "../services/EntityPostBackfillService";
 import { EntityTopicBackfillService } from "../services/EntityTopicBackfillService";
 import { CandidatePayloadService } from "../services/CandidatePayloadService";
@@ -138,6 +140,9 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const entityGraphRepoLayer = EntityGraphRepoD1.layer.pipe(
     Layer.provideMerge(baseLayer)
   );
+  const entityIngestionWriterLayer = EntityIngestionWriter.layer.pipe(
+    Layer.provideMerge(Layer.mergeAll(entitySnapshotStoreLayer, reindexQueueLayer))
+  );
   const entityProjectionRegistryLayer =
     EntityProjectionRegistry.snapshotLayer(ENTITY_PROJECTION_SPECS).pipe(
       Layer.provideMerge(entitySnapshotStoreLayer)
@@ -164,8 +169,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     Layer.provideMerge(
       Layer.mergeAll(
         expertsLayer,
-        entitySnapshotStoreLayer,
-        reindexQueueLayer,
+        entityIngestionWriterLayer,
         entityGraphRepoLayer
       )
     )
@@ -176,21 +180,26 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         baseLayer,
         ontologyLayer,
         expertsLayer,
-        entitySnapshotStoreLayer,
-        reindexQueueLayer,
+        entityIngestionWriterLayer,
         entityGraphRepoLayer
       )
     )
   );
   const entityTopicBackfillLayer = EntityTopicBackfillService.layer.pipe(
     Layer.provideMerge(
-      Layer.mergeAll(
-        ontologyLayer,
-        entitySnapshotStoreLayer,
-        reindexQueueLayer
-      )
+      Layer.mergeAll(ontologyLayer, entityIngestionWriterLayer)
     )
   );
+  const entityOrganizationBackfillLayer =
+    EntityOrganizationBackfillService.layer.pipe(
+      Layer.provideMerge(
+        Layer.mergeAll(
+          baseLayer,
+          entityIngestionWriterLayer,
+          entityGraphRepoLayer
+        )
+      )
+    );
   const curationRepoLayer = CurationRepoD1.layer.pipe(
     Layer.provideMerge(baseLayer)
   );
@@ -338,6 +347,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         entityExpertBackfillLayer,
         entityPostBackfillLayer,
         entityTopicBackfillLayer,
+        entityOrganizationBackfillLayer,
         entityProjectionDrainLayer
       )
     : Layer.mergeAll(
@@ -364,6 +374,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         entityExpertBackfillLayer,
         entityPostBackfillLayer,
         entityTopicBackfillLayer,
+        entityOrganizationBackfillLayer,
         entityProjectionDrainLayer,
         enrichmentLauncherLayer
       );
@@ -385,12 +396,14 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     entitySnapshotStoreLayer,
     reindexQueueLayer,
     entityGraphRepoLayer,
+    entityIngestionWriterLayer,
     entityProjectionRegistryLayer,
     aiSearchClientLayer,
     entityProjectionDrainLayer,
     entityExpertBackfillLayer,
     entityPostBackfillLayer,
     entityTopicBackfillLayer,
+    entityOrganizationBackfillLayer,
     postImportServiceLayer,
     curationRepoLayer,
     dataLayerReposLayer,

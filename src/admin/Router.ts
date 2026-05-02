@@ -16,6 +16,7 @@ import {
 import { CurationService } from "../services/CurationService";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { EntityExpertBackfillService } from "../services/EntityExpertBackfillService";
+import { EntityOrganizationBackfillService } from "../services/EntityOrganizationBackfillService";
 import { EntityPostBackfillService } from "../services/EntityPostBackfillService";
 import { EntityTopicBackfillService } from "../services/EntityTopicBackfillService";
 import { EditorialService } from "../services/EditorialService";
@@ -123,6 +124,14 @@ const AdminApi = HttpApi.make("admin")
           disableCodecs: true,
           payload: AdminRequestSchemas.entityTopicsBackfill,
           success: AdminResponseSchemas.entityTopicsBackfill,
+          error: ApiErrorSchemas
+        })
+      )
+      .add(
+        HttpApiEndpoint.post("entityOrganizationsBackfill", "/admin/ops/entity-organizations/backfill", {
+          disableCodecs: true,
+          payload: AdminRequestSchemas.entityOrganizationsBackfill,
+          success: AdminResponseSchemas.entityOrganizationsBackfill,
           error: ApiErrorSchemas
         })
       )
@@ -445,6 +454,17 @@ const AdminHandlers = Layer.mergeAll(
         withAdminErrors("/admin/ops/entity-topics/backfill", Effect.gen(function* () {
           yield* ensureStagingOpsEnabled;
           const backfill = yield* EntityTopicBackfillService;
+          const backfillInput: { limit?: number; offset?: number } = {};
+          if (payload.limit !== undefined) backfillInput.limit = payload.limit;
+          if (payload.offset !== undefined) backfillInput.offset = payload.offset;
+          const result = yield* backfill.backfill(backfillInput);
+          return yield* withOptionalEntityDrain(payload, result);
+        }))
+      )
+      .handle("entityOrganizationsBackfill", ({ payload }) =>
+        withAdminErrors("/admin/ops/entity-organizations/backfill", Effect.gen(function* () {
+          yield* ensureStagingOpsEnabled;
+          const backfill = yield* EntityOrganizationBackfillService;
           const backfillInput: { limit?: number; offset?: number } = {};
           if (payload.limit !== undefined) backfillInput.limit = payload.limit;
           if (payload.offset !== undefined) backfillInput.offset = payload.offset;

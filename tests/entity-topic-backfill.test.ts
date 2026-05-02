@@ -6,6 +6,7 @@ import {
   ENTITY_GRAPH_ALL_SCHEMA_STATEMENTS,
   EnergyTopicEntity,
   EnergyTopicIri,
+  EntityIngestionWriter,
   EntitySnapshotStore,
   EntitySnapshotStoreD1,
   ReindexQueueD1,
@@ -32,9 +33,12 @@ const makeServiceLayer = () => {
   const queueLayer = ReindexQueueD1.layer.pipe(
     Layer.provideMerge(sqliteLayer)
   );
+  const writerLayer = EntityIngestionWriter.layer.pipe(
+    Layer.provideMerge(Layer.mergeAll(snapshotLayer, queueLayer))
+  );
   const backfillLayer = EntityTopicBackfillService.layer.pipe(
     Layer.provideMerge(
-      Layer.mergeAll(OntologyCatalog.layer, snapshotLayer, queueLayer)
+      Layer.mergeAll(OntologyCatalog.layer, writerLayer)
     )
   );
 
@@ -43,6 +47,7 @@ const makeServiceLayer = () => {
     OntologyCatalog.layer,
     snapshotLayer,
     queueLayer,
+    writerLayer,
     backfillLayer
   );
 };

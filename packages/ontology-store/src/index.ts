@@ -175,6 +175,13 @@ export {
 } from "./Service/EntityRegistry";
 export type { RegisteredEntity } from "./Service/EntityRegistry";
 export {
+  EntityIngestionWriter
+} from "./Service/EntityIngestionWriter";
+export type {
+  EntityIngestionWriteOptions,
+  EntityIngestionWriteResult
+} from "./Service/EntityIngestionWriter";
+export {
   REINDEX_MAX_PROPAGATION_DEPTH,
   ReindexDepthExceededError,
   ReindexQueueService
