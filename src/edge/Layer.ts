@@ -31,6 +31,7 @@ import { Logging } from "../platform/Logging";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { EntityExpertBackfillService } from "../services/EntityExpertBackfillService";
 import { EntityPostBackfillService } from "../services/EntityPostBackfillService";
+import { EntityTopicBackfillService } from "../services/EntityTopicBackfillService";
 import { CandidatePayloadService } from "../services/CandidatePayloadService";
 import { CurationService } from "../services/CurationService";
 import { DataRefQueryService } from "../services/DataRefQueryService";
@@ -181,6 +182,15 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
       )
     )
   );
+  const entityTopicBackfillLayer = EntityTopicBackfillService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        ontologyLayer,
+        entitySnapshotStoreLayer,
+        reindexQueueLayer
+      )
+    )
+  );
   const curationRepoLayer = CurationRepoD1.layer.pipe(
     Layer.provideMerge(baseLayer)
   );
@@ -327,6 +337,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         dataLayerReposLayer,
         entityExpertBackfillLayer,
         entityPostBackfillLayer,
+        entityTopicBackfillLayer,
         entityProjectionDrainLayer
       )
     : Layer.mergeAll(
@@ -352,6 +363,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         dataLayerReposLayer,
         entityExpertBackfillLayer,
         entityPostBackfillLayer,
+        entityTopicBackfillLayer,
         entityProjectionDrainLayer,
         enrichmentLauncherLayer
       );
@@ -378,6 +390,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     entityProjectionDrainLayer,
     entityExpertBackfillLayer,
     entityPostBackfillLayer,
+    entityTopicBackfillLayer,
     postImportServiceLayer,
     curationRepoLayer,
     dataLayerReposLayer,

@@ -160,7 +160,7 @@ describe("EntityContextService", () => {
       yield* graph.upsertEntity(postIri, asEntityTag("Post"));
       yield* graph.upsertEntity(topicIri, asEntityTag("EnergyTopic"));
       const link = yield* graph.createLink({
-        predicate: "ei:aboutTechnology",
+        predicate: "ei:mentions",
         subject: { iri: postIri, type: "Post" },
         object: { iri: topicIri, type: "EnergyTopic" },
         effectiveFrom: 10

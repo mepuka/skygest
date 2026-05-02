@@ -60,8 +60,7 @@ const ENERGY_TOPIC_ENTITY_TAG = asEntityTag("EnergyTopic");
 const DEFAULT_GRAPH_IRI = "urn:skygest:graph:default";
 const COALESCE_WINDOW_MS = 30_000;
 const AUTHORED_BY_PREDICATE_IRI = predicateSpec("ei:authoredBy").iri;
-const ABOUT_TECHNOLOGY_PREDICATE_IRI =
-  predicateSpec("ei:aboutTechnology").iri;
+const TOPIC_MENTION_PREDICATE_IRI = predicateSpec("ei:mentions").iri;
 const UNKNOWN_TOPIC_PRIORITY = 10_000;
 
 const normalizeLimit = (limit: number | undefined): number =>
@@ -447,7 +446,7 @@ export class EntityPostBackfillService extends ServiceMap.Service<
             Effect.gen(function* () {
               const tripleHash = yield* hashTriple(
                 iri,
-                ABOUT_TECHNOLOGY_PREDICATE_IRI,
+                TOPIC_MENTION_PREDICATE_IRI,
                 edge.iri,
                 DEFAULT_GRAPH_IRI
               );
@@ -704,7 +703,7 @@ export class EntityPostBackfillService extends ServiceMap.Service<
                 yield* Random.nextUUIDv4,
                 edge.tripleHash,
                 row.iri,
-                ABOUT_TECHNOLOGY_PREDICATE_IRI,
+                TOPIC_MENTION_PREDICATE_IRI,
                 edge.iri,
                 DEFAULT_GRAPH_IRI,
                 POST_ENTITY_TAG,
@@ -815,7 +814,7 @@ export class EntityPostBackfillService extends ServiceMap.Service<
                 ENERGY_TOPIC_ENTITY_TAG
               );
               const link = yield* entityGraph.createLink({
-                predicate: "ei:aboutTechnology",
+                predicate: "ei:mentions",
                 subject: { iri, type: "Post" },
                 object: { iri: topicIri, type: "EnergyTopic" },
                 effectiveFrom: post.postedAt

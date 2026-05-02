@@ -870,6 +870,44 @@ export type EntityPostsBackfillOutput = Schema.Schema.Type<
   typeof EntityPostsBackfillOutput
 >;
 
+export const EntityTopicsBackfillInput = Schema.Struct({
+  limit: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 500 }))
+    )
+  ),
+  offset: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isGreaterThanOrEqualTo(0))
+    )
+  ),
+  drain: Schema.optionalKey(Schema.Boolean),
+  drainConcurrency: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 8 }))
+    )
+  )
+});
+export type EntityTopicsBackfillInput = Schema.Schema.Type<
+  typeof EntityTopicsBackfillInput
+>;
+
+export const EntityTopicsBackfillOutput = Schema.Struct({
+  total: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  scanned: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  migrated: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  queued: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failed: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failedIris: Schema.Array(Schema.String),
+  drain: Schema.NullOr(EntityReindexDrainOutput)
+});
+export type EntityTopicsBackfillOutput = Schema.Schema.Type<
+  typeof EntityTopicsBackfillOutput
+>;
+
 // ---------------------------------------------------------------------------
 // Import schemas (Twitter cross-post pipeline)
 // ---------------------------------------------------------------------------
@@ -1147,6 +1185,7 @@ export const AdminRequestSchemas = {
   dataLayerAuditPath: DataLayerAuditPathParams,
   entityExpertsBackfill: EntityExpertsBackfillInput,
   entityPostsBackfill: EntityPostsBackfillInput,
+  entityTopicsBackfill: EntityTopicsBackfillInput,
   entityReindexDrain: EntityReindexDrainInput
 } as const;
 
@@ -1168,6 +1207,7 @@ export const AdminResponseSchemas = {
   stats: StagingStats,
   entityExpertsBackfill: EntityExpertsBackfillOutput,
   entityPostsBackfill: EntityPostsBackfillOutput,
+  entityTopicsBackfill: EntityTopicsBackfillOutput,
   entityReindexDrain: EntityReindexDrainOutput,
   dataLayerEntity: DataLayerRegistryEntity,
   dataLayerEntitiesPage: DataLayerEntityPageOutput,

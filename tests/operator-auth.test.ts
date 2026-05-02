@@ -149,6 +149,13 @@ describe("operator request policies", () => {
     ).toEqual(["ops:refresh"]);
     expect(
       requiredOperatorScopes(
+        new Request("https://skygest.local/admin/ops/entity-topics/backfill", {
+          method: "POST"
+        })
+      )
+    ).toEqual(["ops:refresh"]);
+    expect(
+      requiredOperatorScopes(
         new Request("https://skygest.local/admin/ops/entity-reindex/drain", {
           method: "POST"
         })
@@ -243,6 +250,13 @@ describe("operator request policies", () => {
         })
       )
     ).toBe("entity_posts_backfill");
+    expect(
+      operatorRequestAction(
+        new Request("https://skygest.local/admin/ops/entity-topics/backfill", {
+          method: "POST"
+        })
+      )
+    ).toBe("entity_topics_backfill");
     expect(
       operatorRequestAction(
         new Request("https://skygest.local/admin/ops/entity-reindex/drain", {

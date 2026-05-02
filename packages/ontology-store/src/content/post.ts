@@ -419,9 +419,9 @@ export const PostEntity = defineEntity({
       target: "Expert",
       cardinality: "one"
     },
-    aboutTechnology: {
+    mentionsTopic: {
       direction: "outbound",
-      predicate: predicate(EI.aboutTechnology),
+      predicate: predicate(EI.mentions),
       target: "EnergyTopic",
       cardinality: "many"
     }

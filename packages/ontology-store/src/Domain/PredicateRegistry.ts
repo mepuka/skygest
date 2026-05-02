@@ -16,7 +16,7 @@ export const PREDICATES = {
   "ei:mentions": {
     iri: predicate(EI.mentions),
     subject: ["Expert", "Post"],
-    object: ["Post", "Article", "Dataset", "Organization", "Expert"]
+    object: ["Post", "Article", "Dataset", "Organization", "Expert", "EnergyTopic"]
   },
   "ei:authoredBy": {
     iri: predicate(EI.authoredBy),
@@ -25,7 +25,7 @@ export const PREDICATES = {
   },
   "ei:aboutTechnology": {
     iri: predicate(EI.aboutTechnology),
-    subject: ["Post"],
+    subject: ["CanonicalMeasurementClaim"],
     object: ["EnergyTopic"]
   },
   "bfo:bearerOf": {

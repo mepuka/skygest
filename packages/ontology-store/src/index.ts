@@ -280,6 +280,19 @@ export {
 export type { LegacyPostRow } from "./content/post";
 
 export {
+  EnergyTopic,
+  EnergyTopicEntity,
+  EnergyTopicIri,
+  EnergyTopicProjectionFixture,
+  EnergyTopicUnifiedProjection,
+  energyTopicFacts,
+  energyTopicFromTriples,
+  energyTopicToTriples,
+  renderEnergyTopicMarkdown,
+  renderEnergyTopicSummary
+} from "./concept/energy-topic";
+
+export {
   ENERGY_INTEL_SEARCH_BINDING,
   ENERGY_INTEL_SEARCH_INSTANCE,
   ENERGY_INTEL_SEARCH_NAMESPACE,
@@ -291,6 +304,8 @@ export {
   ENTITY_SEARCH_CUSTOM_METADATA,
   ENTITY_SEARCH_PROVISIONING,
   EntityRuntimeCatalogError,
+  EnergyTopicProvisioning,
+  EnergyTopicRuntimeModule,
   ExpertProvisioning,
   ExpertRuntimeModule,
   MAX_AI_SEARCH_CUSTOM_METADATA_FIELDS,

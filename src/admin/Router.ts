@@ -17,6 +17,7 @@ import { CurationService } from "../services/CurationService";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { EntityExpertBackfillService } from "../services/EntityExpertBackfillService";
 import { EntityPostBackfillService } from "../services/EntityPostBackfillService";
+import { EntityTopicBackfillService } from "../services/EntityTopicBackfillService";
 import { EditorialService } from "../services/EditorialService";
 import { EditorialPickBundleReadService } from "../services/EditorialPickBundleReadService";
 import { StagingOpsService } from "../services/StagingOpsService";
@@ -114,6 +115,14 @@ const AdminApi = HttpApi.make("admin")
           disableCodecs: true,
           payload: AdminRequestSchemas.entityPostsBackfill,
           success: AdminResponseSchemas.entityPostsBackfill,
+          error: ApiErrorSchemas
+        })
+      )
+      .add(
+        HttpApiEndpoint.post("entityTopicsBackfill", "/admin/ops/entity-topics/backfill", {
+          disableCodecs: true,
+          payload: AdminRequestSchemas.entityTopicsBackfill,
+          success: AdminResponseSchemas.entityTopicsBackfill,
           error: ApiErrorSchemas
         })
       )
@@ -413,6 +422,32 @@ const AdminHandlers = Layer.mergeAll(
         withAdminErrors("/admin/ops/entity-posts/backfill", Effect.gen(function* () {
           yield* ensureStagingOpsEnabled;
           const backfill = yield* EntityPostBackfillService;
+          const backfillInput: { limit?: number; offset?: number } = {};
+          if (payload.limit !== undefined) backfillInput.limit = payload.limit;
+          if (payload.offset !== undefined) backfillInput.offset = payload.offset;
+          const result = yield* backfill.backfill(backfillInput);
+          if (payload.drain !== true) {
+            return { ...result, drain: null };
+          }
+          if (result.queued === 0) {
+            return {
+              ...result,
+              drain: { pulled: 0, rendered: 0, failed: 0 }
+            };
+          }
+          const drain = yield* EntityProjectionDrainService;
+          const drainOptions =
+            payload.drainConcurrency === undefined
+              ? undefined
+              : { concurrency: payload.drainConcurrency };
+          const drainResult = yield* drain.drainNext(result.queued, drainOptions);
+          return { ...result, drain: drainResult };
+        }))
+      )
+      .handle("entityTopicsBackfill", ({ payload }) =>
+        withAdminErrors("/admin/ops/entity-topics/backfill", Effect.gen(function* () {
+          yield* ensureStagingOpsEnabled;
+          const backfill = yield* EntityTopicBackfillService;
           const backfillInput: { limit?: number; offset?: number } = {};
           if (payload.limit !== undefined) backfillInput.limit = payload.limit;
           if (payload.offset !== undefined) backfillInput.offset = payload.offset;

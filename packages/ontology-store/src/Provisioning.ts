@@ -26,6 +26,11 @@ import {
   PostProjectionFixture,
   PostUnifiedProjection
 } from "./content/post";
+import {
+  EnergyTopicEntity,
+  EnergyTopicProjectionFixture,
+  EnergyTopicUnifiedProjection
+} from "./concept/energy-topic";
 import { AUTO_RUNTIME_MODULES } from "./auto-entities";
 
 export const ENERGY_INTEL_SEARCH_BINDING = "ENERGY_INTEL_SEARCH" as const;
@@ -258,11 +263,17 @@ export const PostRuntimeModule = defineEntityRuntimeModule({
   projection: PostUnifiedProjection,
   fixture: PostProjectionFixture
 });
+export const EnergyTopicRuntimeModule = defineEntityRuntimeModule({
+  definition: EnergyTopicEntity,
+  projection: EnergyTopicUnifiedProjection,
+  fixture: EnergyTopicProjectionFixture
+});
 
 export const ENTITY_RUNTIME_CATALOG = defineEntityRuntimeCatalog([
   ExpertRuntimeModule,
   OrganizationRuntimeModule,
   PostRuntimeModule,
+  EnergyTopicRuntimeModule,
   ...AUTO_RUNTIME_MODULES
 ] as const);
 
@@ -276,6 +287,9 @@ export const OrganizationProvisioning = defineEntityProvisioning(
 );
 export const PostProvisioning = defineEntityProvisioning(
   PostRuntimeModule.definition
+);
+export const EnergyTopicProvisioning = defineEntityProvisioning(
+  EnergyTopicRuntimeModule.definition
 );
 
 export const ENTITY_PROVISIONING = ENTITY_RUNTIME_CATALOG.provisioning;
