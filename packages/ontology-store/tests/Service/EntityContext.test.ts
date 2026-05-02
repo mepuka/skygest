@@ -13,6 +13,8 @@ import {
   ExpertProjectionFixture,
   OrganizationEntity,
   OrganizationProjectionFixture,
+  PostEntity,
+  PostProjectionFixture,
   asEntityIri,
   asEntityTag,
   type AnyEntityDefinition,
@@ -68,6 +70,10 @@ const makeTestLayer = () => {
       storage: makeMemoryStorage(OrganizationEntity, [
         OrganizationProjectionFixture.fixture
       ])
+    },
+    {
+      definition: PostEntity,
+      storage: makeMemoryStorage(PostEntity, [PostProjectionFixture.fixture])
     }
   ]);
   const baseLayer = Layer.mergeAll(
@@ -111,6 +117,7 @@ describe("EntityContextService", () => {
       expect(assembled.linksOut).toHaveLength(1);
       expect(assembled.linksIn).toHaveLength(0);
       expect(assembled.neighbors).toHaveLength(1);
+      expect(assembled.unhydratedNeighbors).toHaveLength(0);
       expect(assembled.neighbors[0]?.entityType).toBe("Organization");
       expect(assembled.neighbors[0]?.summary).toBe(
         "Fixture Organization, research on grid"
@@ -136,6 +143,43 @@ describe("EntityContextService", () => {
       expect(assembled.linksOut).toHaveLength(0);
       expect(assembled.linksIn).toHaveLength(0);
       expect(assembled.neighbors).toHaveLength(0);
+      expect(assembled.unhydratedNeighbors).toHaveLength(0);
+    }).pipe(Effect.provide(makeTestLayer()))
+  );
+
+  it.effect("keeps graph edges when a concept neighbor is not snapshot-backed", () =>
+    Effect.gen(function* () {
+      yield* installSchema;
+      const graph = yield* EntityGraphRepo;
+      const context = yield* EntityContextService;
+      const postIri = asEntityIri(PostProjectionFixture.fixture.iri);
+      const topicIri = asEntityIri(
+        "http://example.org/ontology/energy-news#SolarPV"
+      );
+
+      yield* graph.upsertEntity(postIri, asEntityTag("Post"));
+      yield* graph.upsertEntity(topicIri, asEntityTag("EnergyTopic"));
+      const link = yield* graph.createLink({
+        predicate: "ei:aboutTechnology",
+        subject: { iri: postIri, type: "Post" },
+        object: { iri: topicIri, type: "EnergyTopic" },
+        effectiveFrom: 10
+      });
+      yield* graph.recordEvidence(link.linkId, {
+        assertedBy: "agent:test",
+        assertionKind: "curated",
+        confidence: 0.95
+      });
+
+      const assembled = yield* context.assemble(postIri, {
+        minConfidence: 0.9
+      });
+
+      expect(assembled.linksOut).toHaveLength(1);
+      expect(assembled.neighbors).toHaveLength(0);
+      expect(assembled.unhydratedNeighbors).toHaveLength(1);
+      expect(assembled.unhydratedNeighbors[0]?.entityType).toBe("EnergyTopic");
+      expect(assembled.unhydratedNeighbors[0]?.iri).toBe(topicIri);
     }).pipe(Effect.provide(makeTestLayer()))
   );
 });

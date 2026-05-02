@@ -1,4 +1,4 @@
-import { Effect, Layer, Schema, ServiceMap } from "effect";
+import { Cause, Effect, Exit, Layer, Schema, ServiceMap } from "effect";
 import type { SqlError } from "effect/unstable/sql/SqlError";
 
 import type { EntityNotFoundError } from "../Domain/Errors";
@@ -24,11 +24,20 @@ export interface EntityContextNeighbor extends RenderedEntityContextNode {
   readonly via: EntityLink;
 }
 
+export interface UnhydratedEntityContextNeighbor {
+  readonly iri: EntityIri;
+  readonly entityType: EntityTag;
+  readonly direction: "outbound" | "inbound";
+  readonly via: EntityLink;
+  readonly message: string;
+}
+
 export interface EntityContext {
   readonly entity: RenderedEntityContextNode;
   readonly linksOut: ReadonlyArray<EntityLinkWithEvidence>;
   readonly linksIn: ReadonlyArray<EntityLinkWithEvidence>;
   readonly neighbors: ReadonlyArray<EntityContextNeighbor>;
+  readonly unhydratedNeighbors: ReadonlyArray<UnhydratedEntityContextNeighbor>;
 }
 
 export interface EntityContextOptions {
@@ -57,6 +66,13 @@ type EntityContextError =
 
 const messageFromUnknown = (cause: unknown): string =>
   cause instanceof Error ? cause.message : String(cause);
+
+const messageFromCause = (cause: Cause.Cause<unknown>): string => {
+  const error = Cause.findErrorOption(cause);
+  return error._tag === "Some"
+    ? messageFromUnknown(error.value)
+    : Cause.pretty(cause);
+};
 
 const queryOptions = (opts: EntityContextOptions): LinkQueryOptions => ({
   limit: opts.limit ?? 25,
@@ -140,6 +156,24 @@ export class EntityContextService extends ServiceMap.Service<
           return { ...node, direction, via: link };
         });
 
+      const unhydratedNeighbor = (
+        direction: "outbound" | "inbound",
+        link: EntityLink,
+        cause: Cause.Cause<unknown>
+      ): UnhydratedEntityContextNeighbor => {
+        const neighborIri =
+          direction === "outbound" ? link.objectIri : link.subjectIri;
+        const neighborType =
+          direction === "outbound" ? link.objectType : link.subjectType;
+        return {
+          iri: neighborIri ?? link.subjectIri,
+          entityType: neighborType,
+          direction,
+          via: link,
+          message: messageFromCause(cause)
+        };
+      };
+
       const assemble = (iri: EntityIri, options: EntityContextOptions = {}) =>
         Effect.gen(function* () {
           const includeOutbound = options.includeOutbound ?? true;
@@ -153,8 +187,7 @@ export class EntityContextService extends ServiceMap.Service<
             ? yield* graph.linksIn(iri, opts)
             : [];
           const seen = new Set<string>();
-          const neighbors = yield* Effect.forEach(
-            [
+          const neighborLinks = [
               ...linksOut.map((item) => ({
                 direction: "outbound" as const,
                 link: item.link
@@ -173,14 +206,30 @@ export class EntityContextService extends ServiceMap.Service<
               }
               seen.add(neighborIri);
               return true;
-            }),
-            (item) => renderNeighbor(item.direction, item.link)
+            });
+          const neighborOutcomes = yield* Effect.forEach(
+            neighborLinks,
+            (item) => Effect.exit(renderNeighbor(item.direction, item.link))
           );
+          const neighbors: Array<EntityContextNeighbor> = [];
+          const unhydratedNeighbors: Array<UnhydratedEntityContextNeighbor> = [];
+          for (const [index, outcome] of neighborOutcomes.entries()) {
+            const item = neighborLinks[index];
+            if (item === undefined) continue;
+            if (Exit.isSuccess(outcome)) {
+              neighbors.push(outcome.value);
+            } else {
+              unhydratedNeighbors.push(
+                unhydratedNeighbor(item.direction, item.link, outcome.cause)
+              );
+            }
+          }
           return {
             entity,
             linksOut,
             linksIn,
-            neighbors
+            neighbors,
+            unhydratedNeighbors
           };
         });
 
