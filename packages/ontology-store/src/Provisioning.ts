@@ -26,6 +26,7 @@ import {
   PostProjectionFixture,
   PostUnifiedProjection
 } from "./content/post";
+import { AUTO_RUNTIME_MODULES } from "./auto-entities";
 
 export const ENERGY_INTEL_SEARCH_BINDING = "ENERGY_INTEL_SEARCH" as const;
 export const ENERGY_INTEL_SEARCH_NAMESPACE = "energy-intel" as const;
@@ -261,7 +262,8 @@ export const PostRuntimeModule = defineEntityRuntimeModule({
 export const ENTITY_RUNTIME_CATALOG = defineEntityRuntimeCatalog([
   ExpertRuntimeModule,
   OrganizationRuntimeModule,
-  PostRuntimeModule
+  PostRuntimeModule,
+  ...AUTO_RUNTIME_MODULES
 ] as const);
 
 export const ENTITY_RUNTIME_MODULES = ENTITY_RUNTIME_CATALOG.modules;
