@@ -256,6 +256,33 @@ const ensureStagingOpsEnabled = Effect.gen(function* () {
   }
 });
 
+const withOptionalEntityDrain = <A extends { readonly queued: number }>(
+  payload: {
+    readonly drain?: boolean;
+    readonly drainConcurrency?: number;
+  },
+  result: A
+) =>
+  Effect.gen(function* () {
+    if (payload.drain !== true) {
+      return { ...result, drain: null };
+    }
+    if (result.queued === 0) {
+      return {
+        ...result,
+        drain: { pulled: 0, rendered: 0, failed: 0 }
+      };
+    }
+
+    const drain = yield* EntityProjectionDrainService;
+    const drainOptions =
+      payload.drainConcurrency === undefined
+        ? undefined
+        : { concurrency: payload.drainConcurrency };
+    const drainResult = yield* drain.drainNext(result.queued, drainOptions);
+    return { ...result, drain: drainResult };
+  });
+
 // ---------------------------------------------------------------------------
 // Import helpers
 // ---------------------------------------------------------------------------
@@ -400,22 +427,7 @@ const AdminHandlers = Layer.mergeAll(
           if (payload.offset !== undefined) backfillInput.offset = payload.offset;
           if (payload.active !== undefined) backfillInput.active = payload.active;
           const result = yield* backfill.backfill(backfillInput);
-          if (payload.drain !== true) {
-            return { ...result, drain: null };
-          }
-          if (result.queued === 0) {
-            return {
-              ...result,
-              drain: { pulled: 0, rendered: 0, failed: 0 }
-            };
-          }
-          const drain = yield* EntityProjectionDrainService;
-          const drainOptions =
-            payload.drainConcurrency === undefined
-              ? undefined
-              : { concurrency: payload.drainConcurrency };
-          const drainResult = yield* drain.drainNext(result.queued, drainOptions);
-          return { ...result, drain: drainResult };
+          return yield* withOptionalEntityDrain(payload, result);
         }))
       )
       .handle("entityPostsBackfill", ({ payload }) =>
@@ -426,22 +438,7 @@ const AdminHandlers = Layer.mergeAll(
           if (payload.limit !== undefined) backfillInput.limit = payload.limit;
           if (payload.offset !== undefined) backfillInput.offset = payload.offset;
           const result = yield* backfill.backfill(backfillInput);
-          if (payload.drain !== true) {
-            return { ...result, drain: null };
-          }
-          if (result.queued === 0) {
-            return {
-              ...result,
-              drain: { pulled: 0, rendered: 0, failed: 0 }
-            };
-          }
-          const drain = yield* EntityProjectionDrainService;
-          const drainOptions =
-            payload.drainConcurrency === undefined
-              ? undefined
-              : { concurrency: payload.drainConcurrency };
-          const drainResult = yield* drain.drainNext(result.queued, drainOptions);
-          return { ...result, drain: drainResult };
+          return yield* withOptionalEntityDrain(payload, result);
         }))
       )
       .handle("entityTopicsBackfill", ({ payload }) =>
@@ -452,22 +449,7 @@ const AdminHandlers = Layer.mergeAll(
           if (payload.limit !== undefined) backfillInput.limit = payload.limit;
           if (payload.offset !== undefined) backfillInput.offset = payload.offset;
           const result = yield* backfill.backfill(backfillInput);
-          if (payload.drain !== true) {
-            return { ...result, drain: null };
-          }
-          if (result.queued === 0) {
-            return {
-              ...result,
-              drain: { pulled: 0, rendered: 0, failed: 0 }
-            };
-          }
-          const drain = yield* EntityProjectionDrainService;
-          const drainOptions =
-            payload.drainConcurrency === undefined
-              ? undefined
-              : { concurrency: payload.drainConcurrency };
-          const drainResult = yield* drain.drainNext(result.queued, drainOptions);
-          return { ...result, drain: drainResult };
+          return yield* withOptionalEntityDrain(payload, result);
         }))
       )
       .handle("entityReindexDrain", ({ payload }) =>

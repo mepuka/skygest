@@ -248,22 +248,22 @@ export const defineEntityRuntimeCatalog = <
 
 // The concrete runtime registry is intentionally limited to ontology-store
 // modules backed by generated IRIs and pinned TTL/codegen drift tests.
-export const ExpertRuntimeModule = defineEntityRuntimeModule({
+const ExpertRuntimeModule = defineEntityRuntimeModule({
   definition: ExpertEntity,
   projection: ExpertUnifiedProjection,
   fixture: ExpertProjectionFixture
 });
-export const OrganizationRuntimeModule = defineEntityRuntimeModule({
+const OrganizationRuntimeModule = defineEntityRuntimeModule({
   definition: OrganizationEntity,
   projection: OrganizationUnifiedProjection,
   fixture: OrganizationProjectionFixture
 });
-export const PostRuntimeModule = defineEntityRuntimeModule({
+const PostRuntimeModule = defineEntityRuntimeModule({
   definition: PostEntity,
   projection: PostUnifiedProjection,
   fixture: PostProjectionFixture
 });
-export const EnergyTopicRuntimeModule = defineEntityRuntimeModule({
+const EnergyTopicRuntimeModule = defineEntityRuntimeModule({
   definition: EnergyTopicEntity,
   projection: EnergyTopicUnifiedProjection,
   fixture: EnergyTopicProjectionFixture
@@ -278,19 +278,6 @@ export const ENTITY_RUNTIME_CATALOG = defineEntityRuntimeCatalog([
 ] as const);
 
 export const ENTITY_RUNTIME_MODULES = ENTITY_RUNTIME_CATALOG.modules;
-
-export const ExpertProvisioning = defineEntityProvisioning(
-  ExpertRuntimeModule.definition
-);
-export const OrganizationProvisioning = defineEntityProvisioning(
-  OrganizationRuntimeModule.definition
-);
-export const PostProvisioning = defineEntityProvisioning(
-  PostRuntimeModule.definition
-);
-export const EnergyTopicProvisioning = defineEntityProvisioning(
-  EnergyTopicRuntimeModule.definition
-);
 
 export const ENTITY_PROVISIONING = ENTITY_RUNTIME_CATALOG.provisioning;
 

@@ -1,12 +1,9 @@
 /**
  * Media domain types derived from the energy-media ontology.
  *
- * ChartType values correspond 1:1 to ChartTypeScheme concepts in
- * energy-media-summary.json (PascalCase → kebab-case).
- *
- * AltTextProvenance values correspond to AltTextProvenanceScheme
- * (AltTextOriginal → "original", AltTextSynthetic → "synthetic",
- * AltTextAbsent → "absent").
+ * These enums are the app-facing media classification vocabulary used by the
+ * enrichment pipeline. The ontology-native media entity classes now live in
+ * `@skygest/ontology-store`.
  */
 
 import { Schema } from "effect";

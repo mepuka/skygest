@@ -10,8 +10,7 @@
  * end-to-end (snapshot, edge, projection) the moment ingest produces them.
  *
  * Add a new auto-entity by appending a single defineAutoRuntimeModule
- * call below and adding the export to ENTITY_RUNTIME_CATALOG in
- * Provisioning.ts.
+ * call below and adding it to AUTO_RUNTIME_MODULES.
  */
 
 import { defineAutoRuntimeModule } from "./Domain/AutoEntity";
