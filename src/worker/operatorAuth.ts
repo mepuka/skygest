@@ -51,6 +51,7 @@ const POST_OPS_REFRESH_ACTIONS = new Map<string, string>([
   ["/admin/ops/entity-experts/backfill", "entity_experts_backfill"],
   ["/admin/ops/entity-posts/backfill", "entity_posts_backfill"],
   ["/admin/ops/entity-topics/backfill", "entity_topics_backfill"],
+  ["/admin/ops/entity-organizations/backfill", "entity_organizations_backfill"],
   ["/admin/ops/entity-reindex/drain", "entity_reindex_drain"],
   ["/admin/import/posts", "import_posts"]
 ]);

@@ -72,7 +72,8 @@ export class Post extends Schema.Class<Post>("Post")({
   authoredBy: Schema.optionalKey(ExpertIri),
   authoredByDisplayName: Schema.optionalKey(Schema.String),
   authoredByHandle: Schema.optionalKey(Schema.String),
-  topics: Schema.optionalKey(Schema.Array(Schema.String))
+  topics: Schema.optionalKey(Schema.Array(Schema.String)),
+  enrichmentText: Schema.optionalKey(Schema.String)
 }) {}
 
 const decodePost = Schema.decodeUnknownEffect(Post);
@@ -256,6 +257,12 @@ export const renderPostMarkdown = (post: Post): string => {
     lines.push(`${byline} wrote:`, "");
   }
   lines.push(post.text);
+  if (
+    post.enrichmentText !== undefined &&
+    post.enrichmentText.trim().length > 0
+  ) {
+    lines.push("", "## Enrichment Context", "", post.enrichmentText.trim());
+  }
   return lines.join("\n");
 };
 

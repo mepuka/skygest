@@ -908,6 +908,45 @@ export type EntityTopicsBackfillOutput = Schema.Schema.Type<
   typeof EntityTopicsBackfillOutput
 >;
 
+export const EntityOrganizationsBackfillInput = Schema.Struct({
+  limit: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 500 }))
+    )
+  ),
+  offset: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isGreaterThanOrEqualTo(0))
+    )
+  ),
+  drain: Schema.optionalKey(Schema.Boolean),
+  drainConcurrency: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 8 }))
+    )
+  )
+});
+export type EntityOrganizationsBackfillInput = Schema.Schema.Type<
+  typeof EntityOrganizationsBackfillInput
+>;
+
+export const EntityOrganizationsBackfillOutput = Schema.Struct({
+  total: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  scanned: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  migrated: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  queued: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  bearsEdges: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failed: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failedPublicationIds: Schema.Array(Schema.String),
+  drain: Schema.NullOr(EntityReindexDrainOutput)
+});
+export type EntityOrganizationsBackfillOutput = Schema.Schema.Type<
+  typeof EntityOrganizationsBackfillOutput
+>;
+
 // ---------------------------------------------------------------------------
 // Import schemas (Twitter cross-post pipeline)
 // ---------------------------------------------------------------------------
@@ -1186,6 +1225,7 @@ export const AdminRequestSchemas = {
   entityExpertsBackfill: EntityExpertsBackfillInput,
   entityPostsBackfill: EntityPostsBackfillInput,
   entityTopicsBackfill: EntityTopicsBackfillInput,
+  entityOrganizationsBackfill: EntityOrganizationsBackfillInput,
   entityReindexDrain: EntityReindexDrainInput
 } as const;
 
@@ -1208,6 +1248,7 @@ export const AdminResponseSchemas = {
   entityExpertsBackfill: EntityExpertsBackfillOutput,
   entityPostsBackfill: EntityPostsBackfillOutput,
   entityTopicsBackfill: EntityTopicsBackfillOutput,
+  entityOrganizationsBackfill: EntityOrganizationsBackfillOutput,
   entityReindexDrain: EntityReindexDrainOutput,
   dataLayerEntity: DataLayerRegistryEntity,
   dataLayerEntitiesPage: DataLayerEntityPageOutput,

@@ -2,9 +2,8 @@ import { Clock, Effect, Exit, Layer, ServiceMap } from "effect";
 import type { SqlError } from "effect/unstable/sql/SqlError";
 import {
   EntityGraphRepo,
-  EntitySnapshotStore,
+  EntityIngestionWriter,
   ExpertEntity,
-  ReindexQueueService,
   asEntityIri,
   asEntityTag,
   expertFromLegacyRow
@@ -31,7 +30,6 @@ export interface EntityExpertBackfillResult {
 
 const BACKFILL_ASSERTED_BY = "EntityExpertBackfillService" as const;
 const ROLE_ENTITY_TAG = asEntityTag("EnergyExpertRole");
-const EXPERT_ENTITY_TAG = asEntityTag("Expert");
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 500;
@@ -67,8 +65,7 @@ export class EntityExpertBackfillService extends ServiceMap.Service<
     EntityExpertBackfillService,
     Effect.gen(function* () {
       const experts = yield* ExpertsRepo;
-      const snapshots = yield* EntitySnapshotStore;
-      const queue = yield* ReindexQueueService;
+      const writer = yield* EntityIngestionWriter;
       const entityGraph = yield* EntityGraphRepo;
 
       const writeRoleEdge = Effect.fn(
@@ -97,20 +94,11 @@ export class EntityExpertBackfillService extends ServiceMap.Service<
         "EntityExpertBackfillService.saveAndQueue"
       )(function* (record: ExpertRecord) {
         const expert = yield* expertFromLegacyRow(toLegacyExpertRow(record));
-        const iri = asEntityIri(expert.iri);
         const now = yield* Clock.currentTimeMillis;
-
-        yield* snapshots.save(ExpertEntity, expert);
-        yield* entityGraph.upsertEntity(iri, EXPERT_ENTITY_TAG);
-        yield* queue.schedule({
-          targetEntityType: EXPERT_ENTITY_TAG,
-          targetIri: iri,
-          originIri: iri,
-          cause: "entity-changed",
-          causePriority: 0,
-          propagationDepth: 0,
+        const writeResult = yield* writer.write(ExpertEntity, expert, {
           nextAttemptAt: now
         });
+        const iri = writeResult.iri;
 
         let bearsEdges = 0;
         for (const roleIri of expert.roles) {

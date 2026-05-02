@@ -6,13 +6,15 @@ import {
   ENTITY_GRAPH_ALL_SCHEMA_STATEMENTS,
   EntityGraphRepo,
   EntityGraphRepoD1,
+  EntityIngestionWriter,
   EntitySnapshotStore,
   EntitySnapshotStoreD1,
   PostEntity,
   PostIri,
   ReindexQueueD1,
   ReindexQueueService,
-  asEntityIri
+  asEntityIri,
+  renderPostMarkdown
 } from "@skygest/ontology-store";
 import { ExpertRecord as ExpertRecordSchema } from "../src/domain/bi";
 import type { ExpertRecord } from "../src/domain/bi";
@@ -52,6 +54,16 @@ const installPostsSchema = Effect.gen(function* () {
       ontology_version TEXT NOT NULL DEFAULT 'test-ontology',
       matcher_version TEXT NOT NULL DEFAULT 'test-matcher',
       PRIMARY KEY (post_uri, topic_slug)
+    )
+  `.pipe(Effect.asVoid);
+  yield* sql`
+    CREATE TABLE IF NOT EXISTS post_enrichments (
+      post_uri TEXT NOT NULL,
+      enrichment_type TEXT NOT NULL,
+      enrichment_payload_json TEXT NOT NULL,
+      updated_at INTEGER NOT NULL,
+      enriched_at INTEGER NOT NULL,
+      PRIMARY KEY (post_uri, enrichment_type)
     )
   `.pipe(Effect.asVoid);
 });
@@ -109,6 +121,75 @@ const seedPostTopics = (topics: ReadonlyArray<{
         `.pipe(Effect.asVoid),
       { discard: true }
     );
+  });
+
+const encodeJson = Schema.encodeUnknownSync(Schema.UnknownFromJsonString);
+
+const seedVisionEnrichment = (input: {
+  readonly postUri: string;
+  readonly summary: string;
+  readonly finding: string;
+}) =>
+  Effect.gen(function* () {
+    const sql = yield* SqlClient.SqlClient;
+    const assetKey =
+      "https://id.skygest.io/post/bluesky/did:plc:alice/3kpost1/chart/asset-1";
+    const payload = encodeJson({
+      kind: "vision",
+      summary: {
+        text: input.summary,
+        mediaTypes: ["chart"],
+        chartTypes: ["line-chart"],
+        titles: ["ERCOT load chart"],
+        keyFindings: [{ text: input.finding, assetKeys: [assetKey] }]
+      },
+      assets: [
+        {
+          assetKey,
+          assetType: "image",
+          source: "embed",
+          index: 0,
+          originalAltText: null,
+          extractionRoute: "full",
+          analysis: {
+            mediaType: "chart",
+            chartTypes: ["line-chart"],
+            altText: "Chart showing ERCOT summer load.",
+            altTextProvenance: "synthetic",
+            xAxis: null,
+            yAxis: null,
+            series: [],
+            sourceLines: [{ sourceText: "Source: ERCOT", datasetName: null }],
+            temporalCoverage: null,
+            keyFindings: [input.finding],
+            visibleUrls: ["https://www.ercot.com/gridinfo/load"],
+            organizationMentions: [{ name: "ERCOT", location: "title" }],
+            logoText: ["ERCOT"],
+            title: "ERCOT load chart",
+            modelId: "test-model",
+            processedAt: 1715000005000
+          }
+        }
+      ],
+      modelId: "test-model",
+      promptVersion: "test",
+      processedAt: 1715000005000
+    });
+    yield* sql`
+      INSERT INTO post_enrichments (
+        post_uri,
+        enrichment_type,
+        enrichment_payload_json,
+        updated_at,
+        enriched_at
+      ) VALUES (
+        ${input.postUri},
+        'vision',
+        ${payload},
+        1715000005000,
+        1715000005000
+      )
+    `.pipe(Effect.asVoid);
   });
 
 const expertRecord = (input: {
@@ -169,14 +250,16 @@ const makeServiceLayer = (experts: ReadonlyArray<ExpertRecord> = []) => {
   const graphLayer = EntityGraphRepoD1.layer.pipe(
     Layer.provideMerge(sqliteLayer)
   );
+  const writerLayer = EntityIngestionWriter.layer.pipe(
+    Layer.provideMerge(Layer.mergeAll(snapshotLayer, queueLayer))
+  );
   const backfillLayer = EntityPostBackfillService.layer.pipe(
       Layer.provideMerge(
       Layer.mergeAll(
         sqliteLayer,
         OntologyCatalog.layer,
         expertsLayer,
-        snapshotLayer,
-        queueLayer,
+        writerLayer,
         graphLayer
       )
     )
@@ -188,6 +271,7 @@ const makeServiceLayer = (experts: ReadonlyArray<ExpertRecord> = []) => {
     snapshotLayer,
     queueLayer,
     graphLayer,
+    writerLayer,
     backfillLayer
   );
 };
@@ -241,6 +325,11 @@ describe("EntityPostBackfillService", () => {
           topicSlug: "hydrogen"
         }
       ]);
+      yield* seedVisionEnrichment({
+        postUri: "at://did:plc:alice/app.bsky.feed.post/3kpost1",
+        summary: "The attached chart summarizes ERCOT summer load.",
+        finding: "Peak load rises during the summer."
+      });
 
       const backfill = yield* EntityPostBackfillService;
       const snapshots = yield* EntitySnapshotStore;
@@ -277,6 +366,11 @@ describe("EntityPostBackfillService", () => {
       expect(saved.authoredByDisplayName).toBe("Alice Energy");
       expect(saved.authoredByHandle).toBe("alice.energy.example");
       expect(saved.topics).toEqual(["solar", "grid-and-infrastructure"]);
+      expect(saved.enrichmentText).toContain(
+        "Vision summary: The attached chart summarizes ERCOT summer load."
+      );
+      expect(renderPostMarkdown(saved)).toContain("## Enrichment Context");
+      expect(renderPostMarkdown(saved)).toContain("Source line: Source: ERCOT");
 
       const aliceLinks = yield* graph.linksOut(
         asEntityIri(
