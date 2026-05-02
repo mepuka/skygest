@@ -154,7 +154,7 @@ describe("EntityContextService", () => {
       const context = yield* EntityContextService;
       const postIri = asEntityIri(PostProjectionFixture.fixture.iri);
       const topicIri = asEntityIri(
-        "http://example.org/ontology/energy-news#SolarPV"
+        "https://w3id.org/energy-intel/concept/solar-pv"
       );
 
       yield* graph.upsertEntity(postIri, asEntityTag("Post"));

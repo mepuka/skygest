@@ -10,15 +10,15 @@ import {
 
 const sampleTopic = (): EnergyTopic =>
   Schema.decodeUnknownSync(EnergyTopic)({
-    iri: "http://example.org/ontology/energy-news#Hydrogen",
-    slug: "Hydrogen",
-    label: "hydrogen",
-    altLabels: ["green hydrogen", "H2"],
-    description: "A skos:Concept representing hydrogen as an energy carrier.",
-    canonicalTopicSlug: "hydrogen",
+    iri: "https://w3id.org/energy-intel/concept/solar",
+    slug: "solar",
+    label: "solar",
+    altLabels: ["solar energy"],
+    description: "A skos:Concept representing solar energy technology.",
+    canonicalTopicSlug: "solar",
     topConcept: true,
     broaderSlugs: [],
-    narrowerSlugs: ["FuelCell", "GreenHydrogen"]
+    narrowerSlugs: ["solar-pv"]
   });
 
 describe("EnergyTopic", () => {
@@ -36,7 +36,7 @@ describe("EnergyTopic", () => {
           quad.predicate.value ===
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
           quad.object.value ===
-            "http://example.org/ontology/energy-news#EnergyTopic"
+            "http://www.w3.org/2004/02/skos/core#Concept"
       )
     ).toBe(true);
     expect(
@@ -45,7 +45,7 @@ describe("EnergyTopic", () => {
           quad.predicate.value ===
             "http://www.w3.org/2004/02/skos/core#narrower" &&
           quad.object.value ===
-            "http://example.org/ontology/energy-news#FuelCell"
+            "https://w3id.org/energy-intel/concept/solar-pv"
       )
     ).toBe(true);
   });
@@ -61,7 +61,7 @@ describe("EnergyTopic", () => {
       "topic"
     ]);
     expect(metadata.entity_type).toBe("EnergyTopic");
-    expect(metadata.topic).toBe("hydrogen");
+    expect(metadata.topic).toBe("solar");
     expect(metadata.authority).toBe("ontology");
   });
 });

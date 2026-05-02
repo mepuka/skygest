@@ -228,6 +228,15 @@ export {
   Variable,
   VariableIri
 } from "./generated/measurement";
+export {
+  ENERGY_INTEL_CONCEPTS,
+  ENERGY_INTEL_CONCEPTS_BY_IRI,
+  ENERGY_INTEL_CONCEPT_SCHEMES
+} from "./generated/concepts";
+export type {
+  EnergyIntelConcept,
+  EnergyIntelConceptScheme
+} from "./generated/concepts";
 
 // Namespace constants used for triple construction outside the package.
 export { BFO, EI, FOAF, IAO, OWL, RDF, RDFS, SKOS, XSD } from "./iris";

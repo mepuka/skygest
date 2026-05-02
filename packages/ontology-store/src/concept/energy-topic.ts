@@ -1,10 +1,10 @@
 /**
  * Hand-written EnergyTopic entity module.
  *
- * Energy topics are SKOS concepts supplied by the ontology snapshot, not
- * OWL classes generated from the energy-intel TTL modules. This module keeps
- * that boundary explicit: the entity identity is the concept IRI, while the
- * payload carries the snapshot fields needed for rendering and search.
+ * Energy topics are native SKOS concepts supplied by ontology_skill concept
+ * schemes, not OWL classes generated from the energy-intel TTL modules. This
+ * module keeps that boundary explicit: the entity identity is the concept
+ * IRI, while the payload carries the fields needed for rendering and search.
  */
 
 import { Effect, Schema } from "effect";
@@ -23,14 +23,17 @@ import {
   type ProjectionFixture
 } from "../Domain/Projection";
 import type { RdfQuad } from "../Domain/Rdf";
+import {
+  ENERGY_INTEL_CONCEPTS,
+  ENERGY_INTEL_CONCEPTS_BY_IRI
+} from "../generated/concepts";
 import { RDF, RDFS, SKOS } from "../iris";
 
 const { quad, namedNode, literal } = DataFactory;
 const predicate = (term: NamedNode): PredicateIri => asPredicateIri(term.value);
 
-const ENERGY_NEWS_BASE = "http://example.org/ontology/energy-news#";
-const ENERGY_TOPIC_CLASS = namedNode(`${ENERGY_NEWS_BASE}EnergyTopic`);
-const ENERGY_TOPIC_SCHEME = namedNode(`${ENERGY_NEWS_BASE}EnergyTopicScheme`);
+const ENERGY_INTEL_CONCEPT_BASE = "https://w3id.org/energy-intel/concept/";
+const ENERGY_TECHNOLOGY_SCHEME = namedNode(`${ENERGY_INTEL_CONCEPT_BASE}technology`);
 const SKOS_CONCEPT = namedNode("http://www.w3.org/2004/02/skos/core#Concept");
 const SKOS_PREF_LABEL = namedNode("http://www.w3.org/2004/02/skos/core#prefLabel");
 const SKOS_ALT_LABEL = namedNode("http://www.w3.org/2004/02/skos/core#altLabel");
@@ -43,6 +46,9 @@ const SKOS_TOP_CONCEPT_OF = namedNode(
 const EI_CANONICAL_TOPIC_SLUG = namedNode(
   "https://w3id.org/energy-intel/canonicalTopicSlug"
 );
+const SOLAR_CONCEPT = ENERGY_INTEL_CONCEPTS.find(
+  (concept) => concept.iri === `${ENERGY_INTEL_CONCEPT_BASE}solar`
+)!;
 
 export const EnergyTopicIri = Schema.String.pipe(
   Schema.check(Schema.isPattern(/^https?:\/\/\S+$/)),
@@ -65,26 +71,32 @@ export class EnergyTopic extends Schema.Class<EnergyTopic>("EnergyTopic")({
 const decodeEnergyTopic = Schema.decodeUnknownEffect(EnergyTopic);
 
 const conceptIriForSlug = (slug: string): NamedNode =>
-  namedNode(`${ENERGY_NEWS_BASE}${slug}`);
+  namedNode(`${ENERGY_INTEL_CONCEPT_BASE}${slug}`);
 
 const slugFromConceptTerm = (value: string): string =>
-  value.startsWith(ENERGY_NEWS_BASE)
-    ? value.slice(ENERGY_NEWS_BASE.length)
+  value.startsWith(ENERGY_INTEL_CONCEPT_BASE)
+    ? value.slice(ENERGY_INTEL_CONCEPT_BASE.length)
     : value;
+
+const conceptSchemeForTopic = (topic: EnergyTopic): NamedNode =>
+  namedNode(
+    ENERGY_INTEL_CONCEPTS_BY_IRI[topic.iri]?.inScheme ??
+      ENERGY_TECHNOLOGY_SCHEME.value
+  );
 
 export const energyTopicToTriples = (
   topic: EnergyTopic
 ): ReadonlyArray<RdfQuad> => {
   const subject = namedNode(topic.iri);
+  const scheme = conceptSchemeForTopic(topic);
   const triples: RdfQuad[] = [
-    quad(subject, RDF.type, ENERGY_TOPIC_CLASS),
     quad(subject, RDF.type, SKOS_CONCEPT),
     quad(subject, SKOS_PREF_LABEL, literal(topic.label)),
     quad(subject, RDFS.label, literal(topic.label)),
-    quad(subject, SKOS_IN_SCHEME, ENERGY_TOPIC_SCHEME)
+    quad(subject, SKOS_IN_SCHEME, scheme)
   ];
   if (topic.topConcept) {
-    triples.push(quad(subject, SKOS_TOP_CONCEPT_OF, ENERGY_TOPIC_SCHEME));
+    triples.push(quad(subject, SKOS_TOP_CONCEPT_OF, scheme));
   }
   if (topic.description !== undefined) {
     triples.push(quad(subject, SKOS.definition, literal(topic.description)));
@@ -142,15 +154,13 @@ export const energyTopicFromTriples = (
     const store = new Store([...quads]);
     const subjectNode = namedNode(subject);
     const hasConceptType =
-      store.getQuads(subjectNode, RDF.type, ENERGY_TOPIC_CLASS, null).length >
-        0 &&
       store.getQuads(subjectNode, RDF.type, SKOS_CONCEPT, null).length > 0;
     if (!hasConceptType) {
       yield* new RdfMappingError({
         direction: "reverse",
         entity: "EnergyTopic",
         iri: subject,
-        message: "missing rdf:type enews:EnergyTopic and skos:Concept"
+        message: "missing rdf:type skos:Concept"
       });
     }
     const label = yield* firstLiteral(
@@ -173,8 +183,7 @@ export const energyTopicFromTriples = (
       ...(description === undefined ? {} : { description }),
       ...(canonicalTopicSlug === undefined ? {} : { canonicalTopicSlug }),
       topConcept:
-        store.getQuads(subjectNode, SKOS_TOP_CONCEPT_OF, ENERGY_TOPIC_SCHEME, null)
-          .length > 0,
+        store.getQuads(subjectNode, SKOS_TOP_CONCEPT_OF, null, null).length > 0,
       broaderSlugs: literalValues(store, subjectNode, SKOS_BROADER).map(
         slugFromConceptTerm
       ),
@@ -250,15 +259,15 @@ export const EnergyTopicUnifiedProjection = {
 export const EnergyTopicProjectionFixture = {
   entityType: "EnergyTopic",
   fixture: Schema.decodeUnknownSync(EnergyTopic)({
-    iri: "http://example.org/ontology/energy-news#Hydrogen",
-    slug: "Hydrogen",
-    label: "Hydrogen",
-    altLabels: ["hydrogen energy"],
-    description: "Hydrogen as an energy carrier across production methods.",
-    canonicalTopicSlug: "hydrogen",
-    topConcept: true,
-    broaderSlugs: [],
-    narrowerSlugs: []
+    iri: SOLAR_CONCEPT.iri,
+    slug: SOLAR_CONCEPT.slug,
+    label: SOLAR_CONCEPT.label,
+    altLabels: [...SOLAR_CONCEPT.altLabels],
+    description: SOLAR_CONCEPT.definition,
+    canonicalTopicSlug: SOLAR_CONCEPT.slug,
+    topConcept: SOLAR_CONCEPT.topConcept,
+    broaderSlugs: SOLAR_CONCEPT.broader.map(slugFromConceptTerm),
+    narrowerSlugs: SOLAR_CONCEPT.narrower.map(slugFromConceptTerm)
   }),
   projection: EnergyTopicUnifiedProjection
 } as const satisfies ProjectionFixture<typeof EnergyTopic>;
@@ -271,12 +280,12 @@ export const EnergyTopicEntity = defineEntity({
     iriOf: (topic) => topic.iri,
     derive: ({ handle }) =>
       Schema.decodeUnknownSync(EnergyTopicIri)(
-        `http://example.org/ontology/energy-news#${slugify(handle)}`
+        `${ENERGY_INTEL_CONCEPT_BASE}${slugify(handle)}`
       )
   },
   ontology: {
-    classIri: ENERGY_TOPIC_CLASS.value,
-    typeChain: [ENERGY_TOPIC_CLASS.value, SKOS_CONCEPT.value],
+    classIri: SKOS_CONCEPT.value,
+    typeChain: [SKOS_CONCEPT.value],
     shapeRef: "shapes/energyTopic.ttl",
     toTriples: energyTopicToTriples,
     fromTriples: energyTopicFromTriples

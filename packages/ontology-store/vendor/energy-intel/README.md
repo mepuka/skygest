@@ -1,15 +1,18 @@
 # Vendored energy-intel TTLs
 
 This directory pins copies of the `energy-intel` ontology TTL modules
-that the codegen pipeline reads from
-(`packages/ontology-store/scripts/generate-from-ttl.ts`). Vendoring
-makes codegen and the drift gate independent of any developer-laptop
-checkout of the upstream repo, so CI runs the gate unconditionally.
+and SKOS concept-scheme TTLs that the codegen pipeline reads from.
+Vendoring makes codegen and the drift gate independent of any
+developer-laptop checkout of the upstream repo, so CI runs the gate
+unconditionally.
 
 ## Source
 
 Upstream: `ontology_skill` repo, path
 `ontologies/energy-intel/modules/`.
+
+Flat OWL modules live directly in this directory. SKOS concept-scheme
+modules live under `concept-schemes/`, mirroring the upstream layout.
 
 ## Pin
 
@@ -34,14 +37,15 @@ at that SHA.
      > packages/ontology-store/vendor/energy-intel/.upstream-commit
    ```
 
-4. Re-run codegen for each vendored flat module and verify there is no
-   drift in `src/generated/`:
+4. Re-run codegen for each vendored flat module and the concept-scheme
+   generator, then verify there is no drift in `src/generated/`:
 
    ```bash
    bun packages/ontology-store/scripts/generate-from-ttl.ts agent
    bun packages/ontology-store/scripts/generate-from-ttl.ts media
    bun packages/ontology-store/scripts/generate-from-ttl.ts measurement
    bun packages/ontology-store/scripts/generate-from-ttl.ts data
+   bun packages/ontology-store/scripts/generate-concepts-from-ttl.ts
    git diff packages/ontology-store/src/generated/  # should be empty
    ```
 

@@ -10,6 +10,8 @@ import {
   ENTITY_PROVISIONING,
   ENTITY_RUNTIME_CATALOG,
   ENTITY_RUNTIME_MODULES,
+  ENERGY_INTEL_CONCEPTS,
+  ENERGY_INTEL_CONCEPT_SCHEMES,
   EI,
   EXPERT_METADATA_KEYS,
   AiSearchClient,
@@ -138,6 +140,16 @@ describe("@skygest/ontology-store", () => {
     expect(Post).toBeDefined();
     expect(CanonicalMeasurementClaim).toBeDefined();
     expect(EnergyExpertRole).toBeDefined();
+    expect(
+      ENERGY_INTEL_CONCEPT_SCHEMES.some(
+        (scheme) => scheme.iri === "https://w3id.org/energy-intel/concept/technology"
+      )
+    ).toBe(true);
+    expect(
+      ENERGY_INTEL_CONCEPTS.some(
+        (concept) => concept.iri === "https://w3id.org/energy-intel/concept/solar"
+      )
+    ).toBe(true);
     expect(ENTITY_PROJECTION_SPECS.map((spec) => spec.definition.tag)).toEqual(
       moduleTags
     );

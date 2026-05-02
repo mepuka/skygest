@@ -34,9 +34,14 @@ import {
   mergeClassTables,
   parseTtlToClassTable
 } from "../../scripts/codegen/parseTtl";
+import {
+  mergeConceptSchemeTables,
+  parseConceptSchemeTtl
+} from "../../scripts/codegen/parseConceptSchemes";
 import { buildJsonSchema } from "../../scripts/codegen/buildJsonSchema";
 import { postProcessAst } from "../../scripts/codegen/postProcessAst";
 import { emitIrisModule } from "../../scripts/codegen/emitIrisModule";
+import { emitConceptSchemeModule } from "../../scripts/codegen/emitConceptSchemeModule";
 import { renderSchemaSource } from "../../scripts/codegen/renderSchemaSource";
 
 const fsLayer = Layer.mergeAll(BunFileSystem.layer, BunPath.layer);
@@ -49,6 +54,12 @@ const GENERATED_ROOT = fileURLToPath(
 );
 const COMMITTED_IRIS = fileURLToPath(
   new URL("../../src/iris.ts", import.meta.url)
+);
+const CONCEPT_SCHEME_ROOT = fileURLToPath(
+  new URL("../../vendor/energy-intel/concept-schemes", import.meta.url)
+);
+const COMMITTED_CONCEPTS = fileURLToPath(
+  new URL("../../src/generated/concepts.ts", import.meta.url)
 );
 
 describe("codegen drift gate", () => {
@@ -109,6 +120,32 @@ describe("codegen drift gate", () => {
       const regenerated = emitIrisModule(merged);
 
       const committed = yield* fs.readFileString(COMMITTED_IRIS);
+      expect(regenerated).toBe(committed);
+    }).pipe(Effect.provide(fsLayer))
+  );
+
+  it.effect("regenerated concept constants match committed", () =>
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+      const path = yield* Path.Path;
+
+      const entries = yield* fs.readDirectory(CONCEPT_SCHEME_ROOT);
+      const ttlNames = entries
+        .filter((name) => name.endsWith(".ttl"))
+        .sort();
+      const tables = yield* Effect.forEach(ttlNames, (name) =>
+        Effect.gen(function* () {
+          const ttl = yield* fs.readFileString(
+            path.join(CONCEPT_SCHEME_ROOT, name)
+          );
+          return yield* parseConceptSchemeTtl(ttl);
+        })
+      );
+      const regenerated = emitConceptSchemeModule(
+        mergeConceptSchemeTables(tables)
+      );
+
+      const committed = yield* fs.readFileString(COMMITTED_CONCEPTS);
       expect(regenerated).toBe(committed);
     }).pipe(Effect.provide(fsLayer))
   );
