@@ -17,6 +17,7 @@ describe("phase-one migrations", () => {
           AND name IN (
             'editorial_picks',
             'entities',
+            'entity_snapshots',
             'entity_link_evidence',
             'entity_links',
             'agents',
@@ -73,6 +74,7 @@ describe("phase-one migrations", () => {
         "entities",
         "entity_link_evidence",
         "entity_links",
+        "entity_snapshots",
         "expert_sources",
         "expert_sync_state",
         "experts",
@@ -126,7 +128,8 @@ describe("phase-one migrations", () => {
           id: 26,
           name: "data_ref_candidate_citation_source_alignment"
         },
-        { id: 27, name: "ontology_entity_graph" }
+        { id: 27, name: "ontology_entity_graph" },
+        { id: 28, name: "ontology_entity_snapshots" }
       ]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );

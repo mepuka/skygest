@@ -1,3 +1,5 @@
+/// <reference path="../types/shacl-runtime.d.ts" />
+
 import rdfDataModel from "@rdfjs/data-model";
 import rdfDataset from "@rdfjs/dataset";
 import { Effect, Layer, Scope, Schema, ServiceMap } from "effect";

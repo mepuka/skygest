@@ -1,7 +1,11 @@
 import { Effect } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { SqlError } from "effect/unstable/sql/SqlError";
-import { ENTITY_GRAPH_ALL_SCHEMA_STATEMENTS } from "../../packages/ontology-store/src/Domain/EntityGraph";
+import {
+  ENTITY_GRAPH_SCHEMA_STATEMENTS,
+  REINDEX_QUEUE_SCHEMA_STATEMENTS,
+  ENTITY_SNAPSHOT_SCHEMA_STATEMENTS
+} from "../../packages/ontology-store/src/Domain/EntityGraph";
 
 export type D1Migration = {
   readonly id: number;
@@ -1095,7 +1099,16 @@ const migration26: D1Migration = {
 const migration27: D1Migration = {
   id: 27,
   name: "ontology_entity_graph",
-  statements: ENTITY_GRAPH_ALL_SCHEMA_STATEMENTS
+  statements: [
+    ...ENTITY_GRAPH_SCHEMA_STATEMENTS,
+    ...REINDEX_QUEUE_SCHEMA_STATEMENTS
+  ]
+};
+
+const migration28: D1Migration = {
+  id: 28,
+  name: "ontology_entity_snapshots",
+  statements: ENTITY_SNAPSHOT_SCHEMA_STATEMENTS
 };
 
 export const migrations: ReadonlyArray<D1Migration> = [
@@ -1125,5 +1138,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration24,
   migration25,
   migration26,
-  migration27
+  migration27,
+  migration28
 ];

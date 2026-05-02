@@ -34,6 +34,27 @@ type DeniedOperatorRequestLogger = (
   error: unknown
 ) => Promise<void>;
 
+const OPS_REFRESH_SCOPES = ["ops:refresh"] as const;
+
+const POST_OPS_REFRESH_ACTIONS = new Map<string, string>([
+  ["/admin/ingest/poll", "poll_ingest"],
+  ["/admin/ingest/backfill", "backfill_ingest"],
+  ["/admin/ingest/reconcile", "reconcile_ingest"],
+  ["/admin/ingest/repair", "repair_ingest"],
+  ["/admin/enrichment/start", "start_enrichment"],
+  ["/admin/enrichment/repair", "repair_enrichment"],
+  ["/admin/ops/migrate", "ops_migrate"],
+  ["/admin/ops/bootstrap-experts", "bootstrap_experts"],
+  ["/admin/ops/load-smoke-fixture", "load_smoke_fixture"],
+  ["/admin/ops/refresh-profiles", "refresh_profiles"],
+  ["/admin/ops/seed-publications", "seed_publications"],
+  ["/admin/ops/entity-experts/backfill", "entity_experts_backfill"],
+  ["/admin/ops/entity-posts/backfill", "entity_posts_backfill"],
+  ["/admin/ops/entity-topics/backfill", "entity_topics_backfill"],
+  ["/admin/ops/entity-reindex/drain", "entity_reindex_drain"],
+  ["/admin/import/posts", "import_posts"]
+]);
+
 const isExpertActivatePath = (pathname: string) =>
   /^\/admin\/experts\/[^/]+\/activate$/u.test(pathname);
 
@@ -178,92 +199,22 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
     };
   }
 
-  if (request.method === "POST" && pathname === "/admin/ingest/poll") {
+  const staticOpsRefreshAction =
+    request.method === "POST"
+      ? POST_OPS_REFRESH_ACTIONS.get(pathname)
+      : undefined;
+  if (staticOpsRefreshAction !== undefined) {
     return {
-      action: "poll_ingest",
-      scopes: ["ops:refresh"]
-    };
-  }
-
-  if (request.method === "POST" && pathname === "/admin/ingest/backfill") {
-    return {
-      action: "backfill_ingest",
-      scopes: ["ops:refresh"]
-    };
-  }
-
-  if (request.method === "POST" && pathname === "/admin/ingest/reconcile") {
-    return {
-      action: "reconcile_ingest",
-      scopes: ["ops:refresh"]
-    };
-  }
-
-  if (request.method === "POST" && pathname === "/admin/ingest/repair") {
-    return {
-      action: "repair_ingest",
-      scopes: ["ops:refresh"]
-    };
-  }
-
-  if (request.method === "POST" && pathname === "/admin/enrichment/start") {
-    return {
-      action: "start_enrichment",
-      scopes: ["ops:refresh"]
+      action: staticOpsRefreshAction,
+      scopes: OPS_REFRESH_SCOPES
     };
   }
 
   if (request.method === "POST" && isEnrichmentRunRetryPath(pathname)) {
     return {
       action: "retry_enrichment",
-      scopes: ["ops:refresh"]
+      scopes: OPS_REFRESH_SCOPES
     };
-  }
-
-  if (request.method === "POST" && pathname === "/admin/enrichment/repair") {
-    return {
-      action: "repair_enrichment",
-      scopes: ["ops:refresh"]
-    };
-  }
-
-  if (request.method === "POST" && pathname === "/admin/ops/migrate") {
-    return {
-      action: "ops_migrate",
-      scopes: ["ops:refresh"]
-    };
-  }
-
-  if (request.method === "POST" && pathname === "/admin/ops/bootstrap-experts") {
-    return {
-      action: "bootstrap_experts",
-      scopes: ["ops:refresh"]
-    };
-  }
-
-  if (request.method === "POST" && pathname === "/admin/ops/load-smoke-fixture") {
-    return {
-      action: "load_smoke_fixture",
-      scopes: ["ops:refresh"]
-    };
-  }
-
-  if (request.method === "POST" && pathname === "/admin/ops/refresh-profiles") {
-    return {
-      action: "refresh_profiles",
-      scopes: ["ops:refresh"]
-    };
-  }
-
-  if (request.method === "POST" && pathname === "/admin/ops/seed-publications") {
-    return {
-      action: "seed_publications",
-      scopes: ["ops:refresh"]
-    };
-  }
-
-  if (request.method === "POST" && pathname === "/admin/import/posts") {
-    return { action: "import_posts", scopes: ["ops:refresh"] };
   }
 
   if (request.method === "POST" && pathname === "/admin/editorial/pick") {

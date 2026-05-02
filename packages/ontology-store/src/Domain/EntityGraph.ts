@@ -65,6 +65,16 @@ export class EntityRecord extends Schema.Class<EntityRecord>("EntityRecord")({
   updatedAt: Schema.Number
 }) {}
 
+export class EntitySnapshot extends Schema.Class<EntitySnapshot>(
+  "EntitySnapshot"
+)({
+  iri: EntityIri,
+  entityType: EntityTag,
+  payloadJson: Schema.String,
+  createdAt: Schema.Number,
+  updatedAt: Schema.Number
+}) {}
+
 export class EntityLink extends Schema.Class<EntityLink>("EntityLink")({
   linkId: LinkId,
   tripleHash: TripleHash,
@@ -237,9 +247,24 @@ export const REINDEX_QUEUE_SCHEMA_STATEMENTS = [
     ON reindex_queue_dlq(failed_at DESC)`
 ] as const;
 
+export const ENTITY_SNAPSHOT_SCHEMA_STATEMENTS = [
+  `CREATE TABLE IF NOT EXISTS entity_snapshots (
+    iri          TEXT PRIMARY KEY,
+    entity_type  TEXT NOT NULL,
+    payload_json TEXT NOT NULL,
+    created_at   INTEGER NOT NULL,
+    updated_at   INTEGER NOT NULL,
+    FOREIGN KEY (iri, entity_type) REFERENCES entities(iri, entity_type)
+      ON DELETE CASCADE
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_entity_snapshots_type_updated
+    ON entity_snapshots(entity_type, updated_at DESC)`
+] as const;
+
 export const ENTITY_GRAPH_ALL_SCHEMA_STATEMENTS = [
   ...ENTITY_GRAPH_SCHEMA_STATEMENTS,
-  ...REINDEX_QUEUE_SCHEMA_STATEMENTS
+  ...REINDEX_QUEUE_SCHEMA_STATEMENTS,
+  ...ENTITY_SNAPSHOT_SCHEMA_STATEMENTS
 ] as const;
 
 export const REINDEX_QUEUE_UPSERT_SET_CLAUSE = `

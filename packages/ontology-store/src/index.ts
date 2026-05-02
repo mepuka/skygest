@@ -43,9 +43,11 @@ export type { OntologyEntityModule } from "./Domain/OntologyEntity";
 export {
   ENTITY_GRAPH_ALL_SCHEMA_STATEMENTS,
   ENTITY_GRAPH_SCHEMA_STATEMENTS,
+  ENTITY_SNAPSHOT_SCHEMA_STATEMENTS,
   EntityIri,
   EntityLink,
   EntityRecord,
+  EntitySnapshot,
   EntityTag,
   GraphIri,
   LinkEvidence,
@@ -126,6 +128,12 @@ export type {
   RenderedEntityContextNode
 } from "./Service/EntityContext";
 export {
+  optionalD1Database,
+  runD1Batch,
+  type D1DatabaseBinding,
+  type D1PreparedStatementBinding
+} from "./Service/D1Batch";
+export {
   EntityGraphRepo
 } from "./Service/EntityGraphRepo";
 export { EntityGraphRepoD1 } from "./Service/EntityGraphRepoD1";
@@ -135,6 +143,31 @@ export type {
   TraversalPattern,
   TraversalResult
 } from "./Service/EntityGraphRepo";
+export {
+  ENTITY_PROJECTION_DRAIN_DEFAULT_CONCURRENCY,
+  ENTITY_PROJECTION_DRAIN_MAX_CONCURRENCY,
+  EntityProjectionDrainItemError,
+  EntityProjectionDrainService
+} from "./Service/EntityProjectionDrain";
+export type {
+  EntityProjectionDrainOptions,
+  EntityProjectionDrainResult
+} from "./Service/EntityProjectionDrain";
+export {
+  EntityProjectionRegistry,
+  EntityProjectionRegistryLookupError,
+  defineEntityProjection
+} from "./Service/EntityProjectionRegistry";
+export type {
+  EntityProjectionEntry,
+  EntityProjectionSnapshotSpec
+} from "./Service/EntityProjectionRegistry";
+export {
+  EntitySnapshotStore,
+  EntitySnapshotStoreD1,
+  entitySnapshotStorageAdapter,
+  makeEntitySnapshotStorageAdapter
+} from "./Service/EntitySnapshotStore";
 export {
   EntityRegistry,
   EntityRegistryLookupError,
@@ -147,23 +180,66 @@ export {
   ReindexQueueService
 } from "./Service/ReindexQueue";
 export { ReindexQueueD1 } from "./Service/ReindexQueueD1";
-export type {
-  ReindexBatchResult,
-  ReindexRequest
-} from "./Service/ReindexQueue";
+export type { ReindexRequest } from "./Service/ReindexQueue";
 
-// Generated branded IRI brands for the agent module. Keep this list
-// conservative — only re-export what consumers reach for.
+// Generated ontology classes and branded IRI brands.
 export {
+  DataProviderRole,
   DataProviderRoleIri,
+  EnergyExpertRole,
   EnergyExpertRoleIri,
   ExpertIri,
   OrganizationIri,
+  PublisherRole,
   PublisherRoleIri
 } from "./generated/agent";
+export {
+  Chart,
+  ChartIri,
+  Conversation,
+  ConversationIri,
+  EvidenceSource,
+  EvidenceSourceIri,
+  Excerpt,
+  ExcerptIri,
+  GenericImageAttachment,
+  GenericImageAttachmentIri,
+  MediaAttachment,
+  MediaAttachmentIri,
+  PodcastEpisode,
+  PodcastEpisodeIri,
+  PodcastSegment,
+  PodcastSegmentIri,
+  PostIri,
+  Screenshot,
+  ScreenshotIri,
+  SocialThread,
+  SocialThreadIri
+} from "./generated/media";
+export {
+  CanonicalMeasurementClaim,
+  CanonicalMeasurementClaimIri,
+  ClaimTemporalWindow,
+  ClaimTemporalWindowIri,
+  Observation,
+  ObservationIri,
+  Series,
+  SeriesIri,
+  Variable,
+  VariableIri
+} from "./generated/measurement";
+export {
+  ENERGY_INTEL_CONCEPTS,
+  ENERGY_INTEL_CONCEPTS_BY_IRI,
+  ENERGY_INTEL_CONCEPT_SCHEMES
+} from "./generated/concepts";
+export type {
+  EnergyIntelConcept,
+  EnergyIntelConceptScheme
+} from "./generated/concepts";
 
 // Namespace constants used for triple construction outside the package.
-export { BFO, EI, FOAF, OWL, RDF, RDFS, SKOS, XSD } from "./iris";
+export { BFO, EI, FOAF, IAO, OWL, RDF, RDFS, SKOS, XSD } from "./iris";
 
 // Canonical Expert agent module. Phase E (Alchemy) and Phase F (services)
 // reach through this surface rather than the private file path.
@@ -197,21 +273,56 @@ export {
 } from "./agent/organization";
 
 export {
+  Post,
+  PostEntity,
+  PostProjectionFixture,
+  PostUnifiedProjection,
+  postFacts,
+  postFromLegacyRow,
+  postFromTriples,
+  postIriFromAtUri,
+  postTimeBucket,
+  postToTriples,
+  renderPostMarkdown,
+  renderPostSummary
+} from "./content/post";
+export type { LegacyPostRow } from "./content/post";
+
+export {
+  EnergyTopic,
+  EnergyTopicEntity,
+  EnergyTopicIri,
+  EnergyTopicProjectionFixture,
+  EnergyTopicUnifiedProjection,
+  energyTopicFacts,
+  energyTopicFromTriples,
+  energyTopicToTriples,
+  renderEnergyTopicMarkdown,
+  renderEnergyTopicSummary
+} from "./concept/energy-topic";
+
+export {
   ENERGY_INTEL_SEARCH_BINDING,
   ENERGY_INTEL_SEARCH_INSTANCE,
   ENERGY_INTEL_SEARCH_NAMESPACE,
   ENTITY_PROJECTION_FIXTURES,
+  ENTITY_PROJECTION_SPECS,
   ENTITY_PROVISIONING,
+  ENTITY_RUNTIME_CATALOG,
+  ENTITY_RUNTIME_MODULES,
   ENTITY_SEARCH_CUSTOM_METADATA,
   ENTITY_SEARCH_PROVISIONING,
-  ExpertProvisioning,
+  EntityRuntimeCatalogError,
   MAX_AI_SEARCH_CUSTOM_METADATA_FIELDS,
-  OrganizationProvisioning,
+  defineEntityRuntimeCatalog,
+  defineEntityRuntimeModule,
   defineEntityProvisioning,
   defineUnifiedEntitySearchProvisioning
 } from "./Provisioning";
 export type {
   AiSearchCustomMetadataField,
+  EntityRuntimeCatalog,
   EntityProvisioningPlan,
+  EntityRuntimeModule,
   EntityRelationProvisioning
 } from "./Provisioning";

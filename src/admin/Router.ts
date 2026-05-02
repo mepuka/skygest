@@ -4,6 +4,7 @@ import * as HttpApiEndpoint from "effect/unstable/httpapi/HttpApiEndpoint";
 import * as HttpApiGroup from "effect/unstable/httpapi/HttpApiGroup";
 import { SqlClient } from "effect/unstable/sql";
 import { Effect, Layer } from "effect";
+import { EntityProjectionDrainService } from "@skygest/ontology-store";
 import type { AccessIdentity } from "../auth/AuthService";
 import {
   AdminRequestSchemas,
@@ -14,6 +15,9 @@ import {
 } from "../domain/api";
 import { CurationService } from "../services/CurationService";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
+import { EntityExpertBackfillService } from "../services/EntityExpertBackfillService";
+import { EntityPostBackfillService } from "../services/EntityPostBackfillService";
+import { EntityTopicBackfillService } from "../services/EntityTopicBackfillService";
 import { EditorialService } from "../services/EditorialService";
 import { EditorialPickBundleReadService } from "../services/EditorialPickBundleReadService";
 import { StagingOpsService } from "../services/StagingOpsService";
@@ -95,6 +99,38 @@ const AdminApi = HttpApi.make("admin")
         HttpApiEndpoint.get("stats", "/admin/ops/stats", {
           disableCodecs: true,
           success: AdminResponseSchemas.stats,
+          error: ApiErrorSchemas
+        })
+      )
+      .add(
+        HttpApiEndpoint.post("entityExpertsBackfill", "/admin/ops/entity-experts/backfill", {
+          disableCodecs: true,
+          payload: AdminRequestSchemas.entityExpertsBackfill,
+          success: AdminResponseSchemas.entityExpertsBackfill,
+          error: ApiErrorSchemas
+        })
+      )
+      .add(
+        HttpApiEndpoint.post("entityPostsBackfill", "/admin/ops/entity-posts/backfill", {
+          disableCodecs: true,
+          payload: AdminRequestSchemas.entityPostsBackfill,
+          success: AdminResponseSchemas.entityPostsBackfill,
+          error: ApiErrorSchemas
+        })
+      )
+      .add(
+        HttpApiEndpoint.post("entityTopicsBackfill", "/admin/ops/entity-topics/backfill", {
+          disableCodecs: true,
+          payload: AdminRequestSchemas.entityTopicsBackfill,
+          success: AdminResponseSchemas.entityTopicsBackfill,
+          error: ApiErrorSchemas
+        })
+      )
+      .add(
+        HttpApiEndpoint.post("entityReindexDrain", "/admin/ops/entity-reindex/drain", {
+          disableCodecs: true,
+          payload: AdminRequestSchemas.entityReindexDrain,
+          success: AdminResponseSchemas.entityReindexDrain,
           error: ApiErrorSchemas
         })
       )
@@ -219,6 +255,33 @@ const ensureStagingOpsEnabled = Effect.gen(function* () {
     return yield* Effect.fail(notFoundError("not found"));
   }
 });
+
+const withOptionalEntityDrain = <A extends { readonly queued: number }>(
+  payload: {
+    readonly drain?: boolean;
+    readonly drainConcurrency?: number;
+  },
+  result: A
+) =>
+  Effect.gen(function* () {
+    if (payload.drain !== true) {
+      return { ...result, drain: null };
+    }
+    if (result.queued === 0) {
+      return {
+        ...result,
+        drain: { pulled: 0, rendered: 0, failed: 0 }
+      };
+    }
+
+    const drain = yield* EntityProjectionDrainService;
+    const drainOptions =
+      payload.drainConcurrency === undefined
+        ? undefined
+        : { concurrency: payload.drainConcurrency };
+    const drainResult = yield* drain.drainNext(result.queued, drainOptions);
+    return { ...result, drain: drainResult };
+  });
 
 // ---------------------------------------------------------------------------
 // Import helpers
@@ -349,6 +412,55 @@ const AdminHandlers = Layer.mergeAll(
             enrichment,
             lastIngest
           };
+        }))
+      )
+      .handle("entityExpertsBackfill", ({ payload }) =>
+        withAdminErrors("/admin/ops/entity-experts/backfill", Effect.gen(function* () {
+          yield* ensureStagingOpsEnabled;
+          const backfill = yield* EntityExpertBackfillService;
+          const backfillInput: {
+            limit?: number;
+            offset?: number;
+            active?: boolean | null;
+          } = {};
+          if (payload.limit !== undefined) backfillInput.limit = payload.limit;
+          if (payload.offset !== undefined) backfillInput.offset = payload.offset;
+          if (payload.active !== undefined) backfillInput.active = payload.active;
+          const result = yield* backfill.backfill(backfillInput);
+          return yield* withOptionalEntityDrain(payload, result);
+        }))
+      )
+      .handle("entityPostsBackfill", ({ payload }) =>
+        withAdminErrors("/admin/ops/entity-posts/backfill", Effect.gen(function* () {
+          yield* ensureStagingOpsEnabled;
+          const backfill = yield* EntityPostBackfillService;
+          const backfillInput: { limit?: number; offset?: number } = {};
+          if (payload.limit !== undefined) backfillInput.limit = payload.limit;
+          if (payload.offset !== undefined) backfillInput.offset = payload.offset;
+          const result = yield* backfill.backfill(backfillInput);
+          return yield* withOptionalEntityDrain(payload, result);
+        }))
+      )
+      .handle("entityTopicsBackfill", ({ payload }) =>
+        withAdminErrors("/admin/ops/entity-topics/backfill", Effect.gen(function* () {
+          yield* ensureStagingOpsEnabled;
+          const backfill = yield* EntityTopicBackfillService;
+          const backfillInput: { limit?: number; offset?: number } = {};
+          if (payload.limit !== undefined) backfillInput.limit = payload.limit;
+          if (payload.offset !== undefined) backfillInput.offset = payload.offset;
+          const result = yield* backfill.backfill(backfillInput);
+          return yield* withOptionalEntityDrain(payload, result);
+        }))
+      )
+      .handle("entityReindexDrain", ({ payload }) =>
+        withAdminErrors("/admin/ops/entity-reindex/drain", Effect.gen(function* () {
+          yield* ensureStagingOpsEnabled;
+          const drain = yield* EntityProjectionDrainService;
+          const drainOptions =
+            payload.concurrency === undefined
+              ? undefined
+              : { concurrency: payload.concurrency };
+          return yield* drain.drainNext(payload.limit ?? 25, drainOptions);
         }))
       )
   ),

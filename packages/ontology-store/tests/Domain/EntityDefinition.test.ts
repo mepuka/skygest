@@ -3,12 +3,14 @@ import { Effect, Schema } from "effect";
 
 import {
   ENTITY_METADATA_FIELDS,
+  EntityRuntimeCatalogError,
   Expert,
   ExpertEntity,
   ExpertProjectionFixture,
   ExpertUnifiedProjection,
   OrganizationEntity,
   OrganizationProjectionFixture,
+  defineEntityRuntimeCatalog,
   PREDICATES,
   assertNoMetadataDrift,
   isPredicateTypeAllowed
@@ -20,29 +22,25 @@ const expert = () =>
     did: "did:plc:xyz",
     displayName: "Mark Z. Jacobson",
     roles: ["https://w3id.org/energy-intel/energyExpertRole/research"],
-    affiliations: ["https://w3id.org/energy-intel/organization/Stanford"],
     tier: "top",
     primaryTopic: "grid"
   });
 
 describe("EntityDefinition foundation", () => {
   it("normalizes generated NamedNode predicates into branded string IRIs", () => {
-    expect(PREDICATES["ei:affiliatedWith"].iri).toBe(
-      "https://w3id.org/energy-intel/affiliatedWith"
-    );
     expect(PREDICATES["ei:authoredBy"].iri).toBe(
       "https://w3id.org/energy-intel/authoredBy"
     );
-    expect(PREDICATES["ei:mentions"].iri).toBe(
-      "https://w3id.org/energy-intel/mentions"
+    expect(PREDICATES["iao:mentions"].iri).toBe(
+      "http://purl.obolibrary.org/obo/IAO_0000142"
     );
   });
 
   it("rejects predicate subject/object drift at runtime boundaries", () => {
-    expect(isPredicateTypeAllowed("ei:affiliatedWith", "Expert", "Organization")).toBe(
+    expect(isPredicateTypeAllowed("iao:mentions", "Expert", "Organization")).toBe(
       true
     );
-    expect(isPredicateTypeAllowed("ei:affiliatedWith", "Organization", "Expert")).toBe(
+    expect(isPredicateTypeAllowed("iao:mentions", "Organization", "Expert")).toBe(
       false
     );
   });
@@ -73,4 +71,19 @@ describe("EntityDefinition foundation", () => {
       expect(OrganizationEntity.tag).toBe("Organization");
     })
   );
+
+  it("fails fast when runtime catalog tags drift", () => {
+    expect(() =>
+      defineEntityRuntimeCatalog([
+        {
+          definition: ExpertEntity,
+          projection: {
+            ...ExpertUnifiedProjection,
+            entityType: "Organization"
+          },
+          fixture: ExpertProjectionFixture
+        } as never
+      ])
+    ).toThrow(EntityRuntimeCatalogError);
+  });
 });

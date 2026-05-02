@@ -761,6 +761,153 @@ export const StagingStats = Schema.Struct({
   lastIngest: Schema.NullOr(StagingStatsLastIngest)
 });
 
+export const EntityReindexDrainInput = Schema.Struct({
+  limit: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 500 }))
+    )
+  ),
+  concurrency: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 16 }))
+    )
+  )
+});
+export type EntityReindexDrainInput = Schema.Schema.Type<
+  typeof EntityReindexDrainInput
+>;
+
+export const EntityReindexDrainOutput = Schema.Struct({
+  pulled: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  rendered: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failed: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)))
+});
+export type EntityReindexDrainOutput = Schema.Schema.Type<
+  typeof EntityReindexDrainOutput
+>;
+
+export const EntityExpertsBackfillInput = Schema.Struct({
+  limit: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 500 }))
+    )
+  ),
+  offset: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isGreaterThanOrEqualTo(0))
+    )
+  ),
+  active: Schema.optionalKey(Schema.NullOr(Schema.Boolean)),
+  drain: Schema.optionalKey(Schema.Boolean),
+  drainConcurrency: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 8 }))
+    )
+  )
+});
+export type EntityExpertsBackfillInput = Schema.Schema.Type<
+  typeof EntityExpertsBackfillInput
+>;
+
+export const EntityExpertsBackfillOutput = Schema.Struct({
+  total: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  scanned: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  migrated: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  queued: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  bearsEdges: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failed: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failedDids: Schema.Array(Schema.String),
+  drain: Schema.NullOr(EntityReindexDrainOutput)
+});
+export type EntityExpertsBackfillOutput = Schema.Schema.Type<
+  typeof EntityExpertsBackfillOutput
+>;
+
+export const EntityPostsBackfillInput = Schema.Struct({
+  limit: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 500 }))
+    )
+  ),
+  offset: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isGreaterThanOrEqualTo(0))
+    )
+  ),
+  drain: Schema.optionalKey(Schema.Boolean),
+  drainConcurrency: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 8 }))
+    )
+  )
+});
+export type EntityPostsBackfillInput = Schema.Schema.Type<
+  typeof EntityPostsBackfillInput
+>;
+
+export const EntityPostsBackfillOutput = Schema.Struct({
+  total: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  scanned: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  migrated: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  queued: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  authoredByEdges: Schema.Int.pipe(
+    Schema.check(Schema.isGreaterThanOrEqualTo(0))
+  ),
+  topicEdges: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failed: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failedUris: Schema.Array(Schema.String),
+  drain: Schema.NullOr(EntityReindexDrainOutput)
+});
+export type EntityPostsBackfillOutput = Schema.Schema.Type<
+  typeof EntityPostsBackfillOutput
+>;
+
+export const EntityTopicsBackfillInput = Schema.Struct({
+  limit: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 500 }))
+    )
+  ),
+  offset: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isGreaterThanOrEqualTo(0))
+    )
+  ),
+  drain: Schema.optionalKey(Schema.Boolean),
+  drainConcurrency: Schema.optionalKey(
+    Schema.Number.pipe(
+      Schema.check(Schema.isInt()),
+      Schema.check(Schema.isBetween({ minimum: 1, maximum: 8 }))
+    )
+  )
+});
+export type EntityTopicsBackfillInput = Schema.Schema.Type<
+  typeof EntityTopicsBackfillInput
+>;
+
+export const EntityTopicsBackfillOutput = Schema.Struct({
+  total: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  scanned: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  migrated: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  queued: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failed: Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0))),
+  failedIris: Schema.Array(Schema.String),
+  drain: Schema.NullOr(EntityReindexDrainOutput)
+});
+export type EntityTopicsBackfillOutput = Schema.Schema.Type<
+  typeof EntityTopicsBackfillOutput
+>;
+
 // ---------------------------------------------------------------------------
 // Import schemas (Twitter cross-post pipeline)
 // ---------------------------------------------------------------------------
@@ -1035,7 +1182,11 @@ export const AdminRequestSchemas = {
   dataLayerList: ListDataLayerUrlParams,
   dataLayerKindPath: DataLayerKindPathParams,
   dataLayerEntityPath: DataLayerEntityPathParams,
-  dataLayerAuditPath: DataLayerAuditPathParams
+  dataLayerAuditPath: DataLayerAuditPathParams,
+  entityExpertsBackfill: EntityExpertsBackfillInput,
+  entityPostsBackfill: EntityPostsBackfillInput,
+  entityTopicsBackfill: EntityTopicsBackfillInput,
+  entityReindexDrain: EntityReindexDrainInput
 } as const;
 
 export const AdminResponseSchemas = {
@@ -1054,6 +1205,10 @@ export const AdminResponseSchemas = {
   editorialPickBundle: EditorialPickBundle,
   importPosts: ImportPostsOutput,
   stats: StagingStats,
+  entityExpertsBackfill: EntityExpertsBackfillOutput,
+  entityPostsBackfill: EntityPostsBackfillOutput,
+  entityTopicsBackfill: EntityTopicsBackfillOutput,
+  entityReindexDrain: EntityReindexDrainOutput,
   dataLayerEntity: DataLayerRegistryEntity,
   dataLayerEntitiesPage: DataLayerEntityPageOutput,
   dataLayerDelete: Schema.Struct({ ok: Schema.Literal(true) }),

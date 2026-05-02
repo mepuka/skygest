@@ -1,17 +1,37 @@
+import { Schema } from "effect";
 import type {
   AnyEntityDefinition,
   RelationDeclaration
 } from "./Domain/EntityDefinition";
 import {
   ENTITY_METADATA_FIELDS,
-  type EntityMetadataKey
+  type EntityMetadata,
+  type EntityMetadataKey,
+  type ProjectionContract,
+  type ProjectionFixture
 } from "./Domain/Projection";
 import { DEFAULT_ENTITY_SEARCH_INSTANCE } from "./Service/AiSearchClient";
-import { ExpertEntity, ExpertProjectionFixture } from "./agent/expert";
+import {
+  ExpertEntity,
+  ExpertProjectionFixture,
+  ExpertUnifiedProjection
+} from "./agent/expert";
 import {
   OrganizationEntity,
-  OrganizationProjectionFixture
+  OrganizationProjectionFixture,
+  OrganizationUnifiedProjection
 } from "./agent/organization";
+import {
+  PostEntity,
+  PostProjectionFixture,
+  PostUnifiedProjection
+} from "./content/post";
+import {
+  EnergyTopicEntity,
+  EnergyTopicProjectionFixture,
+  EnergyTopicUnifiedProjection
+} from "./concept/energy-topic";
+import { AUTO_RUNTIME_MODULES } from "./auto-entities";
 
 export const ENERGY_INTEL_SEARCH_BINDING = "ENERGY_INTEL_SEARCH" as const;
 export const ENERGY_INTEL_SEARCH_NAMESPACE = "energy-intel" as const;
@@ -56,6 +76,35 @@ export type EntityProvisioningPlan = {
   };
 };
 
+export type EntityRuntimeModule<
+  Def extends AnyEntityDefinition = AnyEntityDefinition
+> = {
+  readonly definition: Def;
+  readonly projection: ProjectionContract<Def["schema"], EntityMetadata>;
+  readonly fixture: ProjectionFixture<Def["schema"]>;
+};
+
+export const defineEntityRuntimeModule = <
+  Def extends AnyEntityDefinition
+>(
+  module: EntityRuntimeModule<Def>
+): EntityRuntimeModule<Def> => module;
+
+export class EntityRuntimeCatalogError extends Schema.TaggedErrorClass<EntityRuntimeCatalogError>()(
+  "EntityRuntimeCatalogError",
+  {
+    kind: Schema.Literals([
+      "DuplicateTag",
+      "ProjectionEntityTypeMismatch",
+      "FixtureEntityTypeMismatch",
+      "MetadataFieldMismatch",
+      "FixtureIriMismatch"
+    ]),
+    tag: Schema.String,
+    message: Schema.String
+  }
+) {}
+
 const relationProvisioning = (
   relations: AnyEntityDefinition["relations"]
 ): ReadonlyArray<EntityRelationProvisioning> =>
@@ -83,19 +132,160 @@ export const defineEntityProvisioning = <Def extends AnyEntityDefinition>(
   }
 });
 
-export const ExpertProvisioning = defineEntityProvisioning(ExpertEntity);
-export const OrganizationProvisioning =
-  defineEntityProvisioning(OrganizationEntity);
+export type EntityRuntimeCatalog<
+  Modules extends ReadonlyArray<EntityRuntimeModule> = ReadonlyArray<EntityRuntimeModule>
+> = {
+  readonly modules: Modules;
+  readonly tags: ReadonlyArray<string>;
+  readonly provisioning: ReadonlyArray<EntityProvisioningPlan>;
+  readonly projectionSpecs: ReadonlyArray<{
+    readonly definition: AnyEntityDefinition;
+    readonly projection: ProjectionContract<AnyEntityDefinition["schema"], EntityMetadata>;
+  }>;
+  readonly fixtures: ReadonlyArray<ProjectionFixture<any>>;
+};
 
-export const ENTITY_PROVISIONING = [
-  ExpertProvisioning,
-  OrganizationProvisioning
-] as const;
+const failCatalog = (
+  error: EntityRuntimeCatalogError
+): never => {
+  throw error;
+};
 
-export const ENTITY_PROJECTION_FIXTURES = [
-  ExpertProjectionFixture,
-  OrganizationProjectionFixture
-] as const;
+const assertRuntimeModule = (
+  module: EntityRuntimeModule,
+  seenTags: Set<string>
+): void => {
+  const tag = module.definition.tag;
+  if (seenTags.has(tag)) {
+    failCatalog(
+      new EntityRuntimeCatalogError({
+        kind: "DuplicateTag",
+        tag,
+        message: `Duplicate entity runtime module tag: ${tag}`
+      })
+    );
+  }
+  seenTags.add(tag);
+
+  if (module.projection.entityType !== tag) {
+    failCatalog(
+      new EntityRuntimeCatalogError({
+        kind: "ProjectionEntityTypeMismatch",
+        tag,
+        message: `Projection entity type ${module.projection.entityType} does not match definition tag ${tag}`
+      })
+    );
+  }
+
+  if (
+    module.fixture.entityType !== tag ||
+    module.fixture.projection.entityType !== tag
+  ) {
+    failCatalog(
+      new EntityRuntimeCatalogError({
+        kind: "FixtureEntityTypeMismatch",
+        tag,
+        message: `Projection fixture does not match definition tag ${tag}`
+      })
+    );
+  }
+
+  const metadata = module.projection.toMetadata(module.fixture.fixture);
+  const expectedKeys = ENTITY_METADATA_FIELDS.map((field) => field.field_name);
+  const actualKeys = Object.keys(metadata);
+  const expected = new Set<string>(expectedKeys);
+  const actual = new Set(actualKeys);
+  const mismatch =
+    expectedKeys.some((key) => !actual.has(key)) ||
+    actualKeys.some((key) => !expected.has(key));
+  if (mismatch) {
+    failCatalog(
+      new EntityRuntimeCatalogError({
+        kind: "MetadataFieldMismatch",
+        tag,
+        message: `Projection metadata for ${tag} must emit exactly ${expectedKeys.join(", ")}`
+      })
+    );
+  }
+
+  const fixtureIri = module.definition.identity.iriOf(
+    module.fixture.fixture as never
+  );
+  if (metadata.iri !== fixtureIri) {
+    failCatalog(
+      new EntityRuntimeCatalogError({
+        kind: "FixtureIriMismatch",
+        tag,
+        message: `Projection metadata iri ${metadata.iri} does not match fixture identity ${fixtureIri}`
+      })
+    );
+  }
+};
+
+export const defineEntityRuntimeCatalog = <
+  Modules extends ReadonlyArray<EntityRuntimeModule>
+>(
+  modules: Modules
+): EntityRuntimeCatalog<Modules> => {
+  const seenTags = new Set<string>();
+  for (const module of modules) {
+    assertRuntimeModule(module, seenTags);
+  }
+
+  return {
+    modules,
+    tags: modules.map((module) => module.definition.tag),
+    provisioning: modules.map((module) =>
+      defineEntityProvisioning(module.definition)
+    ),
+    projectionSpecs: modules.map((module) => ({
+      definition: module.definition,
+      projection: module.projection
+    })),
+    fixtures: modules.map((module) => module.fixture)
+  };
+};
+
+// The concrete runtime registry is intentionally limited to ontology-store
+// modules backed by generated IRIs and pinned TTL/codegen drift tests.
+const ExpertRuntimeModule = defineEntityRuntimeModule({
+  definition: ExpertEntity,
+  projection: ExpertUnifiedProjection,
+  fixture: ExpertProjectionFixture
+});
+const OrganizationRuntimeModule = defineEntityRuntimeModule({
+  definition: OrganizationEntity,
+  projection: OrganizationUnifiedProjection,
+  fixture: OrganizationProjectionFixture
+});
+const PostRuntimeModule = defineEntityRuntimeModule({
+  definition: PostEntity,
+  projection: PostUnifiedProjection,
+  fixture: PostProjectionFixture
+});
+const EnergyTopicRuntimeModule = defineEntityRuntimeModule({
+  definition: EnergyTopicEntity,
+  projection: EnergyTopicUnifiedProjection,
+  fixture: EnergyTopicProjectionFixture
+});
+
+export const ENTITY_RUNTIME_CATALOG = defineEntityRuntimeCatalog([
+  ExpertRuntimeModule,
+  OrganizationRuntimeModule,
+  PostRuntimeModule,
+  EnergyTopicRuntimeModule,
+  ...AUTO_RUNTIME_MODULES
+] as const);
+
+export const ENTITY_RUNTIME_MODULES = ENTITY_RUNTIME_CATALOG.modules;
+
+export const ENTITY_PROVISIONING = ENTITY_RUNTIME_CATALOG.provisioning;
+
+export const ENTITY_PROJECTION_SPECS =
+  ENTITY_RUNTIME_CATALOG.projectionSpecs;
+
+export const ENTITY_PROJECTION_FIXTURES =
+  ENTITY_RUNTIME_CATALOG.fixtures;
 
 const customMetadataEqual = (
   left: typeof ENTITY_SEARCH_CUSTOM_METADATA,

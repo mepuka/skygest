@@ -1,5 +1,15 @@
 import { D1Client } from "@effect/sql-d1";
-import { Layer } from "effect";
+import { Effect, Layer } from "effect";
+import {
+  AiSearchClient,
+  EntityGraphRepoD1,
+  EntityProjectionDrainService,
+  EntityProjectionRegistry,
+  ENTITY_PROJECTION_SPECS,
+  EntitySnapshotStoreD1,
+  makeAiSearchClient,
+  ReindexQueueD1
+} from "@skygest/ontology-store";
 import { AuthService } from "../auth/AuthService";
 import { d1DataLayerRegistryLayer } from "../bootstrap/D1DataLayerRegistry";
 import { BlueskyClient, layer as BlueskyClientLayer } from "../bluesky/BlueskyClient";
@@ -10,6 +20,7 @@ import { IngestWorkflowLauncher } from "../ingest/IngestWorkflowLauncher";
 import { AppConfig } from "../platform/Config";
 import {
   CloudflareEnv,
+  EnvError,
   type EnvBindings,
   makeWorkflowEnrichmentEnvLayer,
   makeWorkflowIngestEnvLayer,
@@ -18,6 +29,9 @@ import {
 } from "../platform/Env";
 import { Logging } from "../platform/Logging";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
+import { EntityExpertBackfillService } from "../services/EntityExpertBackfillService";
+import { EntityPostBackfillService } from "../services/EntityPostBackfillService";
+import { EntityTopicBackfillService } from "../services/EntityTopicBackfillService";
 import { CandidatePayloadService } from "../services/CandidatePayloadService";
 import { CurationService } from "../services/CurationService";
 import { DataRefQueryService } from "../services/DataRefQueryService";
@@ -114,6 +128,68 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         );
   const pipelineStatusServiceLayer = PipelineStatusService.layer.pipe(
     Layer.provideMerge(pipelineStatusRepoLayer)
+  );
+  const entitySnapshotStoreLayer = EntitySnapshotStoreD1.layer.pipe(
+    Layer.provideMerge(baseLayer)
+  );
+  const reindexQueueLayer = ReindexQueueD1.layer.pipe(
+    Layer.provideMerge(baseLayer)
+  );
+  const entityGraphRepoLayer = EntityGraphRepoD1.layer.pipe(
+    Layer.provideMerge(baseLayer)
+  );
+  const entityProjectionRegistryLayer =
+    EntityProjectionRegistry.snapshotLayer(ENTITY_PROJECTION_SPECS).pipe(
+      Layer.provideMerge(entitySnapshotStoreLayer)
+    );
+  const aiSearchClientLayer = Layer.effect(
+    AiSearchClient,
+    CloudflareEnv.use((runtimeEnv) =>
+      runtimeEnv.ENERGY_INTEL_SEARCH === undefined
+        ? Effect.fail(new EnvError({ missing: "ENERGY_INTEL_SEARCH" }))
+        : Effect.succeed(makeAiSearchClient(runtimeEnv.ENERGY_INTEL_SEARCH))
+    )
+  ).pipe(Layer.provideMerge(baseLayer));
+  const entityProjectionDrainLayer =
+    EntityProjectionDrainService.layer.pipe(
+      Layer.provideMerge(
+        Layer.mergeAll(
+          reindexQueueLayer,
+          entityProjectionRegistryLayer,
+          aiSearchClientLayer
+        )
+      )
+    );
+  const entityExpertBackfillLayer = EntityExpertBackfillService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        expertsLayer,
+        entitySnapshotStoreLayer,
+        reindexQueueLayer,
+        entityGraphRepoLayer
+      )
+    )
+  );
+  const entityPostBackfillLayer = EntityPostBackfillService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        baseLayer,
+        ontologyLayer,
+        expertsLayer,
+        entitySnapshotStoreLayer,
+        reindexQueueLayer,
+        entityGraphRepoLayer
+      )
+    )
+  );
+  const entityTopicBackfillLayer = EntityTopicBackfillService.layer.pipe(
+    Layer.provideMerge(
+      Layer.mergeAll(
+        ontologyLayer,
+        entitySnapshotStoreLayer,
+        reindexQueueLayer
+      )
+    )
   );
   const curationRepoLayer = CurationRepoD1.layer.pipe(
     Layer.provideMerge(baseLayer)
@@ -258,7 +334,11 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         curationServiceLayer,
         pipelineStatusServiceLayer,
         postImportServiceLayer,
-        dataLayerReposLayer
+        dataLayerReposLayer,
+        entityExpertBackfillLayer,
+        entityPostBackfillLayer,
+        entityTopicBackfillLayer,
+        entityProjectionDrainLayer
       )
     : Layer.mergeAll(
         baseLayer,
@@ -281,6 +361,10 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         curationServiceLayer,
         postImportServiceLayer,
         dataLayerReposLayer,
+        entityExpertBackfillLayer,
+        entityPostBackfillLayer,
+        entityTopicBackfillLayer,
+        entityProjectionDrainLayer,
         enrichmentLauncherLayer
       );
 
@@ -298,6 +382,15 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     enrichmentReadServiceLayer,
     pipelineStatusRepoLayer,
     pipelineStatusServiceLayer,
+    entitySnapshotStoreLayer,
+    reindexQueueLayer,
+    entityGraphRepoLayer,
+    entityProjectionRegistryLayer,
+    aiSearchClientLayer,
+    entityProjectionDrainLayer,
+    entityExpertBackfillLayer,
+    entityPostBackfillLayer,
+    entityTopicBackfillLayer,
     postImportServiceLayer,
     curationRepoLayer,
     dataLayerReposLayer,

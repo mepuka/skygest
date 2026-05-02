@@ -110,11 +110,29 @@ describe("ExpertModule", () => {
         tier: "core"
       });
       expect(expert.iri).toBe(
-        "https://w3id.org/energy-intel/expert/alice_bsky_social"
+        "https://w3id.org/energy-intel/expert/did_plc_abc"
       );
       expect(expert.did).toBe("did:plc:abc");
       expect(expert.displayName).toBe("Alice");
       expect(expert.roles).toHaveLength(1);
+    })
+  );
+
+  it.effect("fromLegacyRow falls back to DID when handle fields are absent", () =>
+    Effect.gen(function* () {
+      const expert = yield* expertFromLegacyRow({
+        did: "did:plc:nohandle",
+        handle: null,
+        displayName: null,
+        bio: null,
+        tier: null,
+        primaryTopic: null
+      });
+      expect(expert.iri).toBe(
+        "https://w3id.org/energy-intel/expert/did_plc_nohandle"
+      );
+      expect(expert.displayName).toBe("did:plc:nohandle");
+      expect(expert.bio).toBeUndefined();
     })
   );
 });

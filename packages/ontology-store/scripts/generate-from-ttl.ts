@@ -160,7 +160,9 @@ const main = Effect.gen(function* () {
   );
   const mergedTable = mergeClassTables([moduleTable, ...otherTables]);
 
-  const jsonSchema = yield* buildJsonSchema(moduleTable);
+  const jsonSchema = yield* buildJsonSchema(moduleTable, {
+    rangeTable: mergedTable
+  });
   const processed = yield* postProcessAst(jsonSchema, moduleTable);
 
   const generatedSource = renderSchemaSource(processed, moduleTable);

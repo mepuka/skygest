@@ -184,8 +184,13 @@ const topoSortClasses = (
     for (const cls of table.classes) {
       const deps = new Set<string>();
       for (const prop of cls.properties) {
-        if (prop.range !== undefined && known.has(prop.range)) {
-          deps.add(prop.range);
+        for (const range of [
+          ...(prop.range === undefined ? [] : [prop.range]),
+          ...(prop.rangeUnion ?? [])
+        ]) {
+          if (range !== cls.iri && known.has(range)) {
+            deps.add(range);
+          }
         }
       }
       dependsOn.set(cls.iri, [...deps]);

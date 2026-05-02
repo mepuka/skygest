@@ -16,7 +16,7 @@
  * declared upstream, regenerate src/generated/agent.ts and replace the
  * hand-declared fields with the generated property schemas to make
  * this fully codegen-driven. The branded ExpertIri / EnergyExpertRoleIri
- * / OrganizationIri imports below are already codegen-driven.
+ * imports below are already codegen-driven.
  *
  * Description-logic axiom (informational):
  *   Expert ≡ foaf:Person ⊓ ∃bfo:bearerOf.EnergyExpertRole
@@ -41,8 +41,7 @@ import {
 import type { RdfQuad } from "../Domain/Rdf";
 import {
   EnergyExpertRoleIri,
-  ExpertIri,
-  OrganizationIri
+  ExpertIri
 } from "../generated/agent";
 import { BFO, EI, FOAF, RDF } from "../iris";
 
@@ -51,7 +50,7 @@ const predicate = (term: NamedNode): PredicateIri => asPredicateIri(term.value);
 
 // Re-export the branded IRI brands so downstream consumers of this
 // module can reach for them through one import.
-export { EnergyExpertRoleIri, ExpertIri, OrganizationIri };
+export { EnergyExpertRoleIri, ExpertIri };
 
 /**
  * Application-level Expert shape.
@@ -71,7 +70,6 @@ export class Expert extends Schema.Class<Expert>("Expert")({
   did: Schema.String,
   displayName: Schema.String,
   roles: Schema.NonEmptyArray(EnergyExpertRoleIri),
-  affiliations: Schema.optionalKey(Schema.Array(OrganizationIri)),
   bio: Schema.optionalKey(Schema.String),
   tier: Schema.optionalKey(Schema.String),
   primaryTopic: Schema.optionalKey(Schema.String)
@@ -170,15 +168,16 @@ const decodeExpert = Schema.decodeUnknownEffect(Expert);
  * Lossy fields:
  *   - tier and primaryTopic: not represented as triples in this slice;
  *     dropped on round-trip until upstream declares them.
- *   - affiliations: same — dropped on round-trip.
+ *   - profile facets such as tier and primaryTopic: not represented as
+ *     triples in this slice; dropped on round-trip until upstream declares
+ *     them.
  *
  * `did` is round-trip stable — it is stored as a `(expert, ei:did,
  * "did:plc:...")` literal triple by `expertToTriples` and read back
- * here. The IRI is built from the URL-sanitised handle, not the DID,
- * so deriving `did` from the IRI tail (the prior implementation) drifted
- * identity (e.g. `expert/MarkZJacobson` parsed back as did "MarkZJacobson"
- * instead of "did:plc:xyz"). The AI Search projection key is derived
- * from `did`, so the drift was load-bearing.
+ * here. Older migration paths used handle-derived IRIs, so deriving `did`
+ * from the IRI tail drifted identity (e.g. `expert/MarkZJacobson` parsed
+ * back as did "MarkZJacobson" instead of "did:plc:xyz"). The AI Search
+ * projection key is derived from `did`, so the drift was load-bearing.
  */
 export const expertFromTriples = (
   quads: ReadonlyArray<RdfQuad>,
@@ -236,9 +235,8 @@ export const expertFromTriples = (
     }
 
     // did: required ei:did literal. Stored as a triple by the forward
-    // mapping (rather than derived from the IRI tail) so a handle-keyed
-    // IRI like `expert/MarkZJacobson` does not round-trip its DID
-    // ("did:plc:xyz") into the wrong value.
+    // mapping (rather than derived from the IRI tail) so every Expert IRI
+    // stays tied to its true DID.
     const didQuads = store.getQuads(subjectNode, EI_DID, null, null);
     const didQuad = didQuads[0];
     if (!didQuad) {
@@ -278,10 +276,6 @@ const renderExpertMarkdown = (e: Expert): string => {
     "roles:"
   ];
   for (const r of e.roles) lines.push(`  - ${r}`);
-  if (e.affiliations !== undefined && e.affiliations.length > 0) {
-    lines.push("affiliations:");
-    for (const a of e.affiliations) lines.push(`  - ${a}`);
-  }
   if (e.tier !== undefined) lines.push(`tier: ${e.tier}`);
   if (e.primaryTopic !== undefined)
     lines.push(`primary_topic: ${e.primaryTopic}`);
@@ -305,13 +299,6 @@ export const expertFacts = (
   ];
   for (const role of e.roles) {
     facts.push({ subject: e.iri, predicate: predicate(BFO.bearerOf), object: role });
-  }
-  for (const affiliation of e.affiliations ?? []) {
-    facts.push({
-      subject: e.iri,
-      predicate: predicate(EI.affiliatedWith),
-      object: affiliation
-    });
   }
   return facts;
 };
@@ -393,12 +380,6 @@ export const ExpertEntity = defineEntity({
     facts: expertFacts
   },
   relations: {
-    affiliatedWith: {
-      direction: "outbound",
-      predicate: predicate(EI.affiliatedWith),
-      target: "Organization",
-      cardinality: "many"
-    },
     bears: {
       direction: "outbound",
       predicate: predicate(BFO.bearerOf),
@@ -447,11 +428,11 @@ export const ExpertModule: OntologyEntityModule<typeof Expert, ExpertMetadata> =
  */
 export interface LegacyExpertRow {
   readonly did: string;
-  readonly handle: string;
-  readonly displayName?: string;
-  readonly bio?: string;
-  readonly tier?: string;
-  readonly primaryTopic?: string;
+  readonly handle?: string | null;
+  readonly displayName?: string | null;
+  readonly bio?: string | null;
+  readonly tier?: string | null;
+  readonly primaryTopic?: string | null;
 }
 
 const SLUG_DISALLOWED = /[^A-Za-z0-9_-]+/g;
@@ -463,23 +444,22 @@ const DEFAULT_LEGACY_ROLE_IRI =
   "https://w3id.org/energy-intel/energyExpertRole/default";
 
 /**
- * Build an `Expert` from a legacy D1 row. Used by Task 19's repo to
- * migrate existing experts into the ontology store. The handle is
- * URL-sanitised before being interpolated into the IRI so it satisfies
- * the codegen-driven `ExpertIri` regex.
+ * Build an `Expert` from a legacy D1 row. The DID is URL-sanitised before
+ * being interpolated into the IRI so entity identity stays stable even when
+ * handles change or collide after slugging.
  */
 export const expertFromLegacyRow = (
   row: LegacyExpertRow
 ): Effect.Effect<Expert, Schema.SchemaError> => {
-  const safeHandle = row.handle.replace(SLUG_DISALLOWED, "_");
+  const safeDid = row.did.replace(SLUG_DISALLOWED, "_");
   const candidate: Record<string, unknown> = {
-    iri: `https://w3id.org/energy-intel/expert/${safeHandle}`,
+    iri: `https://w3id.org/energy-intel/expert/${safeDid}`,
     did: row.did,
-    displayName: row.displayName ?? row.handle,
+    displayName: row.displayName ?? row.handle ?? row.did,
     roles: [DEFAULT_LEGACY_ROLE_IRI]
   };
-  if (row.bio !== undefined) candidate.bio = row.bio;
-  if (row.tier !== undefined) candidate.tier = row.tier;
-  if (row.primaryTopic !== undefined) candidate.primaryTopic = row.primaryTopic;
+  if (row.bio != null) candidate.bio = row.bio;
+  if (row.tier != null) candidate.tier = row.tier;
+  if (row.primaryTopic != null) candidate.primaryTopic = row.primaryTopic;
   return decodeExpert(candidate);
 };

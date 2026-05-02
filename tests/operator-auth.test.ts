@@ -135,6 +135,34 @@ describe("operator request policies", () => {
     ).toEqual(["ops:refresh"]);
     expect(
       requiredOperatorScopes(
+        new Request("https://skygest.local/admin/ops/entity-experts/backfill", {
+          method: "POST"
+        })
+      )
+    ).toEqual(["ops:refresh"]);
+    expect(
+      requiredOperatorScopes(
+        new Request("https://skygest.local/admin/ops/entity-posts/backfill", {
+          method: "POST"
+        })
+      )
+    ).toEqual(["ops:refresh"]);
+    expect(
+      requiredOperatorScopes(
+        new Request("https://skygest.local/admin/ops/entity-topics/backfill", {
+          method: "POST"
+        })
+      )
+    ).toEqual(["ops:refresh"]);
+    expect(
+      requiredOperatorScopes(
+        new Request("https://skygest.local/admin/ops/entity-reindex/drain", {
+          method: "POST"
+        })
+      )
+    ).toEqual(["ops:refresh"]);
+    expect(
+      requiredOperatorScopes(
         new Request("https://skygest.local/admin/data-layer/agents", {
           method: "POST"
         })
@@ -208,6 +236,34 @@ describe("operator request policies", () => {
         })
       )
     ).toBe("repair_enrichment");
+    expect(
+      operatorRequestAction(
+        new Request("https://skygest.local/admin/ops/entity-experts/backfill", {
+          method: "POST"
+        })
+      )
+    ).toBe("entity_experts_backfill");
+    expect(
+      operatorRequestAction(
+        new Request("https://skygest.local/admin/ops/entity-posts/backfill", {
+          method: "POST"
+        })
+      )
+    ).toBe("entity_posts_backfill");
+    expect(
+      operatorRequestAction(
+        new Request("https://skygest.local/admin/ops/entity-topics/backfill", {
+          method: "POST"
+        })
+      )
+    ).toBe("entity_topics_backfill");
+    expect(
+      operatorRequestAction(
+        new Request("https://skygest.local/admin/ops/entity-reindex/drain", {
+          method: "POST"
+        })
+      )
+    ).toBe("entity_reindex_drain");
     expect(
       operatorRequestAction(
         new Request(

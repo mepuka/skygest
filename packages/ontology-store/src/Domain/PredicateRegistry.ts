@@ -1,6 +1,6 @@
 import type { NamedNode } from "n3";
 
-import { BFO, EI } from "../iris";
+import { BFO, EI, IAO } from "../iris";
 import { asPredicateIri, type PredicateIri } from "./EntityDefinition";
 import type { EntityIri } from "./EntityGraph";
 
@@ -13,25 +13,25 @@ export interface PredicateSpec {
 }
 
 export const PREDICATES = {
-  "ei:mentions": {
-    iri: predicate(EI.mentions),
+  "iao:mentions": {
+    iri: predicate(IAO.mentions),
     subject: ["Expert", "Post"],
-    object: ["Post", "Article", "Dataset", "Organization", "Expert"]
+    object: ["Post", "Article", "Dataset", "Organization", "Expert", "EnergyTopic"]
   },
   "ei:authoredBy": {
     iri: predicate(EI.authoredBy),
     subject: ["Post", "Article"],
     object: ["Expert"]
   },
+  "ei:aboutTechnology": {
+    iri: predicate(EI.aboutTechnology),
+    subject: ["CanonicalMeasurementClaim"],
+    object: ["EnergyTopic"]
+  },
   "bfo:bearerOf": {
     iri: predicate(BFO.bearerOf),
     subject: ["Expert", "Organization"],
     object: ["EnergyExpertRole", "PublisherRole", "DataProviderRole"]
-  },
-  "ei:affiliatedWith": {
-    iri: predicate(EI.affiliatedWith),
-    subject: ["Expert"],
-    object: ["Organization"]
   }
 } as const satisfies Record<string, PredicateSpec>;
 

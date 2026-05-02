@@ -5,19 +5,33 @@ import {
   BFO,
   ENTITY_GRAPH_SCHEMA_STATEMENTS,
   ENTITY_METADATA_FIELDS,
+  ENTITY_PROJECTION_FIXTURES,
+  ENTITY_PROJECTION_SPECS,
+  ENTITY_PROVISIONING,
+  ENTITY_RUNTIME_CATALOG,
+  ENTITY_RUNTIME_MODULES,
+  ENERGY_INTEL_CONCEPTS,
+  ENERGY_INTEL_CONCEPT_SCHEMES,
   EI,
   EXPERT_METADATA_KEYS,
   AiSearchClient,
   Expert,
+  CanonicalMeasurementClaim,
   EntityContextService,
+  EntityProjectionDrainService,
+  EntityProjectionRegistry,
   EntitySearchService,
+  EntitySnapshotStore,
+  EnergyExpertRole,
   ExpertEntity,
   ExpertIri,
   ExpertModule,
   ExpertUnifiedProjection,
   FOAF,
+  IAO,
   IRI,
   PREDICATES,
+  Post,
   PredicateIri,
   RDF,
   RdfError,
@@ -92,15 +106,18 @@ describe("@skygest/ontology-store", () => {
     expect(BFO.bearerOf).toBeDefined();
     expect(FOAF.name).toBeDefined();
     expect(RDF.type).toBeDefined();
-    expect(EI.mentions).toBeDefined();
+    expect(IAO.mentions).toBeDefined();
+    expect(EI.CanonicalMeasurementClaim).toBeDefined();
+    expect(EI.Post).toBeDefined();
+    expect(EI.presents).toBeDefined();
   });
 
   it("exposes entity graph and projection primitives", () => {
     expect(Schema.decodeUnknownSync(PredicateIri)(BFO.bearerOf.value)).toBe(
       BFO.bearerOf.value
     );
-    expect(asPredicateIri(PREDICATES["ei:mentions"].iri)).toBe(
-      "https://w3id.org/energy-intel/mentions"
+    expect(asPredicateIri(PREDICATES["iao:mentions"].iri)).toBe(
+      "http://purl.obolibrary.org/obo/IAO_0000142"
     );
     expect(ENTITY_GRAPH_SCHEMA_STATEMENTS.length).toBeGreaterThan(0);
     expect(ENTITY_METADATA_FIELDS.map((field) => field.field_name)).toEqual([
@@ -113,5 +130,32 @@ describe("@skygest/ontology-store", () => {
     expect(AiSearchClient).toBeDefined();
     expect(EntitySearchService).toBeDefined();
     expect(EntityContextService).toBeDefined();
+    expect(EntitySnapshotStore).toBeDefined();
+    expect(EntityProjectionRegistry).toBeDefined();
+    expect(EntityProjectionDrainService).toBeDefined();
+    const moduleTags = ENTITY_RUNTIME_MODULES.map(
+      (module) => module.definition.tag
+    );
+    expect(ENTITY_RUNTIME_CATALOG.tags).toEqual(moduleTags);
+    expect(Post).toBeDefined();
+    expect(CanonicalMeasurementClaim).toBeDefined();
+    expect(EnergyExpertRole).toBeDefined();
+    expect(
+      ENERGY_INTEL_CONCEPT_SCHEMES.some(
+        (scheme) => scheme.iri === "https://w3id.org/energy-intel/concept/technology"
+      )
+    ).toBe(true);
+    expect(
+      ENERGY_INTEL_CONCEPTS.some(
+        (concept) => concept.iri === "https://w3id.org/energy-intel/concept/solar"
+      )
+    ).toBe(true);
+    expect(ENTITY_PROJECTION_SPECS.map((spec) => spec.definition.tag)).toEqual(
+      moduleTags
+    );
+    expect(ENTITY_PROVISIONING.map((plan) => plan.tag)).toEqual(moduleTags);
+    expect(
+      ENTITY_PROJECTION_FIXTURES.map((fixture) => fixture.entityType)
+    ).toEqual(moduleTags);
   });
 });

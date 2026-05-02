@@ -53,7 +53,7 @@ const makeLinkRow = (linkId: string, state: "active" | "superseded") => ({
   link_id: linkId,
   triple_hash: "hash-1",
   subject_iri: expertIri,
-  predicate_iri: PREDICATES["ei:affiliatedWith"].iri,
+  predicate_iri: PREDICATES["iao:mentions"].iri,
   object_iri: orgIri,
   object_value: null,
   object_datatype: null,
@@ -164,7 +164,7 @@ describe("EntityGraphRepoD1", () => {
       yield* graph.upsertEntity(orgIri, orgTag);
 
       const link = yield* graph.createLink({
-        predicate: "ei:affiliatedWith",
+        predicate: "iao:mentions",
         subject: { iri: expertIri, type: "Expert" },
         object: { iri: orgIri, type: "Organization" },
         effectiveFrom: 10
@@ -179,7 +179,7 @@ describe("EntityGraphRepoD1", () => {
       const inbound = yield* graph.linksIn(orgIri);
       expect(out).toHaveLength(1);
       expect(inbound).toHaveLength(1);
-      expect(out[0]?.link.predicateIri).toBe(PREDICATES["ei:affiliatedWith"].iri);
+      expect(out[0]?.link.predicateIri).toBe(PREDICATES["iao:mentions"].iri);
       expect(out[0]?.evidence[0]?.confidence).toBe(0.9);
     }).pipe(Effect.provide(testLayer))
   );
@@ -193,7 +193,7 @@ describe("EntityGraphRepoD1", () => {
       yield* graph.upsertEntity(orgIri, orgTag);
 
       const input = {
-        predicate: "ei:affiliatedWith" as const,
+        predicate: "iao:mentions" as const,
         subject: { iri: expertIri, type: "Expert" as const },
         object: { iri: orgIri, type: "Organization" as const },
         effectiveFrom: 10
@@ -217,7 +217,7 @@ describe("EntityGraphRepoD1", () => {
 
       const exit = yield* Effect.exit(
         graph.createLink({
-          predicate: "ei:affiliatedWith",
+          predicate: "iao:mentions",
           subject: { iri: orgIri, type: "Organization" },
           object: { iri: expertIri, type: "Expert" },
           effectiveFrom: 10
@@ -237,13 +237,13 @@ describe("EntityGraphRepoD1", () => {
       yield* graph.upsertEntity(expertIri, expertTag);
       yield* graph.upsertEntity(orgIri, orgTag);
       const old = yield* graph.createLink({
-        predicate: "ei:affiliatedWith",
+        predicate: "iao:mentions",
         subject: { iri: expertIri, type: "Expert" },
         object: { iri: orgIri, type: "Organization" },
         effectiveFrom: 10
       });
       const replacement = yield* graph.supersede(old.linkId, {
-        predicate: "ei:affiliatedWith",
+        predicate: "iao:mentions",
         subject: { iri: expertIri, type: "Expert" },
         object: { iri: orgIri, type: "Organization" },
         effectiveFrom: 20
@@ -284,7 +284,7 @@ describe("EntityGraphRepoD1", () => {
       const graph = yield* EntityGraphRepo;
 
       const replacement = yield* graph.supersede(oldLinkId, {
-        predicate: "ei:affiliatedWith",
+        predicate: "iao:mentions",
         subject: { iri: expertIri, type: "Expert" },
         object: { iri: orgIri, type: "Organization" },
         effectiveFrom: 20
