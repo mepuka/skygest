@@ -230,7 +230,7 @@ export {
 } from "./generated/measurement";
 
 // Namespace constants used for triple construction outside the package.
-export { BFO, EI, FOAF, OWL, RDF, RDFS, SKOS, XSD } from "./iris";
+export { BFO, EI, FOAF, IAO, OWL, RDF, RDFS, SKOS, XSD } from "./iris";
 
 // Canonical Expert agent module. Phase E (Alchemy) and Phase F (services)
 // reach through this surface rather than the private file path.

@@ -26,6 +26,7 @@ import {
   ExpertModule,
   ExpertUnifiedProjection,
   FOAF,
+  IAO,
   IRI,
   PREDICATES,
   Post,
@@ -103,7 +104,7 @@ describe("@skygest/ontology-store", () => {
     expect(BFO.bearerOf).toBeDefined();
     expect(FOAF.name).toBeDefined();
     expect(RDF.type).toBeDefined();
-    expect(EI.mentions).toBeDefined();
+    expect(IAO.mentions).toBeDefined();
     expect(EI.CanonicalMeasurementClaim).toBeDefined();
     expect(EI.Post).toBeDefined();
     expect(EI.presents).toBeDefined();
@@ -113,8 +114,8 @@ describe("@skygest/ontology-store", () => {
     expect(Schema.decodeUnknownSync(PredicateIri)(BFO.bearerOf.value)).toBe(
       BFO.bearerOf.value
     );
-    expect(asPredicateIri(PREDICATES["ei:mentions"].iri)).toBe(
-      "https://w3id.org/energy-intel/mentions"
+    expect(asPredicateIri(PREDICATES["iao:mentions"].iri)).toBe(
+      "http://purl.obolibrary.org/obo/IAO_0000142"
     );
     expect(ENTITY_GRAPH_SCHEMA_STATEMENTS.length).toBeGreaterThan(0);
     expect(ENTITY_METADATA_FIELDS.map((field) => field.field_name)).toEqual([

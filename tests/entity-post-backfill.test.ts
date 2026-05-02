@@ -302,7 +302,7 @@ describe("EntityPostBackfillService", () => {
       const topicLinks = aliceLinks.filter(
         (link) =>
           link.link.predicateIri ===
-          "https://w3id.org/energy-intel/mentions"
+          "http://purl.obolibrary.org/obo/IAO_0000142"
       );
       expect(topicLinks.map((link) => link.link.objectType).sort()).toEqual([
         "EnergyTopic",

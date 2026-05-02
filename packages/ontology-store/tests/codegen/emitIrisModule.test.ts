@@ -6,7 +6,7 @@ import {
 } from "../../scripts/codegen/parseTtl";
 
 describe("emitIrisModule", () => {
-  it("emits namespace constants for EI, BFO, FOAF, RDF, OWL, etc.", () => {
+  it("emits namespace constants for EI, BFO, FOAF, IAO, RDF, OWL, etc.", () => {
     const table: ClassTable = {
       classes: [
         {
@@ -45,6 +45,10 @@ describe("emitIrisModule", () => {
     expect(source).not.toContain('BFO_0000053: namedNode');
     expect(source).toContain("export const FOAF");
     expect(source).toContain('name: namedNode("http://xmlns.com/foaf/0.1/name")');
+    expect(source).toContain("export const IAO");
+    expect(source).toContain(
+      'mentions: namedNode("http://purl.obolibrary.org/obo/IAO_0000142")'
+    );
     expect(source).toContain("export const RDF");
     expect(source).toContain("export const RDFS");
     expect(source).toContain("export const OWL");

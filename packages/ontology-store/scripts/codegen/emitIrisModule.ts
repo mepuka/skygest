@@ -1,8 +1,8 @@
 /**
  * Stage 4 of the TTL → Effect Schema codegen pipeline: produce a TS source
  * string for `packages/ontology-store/src/iris.ts` — namespace constants
- * keyed by short prefix (`EI`, `BFO`, `FOAF`, `RDF`, `RDFS`, `OWL`, `SKOS`,
- * `XSD`) whose values are `n3.NamedNode`s.
+ * keyed by short prefix (`EI`, `BFO`, `FOAF`, `IAO`, `RDF`, `RDFS`, `OWL`,
+ * `SKOS`, `XSD`) whose values are `n3.NamedNode`s.
  *
  * Generated code shape (excerpt):
  *
@@ -32,6 +32,7 @@ import type { ClassTable } from "./parseTtl.ts";
 
 const NS_EI = "https://w3id.org/energy-intel/";
 const NS_BFO = "http://purl.obolibrary.org/obo/";
+const NS_IAO = "http://purl.obolibrary.org/obo/IAO_";
 const NS_FOAF = "http://xmlns.com/foaf/0.1/";
 const NS_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 const NS_RDFS = "http://www.w3.org/2000/01/rdf-schema#";
@@ -52,6 +53,20 @@ const BFO_ALIASES: Readonly<Record<string, string>> = {
   BFO_0000030: "object",
   BFO_0000052: "inheresIn",
   BFO_0000053: "bearerOf"
+};
+
+// Imported IAO terms that are used by the energy-intel modules after
+// import materialization. Keep these aligned with ontology_skill's
+// imports-manifest.yaml / validation/merged-data.ttl; do not patch local
+// EI predicates into the vendored TTLs to stand in for them.
+const IAO_TERMS: Readonly<Record<string, string>> = {
+  document: `${NS_IAO}0000310`,
+  image: `${NS_IAO}0000101`,
+  informationContentEntity: `${NS_IAO}0000030`,
+  isAbout: `${NS_IAO}0000136`,
+  mentionedBy: `${NS_IAO}0000143`,
+  mentions: `${NS_IAO}0000142`,
+  textualEntity: `${NS_IAO}0000300`
 };
 
 /**
@@ -84,6 +99,7 @@ export const emitIrisModule = (table: ClassTable): string => {
   const ei = new Map<string, string>();
   const bfo = new Map<string, string>();
   const foaf = new Map<string, string>();
+  const iao = new Map<string, string>(Object.entries(IAO_TERMS));
 
   for (const propertyIri of table.declaredProperties ?? []) {
     const eiPropTail = stripPrefix(propertyIri, NS_EI);
@@ -164,6 +180,7 @@ export const emitIrisModule = (table: ClassTable): string => {
   lines.push(renderConst("EI", NS_EI, ei));
   lines.push(renderConst("BFO", NS_BFO, bfo));
   lines.push(renderConst("FOAF", NS_FOAF, foaf));
+  lines.push(renderConst("IAO", NS_IAO, iao));
 
   // Standard namespaces ship a fixed set of common terms — Task 9's writer
   // only references these few and there's no ontology signal to grow them

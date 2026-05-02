@@ -60,7 +60,7 @@ const ENERGY_TOPIC_ENTITY_TAG = asEntityTag("EnergyTopic");
 const DEFAULT_GRAPH_IRI = "urn:skygest:graph:default";
 const COALESCE_WINDOW_MS = 30_000;
 const AUTHORED_BY_PREDICATE_IRI = predicateSpec("ei:authoredBy").iri;
-const TOPIC_MENTION_PREDICATE_IRI = predicateSpec("ei:mentions").iri;
+const TOPIC_MENTION_PREDICATE_IRI = predicateSpec("iao:mentions").iri;
 const UNKNOWN_TOPIC_PRIORITY = 10_000;
 
 const normalizeLimit = (limit: number | undefined): number =>
@@ -814,7 +814,7 @@ export class EntityPostBackfillService extends ServiceMap.Service<
                 ENERGY_TOPIC_ENTITY_TAG
               );
               const link = yield* entityGraph.createLink({
-                predicate: "ei:mentions",
+                predicate: "iao:mentions",
                 subject: { iri, type: "Post" },
                 object: { iri: topicIri, type: "EnergyTopic" },
                 effectiveFrom: post.postedAt

@@ -68,7 +68,7 @@ const insertLink = (
       ${input.linkId},
       ${input.tripleHash},
       ${input.subjectIri},
-      ${PREDICATES["ei:affiliatedWith"].iri},
+      ${PREDICATES["iao:mentions"].iri},
       ${input.objectIri},
       NULL,
       NULL,

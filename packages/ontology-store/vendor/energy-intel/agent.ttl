@@ -45,14 +45,6 @@ ei:DataProviderRole a owl:Class ;
         bfo:0000023 ;
     skos:definition "A BFO role inhering in an Organization that acts as the authoritative data source referenced by one or more CMCs."@en .
 
-ei:affiliatedWith a owl:ObjectProperty ;
-    rdfs:label "affiliated with"@en ;
-    skos:definition "Connects a person-like energy-intel entity to an organization it is affiliated with."@en .
-
-ei:authoredBy a owl:ObjectProperty ;
-    rdfs:label "authored by"@en ;
-    skos:definition "Connects a content entity such as a post or article to the expert who authored it."@en .
-
 ei:EnergyExpertRole a owl:Class ;
     rdfs:label "energy expert role"@en ;
     rdfs:subClassOf [ a owl:Restriction ;
@@ -60,10 +52,6 @@ ei:EnergyExpertRole a owl:Class ;
             owl:someValuesFrom foaf:Person ],
         bfo:0000023 ;
     skos:definition "A BFO role inhering in a foaf:Person who publishes energy-domain claims (on social media, podcasts, or articles) that an editorial pipeline extracts as CanonicalMeasurementClaims."@en .
-
-ei:mentions a owl:ObjectProperty ;
-    rdfs:label "mentions"@en ;
-    skos:definition "Connects a content or agentic context entity to another entity that it mentions."@en .
 
 ei:Organization a owl:Class ;
     rdfs:label "Organization"@en ;

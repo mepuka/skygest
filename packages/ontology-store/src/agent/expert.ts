@@ -16,7 +16,7 @@
  * declared upstream, regenerate src/generated/agent.ts and replace the
  * hand-declared fields with the generated property schemas to make
  * this fully codegen-driven. The branded ExpertIri / EnergyExpertRoleIri
- * / OrganizationIri imports below are already codegen-driven.
+ * imports below are already codegen-driven.
  *
  * Description-logic axiom (informational):
  *   Expert ≡ foaf:Person ⊓ ∃bfo:bearerOf.EnergyExpertRole
@@ -41,8 +41,7 @@ import {
 import type { RdfQuad } from "../Domain/Rdf";
 import {
   EnergyExpertRoleIri,
-  ExpertIri,
-  OrganizationIri
+  ExpertIri
 } from "../generated/agent";
 import { BFO, EI, FOAF, RDF } from "../iris";
 
@@ -51,7 +50,7 @@ const predicate = (term: NamedNode): PredicateIri => asPredicateIri(term.value);
 
 // Re-export the branded IRI brands so downstream consumers of this
 // module can reach for them through one import.
-export { EnergyExpertRoleIri, ExpertIri, OrganizationIri };
+export { EnergyExpertRoleIri, ExpertIri };
 
 /**
  * Application-level Expert shape.
@@ -71,7 +70,6 @@ export class Expert extends Schema.Class<Expert>("Expert")({
   did: Schema.String,
   displayName: Schema.String,
   roles: Schema.NonEmptyArray(EnergyExpertRoleIri),
-  affiliations: Schema.optionalKey(Schema.Array(OrganizationIri)),
   bio: Schema.optionalKey(Schema.String),
   tier: Schema.optionalKey(Schema.String),
   primaryTopic: Schema.optionalKey(Schema.String)
@@ -170,7 +168,9 @@ const decodeExpert = Schema.decodeUnknownEffect(Expert);
  * Lossy fields:
  *   - tier and primaryTopic: not represented as triples in this slice;
  *     dropped on round-trip until upstream declares them.
- *   - affiliations: same — dropped on round-trip.
+ *   - profile facets such as tier and primaryTopic: not represented as
+ *     triples in this slice; dropped on round-trip until upstream declares
+ *     them.
  *
  * `did` is round-trip stable — it is stored as a `(expert, ei:did,
  * "did:plc:...")` literal triple by `expertToTriples` and read back
@@ -276,10 +276,6 @@ const renderExpertMarkdown = (e: Expert): string => {
     "roles:"
   ];
   for (const r of e.roles) lines.push(`  - ${r}`);
-  if (e.affiliations !== undefined && e.affiliations.length > 0) {
-    lines.push("affiliations:");
-    for (const a of e.affiliations) lines.push(`  - ${a}`);
-  }
   if (e.tier !== undefined) lines.push(`tier: ${e.tier}`);
   if (e.primaryTopic !== undefined)
     lines.push(`primary_topic: ${e.primaryTopic}`);
@@ -303,13 +299,6 @@ export const expertFacts = (
   ];
   for (const role of e.roles) {
     facts.push({ subject: e.iri, predicate: predicate(BFO.bearerOf), object: role });
-  }
-  for (const affiliation of e.affiliations ?? []) {
-    facts.push({
-      subject: e.iri,
-      predicate: predicate(EI.affiliatedWith),
-      object: affiliation
-    });
   }
   return facts;
 };
@@ -391,12 +380,6 @@ export const ExpertEntity = defineEntity({
     facts: expertFacts
   },
   relations: {
-    affiliatedWith: {
-      direction: "outbound",
-      predicate: predicate(EI.affiliatedWith),
-      target: "Organization",
-      cardinality: "many"
-    },
     bears: {
       direction: "outbound",
       predicate: predicate(BFO.bearerOf),

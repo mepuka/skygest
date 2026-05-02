@@ -96,7 +96,7 @@ describe("EntityContextService", () => {
       yield* graph.upsertEntity(expertIri, asEntityTag("Expert"));
       yield* graph.upsertEntity(orgIri, asEntityTag("Organization"));
       const link = yield* graph.createLink({
-        predicate: "ei:affiliatedWith",
+        predicate: "iao:mentions",
         subject: { iri: expertIri, type: "Expert" },
         object: { iri: orgIri, type: "Organization" },
         effectiveFrom: 10
@@ -160,7 +160,7 @@ describe("EntityContextService", () => {
       yield* graph.upsertEntity(postIri, asEntityTag("Post"));
       yield* graph.upsertEntity(topicIri, asEntityTag("EnergyTopic"));
       const link = yield* graph.createLink({
-        predicate: "ei:mentions",
+        predicate: "iao:mentions",
         subject: { iri: postIri, type: "Post" },
         object: { iri: topicIri, type: "EnergyTopic" },
         effectiveFrom: 10

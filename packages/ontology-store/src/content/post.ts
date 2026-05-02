@@ -35,7 +35,7 @@ import {
 import type { RdfQuad } from "../Domain/Rdf";
 import { ExpertIri } from "../generated/agent";
 import { PostIri } from "../generated/media";
-import { EI, RDF } from "../iris";
+import { EI, IAO, RDF } from "../iris";
 
 const { quad, namedNode, literal } = DataFactory;
 const predicate = (term: NamedNode): PredicateIri => asPredicateIri(term.value);
@@ -421,7 +421,7 @@ export const PostEntity = defineEntity({
     },
     mentionsTopic: {
       direction: "outbound",
-      predicate: predicate(EI.mentions),
+      predicate: predicate(IAO.mentions),
       target: "EnergyTopic",
       cardinality: "many"
     }

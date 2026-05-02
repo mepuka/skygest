@@ -28,7 +28,6 @@ export const EI = {
   SocialThread: namedNode("https://w3id.org/energy-intel/SocialThread"),
   Variable: namedNode("https://w3id.org/energy-intel/Variable"),
   aboutTechnology: namedNode("https://w3id.org/energy-intel/aboutTechnology"),
-  affiliatedWith: namedNode("https://w3id.org/energy-intel/affiliatedWith"),
   assertedTime: namedNode("https://w3id.org/energy-intel/assertedTime"),
   assertedUnit: namedNode("https://w3id.org/energy-intel/assertedUnit"),
   assertedValue: namedNode("https://w3id.org/energy-intel/assertedValue"),
@@ -42,7 +41,6 @@ export const EI = {
   inConversation: namedNode("https://w3id.org/energy-intel/inConversation"),
   intervalEnd: namedNode("https://w3id.org/energy-intel/intervalEnd"),
   intervalStart: namedNode("https://w3id.org/energy-intel/intervalStart"),
-  mentions: namedNode("https://w3id.org/energy-intel/mentions"),
   partOfEpisode: namedNode("https://w3id.org/energy-intel/partOfEpisode"),
   presents: namedNode("https://w3id.org/energy-intel/presents"),
   publishedInDataset: namedNode("https://w3id.org/energy-intel/publishedInDataset"),
@@ -68,6 +66,16 @@ export const FOAF = {
   Organization: namedNode("http://xmlns.com/foaf/0.1/Organization"),
   Person: namedNode("http://xmlns.com/foaf/0.1/Person"),
   name: namedNode("http://xmlns.com/foaf/0.1/name"),
+} as const;
+
+export const IAO = {
+  document: namedNode("http://purl.obolibrary.org/obo/IAO_0000310"),
+  image: namedNode("http://purl.obolibrary.org/obo/IAO_0000101"),
+  informationContentEntity: namedNode("http://purl.obolibrary.org/obo/IAO_0000030"),
+  isAbout: namedNode("http://purl.obolibrary.org/obo/IAO_0000136"),
+  mentionedBy: namedNode("http://purl.obolibrary.org/obo/IAO_0000143"),
+  mentions: namedNode("http://purl.obolibrary.org/obo/IAO_0000142"),
+  textualEntity: namedNode("http://purl.obolibrary.org/obo/IAO_0000300"),
 } as const;
 
 export const RDF = {
