@@ -100,13 +100,8 @@ jobs:
       - name: Build web assets
         run: bun run build:web:prod
 
-      - name: Deploy agent to staging
-        run: bunx wrangler deploy --config wrangler.agent.toml --env staging
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Deploy ingest to staging
-        run: bunx wrangler deploy --config wrangler.toml --env staging
+      - name: Deploy workers to staging via Alchemy
+        run: bun alchemy.run.ts --stage staging
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
