@@ -1,190 +1,160 @@
-# Resolution Trace: One Post Through the Shipped Provenance-First Path
+# Entity Search Trace: One Post Through The Cutover Path
 
-This document walks one real post through the resolver path that is actually shipped on `main` today. The post is:
+This document replaces the old resolver trace. The shipped backend no longer runs:
 
-`at://did:plc:3zhdeyok4trlrd3cijz7p4e6/app.bsky.feed.post/3m7rx7sb6q22l`
+`vision -> source attribution -> resolver worker -> Stage 1 -> bundle resolution -> data-ref-resolution`
 
-It is the same Blyth Offshore Wind / Ember chart example the earlier docs used, because it still gives us a concrete target to reason about:
+The live path is now:
 
-- Ember as the publisher
-- the Ember dataset/distribution pair behind the chart
-- the chart provenance cues that should point at Ember's dataset surface
+`vision -> source attribution -> search_entities`
 
-The critical architectural update is that the runtime path is now:
+Vision and source attribution are extraction outputs. `search_entities` is the canonical ontology-aligned read/search surface. It can be called by MCP, admin routes, future editorial tooling, and future linking workflows.
 
-`vision -> source-attribution -> resolver worker -> Stage 1 matching -> asset bundle search -> stored data-ref-resolution row`
+## Prep Loop
 
-There is no live facet kernel in this branch. Variable and series semantic resolution are future work.
+### 0A. Provider ingest -> git-backed snapshot
 
-## Snapshot note
+- **Component:** `scripts/cold-start-ingest-*.ts` and `src/ingest/dcat-harness/`
+- **Input:** provider catalog/API surfaces
+- **Output:** `.generated/cold-start/`
+- **Why it matters:** search quality starts with clean ontology-aligned entity data
 
-This trace describes the shipped contract, not a claim that every post already resolves perfectly. The resolver now writes real `data-ref-resolution` rows, but the live output is intentionally narrower than the older kernel-shaped ambition. The current path is about provenance-first matching: agent, dataset, and distribution-derived scope.
-
-## Prep loop
-
-### 0A. Provider ingest -> git-backed cold-start snapshot
-
-- **Component:** `scripts/cold-start-ingest-*.ts` over `src/ingest/dcat-harness/`
-- **Input:** provider catalog or API surfaces
-- **Output:** fetched registry snapshot under `.generated/cold-start/`
-- **Why it matters:** the resolver only becomes meaningful if the Ember agent, dataset, and distribution already exist in the repo-local snapshot
-
-This is the repo-local source material behind the runtime registry, even though production no longer reads it directly.
-
-### 0B. Snapshot -> D1 runtime registry
+### 0B. Snapshot -> D1 registry
 
 - **Component:** `scripts/sync-data-layer.ts`, `src/data-layer/Sync.ts`
-- **Input:** `.generated/cold-start/`
-- **Output:** the D1 tables the runtime actually reads
-- **Why it matters:** Stage 1 and bundle resolution now resolve against the D1-backed registry, not the snapshot files directly
+- **Output:** D1 data-layer tables for Agent, Dataset, Distribution, Series, Variable, and deferred families
+- **Why it matters:** D1 is the runtime source of truth for hydration
 
-The runtime registry is the live source of truth. The fetched snapshot remains the repo-local seed surface.
+### 0C. Registry -> search projection
 
-### 0C. D1 registry -> entity search projection
+- **Component:** `src/search/*`, `src/services/d1/EntitySearchRepoD1.ts`
+- **Output:** `SEARCH_DB` rows for text search, exact URL probes, hostname probes, aliases, and hydration
+- **Why it matters:** search can only return what projection stores and hydrates
 
-- **Component:** search rebuild scripts plus `SEARCH_DB`
-- **Input:** data-layer entities promoted from the snapshot
-- **Output:** typed search rows used by the resolver
-- **Why it matters:** after exact URL and hostname wins, the resolver now falls through to typed search instead of facet stitching
+### 0D. Registry/search corpus -> AI Search
 
-### 0D. Snapshot -> ontology-store round-trip validation
+- **Component:** Cloudflare AI Search binding `ENERGY_INTEL_SEARCH`
+- **Output:** semantic recall candidates
+- **Why it matters:** AI Search improves recall, but D1 remains authoritative for returned payloads
+
+### 0E. Snapshot -> ontology-store validation
 
 - **Component:** `packages/ontology-store/`
-- **Input:** the same `.generated/cold-start/` entity corpus
-- **Output:** RDF emission, SHACL validation, Turtle reload, and distill-back tests
-- **Why it matters:** this is not part of the hot path, but it is now a real adjacent quality loop that checks whether the catalog snapshot can survive the new ontology export seam
+- **Output:** RDF emit, SHACL validation, reload, and distill checks
+- **Why it matters:** this validates ontology/export health offline without putting RDF reasoning in the Worker hot path
 
-## Runtime path
+## Runtime Path
 
 ### 1. Post intake -> `posts` row
 
 - **Component:** `IngestRunWorkflow`
-- **Output:** `KnowledgePost` in D1 `posts`
-- **Why it matters:** every downstream enrichment and resolver step keys off `PostUri`
+- **Output:** `KnowledgePost` in D1
+- **Why it matters:** downstream enrichment and editorial reads key off `PostUri`
 
-For this trace, the post lands as a normal knowledge post with chart media and outbound link context.
-
-### 2. Vision enrichment -> `post_enrichments(kind = vision)`
+### 2. Vision enrichment -> `post_enrichments(kind=vision)`
 
 - **Component:** `VisionEnrichmentExecutor`
 - **Output:** `VisionEnrichment`
-- **Why it matters:** chart title, visible URL, source lines, logo text, and series text become structured inputs instead of raw image bytes
+- **Why it matters:** chart titles, visible URLs, source lines, axes, and media clues become structured extraction data
 
-For the Ember post, the vision lane is where "Ember" and the chart-language cues should first become machine-readable.
-
-### 3. Source attribution -> `post_enrichments(kind = source-attribution)`
+### 3. Source attribution -> `post_enrichments(kind=source-attribution)`
 
 - **Component:** `SourceAttributionExecutor`
 - **Output:** `SourceAttributionEnrichment`
-- **Why it matters:** the resolver gets ranked publisher hints instead of having to infer everything from scratch
+- **Why it matters:** publisher and content-source hints remain useful context for readers, editors, and future search/linking workflows
 
-This lane still uses the older provider registry, but it remains load-bearing because the resolver treats publisher hints as one of its evidence sources.
+There is no resolver call after this step. The enrichment workflow no longer writes `data-ref-resolution`.
 
-### 4. Enrichment workflow calls the resolver
+### 4. A caller searches ontology entities
 
-- **Component:** `EnrichmentRunWorkflow` plus `ResolverClient`
-- **Transport:** `RESOLVER` Service Binding with `ResolverEntrypoint`
-- **Request contract:** `ResolvePostRequest`
+- **Component:** `EntitySearchService.searchEntities`
+- **Surface:** `search_entities`
+- **Inputs:** query text and/or exact probes
+- **Outputs:** branded ontology entity hits plus fail-closed warnings
 
-The workflow now calls the resolver after source attribution. It can pass the structured Stage 1 input inline so the resolver does not need to re-read the same enrichments off the hot path.
+Search inputs can include:
 
-Current response contract:
+- exact IRIs
+- normalized URLs
+- normalized hostnames
+- aliases
+- query text
+- requested entity families
+- limit
 
-```ts
-export const ResolvePostResponse = Schema.Struct({
-  postUri: PostUri,
-  stage1: Stage1Result,
-  resolution: Schema.Array(ResolvedAssetBundle),
-  resolverVersion: ResolverVersion,
-  latencyMs: ResolveLatencyMs
-});
-```
+Enabled families:
 
-This is the live contract everywhere else in the repo.
+- Agent
+- Dataset
+- Distribution
+- Series
+- Variable
 
-### 5. Inside the resolver: Stage 1 matching -> asset bundles -> provenance search
+Deferred families fail closed with warnings:
 
-- **Components:** `Stage1Resolver`, `EnrichmentPlanner`, `resolveBundle`
-- **Why it matters:** this is now the entire live resolver stack
+- Catalog
+- CatalogRecord
+- DatasetSeries
+- DataService
 
-The resolver first runs Stage 1 and produces the familiar direct matches plus typed residuals. It then assembles asset bundles from:
+### 5. Search normalizes probes
 
-- post text
-- chart title
-- x-axis and y-axis
-- series labels
-- key findings
-- source lines
-- publisher hints
+- **Component:** `src/platform/Normalize.ts`
+- **Why it matters:** query-side URL, hostname, and alias values must normalize the same way stored projection values do
 
-For each asset bundle, the live resolver now:
+This prevents exact probes from silently missing because of schemes, `www`, query strings, fragments, casing, or alias-scheme differences.
 
-- keeps the provenance signals as a trail
-- resolves exact URL and exact hostname candidates first
-- falls through to entity search for agent and dataset candidates
-- expands distribution hits back to dataset scope
-- stores empty `series` and `variables` arrays for now
+### 6. Search ranks and hydrates results
 
-This is the key replacement for the older staged runtime story. The live resolver no longer says "Stage 1 plus kernel outcomes." It says "Stage 1 plus one authoritative asset-resolution array."
+The service combines:
 
-Two caveats matter:
+1. exact IRI matches
+2. exact URL matches
+3. exact hostname matches
+4. exact alias matches
+5. lexical D1 search
+6. Cloudflare AI Search semantic recall
 
-1. The runtime is intentionally provenance-first. It can strongly link agent and dataset surfaces before it can semantically resolve the chart's variable.
-2. Series and variable semantic resolution are deliberately deferred in this slice.
+Exact probes occupy the deterministic top scoring band. Fuzzy and semantic recall are merged below exact matches and hydrated from D1 before returning.
 
-### 6. Resolver result -> stored `data-ref-resolution` enrichment
+### 7. Search emits observability
 
-- **Component:** `src/domain/enrichment.ts`
-- **Storage:** `post_enrichments`
-- **Why it matters:** the rest of the system reads the stored row, not the in-flight resolver call
+- **Workers Logs:** structured Effect JSON logs
+- **Analytics Engine:** one request datapoint through `REQUEST_METRICS`
+- **Version metadata:** deploy tags from `CF_VERSION_METADATA`
 
-Current stored shape:
+Minimum production fields include route, status, duration, enabled/deferred entity families, exact probe counts, hydration misses, fail-closed counts, AI Search latency, hydration latency, and worker version metadata.
 
-```ts
-export const DataRefResolutionEnrichmentV2 = Schema.Struct({
-  kind: Schema.Literal("data-ref-resolution"),
-  stage1: DeferredStage1Result,
-  resolution: Schema.Array(ResolvedAssetBundle),
-  resolverVersion: ResolverVersion,
-  processedAt: Schema.Number
-});
-```
+## What The Response Means
 
-That is the new durable seam. Legacy stored rows with `kernel` are still readable so old enrichments do not break.
+A `search_entities` response is a search result, not a durable link.
 
-### 7. Editorial read path
+It can be used by:
 
-- **Current readers:** `get_post_enrichments`, `get_editorial_pick_bundle`
-- **Current gap:** `hydrate-story` does not yet project these data refs into story frontmatter
+- an editor or model looking up an entity
+- an admin/operator debugging the registry
+- future linking workflows that want candidate entities
 
-This means the system already has real resolver output in D1 and on the MCP read surface, but the editorial repo still needs the follow-through steps:
+It should not directly create graph edges, citation rows, or story frontmatter. Those writes belong in dedicated workflows that can apply review, provenance, and versioning rules.
 
-- `SKY-241` for direct lookup on demand
-- `SKY-242` for story-frontmatter projection
-- `SKY-243` for build-graph warnings over unresolved refs
-- `SKY-244` for cross-expert join lookup
+## Feedback Loop
 
-That is the product gap now. The runtime write path exists; the editorial projection and lookup paths still need to catch up.
+Search quality now improves through:
 
-## Feedback loop
+1. better registry coverage
+2. better exact URL/hostname/alias projection
+3. better labels and descriptions in the search document
+4. better AI Search recall configuration
+5. better hydration tests
+6. observability over misses and fail-closed requests
 
-### 8. No checked-in snapshot harness
+The old resolver eval loop is gone. The useful replacement is a smaller loop: curated search probes, projection tests, hydration tests, and staging metrics.
 
-The current runtime quality loop is now targeted resolver and enrichment tests over the live `stage1 + resolution` contract, plus repo-search checks that the deleted facet stack is gone from the live code path.
+## What This Trace Means Now
 
-Alongside that, the ontology-store package now adds a separate non-runtime validation loop: emit the snapshot into RDF, validate against SHACL shapes, serialize, reload, and distill back to entities. That loop is about export fidelity and schema drift, not hot-path resolver behavior.
-
-Why this matters for the architecture family:
-
-1. It keeps the docs honest. The resolver is shipped infrastructure, but the old facet fixtures are no longer the source of truth.
-2. It prevents legacy eval artifacts from defining current requirements.
-3. It makes the new ontology export seam explicit without pretending it is part of the request path.
-
-## What this trace means now
-
-1. The resolver infrastructure is no longer hypothetical. It is a shipped Worker and a shipped stored row.
-2. The durable resolver contract is now `stage1 + resolution`.
-3. The main product gaps are lookup and projection gaps, not missing runtime plumbing.
-4. The main quality gaps are provenance coverage and registry completeness, not missing facet algebra.
-5. The ontology-store package is a real adjacent validation seam, but not part of today's resolver hot path.
-6. Any future semantic resolution or reranking should be described as follow-on work, not as part of today's runtime path.
+1. There is one ontology search surface.
+2. Search is read-only candidate retrieval.
+3. D1 projection/hydration is authoritative.
+4. AI Search improves recall but does not define payloads.
+5. Enrichment stops at extraction outputs.
+6. Linking and edge creation are future workflows, not hidden search side effects.

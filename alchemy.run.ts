@@ -2,11 +2,13 @@ import alchemy, { type } from "alchemy";
 import {
   AiSearch,
   AiSearchNamespace,
+  AnalyticsEngineDataset,
   Assets,
   D1Database,
   DurableObjectNamespace,
   KVNamespace,
   R2Bucket,
+  VersionMetadata,
   Worker,
   Workflow
 } from "alchemy/cloudflare";
@@ -23,11 +25,10 @@ import { ensureAiSearchCustomMetadata } from "./alchemy/ai-search-metadata";
 import type { EnrichmentRunParams } from "./src/domain/enrichmentRun";
 import type { IngestRunParams } from "./src/domain/polling";
 import type { ExpertPollCoordinatorDo } from "./src/ingest/ExpertPollCoordinatorDo";
-import type { ResolverEntrypoint } from "./src/resolver-worker";
 import type { EnrichmentEntrypoint } from "./src/worker/filter";
 
 const ACCOUNT_ID = "af578620f2ff4eae2042c031be82f7e7";
-const COMPATIBILITY_DATE = "2026-05-01";
+const COMPATIBILITY_DATE = "2026-05-03";
 const entitySearchProvisioning =
   defineUnifiedEntitySearchProvisioning(ENTITY_PROVISIONING);
 
@@ -38,7 +39,7 @@ type DeploymentConfig = {
   readonly databaseName: string;
   readonly searchDatabaseName?: string;
   readonly transcriptsBucketName: string;
-  readonly resolverWorkerName: string;
+  readonly requestMetricsDatasetName: string;
   readonly ingestWorkerName: string;
   readonly agentWorkerName: string;
   readonly ingestCrons: ReadonlyArray<string>;
@@ -60,7 +61,7 @@ const stagingConfig: DeploymentConfig = {
   databaseName: "skygest-staging",
   searchDatabaseName: "skygest-search-staging",
   transcriptsBucketName: "skygest-transcripts-staging",
-  resolverWorkerName: "skygest-resolver-staging",
+  requestMetricsDatasetName: "skygest_request_metrics_staging",
   ingestWorkerName: "skygest-bi-ingest-staging",
   agentWorkerName: "skygest-bi-agent-staging",
   ingestCrons: [],
@@ -68,7 +69,6 @@ const stagingConfig: DeploymentConfig = {
   ingestVars: {
     ...baseVars,
     ENABLE_STAGING_OPS: "true",
-    ENABLE_DATA_REF_RESOLUTION: "true",
     GEMINI_VISION_MODEL: "gemini-3-flash-preview"
   },
   agentVars: {
@@ -81,7 +81,7 @@ const productionConfig: DeploymentConfig = {
   workerSuffix: "",
   databaseName: "skygest",
   transcriptsBucketName: "skygest-transcripts",
-  resolverWorkerName: "skygest-resolver",
+  requestMetricsDatasetName: "skygest_request_metrics",
   ingestWorkerName: "skygest-bi-ingest",
   agentWorkerName: "skygest-bi-agent",
   ingestCrons: ["*/15 * * * *"],
@@ -173,25 +173,10 @@ await ensureAiSearchCustomMetadata({
 });
 
 const searchDbBinding = searchDb === undefined ? {} : { SEARCH_DB: searchDb };
-
-export const resolverWorker = await Worker("resolver", {
-  ...apiOptions,
-  name: config.resolverWorkerName,
-  entrypoint: "src/resolver-worker/index.ts",
-  adopt: true,
-  delete: false,
-  rpc: type<ResolverEntrypoint>,
-  compatibilityDate: COMPATIBILITY_DATE,
-  observability: { enabled: true },
-  bindings: {
-    DB: db,
-    ...searchDbBinding
-  },
-  bundle: {
-    format: "esm",
-    target: "es2022"
-  }
+const requestMetrics = AnalyticsEngineDataset("request-metrics", {
+  dataset: config.requestMetricsDatasetName
 });
+const versionMetadata = VersionMetadata();
 
 const expertPollCoordinator =
   DurableObjectNamespace<ExpertPollCoordinatorDo>("ExpertPollCoordinatorDo", {
@@ -213,7 +198,8 @@ export const ingestWorker = await Worker("ingest", {
     DB: db,
     ONTOLOGY_KV: ontologyKv,
     TRANSCRIPTS_BUCKET: transcriptsBucket,
-    RESOLVER: resolverWorker,
+    REQUEST_METRICS: requestMetrics,
+    CF_VERSION_METADATA: versionMetadata,
     [entitySearchProvisioning.binding]: energyIntelSearch,
     INGEST_RUN_WORKFLOW: Workflow<IngestRunParams>("ingest-run", {
       workflowName: "ingest-run",
@@ -251,7 +237,8 @@ export const agentWorker = await Worker("agent", {
     ONTOLOGY_KV: ontologyKv,
     TRANSCRIPTS_BUCKET: transcriptsBucket,
     INGEST_SERVICE: ingestWorker,
-    RESOLVER: resolverWorker,
+    REQUEST_METRICS: requestMetrics,
+    CF_VERSION_METADATA: versionMetadata,
     [entitySearchProvisioning.binding]: energyIntelSearch,
     ASSETS: await Assets({ path: "./dist" }),
     ...config.agentVars
@@ -262,7 +249,6 @@ export const agentWorker = await Worker("agent", {
   }
 });
 
-export type ResolverEnv = typeof resolverWorker.Env;
 export type IngestEnv = typeof ingestWorker.Env;
 export type AgentEnv = typeof agentWorker.Env;
 

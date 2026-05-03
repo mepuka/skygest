@@ -258,8 +258,7 @@ describe("ops CLI", () => {
 
       expect(deployCalls).toEqual([
         { configFile: "wrangler.toml", env: "staging" },
-        { configFile: "wrangler.agent.toml", env: "staging" },
-        { configFile: "wrangler.resolver.toml", env: "staging" }
+        { configFile: "wrangler.agent.toml", env: "staging" }
       ]);
     })
   );

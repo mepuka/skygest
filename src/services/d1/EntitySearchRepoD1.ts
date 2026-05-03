@@ -1050,6 +1050,76 @@ export const EntitySearchRepoD1 = {
         )
       );
 
+    const getManyByEntityId = (
+      entityIds: ReadonlyArray<EntitySearchEntityId>
+    ) =>
+      decodeWithDbError(
+        Schema.Array(EntitySearchEntityId),
+        entityIds,
+        "Invalid entity-search entity ids"
+      ).pipe(
+        Effect.map((validated) => [...new Set(validated)]),
+        Effect.flatMap((validated) => {
+          if (validated.length === 0) {
+            return Effect.succeed([] as ReadonlyArray<EntitySearchDocument>);
+          }
+
+          return sql<any>`
+            SELECT
+              d.entity_id as entity_id,
+              d.entity_type as entity_type,
+              d.primary_label as primary_label,
+              d.secondary_label as secondary_label,
+              d.publisher_agent_id as publisher_agent_id,
+              d.agent_id as agent_id,
+              d.dataset_id as dataset_id,
+              d.variable_id as variable_id,
+              d.series_id as series_id,
+              d.measured_property as measured_property,
+              d.domain_object as domain_object,
+              d.technology_or_fuel as technology_or_fuel,
+              d.statistic_type as statistic_type,
+              d.aggregation as aggregation,
+              d.unit_family as unit_family,
+              d.policy_instrument as policy_instrument,
+              d.frequency as frequency,
+              d.place as place,
+              d.market as market,
+              d.homepage_hostname as homepage_hostname,
+              d.landing_page_hostname as landing_page_hostname,
+              d.access_hostname as access_hostname,
+              d.download_hostname as download_hostname,
+              d.canonical_urls_json as canonical_urls_json,
+              d.aliases_json as aliases_json,
+              d.payload_json as payload_json,
+              d.primary_text as primary_text,
+              d.alias_text as alias_text,
+              d.lineage_text as lineage_text,
+              d.url_text as url_text,
+              d.ontology_text as ontology_text,
+              d.semantic_text as semantic_text,
+              d.updated_at as updated_at
+            FROM entity_search_docs d
+            WHERE d.deleted_at IS NULL
+              AND d.entity_id IN (${sql.join(", ", false)(
+                validated.map((entityId) => sql`${entityId}`)
+              )})
+            ORDER BY d.entity_id ASC
+          `.pipe(
+            Effect.flatMap((rows) =>
+              decodeWithDbError(
+                Schema.Array(EntitySearchDocumentRowSchema),
+                rows,
+                "Failed to decode batched entity-search rows"
+              )
+            ),
+            Effect.flatMap((rows) =>
+              Effect.forEach(rows, toDocument, { concurrency: 1 })
+            )
+          );
+        })
+      );
+
     const searchExactUrlDocuments = (
       input: NormalizedEntitySearchQuery
     ) => {
@@ -1399,6 +1469,7 @@ export const EntitySearchRepoD1 = {
       upsertDocuments,
       deleteDocuments,
       getByEntityId,
+      getManyByEntityId,
       searchLexical,
       rebuildFts,
       optimizeFts

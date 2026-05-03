@@ -402,8 +402,6 @@ const formatPostEnrichment = (
       return formatSourceAttributionEnrichment(result);
     case "grounding":
       return formatGroundingEnrichment(result);
-    case "data-ref-resolution":
-      return ["Data-reference resolution available."];
   }
 };
 

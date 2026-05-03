@@ -36,7 +36,6 @@ import { EntityPostBackfillService } from "../services/EntityPostBackfillService
 import { EntityTopicBackfillService } from "../services/EntityTopicBackfillService";
 import { CandidatePayloadService } from "../services/CandidatePayloadService";
 import { CurationService } from "../services/CurationService";
-import { DataRefQueryService } from "../services/DataRefQueryService";
 import { PostHydrationService } from "../services/PostHydrationService";
 import { CurationRepoD1 } from "../services/d1/CurationRepoD1";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
@@ -44,8 +43,8 @@ import { OntologyCatalog } from "../services/OntologyCatalog";
 import { PostImportService } from "../services/PostImportService";
 import { StagingOpsService } from "../services/StagingOpsService";
 import { CandidatePayloadRepoD1 } from "../services/d1/CandidatePayloadRepoD1";
-import { DataRefCandidateReadRepoD1 } from "../services/d1/DataRefCandidateReadRepoD1";
 import { DataLayerReposD1 } from "../services/d1/DataLayerReposD1";
+import { EntitySearchRepoD1 } from "../services/d1/EntitySearchRepoD1";
 import { EnrichmentRunsRepoD1 } from "../services/d1/EnrichmentRunsRepoD1";
 import { ExpertSyncStateRepoD1 } from "../services/d1/ExpertSyncStateRepoD1";
 import { EditorialPickBundleReadService } from "../services/EditorialPickBundleReadService";
@@ -62,6 +61,11 @@ import { ProviderRegistry } from "../services/ProviderRegistry";
 import { EnrichmentWorkflowLauncher } from "../enrichment/EnrichmentWorkflowLauncher";
 import { PipelineStatusService } from "../services/PipelineStatusService";
 import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
+import { missingEntitySearchRepoLayer } from "../services/EntitySearchRepo";
+import { EntitySearchService } from "../services/EntitySearchService";
+import { EntitySemanticRecall } from "../services/EntitySemanticRecall";
+import { entitySearchSqlLayer } from "../search/Layer";
+import { RequestMetrics } from "../platform/Observability";
 
 const makeBaseLayer = (env: EnvBindings) =>
   Layer.mergeAll(
@@ -72,6 +76,7 @@ const makeBaseLayer = (env: EnvBindings) =>
 
 const buildSharedWorkerParts = (env: EnvBindings) => {
   const baseLayer = makeBaseLayer(env);
+  const metricsLayer = RequestMetrics.layer.pipe(Layer.provideMerge(baseLayer));
   const configLayer = AppConfig.layer.pipe(Layer.provideMerge(baseLayer));
   const ontologyLayer = OntologyCatalog.layer;
   const providerRegistryLayer = ProviderRegistry.layer;
@@ -209,12 +214,24 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const dataLayerRegistryLayer = d1DataLayerRegistryLayer().pipe(
     Layer.provideMerge(dataLayerReposLayer)
   );
-  const dataRefCandidateReadRepoLayer = DataRefCandidateReadRepoD1.layer.pipe(
+  const entitySearchRepoLayer = env.SEARCH_DB == null
+    ? missingEntitySearchRepoLayer
+    : EntitySearchRepoD1.layer.pipe(
+        Layer.provideMerge(
+          entitySearchSqlLayer(D1Client.layer({ db: env.SEARCH_DB }))
+        )
+      );
+  const entitySemanticRecallLayer = EntitySemanticRecall.cloudflareLayer.pipe(
     Layer.provideMerge(baseLayer)
   );
-  const dataRefQueryServiceLayer = DataRefQueryService.layer.pipe(
+  const entitySearchServiceLayer = EntitySearchService.layer.pipe(
     Layer.provideMerge(
-      Layer.mergeAll(configLayer, dataLayerRegistryLayer, dataRefCandidateReadRepoLayer)
+      Layer.mergeAll(
+        dataLayerRegistryLayer,
+        entitySearchRepoLayer,
+        entitySemanticRecallLayer,
+        metricsLayer
+      )
     )
   );
   const queryRepositoriesLayer = Layer.mergeAll(
@@ -224,8 +241,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     publicationsLayer,
     editorialRepoLayer,
     candidatePayloadRepoLayer,
-    dataLayerReposLayer,
-    dataRefCandidateReadRepoLayer
+    dataLayerReposLayer
   );
   const editorialServiceLayer = EditorialService.layer.pipe(
     Layer.provideMerge(Layer.mergeAll(editorialRepoLayer, configLayer, ontologyLayer))
@@ -296,10 +312,12 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     pipelineStatusServiceLayer,
     postImportServiceLayer,
     registryLayer,
+    entitySearchRepoLayer,
+    entitySemanticRecallLayer,
+    entitySearchServiceLayer,
     KnowledgeQueryService.layer.pipe(
       Layer.provideMerge(Layer.mergeAll(queryRepositoriesLayer, configLayer))
     ),
-    dataRefQueryServiceLayer,
     editorialServiceLayer,
     editorialPickBundleReadServiceLayer,
     curationServiceLayer
@@ -348,7 +366,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         entityPostBackfillLayer,
         entityTopicBackfillLayer,
         entityOrganizationBackfillLayer,
-        entityProjectionDrainLayer
+        entityProjectionDrainLayer,
+        entitySearchServiceLayer
       )
     : Layer.mergeAll(
         baseLayer,
@@ -376,11 +395,13 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         entityTopicBackfillLayer,
         entityOrganizationBackfillLayer,
         entityProjectionDrainLayer,
+        entitySearchServiceLayer,
         enrichmentLauncherLayer
       );
 
   return {
     baseLayer,
+    metricsLayer,
     configLayer,
     ontologyLayer,
     providerRegistryLayer,
@@ -407,8 +428,9 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     postImportServiceLayer,
     curationRepoLayer,
     dataLayerReposLayer,
-    dataRefCandidateReadRepoLayer,
-    dataRefQueryServiceLayer,
+    entitySearchRepoLayer,
+    entitySemanticRecallLayer,
+    entitySearchServiceLayer,
     curationServiceLayer,
     queryLayer,
     blueskyLayer,

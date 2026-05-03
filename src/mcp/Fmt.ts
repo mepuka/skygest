@@ -39,19 +39,12 @@ import type {
   ListEnrichmentGapsOutput,
   ListEnrichmentIssuesOutput
 } from "../domain/enrichment.ts";
-import {
-  isDataRefResolutionEnrichmentV2
-} from "../domain/enrichment.ts";
 import type { ImportPostsOutput } from "../domain/api.ts";
-import type {
-  FindCandidatesByDataRefHit,
-  ResolveDataRefOutput
-} from "../domain/data-layer/query.ts";
+import type { SearchEntitiesResult } from "../domain/entitySearch.ts";
 import type {
   PipelineStatusDetail,
   PipelineStatusOutput
 } from "../domain/pipeline.ts";
-import type { DataLayerRegistryEntity } from "../domain/data-layer/registry.ts";
 
 // ---------------------------------------------------------------------------
 // Internal helpers (not exported)
@@ -248,82 +241,6 @@ export const formatSetExpertActiveResult = (result: SetExpertActiveResult): stri
     `Expert ${result.did} is now ${result.active ? "active" : "inactive"}.`,
     `Shard: ${result.shard}`
   ].join("\n");
-
-const dataLayerEntityLabel = (entity: DataLayerRegistryEntity): string => {
-  switch (entity._tag) {
-    case "Agent":
-      return entity.name;
-    case "Catalog":
-    case "DataService":
-    case "Dataset":
-    case "DatasetSeries":
-      return entity.title;
-    case "CatalogRecord":
-      return entity.primaryTopicId;
-    case "Distribution":
-      return entity.title ?? entity.downloadURL ?? entity.accessURL ?? entity.id;
-    case "Series":
-    case "Variable":
-      return entity.label;
-  }
-};
-
-export const formatResolveDataRef = (result: ResolveDataRefOutput): string =>
-  result.entity === null
-    ? "No data-layer entity found."
-    : [
-        `${result.entity._tag}: ${dataLayerEntityLabel(result.entity)}`,
-        `ID: ${result.entity.id}`
-      ].join("\n");
-
-const formatObservationWindow = (
-  value: FindCandidatesByDataRefHit["observationTime"]
-): string => {
-  if (value === null) {
-    return "unknown";
-  }
-
-  if (value.start !== undefined && value.end !== undefined) {
-    return `${value.start} -> ${value.end}`;
-  }
-
-  return value.start ?? value.end ?? value.label ?? "unknown";
-};
-
-export const formatFindCandidatesByDataRef = (
-  result: {
-    readonly items: ReadonlyArray<FindCandidatesByDataRefHit>;
-    readonly nextCursor: unknown;
-  }
-): string => {
-  if (result.items.length === 0) {
-    return "No candidate citations found.";
-  }
-
-  const rows = result.items.map((item, index) => {
-    const expert = personLabel(
-      item.expert.handle,
-      item.expert.displayName,
-      item.expert.did
-    );
-    const assertedValue =
-      item.assertedValue === null
-        ? "n/a"
-        : `${item.assertedValue}${item.assertedUnit === null ? "" : ` ${item.assertedUnit}`}`;
-
-    return [
-      `[C${index + 1}] ${expert} | ${item.citationSource} | ${item.resolutionState} | Observation: ${formatObservationWindow(item.observationTime)}`,
-      `     Post: ${item.sourcePostUri}`,
-      `     Value: ${assertedValue}`
-    ].join("\n");
-  });
-
-  if (result.nextCursor !== null) {
-    rows.push("More results are available.");
-  }
-
-  return rows.join("\n");
-};
 
 /**
  * Format a list of ontology topics for MCP display.
@@ -878,7 +795,7 @@ export const formatPipelineStatus = (
     `Posts: ${output.posts.total} active | bluesky ${output.posts.bluesky} | twitter ${output.posts.twitter}`,
     `Curation: curated ${output.curation.curated} | rejected ${output.curation.rejected} | flagged ${output.curation.flagged} | uncurated ${output.curation.uncurated}`,
     "",
-    `Stored enrichments: ${output.enrichments.stored.total} total | vision ${output.enrichments.stored.vision} | source-attribution ${output.enrichments.stored.sourceAttribution} | grounding ${output.enrichments.stored.grounding} | data-ref-resolution ${output.enrichments.stored.dataRefResolution}`,
+    `Stored enrichments: ${output.enrichments.stored.total} total | vision ${output.enrichments.stored.vision} | source-attribution ${output.enrichments.stored.sourceAttribution} | grounding ${output.enrichments.stored.grounding}`,
     `Enrichment runs: queued ${output.enrichments.runs.queued} | running ${output.enrichments.runs.running} | complete ${output.enrichments.runs.complete} | failed ${output.enrichments.runs.failed} | needs-review ${output.enrichments.runs.needsReview}`
   ];
 
@@ -978,51 +895,6 @@ export const formatEnrichments = (
           lines.push(`    ${claim}`);
           break;
         }
-        case "data-ref-resolution": {
-          const matchCount = e.payload.stage1.matches.length;
-          const residualCount = e.payload.stage1.residuals.length;
-          const outcomeSummary = isDataRefResolutionEnrichmentV2(e.payload)
-            ? (() => {
-                const agentIds = new Set<string>();
-                const datasetIds = new Set<string>();
-
-                for (const bundle of e.payload.resolution) {
-                  for (const agent of bundle.resolution.agents) {
-                    agentIds.add(agent.entityId);
-                  }
-
-                  for (const dataset of bundle.resolution.datasets) {
-                    datasetIds.add(dataset.entityId);
-                  }
-                }
-
-                return `${e.payload.resolution.length} bundle${e.payload.resolution.length !== 1 ? "s" : ""}, ${agentIds.size} agent${agentIds.size !== 1 ? "s" : ""}, ${datasetIds.size} dataset${datasetIds.size !== 1 ? "s" : ""}`;
-              })()
-            : (() => {
-                const outcomeCounts = new Map<string, number>();
-
-                for (const outcome of e.payload.kernel) {
-                  const tag =
-                    typeof outcome === "object" &&
-                    outcome !== null &&
-                    "_tag" in outcome &&
-                    typeof outcome._tag === "string"
-                      ? outcome._tag
-                      : "Unknown";
-                  outcomeCounts.set(tag, (outcomeCounts.get(tag) ?? 0) + 1);
-                }
-
-                return outcomeCounts.size === 0
-                  ? "0 outcomes"
-                  : Array.from(outcomeCounts.entries())
-                      .map(([tag, count]) => `${count} ${tag}`)
-                      .join(", ");
-              })();
-          lines.push(
-            `[R] data-ref-resolution \u00B7 ${matchCount} match${matchCount !== 1 ? "es" : ""} \u00B7 ${residualCount} residual${residualCount !== 1 ? "s" : ""} \u00B7 ${outcomeSummary} \u00B7 ${date}`
-          );
-          break;
-        }
       }
     }
   }
@@ -1034,6 +906,42 @@ export const formatEnrichments = (
       const progress = r.lastProgressAt !== null ? ` \u00B7 ${formatTimestamp(r.lastProgressAt)}` : "";
       lines.push(`  ${r.enrichmentType}: ${r.status} (${r.phase})${progress}`);
     }
+  }
+
+  return lines.join("\n");
+};
+
+export const formatSearchEntities = (
+  output: SearchEntitiesResult
+): string => {
+  const lines: string[] = [];
+
+  if (output.warnings !== undefined && output.warnings.length > 0) {
+    lines.push(
+      `Deferred types: ${output.warnings
+        .map((warning) => `${warning.entityType} (${warning.reason})`)
+        .join(", ")}`
+    );
+  }
+
+  if (output.hits.length === 0) {
+    lines.push("No entity matches.");
+    return lines.join("\n");
+  }
+
+  lines.push(`Entity matches: ${output.hits.length}`);
+  for (const hit of output.hits) {
+    const summary = hit.summary === undefined
+      ? ""
+      : ` - ${truncate(collapse(hit.summary), 120)}`;
+    const evidence = hit.evidence.length === 0
+      ? ""
+      : ` [${hit.evidence
+          .map((item) => `${item.kind}: ${truncate(collapse(item.text), 64)}`)
+          .join("; ")}]`;
+    lines.push(
+      `${hit.rank}. ${hit.label} (${hit.entityType}) - ${hit.matchReason} - ${hit.iri}${summary}${evidence}`
+    );
   }
 
   return lines.join("\n");

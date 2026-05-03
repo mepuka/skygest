@@ -3,7 +3,6 @@ import { describe, expect, it } from "@effect/vitest";
 import { vi } from "vitest";
 import type { WorkflowStep } from "cloudflare:workers";
 import {
-  ResolverClientError,
   type EnrichmentErrorEnvelope
 } from "../src/domain/errors";
 import type {
@@ -19,14 +18,11 @@ import { chartAssetIdFromBluesky } from "../src/domain/data-layer/post-ids";
 import type { PostUri } from "../src/domain/types";
 import { EnrichmentPlanner } from "../src/enrichment/EnrichmentPlanner";
 import { EnrichmentWorkflowLauncher } from "../src/enrichment/EnrichmentWorkflowLauncher";
-import { AppConfig } from "../src/platform/Config";
 import { VisionEnrichmentExecutor } from "../src/enrichment/VisionEnrichmentExecutor";
 import { SourceAttributionExecutor } from "../src/enrichment/SourceAttributionExecutor";
-import { ResolverClient } from "../src/resolver/Client";
 import type { WorkflowEnrichmentEnvBindings } from "../src/platform/Env";
 import { CandidatePayloadRepo } from "../src/services/CandidatePayloadRepo";
 import { EnrichmentRunsRepo } from "../src/services/EnrichmentRunsRepo";
-import { testConfig } from "./support/runtime";
 
 let currentLayer: Layer.Layer<any, any, never>;
 
@@ -199,25 +195,6 @@ const makeSourceAttributionEnrichment = (): SourceAttributionEnrichment => ({
   processedAt: 20
 });
 
-const makeResolutionBundles = (
-  postUri = "at://did:plc:test/app.bsky.feed.post/post-1"
-)=>
-  [
-    {
-      assetKey: chartAssetIdFromBluesky(
-        asPostUri(postUri),
-        "bafkreiworkflowresolutionasset"
-      ),
-      resolution: {
-        agents: [],
-        datasets: [],
-        series: [],
-        variables: [],
-        trail: []
-      }
-    }
-  ];
-
 describe("EnrichmentRunWorkflow", () => {
   it.live("completes a vision run and persists the enrichment payload", () =>
     Effect.promise(async () => {
@@ -368,14 +345,13 @@ describe("EnrichmentRunWorkflow", () => {
     })
   );
 
-  it.live("persists data-ref resolution after source attribution when the flag is enabled", () =>
+  it.live("persists source attribution without invoking resolution", () =>
     Effect.promise(async () => {
       const { EnrichmentRunWorkflow } = await import(
         "../src/enrichment/EnrichmentRunWorkflow"
       );
 
       const persisted: Array<unknown> = [];
-      const resolverCalls: Array<unknown> = [];
       const completions: Array<unknown> = [];
       const sourcePlan = makePlan({
         enrichmentType: "source-attribution",
@@ -406,52 +382,11 @@ describe("EnrichmentRunWorkflow", () => {
       }).pipe(
         Layer.provideMerge(
           Layer.mergeAll(
-            Layer.succeed(AppConfig, testConfig({
-              enableDataRefResolution: true,
-              enableStagingOps: true
-            })),
             Layer.succeed(EnrichmentPlanner, {
               plan: () => Effect.succeed(sourcePlan)
             }),
             Layer.succeed(SourceAttributionExecutor, {
               execute: () => Effect.succeed(makeSourceAttributionEnrichment())
-            }),
-            Layer.succeed(ResolverClient, {
-              resolvePost: (input, options) =>
-                Effect.sync(() => {
-                  resolverCalls.push({ input, options });
-                  return {
-                    postUri: input.postUri,
-                    stage1: {
-                      matches: [],
-                      residuals: []
-                    },
-                    resolution: makeResolutionBundles(input.postUri),
-                    resolverVersion: "bundle-resolution@sky-367",
-                    latencyMs: {
-                      stage1: 3,
-                      resolution: 2,
-                      total: 5
-                    }
-                  };
-                }),
-              resolveBulk: () =>
-                Effect.fail(
-                  new ResolverClientError({
-                    message: "bulk resolution should not be called in this test",
-                    status: 500,
-                    operation: "ResolverClient.resolveBulk"
-                  })
-                ),
-              searchCandidates: () =>
-                Effect.fail(
-                  new ResolverClientError({
-                    message:
-                      "grouped search-candidates should not be called in this test",
-                    status: 500,
-                    operation: "ResolverClient.searchCandidates"
-                  })
-                )
             }),
             Layer.succeed(EnrichmentWorkflowLauncher, {
               start: () =>
@@ -498,59 +433,24 @@ describe("EnrichmentRunWorkflow", () => {
         runId: "run-1",
         status: "complete"
       });
-      expect(resolverCalls).toEqual([
-        {
-          input: {
-            postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
-            stage1Input: {
-              postContext: {
-                postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
-                text: "Stored post text",
-                links: [],
-                linkCards: [],
-                threadCoverage: "focus-only"
-              },
-              vision: makeVisionEnrichment(),
-              sourceAttribution: makeSourceAttributionEnrichment()
-            }
-          },
-          options: {
-            requestId: "run-1"
-          }
-        }
-      ]);
       expect(persisted).toEqual([
         {
           postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
           enrichmentType: "source-attribution",
           enrichmentPayload: makeSourceAttributionEnrichment()
-        },
-        {
-          postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
-          enrichmentType: "data-ref-resolution",
-          enrichmentPayload: expect.objectContaining({
-            kind: "data-ref-resolution",
-            stage1: {
-              matches: [],
-              residuals: []
-            },
-            resolution: makeResolutionBundles(),
-            resolverVersion: "bundle-resolution@sky-367"
-          })
         }
       ]);
       expect(completions).toHaveLength(1);
     })
   );
 
-  it.live("skips resolver persistence when the data-ref flag is off", () =>
+  it.live("completes source attribution without any resolver binding", () =>
     Effect.promise(async () => {
       const { EnrichmentRunWorkflow } = await import(
         "../src/enrichment/EnrichmentRunWorkflow"
       );
 
       const persisted: Array<unknown> = [];
-      const resolverCalls: Array<unknown> = [];
       const sourcePlan = makePlan({
         enrichmentType: "source-attribution",
         vision: makeVisionEnrichment()
@@ -577,51 +477,11 @@ describe("EnrichmentRunWorkflow", () => {
       }).pipe(
         Layer.provideMerge(
           Layer.mergeAll(
-            Layer.succeed(AppConfig, testConfig({
-              enableDataRefResolution: false
-            })),
             Layer.succeed(EnrichmentPlanner, {
               plan: () => Effect.succeed(sourcePlan)
             }),
             Layer.succeed(SourceAttributionExecutor, {
               execute: () => Effect.succeed(makeSourceAttributionEnrichment())
-            }),
-            Layer.succeed(ResolverClient, {
-              resolvePost: (input) =>
-                Effect.sync(() => {
-                  resolverCalls.push(input);
-                  return {
-                    postUri: input.postUri,
-                    stage1: {
-                      matches: [],
-                      residuals: []
-                    },
-                    resolution: makeResolutionBundles(input.postUri),
-                    resolverVersion: "bundle-resolution@sky-367",
-                    latencyMs: {
-                      stage1: 1,
-                      resolution: 1,
-                      total: 2
-                    }
-                  };
-                }),
-              resolveBulk: () =>
-                Effect.fail(
-                  new ResolverClientError({
-                    message: "bulk resolution should not be called in this test",
-                    status: 500,
-                    operation: "ResolverClient.resolveBulk"
-                  })
-                ),
-              searchCandidates: () =>
-                Effect.fail(
-                  new ResolverClientError({
-                    message:
-                      "grouped search-candidates should not be called in this test",
-                    status: 500,
-                    operation: "ResolverClient.searchCandidates"
-                  })
-                )
             }),
             Layer.succeed(EnrichmentWorkflowLauncher, {
               start: () =>
@@ -668,136 +528,6 @@ describe("EnrichmentRunWorkflow", () => {
         runId: "run-1",
         status: "complete"
       });
-      expect(resolverCalls).toEqual([]);
-      expect(persisted).toEqual([
-        {
-          postUri: "at://did:plc:test/app.bsky.feed.post/post-1",
-          enrichmentType: "source-attribution",
-          enrichmentPayload: makeSourceAttributionEnrichment()
-        }
-      ]);
-    })
-  );
-
-  it.live("keeps the run complete when resolver lookup fails", () =>
-    Effect.promise(async () => {
-      const { EnrichmentRunWorkflow } = await import(
-        "../src/enrichment/EnrichmentRunWorkflow"
-      );
-
-      const persisted: Array<unknown> = [];
-      const failures: Array<unknown> = [];
-      const sourcePlan = makePlan({
-        enrichmentType: "source-attribution",
-        vision: makeVisionEnrichment()
-      });
-
-      currentLayer = Layer.succeed(EnrichmentRunsRepo, {
-        createQueuedIfAbsent: () => Effect.succeed(true),
-        getById: () =>
-          Effect.succeed(
-            makeRunRecord({
-              enrichmentType: "source-attribution"
-            })
-          ),
-        listRunning: () => Effect.succeed([]),
-        listRecent: () => Effect.succeed([]),
-        listActive: () => Effect.succeed([]),
-        listStaleActive: () => Effect.succeed([]),
-        markPhase: () => Effect.void,
-        resetForRetry: () => Effect.succeed(false),
-        listLatestByPostUri: () => Effect.succeed([]),
-        markComplete: () => Effect.void,
-        markFailed: (input) =>
-          Effect.sync(() => {
-            failures.push(input);
-          }),
-        markNeedsReview: () => Effect.void
-      }).pipe(
-        Layer.provideMerge(
-          Layer.mergeAll(
-            Layer.succeed(AppConfig, testConfig({
-              enableDataRefResolution: true
-            })),
-            Layer.succeed(EnrichmentPlanner, {
-              plan: () => Effect.succeed(sourcePlan)
-            }),
-            Layer.succeed(SourceAttributionExecutor, {
-              execute: () => Effect.succeed(makeSourceAttributionEnrichment())
-            }),
-            Layer.succeed(ResolverClient, {
-              resolvePost: () =>
-                Effect.fail(
-                  new ResolverClientError({
-                    message: "resolver timed out",
-                    status: 503,
-                    operation: "ResolverClient.resolvePost"
-                  })
-                ),
-              resolveBulk: () =>
-                Effect.fail(
-                  new ResolverClientError({
-                    message: "bulk resolution should not be called in this test",
-                    status: 500,
-                    operation: "ResolverClient.resolveBulk"
-                  })
-                ),
-              searchCandidates: () =>
-                Effect.fail(
-                  new ResolverClientError({
-                    message:
-                      "grouped search-candidates should not be called in this test",
-                    status: 500,
-                    operation: "ResolverClient.searchCandidates"
-                  })
-                )
-            }),
-            Layer.succeed(EnrichmentWorkflowLauncher, {
-              start: () =>
-                Effect.succeed({
-                  runId: "unused",
-                  workflowInstanceId: "unused",
-                  status: "queued" as const
-                }),
-              startIfAbsent: () => Effect.succeed(true)
-            }),
-            Layer.succeed(CandidatePayloadRepo, {
-              upsertCapture: () => Effect.succeed(false),
-              getByPostUri: () => Effect.succeed(null),
-              markPicked: () => Effect.succeed(false),
-              saveEnrichment: (input) =>
-                Effect.sync(() => {
-                  persisted.push(input);
-                  return true;
-                })
-            })
-          )
-        )
-      );
-
-      const workflow = new EnrichmentRunWorkflow(
-        {} as ExecutionContext,
-        makeEnv()
-      );
-      const result = await workflow.run(
-        {
-          instanceId: "run-1",
-          payload: {
-            postUri: asPostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
-            enrichmentType: "source-attribution",
-            schemaVersion: "v2",
-            triggeredBy: "admin",
-            requestedBy: "operator@example.com"
-          } satisfies EnrichmentRunParams
-        } as any,
-        makeStep()
-      );
-
-      expect(result).toEqual({
-        runId: "run-1",
-        status: "complete"
-      });
-      expect(failures).toEqual([]);
       expect(persisted).toEqual([
         {
           postUri: "at://did:plc:test/app.bsky.feed.post/post-1",

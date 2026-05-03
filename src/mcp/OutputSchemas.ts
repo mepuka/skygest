@@ -8,10 +8,7 @@
 
 import { Schema } from "effect";
 import { ImportPostsOutput } from "../domain/api.ts";
-import {
-  FindCandidatesByDataRefOutput,
-  ResolveDataRefOutput
-} from "../domain/data-layer/query.ts";
+import { SearchEntitiesResult } from "../domain/entitySearch.ts";
 import {
   KnowledgePostsOutput,
   KnowledgeLinksOutput,
@@ -116,20 +113,8 @@ export type PipelineStatusMcpOutput = typeof PipelineStatusMcpOutput.Type;
 export const ImportPostsMcpOutput = ImportPostsOutput.pipe(Schema.fieldsAssign(displayFields));
 export type ImportPostsMcpOutput = typeof ImportPostsMcpOutput.Type;
 
-export const ResolveDataRefMcpOutput = ResolveDataRefOutput.pipe(
-  Schema.fieldsAssign(displayFields)
-);
-export type ResolveDataRefMcpOutput = typeof ResolveDataRefMcpOutput.Type;
-
-const FindCandidatesByDataRefTransportOutput = Schema.Struct({
-  ...FindCandidatesByDataRefOutput.fields,
-  nextCursor: Schema.NullOr(Schema.String)
-});
-
-export const FindCandidatesByDataRefMcpOutput =
-  FindCandidatesByDataRefTransportOutput.pipe(Schema.fieldsAssign(displayFields));
-export type FindCandidatesByDataRefMcpOutput =
-  typeof FindCandidatesByDataRefMcpOutput.Type;
+export const SearchEntitiesMcpOutput = SearchEntitiesResult.pipe(Schema.fieldsAssign(displayFields));
+export type SearchEntitiesMcpOutput = typeof SearchEntitiesMcpOutput.Type;
 
 export const StartEnrichmentMcpOutput = Schema.Struct({
   postUri: PostUri,

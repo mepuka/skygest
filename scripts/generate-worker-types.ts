@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { join } from "node:path";
 
 type WorkerSpec = {
-  readonly label: "Ingest" | "Agent" | "Resolver";
+  readonly label: "Ingest" | "Agent";
   readonly configs: ReadonlyArray<string>;
   readonly envInterface: string;
 };
@@ -10,22 +10,13 @@ type WorkerSpec = {
 const workerSpecs: ReadonlyArray<WorkerSpec> = [
   {
     label: "Ingest",
-    configs: ["wrangler.toml", "wrangler.resolver.toml"],
+    configs: ["wrangler.toml"],
     envInterface: "CloudflareIngestEnv"
   },
   {
     label: "Agent",
-    configs: [
-      "wrangler.agent.toml",
-      "wrangler.toml",
-      "wrangler.resolver.toml"
-    ],
+    configs: ["wrangler.agent.toml", "wrangler.toml"],
     envInterface: "CloudflareAgentEnv"
-  },
-  {
-    label: "Resolver",
-    configs: ["wrangler.resolver.toml"],
-    envInterface: "CloudflareResolverEnv"
   }
 ];
 
@@ -75,6 +66,11 @@ const extractInterfaceBody = (
 
 const normalizeGeneratedImports = (source: string) =>
   source.replaceAll('import("../../src/', 'import("./src/');
+
+const normalizeGeneratedWhitespace = (source: string) =>
+  source
+    .replace(/^ +\t/gm, "\t")
+    .replace(/[ \t]+$/gm, "");
 
 const extractAllowedKeys = (configPath: string): ReadonlySet<string> => {
   const source = readFileSync(join(projectRoot, configPath), "utf8");
@@ -174,7 +170,9 @@ try {
   ]);
   writeFileSync(
     runtimeOutputPath,
-    normalizeGeneratedImports(readFileSync(runtimeRawPath, "utf8"))
+    normalizeGeneratedWhitespace(
+      normalizeGeneratedImports(readFileSync(runtimeRawPath, "utf8"))
+    )
   );
 
   const combinedOutput = [
@@ -195,7 +193,7 @@ try {
     "}"
   ].join("\n");
 
-  writeFileSync(combinedOutputPath, combinedOutput);
+  writeFileSync(combinedOutputPath, normalizeGeneratedWhitespace(combinedOutput));
 } finally {
   rmSync(tempDir, { recursive: true, force: true });
 }

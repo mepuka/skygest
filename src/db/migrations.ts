@@ -1111,6 +1111,14 @@ const migration28: D1Migration = {
   statements: ENTITY_SNAPSHOT_SCHEMA_STATEMENTS
 };
 
+const migration29: D1Migration = {
+  id: 29,
+  name: "drop_data_ref_candidate_citations",
+  statements: [
+    `DROP TABLE IF EXISTS data_ref_candidate_citations`
+  ]
+};
+
 export const migrations: ReadonlyArray<D1Migration> = [
   migration1,
   migration2,
@@ -1139,5 +1147,6 @@ export const migrations: ReadonlyArray<D1Migration> = [
   migration25,
   migration26,
   migration27,
-  migration28
+  migration28,
+  migration29
 ];

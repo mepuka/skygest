@@ -24,7 +24,6 @@ describe("phase-one migrations", () => {
             'catalog_records',
             'catalogs',
             'data_layer_audit',
-            'data_ref_candidate_citations',
             'data_services',
             'dataset_series',
             'datasets',
@@ -65,7 +64,6 @@ describe("phase-one migrations", () => {
         "catalog_records",
         "catalogs",
         "data_layer_audit",
-        "data_ref_candidate_citations",
         "data_services",
         "dataset_series",
         "datasets",
@@ -129,8 +127,17 @@ describe("phase-one migrations", () => {
           name: "data_ref_candidate_citation_source_alignment"
         },
         { id: 27, name: "ontology_entity_graph" },
-        { id: 28, name: "ontology_entity_snapshots" }
+        { id: 28, name: "ontology_entity_snapshots" },
+        { id: 29, name: "drop_data_ref_candidate_citations" }
       ]);
+
+      const dataRefCitationTables = yield* sql<{ name: string }>`
+        SELECT name as name
+        FROM sqlite_master
+        WHERE type = 'table'
+          AND name = 'data_ref_candidate_citations'
+      `;
+      expect(dataRefCitationTables).toEqual([]);
     }).pipe(Effect.provide(makeSqliteLayer()))
   );
 

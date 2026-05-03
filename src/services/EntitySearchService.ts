@@ -1,44 +1,53 @@
-import { Effect, Layer, Schema, ServiceMap } from "effect";
+import { Clock, Effect, Layer, Option, Schema, ServiceMap } from "effect";
 import { SqlError } from "effect/unstable/sql/SqlError";
 import type { DbError } from "../domain/errors";
 import {
-  EntitySearchBundleCandidates,
+  EntitySearchDocument,
+  EntitySearchEntityType as EntitySearchEntityTypeSchema,
   EntitySearchHit,
   EntitySearchQueryInput,
+  SearchEntitiesInput,
+  SearchEntitiesResult,
+  SearchEntityHit,
   SearchAgentsInput,
   SearchDatasetsInput,
   SearchDistributionsInput,
   SearchLimit,
   SearchSeriesInput,
   SearchVariablesInput,
-  type EntitySearchBundleCandidates as EntitySearchBundleCandidatesValue,
+  type EntitySearchAliasProbe,
+  type EntitySearchDocument as EntitySearchDocumentValue,
   type EntitySearchEntityType,
   type EntitySearchHit as EntitySearchHitValue,
+  type EntitySearchIndexError,
   type EntitySearchQueryInput as EntitySearchQueryInputValue,
   type EntitySearchSemanticRecallInput as EntitySearchSemanticRecallInputValue,
-  type EntitySearchSemanticRecallHit
+  type EntitySearchSemanticRecallHit,
+  type SearchEntitiesInput as SearchEntitiesInputValue,
+  type SearchEntitiesRequestedEntityType,
+  type SearchEntitiesResult as SearchEntitiesResultValue,
+  type SearchEntitiesWarning as SearchEntitiesWarningValue,
+  type SearchEntityEvidence as SearchEntityEvidenceValue,
+  type SearchEntityHit as SearchEntityHitValue,
+  type SearchEntityMatchReason
 } from "../domain/entitySearch";
-import type {
-  Stage1Input,
-  Stage1Result
-} from "../domain/stage1Resolution";
+import { normalizeAliasLookupValue } from "../platform/Normalize";
 import { stripUndefined } from "../platform/Json";
-import { buildEntitySearchBundlePlan } from "../search/buildEntitySearchBundlePlan";
+import { RequestMetrics } from "../platform/Observability";
 import { DataLayerRegistry } from "./DataLayerRegistry";
 import { EntitySearchRepo } from "./EntitySearchRepo";
 import { EntitySemanticRecall } from "./EntitySemanticRecall";
 
-type SearchBundleCandidatesInput = {
-  readonly stage1Input: Stage1Input;
-  readonly stage1?: Stage1Result;
-  readonly limit?: SearchLimit;
-};
-
-const decodeBundleCandidates = Schema.decodeUnknownSync(EntitySearchBundleCandidates);
 const decodeSearchHit = Schema.decodeUnknownSync(EntitySearchHit);
+const decodeSearchEntityHit = Schema.decodeUnknownSync(SearchEntityHit);
+const decodeSearchEntitiesResult = Schema.decodeUnknownSync(SearchEntitiesResult);
 const defaultSearchLimit = 20 as SearchLimit;
 const reciprocalRankConstant = 60;
-const maxBundleTextQueries = 4;
+const searchEntitiesExactBand = 1_000;
+
+const noopRequestMetrics = RequestMetrics.of({
+  recordSearchEntities: () => Effect.void
+});
 
 const clampSearchLimit = (value: SearchLimit | undefined): SearchLimit =>
   value === undefined ? defaultSearchLimit : value;
@@ -60,51 +69,124 @@ const buildTypedInput = (
 const reciprocalRank = (rank: number) =>
   1 / (reciprocalRankConstant + rank);
 
-const selectBundleQueries = (
-  values: ReadonlyArray<string>
-): ReadonlyArray<string> => {
-  const seen = new Set<string>();
-  const queries: Array<string> = [];
+const enabledEntityTypes = new Set<string>(EntitySearchEntityTypeSchema.literals);
 
-  for (const raw of values) {
-    const query = raw.trim();
-    if (query.length === 0) {
-      continue;
-    }
+const isEnabledEntityType = (
+  entityType: SearchEntitiesRequestedEntityType
+): entityType is EntitySearchEntityType =>
+  enabledEntityTypes.has(entityType);
 
-    const key = query.toLocaleLowerCase("en-US");
-    if (seen.has(key)) {
-      continue;
-    }
+const splitEntityTypes = (
+  entityTypes: ReadonlyArray<SearchEntitiesRequestedEntityType> | undefined
+): {
+  readonly enabled: ReadonlyArray<EntitySearchEntityType> | undefined;
+  readonly warnings: ReadonlyArray<SearchEntitiesWarningValue> | undefined;
+} => {
+  if (entityTypes === undefined) {
+    return { enabled: undefined, warnings: undefined };
+  }
 
-    seen.add(key);
-    queries.push(query);
+  const enabled: Array<EntitySearchEntityType> = [];
+  const warnings: Array<SearchEntitiesWarningValue> = [];
 
-    if (queries.length >= maxBundleTextQueries) {
-      break;
+  for (const entityType of [...new Set(entityTypes)]) {
+    if (isEnabledEntityType(entityType)) {
+      enabled.push(entityType);
+    } else {
+      warnings.push({ entityType, reason: "not-yet-enabled" });
     }
   }
 
-  return queries;
+  return {
+    enabled,
+    warnings: warnings.length === 0 ? undefined : warnings
+  };
 };
 
-const mergeMatchKinds = (
-  values: ReadonlySet<EntitySearchHitValue["matchKind"]>
-): EntitySearchHitValue["matchKind"] => {
-  if (values.has("exact-url")) {
-    return "exact-url";
+const hasEnabledSearchTypes = (
+  enabled: ReadonlyArray<EntitySearchEntityType> | undefined
+) =>
+  enabled === undefined || enabled.length > 0;
+
+const publicMatchReason = (
+  matchKind: EntitySearchHitValue["matchKind"]
+): SearchEntityMatchReason => {
+  switch (matchKind) {
+    case "lexical":
+      return "keyword";
+    case "exact-iri":
+    case "exact-url":
+    case "exact-hostname":
+    case "exact-alias":
+    case "semantic":
+    case "hybrid":
+      return matchKind;
   }
-  if (values.has("exact-hostname")) {
-    return "exact-hostname";
-  }
-  if (values.has("hybrid")) {
-    return "hybrid";
-  }
-  if (values.has("lexical")) {
-    return "lexical";
-  }
-  return "semantic";
 };
+
+const boundedEvidenceText = (value: string) => {
+  const trimmed = value.replace(/\s+/gu, " ").trim();
+  return trimmed.length <= 240 ? trimmed : `${trimmed.slice(0, 237)}...`;
+};
+
+const makeEvidence = (
+  kind: SearchEntityEvidenceValue["kind"],
+  text: string,
+  source?: SearchEntityEvidenceValue["source"]
+): SearchEntityEvidenceValue => stripUndefined({
+  kind,
+  text: boundedEvidenceText(text),
+  source
+});
+
+const primarySummary = (
+  document: EntitySearchDocumentValue
+): string | undefined =>
+  document.secondaryLabel ?? document.semanticText.split(/\s+/u).slice(0, 24).join(" ");
+
+const makeSearchEntityHit = (
+  document: EntitySearchDocumentValue,
+  rank: number,
+  score: number,
+  matchReason: SearchEntityMatchReason,
+  evidence: ReadonlyArray<SearchEntityEvidenceValue>
+): SearchEntityHitValue =>
+  decodeSearchEntityHit(stripUndefined({
+    entityType: document.entityType,
+    iri: document.entityId,
+    label: document.primaryLabel,
+    summary: primarySummary(document),
+    rank,
+    score,
+    matchReason,
+    evidence: evidence.slice(0, 3)
+  }));
+
+const normalizedAliasKey = (alias: EntitySearchAliasProbe) =>
+  `${alias.scheme}\0${normalizeAliasLookupValue(alias.scheme, alias.value)}`;
+
+const documentMatchesAliasProbe = (
+  document: EntitySearchDocumentValue,
+  probeKeys: ReadonlySet<string>
+) =>
+  document.aliases.some((alias) =>
+    probeKeys.has(
+      `${alias.scheme}\0${normalizeAliasLookupValue(alias.scheme, alias.value)}`
+    )
+  );
+
+const toSearchEntitiesQueryInput = (
+  input: SearchEntitiesInputValue,
+  enabled: ReadonlyArray<EntitySearchEntityType> | undefined
+): EntitySearchQueryInputValue =>
+  stripUndefined({
+    query: input.query,
+    entityTypes: enabled,
+    scope: input.scope,
+    exactCanonicalUrls: input.probes?.urls,
+    exactHostnames: input.probes?.hostnames,
+    limit: input.limit
+  });
 
 export class EntitySearchService extends ServiceMap.Service<
   EntitySearchService,
@@ -113,43 +195,43 @@ export class EntitySearchService extends ServiceMap.Service<
       input: EntitySearchQueryInputValue
     ) => Effect.Effect<
       ReadonlyArray<EntitySearchHitValue>,
-      SqlError | DbError
+      SqlError | DbError | EntitySearchIndexError
+    >;
+    readonly searchEntities: (
+      input: SearchEntitiesInputValue
+    ) => Effect.Effect<
+      SearchEntitiesResultValue,
+      SqlError | DbError | EntitySearchIndexError
     >;
     readonly searchAgents: (
       input: SearchAgentsInput
     ) => Effect.Effect<
       ReadonlyArray<EntitySearchHitValue>,
-      SqlError | DbError
+      SqlError | DbError | EntitySearchIndexError
     >;
     readonly searchDatasets: (
       input: SearchDatasetsInput
     ) => Effect.Effect<
       ReadonlyArray<EntitySearchHitValue>,
-      SqlError | DbError
+      SqlError | DbError | EntitySearchIndexError
     >;
     readonly searchDistributions: (
       input: SearchDistributionsInput
     ) => Effect.Effect<
       ReadonlyArray<EntitySearchHitValue>,
-      SqlError | DbError
+      SqlError | DbError | EntitySearchIndexError
     >;
     readonly searchSeries: (
       input: SearchSeriesInput
     ) => Effect.Effect<
       ReadonlyArray<EntitySearchHitValue>,
-      SqlError | DbError
+      SqlError | DbError | EntitySearchIndexError
     >;
     readonly searchVariables: (
       input: SearchVariablesInput
     ) => Effect.Effect<
       ReadonlyArray<EntitySearchHitValue>,
-      SqlError | DbError
-    >;
-    readonly searchBundleCandidates: (
-      input: SearchBundleCandidatesInput
-    ) => Effect.Effect<
-      EntitySearchBundleCandidatesValue,
-      SqlError | DbError
+      SqlError | DbError | EntitySearchIndexError
     >;
   }
 >()("@skygest/EntitySearchService") {
@@ -159,6 +241,8 @@ export class EntitySearchService extends ServiceMap.Service<
       const registry = yield* DataLayerRegistry;
       const repo = yield* EntitySearchRepo;
       const semanticRecall = yield* EntitySemanticRecall;
+      const metricsOption = yield* Effect.serviceOption(RequestMetrics);
+      const metrics = Option.getOrElse(metricsOption, () => noopRequestMetrics);
 
       const mergeHybridHits = (
         lexicalHits: ReadonlyArray<EntitySearchHitValue>,
@@ -189,9 +273,16 @@ export class EntitySearchService extends ServiceMap.Service<
             });
           }
 
+          const semanticDocuments = yield* repo.getManyByEntityId(
+            semanticHits.map((semantic) => semantic.entityId)
+          );
+          const semanticDocumentById = new Map(
+            semanticDocuments.map((document) => [document.entityId, document])
+          );
+
           for (const [index, semantic] of semanticHits.entries()) {
-            const document = yield* repo.getByEntityId(semantic.entityId);
-            if (document === null) {
+            const document = semanticDocumentById.get(semantic.entityId);
+            if (document === undefined) {
               continue;
             }
 
@@ -271,6 +362,206 @@ export class EntitySearchService extends ServiceMap.Service<
         return yield* mergeHybridHits(lexicalHits, semanticHits, limit);
       });
 
+      const searchEntities = Effect.fn("EntitySearchService.searchEntities")(
+        function* (input: SearchEntitiesInputValue) {
+          const startedAt = yield* Clock.currentTimeMillis;
+          const limit = clampSearchLimit(input.limit);
+          const { enabled, warnings } = splitEntityTypes(input.entityTypes);
+          const failClosedTotal = warnings?.length ?? 0;
+
+          if (!hasEnabledSearchTypes(enabled)) {
+            const completedAt = yield* Clock.currentTimeMillis;
+            yield* metrics.recordSearchEntities({
+              durationMs: completedAt - startedAt,
+              aiSearchLatencyMs: 0,
+              hydrationLatencyMs: 0,
+              exactProbeHitCounts: {
+                iri: 0,
+                url: 0,
+                hostname: 0,
+                alias: 0
+              },
+              hydrationMissTotal: 0,
+              failClosedTotal,
+              hitCount: 0,
+              status: "ok"
+            });
+            return decodeSearchEntitiesResult(stripUndefined({
+              hits: [],
+              warnings
+            }));
+          }
+
+          const candidates = new Map<
+            string,
+            {
+              readonly document: EntitySearchDocumentValue;
+              score: number;
+              readonly matchReasons: Set<SearchEntityMatchReason>;
+              readonly evidence: Array<SearchEntityEvidenceValue>;
+            }
+          >();
+
+          const addCandidate = (
+            document: EntitySearchDocumentValue,
+            score: number,
+            matchReason: SearchEntityMatchReason,
+            evidence: SearchEntityEvidenceValue
+          ) => {
+            const current = candidates.get(document.entityId);
+            if (current === undefined) {
+              candidates.set(document.entityId, {
+                document,
+                score,
+                matchReasons: new Set([matchReason]),
+                evidence: [evidence]
+              });
+              return;
+            }
+
+            current.score = Math.max(current.score, score);
+            current.matchReasons.add(matchReason);
+            if (current.evidence.length < 3) {
+              current.evidence.push(evidence);
+            }
+          };
+
+          const exactIris = [...new Set(input.probes?.iris ?? [])];
+          const hydrationStartedAt = yield* Clock.currentTimeMillis;
+          const exactIriDocs = yield* repo.getManyByEntityId(exactIris);
+          const hydrationCompletedAt = yield* Clock.currentTimeMillis;
+          const exactIriDocIds = new Set(
+            exactIriDocs.map((document) => document.entityId)
+          );
+          const hydrationMissTotal = exactIris.filter(
+            (iri) => !exactIriDocIds.has(iri)
+          ).length;
+
+          for (const document of exactIriDocs) {
+            if (enabled !== undefined && !enabled.includes(document.entityType)) {
+              continue;
+            }
+            addCandidate(
+              document,
+              searchEntitiesExactBand + 400,
+              "exact-iri",
+              makeEvidence("iri", document.entityId, document.entityId)
+            );
+          }
+
+          const recallStartedAt = yield* Clock.currentTimeMillis;
+          const recallHits = yield* search(toSearchEntitiesQueryInput(input, enabled));
+          const recallCompletedAt = yield* Clock.currentTimeMillis;
+
+          for (const hit of recallHits) {
+            addCandidate(
+              hit.document,
+              hit.matchKind.startsWith("exact-")
+                ? searchEntitiesExactBand + hit.score
+                : hit.score,
+              publicMatchReason(hit.matchKind),
+              makeEvidence(
+                hit.matchKind === "exact-url"
+                  ? "url"
+                  : hit.matchKind === "exact-hostname"
+                    ? "hostname"
+                    : hit.matchKind === "semantic"
+                      ? "semantic-chunk"
+                      : "snippet",
+                hit.snippet ?? hit.document.primaryLabel,
+                hit.document.entityId
+              )
+            );
+          }
+
+          const aliases = input.probes?.aliases ?? [];
+          if (aliases.length > 0) {
+            const aliasProbeKeys = new Set(aliases.map(normalizedAliasKey));
+            const aliasQuery = joinQueryTerms(aliases.map((alias) => alias.value));
+            if (aliasQuery !== undefined) {
+              const aliasHits = yield* repo.searchLexical(stripUndefined({
+                query: aliasQuery,
+                entityTypes: enabled,
+                scope: input.scope,
+                limit
+              }));
+
+              for (const hit of aliasHits) {
+                if (!documentMatchesAliasProbe(hit.document, aliasProbeKeys)) {
+                  continue;
+                }
+                addCandidate(
+                  hit.document,
+                  searchEntitiesExactBand + 50,
+                  "exact-alias",
+                  makeEvidence("alias", hit.snippet ?? aliasQuery, hit.document.entityId)
+                );
+              }
+            }
+          }
+
+          const orderedHits = [...candidates.values()]
+            .map((candidate) => {
+              const matchReason: SearchEntityMatchReason = candidate.matchReasons.has("exact-iri")
+                ? "exact-iri"
+                : candidate.matchReasons.has("exact-url")
+                  ? "exact-url"
+                  : candidate.matchReasons.has("exact-hostname")
+                    ? "exact-hostname"
+                    : candidate.matchReasons.has("exact-alias")
+                      ? "exact-alias"
+                      : candidate.matchReasons.has("hybrid")
+                        ? "hybrid"
+                        : candidate.matchReasons.has("semantic")
+                          ? "semantic"
+                          : "keyword";
+              return {
+                ...candidate,
+                matchReason
+              };
+            })
+            .sort((left, right) =>
+              right.score === left.score
+                ? left.document.entityId.localeCompare(right.document.entityId)
+                : right.score - left.score
+            )
+            .slice(0, limit)
+            .map((candidate, index) =>
+              makeSearchEntityHit(
+                candidate.document,
+                index + 1,
+                candidate.score,
+                candidate.matchReason,
+                candidate.evidence
+              )
+            );
+
+          const exactProbeHitCounts = {
+            iri: orderedHits.filter((hit) => hit.matchReason === "exact-iri").length,
+            url: orderedHits.filter((hit) => hit.matchReason === "exact-url").length,
+            hostname: orderedHits.filter((hit) => hit.matchReason === "exact-hostname").length,
+            alias: orderedHits.filter((hit) => hit.matchReason === "exact-alias").length
+          };
+          const completedAt = yield* Clock.currentTimeMillis;
+
+          yield* metrics.recordSearchEntities({
+            durationMs: completedAt - startedAt,
+            aiSearchLatencyMs: recallCompletedAt - recallStartedAt,
+            hydrationLatencyMs: hydrationCompletedAt - hydrationStartedAt,
+            exactProbeHitCounts,
+            hydrationMissTotal,
+            failClosedTotal,
+            hitCount: orderedHits.length,
+            status: "ok"
+          });
+
+          return decodeSearchEntitiesResult(stripUndefined({
+            hits: orderedHits,
+            warnings
+          }));
+        }
+      );
+
       const searchAgents = Effect.fn("EntitySearchService.searchAgents")(
         function* (input: SearchAgentsInput) {
           return yield* search(buildTypedInput("Agent", input));
@@ -301,207 +592,14 @@ export class EntitySearchService extends ServiceMap.Service<
         }
       );
 
-      const searchBundleGroup = Effect.fn(
-        "EntitySearchService.searchBundleGroup"
-      )(function* (input: {
-        readonly entityType: EntitySearchEntityType;
-        readonly texts: ReadonlyArray<string>;
-        readonly limit: SearchLimit;
-        readonly scope?: EntitySearchQueryInputValue["scope"];
-        readonly exactCanonicalUrls?: ReadonlyArray<string>;
-        readonly exactHostnames?: ReadonlyArray<string>;
-      }) {
-        const variants: Array<EntitySearchQueryInputValue> = [];
-        const queries = selectBundleQueries(input.texts);
-        const hasExactSignals =
-          (input.exactCanonicalUrls?.length ?? 0) > 0 ||
-          (input.exactHostnames?.length ?? 0) > 0;
-
-        if (hasExactSignals) {
-          variants.push(
-            buildTypedInput(
-              input.entityType,
-              stripUndefined({
-                exactCanonicalUrls: input.exactCanonicalUrls,
-                exactHostnames: input.exactHostnames,
-                ...(input.scope === undefined ? {} : { scope: input.scope }),
-                limit: input.limit
-              })
-            )
-          );
-        }
-
-        for (const query of queries) {
-          variants.push(
-            buildTypedInput(
-              input.entityType,
-              stripUndefined({
-                query,
-                ...(input.scope === undefined ? {} : { scope: input.scope }),
-                limit: input.limit
-              })
-            )
-          );
-        }
-
-        if (variants.length === 0) {
-          return [] as ReadonlyArray<EntitySearchHitValue>;
-        }
-
-        const rankedLists = yield* Effect.all(
-          variants.map((variant) => search(variant)),
-          { concurrency: "unbounded" }
-        );
-
-        const merged = new Map<
-          string,
-          {
-            readonly document: EntitySearchHitValue["document"];
-            score: number;
-            snippet: string | null;
-            readonly matchKinds: Set<EntitySearchHitValue["matchKind"]>;
-          }
-        >();
-
-        for (const hits of rankedLists) {
-          for (const hit of hits) {
-            const current = merged.get(hit.document.entityId);
-            if (current === undefined) {
-              merged.set(hit.document.entityId, {
-                document: hit.document,
-                score: hit.score,
-                snippet: hit.snippet,
-                matchKinds: new Set([hit.matchKind])
-              });
-              continue;
-            }
-
-            current.score += hit.score;
-            current.snippet = current.snippet ?? hit.snippet;
-            current.matchKinds.add(hit.matchKind);
-          }
-        }
-
-        return [...merged.values()]
-          .map((candidate) =>
-            decodeSearchHit({
-              document: candidate.document,
-              score: candidate.score,
-              rank: 1,
-              matchKind: mergeMatchKinds(candidate.matchKinds),
-              snippet: candidate.snippet
-            })
-          )
-          .sort((left, right) =>
-            right.score === left.score
-              ? left.document.entityId.localeCompare(right.document.entityId)
-              : right.score - left.score
-          )
-          .slice(0, input.limit)
-          .map((hit, index) =>
-            decodeSearchHit({
-              ...hit,
-              rank: index + 1
-            })
-          );
-      });
-
-      const searchBundleCandidates = Effect.fn(
-        "EntitySearchService.searchBundleCandidates"
-      )(function* (input: SearchBundleCandidatesInput) {
-        const limit = clampSearchLimit(input.limit);
-        const plan = buildEntitySearchBundlePlan(
-          input.stage1Input,
-          registry.lookup,
-          input.stage1
-        );
-
-        const commonScope = stripUndefined({
-          ...(plan.publisherAgentId === undefined
-            ? {}
-            : { publisherAgentId: plan.publisherAgentId }),
-          ...(plan.datasetId === undefined ? {} : { datasetId: plan.datasetId }),
-          ...(plan.variableId === undefined
-            ? {}
-            : { variableId: plan.variableId })
-        });
-
-        const [agents, datasets, distributions, series, variables] = yield* Effect.all(
-          [
-            searchBundleGroup({
-              entityType: "Agent",
-              texts: plan.agentText,
-              exactCanonicalUrls: plan.exactCanonicalUrls,
-              exactHostnames: plan.exactHostnames,
-              limit
-            }),
-            searchBundleGroup({
-              entityType: "Dataset",
-              texts: plan.datasetText,
-              exactCanonicalUrls: plan.exactCanonicalUrls,
-              exactHostnames: plan.exactHostnames,
-              scope:
-                commonScope.publisherAgentId === undefined
-                  ? undefined
-                  : { publisherAgentId: commonScope.publisherAgentId },
-              limit
-            }),
-            searchBundleGroup({
-              entityType: "Distribution",
-              texts: plan.distributionText,
-              exactCanonicalUrls: plan.exactCanonicalUrls,
-              exactHostnames: plan.exactHostnames,
-              scope: stripUndefined({
-                ...(commonScope.publisherAgentId === undefined
-                  ? {}
-                  : { publisherAgentId: commonScope.publisherAgentId }),
-                ...(commonScope.datasetId === undefined
-                  ? {}
-                  : { datasetId: commonScope.datasetId })
-              }),
-              limit
-            }),
-            searchBundleGroup({
-              entityType: "Series",
-              texts: plan.seriesText,
-              scope: commonScope,
-              limit
-            }),
-            searchBundleGroup({
-              entityType: "Variable",
-              texts: plan.variableText,
-              scope: stripUndefined({
-                ...(commonScope.publisherAgentId === undefined
-                  ? {}
-                  : { publisherAgentId: commonScope.publisherAgentId }),
-                ...(commonScope.datasetId === undefined
-                  ? {}
-                  : { datasetId: commonScope.datasetId })
-              }),
-              limit
-            })
-          ],
-          { concurrency: "unbounded" }
-        );
-
-        return decodeBundleCandidates({
-          plan,
-          agents,
-          datasets,
-          distributions,
-          series,
-          variables
-        });
-      });
-
       return EntitySearchService.of({
         search,
+        searchEntities,
         searchAgents,
         searchDatasets,
         searchDistributions,
         searchSeries,
-        searchVariables,
-        searchBundleCandidates
+        searchVariables
       });
     })
   );
