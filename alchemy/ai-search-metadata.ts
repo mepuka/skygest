@@ -87,11 +87,15 @@ const fieldsEqual = (
   right: ReadonlyArray<AiSearchCustomMetadataField>
 ): boolean => {
   if (left == null || left.length !== right.length) return false;
-  return left.every(
-    (field, index) =>
-      field.field_name.toLowerCase() === right[index]?.field_name &&
-      field.data_type === right[index]?.data_type
-  );
+  return left.every((field, index) => {
+    const r = right[index];
+    if (r === undefined) return false;
+    const leftName = (field as { field_name?: unknown } | undefined)?.field_name;
+    if (typeof leftName !== "string") return false;
+    return (
+      leftName.toLowerCase() === r.field_name && field.data_type === r.data_type
+    );
+  });
 };
 
 const whenPresent = <A>(key: string, value: A | null | undefined) =>
