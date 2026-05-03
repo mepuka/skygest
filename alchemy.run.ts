@@ -1,4 +1,5 @@
 import alchemy, { type } from "alchemy";
+import { CloudflareStateStore } from "alchemy/state";
 import {
   AiSearch,
   AiSearchNamespace,
@@ -102,7 +103,12 @@ const resolveConfig = (stage: string): DeploymentConfig => {
 };
 
 const app = await alchemy("skygest-cloudflare", {
-  adopt: true
+  adopt: true,
+  ...(process.env.ALCHEMY_PASSWORD === undefined ? {} : { password: process.env.ALCHEMY_PASSWORD }),
+  stateStore: (scope) =>
+    new CloudflareStateStore(scope, {
+      accountId: ACCOUNT_ID
+    })
 });
 const config = resolveConfig(app.stage);
 const apiOptions = { accountId: ACCOUNT_ID };
