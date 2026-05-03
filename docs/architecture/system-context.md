@@ -1,8 +1,14 @@
 # Skygest System Context
 
-This document maps the current top-level subsystems across `skygest-cloudflare` and `skygest-editorial` after the April 15-16, 2026 resolver cleanup and ontology-store additions. The live resolver path is now `Stage 1 matching -> asset bundle search` inside the standalone `skygest-resolver` Worker. The facet vocabulary, facet kernel, and generated energy-profile runtime are no longer part of the shipped path. Variable and series semantic resolution are future work.
+This document maps the current top-level subsystems after the resolver hard cutover. The live backend no longer has a standalone resolver Worker, a `RESOLVER` binding, Stage 1 matching, bundle resolution, or stored `data-ref-resolution` rows.
 
-Effect vocabulary is still load-bearing here: every subsystem name is a Tag, a Workflow class, a Worker name, or a script you can grep for.
+The current backend shape is:
+
+`ingest -> vision -> source attribution -> entity search`
+
+`search_entities` is the single ontology-aligned search surface. It combines exact IRI, URL, hostname, alias, lexical, and AI Search recall, then hydrates results from the D1-backed entity-search projection. Linking and edge creation are future workflows, not part of the read/search path.
+
+Effect vocabulary remains load-bearing here: subsystem names map to services, layers, Workflow classes, Worker entry points, or deploy bindings that can be searched in the repo.
 
 ## Diagram
 
@@ -17,37 +23,36 @@ graph TD
     direction TB
     AgentWorker[skygest-bi-agent Worker<br/>src/worker/feed.ts]
     IngestWorker[skygest-bi-ingest Worker<br/>src/worker/filter.ts]
-    Ingest[Post Ingest<br/>IngestRunWorkflow +<br/>ExpertPollCoordinatorDo]
+    Ingest[Post Ingest<br/>IngestRunWorkflow + ExpertPollCoordinatorDo]
     Enrich[Enrichment Chain<br/>EnrichmentRunWorkflow]
     Vision[Vision Lane<br/>VisionEnrichmentExecutor]
-    SrcAttr[Source-Attribution Lane<br/>SourceAttributionExecutor]
-    Resolver[skygest-resolver Worker<br/>src/resolver-worker/index.ts]
-    Stage1[Stage 1 Matching<br/>src/resolution/Stage1.ts]
-    Search[Bundle Resolution Search<br/>src/resolution/bundle/resolveBundle.ts]
-    Registry[Data Layer Registry<br/>D1-backed runtime source of truth]
-    SearchProjection[Entity Search Projection<br/>SEARCH_DB + EntitySearch]
+    Source[Source Attribution Lane<br/>SourceAttributionExecutor]
+    EntitySearch[Unified Entity Search<br/>search_entities]
+    SearchDb[Search Projection<br/>SEARCH_DB]
+    AiSearch[Cloudflare AI Search<br/>ENERGY_INTEL_SEARCH]
+    Registry[Ontology-aligned Registry<br/>D1 data-layer tables]
+    Metrics[Workers Logs + Analytics Engine<br/>REQUEST_METRICS + CF_VERSION_METADATA]
     MCP[MCP Surface<br/>src/mcp/Router.ts]
     Api[HTTP API<br/>src/api + src/admin]
   end
 
-  subgraph TOOLS[Local Tooling in skygest-cloudflare]
+  subgraph TOOLS[Local Tooling]
     direction TB
-    ColdStart[Cold-start Ingest Toolchain<br/>scripts/cold-start-ingest-*.ts +<br/>src/ingest/dcat-harness]
-    Seed[Git-backed Cold-start Snapshot<br/>.generated/cold-start/*]
-    VariableVocab[Variable Vocabulary Constants<br/>src/domain/data-layer/variable-vocabulary.ts]
+    ColdStart[Cold-start Ingest Toolchain<br/>scripts/cold-start-ingest-*.ts]
+    Snapshot[Git-backed Snapshot<br/>.generated/cold-start/*]
+    SearchRebuild[Search Projection Rebuild<br/>src/search/*]
     OntologyStore[Ontology Store Package<br/>packages/ontology-store]
   end
 
   subgraph ED[skygest-editorial]
     direction TB
-    Hydrate[hydrate-story<br/>scripts/hydrate-story.ts]
-    Sync[Cache Sync CLIs<br/>sync-experts, sync-data-layer-cache]
+    Hydrate[hydrate-story]
+    Sync[Cache Sync CLIs]
     Caches[Editorial Caches<br/>.skygest/cache/*.json]
-    BuildGraph[build-graph Validator<br/>scripts/build-graph.ts]
-    Discussion[Discussion Skill<br/>.claude/skills/discussion]
-    Stories[Story Files<br/>narratives/<slug>/stories/*.md]
-    Arcs[Narrative Arcs<br/>narratives/<slug>/index.md]
-    Editions[Editions<br/>editions/published/*.md]
+    BuildGraph[build-graph Validator]
+    Discussion[Discussion Skill]
+    Stories[Story Files]
+    Editions[Editions]
   end
 
   DomainBridge[/"@skygest/domain<br/>tsconfig path alias"/]
@@ -60,175 +65,125 @@ graph TD
 
   Ingest -->|D1 row: posts| Enrich
   Enrich --> Vision
-  Vision -->|D1 row: post_enrichments<br/>kind=vision| SrcAttr
-  SrcAttr -->|Service Binding + RPC<br/>RESOLVER| Resolver
-  Resolver --> Stage1
-  Stage1 --> Search
-  Stage1 -.->|registry lookups| Registry
-  Search -.->|registry lookups| Registry
-  Search -.->|search queries| SearchProjection
-  Search -->|D1 row: post_enrichments<br/>kind=data-ref-resolution| Enrich
+  Vision -->|D1 row: post_enrichments<br/>kind=vision| Source
+  Source -->|D1 row: post_enrichments<br/>kind=source-attribution| Enrich
 
-  ColdStart -->|filesystem write| Seed
-  Seed -->|sync-data-layer CLI| Registry
-  Seed -->|emit + distill validation| OntologyStore
-  VariableVocab -.->|closed enum + canonical lists| Registry
+  MCP --> EntitySearch
+  Api --> EntitySearch
+  EntitySearch --> SearchDb
+  EntitySearch --> AiSearch
+  EntitySearch --> Registry
+  EntitySearch --> Metrics
+  Enrich --> Metrics
+  Ingest --> Metrics
 
-  MCP -->|D1 row read| Enrich
-  MCP -->|D1 row read| Registry
-  Api -->|D1 row read| Enrich
+  ColdStart --> Snapshot
+  Snapshot -->|sync-data-layer| Registry
+  Registry --> SearchRebuild
+  SearchRebuild --> SearchDb
+  Snapshot --> OntologyStore
+
+  MCP -->|D1 reads| Enrich
+  MCP -->|D1 reads| Registry
+  Api -->|D1 reads| Registry
 
   CF -.->|src/domain/*<br/>Schemas + branded IDs| DomainBridge
   DomainBridge -.->|tsconfig paths<br/>resolved by Bun| ED
 
   Sync -->|MCP tool call| MCP
-  Sync -->|filesystem write| Caches
-  Hydrate -->|MCP tool call<br/>get_editorial_pick_bundle| MCP
-  Hydrate -->|filesystem write| Stories
-  Caches -->|filesystem read| BuildGraph
-  Stories -->|filesystem read| BuildGraph
-  Arcs -->|filesystem read| BuildGraph
-  Discussion -->|filesystem rw| Stories
-  Discussion -->|filesystem rw| Arcs
-  Discussion -->|MCP tool call| MCP
-  Stories -->|filesystem read| Editions
+  Sync --> Caches
+  Hydrate -->|MCP tool call| MCP
+  Hydrate --> Stories
+  Caches --> BuildGraph
+  Stories --> BuildGraph
+  Stories --> Editions
+  Discussion --> Stories
+  Discussion --> MCP
 
-  Editor -->|voice + Skill tool| Discussion
-  MCPModel -->|tool calls over MCP| MCP
-  Operator -->|HTTPS bearer auth| Api
-  Operator -->|bun run| Sync
-  Operator -->|bun run| ColdStart
-  Operator -->|bun run test| OntologyStore
-  Operator -->|wrangler deploy| IngestWorker
-  Operator -->|wrangler deploy| AgentWorker
-  Operator -->|wrangler deploy| Resolver
-  Reader -->|reads published markdown| Editions
-
-  classDef cf fill:#e1f5ff,stroke:#0288d1,color:#01579b
-  classDef ed fill:#f3e5f5,stroke:#7b1fa2,color:#4a148c
-  classDef bridge fill:#fff9c4,stroke:#f9a825,color:#f57f17
-  classDef tools fill:#fff3e0,stroke:#ef6c00,color:#e65100
-  classDef actor fill:#c8e6c9,stroke:#388e3c,color:#1b5e20
-
-  class IngestWorker,AgentWorker,Ingest,Enrich,Vision,SrcAttr,Resolver,Stage1,Search,Registry,SearchProjection,MCP,Api cf
-  class Hydrate,Sync,Caches,BuildGraph,Discussion,Stories,Arcs,Editions ed
-  class DomainBridge bridge
-  class ColdStart,Seed,VariableVocab,OntologyStore tools
-  class Reader,Editor,MCPModel,Operator actor
+  Reader --> Editions
+  Editor --> Discussion
+  MCPModel --> MCP
+  Operator --> Api
+  Operator --> ColdStart
+  Operator --> SearchRebuild
+  Operator --> OntologyStore
+  Operator --> IngestWorker
+  Operator --> AgentWorker
 ```
 
 ## Subsystems
 
-### skygest-cloudflare
+### Cloudflare Workers
 
-**skygest-bi-ingest Worker** (`wrangler.toml`, `src/worker/filter.ts`). The backend Worker that hosts `IngestRunWorkflow`, `EnrichmentRunWorkflow`, the `ExpertPollCoordinatorDo` Durable Object, and the cron sweep that launches ingest. It owns the write-heavy side of the system and the bindings the async workflows need. *Shipped.*
+**skygest-bi-ingest Worker** (`wrangler.toml`, `src/worker/filter.ts`). Hosts ingest, enrichment, the polling Durable Object, and the backend write routes. It owns the write-heavy workflow path.
 
-**skygest-bi-agent Worker** (`wrangler.agent.toml`, `src/worker/feed.ts`). The frontend Worker that serves the public/admin HTTP API and the MCP endpoint. It still uses `INGEST_SERVICE` for backend-owned write paths, while keeping its own direct read/admin bindings for the routes declared in `src/worker/feed.ts`. *Shipped.*
+**skygest-bi-agent Worker** (`wrangler.agent.toml`, `src/worker/feed.ts`). Serves public/admin HTTP routes and MCP. It uses `INGEST_SERVICE` for backend-owned writes and direct read bindings for search and read surfaces.
 
-**Post Ingest** (`src/ingest/`). Polls tracked experts, writes new posts to D1, and launches enrichment for new material. Exposes `IngestWorkflowLauncher` and `IngestRunWorkflow`; depends on the expert repos, sync-state repos, and Bluesky/Twitter client layers. *Shipped.*
+There is no active resolver Worker. `wrangler.resolver.toml`, resolver RPC, and the `RESOLVER` service binding were removed in the cutover.
 
-**Enrichment Chain** (`src/enrichment/`). Runs the lane DAG over each post via `EnrichmentRunWorkflow` and `EnrichmentPlanner`. When `ENABLE_DATA_REF_RESOLUTION` is on, the workflow calls the resolver after source attribution and persists a `data-ref-resolution` enrichment row containing `stage1` plus asset-level `resolution` bundles. Legacy `kernel` rows remain readable, but new writes use the new shape only. *Shipped.*
+### Runtime Flow
 
-**Vision Lane** (`src/enrichment/vision/`). Calls Gemini to extract chart titles, visible URLs, source lines, logo text, and other media cues. Exposes `VisionEnrichmentExecutor` layered on `GeminiVisionServiceLive`. *Shipped.*
+**Post Ingest** (`src/ingest/`). Polls tracked experts, writes posts, and launches enrichment.
 
-**Source-Attribution Lane** (`src/source/`). Turns vision output plus link context into ranked provider hints against the legacy provider registry. Exposes `SourceAttributionExecutor` layered on `SourceAttributionMatcher` and `ProviderRegistry`. This lane still matters because it feeds the resolver, even though the registry it uses is intentionally frozen for new providers. *Shipped; frozen for new providers.*
+**Enrichment Chain** (`src/enrichment/`). Runs vision and source attribution. It no longer calls a resolver and no longer writes `data-ref-resolution`.
 
-**skygest-resolver Worker** (`wrangler.resolver.toml`, `src/resolver-worker/index.ts`). Standalone Worker that exposes the resolver over HTTP and over the `RESOLVER` Service Binding through `ResolverEntrypoint`. It is now part of the shipped runtime, not a planned deployment slice. `src/resolver/Client.ts` is the calling seam used by the ingest and agent workers. *Shipped.*
+**Vision Lane** (`src/enrichment/vision/`). Extracts chart/media cues, visible URLs, source lines, titles, and other evidence from post media.
 
-**Stage 1 Matching** (`src/resolution/Stage1.ts`, `src/resolution/Stage1Resolver.ts`). The deterministic first pass that turns post context, vision output, and source-attribution output into direct matches and typed residuals. It is still the front door to the live resolver and still carries the exact-match and scope-hint work. *Shipped.*
+**Source Attribution Lane** (`src/source/`). Produces publisher/source hints. It remains useful extraction output, but it is not a resolver handoff anymore.
 
-**Bundle Resolution Search** (`src/resolution/bundle/resolveBundle.ts`, `src/resolver/ResolverService.ts`). The authoritative resolver output for the current runtime. It turns each chart asset into an enriched bundle, preserves provenance signals, and resolves agent and dataset candidates through exact URL, hostname, and entity-search lanes. Series and variable arrays are intentionally empty in this slice; semantic resolution is deferred. *Shipped.*
+**Unified Entity Search** (`src/services/EntitySearchService.ts`, `src/domain/entitySearch.ts`). The canonical search surface. It accepts typed probes and query text, fails closed for not-yet-enabled entity families, records per-request metrics, and returns branded ontology-aligned hits.
 
-**Data Layer Registry (D1)** (`variables`, `series`, `distributions`, `datasets`, `agents`, `catalogs`, `catalog_records`, `data_services`, `dataset_series`). The runtime source of truth for Stage 1 lookups, exact URL matching, and graph expansion from distribution to dataset and publisher. It is loaded into a prepared lookup contract at Worker cold start and is fed from the git-backed cold-start snapshot via `scripts/sync-data-layer.ts`. *Shipped.*
+Enabled search families are Agent, Dataset, Distribution, Series, and Variable. Catalog, CatalogRecord, DatasetSeries, and DataService are intentionally fail-closed until projection and hydration are complete.
 
-**Entity Search Projection** (`SEARCH_DB`, `src/search/*`, `src/services/EntitySearchService.ts`). The lexical and typed-search substrate used by bundle resolution after Stage 1. This is now part of the live resolver path for provenance-first search rather than an optional sidecar. *Shipped.*
+**Search Projection** (`SEARCH_DB`, `src/search/*`, `src/services/d1/EntitySearchRepoD1.ts`). Stores the search documents and exact probe indexes used by `search_entities`.
 
-**Cold-start Ingest Toolchain** (`scripts/cold-start-ingest-*.ts`, `src/ingest/dcat-harness/`). Local Effect scripts that fetch provider catalog surfaces and project them into the git-backed snapshot the rest of the repo consumes. The shared harness owns merge rules, slug stability, validation, graph construction, and atomic writes. *Shipped.*
+**AI Search Recall** (`ENERGY_INTEL_SEARCH`). Adds semantic recall to entity search. D1 remains the hydration source of truth for returned entity payloads.
 
-**Git-backed Cold-start Snapshot** (`.generated/cold-start/`, `src/bootstrap/CheckedInDataLayerRegistry.ts`). Fetched catalog snapshot used by sync scripts, tests, and registry preparation. The Worker runtime still does not read it directly in production, but it is the repo-local source that feeds the D1 registry and validation tooling. *Shipped.*
+**Data Layer Registry** (`src/domain/data-layer/*`, D1 registry tables). The ontology-aligned source of truth for entities and graph relationships.
 
-**Variable Vocabulary Constants** (`src/domain/data-layer/variable-vocabulary.ts`, `src/domain/data-layer/variable-enums.ts`). Small closed lists such as statistic types, aggregation families, unit families, and canonical concept names that still matter to registry validation and the data-layer spine. These now live in permanent domain code instead of a generated facet profile. *Shipped.*
+**Observability** (`src/platform/Observability.ts`). Workers Logs are enabled. Analytics Engine records one search datapoint per `search_entities` request, and `CF_VERSION_METADATA` tags logs/metrics with deploy version metadata.
 
-**Ontology Store Package** (`packages/ontology-store/`). The RDF export, SHACL validation, and round-trip distill package for data-layer entities. It emits the registry snapshot into RDF, validates against committed shapes, and rebuilds entities back out again. It is not on the Worker hot path, but it is now a real adjacent architecture seam for validation and future ontology interoperability. *Shipped as validation/export tooling.*
+### Tooling
 
-**MCP Surface** (`src/mcp/Router.ts`, `src/mcp/Toolkit.ts`). Exposes the tool surface used by the discussion workflow and other operator/editor flows. The data-ref resolution rows are already readable through existing read tools such as `get_post_enrichments`, but the dedicated lookup tools `resolve_data_ref` and `find_candidates_by_data_ref` are still not present. *Shipped, with planned data-ref lookup additions.*
+**Cold-start Ingest Toolchain** (`scripts/cold-start-ingest-*.ts`, `src/ingest/dcat-harness/`). Fetches catalog surfaces and projects them into the repo-local snapshot.
 
-**HTTP API Surface** (`src/api/Router.ts`, `src/admin/Router.ts`, plus backend routes mounted under `/admin`). Public reads plus operator writes. Authorized by bearer token on the admin side. *Shipped.*
+**Git-backed Snapshot** (`.generated/cold-start/`). The local source that feeds D1 sync, tests, search rebuilds, and ontology-store validation.
 
-### skygest-editorial
+**Ontology Store Package** (`packages/ontology-store/`). Offline RDF emit, SHACL validation, reload, and distill tooling. It stays off the Worker hot path.
 
-**hydrate-story** (`scripts/hydrate-story.ts` -> `src/narrative/HydrateStory.ts`). Pulls an `EditorialPickBundle` from staging and writes or refreshes a story scaffold plus per-post annotations. The core scaffold path is shipped; projecting resolver-backed `dataRefs` into story frontmatter is still the open `SKY-242` step. *Shipped core, data-ref projection planned.*
+### Editorial Bridge
 
-**Cache Sync CLIs** (`scripts/sync-experts.ts`, `scripts/sync-data-layer-cache.ts`). Refresh the local registry mirrors from staging on demand. The data-layer cache substrate is already in place. *Shipped.*
+**MCP Surface** (`src/mcp/Router.ts`, `src/mcp/Toolkit.ts`). Exposes post reads, editorial bundles, pipeline status, and entity search. Old data-ref lookup tools are gone; future linking/search tools should build on `search_entities`.
 
-**Editorial Caches** (`.skygest/cache/experts.json`, `variables.json`, `series.json`, `distributions.json`, `datasets.json`, `agents.json`). Read-only local mirrors of the Cloudflare registry. Used by build-graph and the discussion workflow. *Shipped.*
+**@skygest/domain** is still the shared schema bridge into `skygest-editorial` via tsconfig path aliases.
 
-**build-graph Validator** (`scripts/build-graph.ts` -> `src/narrative/BuildGraph.ts`). Validates frontmatter and graph structure across stories, arcs, annotations, and editions. The additional warning pass for unresolved data-layer refs is still open `SKY-243`. *Shipped core, data-layer warning pass planned.*
-
-**Discussion Skill** (`.claude/skills/discussion/SKILL.md`). The editor-facing voice loop. It depends on the MCP read surface, story files, and the editorial scripts. *Shipped.*
-
-**Story Files** (`narratives/<slug>/stories/*.md`). The durable editorial working surface, backed by the shared narrative Schemas. *Shipped.*
-
-**Narrative Arcs** (`narratives/<slug>/index.md`). Parent containers for long-running questions and arc evolution. *Shipped.*
-
-**Editions** (`editions/drafts/*.md`, `editions/published/*.md`). Reader-facing compiled artifacts. The artifact shape exists, but the end-to-end compile loop is still not the center of gravity of current work. *In progress.*
-
-### Cross-repo bridge
-
-**@skygest/domain** (tsconfig `paths` alias, not an npm workspace). `skygest-editorial` imports shared Schemas directly from `../skygest-cloudflare/src/domain/*`. This is still the single load-bearing bridge that keeps the editorial repo and the Cloudflare repo on one set of types. *Shipped.*
-
-## Actors
-
-**Reader** consumes published markdown under `editions/published/`. The artifact is the contract.
-
-**Editor** drives the system through the Discussion Skill, which fans out to MCP read tools, `hydrate-story`, `spawn-arc`, and `build-graph`. The editor does not work by calling raw Worker endpoints directly.
-
-**MCP-calling LLM** is the model inside the discussion workflow and other tool-using flows. The tool surface is its API, which is why structured Schema-backed output matters so much.
-
-**Operator** runs the admin API, sync scripts, cold-start ingest scripts, search projection rebuilds, ontology-store validation, and `wrangler deploy` against the worker configs. The operator is also the person who can turn the resolver lane on in staging and judge whether the stored outputs are trustworthy enough to move forward.
-
-## Key seams
+## Key Seams
 
 | Seam | What crosses | Current contract |
 |---|---|---|
-| `@skygest/domain` bridge | Shared Schemas and branded IDs across both repos | `src/domain/*` imported into `skygest-editorial` via tsconfig `paths` |
-| Vision -> Source Attribution | Vision enrichment row written by the vision lane | `VisionEnrichment` in `src/domain/enrichment.ts` |
-| Source Attribution -> Resolver | Source-attribution row plus vision/post context | `Stage1Input` assembled from `postContext`, `vision`, `sourceAttribution` |
-| Resolver service boundary | Resolver request and response across the `RESOLVER` binding or HTTP | `ResolvePostRequest` / `ResolvePostResponse` in `src/domain/resolution.ts` |
-| Resolver -> stored enrichment | Persisted resolver result in `post_enrichments` | `DataRefResolutionEnrichment` in `src/domain/enrichment.ts` with `stage1 + resolution` plus legacy `kernel` read compatibility |
-| Registry lookup contract | D1-backed entity lookups used by Stage 1 and bundle resolution | `src/resolution/dataLayerRegistry.ts` |
-| Search projection contract | Typed search hits used by bundle resolution | `src/domain/entitySearch.ts`, `src/services/EntitySearchService.ts` |
-| Snapshot -> D1 registry | Fetched snapshot promoted into runtime tables | `scripts/sync-data-layer.ts`, `src/data-layer/Sync.ts`, `.generated/cold-start/` |
-| Snapshot -> ontology-store | RDF emit, SHACL validation, and distill over the repo-local snapshot | `packages/ontology-store/*`, `packages/ontology-store/generated/emit-spec.json`, `packages/ontology-store/shapes/dcat-instances.ttl` |
-| Variable vocabulary constants | Shared enum and canonical-name lists used by the data-layer spine | `src/domain/data-layer/variable-vocabulary.ts` |
-| MCP read path | Tool responses consumed by editorial workflows | `src/mcp/Toolkit.ts` plus response Schemas in `src/domain/*` |
-| Editorial cache mirror | Local cached registry manifests | `.skygest/cache/*.json` |
-| Story frontmatter | Filesystem contract between scripts, discussion workflow, and validator | `src/domain/narrative/*` |
+| Worker deploy config | Cloudflare bindings and deploy targets | `wrangler.toml`, `wrangler.agent.toml` only |
+| Ingest -> Enrichment | Post rows and workflow params | `IngestRunParams`, `EnrichmentRunParams` |
+| Vision -> Source Attribution | Vision extraction payload | `VisionEnrichment` |
+| Source Attribution -> Reads/Search | Publisher/source extraction payload | `SourceAttributionEnrichment` |
+| Entity search request | Typed probes and query text | `SearchEntitiesRequest` |
+| Entity search response | Branded ontology hits and warnings | `SearchEntitiesResponse` |
+| Exact probe normalization | URL, hostname, alias matching | `src/platform/Normalize.ts` |
+| Search projection | Searchable entity documents | `EntitySearchDocument` |
+| AI Search recall | Semantic candidates before hydration | `EntitySemanticRecall` |
+| Observability | Request metrics and deploy tags | `REQUEST_METRICS`, `CF_VERSION_METADATA` |
+| Editorial bridge | Shared schemas into editorial repo | `@skygest/domain/*` |
 
-## Current state
+## Current State
 
 | Subsystem | State |
 |---|---|
-| Post Ingest, Enrichment Chain, Vision Lane, Source-Attribution Lane | Shipped |
-| Resolver Worker + `RESOLVER` Service Binding / `ResolverEntrypoint` RPC | Shipped |
-| Stage 1 Matching + Bundle Resolution Search | Shipped |
-| Persisted `data-ref-resolution` enrichment row (`stage1 + resolution`, legacy `kernel` rows readable) | Shipped |
-| Data Layer Registry (D1), git-backed snapshot, sync pipeline | Shipped |
-| Entity Search projection and typed search lanes | Shipped |
-| Ontology-store RDF round-trip and SHACL validation package | Shipped |
-| Variable/series semantic runtime resolution | Deferred |
-| `resolve_data_ref` / `find_candidates_by_data_ref` MCP tools | Planned (`SKY-241`, `SKY-244`) |
-| hydrate-story `dataRefs` projection | Planned (`SKY-242`) |
-| build-graph unresolved data-ref warnings | Planned (`SKY-243`) |
-| LLM follow-up workflow / old Stage 3 story | Not part of the current runtime; future work only |
-| Editorial caches, hydrate-story core, build-graph core, discussion workflow, story files, narrative arcs | Shipped |
-| Editions compile workflow | In progress |
-
-## What changed in this refresh
-
-1. The resolver is now described as `stage1 + resolution`, not `stage1 + kernel`.
-2. The facet vocabulary, facet kernel, and generated energy-profile runtime were removed from the live story.
-3. The docs now call out entity search as part of the shipped resolver path.
-4. The snapshot path now matches the repo: `.generated/cold-start`, not `references/cold-start`.
-5. The ontology-store package is now documented as a shipped validation/export seam adjacent to the runtime.
-6. Variable and series semantic resolution are explicitly marked as deferred follow-on work.
+| Post ingest, enrichment, vision, source attribution | Shipped |
+| Resolver Worker, resolver RPC, `RESOLVER` binding | Removed |
+| Stored `data-ref-resolution` enrichment rows | Removed from live contract |
+| Unified `search_entities` surface | Shipped |
+| Entity-search D1 projection and hydration | Shipped |
+| Cloudflare AI Search recall binding | Shipped |
+| Search observability via Workers Logs and Analytics Engine | Shipped |
+| Data-layer registry and sync pipeline | Shipped |
+| Ontology-store validation/export tooling | Shipped as offline tooling |
+| Link-writing workflows / edge creation | Future work |

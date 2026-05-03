@@ -52,10 +52,6 @@ export const WorkerKeys = {
     Config.boolean("ENABLE_STAGING_OPS"),
     false
   ),
-  enableDataRefResolution: Config.withDefault(
-    Config.boolean("ENABLE_DATA_REF_RESOLUTION"),
-    false
-  ),
   editorialDefaultExpiryHours: Config.withDefault(
     Config.int("EDITORIAL_DEFAULT_EXPIRY_HOURS"),
     24

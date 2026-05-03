@@ -13,15 +13,7 @@ import {
   mintSeriesId,
   mintVariableId
 } from "../src/domain/data-layer";
-import { ProviderId } from "../src/domain/source";
-import type {
-  EntitySearchSemanticRecallHit
-} from "../src/domain/entitySearch";
-import type {
-  Stage1Input,
-  Stage1Result
-} from "../src/domain/stage1Resolution";
-import { PostUri } from "../src/domain/types";
+import type { EntitySearchSemanticRecallHit } from "../src/domain/entitySearch";
 import { prepareDataLayerRegistry } from "../src/resolution/dataLayerRegistry";
 import { DataLayerRegistry } from "../src/services/DataLayerRegistry";
 import { runEntitySearchMigrations } from "../src/search/migrate";
@@ -38,8 +30,6 @@ const decodeDataset = Schema.decodeUnknownSync(Dataset);
 const decodeDistribution = Schema.decodeUnknownSync(Distribution);
 const decodeSeries = Schema.decodeUnknownSync(Series);
 const decodeVariable = Schema.decodeUnknownSync(Variable);
-const decodePostUri = Schema.decodeUnknownSync(PostUri);
-const decodeProviderId = Schema.decodeUnknownSync(ProviderId);
 
 const agentId = mintAgentId();
 const datasetId = mintDatasetId();
@@ -163,138 +153,6 @@ const makePreparedRegistry = () => {
   return prepared.success;
 };
 
-const makeStage1Input = (): Stage1Input => ({
-  postContext: {
-    postUri: decodePostUri("at://did:plc:test/app.bsky.feed.post/post-1"),
-    text: "EIA chart showing ERCOT wind generation",
-    links: [
-      {
-        url: "https://www.eia.gov/electricity/gridmonitor/",
-        title: "EIA Hourly Electric Grid Monitor",
-        description: "Hourly electric system operating data",
-        imageUrl: null,
-        domain: "www.eia.gov",
-        extractedAt: 1
-      }
-    ],
-    linkCards: [
-      {
-        source: "embed",
-        uri: "https://api.eia.gov/v2/electricity/rto/",
-        title: "EIA Grid Monitor API",
-        description: "API access to hourly generation and demand values.",
-        thumb: null
-      }
-    ],
-    threadCoverage: "focus-only"
-  },
-  sourceAttribution: {
-    kind: "source-attribution",
-    provider: {
-      providerId: decodeProviderId("eia"),
-      providerLabel: "EIA",
-      sourceFamily: null
-    },
-    resolution: "matched",
-    providerCandidates: [],
-    contentSource: {
-      url: "https://www.eia.gov/electricity/gridmonitor/",
-      title: "EIA Hourly Electric Grid Monitor",
-      domain: "www.eia.gov",
-      publication: "EIA"
-    },
-    socialProvenance: null,
-    processedAt: 1
-  },
-  vision: {
-    kind: "vision",
-    summary: {
-      text: "Wind generation in ERCOT",
-      mediaTypes: ["chart"],
-      chartTypes: ["line-chart"],
-      titles: ["ERCOT wind generation (hourly)"],
-      keyFindings: [
-        {
-          text: "ERCOT wind output rises",
-          assetKeys: ["asset-1" as any]
-        }
-      ]
-    },
-    assets: [
-      {
-        assetKey: "asset-1" as any,
-        assetType: "image",
-        source: "embed",
-        index: 0,
-        originalAltText: null,
-        extractionRoute: "full",
-        analysis: {
-          mediaType: "chart",
-          chartTypes: ["line-chart"],
-          altText: null,
-          altTextProvenance: "absent",
-          xAxis: {
-            label: "Hour",
-            unit: null
-          },
-          yAxis: {
-            label: "Wind generation",
-            unit: "MWh"
-          },
-          series: [
-            {
-              legendLabel: "ERCOT wind generation",
-              unit: "MWh"
-            }
-          ],
-          sourceLines: [
-            {
-              sourceText: "Source: EIA",
-              datasetName: "EIA Hourly Electric Grid Monitor"
-            }
-          ],
-          temporalCoverage: null,
-          keyFindings: ["ERCOT wind output"],
-          visibleUrls: ["https://api.eia.gov/v2/electricity/rto/"],
-          organizationMentions: [
-            {
-              name: "EIA",
-              location: "body"
-            }
-          ],
-          logoText: ["EIA"],
-          title: "ERCOT wind generation (hourly)",
-          modelId: "test",
-          processedAt: 1
-        }
-      }
-    ],
-    modelId: "test",
-    promptVersion: "v1",
-    processedAt: 1
-  }
-});
-
-const makeStage1Result = (): Stage1Result => ({
-  matches: [
-    {
-      _tag: "AgentMatch",
-      agentId,
-      name: "U.S. Energy Information Administration",
-      bestRank: 1,
-      evidence: []
-    }
-  ],
-  residuals: [
-    {
-      _tag: "UnmatchedDatasetTitleResidual",
-      datasetName: "EIA Hourly Electric Grid Monitor",
-      normalizedTitle: "eia hourly electric grid monitor",
-      assetKey: "asset-1" as any
-    }
-  ]
-});
-
 const makeServiceLayer = (
   semanticHits?: ReadonlyArray<EntitySearchSemanticRecallHit>
 ) => {
@@ -335,29 +193,6 @@ const seedSearchDocs = Effect.gen(function* () {
 });
 
 describe("EntitySearchService", () => {
-  it.effect("builds typed bundle candidates from Stage 1 evidence", () =>
-    Effect.gen(function* () {
-      yield* seedSearchDocs;
-      const service = yield* EntitySearchService;
-
-      const result = yield* service.searchBundleCandidates({
-        stage1Input: makeStage1Input(),
-        stage1: makeStage1Result(),
-        limit: 3
-      });
-
-      expect(result.plan.publisherAgentId).toBe(agentId);
-      expect(result.plan.exactCanonicalUrls).toContain(
-        "eia.gov/electricity/gridmonitor"
-      );
-      expect(result.plan.exactHostnames).toContain("api.eia.gov");
-      expect(result.datasets[0]?.document.entityId).toBe(datasetId);
-      expect(result.distributions[0]?.document.entityId).toBe(distributionId);
-      expect(result.series[0]?.document.entityId).toBe(seriesId);
-      expect(result.variables[0]?.document.entityId).toBe(variableId);
-    }).pipe(Effect.provide(makeServiceLayer()))
-  );
-
   it.effect("dispatches the generic and typed search methods through the repo", () =>
     Effect.gen(function* () {
       yield* seedSearchDocs;
@@ -411,6 +246,58 @@ describe("EntitySearchService", () => {
       expect(byExactUrl[0]?.matchKind).toBe("exact-url");
       expect(byExactHostname[0]?.document.entityId).toBe(seriesId);
       expect(byExactHostname[0]?.matchKind).toBe("exact-hostname");
+    }).pipe(Effect.provide(makeServiceLayer()))
+  );
+
+  it.effect("serves canonical search_entities exact probes and fail-closed warnings", () =>
+    Effect.gen(function* () {
+      yield* seedSearchDocs;
+      const service = yield* EntitySearchService;
+
+      const exactIri = yield* service.searchEntities({
+        probes: {
+          iris: [datasetId]
+        },
+        entityTypes: ["Dataset", "Catalog"],
+        limit: 3
+      });
+      expect(exactIri.hits[0]?.iri).toBe(datasetId);
+      expect(exactIri.hits[0]?.matchReason).toBe("exact-iri");
+      expect(exactIri.warnings).toEqual([
+        {
+          entityType: "Catalog",
+          reason: "not-yet-enabled"
+        }
+      ]);
+
+      const exactAlias = yield* service.searchEntities({
+        probes: {
+          aliases: [
+            {
+              scheme: "display-alias",
+              value: "Wind output"
+            }
+          ]
+        },
+        entityTypes: ["Variable"],
+        limit: 3
+      });
+      expect(exactAlias.hits[0]?.iri).toBe(variableId);
+      expect(exactAlias.hits[0]?.matchReason).toBe("exact-alias");
+      expect(exactAlias.hits[0]?.evidence[0]?.kind).toBe("alias");
+
+      const deferredOnly = yield* service.searchEntities({
+        query: "catalog",
+        entityTypes: ["Catalog"],
+        limit: 3
+      });
+      expect(deferredOnly.hits).toEqual([]);
+      expect(deferredOnly.warnings).toEqual([
+        {
+          entityType: "Catalog",
+          reason: "not-yet-enabled"
+        }
+      ]);
     }).pipe(Effect.provide(makeServiceLayer()))
   );
 

@@ -9,7 +9,6 @@
 
 import { Schema, SchemaGetter } from "effect";
 import { FlexibleNumber } from "./bi";
-import { ResolvedAssetBundle } from "./bundleResolution";
 import { ChartAssetId } from "./data-layer/post-ids";
 import { NonNegativeInt, PlatformSchema, PostUri } from "./types";
 import { EnrichmentErrorEnvelope } from "./errors";
@@ -33,12 +32,6 @@ import {
   VisionOrganizationMention,
   VisionSourceLineAttribution
 } from "./sourceMatching";
-import {
-  ResolverVersion
-} from "./resolutionShared";
-import { Stage1Result } from "./stage1Resolution";
-
-const DeferredStage1Result = Schema.suspend(() => Stage1Result);
 
 // ---------------------------------------------------------------------------
 // Enrichment kind discriminator
@@ -53,10 +46,7 @@ export type WorkflowEnrichmentKind = Schema.Schema.Type<
   typeof WorkflowEnrichmentKind
 >;
 
-export const EnrichmentKind = Schema.Literals([
-  ...WorkflowEnrichmentKind.literals,
-  "data-ref-resolution"
-]);
+export const EnrichmentKind = WorkflowEnrichmentKind;
 export type EnrichmentKind = Schema.Schema.Type<typeof EnrichmentKind>;
 
 export const defaultSchemaVersionForEnrichmentKind = (
@@ -67,7 +57,6 @@ export const defaultSchemaVersionForEnrichmentKind = (
     case "source-attribution":
       return "v2";
     case "grounding":
-    case "data-ref-resolution":
       return "v1";
   }
 };
@@ -273,57 +262,13 @@ export const GroundingEnrichment = Schema.Struct({
 export type GroundingEnrichment = Schema.Schema.Type<typeof GroundingEnrichment>;
 
 // ---------------------------------------------------------------------------
-// Data-ref resolution enrichment
-// ---------------------------------------------------------------------------
-
-export const DataRefResolutionEnrichmentV2 = Schema.Struct({
-  kind: Schema.Literal("data-ref-resolution"),
-  stage1: DeferredStage1Result,
-  resolution: Schema.Array(ResolvedAssetBundle),
-  resolverVersion: ResolverVersion,
-  processedAt: Schema.Number
-});
-export type DataRefResolutionEnrichmentV2 = Schema.Schema.Type<
-  typeof DataRefResolutionEnrichmentV2
->;
-
-export const LegacyDataRefResolutionEnrichment = Schema.Struct({
-  kind: Schema.Literal("data-ref-resolution"),
-  stage1: DeferredStage1Result,
-  kernel: Schema.Array(Schema.Unknown),
-  resolverVersion: ResolverVersion,
-  processedAt: Schema.Number
-});
-export type LegacyDataRefResolutionEnrichment = Schema.Schema.Type<
-  typeof LegacyDataRefResolutionEnrichment
->;
-
-export const DataRefResolutionEnrichment = Schema.Union([
-  DataRefResolutionEnrichmentV2,
-  LegacyDataRefResolutionEnrichment
-]);
-export type DataRefResolutionEnrichment = Schema.Schema.Type<
-  typeof DataRefResolutionEnrichment
->;
-
-export const isDataRefResolutionEnrichmentV2 = (
-  value: DataRefResolutionEnrichment
-): value is DataRefResolutionEnrichmentV2 => "resolution" in value;
-
-export const isLegacyDataRefResolutionEnrichment = (
-  value: DataRefResolutionEnrichment
-): value is LegacyDataRefResolutionEnrichment =>
-  "kernel" in value && !("resolution" in value);
-
-// ---------------------------------------------------------------------------
 // EnrichmentOutput union
 // ---------------------------------------------------------------------------
 
 export const EnrichmentOutput = Schema.Union([
   VisionEnrichment,
   SourceAttributionEnrichment,
-  GroundingEnrichment,
-  DataRefResolutionEnrichment
+  GroundingEnrichment
 ]);
 export type EnrichmentOutput = Schema.Schema.Type<typeof EnrichmentOutput>;
 
@@ -354,20 +299,10 @@ export type GroundingPostEnrichmentResult = Schema.Schema.Type<
   typeof GroundingPostEnrichmentResult
 >;
 
-export const DataRefResolutionPostEnrichmentResult = Schema.Struct({
-  kind: Schema.Literal("data-ref-resolution"),
-  payload: DataRefResolutionEnrichment,
-  enrichedAt: Schema.Number
-});
-export type DataRefResolutionPostEnrichmentResult = Schema.Schema.Type<
-  typeof DataRefResolutionPostEnrichmentResult
->;
-
 export const PostEnrichmentResult = Schema.Union([
   VisionPostEnrichmentResult,
   SourceAttributionPostEnrichmentResult,
-  GroundingPostEnrichmentResult,
-  DataRefResolutionPostEnrichmentResult
+  GroundingPostEnrichmentResult
 ]);
 export type PostEnrichmentResult = Schema.Schema.Type<
   typeof PostEnrichmentResult

@@ -23,6 +23,7 @@ import { EditorialService } from "../services/EditorialService";
 import { EditorialPickBundleReadService } from "../services/EditorialPickBundleReadService";
 import { StagingOpsService } from "../services/StagingOpsService";
 import { PostImportService } from "../services/PostImportService";
+import { EntitySearchService } from "../services/EntitySearchService";
 import { AppConfig } from "../platform/Config";
 import { OperatorIdentity, operatorIdentityContext } from "../http/Identity";
 import { handleWithApiLayer, makeCachedApiHandler } from "../http/ApiSupport";
@@ -197,6 +198,17 @@ const AdminApi = HttpApi.make("admin")
           disableCodecs: true,
           payload: AdminRequestSchemas.importPosts,
           success: AdminResponseSchemas.importPosts,
+          error: ApiErrorSchemas
+        })
+      )
+  )
+  .add(
+    HttpApiGroup.make("search")
+      .add(
+        HttpApiEndpoint.post("entities", "/admin/search/entities", {
+          disableCodecs: true,
+          payload: AdminRequestSchemas.searchEntities,
+          success: AdminResponseSchemas.searchEntities,
           error: ApiErrorSchemas
         })
       )
@@ -535,6 +547,13 @@ const AdminHandlers = Layer.mergeAll(
         const postImport = yield* PostImportService;
         return yield* postImport.importPosts(actor, payload);
       }))
+    )
+  ),
+  HttpApiBuilder.group(AdminApi, "search", (handlers) =>
+    handlers.handle("entities", ({ payload }) =>
+      withAdminErrors("/admin/search/entities", EntitySearchService.use(
+        (search) => search.searchEntities(payload)
+      ))
     )
   )
 );

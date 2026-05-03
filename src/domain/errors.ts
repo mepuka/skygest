@@ -325,13 +325,6 @@ export class EnrichmentDependencyPendingError extends Schema.TaggedErrorClass<En
   }
 ) {}
 
-export class ResolverSourceAttributionMissingError extends Schema.TaggedErrorClass<ResolverSourceAttributionMissingError>()(
-  "ResolverSourceAttributionMissingError",
-  {
-    postUri: PostUri
-  }
-) {}
-
 export class OntologyDecodeError extends Schema.TaggedErrorClass<OntologyDecodeError>()(
   "OntologyDecodeError",
   {
@@ -477,24 +470,6 @@ export class PartialVariableJoinConflictError extends Schema.TaggedErrorClass<Pa
   {
     message: Schema.String,
     conflicts: Schema.Array(PartialVariableFacetConflict)
-  }
-) {}
-
-export class ResolverWorkflowLaunchError extends Schema.TaggedErrorClass<ResolverWorkflowLaunchError>()(
-  "ResolverWorkflowLaunchError",
-  {
-    message: Schema.String,
-    operation: Schema.String
-  }
-) {}
-
-export class ResolverClientError extends Schema.TaggedErrorClass<ResolverClientError>()(
-  "ResolverClientError",
-  {
-    message: Schema.String,
-    status: Schema.Number,
-    postUri: Schema.optionalKey(PostUri),
-    operation: Schema.optionalKey(Schema.String)
   }
 ) {}
 

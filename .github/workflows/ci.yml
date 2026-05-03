@@ -100,15 +100,6 @@ jobs:
       - name: Build web assets
         run: bun run build:web:prod
 
-      # Deploy order matters: the agent + ingest workers declare a [[services]]
-      # binding to skygest-resolver-staging, so the resolver must exist first or
-      # their deploys will fail with [code: 10143] "Service binding 'RESOLVER'
-      # references Worker 'skygest-resolver-staging' which was not found."
-      - name: Deploy resolver to staging
-        run: bunx wrangler deploy --config wrangler.resolver.toml --env staging
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
       - name: Deploy agent to staging
         run: bunx wrangler deploy --config wrangler.agent.toml --env staging
         env:

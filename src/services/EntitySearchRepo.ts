@@ -1,6 +1,6 @@
 import { Effect, Layer, ServiceMap } from "effect";
 import { SqlError } from "effect/unstable/sql/SqlError";
-import type { DbError } from "../domain/errors";
+import { DbError } from "../domain/errors";
 import type {
   EntitySearchDocument,
   EntitySearchEntityId,
@@ -23,6 +23,9 @@ export class EntitySearchRepo extends ServiceMap.Service<
     readonly getByEntityId: (
       entityId: EntitySearchEntityId
     ) => Effect.Effect<EntitySearchDocument | null, SqlError | DbError>;
+    readonly getManyByEntityId: (
+      entityIds: ReadonlyArray<EntitySearchEntityId>
+    ) => Effect.Effect<ReadonlyArray<EntitySearchDocument>, SqlError | DbError>;
     readonly searchLexical: (
       input: EntitySearchQueryInput
     ) => Effect.Effect<ReadonlyArray<EntitySearchHit>, SqlError | DbError>;
@@ -38,8 +41,31 @@ export const emptyEntitySearchRepoLayer = Layer.succeed(
     upsertDocuments: () => Effect.void,
     deleteDocuments: () => Effect.void,
     getByEntityId: () => Effect.succeed(null),
+    getManyByEntityId: () => Effect.succeed([]),
     searchLexical: () => Effect.succeed([]),
     rebuildFts: () => Effect.void,
     optimizeFts: () => Effect.void
+  })
+);
+
+export const missingEntitySearchRepoLayer = Layer.succeed(
+  EntitySearchRepo,
+  EntitySearchRepo.of({
+    replaceAllDocuments: () =>
+      Effect.fail(new DbError({ message: "missing SEARCH_DB binding" })),
+    upsertDocuments: () =>
+      Effect.fail(new DbError({ message: "missing SEARCH_DB binding" })),
+    deleteDocuments: () =>
+      Effect.fail(new DbError({ message: "missing SEARCH_DB binding" })),
+    getByEntityId: () =>
+      Effect.fail(new DbError({ message: "missing SEARCH_DB binding" })),
+    getManyByEntityId: () =>
+      Effect.fail(new DbError({ message: "missing SEARCH_DB binding" })),
+    searchLexical: () =>
+      Effect.fail(new DbError({ message: "missing SEARCH_DB binding" })),
+    rebuildFts: () =>
+      Effect.fail(new DbError({ message: "missing SEARCH_DB binding" })),
+    optimizeFts: () =>
+      Effect.fail(new DbError({ message: "missing SEARCH_DB binding" }))
   })
 );

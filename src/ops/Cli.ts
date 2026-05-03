@@ -37,8 +37,7 @@ const blueskyCliLayer = Layer.effect(
 const deployWorkers = [
   "all",
   "ingest",
-  "agent",
-  "resolver"
+  "agent"
 ] as const;
 
 type DeployWorker = typeof deployWorkers[number];
@@ -182,16 +181,13 @@ const deploySelection = (env: string, worker: DeployWorker) =>
     const targets = worker === "all"
       ? [
         ["ingest", "wrangler.toml"],
-        ["agent", "wrangler.agent.toml"],
-        ["resolver", "wrangler.resolver.toml"]
+        ["agent", "wrangler.agent.toml"]
       ] as const
       : [[
           worker,
           worker === "ingest"
             ? "wrangler.toml"
-            : worker === "agent"
-              ? "wrangler.agent.toml"
-              : "wrangler.resolver.toml"
+            : "wrangler.agent.toml"
         ]] as const;
 
     yield* Effect.forEach(

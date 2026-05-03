@@ -17,14 +17,11 @@ import { EnrichmentWorkflowLauncher } from "./EnrichmentWorkflowLauncher";
 import { GeminiVisionServiceLive } from "./GeminiVisionServiceLive";
 import { SourceAttributionMatcher } from "../source/SourceAttributionMatcher";
 import { VisionEnrichmentExecutor } from "./VisionEnrichmentExecutor";
-import { ResolverClient } from "../resolver/Client";
 
 export const makeWorkflowEnrichmentLayer = (
   env: WorkflowEnrichmentEnvBindings
 ) => {
-  const requiredBindings = env.ENABLE_DATA_REF_RESOLUTION === "true"
-    ? ["DB", "RESOLVER", "OPERATOR_SECRET"] as const
-    : ["DB"] as const;
+  const requiredBindings = ["DB"] as const;
 
   // Build a ConfigProvider from Worker env bindings so Config.string()
   // resolves GOOGLE_API_KEY, GEMINI_VISION_MODEL, etc. at runtime.
@@ -82,10 +79,6 @@ export const makeWorkflowEnrichmentLayer = (
   const sourceExecutorLayer = SourceAttributionExecutor.layer.pipe(
     Layer.provideMerge(sourceMatcherLayer)
   );
-  const resolverClientLayer = env.RESOLVER == null
-    ? null
-    : ResolverClient.layerFromBinding(env.RESOLVER);
-
   const coreLayer = Layer.mergeAll(
     baseLayer,
     appConfigLayer,
@@ -102,7 +95,5 @@ export const makeWorkflowEnrichmentLayer = (
     sourceExecutorLayer
   );
 
-  return resolverClientLayer === null
-    ? coreLayer
-    : Layer.mergeAll(coreLayer, resolverClientLayer);
+  return coreLayer;
 };

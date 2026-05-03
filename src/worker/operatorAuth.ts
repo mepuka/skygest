@@ -218,6 +218,10 @@ const operatorRequestPolicy = (request: Request): OperatorRequestPolicy => {
     };
   }
 
+  if (request.method === "POST" && pathname === "/admin/search/entities") {
+    return { action: "search_entities", scopes: ["ops:read"] };
+  }
+
   if (request.method === "POST" && pathname === "/admin/editorial/pick") {
     return { action: "submit_editorial_pick", scopes: ["editorial:write"] };
   }

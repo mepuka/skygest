@@ -33,7 +33,6 @@ import {
   createMcpClient,
   expertsWriteIdentity,
   makeBiLayer,
-  withDataRefQueryService,
   opsCurationWriteIdentity,
   opsEditorialWriteIdentity,
   opsExpertsWriteIdentity,
@@ -156,7 +155,7 @@ const initializePersistentPromptSession = async (
   layer: ReturnType<typeof makeBiLayer>
 ) => {
   const webHandler = createPersistentMcpHandler(
-    withDataRefQueryService(layer),
+    layer,
     readOnlyIdentity
   );
 
@@ -254,7 +253,6 @@ describe("read-only MCP server", () => {
           expect(tools.tools.map((tool) => tool.name).sort()).toEqual([
             "expand_topics",
             "explain_post_topics",
-            "find_candidates_by_data_ref",
             "get_editorial_pick_bundle",
             "get_post_enrichments",
             "get_post_links",
@@ -268,7 +266,7 @@ describe("read-only MCP server", () => {
             "list_enrichment_issues",
             "list_experts",
             "list_topics",
-            "resolve_data_ref",
+            "search_entities",
             "search_posts"
           ]);
 
@@ -1247,8 +1245,7 @@ describe("MCP get_pipeline_status", () => {
             total: 3,
             vision: 1,
             sourceAttribution: 1,
-            grounding: 1,
-            dataRefResolution: 0
+            grounding: 1
           });
           expect(summary.enrichments.runs).toEqual({
             queued: 1,
@@ -1326,8 +1323,7 @@ describe("MCP get_pipeline_status", () => {
             total: 0,
             vision: 0,
             sourceAttribution: 0,
-            grounding: 0,
-            dataRefResolution: 0
+            grounding: 0
           });
           expect(snapshot.enrichments.runs).toEqual({
             queued: 0,

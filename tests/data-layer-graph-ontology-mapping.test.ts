@@ -22,12 +22,15 @@ const ontologyRoot = resolve(
   process.cwd(),
   "../ontology_skill/ontologies/skygest-energy-vocab",
 );
-const ontologyAvailable = existsSync(ontologyRoot);
+const ontologyTtl = join(ontologyRoot, "skygest-energy-vocab.ttl");
+const ontologyImports = join(ontologyRoot, "imports");
+const ontologyAvailable =
+  existsSync(ontologyTtl) && existsSync(ontologyImports);
 const ontologyDeclarationCorpus = ontologyAvailable
   ? [
-      readFileSync(join(ontologyRoot, "skygest-energy-vocab.ttl"), "utf8"),
-      ...readdirSync(join(ontologyRoot, "imports")).map((filename) =>
-        readFileSync(join(ontologyRoot, "imports", filename), "utf8"),
+      readFileSync(ontologyTtl, "utf8"),
+      ...readdirSync(ontologyImports).map((filename) =>
+        readFileSync(join(ontologyImports, filename), "utf8"),
       ),
     ].join("\n")
   : "";

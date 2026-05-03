@@ -16,7 +16,8 @@ const NonEmptyText = Schema.String.pipe(
 );
 
 export const SearchLimit = Schema.Int.pipe(
-  Schema.check(Schema.isGreaterThanOrEqualTo(1))
+  Schema.check(Schema.isGreaterThanOrEqualTo(1)),
+  Schema.check(Schema.isLessThanOrEqualTo(50))
 ).annotate({
   description: "Maximum number of ranked entity-search rows to return"
 });
@@ -69,6 +70,34 @@ export type EntitySearchAlias = Schema.Schema.Type<typeof EntitySearchAlias>;
 export const EntitySearchAliasScheme = AliasScheme;
 export type EntitySearchAliasScheme = Schema.Schema.Type<
   typeof EntitySearchAliasScheme
+>;
+
+export const SearchEntitiesRequestedEntityType = Schema.Literals([
+  "Agent",
+  "Dataset",
+  "Distribution",
+  "Series",
+  "Variable",
+  "Catalog",
+  "CatalogRecord",
+  "DatasetSeries",
+  "DataService"
+]).annotate({
+  description:
+    "Entity families accepted by search_entities. Deferred families fail closed until projection and hydration exist."
+});
+export type SearchEntitiesRequestedEntityType = Schema.Schema.Type<
+  typeof SearchEntitiesRequestedEntityType
+>;
+
+export const EntitySearchAliasProbe = Schema.Struct({
+  scheme: AliasScheme,
+  value: NonEmptyText
+}).annotate({
+  description: "Structured alias probe for exact search_entities lookup"
+});
+export type EntitySearchAliasProbe = Schema.Schema.Type<
+  typeof EntitySearchAliasProbe
 >;
 
 const entitySearchScopeFields = {
@@ -169,8 +198,10 @@ export type SearchVariablesInput = Schema.Schema.Type<typeof SearchVariablesInpu
 
 export const EntitySearchMatchKind = Schema.Literals([
   "lexical",
+  "exact-iri",
   "exact-url",
   "exact-hostname",
+  "exact-alias",
   "semantic",
   "hybrid"
 ]).annotate({
@@ -197,6 +228,154 @@ export const EntitySearchHits = Schema.Array(EntitySearchHit).annotate({
 });
 export type EntitySearchHits = Schema.Schema.Type<typeof EntitySearchHits>;
 
+export const SearchEntityEvidenceKind = Schema.Literals([
+  "iri",
+  "url",
+  "hostname",
+  "alias",
+  "label",
+  "snippet",
+  "semantic-chunk"
+]).annotate({
+  description:
+    "Read-side evidence explanation for search_entities results; not graph-edge provenance"
+});
+export type SearchEntityEvidenceKind = Schema.Schema.Type<
+  typeof SearchEntityEvidenceKind
+>;
+
+export const SearchEntityEvidenceText = Schema.String.pipe(
+  Schema.check(Schema.isMinLength(1)),
+  Schema.check(Schema.isMaxLength(240))
+).annotate({
+  description: "Bounded evidence text returned by search_entities"
+});
+export type SearchEntityEvidenceText = Schema.Schema.Type<
+  typeof SearchEntityEvidenceText
+>;
+
+export const SearchEntityEvidence = Schema.Struct({
+  kind: SearchEntityEvidenceKind,
+  text: SearchEntityEvidenceText,
+  source: Schema.optionalKey(
+    Schema.Union([
+      EntitySearchEntityId,
+      EntitySearchUrl,
+      EntitySearchHostname
+    ])
+  )
+}).annotate({
+  description: "Bounded read-side evidence for one canonical entity hit"
+});
+export type SearchEntityEvidence = Schema.Schema.Type<
+  typeof SearchEntityEvidence
+>;
+
+export const SearchEntityProbe = Schema.Struct({
+  iris: Schema.optionalKey(Schema.Array(EntitySearchEntityId)),
+  urls: Schema.optionalKey(Schema.Array(EntitySearchUrl)),
+  hostnames: Schema.optionalKey(Schema.Array(EntitySearchHostname)),
+  aliases: Schema.optionalKey(Schema.Array(EntitySearchAliasProbe))
+}).annotate({
+  description: "Structured exact probes accepted by search_entities"
+});
+export type SearchEntityProbe = Schema.Schema.Type<typeof SearchEntityProbe>;
+
+export const SearchEntityMatchReason = Schema.Literals([
+  "exact-iri",
+  "exact-url",
+  "exact-hostname",
+  "exact-alias",
+  "keyword",
+  "semantic",
+  "hybrid"
+]).annotate({
+  description: "Public search_entities match explanation"
+});
+export type SearchEntityMatchReason = Schema.Schema.Type<
+  typeof SearchEntityMatchReason
+>;
+
+const hasProbeValues = (probe: SearchEntityProbe | undefined) =>
+  probe !== undefined &&
+  ((probe.iris?.length ?? 0) > 0 ||
+    (probe.urls?.length ?? 0) > 0 ||
+    (probe.hostnames?.length ?? 0) > 0 ||
+    (probe.aliases?.length ?? 0) > 0);
+
+export const SearchEntitiesInput = Schema.Struct({
+  query: Schema.optionalKey(NonEmptyText),
+  entityTypes: Schema.optionalKey(Schema.Array(SearchEntitiesRequestedEntityType)),
+  scope: Schema.optionalKey(EntitySearchScope),
+  probes: Schema.optionalKey(SearchEntityProbe),
+  limit: Schema.optionalKey(SearchLimit)
+}).pipe(
+  Schema.check(
+    Schema.makeFilter((input) =>
+      input.query === undefined && !hasProbeValues(input.probes)
+        ? "at least one of query or probes must be present"
+        : undefined
+    )
+  )
+).annotate({
+  description:
+    "Operator/internal canonical entity search request with exact probes and optional recall query"
+});
+export type SearchEntitiesInput = Schema.Schema.Type<
+  typeof SearchEntitiesInput
+>;
+
+export const SearchEntitiesWarning = Schema.Struct({
+  entityType: SearchEntitiesRequestedEntityType,
+  reason: Schema.Literal("not-yet-enabled")
+}).annotate({
+  description: "Fail-closed warning for deferred entity families"
+});
+export type SearchEntitiesWarning = Schema.Schema.Type<
+  typeof SearchEntitiesWarning
+>;
+
+export const SearchEntityHit = Schema.Struct({
+  entityType: EntitySearchEntityType,
+  iri: EntitySearchEntityId,
+  label: NonEmptyText,
+  summary: Schema.optionalKey(NonEmptyText),
+  rank: SearchLimit,
+  score: Schema.Number,
+  matchReason: SearchEntityMatchReason,
+  evidence: Schema.Array(SearchEntityEvidence).pipe(
+    Schema.check(Schema.isMaxLength(3))
+  )
+}).annotate({
+  description: "Canonical hydrated entity hit returned by search_entities"
+});
+export type SearchEntityHit = Schema.Schema.Type<typeof SearchEntityHit>;
+
+export const SearchEntitiesResult = Schema.Struct({
+  hits: Schema.Array(SearchEntityHit),
+  warnings: Schema.optionalKey(Schema.Array(SearchEntitiesWarning))
+}).annotate({
+  description: "Canonical search_entities response"
+});
+export type SearchEntitiesResult = Schema.Schema.Type<
+  typeof SearchEntitiesResult
+>;
+
+export class EntitySearchIndexError extends Schema.TaggedErrorClass<EntitySearchIndexError>()(
+  "EntitySearchIndexError",
+  {
+    message: Schema.String,
+    operation: Schema.String
+  }
+) {}
+
+export class EntityTypeNotEnabledError extends Schema.TaggedErrorClass<EntityTypeNotEnabledError>()(
+  "EntityTypeNotEnabledError",
+  {
+    entityType: SearchEntitiesRequestedEntityType
+  }
+) {}
+
 export const EntitySearchSemanticRecallInput = Schema.Struct({
   text: NonEmptyText,
   entityTypes: Schema.optionalKey(Schema.Array(EntitySearchEntityType)),
@@ -220,38 +399,4 @@ export const EntitySearchSemanticRecallHit = Schema.Struct({
 });
 export type EntitySearchSemanticRecallHit = Schema.Schema.Type<
   typeof EntitySearchSemanticRecallHit
->;
-
-export const EntitySearchBundlePlan = Schema.Struct({
-  exactCanonicalUrls: Schema.Array(EntitySearchUrl),
-  exactHostnames: Schema.Array(EntitySearchHostname),
-  publisherAgentId: Schema.optionalKey(AgentId),
-  datasetId: Schema.optionalKey(DatasetId),
-  variableId: Schema.optionalKey(VariableId),
-  agentText: Schema.Array(NonEmptyText),
-  datasetText: Schema.Array(NonEmptyText),
-  distributionText: Schema.Array(NonEmptyText),
-  seriesText: Schema.Array(NonEmptyText),
-  variableText: Schema.Array(NonEmptyText)
-}).annotate({
-  description:
-    "Bundle-derived search plan that turns post, URL, and chart evidence into typed entity-search requests"
-});
-export type EntitySearchBundlePlan = Schema.Schema.Type<
-  typeof EntitySearchBundlePlan
->;
-
-export const EntitySearchBundleCandidates = Schema.Struct({
-  plan: EntitySearchBundlePlan,
-  agents: EntitySearchHits,
-  datasets: EntitySearchHits,
-  distributions: EntitySearchHits,
-  series: EntitySearchHits,
-  variables: EntitySearchHits
-}).annotate({
-  description:
-    "Typed grouped candidates produced from one evidence bundle after Stage 1 exact lookup has narrowed but not finished the resolution path"
-});
-export type EntitySearchBundleCandidates = Schema.Schema.Type<
-  typeof EntitySearchBundleCandidates
 >;

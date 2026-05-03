@@ -9,7 +9,6 @@ import { encodeJsonString } from "../src/platform/Json";
 import {
   makeBiLayer,
   seedKnowledgeBase,
-  withDataRefQueryService,
   withTempSqliteFile,
   workflowIdentity,
   readOnlyIdentity
@@ -175,7 +174,7 @@ describe("MCP session proxy (real server)", () => {
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
-          (_env: TestEnv) => withDataRefQueryService(makeBiLayer({ filename })),
+          (_env: TestEnv) => makeBiLayer({ filename }),
           (env) => env.marker
         );
 
@@ -199,7 +198,7 @@ describe("MCP session proxy (real server)", () => {
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
-          (_env: TestEnv) => withDataRefQueryService(makeBiLayer({ filename })),
+          (_env: TestEnv) => makeBiLayer({ filename }),
           (env) => env.marker
         );
 
@@ -239,7 +238,7 @@ describe("MCP session proxy (real server)", () => {
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
-          (_env: TestEnv) => withDataRefQueryService(makeBiLayer({ filename })),
+          (_env: TestEnv) => makeBiLayer({ filename }),
           (env) => env.marker
         );
 
@@ -263,7 +262,7 @@ describe("MCP session proxy (real server)", () => {
       withTempSqliteFile(async (filename) => {
         const { sessionStore } = makeMemorySessionStore<TestEnv>();
         const handler = makeCachedMcpHandler(
-          (_env: TestEnv) => withDataRefQueryService(makeBiLayer({ filename })),
+          (_env: TestEnv) => makeBiLayer({ filename }),
           (env) => env.marker,
           { sessionStore }
         );
@@ -297,7 +296,7 @@ describe("MCP session proxy (real server)", () => {
     Effect.promise(() =>
       withTempSqliteFile(async (filename) => {
         const handler = makeCachedMcpHandler(
-          (_env: TestEnv) => withDataRefQueryService(makeBiLayer({ filename })),
+          (_env: TestEnv) => makeBiLayer({ filename }),
           (env) => env.marker
         );
 

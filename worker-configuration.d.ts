@@ -3,83 +3,75 @@
 /// <reference path="./worker-runtime.d.ts" />
 declare namespace WorkerConfiguration {
   interface IngestStagingEnv {
-  	ONTOLOGY_KV: KVNamespace;
-  	TRANSCRIPTS_BUCKET: R2Bucket;
-  	DB: D1Database;
-  	ENERGY_INTEL_SEARCH: AiSearchNamespace;
-  	PUBLIC_BSKY_API: "https://public.api.bsky.app";
-  	INGEST_SHARD_COUNT: "1";
-  	DEFAULT_DOMAIN: "energy";
-  	MCP_LIMIT_DEFAULT: "20";
-  	MCP_LIMIT_MAX: "100";
-  	ENABLE_STAGING_OPS: "true";
-  	ENABLE_DATA_REF_RESOLUTION: "true";
-  	GEMINI_VISION_MODEL: "gemini-3-flash-preview";
-  	EXPERT_POLL_COORDINATOR: DurableObjectNamespace<import("./src/worker/filter").ExpertPollCoordinatorDo>;
-  	RESOLVER: Service<typeof import("./src/resolver-worker/index").ResolverEntrypoint>;
-  	INGEST_RUN_WORKFLOW: Workflow<Parameters<import("./src/worker/filter").IngestRunWorkflow['run']>[0]['payload']>;
-  	ENRICHMENT_RUN_WORKFLOW: Workflow<Parameters<import("./src/worker/filter").EnrichmentRunWorkflow['run']>[0]['payload']>;
+	ONTOLOGY_KV: KVNamespace;
+	TRANSCRIPTS_BUCKET: R2Bucket;
+	DB: D1Database;
+	REQUEST_METRICS: AnalyticsEngineDataset;
+	CF_VERSION_METADATA: WorkerVersionMetadata;
+	ENERGY_INTEL_SEARCH: AiSearchNamespace;
+	PUBLIC_BSKY_API: "https://public.api.bsky.app";
+	INGEST_SHARD_COUNT: "1";
+	DEFAULT_DOMAIN: "energy";
+	MCP_LIMIT_DEFAULT: "20";
+	MCP_LIMIT_MAX: "100";
+	ENABLE_STAGING_OPS: "true";
+	GEMINI_VISION_MODEL: "gemini-3-flash-preview";
+	EXPERT_POLL_COORDINATOR: DurableObjectNamespace<import("./src/worker/filter").ExpertPollCoordinatorDo>;
+	INGEST_RUN_WORKFLOW: Workflow<Parameters<import("./src/worker/filter").IngestRunWorkflow['run']>[0]['payload']>;
+	ENRICHMENT_RUN_WORKFLOW: Workflow<Parameters<import("./src/worker/filter").EnrichmentRunWorkflow['run']>[0]['payload']>;
   }
 
   interface IngestEnv {
-  	ONTOLOGY_KV: KVNamespace;
-  	TRANSCRIPTS_BUCKET: R2Bucket;
-  	DB: D1Database;
-  	ENERGY_INTEL_SEARCH: AiSearchNamespace;
-  	PUBLIC_BSKY_API: "https://public.api.bsky.app";
-  	INGEST_SHARD_COUNT: "1";
-  	DEFAULT_DOMAIN: "energy";
-  	MCP_LIMIT_DEFAULT: "20";
-  	MCP_LIMIT_MAX: "100";
-  	ENABLE_STAGING_OPS?: "true";
-  	ENABLE_DATA_REF_RESOLUTION?: "true";
-  	GEMINI_VISION_MODEL: "gemini-3-flash-preview" | "gemini-2.5-flash";
-  	EXPERT_POLL_COORDINATOR: DurableObjectNamespace<import("./src/worker/filter").ExpertPollCoordinatorDo>;
-  	RESOLVER: Service<typeof import("./src/resolver-worker/index").ResolverEntrypoint>;
-  	INGEST_RUN_WORKFLOW: Workflow<Parameters<import("./src/worker/filter").IngestRunWorkflow['run']>[0]['payload']>;
-  	ENRICHMENT_RUN_WORKFLOW: Workflow<Parameters<import("./src/worker/filter").EnrichmentRunWorkflow['run']>[0]['payload']>;
+	ONTOLOGY_KV: KVNamespace;
+	TRANSCRIPTS_BUCKET: R2Bucket;
+	DB: D1Database;
+	REQUEST_METRICS: AnalyticsEngineDataset;
+	CF_VERSION_METADATA: WorkerVersionMetadata;
+	ENERGY_INTEL_SEARCH: AiSearchNamespace;
+	PUBLIC_BSKY_API: "https://public.api.bsky.app";
+	INGEST_SHARD_COUNT: "1";
+	DEFAULT_DOMAIN: "energy";
+	MCP_LIMIT_DEFAULT: "20";
+	MCP_LIMIT_MAX: "100";
+	ENABLE_STAGING_OPS?: "true";
+	GEMINI_VISION_MODEL: "gemini-3-flash-preview" | "gemini-2.5-flash";
+	EXPERT_POLL_COORDINATOR: DurableObjectNamespace<import("./src/worker/filter").ExpertPollCoordinatorDo>;
+	INGEST_RUN_WORKFLOW: Workflow<Parameters<import("./src/worker/filter").IngestRunWorkflow['run']>[0]['payload']>;
+	ENRICHMENT_RUN_WORKFLOW: Workflow<Parameters<import("./src/worker/filter").EnrichmentRunWorkflow['run']>[0]['payload']>;
   }
 
   interface AgentStagingEnv {
-  	ONTOLOGY_KV: KVNamespace;
-  	TRANSCRIPTS_BUCKET: R2Bucket;
-  	DB: D1Database;
-  	SEARCH_DB: D1Database;
-  	ENERGY_INTEL_SEARCH: AiSearchNamespace;
-  	PUBLIC_BSKY_API: "https://public.api.bsky.app";
-  	INGEST_SHARD_COUNT: "1";
-  	DEFAULT_DOMAIN: "energy";
-  	MCP_LIMIT_DEFAULT: "20";
-  	MCP_LIMIT_MAX: "100";
-  	ENABLE_STAGING_OPS: "true";
-  	INGEST_SERVICE: Service<typeof import("./src/worker/filter").EnrichmentEntrypoint>;
-  	RESOLVER: Service<typeof import("./src/resolver-worker/index").ResolverEntrypoint>;
+	ONTOLOGY_KV: KVNamespace;
+	TRANSCRIPTS_BUCKET: R2Bucket;
+	DB: D1Database;
+	SEARCH_DB: D1Database;
+	REQUEST_METRICS: AnalyticsEngineDataset;
+	CF_VERSION_METADATA: WorkerVersionMetadata;
+	ENERGY_INTEL_SEARCH: AiSearchNamespace;
+	PUBLIC_BSKY_API: "https://public.api.bsky.app";
+	INGEST_SHARD_COUNT: "1";
+	DEFAULT_DOMAIN: "energy";
+	MCP_LIMIT_DEFAULT: "20";
+	MCP_LIMIT_MAX: "100";
+	ENABLE_STAGING_OPS: "true";
+	INGEST_SERVICE: Service<typeof import("./src/worker/filter").EnrichmentEntrypoint>;
   }
 
   interface AgentEnv {
-  	ONTOLOGY_KV: KVNamespace;
-  	TRANSCRIPTS_BUCKET: R2Bucket;
-  	DB: D1Database;
-  	SEARCH_DB?: D1Database;
-  	ENERGY_INTEL_SEARCH: AiSearchNamespace;
-  	PUBLIC_BSKY_API: "https://public.api.bsky.app";
-  	INGEST_SHARD_COUNT: "1";
-  	DEFAULT_DOMAIN: "energy";
-  	MCP_LIMIT_DEFAULT: "20";
-  	MCP_LIMIT_MAX: "100";
-  	ENABLE_STAGING_OPS?: "true";
-  	INGEST_SERVICE: Service<typeof import("./src/worker/filter").EnrichmentEntrypoint>;
-  	RESOLVER: Service<typeof import("./src/resolver-worker/index").ResolverEntrypoint>;
-  }
-
-  interface ResolverStagingEnv {
-  	DB: D1Database;
-  	SEARCH_DB: D1Database;
-  }
-
-  interface ResolverEnv {
-  	DB: D1Database;
-  	SEARCH_DB?: D1Database;
+	ONTOLOGY_KV: KVNamespace;
+	TRANSCRIPTS_BUCKET: R2Bucket;
+	DB: D1Database;
+	SEARCH_DB?: D1Database;
+	REQUEST_METRICS: AnalyticsEngineDataset;
+	CF_VERSION_METADATA: WorkerVersionMetadata;
+	ENERGY_INTEL_SEARCH: AiSearchNamespace;
+	PUBLIC_BSKY_API: "https://public.api.bsky.app";
+	INGEST_SHARD_COUNT: "1";
+	DEFAULT_DOMAIN: "energy";
+	MCP_LIMIT_DEFAULT: "20";
+	MCP_LIMIT_MAX: "100";
+	ENABLE_STAGING_OPS?: "true";
+	INGEST_SERVICE: Service<typeof import("./src/worker/filter").EnrichmentEntrypoint>;
   }
 
 }

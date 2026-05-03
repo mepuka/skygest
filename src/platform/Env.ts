@@ -4,7 +4,6 @@ import type {
 } from "../../packages/ontology-store/src/Service/AiSearchClient";
 import type { EnrichmentRunParams } from "../domain/enrichmentRun";
 import type { IngestRunParams } from "../domain/polling";
-import type { ResolverBinding } from "../resolver/Client";
 import type { EnrichmentTriggerBinding } from "../services/EnrichmentTriggerClient";
 
 export class EnvError extends Schema.TaggedErrorClass<EnvError>()("EnvError", {
@@ -25,13 +24,14 @@ interface SharedRuntimeEnv {
   readonly ENERGY_INTEL_SEARCH?: AiSearchNamespaceBinding;
   readonly ONTOLOGY_KV?: KVNamespace;
   readonly TRANSCRIPTS_BUCKET?: R2Bucket;
+  readonly REQUEST_METRICS?: AnalyticsEngineDataset;
+  readonly CF_VERSION_METADATA?: WorkerVersionMetadata;
   readonly PUBLIC_BSKY_API?: string;
   readonly INGEST_SHARD_COUNT?: string;
   readonly DEFAULT_DOMAIN?: string;
   readonly MCP_LIMIT_DEFAULT?: string;
   readonly MCP_LIMIT_MAX?: string;
   readonly ENABLE_STAGING_OPS?: "true";
-  readonly ENABLE_DATA_REF_RESOLUTION?: "true";
   readonly GEMINI_VISION_MODEL?: string;
 }
 
@@ -44,7 +44,6 @@ export type EnvBindings = Simplify<
   SharedRuntimeEnv &
     AppConfigEnv & {
       readonly INGEST_SERVICE?: IngestServiceBinding;
-      readonly RESOLVER?: ResolverBinding;
       readonly INGEST_RUN_WORKFLOW?: IngestWorkflowBinding;
       readonly ENRICHMENT_RUN_WORKFLOW?: EnrichmentWorkflowBinding;
       readonly EXPERT_POLL_COORDINATOR?: ExpertPollCoordinatorNamespace;
@@ -71,9 +70,6 @@ export type WorkflowEnrichmentEnvBindings =
       readonly ENRICHMENT_RUN_WORKFLOW: EnrichmentWorkflowBinding;
     }
   >;
-
-export type ResolverWorkerEnvBindings =
-  EnvBindings;
 
 export type SearchRuntimeEnvBindings =
   Simplify<

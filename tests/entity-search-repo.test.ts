@@ -250,4 +250,28 @@ describe("entity search repo", () => {
       expect(lexicalHits).toHaveLength(0);
     }).pipe(Effect.provide(makeEntitySearchRepoLayer()))
   );
+
+  it.effect("hydrates multiple entity IDs in one repo call", () =>
+    Effect.gen(function* () {
+      yield* runEntitySearchMigrations;
+      const repo = yield* EntitySearchRepo;
+      const docs = makeProjectedDocs();
+      const datasetDoc = docs.find((doc) => doc.entityType === "Dataset");
+      const distributionDoc = docs.find((doc) => doc.entityType === "Distribution");
+
+      expect(datasetDoc).toBeDefined();
+      expect(distributionDoc).toBeDefined();
+
+      yield* repo.replaceAllDocuments(docs);
+
+      const hydrated = yield* repo.getManyByEntityId([
+        datasetDoc!.entityId,
+        distributionDoc!.entityId
+      ]);
+
+      expect(new Set(hydrated.map((doc) => doc.entityId))).toEqual(
+        new Set([datasetDoc!.entityId, distributionDoc!.entityId])
+      );
+    }).pipe(Effect.provide(makeEntitySearchRepoLayer()))
+  );
 });

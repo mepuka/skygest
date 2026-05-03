@@ -1,12 +1,10 @@
 import { SqlClient } from "effect/unstable/sql";
-import { Effect, Layer, Schema } from "effect";
+import { Effect, Layer } from "effect";
 import { TestClock } from "effect/testing";
 import { describe, expect, it } from "@effect/vitest";
 import {
   CandidatePayloadNotPickedError
 } from "../src/domain/candidatePayload";
-import { DataRefResolutionEnrichment } from "../src/domain/enrichment";
-import { chartAssetIdFromBluesky } from "../src/domain/data-layer/post-ids";
 import { runMigrations } from "../src/db/migrate";
 import { CandidatePayloadService } from "../src/services/CandidatePayloadService";
 import { CandidatePayloadRepo } from "../src/services/CandidatePayloadRepo";
@@ -21,88 +19,6 @@ import {
 import type { PostUri } from "../src/domain/types";
 
 const solarUri = `at://${sampleDid}/app.bsky.feed.post/post-solar` as PostUri;
-const decodeDataRefResolutionEnrichment = Schema.decodeUnknownSync(
-  DataRefResolutionEnrichment
-);
-const dataRefAgentId = "https://id.skygest.io/agent/ag_TESTDATAREF01";
-const dataRefDatasetId = "https://id.skygest.io/dataset/ds_TESTDATAREF01";
-
-const makeDataRefResolutionPayload = (options?: {
-  readonly includeDatasetMatch?: boolean;
-  readonly includeResolutionAgent?: boolean;
-  readonly includeResolutionDataset?: boolean;
-  readonly agentId?: string;
-}) =>
-  decodeDataRefResolutionEnrichment({
-    kind: "data-ref-resolution",
-    stage1: {
-      matches:
-        options?.includeDatasetMatch === false
-          ? []
-          : [
-              {
-                _tag: "DatasetMatch",
-                datasetId: dataRefDatasetId,
-                title: "Average retail electricity price",
-                bestRank: 1,
-                evidence: [
-                  {
-                    _tag: "DatasetTitleEvidence",
-                    signal: "dataset-title",
-                    rank: 1,
-                    datasetName: "Average retail electricity price",
-                    normalizedTitle: "average retail electricity price"
-                  }
-                ]
-              }
-            ],
-      residuals: []
-    },
-    resolution: [
-      {
-        assetKey: chartAssetIdFromBluesky(solarUri, "bafkreicandidatepayload"),
-        resolution: {
-          agents:
-            options?.includeResolutionAgent === false
-              ? []
-              : [
-                  {
-                    entityId: options?.agentId ?? dataRefAgentId,
-                    signal: {
-                      kind: "source-attribution-provider-label",
-                      field: "sourceAttribution.provider.providerLabel",
-                      value: "Example Provider"
-                    },
-                    score: null,
-                    scoped: false,
-                    matchKind: "exact-hostname"
-                  }
-                ],
-          datasets:
-            options?.includeResolutionDataset === false
-              ? []
-              : [
-                  {
-                    entityId: dataRefDatasetId,
-                    signal: {
-                      kind: "source-line-dataset-name",
-                      field: "asset.analysis.sourceLines[].datasetName",
-                      value: "Average retail electricity price"
-                    },
-                    score: 0.97,
-                    scoped: true,
-                    matchKind: "lexical"
-                  }
-                ],
-          series: [],
-          variables: [],
-          trail: []
-        }
-      }
-    ],
-    resolverVersion: "test-resolver-v1",
-    processedAt: 60
-  });
 
 const makeLayer = () => {
   const baseLayer = makeBiLayer();
@@ -111,46 +27,6 @@ const makeLayer = () => {
 
   return Layer.mergeAll(baseLayer, repoLayer, serviceLayer);
 };
-
-describe("DataRefResolutionEnrichment schema", () => {
-  it("decodes both new resolution rows and legacy kernel rows", () => {
-    const modern = decodeDataRefResolutionEnrichment({
-      kind: "data-ref-resolution",
-      stage1: {
-        matches: [],
-        residuals: []
-      },
-      resolution: [],
-      resolverVersion: "bundle-resolution@sky-367",
-      processedAt: 1
-    });
-    const legacy = decodeDataRefResolutionEnrichment({
-      kind: "data-ref-resolution",
-      stage1: {
-        matches: [],
-        residuals: []
-      },
-      kernel: [{ _tag: "NoMatch" }],
-      resolverVersion: "resolution-kernel@sky-314",
-      processedAt: 1
-    });
-
-    expect("resolution" in modern).toBe(true);
-    expect("kernel" in legacy).toBe(true);
-  });
-
-  it("encodes new writes using the resolution field only", () => {
-    const encodeDataRefResolutionEnrichment = Schema.encodeSync(
-      DataRefResolutionEnrichment
-    );
-    const encoded = encodeDataRefResolutionEnrichment(
-      makeDataRefResolutionPayload()
-    );
-
-    expect("resolution" in encoded).toBe(true);
-    expect("kernel" in encoded).toBe(false);
-  });
-});
 
 describe("payload storage migrations", () => {
   it.live("creates post_payloads and post_enrichments with the expected primary keys", () =>
@@ -432,162 +308,6 @@ describe("CandidatePayloadRepoD1", () => {
     }).pipe(Effect.provide(makeLayer()))
   );
 
-  it.effect("saveEnrichment persists data-ref candidate citations for resolver output", () =>
-    Effect.gen(function* () {
-      yield* seedKnowledgeBase();
-      const repo = yield* CandidatePayloadRepo;
-      const sql = yield* SqlClient.SqlClient;
-
-      yield* repo.upsertCapture({
-        postUri: solarUri,
-        captureStage: "candidate",
-        embedType: "img",
-        embedPayload: {
-          kind: "img",
-          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null, mediaId: null }]
-        },
-        enrichments: [],
-        capturedAt: 10,
-        updatedAt: 10,
-        enrichedAt: null
-      });
-      yield* repo.markPicked(solarUri, 20);
-
-      yield* repo.saveEnrichment(
-        {
-          postUri: solarUri,
-          enrichmentType: "data-ref-resolution",
-          enrichmentPayload: makeDataRefResolutionPayload()
-        },
-        60,
-        60
-      );
-
-      const rows = yield* sql<{
-        entityId: string;
-        citationSource: string;
-        citationKey: string;
-        resolutionState: string;
-        assertedUnit: string | null;
-        observationStart: string | null;
-        observationEnd: string | null;
-        observationSortKey: string;
-        hasObservationTime: number;
-      }>`
-        SELECT
-          entity_id as entityId,
-          citation_source as citationSource,
-          citation_key as citationKey,
-          resolution_state as resolutionState,
-          asserted_unit as assertedUnit,
-          observation_start as observationStart,
-          observation_end as observationEnd,
-          observation_sort_key as observationSortKey,
-          has_observation_time as hasObservationTime
-        FROM data_ref_candidate_citations
-        WHERE source_post_uri = ${solarUri}
-        ORDER BY entity_id ASC
-      `;
-
-      expect(rows).toEqual([
-        {
-          entityId: dataRefAgentId,
-          citationSource: "resolution",
-          citationKey:
-            `resolution\u0000resolved\u0000${dataRefAgentId}\u0000\u0000\u0000`,
-          resolutionState: "resolved",
-          assertedUnit: null,
-          observationStart: null,
-          observationEnd: null,
-          observationSortKey: "",
-          hasObservationTime: 0
-        },
-        {
-          entityId: dataRefDatasetId,
-          citationSource: "resolution",
-          citationKey:
-            `resolution\u0000resolved\u0000${dataRefDatasetId}\u0000\u0000\u0000`,
-          resolutionState: "resolved",
-          assertedUnit: null,
-          observationStart: null,
-          observationEnd: null,
-          observationSortKey: "",
-          hasObservationTime: 0
-        }
-      ]);
-    }).pipe(Effect.provide(makeLayer()))
-  );
-
-  it.effect("saveEnrichment rewrites data-ref citation rows without leaving stale entries behind", () =>
-    Effect.gen(function* () {
-      yield* seedKnowledgeBase();
-      const repo = yield* CandidatePayloadRepo;
-      const sql = yield* SqlClient.SqlClient;
-
-      yield* repo.upsertCapture({
-        postUri: solarUri,
-        captureStage: "candidate",
-        embedType: "img",
-        embedPayload: {
-          kind: "img",
-          images: [{ thumb: "thumb-a", fullsize: "full-a", alt: null, mediaId: null }]
-        },
-        enrichments: [],
-        capturedAt: 10,
-        updatedAt: 10,
-        enrichedAt: null
-      });
-      yield* repo.markPicked(solarUri, 20);
-
-      yield* repo.saveEnrichment(
-        {
-          postUri: solarUri,
-          enrichmentType: "data-ref-resolution",
-          enrichmentPayload: makeDataRefResolutionPayload()
-        },
-        60,
-        60
-      );
-
-      yield* repo.saveEnrichment(
-        {
-          postUri: solarUri,
-          enrichmentType: "data-ref-resolution",
-          enrichmentPayload: makeDataRefResolutionPayload({
-            includeDatasetMatch: false,
-            includeResolutionDataset: false
-          })
-        },
-        70,
-        70
-      );
-
-      const rows = yield* sql<{
-        entityId: string;
-        citationSource: string;
-        assertedUnit: string | null;
-        observationSortKey: string;
-      }>`
-        SELECT
-          entity_id as entityId,
-          citation_source as citationSource,
-          asserted_unit as assertedUnit,
-          observation_sort_key as observationSortKey
-        FROM data_ref_candidate_citations
-        WHERE source_post_uri = ${solarUri}
-        ORDER BY entity_id ASC
-      `;
-
-      expect(rows).toEqual([
-        {
-          entityId: dataRefAgentId,
-          citationSource: "resolution",
-          assertedUnit: null,
-          observationSortKey: ""
-        }
-      ]);
-    }).pipe(Effect.provide(makeLayer()))
-  );
 });
 
 describe("CandidatePayloadService", () => {

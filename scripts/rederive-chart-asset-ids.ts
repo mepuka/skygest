@@ -43,8 +43,7 @@ const encodeEnrichmentOutput = encodeJsonStringWith(EnrichmentOutput);
 
 const TargetEnrichmentType = Schema.Literals([
   "vision",
-  "source-attribution",
-  "data-ref-resolution"
+  "source-attribution"
 ]);
 type TargetEnrichmentType = Schema.Schema.Type<typeof TargetEnrichmentType>;
 
@@ -173,7 +172,7 @@ const loadRepairRows = (
       enrichment_type as enrichmentType,
       enrichment_payload_json as enrichmentPayloadJson
     FROM post_enrichments
-    WHERE enrichment_type IN ('vision', 'source-attribution', 'data-ref-resolution')
+    WHERE enrichment_type IN ('vision', 'source-attribution')
       AND (post_uri LIKE 'at://%' OR post_uri LIKE 'x://%')
       AND (${options.postUri} IS NULL OR post_uri = ${options.postUri})
     ORDER BY post_uri ASC, enrichment_type ASC

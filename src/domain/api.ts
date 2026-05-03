@@ -52,6 +52,10 @@ import {
   WorkflowEnrichmentKind
 } from "./enrichment";
 import {
+  SearchEntitiesInput,
+  SearchEntitiesResult
+} from "./entitySearch";
+import {
   EditorialPickBundle,
   EditorialScore,
   SubmitEditorialPickInput,
@@ -1216,6 +1220,7 @@ export const AdminRequestSchemas = {
   listEditorialPicks: ListEditorialPicksUrlParams,
   editorialPickBundlePath: PostUriEnrichmentsPath,
   importPosts: ImportPostsInput,
+  searchEntities: SearchEntitiesInput,
   dataLayerCreateInput: DataLayerCreateInput,
   dataLayerReplaceInput: DataLayerReplaceInput,
   dataLayerList: ListDataLayerUrlParams,
@@ -1244,6 +1249,7 @@ export const AdminResponseSchemas = {
   listEditorialPicks: EditorialPicksOutput,
   editorialPickBundle: EditorialPickBundle,
   importPosts: ImportPostsOutput,
+  searchEntities: SearchEntitiesResult,
   stats: StagingStats,
   entityExpertsBackfill: EntityExpertsBackfillOutput,
   entityPostsBackfill: EntityPostsBackfillOutput,
