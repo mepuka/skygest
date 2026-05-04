@@ -4,7 +4,7 @@ import {
   type OntologySearchResult,
   type OntologySearchResultDecodeError
 } from "@skygest/ontology-store";
-import { Clock, Effect, Layer, Result, Schema, ServiceMap } from "effect";
+import { Clock, Duration, Effect, Layer, Result, Schema, ServiceMap } from "effect";
 import {
   OntologyEntityIri,
   OntologyEntityType,
@@ -97,6 +97,13 @@ export class SearchEntitiesService extends ServiceMap.Service<
     >;
   }
 >()("@skygest/SearchEntitiesService") {
+  static readonly noopLayer = Layer.succeed(
+    SearchEntitiesService,
+    SearchEntitiesService.of({
+      searchEntities: () => Effect.succeed({ hits: [] })
+    })
+  );
+
   static readonly layer = Layer.effect(
     SearchEntitiesService,
     Effect.gen(function* () {
@@ -122,29 +129,29 @@ export class SearchEntitiesService extends ServiceMap.Service<
         startedAt: number
       ) =>
         Effect.gen(function* () {
-          const hydrationStartedAt = yield* Clock.currentTimeMillis;
-          const hydrated = yield* hydrator.hydrate(
-            entityTypes === undefined
-              ? {
-                  iri,
-                  rank: 1,
-                  score: 1,
-                  matchReason: "exact-iri"
-                }
-              : {
-                  iri,
-                  rank: 1,
-                  score: 1,
-                  matchReason: "exact-iri",
-                  candidateEntityTypes: entityTypes
-                }
+          const [hydrationDuration, hydrated] = yield* Effect.timed(
+            hydrator.hydrate(
+              entityTypes === undefined
+                ? {
+                    iri,
+                    rank: 1,
+                    score: 1,
+                    matchReason: "exact-iri"
+                  }
+                : {
+                    iri,
+                    rank: 1,
+                    score: 1,
+                    matchReason: "exact-iri",
+                    candidateEntityTypes: entityTypes
+                  }
+            )
           );
-          const hydrationFinishedAt = yield* Clock.currentTimeMillis;
           const hits = successfulHits([hydrated]);
           const finishedAt = yield* Clock.currentTimeMillis;
           yield* recordMetric({
             ...metricBase(finishedAt - startedAt, "ok"),
-            hydrationLatencyMs: hydrationFinishedAt - hydrationStartedAt,
+            hydrationLatencyMs: Duration.toMillis(hydrationDuration),
             exactIriHitCount: hits.length,
             hydrationMissTotal: hydrated._tag === "Miss" ? 1 : 0,
             hitCount: hits.length
@@ -155,54 +162,54 @@ export class SearchEntitiesService extends ServiceMap.Service<
       const searchQuery = (input: SearchEntitiesInput, startedAt: number) =>
         Effect.gen(function* () {
           const limit = input.limit ?? DEFAULT_SEARCH_LIMIT;
-          const aiSearchStartedAt = yield* Clock.currentTimeMillis;
-          const indexHits = yield* index.search(
-            input.entityTypes === undefined
-              ? {
-                  query: String(input.query),
-                  maxResults: limit,
-                  retrievalType: "hybrid"
-                }
-              : {
-                  query: String(input.query),
-                  maxResults: limit,
-                  retrievalType: "hybrid",
-                  filters: {
-                    entity_type: input.entityTypes.map((entityType) =>
-                      String(entityType)
-                    )
+          const [aiSearchDuration, indexHits] = yield* Effect.timed(
+            index.search(
+              input.entityTypes === undefined
+                ? {
+                    query: String(input.query),
+                    maxResults: limit,
+                    retrievalType: "hybrid"
                   }
-                }
+                : {
+                    query: String(input.query),
+                    maxResults: limit,
+                    retrievalType: "hybrid",
+                    filters: {
+                      entity_type: input.entityTypes.map((entityType) =>
+                        String(entityType)
+                      )
+                    }
+                  }
+            )
           );
-          const aiSearchFinishedAt = yield* Clock.currentTimeMillis;
           const deduped = dedupeByIri(indexHits);
           const candidates = deduped.flatMap((hit) => {
             const candidate = toHydrationCandidate(hit);
             return candidate === null ? [] : [candidate];
           });
 
-          const hydrationStartedAt = yield* Clock.currentTimeMillis;
-          const hydrated = yield* Effect.forEach(
-            candidates,
-            (candidate, index) =>
-              hydrator.hydrate({
-                entityType: candidate.entityType,
-                iri: candidate.iri,
-                rank: index + 1,
-                score: candidate.hit.score,
-                matchReason: "match",
-                evidenceText: candidate.hit.text
-              }),
-            { concurrency: 8 }
+          const [hydrationDuration, hydrated] = yield* Effect.timed(
+            Effect.forEach(
+              candidates,
+              (candidate, index) =>
+                hydrator.hydrate({
+                  entityType: candidate.entityType,
+                  iri: candidate.iri,
+                  rank: index + 1,
+                  score: candidate.hit.score,
+                  matchReason: "match",
+                  evidenceText: candidate.hit.text
+                }),
+              { concurrency: 8 }
+            )
           );
-          const hydrationFinishedAt = yield* Clock.currentTimeMillis;
           const hits = successfulHits(hydrated);
           const hydrationMissTotal = hydrated.length - hits.length;
           const finishedAt = yield* Clock.currentTimeMillis;
           yield* recordMetric({
             ...metricBase(finishedAt - startedAt, "ok"),
-            aiSearchLatencyMs: aiSearchFinishedAt - aiSearchStartedAt,
-            hydrationLatencyMs: hydrationFinishedAt - hydrationStartedAt,
+            aiSearchLatencyMs: Duration.toMillis(aiSearchDuration),
+            hydrationLatencyMs: Duration.toMillis(hydrationDuration),
             hydrationMissTotal,
             droppedAiHitTotal: indexHits.length - hits.length,
             hitCount: hits.length
