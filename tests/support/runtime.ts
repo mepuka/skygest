@@ -24,6 +24,7 @@ import { PostImportService } from "../../src/services/PostImportService";
 import { PostHydrationService } from "../../src/services/PostHydrationService";
 import { KnowledgeQueryService } from "../../src/services/KnowledgeQueryService";
 import { CurationService } from "../../src/services/CurationService";
+import { SearchEntitiesService } from "../../src/services/SearchEntitiesService";
 import { CandidatePayloadRepoD1 } from "../../src/services/d1/CandidatePayloadRepoD1";
 import { DataLayerReposD1 } from "../../src/services/d1/DataLayerReposD1";
 import { PostEnrichmentReadService } from "../../src/services/PostEnrichmentReadService";
@@ -242,7 +243,8 @@ export const makeBiLayer = (options?: {
     enrichmentReadServiceLayer,
     pipelineStatusServiceLayer,
     postImportServiceLayer,
-    registryLayer
+    registryLayer,
+    SearchEntitiesService.noopLayer
   );
 };
 

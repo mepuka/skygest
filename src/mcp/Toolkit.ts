@@ -801,7 +801,7 @@ const makeExpertWriteHandlers = (
 
 const makeReadOnlyHandlers = (
   queryService: KnowledgeQueryServiceI,
-  searchEntitiesServiceOption: Option.Option<SearchEntitiesServiceI>,
+  searchEntitiesService: SearchEntitiesServiceI,
   editorialService: EditorialServiceI,
   curationService: CurationServiceI,
   bskyClient: BlueskyClientI,
@@ -817,23 +817,11 @@ const makeReadOnlyHandlers = (
       Effect.mapError(toQueryError("search_posts"))
     ),
   search_entities: (input: typeof SearchEntitiesInput.Type) =>
-    Effect.gen(function* () {
-      if (Option.isNone(searchEntitiesServiceOption)) {
-        return yield* Effect.fail(
-          new McpToolQueryError({
-            tool: "search_entities",
-            message: "Entity search is not available in this runtime.",
-            error: new Error("SearchEntitiesService not available")
-          })
-        );
-      }
-
-      const result = yield* searchEntitiesServiceOption.value.searchEntities(input);
-      return {
+    searchEntitiesService.searchEntities(input).pipe(
+      Effect.map((result) => ({
         ...result,
         _display: formatSearchEntities(result)
-      };
-    }).pipe(
+      })),
       Effect.mapError(toQueryError("search_entities"))
     ),
   get_recent_posts: (input: typeof GetRecentPostsMcpInput.Type) =>
@@ -1414,7 +1402,7 @@ const makeCapabilityHandlers = <
   toolkit.toLayer(
     Effect.gen(function* () {
       const queryService = yield* KnowledgeQueryService;
-      const searchEntitiesServiceOption = yield* Effect.serviceOption(SearchEntitiesService);
+      const searchEntitiesService = yield* SearchEntitiesService;
       const editorialService = yield* EditorialService;
       const curationService = yield* CurationService;
       const expertRegistryService = yield* ExpertRegistryService;
@@ -1427,7 +1415,7 @@ const makeCapabilityHandlers = <
       return toolkit.of({
         ...makeReadOnlyHandlers(
           queryService,
-          searchEntitiesServiceOption,
+          searchEntitiesService,
           editorialService,
           curationService,
           bskyClient,
