@@ -26,11 +26,14 @@ const forbiddenPatterns = [
   "entitySearchSqlLayer",
   "WranglerD1",
   "SearchDbScriptKeys",
+  "SearchDbScriptError",
   "SEARCH_SOURCE_DB_NAME",
   "SEARCH_TARGET_DB_NAME",
   "migrate-search-db",
   "rebuild-search-db",
   "rebuild-entity-search-index",
+  "EntityTypeNotEnabledError",
+  "searchSignals",
   "src/search"
 ] as const;
 
