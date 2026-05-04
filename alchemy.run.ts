@@ -38,7 +38,6 @@ await Effect.runPromise(assertNoMetadataDrift(ENTITY_PROJECTION_FIXTURES));
 type DeploymentConfig = {
   readonly workerSuffix: string;
   readonly databaseName: string;
-  readonly searchDatabaseName?: string;
   readonly transcriptsBucketName: string;
   readonly requestMetricsDatasetName: string;
   readonly ingestWorkerName: string;
@@ -60,7 +59,6 @@ const baseVars = {
 const stagingConfig: DeploymentConfig = {
   workerSuffix: "-staging",
   databaseName: "skygest-staging",
-  searchDatabaseName: "skygest-search-staging",
   transcriptsBucketName: "skygest-transcripts-staging",
   requestMetricsDatasetName: "skygest_request_metrics_staging",
   ingestWorkerName: "skygest-bi-ingest-staging",
@@ -145,17 +143,6 @@ const [db, ontologyKv, transcriptsBucket, energyIntelSearch] =
     })
   ]);
 
-const searchDb =
-  config.searchDatabaseName === undefined
-    ? undefined
-    : await D1Database("search-db", {
-        ...apiOptions,
-        name: config.searchDatabaseName,
-        adopt: true,
-        delete: false,
-        dev: { remote: true }
-      });
-
 const ENTITY_SEARCH_RESOURCE_ID = "entity-search";
 
 export const entitySearch = await AiSearch(ENTITY_SEARCH_RESOURCE_ID, {
@@ -178,7 +165,6 @@ await ensureAiSearchCustomMetadata({
   customMetadata: entitySearchProvisioning.customMetadata
 });
 
-const searchDbBinding = searchDb === undefined ? {} : { SEARCH_DB: searchDb };
 const requestMetrics = AnalyticsEngineDataset("request-metrics", {
   dataset: config.requestMetricsDatasetName
 });
@@ -239,7 +225,6 @@ export const agentWorker = await Worker("agent", {
   },
   bindings: {
     DB: db,
-    ...searchDbBinding,
     ONTOLOGY_KV: ontologyKv,
     TRANSCRIPTS_BUCKET: transcriptsBucket,
     INGEST_SERVICE: ingestWorker,

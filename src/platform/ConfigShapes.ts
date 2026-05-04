@@ -239,16 +239,3 @@ export const D1SnapshotKeys = {
     24
   )
 } as const;
-
-// ── Search DB script keys ───────────────────────────────────────────────
-
-export const SearchDbScriptKeys = {
-  sourceDbName: Config.withDefault(
-    Config.string("SEARCH_SOURCE_DB_NAME"),
-    "skygest-staging"
-  ),
-  searchDbName: Config.withDefault(
-    Config.string("SEARCH_TARGET_DB_NAME"),
-    "skygest-search-staging"
-  )
-} as const;

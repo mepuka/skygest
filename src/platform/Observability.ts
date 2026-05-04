@@ -6,14 +6,9 @@ export type SearchEntitiesMetricInput = {
   readonly durationMs: number;
   readonly aiSearchLatencyMs: number;
   readonly hydrationLatencyMs: number;
-  readonly exactProbeHitCounts: {
-    readonly iri: number;
-    readonly url: number;
-    readonly hostname: number;
-    readonly alias: number;
-  };
+  readonly exactIriHitCount: number;
   readonly hydrationMissTotal: number;
-  readonly failClosedTotal: number;
+  readonly droppedAiHitTotal: number;
   readonly hitCount: number;
   readonly status: "ok" | "error";
   readonly errorType?: string;
@@ -53,35 +48,35 @@ export class RequestMetrics extends ServiceMap.Service<
               "search_entities",
               input.status,
               input.errorType ?? "",
-              "v1",
-              "entity-search",
+              "v2",
+              "ontology-runtime",
               version.tag
             ],
             doubles: [
               input.durationMs,
               input.aiSearchLatencyMs,
               input.hydrationLatencyMs,
-              input.exactProbeHitCounts.iri,
-              input.exactProbeHitCounts.url,
-              input.exactProbeHitCounts.hostname,
-              input.exactProbeHitCounts.alias,
+              input.exactIriHitCount,
               input.hydrationMissTotal,
-              input.failClosedTotal,
+              input.droppedAiHitTotal,
               input.hitCount
             ]
           });
         }).pipe(
           Effect.tap(() =>
             Logging.logSummary("search_entities completed", {
-              searchContractVersion: "v1",
-              projectionCatalogVersion: "entity-search",
+              searchContractVersion: "v2",
+              projectionCatalogVersion: "ontology-runtime",
               aiSearchInstance: "entity-search",
               workerVersion: workerVersion(env.CF_VERSION_METADATA).tag,
               status: input.status,
               hitCount: input.hitCount,
               durationMs: input.durationMs,
+              aiSearchLatencyMs: input.aiSearchLatencyMs,
+              hydrationLatencyMs: input.hydrationLatencyMs,
+              exactIriHitCount: input.exactIriHitCount,
               hydrationMissTotal: input.hydrationMissTotal,
-              failClosedTotal: input.failClosedTotal
+              droppedAiHitTotal: input.droppedAiHitTotal
             })
           )
         );

@@ -3,16 +3,18 @@ import * as HttpApiBuilder from "effect/unstable/httpapi/HttpApiBuilder";
 import * as HttpApiEndpoint from "effect/unstable/httpapi/HttpApiEndpoint";
 import * as HttpApiGroup from "effect/unstable/httpapi/HttpApiGroup";
 import { SqlClient } from "effect/unstable/sql";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Result, Schema } from "effect";
 import { EntityProjectionDrainService } from "@skygest/ontology-store";
 import type { AccessIdentity } from "../auth/AuthService";
 import {
   AdminRequestSchemas,
   AdminResponseSchemas,
   ApiErrorSchemas,
+  badRequestError,
   conflictError,
   notFoundError
 } from "../domain/api";
+import { SearchEntitiesInput } from "../domain/entitySearch";
 import { CurationService } from "../services/CurationService";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { EntityExpertBackfillService } from "../services/EntityExpertBackfillService";
@@ -23,8 +25,9 @@ import { EditorialService } from "../services/EditorialService";
 import { EditorialPickBundleReadService } from "../services/EditorialPickBundleReadService";
 import { StagingOpsService } from "../services/StagingOpsService";
 import { PostImportService } from "../services/PostImportService";
-import { EntitySearchService } from "../services/EntitySearchService";
+import { SearchEntitiesService } from "../services/SearchEntitiesService";
 import { AppConfig } from "../platform/Config";
+import { formatSchemaParseError } from "../platform/Json";
 import { OperatorIdentity, operatorIdentityContext } from "../http/Identity";
 import { handleWithApiLayer, makeCachedApiHandler } from "../http/ApiSupport";
 import { getStringField, isTaggedError, toUpstreamFailure, withHttpErrorMapping } from "../http/ErrorMapping";
@@ -304,6 +307,19 @@ const withOptionalEntityDrain = <A extends { readonly queued: number }>(
     return { ...result, drain: drainResult };
   });
 
+const decodeSearchEntitiesPayload = (
+  payload: unknown
+): Effect.Effect<SearchEntitiesInput, ReturnType<typeof badRequestError>> => {
+  const decoded = Schema.decodeUnknownResult(SearchEntitiesInput)(payload);
+  return Result.isSuccess(decoded)
+    ? Effect.succeed(decoded.success)
+    : Effect.fail(
+        badRequestError(
+          `invalid search_entities request: ${formatSchemaParseError(decoded.failure)}`
+        )
+      );
+};
+
 // ---------------------------------------------------------------------------
 // Import helpers
 // ---------------------------------------------------------------------------
@@ -551,9 +567,11 @@ const AdminHandlers = Layer.mergeAll(
   ),
   HttpApiBuilder.group(AdminApi, "search", (handlers) =>
     handlers.handle("entities", ({ payload }) =>
-      withAdminErrors("/admin/search/entities", EntitySearchService.use(
-        (search) => search.searchEntities(payload)
-      ))
+      withAdminErrors("/admin/search/entities", Effect.gen(function* () {
+        const input = yield* decodeSearchEntitiesPayload(payload);
+        const search = yield* SearchEntitiesService;
+        return yield* search.searchEntities(input);
+      }))
     )
   )
 );

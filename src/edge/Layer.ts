@@ -8,7 +8,7 @@ import {
   EntityProjectionRegistry,
   ENTITY_PROJECTION_SPECS,
   EntitySnapshotStoreD1,
-  makeAiSearchClient,
+  OntologySearchIndex,
   ReindexQueueD1
 } from "@skygest/ontology-store";
 import { AuthService } from "../auth/AuthService";
@@ -44,7 +44,6 @@ import { PostImportService } from "../services/PostImportService";
 import { StagingOpsService } from "../services/StagingOpsService";
 import { CandidatePayloadRepoD1 } from "../services/d1/CandidatePayloadRepoD1";
 import { DataLayerReposD1 } from "../services/d1/DataLayerReposD1";
-import { EntitySearchRepoD1 } from "../services/d1/EntitySearchRepoD1";
 import { EnrichmentRunsRepoD1 } from "../services/d1/EnrichmentRunsRepoD1";
 import { ExpertSyncStateRepoD1 } from "../services/d1/ExpertSyncStateRepoD1";
 import { EditorialPickBundleReadService } from "../services/EditorialPickBundleReadService";
@@ -61,10 +60,8 @@ import { ProviderRegistry } from "../services/ProviderRegistry";
 import { EnrichmentWorkflowLauncher } from "../enrichment/EnrichmentWorkflowLauncher";
 import { PipelineStatusService } from "../services/PipelineStatusService";
 import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
-import { missingEntitySearchRepoLayer } from "../services/EntitySearchRepo";
-import { EntitySearchService } from "../services/EntitySearchService";
-import { EntitySemanticRecall } from "../services/EntitySemanticRecall";
-import { entitySearchSqlLayer } from "../search/Layer";
+import { OntologyEntityHydrator } from "../services/OntologyEntityHydrator";
+import { SearchEntitiesService } from "../services/SearchEntitiesService";
 import { RequestMetrics } from "../platform/Observability";
 
 const makeBaseLayer = (env: EnvBindings) =>
@@ -152,12 +149,11 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     EntityProjectionRegistry.snapshotLayer(ENTITY_PROJECTION_SPECS).pipe(
       Layer.provideMerge(entitySnapshotStoreLayer)
     );
-  const aiSearchClientLayer = Layer.effect(
-    AiSearchClient,
+  const aiSearchClientLayer = Layer.unwrap(
     CloudflareEnv.use((runtimeEnv) =>
       runtimeEnv.ENERGY_INTEL_SEARCH === undefined
         ? Effect.fail(new EnvError({ missing: "ENERGY_INTEL_SEARCH" }))
-        : Effect.succeed(makeAiSearchClient(runtimeEnv.ENERGY_INTEL_SEARCH))
+        : Effect.succeed(AiSearchClient.layer(runtimeEnv.ENERGY_INTEL_SEARCH))
     )
   ).pipe(Layer.provideMerge(baseLayer));
   const entityProjectionDrainLayer =
@@ -214,22 +210,17 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
   const dataLayerRegistryLayer = d1DataLayerRegistryLayer().pipe(
     Layer.provideMerge(dataLayerReposLayer)
   );
-  const entitySearchRepoLayer = env.SEARCH_DB == null
-    ? missingEntitySearchRepoLayer
-    : EntitySearchRepoD1.layer.pipe(
-        Layer.provideMerge(
-          entitySearchSqlLayer(D1Client.layer({ db: env.SEARCH_DB }))
-        )
-      );
-  const entitySemanticRecallLayer = EntitySemanticRecall.cloudflareLayer.pipe(
-    Layer.provideMerge(baseLayer)
+  const ontologySearchIndexLayer = OntologySearchIndex.layer.pipe(
+    Layer.provideMerge(aiSearchClientLayer)
   );
-  const entitySearchServiceLayer = EntitySearchService.layer.pipe(
+  const ontologyEntityHydratorLayer = OntologyEntityHydrator.layer.pipe(
+    Layer.provideMerge(entityProjectionRegistryLayer)
+  );
+  const searchEntitiesServiceLayer = SearchEntitiesService.layer.pipe(
     Layer.provideMerge(
       Layer.mergeAll(
-        dataLayerRegistryLayer,
-        entitySearchRepoLayer,
-        entitySemanticRecallLayer,
+        ontologySearchIndexLayer,
+        ontologyEntityHydratorLayer,
         metricsLayer
       )
     )
@@ -312,9 +303,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     pipelineStatusServiceLayer,
     postImportServiceLayer,
     registryLayer,
-    entitySearchRepoLayer,
-    entitySemanticRecallLayer,
-    entitySearchServiceLayer,
+    searchEntitiesServiceLayer,
     KnowledgeQueryService.layer.pipe(
       Layer.provideMerge(Layer.mergeAll(queryRepositoriesLayer, configLayer))
     ),
@@ -367,7 +356,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         entityTopicBackfillLayer,
         entityOrganizationBackfillLayer,
         entityProjectionDrainLayer,
-        entitySearchServiceLayer
+        searchEntitiesServiceLayer
       )
     : Layer.mergeAll(
         baseLayer,
@@ -395,7 +384,7 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
         entityTopicBackfillLayer,
         entityOrganizationBackfillLayer,
         entityProjectionDrainLayer,
-        entitySearchServiceLayer,
+        searchEntitiesServiceLayer,
         enrichmentLauncherLayer
       );
 
@@ -420,6 +409,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     entityIngestionWriterLayer,
     entityProjectionRegistryLayer,
     aiSearchClientLayer,
+    ontologySearchIndexLayer,
+    ontologyEntityHydratorLayer,
     entityProjectionDrainLayer,
     entityExpertBackfillLayer,
     entityPostBackfillLayer,
@@ -428,9 +419,8 @@ const buildSharedWorkerParts = (env: EnvBindings) => {
     postImportServiceLayer,
     curationRepoLayer,
     dataLayerReposLayer,
-    entitySearchRepoLayer,
-    entitySemanticRecallLayer,
-    entitySearchServiceLayer,
+    dataLayerRegistryLayer,
+    searchEntitiesServiceLayer,
     curationServiceLayer,
     queryLayer,
     blueskyLayer,

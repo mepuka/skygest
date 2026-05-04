@@ -4,10 +4,10 @@ import { TestClock } from "effect/testing";
 
 import {
   AiSearchClient,
-  EntitySearchService,
   ExpertUnifiedProjection,
   ExpertProjectionFixture,
   makeAiSearchAdapter,
+  OntologySearchIndex,
   type AiSearchInstanceBinding,
   type AiSearchItemInfo,
   type AiSearchNamespaceBinding,
@@ -219,11 +219,11 @@ describe("AiSearchClient", () => {
 
   it.effect("searches the unified instance with typed metadata filters", () => {
     const fake = makeFakeNamespace();
-    const serviceLayer = EntitySearchService.layer.pipe(
+    const serviceLayer = OntologySearchIndex.layer.pipe(
       Layer.provide(AiSearchClient.layer(fake.namespace))
     );
     return Effect.gen(function* () {
-      const search = yield* EntitySearchService;
+      const search = yield* OntologySearchIndex;
 
       const results = yield* search.search({
         query: "hydrogen expert",

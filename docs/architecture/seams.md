@@ -6,8 +6,8 @@ The highest-risk seams are now:
 
 - `search_entities`
 - the branded entity-search domain contract
-- D1 search projection and hydration
-- Cloudflare AI Search recall
+- Cloudflare AI Search recall/ranking
+- D1 ontology snapshot hydration
 - deploy-versioned observability
 - the shared `@skygest/domain` bridge into editorial tooling
 
@@ -21,9 +21,9 @@ The highest-risk seams are now:
 | `EnrichmentWorkflowLauncher` | ingest/admin routes -> `EnrichmentRunWorkflow` | `EnrichmentRunParams` | locked | Starts vision and source-attribution work. |
 | `VisionEnrichmentExecutor` | enrichment workflow -> stored vision row | `VisionEnrichment` | locked | Structured media evidence begins here. |
 | `SourceAttributionExecutor` | enrichment workflow -> stored source row | `SourceAttributionEnrichment` | locked | Publisher/source evidence remains useful to readers and search consumers. |
-| `EntitySearchService.searchEntities` | MCP/admin/API -> entity search | `SearchEntitiesRequest` / `SearchEntitiesResponse` | locked for this cutover | This is the one ontology search surface. |
-| `EntitySemanticRecall` | entity search -> AI Search | `EntitySearchSemanticRecallHit` | stabilizing | Semantic recall is useful, but D1 hydration remains authoritative. |
-| `EntitySearchRepo` | entity search -> D1 search projection | `EntitySearchDocument`, exact probe rows | locked | Exact probes, lexical results, and hydration depend on it. |
+| `SearchEntitiesService.searchEntities` | MCP/admin/API -> entity search | `SearchEntitiesRequest` / `SearchEntitiesResponse` | locked for this cutover | This is the one ontology search surface. |
+| `OntologySearchIndex` | entity search -> AI Search | ontology metadata filters and ranked chunks | locked | Cloudflare owns fuzzy recall and ranking. |
+| `OntologyEntityHydrator` | entity search -> D1 ontology snapshots | branded IRI decode and snapshot load | locked | Returned payloads come from D1, not AI Search chunks. |
 | `RequestMetrics` | search/runtime services -> Analytics Engine | one datapoint per search request | stabilizing | Makes silent search regressions visible. |
 | `DeployVersion` | runtime services -> logs/metrics | Cloudflare ScriptVersion metadata | stabilizing | Ties behavior back to a deploy. |
 | `PostEnrichmentReadService` | MCP/API readers -> joined enrichment view | `GetPostEnrichmentsOutput` | locked | Readers still need vision and source-attribution outputs. |
@@ -35,8 +35,7 @@ The highest-risk seams are now:
 |---|---|---|---|---|
 | `INGEST_SERVICE` | agent Worker -> ingest Worker | backend fetch routes mounted under `/admin` | locked | The agent Worker delegates backend-owned writes here. |
 | `DB` | Workers -> primary D1 | D1 row decoders in `src/services/d1/*` | locked | Primary application storage. |
-| `SEARCH_DB` | agent Worker -> search D1 | entity-search projection tables | locked | Search cannot hydrate without it. |
-| `ENERGY_INTEL_SEARCH` | agent Worker -> Cloudflare AI Search | semantic recall namespace | stabilizing | Adds recall without becoming the source of truth. |
+| `ENERGY_INTEL_SEARCH` | agent Worker -> Cloudflare AI Search | ontology search namespace | locked | Provides query recall and ranking. |
 | `REQUEST_METRICS` | Workers -> Analytics Engine | request/search datapoints | locked | Production search health is visible in Cloudflare. |
 | `CF_VERSION_METADATA` | Workers -> version metadata | deploy version tags | locked | Logs and metrics can be tied to deployments. |
 | `ONTOLOGY_KV` | Workers -> KV | ontology/topic reads | stabilizing | Adjacent read surface; not the search authority. |
@@ -51,8 +50,8 @@ There is no active `RESOLVER` binding after the cutover.
 | `post_enrichments(kind=vision)` | vision -> read services | `VisionEnrichment` | locked | Keeps media extraction durable. |
 | `post_enrichments(kind=source-attribution)` | source attribution -> read services | `SourceAttributionEnrichment` | locked | Keeps publisher/source extraction durable. |
 | `post_enrichments(kind=data-ref-resolution)` | old resolver -> readers | removed from live contract | removed | Old resolved results are not preserved as a runtime surface. |
-| Entity-search projection tables | search rebuild -> search service | search docs, exact probes, hydrated rows | locked | This is the read/search substrate. |
-| Registry tables | sync pipeline -> search hydration, admin reads, editorial cache sync | `src/domain/data-layer/*` | locked | Ontology-aligned entity source of truth. |
+| `entity_snapshots` | entity ingestion/backfill -> search hydration | ontology runtime entity payloads | locked | Search hydrates AI Search IRIs from this table. |
+| Registry tables | sync pipeline -> admin reads, editorial cache sync | `src/domain/data-layer/*` | locked | Legacy data-layer reads still exist outside the new search path. |
 | `data_ref_candidate_citations` | old data-ref lookup path | migration 27 drops table | removed | Historical migrations can create it; final schema drops it. |
 | `data_layer_audit` | sync/admin writes -> operator inspection | audit rows | locked | Registry changes need traceability. |
 
@@ -60,8 +59,7 @@ There is no active `RESOLVER` binding after the cutover.
 
 | Seam | Producer -> Consumer | Contract | State | Why it matters |
 |---|---|---|---|---|
-| `.generated/cold-start/*` | fetch/cold-start ingest -> sync/tests/search rebuilds | git-backed snapshot tree | stabilizing | Local source feeding runtime D1 tables. |
-| Search rebuild scripts | D1 registry -> `SEARCH_DB` | `src/search/*` | locked | Search quality depends on projection quality. |
+| `.generated/cold-start/*` | fetch/cold-start ingest -> sync/tests/backfills | git-backed snapshot tree | stabilizing | Local source feeding runtime D1 tables. |
 | Ontology-store emit/distill | snapshot entities -> RDF/SHACL round trip | `packages/ontology-store/*` | stabilizing | Offline validation/export seam, not Worker hot path. |
 | `.skygest/cache/*.json` | cache sync CLIs -> editorial tools | editorial cache manifests | locked | Editorial repo reads local mirrors. |
 | Story frontmatter | hydrate-story/discussion -> build-graph | `src/domain/narrative/*` | locked at base level | Filesystem contract for editorial work. |
@@ -82,26 +80,22 @@ Ordered by blast radius, highest first.
 
 1. **`@skygest/domain/*` alias.** Breaks shared schemas across repos.
 2. **`search_entities` contract.** This is now the system's canonical ontology access surface.
-3. **Search projection plus hydration.** Bad projection or hydration makes search look wrong even when the registry is correct.
-4. **Exact probe normalization.** URL, hostname, and alias probes must normalize exactly like stored rows.
-5. **AI Search recall.** Recall can widen results, but it must never bypass D1 hydration or enabled-entity gating.
+3. **AI Search recall/ranking.** Query search depends on the Cloudflare index and metadata filters.
+4. **Ontology snapshot hydration.** Bad hydration makes search look wrong even when AI Search recall is correct.
+5. **Exact IRI lookup.** Exact lookup must stay a direct hydration path, not a second search path.
 6. **Observability.** Search regressions need metrics and deploy tags at launch, not after an incident.
 
 ## Current Seam Risks
 
-### 1. Search Must Fail Closed For Deferred Entity Families
+### 1. AI Search Is Recall, Not Authority
 
-Agent, Dataset, Distribution, Series, and Variable are enabled. Catalog, CatalogRecord, DatasetSeries, and DataService must return clear warnings until projection and hydration are complete.
+Cloudflare AI Search can suggest and rank candidates. The response payload still comes from D1 ontology snapshots and branded domain schemas.
 
-### 2. AI Search Is Recall, Not Authority
-
-Cloudflare AI Search can suggest candidates. The response payload still comes from D1 projection/hydration and branded domain schemas.
-
-### 3. Linking Must Not Leak Into Search
+### 2. Linking Must Not Leak Into Search
 
 Search returns candidates. Edge creation, citation writes, and durable linking jobs belong in dedicated workflows.
 
-### 4. Historical Migration Names Are Not Live Surfaces
+### 3. Historical Migration Names Are Not Live Surfaces
 
 Older migrations can still mention `data_ref_candidate_citations` so existing databases can migrate forward. The final schema drops that table.
 
@@ -113,7 +107,7 @@ Older migrations can still mention `data_ref_candidate_citations` so existing da
 
 **MCP-calling model** uses `search_entities`, post reads, thread tools, and editorial bundles.
 
-**Operator** runs admin APIs, sync scripts, search rebuilds, ontology-store validation, Cloudflare deploys, and observability checks.
+**Operator** runs admin APIs, sync scripts, ontology-store validation, Cloudflare deploys, and observability checks.
 
 ## What Changed In This Refresh
 

@@ -916,14 +916,6 @@ export const formatSearchEntities = (
 ): string => {
   const lines: string[] = [];
 
-  if (output.warnings !== undefined && output.warnings.length > 0) {
-    lines.push(
-      `Deferred types: ${output.warnings
-        .map((warning) => `${warning.entityType} (${warning.reason})`)
-        .join(", ")}`
-    );
-  }
-
   if (output.hits.length === 0) {
     lines.push("No entity matches.");
     return lines.join("\n");

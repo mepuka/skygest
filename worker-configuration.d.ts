@@ -44,7 +44,6 @@ declare namespace WorkerConfiguration {
 	ONTOLOGY_KV: KVNamespace;
 	TRANSCRIPTS_BUCKET: R2Bucket;
 	DB: D1Database;
-	SEARCH_DB: D1Database;
 	REQUEST_METRICS: AnalyticsEngineDataset;
 	CF_VERSION_METADATA: WorkerVersionMetadata;
 	ENERGY_INTEL_SEARCH: AiSearchNamespace;
@@ -61,7 +60,6 @@ declare namespace WorkerConfiguration {
 	ONTOLOGY_KV: KVNamespace;
 	TRANSCRIPTS_BUCKET: R2Bucket;
 	DB: D1Database;
-	SEARCH_DB?: D1Database;
 	REQUEST_METRICS: AnalyticsEngineDataset;
 	CF_VERSION_METADATA: WorkerVersionMetadata;
 	ENERGY_INTEL_SEARCH: AiSearchNamespace;

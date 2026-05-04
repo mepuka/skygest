@@ -20,7 +20,6 @@ import {
   EntityContextService,
   EntityProjectionDrainService,
   EntityProjectionRegistry,
-  EntitySearchService,
   EntitySnapshotStore,
   EnergyExpertRole,
   ExpertEntity,
@@ -33,6 +32,7 @@ import {
   PREDICATES,
   Post,
   PredicateIri,
+  OntologySearchIndex,
   RDF,
   RdfError,
   RdfMappingError,
@@ -128,7 +128,7 @@ describe("@skygest/ontology-store", () => {
       "time_bucket"
     ]);
     expect(AiSearchClient).toBeDefined();
-    expect(EntitySearchService).toBeDefined();
+    expect(OntologySearchIndex).toBeDefined();
     expect(EntityContextService).toBeDefined();
     expect(EntitySnapshotStore).toBeDefined();
     expect(EntityProjectionRegistry).toBeDefined();

@@ -21,8 +21,6 @@
     "seed:ontology-kv": "bun run src/scripts/seed-ontology-kv.ts",
     "sync:data-layer": "bun run scripts/sync-data-layer.ts",
     "gen:data-layer-spine": "bun run scripts/generate-data-layer-spine.ts",
-    "search-db:migrate": "bun run scripts/migrate-search-db.ts",
-    "search-db:rebuild": "bun run scripts/rebuild-search-db.ts",
     "ops": "bun run src/scripts/ops.ts"
   },
   "devDependencies": {

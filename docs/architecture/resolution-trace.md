@@ -19,25 +19,19 @@ Vision and source attribution are extraction outputs. `search_entities` is the c
 - **Output:** `.generated/cold-start/`
 - **Why it matters:** search quality starts with clean ontology-aligned entity data
 
-### 0B. Snapshot -> D1 registry
+### 0B. Snapshot -> D1 ontology snapshots
 
-- **Component:** `scripts/sync-data-layer.ts`, `src/data-layer/Sync.ts`
-- **Output:** D1 data-layer tables for Agent, Dataset, Distribution, Series, Variable, and deferred families
+- **Component:** entity backfill and ontology-store ingestion services
+- **Output:** D1 `entity_snapshots` rows for ontology runtime entities
 - **Why it matters:** D1 is the runtime source of truth for hydration
 
-### 0C. Registry -> search projection
-
-- **Component:** `src/search/*`, `src/services/d1/EntitySearchRepoD1.ts`
-- **Output:** `SEARCH_DB` rows for text search, exact URL probes, hostname probes, aliases, and hydration
-- **Why it matters:** search can only return what projection stores and hydrates
-
-### 0D. Registry/search corpus -> AI Search
+### 0C. Ontology corpus -> AI Search
 
 - **Component:** Cloudflare AI Search binding `ENERGY_INTEL_SEARCH`
-- **Output:** semantic recall candidates
-- **Why it matters:** AI Search improves recall, but D1 remains authoritative for returned payloads
+- **Output:** ranked query candidates with ontology metadata
+- **Why it matters:** AI Search owns fuzzy recall and ranking, while D1 remains authoritative for returned payloads
 
-### 0E. Snapshot -> ontology-store validation
+### 0D. Snapshot -> ontology-store validation
 
 - **Component:** `packages/ontology-store/`
 - **Output:** RDF emit, SHACL validation, reload, and distill checks
@@ -67,63 +61,34 @@ There is no resolver call after this step. The enrichment workflow no longer wri
 
 ### 4. A caller searches ontology entities
 
-- **Component:** `EntitySearchService.searchEntities`
+- **Component:** `SearchEntitiesService.searchEntities`
 - **Surface:** `search_entities`
-- **Inputs:** query text and/or exact probes
-- **Outputs:** branded ontology entity hits plus fail-closed warnings
+- **Inputs:** exactly one of query text or exact ontology IRI
+- **Outputs:** hydrated ontology entity hits
 
 Search inputs can include:
 
 - exact IRIs
-- normalized URLs
-- normalized hostnames
-- aliases
 - query text
-- requested entity families
+- ontology runtime entity-type filters
 - limit
 
-Enabled families:
-
-- Agent
-- Dataset
-- Distribution
-- Series
-- Variable
-
-Deferred families fail closed with warnings:
-
-- Catalog
-- CatalogRecord
-- DatasetSeries
-- DataService
-
-### 5. Search normalizes probes
-
-- **Component:** `src/platform/Normalize.ts`
-- **Why it matters:** query-side URL, hostname, and alias values must normalize the same way stored projection values do
-
-This prevents exact probes from silently missing because of schemes, `www`, query strings, fragments, casing, or alias-scheme differences.
-
-### 6. Search ranks and hydrates results
+### 5. Search ranks and hydrates results
 
 The service combines:
 
-1. exact IRI matches
-2. exact URL matches
-3. exact hostname matches
-4. exact alias matches
-5. lexical D1 search
-6. Cloudflare AI Search semantic recall
+1. exact IRI direct hydration
+2. Cloudflare AI Search hybrid query retrieval
 
-Exact probes occupy the deterministic top scoring band. Fuzzy and semantic recall are merged below exact matches and hydrated from D1 before returning.
+Exact IRI lookup bypasses AI Search. Query search preserves Cloudflare ranking, dedupes repeated chunks by IRI, and hydrates each returned IRI from D1 before responding. AI Search hits that cannot be decoded or hydrated are dropped and counted.
 
-### 7. Search emits observability
+### 6. Search emits observability
 
 - **Workers Logs:** structured Effect JSON logs
 - **Analytics Engine:** one request datapoint through `REQUEST_METRICS`
 - **Version metadata:** deploy tags from `CF_VERSION_METADATA`
 
-Minimum production fields include route, status, duration, enabled/deferred entity families, exact probe counts, hydration misses, fail-closed counts, AI Search latency, hydration latency, and worker version metadata.
+Minimum production fields include route, status, duration, exact IRI hit count, hydration misses, dropped AI hits, AI Search latency, hydration latency, result count, and worker version metadata.
 
 ## What The Response Means
 
@@ -141,20 +106,19 @@ It should not directly create graph edges, citation rows, or story frontmatter. 
 
 Search quality now improves through:
 
-1. better registry coverage
-2. better exact URL/hostname/alias projection
-3. better labels and descriptions in the search document
-4. better AI Search recall configuration
-5. better hydration tests
-6. observability over misses and fail-closed requests
+1. better ontology snapshot coverage
+2. better AI Search corpus documents and metadata
+3. better AI Search recall/ranking configuration
+4. better hydration tests
+5. observability over misses and dropped candidates
 
-The old resolver eval loop is gone. The useful replacement is a smaller loop: curated search probes, projection tests, hydration tests, and staging metrics.
+The old resolver eval loop is gone. The useful replacement is a smaller loop: curated search cases, corpus tests, hydration tests, and staging metrics.
 
 ## What This Trace Means Now
 
 1. There is one ontology search surface.
 2. Search is read-only candidate retrieval.
-3. D1 projection/hydration is authoritative.
-4. AI Search improves recall but does not define payloads.
+3. D1 ontology snapshot hydration is authoritative.
+4. AI Search owns query recall/ranking but does not define payloads.
 5. Enrichment stops at extraction outputs.
 6. Linking and edge creation are future workflows, not hidden search side effects.

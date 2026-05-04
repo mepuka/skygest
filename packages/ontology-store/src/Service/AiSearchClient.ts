@@ -106,7 +106,7 @@ export interface AiSearchNamespaceBinding {
   readonly get: (name: string) => AiSearchInstanceBinding;
 }
 
-export interface EntitySearchFilter {
+export interface OntologySearchFilter {
   readonly entity_type?: ReadonlyArray<string>;
   readonly iri?: ReadonlyArray<string>;
   readonly topic?: ReadonlyArray<string>;
@@ -114,9 +114,9 @@ export interface EntitySearchFilter {
   readonly time_bucket?: ReadonlyArray<string>;
 }
 
-export interface EntitySearchInput {
+export interface OntologySearchInput {
   readonly query: string;
-  readonly filters?: EntitySearchFilter;
+  readonly filters?: OntologySearchFilter;
   readonly maxResults?: number;
   readonly scoreThreshold?: number;
   readonly retrievalType?: "vector" | "keyword" | "hybrid";
@@ -124,7 +124,7 @@ export interface EntitySearchInput {
   readonly rerank?: boolean;
 }
 
-export interface EntitySearchResult {
+export interface OntologySearchResult {
   readonly entityType: string;
   readonly iri: string;
   readonly key: string;
@@ -133,8 +133,8 @@ export interface EntitySearchResult {
   readonly metadata: EntityMetadata;
 }
 
-export class EntitySearchResultDecodeError extends Schema.TaggedErrorClass<EntitySearchResultDecodeError>()(
-  "EntitySearchResultDecodeError",
+export class OntologySearchResultDecodeError extends Schema.TaggedErrorClass<OntologySearchResultDecodeError>()(
+  "OntologySearchResultDecodeError",
   {
     key: Schema.String,
     message: Schema.String
@@ -341,7 +341,7 @@ const filterValue = (
 };
 
 const buildFilters = (
-  filter: EntitySearchFilter | undefined
+  filter: OntologySearchFilter | undefined
 ): Readonly<Record<string, unknown>> | undefined => {
   if (filter === undefined) return undefined;
   const filters: Record<string, unknown> = {};
@@ -352,7 +352,7 @@ const buildFilters = (
   return Object.keys(filters).length === 0 ? undefined : filters;
 };
 
-const toSearchRequest = (input: EntitySearchInput): AiSearchSearchRequest => {
+const toSearchRequest = (input: OntologySearchInput): AiSearchSearchRequest => {
   const filters = buildFilters(input.filters);
   const retrieval: NonNullable<
     NonNullable<AiSearchSearchRequest["ai_search_options"]>["retrieval"]
@@ -379,10 +379,10 @@ const toSearchRequest = (input: EntitySearchInput): AiSearchSearchRequest => {
 const decodeMetadata = (
   key: string,
   metadata: Readonly<Record<string, unknown>> | undefined
-): Effect.Effect<EntityMetadata, EntitySearchResultDecodeError> =>
+): Effect.Effect<EntityMetadata, OntologySearchResultDecodeError> =>
   Effect.gen(function* () {
     if (metadata === undefined) {
-      return yield* new EntitySearchResultDecodeError({
+      return yield* new OntologySearchResultDecodeError({
         key,
         message: "AI Search chunk is missing entity metadata"
       });
@@ -390,7 +390,7 @@ const decodeMetadata = (
     const entityType = metadata.entity_type;
     const iri = metadata.iri;
     if (typeof entityType !== "string" || typeof iri !== "string") {
-      return yield* new EntitySearchResultDecodeError({
+      return yield* new OntologySearchResultDecodeError({
         key,
         message: "AI Search chunk metadata must include string entity_type and iri"
       });
@@ -399,7 +399,7 @@ const decodeMetadata = (
     for (const field of ENTITY_METADATA_FIELDS) {
       const value = metadata[field.field_name];
       if (typeof value !== "string") {
-        return yield* new EntitySearchResultDecodeError({
+        return yield* new OntologySearchResultDecodeError({
           key,
           message: `AI Search chunk metadata field ${field.field_name} must be a string`
         });
@@ -533,22 +533,22 @@ export const makeAiSearchAdapter = <Contract extends AnyProjectionContract>(
     };
   });
 
-export class EntitySearchService extends ServiceMap.Service<
-  EntitySearchService,
+export class OntologySearchIndex extends ServiceMap.Service<
+  OntologySearchIndex,
   {
     readonly search: (
-      input: EntitySearchInput
+      input: OntologySearchInput
     ) => Effect.Effect<
-      ReadonlyArray<EntitySearchResult>,
-      AiSearchError | EntitySearchResultDecodeError
+      ReadonlyArray<OntologySearchResult>,
+      AiSearchError | OntologySearchResultDecodeError
     >;
   }
->()("@skygest/ontology-store/EntitySearchService") {
+>()("@skygest/ontology-store/OntologySearchIndex") {
   static readonly layer = Layer.effect(
-    EntitySearchService,
+    OntologySearchIndex,
     Effect.gen(function* () {
       const client = yield* AiSearchClient;
-      const search = (input: EntitySearchInput) =>
+      const search = (input: OntologySearchInput) =>
         Effect.gen(function* () {
           const response = yield* client.search(
             DEFAULT_ENTITY_SEARCH_INSTANCE,
@@ -571,7 +571,7 @@ export class EntitySearchService extends ServiceMap.Service<
             })
           );
         });
-      return EntitySearchService.of({ search });
+      return OntologySearchIndex.of({ search });
     })
   );
 }

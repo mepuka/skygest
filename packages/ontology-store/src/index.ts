@@ -97,10 +97,10 @@ export type {
 export {
   AiSearchClient,
   DEFAULT_ENTITY_SEARCH_INSTANCE,
-  EntitySearchResultDecodeError,
-  EntitySearchService,
   makeAiSearchAdapter,
-  makeAiSearchClient
+  makeAiSearchClient,
+  OntologySearchIndex,
+  OntologySearchResultDecodeError
 } from "./Service/AiSearchClient";
 export type {
   AiSearchInstanceBinding,
@@ -113,9 +113,9 @@ export type {
   AiSearchNamespaceBinding,
   AiSearchSearchRequest,
   AiSearchSearchResponse,
-  EntitySearchFilter,
-  EntitySearchInput,
-  EntitySearchResult
+  OntologySearchFilter,
+  OntologySearchInput,
+  OntologySearchResult
 } from "./Service/AiSearchClient";
 export {
   EntityContextHydrationError,
