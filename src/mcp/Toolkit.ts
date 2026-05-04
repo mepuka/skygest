@@ -106,7 +106,7 @@ import { CurationService } from "../services/CurationService";
 import { CurationRepo } from "../services/CurationRepo";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
-import { EntitySearchService } from "../services/EntitySearchService";
+import { SearchEntitiesService } from "../services/SearchEntitiesService";
 import { BlueskyClient } from "../bluesky/BlueskyClient";
 import { PostEnrichmentReadService } from "../services/PostEnrichmentReadService";
 import {
@@ -219,7 +219,7 @@ export const SearchPostsTool = Tool.make("search_posts", {
   .annotate(Tool.OpenWorld, false);
 
 export const SearchEntitiesTool = Tool.make("search_entities", {
-  description: "Search canonical ontology-aligned entities across Agent, Dataset, Distribution, Series, and Variable. Supports exact IRI, URL, hostname, and alias probes plus keyword/semantic recall. Deferred DCAT types return explicit warnings instead of legacy resolver payloads.",
+  description: "Search canonical ontology entities. Provide either a natural-language query for Cloudflare AI Search or an exact ontology IRI for direct lookup. Optional entityTypes filters use ontology runtime entity tags.",
   parameters: SearchEntitiesInput,
   success: SearchEntitiesMcpOutput,
   failure: McpToolQueryError
@@ -597,7 +597,7 @@ const extractCreatedAt = (record: unknown, fallbackIndexedAt: string): string =>
 // ---------------------------------------------------------------------------
 
 type KnowledgeQueryServiceI = (typeof KnowledgeQueryService)["Service"];
-type EntitySearchServiceI = (typeof EntitySearchService)["Service"];
+type SearchEntitiesServiceI = (typeof SearchEntitiesService)["Service"];
 type EditorialServiceI = (typeof EditorialService)["Service"];
 type CurationServiceI = (typeof CurationService)["Service"];
 type ExpertRegistryServiceI = (typeof ExpertRegistryService)["Service"];
@@ -801,7 +801,7 @@ const makeExpertWriteHandlers = (
 
 const makeReadOnlyHandlers = (
   queryService: KnowledgeQueryServiceI,
-  entitySearchServiceOption: Option.Option<EntitySearchServiceI>,
+  searchEntitiesServiceOption: Option.Option<SearchEntitiesServiceI>,
   editorialService: EditorialServiceI,
   curationService: CurationServiceI,
   bskyClient: BlueskyClientI,
@@ -818,17 +818,17 @@ const makeReadOnlyHandlers = (
     ),
   search_entities: (input: typeof SearchEntitiesInput.Type) =>
     Effect.gen(function* () {
-      if (Option.isNone(entitySearchServiceOption)) {
+      if (Option.isNone(searchEntitiesServiceOption)) {
         return yield* Effect.fail(
           new McpToolQueryError({
             tool: "search_entities",
             message: "Entity search is not available in this runtime.",
-            error: new Error("EntitySearchService not available")
+            error: new Error("SearchEntitiesService not available")
           })
         );
       }
 
-      const result = yield* entitySearchServiceOption.value.searchEntities(input);
+      const result = yield* searchEntitiesServiceOption.value.searchEntities(input);
       return {
         ...result,
         _display: formatSearchEntities(result)
@@ -1414,7 +1414,7 @@ const makeCapabilityHandlers = <
   toolkit.toLayer(
     Effect.gen(function* () {
       const queryService = yield* KnowledgeQueryService;
-      const entitySearchServiceOption = yield* Effect.serviceOption(EntitySearchService);
+      const searchEntitiesServiceOption = yield* Effect.serviceOption(SearchEntitiesService);
       const editorialService = yield* EditorialService;
       const curationService = yield* CurationService;
       const expertRegistryService = yield* ExpertRegistryService;
@@ -1427,7 +1427,7 @@ const makeCapabilityHandlers = <
       return toolkit.of({
         ...makeReadOnlyHandlers(
           queryService,
-          entitySearchServiceOption,
+          searchEntitiesServiceOption,
           editorialService,
           curationService,
           bskyClient,

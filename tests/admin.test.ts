@@ -301,4 +301,38 @@ describe("admin expert registry routes", () => {
     )
   );
 
+  it.live("rejects legacy search entity probe payloads", () =>
+    Effect.promise(() =>
+      withTempSqliteFile(async (filename) => {
+        const layer = makeAdminTestLayer({ filename });
+
+        await Effect.runPromise(runMigrations.pipe(Effect.provide(layer)));
+
+        const response = await handleAdminRequestWithLayer(
+          new Request("https://skygest.local/admin/search/entities", {
+            method: "POST",
+            headers: {
+              "content-type": "application/json"
+            },
+            body: encodeJsonString({
+              query: "solar generation",
+              probes: {
+                urls: ["https://example.com/data"]
+              }
+            })
+          }),
+          operatorIdentity,
+          layer
+        );
+
+        const body = await expectJsonResponse<{
+          readonly error: string;
+          readonly message: string;
+        }>(response, 400);
+        expect(body.error).toBe("BadRequest");
+        expect(body.message).toContain("invalid request");
+      })
+    )
+  );
+
 });

@@ -1,328 +1,246 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, Layer, Result, Schema } from "effect";
 import {
-  Agent,
-  Dataset,
-  Distribution,
-  Series,
-  Variable,
-  type DataLayerRegistrySeed,
-  mintAgentId,
-  mintDatasetId,
-  mintDistributionId,
-  mintSeriesId,
-  mintVariableId
-} from "../src/domain/data-layer";
-import type { EntitySearchSemanticRecallHit } from "../src/domain/entitySearch";
-import { prepareDataLayerRegistry } from "../src/resolution/dataLayerRegistry";
-import { DataLayerRegistry } from "../src/services/DataLayerRegistry";
-import { runEntitySearchMigrations } from "../src/search/migrate";
-import { entitySearchSqlLayer } from "../src/search/Layer";
-import { projectEntitySearchDocs } from "../src/search/projectEntitySearchDocs";
-import { EntitySearchRepo } from "../src/services/EntitySearchRepo";
-import { EntitySearchService } from "../src/services/EntitySearchService";
-import { EntitySemanticRecall } from "../src/services/EntitySemanticRecall";
-import { EntitySearchRepoD1 } from "../src/services/d1/EntitySearchRepoD1";
-import { makeSqliteLayer } from "./support/runtime";
+  OntologySearchIndex,
+  type OntologySearchInput,
+  type OntologySearchResult
+} from "@skygest/ontology-store";
+import { Effect, Layer, Schema } from "effect";
+import {
+  OntologyEntityIri,
+  OntologyEntityType,
+  SearchEntitiesInput,
+  SearchEntityHit,
+  type SearchEntityHit as SearchEntityHitValue
+} from "../src/domain/entitySearch";
+import {
+  OntologyEntityHydrator,
+  type HydrateOntologyEntityInput,
+  type HydrateOntologyEntityResult
+} from "../src/services/OntologyEntityHydrator";
+import { SearchEntitiesService } from "../src/services/SearchEntitiesService";
+import {
+  RequestMetrics,
+  type SearchEntitiesMetricInput
+} from "../src/platform/Observability";
 
-const decodeAgent = Schema.decodeUnknownSync(Agent);
-const decodeDataset = Schema.decodeUnknownSync(Dataset);
-const decodeDistribution = Schema.decodeUnknownSync(Distribution);
-const decodeSeries = Schema.decodeUnknownSync(Series);
-const decodeVariable = Schema.decodeUnknownSync(Variable);
+const decodeInput = Schema.decodeUnknownSync(SearchEntitiesInput);
+const decodeEntityType = Schema.decodeUnknownSync(OntologyEntityType);
+const decodeIri = Schema.decodeUnknownSync(OntologyEntityIri);
+const decodeHit = Schema.decodeUnknownSync(SearchEntityHit);
 
-const agentId = mintAgentId();
-const datasetId = mintDatasetId();
-const distributionId = mintDistributionId();
-const variableId = mintVariableId();
-const seriesId = mintSeriesId();
+const expertType = decodeEntityType("Expert");
+const expertIri = decodeIri("skygest:expert:solar-desk");
+const topicType = decodeEntityType("EnergyTopic");
+const topicIri = decodeIri("skygest:topic:solar");
 
-const makeSyntheticSeed = (): DataLayerRegistrySeed => {
-  const agent = decodeAgent({
-    _tag: "Agent",
-    id: agentId,
-    kind: "organization",
-    name: "U.S. Energy Information Administration",
-    alternateNames: ["EIA", "Energy Information Administration"],
-    homepage: "https://www.eia.gov/",
-    aliases: [
-      {
-        scheme: "url",
-        value: "https://www.eia.gov/",
-        relation: "exactMatch"
-      }
-    ],
-    createdAt: "2026-04-08T00:00:00.000Z",
-    updatedAt: "2026-04-08T00:00:00.000Z"
-  });
-
-  const variable = decodeVariable({
-    _tag: "Variable",
-    id: variableId,
-    label: "Wind electricity generation",
-    definition: "Electrical energy produced by wind turbines",
-    measuredProperty: "generation",
-    domainObject: "electricity",
-    technologyOrFuel: "wind",
-    statisticType: "flow",
-    aggregation: "sum",
-    unitFamily: "energy",
-    aliases: [
-      {
-        scheme: "display-alias",
-        value: "Wind output",
-        relation: "closeMatch"
-      }
-    ],
-    createdAt: "2026-04-08T00:00:00.000Z",
-    updatedAt: "2026-04-08T00:00:00.000Z"
-  });
-
-  const dataset = decodeDataset({
-    _tag: "Dataset",
-    id: datasetId,
-    title: "EIA U.S. Electric System Operating Data",
-    description:
-      "Hourly electric system operating data including demand and generation by source.",
-    publisherAgentId: agentId,
-    landingPage: "https://www.eia.gov/electricity/gridmonitor/",
-    keywords: ["electricity", "grid", "hourly"],
-    themes: ["electricity", "grid operations"],
-    variableIds: [variableId],
-    distributionIds: [distributionId],
-    aliases: [
-      {
-        scheme: "display-alias",
-        value: "EIA Hourly Electric Grid Monitor",
-        relation: "closeMatch"
-      }
-    ],
-    createdAt: "2026-04-08T00:00:00.000Z",
-    updatedAt: "2026-04-08T00:00:00.000Z"
-  });
-
-  const distribution = decodeDistribution({
-    _tag: "Distribution",
-    id: distributionId,
-    datasetId,
-    kind: "api-access",
-    title: "EIA Grid Monitor API",
-    description: "API access to hourly generation and demand values.",
-    accessURL: "https://api.eia.gov/v2/electricity/rto/",
-    downloadURL: "https://api.eia.gov/bulk/EBA.zip",
-    aliases: [],
-    createdAt: "2026-04-08T00:00:00.000Z",
-    updatedAt: "2026-04-08T00:00:00.000Z"
-  });
-
-  const series = decodeSeries({
-    _tag: "Series",
-    id: seriesId,
-    label: "ERCOT wind generation (hourly)",
-    variableId,
-    datasetId,
-    fixedDims: {
-      place: "US-TX",
-      market: "ERCOT",
-      frequency: "hourly"
-    },
-    aliases: [],
-    createdAt: "2026-04-08T00:00:00.000Z",
-    updatedAt: "2026-04-08T00:00:00.000Z"
-  });
-
-  return {
-    agents: [agent],
-    catalogs: [],
-    catalogRecords: [],
-    datasets: [dataset],
-    distributions: [distribution],
-    dataServices: [],
-    datasetSeries: [],
-    variables: [variable],
-    series: [series]
-  };
+type TestState = {
+  readonly searches: Array<OntologySearchInput>;
+  readonly hydrations: Array<HydrateOntologyEntityInput>;
+  readonly metrics: Array<SearchEntitiesMetricInput>;
+  searchResults: ReadonlyArray<OntologySearchResult>;
+  readonly hydratedHits: Map<string, SearchEntityHitValue>;
 };
 
-const makePreparedRegistry = () => {
-  const prepared = prepareDataLayerRegistry(makeSyntheticSeed());
-  expect(Result.isSuccess(prepared)).toBe(true);
-  if (Result.isFailure(prepared)) {
-    throw new Error("expected prepared registry");
-  }
-  return prepared.success;
-};
-
-const makeServiceLayer = (
-  semanticHits?: ReadonlyArray<EntitySearchSemanticRecallHit>
-) => {
-  const sqliteLayer = makeSqliteLayer();
-  const searchSqlLayer = entitySearchSqlLayer(sqliteLayer);
-  const prepared = makePreparedRegistry();
-  const repoLayer = EntitySearchRepoD1.layer.pipe(
-    Layer.provideMerge(searchSqlLayer)
-  );
-  const semanticRecallLayer = Layer.succeed(EntitySemanticRecall, {
-    recall: () => Effect.succeed(semanticHits ?? [])
-  });
-  const serviceLayer = EntitySearchService.layer.pipe(
-    Layer.provideMerge(
-      Layer.mergeAll(
-        DataLayerRegistry.layerFromPrepared(prepared),
-        repoLayer,
-        semanticRecallLayer
-      )
-    )
-  );
-
-  return Layer.mergeAll(
-    sqliteLayer,
-    searchSqlLayer,
-    DataLayerRegistry.layerFromPrepared(prepared),
-    repoLayer,
-    semanticRecallLayer,
-    serviceLayer
-  );
-};
-
-const seedSearchDocs = Effect.gen(function* () {
-  yield* runEntitySearchMigrations;
-  const repo = yield* EntitySearchRepo;
-  const docs = projectEntitySearchDocs(makePreparedRegistry());
-  yield* repo.replaceAllDocuments(docs);
+const metadataFor = (entityType: string, iri: string) => ({
+  entity_type: entityType,
+  iri,
+  topic: "energy",
+  authority: "skygest",
+  time_bucket: "all"
 });
 
-describe("EntitySearchService", () => {
-  it.effect("dispatches the generic and typed search methods through the repo", () =>
-    Effect.gen(function* () {
-      yield* seedSearchDocs;
-      const service = yield* EntitySearchService;
+const searchResult = (
+  entityType: string,
+  iri: string,
+  score: number,
+  text: string,
+  key = `${entityType}:${iri}`
+): OntologySearchResult => ({
+  entityType,
+  iri,
+  key,
+  score,
+  text,
+  metadata: metadataFor(entityType, iri)
+});
 
-      const allTypes = yield* service.search({
-        query: "ERCOT wind generation",
-        entityTypes: ["Series"],
-        limit: 3
-      });
-      const agents = yield* service.searchAgents({
-        query: "Energy Information Administration",
-        limit: 3
-      });
-      const datasets = yield* service.searchDatasets({
-        query: "Hourly Electric Grid Monitor",
-        limit: 3
-      });
-      const distributions = yield* service.searchDistributions({
-        exactHostnames: ["https://api.eia.gov/v2/electricity/rto/"],
-        limit: 3
-      });
-      const series = yield* service.searchSeries({
-        query: "ERCOT wind generation",
-        limit: 3
-      });
+const hit = (
+  entityType: typeof expertType | typeof topicType,
+  iri: typeof expertIri | typeof topicIri,
+  label: string,
+  rank: number,
+  matchReason: "exact-iri" | "match",
+  score = 1
+): SearchEntityHitValue =>
+  decodeHit({
+    entityType,
+    iri,
+    label,
+    summary: `${label} summary`,
+    rank,
+    score,
+    matchReason,
+    evidence: [
+      {
+        kind: matchReason === "exact-iri" ? "iri" : "chunk",
+        text: `${label} evidence`,
+        source: iri
+      }
+    ]
+  });
 
-      expect(allTypes[0]?.document.entityId).toBe(seriesId);
-      expect(agents[0]?.document.entityId).toBe(agentId);
-      expect(datasets[0]?.document.entityId).toBe(datasetId);
-      expect(distributions[0]?.document.entityId).toBe(distributionId);
-      expect(series[0]?.document.entityId).toBe(seriesId);
-    }).pipe(Effect.provide(makeServiceLayer()))
+const hydrationKey = (entityType: string | undefined, iri: string) =>
+  `${entityType ?? ""}|${iri}`;
+
+const makeState = (): TestState => ({
+  searches: [],
+  hydrations: [],
+  metrics: [],
+  searchResults: [],
+  hydratedHits: new Map()
+});
+
+const makeLayer = (state: TestState) => {
+  const indexLayer = Layer.succeed(
+    OntologySearchIndex,
+    OntologySearchIndex.of({
+      search: (input) =>
+        Effect.sync(() => {
+          state.searches.push(input);
+          return state.searchResults;
+        })
+    })
+  );
+  const hydratorLayer = Layer.succeed(
+    OntologyEntityHydrator,
+    OntologyEntityHydrator.of({
+      hydrate: (input) =>
+        Effect.sync((): HydrateOntologyEntityResult => {
+          state.hydrations.push(input);
+          const hydrated =
+            state.hydratedHits.get(hydrationKey(input.entityType, input.iri)) ??
+            state.hydratedHits.get(hydrationKey(undefined, input.iri));
+          return hydrated === undefined
+            ? {
+                _tag: "Miss",
+                iri: input.iri,
+                reason: "not-found",
+                ...(input.entityType === undefined
+                  ? {}
+                  : { entityType: input.entityType })
+              }
+            : {
+                _tag: "Hit",
+                hit: hydrated
+              };
+        })
+    })
+  );
+  const metricsLayer = Layer.succeed(
+    RequestMetrics,
+    RequestMetrics.of({
+      recordSearchEntities: (input) =>
+        Effect.sync(() => {
+          state.metrics.push(input);
+        })
+    })
   );
 
-  it.effect("retrieves series through inherited parent URL and hostname surfaces", () =>
-    Effect.gen(function* () {
-      yield* seedSearchDocs;
-      const service = yield* EntitySearchService;
-
-      const byExactUrl = yield* service.searchSeries({
-        exactCanonicalUrls: ["https://api.eia.gov/v2/electricity/rto/"],
-        limit: 3
-      });
-      const byExactHostname = yield* service.searchSeries({
-        exactHostnames: ["https://api.eia.gov/v2/electricity/rto/"],
-        limit: 3
-      });
-
-      expect(byExactUrl[0]?.document.entityId).toBe(seriesId);
-      expect(byExactUrl[0]?.matchKind).toBe("exact-url");
-      expect(byExactHostname[0]?.document.entityId).toBe(seriesId);
-      expect(byExactHostname[0]?.matchKind).toBe("exact-hostname");
-    }).pipe(Effect.provide(makeServiceLayer()))
+  return SearchEntitiesService.layer.pipe(
+    Layer.provideMerge(Layer.mergeAll(indexLayer, hydratorLayer, metricsLayer))
   );
+};
 
-  it.effect("serves canonical search_entities exact probes and fail-closed warnings", () =>
-    Effect.gen(function* () {
-      yield* seedSearchDocs;
-      const service = yield* EntitySearchService;
+describe("SearchEntitiesService", () => {
+  it.effect("hydrates exact IRI directly without calling AI Search", () => {
+    const state = makeState();
+    return Effect.gen(function* () {
+      state.hydratedHits.set(
+        hydrationKey(undefined, String(expertIri)),
+        hit(expertType, expertIri, "Solar Desk", 1, "exact-iri")
+      );
+      const service = yield* SearchEntitiesService;
 
-      const exactIri = yield* service.searchEntities({
-        probes: {
-          iris: [datasetId]
-        },
-        entityTypes: ["Dataset", "Catalog"],
-        limit: 3
-      });
-      expect(exactIri.hits[0]?.iri).toBe(datasetId);
-      expect(exactIri.hits[0]?.matchReason).toBe("exact-iri");
-      expect(exactIri.warnings).toEqual([
+      const result = yield* service.searchEntities(
+        decodeInput({
+          iri: expertIri,
+          limit: 1
+        })
+      );
+
+      expect(result.hits).toHaveLength(1);
+      expect(result.hits[0]?.iri).toBe(expertIri);
+      expect(result.hits[0]?.matchReason).toBe("exact-iri");
+      expect(state.searches).toEqual([]);
+      expect(state.hydrations).toHaveLength(1);
+      expect(state.metrics[0]?.exactIriHitCount).toBe(1);
+    }).pipe(Effect.provide(makeLayer(state)));
+  });
+
+  it.effect("passes query filters to Cloudflare AI Search and dedupes chunks", () => {
+    const state = makeState();
+    return Effect.gen(function* () {
+      state.searchResults = [
+        searchResult("Expert", String(expertIri), 0.93, "solar expert"),
+        searchResult("Expert", String(expertIri), 0.89, "duplicate chunk")
+      ];
+      state.hydratedHits.set(
+        hydrationKey("Expert", String(expertIri)),
+        hit(expertType, expertIri, "Solar Desk", 1, "match", 0.93)
+      );
+      const service = yield* SearchEntitiesService;
+
+      const result = yield* service.searchEntities(
+        decodeInput({
+          query: "solar expert",
+          entityTypes: ["Expert"],
+          limit: 5
+        })
+      );
+
+      expect(state.searches).toEqual([
         {
-          entityType: "Catalog",
-          reason: "not-yet-enabled"
-        }
-      ]);
-
-      const exactAlias = yield* service.searchEntities({
-        probes: {
-          aliases: [
-            {
-              scheme: "display-alias",
-              value: "Wind output"
-            }
-          ]
-        },
-        entityTypes: ["Variable"],
-        limit: 3
-      });
-      expect(exactAlias.hits[0]?.iri).toBe(variableId);
-      expect(exactAlias.hits[0]?.matchReason).toBe("exact-alias");
-      expect(exactAlias.hits[0]?.evidence[0]?.kind).toBe("alias");
-
-      const deferredOnly = yield* service.searchEntities({
-        query: "catalog",
-        entityTypes: ["Catalog"],
-        limit: 3
-      });
-      expect(deferredOnly.hits).toEqual([]);
-      expect(deferredOnly.warnings).toEqual([
-        {
-          entityType: "Catalog",
-          reason: "not-yet-enabled"
-        }
-      ]);
-    }).pipe(Effect.provide(makeServiceLayer()))
-  );
-
-  it.effect("merges lexical and semantic candidates into a hybrid result list", () =>
-    Effect.gen(function* () {
-      yield* seedSearchDocs;
-      const service = yield* EntitySearchService;
-
-      const result = yield* service.searchVariables({
-        query: "wind electricity generation",
-        limit: 3
-      });
-
-      expect(result[0]?.document.entityId).toBe(variableId);
-      expect(result[0]?.matchKind).toBe("hybrid");
-    }).pipe(
-      Effect.provide(
-        makeServiceLayer([
-          {
-            entityId: variableId,
-            entityType: "Variable",
-            score: 0.95
+          query: "solar expert",
+          maxResults: 5,
+          retrievalType: "hybrid",
+          filters: {
+            entity_type: ["Expert"]
           }
-        ])
-      )
-    )
-  );
+        }
+      ]);
+      expect(state.hydrations).toHaveLength(1);
+      expect(result.hits).toHaveLength(1);
+      expect(result.hits[0]?.rank).toBe(1);
+      expect(result.hits[0]?.matchReason).toBe("match");
+      expect(state.metrics[0]?.droppedAiHitTotal).toBe(1);
+    }).pipe(Effect.provide(makeLayer(state)));
+  });
+
+  it.effect("omits hydration misses and records dropped AI hits", () => {
+    const state = makeState();
+    return Effect.gen(function* () {
+      state.searchResults = [
+        searchResult("EnergyTopic", String(topicIri), 0.8, "solar topic"),
+        searchResult("Expert", String(expertIri), 0.7, "missing expert")
+      ];
+      state.hydratedHits.set(
+        hydrationKey("EnergyTopic", String(topicIri)),
+        hit(topicType, topicIri, "Solar", 1, "match", 0.8)
+      );
+      const service = yield* SearchEntitiesService;
+
+      const result = yield* service.searchEntities(
+        decodeInput({
+          query: "solar",
+          limit: 10
+        })
+      );
+
+      expect(result.hits).toHaveLength(1);
+      expect(result.hits[0]?.iri).toBe(topicIri);
+      expect(result.hits[0]?.rank).toBe(1);
+      expect(state.metrics[0]?.hydrationMissTotal).toBe(1);
+      expect(state.metrics[0]?.droppedAiHitTotal).toBe(1);
+    }).pipe(Effect.provide(makeLayer(state)));
+  });
 });

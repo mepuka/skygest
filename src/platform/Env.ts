@@ -20,7 +20,6 @@ interface AppConfigEnv {
 
 interface SharedRuntimeEnv {
   readonly DB: D1Database;
-  readonly SEARCH_DB?: D1Database;
   readonly ENERGY_INTEL_SEARCH?: AiSearchNamespaceBinding;
   readonly ONTOLOGY_KV?: KVNamespace;
   readonly TRANSCRIPTS_BUCKET?: R2Bucket;
@@ -68,13 +67,6 @@ export type WorkflowEnrichmentEnvBindings =
   Simplify<
     EnvBindings & {
       readonly ENRICHMENT_RUN_WORKFLOW: EnrichmentWorkflowBinding;
-    }
-  >;
-
-export type SearchRuntimeEnvBindings =
-  Simplify<
-    EnvBindings & {
-      readonly SEARCH_DB: D1Database;
     }
   >;
 

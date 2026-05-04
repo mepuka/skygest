@@ -116,28 +116,3 @@ jobs:
             https://skygest-bi-agent-staging.kokokessy.workers.dev/admin/ops/migrate
         env:
           OPERATOR_SECRET: ${{ secrets.OPERATOR_SECRET }}
-
-      # Entity-search infrastructure (SKY-352). The rebuild projects from a
-      # hermetic local sqlite built from the in-repo cold-start files, not
-      # from a snapshot of skygest-staging D1 — the catalog lives in the
-      # repo, not in the main DB. Runs on every merge; re-applies migrations
-      # idempotently (CREATE TABLE IF NOT EXISTS + INSERT OR IGNORE) and
-      # rebuilds the full FTS index.
-      - name: Build local data-layer source for search projection
-        run: |
-          bun run scripts/sync-data-layer.ts \
-            --db-file /tmp/search-source.sqlite \
-            --updated-by ci-search-rebuild \
-            --apply
-
-      - name: Apply SEARCH_DB migrations
-        run: bun run scripts/migrate-search-db.ts
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Rebuild entity search index
-        run: |
-          bun run scripts/rebuild-search-db.ts \
-            --source-db /tmp/search-source.sqlite
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

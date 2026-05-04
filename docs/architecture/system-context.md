@@ -6,7 +6,7 @@ The current backend shape is:
 
 `ingest -> vision -> source attribution -> entity search`
 
-`search_entities` is the single ontology-aligned search surface. It combines exact IRI, URL, hostname, alias, lexical, and AI Search recall, then hydrates results from the D1-backed entity-search projection. Linking and edge creation are future workflows, not part of the read/search path.
+`search_entities` is the single ontology-aligned search surface. Exact IRI lookup hydrates directly from the D1 ontology snapshot; query search goes through Cloudflare AI Search and hydrates returned IRIs from D1. URL, hostname, alias, local FTS, and custom ranking paths are no longer live surfaces. Linking and edge creation are future workflows, not part of the read/search path.
 
 Effect vocabulary remains load-bearing here: subsystem names map to services, layers, Workflow classes, Worker entry points, or deploy bindings that can be searched in the repo.
 
@@ -28,9 +28,8 @@ graph TD
     Vision[Vision Lane<br/>VisionEnrichmentExecutor]
     Source[Source Attribution Lane<br/>SourceAttributionExecutor]
     EntitySearch[Unified Entity Search<br/>search_entities]
-    SearchDb[Search Projection<br/>SEARCH_DB]
     AiSearch[Cloudflare AI Search<br/>ENERGY_INTEL_SEARCH]
-    Registry[Ontology-aligned Registry<br/>D1 data-layer tables]
+    SnapshotStore[Ontology Snapshot Store<br/>D1 entity_snapshots]
     Metrics[Workers Logs + Analytics Engine<br/>REQUEST_METRICS + CF_VERSION_METADATA]
     MCP[MCP Surface<br/>src/mcp/Router.ts]
     Api[HTTP API<br/>src/api + src/admin]
@@ -40,7 +39,6 @@ graph TD
     direction TB
     ColdStart[Cold-start Ingest Toolchain<br/>scripts/cold-start-ingest-*.ts]
     Snapshot[Git-backed Snapshot<br/>.generated/cold-start/*]
-    SearchRebuild[Search Projection Rebuild<br/>src/search/*]
     OntologyStore[Ontology Store Package<br/>packages/ontology-store]
   end
 
@@ -70,22 +68,19 @@ graph TD
 
   MCP --> EntitySearch
   Api --> EntitySearch
-  EntitySearch --> SearchDb
   EntitySearch --> AiSearch
-  EntitySearch --> Registry
+  EntitySearch --> SnapshotStore
   EntitySearch --> Metrics
   Enrich --> Metrics
   Ingest --> Metrics
 
   ColdStart --> Snapshot
-  Snapshot -->|sync-data-layer| Registry
-  Registry --> SearchRebuild
-  SearchRebuild --> SearchDb
+  Snapshot -->|entity backfill/sync| SnapshotStore
   Snapshot --> OntologyStore
 
   MCP -->|D1 reads| Enrich
-  MCP -->|D1 reads| Registry
-  Api -->|D1 reads| Registry
+  MCP -->|D1 reads| SnapshotStore
+  Api -->|D1 reads| SnapshotStore
 
   CF -.->|src/domain/*<br/>Schemas + branded IDs| DomainBridge
   DomainBridge -.->|tsconfig paths<br/>resolved by Bun| ED
@@ -105,7 +100,6 @@ graph TD
   MCPModel --> MCP
   Operator --> Api
   Operator --> ColdStart
-  Operator --> SearchRebuild
   Operator --> OntologyStore
   Operator --> IngestWorker
   Operator --> AgentWorker
@@ -131,15 +125,11 @@ There is no active resolver Worker. `wrangler.resolver.toml`, resolver RPC, and 
 
 **Source Attribution Lane** (`src/source/`). Produces publisher/source hints. It remains useful extraction output, but it is not a resolver handoff anymore.
 
-**Unified Entity Search** (`src/services/EntitySearchService.ts`, `src/domain/entitySearch.ts`). The canonical search surface. It accepts typed probes and query text, fails closed for not-yet-enabled entity families, records per-request metrics, and returns branded ontology-aligned hits.
+**Unified Entity Search** (`src/services/SearchEntitiesService.ts`, `src/services/OntologyEntityHydrator.ts`, `src/domain/entitySearch.ts`). The canonical search surface. It accepts exactly one of `query` or `iri`, records per-request metrics, and returns hydrated ontology hits. Exact IRI lookup bypasses AI Search. Query lookup uses Cloudflare AI Search hybrid retrieval and preserves Cloudflare ordering after D1 hydration.
 
-Enabled search families are Agent, Dataset, Distribution, Series, and Variable. Catalog, CatalogRecord, DatasetSeries, and DataService are intentionally fail-closed until projection and hydration are complete.
+**AI Search Index** (`ENERGY_INTEL_SEARCH`). Owns fuzzy recall and ranking for query search. The Worker sends ontology entity-type metadata filters and does not run a second local ranking layer.
 
-**Search Projection** (`SEARCH_DB`, `src/search/*`, `src/services/d1/EntitySearchRepoD1.ts`). Stores the search documents and exact probe indexes used by `search_entities`.
-
-**AI Search Recall** (`ENERGY_INTEL_SEARCH`). Adds semantic recall to entity search. D1 remains the hydration source of truth for returned entity payloads.
-
-**Data Layer Registry** (`src/domain/data-layer/*`, D1 registry tables). The ontology-aligned source of truth for entities and graph relationships.
+**Ontology Snapshot Store** (`packages/ontology-store`, D1 `entity_snapshots`). The hydration source of truth for returned search payloads. AI Search results that cannot be decoded or hydrated are dropped and counted.
 
 **Observability** (`src/platform/Observability.ts`). Workers Logs are enabled. Analytics Engine records one search datapoint per `search_entities` request, and `CF_VERSION_METADATA` tags logs/metrics with deploy version metadata.
 
@@ -147,7 +137,7 @@ Enabled search families are Agent, Dataset, Distribution, Series, and Variable. 
 
 **Cold-start Ingest Toolchain** (`scripts/cold-start-ingest-*.ts`, `src/ingest/dcat-harness/`). Fetches catalog surfaces and projects them into the repo-local snapshot.
 
-**Git-backed Snapshot** (`.generated/cold-start/`). The local source that feeds D1 sync, tests, search rebuilds, and ontology-store validation.
+**Git-backed Snapshot** (`.generated/cold-start/`). The local source that feeds D1 sync/backfill, tests, and ontology-store validation.
 
 **Ontology Store Package** (`packages/ontology-store/`). Offline RDF emit, SHACL validation, reload, and distill tooling. It stays off the Worker hot path.
 
@@ -165,11 +155,10 @@ Enabled search families are Agent, Dataset, Distribution, Series, and Variable. 
 | Ingest -> Enrichment | Post rows and workflow params | `IngestRunParams`, `EnrichmentRunParams` |
 | Vision -> Source Attribution | Vision extraction payload | `VisionEnrichment` |
 | Source Attribution -> Reads/Search | Publisher/source extraction payload | `SourceAttributionEnrichment` |
-| Entity search request | Typed probes and query text | `SearchEntitiesRequest` |
-| Entity search response | Branded ontology hits and warnings | `SearchEntitiesResponse` |
-| Exact probe normalization | URL, hostname, alias matching | `src/platform/Normalize.ts` |
-| Search projection | Searchable entity documents | `EntitySearchDocument` |
-| AI Search recall | Semantic candidates before hydration | `EntitySemanticRecall` |
+| Entity search request | Query text or exact ontology IRI | `SearchEntitiesRequest` |
+| Entity search response | Hydrated ontology hits | `SearchEntitiesResponse` |
+| AI Search recall/ranking | Query candidates before hydration | `ENERGY_INTEL_SEARCH` |
+| Ontology hydration | Branded IRI decode and snapshot load | `OntologyEntityHydrator` |
 | Observability | Request metrics and deploy tags | `REQUEST_METRICS`, `CF_VERSION_METADATA` |
 | Editorial bridge | Shared schemas into editorial repo | `@skygest/domain/*` |
 
@@ -181,8 +170,8 @@ Enabled search families are Agent, Dataset, Distribution, Series, and Variable. 
 | Resolver Worker, resolver RPC, `RESOLVER` binding | Removed |
 | Stored `data-ref-resolution` enrichment rows | Removed from live contract |
 | Unified `search_entities` surface | Shipped |
-| Entity-search D1 projection and hydration | Shipped |
-| Cloudflare AI Search recall binding | Shipped |
+| Cloudflare AI Search recall/ranking binding | Shipped |
+| D1 ontology snapshot hydration | Shipped |
 | Search observability via Workers Logs and Analytics Engine | Shipped |
 | Data-layer registry and sync pipeline | Shipped |
 | Ontology-store validation/export tooling | Shipped as offline tooling |

@@ -14,7 +14,7 @@ import { CurationService } from "../services/CurationService";
 import { EditorialPickBundleReadService } from "../services/EditorialPickBundleReadService";
 import { EditorialService } from "../services/EditorialService";
 import { EnrichmentTriggerClient } from "../services/EnrichmentTriggerClient";
-import { EntitySearchService } from "../services/EntitySearchService";
+import { SearchEntitiesService } from "../services/SearchEntitiesService";
 import { ExpertRegistryService } from "../services/ExpertRegistryService";
 import { KnowledgeQueryService } from "../services/KnowledgeQueryService";
 import { PipelineStatusService } from "../services/PipelineStatusService";
@@ -42,7 +42,7 @@ type QueryLayer = Layer.Layer<
   EditorialService |
   EditorialPickBundleReadService |
   CurationService |
-  EntitySearchService |
+  SearchEntitiesService |
   ExpertRegistryService |
   BlueskyClient |
   PostEnrichmentReadService |

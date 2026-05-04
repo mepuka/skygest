@@ -81,14 +81,6 @@ export class CommandExecutionError extends Schema.TaggedErrorClass<CommandExecut
   }
 ) {}
 
-export class SearchDbScriptError extends Schema.TaggedErrorClass<SearchDbScriptError>()(
-  "SearchDbScriptError",
-  {
-    operation: Schema.String,
-    message: Schema.String
-  }
-) {}
-
 export class IngestRunNotFoundError extends Schema.TaggedErrorClass<IngestRunNotFoundError>()(
   "IngestRunNotFoundError",
   {
